@@ -428,6 +428,12 @@ layer_descriptor ogr_datasource::get_descriptor() const
     return desc_;
 }
 
+std::map<std::string, mapnik::parameters> ogr_datasource::get_statistics()  const
+{
+    if (! is_bound_) bind();
+    return stats_;
+}
+
 featureset_ptr ogr_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();

@@ -358,6 +358,12 @@ layer_descriptor postgis_datasource::get_descriptor() const
 }
 
 
+std::map<std::string, mapnik::parameters> postgis_datasource::get_statistics()  const
+{
+    if (! is_bound_) bind();
+    return stats_;
+}
+
 std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;

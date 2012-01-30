@@ -33,6 +33,8 @@
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/statistics/median.hpp>
 #include <boost/accumulators/framework/accumulator_set.hpp>
 
 // stl
@@ -43,6 +45,8 @@ namespace mapnik {
 typedef boost::accumulators::accumulator_set<
         double, boost::accumulators::features<
             boost::accumulators::tag::mean,
+            boost::accumulators::tag::median,
+            boost::accumulators::tag::variance,
             boost::accumulators::tag::min,
             boost::accumulators::tag::max
         > > statistics_accumulator;

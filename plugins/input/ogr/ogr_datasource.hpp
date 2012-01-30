@@ -48,6 +48,7 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
+    std::map<std::string, mapnik::parameters> get_statistics() const;
     void bind() const;
 
 private:
@@ -59,6 +60,7 @@ private:
     mutable ogr_layer_ptr layer_;
     mutable std::string layer_name_;
     mutable mapnik::layer_descriptor desc_;
+    mutable std::map<std::string, mapnik::parameters> stats_;
     mutable bool indexed_;
 };
 

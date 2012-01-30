@@ -128,7 +128,9 @@ std::map<std::string, mapnik::parameters> memory_datasource::get_statistics() co
     for (; it != end; ++it) {
         mapnik::parameters p;
         p["mean"] = boost::accumulators::mean(it->second);
+        p["median"] = boost::accumulators::median(it->second);
         p["min"] = boost::accumulators::min(it->second);
+        p["stddev"] = sqrt(boost::accumulators::variance(it->second));
         p["max"] = boost::accumulators::max(it->second);
         _stats[it->first] = p;
     }

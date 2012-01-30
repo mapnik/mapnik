@@ -49,6 +49,7 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
+    std::map<std::string, mapnik::parameters> get_statistics() const;
     void bind() const;
 
 private:
@@ -79,6 +80,7 @@ private:
     mutable bool has_spatial_index_;
     mutable bool using_subquery_;
     mutable std::vector<std::string> init_statements_;
+    mutable std::map<std::string, mapnik::parameters> stats_;
 
     // Fill init_statements with any statements
     // needed to attach auxillary databases

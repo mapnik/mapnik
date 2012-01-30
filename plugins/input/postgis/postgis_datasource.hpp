@@ -85,11 +85,13 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
+    std::map<std::string, mapnik::parameters> get_statistics() const;
     postgis_datasource(const parameters &params, bool bind=true);
     ~postgis_datasource();
     void bind() const;
 private:
     std::string sql_bbox(box2d<double> const& env) const;
+    mutable std::map<std::string, mapnik::parameters> stats_;
     std::string populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env) const;
     std::string populate_tokens(const std::string& sql) const;
     static std::string unquote(const std::string& sql);

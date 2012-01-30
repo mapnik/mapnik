@@ -484,6 +484,12 @@ box2d<double> sqlite_datasource::envelope() const
     return extent_;
 }
 
+std::map<std::string, mapnik::parameters> sqlite_datasource::get_statistics()  const
+{
+    if (! is_bound_) bind();
+    return stats_;
+}
+
 boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_type() const
 {
     if (! is_bound_) bind();
