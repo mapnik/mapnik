@@ -27,6 +27,7 @@
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/line_symbolizer.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"

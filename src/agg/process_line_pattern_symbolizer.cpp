@@ -27,6 +27,7 @@
 #include <mapnik/agg_pattern_source.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/line_pattern_symbolizer.hpp>
 
 // agg
 #include "agg_basics.h"

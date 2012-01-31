@@ -63,8 +63,9 @@ def main():
         # 3 * '-v' gets us debugging information from nose
         argv.append('-v')
         argv.append('-v')
-    
-    argv.extend(['-w','./tests/python_tests'])
+   
+    dirname = os.path.dirname(sys.argv[0]) 
+    argv.extend(['-w', dirname+'/python_tests'])
 
     if not nose.run(argv=argv, plugins=[TodoPlugin(), Doctest()]):
         sys.exit(1)

@@ -19,22 +19,34 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
-// mapnik
-#include <mapnik/svg_renderer.hpp>
+#ifndef CHAR_INFO_HPP
+#define CHAR_INFO_HPP
 
-namespace mapnik
-{
-    template <typename T>
-    void svg_renderer<T>::process(glyph_symbolizer const& sym,
-          Feature const& feature,
-          proj_transform const& prj_trans)
+#include <boost/shared_ptr.hpp>
+
+namespace mapnik {
+struct char_properties;
+
+class char_info {
+public:
+    char_info(unsigned c_, double width_, double ymax_, double ymin_, double line_height_)
+        :  c(c_), width(width_), line_height(line_height_), ymin(ymin_), ymax(ymax_)
     {
-          // nothing yet.
+    }
+    char_info()
+        : c(0), width(0), line_height(0), ymin(0), ymax(0)
+    {
     }
 
-    template void svg_renderer<std::ostream_iterator<char> >::process(glyph_symbolizer const& sym,
-                      Feature const& feature,
-                      proj_transform const& prj_trans);
+    unsigned c;
+    double width;
+    double line_height;
+    double ymin;
+    double ymax;
+    double avg_height;
+    char_properties *format;
+    double height() const { return ymax-ymin; }
+};
 }
+#endif

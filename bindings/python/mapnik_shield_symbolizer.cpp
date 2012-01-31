@@ -37,6 +37,7 @@ using mapnik::path_expression_ptr;
 using mapnik::guess_type;
 using mapnik::expression_ptr;
 using mapnik::parse_path;
+using mapnik::position;
 
 
 namespace {
@@ -44,8 +45,8 @@ using namespace boost::python;
 
 tuple get_shield_displacement(const shield_symbolizer& s)
 {
-    boost::tuple<double,double> pos = s.get_shield_displacement();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+    position const& pos = s.get_shield_displacement();
+    return boost::python::make_tuple(pos.first, pos.second);
 }
 
 void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
@@ -55,24 +56,13 @@ void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
 
 tuple get_text_displacement(const shield_symbolizer& t)
 {
-    boost::tuple<double,double> pos = t.get_displacement();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+    position const& pos = t.get_displacement();
+    return boost::python::make_tuple(pos.first, pos.second);
 }
 
 void set_text_displacement(shield_symbolizer & t, boost::python::tuple arg)
 {
     t.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
-}
-
-tuple get_anchor(const shield_symbolizer& t)
-{
-    boost::tuple<double,double> pos = t.get_anchor();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
-}
-
-void set_anchor(shield_symbolizer & t, boost::python::tuple arg)
-{
-    t.set_anchor(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
 const std::string get_filename(shield_symbolizer const& t)
@@ -137,9 +127,6 @@ void export_shield_symbolizer()
                                                         path_expression_ptr>("TODO")
         )
         //.def_pickle(shield_symbolizer_pickle_suite())
-        .add_property("anchor",
-                      &get_anchor,
-                      &set_anchor)
         .add_property("allow_overlap",
                       &shield_symbolizer::get_allow_overlap,
                       &shield_symbolizer::set_allow_overlap,
@@ -237,9 +224,6 @@ void export_shield_symbolizer()
         .add_property("wrap_before",
                       &shield_symbolizer::get_wrap_before,
                       &shield_symbolizer::set_wrap_before)
-        .add_property("no_text",
-                      &shield_symbolizer::get_no_text,
-                      &shield_symbolizer::set_no_text)
         .add_property("unlock_image",
                       &shield_symbolizer::get_unlock_image,
                       &shield_symbolizer::set_unlock_image)

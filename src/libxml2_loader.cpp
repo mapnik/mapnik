@@ -29,6 +29,7 @@
 #include <boost/utility.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -200,8 +201,13 @@ private:
             }
             break;
             case XML_TEXT_NODE:
-                pt.put_value( (char*) cur_node->content );
-                break;
+            {
+                std::string trimmed = boost::algorithm::trim_copy(std::string((char*)cur_node->content));
+                if (trimmed.empty()) break;
+                ptree::iterator it = pt.push_back(ptree::value_type("<xmltext>", ptree()));
+                it->second.put_value(trimmed);
+            }
+            break;
             case XML_COMMENT_NODE:
             {
                 ptree::iterator it = pt.push_back(

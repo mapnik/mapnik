@@ -60,13 +60,13 @@ void export_polygon_symbolizer();
 void export_polygon_pattern_symbolizer();
 void export_raster_symbolizer();
 void export_text_symbolizer();
+void export_text_placement();
 void export_shield_symbolizer();
 void export_font_engine();
 void export_projection();
 void export_proj_transform();
 void export_view_transform();
 void export_raster_colorizer();
-void export_glyph_symbolizer();
 void export_inmem_metawriter();
 void export_label_collision_detector();
 
@@ -84,6 +84,7 @@ void export_label_collision_detector();
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
+#include <mapnik/scale_denominator.hpp>
 #include "python_grid_utils.hpp"
 #include "mapnik_value_converter.hpp"
 #include "python_optional.hpp"
@@ -425,6 +426,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_polygon_symbolizer();
     export_polygon_pattern_symbolizer();
     export_raster_symbolizer();
+    export_text_placement();
     export_text_symbolizer();
     export_shield_symbolizer();
     export_font_engine();
@@ -434,7 +436,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_coord();
     export_map();
     export_raster_colorizer();
-    export_glyph_symbolizer();
     export_inmem_metawriter();
     export_label_collision_detector();
 
