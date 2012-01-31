@@ -90,26 +90,40 @@ void export_text_placement()
 
 
     class_<text_symbolizer_properties>("TextSymbolizerProperties")
-        .def_readwrite("orientation", &text_symbolizer_properties::orientation)
-        .add_property("displacement",
-                       &get_displacement,
-                       &set_displacement)
-        .def_readwrite("label_placement", &text_symbolizer_properties::label_placement)
-        .def_readwrite("horizontal_alignment", &text_symbolizer_properties::halign)
-        .def_readwrite("justify_alignment", &text_symbolizer_properties::jalign)
-        .def_readwrite("vertical_alignment", &text_symbolizer_properties::valign)
-        .def_readwrite("label_spacing", &text_symbolizer_properties::label_spacing)
-        .def_readwrite("label_position_tolerance", &text_symbolizer_properties::label_position_tolerance)
-        .def_readwrite("avoid_edges", &text_symbolizer_properties::avoid_edges)
-        .def_readwrite("minimum_distance", &text_symbolizer_properties::minimum_distance)
-        .def_readwrite("minimum_padding", &text_symbolizer_properties::minimum_padding)
-        .def_readwrite("minimum_path_length", &text_symbolizer_properties::minimum_path_length)
-        .def_readwrite("maximum_angle_char_delta", &text_symbolizer_properties::max_char_angle_delta)
-        .def_readwrite("force_odd_labels", &text_symbolizer_properties::force_odd_labels)
-        .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
-        .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
-        .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
-        /* TODO: text_processor */
-        /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
-        ;
+            .def_readwrite("orientation", &text_symbolizer_properties::orientation)
+            .add_property("displacement",
+                          &get_displacement,
+                          &set_displacement)
+            .def_readwrite("label_placement", &text_symbolizer_properties::label_placement)
+            .def_readwrite("horizontal_alignment", &text_symbolizer_properties::halign)
+            .def_readwrite("justify_alignment", &text_symbolizer_properties::jalign)
+            .def_readwrite("vertical_alignment", &text_symbolizer_properties::valign)
+            .def_readwrite("label_spacing", &text_symbolizer_properties::label_spacing)
+            .def_readwrite("label_position_tolerance", &text_symbolizer_properties::label_position_tolerance)
+            .def_readwrite("avoid_edges", &text_symbolizer_properties::avoid_edges)
+            .def_readwrite("minimum_distance", &text_symbolizer_properties::minimum_distance)
+            .def_readwrite("minimum_padding", &text_symbolizer_properties::minimum_padding)
+            .def_readwrite("minimum_path_length", &text_symbolizer_properties::minimum_path_length)
+            .def_readwrite("maximum_angle_char_delta", &text_symbolizer_properties::max_char_angle_delta)
+            .def_readwrite("force_odd_labels", &text_symbolizer_properties::force_odd_labels)
+            .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
+            .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
+            .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
+            /* TODO: text_processor */
+            /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
+            ;
+    class_<char_properties>("CharProperties")
+            .def_readwrite("face_name", &char_properties::face_name)
+            .def_readwrite("fontset", &char_properties::fontset)
+            .def_readwrite("text_size", &char_properties::text_size)
+            .def_readwrite("character_spacing", &char_properties::character_spacing)
+            .def_readwrite("line_spacing", &char_properties::line_spacing)
+            .def_readwrite("text_opacity", &char_properties::text_opacity)
+            .def_readwrite("wrap_char", &char_properties::wrap_char)
+            .def_readwrite("wrap_before", &char_properties::wrap_before)
+            .def_readwrite("text_transform", &char_properties::text_transform)
+            .def_readwrite("fill", &char_properties::fill)
+            .def_readwrite("halo_fill", &char_properties::halo_fill)
+            .def_readwrite("halo_radius", &char_properties::halo_radius)
+            ;
 }
