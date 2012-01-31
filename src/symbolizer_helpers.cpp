@@ -109,7 +109,6 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
             largest_box_only = true;
             if (sym_.get_minimum_path_length() > 0)
             {
-                largest_box_only = true;
                 // TODO - find less costly method than fetching full envelope
                 box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
                 
