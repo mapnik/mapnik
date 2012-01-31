@@ -59,16 +59,6 @@ void set_anchor(text_symbolizer & t, boost::python::tuple arg)
     t.set_anchor(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
-void set_placement_options(text_symbolizer & t, placement_type_e arg, std::string const& placements)
-{
-    t.set_placement_options(arg, placements);
-}
-
-void set_placement_options_2(text_symbolizer & t, placement_type_e arg)
-{
-    t.set_placement_options(arg, "");
-}
-
 }
 
 struct text_symbolizer_pickle_suite : boost::python::pickle_suite
@@ -205,11 +195,6 @@ void export_text_symbolizer()
         .value("CAPITALIZE",CAPITALIZE)
         ;
 
-    enumeration_<placement_type_e>("placement_type")
-        .value("SIMPLE",T_SIMPLE)
-        .value("DUMMY",T_DUMMY)
-        ;
-
     class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
         /*
         // todo - all python classes can have kwargs and default constructors
@@ -302,10 +287,6 @@ void export_text_symbolizer()
                       &text_symbolizer::get_text_opacity,
                       &text_symbolizer::set_text_opacity,
                       "Set/get the text opacity")
-        .add_property("placement",
-                      &text_symbolizer::get_label_placement,
-                      &text_symbolizer::set_label_placement,
-                      "Set/get the placement of the label")
         .add_property("text_transform",
                       &text_symbolizer::get_text_transform,
                       &text_symbolizer::set_text_transform,
@@ -329,9 +310,5 @@ void export_text_symbolizer()
         .add_property("wrap_before",
                       &text_symbolizer::get_wrap_before,
                       &text_symbolizer::set_wrap_before)
-        .add_property("placement_type", &text_symbolizer::get_placement_type)
-        .add_property("placements", &text_symbolizer::get_placements)
-        .def("set_placement_options", set_placement_options)
-        .def("set_placement_options", set_placement_options_2)
         ;
 }

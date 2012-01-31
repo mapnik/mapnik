@@ -187,11 +187,6 @@ text_placements_simple::text_placements_simple()
     set_positions("X");
 }
 
-std::string text_placements_simple::get_positions() const
-{
-    return positions_;
-}
-
 text_placements_simple::text_placements_simple(std::string positions)
 {
     set_positions(positions);
