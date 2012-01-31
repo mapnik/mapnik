@@ -170,7 +170,7 @@ void text_node::apply(char_properties const& p, Feature const& feature, processe
         text_str = text_str.toTitle(NULL);
     }
     if (text_str.length() > 0) {
-        output.push_back(processed_expression(p, text_str));
+        output.push_back(processed_text::processed_expression(p, text_str));
     } else {
 #ifdef MAPNIK_DEBUG
         std::cerr << "Warning: Empty expression.\n";
@@ -343,61 +343,6 @@ void format_node::set_halo_radius(optional<double> radius)
     halo_radius_ = radius;
 }
 } //namespace formating
-
-/************************************************************/
-
-text_processor::text_processor():
-    tree_()
-{
-}
-
-void text_processor::set_format_tree(formating::node_ptr tree)
-{
-    tree_ = tree;
-}
-
-formating::node_ptr text_processor::get_format_tree() const
-{
-    return tree_;
-}
-
-void text_processor::from_xml(const boost::property_tree::ptree &pt, std::map<std::string,font_set> const &fontsets)
-{
-    defaults.from_xml(pt, fontsets);
-    formating::node_ptr n = formating::node::from_xml(pt);
-    if (n) set_format_tree(n);
-}
-
-
-void text_processor::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_processor const& dfl) const
-{
-    defaults.to_xml(node, explicit_defaults, dfl.defaults);
-    if (tree_) tree_->to_xml(node);
-}
-
-void text_processor::process(processed_text &output, Feature const& feature) const
-{
-    output.clear();
-    if (tree_) {
-        tree_->apply(defaults, feature, output);
-    } else {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "Warning: text_processor can't produce text: No formating tree!\n";
-#endif
-    }
-}
-
-std::set<expression_ptr> text_processor::get_all_expressions() const
-{
-    std::set<expression_ptr> result;
-    if (tree_) tree_->add_expressions(result);
-    return result;
-}
-
-void text_processor::set_old_style_expression(expression_ptr expr)
-{
-    tree_ = formating::node_ptr(new formating::text_node(expr));
-}
 
 /************************************************************/
 

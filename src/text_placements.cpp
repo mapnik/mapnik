@@ -58,9 +58,31 @@ text_symbolizer_properties::text_symbolizer_properties() :
     allow_overlap(false),
     text_ratio(0),
     wrap_width(0),
-    processor()
+    tree_()
 {
 
+}
+
+void text_symbolizer_properties::process(processed_text &output, Feature const& feature) const
+{
+    output.clear();
+    if (tree_) {
+        tree_->apply(default_format, feature, output);
+    } else {
+#ifdef MAPNIK_DEBUG
+        std::cerr << "Warning: text_symbolizer_properties can't produce text: No formating tree!\n";
+#endif
+    }
+}
+
+void text_symbolizer_properties::set_format_tree(formating::node_ptr tree)
+{
+    tree_ = tree;
+}
+
+formating::node_ptr text_symbolizer_properties::format_tree() const
+{
+    return tree_;
 }
 
 void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets)
@@ -100,12 +122,16 @@ void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym
     if (dy) displacement.second = *dy;
     optional<double> max_char_angle_delta_ = get_opt_attr<double>(sym, "max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
-    processor.from_xml(sym, fontsets);
+
     optional<std::string> name_ = get_opt_attr<std::string>(sym, "name");
     if (name_) {
         std::clog << "### WARNING: Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!\n";
-        processor.set_old_style_expression(parse_expression(*name_, "utf8"));
+        set_old_style_expression(parse_expression(*name_, "utf8"));
     }
+
+    default_format.from_xml(sym, fontsets);
+    formating::node_ptr n(formating::node::from_xml(sym));
+    if (n) set_format_tree(n);
 }
 
 void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_symbolizer_properties const &dfl) const
@@ -186,7 +212,21 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool 
     {
         set_attr(node, "vertical-alignment", valign);
     }
-    processor.to_xml(node, explicit_defaults, dfl.processor);
+    default_format.to_xml(node, explicit_defaults, dfl.default_format);
+    if (tree_) tree_->to_xml(node);
+}
+
+
+std::set<expression_ptr> text_symbolizer_properties::get_all_expressions() const
+{
+    std::set<expression_ptr> result;
+    if (tree_) tree_->add_expressions(result);
+    return result;
+}
+
+void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
+{
+    tree_ = formating::node_ptr(new formating::text_node(expr));
 }
 
 char_properties::char_properties() :
@@ -319,7 +359,7 @@ text_placements::text_placements() : properties()
 std::set<expression_ptr> text_placements::get_all_expressions()
 {
     std::set<expression_ptr> result, tmp;
-    tmp = properties.processor.get_all_expressions();
+    tmp = properties.get_all_expressions();
     result.insert(tmp.begin(), tmp.end());
     result.insert(properties.orientation);
     return result;
@@ -358,11 +398,10 @@ text_placement_info_ptr text_placements_dummy::get_placement_info(
 bool text_placement_info_simple::next()
 {
     while (1) {
-        if (state == 0) {
-            properties.processor.defaults.text_size = parent_->properties.processor.defaults.text_size;
-        } else {
+        if (state > 0)
+        {
             if (state > parent_->text_sizes_.size()) return false;
-            properties.processor.defaults.text_size = parent_->text_sizes_[state-1];
+            properties.default_format.text_size = parent_->text_sizes_[state-1];
         }
         if (!next_position_only()) {
             state++;
@@ -530,14 +569,14 @@ text_placements_list::text_placements_list() : text_placements(), list_(0)
 std::set<expression_ptr> text_placements_list::get_all_expressions()
 {
     std::set<expression_ptr> result, tmp;
-    tmp = properties.processor.get_all_expressions();
+    tmp = properties.get_all_expressions();
     result.insert(tmp.begin(), tmp.end());
     result.insert(properties.orientation);
 
     std::vector<text_symbolizer_properties>::const_iterator it;
     for (it=list_.begin(); it != list_.end(); it++)
     {
-        tmp = it->processor.get_all_expressions();
+        tmp = it->get_all_expressions();
         result.insert(tmp.begin(), tmp.end());
         result.insert(it->orientation);
     }

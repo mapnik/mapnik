@@ -166,7 +166,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         placement_valid_ = false;
         return false;
     }
-    placement_->properties.processor.process(text_, feature_);
+    placement_->properties.process(text_, feature_);
     info_ = &(text_.get_string_info());
     if (placement_->properties.orientation)
     {
