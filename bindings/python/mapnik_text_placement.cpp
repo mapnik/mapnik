@@ -44,8 +44,17 @@ tuple get_displacement(text_symbolizer_properties const& t)
 
 void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
 {
+    if (len(arg) != 2)
+    {
+        PyErr_SetObject(PyExc_ValueError,
+                        ("expected 2-item tuple in call to set_displacement; got %s"
+                         % arg).ptr()
+            );
+        throw_error_already_set();
+    }
+    
     double x = extract<double>(arg[0]);
-    double y = extract<double>(arg[0]);
+    double y = extract<double>(arg[1]);
     t.displacement = std::make_pair(x, y);
 }
 
