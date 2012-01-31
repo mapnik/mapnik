@@ -23,8 +23,6 @@
 
 // mapnik
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 
 namespace mapnik {
@@ -36,23 +34,26 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
 {
     text_symbolizer_helper<face_manager<freetype_engine>,
             label_collision_detector4> helper(
+                sym, feature, prj_trans,
                 width_, height_,
                 scale_factor_ * (1.0/pixmap_.get_resolution()),
                 t_, font_manager_, detector_);
-
-    text_placement_info_ptr placement = helper.get_placement(sym, feature, prj_trans);
-
-    if (!placement) return;
+    bool placement_found = false;
 
     text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
-    for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
-    {
-        double x = placement->placements[ii].starting_x;
-        double y = placement->placements[ii].starting_y;
-        ren.prepare_glyphs(&(placement->placements[ii]));
-        ren.render_id(feature.id(),x,y,2);
+
+    text_placement_info_ptr placement;
+    while ((placement = helper.get_placement())) {
+        placement_found = true;
+        for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+        {
+            double x = placement->placements[ii].starting_x;
+            double y = placement->placements[ii].starting_y;
+            ren.prepare_glyphs(&(placement->placements[ii]));
+            ren.render_id(feature.id(),x,y,2);
+        }
     }
-    pixmap_.add_feature(feature);
+    if (placement_found) pixmap_.add_feature(feature);
 
 }
 

@@ -145,6 +145,7 @@ source = Split(
     memory_datasource.cpp
     stroke.cpp
     symbolizer.cpp
+    symbolizer_helpers.cpp
     arrow.cpp
     unicode.cpp
     markers_symbolizer.cpp

@@ -39,8 +39,8 @@ using namespace boost::python;
 
 tuple get_text_displacement(const text_symbolizer& t)
 {
-    position pos = t.get_displacement();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+    mapnik::position const& pos = t.get_displacement();
+    return boost::python::make_tuple(pos.first, pos.second);
 }
 
 void set_text_displacement(text_symbolizer & t, boost::python::tuple arg)

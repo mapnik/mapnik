@@ -46,9 +46,8 @@ namespace mapnik {
 
 class text_placements;
 
-typedef text_path placement_element;
-
-typedef boost::tuple<double,double> position;
+typedef std::pair<double,double> position;
+typedef std::pair<double,double> dimension_type;
 
 enum label_placement_enum {
     POINT_PLACEMENT,
@@ -97,7 +96,7 @@ struct text_symbolizer_properties
 {
     text_symbolizer_properties();
     /** Load all values and also the ```processor``` object from XML ptree. */
-    void set_values_from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets);
+    void from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets);
     /** Save all values to XML ptree (but does not create a new parent node!). */
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_symbolizer_properties const &dfl=text_symbolizer_properties()) const;
 
@@ -136,7 +135,8 @@ class text_placement_info : boost::noncopyable
 public:
     /** Constructor. Takes the parent text_placements object as a parameter
      * to read defaults from it. */
-    text_placement_info(text_placements const* parent);
+    text_placement_info(text_placements const* parent,
+        double scale_factor_, dimension_type dim, bool has_dimensions_);
     /** Get next placement.
       * This function is also called before the first placement is tried.
       * Each class has to return at least one position!
@@ -160,7 +160,7 @@ public:
     /* TODO: Don't know what this is used for. */
     bool has_dimensions;
     /* TODO: Don't know what this is used for. */
-    std::pair<double, double> dimensions;
+    dimension_type dimensions;
     /** Set scale factor. */
     void set_scale_factor(double factor) { scale_factor = factor; }
     /** Get scale factor. */
@@ -177,10 +177,16 @@ public:
     //Output by placement finder
     /** Bounding box of all texts placed. */
     box2d<double> extents;
+    /** Additional boxes to take into account when finding placement.
+      * Used for finding line placements where multiple placements are returned.
+      * Boxes are relative to starting point of current placement.
+      */
+    std::vector<box2d<double> > additional_boxes;
+
     /* TODO */
     std::queue< box2d<double> > envelopes;
-    /* TODO */
-    boost::ptr_vector<placement_element> placements;
+    /** Used to return all placements found. */
+    boost::ptr_vector<text_path> placements;
 };
 
 typedef boost::shared_ptr<text_placement_info> text_placement_info_ptr;
@@ -206,7 +212,9 @@ public:
       *     return text_placement_info_ptr(new text_placement_info_XXX(this));
       * }
       */
-    virtual text_placement_info_ptr get_placement_info() const =0;
+    virtual text_placement_info_ptr get_placement_info(
+        double scale_factor_, dimension_type dim,
+        bool has_dimensions_) const =0;
     /** Get a list of all expressions used in any placement.
       * This function is used to collect attributes.
       */
@@ -229,7 +237,8 @@ class text_placements_info_dummy;
 class MAPNIK_DECL text_placements_dummy: public text_placements
 {
 public:
-    text_placement_info_ptr get_placement_info() const;
+    text_placement_info_ptr get_placement_info(
+        double scale_factor, dimension_type dim, bool has_dimensions) const;
     friend class text_placement_info_dummy;
 };
 
@@ -237,8 +246,10 @@ public:
 class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
 {
 public:
-    text_placement_info_dummy(text_placements_dummy const* parent) : text_placement_info(parent),
-        state(0), parent_(parent) {}
+    text_placement_info_dummy(text_placements_dummy const* parent,
+        double scale_factor, dimension_type dim, bool has_dimensions)
+        : text_placement_info(parent, scale_factor, dim, has_dimensions),
+          state(0), parent_(parent) {}
     bool next();
 private:
     unsigned state;

@@ -24,7 +24,6 @@ def test_line_symbolizer_init():
 # ShieldSymbolizer initialization
 def test_shieldsymbolizer_init():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
-    eq_(s.anchor, (0.0,0.5,))
     eq_(s.displacement, (0.0,0.0))
     eq_(s.allow_overlap, False)
     eq_(s.avoid_edges, False)
@@ -41,7 +40,7 @@ def test_shieldsymbolizer_init():
     eq_(s.text_ratio, 0)
     eq_(s.text_size, 6)
     eq_(s.wrap_width, 0)
-    eq_(s.vertical_alignment, mapnik.vertical_alignment.MIDDLE)
+    eq_(s.vertical_alignment, mapnik.vertical_alignment.AUTO)
     eq_(s.label_spacing, 0)
     eq_(s.label_position_tolerance, 0)
     # 22.5 * M_PI/180.0 initialized by default
@@ -54,7 +53,7 @@ def test_shieldsymbolizer_init():
     
     # r1341
     eq_(s.wrap_before, False)
-    eq_(s.horizontal_alignment, mapnik.horizontal_alignment.MIDDLE)
+    eq_(s.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
     eq_(s.justify_alignment, mapnik.justify_alignment.MIDDLE)
     eq_(s.opacity, 1.0)
     

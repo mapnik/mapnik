@@ -342,7 +342,7 @@ label_placement_e  text_symbolizer::get_label_placement() const
 
 void  text_symbolizer::set_displacement(double x, double y)
 {
-    placement_options_->properties.displacement = boost::make_tuple(x,y);
+    placement_options_->properties.displacement = std::make_pair(x,y);
 }
 
 void text_symbolizer::set_displacement(position const& p)

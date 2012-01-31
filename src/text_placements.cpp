@@ -63,7 +63,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
 
 }
 
-void text_symbolizer_properties::set_values_from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets)
+void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets)
 {
     optional<label_placement_e> placement_ = get_opt_attr<label_placement_e>(sym, "placement");
     if (placement_) label_placement = *placement_;
@@ -95,9 +95,9 @@ void text_symbolizer_properties::set_values_from_xml(boost::property_tree::ptree
     optional<std::string> orientation_ = get_opt_attr<std::string>(sym, "orientation");
     if (orientation_) orientation = parse_expression(*orientation_, "utf8");
     optional<double> dx = get_opt_attr<double>(sym, "dx");
-    if (dx) displacement.get<0>() = *dx;
+    if (dx) displacement.first = *dx;
     optional<double> dy = get_opt_attr<double>(sym, "dy");
-    if (dy) displacement.get<1>() = *dy;
+    if (dy) displacement.second = *dy;
     optional<double> max_char_angle_delta_ = get_opt_attr<double>(sym, "max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
     processor.from_xml(sym, fontsets);
@@ -118,13 +118,13 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool 
         }
     }
 
-    if (displacement.get<0>() != dfl.displacement.get<0>() || explicit_defaults)
+    if (displacement.first != dfl.displacement.first || explicit_defaults)
     {
-        set_attr(node, "dx", displacement.get<0>());
+        set_attr(node, "dx", displacement.first);
     }
-    if (displacement.get<1>() != dfl.displacement.get<1>() || explicit_defaults)
+    if (displacement.second != dfl.displacement.second || explicit_defaults)
     {
-        set_attr(node, "dy", displacement.get<1>());
+        set_attr(node, "dy", displacement.second);
     }
     if (label_placement != dfl.label_placement || explicit_defaults)
     {
@@ -204,7 +204,7 @@ char_properties::char_properties() :
 
 }
 
-void char_properties::set_values_from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets)
+void char_properties::from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets)
 {
     optional<double> text_size_ = get_opt_attr<double>(sym, "size");
     if (text_size_) text_size = *text_size_;
@@ -328,11 +328,13 @@ std::set<expression_ptr> text_placements::get_all_expressions()
 
 /************************************************************************/
 
-text_placement_info::text_placement_info(text_placements const* parent):
-    properties(parent->properties),
-    scale_factor(1),
-    has_dimensions(false),
-    collect_extents(false)
+text_placement_info::text_placement_info(text_placements const* parent,
+    double scale_factor_, dimension_type dim, bool has_dimensions_)
+    : properties(parent->properties),
+      scale_factor(scale_factor_),
+      has_dimensions(has_dimensions_),
+      dimensions(dim),
+      collect_extents(false)
 {
 
 }
@@ -344,17 +346,11 @@ bool text_placement_info_dummy::next()
     return true;
 }
 
-text_placement_info_ptr text_placements_dummy::get_placement_info() const
+text_placement_info_ptr text_placements_dummy::get_placement_info(
+    double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_dummy(this));
-}
-
-void text_placement_info::init(double scale_factor_,
-                               unsigned w, unsigned h, bool has_dimensions_)
-{
-    scale_factor = scale_factor_;
-    dimensions = std::make_pair(w, h);
-    has_dimensions = has_dimensions_;
+    return text_placement_info_ptr(new text_placement_info_dummy(
+        this, scale_factor, dim, has_dimensions));
 }
 
 /************************************************************************/
@@ -389,36 +385,28 @@ bool text_placement_info_simple::next_position_only()
         displacement = pdisp;
         break;
     case NORTH:
-        displacement = boost::make_tuple(0, -abs(pdisp.get<1>()));
+        displacement = std::make_pair(0, -abs(pdisp.second));
         break;
     case EAST:
-        displacement = boost::make_tuple(abs(pdisp.get<0>()), 0);
+        displacement = std::make_pair(abs(pdisp.first), 0);
         break;
     case SOUTH:
-        displacement = boost::make_tuple(0, abs(pdisp.get<1>()));
+        displacement = std::make_pair(0, abs(pdisp.second));
         break;
     case WEST:
-        displacement = boost::make_tuple(-abs(pdisp.get<0>()), 0);
+        displacement = std::make_pair(-abs(pdisp.first), 0);
         break;
     case NORTHEAST:
-        displacement = boost::make_tuple(
-            abs(pdisp.get<0>()),
-            -abs(pdisp.get<1>()));
+        displacement = std::make_pair(abs(pdisp.first), -abs(pdisp.second));
         break;
     case SOUTHEAST:
-        displacement = boost::make_tuple(
-            abs(pdisp.get<0>()),
-            abs(pdisp.get<1>()));
+        displacement = std::make_pair(abs(pdisp.first), abs(pdisp.second));
         break;
     case NORTHWEST:
-        displacement = boost::make_tuple(
-            -abs(pdisp.get<0>()),
-            -abs(pdisp.get<1>()));
+        displacement = std::make_pair(-abs(pdisp.first), -abs(pdisp.second));
         break;
     case SOUTHWEST:
-        displacement = boost::make_tuple(
-            -abs(pdisp.get<0>()),
-            abs(pdisp.get<1>()));
+        displacement = std::make_pair(-abs(pdisp.first), abs(pdisp.second));
         break;
     default:
         std::cerr << "WARNING: Unknown placement\n";
@@ -427,22 +415,24 @@ bool text_placement_info_simple::next_position_only()
     return true;
 }
 
-text_placement_info_ptr text_placements_simple::get_placement_info() const
+text_placement_info_ptr text_placements_simple::get_placement_info(
+    double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_simple(this));
+    return text_placement_info_ptr(new text_placement_info_simple(this,
+        scale_factor, dim, has_dimensions));
 }
 
 /** Position string: [POS][SIZE]
- * [POS] is any combination of
- * N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
- * [SIZE] is a list of font sizes, separated by commas. The first font size
- * is always the one given in the TextSymbolizer's parameters.
- * First all directions are tried, then font size is reduced
- * and all directions are tried again. The process ends when a placement is
- * found or the last fontsize is tried without success.
- * Example: N,S,15,10,8 (tries placement above, then below and if
- *    that fails it tries the additional font sizes 15, 10 and 8.
- */
+  * [POS] is any combination of
+  * N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
+  * [SIZE] is a list of font sizes, separated by commas. The first font size
+  * is always the one given in the TextSymbolizer's parameters.
+  * First all directions are tried, then font size is reduced
+  * and all directions are tried again. The process ends when a placement is
+  * found or the last fontsize is tried without success.
+  * Example: N,S,15,10,8 (tries placement above, then below and if
+  *    that fails it tries the additional font sizes 15, 10 and 8.
+  */
 void text_placements_simple::set_positions(std::string positions)
 {
     positions_ = positions;
@@ -460,16 +450,16 @@ void text_placements_simple::set_positions(std::string positions)
                 ("NW", NORTHWEST)
                 ("SW", SOUTHWEST)
                 ("X" , EXACT_POSITION)
-                ;
+            ;
         }
 
     } direction_name;
 
     std::string::iterator first = positions.begin(),  last = positions.end();
     qi::phrase_parse(first, last,
-                     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> qi::float_[push_back(phoenix::ref(text_sizes_), _1)]),
-                     space
-        );
+		     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> qi::float_[push_back(phoenix::ref(text_sizes_), _1)]),
+		     space
+    );
     if (first != last) {
         std::cerr << "WARNING: Could not parse text_placement_simple placement string ('" << positions << "').\n";
     }
@@ -483,16 +473,15 @@ text_placements_simple::text_placements_simple()
     set_positions("X");
 }
 
-std::string const& text_placements_simple::get_positions() const
-{
-    return positions_;
-}
-
 text_placements_simple::text_placements_simple(std::string positions)
 {
     set_positions(positions);
 }
 
+std::string text_placements_simple::get_positions()
+{
+    return positions_; //TODO: Build string from data in direction_ and text_sizes_
+}
 
 /***************************************************************************/
 
@@ -526,9 +515,11 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
 
 /***************************************************************************/
 
-text_placement_info_ptr text_placements_list::get_placement_info() const
+text_placement_info_ptr text_placements_list::get_placement_info(
+    double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_list(this));
+    return text_placement_info_ptr(new text_placement_info_list(this,
+        scale_factor, dim, has_dimensions));
 }
 
 text_placements_list::text_placements_list() : text_placements(), list_(0)
