@@ -105,11 +105,13 @@ source = Split(
     """
     color.cpp
     box2d.cpp
+    building_symbolizer.cpp
     datasource_cache.cpp
     deepcopy.cpp
     expression_string.cpp
     filter_factory.cpp
-    feature_type_style.cpp
+    feature_kv_iterator.cpp
+    feature_type_style.cpp 
     font_engine_freetype.cpp
     font_set.cpp
     gamma_method.cpp

@@ -81,10 +81,21 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_poi
     return text_placement_info_ptr();
 }
 
+struct largest_bbox_first
+{
+    bool operator() (geometry_type const* g0, geometry_type const* g1) const
+    {
+        box2d<double> b0 = g0->envelope();
+        box2d<double> b1 = g1->envelope();
+        return b0.width()*b0.height() > b1.width()*b1.height();
+    }
+
+};
 
 template <typename FaceManagerT, typename DetectorT>
 void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
 {
+    bool largest_box_only = false;
     unsigned num_geom = feature_.num_geometries();
     for (unsigned i=0; i<num_geom; ++i)
     {
@@ -92,18 +103,30 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
 
         // don't bother with empty geometries
         if (geom.num_points() == 0) continue;
-
-        if ((geom.type() == Polygon) && sym_.get_minimum_path_length() > 0)
+        eGeomType type = geom.type();
+        if (type == Polygon) 
         {
-            // TODO - find less costly method than fetching full envelope
-            box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
-            if (gbox.width() < sym_.get_minimum_path_length())
+            largest_box_only = true;
+            if (sym_.get_minimum_path_length() > 0)
             {
-                continue;
+                // TODO - find less costly method than fetching full envelope
+                box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
+                
+                if (gbox.width() < sym_.get_minimum_path_length())
+                {
+                    continue;
+                }
             }
         }
         // TODO - calculate length here as well
         geometries_to_process_.push_back(const_cast<geometry_type*>(&geom));
+    }
+    
+    if (largest_box_only)
+    {
+        geometries_to_process_.sort(largest_bbox_first());
+        geo_itr_ = geometries_to_process_.begin();
+        geometries_to_process_.erase(++geo_itr_,geometries_to_process_.end());
     }
     geo_itr_ = geometries_to_process_.begin();
 }

@@ -56,6 +56,7 @@ private:
     std::string field_;
     std::string field_name_;
     bool already_rendered_;
+    mapnik::context_ptr ctx_;
 
     geos_featureset(const geos_featureset&);
     const geos_featureset& operator=(const geos_featureset&);

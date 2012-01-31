@@ -105,24 +105,23 @@ void metawriter_json_stream::write_properties(Feature const& feature, metawriter
 {
     *f_ << "}," << //Close coordinates object
             "\n  \"properties\": {";
-    std::map<std::string, value> const &fprops = feature.props();
+    
     int i = 0;
-    BOOST_FOREACH(std::string p, properties)
+    BOOST_FOREACH(std::string const& p, properties)
     {
-        std::map<std::string, value>::const_iterator itr = fprops.find(p);
-        std::string text;
-        if (itr != fprops.end())
+        if (feature.has_key(p))
         {
-            // Skip empty props
-            if(itr->second.to_string().size() == 0) continue; // ignore empty
+            mapnik::value const& val = feature.get(p);
+            std::string str = val.to_string();            
+            if (str.size() == 0) continue; // ignore empty attributes
             
             //Property found
-            text = boost::replace_all_copy(boost::replace_all_copy(itr->second.to_string(), "\\", "\\\\"), "\"", "\\\"");
+            std::string text = boost::replace_all_copy(boost::replace_all_copy(str, "\\", "\\\\"), "\"", "\\\"");
             if (i++) *f_ << ",";
             *f_ << "\n    \"" << p << "\":\"" << text << "\"";
         }
     }
-
+    
     *f_ << "\n} }";
 }
 
@@ -330,8 +329,7 @@ metawriter_json::metawriter_json(metawriter_properties dflt_properties, path_exp
 
 void metawriter_json::start(metawriter_property_map const& properties)
 {
-    filename_ =
-        path_processor<metawriter_property_map>::evaluate(*fn_, properties);
+    filename_ = path_processor<metawriter_property_map>::evaluate(*fn_, properties);
 #ifdef MAPNIK_DEBUG
     std::clog << "Metawriter JSON: filename=" << filename_ << "\n";
 #endif

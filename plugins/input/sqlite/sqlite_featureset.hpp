@@ -40,6 +40,7 @@ class sqlite_featureset : public mapnik::Featureset
 {
 public:
     sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
+                      mapnik::context_ptr const& ctx,
                       std::string const& encoding,
                       mapnik::wkbFormat format,
                       bool using_subquery);
@@ -51,6 +52,7 @@ private:
     boost::scoped_ptr<mapnik::transcoder> tr_;
     mapnik::wkbFormat format_;
     bool using_subquery_;
+    mapnik::context_ptr ctx_;
 };
 
 #endif // MAPNIK_SQLITE_FEATURESET_HPP

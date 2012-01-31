@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,40 +20,32 @@
  *
  *****************************************************************************/
 
-#ifndef KISMET_FEATURESET_HPP
-#define KISMET_FEATURESET_HPP
+#include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/feature.hpp>
 
-// mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp>
-#include <mapnik/wkb.hpp>
+namespace mapnik {
 
-// boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 
-//STL
-#include <list>
+feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
+    : f_(f),
+      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
+  
+     
+void feature_kv_iterator::increment()
+{        
+    ++itr_;
+}
 
-#include "kismet_types.hpp"
-
-class kismet_featureset : public mapnik::Featureset
+bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
 {
-public:
-    kismet_featureset(std::list<kismet_network_data> const& knd_list,
-                      std::string const& srs,
-                      std::string const& encoding);
-    virtual ~kismet_featureset();
-    mapnik::feature_ptr next();
+    return ( itr_ == other.itr_);        
+}
+    
+feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
+{
+    boost::get<0>(kv_) = itr_->first;
+    boost::get<1>(kv_) = f_.get(itr_->first);
+    return kv_;
+}
 
-private:
-    std::list<kismet_network_data> const& knd_list_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
-    mapnik::wkbFormat format_;
-    int feature_id_;
-    std::list<kismet_network_data>::const_iterator knd_list_it;
-    mapnik::projection source_;
-    mapnik::context_ptr ctx_;
-};
-
-#endif // KISMET_FEATURESET_HPP
+} // endof mapnik namespace

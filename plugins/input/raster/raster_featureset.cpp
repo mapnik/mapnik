@@ -50,6 +50,7 @@ raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
       curIter_(policy_.begin()),
       endIter_(policy_.end())
 {
+    ctx_ = boost::make_shared<mapnik::context_type>();
 }
 
 template <typename LookupPolicy>
@@ -62,9 +63,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 {
     if (curIter_ != endIter_)
     {
-        feature_ptr feature(feature_factory::create(feature_id_));
-        ++feature_id_;
-
+        feature_ptr feature(feature_factory::create(ctx_,feature_id_++));
+        
         try
         {
             std::auto_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));

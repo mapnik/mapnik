@@ -368,6 +368,18 @@ if HAS_PYCAIRO_MODULE and mapnik.has_pycairo():
     images_.append('demo.ps')
     postscript_surface.finish()    
 
+    image_surface = cairo.ImageSurface(cairo.FORMAT_RGB24, m.width, m.height)
+    mapnik.render(m, image_surface)
+    image_surface.write_to_png('demo_cairo_rgb24.png')
+    images_.append('demo_cairo_argb24.png')
+    image_surface.finish()
+
+    image_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, m.width, m.height)
+    mapnik.render(m, image_surface)
+    image_surface.write_to_png('demo_cairo_argb32.png')
+    images_.append('demo_cairo_argb32.png')
+    image_surface.finish()
+    
 else:
     print '\n\nPycairo not available...',
     if  mapnik.has_cairo():
@@ -379,9 +391,9 @@ else:
         images_.append('demo.ps')
         mapnik.render_to_file(m,'demo.svg')
         images_.append('demo.svg')
-        mapnik.render_to_file(m,'demo_cairo_rgb.png','RGB24')
+        mapnik.render_to_file(m,'demo_cairo_rgb24.png','RGB24')
         images_.append('demo_cairo_rgb.png')
-        mapnik.render_to_file(m,'demo_cairo_argb.png','ARGB32')
+        mapnik.render_to_file(m,'demo_cairo_argb32.png','ARGB32')
         images_.append('demo_cairo_argb.png')
 
 print "\n\n", len(images_), "maps have been rendered in the current directory:"

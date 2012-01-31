@@ -20,40 +20,21 @@
  *
  *****************************************************************************/
 
-#ifndef KISMET_FEATURESET_HPP
-#define KISMET_FEATURESET_HPP
+#ifndef SHAPE_UTILS_HPP
+#define SHAPE_UTILS_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp>
-#include <mapnik/wkb.hpp>
+#include <mapnik/feature.hpp>
+#include "shape_io.hpp"
+// stl
+#include <set>
+#include <vector>
+#include <string>
 
-// boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+void setup_attributes(mapnik::context_ptr const& ctx, 
+                      std::set<std::string> const& names,
+                      std::string const& shape_name,
+                      shape_io & shape, 
+                      std::vector<int> & attr_ids);
 
-//STL
-#include <list>
-
-#include "kismet_types.hpp"
-
-class kismet_featureset : public mapnik::Featureset
-{
-public:
-    kismet_featureset(std::list<kismet_network_data> const& knd_list,
-                      std::string const& srs,
-                      std::string const& encoding);
-    virtual ~kismet_featureset();
-    mapnik::feature_ptr next();
-
-private:
-    std::list<kismet_network_data> const& knd_list_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
-    mapnik::wkbFormat format_;
-    int feature_id_;
-    std::list<kismet_network_data>::const_iterator knd_list_it;
-    mapnik::projection source_;
-    mapnik::context_ptr ctx_;
-};
-
-#endif // KISMET_FEATURESET_HPP
+#endif // SHAPE_UTILS_HPP               

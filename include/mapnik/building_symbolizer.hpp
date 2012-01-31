@@ -1,5 +1,5 @@
 /*****************************************************************************
- *
+ * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -20,40 +20,34 @@
  *
  *****************************************************************************/
 
-#ifndef KISMET_FEATURESET_HPP
-#define KISMET_FEATURESET_HPP
+#ifndef MAPNIK_BUILDING_SYMBOLIZER_HPP
+#define MAPNIK_BUILDING_SYMBOLIZER_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp>
-#include <mapnik/wkb.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/symbolizer.hpp>
+#include <mapnik/filter_factory.hpp>
 
-// boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-
-//STL
-#include <list>
-
-#include "kismet_types.hpp"
-
-class kismet_featureset : public mapnik::Featureset
+namespace mapnik 
 {
-public:
-    kismet_featureset(std::list<kismet_network_data> const& knd_list,
-                      std::string const& srs,
-                      std::string const& encoding);
-    virtual ~kismet_featureset();
-    mapnik::feature_ptr next();
+   
+struct MAPNIK_DECL building_symbolizer : public symbolizer_base
+{
+    building_symbolizer();
+    building_symbolizer(color const& fill, expression_ptr height);   
+    color const& get_fill() const;
+    void set_fill(color const& fill);    
+    expression_ptr height() const;
+    void set_height(expression_ptr height);
+    void set_opacity(double opacity);
+    double get_opacity() const;
 
 private:
-    std::list<kismet_network_data> const& knd_list_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
-    mapnik::wkbFormat format_;
-    int feature_id_;
-    std::list<kismet_network_data>::const_iterator knd_list_it;
-    mapnik::projection source_;
-    mapnik::context_ptr ctx_;
-};
+    color fill_;
+    expression_ptr height_;
+    double opacity_;
+};  
 
-#endif // KISMET_FEATURESET_HPP
+}
+
+#endif // MAPNIK_BUILDING_SYMBOLIZER_HPP

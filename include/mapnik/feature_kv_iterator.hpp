@@ -1,8 +1,8 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,30 +20,44 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_ATTRIBUTE_HPP
-#define MAPNIK_ATTRIBUTE_HPP
+#ifndef MAPNIK_FEATURE_KV_ITERATOR_HPP
+#define MAPNIK_FEATURE_KV_ITERATOR_HPP
 
-// mapnik
+#include <boost/tuple/tuple.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+
+#include <map>
+//#include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
-// stl
-#include <string>
 
-namespace mapnik {
+namespace mapnik { 
 
-struct attribute
+class feature_impl;
+
+class feature_kv_iterator :
+        public boost::iterator_facade<feature_kv_iterator,
+                                      boost::tuple<std::string , value> const,
+                                      boost::forward_traversal_tag>
 {
-    std::string name_;
-    explicit attribute(std::string const& name)
-        : name_(name) {}
+public:
+    typedef boost::tuple<std::string,value> value_type;
     
-    template <typename V ,typename F>
-    V const& value(F const& f) const
-    {
-        return f.get(name_); 
-    }
+    feature_kv_iterator (feature_impl const& f, bool begin = false);
+private:
+    friend class boost::iterator_core_access;    
+    void increment();
+
+    bool equal( feature_kv_iterator const& other) const;
+
+    value_type const& dereference() const;
     
-    std::string const& name() const { return name_;}
+    feature_impl const& f_;
+    std::map<std::string,std::size_t>::const_iterator itr_;
+    mutable value_type kv_;
+    
 };
+
 }
 
-#endif // MAPNIK_ATTRIBUTE_HPP
+#endif // MAPNIK_FEATURE_KV_ITERATOR_HPP
+

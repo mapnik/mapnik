@@ -1,5 +1,5 @@
 /*****************************************************************************
- *
+ * 
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -20,40 +20,53 @@
  *
  *****************************************************************************/
 
-#ifndef KISMET_FEATURESET_HPP
-#define KISMET_FEATURESET_HPP
+//$Id$
 
 // mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/unicode.hpp>
-#include <mapnik/wkb.hpp>
+#include <mapnik/building_symbolizer.hpp>
 
-// boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-
-//STL
-#include <list>
-
-#include "kismet_types.hpp"
-
-class kismet_featureset : public mapnik::Featureset
+namespace mapnik
 {
-public:
-    kismet_featureset(std::list<kismet_network_data> const& knd_list,
-                      std::string const& srs,
-                      std::string const& encoding);
-    virtual ~kismet_featureset();
-    mapnik::feature_ptr next();
 
-private:
-    std::list<kismet_network_data> const& knd_list_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
-    mapnik::wkbFormat format_;
-    int feature_id_;
-    std::list<kismet_network_data>::const_iterator knd_list_it;
-    mapnik::projection source_;
-    mapnik::context_ptr ctx_;
-};
+building_symbolizer::building_symbolizer() 
+    : symbolizer_base(),
+      fill_(color(128,128,128)),
+      opacity_(1.0)
+{}
 
-#endif // KISMET_FEATURESET_HPP
+building_symbolizer::building_symbolizer(color const& fill, expression_ptr height)
+    : symbolizer_base(),
+      fill_(fill),
+      height_(height),
+      opacity_(1.0) {}
+
+color const& building_symbolizer::get_fill() const
+{
+    return fill_;
+}
+
+void building_symbolizer::set_fill(color const& fill)
+{
+    fill_ = fill;
+}
+expression_ptr building_symbolizer::height() const
+{
+    return height_;
+}
+
+void building_symbolizer::set_height(expression_ptr height)
+{
+    height_=height;
+}
+
+void building_symbolizer::set_opacity(double opacity)
+{
+    opacity_ = opacity;
+}
+
+double building_symbolizer::get_opacity() const
+{
+    return opacity_;
+}
+
+}

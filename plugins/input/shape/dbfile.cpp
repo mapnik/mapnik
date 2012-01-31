@@ -121,7 +121,7 @@ const field_descriptor& dbf_file::descriptor(int col) const
 }
 
 
-void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature const& f) const throw()
+void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f) const throw()
 {
     using namespace boost::spirit;
 
@@ -139,7 +139,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
             // FIXME - avoid constructing std::string on stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
             boost::trim(str);
-            f[name] = tr.transcode(str.c_str());
+            f.put(name,tr.transcode(str.c_str()));
             break;
         }
         case 'N':
@@ -148,7 +148,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
 
             if (record_[fields_[col].offset_] == '*')
             {
-                boost::put(f,name,0);
+                f.put(name,0);
                 break;
             }
             if ( fields_[col].dec_>0 )
@@ -157,7 +157,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
                 qi::phrase_parse(itr,end,double_,ascii::space,val);
-                boost::put(f,name,val);
+                f.put(name,val);
             }
             else
             {
@@ -165,7 +165,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature cons
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
                 qi::phrase_parse(itr,end,int_,ascii::space,val);
-                boost::put(f,name,val);
+                f.put(name,val);
             }
             break;
         }

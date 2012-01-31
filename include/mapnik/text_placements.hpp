@@ -167,6 +167,11 @@ public:
       */
     virtual bool next()=0;
     virtual ~text_placement_info() {}
+    /** Initialize values used by placement finder. Only has to be done once
+     * per object.
+     */
+    void init(double scale_factor_,
+              unsigned w = 0, unsigned h = 0, bool has_dimensions_ = false);
 
     /** Properties actually used by placement finder and renderer. Values in
      * here are modified each time next() is called. */
