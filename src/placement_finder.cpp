@@ -787,8 +787,8 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
         }
 
         double render_angle = angle;
-        double cosa = fast_cos(angle);
-        double sina = fast_sin(angle);
+        //double cosa = fast_cos(angle); TODO: do we need them?
+        //double sina = fast_sin(angle);
 
         double render_x = start_x;
         double render_y = start_y;
