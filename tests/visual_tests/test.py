@@ -11,7 +11,9 @@ dirname = os.path.dirname(sys.argv[0])
 widths = [ 800, 600, 400, 300, 250, 200, 150, 100]
 filenames = ["list", "simple"]
 filenames_one_width = ["simple-E", "simple-NE", "simple-NW", "simple-N",
-    "simple-SE", "simple-SW", "simple-S", "simple-W", "formating"]
+    "simple-SE", "simple-SW", "simple-S", "simple-W",
+    "formating-1", "formating-2", "formating-3", "formating-4",
+    "shieldsymbolizer-1"]
     
 def render(filename, width):
     print "Rendering style \"%s\" with width %d" % (filename, width)
@@ -22,12 +24,16 @@ def render(filename, width):
     mapnik.render_to_file(m, '%s-%d-agg.png' % (filename, width))
     return m
     
-
+if len(sys.argv) > 1:
+    filenames = []
+    filenames_one_width = sys.argv[1:]
+    
 for filename in filenames:
     for width in widths:
         m = render(filename, width)
     mapnik.save_map(m, "%s-out.xml" % filename)
 
 for filename in filenames_one_width:
-    render(filename, 500)
+    m = render(filename, 500)
+    mapnik.save_map(m, "%s-out.xml" % filename)
 

@@ -143,7 +143,8 @@ public:
         else
         {
             cont_type::size_type index = ctx_->push(key);
-            data_.push_back(val);
+            if (index == data_.size())
+                data_.push_back(val);
         }
     } 
     

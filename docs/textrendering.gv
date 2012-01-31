@@ -1,24 +1,40 @@
-#process with: dot textrendering.gv -Tpng > textrendering.png
+/* process with:
+dot textrendering.gv -Tsvg > textrendering.svg
+dot textrendering.gv -Tpng > textrendering.png
+ */
 digraph textrendering {
-# Classes without important virtual members: Round
-# Classes with    important virtual members: Rect
-# Pointers [style=dashed]
-# Red: function is called
+  /* Classes without important virtual members: Round
+     Classes with    important virtual members: Rect
+     Pointers [style=dashed] */
+
+  Renderer [color=red]
+  rankdir="TD";
   text_placements[shape=box]
   text_placement_info[shape=box]
-  Renderer
-
+  node_ -> text_symbolizer_properties [label="tree_", style=dashed]
   TextSymbolizer -> text_placements [label="placement_options_", style=dashed]
   text_placements -> text_symbolizer_properties [label="properties"]
   text_placements -> text_placement_info [label="get_placement_info()", style=dashed]
   text_placement_info -> text_symbolizer_properties [label="properties"]
   text_placement_info -> text_path [label="placements", style=dashed]
   text_placement_info -> text_placement_info [label="next()"]
-  text_symbolizer_properties -> text_processor [label="processor"]
-  text_processor ->  processed_text [label="process()", style=dashed]
-  processed_text -> string_info [label="get_string_info()"]
+  text_symbolizer_properties ->  processed_text [label="process()", style=dashed]
+  processed_text -> string_info [label="get_string_info()", style=dashed]
   text_path -> Renderer [color=red, label="used by"]
-  Renderer -> text_placement_info [color=red, label="init()"]
-  Renderer -> processed_text [color=red, label="initializes"]
+  processed_text -> Renderer [color=red, label="owned by"]
+  Renderer -> text_symbolizer_helper [color=red, label="creates"]
+  text_symbolizer_helper -> placement_finder [color=red, label="creates"]
+  placement_finder -> text_path [color=red, label="creates"]
+  string_info -> placement_finder [color=red, label="used by"]
+  text_placement_info -> Renderer [color=red, label="used by"]
   
+  
+  node_[label="node"]
+  node_ -> text_node [style=dashed]
+  node_ -> list_node [style=dashed]
+  node_ -> format_node [style=dashed]
+  list_node -> text_node [style=dashed]
+  list_node -> format_node [style=dashed]
+  format_node -> text_node [style=dashed]
+   { rank=same; text_path text_symbolizer_helper }
 }

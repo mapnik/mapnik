@@ -196,7 +196,6 @@
         line_spacing    CDATA            "0"
         min_distance    CDATA            "0"
         name            CDATA            #IMPLIED
-        no_text            (true|false)    "false"
         placement        (point|line|vertex)        "point"
         size            CDATA            "10"
         spacing            CDATA            "0"

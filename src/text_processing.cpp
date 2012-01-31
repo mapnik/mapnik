@@ -25,372 +25,324 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/filter_factory.hpp>
-#include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
+#include <mapnik/ptree_helpers.hpp>
 
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <stack>
+#include <vector>
 
 namespace mapnik {
 using boost::property_tree::ptree;
 using boost::optional;
 
-class abstract_token
-{
-public:
-    virtual ~abstract_token() {}
-    virtual ptree *to_xml(ptree *node) = 0;
-};
+namespace formating {
 
-class abstract_formating_token : public abstract_token
+void node::to_xml(boost::property_tree::ptree &xml) const
 {
-public:
-    virtual void apply(char_properties &p, Feature const& feature) = 0;
-};
+    //TODO: Should this throw a config_error?
+#ifdef MAPNIK_DEBUG
+        std::cerr << "Error: Trying to write unsupported node type to XML.\n";
+#endif
+}
 
-class abstract_text_token : public abstract_token
+node_ptr node::from_xml(boost::property_tree::ptree const& xml)
 {
-public:
-    virtual UnicodeString to_string(Feature const& feature) = 0;
-};
+    list_node *list = new list_node();
+    node_ptr list_ptr(list);
+    ptree::const_iterator itr = xml.begin();
+    ptree::const_iterator end = xml.end();
+    for (; itr != end; ++itr) {
+        node_ptr n;
+        if (itr->first == "<xmltext>") {
+            n = text_node::from_xml(itr->second);
+        } else if (itr->first == "Format") {
+            n = format_node::from_xml(itr->second);
+        } else if (itr->first != "<xmlcomment>" && itr->first != "<xmlattr>" && itr->first != "Placement") {
+            throw config_error("Unknown item " + itr->first);
+        }
+        if (n) list->push_back(n);
+    }
+    if (list->get_children().size() == 1) {
+        return list->get_children()[0];
+    } else if (list->get_children().size() > 1) {
+        return list_ptr;
+    } else {
+        return node_ptr();
+    }
+}
 
-class end_format_token : public abstract_token
+void node::add_expressions(std::set<expression_ptr> &expressions) const
 {
-public:
-    end_format_token() {}
-    ptree *to_xml(ptree *node);
-};
-
-class expression_token: public abstract_text_token
-{
-public:
-    expression_token(expression_ptr text);
-    UnicodeString to_string(Feature const& feature);
-    ptree *to_xml(ptree *node);
-    void set_expression(expression_ptr text);
-    expression_ptr get_expression();
-private:
-    expression_ptr text_;
-};
-
-class fixed_formating_token : public abstract_formating_token
-{
-public:
-    fixed_formating_token();
-    virtual void apply(char_properties &p, Feature const& feature);
-    ptree* to_xml(ptree *node);
-    void from_xml(ptree const& node);
-    void set_face_name(optional<std::string> face_name);
-    void set_text_size(optional<unsigned> text_size);
-    void set_character_spacing(optional<unsigned> character_spacing);
-    void set_line_spacing(optional<unsigned> line_spacing);
-    void set_text_opacity(optional<double> opacity);
-    void set_wrap_before(optional<boolean> wrap_before);
-    void set_wrap_char(optional<unsigned> wrap_char);
-    void set_text_transform(optional<text_transform_e> text_trans);
-    void set_fill(optional<color> fill);
-    void set_halo_fill(optional<color> halo_fill);
-    void set_halo_radius(optional<double> radius);
-private:
-    boost::optional<std::string> face_name_;
-//    font_set fontset;
-    boost::optional<unsigned> text_size_;
-    boost::optional<unsigned> character_spacing_;
-    boost::optional<unsigned> line_spacing_;
-    boost::optional<double> text_opacity_;
-    boost::optional<boolean> wrap_before_;
-    boost::optional<unsigned> wrap_char_;
-    boost::optional<text_transform_e> text_transform_;
-    boost::optional<color> fill_;
-    boost::optional<color> halo_fill_;
-    boost::optional<double> halo_radius_;
-};
+    //Do nothing by default
+}
 
 /************************************************************/
 
-expression_token::expression_token(expression_ptr text):
-    text_(text)
+void list_node::to_xml(boost::property_tree::ptree &xml) const
 {
+    std::vector<node_ptr>::const_iterator itr = children_.begin();
+    std::vector<node_ptr>::const_iterator end = children_.end();
+    for (;itr != end; itr++)
+    {
+        (*itr)->to_xml(xml);
+    }
 }
 
-void expression_token::set_expression(expression_ptr text)
+
+void list_node::apply(char_properties const& p, Feature const& feature, processed_text &output) const
+{
+    std::vector<node_ptr>::const_iterator itr = children_.begin();
+    std::vector<node_ptr>::const_iterator end = children_.end();
+    for (;itr != end; itr++)
+    {
+        (*itr)->apply(p, feature, output);
+    }
+}
+
+
+void list_node::add_expressions(std::set<expression_ptr> &expressions) const
+{
+    std::vector<node_ptr>::const_iterator itr = children_.begin();
+    std::vector<node_ptr>::const_iterator end = children_.end();
+    for (;itr != end; itr++)
+    {
+        (*itr)->add_expressions(expressions);
+    }
+}
+
+
+void list_node::push_back(node_ptr n)
+{
+    children_.push_back(n);
+}
+
+
+void list_node::clear()
+{
+    children_.clear();
+}
+
+void list_node::set_children(std::vector<node_ptr> const& children)
+{
+    children_ = children;
+}
+
+std::vector<node_ptr> const& list_node::get_children() const
+{
+    return children_;
+}
+
+/************************************************************/
+
+void text_node::to_xml(ptree &xml) const
+{
+    ptree &new_node = xml.push_back(ptree::value_type(
+                             "<xmltext>", ptree()))->second;
+    new_node.put_value(to_expression_string(*text_));
+}
+
+
+node_ptr text_node::from_xml(boost::property_tree::ptree const& xml)
+{
+    std::string data = xml.data();
+    boost::trim(data);
+    if (data.empty()) return node_ptr(); //No text
+    return node_ptr(new text_node(parse_expression(data, "utf8")));
+}
+
+void text_node::apply(char_properties const& p, Feature const& feature, processed_text &output) const
+{
+    UnicodeString text_str = boost::apply_visitor(evaluate<Feature,value_type>(feature), *text_).to_unicode();
+    if (p.text_transform == UPPERCASE)
+    {
+        text_str = text_str.toUpper();
+    }
+    else if (p.text_transform == LOWERCASE)
+    {
+        text_str = text_str.toLower();
+    }
+    else if (p.text_transform == CAPITALIZE)
+    {
+        text_str = text_str.toTitle(NULL);
+    }
+    if (text_str.length() > 0) {
+        output.push_back(processed_text::processed_expression(p, text_str));
+    } else {
+#ifdef MAPNIK_DEBUG
+        std::cerr << "Warning: Empty expression.\n";
+#endif
+    }
+}
+
+
+void text_node::add_expressions(std::set<expression_ptr> &expressions) const
+{
+    if (text_) expressions.insert(text_);
+}
+
+
+void text_node::set_text(expression_ptr text)
 {
     text_ = text;
 }
 
-expression_ptr expression_token::get_expression()
+
+expression_ptr text_node::get_text() const
 {
     return text_;
 }
 
-UnicodeString expression_token::to_string(const Feature &feature)
-{
-    value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *text_);
-    return result.to_unicode();
-}
-
-ptree *expression_token::to_xml(ptree *node)
-{
-    ptree &new_node = node->push_back(ptree::value_type(
-                             "<xmltext>", ptree()))->second;
-    new_node.put_value(to_expression_string(*text_));
-    return &new_node;
-}
-
 /************************************************************/
 
-fixed_formating_token::fixed_formating_token():
-    fill_()
+format_node::format_node():
+    node(),
+    fill_(),
+    child_()
 {
+
 }
 
-void fixed_formating_token::apply(char_properties &p, const Feature &feature)
+void format_node::to_xml(ptree &xml) const
 {
-    if (face_name_) p.face_name = *face_name_;
-    if (text_size_) p.text_size = *text_size_;
-    if (character_spacing_) p.character_spacing = *character_spacing_;
-    if (line_spacing_) p.line_spacing = *line_spacing_;
-    if (text_opacity_) p.text_opacity = *text_opacity_;
-    if (wrap_before_) p.wrap_before = *wrap_before_;
-    if (wrap_char_) p.wrap_char = *wrap_char_;
-    if (text_transform_) p.text_transform = *text_transform_;
-    if (fill_) p.fill = *fill_;
-    if (halo_fill_) p.halo_fill = *halo_fill_;
-    if (halo_radius_) p.halo_radius = *halo_radius_;
+    ptree &new_node = xml.push_back(ptree::value_type("Format", ptree()))->second;
+    if (face_name_) set_attr(new_node, "face-name", *face_name_);
+    if (text_size_) set_attr(new_node, "size", *text_size_);
+    if (character_spacing_) set_attr(new_node, "character-spacing", *character_spacing_);
+    if (line_spacing_) set_attr(new_node, "line-spacing", *line_spacing_);
+    if (text_opacity_) set_attr(new_node, "opacity", *text_opacity_);
+    if (wrap_before_) set_attr(new_node, "wrap-before", *wrap_before_);
+    if (wrap_char_) set_attr(new_node, "wrap-character", *wrap_char_);
+    if (text_transform_) set_attr(new_node, "text-transform", *text_transform_);
+    if (fill_) set_attr(new_node, "fill", *fill_);
+    if (halo_fill_) set_attr(new_node, "halo-fill", *halo_fill_);
+    if (halo_radius_) set_attr(new_node, "halo-radius", *halo_radius_);
+    if (child_) child_->to_xml(new_node);
 }
 
-ptree *fixed_formating_token::to_xml(ptree *node)
-{
 
-    ptree &new_node = node->push_back(ptree::value_type("Format", ptree()))->second;
-    if (face_name_) set_attr(new_node, "face-name", face_name_);
-    if (text_size_) set_attr(new_node, "size", text_size_);
-    if (character_spacing_) set_attr(new_node, "character-spacing", character_spacing_);
-    if (line_spacing_) set_attr(new_node, "line-spacing", line_spacing_);
-    if (text_opacity_) set_attr(new_node, "opacity", text_opacity_);
-    if (wrap_before_) set_attr(new_node, "wrap-before", wrap_before_);
-    if (wrap_char_) set_attr(new_node, "wrap-character", wrap_char_);
-    if (text_transform_) set_attr(new_node, "text-transform", text_transform_);
-    if (fill_) set_attr(new_node, "fill", fill_);
-    if (halo_fill_) set_attr(new_node, "halo-fill", halo_fill_);
-    if (halo_radius_) set_attr(new_node, "halo-radius", halo_radius_);
-    return &new_node;
-}
-
-void fixed_formating_token::from_xml(ptree const& node)
+node_ptr format_node::from_xml(ptree const& xml)
 {
-    set_face_name(get_opt_attr<std::string>(node, "face-name"));
+    format_node *n = new format_node();
+    node_ptr np(n);
+
+    node_ptr child = node::from_xml(xml);
+    n->set_child(child);
+
+    n->set_face_name(get_opt_attr<std::string>(xml, "face-name"));
     /*TODO: Fontset is problematic. We don't have the fontsets pointer here... */
-    set_text_size(get_opt_attr<unsigned>(node, "size"));
-    set_character_spacing(get_opt_attr<unsigned>(node, "character-spacing"));
-    set_line_spacing(get_opt_attr<unsigned>(node, "line-spacing"));
-    set_text_opacity(get_opt_attr<double>(node, "opactity"));
-    set_wrap_before(get_opt_attr<boolean>(node, "wrap-before"));
-    set_wrap_char(get_opt_attr<unsigned>(node, "wrap-character"));
-    set_text_transform(get_opt_attr<text_transform_e>(node, "text-transform"));
-    set_fill(get_opt_attr<color>(node, "fill"));
-    set_halo_fill(get_opt_attr<color>(node, "halo-fill"));
-    set_halo_radius(get_opt_attr<double>(node, "halo-radius"));
+    n->set_text_size(get_opt_attr<unsigned>(xml, "size"));
+    n->set_character_spacing(get_opt_attr<unsigned>(xml, "character-spacing"));
+    n->set_line_spacing(get_opt_attr<unsigned>(xml, "line-spacing"));
+    n->set_text_opacity(get_opt_attr<double>(xml, "opactity"));
+    boost::optional<boolean> wrap = get_opt_attr<boolean>(xml, "wrap-before");
+    boost::optional<bool> wrap_before;
+    if (wrap) wrap_before = *wrap;
+    n->set_wrap_before(wrap_before);
+    n->set_wrap_char(get_opt_attr<unsigned>(xml, "wrap-character"));
+    n->set_text_transform(get_opt_attr<text_transform_e>(xml, "text-transform"));
+    n->set_fill(get_opt_attr<color>(xml, "fill"));
+    n->set_halo_fill(get_opt_attr<color>(xml, "halo-fill"));
+    n->set_halo_radius(get_opt_attr<double>(xml, "halo-radius"));
+    return np;
 }
 
-void fixed_formating_token::set_face_name(optional<std::string> face_name)
+
+void format_node::apply(char_properties const& p, const Feature &feature, processed_text &output) const
+{
+    char_properties new_properties = p;
+    if (face_name_) new_properties.face_name = *face_name_;
+    if (text_size_) new_properties.text_size = *text_size_;
+    if (character_spacing_) new_properties.character_spacing = *character_spacing_;
+    if (line_spacing_) new_properties.line_spacing = *line_spacing_;
+    if (text_opacity_) new_properties.text_opacity = *text_opacity_;
+    if (wrap_before_) new_properties.wrap_before = *wrap_before_;
+    if (wrap_char_) new_properties.wrap_char = *wrap_char_;
+    if (text_transform_) new_properties.text_transform = *text_transform_;
+    if (fill_) new_properties.fill = *fill_;
+    if (halo_fill_) new_properties.halo_fill = *halo_fill_;
+    if (halo_radius_) new_properties.halo_radius = *halo_radius_;
+
+    if (child_) {
+        child_->apply(new_properties, feature, output);
+    } else {
+#ifdef MAPNIK_DEBUG
+        std::cerr << "Warning: Useless format: No text to format\n";
+#endif
+    }
+}
+
+
+void format_node::set_child(node_ptr child)
+{
+    child_ = child;
+}
+
+
+node_ptr format_node::get_child() const
+{
+    return child_;
+}
+
+
+void format_node::set_face_name(optional<std::string> face_name)
 {
     face_name_ = face_name;
 }
 
-void fixed_formating_token::set_text_size(optional<unsigned> text_size)
+void format_node::set_text_size(optional<unsigned> text_size)
 {
     text_size_ = text_size;
 }
 
-void fixed_formating_token::set_character_spacing(optional<unsigned> character_spacing)
+void format_node::set_character_spacing(optional<unsigned> character_spacing)
 {
     character_spacing_ = character_spacing;
 }
 
-void fixed_formating_token::set_line_spacing(optional<unsigned> line_spacing)
+void format_node::set_line_spacing(optional<unsigned> line_spacing)
 {
     line_spacing_ = line_spacing;
 }
 
-void fixed_formating_token::set_text_opacity(optional<double> text_opacity)
+void format_node::set_text_opacity(optional<double> text_opacity)
 {
     text_opacity_ = text_opacity;
 }
 
-void fixed_formating_token::set_wrap_before(optional<boolean> wrap_before)
+void format_node::set_wrap_before(optional<bool> wrap_before)
 {
     wrap_before_ = wrap_before;
 }
 
-void fixed_formating_token::set_wrap_char(optional<unsigned> wrap_char)
+void format_node::set_wrap_char(optional<unsigned> wrap_char)
 {
     wrap_char_ = wrap_char;
 }
 
-void fixed_formating_token::set_text_transform(optional<text_transform_e> text_transform)
+void format_node::set_text_transform(optional<text_transform_e> text_transform)
 {
     text_transform_ = text_transform;
 }
 
-void fixed_formating_token::set_fill(optional<color> c)
+void format_node::set_fill(optional<color> c)
 {
     fill_ = c;
 }
 
-void fixed_formating_token::set_halo_fill(optional<color> c)
+void format_node::set_halo_fill(optional<color> c)
 {
     halo_fill_ = c;
 }
 
-void fixed_formating_token::set_halo_radius(optional<double> radius)
+void format_node::set_halo_radius(optional<double> radius)
 {
     halo_radius_ = radius;
 }
-
-/************************************************************/
-
-ptree *end_format_token::to_xml(ptree *node)
-{
-    return 0;
-}
-
-/************************************************************/
-
-text_processor::text_processor():
-    list_(), clear_on_write(false)
-{
-}
-
-void text_processor::push_back(abstract_token *token)
-{
-    if (clear_on_write) list_.clear();
-    clear_on_write = false;
-    list_.push_back(token);
-}
-
-void text_processor::from_xml(const boost::property_tree::ptree &pt, std::map<std::string,font_set> const &fontsets)
-{
-    clear_on_write = true;
-    defaults.set_values_from_xml(pt, fontsets);
-    from_xml_recursive(pt, fontsets);
-}
-
-void text_processor::from_xml_recursive(const boost::property_tree::ptree &pt, std::map<std::string,font_set> const &fontsets)
-{
-    ptree::const_iterator itr = pt.begin();
-    ptree::const_iterator end = pt.end();
-    for (; itr != end; ++itr) {
-        if (itr->first == "<xmltext>") {
-            std::string data = itr->second.data();
-            boost::trim(data);
-            if (data.empty()) continue;
-            expression_token *token = new expression_token(parse_expression(data, "utf8"));
-            push_back(token);
-        } else if (itr->first == "Format") {
-            fixed_formating_token *token = new fixed_formating_token();
-            token->from_xml(itr->second);
-            push_back(token);
-            from_xml_recursive(itr->second, fontsets); /* Parse children, making a list out of a tree. */
-            push_back(new end_format_token());
-        } else if (itr->first != "<xmlcomment>" && itr->first != "<xmlattr>" && itr->first != "Placement") {
-            std::cerr << "Unknown item" << itr->first;
-        }
-    }
-}
-
-void text_processor::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_processor const& dfl) const
-{
-    defaults.to_xml(node, explicit_defaults, dfl.defaults);
-    std::list<abstract_token *>::const_iterator itr = list_.begin();
-    std::list<abstract_token *>::const_iterator end = list_.end();
-    std::stack<ptree *> nodes;
-    ptree *current_node = &node;
-    for (; itr != end; ++itr) {
-        abstract_token *token = *itr;
-        ptree *new_node = token->to_xml(current_node);
-        if (dynamic_cast<abstract_formating_token *>(token)) {
-            nodes.push(current_node);
-            current_node = new_node;
-        } else if (dynamic_cast<end_format_token *>(token)) {
-            current_node = nodes.top();
-            nodes.pop();
-        }
-    }
-}
-
-void text_processor::process(processed_text &output, Feature const& feature)
-{
-    std::list<abstract_token *>::const_iterator itr = list_.begin();
-    std::list<abstract_token *>::const_iterator end = list_.end();
-    std::stack<char_properties> formats;
-    formats.push(defaults);
-
-    for (; itr != end; ++itr) {
-        abstract_text_token *text = dynamic_cast<abstract_text_token *>(*itr);
-        abstract_formating_token *format = dynamic_cast<abstract_formating_token *>(*itr);;
-        end_format_token *end = dynamic_cast<end_format_token *>(*itr);;
-        if (text) {
-            UnicodeString text_str = text->to_string(feature);
-            char_properties const& p = formats.top();
-            /* TODO: Make a class out of text_transform which does the work! */
-            if (p.text_transform == UPPERCASE)
-            {
-                text_str = text_str.toUpper();
-            }
-            else if (p.text_transform == LOWERCASE)
-            {
-                text_str = text_str.toLower();
-            }
-            else if (p.text_transform == CAPITALIZE)
-            {
-                text_str = text_str.toTitle(NULL);
-            }
-            if (text_str.length() > 0) {
-                output.push_back(processed_expression(p, text_str));
-            } else {
-#ifdef MAPNIK_DEBUG
-                std::cerr << "Warning: Empty expression.\n";
-#endif
-            }
-        } else if (format) {
-            char_properties next_properties = formats.top();
-            format->apply(next_properties, feature);
-            formats.push(next_properties);
-        } else if (end) {
-            /* Always keep at least the defaults_ on stack. */
-            if (formats.size() > 1) {
-                formats.pop();
-            } else {
-                std::cerr << "Warning: Internal mapnik error. More elements popped than pushed in text_processor::process()\n";
-                output.clear();
-                return;
-            }
-        }
-    }
-    if (formats.size() != 1) {
-        std::cerr << "Warning: Internal mapnik error. Less elements popped than pushed in text_processor::process()\n";
-    }
-}
-
-std::set<expression_ptr> text_processor::get_all_expressions() const
-{
-    std::set<expression_ptr> result;
-    std::list<abstract_token *>::const_iterator itr = list_.begin();
-    std::list<abstract_token *>::const_iterator end = list_.end();
-    for (; itr != end; ++itr) {
-        expression_token *text = dynamic_cast<expression_token *>(*itr);
-        if (text) result.insert(text->get_expression());
-    }
-    return result;
-}
-
-void text_processor::set_old_style_expression(expression_ptr expr)
-{
-    list_.push_back(new expression_token(expr));
-}
+} //namespace formating
 
 /************************************************************/
 
@@ -399,12 +351,12 @@ void processed_text::push_back(processed_expression const& exp)
     expr_list_.push_back(exp);
 }
 
-processed_text::expression_list::const_iterator processed_text::begin()
+processed_text::expression_list::const_iterator processed_text::begin() const
 {
     return expr_list_.begin();
 }
 
-processed_text::expression_list::const_iterator processed_text::end()
+processed_text::expression_list::const_iterator processed_text::end() const
 {
     return expr_list_.end();
 }
@@ -424,7 +376,7 @@ void processed_text::clear()
 
 string_info &processed_text::get_string_info()
 {
-    //info_.clear(); TODO: if this function is called twice invalid results are returned, so clear string_info first
+    info_.clear(); //if this function is called twice invalid results are returned, so clear string_info first
     expression_list::iterator itr = expr_list_.begin();
     expression_list::iterator end = expr_list_.end();
     for (; itr != end; ++itr)

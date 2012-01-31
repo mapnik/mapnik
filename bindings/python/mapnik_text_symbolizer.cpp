@@ -39,8 +39,8 @@ using namespace boost::python;
 
 tuple get_text_displacement(const text_symbolizer& t)
 {
-    position pos = t.get_displacement();
-    return boost::python::make_tuple(boost::get<0>(pos),boost::get<1>(pos));
+    mapnik::position const& pos = t.get_displacement();
+    return boost::python::make_tuple(pos.first, pos.second);
 }
 
 void set_text_displacement(text_symbolizer & t, boost::python::tuple arg)
@@ -145,40 +145,7 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
 void export_text_symbolizer()
 {
     using namespace boost::python;
-
-    enumeration_<label_placement_e>("label_placement")
-        .value("LINE_PLACEMENT",LINE_PLACEMENT)
-        .value("POINT_PLACEMENT",POINT_PLACEMENT)
-        .value("VERTEX_PLACEMENT",VERTEX_PLACEMENT)
-        .value("INTERIOR_PLACEMENT",INTERIOR_PLACEMENT)
-        ;
-    enumeration_<vertical_alignment_e>("vertical_alignment")
-        .value("TOP",V_TOP)
-        .value("MIDDLE",V_MIDDLE)
-        .value("BOTTOM",V_BOTTOM)
-        .value("AUTO",V_AUTO)
-        ;
-
-    enumeration_<horizontal_alignment_e>("horizontal_alignment")
-        .value("LEFT",H_LEFT)
-        .value("MIDDLE",H_MIDDLE)
-        .value("RIGHT",H_RIGHT)
-        .value("AUTO",H_AUTO)
-        ;
-
-    enumeration_<justify_alignment_e>("justify_alignment")
-        .value("LEFT",J_LEFT)
-        .value("MIDDLE",J_MIDDLE)
-        .value("RIGHT",J_RIGHT)
-        ;
-
-    enumeration_<text_transform_e>("text_transform")
-        .value("NONE",NONE)
-        .value("UPPERCASE",UPPERCASE)
-        .value("LOWERCASE",LOWERCASE)
-        .value("CAPITALIZE",CAPITALIZE)
-        ;
-
+    
     class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
         /*
         // todo - all python classes can have kwargs and default constructors

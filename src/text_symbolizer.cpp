@@ -137,7 +137,7 @@ expression_ptr text_symbolizer::get_name() const
 
 void text_symbolizer::set_name(expression_ptr name)
 {
-    placement_options_->properties.processor.set_old_style_expression(name);
+    placement_options_->properties.set_old_style_expression(name);
 }
 
 expression_ptr text_symbolizer::get_orientation() const
@@ -152,22 +152,22 @@ void text_symbolizer::set_orientation(expression_ptr orientation)
 
 std::string const&  text_symbolizer::get_face_name() const
 {
-    return placement_options_->properties.processor.defaults.face_name;
+    return placement_options_->properties.default_format.face_name;
 }
 
 void text_symbolizer::set_face_name(std::string face_name)
 {
-    placement_options_->properties.processor.defaults.face_name = face_name;
+    placement_options_->properties.default_format.face_name = face_name;
 }
 
 void text_symbolizer::set_fontset(font_set const& fontset)
 {
-    placement_options_->properties.processor.defaults.fontset = fontset;
+    placement_options_->properties.default_format.fontset = fontset;
 }
 
 font_set const& text_symbolizer::get_fontset() const
 {
-    return placement_options_->properties.processor.defaults.fontset;
+    return placement_options_->properties.default_format.fontset;
 }
 
 unsigned  text_symbolizer::get_text_ratio() const
@@ -192,62 +192,62 @@ void  text_symbolizer::set_wrap_width(unsigned width)
 
 bool  text_symbolizer::get_wrap_before() const
 {
-    return placement_options_->properties.processor.defaults.wrap_before;
+    return placement_options_->properties.default_format.wrap_before;
 }
 
 void  text_symbolizer::set_wrap_before(bool wrap_before)
 {
-    placement_options_->properties.processor.defaults.wrap_before = wrap_before;
+    placement_options_->properties.default_format.wrap_before = wrap_before;
 }
 
 unsigned char text_symbolizer::get_wrap_char() const
 {
-    return placement_options_->properties.processor.defaults.wrap_char;
+    return placement_options_->properties.default_format.wrap_char;
 }
 
 std::string text_symbolizer::get_wrap_char_string() const
 {
-    return std::string(1, placement_options_->properties.processor.defaults.wrap_char);
+    return std::string(1, placement_options_->properties.default_format.wrap_char);
 }
 
 void  text_symbolizer::set_wrap_char(unsigned char character)
 {
-    placement_options_->properties.processor.defaults.wrap_char = character;
+    placement_options_->properties.default_format.wrap_char = character;
 }
 
 void  text_symbolizer::set_wrap_char_from_string(std::string const& character)
 {
-    placement_options_->properties.processor.defaults.wrap_char = (character)[0];
+    placement_options_->properties.default_format.wrap_char = (character)[0];
 }
 
 text_transform_e  text_symbolizer::get_text_transform() const
 {
-    return placement_options_->properties.processor.defaults.text_transform;
+    return placement_options_->properties.default_format.text_transform;
 }
 
 void  text_symbolizer::set_text_transform(text_transform_e convert)
 {
-    placement_options_->properties.processor.defaults.text_transform = convert;
+    placement_options_->properties.default_format.text_transform = convert;
 }
 
 unsigned  text_symbolizer::get_line_spacing() const
 {
-    return placement_options_->properties.processor.defaults.line_spacing;
+    return placement_options_->properties.default_format.line_spacing;
 }
 
 void  text_symbolizer::set_line_spacing(unsigned spacing)
 {
-    placement_options_->properties.processor.defaults.line_spacing = spacing;
+    placement_options_->properties.default_format.line_spacing = spacing;
 }
 
 unsigned  text_symbolizer::get_character_spacing() const
 {
-    return placement_options_->properties.processor.defaults.character_spacing;
+    return placement_options_->properties.default_format.character_spacing;
 }
 
 void  text_symbolizer::set_character_spacing(unsigned spacing)
 {
-    placement_options_->properties.processor.defaults.character_spacing = spacing;
+    placement_options_->properties.default_format.character_spacing = spacing;
 }
 
 unsigned  text_symbolizer::get_label_spacing() const
@@ -292,42 +292,42 @@ void text_symbolizer::set_max_char_angle_delta(double angle)
 
 void text_symbolizer::set_text_size(float size)
 {
-    placement_options_->properties.processor.defaults.text_size = size;
+    placement_options_->properties.default_format.text_size = size;
 }
 
 float text_symbolizer::get_text_size() const
 {
-    return placement_options_->properties.processor.defaults.text_size;
+    return placement_options_->properties.default_format.text_size;
 }
 
 void text_symbolizer::set_fill(color const& fill)
 {
-    placement_options_->properties.processor.defaults.fill = fill;
+    placement_options_->properties.default_format.fill = fill;
 }
 
 color const&  text_symbolizer::get_fill() const
 {
-    return placement_options_->properties.processor.defaults.fill;
+    return placement_options_->properties.default_format.fill;
 }
 
 void  text_symbolizer::set_halo_fill(color const& fill)
 {
-    placement_options_->properties.processor.defaults.halo_fill = fill;
+    placement_options_->properties.default_format.halo_fill = fill;
 }
 
 color const&  text_symbolizer::get_halo_fill() const
 {
-    return placement_options_->properties.processor.defaults.halo_fill;
+    return placement_options_->properties.default_format.halo_fill;
 }
 
 void  text_symbolizer::set_halo_radius(double radius)
 {
-    placement_options_->properties.processor.defaults.halo_radius = radius;
+    placement_options_->properties.default_format.halo_radius = radius;
 }
 
 double text_symbolizer::get_halo_radius() const
 {
-    return placement_options_->properties.processor.defaults.halo_radius;
+    return placement_options_->properties.default_format.halo_radius;
 }
 
 void  text_symbolizer::set_label_placement(label_placement_e label_p)
@@ -342,7 +342,7 @@ label_placement_e  text_symbolizer::get_label_placement() const
 
 void  text_symbolizer::set_displacement(double x, double y)
 {
-    placement_options_->properties.displacement = boost::make_tuple(x,y);
+    placement_options_->properties.displacement = std::make_pair(x,y);
 }
 
 void text_symbolizer::set_displacement(position const& p)
@@ -407,12 +407,12 @@ bool text_symbolizer::get_allow_overlap() const
 
 void text_symbolizer::set_text_opacity(double text_opacity)
 {
-    placement_options_->properties.processor.defaults.text_opacity = text_opacity;
+    placement_options_->properties.default_format.text_opacity = text_opacity;
 }
 
 double text_symbolizer::get_text_opacity() const
 {
-    return placement_options_->properties.processor.defaults.text_opacity;
+    return placement_options_->properties.default_format.text_opacity;
 }
 
 void text_symbolizer::set_vertical_alignment(vertical_alignment_e valign)

@@ -33,23 +33,24 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-    /* This could also be a member of the renderer class, but I would have
-       to check if any of the variables changes and notify the helper.
-       It could be done at a later point, but for now keep the code simple.
-     */
-    text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(width_, height_, scale_factor_, t_, font_manager_, *detector_);
-
-    text_placement_info_ptr placement = helper.get_placement(sym, feature, prj_trans);
-
-    if (!placement) return;
+    text_symbolizer_helper<face_manager<freetype_engine>,
+            label_collision_detector4> helper(
+                sym, feature, prj_trans,
+                width_, height_,
+                scale_factor_,
+                t_, font_manager_, *detector_);
 
     text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
-    for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
-    {
-        double x = placement->placements[ii].starting_x;
-        double y = placement->placements[ii].starting_y;
-        ren.prepare_glyphs(&(placement->placements[ii]));
-        ren.render(x, y);
+
+    text_placement_info_ptr placement;
+    while ((placement = helper.get_placement())) {
+        for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+        {
+            double x = placement->placements[ii].starting_x;
+            double y = placement->placements[ii].starting_y;
+            ren.prepare_glyphs(&(placement->placements[ii]));
+            ren.render(x, y);
+        }
     }
 }
 
