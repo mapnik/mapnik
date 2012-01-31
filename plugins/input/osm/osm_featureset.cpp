@@ -47,7 +47,7 @@ osm_featureset<filterT>::osm_featureset(const filterT& filter,
       feature_id_(1),
       dataset_ (dataset),
       attribute_names_ (attribute_names),
-      ctx_(boost::make_shared<mapnik::context>())
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
     dataset_->rewind();
 }
