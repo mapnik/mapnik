@@ -41,6 +41,9 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
     def test_attachdb_with_multiple_files():
         ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', table='world_merc')
         stats = ds.statistics()
+        eq_(stats['pop2005']['min'], 0)
+        eq_(stats['pop2005']['max'], 1312978855)
+        eq_(stats['area']['max'], 1638094)
         print stats
     
     def test_attachdb_with_absolute_file():

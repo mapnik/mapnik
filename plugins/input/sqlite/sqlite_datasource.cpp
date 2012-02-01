@@ -522,7 +522,7 @@ std::map<std::string, mapnik::parameters> sqlite_datasource::get_statistics()  c
     {
         itr = desc_.get_descriptors().begin();
         int col = 0;
-        for ( ; itr != end; ++itr, ++col) {
+        for ( ; itr != end; ++itr) {
             std::string fld_name = itr->get_name();
             if (fld_name != key_field_ &&
                 itr->get_type() == mapnik::Double ||
@@ -533,6 +533,7 @@ std::map<std::string, mapnik::parameters> sqlite_datasource::get_statistics()  c
                 p["max"] = rs->column_double(col);
                 col++;
                 p["mean"] = rs->column_double(col);
+                col++;
                 stats_[itr->get_name()] = p;
             }
         }
