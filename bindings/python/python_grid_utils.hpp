@@ -33,6 +33,8 @@
 #include <mapnik/grid/grid_util.hpp>
 #include <mapnik/grid/grid_view.hpp>
 #include <mapnik/value_error.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/feature_kv_iterator.hpp>
 #include "mapnik_value_converter.hpp"
 
 
@@ -213,42 +215,54 @@ static void write_features(T const& grid_type,
     bool include_key = (attributes.find(key) != attributes.end());
     for (; feat_itr != feat_end; ++feat_itr)
     {
-        std::map<std::string,mapnik::value> const& props = feat_itr->second;
-        std::map<std::string,mapnik::value>::const_iterator const& itr = props.find(key);
-        if (itr != props.end())
+        mapnik::Feature const* feature = feat_itr->second;
+        boost::optional<std::string> join_value;
+        if (key == grid_type.key_name())
         {
-            typename T::lookup_type const& join_value = itr->second.to_string();
+            std::stringstream s;
+            s << feature->id();
+            join_value = s.str();
+        }
+        else if (feature->has_key(key))
+        {
+            join_value = feature->get(key).to_string();
+        }
 
+        if (join_value)
+        {
             // only serialize features visible in the grid
-            if(std::find(key_order.begin(), key_order.end(), join_value) != key_order.end()) {
+            if(std::find(key_order.begin(), key_order.end(), *join_value) != key_order.end()) {
                 boost::python::dict feat;
-                std::map<std::string,mapnik::value>::const_iterator it = props.begin();
-                std::map<std::string,mapnik::value>::const_iterator end = props.end();
                 bool found = false;
-                for (; it != end; ++it)
+                if (key == grid_type.key_name())
                 {
-                    std::string const& key_name = it->first;
+                    // drop key unless requested
+                    if (include_key) {
+                        found = true;
+                        //TODO - add __id__ as data key?
+                        //feat[key] = *join_value;
+                    }
+                }
+
+                feature_kv_iterator itr = feature->begin();
+                feature_kv_iterator end = feature->end();
+                for ( ;itr!=end; ++itr)
+                {
+                    std::string const& key_name = boost::get<0>(*itr);
                     if (key_name == key) {
                         // drop key unless requested
                         if (include_key) {
                             found = true;
-                            feat[it->first] = boost::python::object(
-                                boost::python::handle<>(
-                                    boost::apply_visitor(
-                                        boost::python::value_converter(),
-                                        it->second.base())));
+                            feat[key_name] = boost::get<1>(*itr);
                         }
                     }
                     else if ( (attributes.find(key_name) != attributes.end()) )
                     {
                         found = true;
-                        feat[it->first] = boost::python::object(
-                            boost::python::handle<>(
-                                boost::apply_visitor(
-                                    boost::python::value_converter(),
-                                    it->second.base())));
+                        feat[key_name] = boost::get<1>(*itr);
                     }
                 }
+
                 if (found)
                 {
                     feature_data[feat_itr->first] = feat;
@@ -358,7 +372,7 @@ static void render_layer_for_grid(const mapnik::Map& map,
     std::string const& key = grid.get_key();
 
     // if key is special __id__ keyword
-    if (key == grid.id_name_)
+    if (key == grid.key_name())
     {
         // TODO - should feature.id() be a first class attribute?
 
@@ -425,7 +439,7 @@ static boost::python::dict render_grid(const mapnik::Map& map,
     std::set<std::string> attributes = grid.property_names();
 
     // if key is special __id__ keyword
-    if (key == grid.id_name_)
+    if (key == grid.key_name())
     {
         // TODO - should feature.id() be a first class attribute?
 

@@ -55,9 +55,7 @@ public:
     // mapping between pixel id and key
     typedef std::map<value_type, lookup_type> feature_key_type;
     typedef std::map<lookup_type, value_type> key_type;
-    typedef std::map<std::string, mapnik::value> feature_properties_type;
-    // note: feature_type is not the same as a mapnik::Feature as it lacks a geometry
-    typedef std::map<std::string, feature_properties_type > feature_type;
+    typedef std::map<std::string, const mapnik::Feature * > feature_type;
     
 private:
     unsigned width_;
@@ -68,11 +66,11 @@ private:
     data_type data_;
     std::set<std::string> names_;
     unsigned int resolution_;
+    std::string id_name_;
     bool painted_;
     
 public:
 
-    std::string id_name_;
 
     hit_grid(int width, int height, std::string const& key, unsigned int resolution)
         :width_(width),
@@ -80,7 +78,9 @@ public:
          key_(key),
          data_(width,height),
          resolution_(resolution),
-         id_name_("__id__") {
+         id_name_("__id__"),
+         painted_(false)
+         {
              // this only works if each datasource's 
              // feature count starts at 1
              f_keys_[0] = "";
@@ -92,7 +92,9 @@ public:
          key_(rhs.key_),
          data_(rhs.data_),
          resolution_(rhs.resolution_),
-         id_name_("__id__")  {
+         id_name_("__id__"),
+         painted_(rhs.painted_)
+         {
              f_keys_[0] = "";     
          }
     
@@ -108,30 +110,28 @@ public:
         return painted_;
     }
 
+    inline std::string const& key_name() const
+    {
+        return id_name_;
+    }
+
     inline void add_feature(mapnik::Feature const& feature)
     {
         
-        // copies feature props
-        // FIXME
-        /*
-        std::map<std::string,value> fprops = feature.props();
-        lookup_type lookup_value;
+        // NOTE: currently lookup keys must be strings,
+        // but this should be revisited
+        boost::optional<lookup_type> lookup_value;
         if (key_ == id_name_)
         {
-            // TODO - this will break if lookup_type is not a string
             std::stringstream s;
             s << feature.id();
             lookup_value = s.str();
-            // add this as a proper feature so filtering works later on
-            fprops[id_name_] = feature.id();
-            //fprops[id_name_] = tr_->transcode(lookup_value));
         }
         else
         {
-            std::map<std::string,value>::const_iterator const& itr = fprops.find(key_);
-            if (itr != fprops.end())
+            if (feature.has_key(key_))
             {
-                lookup_value = itr->second.to_string();
+                lookup_value = feature.get(key_).to_string();
             }
             else
             {
@@ -139,23 +139,21 @@ public:
             }    
         }
 
-        // what good is an empty lookup key?
-        if (!lookup_value.empty())
+        if (lookup_value)
         {
             // TODO - consider shortcutting f_keys if feature_id == lookup_value
             // create a mapping between the pixel id and the feature key
-            f_keys_.insert(std::make_pair(feature.id(),lookup_value));
+            f_keys_.insert(std::make_pair(feature.id(),*lookup_value));
             // if extra fields have been supplied, push them into grid memory
-            if (!names_.empty()) {
-                // TODO - add ability to push WKT/WKB of geometry into grid storage
-                features_.insert(std::make_pair(lookup_value,fprops));
+            if (!names_.empty())
+            {
+                features_.insert(std::make_pair(*lookup_value,const_cast<mapnik::Feature*>(&feature)));
             }
         }
         else
         {
             std::clog << "### Warning: key '" << key_ << "' was blank for " << feature << "\n";
         }
-        */
     } 
     
     inline void add_property_name(std::string const& name)
@@ -198,18 +196,6 @@ public:
         key_ = key;
     }
 
-    // compatibility
-    inline const std::string& get_join_field() const
-    {
-        return key_;
-    }
-
-    // compatibility
-    inline unsigned int get_step() const
-    {
-        return resolution_;
-    }
-
     inline unsigned int get_resolution() const
     {
         return resolution_;
@@ -248,9 +234,8 @@ public:
     inline mapnik::grid_view get_view(unsigned x, unsigned y, unsigned w, unsigned h)
     {
         return mapnik::grid_view(x,y,w,h,
-            data_,key_,resolution_,names_,f_keys_,features_);
+            data_,key_,id_name_,resolution_,names_,f_keys_,features_);
     }
-    
 
 private:
 

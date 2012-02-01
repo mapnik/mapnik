@@ -787,22 +787,22 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
         }
 
         double render_angle = angle;
-        //double cosa = fast_cos(angle); TODO: do we need them?
-        //double sina = fast_sin(angle);
+        double cosa = fast_cos(angle);
+        double sina = fast_sin(angle);
 
         double render_x = start_x;
         double render_y = start_y;
 
         //Center the text on the line
         double char_height = ci.avg_height;
-        render_x -= char_height/2.0*cos(render_angle+M_PI/2);
-        render_y += char_height/2.0*sin(render_angle+M_PI/2);
+        render_x += char_height/2.0*sina;
+        render_y += char_height/2.0*cosa;
 
         if (orientation < 0)
         {
             // rotate in place
-            render_x += ci.width*cos(render_angle) - (char_height-2)*sin(render_angle);
-            render_y -= ci.width*sin(render_angle) + (char_height-2)*cos(render_angle);
+            render_x += ci.width*cosa - (char_height-2)*sina;
+            render_y -= ci.width*sina + (char_height-2)*cosa;
             render_angle += M_PI;
         }
         current_placement->add_node(c,render_x - current_placement->starting_x,
@@ -854,13 +854,19 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
         current_placement->vertex(&c, &x, &y, &angle, &properties);
         x = current_placement->starting_x + x;
         y = current_placement->starting_y - y;
+
+        double sina = fast_sin(angle);
+        double cosa = fast_cos(angle);
         if (orientation < 0)
         {
             // rotate in place
             /* TODO: What's the meaning of -2? */
-            x += ci.width*cos(angle) - (string_height_-2)*sin(angle);
-            y -= ci.width*sin(angle) + (string_height_-2)*cos(angle);
+            x += ci.width*cosa - (string_height_-2)*sina;
+            y -= ci.width*sina + (string_height_-2)*cosa;
             angle += M_PI;
+            //sin(x+PI) = -sin(x)
+            sina = -sina;
+            cosa = -cosa;
         }
 
         box2d<double> e;
@@ -871,12 +877,12 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
         else
         {
             // put four corners of the letter into envelope
-            e.init(x, y, x + ci.width*cos(angle),
-                   y - ci.width*sin(angle));
-            e.expand_to_include(x - ci.height()*sin(angle),
-                                y - ci.height()*cos(angle));
-            e.expand_to_include(x + (ci.width*cos(angle) - ci.height()*sin(angle)),
-                                y - (ci.width*sin(angle) + ci.height()*cos(angle)));
+            e.init(x, y, x + ci.width*cosa,
+                   y - ci.width*sina);
+            e.expand_to_include(x - ci.height()*sina,
+                                y - ci.height()*cosa);
+            e.expand_to_include(x + (ci.width*cosa - ci.height()*sina),
+                                y - (ci.width*sina + ci.height()*cosa));
         }
 
         if (!detector_.extent().intersects(e) ||
