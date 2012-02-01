@@ -62,7 +62,13 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
-    if (!mark || !(*mark)->is_bitmap()) return;
+    if (!mark) return;
+
+    if (!(*mark)->is_bitmap())
+    {
+        std::clog << "### Warning only images (not '" << filename << "') are supported in the line_pattern_symbolizer\n";
+        return;
+    }
 
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
 

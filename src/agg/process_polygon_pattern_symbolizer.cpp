@@ -103,7 +103,13 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         std::clog << "### Warning: file not found: " << filename << "\n";
     }
 
-    if (!marker || !(*marker)->is_bitmap()) return;
+    if (!marker) return;
+
+    if (!(*marker)->is_bitmap())
+    {
+        std::clog << "### Warning only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer\n";
+        return;
+    }
     
 
     boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
