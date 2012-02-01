@@ -29,6 +29,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/feature.hpp>
 
 // boost
 #include <boost/cstdint.hpp>
@@ -49,16 +50,17 @@ class hit_grid_view
 public:
     typedef T data_type;
     typedef typename T::pixel_type value_type;
+    typedef typename T::pixel_type pixel_type;
     typedef std::string lookup_type;
     typedef std::map<value_type, lookup_type> feature_key_type;
     typedef std::map<lookup_type, value_type> key_type;
-    typedef std::map<std::string, mapnik::value> feature_properties_type;
-    typedef std::map<std::string, feature_properties_type > feature_type;
+    typedef std::map<std::string, const mapnik::Feature * > feature_type;
           
     hit_grid_view(unsigned x, unsigned y, 
               unsigned width, unsigned height,
               T const& data,
               std::string const& key,
+              std::string const& id_name,
               unsigned resolution,
               std::set<std::string> const& names,
               feature_key_type const& f_keys,
@@ -71,6 +73,7 @@ public:
           data_(data),
           key_(key),
           resolution_(resolution),
+          id_name_(id_name),
           names_(names),
           f_keys_(f_keys),
           features_(features)
@@ -92,6 +95,7 @@ public:
           data_(rhs.data_),
           key_(rhs.key_),
           resolution_(rhs.resolution_),
+          id_name_(rhs.id_name_),
           names_(rhs.names_),
           f_keys_(rhs.f_keys_),
           features_(rhs.features_)
@@ -107,6 +111,7 @@ public:
         data_ = rhs.data_;
         key_ = rhs.key_;
         resolution_ = rhs.resolution_;
+        id_name_ = rhs.id_name_;
         names_ = rhs.names_;
         f_keys_ = rhs.f_keys_;
         features_ = rhs.features_;
@@ -130,6 +135,11 @@ public:
     inline unsigned height() const
     {
         return height_;
+    }
+
+    inline std::string const& key_name() const
+    {
+        return id_name_;
     }
         
     inline const value_type* getRow(unsigned row) const
@@ -185,6 +195,7 @@ private:
     T const& data_;
     std::string const& key_;
     unsigned int resolution_;
+    std::string const& id_name_;
     std::set<std::string> const& names_;
     feature_key_type const& f_keys_;
     feature_type const& features_;
