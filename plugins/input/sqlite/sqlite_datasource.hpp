@@ -55,7 +55,7 @@ public:
 private:
 
     // FIXME: remove mutable qualifier from data members
-    //        by factoring out bind() logic out from 
+    //        by factoring out bind() logic out from
     //        datasource impl !!!
     
     mutable mapnik::box2d<double> extent_;

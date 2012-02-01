@@ -316,7 +316,6 @@ void sqlite_datasource::bind() const
                     }
                 }
 
-                
                 */
                 boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
                 if (sqlite_utils::create_spatial_index(index_db,index_table_,rs))
@@ -487,6 +486,58 @@ box2d<double> sqlite_datasource::envelope() const
 std::map<std::string, mapnik::parameters> sqlite_datasource::get_statistics()  const
 {
     if (! is_bound_) bind();
+
+    std::map<std::string, mapnik::parameters> _stats;
+    std::ostringstream s;
+
+    std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
+    std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
+    std::vector<std::string> field_names;
+
+    for ( ; itr != end; ++itr) {
+        std::string fld_name = itr->get_name();
+        if (fld_name != key_field_ &&
+            itr->get_type() == mapnik::Double ||
+            itr->get_type() == mapnik::Integer) {
+            field_names.push_back("MIN([" + itr->get_name() + "])");
+            field_names.push_back("MAX([" + itr->get_name() + "])");
+            field_names.push_back("AVG([" + itr->get_name() + "])");
+        }
+    }
+    std::string query(table_);
+    query = populate_tokens(table_);
+
+    s << "SELECT ";
+    s << boost::algorithm::join(field_names, ",");
+    s << " FROM ";
+    s << query ;
+
+#ifdef MAPNIK_DEBUG
+    std::clog << "Sqlite Plugin: " << s.str() << std::endl;
+#endif
+
+    boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+
+    while (rs->is_valid() && rs->step_next())
+    {
+        itr = desc_.get_descriptors().begin();
+        int col = 0;
+        for ( ; itr != end; ++itr, ++col) {
+            std::string fld_name = itr->get_name();
+            if (fld_name != key_field_ &&
+                itr->get_type() == mapnik::Double ||
+                itr->get_type() == mapnik::Integer) {
+                mapnik::parameters p;
+                p["min"] = rs->column_double(col);
+                col++;
+                p["max"] = rs->column_double(col);
+                col++;
+                p["mean"] = rs->column_double(col);
+                stats_[itr->get_name()] = p;
+            }
+        }
+    }
+
     return stats_;
 }
 
@@ -533,7 +584,7 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
             }
         }
     }
-    
+
     return result;
 }
 
@@ -639,7 +690,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
             s << "," << key_field_;
             ctx->push(key_field_);
         }
-        
+
         std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
 
@@ -697,6 +748,6 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
                                                      format_,
                                                      using_subquery_);
     }
-    
+
     return featureset_ptr();
 }

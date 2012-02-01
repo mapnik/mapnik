@@ -37,6 +37,11 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         feature = fs.next()
         # the above should not throw but will result in no features
         eq_(feature,None)
+
+    def test_attachdb_with_multiple_files():
+        ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', table='world_merc')
+        stats = ds.statistics()
+        print stats
     
     def test_attachdb_with_absolute_file():
         # The point table and index is in the qgis_spatiallite.sqlite
