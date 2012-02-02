@@ -56,7 +56,7 @@ public:
     typedef std::map<value_type, lookup_type> feature_key_type;
     typedef std::map<lookup_type, value_type> key_type;
     typedef std::map<std::string, mapnik::feature_ptr> feature_type;
-    
+
 private:
     unsigned width_;
     unsigned height_;
@@ -68,36 +68,36 @@ private:
     unsigned int resolution_;
     std::string id_name_;
     bool painted_;
-    
+
 public:
 
 
     hit_grid(int width, int height, std::string const& key, unsigned int resolution)
         :width_(width),
-         height_(height),
-         key_(key),
-         data_(width,height),
-         resolution_(resolution),
-         id_name_("__id__"),
-         painted_(false)
-         {
-             // this only works if each datasource's 
-             // feature count starts at 1
-             f_keys_[0] = "";
-         }
-    
+        height_(height),
+        key_(key),
+        data_(width,height),
+        resolution_(resolution),
+        id_name_("__id__"),
+        painted_(false)
+        {
+            // this only works if each datasource's
+            // feature count starts at 1
+            f_keys_[0] = "";
+        }
+
     hit_grid(const hit_grid<T>& rhs)
         :width_(rhs.width_),
-         height_(rhs.height_),
-         key_(rhs.key_),
-         data_(rhs.data_),
-         resolution_(rhs.resolution_),
-         id_name_("__id__"),
-         painted_(rhs.painted_)
-         {
-             f_keys_[0] = "";     
-         }
-    
+        height_(rhs.height_),
+        key_(rhs.key_),
+        data_(rhs.data_),
+        resolution_(rhs.resolution_),
+        id_name_("__id__"),
+        painted_(rhs.painted_)
+        {
+            f_keys_[0] = "";
+        }
+
     ~hit_grid() {}
 
     inline void painted(bool painted)
@@ -117,7 +117,7 @@ public:
 
     inline void add_feature(mapnik::feature_ptr const& feature)
     {
-        
+
         // NOTE: currently lookup keys must be strings,
         // but this should be revisited
         boost::optional<lookup_type> lookup_value;
@@ -136,7 +136,7 @@ public:
             else
             {
                 std::clog << "should not get here: key '" << key_ << "' not found in feature properties\n";
-            }    
+            }
         }
 
         if (lookup_value)
@@ -154,12 +154,12 @@ public:
         {
             std::clog << "### Warning: key '" << key_ << "' was blank for " << *feature << "\n";
         }
-    } 
-    
+    }
+
     inline void add_property_name(std::string const& name)
     {
         names_.insert(name);
-    } 
+    }
 
     inline std::set<std::string> const& property_names() const
     {
@@ -205,12 +205,12 @@ public:
     {
         resolution_ = res;
     }
-        
+
     inline const data_type& data() const
     {
         return data_;
     }
-    
+
     inline data_type& data()
     {
         return data_;
@@ -230,11 +230,11 @@ public:
     {
         return data_.getRow(row);
     }
-    
+
     inline mapnik::grid_view get_view(unsigned x, unsigned y, unsigned w, unsigned h)
     {
         return mapnik::grid_view(x,y,w,h,
-            data_,key_,id_name_,resolution_,names_,f_keys_,features_);
+                                 data_,key_,id_name_,resolution_,names_,f_keys_,features_);
     }
 
 private:
@@ -245,7 +245,7 @@ private:
     }
 
     hit_grid& operator=(const hit_grid&);
-    
+
 public:
     inline void setPixel(int x,int y,value_type feature_id)
     {
@@ -278,7 +278,7 @@ public:
             unsigned a = (int)((rgba1 & 0xff) * opacity) & 0xff; // adjust for desired opacity
 #else
             unsigned a = (int)(((rgba1 >> 24) & 0xff) * opacity) & 0xff; // adjust for desired opacity
-#endif                    
+#endif
             // if the pixel is more than a tenth
             // opaque then burn in the feature id
             if (a >= 25)
@@ -287,7 +287,7 @@ public:
             }
         }
     }
-    
+
     inline void set_rectangle(value_type id,image_data_32 const& data,int x0,int y0)
     {
         box2d<int> ext0(0,0,width_,height_);
@@ -308,7 +308,7 @@ public:
                     unsigned a = rgba & 0xff;
 #else
                     unsigned a = (rgba >> 24) & 0xff;
-#endif                    
+#endif
                     // if the pixel is more than a tenth
                     // opaque then burn in the feature id
                     if (a >= 25)

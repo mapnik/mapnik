@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -33,8 +33,8 @@ namespace mapnik {
  */
 
 static inline void scale_grid(mapnik::grid::data_type & target,
-                        const mapnik::grid::data_type & source,
-                        double x_off_f, double y_off_f)
+                              const mapnik::grid::data_type & source,
+                              double x_off_f, double y_off_f)
 {
 
     int source_width=source.width();
@@ -93,7 +93,7 @@ static inline void scale_grid(mapnik::grid::data_type & target,
             mapnik::grid::value_type b = source(xs1,ys);
             mapnik::grid::value_type c = source(xs,ys1);
             mapnik::grid::value_type d = source(xs1,ys1);
-            
+
             if ((a > 0) && (b > 0))
                 target(x,y) = b;
             else if ((c > 0) && (d > 0))

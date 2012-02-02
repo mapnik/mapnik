@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -45,20 +45,20 @@
 // apps using mapnik do not
 // need agg headers
 namespace agg {
-  struct trans_affine;
+struct trans_affine;
 }
 
 namespace mapnik {
 
 class marker;
-   
+
 struct grid_rasterizer;
-   
+
 template <typename T>
 class MAPNIK_DECL grid_renderer : public feature_style_processor<grid_renderer<T> >,
                                   private boost::noncopyable
 {
-     
+
 public:
     grid_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~grid_renderer();
