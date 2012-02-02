@@ -240,7 +240,7 @@ layer_descriptor shape_datasource::get_descriptor() const
     return desc_;
 }
 
-std::map<std::string, mapnik::parameters> shape_datasource::get_statistics()  const
+mapnik::statistics_ptr shape_datasource::get_statistics()  const
 {
     if (! is_bound_) bind();
     return stats_;

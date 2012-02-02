@@ -483,11 +483,11 @@ box2d<double> sqlite_datasource::envelope() const
     return extent_;
 }
 
-std::map<std::string, mapnik::parameters> sqlite_datasource::get_statistics()  const
+mapnik::statistics_ptr sqlite_datasource::get_statistics()  const
 {
     if (! is_bound_) bind();
 
-    std::map<std::string, mapnik::parameters> _stats;
+    mapnik::statistics_ptr _stats;
     std::ostringstream s;
 
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
@@ -534,7 +534,7 @@ std::map<std::string, mapnik::parameters> sqlite_datasource::get_statistics()  c
                 col++;
                 p["mean"] = rs->column_double(col);
                 col++;
-                stats_[itr->get_name()] = p;
+                stats_->insert(std::pair<std::string, mapnik::parameters>(itr->get_name(), p));
             }
         }
     }

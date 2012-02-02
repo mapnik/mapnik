@@ -52,7 +52,7 @@ public:
     box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    std::map<std::string, mapnik::parameters> get_statistics() const;
+    mapnik::statistics_ptr get_statistics() const;
     void bind() const;
 private:
     shape_datasource(const shape_datasource&);
@@ -63,7 +63,7 @@ private:
     std::string shape_name_;
     mutable boost::shared_ptr<shape_io> shape_;
     mutable shape_io::shapeType shape_type_;
-    mutable std::map<std::string, mapnik::parameters> stats_;
+    mutable mapnik::statistics_ptr stats_;
     mutable long file_length_;
     mutable box2d<double> extent_;
     mutable bool indexed_;

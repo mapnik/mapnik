@@ -358,7 +358,7 @@ layer_descriptor postgis_datasource::get_descriptor() const
 }
 
 
-std::map<std::string, mapnik::parameters> postgis_datasource::get_statistics()  const
+mapnik::statistics_ptr postgis_datasource::get_statistics()  const
 {
     if (! is_bound_) bind();
     return stats_;
