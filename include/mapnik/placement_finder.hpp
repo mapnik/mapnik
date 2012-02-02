@@ -35,7 +35,7 @@ class placement_finder : boost::noncopyable
 public:
     placement_finder(text_placement_info &p, string_info &info, DetectorT & detector);
     placement_finder(text_placement_info &p, string_info &info, DetectorT & detector, box2d<double> const& extent);
-    
+
     /** Try place a single label at the given point. */
     void find_point_placement(double pos_x, double pos_y, double angle=0.0);
 
@@ -50,7 +50,7 @@ public:
     void update_detector();
 
     void clear();
-    
+
 private:
     ///Helpers for find_line_placement
 
@@ -63,8 +63,8 @@ private:
     //             If >= 50% of the characters end up upside down, it will be retried the other way.
     //             RETURN: 1/-1 depending which way up the string ends up being.
     std::auto_ptr<text_path> get_placement_offset(const std::vector<vertex2d> & path_positions,
-                                                          const std::vector<double> & path_distances,
-                                                          int & orientation, unsigned index, double distance);
+                                                  const std::vector<double> & path_distances,
+                                                  int & orientation, unsigned index, double distance);
 
     ///Tests wether the given text_path be placed without a collision
     // Returns true if it can

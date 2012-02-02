@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -25,7 +25,7 @@
 
 #include <cmath>
 
-namespace mapnik 
+namespace mapnik
 {
 struct MAPNIK_DECL gamma
 {

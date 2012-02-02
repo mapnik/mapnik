@@ -53,8 +53,8 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(markers_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
-                              proj_transform const& prj_trans)
+                               mapnik::feature_ptr const& feature,
+                               proj_transform const& prj_trans)
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
@@ -88,7 +88,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             double y1 = bbox.miny();
             double x2 = bbox.maxx();
             double y2 = bbox.maxy();
-            
+
             agg::trans_affine recenter = agg::trans_affine_translation(-0.5*(x1+x2),-0.5*(y1+y2));
             tr.transform(&x1,&y1);
             tr.transform(&x2,&y2);
@@ -96,10 +96,10 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             using namespace mapnik::svg;
             vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
             svg_path_adapter svg_path(stl_storage);
-            svg_renderer<svg_path_adapter, 
-                         agg::pod_bvector<path_attributes>,
-                         renderer,
-                         mapnik::pixfmt_gray16 > svg_renderer(svg_path,(*marker)->attributes());
+            svg_renderer<svg_path_adapter,
+                agg::pod_bvector<path_attributes>,
+                renderer,
+                mapnik::pixfmt_gray16 > svg_renderer(svg_path,(*marker)->attributes());
 
             bool placed = false;
             for (unsigned i=0; i<feature->num_geometries(); ++i)
@@ -109,15 +109,15 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 {
                     std::clog << "### Warning svg markers not supported yet for points within markers_symbolizer\n";
                     continue;
-                } 
-                
+                }
+
                 path_type path(t_,geom,prj_trans);
-                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
-                                                                                  sym.get_spacing() * scale_factor_, 
-                                                                                  sym.get_max_error(), 
-                                                                                  sym.get_allow_overlap());        
+                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_,
+                                                                                  sym.get_spacing() * scale_factor_,
+                                                                                  sym.get_max_error(),
+                                                                                  sym.get_allow_overlap());
                 double x, y, angle;
-            
+
                 while (placement.get_point(&x, &y, &angle))
                 {
                     placed = true;
@@ -133,7 +133,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     {
         stroke const& stroke_ = sym.get_stroke();
         double strk_width = stroke_.get_width();
-        
+
         double w;
         double h;
         unsigned int res = pixmap_.get_resolution();
@@ -146,7 +146,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             w = sym.get_width()/res;
             h = sym.get_height()/res;
         }
-    
+
         arrow arrow_;
         box2d<double> extent;
 
@@ -174,7 +174,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             tr.transform(&x2,&y2);
             extent.init(x1,y1,x2,y2);
         }
-    
+
         double x;
         double y;
         double z=0;
@@ -198,7 +198,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     agg::path_storage marker;
                     marker.concat_path(c);
                     ras_ptr->add_path(marker);
-                    
+
                     // outline
                     if (strk_width)
                     {
@@ -212,18 +212,18 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             }
             else
             {
-                
+
                 agg::path_storage marker;
                 if (marker_type == ARROW)
                     marker.concat_path(arrow_);
 
                 path_type path(t_,geom,prj_trans);
-                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_, 
-                                                                                  sym.get_spacing() * scale_factor_, 
-                                                                                  sym.get_max_error(), 
-                                                                                  sym.get_allow_overlap());        
+                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_,
+                                                                                  sym.get_spacing() * scale_factor_,
+                                                                                  sym.get_max_error(),
+                                                                                  sym.get_allow_overlap());
                 double x_t, y_t, angle;
-            
+
                 while (placement.get_point(&x_t, &y_t, &angle))
                 {
                     agg::trans_affine matrix;
@@ -267,6 +267,6 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 }
 
 template void grid_renderer<grid>::process(markers_symbolizer const&,
-                                              mapnik::feature_ptr const&,
-                                              proj_transform const&);
+                                           mapnik::feature_ptr const&,
+                                           proj_transform const&);
 }

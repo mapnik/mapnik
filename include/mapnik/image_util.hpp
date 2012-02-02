@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -37,13 +37,13 @@
 
 namespace mapnik {
 
-class Map;    
+class Map;
 class ImageWriterException : public std::exception
 {
 private:
     std::string message_;
 public:
-    ImageWriterException(const std::string& message) 
+    ImageWriterException(const std::string& message)
         : message_(message) {}
 
     ~ImageWriterException() throw() {}
@@ -70,7 +70,7 @@ MAPNIK_DECL void save_to_file(T const& image,
                               std::string const& filename,
                               std::string const& type,
                               rgba_palette const& palette);
-                              
+
 // guess type from file extension
 template <typename T>
 MAPNIK_DECL void save_to_file(T const& image,
@@ -80,7 +80,7 @@ template <typename T>
 MAPNIK_DECL void save_to_file(T const& image,
                               std::string const& filename,
                               rgba_palette const& palette);
-   
+
 template <typename T>
 MAPNIK_DECL std::string save_to_string(T const& image,
                                        std::string const& type);
@@ -133,7 +133,7 @@ inline bool is_ps (std::string const& filename)
 {
     return boost::algorithm::iends_with(filename,std::string(".ps"));
 }
-   
+
 inline boost::optional<std::string> type_from_filename(std::string const& filename)
 
 {
@@ -176,7 +176,7 @@ void add_border(T & image)
     }
     for (unsigned y = 0; y < image.height();++y)
     {
-        image(0,y) = 0xff00ffff; //yellow 
+        image(0,y) = 0xff00ffff; //yellow
         image(image.width()-1,y) = 0xffff0000; // blue
     }
 }
@@ -214,7 +214,7 @@ void scale_image_bilinear_old (Image& target,const Image& source, double x_off_f
 template <typename Image>
 void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f=0, double y_off_f=0);
 
-/////////// save_to_file ////////////////////////////////////////////////    
+/////////// save_to_file ////////////////////////////////////////////////
 
 inline MAPNIK_DECL void save_to_file(image_32 const& image,
                                      std::string const& file)
@@ -252,7 +252,7 @@ inline MAPNIK_DECL std::string save_to_string(image_32 const& image,
 {
     return save_to_string<image_data_32>(image.data(), type, palette);
 }
-   
+
 ///////////////////////////////////////////////////////////////////////////
 
 #ifdef _MSC_VER
@@ -265,14 +265,14 @@ template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
                                                       rgba_palette const&);
 
 template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
-						      std::string const&);
+                                                      std::string const&);
 
 
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                     std::string const&,
                                                                     std::string const&,
                                                                     rgba_palette const&);
- 
+
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
                                                                     std::string const&,
                                                                     std::string const&);
@@ -282,18 +282,18 @@ template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<i
                                                                     rgba_palette const&);
 
 template MAPNIK_DECL void save_to_file<image_view<image_data_32> > (image_view<image_data_32> const&,
-								    std::string const&);
-								    
+                                                                    std::string const&);
+
 
 template MAPNIK_DECL std::string save_to_string<image_data_32>(image_data_32 const&,
                                                                std::string const&,
                                                                rgba_palette const&);
-   
-template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
-									     std::string const&);
 
 template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
-									     std::string const&,
+                                                                             std::string const&);
+
+template MAPNIK_DECL std::string save_to_string<image_view<image_data_32> > (image_view<image_data_32> const&,
+                                                                             std::string const&,
                                                                              rgba_palette const&);
 #endif
 

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -58,8 +58,8 @@ box2d<T>::box2d(const box2d &rhs)
 // copy rather than init so dfl ctor (0,0,-1,-1) is not modified
 // http://trac.mapnik.org/ticket/749
 /*{
-    init(rhs.minx_,rhs.miny_,rhs.maxx_,rhs.maxy_);
-}*/
+  init(rhs.minx_,rhs.miny_,rhs.maxx_,rhs.maxy_);
+  }*/
 
 template <typename T>
 #if !defined(__SUNPRO_CC)
@@ -319,10 +319,10 @@ inline
 #endif
 void box2d<T>::clip(const box2d_type& other)
 {
-        minx_ = std::max(minx_,other.minx());
-        miny_ = std::max(miny_,other.miny());
-        maxx_ = std::min(maxx_,other.maxx());
-        maxy_ = std::min(maxy_,other.maxy());
+    minx_ = std::max(minx_,other.minx());
+    miny_ = std::max(miny_,other.miny());
+    maxx_ = std::min(maxx_,other.maxx());
+    maxy_ = std::min(maxy_,other.maxy());
 }
 
 
@@ -339,10 +339,10 @@ bool box2d<T>::from_string(const std::string& s)
 
     unsigned i = 0;
     double d[4];
-    for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin(); 
+    for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
          beg != tok.end(); ++beg)
     {
-        try 
+        try
         {
             d[i] = boost::lexical_cast<double>(boost::trim_copy(*beg));
         }
@@ -350,13 +350,13 @@ bool box2d<T>::from_string(const std::string& s)
         {
             break;
         }
-        
-        if (i == 3) 
+
+        if (i == 3)
         {
             success = true;
             break;
         }
-        
+
         ++i;
     }
 
@@ -364,7 +364,7 @@ bool box2d<T>::from_string(const std::string& s)
     {
         init(d[0], d[1], d[2], d[3]);
     }
-    
+
     return success;
 }
 
@@ -384,8 +384,8 @@ box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
     return *this;
 }
 
-    
-template <typename T>    
+
+template <typename T>
 box2d<T>& box2d<T>::operator*=(T t)
 {
     coord<T,2> c = center();
@@ -397,8 +397,8 @@ box2d<T>& box2d<T>::operator*=(T t)
     maxy_ = c.y + sy;
     return *this;
 }
-   
-template <typename T>    
+
+template <typename T>
 box2d<T>& box2d<T>::operator/=(T t)
 {
     coord<T,2> c = center();
@@ -411,7 +411,7 @@ box2d<T>& box2d<T>::operator/=(T t)
     return *this;
 }
 
-template <typename T>    
+template <typename T>
 T box2d<T>::operator[] (int index) const
 {
     switch(index)
@@ -436,7 +436,7 @@ T box2d<T>::operator[] (int index) const
         throw std::out_of_range("index out of range, max value is 3, min value is -4 ");
     }
 }
-    
+
 template class box2d<int>;
 template class box2d<double>;
 }

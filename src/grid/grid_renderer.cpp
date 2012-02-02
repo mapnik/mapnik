@@ -127,13 +127,13 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
         typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
         typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
         agg::scanline_bin sl;
-    
+
         grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
         mapnik::pixfmt_gray16 pixf(buf);
-    
+
         ren_base renb(pixf);
         renderer ren(renb);
-    
+
         ras_ptr->reset();
 
         box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
@@ -149,27 +149,27 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,
-                     agg::pod_bvector<path_attributes>,
-                     renderer,
-                     mapnik::pixfmt_gray16> svg_renderer(svg_path,
-                             (*marker.get_vector_data())->attributes());
+            agg::pod_bvector<path_attributes>,
+            renderer,
+            mapnik::pixfmt_gray16> svg_renderer(svg_path,
+                                                (*marker.get_vector_data())->attributes());
 
         svg_renderer.render_id(*ras_ptr, sl, renb, feature->id(), mtx, opacity, bbox);
-        
+
     }
     else
     {
         image_data_32 const& data = **marker.get_bitmap_data();
         if (step == 1 && scale_factor_ == 1.0)
         {
-            pixmap_.set_rectangle(feature->id(), data, x, y);    
+            pixmap_.set_rectangle(feature->id(), data, x, y);
         }
         else
         {
             double ratio = (1.0/step);
             image_data_32 target(ratio * data.width(), ratio * data.height());
             mapnik::scale_image_agg<image_data_32>(target,data, SCALING_NEAR,
-                scale_factor_, 0.0, 0.0, 1.0, ratio);
+                                                   scale_factor_, 0.0, 0.0, 1.0, ratio);
             pixmap_.set_rectangle(feature->id(), target, x, y);
         }
     }

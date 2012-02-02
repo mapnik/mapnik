@@ -30,7 +30,7 @@
 //#include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
 
-namespace mapnik { 
+namespace mapnik {
 
 class feature_impl;
 
@@ -41,20 +41,20 @@ class feature_kv_iterator :
 {
 public:
     typedef boost::tuple<std::string,value> value_type;
-    
+
     feature_kv_iterator (feature_impl const& f, bool begin = false);
 private:
-    friend class boost::iterator_core_access;    
+    friend class boost::iterator_core_access;
     void increment();
 
     bool equal( feature_kv_iterator const& other) const;
 
     value_type const& dereference() const;
-    
+
     feature_impl const& f_;
     std::map<std::string,std::size_t>::const_iterator itr_;
     mutable value_type kv_;
-    
+
 };
 
 }

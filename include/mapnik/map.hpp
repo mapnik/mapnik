@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -37,16 +37,16 @@
 namespace mapnik
 {
 class MAPNIK_DECL Map
-{       
+{
 public:
 
-    enum aspect_fix_mode 
+    enum aspect_fix_mode
     {
         // grow the width or height of the specified geo bbox to fill the map size. default behaviour.
         GROW_BBOX,
         // grow the width or height of the map to accomodate the specified geo bbox.
         GROW_CANVAS,
-        // shrink the width or height of the specified geo bbox to fill the map size. 
+        // shrink the width or height of the specified geo bbox to fill the map size.
         SHRINK_BBOX,
         // shrink the width or height of the map to accomodate the specified geo bbox.
         SHRINK_CANVAS,
@@ -56,12 +56,12 @@ public:
         ADJUST_BBOX_HEIGHT,
         // adjust the width of the map, leave height and geo bbox unchanged
         ADJUST_CANVAS_WIDTH,
-        //adjust the height of the map, leave width and geo bbox unchanged 
+        //adjust the height of the map, leave width and geo bbox unchanged
         ADJUST_CANVAS_HEIGHT,
-        // 
+        //
         aspect_fix_mode_MAX
     };
-        
+
 private:
     static const unsigned MIN_MAPSIZE=16;
     static const unsigned MAX_MAPSIZE=MIN_MAPSIZE<<10;
@@ -81,7 +81,7 @@ private:
     std::string base_path_;
     parameters extra_attr_;
     parameters extra_params_;
-        
+
 public:
 
     typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
@@ -89,7 +89,7 @@ public:
     typedef std::map<std::string,font_set>::const_iterator const_fontset_iterator;
     typedef std::map<std::string,font_set>::iterator fontset_iterator;
     typedef std::map<std::string,metawriter_ptr>::const_iterator const_metawriter_iterator;
-        
+
     /*! \brief Default constructor.
      *
      *  Creates a map with these parameters:
@@ -115,20 +115,20 @@ public:
     /*! \brief Assignment operator
      *
      *  TODO: to be documented
-     *  
+     *
      */
     Map& operator=(const Map& rhs);
-        
+
     /*! \brief Get all styles
      * @return Const reference to styles
      */
-    std::map<std::string,feature_type_style> const& styles() const; 
-        
-    /*! \brief Get all styles 
+    std::map<std::string,feature_type_style> const& styles() const;
+
+    /*! \brief Get all styles
      * @return Non-constant reference to styles
      */
     std::map<std::string,feature_type_style> & styles();
-        
+
     /*! \brief Get first iterator in styles.
      *  @return Constant style iterator.
      */
@@ -201,7 +201,7 @@ public:
      *  @return Constant metawriter iterator.
      */
     const_metawriter_iterator end_metawriters() const;
-        
+
     /*! \brief Insert a fontset into the map.
      *  @param name The name of the fontset.
      *  @param style The fontset to insert.
@@ -209,7 +209,7 @@ public:
      *  @return false If failure.
      */
     bool insert_fontset(std::string const& name, font_set const& fontset);
-       
+
     /*! \brief Find a fontset.
      *  @param name The name of the fontset.
      *  @return The fontset if found. If not found return the default map fontset.
@@ -246,7 +246,7 @@ public:
      *  @return Non-constant layer.
      */
     layer& getLayer(size_t index);
-        
+
     /*! \brief Remove a layer.
      *  @param index layer number.
      */
@@ -300,31 +300,31 @@ public:
      *  @param c Background color.
      */
     void set_background(const color& c);
-    
-    /*! \brief Get the map background color 
+
+    /*! \brief Get the map background color
      *  @return Background color as boost::optional
      *  object
      */
     boost::optional<color> const& background() const;
-    
+
     /*! \brief Set the map background image filename.
      *  @param c Background image filename.
      */
     void set_background_image(std::string const& image_filename);
-    
+
     /*! \brief Get the map background image
      *  @return Background image path as std::string
      *  object
      */
     boost::optional<std::string> const& background_image() const;
-    
-    /*! \brief Set buffer size 
+
+    /*! \brief Set buffer size
      *  @param buffer_size Buffer size in pixels.
      */
-        
+
     void set_buffer_size(int buffer_size);
-        
-    /*! \brief Get the map buffer size 
+
+    /*! \brief Get the map buffer size
      *  @return Buffer size as int
      */
     int buffer_size() const;
@@ -333,9 +333,9 @@ public:
      *  @param box The bounding box for the maximum extent.
      */
     void set_maximum_extent(box2d<double>const& box);
-        
+
     /*! \brief Get the map maximum extent as box2d<double>
-    */
+     */
     boost::optional<box2d<double> > const& maximum_extent() const;
 
     /*! \brief Get the map base path where paths should be relative to.
@@ -352,7 +352,7 @@ public:
      */
     void zoom(double factor);
 
-    /*! \brief Zoom the map to a bounding box. 
+    /*! \brief Zoom the map to a bounding box.
      *
      *  Aspect is handled automatic if not fitting to width/height.
      *  @param box The bounding box where to zoom.
@@ -376,16 +376,16 @@ public:
      *  @return The current buffered bounding box.
      */
     box2d<double> get_buffered_extent() const;
-        
+
     /*!
      * @return The Map Scale.
      */
     double scale() const;
-        
+
     double scale_denominator() const;
 
     CoordTransform view_transform() const;
-        
+
     /*!
      * @brief Query a Map layer (by layer index) for features
      *
@@ -416,7 +416,7 @@ public:
      * @brief Resolve names to object references for metawriters.
      */
     void init_metawriters();
-        
+
     ~Map();
 
     inline void set_aspect_fix_mode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
@@ -473,7 +473,7 @@ public:
 private:
     void fixAspectRatio();
 };
-   
+
 DEFINE_ENUM(aspect_fix_mode_e,Map::aspect_fix_mode);
 }
 

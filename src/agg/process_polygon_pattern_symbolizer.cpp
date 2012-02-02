@@ -68,28 +68,28 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
     ren_base renb(pixf);
-    
+
     agg::scanline_u8 sl;
     ras_ptr->reset();
     switch (sym.get_gamma_method())
     {
-        case GAMMA_POWER:
-            ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-            break;
-        case GAMMA_LINEAR:
-            ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
-            break;
-        case GAMMA_NONE:
-            ras_ptr->gamma(agg::gamma_none());
-            break;
-        case GAMMA_THRESHOLD:
-            ras_ptr->gamma(agg::gamma_threshold(sym.get_gamma()));
-            break;
-        case GAMMA_MULTIPLY:
-            ras_ptr->gamma(agg::gamma_multiply(sym.get_gamma()));
-            break;
-        default:
-            ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
+    case GAMMA_POWER:
+        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
+        break;
+    case GAMMA_LINEAR:
+        ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
+        break;
+    case GAMMA_NONE:
+        ras_ptr->gamma(agg::gamma_none());
+        break;
+    case GAMMA_THRESHOLD:
+        ras_ptr->gamma(agg::gamma_threshold(sym.get_gamma()));
+        break;
+    case GAMMA_MULTIPLY:
+        ras_ptr->gamma(agg::gamma_multiply(sym.get_gamma()));
+        break;
+    default:
+        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
     }
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
@@ -110,12 +110,12 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         std::clog << "### Warning only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer\n";
         return;
     }
-    
+
 
     boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
 
     if (!pat) return;
-    
+
     unsigned w=(*pat)->width();
     unsigned h=(*pat)->height();
     agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
@@ -123,13 +123,13 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_plain,
         agg::row_accessor<agg::int8u>, agg::pixel32_type> pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
-    
+
     unsigned num_geometries = feature->num_geometries();
 
     pattern_alignment_e align = sym.get_alignment();
     unsigned offset_x=0;
     unsigned offset_y=0;
-    
+
     if (align == LOCAL_ALIGNMENT)
     {
         double x0=0,y0=0;
@@ -139,9 +139,9 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             path.vertex(&x0,&y0);
         }
         offset_x = unsigned(width_-x0);
-        offset_y = unsigned(height_-y0);    
+        offset_y = unsigned(height_-y0);
     }
-    
+
     span_gen_type sg(img_src, offset_x, offset_y);
     renderer_type rp(renb,sa, sg);
     metawriter_with_properties writer = sym.get_metawriter();
@@ -164,4 +164,4 @@ template void agg_renderer<image_32>::process(polygon_pattern_symbolizer const&,
                                               proj_transform const&);
 
 }
- 
+

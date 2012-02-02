@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,10 +35,10 @@
 namespace mapnik
 {
 class PluginInfo : boost::noncopyable
-{         
+{
 private:
     std::string name_;
-    lt_dlhandle module_;     
+    lt_dlhandle module_;
 public:
     PluginInfo (const std::string& name,const lt_dlhandle module);
     ~PluginInfo();

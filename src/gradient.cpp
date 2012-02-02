@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -36,15 +36,15 @@ static const char * gradient_strings[] = {
 IMPLEMENT_ENUM( gradient_e, gradient_strings )
 
 
-gradient::gradient() 
-    : gradient_type_(NO_GRADIENT),
-      stops_(),
-      x1_(0),
-      y1_(0),
-      x2_(0),
-      y2_(0),
-      r_(0),
-      units_(OBJECT_BOUNDING_BOX)
+gradient::gradient()
+: gradient_type_(NO_GRADIENT),
+    stops_(),
+    x1_(0),
+    y1_(0),
+    x2_(0),
+    y2_(0),
+    r_(0),
+    units_(OBJECT_BOUNDING_BOX)
 {
 }
 
@@ -67,12 +67,12 @@ gradient & gradient::operator=(const gradient& rhs)
     return *this;
 }
 
-void gradient::set_gradient_type(gradient_e grad) 
+void gradient::set_gradient_type(gradient_e grad)
 {
     gradient_type_=grad;
 }
 
-gradient_e gradient::get_gradient_type() const 
+gradient_e gradient::get_gradient_type() const
 {
     return gradient_type_;
 }
@@ -100,7 +100,7 @@ void gradient::add_stop(double offset,mapnik::color const& c)
     stops_.push_back(mapnik::stop_pair(offset,c));
 }
 
-bool gradient::has_stop() const 
+bool gradient::has_stop() const
 {
     return ! stops_.empty();
 }

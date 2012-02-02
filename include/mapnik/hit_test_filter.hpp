@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -32,9 +32,9 @@ class hit_test_filter
 public:
     hit_test_filter(double x, double y, double tol)
         : x_(x),
-          y_(y), 
+          y_(y),
           tol_(tol) {}
-        
+
     bool pass(Feature const& feature)
     {
         for (unsigned i=0;i<feature.num_geometries();++i)
@@ -45,7 +45,7 @@ public:
         }
         return false;
     }
-        
+
 private:
     double x_;
     double y_;

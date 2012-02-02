@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -137,7 +137,7 @@ template <typename Locator, typename Detector> bool markers_placement<Locator, D
     double *x, double *y, double *angle, bool add_to_detector)
 {
     if (done_) return false;
-    
+
     unsigned cmd;
     double spacing_left;
     if (marker_nr_++ == 0)
@@ -197,7 +197,7 @@ template <typename Locator, typename Detector> bool markers_placement<Locator, D
         } else if (d - spacing_left < size_.width()/2)
         {
             //Segment is long enough, but we are to close to the end
-            
+
             //Note: This function moves backwards. This could lead to an infinite
             // loop when another function adds a positive offset. Therefore we
             // only move backwards when there is no offset

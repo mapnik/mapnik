@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -54,104 +54,104 @@ class quad_tree : boost::noncopyable
         {
             std::memset(children_,0,4*sizeof(node*));
         }
-   
+
         box2d<double> const& extent() const
         {
             return extent_;
         }
-            
-        iterator begin() 
+
+        iterator begin()
         {
             return cont_.begin();
         }
-            
-        const_iterator begin() const 
+
+        const_iterator begin() const
         {
             return cont_.begin();
         }
-            
-        iterator end() 
+
+        iterator end()
         {
             return cont_.end();
         }
-            
-        const_iterator end() const 
+
+        const_iterator end() const
         {
             return cont_.end();
         }
         ~node () {}
     };
-        
-    typedef boost::ptr_vector<node> nodes_t;    
+
+    typedef boost::ptr_vector<node> nodes_t;
     typedef typename node::cont_t cont_t;
     typedef typename cont_t::iterator node_data_iterator;
-        
+
     nodes_t nodes_;
-    node * root_;       
+    node * root_;
     const unsigned int max_depth_;
-    const double ratio_; 
+    const double ratio_;
 public:
     typedef typename nodes_t::iterator iterator;
     typedef typename nodes_t::const_iterator const_iterator;
-    typedef typename boost::ptr_vector<T,boost::view_clone_allocator> result_t; 
+    typedef typename boost::ptr_vector<T,boost::view_clone_allocator> result_t;
     typedef typename result_t::iterator query_iterator;
-   
+
     result_t query_result_;
-        
-    explicit quad_tree(box2d<double> const& ext, 
-                       unsigned int max_depth = 8, 
-                       double ratio = 0.55) 
+
+    explicit quad_tree(box2d<double> const& ext,
+                       unsigned int max_depth = 8,
+                       double ratio = 0.55)
         : max_depth_(max_depth),
           ratio_(ratio)
     {
         nodes_.push_back(new node(ext));
         root_ = &nodes_[0];
     }
-                
+
     void insert(T data, box2d<double> const& box)
     {
         unsigned int depth=0;
         do_insert_data(data,box,root_,depth);
     }
-         
+
     query_iterator query_in_box(box2d<double> const& box)
     {
         query_result_.clear();
         query_node(box,query_result_,root_);
         return query_result_.begin();
     }
-        
+
     query_iterator query_end()
     {
         return query_result_.end();
     }
-        
+
     const_iterator begin() const
     {
         return nodes_.begin();
     }
 
-    
+
     const_iterator end() const
     {
         return  nodes_.end();
     }
-          
-    void clear () 
+
+    void clear ()
     {
         box2d<double> ext = root_->extent_;
         nodes_.clear();
         nodes_.push_back(new node(ext));
         root_ = &nodes_[0];
     }
-    
+
     box2d<double> const& extent() const
     {
         return root_->extent_;
     }
-    
+
 private:
-    
+
     void query_node(box2d<double> const& box, result_t & result, node * node_) const
     {
         if (node_)
@@ -173,18 +173,18 @@ private:
             }
         }
     }
-        
+
     void do_insert_data(T data, box2d<double> const& box, node * n, unsigned int& depth)
     {
         if (++depth >= max_depth_)
         {
             n->cont_.push_back(data);
         }
-        else 
+        else
         {
             box2d<double> const& node_extent = n->extent();
             box2d<double> ext[4];
-            split_box(node_extent,ext);         
+            split_box(node_extent,ext);
             for (int i=0;i<4;++i)
             {
                 if (ext[i].contains(box))
@@ -201,25 +201,25 @@ private:
             n->cont_.push_back(data);
         }
     }
-        
+
     void split_box(box2d<double> const& node_extent,box2d<double> * ext)
     {
         //coord2d c=node_extent.center();
 
         double width=node_extent.width();
         double height=node_extent.height();
-            
+
         double lox=node_extent.minx();
         double loy=node_extent.miny();
         double hix=node_extent.maxx();
         double hiy=node_extent.maxy();
-            
+
         ext[0]=box2d<double>(lox,loy,lox + width * ratio_,loy + height * ratio_);
         ext[1]=box2d<double>(hix - width * ratio_,loy,hix,loy + height * ratio_);
         ext[2]=box2d<double>(lox,hiy - height*ratio_,lox + width * ratio_,hiy);
         ext[3]=box2d<double>(hix - width * ratio_,hiy - height*ratio_,hix,hiy);
     }
-};    
-} 
+};
+}
 
 #endif // MAPNIK_QUAD_TREE_HPP

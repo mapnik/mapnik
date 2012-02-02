@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -34,15 +34,15 @@
 #include <iomanip>
 
 namespace mapnik {
-  
+
 /*!
  * A spatial envelope (i.e. bounding box) which also defines some basic operators.
  */
-template <typename T> class MAPNIK_DECL box2d  
+template <typename T> class MAPNIK_DECL box2d
 : boost::equality_comparable<box2d<T> ,
-                             boost::addable<box2d<T>, 
-					    boost::dividable2<box2d<T>, T,
-							      boost::multipliable2<box2d<T>, T > > > >
+                             boost::addable<box2d<T>,
+                                            boost::dividable2<box2d<T>, T,
+                                                              boost::multipliable2<box2d<T>, T > > > >
 {
 public:
     typedef box2d<T> box2d_type;
@@ -82,14 +82,14 @@ public:
     void clip(const box2d_type &other);
     bool from_string(const std::string& s);
     bool valid() const;
-        
-    // define some operators 
+
+    // define some operators
     box2d_type& operator+=(box2d_type const& other);
     box2d_type& operator*=(T);
     box2d_type& operator/=(T);
     T operator[](int index) const;
 };
-    
+
 template <class charT,class traits,class T>
 inline std::basic_ostream<charT,traits>&
 operator << (std::basic_ostream<charT,traits>& out,
@@ -98,8 +98,8 @@ operator << (std::basic_ostream<charT,traits>& out,
     std::basic_ostringstream<charT,traits> s;
     s.copyfmt(out);
     s.width(0);
-    s <<"box2d(" << std::setprecision(16) 
-      << e.minx() << "," << e.miny() <<"," 
+    s <<"box2d(" << std::setprecision(16)
+      << e.minx() << "," << e.miny() <<","
       << e.maxx() << "," << e.maxy() <<")";
     out << s.str();
     return out;

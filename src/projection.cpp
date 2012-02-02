@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -37,51 +37,51 @@ namespace mapnik {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
 boost::mutex projection::mutex_;
 #endif
-   
+
 projection::projection(std::string const& params)
     : params_(params)
-{ 
-    init(); //
-}
-    
-projection::projection(projection const& rhs)
-    : params_(rhs.params_) 
 {
     init(); //
 }
-        
-projection& projection::operator=(projection const& rhs) 
-{ 
+
+projection::projection(projection const& rhs)
+    : params_(rhs.params_)
+{
+    init(); //
+}
+
+projection& projection::operator=(projection const& rhs)
+{
     projection tmp(rhs);
     swap(tmp);
     return *this;
 }
-    
-bool projection::operator==(const projection& other) const 
+
+bool projection::operator==(const projection& other) const
 {
     return (params_ == other.params_);
 }
-    
-bool projection::operator!=(const projection& other) const 
+
+bool projection::operator!=(const projection& other) const
 {
     return !(*this == other);
 }
-    
+
 bool projection::is_initialized() const
 {
     return proj_ ? true : false;
 }
-    
+
 bool projection::is_geographic() const
 {
     return is_geographic_;
 }
-    
+
 std::string const& projection::params() const
 {
     return params_;
 }
-    
+
 void projection::forward(double & x, double &y ) const
 {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
@@ -97,9 +97,9 @@ void projection::forward(double & x, double &y ) const
     {
         x *=RAD_TO_DEG;
         y *=RAD_TO_DEG;
-    }           
+    }
 }
-    
+
 void projection::inverse(double & x,double & y) const
 {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
@@ -109,7 +109,7 @@ void projection::inverse(double & x,double & y) const
     {
         x *=DEG_TO_RAD;
         y *=DEG_TO_RAD;
-    }  
+    }
     projUV p;
     p.u = x;
     p.v = y;
@@ -117,8 +117,8 @@ void projection::inverse(double & x,double & y) const
     x = RAD_TO_DEG * p.u;
     y = RAD_TO_DEG * p.v;
 }
-    
-projection::~projection() 
+
+projection::~projection()
 {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
@@ -128,7 +128,7 @@ projection::~projection()
     if (proj_ctx_) pj_ctx_free(proj_ctx_);
 #endif
 }
-    
+
 void projection::init()
 {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
@@ -153,7 +153,7 @@ std::string projection::expanded() const
     }
     return std::string("");
 }
-    
+
 void projection::swap (projection& rhs)
 {
     std::swap(params_,rhs.params_);

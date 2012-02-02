@@ -40,13 +40,13 @@ namespace mapnik {
 metawriter_ptr metawriter_create(const boost::property_tree::ptree &pt);
 
 /**
- * Writes properties into the given property tree representing the 
+ * Writes properties into the given property tree representing the
  * metawriter argument, and which can be used to reconstruct it.
  */
 void metawriter_save(
-  const metawriter_ptr &m, 
-  boost::property_tree::ptree &pt,
-  bool explicit_defaults);
+    const metawriter_ptr &m,
+    boost::property_tree::ptree &pt,
+    bool explicit_defaults);
 
 }
 

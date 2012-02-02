@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -31,7 +31,7 @@
 #include <vector>
 
 namespace mapnik {
-    
+
 class MAPNIK_DECL memory_datasource : public datasource
 {
     friend class memory_featureset;
@@ -50,8 +50,8 @@ public:
 private:
     std::vector<feature_ptr> features_;
     mapnik::layer_descriptor desc_;
-}; 
-   
+};
+
 }
 
 #endif // MAPNIK_MEMORY_DATASOURCE_HPP

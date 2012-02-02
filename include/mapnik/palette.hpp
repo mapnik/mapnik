@@ -129,7 +129,7 @@ public:
 
     explicit rgba_palette(std::string const& pal, palette_type type = PALETTE_RGBA);
     rgba_palette();
-    
+
     const std::vector<rgb>& palette() const;
     const std::vector<unsigned>& alphaTable() const;
 

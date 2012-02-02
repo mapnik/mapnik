@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -49,7 +49,7 @@ enum marker_type_enum {
 
 DEFINE_ENUM( marker_type_e, marker_type_enum );
 
-struct MAPNIK_DECL markers_symbolizer : 
+struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image, public symbolizer_base
 {
 public:

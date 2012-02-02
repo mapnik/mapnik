@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -26,7 +26,7 @@
 namespace mapnik {
 struct ellipsoid
 {
-    double a; // semi mayor axis  
+    double a; // semi mayor axis
     double b; // semi minor axis
 };
 }

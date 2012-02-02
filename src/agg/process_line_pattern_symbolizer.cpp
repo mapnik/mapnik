@@ -58,7 +58,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
-    
+
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
@@ -73,7 +73,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
 
     if (!pat) return;
-      
+
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
     pattern_source source(*(*pat));

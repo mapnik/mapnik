@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -36,35 +36,35 @@
 
 namespace boost { namespace spirit { namespace traits {
 
-template <>
-struct is_container<mapnik::geometry_type const> : mpl::true_ {} ;
+        template <>
+        struct is_container<mapnik::geometry_type const> : mpl::true_ {} ;
 
-template <>
-struct container_iterator<mapnik::geometry_type const>
-{
-    typedef mapnik::util::vertex_iterator<double> type;
-};
+        template <>
+        struct container_iterator<mapnik::geometry_type const>
+        {
+            typedef mapnik::util::vertex_iterator<double> type;
+        };
 
-template <>
-struct begin_container<mapnik::geometry_type const>
-{
-    static mapnik::util::vertex_iterator<double>
-    call (mapnik::geometry_type const& g)
-    {
-        return mapnik::util::vertex_iterator<double>(g.data());
-    }
-};
+        template <>
+        struct begin_container<mapnik::geometry_type const>
+        {
+            static mapnik::util::vertex_iterator<double>
+            call (mapnik::geometry_type const& g)
+            {
+                return mapnik::util::vertex_iterator<double>(g.data());
+            }
+        };
 
-template <>
-struct end_container<mapnik::geometry_type const>
-{
-    static mapnik::util::vertex_iterator<double>
-    call (mapnik::geometry_type const& g)
-    {
-        return mapnik::util::vertex_iterator<double>();
-    }
-};
+        template <>
+        struct end_container<mapnik::geometry_type const>
+        {
+            static mapnik::util::vertex_iterator<double>
+            call (mapnik::geometry_type const& g)
+            {
+                return mapnik::util::vertex_iterator<double>();
+            }
+        };
 
-}}}
+        }}}
 
 #endif // CONTAINER_ADAPTER_HPP

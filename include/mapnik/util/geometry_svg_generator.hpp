@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -44,102 +44,102 @@
 
 namespace mapnik { namespace util {
 
-namespace karma = boost::spirit::karma;
-namespace phoenix = boost::phoenix;
+    namespace karma = boost::spirit::karma;
+    namespace phoenix = boost::phoenix;
 
-namespace detail {
-struct get_type
-{
-    template <typename T>
-    struct result { typedef int type; };
-
-    int operator() (geometry_type const& geom) const
+    namespace detail {
+    struct get_type
     {
-        return (int)geom.type();
-    }
-};
+        template <typename T>
+        struct result { typedef int type; };
 
-struct get_first
-{
-    template <typename T>
-    struct result { typedef geometry_type::value_type const type; };
+        int operator() (geometry_type const& geom) const
+        {
+            return (int)geom.type();
+        }
+    };
 
-    geometry_type::value_type const operator() (geometry_type const& geom) const
+    struct get_first
     {
-        geometry_type::value_type coord;
-        boost::get<0>(coord) = geom.get_vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
-        return coord;
+        template <typename T>
+        struct result { typedef geometry_type::value_type const type; };
+
+        geometry_type::value_type const operator() (geometry_type const& geom) const
+        {
+            geometry_type::value_type coord;
+            boost::get<0>(coord) = geom.get_vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+            return coord;
+        }
+    };
+
+    template <typename T>
+    struct coordinate_policy : karma::real_policies<T>
+    {
+        typedef boost::spirit::karma::real_policies<T> base_type;
+        static int floatfield(T n) { return base_type::fmtflags::fixed; }
+        static unsigned precision(T n) { return 6u ;}
+    };
     }
-};
 
-template <typename T>
-struct coordinate_policy : karma::real_policies<T>
-{
-    typedef boost::spirit::karma::real_policies<T> base_type;
-    static int floatfield(T n) { return base_type::fmtflags::fixed; }
-    static unsigned precision(T n) { return 6u ;}
-};
-}
-
-template <typename OutputIterator>
-struct svg_generator : 
+    template <typename OutputIterator>
+    struct svg_generator :
         karma::grammar<OutputIterator, geometry_type const& ()>
-{
-    
-    svg_generator()
-        : svg_generator::base_type(svg)
     {
-        using boost::spirit::karma::uint_;
-        using boost::spirit::karma::_val;
-        using boost::spirit::karma::_1;
-        using boost::spirit::karma::lit;
-        using boost::spirit::karma::_a;
-        
-        svg = point | linestring | polygon 
-            ;
-        
-        point = &uint_(mapnik::Point)[_1 = _type(_val)] 
-            << svg_point [_1 = _first(_val)]
-            ;
-        
-        svg_point = &uint_ 
-            << lit("cx=\"") << coord_type 
-            << lit("\" cy=\"") << coord_type
-            << lit('\"')
-            ;
-        
-        linestring = &uint_(mapnik::LineString)[_1 = _type(_val)] 
-            << svg_path  
-            ;
-        
-        polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
-            << svg_path
-            ;
-        
-        svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M') 
-                      | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ] ])
-                     << lit(' ') << coord_type << lit(' ') << coord_type) % lit(' ')
-            ;
-        
-        
-        
-    }
-    // rules
-    karma::rule<OutputIterator, geometry_type const& ()> svg; 
-    karma::rule<OutputIterator, geometry_type const& ()> point;
-    karma::rule<OutputIterator, geometry_type const& ()> linestring;
-    karma::rule<OutputIterator, geometry_type const& ()> polygon;
 
-    karma::rule<OutputIterator, geometry_type::value_type ()> svg_point;
-    karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> svg_path;    
+        svg_generator()
+            : svg_generator::base_type(svg)
+        {
+            using boost::spirit::karma::uint_;
+            using boost::spirit::karma::_val;
+            using boost::spirit::karma::_1;
+            using boost::spirit::karma::lit;
+            using boost::spirit::karma::_a;
 
-    // phoenix functions
-    phoenix::function<detail::get_type > _type;
-    phoenix::function<detail::get_first> _first;
-    //
-    karma::real_generator<double, detail::coordinate_policy<double> > coord_type;
-    
-};
+            svg = point | linestring | polygon
+                ;
+
+            point = &uint_(mapnik::Point)[_1 = _type(_val)]
+                << svg_point [_1 = _first(_val)]
+                ;
+
+            svg_point = &uint_
+                << lit("cx=\"") << coord_type
+                << lit("\" cy=\"") << coord_type
+                << lit('\"')
+                ;
+
+            linestring = &uint_(mapnik::LineString)[_1 = _type(_val)]
+                << svg_path
+                ;
+
+            polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
+                << svg_path
+                ;
+
+            svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
+                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ] ])
+                         << lit(' ') << coord_type << lit(' ') << coord_type) % lit(' ')
+                ;
+
+
+
+        }
+        // rules
+        karma::rule<OutputIterator, geometry_type const& ()> svg;
+        karma::rule<OutputIterator, geometry_type const& ()> point;
+        karma::rule<OutputIterator, geometry_type const& ()> linestring;
+        karma::rule<OutputIterator, geometry_type const& ()> polygon;
+
+        karma::rule<OutputIterator, geometry_type::value_type ()> svg_point;
+        karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> svg_path;
+
+        // phoenix functions
+        phoenix::function<detail::get_type > _type;
+        phoenix::function<detail::get_first> _first;
+        //
+        karma::real_generator<double, detail::coordinate_policy<double> > coord_type;
+
+    };
 
 }}
 

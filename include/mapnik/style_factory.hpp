@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -26,8 +26,8 @@
 //#include <mapnik/style.hpp>
 
 namespace mapnik {
-    
-class style_factory 
+
+class style_factory
 {
 };
 }

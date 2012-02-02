@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
- 
+
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
@@ -104,24 +104,24 @@ metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_proper
 void metawriter_json_stream::write_properties(Feature const& feature, metawriter_properties const& properties)
 {
     *f_ << "}," << //Close coordinates object
-            "\n  \"properties\": {";
-    
+        "\n  \"properties\": {";
+
     int i = 0;
     BOOST_FOREACH(std::string const& p, properties)
     {
         if (feature.has_key(p))
         {
             mapnik::value const& val = feature.get(p);
-            std::string str = val.to_string();            
+            std::string str = val.to_string();
             if (str.size() == 0) continue; // ignore empty attributes
-            
+
             //Property found
             std::string text = boost::replace_all_copy(boost::replace_all_copy(str, "\\", "\\\\"), "\"", "\\\"");
             if (i++) *f_ << ",";
             *f_ << "\n    \"" << p << "\":\"" << text << "\"";
         }
     }
-    
+
     *f_ << "\n} }";
 }
 
@@ -142,7 +142,7 @@ void metawriter_json_stream::write_properties(Feature const& feature, metawriter
 
 
 void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& feature,
-                              CoordTransform const& t, metawriter_properties const& properties)
+                                     CoordTransform const& t, metawriter_properties const& properties)
 {
     /* Check if feature is in bounds. */
     if (box.maxx() < 0 || box.maxy() < 0 || box.minx() > width_ || box.miny() > height_) return;
@@ -165,33 +165,33 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
     write_feature_header("Polygon");
 
     *f_ << " [ [ [" <<
-            minx << ", " << miny << "], [" <<
-            maxx << ", " << miny << "], [" <<
-            maxx << ", " << maxy << "], [" <<
-            minx << ", " << maxy << "] ] ]";
+        minx << ", " << miny << "], [" <<
+        maxx << ", " << miny << "], [" <<
+        maxx << ", " << maxy << "], [" <<
+        minx << ", " << maxy << "] ] ]";
 
     write_properties(feature, properties);
 
 }
 
 void metawriter_json_stream::add_text(text_placement_info const& p,
-    face_manager_freetype &font_manager,
-    Feature const& feature,
-    CoordTransform const& t,
-    metawriter_properties const& properties)
+                                      face_manager_freetype &font_manager,
+                                      Feature const& feature,
+                                      CoordTransform const& t,
+                                      metawriter_properties const& properties)
 {
     /* Note:
        Map coordinate system (and starting_{x,y}) starts in upper left corner
-         and grows towards lower right corner.
+       and grows towards lower right corner.
        Font + placement vertex coordinate system starts in lower left corner
-         and grows towards upper right corner.
+       and grows towards upper right corner.
        Therefore y direction is different. Keep this in mind while doing calculations.
 
        The y value returned by vertex() is always the baseline.
        Lowest y = baseline of bottom line
        Hightest y = baseline of top line
 
-      */
+    */
     for (unsigned n = 0; n < p.placements.size(); n++) {
         text_path & current_placement = const_cast<text_path &>(p.placements[n]);
 
@@ -269,9 +269,9 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
 }
 
 void metawriter_json_stream::add_polygon(path_type & path,
-    Feature const& feature,
-    CoordTransform const& t,
-    metawriter_properties const& properties)
+                                         Feature const& feature,
+                                         CoordTransform const& t,
+                                         metawriter_properties const& properties)
 {
     write_feature_header("Polygon");
     write_line_polygon(path, t, true);
@@ -279,9 +279,9 @@ void metawriter_json_stream::add_polygon(path_type & path,
 }
 
 void metawriter_json_stream::add_line(path_type & path,
-    Feature const& feature,
-    CoordTransform const& t,
-    metawriter_properties const& properties)
+                                      Feature const& feature,
+                                      CoordTransform const& t,
+                                      metawriter_properties const& properties)
 {
     write_feature_header("MultiLineString");
     write_line_polygon(path, t, false);
@@ -365,7 +365,7 @@ void metawriter_json::set_filename(path_expression_ptr fn)
 
 path_expression_ptr metawriter_json::get_filename() const
 {
-   return fn_;
+    return fn_;
 }
 
 }

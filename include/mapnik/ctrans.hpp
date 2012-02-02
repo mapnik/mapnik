@@ -165,31 +165,31 @@ struct MAPNIK_DECL coord_transform_parallel
     typedef typename Geometry::value_type value_type;
 
     coord_transform_parallel(Transform const& t,
-                     Geometry const& geom,
-                     proj_transform const& prj_trans )
-        : t_(t), 
-          geom_(geom), 
-          prj_trans_(prj_trans),
-          offset_(0.0),
-          threshold_(10),
-          m_status(initial) {}
-    
+                             Geometry const& geom,
+                             proj_transform const& prj_trans )
+        : t_(t),
+        geom_(geom),
+        prj_trans_(prj_trans),
+        offset_(0.0),
+        threshold_(10),
+        m_status(initial) {}
+
     enum status
-    { 
-        initial, 
+    {
+        initial,
         start,
-        first, 
+        first,
         process,
         last_vertex,
         angle_joint,
-        end 
+        end
     };
 
     double get_offset() const
     {
         return offset_;
     }
-    
+
     void set_offset(double offset)
     {
         offset_ = offset;
@@ -199,7 +199,7 @@ struct MAPNIK_DECL coord_transform_parallel
     {
         return threshold_;
     }
-    
+
     void set_threshold(unsigned int t)
     {
         threshold_ = t;
@@ -208,7 +208,7 @@ struct MAPNIK_DECL coord_transform_parallel
     unsigned vertex(double * x , double  * y)
     {
         double z=0;
-       
+
         if (offset_==0.0)
         {
             unsigned command = geom_.vertex(x,y);
@@ -239,10 +239,10 @@ struct MAPNIK_DECL coord_transform_parallel
                     angle_a = atan2((m_pre_y-m_cur_y),(m_pre_x-m_cur_x));
                     dx_pre = cos(angle_a + pi_by_2);
                     dy_pre = sin(angle_a + pi_by_2);
-                    #ifdef MAPNIK_DEBUG
-                        std::clog << "offsetting line by: " << offset_ << "\n";
-                        std::clog << "initial dx=" << (dx_pre * offset_) << " dy=" << (dy_pre * offset_) << "\n";
-                    #endif
+#ifdef MAPNIK_DEBUG
+                    std::clog << "offsetting line by: " << offset_ << "\n";
+                    std::clog << "initial dx=" << (dx_pre * offset_) << " dy=" << (dy_pre * offset_) << "\n";
+#endif
                     *x = m_pre_x + (dx_pre * offset_);
                     *y = m_pre_y + (dy_pre * offset_);
                     m_status = process;
@@ -250,23 +250,23 @@ struct MAPNIK_DECL coord_transform_parallel
                 case process:
                     switch(m_cur_cmd)
                     {
+                    case SEG_LINETO:
+                        m_next_cmd = geom_.vertex(&m_next_x, &m_next_y);
+                        prj_trans_.backward(m_next_x,m_next_y,z);
+                        t_.forward(&m_next_x,&m_next_y);
+                        switch(m_next_cmd)
+                        {
                         case SEG_LINETO:
-                            m_next_cmd = geom_.vertex(&m_next_x, &m_next_y);
-                            prj_trans_.backward(m_next_x,m_next_y,z);
-                            t_.forward(&m_next_x,&m_next_y);
-                            switch(m_next_cmd)
-                            {
-                                case SEG_LINETO:
-                                    m_status = angle_joint;
-                                    break;
-                                default:
-                                    m_status = last_vertex;
-                                    break;
-                            }
+                            m_status = angle_joint;
                             break;
-                        case SEG_END:
-                            m_status = end;
-                            return SEG_END;
+                        default:
+                            m_status = last_vertex;
+                            break;
+                        }
+                        break;
+                    case SEG_END:
+                        m_status = end;
+                        return SEG_END;
                     }
                     break;
                 case last_vertex:
@@ -289,8 +289,8 @@ struct MAPNIK_DECL coord_transform_parallel
                     }
                     else // skip sharp spikes
                     {
-                        
-                        #ifdef MAPNIK_DEBUG
+
+#ifdef MAPNIK_DEBUG
                         dx_curr = cos(angle_a + pi_by_2);
                         dy_curr = sin(angle_a + pi_by_2);
                         sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
@@ -298,35 +298,35 @@ struct MAPNIK_DECL coord_transform_parallel
                         std::clog << "angle b: " << angle_b << "\n";
                         std::clog << "h: " << h << "\n";
                         std::clog << "sin_curve: " << sin_curve << "\n";
-                        #endif
+#endif
                         m_status = process;
                         break;
                     }
 
                     // alternate sharp spike fix, but suboptimal...
-                   
+
                     /*
-                    sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
-                    cos_curve = -dx_pre*dx_curr-dy_pre*dy_curr;
-                   
-                    #ifdef MAPNIK_DEBUG
-                        std::clog << "sin_curve value: " << sin_curve << "\n";
-                    #endif
-                    if(sin_curve > -0.3 && sin_curve < 0.3) {
-                        angle_b = atan2((m_cur_y-m_next_y),(m_cur_x-m_next_x));
-                        h = tan((angle_b - angle_a)/2.0);
-                        *x = m_cur_x + (dx_curr * offset_) - h * (dy_curr * offset_);
-                        *y = m_cur_y + (dy_curr * offset_) + h * (dx_curr * offset_);
-                    } else {
-                        if (angle_b - angle_a > 0)
-                            h = -1.0*(1.0+cos_curve)/sin_curve;
-                        else
-                            h = (1.0+cos_curve)/sin_curve;
-                        *x = m_cur_x + (dx_curr + base_shift*dy_curr)*offset_;
-                        *y = m_cur_y + (dy_curr - base_shift*dx_curr)*offset_;
-                    }
+                      sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
+                      cos_curve = -dx_pre*dx_curr-dy_pre*dy_curr;
+
+                      #ifdef MAPNIK_DEBUG
+                      std::clog << "sin_curve value: " << sin_curve << "\n";
+                      #endif
+                      if(sin_curve > -0.3 && sin_curve < 0.3) {
+                      angle_b = atan2((m_cur_y-m_next_y),(m_cur_x-m_next_x));
+                      h = tan((angle_b - angle_a)/2.0);
+                      *x = m_cur_x + (dx_curr * offset_) - h * (dy_curr * offset_);
+                      *y = m_cur_y + (dy_curr * offset_) + h * (dx_curr * offset_);
+                      } else {
+                      if (angle_b - angle_a > 0)
+                      h = -1.0*(1.0+cos_curve)/sin_curve;
+                      else
+                      h = (1.0+cos_curve)/sin_curve;
+                      *x = m_cur_x + (dx_curr + base_shift*dy_curr)*offset_;
+                      *y = m_cur_y + (dy_curr - base_shift*dx_curr)*offset_;
+                      }
                     */
-                   
+
                     m_pre_x = *x;
                     m_pre_x = *y;
                     m_cur_x = m_next_x;
@@ -337,7 +337,7 @@ struct MAPNIK_DECL coord_transform_parallel
                     m_status = process;
                     return m_pre_cmd;
                 }
-            }  
+            }
         }
     }
 
@@ -346,7 +346,7 @@ struct MAPNIK_DECL coord_transform_parallel
         geom_.rewind(pos);
         m_status = initial;
     }
-   
+
 private:
     Transform const& t_;
     Geometry const& geom_;
@@ -390,7 +390,7 @@ public:
     CoordTransform(int width, int height, const box2d<double>& extent,
                    double offset_x = 0, double offset_y = 0)
         : width_(width), height_(height), extent_(extent),
-        offset_x_(offset_x), offset_y_(offset_y)
+          offset_x_(offset_x), offset_y_(offset_y)
     {
         sx_ = static_cast<double>(width_) / extent_.width();
         sy_ = static_cast<double>(height_) / extent_.height();

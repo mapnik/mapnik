@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -27,7 +27,7 @@
 #include <mapnik/config.hpp>
 
 namespace mapnik {
- 
+
 class Map;
 MAPNIK_DECL double scale_denominator(Map const& map, bool geographic);
 }

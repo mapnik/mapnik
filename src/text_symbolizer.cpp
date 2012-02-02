@@ -87,8 +87,8 @@ IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
 
 
 text_symbolizer::text_symbolizer(text_placements_ptr placements)
-    : symbolizer_base(),
-      placement_options_(placements)
+: symbolizer_base(),
+    placement_options_(placements)
 {
 
 }

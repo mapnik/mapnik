@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -28,8 +28,8 @@
 
 namespace mapnik {
 
-arrow::arrow() 
-    : pos_(0) 
+arrow::arrow()
+    : pos_(0)
 {
     x_[0] = -7.0; y_[0] = 1.0; cmd_[0] = agg::path_cmd_move_to;
     x_[1] =  1.0; y_[1] = 1.0; cmd_[1] = agg::path_cmd_line_to;
@@ -46,7 +46,7 @@ void arrow::rewind(unsigned )
 {
     pos_ = 0;
 }
-    
+
 unsigned arrow::vertex(double* x, double* y)
 {
     if(pos_ < 7 )
@@ -57,7 +57,7 @@ unsigned arrow::vertex(double* x, double* y)
     }
     return agg::path_cmd_stop;
 }
-   
+
 box2d<double> arrow::extent() const
 {
     return box2d<double>(-7,-3,7,3);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -45,16 +45,16 @@ struct RGBPolicy
     inline static unsigned index_from_level(unsigned level, rgb const& c)
     {
         unsigned shift = 7 - level;
-        return (((c.r >> shift) & 1) << 2) 
-            | (((c.g >> shift) & 1) << 1) 
+        return (((c.r >> shift) & 1) << 2)
+            | (((c.g >> shift) & 1) << 1)
             | ((c.b >> shift) & 1);
     }
 };
 
 template <typename T, typename InsertPolicy = RGBPolicy >
 class octree : private boost::noncopyable
-{       
-    struct node 
+{
+    struct node
     {
         node ()
             :  reds(0),
@@ -182,7 +182,7 @@ public:
         node * cur_node = root_;
         while (cur_node)
         {
-            if (cur_node->children_count == 0) 
+            if (cur_node->children_count == 0)
                 return cur_node->index + offset_;
             unsigned idx = InsertPolicy::index_from_level(level,c);
             cur_node = cur_node->children_[idx];
@@ -202,7 +202,7 @@ public:
         palette.reserve(colors_);
         create_palette(palette, root_);
     }
-         
+
     void computeCost(node *r)
     {
         r->reduce_cost = 0;
@@ -220,7 +220,7 @@ public:
                                                  dr = r->children_[idx]->reds   / r->children_[idx]->count_cum - mean_r;
                                                  dg = r->children_[idx]->greens / r->children_[idx]->count_cum - mean_g;
                                                  db = r->children_[idx]->blues  / r->children_[idx]->count_cum - mean_b;
-                
+
                                                  r->reduce_cost += r->children_[idx]->reduce_cost;
                                                  r->reduce_cost += (dr*dr + dg*dg + db*db) * r->children_[idx]->count_cum;
                                              }
@@ -230,7 +230,7 @@ public:
     {
         computeCost(root_);
         reducible_[0].push_back(root_);
-            
+
         // sort reducible by reduce_cost
         for (unsigned i=0;i<InsertPolicy::MAX_LEVELS;++i)
         {
@@ -275,15 +275,15 @@ public:
                     delete cur_node->children_[idx], cur_node->children_[idx]=0;
                 }
             }
-               
+
             reducible_[red_idx].erase(pos);
-            if (num_children > 0 ) 
+            if (num_children > 0 )
             {
                 colors_ -= (num_children - 1);
             }
         }
     }
-       
+
     void create_palette(std::vector<rgb> & palette, node * itr) const
     {
         if (itr->count != 0)
@@ -296,12 +296,12 @@ public:
         }
         for (unsigned i=0; i < 8 ;++i)
         {
-            if (itr->children_[i] != 0) 
+            if (itr->children_[i] != 0)
                 create_palette(palette, itr->children_[i]);
-        }  
+        }
     }
-private:        
-    node * root_;               
+private:
+    node * root_;
 };
 
 } // namespace mapnik

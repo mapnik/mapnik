@@ -39,7 +39,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_conv_stroke.h"
 
-namespace mapnik 
+namespace mapnik
 {
 
 template <typename T>
@@ -66,7 +66,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
 
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_power());
-    
+
     double height = 0.0;
     expression_ptr height_expr = sym.height();
     if (height_expr)
@@ -74,7 +74,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
         value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature), *height_expr);
         height = result.to_double() * scale_factor_;
     }
-    
+
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
         geometry_type const& geom = feature->get_geometry(i);
@@ -102,7 +102,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-                
+
                 x0 = x;
                 y0 = y;
             }
@@ -142,7 +142,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                     roof->line_to(x,y+height);
                 }
             }
-            
+
             path_type path(t_,*frame,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
             ras_ptr->add_path(stroke);

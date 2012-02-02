@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -24,10 +24,10 @@
 #define MAPNIK_POINT_SYMBOLIZER_HPP
 
 // mapnik
-#include <mapnik/symbolizer.hpp> 
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
- 
-namespace mapnik 
+
+namespace mapnik
 {
 
 enum point_placement_enum {
@@ -38,9 +38,9 @@ enum point_placement_enum {
 
 DEFINE_ENUM( point_placement_e, point_placement_enum );
 
-struct MAPNIK_DECL point_symbolizer : 
+struct MAPNIK_DECL point_symbolizer :
         public symbolizer_with_image, public symbolizer_base
-{       
+{
     explicit point_symbolizer();
     point_symbolizer(path_expression_ptr file);
     point_symbolizer(point_symbolizer const& rhs);
@@ -50,7 +50,7 @@ struct MAPNIK_DECL point_symbolizer :
     point_placement_e get_point_placement() const;
     void set_ignore_placement(bool ignore_placement);
     bool get_ignore_placement() const;
-        
+
 private:
     bool overlap_;
     point_placement_e point_p_;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -30,7 +30,7 @@
 // stl
 #include <string>
 
-namespace mapnik { 
+namespace mapnik {
 
 MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
 

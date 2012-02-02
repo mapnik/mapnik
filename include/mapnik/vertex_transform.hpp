@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -41,7 +41,7 @@ struct Shift
 };
 
 template <typename T0,typename T1>
-struct Shift<T0,T1,0> 
+struct Shift<T0,T1,0>
 {
     typedef T0 value_type;
     typedef T1 return_type;
@@ -65,27 +65,27 @@ struct Shift<T,T,0>
 typedef Shift<double,double,0> NO_SHIFT;
 typedef Shift<double,int,0> SHIFT0;
 typedef Shift<double,int,8> SHIFT8;
-    
-    
+
+
 template <typename T0,typename T1,typename Trans>
 struct view_transform;
-    
+
 template <typename Trans>
-struct view_transform <vertex2d,vertex2d,Trans>   
+struct view_transform <vertex2d,vertex2d,Trans>
 {
-        
+
 };
-    
+
 template <typename Trans>
-struct view_transform <vertex2d,vertex2i,Trans>   
+struct view_transform <vertex2d,vertex2i,Trans>
 {
-        
+
 };
 
 template <typename Trans>
 struct view_transform<box2d<double>,box2d<double>,Trans>
 {
-        
+
 };
 }
 

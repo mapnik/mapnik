@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -49,7 +49,7 @@ private:
     wkbFormat format_;
 
 public:
-        
+
     enum wkbGeometryType {
         wkbPoint=1,
         wkbLineString=2,
@@ -112,10 +112,10 @@ public:
         needSwap_ = byteOrder_ ? wkbXDR : wkbNDR;
 #else
         needSwap_ = byteOrder_ ? wkbNDR : wkbXDR;
-#endif      
+#endif
     }
-             
-    void read(boost::ptr_vector<geometry_type> & paths) 
+
+    void read(boost::ptr_vector<geometry_type> & paths)
     {
         int type = read_integer();
 
@@ -171,25 +171,25 @@ public:
             break;
         }
     }
-          
+
 private:
-        
-    int read_integer() 
+
+    int read_integer()
     {
         boost::int32_t n;
         if (needSwap_)
         {
             read_int32_xdr(wkb_ + pos_, n);
-        } 
-        else 
+        }
+        else
         {
             read_int32_ndr(wkb_ + pos_, n);
         }
         pos_ += 4;
-            
+
         return n;
     }
-        
+
     double read_double()
     {
         double d;
@@ -197,15 +197,15 @@ private:
         {
             read_double_xdr(wkb_ + pos_, d);
         }
-        else 
+        else
         {
             read_double_ndr(wkb_ + pos_, d);
         }
         pos_ += 8;
-            
+
         return d;
     }
-        
+
     void read_coords(CoordinateArray& ar)
     {
         if (! needSwap_)
@@ -217,7 +217,7 @@ private:
                 pos_ += 16; // skip XY
             }
         }
-        else 
+        else
         {
             for (unsigned i=0;i<ar.size();++i)
             {
@@ -259,7 +259,7 @@ private:
         pt->move_to(x, y);
         paths.push_back(pt);
     }
-         
+
     void read_multipoint(boost::ptr_vector<geometry_type> & paths)
     {
         int num_points = read_integer();
@@ -269,7 +269,7 @@ private:
             read_point(paths);
         }
     }
-    
+
     void read_point_xyz(boost::ptr_vector<geometry_type> & paths)
     {
         geometry_type* pt = new geometry_type(Point);
@@ -304,7 +304,7 @@ private:
         }
         paths.push_back(line);
     }
-         
+
     void read_multilinestring(boost::ptr_vector<geometry_type> & paths)
     {
         int num_lines = read_integer();
@@ -314,7 +314,7 @@ private:
             read_linestring(paths);
         }
     }
-    
+
     void read_linestring_xyz(boost::ptr_vector<geometry_type> & paths)
     {
         geometry_type* line = new geometry_type(LineString);
@@ -340,8 +340,8 @@ private:
         }
     }
 
-    
-    void read_polygon(boost::ptr_vector<geometry_type> & paths) 
+
+    void read_polygon(boost::ptr_vector<geometry_type> & paths)
     {
         geometry_type* poly = new geometry_type(Polygon);
         int num_rings = read_integer();
@@ -361,7 +361,7 @@ private:
         }
         paths.push_back(poly);
     }
-        
+
     void read_multipolygon(boost::ptr_vector<geometry_type> & paths)
     {
         int num_polys = read_integer();
@@ -371,7 +371,7 @@ private:
             read_polygon(paths);
         }
     }
-    
+
     void read_polygon_xyz(boost::ptr_vector<geometry_type> & paths)
     {
         geometry_type* poly = new geometry_type(Polygon);
@@ -412,7 +412,7 @@ private:
             read(paths);
         }
     }
-    
+
 #ifdef MAPNIK_DEBUG_WKB
     std::string wkb_geometry_type_string(int type)
     {
@@ -446,10 +446,10 @@ private:
 void geometry_utils::from_wkb (boost::ptr_vector<geometry_type>& paths,
                                const char* wkb,
                                unsigned size,
-                               wkbFormat format) 
+                               wkbFormat format)
 {
     wkb_reader reader(wkb, size, format);
     return reader.read(paths);
-}    
+}
 
 }

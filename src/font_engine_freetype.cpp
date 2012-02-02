@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,7 +35,7 @@
 #include <unicode/ubidi.h>
 #include <unicode/ushape.h>
 #include <unicode/schriter.h>
-#include <unicode/uversion.h> 
+#include <unicode/uversion.h>
 
 namespace mapnik
 {
@@ -47,10 +47,10 @@ freetype_engine::freetype_engine()
         throw std::runtime_error("can not load FreeType2 library");
     }
 }
-   
+
 freetype_engine::~freetype_engine()
-{   
-    FT_Done_FreeType(library_);   
+{
+    FT_Done_FreeType(library_);
 }
 
 bool freetype_engine::is_font_file(std::string const& file_name)
@@ -79,7 +79,7 @@ bool freetype_engine::register_font(std::string const& file_name)
     {
         throw std::runtime_error("Failed to initialize FreeType2 library");
     }
-      
+
     FT_Face face = 0;
     // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
@@ -105,7 +105,7 @@ bool freetype_engine::register_font(std::string const& file_name)
             FT_Done_FreeType(library);
             std::ostringstream s;
             s << "Error: unable to load invalid font file which lacks identifiable family and style name: '"
-            << file_name << "'";
+              << file_name << "'";
             throw std::runtime_error(s.str());
         }
     }
@@ -116,30 +116,30 @@ bool freetype_engine::register_font(std::string const& file_name)
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
     boost::filesystem::path path(dir);
-    
+
     if (!boost::filesystem::exists(path))
         return false;
 
     if (!boost::filesystem::is_directory(path))
-        return mapnik::freetype_engine::register_font(dir); 
-    
+        return mapnik::freetype_engine::register_font(dir);
+
     boost::filesystem::directory_iterator end_itr;
     for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
     {
         if (boost::filesystem::is_directory(*itr) && recurse)
         {
-#if (BOOST_FILESYSTEM_VERSION == 3) 
+#if (BOOST_FILESYSTEM_VERSION == 3)
             if (!register_fonts(itr->path().string(), true)) return false;
 #else // v2
             if (!register_fonts(itr->string(), true)) return false;
 #endif
         }
-        else 
+        else
         {
-#if (BOOST_FILESYSTEM_VERSION == 3) 
+#if (BOOST_FILESYSTEM_VERSION == 3)
             mapnik::freetype_engine::register_font(itr->path().string());
 #else // v2
-            mapnik::freetype_engine::register_font(itr->string());  
+            mapnik::freetype_engine::register_font(itr->string());
 #endif
         }
     }
@@ -171,12 +171,12 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
     if (itr != name2file_.end())
     {
         FT_Face face;
-        FT_Error error = FT_New_Face (library_, 
-                                      itr->second.second.c_str(), 
-                                      itr->second.first, 
+        FT_Error error = FT_New_Face (library_,
+                                      itr->second.second.c_str(),
+                                      itr->second.first,
                                       &face);
         if (!error)
-        {           
+        {
             return face_ptr (new font_face(face));
         }
     }
@@ -186,7 +186,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 stroker_ptr freetype_engine::create_stroker()
 {
     FT_Stroker s;
-    FT_Error error = FT_Stroker_New(library_, &s); 
+    FT_Error error = FT_Stroker_New(library_, &s);
     if (!error)
     {
         return stroker_ptr(new stroker(s));
@@ -254,14 +254,14 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
     UBiDi *bidi = ubidi_openSized(length, 0, &err);
     ubidi_setPara(bidi, ustr.getBuffer(), length, UBIDI_DEFAULT_LTR, 0, &err);
 
-    ubidi_writeReordered(bidi, reordered.getBuffer(length), 
+    ubidi_writeReordered(bidi, reordered.getBuffer(length),
                          length, UBIDI_DO_MIRRORING, &err);
 
     reordered.releaseBuffer(length);
 
     u_shapeArabic(reordered.getBuffer(), length,
                   shaped.getBuffer(length), length,
-                  U_SHAPE_LETTERS_SHAPE | U_SHAPE_LENGTH_FIXED_SPACES_NEAR | 
+                  U_SHAPE_LETTERS_SHAPE | U_SHAPE_LENGTH_FIXED_SPACES_NEAR |
                   U_SHAPE_TEXT_DIRECTION_VISUAL_LTR, &err);
 
     shaped.releaseBuffer(length);
@@ -390,30 +390,30 @@ void text_renderer<T>::render(double x0, double y0)
 
     // now render transformed glyphs
     typename glyphs_t::iterator pos;
-        for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+    for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+    {
+        double halo_radius = pos->properties->halo_radius;
+        //make sure we've got reasonable values.
+        if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
+        stroker_.init(halo_radius);
+        FT_Glyph g;
+        error = FT_Glyph_Copy(pos->image, &g);
+        if (!error)
         {
-            double halo_radius = pos->properties->halo_radius;
-            //make sure we've got reasonable values.
-            if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
-            stroker_.init(halo_radius);
-            FT_Glyph g;
-            error = FT_Glyph_Copy(pos->image, &g);
-            if (!error)
+            FT_Glyph_Transform(g,0,&start);
+            FT_Glyph_Stroke(&g,stroker_.get(),1);
+            error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
+            if ( ! error )
             {
-                FT_Glyph_Transform(g,0,&start);
-                FT_Glyph_Stroke(&g,stroker_.get(),1);
-                error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
-                if ( ! error )
-                {
 
-                    FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                    render_bitmap(&bit->bitmap, pos->properties->halo_fill.rgba(),
-                                  bit->left,
-                                  height - bit->top, pos->properties->text_opacity);
-                }
+                FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
+                render_bitmap(&bit->bitmap, pos->properties->halo_fill.rgba(),
+                              bit->left,
+                              height - bit->top, pos->properties->text_opacity);
             }
-            FT_Done_Glyph(g);
         }
+        FT_Done_Glyph(g);
+    }
     //render actual text
     for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
     {
@@ -461,8 +461,8 @@ void text_renderer<T>::render_id(int feature_id,double x0, double y0, double min
 
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
                 render_bitmap_id(&bit->bitmap, feature_id,
-                              bit->left,
-                              height - bit->top);
+                                 bit->left,
+                                 height - bit->top);
             }
         }
         FT_Done_Glyph(g);

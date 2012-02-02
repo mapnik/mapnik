@@ -37,34 +37,34 @@ class svg_storage :  boost::noncopyable
 {
 public:
     svg_storage() {}
-    
+
     VertexSource & source() // FIXME!! make const
     {
         return source_;
     }
-    
+
     AttributeSource & attributes() // FIXME!! make const
     {
         return attributes_;
     }
-    
+
     void set_bounding_box(box2d<double> const& b)
     {
         bounding_box_ = b;
     }
-    
+
     void set_bounding_box(double x0, double y0, double x1, double y1)
     {
         bounding_box_.init(x0,y0,x1,y1);
     }
-    
+
     box2d<double> const& bounding_box() const
     {
         return bounding_box_;
     }
-    
+
 private:
-    
+
     VertexSource source_;
     AttributeSource attributes_;
     box2d<double> bounding_box_;

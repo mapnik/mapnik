@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,9 +35,9 @@ namespace mapnik
 /*!
  * @brief A Mapnik map layer.
  *
- * Create a layer with a named string and, optionally, an srs string either 
- * with a Proj.4 epsg code ('+init=epsg:<code>') or with a Proj.4 literal 
- * ('+proj=<literal>'). If no srs is specified it will default to 
+ * Create a layer with a named string and, optionally, an srs string either
+ * with a Proj.4 epsg code ('+init=epsg:<code>') or with a Proj.4 literal
+ * ('+proj=<literal>'). If no srs is specified it will default to
  * '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
  */
 class MAPNIK_DECL layer
@@ -47,7 +47,7 @@ public:
     layer(layer const& l);
     layer& operator=(layer const& l);
     bool operator==(layer const& other) const;
-        
+
     /*!
      * @brief Set the name of the layer.
      */
@@ -56,77 +56,77 @@ public:
     /*!
      * @return the name of the layer.
      */
-    
+
     const std::string& name() const;
 
     /*!
      * @brief Set the SRS of the layer.
      */
     void set_srs(std::string const& srs);
-        
+
     /*!
      * @return the SRS of the layer.
      */
     std::string const& srs() const;
-        
+
     /*!
      * @brief Add a new style to this layer.
      *
      * @param stylename The name of the style to add.
      */
     void add_style(std::string const& stylename);
-        
+
     /*!
      * @return the styles list attached to this layer.
      */
     std::vector<std::string> const& styles() const;
-        
+
     /*!
      * @return the styles list attached to this layer
      *         (const version).
      */
     std::vector<std::string>& styles();
-        
+
     /*!
      * @param maxZoom The minimum zoom level to set
      */
     void setMinZoom(double minZoom);
-        
+
     /*!
      * @param maxZoom The maximum zoom level to set
      */
     void setMaxZoom(double maxZoom);
-        
+
     /*!
      * @return the minimum zoom level of the layer.
      */
     double getMinZoom() const;
-        
+
     /*!
      * @return the maximum zoom level of the layer.
      */
     double getMaxZoom() const;
-        
+
     /*!
      * @brief Set whether this layer is active and will be rendered.
      */
     void setActive(bool active);
-        
+
     /*!
      * @return whether this layer is active and will be rendered.
      */
     bool isActive() const;
-        
+
     /*!
      * @brief Set whether this layer is queryable.
      */
     void setQueryable(bool queryable);
-        
+
     /*!
      * @return whether this layer is queryable or not.
      */
     bool isQueryable() const;
-        
+
     /*!
      * @brief Get the visability for a specific scale.
      *
@@ -140,27 +140,27 @@ public:
      *         scale < maxzoom + 1e-6
      */
     bool isVisible(double scale) const;
-        
+
     /*!
      * @param clear_cache Set whether this layer's labels are cached.
      */
     void set_clear_label_cache(bool clear_cache);
-        
+
     /*!
      * @return whether this layer's labels are cached.
      */
-    bool clear_label_cache() const; 
+    bool clear_label_cache() const;
 
     /*!
      * @param clear_cache Set whether this layer's features should be cached if used by multiple styles.
      */
     void set_cache_features(bool cache_features);
-        
+
     /*!
      * @return whether this layer's features will be cached if used by multiple styles
      */
-    bool cache_features() const; 
-        
+    bool cache_features() const;
+
     /*!
      * @param group_by Set the field rendering of this layer is grouped by.
      */
@@ -177,24 +177,24 @@ public:
      * @param ds The datasource to attach.
      */
     void set_datasource(datasource_ptr const& ds);
-        
+
     /*!
      * @return the datasource attached to this layer.
      */
     datasource_ptr datasource() const;
-        
+
     /*!
      * @return the geographic envelope/bounding box of the data in the layer.
      */
     box2d<double> envelope() const;
-        
+
     ~layer();
 private:
     void swap(const layer& other);
 
     std::string name_;
     std::string srs_;
-    
+
     double minZoom_;
     double maxZoom_;
     bool active_;

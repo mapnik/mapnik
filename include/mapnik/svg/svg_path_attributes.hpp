@@ -52,7 +52,7 @@ struct path_attributes
     agg::trans_affine transform;
     mapnik::gradient fill_gradient;
     mapnik::gradient stroke_gradient;
-    
+
     // Empty constructor
     path_attributes() :
         index(0),
@@ -74,7 +74,7 @@ struct path_attributes
     }
 
     // Copy constructor
-    path_attributes(const path_attributes& attr) 
+    path_attributes(const path_attributes& attr)
         : index(attr.index),
           fill_color(attr.fill_color),
           stroke_color(attr.stroke_color),
@@ -93,7 +93,7 @@ struct path_attributes
     {}
 
     // Copy constructor with new index value
-    path_attributes(path_attributes const& attr, unsigned idx) 
+    path_attributes(path_attributes const& attr, unsigned idx)
         : index(idx),
           fill_color(attr.fill_color),
           stroke_color(attr.stroke_color),

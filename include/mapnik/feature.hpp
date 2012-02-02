@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -46,16 +46,16 @@
 
 namespace mapnik {
 
-typedef boost::shared_ptr<raster> raster_ptr; 
+typedef boost::shared_ptr<raster> raster_ptr;
 
 class feature_impl;
 
-template <typename T> 
-class context : private boost::noncopyable, 
+template <typename T>
+class context : private boost::noncopyable,
                 public boost::associative_property_map<T>
 
 {
-    friend class feature_impl; 
+    friend class feature_impl;
 public:
     typedef T map_type;
     typedef typename boost::associative_property_map<map_type> base_type;
@@ -65,21 +65,21 @@ public:
     typedef typename map_type::difference_type difference_type;
     typedef typename map_type::iterator iterator;
     typedef typename map_type::const_iterator const_iterator;
-    
+
     context()
         : base_type(mapping_) {}
-    
+
     size_type push(key_type const& name)
     {
         size_type index = mapping_.size();
         mapping_.insert(std::make_pair(name, index));
         return index;
     }
-    
+
     size_type size() const { return mapping_.size(); }
     const_iterator begin() const { return mapping_.begin();}
     const_iterator end() const { return mapping_.end();}
-    
+
 private:
     map_type mapping_;
 };
@@ -92,37 +92,37 @@ class feature_impl : private boost::noncopyable
     friend class feature_kv_iterator;
 public:
 
-    typedef mapnik::value value_type;    
+    typedef mapnik::value value_type;
     typedef std::vector<value_type> cont_type;
     typedef feature_kv_iterator iterator;
-    
-    feature_impl(context_ptr const& ctx, int id) 
+
+    feature_impl(context_ptr const& ctx, int id)
         : id_(id),
           ctx_(ctx),
           data_(ctx_->mapping_.size())
     {}
-    
+
     inline int id() const { return id_;}
 
     inline void set_id(int id) { id_ = id;}
-    
+
     template <typename T>
     void put(context_type::key_type const& key, T const& val)
     {
         put(key,value(val));
-    } 
-    
+    }
+
     template <typename T>
     void put_new(context_type::key_type const& key, T const& val)
     {
         put_new(key,value(val));
-    } 
-    
+    }
+
 
     void put(context_type::key_type const& key, value const& val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end() 
+        if (itr != ctx_->mapping_.end()
             && itr->second < data_.size())
         {
             data_[itr->second] = val;
@@ -131,11 +131,11 @@ public:
             throw std::out_of_range("Key doesn't exist");
     }
 
-   
+
     void put_new(context_type::key_type const& key, value const& val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end() 
+        if (itr != ctx_->mapping_.end()
             && itr->second < data_.size())
         {
             data_[itr->second] = val;
@@ -146,25 +146,25 @@ public:
             if (index == data_.size())
                 data_.push_back(val);
         }
-    } 
-    
-    
+    }
+
+
     bool has_key(context_type::key_type const& key) const
     {
         return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
     }
-    
+
     value_type const& get(context_type::key_type const& key) const
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end() 
+        if (itr != ctx_->mapping_.end()
             && itr->second < data_.size())
         {
             return data_[itr->second];
         }
         throw std::out_of_range("Key doesn't exist");
     }
-    
+
     value_type const& get(std::size_t index) const
     {
         if (index < data_.size())
@@ -176,7 +176,7 @@ public:
     {
         return data_.size();
     }
-    
+
     context_ptr context()
     {
         return ctx_;
@@ -186,32 +186,32 @@ public:
     {
         return geom_cont_;
     }
-    
-    boost::ptr_vector<geometry_type> & paths() 
+
+    boost::ptr_vector<geometry_type> & paths()
     {
         return geom_cont_;
     }
-    
+
     void add_geometry(geometry_type * geom)
     {
         geom_cont_.push_back(geom);
     }
-       
+
     unsigned num_geometries() const
     {
         return geom_cont_.size();
     }
-    
+
     geometry_type const& get_geometry(unsigned index) const
     {
         return geom_cont_[index];
     }
-       
+
     geometry_type& get_geometry(unsigned index)
     {
         return geom_cont_[index];
     }
-    
+
     box2d<double> envelope() const
     {
         box2d<double> result;
@@ -229,13 +229,13 @@ public:
             }
         }
         return result;
-    }       
-    
+    }
+
     const raster_ptr& get_raster() const
     {
         return raster_;
     }
-    
+
     void set_raster(raster_ptr const& raster)
     {
         raster_ = raster;
@@ -250,9 +250,9 @@ public:
     {
         return feature_kv_iterator(*this);
     }
-    
+
     std::string to_string() const
-    {        
+    {
         std::stringstream ss;
         ss << "Feature (" << std::endl;
         context_type::map_type::const_iterator itr = ctx_->mapping_.begin();
@@ -273,7 +273,7 @@ private:
     cont_type data_;
 };
 
-   
+
 inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
 {
     out << f.to_string();

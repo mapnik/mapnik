@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -37,7 +37,7 @@ typedef boost::shared_ptr<expr_node> expression_ptr;
 
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding);
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt);
-   
+
 }
 
 #endif // MAPNIK_FILTER_FACTORY_HPP

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -130,7 +130,7 @@ class hextree : private boost::noncopyable
     {
         return 255 * std::pow(b/255, g);
     }
-    
+
 public:
     explicit hextree(unsigned max_colors=256, const double &g=2.0)
         : max_colors_(max_colors),
@@ -233,7 +233,7 @@ public:
             int dist, newdist;
 
             // find closest match based on mean of r,g,b,a
-            std::vector<rgba>::const_iterator pit = 
+            std::vector<rgba>::const_iterator pit =
                 std::lower_bound(sorted_pal_.begin(), sorted_pal_.end(), c, rgba::mean_sort_cmp());
             ind = pit-sorted_pal_.begin();
             if (ind == sorted_pal_.size())
@@ -337,11 +337,11 @@ private:
             printf("%d: (+%d/%d/%.5f) (%d %d %d %d)\n",
                    id, (int)r->count, (int)r->pixel_count, r->reduce_cost,
                    (int)round(gamma(r->reds / r->count, gamma_)),
-                   (int)round(gamma(r->greens / r->count, gamma_)), 
+                   (int)round(gamma(r->greens / r->count, gamma_)),
                    (int)round(gamma(r->blues / r->count, gamma_)),
                    (int)(r->alphas / r->count));
         else
-            printf("%d: (%d/%d/%.5f) (%d %d %d %d)\n", id, 
+            printf("%d: (%d/%d/%.5f) (%d %d %d %d)\n", id,
                    (int)r->count, (int)r->pixel_count, r->reduce_cost,
                    (int)round(gamma(r->reds / r->pixel_count, gamma_)),
                    (int)round(gamma(r->greens / r->pixel_count, gamma_)),
@@ -387,7 +387,7 @@ private:
         double mean_g = r->greens / r->pixel_count;
         double mean_b = r->blues  / r->pixel_count;
         double mean_a = r->alphas / r->pixel_count;
-        for (unsigned idx=0; idx < 16; ++idx) 
+        for (unsigned idx=0; idx < 16; ++idx)
         {
             if (r->children_[idx] != 0)
             {
@@ -406,7 +406,7 @@ private:
             }
         }
     }
-    
+
     // starting from root_, unfold nodes with biggest penalty
     // until all available colors are assigned to processed nodes
     void assign_node_colors()
@@ -438,7 +438,7 @@ private:
             {
                 colors_--;
                 cur_node->count = 0;
-                for (unsigned idx=0; idx < 16; ++idx) 
+                for (unsigned idx=0; idx < 16; ++idx)
                 {
                     if (cur_node->children_[idx] != 0)
                     {

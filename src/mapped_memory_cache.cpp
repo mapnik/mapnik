@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -30,7 +30,7 @@
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/filesystem/operations.hpp>
 
-namespace mapnik 
+namespace mapnik
 {
 
 boost::unordered_map<std::string, mapped_region_ptr> mapped_memory_cache::cache_;
@@ -56,7 +56,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         result.reset(itr->second);
         return result;
     }
-    
+
     boost::filesystem::path path(uri);
     if (exists(path))
     {
@@ -64,9 +64,9 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         {
             file_mapping mapping(uri.c_str(),read_only);
             mapped_region_ptr region(new mapped_region(mapping,read_only));
-            
+
             result.reset(region);
-            
+
             if (update_cache)
             {
                 cache_.insert(std::make_pair(uri,*result));
@@ -79,9 +79,9 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         }
     }
     /*else
-    {
-        std::cerr << "### WARNING Memory region does not exist file: " << uri << std::endl;
-    }*/
+      {
+      std::cerr << "### WARNING Memory region does not exist file: " << uri << std::endl;
+      }*/
     return result;
 }
 

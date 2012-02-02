@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -40,9 +40,9 @@ namespace mapnik
 class Map;
 class layer;
 class projection;
-  
+
 template <typename Processor>
-class feature_style_processor 
+class feature_style_processor
 {
     struct symbol_dispatch;
 public:

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -32,13 +32,13 @@
 
 // stl
 #include <vector>
- 
+
 namespace mapnik
 {
 
 typedef std::pair<double, mapnik::color> stop_pair;
 typedef std::vector<stop_pair > stop_array;
-        
+
 enum gradient_enum
 {
     NO_GRADIENT,
@@ -60,7 +60,7 @@ enum gradient_unit_enum
 DEFINE_ENUM( gradient_unit_e, gradient_unit_enum );
 
 class MAPNIK_DECL gradient
-{       
+{
     gradient_e gradient_type_;
     stop_array stops_;
     // control points for the gradient, x1/y1 is the start point, x2/y2 the stop point.
@@ -92,7 +92,7 @@ public:
 
     void add_stop(double offset, color const& c);
     bool has_stop() const;
-    
+
     stop_array const& get_stop_array() const;
 
     void set_control_points(double x1, double y1, double x2, double y2, double r=0);

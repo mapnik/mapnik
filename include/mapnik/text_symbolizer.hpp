@@ -54,10 +54,10 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     text_symbolizer(expression_ptr name, std::string const& face_name,
                     float size, color const& fill,
                     text_placements_ptr placements = text_placements_ptr(new text_placements_dummy)
-                    );
+        );
     text_symbolizer(expression_ptr name, float size, color const& fill,
                     text_placements_ptr placements = text_placements_ptr(new text_placements_dummy)
-                    );
+        );
     text_symbolizer(text_symbolizer const& rhs);
     text_symbolizer& operator=(text_symbolizer const& rhs);
     expression_ptr get_name() const func_deprecated;
@@ -65,7 +65,7 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 
     expression_ptr get_orientation() const func_deprecated; // orienation (rotation angle atm)
     void set_orientation(expression_ptr expr);
-         
+
     unsigned get_text_ratio() const func_deprecated; // target ratio for text bounding box in pixels
     void set_text_ratio(unsigned ratio);
     unsigned get_wrap_width() const func_deprecated; // width to wrap text at, or trigger ratio

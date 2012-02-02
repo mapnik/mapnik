@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -41,12 +41,12 @@
 
 namespace mapnik
 {
-   
+
 bool is_input_plugin (std::string const& filename)
 {
     return boost::algorithm::ends_with(filename,std::string(".input"));
 }
-   
+
 
 datasource_cache::datasource_cache()
 {
@@ -61,8 +61,8 @@ datasource_cache::~datasource_cache()
 std::map<std::string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
 bool datasource_cache::registered_=false;
 std::vector<std::string> datasource_cache::plugin_directories_;
-    
-datasource_ptr datasource_cache::create(const parameters& params, bool bind) 
+
+datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 {
     boost::optional<std::string> type = params.get<std::string>("type");
     if ( ! type)
@@ -87,10 +87,10 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
                                  lt_dlerror());
     }
     // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
-    #ifdef __GNUC__
+#ifdef __GNUC__
     __extension__
-    #endif
-    create_ds* create_datasource = 
+#endif
+        create_ds* create_datasource =
         reinterpret_cast<create_ds*>(lt_dlsym(itr->second->handle(), "create"));
 
     if ( ! create_datasource)
@@ -135,9 +135,9 @@ std::vector<std::string> datasource_cache::plugin_names ()
     }
     return names;
 }
-   
+
 void datasource_cache::register_datasources(const std::string& str)
-{       
+{
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache,
                             mapnik::CreateStatic>::mutex_);
@@ -146,58 +146,58 @@ void datasource_cache::register_datasources(const std::string& str)
     // TODO - only push unique paths
     plugin_directories_.push_back(str);
     boost::filesystem::directory_iterator end_itr;
- 
+
     if (exists(path) && is_directory(path))
     {
         for (boost::filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
         {
 
-#if (BOOST_FILESYSTEM_VERSION == 3)      
+#if (BOOST_FILESYSTEM_VERSION == 3)
             if (!is_directory( *itr )  && is_input_plugin(itr->path().filename().string()))
 #else // v2
-            if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf())) 
-#endif 
-            {
-                try 
+                if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
+#endif
                 {
-#if (BOOST_FILESYSTEM_VERSION == 3)   
-                    lt_dlhandle module = lt_dlopen(itr->path().string().c_str());
-#else // v2
-                    lt_dlhandle module = lt_dlopen(itr->string().c_str());
-#endif
-                    if (module)
+                    try
                     {
-                        // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
-                        #ifdef __GNUC__
-                        __extension__
-                        #endif
-                        datasource_name* ds_name = 
-                            reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
-                        if (ds_name && insert(ds_name(),module))
-                        {            
-#ifdef MAPNIK_DEBUG
-                            std::clog << "Datasource loader: registered: " << ds_name() << std::endl;
-#endif 
-                            registered_=true;
-                        }
-                        else if (!ds_name)
+#if (BOOST_FILESYSTEM_VERSION == 3)
+                        lt_dlhandle module = lt_dlopen(itr->path().string().c_str());
+#else // v2
+                        lt_dlhandle module = lt_dlopen(itr->string().c_str());
+#endif
+                        if (module)
                         {
-                            std::clog << "Problem loading plugin library '" << itr->path().string() << "' (plugin is lacking compatible interface)" << std::endl;
+                            // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
+#ifdef __GNUC__
+                            __extension__
+#endif
+                                datasource_name* ds_name =
+                                reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
+                            if (ds_name && insert(ds_name(),module))
+                            {
+#ifdef MAPNIK_DEBUG
+                                std::clog << "Datasource loader: registered: " << ds_name() << std::endl;
+#endif
+                                registered_=true;
+                            }
+                            else if (!ds_name)
+                            {
+                                std::clog << "Problem loading plugin library '" << itr->path().string() << "' (plugin is lacking compatible interface)" << std::endl;
+                            }
+                        }
+                        else
+                        {
+#if (BOOST_FILESYSTEM_VERSION == 3)
+                            std::clog << "Problem loading plugin library: " << itr->path().string()
+                                      << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;
+#else // v2
+                            std::clog << "Problem loading plugin library: " << itr->string()
+                                      << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;
+#endif
                         }
                     }
-                    else
-                    {
-#if (BOOST_FILESYSTEM_VERSION == 3) 
-                        std::clog << "Problem loading plugin library: " << itr->path().string() 
-                                  << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;
-#else // v2
-                        std::clog << "Problem loading plugin library: " << itr->string() 
-                                  << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;    
-#endif
-                    }
+                    catch (...) {}
                 }
-                catch (...) {}
-            }
         }
     }
 }

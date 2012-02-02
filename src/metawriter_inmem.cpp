@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
- 
+
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_inmem.hpp>
@@ -41,25 +41,25 @@ using mapnik::metawriter_properties;
 map<string,value> intersect_properties(Feature const& feature, metawriter_properties const& properties) {
 
     map<string,value> nprops;
-    BOOST_FOREACH(string p, properties) 
+    BOOST_FOREACH(string p, properties)
     {
-        if (feature.has_key(p)) 
+        if (feature.has_key(p))
             nprops.insert(std::make_pair(p,feature.get(p)));
     }
-    
+
     return nprops;
 }} // end anonymous namespace
 
 namespace mapnik {
 
-metawriter_inmem::metawriter_inmem(metawriter_properties dflt_properties) 
+metawriter_inmem::metawriter_inmem(metawriter_properties dflt_properties)
     : metawriter(dflt_properties) {
 }
 
 metawriter_inmem::~metawriter_inmem() {
 }
 
-void 
+void
 metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
                           CoordTransform const& /*t*/,
                           metawriter_properties const& properties) {
@@ -83,7 +83,7 @@ metawriter_inmem::add_text(text_placement_info const& p,
     }
 }
 
-void 
+void
 metawriter_inmem::add_polygon(path_type & path,
                               Feature const& feature,
                               CoordTransform const& t,
@@ -91,7 +91,7 @@ metawriter_inmem::add_polygon(path_type & path,
     add_vertices(path, feature, t, properties);
 }
 
-void 
+void
 metawriter_inmem::add_line(path_type & path,
                            Feature const& feature,
                            CoordTransform const& t,
@@ -99,7 +99,7 @@ metawriter_inmem::add_line(path_type & path,
     add_vertices(path, feature, t, properties);
 }
 
-void 
+void
 metawriter_inmem::add_vertices(path_type & path,
                                Feature const& feature,
                                CoordTransform const& /*t*/,
@@ -112,16 +112,16 @@ metawriter_inmem::add_vertices(path_type & path,
     while ((cmd = path.vertex(&x, &y)) != SEG_END) {
         box.expand_to_include(x, y);
     }
-  
+
     if ((box.width() >= 0.0) && (box.height() >= 0.0)) {
         meta_instance inst;
         inst.properties = intersect_properties(feature, properties);
         inst.box = box;
         instances_.push_back(inst);
-    } 
+    }
 }
 
-void 
+void
 metawriter_inmem::start(metawriter_property_map const& /*properties*/) {
     instances_.clear();
 }
@@ -131,12 +131,12 @@ metawriter_inmem::instances() const {
     return instances_;
 }
 
-metawriter_inmem::meta_instance_list::const_iterator 
+metawriter_inmem::meta_instance_list::const_iterator
 metawriter_inmem::inst_begin() const {
     return instances_.begin();
 }
 
-metawriter_inmem::meta_instance_list::const_iterator 
+metawriter_inmem::meta_instance_list::const_iterator
 metawriter_inmem::inst_end() const {
     return instances_.end();
 }

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -44,7 +44,7 @@
 #include <cassert>
 #include <cstring>
 
-namespace mapnik 
+namespace mapnik
 {
 
 typedef agg::pod_bvector<mapnik::svg::path_attributes> attr_storage;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -44,24 +44,24 @@ static const char * marker_type_strings[] = {
 IMPLEMENT_ENUM( marker_type_e, marker_type_strings )
 
 markers_symbolizer::markers_symbolizer()
-    : symbolizer_with_image(path_expression_ptr(new path_expression)),
+: symbolizer_with_image(path_expression_ptr(new path_expression)),
+    symbolizer_base(),
+    allow_overlap_(false),
+    fill_(color(0,0,255)),
+    spacing_(100.0),
+    max_error_(0.2),
+    width_(5.0),
+    height_(5.0),
+    stroke_(),
+    marker_p_(MARKER_LINE_PLACEMENT),
+    marker_type_(ARROW) {}
+
+markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
+    : symbolizer_with_image(filename),
       symbolizer_base(),
       allow_overlap_(false),
-      fill_(color(0,0,255)), 
-      spacing_(100.0), 
-      max_error_(0.2),
-      width_(5.0),
-      height_(5.0),
-      stroke_(),
-      marker_p_(MARKER_LINE_PLACEMENT),
-      marker_type_(ARROW) {}
-    
-markers_symbolizer::markers_symbolizer(path_expression_ptr filename) 
-    : symbolizer_with_image(filename), 
-      symbolizer_base(),
-      allow_overlap_(false),
-      fill_(color(0,0,255)), 
-      spacing_(100.0), 
+      fill_(color(0,0,255)),
+      spacing_(100.0),
       max_error_(0.2),
       width_(5.0),
       height_(5.0),
@@ -69,24 +69,24 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
       marker_p_(MARKER_LINE_PLACEMENT),
       marker_type_(ARROW) {}
 
-markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs) 
-    : symbolizer_with_image(rhs), 
+markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
+    : symbolizer_with_image(rhs),
       symbolizer_base(rhs),
       allow_overlap_(rhs.allow_overlap_),
-      fill_(rhs.fill_), 
-      spacing_(rhs.spacing_), 
+      fill_(rhs.fill_),
+      spacing_(rhs.spacing_),
       max_error_(rhs.max_error_),
       width_(rhs.width_),
       height_(rhs.height_),
       stroke_(rhs.stroke_),
       marker_p_(rhs.marker_p_),
       marker_type_(rhs.marker_type_) {}
-    
+
 void markers_symbolizer::set_allow_overlap(bool overlap)
 {
     allow_overlap_ = overlap;
 }
-    
+
 bool markers_symbolizer::get_allow_overlap() const
 {
     return allow_overlap_;
@@ -96,7 +96,7 @@ void markers_symbolizer::set_spacing(double spacing)
 {
     spacing_ = spacing;
 }
-    
+
 double markers_symbolizer::get_spacing() const
 {
     return spacing_;
@@ -106,17 +106,17 @@ void markers_symbolizer::set_max_error(double max_error)
 {
     max_error_ = max_error;
 }
-    
+
 double markers_symbolizer::get_max_error() const
 {
     return max_error_;
 }
-    
+
 void markers_symbolizer::set_fill(color fill)
 {
     fill_ = fill;
 }
-    
+
 color const& markers_symbolizer::get_fill() const
 {
     return fill_;
@@ -146,7 +146,7 @@ stroke const& markers_symbolizer::get_stroke() const
 {
     return stroke_;
 }
-    
+
 void markers_symbolizer::set_stroke(stroke const& stroke)
 {
     stroke_ = stroke;

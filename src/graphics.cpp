@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -82,7 +82,7 @@ image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
                 else x = x * 255 / a;           \
                 if (x > 255) x = 255;           \
             } while(0)
-                   
+
             DE_ALPHA(r);
             DE_ALPHA(g);
             DE_ALPHA(b);
@@ -108,7 +108,7 @@ void image_32::set_grayscale_to_alpha()
             unsigned r = rgba & 0xff;
             unsigned g = (rgba >> 8 ) & 0xff;
             unsigned b = (rgba >> 16) & 0xff;
-            
+
             // magic numbers for grayscale
             unsigned a = (int)((r * .3) + (g * .59) + (b * .11));
 
@@ -124,41 +124,41 @@ void image_32::set_color_to_alpha(const color& /*c*/)
 
 void image_32::set_alpha(float opacity)
 {
-{
-    for (unsigned int y = 0; y < height_; ++y)
     {
-        unsigned int* row_to =  data_.getRow(y);
-        for (unsigned int x = 0; x < width_; ++x)
+        for (unsigned int y = 0; y < height_; ++y)
         {
-            unsigned rgba = row_to[x];
+            unsigned int* row_to =  data_.getRow(y);
+            for (unsigned int x = 0; x < width_; ++x)
+            {
+                unsigned rgba = row_to[x];
 
 #ifdef MAPNIK_BIG_ENDIAN
-            unsigned a0 = (rgba & 0xff);
-            unsigned a1 = int( (rgba & 0xff) * opacity );
+                unsigned a0 = (rgba & 0xff);
+                unsigned a1 = int( (rgba & 0xff) * opacity );
 
-            if (a0 == a1) continue;
+                if (a0 == a1) continue;
 
-            unsigned r = (rgba >> 24) & 0xff;
-            unsigned g = (rgba >> 16 ) & 0xff;
-            unsigned b = (rgba >> 8) & 0xff;
-            
-            row_to[x] = (a1) | (b << 8) |  (g << 16) | (r << 24) ;
+                unsigned r = (rgba >> 24) & 0xff;
+                unsigned g = (rgba >> 16 ) & 0xff;
+                unsigned b = (rgba >> 8) & 0xff;
+
+                row_to[x] = (a1) | (b << 8) |  (g << 16) | (r << 24) ;
 
 #else
-            unsigned a0 = (rgba >> 24) & 0xff;
-            unsigned a1 = int( ((rgba >> 24) & 0xff) * opacity );
-            //unsigned a1 = opacity;
-            if (a0 == a1) continue;
+                unsigned a0 = (rgba >> 24) & 0xff;
+                unsigned a1 = int( ((rgba >> 24) & 0xff) * opacity );
+                //unsigned a1 = opacity;
+                if (a0 == a1) continue;
 
-            unsigned r = rgba & 0xff;
-            unsigned g = (rgba >> 8 ) & 0xff;
-            unsigned b = (rgba >> 16) & 0xff;
+                unsigned r = rgba & 0xff;
+                unsigned g = (rgba >> 8 ) & 0xff;
+                unsigned b = (rgba >> 16) & 0xff;
 
-            row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
+                row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
 #endif
+            }
         }
     }
-}
 
 }
 

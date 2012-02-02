@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -31,9 +31,9 @@
 
 namespace mapnik
 {
-struct MAPNIK_DECL raster_symbolizer : public symbolizer_base 
+struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
 {
-    
+
     raster_symbolizer()
         : symbolizer_base(),
         mode_("normal"),
@@ -51,7 +51,7 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
         colorizer_(rhs.colorizer_),
         filter_factor_(rhs.filter_factor_),
         mesh_size_(rhs.mesh_size_) {}
-    
+
     std::string const& get_mode() const
     {
         return mode_;
@@ -102,38 +102,38 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
             // No filter factor specified, calculate a sensible default value
             // based on the scaling algorithm being employed.
             scaling_method_e scaling = get_scaling_method_by_name (scaling_);
-            
+
             double ff = 1.0;
-            
+
             switch(scaling)
             {
-                case SCALING_NEAR:
-                    ff = 1.0;
-                    break;
-                
+            case SCALING_NEAR:
+                ff = 1.0;
+                break;
+
                 // TODO potentially some of these algorithms would use filter_factor >2.0.
                 // Contributions welcome from someone who knows more about them.
-                case SCALING_BILINEAR:
-                case SCALING_BICUBIC:
-                case SCALING_SPLINE16:
-                case SCALING_SPLINE36:
-                case SCALING_HANNING:
-                case SCALING_HAMMING:
-                case SCALING_HERMITE:
-                case SCALING_KAISER:
-                case SCALING_QUADRIC:
-                case SCALING_CATROM:
-                case SCALING_GAUSSIAN:
-                case SCALING_BESSEL:
-                case SCALING_MITCHELL:
-                case SCALING_SINC:
-                case SCALING_LANCZOS:
-                case SCALING_BLACKMAN:
-                    ff = 2.0;
-                    break;
-                default:
-                    ff = 1.0;
-                    break;
+            case SCALING_BILINEAR:
+            case SCALING_BICUBIC:
+            case SCALING_SPLINE16:
+            case SCALING_SPLINE36:
+            case SCALING_HANNING:
+            case SCALING_HAMMING:
+            case SCALING_HERMITE:
+            case SCALING_KAISER:
+            case SCALING_QUADRIC:
+            case SCALING_CATROM:
+            case SCALING_GAUSSIAN:
+            case SCALING_BESSEL:
+            case SCALING_MITCHELL:
+            case SCALING_SINC:
+            case SCALING_LANCZOS:
+            case SCALING_BLACKMAN:
+                ff = 2.0;
+                break;
+            default:
+                ff = 1.0;
+                break;
             }
             return ff;
         }
@@ -146,8 +146,8 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
     {
         mesh_size_=mesh_size;
     }
-    
-    
+
+
 private:
     std::string mode_;
     std::string scaling_;

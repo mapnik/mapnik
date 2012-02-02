@@ -37,7 +37,7 @@
 namespace mapnik {
 
 /** Helper object that does all the TextSymbolizer placment finding
-  * work except actually rendering the object. */
+ * work except actually rendering the object. */
 template <typename FaceManagerT, typename DetectorT>
 class text_symbolizer_helper
 {
@@ -62,20 +62,20 @@ public:
           text_(font_manager, scale_factor),
           angle_(0.0),
           placement_valid_(true)
-      {
-          initialize_geometries();
-          if (!geometries_to_process_.size()) return; //TODO: Test this
-          placement_ = sym_.get_placement_options()->get_placement_info(
-                      scale_factor, std::make_pair(width, height), false);
-          //TODO: has_dimensions? Why? When?
-          if (writer_.first) placement_->collect_extents = true;
-          next_placement();
-          initialize_points();
-      }
+    {
+        initialize_geometries();
+        if (!geometries_to_process_.size()) return; //TODO: Test this
+        placement_ = sym_.get_placement_options()->get_placement_info(
+            scale_factor, std::make_pair(width, height), false);
+        //TODO: has_dimensions? Why? When?
+        if (writer_.first) placement_->collect_extents = true;
+        next_placement();
+        initialize_points();
+    }
 
     /** Return next placement.
-      * If no more placements are found returns null pointer.
-      */
+     * If no more placements are found returns null pointer.
+     */
     text_placement_info_ptr get_placement();
     text_placement_info_ptr get_point_placement();
     text_placement_info_ptr get_line_placement();

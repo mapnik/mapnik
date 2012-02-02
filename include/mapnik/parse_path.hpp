@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -55,61 +55,61 @@ struct path_processor
         path_visitor_ (std::string & filename, feature_type const& f)
             : filename_(filename),
               feature_(f) {}
-        
+
         void operator() (std::string const& token) const
         {
             filename_ += token;
         }
-        
+
         void operator() (attribute const& attr) const
         {
             // convert mapnik::value to std::string
             filename_ += attr.value<mapnik::value,feature_type>(feature_).to_string();
         }
-        
+
         std::string & filename_;
         feature_type const& feature_;
     };
-    
+
     struct to_string_ : boost::static_visitor<void>
     {
         to_string_ (std::string & str)
             : str_(str) {}
-        
+
         void operator() (std::string const& token) const
         {
             str_ += token;
         }
 
-        void operator() (attribute const& attr) const    
+        void operator() (attribute const& attr) const
         {
             str_ += "[";
             str_ += attr.name();
             str_ += "]";
         }
-        
+
         std::string & str_;
     };
-    
+
     template <typename T1>
     struct collect_ : boost::static_visitor<void>
     {
         collect_ (T1 & cont)
             : cont_(cont) {}
-        
+
         void operator() (std::string const& token) const
         {
             boost::ignore_unused_variable_warning(token);
         }
-        
-        void operator() (attribute const& attr) const    
+
+        void operator() (attribute const& attr) const
         {
             cont_.insert(attr.name());
         }
-        
+
         T1 & cont_;
     };
-    
+
     static std::string evaluate(path_expression const& path,feature_type const& f)
     {
         std::string out;
@@ -118,7 +118,7 @@ struct path_processor
             boost::apply_visitor(eval,token);
         return out;
     }
-    
+
     static std::string to_string(path_expression const& path)
     {
         std::string str;
@@ -127,7 +127,7 @@ struct path_processor
             boost::apply_visitor(visitor,token);
         return str;
     }
-    
+
     template <typename T2>
     static void collect_attributes(path_expression const& path, T2 & names)
     {

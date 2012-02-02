@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -40,7 +40,7 @@ using namespace mapnik;
 
 /*
  * @brief Iterator class used to iterate over geometry vertexes.
- * Since mapnik::geometry provides access to the components of 
+ * Since mapnik::geometry provides access to the components of
  * a vertex only through variables passed by reference,
  * geometry_iterator retrieves these components (command, x coord,
  * and y coord) and makes them available inside tuples.
@@ -51,47 +51,47 @@ using namespace mapnik;
  *
  * @tparam Value the type of sequence element dereferenced.
  * @tparam Container the sequence over which it iterates.
-*/
+ */
 template <typename Value, typename Container>
 class path_iterator
-  : public boost::iterator_adaptor<path_iterator<Value, Container>,
-                                   Value*,
-                                   boost::use_default,
-                                   boost::forward_traversal_tag>
+    : public boost::iterator_adaptor<path_iterator<Value, Container>,
+                                     Value*,
+                                     boost::use_default,
+                                     boost::forward_traversal_tag>
 {
 public:
     typedef Value value_type;
     typedef Container container_type;
     typedef typename Container::value_type value_component_type;
 
-    /*! 
+    /*!
      * @brief Constructor that initializes the reference to the current element to null.
-     * This constructor is suitable to mark the end of the iterator (analogous to 
+     * This constructor is suitable to mark the end of the iterator (analogous to
      * calling end_iterator() in an STL container).
      *
      * @param geometry the geometry that handles the vector of vertexes.
      */
     path_iterator(Container const& path)
-      : path_iterator::iterator_adaptor_(0),
-        path_(path),
-        first_value_(boost::make_shared<Value>(0,0,0))
+        : path_iterator::iterator_adaptor_(0),
+          path_(path),
+          first_value_(boost::make_shared<Value>(0,0,0))
     {}
 
     /*!
      * This constructor receives the first element of the sequence as a pointer.
-     * Since the container type will likely be a mapnik::geometry, this 
+     * Since the container type will likely be a mapnik::geometry, this
      * first element would need to be obtained in a similar way as the increment
      * method below. For this reason, most of the time this constructor will
      * be called with a null pointer. The body of the constructor makes a call
      * to increment() in order to obtain this first element from the container.
      *
      * @param p pointer to the first element of the sequence.
-     * @param geometry the geometry that handles the vector of vertexes.    
+     * @param geometry the geometry that handles the vector of vertexes.
      */
-    explicit path_iterator(Value* first_element, Container const& path) 
-      : path_iterator::iterator_adaptor_(first_element),
-        path_(path),
-        first_value_(boost::make_shared<Value>(0,0,0))
+    explicit path_iterator(Value* first_element, Container const& path)
+        : path_iterator::iterator_adaptor_(first_element),
+          path_(path),
+          first_value_(boost::make_shared<Value>(0,0,0))
     {
         this->increment();
     }
@@ -104,9 +104,9 @@ public:
      */
     template <typename OtherValue>
     path_iterator(path_iterator<OtherValue, Container> const& other,
-                      typename boost::enable_if<boost::is_convertible<OtherValue*, Value*>,
-          enabler>::type = enabler())   
-      : path_iterator::iterator_adaptor_(other.base()) {}
+                  typename boost::enable_if<boost::is_convertible<OtherValue*, Value*>,
+                  enabler>::type = enabler())
+        : path_iterator::iterator_adaptor_(other.base()) {}
 
 private:
 
@@ -129,13 +129,13 @@ private:
         {
             // if the end of the sequence is reached, set the reference
             // to the current element to null, so it matches the value
-            // that marks the end of the sequence as defined in the 
+            // that marks the end of the sequence as defined in the
             // "end_iterator" constructor.
             this->base_reference() = 0;
         }
         else if(this->base_reference() == 0)
         {
-            // the first element of the container is stored in the 
+            // the first element of the container is stored in the
             // member variable 'first_value_' and later assigned
             // to the reference that boost::iterator_adaptor stores
             // to track the current element.
@@ -173,7 +173,7 @@ private:
  * The Value type is a boost::tuple that holds 5 elements, the command and the x and y coordinate.
  * Each coordinate is stored twice to match the needs of the grammar.
  */
-typedef path_iterator<boost::tuple<unsigned, geometry_type::value_type, geometry_type::value_type>, 
+typedef path_iterator<boost::tuple<unsigned, geometry_type::value_type, geometry_type::value_type>,
                       coord_transform2<CoordTransform, geometry_type> > path_iterator_type;
 
 }}

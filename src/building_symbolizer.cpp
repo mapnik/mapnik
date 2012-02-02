@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -28,7 +28,7 @@
 namespace mapnik
 {
 
-building_symbolizer::building_symbolizer() 
+building_symbolizer::building_symbolizer()
     : symbolizer_base(),
       fill_(color(128,128,128)),
       opacity_(1.0)

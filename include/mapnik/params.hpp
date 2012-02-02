@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -41,40 +41,40 @@ namespace mapnik
 typedef boost::variant<value_null,int,double,std::string> value_holder;
 typedef std::pair<std::string, value_holder> parameter;
 typedef std::map<std::string, value_holder> param_map;
-   
+
 template <typename T>
 struct value_extractor_visitor : public boost::static_visitor<>
 {
     value_extractor_visitor(boost::optional<T> & var)
         :var_(var) {}
-         
+
     void operator () (T val) const
     {
         var_ = val;
     }
-         
+
     template <typename T1>
-    void operator () (T1 val) const 
+    void operator () (T1 val) const
     {
-        try 
+        try
         {
             var_ = boost::lexical_cast<T>(val);
         }
         catch (boost::bad_lexical_cast & ) {}
     }
-         
+
     boost::optional<T> & var_;
 };
-   
-  
+
+
 class parameters : public param_map
 {
-    template <typename T> 
+    template <typename T>
     struct converter
     {
-        typedef boost::optional<T> return_type;       
+        typedef boost::optional<T> return_type;
         static return_type extract(parameters const& params,
-                                   std::string const& name, 
+                                   std::string const& name,
                                    boost::optional<T> const& default_value)
         {
             boost::optional<T> result(default_value);
@@ -86,17 +86,17 @@ class parameters : public param_map
             return result;
         }
     };
-         
+
 public:
-         
+
     parameters() {}
-         
+
     template <typename T>
     boost::optional<T> get(std::string const& key) const
     {
         return converter<T>::extract(*this,key, boost::none);
     }
-         
+
     template <typename T>
     boost::optional<T> get(std::string const& key, T const& default_value) const
     {

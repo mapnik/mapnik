@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -26,7 +26,7 @@
 
 namespace mapnik
 {
-    
+
 static const char * pattern_alignment_strings[] = {
     "local", // feature
     "global", // map
@@ -36,10 +36,10 @@ static const char * pattern_alignment_strings[] = {
 IMPLEMENT_ENUM( pattern_alignment_e, pattern_alignment_strings )
 
 polygon_pattern_symbolizer::polygon_pattern_symbolizer(path_expression_ptr file)
-    : symbolizer_with_image(file), symbolizer_base(),
-      alignment_(LOCAL_ALIGNMENT),
-      gamma_(1.0),
-      gamma_method_(GAMMA_POWER) {}
+: symbolizer_with_image(file), symbolizer_base(),
+    alignment_(LOCAL_ALIGNMENT),
+    gamma_(1.0),
+    gamma_method_(GAMMA_POWER) {}
 
 polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)
     : symbolizer_with_image(rhs), symbolizer_base(rhs),

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -28,16 +28,16 @@
 namespace mapnik
 {
 struct ellipsoid;
-    
-// great-circle distance 
-    
+
+// great-circle distance
+
 class great_circle_distance
 {
 public:
     double operator() (coord2d const& pt0, coord2d const& pt1) const;
 };
-    
-// vincenty distance 
+
+// vincenty distance
 /*
   class vincenty_distance : boost::noncopyble
   {

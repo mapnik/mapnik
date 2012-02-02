@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -34,7 +34,7 @@ void symbolizer_base::add_metawriter(std::string const& name, metawriter_propert
 }
 
 void symbolizer_base::add_metawriter(metawriter_ptr writer_ptr, metawriter_properties const& properties,
-                    std::string const& name)
+                                     std::string const& name)
 {
     writer_ptr_ = writer_ptr;
     properties_ = properties;
@@ -87,17 +87,17 @@ symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
     : image_filename_(rhs.image_filename_),
       image_opacity_(rhs.image_opacity_),
       matrix_(rhs.matrix_) {}
-   
+
 path_expression_ptr symbolizer_with_image::get_filename() const
 {
     return image_filename_;
 }
 
-void symbolizer_with_image::set_filename(path_expression_ptr image_filename) 
+void symbolizer_with_image::set_filename(path_expression_ptr image_filename)
 {
     image_filename_ = image_filename;
 }
-      
+
 void symbolizer_with_image::set_transform(transform_type const& matrix)
 {
     matrix_ = matrix;

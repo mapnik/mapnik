@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -99,8 +99,8 @@ inline color get_css (boost::property_tree::ptree const& node, std::string const
                            " but got '" + str + "'");
     }
 }
-   
-   
+
+
 template <typename charT, typename traits>
 std::basic_ostream<charT, traits> &
 operator << ( std::basic_ostream<charT, traits> & s, const mapnik::color & c )
@@ -117,7 +117,7 @@ public:
     boolean(bool b) : b_(b) {}
     boolean(const boolean & b) : b_(b.b_) {}
 
-    operator bool() const 
+    operator bool() const
     {
         return b_;
     }
@@ -142,9 +142,9 @@ operator >> ( std::basic_istream<charT, traits> & s, boolean & b )
 {
     std::string word;
     s >> word;
-    if ( s ) 
+    if ( s )
     {
-        if ( word == "true" || word == "yes" || word == "on" || 
+        if ( word == "true" || word == "yes" || word == "on" ||
              word == "1")
         {
             b = true;
@@ -156,7 +156,7 @@ operator >> ( std::basic_istream<charT, traits> & s, boolean & b )
         }
         else
         {
-            s.setstate( std::ios::failbit );    
+            s.setstate( std::ios::failbit );
         }
     }
     return s;
@@ -190,7 +190,7 @@ template <typename T>
 void set_css(boost::property_tree::ptree & pt, const std::string & name, const T & v)
 {
     boost::property_tree::ptree & css_node = pt.push_back(
-        boost::property_tree::ptree::value_type("CssParameter", 
+        boost::property_tree::ptree::value_type("CssParameter",
                                                 boost::property_tree::ptree()))->second;
     css_node.put("<xmlattr>.name", name );
     css_node.put_value( v );
@@ -242,7 +242,7 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
             if ( i + 1 < Enum::MAX ) value_list += ", ";
         }
         value_list += "]";
-            
+
         return value_list;
     }
 };
@@ -291,8 +291,8 @@ inline color get(boost::property_tree::ptree const& node, std::string const& nam
     {
         str = node.get_optional<std::string>(name+".<xmltext>");
     }
-      
-    if ( str ) 
+
+    if ( str )
     {
         try
         {
@@ -305,13 +305,13 @@ inline color get(boost::property_tree::ptree const& node, std::string const& nam
                                name + "'. Expected " + name_trait<color>::name() +
                                " but got '" + *str + "'");
         }
-    } 
-    else 
+    }
+    else
     {
         return default_value;
     }
 }
-   
+
 template <typename T>
 T get(const boost::property_tree::ptree & node, const std::string & name, bool is_attribute)
 {
@@ -350,7 +350,7 @@ T get_value(const boost::property_tree::ptree & node, const std::string & name)
     {
         /* NOTE: get_child works as long as there is only one child with that name.
            If this function is used this used this condition must always be satisfied.
-         */
+        */
         return node.get_child("<xmltext>").get_value<T>();
     }
     catch (boost::property_tree::ptree_bad_path)
@@ -382,9 +382,9 @@ boost::optional<T> get_optional(const boost::property_tree::ptree & node, const 
     {
         str = node.get_optional<std::string>(name+".<xmltext>");
     }
-        
+
     boost::optional<T> result;
-    if ( str ) 
+    if ( str )
     {
         try
         {
@@ -396,13 +396,13 @@ boost::optional<T> get_optional(const boost::property_tree::ptree & node, const 
                                (is_attribute ? "attribute" : "child node") + " '" +
                                name + "'. Expected " + name_trait<T>::name() +
                                " but got '" + *str + "'");
-        }  
+        }
     }
-        
+
     return result;
 }
 //
-   
+
 template <>
 inline boost::optional<color> get_optional(const boost::property_tree::ptree & node, const std::string & name,
                                            bool is_attribute)
@@ -416,9 +416,9 @@ inline boost::optional<color> get_optional(const boost::property_tree::ptree & n
     {
         str = node.get_optional<std::string>(name+".<xmltext>");
     }
-        
+
     boost::optional<color> result;
-    if ( str ) 
+    if ( str )
     {
         try
         {
@@ -431,9 +431,9 @@ inline boost::optional<color> get_optional(const boost::property_tree::ptree & n
                                (is_attribute ? "attribute" : "child node") + " '" +
                                name + "'. Expected " + name_trait<color>::name() +
                                " but got '" + *str + "'");
-        }  
+        }
     }
-        
+
     return result;
 }
 

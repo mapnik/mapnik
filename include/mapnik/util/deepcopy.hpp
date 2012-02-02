@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -30,8 +30,8 @@
 namespace mapnik { namespace util {
 
 // poor man deepcopy implementation
-void deepcopy(Map const& map_in, Map & map_out);
+    void deepcopy(Map const& map_in, Map & map_out);
 
-}} 
+    }}
 
 #endif  // MAPNIK_DEEPSOPY_HPP

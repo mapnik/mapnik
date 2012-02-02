@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -33,13 +33,13 @@ public:
     arrow();
     void rewind(unsigned path_id);
     unsigned vertex(double* x, double* y);
-    box2d<double> extent() const;   
+    box2d<double> extent() const;
 private:
     unsigned pos_;
     double x_[7];
     double y_[7];
     unsigned cmd_[9];
-};   
+};
 }
 
 #endif // MAPNIK_ARROW_HPP

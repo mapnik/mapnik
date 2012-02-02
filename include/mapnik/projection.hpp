@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -41,14 +41,14 @@
 #include <stdexcept>
 
 namespace mapnik {
-    
+
 class proj_init_error : public std::runtime_error
 {
 public:
     proj_init_error(std::string const& params)
         : std::runtime_error("failed to initialize projection with: '" + params + "'") {}
 };
-    
+
 class MAPNIK_DECL projection
 {
     friend class proj_transform;
@@ -56,23 +56,23 @@ public:
     explicit projection(std::string const& params = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
     projection(projection const& rhs);
     ~projection();
-        
+
     projection& operator=(projection const& rhs);
     bool operator==(const projection& other) const;
     bool operator!=(const projection& other) const;
     bool is_initialized() const;
     bool is_geographic() const;
     std::string const& params() const;
-      
+
     void forward(double & x, double &y ) const;
     void inverse(double & x,double & y) const;
 
     std::string expanded() const;
-        
+
 private:
-    void init(); 
+    void init();
     void swap (projection& rhs);
-       
+
 private:
     std::string params_;
     projPJ proj_;

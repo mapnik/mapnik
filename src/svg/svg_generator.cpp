@@ -32,8 +32,8 @@ namespace mapnik { namespace svg {
     using namespace boost::spirit;
 
     template <typename OutputIterator>
-    svg_generator<OutputIterator>::svg_generator(OutputIterator& output_iterator) 
-      : output_iterator_(output_iterator) {}
+    svg_generator<OutputIterator>::svg_generator(OutputIterator& output_iterator)
+        : output_iterator_(output_iterator) {}
 
     template <typename OutputIterator>
     svg_generator<OutputIterator>::~svg_generator() {}
@@ -66,16 +66,16 @@ namespace mapnik { namespace svg {
     }
 
     template <typename OutputIterator>
-    void svg_generator<OutputIterator>::generate_path(path_type const& path, path_output_attributes const& path_attributes) 
-    {  
+    void svg_generator<OutputIterator>::generate_path(path_type const& path, path_output_attributes const& path_attributes)
+    {
         path_data_grammar data_grammar(path);
         path_attributes_grammar attributes_grammar;
         path_dash_array_grammar dash_array_grammar;
-      
+
         karma::generate(output_iterator_, lit("<path ")  << data_grammar, path);
         karma::generate(output_iterator_, lit(" ") << dash_array_grammar, path_attributes.stroke_dasharray());
         karma::generate(output_iterator_, lit(" ") << attributes_grammar << lit("/>\n"), path_attributes);
     }
 
     template class svg_generator<std::ostream_iterator<char> >;
-}}
+    }}

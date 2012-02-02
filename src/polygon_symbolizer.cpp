@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -27,7 +27,7 @@
 namespace mapnik
 {
 
-polygon_symbolizer::polygon_symbolizer() 
+polygon_symbolizer::polygon_symbolizer()
     : symbolizer_base(),
       fill_(color(128,128,128)),
       opacity_(1.0),
@@ -40,7 +40,7 @@ polygon_symbolizer::polygon_symbolizer(color const& fill)
       opacity_(1.0),
       gamma_(1.0),
       gamma_method_(GAMMA_POWER) {}
-    
+
 color const& polygon_symbolizer::get_fill() const
 {
     return fill_;

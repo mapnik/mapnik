@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -27,8 +27,8 @@
 
 namespace mapnik
 {
-    
-line_pattern_symbolizer::line_pattern_symbolizer(path_expression_ptr file) 
+
+line_pattern_symbolizer::line_pattern_symbolizer(path_expression_ptr file)
     : symbolizer_with_image(file), symbolizer_base() {}
 
 line_pattern_symbolizer::line_pattern_symbolizer(line_pattern_symbolizer const& rhs)

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,8 +35,8 @@ namespace mapnik
 class MAPNIK_DECL font_set
 {
 public:
-    font_set(); 
-    font_set(std::string const& name); 
+    font_set();
+    font_set(std::string const& name);
     font_set(font_set const& rhs);
     font_set& operator=(font_set const& rhs);
     unsigned size() const;

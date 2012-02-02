@@ -53,17 +53,17 @@ namespace mapnik { namespace svg {
         template <typename T0, typename T1, typename T2, typename T3, typename T4, typename T5>
         struct result
         {
-            typedef void type; 
+            typedef void type;
         };
-    
+
         explicit process_matrix( TransformType & tr)
             :tr_(tr) {}
-    
+
         void operator () (double a, double b, double c, double d, double e, double f) const
         {
-            tr_ = agg::trans_affine(a,b,c,d,e,f) * tr_; 
+            tr_ = agg::trans_affine(a,b,c,d,e,f) * tr_;
         }
-    
+
         TransformType & tr_;
     };
 
@@ -73,12 +73,12 @@ namespace mapnik { namespace svg {
         template <typename T0, typename T1, typename T2>
         struct result
         {
-            typedef void type; 
+            typedef void type;
         };
 
         explicit process_rotate( TransformType & tr)
             :tr_(tr) {}
-    
+
         template <typename T0,typename T1,typename T2>
         void operator () (T0 a, T1 cx, T2 cy) const
         {
@@ -94,8 +94,8 @@ namespace mapnik { namespace svg {
                 tr_ = t * tr_;
             }
         }
-    
-        TransformType & tr_;    
+
+        TransformType & tr_;
     };
 
     template <typename TransformType>
@@ -104,20 +104,20 @@ namespace mapnik { namespace svg {
         template <typename T0, typename T1>
         struct result
         {
-            typedef void type; 
+            typedef void type;
         };
 
         explicit process_translate( TransformType & tr)
             :tr_(tr) {}
-    
+
         template <typename T0,typename T1>
         void operator () (T0 tx, T1 ty) const
         {
             if (ty) tr_ = agg::trans_affine_translation(tx,*ty) * tr_;
             else tr_ = agg::trans_affine_translation(tx,0.0) * tr_;
         }
-    
-        TransformType & tr_;    
+
+        TransformType & tr_;
     };
 
     template <typename TransformType>
@@ -126,20 +126,20 @@ namespace mapnik { namespace svg {
         template <typename T0, typename T1>
         struct result
         {
-            typedef void type; 
+            typedef void type;
         };
 
         explicit process_scale( TransformType & tr)
             :tr_(tr) {}
-    
+
         template <typename T0,typename T1>
         void operator () (T0 sx, T1 sy) const
         {
             if (sy) tr_ = agg::trans_affine_scaling(sx,*sy) * tr_;
             else tr_ = agg::trans_affine_scaling(sx,sx) * tr_;
         }
-    
-        TransformType & tr_;    
+
+        TransformType & tr_;
     };
 
 
@@ -149,31 +149,31 @@ namespace mapnik { namespace svg {
         template <typename T0, typename T1>
         struct result
         {
-            typedef void type; 
+            typedef void type;
         };
 
         explicit process_skew( TransformType & tr)
             :tr_(tr) {}
-    
+
         template <typename T0,typename T1>
         void operator () (T0 skew_x, T1 skew_y) const
         {
             tr_ = agg::trans_affine_skewing(deg2rad(skew_x),deg2rad(skew_y)) * tr_;
         }
-    
-        TransformType & tr_;    
+
+        TransformType & tr_;
     };
 
     // commented as this does not appear used and crashes clang when used with pch
     /*
-    struct print_action
-    {
-        template <typename T>
-        void operator()(T const& c, qi::unused_type, qi::unused_type) const
-        {
-            std::cerr << typeid(c).name() << std::endl;
-        }
-    };
+      struct print_action
+      {
+      template <typename T>
+      void operator()(T const& c, qi::unused_type, qi::unused_type) const
+      {
+      std::cerr << typeid(c).name() << std::endl;
+      }
+      };
     */
 
     template <typename Iterator, typename SkipType, typename TransformType>
@@ -199,45 +199,45 @@ namespace mapnik { namespace svg {
             using qi::_val;
             using qi::double_;
             using qi::no_case;
-        
+
             start =  +transform_ ;
-        
+
             transform_ = matrix | rotate | translate | scale | rotate | skewX | skewY ;
-        
-            matrix = no_case[lit("matrix")] 
-                >> lit('(') 
-                >> ( 
-                    double_ >> -lit(',') 
-                    >> double_ >> -lit(',') 
-                    >> double_ >> -lit(',') 
-                    >> double_ >> -lit(',') 
-                    >> double_ >> -lit(',') 
+
+            matrix = no_case[lit("matrix")]
+                >> lit('(')
+                >> (
+                    double_ >> -lit(',')
+                    >> double_ >> -lit(',')
+                    >> double_ >> -lit(',')
+                    >> double_ >> -lit(',')
+                    >> double_ >> -lit(',')
                     >> double_) [ matrix_action(_1,_2,_3,_4,_5,_6) ]
                 >>  lit(')')
                 ;
-        
-            translate = no_case[lit("translate")] 
-                >> lit('(') 
-                >> (double_ >> -lit(',') 
+
+            translate = no_case[lit("translate")]
+                >> lit('(')
+                >> (double_ >> -lit(',')
                     >> -double_) [ translate_action(_1,_2) ]
                 >> lit(')');
-        
-            scale = no_case[lit("scale")] 
-                >> lit('(') 
-                >> (double_ >> -lit(',') 
-                    >> -double_ )[ scale_action(_1,_2)] 
+
+            scale = no_case[lit("scale")]
+                >> lit('(')
+                >> (double_ >> -lit(',')
+                    >> -double_ )[ scale_action(_1,_2)]
                 >>  lit(')');
-        
-            rotate = no_case[lit("rotate")] 
-                >> lit('(') 
-                >> double_[_a = _1] >> -lit(',') 
-                >> -(double_ [_b = _1] >> -lit(',') >> double_[_c = _1]) 
+
+            rotate = no_case[lit("rotate")]
+                >> lit('(')
+                >> double_[_a = _1] >> -lit(',')
+                >> -(double_ [_b = _1] >> -lit(',') >> double_[_c = _1])
                 >> lit(')') [ rotate_action(_a,_b,_c)];
-        
+
             skewX = no_case[lit("skewX")] >> lit('(') >> double_ [ skew_action(_1, 0.0)] >> lit(')');
-        
+
             skewY = no_case[lit("skewY")] >> lit('(') >> double_ [ skew_action(0.0, _1)] >> lit(')');
-        
+
         }
 
         // rules
@@ -249,7 +249,7 @@ namespace mapnik { namespace svg {
         qi::rule<Iterator,qi::locals<double,double,double>, SkipType> rotate;
         qi::rule<Iterator,SkipType> skewX;
         qi::rule<Iterator,SkipType> skewY;
-    
+
         // actions
         function<process_matrix<TransformType> > matrix_action;
         function<process_rotate<TransformType> > rotate_action;

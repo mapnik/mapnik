@@ -36,9 +36,9 @@ bool rgba::mean_sort_cmp::operator() (const rgba& x, const rgba& y) const
     if (t1 != t2) return t1 < t2;
 
     return (((int)x.a - y.a) >> 24) +
-           (((int)x.r - y.r) >> 16) +
-           (((int)x.g - y.g) >> 8) +
-           (((int)x.b - y.b));
+        (((int)x.r - y.r) >> 16) +
+        (((int)x.g - y.g) >> 8) +
+        (((int)x.b - y.b));
 }
 
 std::size_t rgba::hash_func::operator()(rgba const& p) const

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -46,13 +46,13 @@ class PoolGuard
 {
 private:
     const T& obj_;
-    PoolT& pool_; 
+    PoolT& pool_;
 public:
     explicit PoolGuard(const T& ptr,PoolT& pool)
         : obj_(ptr),
           pool_(pool) {}
 
-    ~PoolGuard() 
+    ~PoolGuard()
     {
         pool_->returnObject(obj_);
     }
@@ -67,10 +67,10 @@ template <typename T,template <typename> class Creator>
 class Pool : private boost::noncopyable
 {
     typedef boost::shared_ptr<T> HolderType;
-    typedef std::deque<HolderType> ContType;    
-        
+    typedef std::deque<HolderType> ContType;
+
     Creator<T> creator_;
-    const unsigned initialSize_; 
+    const unsigned initialSize_;
     const unsigned maxSize_;
     ContType usedPool_;
     ContType unusedPool_;
@@ -84,7 +84,7 @@ public:
          initialSize_(initialSize),
          maxSize_(maxSize)
     {
-        for (unsigned i=0; i < initialSize_; ++i) 
+        for (unsigned i=0; i < initialSize_; ++i)
         {
             HolderType conn(creator_());
             if (conn->isOK())
@@ -93,13 +93,13 @@ public:
     }
 
     HolderType borrowObject()
-    {   
-#ifdef MAPNIK_THREADSAFE    
+    {
+#ifdef MAPNIK_THREADSAFE
         mutex::scoped_lock lock(mutex_);
 #endif
         typename ContType::iterator itr=unusedPool_.begin();
         while ( itr!=unusedPool_.end())
-        { 
+        {
 #ifdef MAPNIK_DEBUG
             std::clog<<"borrow "<<(*itr).get()<<"\n";
 #endif
@@ -113,7 +113,7 @@ public:
             {
 #ifdef MAPNIK_DEBUG
                 std::clog<<"bad connection (erase)" << (*itr).get()<<"\n";
-#endif 
+#endif
                 itr=unusedPool_.erase(itr);
             }
         }
@@ -130,7 +130,7 @@ public:
             }
         }
         return HolderType();
-    } 
+    }
 
     void returnObject(HolderType obj)
     {
@@ -140,7 +140,7 @@ public:
         typename ContType::iterator itr=usedPool_.begin();
         while (itr != usedPool_.end())
         {
-            if (obj.get()==(*itr).get()) 
+            if (obj.get()==(*itr).get())
             {
 #ifdef MAPNIK_DEBUG
                 std::clog<<"return "<<(*itr).get()<<"\n";
@@ -152,7 +152,7 @@ public:
             ++itr;
         }
     }
-         
+
     std::pair<unsigned,unsigned> size() const
     {
 #ifdef MAPNIK_THREADSAFE

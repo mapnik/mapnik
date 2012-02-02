@@ -81,7 +81,7 @@ void shield_symbolizer::set_shield_displacement(double shield_dx,double shield_d
 {
     shield_displacement_ = std::make_pair(shield_dx, shield_dy);
 }
-                      
+
 position const& shield_symbolizer::get_shield_displacement() const
 {
     return shield_displacement_;

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -28,7 +28,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
 
-namespace mapnik 
+namespace mapnik
 {
 
 enum line_rasterizer_enum {
@@ -43,19 +43,19 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
 {
     explicit line_symbolizer()
         : symbolizer_base(),
-          stroke_(),
-          rasterizer_p_(RASTERIZER_FULL) {}
-        
+        stroke_(),
+        rasterizer_p_(RASTERIZER_FULL) {}
+
     line_symbolizer(stroke const& stroke)
         : symbolizer_base(),
-          stroke_(stroke),
-          rasterizer_p_(RASTERIZER_FULL) {}
-        
+        stroke_(stroke),
+        rasterizer_p_(RASTERIZER_FULL) {}
+
     line_symbolizer(color const& pen,float width=1.0)
         : symbolizer_base(),
-          stroke_(pen,width),
-          rasterizer_p_(RASTERIZER_FULL) {}
-        
+        stroke_(pen,width),
+        rasterizer_p_(RASTERIZER_FULL) {}
+
     stroke const& get_stroke() const
     {
         return stroke_;
@@ -65,12 +65,12 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
     {
         stroke_ = stk;
     }
-        
+
     void set_rasterizer(line_rasterizer_e rasterizer_p)
     {
         rasterizer_p_ = rasterizer_p;
     }
-    
+
     line_rasterizer_e get_rasterizer() const
     {
         return rasterizer_p_;

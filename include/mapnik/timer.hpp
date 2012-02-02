@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -28,7 +28,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-#include <ctime> 
+#include <ctime>
 
 namespace mapnik {
 
@@ -41,8 +41,8 @@ public:
         restart();
     }
 
-    void restart() 
-    {   
+    void restart()
+    {
         _stopped = false;
         gettimeofday(&_wall_clock_start, NULL);
         _cpu_start = clock();
@@ -87,16 +87,16 @@ class progress_timer : public timer
 {
 public:
     progress_timer(std::ostream & os, std::string const& base_message):
-      os_(os),
-      base_message_(base_message)
-      {}
+        os_(os),
+        base_message_(base_message)
+    {}
 
     ~progress_timer()
     {
         if (!_stopped)
             stop();
     }
-    
+
     void stop() const
     {
         timer::stop();
@@ -104,9 +104,9 @@ public:
         {
             std::ostringstream s;
             s.precision(2);
-            s << std::fixed; 
+            s << std::fixed;
             s << wall_clock_elapsed() << "ms (cpu " << cpu_elapsed() << "ms)";
-            s << std::setw(30 - (int)s.tellp()) << std::right << "| " << base_message_ << "\n"; 
+            s << std::setw(30 - (int)s.tellp()) << std::right << "| " << base_message_ << "\n";
             os_ << s.str();
         }
         catch (...) {} // eat any exceptions
@@ -120,6 +120,6 @@ private:
     std::ostream & os_;
     std::string base_message_;
 };
-    
+
 };
 #endif // MAPNIK_TIMER_HPP

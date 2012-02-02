@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,8 +35,8 @@
 #include <sstream>
 
 namespace mapnik {
-     
-class MAPNIK_DECL color 
+
+class MAPNIK_DECL color
     : boost::equality_comparable<color>
 {
 private:
@@ -44,7 +44,7 @@ private:
     boost::uint8_t green_;
     boost::uint8_t blue_;
     boost::uint8_t alpha_;
-        
+
 public:
     color()
         : red_(0xff),
@@ -52,38 +52,38 @@ public:
         blue_(0xff),
         alpha_(0xff)
         {}
-    
+
     color(unsigned red, unsigned green, unsigned blue, unsigned alpha = 0xff)
         :  red_(red),
         green_(green),
         blue_(blue),
         alpha_(alpha)
         {}
-    
+
     color( std::string const& css_string);
-        
+
     color(const color& rhs)
         : red_(rhs.red_),
         green_(rhs.green_),
         blue_(rhs.blue_),
-        alpha_(rhs.alpha_) 
+        alpha_(rhs.alpha_)
         {}
 
     color& operator=(const color& rhs)
-    {
-        if (this==&rhs) return *this;
-        red_=rhs.red_;
-        green_=rhs.green_;
-        blue_=rhs.blue_;
-        alpha_=rhs.alpha_;
-        return *this;
-    }
-        
+        {
+            if (this==&rhs) return *this;
+            red_=rhs.red_;
+            green_=rhs.green_;
+            blue_=rhs.blue_;
+            alpha_=rhs.alpha_;
+            return *this;
+        }
+
     inline unsigned red() const
     {
         return red_;
     }
-        
+
     inline unsigned green() const
     {
         return green_;
@@ -95,8 +95,8 @@ public:
     inline unsigned alpha() const
     {
         return alpha_;
-    }   
-        
+    }
+
     inline void set_red(unsigned red)
     {
         red_ = red;
@@ -105,7 +105,7 @@ public:
     {
         green_ = green;
     }
-        
+
     inline void set_blue(unsigned blue)
     {
         blue_ = blue;
@@ -123,19 +123,19 @@ public:
         return (alpha_ << 24) | (blue_ << 16) | (green_ << 8) | (red_) ;
 #endif
     }
-    
+
     inline bool operator==(color const& rhs) const
     {
         return (red_== rhs.red()) &&
             (green_ == rhs.green()) &&
             (blue_  == rhs.blue()) &&
             (alpha_ == rhs.alpha());
-        
+
     }
-    
-    std::string to_string() const;        
+
+    std::string to_string() const;
     std::string to_hex_string() const;
-};    
+};
 
 
 }

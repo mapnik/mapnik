@@ -45,12 +45,12 @@ private:
 };
 
 /** List placement strategy.
-  * See parent class for documentation of each function. */
+ * See parent class for documentation of each function. */
 class text_placement_info_list : public text_placement_info
 {
 public:
     text_placement_info_list(text_placements_list const* parent,
-       double scale_factor, dimension_type dim, bool has_dimensions) :
+                             double scale_factor, dimension_type dim, bool has_dimensions) :
         text_placement_info(parent, scale_factor, dim, has_dimensions),
         state(0), parent_(parent) {}
     bool next();

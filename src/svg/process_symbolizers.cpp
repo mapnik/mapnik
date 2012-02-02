@@ -24,7 +24,7 @@
 // mapnik
 #include <mapnik/svg_renderer.hpp>
 
-namespace mapnik { 
+namespace mapnik {
 
 template <typename OutputIterator>
 bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,

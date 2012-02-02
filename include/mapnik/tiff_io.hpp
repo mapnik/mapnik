@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -30,14 +30,14 @@
 extern "C"
 {
 #ifdef HAVE_GEOTIFF
-  #include <xtiffio.h>
-  #include <geotiffio.h>
-  #define RealTIFFOpen XTIFFClientOpen
-  #define RealTIFFClose XTIFFClose
+#include <xtiffio.h>
+#include <geotiffio.h>
+#define RealTIFFOpen XTIFFClientOpen
+#define RealTIFFClose XTIFFClose
 #else
-  #include <tiffio.h>
-  #define RealTIFFOpen TIFFClientOpen
-  #define RealTIFFClose TIFFClose
+#include <tiffio.h>
+#define RealTIFFOpen TIFFClientOpen
+#define RealTIFFClose TIFFClose
 #endif
 }
 
@@ -139,15 +139,15 @@ void save_as_tiff(T1 & file, T2 const& image)
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette
     /*
-    unsigned short r[256], g[256], b[256];
-    for (int i = 0; i < (1 << 24); ++i)
-    {
-        r[i] = (unsigned short)palette[i * 3 + 0] << 8;
-        g[i] = (unsigned short)palette[i * 3 + 1] << 8;
-        b[i] = (unsigned short)palette[i * 3 + 2] << 8;
-    }
-    TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE);
-    TIFFSetField(output, TIFFTAG_COLORMAP, r, g, b);
+      unsigned short r[256], g[256], b[256];
+      for (int i = 0; i < (1 << 24); ++i)
+      {
+      r[i] = (unsigned short)palette[i * 3 + 0] << 8;
+      g[i] = (unsigned short)palette[i * 3 + 1] << 8;
+      b[i] = (unsigned short)palette[i * 3 + 2] << 8;
+      }
+      TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE);
+      TIFFSetField(output, TIFFTAG_COLORMAP, r, g, b);
     */
 
 #ifdef HAVE_GEOTIFF

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2012 Artem Pavlenko
@@ -35,32 +35,32 @@
 
 namespace mapnik { namespace util {
 
-void to_ds_type(mapnik::geometry_container const& paths,
-                boost::optional<mapnik::datasource::geometry_t> & result)
-{
-    if (paths.size() == 1)
+    void to_ds_type(mapnik::geometry_container const& paths,
+                    boost::optional<mapnik::datasource::geometry_t> & result)
     {
-        result.reset(static_cast<mapnik::datasource::geometry_t>(paths.front().type()));
-    }
-    else if (paths.size() > 1)
-    {
-        int multi_type = 0;
-        geometry_container::const_iterator itr = paths.begin();
-        geometry_container::const_iterator end = paths.end();
-        for ( ; itr!=end; ++itr)
+        if (paths.size() == 1)
         {
-            int type = static_cast<int>(itr->type());
-            if (multi_type > 0 && multi_type != type)
+            result.reset(static_cast<mapnik::datasource::geometry_t>(paths.front().type()));
+        }
+        else if (paths.size() > 1)
+        {
+            int multi_type = 0;
+            geometry_container::const_iterator itr = paths.begin();
+            geometry_container::const_iterator end = paths.end();
+            for ( ; itr!=end; ++itr)
             {
-                result.reset(datasource::Collection);
+                int type = static_cast<int>(itr->type());
+                if (multi_type > 0 && multi_type != type)
+                {
+                    result.reset(datasource::Collection);
+                }
+                multi_type = type;
+                result.reset(static_cast<mapnik::datasource::geometry_t>(type));
             }
-            multi_type = type;
-            result.reset(static_cast<mapnik::datasource::geometry_t>(type));
         }
     }
-}
-                                     
-}}
+
+    }}
 
 
 #endif // MAPNIK_GEOMETRY_TO_DS_TYPE

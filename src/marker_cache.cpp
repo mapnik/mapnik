@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -36,7 +36,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
 
-namespace mapnik 
+namespace mapnik
 {
 
 boost::unordered_map<std::string, marker_ptr> marker_cache::cache_;

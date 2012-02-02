@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -29,18 +29,18 @@
 #include <algorithm>
 
 namespace mapnik {
-    
+
 struct accumulate_extent
 {
     accumulate_extent(box2d<double> & ext)
         : ext_(ext),first_(true) {}
-        
+
     void operator() (feature_ptr feat)
     {
         for (unsigned i=0;i<feat->num_geometries();++i)
         {
             geometry_type & geom = feat->get_geometry(i);
-            if ( first_ ) 
+            if ( first_ )
             {
                 first_ = false;
                 ext_ = geom.envelope();
@@ -51,29 +51,29 @@ struct accumulate_extent
             }
         }
     }
-        
+
     box2d<double> & ext_;
     bool first_;
 };
-    
+
 memory_datasource::memory_datasource()
     : datasource(parameters()),
       desc_("in-memory datasource","utf-8") {}
 
 memory_datasource::~memory_datasource() {}
-    
+
 void memory_datasource::push(feature_ptr feature)
 {
     // TODO - collect attribute descriptors?
     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
     features_.push_back(feature);
 }
-    
+
 datasource::datasource_t memory_datasource::type() const
 {
     return datasource::Vector;
 }
-    
+
 featureset_ptr memory_datasource::features(const query& q) const
 {
     return featureset_ptr(new memory_featureset(q.get_bbox(),*this));
@@ -88,13 +88,13 @@ featureset_ptr memory_datasource::features_at_point(coord2d const& pt) const
 #endif
     return featureset_ptr(new memory_featureset(box,*this));
 }
-    
+
 box2d<double> memory_datasource::envelope() const
 {
     box2d<double> ext;
     accumulate_extent func(ext);
     std::for_each(features_.begin(),features_.end(),func);
-    return ext;      
+    return ext;
 }
 
 boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() const
@@ -102,12 +102,12 @@ boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() c
     // TODO - detect this?
     return datasource::Collection;
 }
-    
+
 layer_descriptor memory_datasource::get_descriptor() const
 {
     return desc_;
 }
-    
+
 size_t memory_datasource::size() const
 {
     return features_.size();

@@ -54,44 +54,44 @@ namespace mapnik { namespace svg {
     {
         stroke_width_ = stroke_width;
     }
-    
+
     void path_output_attributes::set_stroke_linecap(const line_cap_e stroke_linecap)
     {
-      switch(stroke_linecap)
-      {
-      case BUTT_CAP:
-          stroke_linecap_ = "butt";
-          break;
-      case SQUARE_CAP:
-          stroke_linecap_ = "square";
-          break;
-      case ROUND_CAP:
-          stroke_linecap_ = "round";
-          break;
-      default:
-          stroke_linecap_ = "butt";
-      }
+        switch(stroke_linecap)
+        {
+        case BUTT_CAP:
+            stroke_linecap_ = "butt";
+            break;
+        case SQUARE_CAP:
+            stroke_linecap_ = "square";
+            break;
+        case ROUND_CAP:
+            stroke_linecap_ = "round";
+            break;
+        default:
+            stroke_linecap_ = "butt";
+        }
     }
 
     void path_output_attributes::set_stroke_linejoin(const line_join_e stroke_linejoin)
     {
-      switch(stroke_linejoin)
-      {
-      case MITER_JOIN:
-          stroke_linejoin_ = "miter";
-          break;
-      case MITER_REVERT_JOIN:
-          stroke_linejoin_ = "miter";
-          break;
-      case ROUND_JOIN:
-          stroke_linejoin_ = "round";
-          break;
-      case BEVEL_JOIN:
-          stroke_linejoin_ = "bevel";
-          break;
-      default:
-          stroke_linejoin_ = "miter";
-      }
+        switch(stroke_linejoin)
+        {
+        case MITER_JOIN:
+            stroke_linejoin_ = "miter";
+            break;
+        case MITER_REVERT_JOIN:
+            stroke_linejoin_ = "miter";
+            break;
+        case ROUND_JOIN:
+            stroke_linejoin_ = "round";
+            break;
+        case BEVEL_JOIN:
+            stroke_linejoin_ = "bevel";
+            break;
+        default:
+            stroke_linejoin_ = "miter";
+        }
     }
 
     void path_output_attributes::set_stroke_dasharray(const dash_array stroke_dasharray)
@@ -225,21 +225,21 @@ namespace mapnik { namespace svg {
 
     // rect_output_attributes
 
-    const double root_output_attributes::SVG_VERSION = 1.1;    
-    const std::string root_output_attributes::SVG_NAMESPACE_URL = "http://www.w3.org/2000/svg";    
+    const double root_output_attributes::SVG_VERSION = 1.1;
+    const std::string root_output_attributes::SVG_NAMESPACE_URL = "http://www.w3.org/2000/svg";
 
     root_output_attributes::root_output_attributes()
-  : width_(400),
-    height_(400),
-    svg_version_(SVG_VERSION),
-    svg_namespace_url_(SVG_NAMESPACE_URL)
+        : width_(400),
+          height_(400),
+          svg_version_(SVG_VERSION),
+          svg_namespace_url_(SVG_NAMESPACE_URL)
     {}
 
     root_output_attributes::root_output_attributes(const unsigned width, const unsigned height)
-  : width_(width),
-    height_(height),
-    svg_version_(SVG_VERSION),
-    svg_namespace_url_(SVG_NAMESPACE_URL)
+        : width_(width),
+          height_(height),
+          svg_version_(SVG_VERSION),
+          svg_namespace_url_(SVG_NAMESPACE_URL)
     {}
 
     void root_output_attributes::set_width(const unsigned width)
@@ -289,4 +289,4 @@ namespace mapnik { namespace svg {
         svg_version_ = SVG_VERSION;
         svg_namespace_url_ = SVG_NAMESPACE_URL;
     }
-}}
+    }}

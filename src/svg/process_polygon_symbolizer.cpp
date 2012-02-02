@@ -26,19 +26,19 @@
 
 namespace mapnik
 {
-    /*!
-     * @brief Collect presentation attributes found in polygon symbolizer.
-     */
-    template <typename T>
-    void svg_renderer<T>::process(polygon_symbolizer const& sym,
-          Feature const& feature,
-          proj_transform const& prj_trans)
-    {
-        path_attributes_.set_fill_color(sym.get_fill());
-        path_attributes_.set_fill_opacity(sym.get_opacity());
-    }
+/*!
+ * @brief Collect presentation attributes found in polygon symbolizer.
+ */
+template <typename T>
+void svg_renderer<T>::process(polygon_symbolizer const& sym,
+                              Feature const& feature,
+                              proj_transform const& prj_trans)
+{
+    path_attributes_.set_fill_color(sym.get_fill());
+    path_attributes_.set_fill_opacity(sym.get_opacity());
+}
 
-    template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,
-                      Feature const& feature,
-                      proj_transform const& prj_trans);
+template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,
+                                                                  Feature const& feature,
+                                                                  proj_transform const& prj_trans);
 }

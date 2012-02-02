@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -42,7 +42,7 @@ namespace mapnik
 #ifdef MAPNIK_THREADSAFE
 using boost::mutex;
 #endif
-   
+
 template <typename T>
 class CreateUsingNew
 {
@@ -76,13 +76,13 @@ private:
     };
 
 public:
-        
+
     static T* create()
     {
         static MaxAlign staticMemory;
         return new(&staticMemory) T;
     }
-#ifdef __SUNPRO_CC        
+#ifdef __SUNPRO_CC
     // Sun C++ Compiler doesn't handle `volatile` keyword same as GCC.
     static void destroy(T* obj)
 #else
@@ -92,7 +92,7 @@ public:
         obj->~T();
     }
 };
-    
+
 template <typename T,
           template <typename U> class CreatePolicy=CreateStatic> class singleton
 {
@@ -113,7 +113,7 @@ template <typename T,
     {
         throw std::runtime_error("dead reference!");
     }
-                  
+
     static void DestroySingleton()
     {
         CreatePolicy<T>::destroy(pInstance_);
@@ -123,7 +123,7 @@ template <typename T,
         std::clog << " destroyed singleton \n";
 #endif
     }
-                  
+
 protected:
 #ifdef MAPNIK_THREADSAFE
     static mutex mutex_;
@@ -136,10 +136,10 @@ public:
         {
 #ifdef MAPNIK_THREADSAFE
             mutex::scoped_lock lock(mutex_);
-#endif                        
+#endif
             if (!pInstance_)
             {
-                           
+
                 if (destroyed_)
                 {
                     onDeadReference();
@@ -159,11 +159,11 @@ public:
 template <typename T,
           template <typename U> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
 #endif
-    
+
 template <typename T,
           template <typename U> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
 template <typename T,
-          template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;  
+          template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
 
 }
 

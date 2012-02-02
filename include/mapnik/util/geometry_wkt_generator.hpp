@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -46,178 +46,178 @@
 namespace boost { namespace spirit { namespace traits {
 
 // make gcc and darwin toolsets happy.
-template <>
-struct is_container<mapnik::geometry_container>
-    : mpl::false_
-{};
-                                     
-}}}
+        template <>
+        struct is_container<mapnik::geometry_container>
+            : mpl::false_
+        {};
+
+        }}}
 
 
 namespace mapnik { namespace util {
 
-namespace karma = boost::spirit::karma;
-namespace phoenix = boost::phoenix;
+    namespace karma = boost::spirit::karma;
+    namespace phoenix = boost::phoenix;
 
-namespace {
+    namespace {
 
-struct get_type
-{
-    template <typename T>
-    struct result { typedef int type; };
-
-    int operator() (geometry_type const& geom) const
+    struct get_type
     {
-        return static_cast<int>(geom.type());
-    }
-};
+        template <typename T>
+        struct result { typedef int type; };
 
-struct get_first
-{
-    template <typename T>
-    struct result { typedef geometry_type::value_type const type; };
-
-    geometry_type::value_type const operator() (geometry_type const& geom) const
-    {
-        geometry_type::value_type coord;
-        boost::get<0>(coord) = geom.get_vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
-        return coord;
-    }
-};
-
-
-struct multi_geometry_
-{
-    template <typename T>
-    struct result { typedef bool type; };
-    
-    bool operator() (geometry_container const& geom) const
-    {
-        return geom.size() > 1 ? true : false;
-    }
-};
-
-struct multi_geometry_type
-{
-    template <typename T>
-    struct result { typedef boost::tuple<unsigned,bool> type; };
-    
-    boost::tuple<unsigned,bool> operator() (geometry_container const& geom) const
-    {
-        unsigned type = 0u;
-        bool collection = false;
-        
-        geometry_container::const_iterator itr = geom.begin();
-        geometry_container::const_iterator end = geom.end();
-        
-        for ( ; itr != end; ++itr)
-        {            
-            if (type != 0 && itr->type() != type) 
-            {
-                collection = true;
-                break;
-            }
-            type = itr->type();
+        int operator() (geometry_type const& geom) const
+        {
+            return static_cast<int>(geom.type());
         }
-        return boost::tuple<unsigned,bool>(type, collection);
-    }
-};
+    };
 
-
-template <typename T>
-struct wkt_coordinate_policy : karma::real_policies<T>
-{
-    typedef boost::spirit::karma::real_policies<T> base_type;
-    static int floatfield(T n) { return base_type::fmtflags::fixed; }
-    static unsigned precision(T n) { return 6 ;}
-};
-
-}
-
-template <typename OutputIterator>
-struct wkt_generator : 
-        karma::grammar<OutputIterator, geometry_type const& ()>
-{
-    
-    wkt_generator(bool single = false)
-        : wkt_generator::base_type(wkt)
+    struct get_first
     {
-        using boost::spirit::karma::uint_;
-        using boost::spirit::karma::_val;
-        using boost::spirit::karma::_1;
-        using boost::spirit::karma::lit;
-        using boost::spirit::karma::_a;
-        using boost::spirit::karma::_r1;
-        using boost::spirit::karma::eps;
-        using boost::spirit::karma::string;
-        
-        wkt = point | linestring | polygon 
-            ;
-        
-        point = &uint_(mapnik::Point)[_1 = _type(_val)] 
-            << string[ phoenix::if_ (single) [_1 = "Point("] 
-                       .else_[_1 = "("]] 
-            << point_coord [_1 = _first(_val)] << lit(')')
-            ;
-        
-        linestring = &uint_(mapnik::LineString)[_1 = _type(_val)] 
-            << string[ phoenix::if_ (single) [_1 = "LineString("] 
-                       .else_[_1 = "("]] 
-            << coords 
-            << lit(')')
-            ;
-        
-        polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
-            << string[ phoenix::if_ (single) [_1 = "Polygon("] 
-                       .else_[_1 = "("]] 
-            << coords2
-            << lit("))")            
-            ;
-        
-        point_coord = &uint_ << coord_type << lit(' ') << coord_type 
-            ;
-        
-        polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1] 
-                   << string[ if_ (_r1 > 1) [_1 = "),("]
-                              .else_[_1 = "("] ] | &uint_ << ",") 
-            << coord_type 
-            << lit(' ') 
-            << coord_type
-            ; 
-        
-        coords2 %= *polygon_coord(_a)
-            ;
+        template <typename T>
+        struct result { typedef geometry_type::value_type const type; };
 
-        coords = point_coord % lit(',')
-            ;
-        
+        geometry_type::value_type const operator() (geometry_type const& geom) const
+        {
+            geometry_type::value_type coord;
+            boost::get<0>(coord) = geom.get_vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+            return coord;
+        }
+    };
+
+
+    struct multi_geometry_
+    {
+        template <typename T>
+        struct result { typedef bool type; };
+
+        bool operator() (geometry_container const& geom) const
+        {
+            return geom.size() > 1 ? true : false;
+        }
+    };
+
+    struct multi_geometry_type
+    {
+        template <typename T>
+        struct result { typedef boost::tuple<unsigned,bool> type; };
+
+        boost::tuple<unsigned,bool> operator() (geometry_container const& geom) const
+        {
+            unsigned type = 0u;
+            bool collection = false;
+
+            geometry_container::const_iterator itr = geom.begin();
+            geometry_container::const_iterator end = geom.end();
+
+            for ( ; itr != end; ++itr)
+            {
+                if (type != 0 && itr->type() != type)
+                {
+                    collection = true;
+                    break;
+                }
+                type = itr->type();
+            }
+            return boost::tuple<unsigned,bool>(type, collection);
+        }
+    };
+
+
+    template <typename T>
+    struct wkt_coordinate_policy : karma::real_policies<T>
+    {
+        typedef boost::spirit::karma::real_policies<T> base_type;
+        static int floatfield(T n) { return base_type::fmtflags::fixed; }
+        static unsigned precision(T n) { return 6 ;}
+    };
+
     }
-    // rules
-    karma::rule<OutputIterator, geometry_type const& ()> wkt; 
-    karma::rule<OutputIterator, geometry_type const& ()> point;
-    karma::rule<OutputIterator, geometry_type const& ()> linestring;
-    karma::rule<OutputIterator, geometry_type const& ()> polygon;
 
-    karma::rule<OutputIterator, geometry_type const& ()> coords;
-    karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> coords2;
-    karma::rule<OutputIterator, geometry_type::value_type ()> point_coord;
-    karma::rule<OutputIterator, geometry_type::value_type (unsigned& )> polygon_coord;
-    
-    // phoenix functions
-    phoenix::function<get_type > _type;
-    phoenix::function<get_first> _first;
-    //
-    karma::real_generator<double, wkt_coordinate_policy<double> > coord_type;
-    
-};
+    template <typename OutputIterator>
+    struct wkt_generator :
+        karma::grammar<OutputIterator, geometry_type const& ()>
+    {
+
+        wkt_generator(bool single = false)
+            : wkt_generator::base_type(wkt)
+        {
+            using boost::spirit::karma::uint_;
+            using boost::spirit::karma::_val;
+            using boost::spirit::karma::_1;
+            using boost::spirit::karma::lit;
+            using boost::spirit::karma::_a;
+            using boost::spirit::karma::_r1;
+            using boost::spirit::karma::eps;
+            using boost::spirit::karma::string;
+
+            wkt = point | linestring | polygon
+                ;
+
+            point = &uint_(mapnik::Point)[_1 = _type(_val)]
+                << string[ phoenix::if_ (single) [_1 = "Point("]
+                           .else_[_1 = "("]]
+                << point_coord [_1 = _first(_val)] << lit(')')
+                ;
+
+            linestring = &uint_(mapnik::LineString)[_1 = _type(_val)]
+                << string[ phoenix::if_ (single) [_1 = "LineString("]
+                           .else_[_1 = "("]]
+                << coords
+                << lit(')')
+                ;
+
+            polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
+                << string[ phoenix::if_ (single) [_1 = "Polygon("]
+                           .else_[_1 = "("]]
+                << coords2
+                << lit("))")
+                ;
+
+            point_coord = &uint_ << coord_type << lit(' ') << coord_type
+                ;
+
+            polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
+                               << string[ if_ (_r1 > 1) [_1 = "),("]
+                                          .else_[_1 = "("] ] | &uint_ << ",")
+                << coord_type
+                << lit(' ')
+                << coord_type
+                ;
+
+            coords2 %= *polygon_coord(_a)
+                ;
+
+            coords = point_coord % lit(',')
+                ;
+
+        }
+        // rules
+        karma::rule<OutputIterator, geometry_type const& ()> wkt;
+        karma::rule<OutputIterator, geometry_type const& ()> point;
+        karma::rule<OutputIterator, geometry_type const& ()> linestring;
+        karma::rule<OutputIterator, geometry_type const& ()> polygon;
+
+        karma::rule<OutputIterator, geometry_type const& ()> coords;
+        karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> coords2;
+        karma::rule<OutputIterator, geometry_type::value_type ()> point_coord;
+        karma::rule<OutputIterator, geometry_type::value_type (unsigned& )> polygon_coord;
+
+        // phoenix functions
+        phoenix::function<get_type > _type;
+        phoenix::function<get_first> _first;
+        //
+        karma::real_generator<double, wkt_coordinate_policy<double> > coord_type;
+
+    };
 
 
 
 template <typename OutputIterator>
-struct wkt_multi_generator : 
+struct wkt_multi_generator :
         karma::grammar<OutputIterator, karma::locals< boost::tuple<unsigned,bool> >, geometry_container const& ()>
 {
-    
+
     wkt_multi_generator()
         : wkt_multi_generator::base_type(wkt)
     {
@@ -226,29 +226,29 @@ struct wkt_multi_generator :
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
         using boost::spirit::karma::_a;
-        
+
         geometry_types.add
             (mapnik::Point,"Point")
             (mapnik::LineString,"LineString")
             (mapnik::Polygon,"Polygon")
             ;
-        
-        wkt =  eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)] 
-            << lit("GeometryCollection(") << geometry << lit(")")    
-            | eps(is_multi(_val)) << lit("Multi") << geometry_types[_1 = phoenix::at_c<0>(_a)] 
-            << "(" << multi_geometry << ")" 
+
+        wkt =  eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)]
+            << lit("GeometryCollection(") << geometry << lit(")")
+            | eps(is_multi(_val)) << lit("Multi") << geometry_types[_1 = phoenix::at_c<0>(_a)]
+            << "(" << multi_geometry << ")"
             |  geometry
             ;
-        
-        geometry =  -(single_geometry % lit(','))            
-            ; 
-        
-        single_geometry = geometry_types[_1 = _type(_val)] << path 
+
+        geometry =  -(single_geometry % lit(','))
             ;
-        
-        multi_geometry = -(path % lit(',')) 
-            ; 
-        
+
+        single_geometry = geometry_types[_1 = _type(_val)] << path
+            ;
+
+        multi_geometry = -(path % lit(','))
+            ;
+
     }
     // rules
     karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >, geometry_container const& ()> wkt;
@@ -260,7 +260,7 @@ struct wkt_multi_generator :
     phoenix::function<multi_geometry_> is_multi;
     phoenix::function<multi_geometry_type> _multi_type;
     phoenix::function<get_type > _type;
-    // 
+    //
     karma::symbols<unsigned, char const*> geometry_types;
 };
 

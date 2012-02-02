@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -39,41 +39,41 @@ struct expression_attributes : boost::static_visitor<void>
 {
     explicit expression_attributes(std::set<std::string> & names)
         : names_(names) {}
-    
-    void operator() (value_type const& x) const 
+
+    void operator() (value_type const& x) const
     {
         boost::ignore_unused_variable_warning(x);
     }
-    
+
     void operator() (attribute const& attr) const
     {
         names_.insert(attr.name());
     }
-    
-    template <typename Tag> 
+
+    template <typename Tag>
     void operator() (binary_node<Tag> const& x) const
     {
         boost::apply_visitor(expression_attributes(names_),x.left);
         boost::apply_visitor(expression_attributes(names_),x.right);
-        
+
     }
 
     template <typename Tag>
     void operator() (unary_node<Tag> const& x) const
     {
-        boost::apply_visitor(expression_attributes(names_),x.expr);     
+        boost::apply_visitor(expression_attributes(names_),x.expr);
     }
-    
+
     void operator() (regex_match_node const& x) const
     {
         boost::apply_visitor(expression_attributes(names_),x.expr);
     }
-    
+
     void operator() (regex_replace_node const& x) const
     {
         boost::apply_visitor(expression_attributes(names_),x.expr);
     }
-    
+
 private:
     std::set<std::string>& names_;
 };
@@ -82,10 +82,10 @@ struct symbolizer_attributes : public boost::static_visitor<>
 {
     symbolizer_attributes(std::set<std::string>& names)
         : names_(names) {}
-        
+
     template <typename T>
     void operator () (T const&) const {}
-    
+
     void operator () (text_symbolizer const& sym)
     {
         std::set<expression_ptr>::const_iterator it;
@@ -97,9 +97,9 @@ struct symbolizer_attributes : public boost::static_visitor<>
         }
         collect_metawriter(sym);
     }
-    
+
     void operator () (point_symbolizer const& sym)
-    {   
+    {
         path_expression_ptr const& filename_expr = sym.get_filename();
         if (filename_expr)
         {
@@ -115,7 +115,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
     }
 
     void operator () (line_pattern_symbolizer const& sym)
-    {   
+    {
         path_expression_ptr const& filename_expr = sym.get_filename();
         if (filename_expr)
         {
@@ -130,7 +130,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
     }
 
     void operator () (polygon_pattern_symbolizer const& sym)
-    {   
+    {
         path_expression_ptr const& filename_expr = sym.get_filename();
         if (filename_expr)
         {
@@ -138,7 +138,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
         }
         collect_metawriter(sym);
     }
-    
+
     void operator () (shield_symbolizer const& sym)
     {
         std::set<expression_ptr>::const_iterator it;
@@ -148,7 +148,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             if (*it) boost::apply_visitor(f_attr, **it);
         }
-        
+
         path_expression_ptr const& filename_expr = sym.get_filename();
         if (filename_expr)
         {
@@ -173,7 +173,7 @@ struct symbolizer_attributes : public boost::static_visitor<>
         collect_metawriter(sym);
     }
     // TODO - support remaining syms
-    
+
 private:
     std::set<std::string>& names_;
     void collect_metawriter(symbolizer_base const& sym)
@@ -189,10 +189,10 @@ class attribute_collector : public boost::noncopyable
 private:
     std::set<std::string>& names_;
 public:
-    
+
     attribute_collector(std::set<std::string>& names)
         : names_(names) {}
-        
+
     template <typename RuleType>
     void operator() (RuleType const& r)
     {
@@ -203,21 +203,21 @@ public:
         {
             boost::apply_visitor(s_attr,*symIter++);
         }
-        
+
         expression_ptr const& expr = r.get_filter();
         expression_attributes f_attr(names_);
         boost::apply_visitor(f_attr,*expr);
-    }   
+    }
 };
 
 struct directive_collector : public boost::static_visitor<>
 {
     directive_collector(double * filter_factor)
         : filter_factor_(filter_factor) {}
-        
+
     template <typename T>
     void operator () (T const&) const {}
-    
+
     void operator () (raster_symbolizer const& sym)
     {
         *filter_factor_ = sym.calculate_filter_factor();

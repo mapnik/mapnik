@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -23,7 +23,7 @@
 #ifndef MAPNIK_POLYGON_PATTERN_SYMBOLIZER_HPP
 #define MAPNIK_POLYGON_PATTERN_SYMBOLIZER_HPP
 
-// mapnik 
+// mapnik
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/gamma_method.hpp>

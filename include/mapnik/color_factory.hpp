@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -36,17 +36,17 @@
 #if BOOST_VERSION >= 104500
 #include <mapnik/css_color_grammar.hpp>
 
-namespace mapnik {    
-   
+namespace mapnik {
+
 class MAPNIK_DECL color_factory : boost::noncopyable
 {
 public:
-    
+
     static void init_from_string(color & c, std::string const& css_color)
-    {   
+    {
         typedef std::string::const_iterator iterator_type;
-        typedef mapnik::css_color_grammar<iterator_type> css_color_grammar; 
-        
+        typedef mapnik::css_color_grammar<iterator_type> css_color_grammar;
+
         css_color_grammar g;
         iterator_type first = css_color.begin();
         iterator_type last =  css_color.end();
@@ -56,15 +56,15 @@ public:
                                             g,
                                             boost::spirit::ascii::space,
                                             c);
-        if (!result) 
+        if (!result)
         {
             throw config_error(std::string("Failed to parse color value: ") +
                                "Expected a CSS color, but got '" + css_color + "'");
         }
-    }    
-    
+    }
+
     static color from_string(std::string const& css_color)
-    {   
+    {
         color c;
         init_from_string(c,css_color);
         return c;
@@ -75,16 +75,16 @@ public:
 #else
 #include <mapnik/css_color_grammar_deprecated.hpp>
 
-namespace mapnik {    
-   
+namespace mapnik {
+
 class MAPNIK_DECL color_factory : boost::noncopyable
 {
 public:
-    
+
     static void init_from_string(color & c, std::string const& css_color)
-    {   
+    {
         typedef std::string::const_iterator iterator_type;
-        typedef mapnik::css_color_grammar<iterator_type> css_color_grammar; 
+        typedef mapnik::css_color_grammar<iterator_type> css_color_grammar;
 
         css_color_grammar g;
         iterator_type first = css_color.begin();
@@ -96,7 +96,7 @@ public:
                                             g,
                                             boost::spirit::ascii::space,
                                             css_);
-        if (!result) 
+        if (!result)
         {
             throw config_error(std::string("Failed to parse color value: ") +
                                "Expected a CSS color, but got '" + css_color + "'");
@@ -105,10 +105,10 @@ public:
         c.set_green(css_.g);
         c.set_blue(css_.b);
         c.set_alpha(css_.a);
-    }    
-    
+    }
+
     static color from_string(std::string const& css_color)
-    {   
+    {
         color c;
         init_from_string(c,css_color);
         return c;

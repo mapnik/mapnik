@@ -39,13 +39,13 @@
 #include "agg_scanline_bin.h"
 #include "agg_conv_stroke.h"
 
-namespace mapnik 
+namespace mapnik
 {
 
 template <typename T>
 void grid_renderer<T>::process(building_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
-                              proj_transform const& prj_trans)
+                               mapnik::feature_ptr const& feature,
+                               proj_transform const& prj_trans)
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
@@ -67,7 +67,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
         value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature), *height_expr);
         height = result.to_double() * scale_factor_;
     }
-    
+
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
         geometry_type const& geom = feature->get_geometry(i);
@@ -93,7 +93,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-                
+
                 x0 = x;
                 y0 = y;
             }
@@ -150,7 +150,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
 }
 
 template void grid_renderer<grid>::process(building_symbolizer const&,
-                                              mapnik::feature_ptr const&,
-                                              proj_transform const&);
+                                           mapnik::feature_ptr const&,
+                                           proj_transform const&);
 
 }

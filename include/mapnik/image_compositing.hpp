@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -33,7 +33,7 @@
 namespace mapnik
 {
 
-// Compositing modes 
+// Compositing modes
 // http://www.w3.org/TR/2009/WD-SVGCompositing-20090430/
 
 enum composite_mode_e
@@ -79,13 +79,13 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
     typedef agg::renderer_base<pixfmt_type> renderer_type;
     typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
     typedef agg::renderer_base<pixfmt_type> renderer_type;
-    
+
     agg::rendering_buffer source(im.getBytes(),im.width(),im.height(),im.width() * 4);
     agg::rendering_buffer mask(im2.getBytes(),im2.width(),im2.height(),im2.width() * 4);
-    
+
     agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf(source);
     agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
-    
+
     switch(mode)
     {
     case clear :
@@ -132,7 +132,7 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
         break;
     case multiply:
         pixf.comp_op(agg::comp_op_multiply);
-        break;     
+        break;
     case screen:
         pixf.comp_op(agg::comp_op_screen);
         break;
@@ -141,7 +141,7 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
         break;
     case darken:
         pixf.comp_op(agg::comp_op_darken);
-        break;    
+        break;
     case lighten:
         pixf.comp_op(agg::comp_op_lighten);
         break;
@@ -174,7 +174,7 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
         break;
     default:
         break;
-    
+
     }
     renderer_type ren(pixf);
     agg::renderer_base<pixfmt_type> rb(pixf);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -25,7 +25,7 @@
 
 #include <sstream>
 
-namespace mapnik 
+namespace mapnik
 {
 
 enum CommandType {
@@ -34,20 +34,20 @@ enum CommandType {
     SEG_LINETO=2,
     SEG_CLOSE =3
 };
-    
+
 template <typename T,int dim>
 struct vertex {
     typedef T coord_type;
 };
-    
+
 template <typename T>
-struct vertex<T,2> 
+struct vertex<T,2>
 {
     typedef T coord_type;
     coord_type x;
     coord_type y;
     unsigned cmd;
-    vertex() 
+    vertex()
         : x(0),y(0),cmd(SEG_END) {}
     vertex(coord_type x,coord_type y,unsigned cmd)
         : x(x),y(y),cmd(cmd) {}
@@ -57,7 +57,7 @@ struct vertex<T,2>
         : x(coord_type(rhs.x)),
           y(coord_type(rhs.y)),
           cmd(rhs.cmd) {}
-        
+
     template <typename T2> vertex<T,2> operator=(const vertex<T2,2>& rhs)
     {
         if ((void*)this == (void*)&rhs)
@@ -68,12 +68,12 @@ struct vertex<T,2>
         y=coord_type(rhs.y);
         cmd=rhs.cmd;
         return *this;
-    }   
+    }
 };
-    
+
 typedef vertex<double,2> vertex2d;
 typedef vertex<int,2> vertex2i;
-    
+
 template <class charT,class traits,class T,int dim>
 inline std::basic_ostream<charT,traits>&
 operator << (std::basic_ostream<charT,traits>& out,
@@ -103,7 +103,7 @@ operator << (std::basic_ostream<charT,traits>& out,
     s<<"vertex3("<<v.x<<","<<v.y<<","<<v.z<<",cmd="<<v.cmd<<")";
     out << s.str();
     return out;
-} 
+}
 
 }
 

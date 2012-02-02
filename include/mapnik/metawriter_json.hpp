@@ -51,9 +51,9 @@ public:
                           CoordTransform const& t,
                           metawriter_properties const& properties);
     virtual void add_polygon(path_type & path,
-                          Feature const& feature,
-                          CoordTransform const& t,
-                          metawriter_properties const& properties);
+                             Feature const& feature,
+                             CoordTransform const& t,
+                             metawriter_properties const& properties);
     virtual void add_line(path_type & path,
                           Feature const& feature,
                           CoordTransform const& t,
@@ -74,9 +74,9 @@ public:
     virtual void set_map_srs(projection const& proj);
 protected:
     enum {
-    HEADER_NOT_WRITTEN = -1,
-    STOPPED = -2,
-    STARTED = 0
+        HEADER_NOT_WRITTEN = -1,
+        STOPPED = -2,
+        STARTED = 0
     };
     /** Features written. */
     int count_;
@@ -129,10 +129,10 @@ public:
     virtual void start(metawriter_property_map const& properties);
     virtual void stop();
     /** Set filename template.
-      *
-      * This template is processed with values from Map's metawriter properties to
-      * create the actual filename during start() call.
-      */
+     *
+     * This template is processed with values from Map's metawriter properties to
+     * create the actual filename during start() call.
+     */
     void set_filename(path_expression_ptr fn);
     /** Get filename template. */
     path_expression_ptr get_filename() const;

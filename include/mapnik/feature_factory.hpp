@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -40,7 +40,7 @@ struct feature_factory
         //return boost::allocate_shared<Feature>(boost::fast_pool_allocator<Feature>(),fid);
         return boost::make_shared<Feature>(ctx,fid);
     }
-}; 
+};
 }
 
 #endif // MAPNIK_FEATURE_FACTORY_HPP

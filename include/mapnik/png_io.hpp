@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -40,7 +40,7 @@ extern "C"
 #define MAX_OCTREE_LEVELS 4
 
 namespace mapnik {
-   
+
 template <typename T>
 void write_data (png_structp png_ptr, png_bytep data, png_size_t length)
 {
@@ -57,13 +57,13 @@ void flush_data (png_structp png_ptr)
 
 template <typename T1, typename T2>
 void save_as_png(T1 & file , T2 const& image, int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY)
-{        
+{
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
-       
+
     if (!png_ptr) return;
-      
+
     // switch on optimization only if supported
 #if defined(PNG_LIBPNG_VER) && (PNG_LIBPNG_VER >= 10200) && defined(PNG_MMX_CODE_SUPPORTED)
     png_uint_32 mask, flags;
@@ -116,7 +116,7 @@ void reduce_8  (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned l
         alpha[i] = 0;
         alphaCount[i] = 0;
     }
-      
+
     for (unsigned y = 0; y < height; ++y)
     {
         mapnik::image_data_32::pixel_type const * row = in.getRow(y);
@@ -141,7 +141,7 @@ void reduce_8  (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned l
             row_out[x] = index;
         }
     }
-    for(unsigned i=0; i<alpha.size(); i++) 
+    for(unsigned i=0; i<alpha.size(); i++)
     {
         if (alphaCount[i]!=0)
             alpha[i] /= alphaCount[i];
@@ -188,7 +188,7 @@ void reduce_4 (T const& in, image_data_8 & out, octree<rgb> trees[], unsigned li
             row_out[x>>1] |= index;
         }
     }
-    for(unsigned i=0; i<alpha.size(); i++) 
+    for(unsigned i=0; i<alpha.size(); i++)
     {
         if (alphaCount[i]!=0)
             alpha[i] /= alphaCount[i];
@@ -256,7 +256,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
     {
         std::vector<png_byte> trans(alpha.size());
         unsigned alphaSize=0;//truncate to nonopaque values
-        for(unsigned i=0; i < alpha.size(); i++) 
+        for(unsigned i=0; i < alpha.size(); i++)
         {
             trans[i]=alpha[i];
             if (alpha[i]<255)
@@ -278,7 +278,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
 
 template <typename T1,typename T2>
 void save_as_png8_oct(T1 & file, T2 const& image, const unsigned max_colors = 256,
-    int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY, int trans_mode = -1)
+                      int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY, int trans_mode = -1)
 {
     // number of alpha ranges in png8 format; 2 results in smallest image with binary transparency
     // 3 is minimum for semitransparency, 4 is recommended, anything else is worse
@@ -376,7 +376,7 @@ void save_as_png8_oct(T1 & file, T2 const& image, const unsigned max_colors = 25
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            
+
             // insert to proper tree based on alpha range
             for(unsigned j=TRANSPARENCY_LEVELS-1; j>0; j--){
                 if (cols[j]>0 && U2ALPHA(val)>=limits[j]) {
@@ -417,7 +417,7 @@ void save_as_png8_oct(T1 & file, T2 const& image, const unsigned max_colors = 25
     //alphaTable.resize(palette.size());//allow semitransparency also in almost opaque range
     if (trans_mode != 0)
         alphaTable.resize(palette.size() - cols[TRANSPARENCY_LEVELS-1]);
-      
+
     if (palette.size() > 16 )
     {
         // >16 && <=256 colors -> write 8-bit color depth
@@ -452,8 +452,8 @@ void save_as_png8_oct(T1 & file, T2 const& image, const unsigned max_colors = 25
 
 template <typename T1, typename T2, typename T3>
 void save_as_png8(T1 & file, T2 const& image, T3 const & tree,
-        std::vector<mapnik::rgb> const& palette, std::vector<unsigned> const& alphaTable,
-        int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY)
+                  std::vector<mapnik::rgb> const& palette, std::vector<unsigned> const& alphaTable,
+                  int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY)
 {
     unsigned width = image.width();
     unsigned height = image.height();
@@ -510,8 +510,8 @@ void save_as_png8(T1 & file, T2 const& image, T3 const & tree,
 
 template <typename T1,typename T2>
 void save_as_png8_hex(T1 & file, T2 const& image, int colors = 256,
-        int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY,
-        int trans_mode = -1, double gamma = 2.0)
+                      int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY,
+                      int trans_mode = -1, double gamma = 2.0)
 {
     unsigned width = image.width();
     unsigned height = image.height();
@@ -551,7 +551,7 @@ void save_as_png8_hex(T1 & file, T2 const& image, int colors = 256,
 
 template <typename T1, typename T2>
 void save_as_png8_pal(T1 & file, T2 const& image, rgba_palette const& pal,
-        int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY)
+                      int compression = Z_DEFAULT_COMPRESSION, int strategy = Z_DEFAULT_STRATEGY)
 {
     save_as_png8<T1, T2, rgba_palette>(file, image, pal, pal.palette(), pal.alphaTable(), compression, strategy);
 }

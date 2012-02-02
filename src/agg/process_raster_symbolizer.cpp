@@ -50,7 +50,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
         raster_colorizer_ptr colorizer = sym.get_colorizer();
         if (colorizer)
             colorizer->colorize(source,*feature);
-        
+
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
 
@@ -63,7 +63,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
         int raster_height = end_y - start_y;
         double err_offs_x = ext.minx() - start_x;
         double err_offs_y = ext.miny() - start_y;
-        
+
         if (raster_width > 0 && raster_height > 0)
         {
             double scale_factor = ext.width() / source->data_.width();
@@ -75,7 +75,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                              sym.calculate_filter_factor(),
                              scale_factor,
                              sym.get_scaling());
-            
+
             if (sym.get_mode() == "normal"){
                 if (sym.get_opacity() == 1.0) {
                     pixmap_.set_rectangle_alpha(start_x,start_y,target.data_);

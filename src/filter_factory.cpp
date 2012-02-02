@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -38,11 +38,11 @@ public:
     static expression_ptr compile(std::string const& str,transcoder const& tr)
     {
         expression_ptr expr(new expr_node(true));
-       
+
         std::string::const_iterator itr = str.begin();
         std::string::const_iterator end = str.end();
         mapnik::expression_grammar<std::string::const_iterator> g(tr);
-       
+
         bool r = boost::spirit::qi::phrase_parse(itr,end,g, boost::spirit::standard_wide::space,*expr);
         if (r  && itr==end)
         {
@@ -50,7 +50,7 @@ public:
         }
         else
         {
-            throw config_error( "Failed to parse expression: \"" + str + "\"" );           
+            throw config_error( "Failed to parse expression: \"" + str + "\"" );
         }
     }
 };

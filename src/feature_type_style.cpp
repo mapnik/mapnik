@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,8 +35,8 @@ IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 
 
 feature_type_style::feature_type_style()
-    : filter_mode_(FILTER_ALL),
-      scale_denom_validity_(-1) {}
+: filter_mode_(FILTER_ALL),
+    scale_denom_validity_(-1) {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
     : filter_mode_(rhs.filter_mode_),
@@ -46,13 +46,13 @@ feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_
         rules_ = rhs.rules_;
     } else {
         rules::const_iterator it  = rhs.rules_.begin(),
-                        end = rhs.rules_.end();
+            end = rhs.rules_.end();
         for(; it != end; ++it) {
             rules_.push_back(rule(*it, deep_copy));
         }
     }
 }
-    
+
 feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
 {
     if (this == &rhs) return *this;
@@ -60,13 +60,13 @@ feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
     scale_denom_validity_ = -1;
     return *this;
 }
-    
+
 void feature_type_style::add_rule(rule const& rule)
 {
     rules_.push_back(rule);
     scale_denom_validity_ = -1;
-} 
-    
+}
+
 rules const& feature_type_style::get_rules() const
 {
     return rules_;
@@ -76,7 +76,7 @@ rules &feature_type_style::get_rules_nonconst()
 {
     return rules_;
 }
-    
+
 void feature_type_style::set_filter_mode(filter_mode_e mode)
 {
     filter_mode_ = mode;

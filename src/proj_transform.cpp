@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -25,7 +25,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/proj_transform.hpp>
-#include <mapnik/coord.hpp> 
+#include <mapnik/coord.hpp>
 #include <mapnik/utils.hpp>
 
 // proj4
@@ -42,8 +42,8 @@ static const float M_PIby360 = M_PI / 360;
 static const float MAXEXTENTby180 = MAXEXTENT/180;
 
 namespace mapnik {
-    
-proj_transform::proj_transform(projection const& source, 
+
+proj_transform::proj_transform(projection const& source,
                                projection const& dest)
     : source_(source),
       dest_(dest)
@@ -91,8 +91,8 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         }
         return true;
     }
-    
-        if (is_source_longlat_)
+
+    if (is_source_longlat_)
     {
         int i;
         for(i=0; i<point_count; i++) {
@@ -105,7 +105,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
-        if (pj_transform( source_.proj_, dest_.proj_, point_count, 
+        if (pj_transform( source_.proj_, dest_.proj_, point_count,
                           0, x,y,z) != 0)
         {
             return false;
@@ -157,7 +157,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         mutex::scoped_lock lock(projection::mutex_);
 #endif
 
-        if (pj_transform( dest_.proj_, source_.proj_, point_count, 
+        if (pj_transform( dest_.proj_, source_.proj_, point_count,
                           0, x,y,z) != 0)
         {
             return false;
@@ -198,7 +198,7 @@ bool proj_transform::forward (box2d<double> & box) const
         return false;
     box.init(minx,miny,maxx,maxy);
     return true;
-} 
+}
 
 bool proj_transform::backward (box2d<double> & box) const
 {
@@ -222,19 +222,19 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
 {
     double width = env.width();
     double height = env.height();
-    
+
     int steps;
-    
+
     if (points <= 4) {
         steps = 0;
     } else {
         steps = static_cast<int>(ceil((points - 4) / 4.0));
     }
-    
+
     steps += 1;
     double xstep = width / steps;
     double ystep = height / steps;
-    
+
     for (int i=0; i<=steps; i++) {
         coords.push_back(coord<double,2>(env.minx() + i * xstep, env.miny()));
         coords.push_back(coord<double,2>(env.minx() + i * xstep, env.maxy()));
@@ -249,7 +249,7 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
 box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
     std::vector<coord<double,2> >::iterator it = points.begin();
     std::vector<coord<double,2> >::iterator it_end = points.end();
-    
+
     box2d<double> env(*it, *(++it));
     for (; it!=it_end; ++it) {
         env.expand_to_include(*it);
@@ -262,16 +262,16 @@ box2d<double> calculate_bbox(std::vector<coord<double,2> > & points) {
  * in the face of proj4 out of bounds conditions.
  * Can result in 20 -> 10 r/s performance hit.
  * Alternative is to provide proper clipping box
- * in the target srs by setting map 'maximum-extent' 
+ * in the target srs by setting map 'maximum-extent'
  */
 bool proj_transform::backward(box2d<double>& env, int points) const
 {
     if (is_source_equal_dest_)
         return true;
-    
+
     std::vector<coord<double,2> > coords;
     envelope_points(coords, env, points);
-    
+
     double z;
     for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
         z = 0;
@@ -281,7 +281,7 @@ bool proj_transform::backward(box2d<double>& env, int points) const
     }
 
     box2d<double> result = calculate_bbox(coords);
-    
+
     env.re_center(result.center().x, result.center().y);
     env.height(result.height());
     env.width(result.width());
@@ -293,10 +293,10 @@ bool proj_transform::forward(box2d<double>& env, int points) const
 {
     if (is_source_equal_dest_)
         return true;
-    
+
     std::vector<coord<double,2> > coords;
     envelope_points(coords, env, points);
-    
+
     double z;
     for (std::vector<coord<double,2> >::iterator it = coords.begin(); it!=coords.end(); ++it) {
         z = 0;
@@ -306,7 +306,7 @@ bool proj_transform::forward(box2d<double>& env, int points) const
     }
 
     box2d<double> result = calculate_bbox(coords);
-    
+
     env.re_center(result.center().x, result.center().y);
     env.height(result.height());
     env.width(result.width());
@@ -322,5 +322,5 @@ mapnik::projection const& proj_transform::dest() const
 {
     return dest_;
 }
- 
+
 }

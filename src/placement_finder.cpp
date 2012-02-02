@@ -112,7 +112,7 @@ placement_finder<DetectorT>::placement_finder(text_placement_info &placement_inf
       dimensions_(extent),
       info_(info), p(placement_info.properties), pi(placement_info), string_width_(0), string_height_(0), first_line_space_(0), valign_(V_AUTO), halign_(H_AUTO), line_breaks_(), line_sizes_()
 {
-        placement_info.placements.clear(); //Remove left overs
+    placement_info.placements.clear(); //Remove left overs
 }
 
 template <typename DetectorT>
@@ -260,7 +260,7 @@ void placement_finder<DetectorT>::find_line_breaks()
             // wrap text at first wrap_char after (default) the wrap width or immediately before the current word
             if ((c == '\n') ||
                 (line_width > 0 && ((line_width > wrap_at && !ci.format->wrap_before) ||
-                                   ((line_width + last_wrap_char_width + word_width) > wrap_at && ci.format->wrap_before)) ))
+                                    ((line_width + last_wrap_char_width + word_width) > wrap_at && ci.format->wrap_before)) ))
             {
                 string_width_ = std::max(string_width_, line_width); //Total width is the longest line
                 string_height_ += line_height;
@@ -407,7 +407,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
             double dy = x * sina + y*cosa;
 
             current_placement->add_node(c, dx, dy, rad, ci.format);
-            
+
             // compute the Bounding Box for each character and test for:
             // overlap, minimum distance or edge avoidance - exit if condition occurs
             box2d<double> e;
@@ -428,30 +428,30 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
                        current_placement->starting_x + dx + ci.width,         // Top Right
                        current_placement->starting_y - dy - ci.ymax);
             }
-            
+
             // if there is an overlap with existing envelopes, then exit - no placement
             if (!detector_.extent().intersects(e) || (!p.allow_overlap && !detector_.has_point_placement(e, pi.get_actual_minimum_distance()))) {
                 return;
             }
 
-            // if avoid_edges test dimensions contains e 
+            // if avoid_edges test dimensions contains e
             if (p.avoid_edges && !dimensions_.contains(e)) {
                 return;
             }
-            
+
             if (p.minimum_padding > 0)
             {
                 double min_pad = pi.get_actual_minimum_padding();
                 box2d<double> epad(e.minx()-min_pad,
-                                      e.miny()-min_pad,
-                                      e.maxx()+min_pad,
-                                      e.maxy()+min_pad);
-                if (!dimensions_.contains(epad)) 
+                                   e.miny()-min_pad,
+                                   e.maxx()+min_pad,
+                                   e.maxy()+min_pad);
+                if (!dimensions_.contains(epad))
                 {
                     return;
                 }
             }
-  
+
 
             c_envelopes.push(e);  // add character's envelope to temp storage
         }
@@ -901,13 +901,13 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
             break;
         }
         if (p.minimum_padding > 0)
-        { 
+        {
             double min_pad = pi.get_actual_minimum_padding();
             box2d<double> epad(e.minx()-min_pad,
                                e.miny()-min_pad,
                                e.maxx()+min_pad,
                                e.maxy()+min_pad);
-            if (!dimensions_.contains(epad)) 
+            if (!dimensions_.contains(epad))
             {
                 status = false;
                 break;
@@ -915,7 +915,7 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
         }
         pi.envelopes.push(e);
     }
-    
+
     current_placement->rewind();
 
     return status;

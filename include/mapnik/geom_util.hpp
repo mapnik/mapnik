@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -54,7 +54,7 @@ bool clip_test(T p,T q,double& tmin,double& tmax)
     } else if (q<0.0) result=false;
     return result;
 }
-    
+
 template <typename T,typename Image>
 bool clip_line(T& x0,T& y0,T& x1,T& y1,box2d<T> const& box)
 {
@@ -87,26 +87,26 @@ bool clip_line(T& x0,T& y0,T& x1,T& y1,box2d<T> const& box)
     }
     return false;
 }
-    
-template <typename Iter> 
+
+template <typename Iter>
 inline bool point_inside_path(double x,double y,Iter start,Iter end)
 {
     bool inside=false;
     double x0=boost::get<0>(*start);
     double y0=boost::get<1>(*start);
-        
+
     double x1,y1;
-    while (++start!=end) 
+    while (++start!=end)
     {
         if ( boost::get<2>(*start) == SEG_MOVETO)
         {
             x0 = boost::get<0>(*start);
             y0 = boost::get<1>(*start);
             continue;
-        }               
+        }
         x1=boost::get<0>(*start);
         y1=boost::get<1>(*start);
-            
+
         if ((((y1 <= y) && (y < y0)) ||
              ((y0 <= y) && (y < y1))) &&
             ( x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
@@ -124,7 +124,7 @@ inline bool point_in_circle(double x,double y,double cx,double cy,double r)
     double d2 = dx * dx + dy * dy;
     return (d2 <= r * r);
 }
-    
+
 template <typename T>
 inline T sqr(T x)
 {
@@ -137,23 +137,23 @@ inline double distance2(double x0,double y0,double x1,double y1)
     double dy = y1 - y0;
     return sqr(dx) + sqr(dy);
 }
-    
+
 inline double distance(double x0,double y0, double x1,double y1)
 {
     return std::sqrt(distance2(x0,y0,x1,y1));
 }
-    
-inline double point_to_segment_distance(double x, double y, 
-                                        double ax, double ay, 
+
+inline double point_to_segment_distance(double x, double y,
+                                        double ax, double ay,
                                         double bx, double by)
 {
     double len2 = distance2(ax,ay,bx,by);
-        
-    if (len2 < 1e-14) 
+
+    if (len2 < 1e-14)
     {
         return distance(x,y,ax,ay);
     }
-        
+
     double r = ((x - ax)*(bx - ax) + (y - ay)*(by -ay))/len2;
     if ( r < 0 )
     {
@@ -166,24 +166,24 @@ inline double point_to_segment_distance(double x, double y,
     double s = ((ay - y)*(bx - ax) - (ax - x)*(by - ay))/len2;
     return std::fabs(s) * std::sqrt(len2);
 }
-        
-template <typename Iter> 
+
+template <typename Iter>
 inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 {
     double x0=boost::get<0>(*start);
     double y0=boost::get<1>(*start);
     double x1,y1;
-    while (++start != end) 
+    while (++start != end)
     {
         if ( boost::get<2>(*start) == SEG_MOVETO)
         {
             x0 = boost::get<0>(*start);
             y0 = boost::get<1>(*start);
             continue;
-        }               
+        }
         x1=boost::get<0>(*start);
         y1=boost::get<1>(*start);
-            
+
         double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
         if (distance < tol)
             return true;
@@ -192,7 +192,7 @@ inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
     }
     return false;
 }
-    
+
 // filters
 struct filter_in_box
 {

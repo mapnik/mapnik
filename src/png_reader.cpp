@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -51,12 +51,12 @@ public:
     ~png_reader();
     unsigned width() const;
     unsigned height() const;
-    void read(unsigned x,unsigned y,image_data_32& image);      
+    void read(unsigned x,unsigned y,image_data_32& image);
 private:
     void init();
 };
-  
-namespace 
+
+namespace
 {
 image_reader* create_png_reader(const std::string& file)
 {
@@ -65,7 +65,7 @@ image_reader* create_png_reader(const std::string& file)
 const bool registered = register_image_reader("png",create_png_reader);
 }
 
-png_reader::png_reader(const std::string& fileName) 
+png_reader::png_reader(const std::string& fileName)
     : fileName_(fileName),
       width_(0),
       height_(0),
@@ -89,7 +89,7 @@ png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
         png_error(png_ptr, "Read Error");
     }
 }
-  
+
 
 void png_reader::init()
 {
@@ -111,7 +111,7 @@ void png_reader::init()
     png_structp png_ptr = png_create_read_struct
         (PNG_LIBPNG_VER_STRING,0,0,0);
 
-    if (!png_ptr) 
+    if (!png_ptr)
     {
         fclose(fp);
         throw image_reader_exception("failed to allocate png_ptr");
@@ -137,21 +137,21 @@ void png_reader::init()
 #ifdef MAPNIK_DEBUG
     std::clog<<"bit_depth="<<bit_depth_<<" color_type="<<color_type_<<std::endl;
 #endif
-    png_destroy_read_struct(&png_ptr,&info_ptr,0);      
+    png_destroy_read_struct(&png_ptr,&info_ptr,0);
     fclose(fp);
 }
 
-unsigned png_reader::width() const 
+unsigned png_reader::width() const
 {
     return width_;
 }
 
-unsigned png_reader::height() const 
+unsigned png_reader::height() const
 {
     return height_;
 }
-    
-void png_reader::read(unsigned x0, unsigned y0,image_data_32& image) 
+
+void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
 {
     FILE *fp=fopen(fileName_.c_str(),"rb");
     if (!fp) throw image_reader_exception("cannot open image file "+fileName_);
@@ -159,7 +159,7 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     png_structp png_ptr = png_create_read_struct
         (PNG_LIBPNG_VER_STRING,0,0,0);
 
-    if (!png_ptr) 
+    if (!png_ptr)
     {
         fclose(fp);
         throw image_reader_exception("failed to allocate png_ptr");
@@ -190,7 +190,7 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
 
     // quick hack -- only work in >=libpng 1.2.7
     png_set_add_alpha(png_ptr,0xff,PNG_FILLER_AFTER); //rgba
-        
+
     double gamma;
     if (png_get_gAMA(png_ptr, info_ptr, &gamma))
         png_set_gamma(png_ptr, 2.2, gamma);
@@ -205,10 +205,10 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     for (unsigned i=0;i<height_;++i)
     {
         png_read_row(png_ptr,row.get(),0);
-        if (i>=y0 && i<h) 
+        if (i>=y0 && i<h)
         {
             image.setRow(i-y0,reinterpret_cast<unsigned*>(&row[x0]),w);
-        } 
+        }
     }
     //END
     png_read_end(png_ptr,0);

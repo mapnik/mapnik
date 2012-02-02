@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -47,7 +47,7 @@ public:
 
     virtual const char * what() const throw()
     {
-        return what_.c_str();    
+        return what_.c_str();
     }
 
 protected:
@@ -63,14 +63,14 @@ protected:
  * are provided to help with instanciation.
  *
  * @par Limitations:
- *    - The enum must start at zero. 
- *    - The enum must be consecutive. 
+ *    - The enum must start at zero.
+ *    - The enum must be consecutive.
  *    - The enum must be terminated with a special token consisting of the enum's
  *      name plus "_MAX".
  *    - The corresponding char pointer array must be terminated with an empty string.
  *    - The names must only consist of characters and digits (<i>a-z, A-Z, 0-9</i>),
  *      underscores (<i>_</i>) and dashes (<i>-</i>).
- * 
+ *
  *
  * @warning At the moment the verify() method is called during static initialization.
  * It quits the application with exit code 1 if any error is detected. The other solution
@@ -103,7 +103,7 @@ protected:
  * @endcode
  * And here is how to use the resulting type Fruit
  * @code
- * 
+ *
  * int
  * main(int argc, char * argv[]) {
  *      fruit f(APPLE);
@@ -116,11 +116,11 @@ protected:
  *              cerr << "Hmmm ... yummy " << f << endl;
  *              break;
  *      }
- *      
+ *
  *      f = CHERRY;
  *
  *      fruit_enum native_enum = f;
- *      
+ *
  *      f.from_string("passion_fruit");
  *
  *      for (unsigned i = 0; i < fruit::MAX; ++i) {
@@ -139,9 +139,9 @@ class MAPNIK_DECL enumeration {
 public:
     typedef ENUM native_type;
     enumeration() {};
-    enumeration( ENUM v ) : value_(v) {} 
-    enumeration( const enumeration & other ) : value_(other.value_) {} 
-        
+    enumeration( ENUM v ) : value_(v) {}
+    enumeration( const enumeration & other ) : value_(other.value_) {}
+
     /** Assignment operator for native enum values. */
     void operator=(ENUM v)
         {
@@ -160,7 +160,7 @@ public:
         return value_;
     }
 
-    enum Max 
+    enum Max
     {
         MAX = THE_MAX
     };
@@ -168,7 +168,7 @@ public:
     {
         return THE_MAX;
     }
-    /** Converts @p str to an enum. 
+    /** Converts @p str to an enum.
      * @throw illegal_enum_value @p str is not a legal identifier.
      * */
     void from_string(const std::string & str)
@@ -181,7 +181,7 @@ public:
                 return;
             }
         }
-        throw illegal_enum_value(std::string("Illegal enumeration value '") + 
+        throw illegal_enum_value(std::string("Illegal enumeration value '") +
                                  str + "' for enum " + our_name_);
     }
 
@@ -210,7 +210,7 @@ public:
                 is.unget();
                 break;
             }
-        } 
+        }
 
         try
         {
@@ -231,11 +231,11 @@ public:
     }
 
     /** Prints the string identifier to the output stream @p os. */
-    std::ostream & print(std::ostream & os = std::cerr) const 
+    std::ostream & print(std::ostream & os = std::cerr) const
     {
         return os << our_strings_[value_];
     }
-        
+
     /** Static helper function to iterate over valid identifiers. */
     static const char * get_string(unsigned i)
     {
@@ -252,14 +252,14 @@ public:
             if (our_strings_[i] == 0 )
             {
                 std::cerr << "### FATAL: Not enough strings for enum "
-                          << our_name_ << " defined in file '" << filename 
+                          << our_name_ << " defined in file '" << filename
                           << "' at line " << line_no << std::endl;
                 //std::exit(1);
             }
         }
         if ( std::string("") != our_strings_[THE_MAX])
         {
-            std::cerr << "### FATAL: The string array for enum " << our_name_ 
+            std::cerr << "### FATAL: The string array for enum " << our_name_
                       << " defined in file '" << filename << "' at line " << line_no
                       << " has too many items or is not terminated with an "
                       << "empty string." << std::endl;
@@ -285,10 +285,10 @@ private:
     ENUM value_;
     static const char ** our_strings_ ;
     static std::string our_name_ ;
-    static bool  our_verified_flag_; 
+    static bool  our_verified_flag_;
 };
 
-/** ostream operator for enumeration 
+/** ostream operator for enumeration
  * @relates mapnik::enumeration
  */
 template <class ENUM, int THE_MAX>
@@ -299,7 +299,7 @@ operator<<(std::ostream & os, const mapnik::enumeration<ENUM, THE_MAX> & e)
     return os;
 }
 
-/** istream operator for enumeration 
+/** istream operator for enumeration
  * @relates mapnik::enumeration
  */
 template <class ENUM, int THE_MAX>
@@ -315,7 +315,7 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
 /** Helper macro. Creates a typedef.
  * @relates mapnik::enumeration
  */
-#define DEFINE_ENUM( name, e)                           \
+#define DEFINE_ENUM( name, e)                   \
     typedef enumeration<e, e ## _MAX> name
 
 /** Helper macro. Runs the verify() method during static initialization.

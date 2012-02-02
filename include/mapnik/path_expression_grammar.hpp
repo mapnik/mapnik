@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -63,7 +63,7 @@ using standard_wide::space;
 
 template <typename Iterator>
 struct path_expression_grammar : qi::grammar<Iterator, std::vector<path_component>(), space_type>
-{    
+{
     path_expression_grammar()
         : path_expression_grammar::base_type(expr)
     {
@@ -74,7 +74,7 @@ struct path_expression_grammar : qi::grammar<Iterator, std::vector<path_componen
         using qi::lit;
         using qi::lexeme;
         using phoenix::push_back;
-        
+
         expr =
             * (
                 str [ push_back(_val, _1)]
@@ -82,11 +82,11 @@ struct path_expression_grammar : qi::grammar<Iterator, std::vector<path_componen
                 ( '[' >> attr [ push_back(_val, construct<mapnik::attribute>( _1 )) ] >> ']')
                 )
             ;
-        
+
         attr %= +(char_ - ']');
         str  %= lexeme[+(char_ -'[')];
     }
-    
+
     qi::rule<Iterator, std::vector<path_component>() , space_type> expr;
     qi::rule<Iterator, std::string() , space_type> attr;
     qi::rule<Iterator, std::string() > str;

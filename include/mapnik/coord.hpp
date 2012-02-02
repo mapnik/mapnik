@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -30,21 +30,21 @@
 #include <iomanip>
 #include <sstream>
 
-namespace mapnik {   
+namespace mapnik {
 template <typename T,int dim>
 struct coord {
     typedef T type;
 };
-    
+
 template <typename T>
-struct coord<T,2> 
+struct coord<T,2>
     : boost::addable<coord<T,2>,
                      boost::addable2<coord<T,2>,T,
                                      boost::subtractable<coord<T,2>,
                                                          boost::subtractable2<coord<T,2>,T,
                                                                               boost::dividable2<coord<T,2>, T,
                                                                                                 boost::multipliable2<coord<T,2>, T > > > > > >
-                    
+
 {
     typedef T type;
     T x;
@@ -82,28 +82,28 @@ public:
         y+=rhs.y;
         return *this;
     }
-        
+
     coord<T,2>& operator+=(T rhs)
     {
         x+=rhs;
         y+=rhs;
         return *this;
     }
-        
+
     coord<T,2>& operator-=(coord<T,2> const& rhs)
     {
         x-=rhs.x;
         y-=rhs.y;
         return *this;
     }
-        
+
     coord<T,2>& operator-=(T rhs)
     {
         x-=rhs;
         y-=rhs;
         return *this;
     }
-        
+
     coord<T,2>& operator*=(T t)
     {
         x*=t;
@@ -119,7 +119,7 @@ public:
 };
 
 template <typename T>
-struct coord<T,3> 
+struct coord<T,3>
 {
     typedef T type;
     T x;
@@ -153,12 +153,12 @@ public:
 typedef coord<double,2> coord2d;
 typedef coord<int,2> coord2i;
 
-     
+
 template <typename charT,typename traits,typename T ,int dim>
 inline std::basic_ostream<charT,traits>&
 operator << (std::basic_ostream<charT,traits>& out,
              const coord<T,dim>& c);
-    
+
 template <typename charT,typename traits,typename T>
 inline std::basic_ostream<charT,traits>&
 operator << (std::basic_ostream<charT,traits>& out,
@@ -167,7 +167,7 @@ operator << (std::basic_ostream<charT,traits>& out,
     std::basic_ostringstream<charT,traits> s;
     s.copyfmt(out);
     s.width(0);
-    s << "coord2(" << std::setprecision(16) 
+    s << "coord2(" << std::setprecision(16)
       << c.x << "," << c.y<< ")";
     out << s.str();
     return out;
@@ -181,11 +181,11 @@ operator << (std::basic_ostream<charT,traits>& out,
     std::basic_ostringstream<charT,traits> s;
     s.copyfmt(out);
     s.width(0);
-    s << "coord3(" << std::setprecision(16) 
+    s << "coord3(" << std::setprecision(16)
       << c.x << "," << c.y<< "," << c.z<<")";
     out << s.str();
     return out;
-} 
+}
 }
 
 #endif // MAPNIK_COORD_HPP

@@ -183,7 +183,7 @@ public:
             (*face)->set_pixel_sizes(size);
         }
     }
-    
+
     void set_character_sizes(float size)
     {
         for (std::vector<face_ptr>::iterator face = faces_.begin(); face != faces_.end(); ++face)
@@ -202,25 +202,25 @@ class stroker : boost::noncopyable
 public:
     explicit stroker(FT_Stroker s)
         : s_(s) {}
-    
+
     void init(double radius)
     {
-        FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)), 
-                       FT_STROKER_LINECAP_ROUND, 
-                       FT_STROKER_LINEJOIN_ROUND, 
-                       0);    
+        FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
+                       FT_STROKER_LINECAP_ROUND,
+                       FT_STROKER_LINEJOIN_ROUND,
+                       0);
     }
-    
+
     FT_Stroker const& get() const
     {
         return s_;
     }
-    
+
     ~stroker()
     {
 #ifdef MAPNIK_DEBUG
         std::clog << "~stroker: destroy stroker:" << s_ << std::endl;
-#endif        
+#endif
         FT_Stroker_Done(s_);
     }
 private:

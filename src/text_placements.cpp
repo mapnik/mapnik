@@ -369,7 +369,7 @@ std::set<expression_ptr> text_placements::get_all_expressions()
 /************************************************************************/
 
 text_placement_info::text_placement_info(text_placements const* parent,
-    double scale_factor_, dimension_type dim, bool has_dimensions_)
+                                         double scale_factor_, dimension_type dim, bool has_dimensions_)
     : properties(parent->properties),
       scale_factor(scale_factor_),
       has_dimensions(has_dimensions_),
@@ -390,7 +390,7 @@ text_placement_info_ptr text_placements_dummy::get_placement_info(
     double scale_factor, dimension_type dim, bool has_dimensions) const
 {
     return text_placement_info_ptr(new text_placement_info_dummy(
-        this, scale_factor, dim, has_dimensions));
+                                       this, scale_factor, dim, has_dimensions));
 }
 
 /************************************************************************/
@@ -458,20 +458,20 @@ text_placement_info_ptr text_placements_simple::get_placement_info(
     double scale_factor, dimension_type dim, bool has_dimensions) const
 {
     return text_placement_info_ptr(new text_placement_info_simple(this,
-        scale_factor, dim, has_dimensions));
+                                                                  scale_factor, dim, has_dimensions));
 }
 
 /** Position string: [POS][SIZE]
-  * [POS] is any combination of
-  * N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
-  * [SIZE] is a list of font sizes, separated by commas. The first font size
-  * is always the one given in the TextSymbolizer's parameters.
-  * First all directions are tried, then font size is reduced
-  * and all directions are tried again. The process ends when a placement is
-  * found or the last fontsize is tried without success.
-  * Example: N,S,15,10,8 (tries placement above, then below and if
-  *    that fails it tries the additional font sizes 15, 10 and 8.
-  */
+ * [POS] is any combination of
+ * N, E, S, W, NE, SE, NW, SW, X (exact position) (separated by commas)
+ * [SIZE] is a list of font sizes, separated by commas. The first font size
+ * is always the one given in the TextSymbolizer's parameters.
+ * First all directions are tried, then font size is reduced
+ * and all directions are tried again. The process ends when a placement is
+ * found or the last fontsize is tried without success.
+ * Example: N,S,15,10,8 (tries placement above, then below and if
+ *    that fails it tries the additional font sizes 15, 10 and 8.
+ */
 void text_placements_simple::set_positions(std::string positions)
 {
     positions_ = positions;
@@ -489,16 +489,16 @@ void text_placements_simple::set_positions(std::string positions)
                 ("NW", NORTHWEST)
                 ("SW", SOUTHWEST)
                 ("X" , EXACT_POSITION)
-            ;
+                ;
         }
 
     } direction_name;
 
     std::string::iterator first = positions.begin(),  last = positions.end();
     qi::phrase_parse(first, last,
-		     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> qi::float_[push_back(phoenix::ref(text_sizes_), _1)]),
-		     space
-    );
+                     (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> qi::float_[push_back(phoenix::ref(text_sizes_), _1)]),
+                     space
+        );
     if (first != last) {
         std::cerr << "WARNING: Could not parse text_placement_simple placement string ('" << positions << "').\n";
     }
@@ -558,7 +558,7 @@ text_placement_info_ptr text_placements_list::get_placement_info(
     double scale_factor, dimension_type dim, bool has_dimensions) const
 {
     return text_placement_info_ptr(new text_placement_info_list(this,
-        scale_factor, dim, has_dimensions));
+                                                                scale_factor, dim, has_dimensions));
 }
 
 text_placements_list::text_placements_list() : text_placements(), list_(0)

@@ -38,8 +38,8 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_lin
             //Found a placement
             geometries_to_process_.erase(current_object);
             if (writer_.first) writer_.first->add_text(
-                        *placement_, font_manager_,
-                        feature_, t_, writer_.second);
+                *placement_, font_manager_,
+                feature_, t_, writer_.second);
             return placement_;
         }
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
@@ -70,8 +70,8 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_poi
             //Found a placement
             points_.erase(current_object);
             if (writer_.first) writer_.first->add_text(
-                        *placement_, font_manager_,
-                        feature_, t_, writer_.second);
+                *placement_, font_manager_,
+                feature_, t_, writer_.second);
             finder.update_detector();
             return placement_;
         }
@@ -104,14 +104,14 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
         // don't bother with empty geometries
         if (geom.num_points() == 0) continue;
         eGeomType type = geom.type();
-        if (type == Polygon) 
+        if (type == Polygon)
         {
             largest_box_only = true;
             if (sym_.get_minimum_path_length() > 0)
             {
                 // TODO - find less costly method than fetching full envelope
                 box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
-                
+
                 if (gbox.width() < sym_.get_minimum_path_length())
                 {
                     continue;
@@ -121,7 +121,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
         // TODO - calculate length here as well
         geometries_to_process_.push_back(const_cast<geometry_type*>(&geom));
     }
-    
+
     if (largest_box_only)
     {
         geometries_to_process_.sort(largest_bbox_first());
@@ -194,8 +194,8 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     if (placement_->properties.orientation)
     {
         angle_ = boost::apply_visitor(
-                    evaluate<Feature, value_type>(feature_),
-                    *(placement_->properties.orientation)).to_double();
+            evaluate<Feature, value_type>(feature_),
+            *(placement_->properties.orientation)).to_double();
     } else {
         angle_ = 0.0;
     }
@@ -287,13 +287,13 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_l
 {
     position const& pos = placement_->properties.displacement;
     placement_->additional_boxes.push_back(
-    /*TODO: I'm not sure this is correct. It's what the old code did, but
-            I think transfroms can make the marker non-centered.
-    */
-    box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
-                  -0.5 * marker_ext_.height() - pos.second,
-                   0.5 * marker_ext_.width()  - pos.first,
-                   0.5 * marker_ext_.height() - pos.second));
+        /*TODO: I'm not sure this is correct. It's what the old code did, but
+          I think transfroms can make the marker non-centered.
+        */
+        box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
+                      -0.5 * marker_ext_.height() - pos.second,
+                      0.5 * marker_ext_.width()  - pos.first,
+                      0.5 * marker_ext_.height() - pos.second));
     return text_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement();
 }
 

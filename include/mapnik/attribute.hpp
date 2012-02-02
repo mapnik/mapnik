@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -35,13 +35,13 @@ struct attribute
     std::string name_;
     explicit attribute(std::string const& name)
         : name_(name) {}
-    
+
     template <typename V ,typename F>
     V const& value(F const& f) const
     {
-        return f.get(name_); 
+        return f.get(name_);
     }
-    
+
     std::string const& name() const { return name_;}
 };
 }

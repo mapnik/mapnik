@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -36,7 +36,7 @@
 
 namespace mapnik {
 
-class query 
+class query
 {
 public:
     typedef boost::tuple<double,double> resolution_type;
@@ -50,9 +50,9 @@ private:
 public:
 
     query(box2d<double> const& bbox,
-        resolution_type const& resolution,
-        double scale_denominator,
-        box2d<double> const& unbuffered_bbox)
+          resolution_type const& resolution,
+          double scale_denominator,
+          box2d<double> const& unbuffered_bbox)
         : bbox_(bbox),
           resolution_(resolution),
           scale_denominator_(scale_denominator),
@@ -61,8 +61,8 @@ public:
     {}
 
     query(box2d<double> const& bbox,
-        resolution_type const& resolution,
-        double scale_denominator = 1.0)
+          resolution_type const& resolution,
+          double scale_denominator = 1.0)
         : bbox_(bbox),
           resolution_(resolution),
           scale_denominator_(scale_denominator),
@@ -77,7 +77,7 @@ public:
           filter_factor_(1.0),
           unbuffered_bbox_(bbox)
     {}
-    
+
     query(query const& other)
         : bbox_(other.bbox_),
           resolution_(other.resolution_),
@@ -86,7 +86,7 @@ public:
           unbuffered_bbox_(other.unbuffered_bbox_),
           names_(other.names_)
     {}
-         
+
     query& operator=(query const& other)
     {
         if (this == &other) return *this;
@@ -98,12 +98,12 @@ public:
         unbuffered_bbox_=other.unbuffered_bbox_;
         return *this;
     }
-         
+
     query::resolution_type const& resolution() const
     {
         return resolution_;
     }
-    
+
     double scale_denominator() const
     {
         return scale_denominator_;
@@ -133,17 +133,17 @@ public:
     {
         return filter_factor_;
     }
-    
+
     void set_filter_factor(double factor)
     {
         filter_factor_ = factor;
     }
-             
+
     void add_property_name(std::string const& name)
     {
         names_.insert(name);
-    } 
-         
+    }
+
     std::set<std::string> const& property_names() const
     {
         return names_;

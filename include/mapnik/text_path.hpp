@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -38,7 +38,7 @@
 
 namespace mapnik
 {
-    
+
 class string_info : private boost::noncopyable
 {
 protected:
@@ -72,12 +72,12 @@ public:
     {
         text_ += text;
     }
-      
+
     unsigned num_characters() const
     {
         return characters_.size();
     }
-    
+
     void set_rtl(bool value)
     {
         is_rtl = value;
@@ -87,26 +87,26 @@ public:
     {
         return is_rtl;
     }
-      
+
     char_info const& at(unsigned i) const
     {
         return characters_[i];
     }
-      
+
     char_info const& operator[](unsigned i) const
     {
         return at(i);
     }
 
-    UnicodeString const&  get_string() const 
+    UnicodeString const&  get_string() const
     {
         return text_;
     }
 
     bool has_line_breaks() const
     {
-       UChar break_char = '\n';
-       return (text_.indexOf(break_char) >= 0);
+        UChar break_char = '\n';
+        return (text_.indexOf(break_char) >= 0);
     }
 
     /** Resets object to initial state. */
@@ -116,7 +116,7 @@ public:
         characters_.clear();
     }
 };
-    
+
 
 /** List of all characters and their positions and formats for a placement. */
 class text_path : boost::noncopyable
@@ -126,11 +126,11 @@ class text_path : boost::noncopyable
         int c;
         double x, y, angle;
         char_properties *format;
-               
+
         character_node(int c_, double x_, double y_, double angle_, char_properties *format_)
             : c(c_), x(x_), y(y_), angle(angle_), format(format_) {}
         ~character_node() {}
-               
+
         void vertex(int *c_, double *x_, double *y_, double *angle_, char_properties **format_)
         {
             *c_ = c;
@@ -140,17 +140,17 @@ class text_path : boost::noncopyable
             *format_ = format;
         }
     };
-         
+
     int itr_;
 public:
     typedef std::vector<character_node> character_nodes_t;
     character_nodes_t nodes_;
     double starting_x;
     double starting_y;
-          
+
 //    std::pair<unsigned,unsigned> string_dimensions;
-        
-    text_path() 
+
+    text_path()
         : itr_(0),
           starting_x(0),
           starting_y(0)
@@ -158,33 +158,33 @@ public:
     {
 
     }
-         
+
     ~text_path() {}
-          
+
     /** Adds a new char to the list. */
     void add_node(int c, double x, double y, double angle, char_properties *format)
     {
         nodes_.push_back(character_node(c, x, y, angle, format));
     }
-        
+
     /** Return node. Always returns a new node. Has no way to report that there are no more nodes. */
     void vertex(int *c, double *x, double *y, double *angle, char_properties **format)
     {
         nodes_[itr_++].vertex(c, x, y, angle, format);
     }
-         
+
     /** Start again at first node. */
     void rewind()
     {
         itr_ = 0;
     }
-         
+
     /** Number of nodes. */
     int num_nodes() const
     {
         return nodes_.size();
     }
-         
+
     /** Delete all nodes. */
     void clear()
     {

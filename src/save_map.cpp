@@ -91,7 +91,7 @@ public:
             set_attr( sym_node, "rasterizer", sym.get_rasterizer() );
         }
     }
-        
+
     void operator () ( const line_pattern_symbolizer & sym )
     {
         ptree & sym_node = rule_.push_back(
@@ -165,7 +165,7 @@ public:
         {
             set_attr( sym_node, "scaling", sym.get_scaling() );
         }
-        
+
         if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
         {
             set_attr( sym_node, "opacity", sym.get_opacity() );
@@ -198,9 +198,9 @@ public:
         // repeating the default values here.
         // maybe add a real, explicit default-ctor?
 
-        
+
         shield_symbolizer dfl;
-        
+
         if (sym.get_unlock_image() != dfl.get_unlock_image() || explicit_defaults_)
         {
             set_attr(sym_node, "unlock-image", sym.get_unlock_image());
@@ -310,7 +310,7 @@ public:
 
 private:
     serialize_symbolizer();
-    
+
     void serialize_raster_colorizer(ptree & sym_node,
                                     raster_colorizer_ptr const& colorizer,
                                     bool explicit_defaults)
@@ -334,7 +334,7 @@ private:
         }
 
     }
-    
+
     void add_image_attributes(ptree & node, const symbolizer_with_image & sym)
     {
         std::string const& filename = path_processor_type::to_string( *sym.get_filename());
@@ -345,7 +345,7 @@ private:
         {
             set_attr( node, "opacity", sym.get_opacity() );
         }
-        
+
         std::string tr_str = sym.get_transform_string();
         if (tr_str != "matrix(1, 0, 0, 1, 0, 0)" || explicit_defaults_ )
         {
@@ -358,10 +358,10 @@ private:
         text_placements_ptr p = sym.get_placement_options();
         p->properties.to_xml(node, explicit_defaults_);
         /* Known types:
-         - text_placements_dummy: no handling required
-         - text_placements_simple: positions string
-         - text_placements_list: list string
-         */
+           - text_placements_dummy: no handling required
+           - text_placements_simple: positions string
+           - text_placements_list: list string
+        */
         text_placements_simple *simple = dynamic_cast<text_placements_simple *>(p.get());
         text_placements_list *list = dynamic_cast<text_placements_list *>(p.get());
         if (simple) {
@@ -385,7 +385,7 @@ private:
     {
 
         stroke dfl = stroke();
-        
+
         if ( strk.get_color() != dfl.get_color() || explicit_defaults_ )
         {
             set_attr( node, "stroke", strk.get_color() );
@@ -428,7 +428,7 @@ private:
             }
             set_attr( node, "stroke-dasharray", os.str() );
         }
-                
+
     }
     void add_metawriter_attributes(ptree &node, symbolizer_base const& sym)
     {
@@ -454,7 +454,7 @@ void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
     {
         set_attr(rule_node, "name", r.get_name());
     }
-    
+
     if ( r.has_else_filter() )
     {
         rule_node.push_back( ptree::value_type(
@@ -471,7 +471,7 @@ void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
         expression_ptr const& expr = r.get_filter();
         std::string filter = mapnik::to_expression_string(*expr);
         std::string default_filter = mapnik::to_expression_string(*dfl.get_filter());
-            
+
         if ( filter != default_filter)
         {
             rule_node.push_back( ptree::value_type(
@@ -509,7 +509,7 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
         ptree::value_type("Style", ptree()))->second;
 
     set_attr(style_node, "name", name);
-    
+
     feature_type_style dfl;
     if (filter_mode != dfl.get_filter_mode() || explicit_defaults)
     {
@@ -566,7 +566,7 @@ void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
 
 class serialize_type : public boost::static_visitor<>
 {
- public:
+public:
     serialize_type( boost::property_tree::ptree & node):
         node_(node) {}
 
@@ -590,7 +590,7 @@ class serialize_type : public boost::static_visitor<>
         node_.put("<xmlattr>.type", "string" );
     }
 
- private:
+private:
     boost::property_tree::ptree & node_;
 };
 
@@ -599,7 +599,7 @@ void serialize_parameters( ptree & map_node, mapnik::parameters const& params)
     if (params.size()) {
         ptree & params_node = map_node.push_back(
             ptree::value_type("Parameters", ptree()))->second;
-    
+
         parameters::const_iterator it = params.begin();
         parameters::const_iterator end = params.end();
         for (; it != end; ++it)
@@ -618,12 +618,12 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
 {
     ptree & layer_node = map_node.push_back(
         ptree::value_type("Layer", ptree()))->second;
-    
+
     if ( layer.name() != "" )
     {
         set_attr( layer_node, "name", layer.name() );
     }
-    
+
     if ( layer.srs() != "" )
     {
         set_attr( layer_node, "srs", layer.srs() );
@@ -633,9 +633,9 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
     {
         set_attr/*<bool>*/( layer_node, "status", layer.isActive() );
     }
-        
+
     if ( layer.clear_label_cache() || explicit_defaults )
-    {        
+    {
         set_attr/*<bool>*/( layer_node, "clear-label-cache", layer.clear_label_cache() );
     }
 
@@ -655,7 +655,7 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
     }
 
     if ( layer.cache_features() || explicit_defaults )
-    {        
+    {
         set_attr/*<bool>*/( layer_node, "cache-features", layer.cache_features() );
     }
 
@@ -710,17 +710,17 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     {
         set_attr( map_node, "background-image", *image_filename );
     }
-    
+
     unsigned buffer_size = map.buffer_size();
     if ( buffer_size || explicit_defaults)
     {
-        set_attr( map_node, "buffer-size", buffer_size ); 
+        set_attr( map_node, "buffer-size", buffer_size );
     }
 
     std::string const& base_path = map.base_path();
     if ( !base_path.empty() || explicit_defaults)
     {
-        set_attr( map_node, "base", base_path ); 
+        set_attr( map_node, "base", base_path );
     }
 
     optional<box2d<double> > const& maximum_extent = map.maximum_extent();
@@ -730,7 +730,7 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         s << std::setprecision(16)
           << maximum_extent->minx() << "," << maximum_extent->miny() << ","
           << maximum_extent->maxx() << "," << maximum_extent->maxy();
-        set_attr( map_node, "maximum-extent", s.str() ); 
+        set_attr( map_node, "maximum-extent", s.str() );
     }
 
     {
@@ -747,9 +747,9 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     parameters::const_iterator p_end = extra_attr.end();
     for (; p_it != p_end; ++p_it)
     {
-        set_attr( map_node, p_it->first, p_it->second ); 
+        set_attr( map_node, p_it->first, p_it->second );
     }
-    
+
     serialize_parameters( map_node, map.get_extra_parameters());
 
     Map::const_style_iterator it = map.styles().begin();

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -44,7 +44,7 @@ using namespace std;
 //#define DEFAULT_OPTIONS (XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 #define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 
-namespace mapnik 
+namespace mapnik
 {
 class libxml2_loader : boost::noncopyable
 {
@@ -67,8 +67,8 @@ public:
     {
         if (ctx_)
         {
-            xmlFreeParserCtxt(ctx_);    
-        }    
+            xmlFreeParserCtxt(ctx_);
+        }
     }
 
     void load( const std::string & filename, ptree & pt )
@@ -89,7 +89,7 @@ public:
             if (error)
             {
                 os << ": " << std::endl << error->message;
-                // remove CR 
+                // remove CR
                 std::string msg = os.str().substr(0, os.str().size() - 1);
                 config_error ex( msg );
 
@@ -104,7 +104,7 @@ public:
         }
 
         /*
-          if ( ! ctx->valid ) 
+          if ( ! ctx->valid )
           {
           std::clog << "### ERROR: Failed to validate DTD."
           << std::endl;
@@ -127,7 +127,7 @@ public:
             if ( ! boost::filesystem::exists( path ) ) {
                 throw config_error(string("Could not locate base_path '") +
                                    base_path + "': file or directory does not exist");
-            }                    
+            }
         }
 
         xmlDocPtr doc = xmlCtxtReadMemory(ctx_, buffer.data(), buffer.length(), base_path.c_str(), encoding_, options_);
@@ -190,7 +190,7 @@ private:
 
         for (; cur_node; cur_node = cur_node->next )
         {
-            switch (cur_node->type) 
+            switch (cur_node->type)
             {
             case XML_ELEMENT_NODE:
             {

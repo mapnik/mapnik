@@ -39,11 +39,11 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(point_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
-                              proj_transform const& prj_trans)
+                               mapnik::feature_ptr const& feature,
+                               proj_transform const& prj_trans)
 {
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
-    
+
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
     {
@@ -94,8 +94,8 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
 }
 
 template void grid_renderer<grid>::process(point_symbolizer const&,
-                                              mapnik::feature_ptr const&,
-                                              proj_transform const&);
+                                           mapnik::feature_ptr const&,
+                                           proj_transform const&);
 
 }
- 
+

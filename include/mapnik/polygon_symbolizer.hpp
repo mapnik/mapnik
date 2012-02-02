@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -30,7 +30,7 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/gamma_method.hpp>
 
-namespace mapnik 
+namespace mapnik
 {
 
 struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
@@ -51,7 +51,7 @@ private:
     double opacity_;
     double gamma_;
     gamma_method_e gamma_method_;
-}; 
+};
 
 }
 

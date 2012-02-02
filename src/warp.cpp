@@ -55,7 +55,7 @@ void reproject_raster(raster &target, raster const& source,
                       std::string scaling_method_name)
 {
     if (prj_trans.equal()) {
-    
+
         if (scaling_method_name == "bilinear8"){
             scale_image_bilinear8<image_data_32>(target.data_,source.data_,
                                                  offset_x, offset_y);
@@ -120,39 +120,39 @@ void reproject_raster(raster &target, raster const& source,
             scaling_method_name);
         switch(scaling_method)
         {
-            case SCALING_NEAR: break;
-            case SCALING_BILINEAR:
-                filter.calculate(agg::image_filter_bilinear(), true); break;
-            case SCALING_BICUBIC:
-                filter.calculate(agg::image_filter_bicubic(), true); break;
-            case SCALING_SPLINE16:
-                filter.calculate(agg::image_filter_spline16(), true); break;
-            case SCALING_SPLINE36:
-                filter.calculate(agg::image_filter_spline36(), true); break;
-            case SCALING_HANNING:
-                filter.calculate(agg::image_filter_hanning(), true); break;
-            case SCALING_HAMMING:
-                filter.calculate(agg::image_filter_hamming(), true); break;
-            case SCALING_HERMITE:
-                filter.calculate(agg::image_filter_hermite(), true); break;
-            case SCALING_KAISER:
-                filter.calculate(agg::image_filter_kaiser(), true); break;
-            case SCALING_QUADRIC:
-                filter.calculate(agg::image_filter_quadric(), true); break;
-            case SCALING_CATROM:
-                filter.calculate(agg::image_filter_catrom(), true); break;
-            case SCALING_GAUSSIAN:
-                filter.calculate(agg::image_filter_gaussian(), true); break;
-            case SCALING_BESSEL:
-                filter.calculate(agg::image_filter_bessel(), true); break;
-            case SCALING_MITCHELL:
-                filter.calculate(agg::image_filter_mitchell(), true); break;
-            case SCALING_SINC:
-                filter.calculate(agg::image_filter_sinc(filter_radius), true); break;
-            case SCALING_LANCZOS:
-                filter.calculate(agg::image_filter_lanczos(filter_radius), true); break;
-            case SCALING_BLACKMAN:
-                filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
+        case SCALING_NEAR: break;
+        case SCALING_BILINEAR:
+            filter.calculate(agg::image_filter_bilinear(), true); break;
+        case SCALING_BICUBIC:
+            filter.calculate(agg::image_filter_bicubic(), true); break;
+        case SCALING_SPLINE16:
+            filter.calculate(agg::image_filter_spline16(), true); break;
+        case SCALING_SPLINE36:
+            filter.calculate(agg::image_filter_spline36(), true); break;
+        case SCALING_HANNING:
+            filter.calculate(agg::image_filter_hanning(), true); break;
+        case SCALING_HAMMING:
+            filter.calculate(agg::image_filter_hamming(), true); break;
+        case SCALING_HERMITE:
+            filter.calculate(agg::image_filter_hermite(), true); break;
+        case SCALING_KAISER:
+            filter.calculate(agg::image_filter_kaiser(), true); break;
+        case SCALING_QUADRIC:
+            filter.calculate(agg::image_filter_quadric(), true); break;
+        case SCALING_CATROM:
+            filter.calculate(agg::image_filter_catrom(), true); break;
+        case SCALING_GAUSSIAN:
+            filter.calculate(agg::image_filter_gaussian(), true); break;
+        case SCALING_BESSEL:
+            filter.calculate(agg::image_filter_bessel(), true); break;
+        case SCALING_MITCHELL:
+            filter.calculate(agg::image_filter_mitchell(), true); break;
+        case SCALING_SINC:
+            filter.calculate(agg::image_filter_sinc(filter_radius), true); break;
+        case SCALING_LANCZOS:
+            filter.calculate(agg::image_filter_lanczos(filter_radius), true); break;
+        case SCALING_BLACKMAN:
+            filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
         }
 
         // Project mesh cells into target interpolating raster inside each one

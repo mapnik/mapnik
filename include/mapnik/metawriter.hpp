@@ -49,7 +49,7 @@ class metawriter_property_map
 public:
     typedef std::map<std::string, UnicodeString> property_map;
     typedef property_map::const_iterator const_iterator;
-    
+
     metawriter_property_map() {}
     UnicodeString const& operator[](std::string const& key) const;
     UnicodeString& operator[](std::string const& key) {return m_[key];}
@@ -61,7 +61,7 @@ public:
     {
         return m_.end();
     }
-    
+
     UnicodeString const& get(std::string const& key) const
     {
         return (*this)[key];
@@ -89,9 +89,9 @@ class metawriter
 public:
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
     metawriter(metawriter_properties dflt_properties) :
-      dflt_properties_(dflt_properties),
-      width_(0),
-      height_(0) {}
+        dflt_properties_(dflt_properties),
+        width_(0),
+        height_(0) {}
     virtual ~metawriter() {};
     /** Output a rectangular area.
      * \param box Area (in pixel coordinates)
@@ -123,11 +123,11 @@ public:
      * \param properties metawriter_property_map object with userdefined values.
      *        Useful for setting filename etc.
      */
-    virtual void start(metawriter_property_map const& properties) 
+    virtual void start(metawriter_property_map const& properties)
     {
         boost::ignore_unused_variable_warning(properties);
     };
-    
+
     /** Stop processing.
      * Write file footer, close database connection, ...
      */

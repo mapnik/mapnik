@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -28,15 +28,15 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/filter_factory.hpp>
 
-namespace mapnik 
+namespace mapnik
 {
-   
+
 struct MAPNIK_DECL building_symbolizer : public symbolizer_base
 {
     building_symbolizer();
-    building_symbolizer(color const& fill, expression_ptr height);   
+    building_symbolizer(color const& fill, expression_ptr height);
     color const& get_fill() const;
-    void set_fill(color const& fill);    
+    void set_fill(color const& fill);
     expression_ptr height() const;
     void set_height(expression_ptr height);
     void set_opacity(double opacity);
@@ -46,7 +46,7 @@ private:
     color fill_;
     expression_ptr height_;
     double opacity_;
-};  
+};
 
 }
 

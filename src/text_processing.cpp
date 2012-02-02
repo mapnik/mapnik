@@ -45,7 +45,7 @@ void node::to_xml(boost::property_tree::ptree &xml) const
 {
     //TODO: Should this throw a config_error?
 #ifdef MAPNIK_DEBUG
-        std::cerr << "Error: Trying to write unsupported node type to XML.\n";
+    std::cerr << "Error: Trying to write unsupported node type to XML.\n";
 #endif
 }
 
@@ -141,7 +141,7 @@ std::vector<node_ptr> const& list_node::get_children() const
 void text_node::to_xml(ptree &xml) const
 {
     ptree &new_node = xml.push_back(ptree::value_type(
-                             "<xmltext>", ptree()))->second;
+                                        "<xmltext>", ptree()))->second;
     new_node.put_value(to_expression_string(*text_));
 }
 
