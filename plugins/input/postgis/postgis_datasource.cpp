@@ -444,6 +444,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
         */
 
         if (!conn->execute(csql.str()))
+            // TODO - better error
             throw mapnik::datasource_exception("Postgis Plugin: error creating cursor for data select." );
 
         return boost::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
