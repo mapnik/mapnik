@@ -47,7 +47,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(line_symbolizer const& sym,
-                              Feature const& feature,
+                              mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
@@ -79,9 +79,9 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         ras.line_join(agg::outline_miter_accurate_join);
         ras.round_cap(true);
    
-        for (unsigned i=0;i<feature.num_geometries();++i)
+        for (unsigned i=0;i<feature->num_geometries();++i)
         {
-            geometry_type const& geom = feature.get_geometry(i);
+            geometry_type const& geom = feature->get_geometry(i);
             if (geom.num_points() > 1)
             {
                 path_type path(t_,geom,prj_trans);
@@ -120,9 +120,9 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         }
         
         metawriter_with_properties writer = sym.get_metawriter();
-        for (unsigned i=0;i<feature.num_geometries();++i)
+        for (unsigned i=0;i<feature->num_geometries();++i)
         {
-            geometry_type const& geom = feature.get_geometry(i);
+            geometry_type const& geom = feature->get_geometry(i);
             if (geom.num_points() > 1)
             {
                 path_type path(t_,geom,prj_trans);
@@ -188,7 +188,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                     stroke.generator().miter_limit(4.0);
                     stroke.generator().width(stroke_.get_width() * scale_factor_);
                     ras_ptr->add_path(stroke);
-                    if (writer.first) writer.first->add_line(path, feature, t_, writer.second);
+                    if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
                 }
             }
         }
@@ -199,7 +199,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
 
 template void agg_renderer<image_32>::process(line_symbolizer const&,
-                                              Feature const&,
+                                              mapnik::feature_ptr const&,
                                               proj_transform const&);
 
 }

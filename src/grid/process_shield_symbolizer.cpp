@@ -41,12 +41,12 @@ namespace mapnik {
 
 template <typename T>
 void  grid_renderer<T>::process(shield_symbolizer const& sym,
-                               Feature const& feature,
+                               mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
     shield_symbolizer_helper<face_manager<freetype_engine>,
             label_collision_detector4> helper(
-                sym, feature, prj_trans,
+                sym, *feature, prj_trans,
                 width_, height_,
                 scale_factor_,
                 t_, font_manager_, detector_);
@@ -69,7 +69,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
             double x = floor(placement->placements[ii].starting_x);
             double y = floor(placement->placements[ii].starting_y);
             ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render_id(feature.id(), x, y, 2);
+            ren.render_id(feature->id(), x, y, 2);
         }
     }
     if (placement_found)
@@ -77,7 +77,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 }
 
 template void grid_renderer<grid>::process(shield_symbolizer const&,
-                                              Feature const&,
+                                              mapnik::feature_ptr const&,
                                               proj_transform const&);
 
 }

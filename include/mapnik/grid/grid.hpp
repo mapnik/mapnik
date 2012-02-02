@@ -55,7 +55,7 @@ public:
     // mapping between pixel id and key
     typedef std::map<value_type, lookup_type> feature_key_type;
     typedef std::map<lookup_type, value_type> key_type;
-    typedef std::map<std::string, const mapnik::Feature * > feature_type;
+    typedef std::map<std::string, mapnik::feature_ptr> feature_type;
     
 private:
     unsigned width_;
@@ -115,7 +115,7 @@ public:
         return id_name_;
     }
 
-    inline void add_feature(mapnik::Feature const& feature)
+    inline void add_feature(mapnik::feature_ptr const& feature)
     {
         
         // NOTE: currently lookup keys must be strings,
@@ -124,14 +124,14 @@ public:
         if (key_ == id_name_)
         {
             std::stringstream s;
-            s << feature.id();
+            s << feature->id();
             lookup_value = s.str();
         }
         else
         {
-            if (feature.has_key(key_))
+            if (feature->has_key(key_))
             {
-                lookup_value = feature.get(key_).to_string();
+                lookup_value = feature->get(key_).to_string();
             }
             else
             {
@@ -143,16 +143,16 @@ public:
         {
             // TODO - consider shortcutting f_keys if feature_id == lookup_value
             // create a mapping between the pixel id and the feature key
-            f_keys_.insert(std::make_pair(feature.id(),*lookup_value));
+            f_keys_.insert(std::make_pair(feature->id(),*lookup_value));
             // if extra fields have been supplied, push them into grid memory
             if (!names_.empty())
             {
-                features_.insert(std::make_pair(*lookup_value,const_cast<mapnik::Feature*>(&feature)));
+                features_.insert(std::make_pair(*lookup_value,feature));
             }
         }
         else
         {
-            std::clog << "### Warning: key '" << key_ << "' was blank for " << feature << "\n";
+            std::clog << "### Warning: key '" << key_ << "' was blank for " << *feature << "\n";
         }
     } 
     

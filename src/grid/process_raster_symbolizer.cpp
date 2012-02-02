@@ -29,14 +29,14 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(raster_symbolizer const& sym,
-                              Feature const& feature,
+                              mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
     std::clog << "grid_renderer does not yet support raster_symbolizer\n";
 }
 
 template void grid_renderer<grid>::process(raster_symbolizer const&,
-                                              Feature const&,
+                                              mapnik::feature_ptr const&,
                                               proj_transform const&);
 
 }

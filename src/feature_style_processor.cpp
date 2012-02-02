@@ -66,7 +66,7 @@ template <typename Processor>
 struct feature_style_processor<Processor>::symbol_dispatch : public boost::static_visitor<>
 {
     symbol_dispatch (Processor & output,
-                     Feature const& f,
+                     mapnik::feature_ptr const& f,
                      proj_transform const& prj_trans)
         : output_(output),
           f_(f),
@@ -79,7 +79,7 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
     }
 
     Processor & output_;
-    Feature const& f_;
+    mapnik::feature_ptr f_;
     proj_transform const& prj_trans_;
 };
 
@@ -476,13 +476,13 @@ void feature_style_processor<Processor>::render_style(
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
 #if defined(SVG_RENDERER)
-                if(!p.process(symbols,*feature,prj_trans))
+                if(!p.process(symbols,feature,prj_trans))
 #endif
                 {
 
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
                     }
                 }
                 if (style->get_filter_mode() == FILTER_FIRST)
@@ -506,12 +506,12 @@ void feature_style_processor<Processor>::render_style(
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
 #if defined(SVG_RENDERER)
-                if(!p.process(symbols,*feature,prj_trans))
+                if(!p.process(symbols,feature,prj_trans))
 #endif
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
                     }
                 }
             }
@@ -530,12 +530,12 @@ void feature_style_processor<Processor>::render_style(
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
 #if defined(SVG_RENDERER)
-                if(!p.process(symbols,*feature,prj_trans))
+                if(!p.process(symbols,feature,prj_trans))
 #endif
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
+                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
                     }
                 }
             }

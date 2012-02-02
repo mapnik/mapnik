@@ -30,6 +30,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/datasource.hpp> // for feature_ptr
 
 // boost
 #include <boost/cstdint.hpp>
@@ -54,7 +55,7 @@ public:
     typedef std::string lookup_type;
     typedef std::map<value_type, lookup_type> feature_key_type;
     typedef std::map<lookup_type, value_type> key_type;
-    typedef std::map<std::string, const mapnik::Feature * > feature_type;
+    typedef std::map<std::string, mapnik::feature_ptr> feature_type;
           
     hit_grid_view(unsigned x, unsigned y, 
               unsigned width, unsigned height,

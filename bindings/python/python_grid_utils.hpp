@@ -215,7 +215,7 @@ static void write_features(T const& grid_type,
     bool include_key = (attributes.find(key) != attributes.end());
     for (; feat_itr != feat_end; ++feat_itr)
     {
-        mapnik::Feature const* feature = feat_itr->second;
+        mapnik::feature_ptr feature = feat_itr->second;
         boost::optional<std::string> join_value;
         if (key == grid_type.key_name())
         {
