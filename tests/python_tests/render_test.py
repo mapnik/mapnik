@@ -202,7 +202,7 @@ def test_render_points():
 
     f = mapnik.Feature(context,2)
     f['Name'] = 'Southernmost Point'
-    f.add_geometries_from_wkt('POINT (143.10,-38.60)')
+    f.add_geometries_from_wkt('POINT (143.10 -38.60)')
     ds.add_feature(f)
 
     # create layer/rule/style
