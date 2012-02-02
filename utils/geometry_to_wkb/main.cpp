@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2011 Artem Pavlenko
@@ -36,25 +36,25 @@
 int main (int argc, char ** argv )
 {
 
-    if ( argc !=2) 
+    if ( argc !=2)
     {
         std::cerr << "Usage: " << argv[0] << " <path-to-shapefile>\n";
         return EXIT_SUCCESS;
     }
-    
+
     std::cerr << "Geometry to WKB converter\n";
-    
+
     mapnik::datasource_cache::instance()->register_datasources("/opt/mapnik/lib/mapnik/input/");
-    
+
     std::string filename(argv[1]);
     std::cerr << filename << std::endl;
-    
+
     mapnik::parameters p;
     p["type"] = "shape";
     p["file"] = filename;
 
     mapnik::datasource_ptr ds;
-    
+
     try
     {
         ds = mapnik::datasource_cache::instance()->create(p);
@@ -64,21 +64,21 @@ int main (int argc, char ** argv )
         std::cerr << "Can't create datasource!\n";
         return EXIT_FAILURE;
     }
-    
+
     if (ds)
-    {       
-        std::cerr << ds->envelope() << std::endl;        
-        
+    {
+        std::cerr << ds->envelope() << std::endl;
+
         mapnik::query q(ds->envelope());
         mapnik::layer_descriptor layer_desc = ds->get_descriptor();
         BOOST_FOREACH ( mapnik::attribute_descriptor const& attr_desc, layer_desc.get_descriptors())
         {
             q.add_property_name(attr_desc.get_name());
         }
-        
+
         mapnik::featureset_ptr fs = ds->features(q);
         mapnik::feature_ptr f = fs->next();
-        
+
         while(f)
         {
             std::cerr << *f << std::endl;
@@ -96,13 +96,13 @@ int main (int argc, char ** argv )
                     std::cerr << mapnik::util::to_hex(wkb->buffer(),wkb->size()) << std::endl;
                 }
             }
-            
+
             f = fs->next();
         }
     }
-    
-    
-    
+
+
+
     return EXIT_SUCCESS;
 }
 
