@@ -44,7 +44,7 @@ namespace mapnik
 
 template <typename T>
 void agg_renderer<T>::process(building_symbolizer const& sym,
-                              Feature const& feature,
+                              mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
@@ -71,13 +71,13 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
     expression_ptr height_expr = sym.height();
     if (height_expr)
     {
-        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
+        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature), *height_expr);
         height = result.to_double() * scale_factor_;
     }
     
-    for (unsigned i=0;i<feature.num_geometries();++i)
+    for (unsigned i=0;i<feature->num_geometries();++i)
     {
-        geometry_type const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
             boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
@@ -159,7 +159,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(building_symbolizer const&,
-                                              Feature const&,
+                                              mapnik::feature_ptr const&,
                                               proj_transform const&);
 
 }

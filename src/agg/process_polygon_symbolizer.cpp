@@ -42,7 +42,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(polygon_symbolizer const& sym,
-                              Feature const& feature,
+                              mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
@@ -85,14 +85,14 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     }
 
     metawriter_with_properties writer = sym.get_metawriter();
-    for (unsigned i=0;i<feature.num_geometries();++i)
+    for (unsigned i=0;i<feature->num_geometries();++i)
     {
-        geometry_type const& geom=feature.get_geometry(i);
+        geometry_type const& geom=feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
             path_type path(t_,geom,prj_trans);
             ras_ptr->add_path(path);
-            if (writer.first) writer.first->add_polygon(path, feature, t_, writer.second);
+            if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
         }
     }
     ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
@@ -101,7 +101,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
 
 
 template void agg_renderer<image_32>::process(polygon_symbolizer const&,
-                                              Feature const&,
+                                              mapnik::feature_ptr const&,
                                               proj_transform const&);
 
 }

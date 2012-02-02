@@ -82,34 +82,34 @@ public:
     void start_layer_processing(layer const& lay);
     void end_layer_processing(layer const& lay);
     void process(point_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(line_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(line_pattern_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(polygon_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(polygon_pattern_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(raster_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(shield_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(text_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(building_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     void process(markers_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     inline bool process(rule::symbolizers const& /*syms*/,
       Feature const& /*feature*/,

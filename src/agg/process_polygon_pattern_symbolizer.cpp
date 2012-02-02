@@ -45,7 +45,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
-                              Feature const& feature,
+                              mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
@@ -92,7 +92,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
     }
 
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
     {
@@ -124,7 +124,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         agg::row_accessor<agg::int8u>, agg::pixel32_type> pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
     
-    unsigned num_geometries = feature.num_geometries();
+    unsigned num_geometries = feature->num_geometries();
 
     pattern_alignment_e align = sym.get_alignment();
     unsigned offset_x=0;
@@ -135,7 +135,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         double x0=0,y0=0;
         if (num_geometries>0)
         {
-            path_type path(t_,feature.get_geometry(0),prj_trans);
+            path_type path(t_,feature->get_geometry(0),prj_trans);
             path.vertex(&x0,&y0);
         }
         offset_x = unsigned(width_-x0);
@@ -147,12 +147,12 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<num_geometries;++i)
     {
-        geometry_type const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
             path_type path(t_,geom,prj_trans);
             ras_ptr->add_path(path);
-            if (writer.first) writer.first->add_polygon(path, feature, t_, writer.second);
+            if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
         }
     }
     agg::render_scanlines(*ras_ptr, sl, rp);
@@ -160,7 +160,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
 
 template void agg_renderer<image_32>::process(polygon_pattern_symbolizer const&,
-                                              Feature const&,
+                                              mapnik::feature_ptr const&,
                                               proj_transform const&);
 
 }

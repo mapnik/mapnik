@@ -45,10 +45,10 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(point_symbolizer const& sym,
-                              Feature const& feature,
+                              mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
     
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
@@ -83,9 +83,9 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
         label_ext.expand_to_include(px2, py2);
         label_ext.expand_to_include(px3, py3);
         
-        for (unsigned i=0; i<feature.num_geometries(); ++i)
+        for (unsigned i=0; i<feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature.get_geometry(i);
+            geometry_type const& geom = feature->get_geometry(i);
             double x;
             double y;
             double z=0;
@@ -107,7 +107,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);
                 metawriter_with_properties writer = sym.get_metawriter();
-                if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
+                if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
             }
         }
     }
@@ -115,7 +115,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(point_symbolizer const&,
-                                              Feature const&,
+                                              mapnik::feature_ptr const&,
                                               proj_transform const&);
 
 }

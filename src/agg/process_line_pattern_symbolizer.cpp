@@ -47,7 +47,7 @@ namespace mapnik {
 
 template <typename T>
 void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
-                               Feature const& feature,
+                               mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
     typedef  coord_transform2<CoordTransform,geometry_type> path_type;
@@ -59,7 +59,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
     
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
     if (!mark) return;
@@ -83,20 +83,20 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     ren.clip_box(0,0,width_,height_);
     rasterizer_type ras(ren);
     metawriter_with_properties writer = sym.get_metawriter();
-    for (unsigned i=0;i<feature.num_geometries();++i)
+    for (unsigned i=0;i<feature->num_geometries();++i)
     {
-        geometry_type const& geom = feature.get_geometry(i);
+        geometry_type const& geom = feature->get_geometry(i);
         if (geom.num_points() > 1)
         {
             path_type path(t_,geom,prj_trans);
             ras.add_path(path);
-            if (writer.first) writer.first->add_line(path, feature, t_, writer.second);
+            if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
         }
     }
 }
 
 template void agg_renderer<image_32>::process(line_pattern_symbolizer const&,
-                                              Feature const&,
+                                              mapnik::feature_ptr const&,
                                               proj_transform const&);
 
 }
