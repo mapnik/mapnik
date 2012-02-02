@@ -356,27 +356,27 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
 #if GDAL_VERSION_NUM < 1800
         switch (wkbFlatten(layer->GetLayerDefn()->GetGeomType()))
 #else
-        switch (wkbFlatten(layer->GetGeomType()))
+            switch (wkbFlatten(layer->GetGeomType()))
 #endif
-        {
-        case wkbPoint:
-        case wkbMultiPoint:
-            result.reset(mapnik::datasource::Point);
-            break;
-        case wkbLinearRing:
-        case wkbLineString:
-        case wkbMultiLineString:
-            result.reset(mapnik::datasource::LineString);
-            break;
-        case wkbPolygon:
-        case wkbMultiPolygon:
-            result.reset(mapnik::datasource::Polygon);
-            break;
-        case wkbGeometryCollection:
-            result.reset(mapnik::datasource::Collection);
-            break;
-        case wkbNone:
-        case wkbUnknown:
+            {
+            case wkbPoint:
+            case wkbMultiPoint:
+                result.reset(mapnik::datasource::Point);
+                break;
+            case wkbLinearRing:
+            case wkbLineString:
+            case wkbMultiLineString:
+                result.reset(mapnik::datasource::LineString);
+                break;
+            case wkbPolygon:
+            case wkbMultiPolygon:
+                result.reset(mapnik::datasource::Polygon);
+                break;
+            case wkbGeometryCollection:
+                result.reset(mapnik::datasource::Collection);
+                break;
+            case wkbNone:
+            case wkbUnknown:
             {
                 // fallback to inspecting first actual geometry
                 // TODO - csv and shapefile inspect first 4 features
@@ -415,11 +415,11 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                 }
                 break;
             }
-        default:
-            break;
-        }
+            default:
+                break;
+            }
     }
-    
+
     return result;
 }
 
@@ -434,23 +434,23 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
     std::set<std::string> const& attribute_names = q.property_names();
     std::set<std::string>::const_iterator pos = attribute_names.begin();
     std::set<std::string>::const_iterator end_names = attribute_names.end();
-    
+
     for ( ;pos != end_names; ++pos)
     {
         bool found_name = false;
-        
+
         std::vector<attribute_descriptor>::const_iterator itr = names.begin();
         std::vector<attribute_descriptor>::const_iterator end = names.end();
-            
+
         for (; itr!=end; ++itr)
-        {            
+        {
             if (itr->get_name() == *pos)
             {
-                found_name = true;                    
+                found_name = true;
                 break;
             }
         }
-        
+
         if (! found_name)
         {
             std::ostringstream s;
@@ -472,19 +472,19 @@ featureset_ptr ogr_datasource::features(query const& q) const
 
     if (dataset_ && layer_.is_valid())
     {
-        // First we validate query fields: https://github.com/mapnik/mapnik/issues/792        
-        
+        // First we validate query fields: https://github.com/mapnik/mapnik/issues/792
+
         std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
         // feature context (schema)
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-        
+
         std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
-        
+
         for (; itr!=end; ++itr) ctx->push(itr->get_name()); // TODO only push query attributes
-                
-        validate_attribute_names(q, desc_ar);        
-        
+
+        validate_attribute_names(q, desc_ar);
+
         OGRLayer* layer = layer_.layer();
 
         if (indexed_)
@@ -497,7 +497,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
                                                                           filter,
                                                                           index_name_,
                                                                           desc_.get_encoding()
-                                                                          ));
+                                      ));
         }
         else
         {
@@ -506,7 +506,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
                                                       *layer,
                                                       q.get_bbox(),
                                                       desc_.get_encoding()
-                                                      ));
+                                      ));
         }
     }
 
@@ -522,24 +522,24 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
         std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
         // feature context (schema)
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-        
+
         std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
         for (; itr!=end; ++itr) ctx->push(itr->get_name());
-        
+
         OGRLayer* layer = layer_.layer();
-        
+
         if (indexed_)
         {
             filter_at_point filter(pt);
-            
+
             return featureset_ptr(new ogr_index_featureset<filter_at_point> (ctx,
                                                                              *dataset_,
                                                                              *layer,
                                                                              filter,
                                                                              index_name_,
                                                                              desc_.get_encoding()
-                                                                             ));
+                                      ));
         }
         else
         {
@@ -552,7 +552,7 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
                                                       *layer,
                                                       point,
                                                       desc_.get_encoding()
-                                                      ));
+                                      ));
         }
     }
 

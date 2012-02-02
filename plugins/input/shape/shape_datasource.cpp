@@ -320,32 +320,32 @@ boost::optional<mapnik::datasource::geometry_t> shape_datasource::get_geometry_t
     boost::optional<mapnik::datasource::geometry_t> result;
     switch (shape_type_)
     {
-        case shape_io::shape_point:
-        case shape_io::shape_pointm:
-        case shape_io::shape_pointz:
-        case shape_io::shape_multipoint:
-        case shape_io::shape_multipointm:
-        case shape_io::shape_multipointz:
-        {
-            result.reset(mapnik::datasource::Point);
-            break;
-        }
-        case shape_io::shape_polyline:
-        case shape_io::shape_polylinem:
-        case shape_io::shape_polylinez:
-        {
-            result.reset(mapnik::datasource::LineString);
-            break;
-        }
-        case shape_io::shape_polygon:
-        case shape_io::shape_polygonm:
-        case shape_io::shape_polygonz:
-        {
-            result.reset(mapnik::datasource::Polygon);
-            break;
-        }
-        default:
-            break;
+    case shape_io::shape_point:
+    case shape_io::shape_pointm:
+    case shape_io::shape_pointz:
+    case shape_io::shape_multipoint:
+    case shape_io::shape_multipointm:
+    case shape_io::shape_multipointz:
+    {
+        result.reset(mapnik::datasource::Point);
+        break;
+    }
+    case shape_io::shape_polyline:
+    case shape_io::shape_polylinem:
+    case shape_io::shape_polylinez:
+    {
+        result.reset(mapnik::datasource::LineString);
+        break;
+    }
+    case shape_io::shape_polygon:
+    case shape_io::shape_polygonm:
+    case shape_io::shape_polygonz:
+    {
+        result.reset(mapnik::datasource::Polygon);
+        break;
+    }
+    default:
+        break;
     }
     return result;
 }

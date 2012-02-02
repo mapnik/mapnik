@@ -31,28 +31,28 @@
 #include <iostream>
 
 
-void setup_attributes(mapnik::context_ptr const& ctx, 
+void setup_attributes(mapnik::context_ptr const& ctx,
                       std::set<std::string> const& names,
                       std::string const& shape_name,
-                      shape_io & shape, 
+                      shape_io & shape,
                       std::vector<int> & attr_ids)
 {
-    std::set<std::string>::const_iterator pos = names.begin();   
-    std::set<std::string>::const_iterator end = names.end();   
+    std::set<std::string>::const_iterator pos = names.begin();
+    std::set<std::string>::const_iterator end = names.end();
     for ( ;pos !=end; ++pos)
     {
         bool found_name = false;
         for (int i = 0; i < shape.dbf().num_fields(); ++i)
         {
             if (shape.dbf().descriptor(i).name_ == *pos)
-            {                
+            {
                 ctx->push(*pos);
                 attr_ids.push_back(i);
                 found_name = true;
                 break;
             }
         }
-        
+
         if (! found_name)
         {
             std::ostringstream s;

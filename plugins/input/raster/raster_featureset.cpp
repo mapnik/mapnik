@@ -64,7 +64,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
     if (curIter_ != endIter_)
     {
         feature_ptr feature(feature_factory::create(ctx_,feature_id_++));
-        
+
         try
         {
             std::auto_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));

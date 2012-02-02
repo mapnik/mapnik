@@ -354,7 +354,7 @@ public:
         sqlite_int64 pkid;
         mapnik::box2d<double> bbox;
     } rtree_type;
-    
+
     static void build_tree(boost::shared_ptr<sqlite_resultset> rs,
                            std::vector<sqlite_utils::rtree_type> & rtree_list)
     {
@@ -372,7 +372,7 @@ public:
                     mapnik::box2d<double> const& bbox = paths[i].envelope();
                     if (bbox.valid())
                     {
-    
+
                         const int type_oid = rs->column_type(1);
                         if (type_oid != SQLITE_INTEGER)
                         {
@@ -382,9 +382,9 @@ public:
                                       << "type was: " << type_oid << "";
                             throw mapnik::datasource_exception(error_msg.str());
                         }
-    
+
                         const sqlite_int64 pkid = rs->column_integer64(1);
-                        
+
                         rtree_type entry = rtree_type();
                         entry.pkid = pkid;
                         entry.bbox = bbox;
@@ -406,8 +406,8 @@ public:
 
 
     static bool create_spatial_index2(std::string const& index_db,
-                                     std::string const& index_table,
-                                     std::vector<rtree_type> const& rtree_list)
+                                      std::string const& index_table,
+                                      std::vector<rtree_type> const& rtree_list)
     {
 
 #if SQLITE_VERSION_NUMBER >= 3005000
@@ -451,10 +451,10 @@ public:
             std::vector<rtree_type>::const_iterator end = rtree_list.end();
             for (; it != end; ++it)
             {
-                    ps.bind(it->bbox);
-                    ps.bind(it->pkid);
-                    ps.step_next();
-                    one_success = true;
+                ps.bind(it->bbox);
+                ps.bind(it->pkid);
+                ps.step_next();
+                one_success = true;
             }
         }
         catch (mapnik::datasource_exception const& ex)
@@ -485,7 +485,7 @@ public:
         }
         return false;
     }
-    
+
     static bool detect_extent(boost::shared_ptr<sqlite_connection> ds,
                               bool has_spatial_index,
                               mapnik::box2d<double> & extent,

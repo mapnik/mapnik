@@ -222,10 +222,10 @@ void sqlite_datasource::bind() const
         std::string query = populate_tokens(table_);
         s << "SELECT " << fields_ << " FROM (" << query << ") LIMIT 1";
         found_types_via_subquery = sqlite_utils::detect_types_from_subquery(
-                                       s.str(),
-                                       geometry_field_,
-                                       desc_,
-                                       dataset_);
+            s.str(),
+            geometry_field_,
+            desc_,
+            dataset_);
     }
 
     // TODO - consider removing this
@@ -301,22 +301,22 @@ void sqlite_datasource::bind() const
                       << geometry_table_ << ")";
 
                 /*
-                std::vector<sqlite_utils::rtree_type> rtree_list;
-                {
-                    boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
-                    sqlite_utils::build_tree(rs,rtree_list);
-                }
-                if (sqlite_utils::create_spatial_index2(index_db,index_table_,rtree_list))
-                {
-                    //extent_initialized_ = true;
-                    has_spatial_index_ = true;
-                    if (boost::filesystem::exists(index_db))
-                    {
-                        dataset_->execute("attach database '" + index_db + "' as " + index_table_);
-                    }
-                }
+                  std::vector<sqlite_utils::rtree_type> rtree_list;
+                  {
+                  boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
+                  sqlite_utils::build_tree(rs,rtree_list);
+                  }
+                  if (sqlite_utils::create_spatial_index2(index_db,index_table_,rtree_list))
+                  {
+                  //extent_initialized_ = true;
+                  has_spatial_index_ = true;
+                  if (boost::filesystem::exists(index_db))
+                  {
+                  dataset_->execute("attach database '" + index_db + "' as " + index_table_);
+                  }
+                  }
 
-                
+
                 */
                 boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
                 if (sqlite_utils::create_spatial_index(index_db,index_table_,rs))
@@ -527,7 +527,7 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
             }
         }
     }
-    
+
     return result;
 }
 
@@ -633,7 +633,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
             s << "," << key_field_;
             ctx->push(key_field_);
         }
-        
+
         std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
 
@@ -691,6 +691,6 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
                                                      format_,
                                                      using_subquery_);
     }
-    
+
     return featureset_ptr();
 }

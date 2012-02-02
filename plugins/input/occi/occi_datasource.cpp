@@ -568,7 +568,7 @@ featureset_ptr occi_datasource::features(query const& q) const
                                                conn_,
                                                ctx,
                                                s.str(),
-                                               desc_.get_encoding(),                                              
+                                               desc_.get_encoding(),
                                                use_connection_pool_,
                                                row_prefetch_);
 }

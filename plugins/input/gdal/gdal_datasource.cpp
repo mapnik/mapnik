@@ -158,10 +158,10 @@ void gdal_datasource::bind() const
     // below is clearly too restrictive.
     // https://github.com/mapnik/mapnik/issues/970
     /*
-    if (tr[2] != 0 || tr[4] != 0)
-    {
-        throw datasource_exception("GDAL Plugin: only 'north up' images are supported");
-    }
+      if (tr[2] != 0 || tr[4] != 0)
+      {
+      throw datasource_exception("GDAL Plugin: only 'north up' images are supported");
+      }
     */
 
     dx_ = tr[1];

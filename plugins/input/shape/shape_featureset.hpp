@@ -51,7 +51,7 @@ class shape_featureset : public Featureset
     std::vector<int> attr_ids_;
     const int row_limit_;
     mutable int count_;
-    
+
 public:
     shape_featureset(filterT const& filter,
                      std::string const& shape_file,

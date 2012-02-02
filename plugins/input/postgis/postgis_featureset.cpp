@@ -109,7 +109,7 @@ feature_ptr postgis_featureset::next()
         for ( ; pos < num_attrs; ++pos)
         {
             std::string name = rs_->getFieldName(pos);
-            
+
             if (rs_->isNull(pos))
             {
                 feature->put(name,mapnik::value_null());
@@ -118,10 +118,10 @@ feature_ptr postgis_featureset::next()
             {
                 const char* buf = rs_->getValue(pos);
                 int oid = rs_->getTypeOID(pos);
-                
+
                 if (oid==16) //bool
                 {
-                    feature->put(name,(buf[0] != 0));                    
+                    feature->put(name,(buf[0] != 0));
                 }
                 else if (oid==23) //int4
                 {

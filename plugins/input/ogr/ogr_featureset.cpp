@@ -47,7 +47,7 @@ using mapnik::feature_factory;
 
 
 ogr_featureset::ogr_featureset(mapnik::context_ptr const & ctx,
-                               OGRDataSource & dataset,                               
+                               OGRDataSource & dataset,
                                OGRLayer & layer,
                                OGRGeometry & extent,
                                std::string const& encoding)
@@ -58,13 +58,13 @@ ogr_featureset::ogr_featureset(mapnik::context_ptr const & ctx,
       tr_(new transcoder(encoding)),
       fidcolumn_(layer_.GetFIDColumn ()),
       count_(0)
-      
+
 {
     layer_.SetSpatialFilter (&extent);
 }
 
 ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
-                               OGRDataSource & dataset,                               
+                               OGRDataSource & dataset,
                                OGRLayer & layer,
                                mapnik::box2d<double> const& extent,
                                std::string const& encoding)

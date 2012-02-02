@@ -74,7 +74,7 @@ feature_ptr sqlite_featureset::next()
 
         feature_ptr feature(feature_factory::create(ctx_,rs_->column_integer(1)));
         geometry_utils::from_wkb(feature->paths(), data, size, format_);
-        
+
         for (int i = 2; i < rs_->column_count(); ++i)
         {
             const int type_oid = rs_->column_type(i);

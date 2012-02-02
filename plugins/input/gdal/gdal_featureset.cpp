@@ -110,13 +110,13 @@ feature_ptr gdal_featureset::next()
 feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 {
     feature_ptr feature = feature_factory::create(ctx_,1);
-    
+
     GDALRasterBand * red = 0;
     GDALRasterBand * green = 0;
     GDALRasterBand * blue = 0;
     GDALRasterBand * alpha = 0;
     GDALRasterBand * grey = 0;
-    
+
     /*
       double tr[6];
       dataset_.GetGeoTransform(tr);
@@ -490,7 +490,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
 
             if (! hasNoData || value != nodata)
             {
-                // construct feature               
+                // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
                 geometry_type * point = new geometry_type(mapnik::Point);
                 point->move_to(pt.x, pt.y);

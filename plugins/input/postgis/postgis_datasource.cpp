@@ -498,7 +498,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
                 s_error << geometry_table_ << "'.";
                 throw mapnik::datasource_exception(s_error.str());
             }
-            
+
             std::ostringstream s;
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
@@ -578,10 +578,10 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
                 mapnik::sql_utils::quote_attr(s,key_field_);
 
             mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-            
+
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
-            
+
             for ( ; itr != end; ++itr)
             {
                 mapnik::sql_utils::quote_attr(s,itr->get_name());
@@ -809,7 +809,7 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
             }
         }
     }
-    
+
     return result;
 }
 

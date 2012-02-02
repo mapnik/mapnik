@@ -97,7 +97,7 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
     boost::optional<std::string> geometry = params.get<std::string>("wkt");
     if (! geometry) throw datasource_exception("missing <wkt> parameter");
     geometry_string_ = *geometry;
-    
+
     boost::optional<std::string> ext = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
@@ -265,7 +265,7 @@ boost::optional<mapnik::datasource::geometry_t> geos_datasource::get_geometry_ty
     default:
         break;
     }
-    
+
     return result;
 }
 

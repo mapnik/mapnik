@@ -61,7 +61,7 @@ public:
 
     shape_file& shp();
     dbf_file& dbf();
-    
+
     inline boost::shared_ptr<shape_file>& index()
     {
         return index_;

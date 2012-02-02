@@ -495,12 +495,12 @@ void csv_datasource::parse_csv(T& stream,
                             std::string::const_iterator str_beg = value.begin();
                             std::string::const_iterator str_end = value.end();
                             bool r = qi::phrase_parse(str_beg,str_end,
-                                      (
-                                          qi::lit("POINT") >> '('
-                                              >> double_[ref(x) = _1]
-                                              >>  double_[ref(y) = _1] >> ')'
-                                      ),
-                                      ascii::space);
+                                                      (
+                                                          qi::lit("POINT") >> '('
+                                                          >> double_[ref(x) = _1]
+                                                          >>  double_[ref(y) = _1] >> ')'
+                                                          ),
+                                                      ascii::space);
 
                             if (r && (str_beg == str_end))
                             {
@@ -627,16 +627,16 @@ void csv_datasource::parse_csv(T& stream,
                 /* First we detect likely strings, then try parsing likely numbers,
                    finally falling back to string type
                    * We intentionally do not try to detect boolean or null types
-                     since they are not common in csv
+                   since they are not common in csv
                    * Likely strings are either empty values, very long values
-                     or value with leading zeros like 001 (which are not safe
-                     to assume are numbers)
+                   or value with leading zeros like 001 (which are not safe
+                   to assume are numbers)
                 */
 
                 bool has_dot = value.find(".") != std::string::npos;
                 if (value.empty() ||
-                   (value_length > 20) ||
-                   (value_length > 1 && !has_dot && value[0] == '0'))
+                    (value_length > 20) ||
+                    (value_length > 1 && !has_dot && value[0] == '0'))
                 {
                     feature->put(fld_name,tr.transcode(value.c_str()));
                     if (feature_count == 1)

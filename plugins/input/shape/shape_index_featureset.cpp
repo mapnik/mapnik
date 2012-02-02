@@ -52,7 +52,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     ctx_ = boost::make_shared<mapnik::context_type>();
     shape_.shp().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
-    
+
     boost::shared_ptr<shape_file> index = shape_.index();
     if (index)
     {
@@ -65,12 +65,12 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     }
 
     std::sort(ids_.begin(), ids_.end());
-    
+
 #ifdef MAPNIK_DEBUG
     std::clog << "Shape Plugin: query size=" << ids_.size() << std::endl;
 #endif
-    
-    itr_ = ids_.begin(); 
+
+    itr_ = ids_.begin();
 }
 
 template <typename filterT>
@@ -164,7 +164,7 @@ feature_ptr shape_index_featureset<filterT>::next()
             case shape_io::shape_polylinem:
             case shape_io::shape_polylinez:
             {
-                shape_.read_polyline(feature->paths());                
+                shape_.read_polyline(feature->paths());
                 ++count_;
                 break;
             }

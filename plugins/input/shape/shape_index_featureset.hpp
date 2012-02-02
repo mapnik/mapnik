@@ -43,7 +43,7 @@ using mapnik::feature_ptr;
 using mapnik::context_ptr;
 
 template <typename filterT>
-class shape_index_featureset : public Featureset                             
+class shape_index_featureset : public Featureset
 {
 public:
     shape_index_featureset(filterT const& filter,
@@ -52,9 +52,9 @@ public:
                            std::string const& encoding,
                            std::string const& shape_name,
                            int row_limit);
-    
+
     virtual ~shape_index_featureset();
-    
+
     feature_ptr next();
 
 private:

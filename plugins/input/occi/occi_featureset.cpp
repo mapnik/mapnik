@@ -432,7 +432,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                     {
                         feature->add_geometry(geom);
                     }
-                    
+
                     geom = new geometry_type(gtype);
                     geom->set_capacity((next_offset - 1) - (offset - 1 - dimensions));
 

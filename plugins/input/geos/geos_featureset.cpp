@@ -125,7 +125,7 @@ feature_ptr geos_featureset::next()
                     {
                         feature->put(field_name_, tr_->transcode(field_.c_str()));
                     }
-                    
+
                     return feature;
                 }
             }
