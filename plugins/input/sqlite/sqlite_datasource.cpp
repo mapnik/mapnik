@@ -487,7 +487,7 @@ mapnik::statistics_ptr sqlite_datasource::get_statistics()  const
 {
     if (! is_bound_) bind();
 
-    std::map<std::string, mapnik::parameters> stats_;
+    std::map<std::string, mapnik::parameters> stats;
     std::ostringstream s;
 
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
@@ -534,12 +534,12 @@ mapnik::statistics_ptr sqlite_datasource::get_statistics()  const
                 col++;
                 p["mean"] = rs->column_double(col);
                 col++;
-                stats_[itr->get_name()] = p;
+                stats[itr->get_name()] = p;
             }
         }
     }
 
-    return boost::make_shared<mapnik::statistics>(stats_);
+    return boost::make_shared<mapnik::statistics>(stats);
 }
 
 boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_type() const
