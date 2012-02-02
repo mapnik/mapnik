@@ -43,7 +43,6 @@ template <typename filterT>
 class shape_featureset : public Featureset
 {
     filterT filter_;
-    context_ptr ctx_;
     shape_io shape_;
     box2d<double> query_ext_;
     boost::scoped_ptr<transcoder> tr_;
@@ -51,6 +50,7 @@ class shape_featureset : public Featureset
     std::vector<int> attr_ids_;
     const int row_limit_;
     mutable int count_;
+    context_ptr ctx_;
 
 public:
     shape_featureset(filterT const& filter,
