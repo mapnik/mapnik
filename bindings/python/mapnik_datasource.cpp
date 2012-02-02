@@ -95,10 +95,10 @@ boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
 boost::python::dict statistics(boost::shared_ptr<mapnik::datasource> const& ds)
 {
     boost::python::dict description;
-    std::map<std::string, mapnik::parameters> stats = ds->get_statistics();
+    mapnik::statistics_ptr stats = ds->get_statistics();
     std::map<std::string, mapnik::parameters>::iterator it;
 
-    for (it = stats.begin(); it != stats.end(); it++) {
+    for (it = stats->begin(); it != stats->end(); it++) {
         boost::python::dict field;
         mapnik::parameters::const_iterator k = it->second.begin();
         for (; k != it->second.end(); ++k) {

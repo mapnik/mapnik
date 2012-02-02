@@ -118,9 +118,9 @@ layer_descriptor memory_datasource::get_descriptor() const
     return desc_;
 }
 
-std::map<std::string, mapnik::parameters> memory_datasource::get_statistics() const
+statistics_ptr memory_datasource::get_statistics() const
 {
-    std::map<std::string, mapnik::parameters> _stats;
+    statistics_ptr(new std::map<std::string, mapnik::parameters>) _stats;
     std::map<std::string, statistics_accumulator>::const_iterator it = accumulators_.begin();
     std::map<std::string, statistics_accumulator>::const_iterator end = accumulators_.end();
     for (; it != end; ++it) {

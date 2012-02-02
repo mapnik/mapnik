@@ -50,6 +50,7 @@ struct MAPNIK_DECL Featureset : private boost::noncopyable
 };
 
 typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
+typedef MAPNIK_DECL boost::shared_ptr< std::map<std::string, mapnik::parameters> > statistics_ptr;
 
 class MAPNIK_DECL datasource_exception : public std::exception
 {
@@ -114,7 +115,7 @@ public:
     virtual box2d<double> envelope() const=0;
     virtual boost::optional<geometry_t> get_geometry_type() const=0;
     virtual layer_descriptor get_descriptor() const=0;
-    virtual std::map<std::string, mapnik::parameters> get_statistics() const=0;
+    virtual statistics_ptr get_statistics() const=0;
     virtual ~datasource() {};
 protected:
     parameters params_;

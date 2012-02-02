@@ -64,7 +64,7 @@ public:
     box2d<double> envelope() const;
     boost::optional<geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    std::map<std::string, mapnik::parameters> get_statistics() const;
+    statistics_ptr get_statistics() const;
     size_t size() const;
     void clear();
 private:
