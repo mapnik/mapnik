@@ -93,7 +93,7 @@ void export_polygon_pattern_symbolizer()
         .value("LOCAL",LOCAL_ALIGNMENT)
         .value("GLOBAL",GLOBAL_ALIGNMENT)
         ;
-    
+
     class_<polygon_pattern_symbolizer>("PolygonPatternSymbolizer",
                                        init<path_expression_ptr>("<path_expression_ptr>"))
         .def_pickle(polygon_pattern_symbolizer_pickle_suite())

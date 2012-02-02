@@ -66,7 +66,7 @@ struct polygon_symbolizer_pickle_suite : boost::python::pickle_suite
 void export_polygon_symbolizer()
 {
     using namespace boost::python;
-    
+
     class_<polygon_symbolizer>("PolygonSymbolizer",
                                init<>("Default PolygonSymbolizer - solid fill grey"))
         .def(init<color const&>("TODO"))
@@ -82,9 +82,9 @@ void export_polygon_symbolizer()
                       &polygon_symbolizer::get_gamma,
                       &polygon_symbolizer::set_gamma)
         .add_property("gamma_method",
-                    &polygon_symbolizer::get_gamma_method,
-                    &polygon_symbolizer::set_gamma_method,
-                    "Set/get the gamma correction method of the polygon")
+                      &polygon_symbolizer::get_gamma_method,
+                      &polygon_symbolizer::set_gamma_method,
+                      "Set/get the gamma correction method of the polygon")
         ;
 
 }

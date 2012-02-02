@@ -280,5 +280,5 @@ void export_envelope()
         .def_pickle(envelope_pickle_suite())
         .def("__deepcopy__", &box2d_deepcopy)
         ;
-        
+
 }

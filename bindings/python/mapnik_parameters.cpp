@@ -159,7 +159,7 @@ mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
 
 void add_parameter(mapnik::parameters & p, mapnik::parameter const& param)
 {
-    p[param.first] = param.second; 
+    p[param.first] = param.second;
 }
 
 mapnik::value_holder get_param(mapnik::parameter const& p, int index)

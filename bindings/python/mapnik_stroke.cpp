@@ -126,7 +126,7 @@ void export_stroke ()
         .value("ROUND_JOIN",ROUND_JOIN)
         .value("BEVEL_JOIN",BEVEL_JOIN)
         ;
-    
+
     class_<stroke>("Stroke",init<>(
                        "Creates a new default black stroke with the width of 1.\n"))
         .def(init<color,float>(

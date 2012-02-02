@@ -29,7 +29,7 @@
 void export_gamma_method()
 {
     using namespace boost::python;
-    
+
     mapnik::enumeration_<mapnik::gamma_method_e>("gamma_method")
         .value("POWER", mapnik::GAMMA_POWER)
         .value("LINEAR",mapnik::GAMMA_LINEAR)
@@ -37,5 +37,5 @@ void export_gamma_method()
         .value("THRESHOLD", mapnik::GAMMA_THRESHOLD)
         .value("MULTIPLY", mapnik::GAMMA_MULTIPLY)
         ;
-    
+
 }

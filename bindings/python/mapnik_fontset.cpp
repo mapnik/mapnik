@@ -39,7 +39,7 @@ struct fontset_pickle_suite : boost::python::pickle_suite
     }
 };
 
-void export_fontset () 
+void export_fontset ()
 {
     using namespace boost::python;
     class_<font_set>("FontSet", init<>("default fontset constructor")
