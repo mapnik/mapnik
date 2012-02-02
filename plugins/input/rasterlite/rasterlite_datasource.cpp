@@ -170,7 +170,7 @@ std::string rasterlite_datasource::name()
     return "rasterlite";
 }
 
-int rasterlite_datasource::type() const
+mapnik::datasource::datasource_t rasterlite_datasource::type() const
 {
     return datasource::Raster;
 }
@@ -180,6 +180,11 @@ box2d<double> rasterlite_datasource::envelope() const
     if (!is_bound_) bind();
 
     return extent_;
+}
+
+boost::optional<mapnik::datasource::geometry_t> rasterlite_datasource::get_geometry_type() const
+{
+    return boost::optional<mapnik::datasource::geometry_t>();
 }
 
 layer_descriptor rasterlite_datasource::get_descriptor() const

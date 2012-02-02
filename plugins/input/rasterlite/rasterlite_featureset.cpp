@@ -44,7 +44,8 @@ using mapnik::feature_factory;
 rasterlite_featureset::rasterlite_featureset(void* dataset, rasterlite_query q)
     : dataset_(dataset),
       gquery_(q),
-      first_(true)
+      first_(true),
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
     rasterliteSetBackgroundColor(dataset_, 255, 0, 255);
     rasterliteSetTransparentColor(dataset_, 255, 0, 255);
@@ -89,7 +90,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     std::clog << "Rasterlite Plugin: get_feature" << std::endl;
 #endif
 
-    feature_ptr feature(feature_factory::create(1));
+    feature_ptr feature(feature_factory::create(ctx_,1));
 
     double x0, y0, x1, y1;
     rasterliteGetExtent (dataset_, &x0, &y0, &x1, &y1);

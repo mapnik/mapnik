@@ -46,6 +46,7 @@ private:
     void* dataset_;
     rasterlite_query gquery_;
     bool first_;
+    mapnik::context_ptr ctx_;
 };
 
 #endif // RASTERLITE_FEATURESET_HPP
