@@ -13,7 +13,7 @@ epydoc --no-private \
     --no-sourcecode \
     --name mapnik \
     --url http://mapnik.org \
-    --css mapnik_epydoc.css mapnik2 \
+    --css mapnik_epydoc.css mapnik \
     -o $API_DOCS_DIR
 
 exit $?
