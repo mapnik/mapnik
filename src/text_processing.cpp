@@ -170,7 +170,7 @@ void text_node::apply(char_properties const& p, Feature const& feature, processe
         text_str = text_str.toTitle(NULL);
     }
     if (text_str.length() > 0) {
-        output.push_back(processed_text::processed_expression(p, text_str));
+        output.push_back(p, text_str);
     } else {
 #ifdef MAPNIK_DEBUG
         std::cerr << "Warning: Empty expression.\n";
@@ -346,9 +346,9 @@ void format_node::set_halo_radius(optional<double> radius)
 
 /************************************************************/
 
-void processed_text::push_back(processed_expression const& exp)
+void processed_text::push_back(char_properties const& properties, UnicodeString const& text)
 {
-    expr_list_.push_back(exp);
+    expr_list_.push_back(processed_expression(properties, text));
 }
 
 processed_text::expression_list::const_iterator processed_text::begin() const

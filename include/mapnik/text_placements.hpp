@@ -117,6 +117,7 @@ struct text_symbolizer_properties
     /** Default values for char_properties. */
     char_properties default_format;
 private:
+    /** A tree of formating::nodes which contain text and formating information. */
     formating::node_ptr tree_;
 };
 
@@ -133,7 +134,7 @@ public:
     };
 public:
     processed_text(face_manager<freetype_engine> & font_manager, double scale_factor);
-    void push_back(processed_expression const& exp);
+    void push_back(char_properties const& properties, UnicodeString const& text);
     unsigned size() const { return expr_list_.size(); }
     unsigned empty() const { return expr_list_.empty(); }
     void clear();
