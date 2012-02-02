@@ -26,8 +26,10 @@
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/feature_factory.hpp>
-#include <boost/math/distributions/normal.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
+
+#include <boost/make_shared.hpp>
+#include <boost/math/distributions/normal.hpp>
 // stl
 #include <algorithm>
 
@@ -120,7 +122,7 @@ layer_descriptor memory_datasource::get_descriptor() const
 
 statistics_ptr memory_datasource::get_statistics() const
 {
-    statistics_ptr _stats;
+    std::map<std::string, mapnik::parameters> _stats;
     std::map<std::string, statistics_accumulator>::const_iterator it = accumulators_.begin();
     std::map<std::string, statistics_accumulator>::const_iterator end = accumulators_.end();
     for (; it != end; ++it) {
@@ -130,9 +132,9 @@ statistics_ptr memory_datasource::get_statistics() const
         p["min"] = boost::accumulators::min(it->second);
         p["stddev"] = sqrt(boost::accumulators::variance(it->second));
         p["max"] = boost::accumulators::max(it->second);
-        _stats->insert(std::pair<std::string, mapnik::parameters>(it->first, p));
+        _stats[it->first] = p;
     }
-    return _stats;
+    return boost::make_shared<mapnik::statistics>(_stats);
 }
     
 size_t memory_datasource::size() const

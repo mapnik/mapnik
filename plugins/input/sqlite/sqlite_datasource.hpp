@@ -80,7 +80,6 @@ private:
     mutable bool has_spatial_index_;
     mutable bool using_subquery_;
     mutable std::vector<std::string> init_statements_;
-    mutable mapnik::statistics_ptr stats_;
 
     // Fill init_statements with any statements
     // needed to attach auxillary databases

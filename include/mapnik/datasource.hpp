@@ -32,6 +32,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 
 // boost
+#include <boost/shared_container_iterator.hpp>
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -50,7 +51,9 @@ struct MAPNIK_DECL Featureset : private boost::noncopyable
 };
 
 typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
+typedef MAPNIK_DECL std::map<std::string, mapnik::parameters> statistics;
 typedef MAPNIK_DECL boost::shared_ptr< std::map<std::string, mapnik::parameters> > statistics_ptr;
+typedef MAPNIK_DECL boost::shared_container_iterator< std::map<std::string, mapnik::parameters> > statistics_ptr_iterator;
 
 class MAPNIK_DECL datasource_exception : public std::exception
 {
