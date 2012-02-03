@@ -58,12 +58,55 @@ void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
     t.displacement = std::make_pair(x, y);
 }
 
+/* boost.python documentation doesn't relly tell you how to do it.
+But this helps:
+http://www.gamedev.net/topic/446225-inheritance-in-boostpython/
+*/
+
 struct NodeWrap: formating::node, wrapper<formating::node>
 {
+    NodeWrap() : formating::node(), wrapper<formating::node>()
+    {
+
+    }
+
     void apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
-        this->get_override("apply")();
+        std::cout << "Calling apply\n";
+        if (!this->get_override("apply")) {
+            std::cout << "Warning: No apply function found!\n";
+        }
+        this->get_override("apply")(ptr(&p), ptr(&feature), ptr(&output));
     }
+};
+
+
+struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
+{
+
+    TextNodeWrap(expression_ptr text) : formating::text_node(text), wrapper<formating::text_node>()
+    {
+
+    }
+
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        if(override func_apply = this->get_override("apply"))
+        {
+            std::cout << "got override!" << &feature << "\n";
+            func_apply(ptr(&p), ptr(&feature), ptr(&output));
+        }
+        else
+        {
+            formating::text_node::apply(p, feature, output);
+        }
+    }
+
+    void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        formating::text_node::apply(p, feature, output);
+    }
+
 };
 
 struct TextPlacementsWrap: text_placements, wrapper<text_placements>
@@ -175,15 +218,21 @@ void export_text_placement()
         /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
         ;
 
-    class_<TextPlacementsWrap, boost::shared_ptr<TextPlacementsWrap>, boost::noncopyable>("TextPlacements")
+    class_<TextPlacementsWrap,
+           boost::shared_ptr<TextPlacementsWrap>,
+           boost::noncopyable>
+           ("TextPlacements")
         .def_readwrite("defaults", &text_placements::properties)
         .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
         /* TODO: get_all expressions. */
         ;
     register_ptr_to_python<boost::shared_ptr<text_placements> >();
 
-    class_<TextPlacementInfoWrap, boost::shared_ptr<TextPlacementInfoWrap>, boost::noncopyable>("TextPlacementInfo",
-        init<text_placements const*, double, dimension_type, bool>())
+    class_<TextPlacementInfoWrap,
+           boost::shared_ptr<TextPlacementInfoWrap>,
+           boost::noncopyable>
+           ("TextPlacementInfo",
+            init<text_placements const*, double, dimension_type, bool>())
         .def("next", pure_virtual(&text_placement_info::next))
         .def("get_actual_label_spacing", &text_placement_info::get_actual_label_spacing)
         .def("get_actual_minimum_distance", &text_placement_info::get_actual_minimum_distance)
@@ -199,11 +248,34 @@ void export_text_placement()
 //        .def_readwrite("placements", &text_placement_info::placements)
         ;
 
+    class_<processed_text,
+            boost::shared_ptr<processed_text>,
+            boost::noncopyable>("ProcessedText", no_init);
+
     register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 
     //TODO: Python namespace
-    class_<NodeWrap, boost::noncopyable>("FormatingNode")
+    class_<NodeWrap,
+           boost::shared_ptr<NodeWrap>,
+           boost::noncopyable>
+           ("FormatingNode")
         .def("apply", pure_virtual(&formating::node::apply))
         ;
+
+    register_ptr_to_python<boost::shared_ptr<formating::node> >();
+
+    class_<TextNodeWrap,
+           boost::shared_ptr<TextNodeWrap>,
+           bases<formating::node>,
+           boost::noncopyable>(
+                "FormatingTextNode", init<expression_ptr>() )
+      /* Apply and add_expressions are automatically inherited. */
+            .def("apply", &TextNodeWrap::apply)//, &TextNodeWrap::default_apply
+            .add_property("text",
+                          &formating::text_node::get_text,
+                          &formating::text_node::set_text)
+        ;
+
+    register_ptr_to_python<boost::shared_ptr<formating::text_node> >();
 
 }
