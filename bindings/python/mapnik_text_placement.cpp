@@ -175,13 +175,14 @@ void export_text_placement()
         /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
         ;
 
-    class_<TextPlacementsWrap, boost::noncopyable>("TextPlacements")
+    class_<TextPlacementsWrap, boost::shared_ptr<TextPlacementsWrap>, boost::noncopyable>("TextPlacements")
         .def_readwrite("defaults", &text_placements::properties)
         .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
         /* TODO: get_all expressions. */
         ;
+    register_ptr_to_python<boost::shared_ptr<text_placements> >();
 
-    class_<TextPlacementInfoWrap, boost::noncopyable>("TextPlacementInfo",
+    class_<TextPlacementInfoWrap, boost::shared_ptr<TextPlacementInfoWrap>, boost::noncopyable>("TextPlacementInfo",
         init<text_placements const*, double, dimension_type, bool>())
         .def("next", pure_virtual(&text_placement_info::next))
         .def("get_actual_label_spacing", &text_placement_info::get_actual_label_spacing)
@@ -196,8 +197,9 @@ void export_text_placement()
         .def_readwrite("additional_boxes", &text_placement_info::additional_boxes)
         .def_readwrite("envelopes", &text_placement_info::envelopes)
 //        .def_readwrite("placements", &text_placement_info::placements)
-
         ;
+
+    register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 
     //TODO: Python namespace
     class_<NodeWrap, boost::noncopyable>("FormatingNode")

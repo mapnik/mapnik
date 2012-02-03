@@ -598,6 +598,7 @@ register_fonts()
 # and ensure correct documentation processing
 __all__ = [
     # classes
+    'CharProperties',
     'Color',
     'Coord',
     'Palette',
@@ -610,6 +611,7 @@ __all__ = [
     'Featureset',
     'FontEngine',
     'FontSet',
+    'FormatingNode',
     'Geometry2d',
     'Image',
     'ImageView',
@@ -640,7 +642,10 @@ __all__ = [
     'Style',
     'Symbolizer',
     'Symbolizers',
+    'TextPlacements',
+    'TextPlacementInfo',
     'TextSymbolizer',
+    'TextSymbolizerProperties',
     'ViewTransform',
     # enums
     'aspect_fix_mode',
