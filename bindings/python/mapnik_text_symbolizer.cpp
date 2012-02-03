@@ -146,7 +146,7 @@ void export_text_symbolizer()
 {
     using namespace boost::python;
 
-    class_<text_symbolizer>("TextSymbolizer",init<expression_ptr,std::string const&, unsigned,color const&>())
+    class_<text_symbolizer>("TextSymbolizer")
         /*
         // todo - all python classes can have kwargs and default constructors
         class_<text_symbolizer>("TextSymbolizer",
@@ -162,6 +162,9 @@ void export_text_symbolizer()
         */
 
         //.def_pickle(text_symbolizer_pickle_suite())
+        .add_property("placements",
+                      &text_symbolizer::get_placement_options,
+                      &text_symbolizer::set_placement_options)
         .add_property("allow_overlap",
                       &text_symbolizer::get_allow_overlap,
                       &text_symbolizer::set_allow_overlap,
