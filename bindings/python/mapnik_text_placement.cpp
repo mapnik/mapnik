@@ -58,6 +58,14 @@ void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
     t.displacement = std::make_pair(x, y);
 }
 
+struct NodeWrap: formating::node, wrapper<formating::node>
+{
+    void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        this->get_override("apply")();
+    }
+};
+
 }
 
 void export_text_placement()
@@ -118,7 +126,9 @@ void export_text_placement()
         .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
         .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
         .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
-        /* TODO: text_processor */
+        .add_property ("format_tree",
+                       &text_symbolizer_properties::format_tree,
+                       &text_symbolizer_properties::set_format_tree);
         /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
         ;
     class_<char_properties>("CharProperties")
@@ -134,5 +144,10 @@ void export_text_placement()
         .def_readwrite("fill", &char_properties::fill)
         .def_readwrite("halo_fill", &char_properties::halo_fill)
         .def_readwrite("halo_radius", &char_properties::halo_radius)
+        ;
+
+    //TODO: Python namespace
+    class_<NodeWrap, boost::noncopyable>("FormatingNode")
+        .def("apply", pure_virtual(&formating::node::apply))
         ;
 }
