@@ -66,6 +66,30 @@ struct NodeWrap: formating::node, wrapper<formating::node>
     }
 };
 
+struct TextPlacementsWrap: text_placements, wrapper<text_placements>
+{
+    text_placement_info_ptr get_placement_info(double scale_factor_, dimension_type dim,
+                            bool has_dimensions_) const
+    {
+        return this->get_override("get_placement_info")();
+    }
+};
+
+struct TextPlacementInfoWrap: text_placement_info, wrapper<text_placement_info>
+{
+    TextPlacementInfoWrap(text_placements const* parent,
+                        double scale_factor_, dimension_type dim, bool has_dimensions_)
+        : text_placement_info(parent, scale_factor_, dim, has_dimensions_)
+    {
+
+    }
+
+    bool next()
+    {
+        return this->get_override("next")();
+    }
+};
+
 }
 
 void export_text_placement()
@@ -126,11 +150,15 @@ void export_text_placement()
         .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
         .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
         .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
+        .def_readwrite("default_format", &text_symbolizer_properties::default_format)
         .add_property ("format_tree",
                        &text_symbolizer_properties::format_tree,
                        &text_symbolizer_properties::set_format_tree);
         /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
+        /* TODO: process, get_all_expressions. */
+        /* set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
         ;
+
     class_<char_properties>("CharProperties")
         .def_readwrite("face_name", &char_properties::face_name)
         .def_readwrite("fontset", &char_properties::fontset)
@@ -144,10 +172,36 @@ void export_text_placement()
         .def_readwrite("fill", &char_properties::fill)
         .def_readwrite("halo_fill", &char_properties::halo_fill)
         .def_readwrite("halo_radius", &char_properties::halo_radius)
+        /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
+        ;
+
+    class_<TextPlacementsWrap, boost::noncopyable>("TextPlacements")
+        .def_readwrite("defaults", &text_placements::properties)
+        .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
+        /* TODO: get_all expressions. */
+        ;
+
+    class_<TextPlacementInfoWrap, boost::noncopyable>("TextPlacementInfo",
+        init<text_placements const*, double, dimension_type, bool>())
+        .def("next", pure_virtual(&text_placement_info::next))
+        .def("get_actual_label_spacing", &text_placement_info::get_actual_label_spacing)
+        .def("get_actual_minimum_distance", &text_placement_info::get_actual_minimum_distance)
+        .def("get_actual_minimum_padding", &text_placement_info::get_actual_minimum_padding)
+        .def_readwrite("properties", &text_placement_info::properties)
+        .def_readwrite("scale_factor", &text_placement_info::scale_factor)
+        .def_readwrite("has_dimensions", &text_placement_info::has_dimensions)
+        .def_readwrite("dimensions", &text_placement_info::dimensions)
+        .def_readwrite("collect_extents", &text_placement_info::collect_extents)
+        .def_readwrite("extents", &text_placement_info::extents)
+        .def_readwrite("additional_boxes", &text_placement_info::additional_boxes)
+        .def_readwrite("envelopes", &text_placement_info::envelopes)
+//        .def_readwrite("placements", &text_placement_info::placements)
+
         ;
 
     //TODO: Python namespace
     class_<NodeWrap, boost::noncopyable>("FormatingNode")
         .def("apply", pure_virtual(&formating::node::apply))
         ;
+
 }
