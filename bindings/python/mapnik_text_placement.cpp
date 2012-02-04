@@ -72,11 +72,13 @@ struct NodeWrap: formating::node, wrapper<formating::node>
 
     void apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
-        std::cout << "Calling apply\n";
-        if (!this->get_override("apply")) {
-            std::cout << "Warning: No apply function found!\n";
+        override o = this->get_override("apply");
+    #ifdef MAPNIK_DEBUG
+        if (!o) {
+            std::cerr << "WARNING: No apply function found in FormatingNode!\n";
         }
-        this->get_override("apply")(ptr(&p), ptr(&feature), ptr(&output));
+    #endif
+        o(ptr(&p), ptr(&feature), ptr(&output));
     }
 };
 
@@ -93,7 +95,6 @@ struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
     {
         if(override func_apply = this->get_override("apply"))
         {
-            std::cout << "got override!" << &feature << "\n";
             func_apply(ptr(&p), ptr(&feature), ptr(&output));
         }
         else
