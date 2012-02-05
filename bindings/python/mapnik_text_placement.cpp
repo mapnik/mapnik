@@ -199,7 +199,8 @@ void export_text_placement()
         ;
 
 
-    class_<text_symbolizer_properties>("TextSymbolizerProperties")
+    class_<text_symbolizer_properties>
+            ("TextSymbolizerProperties")
         .def_readwrite("orientation", &text_symbolizer_properties::orientation)
         .add_property("displacement",
                       &get_displacement,
@@ -224,13 +225,14 @@ void export_text_placement()
                        &text_symbolizer_properties::format_tree,
                        &text_symbolizer_properties::set_format_tree);
         /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
-        get_all_expressions isn't useful in python either. The result is only needed by
+        add_expressions isn't useful in python either. The result is only needed by
         attribute_collector (which isn't exposed in python) and
         it just calls add_expressions of the associated formating tree.
         set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
         ;
 
-    class_<char_properties>("CharProperties")
+    class_<char_properties>
+            ("CharProperties")
         .def(init<char_properties const&>()) //Copy constructor
         .def_readwrite("face_name", &char_properties::face_name)
         .def_readwrite("fontset", &char_properties::fontset)
@@ -248,20 +250,20 @@ void export_text_placement()
         ;
 
     class_<TextPlacementsWrap,
-           boost::shared_ptr<TextPlacementsWrap>,
-           boost::noncopyable>
-           ("TextPlacements")
+            boost::shared_ptr<TextPlacementsWrap>,
+            boost::noncopyable>
+            ("TextPlacements")
         .def_readwrite("defaults", &text_placements::properties)
         .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
-        /* TODO: get_all_expressions() */
+        /* TODO: add_expressions() */
         ;
     register_ptr_to_python<boost::shared_ptr<text_placements> >();
 
     class_<TextPlacementInfoWrap,
-           boost::shared_ptr<TextPlacementInfoWrap>,
-           boost::noncopyable>
-           ("TextPlacementInfo",
-            init<text_placements const*, double, dimension_type, bool>())
+            boost::shared_ptr<TextPlacementInfoWrap>,
+            boost::noncopyable>
+            ("TextPlacementInfo",
+             init<text_placements const*, double, dimension_type, bool>())
         .def("next", pure_virtual(&text_placement_info::next))
         .def("get_actual_label_spacing", &text_placement_info::get_actual_label_spacing)
         .def("get_actual_minimum_distance", &text_placement_info::get_actual_minimum_distance)
@@ -278,18 +280,22 @@ void export_text_placement()
         ;
     register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 
+
     class_<processed_text,
             boost::shared_ptr<processed_text>,
-            boost::noncopyable>("ProcessedText", no_init)
+            boost::noncopyable>
+            ("ProcessedText", no_init)
         .def("push_back", &processed_text::push_back)
         .def("clear", &processed_text::clear)
         ;
 
+
     class_<expression_set,
             boost::shared_ptr<expression_set>,
-            boost::noncopyable>("ExpressionSet")
-            .def("insert", &insert_expression);
-            ;
+            boost::noncopyable>
+            ("ExpressionSet")
+        .def("insert", &insert_expression);
+        ;
 
 
     //TODO: Python namespace
@@ -302,20 +308,19 @@ void export_text_placement()
              &NodeWrap::add_expressions,
              &NodeWrap::default_add_expressions)
         ;
-
     register_ptr_to_python<boost::shared_ptr<formating::node> >();
+
 
     class_<TextNodeWrap,
            boost::shared_ptr<TextNodeWrap>,
            bases<formating::node>,
-           boost::noncopyable>(
-                "FormatingTextNode", init<expression_ptr>())
-            .def("apply", &formating::text_node::apply, &TextNodeWrap::default_apply)
-            .add_property("text",
-                          &formating::text_node::get_text,
-                          &formating::text_node::set_text)
+           boost::noncopyable>
+           ("FormatingTextNode", init<expression_ptr>())
+        .def("apply", &formating::text_node::apply, &TextNodeWrap::default_apply)
+        .add_property("text",
+                      &formating::text_node::get_text,
+                      &formating::text_node::set_text)
         ;
-
     register_ptr_to_python<boost::shared_ptr<formating::text_node> >();
 
 }
