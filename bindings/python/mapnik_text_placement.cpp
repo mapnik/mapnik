@@ -251,7 +251,10 @@ void export_text_placement()
 
     class_<processed_text,
             boost::shared_ptr<processed_text>,
-            boost::noncopyable>("ProcessedText", no_init);
+            boost::noncopyable>("ProcessedText", no_init)
+        .def("push_back", &processed_text::push_back)
+        .def("clear", &processed_text::clear)
+        ;
 
     register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 
