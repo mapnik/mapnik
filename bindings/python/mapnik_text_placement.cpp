@@ -160,6 +160,26 @@ void insert_expression(expression_set *set, expression_ptr p)
     set->insert(p);
 }
 
+char_properties & get_format(text_symbolizer const& sym)
+{
+    return sym.get_placement_options()->properties.default_format;
+}
+
+void set_format(text_symbolizer const& sym, char_properties & format)
+{
+    sym.get_placement_options()->properties.default_format = format;
+}
+
+text_symbolizer_properties & get_properties(text_symbolizer const& sym)
+{
+    return sym.get_placement_options()->properties;
+}
+
+void set_properties(text_symbolizer const& sym, text_symbolizer_properties & properties)
+{
+    sym.get_placement_options()->properties = properties;
+}
+
 }
 
 void export_text_placement()
@@ -205,6 +225,15 @@ void export_text_placement()
         .add_property("placements",
                       &text_symbolizer::get_placement_options,
                       &text_symbolizer::set_placement_options)
+        //TODO: Check return policy, is there a better way to do this?
+        .add_property("format",
+                      make_function(&get_format, return_value_policy<reference_existing_object>()),
+                      &set_format,
+                      "Shortcut for placements.defaults.default_format")
+        .add_property("properties",
+                      make_function(&get_properties, return_value_policy<reference_existing_object>()),
+                      &set_properties,
+                      "Shortcut for placements.defaults")
         ;
 
 
