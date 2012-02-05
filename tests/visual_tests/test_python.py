@@ -13,7 +13,7 @@ class MyText(mapnik.FormatingNode):
                   mapnik.Color('blue')]
         text = self.expr.evaluate(feature)
         i = 0
-        my_properties = properties #mapnik.CharProperties(properties)
+        my_properties = mapnik.CharProperties(properties)
         for char in text:
             my_properties.fill = colors[i % len(colors)]
             output.append(my_properties, char)

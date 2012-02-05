@@ -28,11 +28,18 @@
 #include <mapnik/expression_string.hpp>
 
 using namespace mapnik;
-//using mapnik::color;
-//using mapnik::text_symbolizer;
-//using mapnik::expr_node;
-//using mapnik::expression_ptr;
-//using mapnik::to_expression_string;
+
+/* Notes:
+Overriding functions in inherited classes:
+boost.python documentation doesn't relly tell you how to do it.
+But this helps:
+http://www.gamedev.net/topic/446225-inheritance-in-boostpython/
+
+register_ptr_to_python is required for wrapped classes, but not for unwrapped.
+
+Functions don't have to be members of the class, but can also be
+normal functions taking a ref to the class as first parameter.
+*/
 
 namespace {
 using namespace boost::python;
@@ -58,10 +65,6 @@ void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
     t.displacement = std::make_pair(x, y);
 }
 
-/* boost.python documentation doesn't relly tell you how to do it.
-But this helps:
-http://www.gamedev.net/topic/446225-inheritance-in-boostpython/
-*/
 
 struct NodeWrap: formating::node, wrapper<formating::node>
 {
@@ -228,6 +231,7 @@ void export_text_placement()
         ;
 
     class_<char_properties>("CharProperties")
+        .def(init<char_properties const&>()) //Copy constructor
         .def_readwrite("face_name", &char_properties::face_name)
         .def_readwrite("fontset", &char_properties::fontset)
         .def_readwrite("text_size", &char_properties::text_size)
@@ -284,10 +288,8 @@ void export_text_placement()
     class_<expression_set,
             boost::shared_ptr<expression_set>,
             boost::noncopyable>("ExpressionSet")
+            .def("insert", &insert_expression);
             ;
-    def("insert_expression", insert_expression);
-
-    register_ptr_to_python<boost::shared_ptr<expression_set> >();
 
 
     //TODO: Python namespace
