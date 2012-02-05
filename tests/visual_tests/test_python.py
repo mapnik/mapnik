@@ -11,13 +11,16 @@ class MyText(mapnik.FormatingNode):
         colors = [mapnik.Color('red'), 
                   mapnik.Color('green'), 
                   mapnik.Color('blue')]
-        text = "Test" #self.expr.evaluate(feature)
+        text = self.expr.evaluate(feature)
         i = 0
         my_properties = properties #mapnik.CharProperties(properties)
         for char in text:
             my_properties.fill = colors[i % len(colors)]
             output.append(my_properties, char)
             i += 1
+            
+    def add_expressions(self, output):
+        output.insert(self.expr)
 
 m = mapnik.Map(600,300)
 m.background = mapnik.Color('white')

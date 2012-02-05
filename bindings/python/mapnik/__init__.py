@@ -256,6 +256,10 @@ class _ProcessedText(ProcessedText, _injector):
         #More pythonic name
         self.push_back(properties, text)
 
+class _ExpressionSet(ExpressionSet, _injector):
+    def insert(self, e):
+        insert_expression(self, e)
+
 class _Symbolizers(Symbolizers,_injector):
 
     def __getitem__(self, idx):

@@ -80,6 +80,23 @@ struct NodeWrap: formating::node, wrapper<formating::node>
     #endif
         o(ptr(&p), ptr(&feature), ptr(&output));
     }
+
+    virtual void add_expressions(expression_set &output) const
+    {
+        override o = this->get_override("add_expressions");
+        if (o)
+        {
+            o(ptr(&output));
+        } else
+        {
+            formating::node::add_expressions(output);
+        }
+    }
+
+    void default_add_expressions(expression_set &output) const
+    {
+        formating::node::add_expressions(output);
+    }
 };
 
 
@@ -133,6 +150,11 @@ struct TextPlacementInfoWrap: text_placement_info, wrapper<text_placement_info>
         return this->get_override("next")();
     }
 };
+
+void insert_expression(expression_set *set, expression_ptr p)
+{
+    set->insert(p);
+}
 
 }
 
@@ -198,9 +220,11 @@ void export_text_placement()
         .add_property ("format_tree",
                        &text_symbolizer_properties::format_tree,
                        &text_symbolizer_properties::set_format_tree);
-        /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.*/
-        /* TODO: process, get_all_expressions. */
-        /* set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
+        /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
+        get_all_expressions isn't useful in python either. The result is only needed by
+        attribute_collector (which isn't exposed in python) and
+        it just calls add_expressions of the associated formating tree.
+        set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
         ;
 
     class_<char_properties>("CharProperties")
@@ -225,7 +249,7 @@ void export_text_placement()
            ("TextPlacements")
         .def_readwrite("defaults", &text_placements::properties)
         .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
-        /* TODO: get_all expressions. */
+        /* TODO: get_all_expressions() */
         ;
     register_ptr_to_python<boost::shared_ptr<text_placements> >();
 
@@ -248,6 +272,7 @@ void export_text_placement()
         .def_readwrite("envelopes", &text_placement_info::envelopes)
 //        .def_readwrite("placements", &text_placement_info::placements)
         ;
+    register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 
     class_<processed_text,
             boost::shared_ptr<processed_text>,
@@ -256,7 +281,14 @@ void export_text_placement()
         .def("clear", &processed_text::clear)
         ;
 
-    register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
+    class_<expression_set,
+            boost::shared_ptr<expression_set>,
+            boost::noncopyable>("ExpressionSet")
+            ;
+    def("insert_expression", insert_expression);
+
+    register_ptr_to_python<boost::shared_ptr<expression_set> >();
+
 
     //TODO: Python namespace
     class_<NodeWrap,
@@ -264,6 +296,9 @@ void export_text_placement()
            boost::noncopyable>
            ("FormatingNode")
         .def("apply", pure_virtual(&formating::node::apply))
+        .def("add_expressions",
+             &NodeWrap::add_expressions,
+             &NodeWrap::default_add_expressions)
         ;
 
     register_ptr_to_python<boost::shared_ptr<formating::node> >();
@@ -272,9 +307,8 @@ void export_text_placement()
            boost::shared_ptr<TextNodeWrap>,
            bases<formating::node>,
            boost::noncopyable>(
-                "FormatingTextNode", init<expression_ptr>() )
-      /* Apply and add_expressions are automatically inherited. */
-            .def("apply", &TextNodeWrap::apply)//, &TextNodeWrap::default_apply
+                "FormatingTextNode", init<expression_ptr>())
+            .def("apply", &formating::text_node::apply, &TextNodeWrap::default_apply)
             .add_property("text",
                           &formating::text_node::get_text,
                           &formating::text_node::set_text)
