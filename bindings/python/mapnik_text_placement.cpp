@@ -31,7 +31,7 @@ using namespace mapnik;
 
 /* Notes:
 Overriding functions in inherited classes:
-boost.python documentation doesn't relly tell you how to do it.
+boost.python documentation doesn't really tell you how to do it.
 But this helps:
 http://www.gamedev.net/topic/446225-inheritance-in-boostpython/
 
@@ -305,7 +305,7 @@ void export_text_placement()
            ("FormatingNode")
         .def("apply", pure_virtual(&formating::node::apply))
         .def("add_expressions",
-             &NodeWrap::add_expressions,
+             &formating::node::add_expressions,
              &NodeWrap::default_add_expressions)
         ;
     register_ptr_to_python<boost::shared_ptr<formating::node> >();
