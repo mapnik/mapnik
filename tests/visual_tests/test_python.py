@@ -9,8 +9,8 @@ class MyText(mapnik.FormatingNode):
         self.expr_nr = mapnik.Expression("[nr]")
 
     def apply(self, properties, feature, output):
-        colors = [mapnik.Color('red'), 
-                  mapnik.Color('green'), 
+        colors = [mapnik.Color('red'),
+                  mapnik.Color('green'),
                   mapnik.Color('blue')]
         text = self.expr.evaluate(feature)
         if int(feature['nr']) > 5:
@@ -22,10 +22,30 @@ class MyText(mapnik.FormatingNode):
                 i += 1
         else:
             output.append(properties, text)
-            
+
     def add_expressions(self, output):
         output.insert(self.expr)
         output.insert(self.expr_nr)
+
+
+class IfElse(mapnik.FormatingNode):
+    def __init__(self, condition, if_node, else_node):
+        mapnik.FormatingNode.__init__(self)
+        self.condition = mapnik.Expression(condition)
+        self.if_node = if_node
+        self.else_node = else_node
+
+    def apply(self, properties, feature, output):
+        c = self.condition.evaluate(feature)
+        if c:
+            self.if_node.apply(properties, feature, output)
+        else:
+            self.else_node.apply(properties, feature, output)
+
+    def add_expressions(self, output):
+        output.insert(self.condition)
+        self.if_node.add_expressions(output)
+        self.else_node.add_expressions(output)
 
 m = mapnik.Map(600, 100)
 m.background = mapnik.Color('white')
@@ -36,11 +56,11 @@ text.placements.defaults.default_format.face_name = 'DejaVu Sans Book'
 
 point = mapnik.PointSymbolizer()
 
-rule = mapnik.Rule() 
+rule = mapnik.Rule()
 rule.symbols.append(text)
 rule.symbols.append(point)
 
-style = mapnik.Style() 
+style = mapnik.Style()
 style.rules.append(rule)
 
 m.append_style('Style', style)
@@ -57,7 +77,11 @@ m.zoom_to_box(bbox)
 
 format_trees = [
     ('TextNode', mapnik.FormatingTextNode(mapnik.Expression("[name]"))),
-    ('MyText', MyText())
+    ('MyText', MyText()),
+    ('IfElse', IfElse("[nr] != '5'",
+                mapnik.FormatingTextNode(mapnik.Expression("[name]")),
+                mapnik.FormatingTextNode(mapnik.Expression("'SPECIAL!'"))))
+
 ]
 
 for format_tree in format_trees:
