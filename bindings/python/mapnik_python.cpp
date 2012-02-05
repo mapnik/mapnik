@@ -100,7 +100,7 @@ void render(const mapnik::Map& map,
             unsigned offset_x = 0u,
             unsigned offset_y = 0u)
 {
-    Py_BEGIN_ALLOW_THREADS
+//    Py_BEGIN_ALLOW_THREADS
         try
         {
             mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
@@ -108,11 +108,11 @@ void render(const mapnik::Map& map,
         }
         catch (...)
         {
-            Py_BLOCK_THREADS
+//            Py_BLOCK_THREADS
                 throw;
         }
-    Py_END_ALLOW_THREADS
-        }
+//    Py_END_ALLOW_THREADS
+}
 
 void render_with_detector(
     const mapnik::Map &map,
