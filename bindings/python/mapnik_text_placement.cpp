@@ -26,6 +26,7 @@
 #include <mapnik/text_placements.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/expression_string.hpp>
+#include <mapnik/text_symbolizer.hpp>
 
 using namespace mapnik;
 
@@ -196,6 +197,14 @@ void export_text_placement()
         .value("UPPERCASE",UPPERCASE)
         .value("LOWERCASE",LOWERCASE)
         .value("CAPITALIZE",CAPITALIZE)
+        ;
+
+    class_<text_symbolizer>("TextSymbolizer",
+           init<>())
+        .def(init<expression_ptr, std::string const&, unsigned, color const&>())
+        .add_property("placements",
+                      &text_symbolizer::get_placement_options,
+                      &text_symbolizer::set_placement_options)
         ;
 
 
