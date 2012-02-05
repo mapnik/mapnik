@@ -35,7 +35,7 @@ public:
     text_placements_list();
     text_placement_info_ptr get_placement_info(
         double scale_factor, dimension_type dim, bool has_dimensions) const;
-    virtual std::set<expression_ptr> get_all_expressions();
+    virtual void add_expressions(expression_set &output);
     text_symbolizer_properties & add();
     text_symbolizer_properties & get(unsigned i);
     unsigned size() const;

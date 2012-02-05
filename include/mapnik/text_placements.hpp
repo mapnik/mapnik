@@ -91,7 +91,7 @@ struct text_symbolizer_properties
     formating::node_ptr format_tree() const;
     /** Get a list of all expressions used in any placement.
      * This function is used to collect attributes. */
-    std::set<expression_ptr> get_all_expressions() const;
+    void add_expressions(expression_set &output) const;
 
     //Per symbolizer options
     expression_ptr orientation;
@@ -236,7 +236,7 @@ public:
     /** Get a list of all expressions used in any placement.
      * This function is used to collect attributes.
      */
-    virtual std::set<expression_ptr> get_all_expressions();
+    virtual void add_expressions(expression_set &output);
 
     /** Destructor. */
     virtual ~text_placements() {}

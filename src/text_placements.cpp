@@ -217,11 +217,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool 
 }
 
 
-std::set<expression_ptr> text_symbolizer_properties::get_all_expressions() const
+void text_symbolizer_properties::add_expressions(expression_set &output) const
 {
-    std::set<expression_ptr> result;
-    if (tree_) tree_->add_expressions(result);
-    return result;
+    output.insert(orientation);
+    if (tree_) tree_->add_expressions(output);
 }
 
 void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
@@ -356,13 +355,9 @@ text_placements::text_placements() : properties()
 {
 }
 
-std::set<expression_ptr> text_placements::get_all_expressions()
+void text_placements::add_expressions(expression_set &output)
 {
-    std::set<expression_ptr> result, tmp;
-    tmp = properties.get_all_expressions();
-    result.insert(tmp.begin(), tmp.end());
-    result.insert(properties.orientation);
-    return result;
+    properties.add_expressions(output);
 }
 
 
@@ -566,21 +561,15 @@ text_placements_list::text_placements_list() : text_placements(), list_(0)
 
 }
 
-std::set<expression_ptr> text_placements_list::get_all_expressions()
+void text_placements_list::add_expressions(expression_set &output)
 {
-    std::set<expression_ptr> result, tmp;
-    tmp = properties.get_all_expressions();
-    result.insert(tmp.begin(), tmp.end());
-    result.insert(properties.orientation);
+    properties.add_expressions(output);
 
     std::vector<text_symbolizer_properties>::const_iterator it;
     for (it=list_.begin(); it != list_.end(); it++)
     {
-        tmp = it->get_all_expressions();
-        result.insert(tmp.begin(), tmp.end());
-        result.insert(it->orientation);
+        it->add_expressions(output);
     }
-    return result;
 }
 
 unsigned text_placements_list::size() const
