@@ -88,8 +88,9 @@ struct symbolizer_attributes : public boost::static_visitor<>
 
     void operator () (text_symbolizer const& sym)
     {
-        std::set<expression_ptr>::const_iterator it;
-        std::set<expression_ptr> expressions = sym.get_placement_options()->get_all_expressions();
+        expression_set::const_iterator it;
+        expression_set expressions;
+        sym.get_placement_options()->add_expressions(expressions);
         expression_attributes f_attr(names_);
         for (it=expressions.begin(); it != expressions.end(); it++)
         {
@@ -141,8 +142,9 @@ struct symbolizer_attributes : public boost::static_visitor<>
 
     void operator () (shield_symbolizer const& sym)
     {
-        std::set<expression_ptr>::const_iterator it;
-        std::set<expression_ptr> expressions = sym.get_placement_options()->get_all_expressions();
+        expression_set::const_iterator it;
+        expression_set expressions;
+        sym.get_placement_options()->add_expressions(expressions);
         expression_attributes f_attr(names_);
         for (it=expressions.begin(); it != expressions.end(); it++)
         {

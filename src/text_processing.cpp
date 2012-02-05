@@ -75,7 +75,7 @@ node_ptr node::from_xml(boost::property_tree::ptree const& xml)
     }
 }
 
-void node::add_expressions(std::set<expression_ptr> &expressions) const
+void node::add_expressions(expression_set &output) const
 {
     //Do nothing by default
 }
@@ -104,13 +104,13 @@ void list_node::apply(char_properties const& p, Feature const& feature, processe
 }
 
 
-void list_node::add_expressions(std::set<expression_ptr> &expressions) const
+void list_node::add_expressions(expression_set &output) const
 {
     std::vector<node_ptr>::const_iterator itr = children_.begin();
     std::vector<node_ptr>::const_iterator end = children_.end();
     for (;itr != end; itr++)
     {
-        (*itr)->add_expressions(expressions);
+        (*itr)->add_expressions(output);
     }
 }
 
@@ -179,9 +179,9 @@ void text_node::apply(char_properties const& p, Feature const& feature, processe
 }
 
 
-void text_node::add_expressions(std::set<expression_ptr> &expressions) const
+void text_node::add_expressions(expression_set &output) const
 {
-    if (text_) expressions.insert(text_);
+    if (text_) output.insert(text_);
 }
 
 
