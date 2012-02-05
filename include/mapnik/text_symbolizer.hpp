@@ -36,8 +36,7 @@
 // stl
 #include <string>
 
-// Warning disabled for the moment
-#if (0 && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+#if (1 && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
 #define func_deprecated __attribute__ ((deprecated))
 #else
 #define func_deprecated
@@ -114,7 +113,7 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     void set_minimum_padding(double distance);
     double get_minimum_padding() const func_deprecated;
     void set_minimum_path_length(double size);
-    double get_minimum_path_length() const func_deprecated;
+    double get_minimum_path_length() const;
     void set_allow_overlap(bool overlap);
     bool get_allow_overlap() const func_deprecated;
     void set_text_opacity(double opacity);

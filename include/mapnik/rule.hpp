@@ -203,26 +203,9 @@ private:
         template <class T>
         void copy_text_ptr(T & sym) const
         {
-            std::string name = to_expression_string(*sym.get_name());
-            sym.set_name( parse_expression(name) );
-
-            // FIXME - orientation doesn't appear to be initialized in constructor?
-            //std::string orientation = to_expression_string(*sym->get_orientation());
-            //sym->set_orientation( parse_expression(orientation) );
-
-            float text_size = sym.get_text_size();
-            position displace = sym.get_displacement();
-            vertical_alignment_e valign = sym.get_vertical_alignment();
-            horizontal_alignment_e halign = sym.get_horizontal_alignment();
-            justify_alignment_e jalign = sym.get_justify_alignment();
-
-            text_placements_ptr placements = text_placements_ptr(boost::make_shared<text_placements_dummy>());
-            sym.set_placement_options( placements );
-            sym.set_text_size(text_size);
-            sym.set_displacement(displace);
-            sym.set_vertical_alignment(valign);
-            sym.set_horizontal_alignment(halign);
-            sym.set_justify_alignment(jalign);
+#ifdef MAPNIK_DEBUG
+            std::cerr << "Warning: Deep copying TextSymbolizers is broken!\n";
+#endif
         }
 
         template <class T>
