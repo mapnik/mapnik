@@ -146,7 +146,9 @@ void export_text_symbolizer()
 {
     using namespace boost::python;
 
-    class_<text_symbolizer>("TextSymbolizer")
+    class_<text_symbolizer>("TextSymbolizer",
+           init<>())
+        .def(init<expression_ptr, std::string const&, unsigned, color const&>())
         /*
         // todo - all python classes can have kwargs and default constructors
         class_<text_symbolizer>("TextSymbolizer",
