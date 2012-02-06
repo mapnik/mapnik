@@ -42,14 +42,20 @@ plugin_env['LIBS'].append(env['ICU_LIB_NAME'])
 if env['THREADING'] == 'multi':
 	plugin_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
 
+linkflags = env['CUSTOM_LDFLAGS']
+
 if env['RUNTIME_LINK'] == 'static':
     #cmd = 'pg_config --libs'
     #plugin_env.ParseConfig(cmd)
     # pg_config does not seem to report correct deps of libpq
     # so resort to hardcoding for now
     plugin_env['LIBS'].extend(['ldap','pam','ssl','crypto','krb5'])
+    # if linking to internationalized libpq
+    linkflags += ' -liconv '
+    linkflags += ' -lintl '
+    linkflags += ' -framework Foundation '
 
-input_plugin = plugin_env.SharedLibrary('../postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LINKFLAGS=env['CUSTOM_LDFLAGS'])
+input_plugin = plugin_env.SharedLibrary('../postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LINKFLAGS=linkflags)
 
 # if the plugin links to libmapnik ensure it is built first
 Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))

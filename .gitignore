@@ -12,7 +12,6 @@ demo/c++/rundemo
 bindings/python/mapnik/paths.py
 config.cache
 config.log
-config.py
 .sconf_temp/
 .sconsign.dblite
 demo/viewer/viewer.ini
