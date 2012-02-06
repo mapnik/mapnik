@@ -44,6 +44,7 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
+    mapnik::statistics_ptr get_statistics() const;
     void bind() const;
 private:
     mutable mapnik::box2d<double> extent_;
@@ -56,6 +57,7 @@ private:
     mutable double dy_;
     mutable int nbands_;
     mutable bool shared_dataset_;
+    mutable std::map<std::string, mapnik::parameters> stats_;
     double filter_factor_;
     inline GDALDataset* open_dataset() const;
 };
