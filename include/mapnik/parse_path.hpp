@@ -64,7 +64,8 @@ struct path_processor
         void operator() (attribute const& attr) const
         {
             // convert mapnik::value to std::string
-            filename_ += attr.value<mapnik::value,feature_type>(feature_).to_string();
+            value const& val = feature_.get(attr.name());
+            filename_ += val.to_string();
         }
 
         std::string & filename_;
