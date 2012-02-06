@@ -106,7 +106,6 @@ struct NodeWrap: formating::node, wrapper<formating::node>
 
 struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
 {
-
     TextNodeWrap(expression_ptr text) : formating::text_node(text), wrapper<formating::text_node>()
     {
 
@@ -128,7 +127,26 @@ struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
     {
         formating::text_node::apply(p, feature, output);
     }
+};
 
+struct FormatNodeWrap: formating::format_node, wrapper<formating::format_node>
+{
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        if(override func_apply = this->get_override("apply"))
+        {
+            func_apply(ptr(&p), ptr(&feature), ptr(&output));
+        }
+        else
+        {
+            formating::format_node::apply(p, feature, output);
+        }
+    }
+
+    void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        formating::format_node::apply(p, feature, output);
+    }
 };
 
 struct TextPlacementsWrap: text_placements, wrapper<text_placements>
@@ -361,4 +379,16 @@ void export_text_placement()
         ;
     register_ptr_to_python<boost::shared_ptr<formating::text_node> >();
 
+
+    class_<FormatNodeWrap,
+           boost::shared_ptr<FormatNodeWrap>,
+           bases<formating::node>,
+           boost::noncopyable>
+           ("FormatingFormatNode")
+        .def("apply", &formating::format_node::apply, &FormatNodeWrap::default_apply)
+        .add_property("child",
+                      &formating::format_node::get_child,
+                      &formating::format_node::set_child)
+        ;
+    register_ptr_to_python<boost::shared_ptr<formating::text_node> >();
 }
