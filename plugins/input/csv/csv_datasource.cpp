@@ -851,6 +851,12 @@ mapnik::box2d<double> csv_datasource::envelope() const
     return extent_;
 }
 
+mapnik::statistics_ptr csv_datasource::get_statistics()  const
+{
+    if (! is_bound_) bind();
+    return boost::make_shared<mapnik::statistics>(stats_);
+}
+
 boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_type() const
 {
     if (! is_bound_) bind();

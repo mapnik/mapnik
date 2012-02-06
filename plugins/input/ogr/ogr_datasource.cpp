@@ -432,7 +432,7 @@ layer_descriptor ogr_datasource::get_descriptor() const
 std::map<std::string, mapnik::parameters> ogr_datasource::get_statistics()  const
 {
     if (! is_bound_) bind();
-    return stats_;
+    return boost::make_shared<mapnik::statistics>(stats_);
 }
 
 void validate_attribute_names(query const& q, std::vector<attribute_descriptor> const& names )

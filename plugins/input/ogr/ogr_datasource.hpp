@@ -48,7 +48,7 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    std::map<std::string, mapnik::parameters> get_statistics() const;
+    mapnik::statistics_ptr get_statistics() const;
     void bind() const;
 
 private:

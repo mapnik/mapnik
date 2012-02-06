@@ -19,6 +19,7 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
+    mapnik::statistics_ptr get_statistics() const;
     void bind() const;
     template <typename T>
     void parse_csv(T& stream,
@@ -38,6 +39,7 @@ private:
     mutable std::string quote_;
     mutable std::vector<std::string> headers_;
     mutable std::string manual_headers_;
+    mutable std::map<std::string, mapnik::parameters> stats_;
     mutable bool strict_;
     mutable bool quiet_;
     mutable double filesize_max_;
