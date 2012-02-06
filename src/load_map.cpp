@@ -1282,7 +1282,9 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         }
 
         placement_finder->properties.from_xml(sym, fontsets_);
-        if (strict_) ensure_font_face(placement_finder->properties.default_format.face_name);
+        if (strict_ &&
+                !placement_finder->properties.default_format.fontset.size())
+            ensure_font_face(placement_finder->properties.default_format.face_name);
         if (list) {
             ptree::const_iterator symIter = sym.begin();
             ptree::const_iterator endSym = sym.end();
@@ -1296,7 +1298,9 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
                 ensure_attrs(symIter->second, "TextSymbolizer/Placement", s_common.str());
                 text_symbolizer_properties & p = list->add();
                 p.from_xml(symIter->second, fontsets_);
-                if (strict_) ensure_font_face(p.default_format.face_name);
+                if (strict_ &&
+                        !p.default_format.fontset.size())
+                    ensure_font_face(p.default_format.face_name);
             }
         }
 
