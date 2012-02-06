@@ -429,7 +429,7 @@ layer_descriptor ogr_datasource::get_descriptor() const
     return desc_;
 }
 
-std::map<std::string, mapnik::parameters> ogr_datasource::get_statistics()  const
+mapnik::statistics_ptr ogr_datasource::get_statistics()  const
 {
     if (! is_bound_) bind();
     return boost::make_shared<mapnik::statistics>(stats_);

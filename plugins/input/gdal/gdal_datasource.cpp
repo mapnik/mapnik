@@ -25,6 +25,7 @@
 #include "gdal_featureset.hpp"
 
 // mapnik
+#include <boost/make_shared.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/geom_util.hpp>
 
@@ -197,6 +198,12 @@ void gdal_datasource::bind() const
 
 gdal_datasource::~gdal_datasource()
 {
+}
+
+mapnik::statistics_ptr gdal_datasource::get_statistics()  const
+{
+    if (! is_bound_) bind();
+    return boost::make_shared<mapnik::statistics>(stats_);
 }
 
 datasource::datasource_t gdal_datasource::type() const
