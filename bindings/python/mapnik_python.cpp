@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: mapnik_python.cc 27 2005-03-30 21:45:40Z pavlenko $
 
 #include <boost/python.hpp>
 #include <boost/get_pointer.hpp>
@@ -105,16 +104,16 @@ void render(const mapnik::Map& map,
             unsigned offset_y = 0u)
 {
     python_thread::unblock();
-        try
-        {
-            mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
-            ren.apply();
-        }
-        catch (...)
-        {
+    try
+    {
+        mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
         python_thread::block();
-                throw;
-        }
+        throw;
+    }
     python_thread::block();
 }
 
@@ -127,18 +126,18 @@ void render_with_detector(
     unsigned offset_y = 0u)
 {
     python_thread::unblock();
-        try
-        {
-            mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector);
-            ren.apply();
-        }
-        catch (...)
-        {
+    try
+    {
+        mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector);
+        ren.apply();
+    }
+    catch (...)
+    {
         python_thread::block();
-                throw;
-        }
+        throw;
+    }
     python_thread::block();
-        }
+}
 
 void render_layer2(const mapnik::Map& map,
                    mapnik::image_32& image,
@@ -154,20 +153,20 @@ void render_layer2(const mapnik::Map& map,
     }
 
     python_thread::unblock();
-        try
-        {
-            mapnik::layer const& layer = layers[layer_idx];
-            mapnik::agg_renderer<mapnik::image_32> ren(map,image,1.0,0,0);
-            std::set<std::string> names;
-            ren.apply(layer,names);
-        }
-        catch (...)
-        {
+    try
+    {
+        mapnik::layer const& layer = layers[layer_idx];
+        mapnik::agg_renderer<mapnik::image_32> ren(map,image,1.0,0,0);
+        std::set<std::string> names;
+        ren.apply(layer,names);
+    }
+    catch (...)
+    {
         python_thread::block();
-                throw;
-        }
+        throw;
+    }
     python_thread::block();
-        }
+}
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
@@ -177,36 +176,36 @@ void render3(const mapnik::Map& map,
              unsigned offset_y = 0)
 {
     python_thread::unblock();
-        try
-        {
-            Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-            mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
-            ren.apply();
-        }
-        catch (...)
-        {
+    try
+    {
+        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+        mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
         python_thread::block();
-                throw;
-        }
+        throw;
+    }
     python_thread::block();
-        }
+}
 
 void render4(const mapnik::Map& map, PycairoSurface* surface)
 {
     python_thread::unblock();
-        try
-        {
-            Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-            mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
-            ren.apply();
-        }
-        catch (...)
-        {
+    try
+    {
+        Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+        mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
+        ren.apply();
+    }
+    catch (...)
+    {
         python_thread::block();
-                throw;
-        }
+        throw;
+    }
     python_thread::block();
-        }
+}
 
 void render5(const mapnik::Map& map,
              PycairoContext* context,
@@ -214,36 +213,36 @@ void render5(const mapnik::Map& map,
              unsigned offset_y = 0)
 {
     python_thread::unblock();
-        try
-        {
-            Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-            mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
-            ren.apply();
-        }
-        catch (...)
-        {
+    try
+    {
+        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+        mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
+        ren.apply();
+    }
+    catch (...)
+    {
         python_thread::block();
-                throw;
-        }
+        throw;
+    }
     python_thread::block();
-        }
+}
 
 void render6(const mapnik::Map& map, PycairoContext* context)
 {
     python_thread::unblock();
-        try
-        {
-            Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-            mapnik::cairo_renderer<Cairo::Context> ren(map,c);
-            ren.apply();
-        }
-        catch (...)
-        {
+    try
+    {
+        Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+        mapnik::cairo_renderer<Cairo::Context> ren(map,c);
+        ren.apply();
+    }
+    catch (...)
+    {
         python_thread::block();
-                throw;
-        }
+        throw;
+    }
     python_thread::block();
-        }
+}
 
 #endif
 
