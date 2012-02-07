@@ -400,5 +400,5 @@ void export_text_placement()
                       &formating::format_node::get_child,
                       &formating::format_node::set_child)
         ;
-    register_ptr_to_python<boost::shared_ptr<formating::text_node> >();
+    register_ptr_to_python<boost::shared_ptr<formating::format_node> >();
 }
