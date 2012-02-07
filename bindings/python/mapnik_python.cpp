@@ -86,6 +86,7 @@ void export_label_collision_detector();
 #include <mapnik/scale_denominator.hpp>
 #include "python_grid_utils.hpp"
 #include "mapnik_value_converter.hpp"
+#include "mapnik_threads.hpp"
 #include "python_optional.hpp"
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -93,13 +94,17 @@ void export_label_collision_detector();
 static Pycairo_CAPI_t *Pycairo_CAPI;
 #endif
 
+using mapnik::python_thread;
+bool python_thread::thread_support = true;
+boost::thread_specific_ptr<PyThreadState> python_thread::state;
+
 void render(const mapnik::Map& map,
             mapnik::image_32& image,
             double scale_factor = 1.0,
             unsigned offset_x = 0u,
             unsigned offset_y = 0u)
 {
-//    Py_BEGIN_ALLOW_THREADS
+    python_thread::unblock();
         try
         {
             mapnik::agg_renderer<mapnik::image_32> ren(map,image,scale_factor,offset_x, offset_y);
@@ -107,10 +112,10 @@ void render(const mapnik::Map& map,
         }
         catch (...)
         {
-//            Py_BLOCK_THREADS
+        python_thread::block();
                 throw;
         }
-//    Py_END_ALLOW_THREADS
+    python_thread::block();
 }
 
 void render_with_detector(
@@ -121,7 +126,7 @@ void render_with_detector(
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)
 {
-    Py_BEGIN_ALLOW_THREADS
+    python_thread::unblock();
         try
         {
             mapnik::agg_renderer<mapnik::image_32> ren(map,image,detector);
@@ -129,10 +134,10 @@ void render_with_detector(
         }
         catch (...)
         {
-            Py_BLOCK_THREADS
+        python_thread::block();
                 throw;
         }
-    Py_END_ALLOW_THREADS
+    python_thread::block();
         }
 
 void render_layer2(const mapnik::Map& map,
@@ -148,7 +153,7 @@ void render_layer2(const mapnik::Map& map,
         throw std::runtime_error(s.str());
     }
 
-    Py_BEGIN_ALLOW_THREADS
+    python_thread::unblock();
         try
         {
             mapnik::layer const& layer = layers[layer_idx];
@@ -158,10 +163,10 @@ void render_layer2(const mapnik::Map& map,
         }
         catch (...)
         {
-            Py_BLOCK_THREADS
+        python_thread::block();
                 throw;
         }
-    Py_END_ALLOW_THREADS
+    python_thread::block();
         }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -171,7 +176,7 @@ void render3(const mapnik::Map& map,
              unsigned offset_x = 0,
              unsigned offset_y = 0)
 {
-    Py_BEGIN_ALLOW_THREADS
+    python_thread::unblock();
         try
         {
             Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
@@ -180,15 +185,15 @@ void render3(const mapnik::Map& map,
         }
         catch (...)
         {
-            Py_BLOCK_THREADS
+        python_thread::block();
                 throw;
         }
-    Py_END_ALLOW_THREADS
+    python_thread::block();
         }
 
 void render4(const mapnik::Map& map, PycairoSurface* surface)
 {
-    Py_BEGIN_ALLOW_THREADS
+    python_thread::unblock();
         try
         {
             Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
@@ -197,10 +202,10 @@ void render4(const mapnik::Map& map, PycairoSurface* surface)
         }
         catch (...)
         {
-            Py_BLOCK_THREADS
+        python_thread::block();
                 throw;
         }
-    Py_END_ALLOW_THREADS
+    python_thread::block();
         }
 
 void render5(const mapnik::Map& map,
@@ -208,7 +213,7 @@ void render5(const mapnik::Map& map,
              unsigned offset_x = 0,
              unsigned offset_y = 0)
 {
-    Py_BEGIN_ALLOW_THREADS
+    python_thread::unblock();
         try
         {
             Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
@@ -217,15 +222,15 @@ void render5(const mapnik::Map& map,
         }
         catch (...)
         {
-            Py_BLOCK_THREADS
+        python_thread::block();
                 throw;
         }
-    Py_END_ALLOW_THREADS
+    python_thread::block();
         }
 
 void render6(const mapnik::Map& map, PycairoContext* context)
 {
-    Py_BEGIN_ALLOW_THREADS
+    python_thread::unblock();
         try
         {
             Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
@@ -234,10 +239,10 @@ void render6(const mapnik::Map& map, PycairoContext* context)
         }
         catch (...)
         {
-            Py_BLOCK_THREADS
+        python_thread::block();
                 throw;
         }
-    Py_END_ALLOW_THREADS
+    python_thread::block();
         }
 
 #endif

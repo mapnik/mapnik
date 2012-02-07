@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+ * Copyright (C) 2012 Artem Pavlenko, Jean-Francois Doyon
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,14 +19,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
-
 #include <boost/python.hpp>
 
 #include <mapnik/text_placements.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>
+#include "mapnik_threads.hpp"
 
 using namespace mapnik;
 
@@ -77,12 +76,9 @@ struct NodeWrap: formating::node, wrapper<formating::node>
     void apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
         override o = this->get_override("apply");
-    #ifdef MAPNIK_DEBUG
-        if (!o) {
-            std::cerr << "WARNING: No apply function found in FormatingNode!\n";
-        }
-    #endif
+        python_thread::block();
         o(ptr(&p), ptr(&feature), ptr(&output));
+        python_thread::unblock();
     }
 
     virtual void add_expressions(expression_set &output) const
@@ -90,7 +86,9 @@ struct NodeWrap: formating::node, wrapper<formating::node>
         override o = this->get_override("add_expressions");
         if (o)
         {
+            python_thread::block();
             o(ptr(&output));
+            python_thread::unblock();
         } else
         {
             formating::node::add_expressions(output);
@@ -113,9 +111,11 @@ struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
 
     virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
-        if(override func_apply = this->get_override("apply"))
+        if(override o = this->get_override("apply"))
         {
-            func_apply(ptr(&p), ptr(&feature), ptr(&output));
+            python_thread::block();
+            o(ptr(&p), ptr(&feature), ptr(&output));
+            python_thread::unblock();
         }
         else
         {
@@ -133,9 +133,11 @@ struct FormatNodeWrap: formating::format_node, wrapper<formating::format_node>
 {
     virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
-        if(override func_apply = this->get_override("apply"))
+        if(override o = this->get_override("apply"))
         {
-            func_apply(ptr(&p), ptr(&feature), ptr(&output));
+            python_thread::block();
+            o(ptr(&p), ptr(&feature), ptr(&output));
+            python_thread::unblock();
         }
         else
         {
@@ -154,7 +156,11 @@ struct TextPlacementsWrap: text_placements, wrapper<text_placements>
     text_placement_info_ptr get_placement_info(double scale_factor_, dimension_type dim,
                             bool has_dimensions_) const
     {
-        return this->get_override("get_placement_info")();
+        override o = this->get_override("get_placement_info");
+        python_thread::block();
+        text_placement_info_ptr result = o();
+        python_thread::unblock();
+        return result;
     }
 };
 
@@ -169,7 +175,11 @@ struct TextPlacementInfoWrap: text_placement_info, wrapper<text_placement_info>
 
     bool next()
     {
-        return this->get_override("next")();
+        override o = this->get_override("next");
+        python_thread::block();
+        bool result = o();
+        python_thread::unblock();
+        return result;
     }
 };
 
