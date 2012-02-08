@@ -76,6 +76,34 @@ private:
 #endif
 };
 
+class python_block_auto_unblock
+{
+public:
+    python_block_auto_unblock()
+    {
+        python_thread::block();
+    }
+
+    ~python_block_auto_unblock()
+    {
+        python_thread::unblock();
+    }
+};
+
+class python_unblock_auto_block
+{
+public:
+    python_unblock_auto_block()
+    {
+        python_thread::unblock();
+    }
+
+    ~python_unblock_auto_block()
+    {
+        python_thread::block();
+    }
+};
+
 } //namespace
 
 #endif // MAPNIK_THREADS_HPP

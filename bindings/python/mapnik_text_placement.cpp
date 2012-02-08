@@ -76,10 +76,8 @@ struct NodeWrap: formating::node, wrapper<formating::node>
 
     void apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
-        override o = this->get_override("apply");
-        python_thread::block();
-        o(ptr(&p), ptr(&feature), ptr(&output));
-        python_thread::unblock();
+        python_block_auto_unblock b;
+        this->get_override("apply")(ptr(&p), ptr(&feature), ptr(&output));
     }
 
     virtual void add_expressions(expression_set &output) const
@@ -87,9 +85,8 @@ struct NodeWrap: formating::node, wrapper<formating::node>
         override o = this->get_override("add_expressions");
         if (o)
         {
-            python_thread::block();
+            python_block_auto_unblock b;
             o(ptr(&output));
-            python_thread::unblock();
         } else
         {
             formating::node::add_expressions(output);
@@ -114,9 +111,8 @@ struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
     {
         if(override o = this->get_override("apply"))
         {
-            python_thread::block();
+            python_block_auto_unblock b;
             o(ptr(&p), ptr(&feature), ptr(&output));
-            python_thread::unblock();
         }
         else
         {
@@ -136,9 +132,8 @@ struct FormatNodeWrap: formating::format_node, wrapper<formating::format_node>
     {
         if(override o = this->get_override("apply"))
         {
-            python_thread::block();
+            python_block_auto_unblock b;
             o(ptr(&p), ptr(&feature), ptr(&output));
-            python_thread::unblock();
         }
         else
         {
@@ -157,11 +152,8 @@ struct TextPlacementsWrap: text_placements, wrapper<text_placements>
     text_placement_info_ptr get_placement_info(double scale_factor_, dimension_type dim,
                             bool has_dimensions_) const
     {
-        override o = this->get_override("get_placement_info");
-        python_thread::block();
-        text_placement_info_ptr result = o();
-        python_thread::unblock();
-        return result;
+        python_block_auto_unblock b;
+        return this->get_override("get_placement_info")();
     }
 };
 
@@ -176,11 +168,8 @@ struct TextPlacementInfoWrap: text_placement_info, wrapper<text_placement_info>
 
     bool next()
     {
-        override o = this->get_override("next");
-        python_thread::block();
-        bool result = o();
-        python_thread::unblock();
-        return result;
+        python_block_auto_unblock b;
+        return this->get_override("next")();
     }
 };
 
