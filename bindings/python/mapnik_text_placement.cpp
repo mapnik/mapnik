@@ -399,6 +399,17 @@ void export_text_placement()
         .add_property("child",
                       &formating::format_node::get_child,
                       &formating::format_node::set_child)
+        .def_readwrite("face_name", &formating::format_node::face_name)
+        .def_readwrite("text_size", &formating::format_node::text_size)
+        .def_readwrite("character_spacing", &formating::format_node::character_spacing)
+        .def_readwrite("line_spacing", &formating::format_node::line_spacing)
+        .def_readwrite("text_opacity", &formating::format_node::text_opacity)
+        .def_readwrite("wrap_char", &formating::format_node::wrap_char)
+        .def_readwrite("wrap_before", &formating::format_node::wrap_before)
+        .def_readwrite("text_transform", &formating::format_node::text_transform)
+        .def_readwrite("fill", &formating::format_node::fill)
+        .def_readwrite("halo_fill", &formating::format_node::halo_fill)
+        .def_readwrite("halo_radius", &formating::format_node::halo_radius)
         ;
     register_ptr_to_python<boost::shared_ptr<formating::format_node> >();
 }
