@@ -131,8 +131,8 @@ public:
     self& def_readwrite_optional(char const* name, D const& d, char const* doc=0)
     {
         this->add_property(name,
-                     make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),
-                     make_setter(d, boost::python::default_call_policies()));
+                     boost::python::make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),
+                     boost::python::make_setter(d, boost::python::default_call_policies()));
         return *this;
     }
 };
