@@ -26,6 +26,7 @@
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include "mapnik_threads.hpp"
+#include "python_optional.hpp"
 
 using namespace mapnik;
 
@@ -390,26 +391,26 @@ void export_text_placement()
     register_ptr_to_python<boost::shared_ptr<formating::text_node> >();
 
 
-    class_<FormatNodeWrap,
+    class_with_optional<FormatNodeWrap,
            boost::shared_ptr<FormatNodeWrap>,
            bases<formating::node>,
            boost::noncopyable>
            ("FormatingFormatNode")
+        .def_readwrite_optional("text_size", &formating::format_node::text_size)
+        .def_readwrite_optional("face_name", &formating::format_node::face_name)
+        .def_readwrite_optional("character_spacing", &formating::format_node::character_spacing)
+        .def_readwrite_optional("line_spacing", &formating::format_node::line_spacing)
+        .def_readwrite_optional("text_opacity", &formating::format_node::text_opacity)
+        .def_readwrite_optional("wrap_char", &formating::format_node::wrap_char)
+        .def_readwrite_optional("wrap_before", &formating::format_node::wrap_before)
+        .def_readwrite_optional("text_transform", &formating::format_node::text_transform)
+        .def_readwrite_optional("fill", &formating::format_node::fill)
+        .def_readwrite_optional("halo_fill", &formating::format_node::halo_fill)
+        .def_readwrite_optional("halo_radius", &formating::format_node::halo_radius)
         .def("apply", &formating::format_node::apply, &FormatNodeWrap::default_apply)
         .add_property("child",
                       &formating::format_node::get_child,
                       &formating::format_node::set_child)
-        .def_readwrite("face_name", &formating::format_node::face_name)
-        .def_readwrite("text_size", &formating::format_node::text_size)
-        .def_readwrite("character_spacing", &formating::format_node::character_spacing)
-        .def_readwrite("line_spacing", &formating::format_node::line_spacing)
-        .def_readwrite("text_opacity", &formating::format_node::text_opacity)
-        .def_readwrite("wrap_char", &formating::format_node::wrap_char)
-        .def_readwrite("wrap_before", &formating::format_node::wrap_before)
-        .def_readwrite("text_transform", &formating::format_node::text_transform)
-        .def_readwrite("fill", &formating::format_node::fill)
-        .def_readwrite("halo_fill", &formating::format_node::halo_fill)
-        .def_readwrite("halo_radius", &formating::format_node::halo_radius)
         ;
     register_ptr_to_python<boost::shared_ptr<formating::format_node> >();
 }
