@@ -745,7 +745,6 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       proj_transform const& prj_trans)
     {
         typedef coord_transform2<CoordTransform,geometry_type> path_type;
-        typedef coord_transform3<CoordTransform,geometry_type> path_type_roof;
 
         cairo_context context(context_);
 

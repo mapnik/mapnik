@@ -34,15 +34,25 @@
 namespace mapnik
 {
 
+#if BOOST_VERSION >= 104700
+wkt_parser::wkt_parser()
+    : grammar_(new mapnik::wkt::wkt_collection_grammar<iterator_type>)
+{}
+
+bool wkt_parser::parse(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
+{
+    using namespace boost::spirit;
+    iterator_type first = wkt.begin();
+    iterator_type last =  wkt.end();
+    return qi::phrase_parse(first, last, *grammar_, ascii::space, paths);
+}
+#endif
+
 bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
 {
 #if BOOST_VERSION >= 104700
-    using namespace boost::spirit;
-    typedef std::string::const_iterator iterator_type;
-    iterator_type first = wkt.begin();
-    iterator_type last =  wkt.end();
-    mapnik::wkt::wkt_collection_grammar<iterator_type> grammar;
-    return qi::phrase_parse(first, last, grammar, ascii::space, paths);
+    wkt_parser parser;
+    return parser.parse(wkt,paths);
 #else
     // TODO - remove this after mapnik 2.0.0 release
     std::ostringstream s;

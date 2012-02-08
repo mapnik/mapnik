@@ -587,7 +587,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         catch (...)
         {
 #ifdef MAPNIK_DEBUG
-            std::clog << "exception caught in \"query_map_point\"\n";
+            std::clog << "exception caught in \"query_point\"\n";
 #endif
         }
     }
