@@ -248,7 +248,7 @@ void save_to_stream(T const& image,
                     std::string const& type,
                     rgba_palette const& palette)
 {
-    if (stream)
+    if (stream && image.width() > 0 && image.height() > 0)
     {
         //all this should go into image_writer factory
         std::string t = boost::algorithm::to_lower_copy(type);
@@ -299,7 +299,7 @@ void save_to_stream(T const& image,
                     std::ostream & stream,
                     std::string const& type)
 {
-    if (stream)
+    if (stream && image.width() > 0 && image.height() > 0)
     {
         //all this should go into image_writer factory
         std::string t = boost::algorithm::to_lower_copy(type);
