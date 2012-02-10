@@ -165,6 +165,9 @@ int main (int argc,char** argv)
             box2d<double> item_ext;
             if (shape_type==shape_io::shape_null)
             {
+                // still need to increment pos, or the pos counter
+                // won't indicate EOF until too late.
+                pos+=4+content_length;
                 continue;
             }
             else if (shape_type==shape_io::shape_point)
