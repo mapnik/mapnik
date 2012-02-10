@@ -44,6 +44,7 @@ plugin_sources = Split(
 libraries = [ '' ] # eg 'libfoo'
 
 libraries.append('mapnik')
+libraries.append('boost_system%s' % env['BOOST_APPEND'])
 # link libicuuc, but ICU_LIB_NAME is used custom builds of icu can
 # have different library names like osx which offers /usr/lib/libicucore.dylib
 libraries.append(env['ICU_LIB_NAME'])

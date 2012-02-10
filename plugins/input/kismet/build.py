@@ -37,6 +37,7 @@ libraries = []
 # Link Library to Dependencies
 libraries.append('mapnik')
 libraries.append(env['ICU_LIB_NAME'])
+libraries.append('boost_system%s' % env['BOOST_APPEND'])
 if env['THREADING'] == 'multi':
     libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 

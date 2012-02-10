@@ -17,6 +17,7 @@ plugin_sources = Split(
 
 libraries = []
 libraries.append('mapnik')
+libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append(env['ICU_LIB_NAME'])
     
 TARGET = plugin_env.SharedLibrary(
