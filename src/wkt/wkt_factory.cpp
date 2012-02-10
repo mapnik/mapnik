@@ -54,7 +54,6 @@ bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
     wkt_parser parser;
     return parser.parse(wkt,paths);
 #else
-    // TODO - remove this after mapnik 2.0.0 release
     std::ostringstream s;
     s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
     throw std::runtime_error("mapnik::from_wkt() requires at least boost 1.47 while your build was compiled against boost " + s.str());

@@ -30,17 +30,26 @@
 
 namespace mapnik { namespace json {
 
+#if BOOST_VERSION >= 104700
 feature_collection_parser::feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr)
     : grammar_(new feature_collection_grammar<iterator_type,feature_type>(ctx,tr)) {}
 
 feature_collection_parser::~feature_collection_parser() {}
+#endif
 
 bool feature_collection_parser::parse(std::string const& json, std::vector<mapnik::feature_ptr> & features)
 {
+#if BOOST_VERSION >= 104700
     using namespace boost::spirit;
     iterator_type first = json.begin();
     iterator_type last =  json.end();
     return qi::phrase_parse(first, last, *grammar_, ascii::space, features);
+#else
+    std::ostringstream s;
+    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+    throw std::runtime_error("mapnik::feature_collection_parser::parse() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+    return false;
+#endif
 }
 
 }}
