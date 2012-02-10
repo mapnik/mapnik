@@ -26,6 +26,8 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
+// boost
+#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
 // stl
@@ -41,7 +43,7 @@ MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_typ
 
 #if BOOST_VERSION >= 104700
 
-class wkt_parser
+class wkt_parser : boost::noncopyable
 {
     typedef std::string::const_iterator iterator_type;
 public:
