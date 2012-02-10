@@ -141,7 +141,11 @@ struct feature_grammar :
         using qi::lit;
         using qi::int_;
         using qi::double_;
+#if BOOST_VERSION > 104200
         using qi::no_skip;
+#else
+        using qi::lexeme;
+#endif
         using ascii::char_;
         using qi::_val;
         using qi::_1;
