@@ -277,6 +277,11 @@ node_ptr format_node::get_child() const
     return child_;
 }
 
+void format_node::add_expressions(expression_set &output) const
+{
+    if (child_) child_->add_expressions(output);
+}
+
 } //namespace formating
 
 /************************************************************/
