@@ -74,14 +74,21 @@ m.layers.append(layer)
 bbox = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
 m.zoom_to_box(bbox)
 
+formatnode = mapnik.FormatingFormatNode()
+formatnode.child = mapnik.FormatingTextNode(mapnik.Expression("[name]"))
+formatnode.fill = mapnik.Color("green")
 
 format_trees = [
     ('TextNode', mapnik.FormatingTextNode(mapnik.Expression("[name]"))),
     ('MyText', MyText()),
     ('IfElse', IfElse("[nr] != '5'",
                 mapnik.FormatingTextNode(mapnik.Expression("[name]")),
-                mapnik.FormatingTextNode(mapnik.Expression("'SPECIAL!'"))))
-
+                mapnik.FormatingTextNode(mapnik.Expression("'SPECIAL!'")))),
+    ('Format', formatnode),
+    ('List',   mapnik.FormatingListNode([
+                mapnik.FormatingTextNode(mapnik.Expression("[name]+'\n'")),
+                MyText()
+                ]))
 ]
 
 for format_tree in format_trees:

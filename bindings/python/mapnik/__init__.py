@@ -618,6 +618,8 @@ __all__ = [
     'FontSet',
     'FormatingNode',
     'FormatingTextNode',
+    'FormatingFormatNode',
+    'FormatingListNode',
     'Geometry2d',
     'Image',
     'ImageView',

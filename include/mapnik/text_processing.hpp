@@ -119,8 +119,9 @@ public:
     void push_back(node_ptr n);
     void set_children(std::vector<node_ptr> const& children);
     std::vector<node_ptr> const& get_children() const;
+
     void clear();
-private:
+protected:
     std::vector<node_ptr> children_;
 };
 

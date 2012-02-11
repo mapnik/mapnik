@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 #include <boost/python.hpp>
+#include <boost/python/stl_iterator.hpp>
 
 #include <mapnik/text_placements.hpp>
 #include "mapnik_enumeration.hpp"
@@ -144,6 +145,43 @@ struct FormatNodeWrap: formating::format_node, wrapper<formating::format_node>
     void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
         formating::format_node::apply(p, feature, output);
+    }
+};
+
+struct ListNodeWrap: formating::list_node, wrapper<formating::list_node>
+{
+    //Default constructor
+    ListNodeWrap() : formating::list_node(), wrapper<formating::list_node>()
+    {
+    }
+
+    //Special constructor: Takes a python sequence as its argument
+    ListNodeWrap(object l) : formating::list_node(), wrapper<formating::list_node>()
+    {
+        stl_input_iterator<formating::node_ptr> begin(l), end;
+        children_.insert(children_.end(), begin, end);
+    }
+
+    /* TODO: Add constructor taking variable number of arguments.
+       http://wiki.python.org/moin/boost.python/HowTo#A.22Raw.22_function */
+
+
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        if(override o = this->get_override("apply"))
+        {
+            python_block_auto_unblock b;
+            o(ptr(&p), ptr(&feature), ptr(&output));
+        }
+        else
+        {
+            formating::list_node::apply(p, feature, output);
+        }
+    }
+
+    void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        formating::list_node::apply(p, feature, output);
     }
 };
 
@@ -402,4 +440,16 @@ void export_text_placement()
                       &formating::format_node::set_child)
         ;
     register_ptr_to_python<boost::shared_ptr<formating::format_node> >();
+
+    class_<ListNodeWrap,
+            boost::shared_ptr<ListNodeWrap>,
+            bases<formating::node>,
+            boost::noncopyable>
+            ("FormatingListNode", init<>())
+        .def(init<list>())
+        .def("append", &formating::list_node::push_back)
+        .def("apply", &formating::list_node::apply, &ListNodeWrap::default_apply)
+    ;
+
+    register_ptr_to_python<boost::shared_ptr<formating::list_node> >();
 }
