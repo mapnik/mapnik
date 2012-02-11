@@ -144,6 +144,7 @@ public:
     void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(boost::property_tree::ptree const& xml);
     virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
+    virtual void add_expressions(expression_set &output) const;
 
     void set_child(node_ptr child);
     node_ptr get_child() const;

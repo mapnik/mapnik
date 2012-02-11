@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,46 +20,37 @@
  *
  *****************************************************************************/
 
+// mapnik
+#include <mapnik/json/feature_collection_parser.hpp>
+#include <mapnik/json/feature_collection_grammar.hpp>
+
 // boost
 #include <boost/version.hpp>
+#include <boost/spirit/include/qi.hpp>
 
-// mapnik
-#include <mapnik/wkt/wkt_factory.hpp>
-#include <mapnik/wkt/wkt_grammar.hpp>
-
-// stl
-#include <string>
-#include <sstream>
-
-namespace mapnik
-{
+namespace mapnik { namespace json {
 
 #if BOOST_VERSION >= 104700
-wkt_parser::wkt_parser()
-    : grammar_(new mapnik::wkt::wkt_collection_grammar<iterator_type>)
-{}
+feature_collection_parser::feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr)
+    : grammar_(new feature_collection_grammar<iterator_type,feature_type>(ctx,tr)) {}
 
-bool wkt_parser::parse(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
-{
-    using namespace boost::spirit;
-    iterator_type first = wkt.begin();
-    iterator_type last =  wkt.end();
-    return qi::phrase_parse(first, last, *grammar_, ascii::space, paths);
-}
+feature_collection_parser::~feature_collection_parser() {}
 #endif
 
-bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths)
+bool feature_collection_parser::parse(std::string const& json, std::vector<mapnik::feature_ptr> & features)
 {
 #if BOOST_VERSION >= 104700
-    wkt_parser parser;
-    return parser.parse(wkt,paths);
+    using namespace boost::spirit;
+    iterator_type first = json.begin();
+    iterator_type last =  json.end();
+    return qi::phrase_parse(first, last, *grammar_, ascii::space, features);
 #else
     std::ostringstream s;
     s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-    throw std::runtime_error("mapnik::from_wkt() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+    throw std::runtime_error("mapnik::feature_collection_parser::parse() requires at least boost 1.47 while your build was compiled against boost " + s.str());
     return false;
 #endif
 }
 
-}
+}}
 

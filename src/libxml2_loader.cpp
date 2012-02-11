@@ -84,10 +84,10 @@ public:
         if ( !doc )
         {
             xmlError * error = xmlCtxtGetLastError( ctx_ );
-            std::ostringstream os;
-            os << "XML document not well formed";
             if (error)
             {
+                std::ostringstream os;
+                os << "XML document not well formed";
                 os << ": " << std::endl << error->message;
                 // remove CR
                 std::string msg = os.str().substr(0, os.str().size() - 1);

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,42 +20,38 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_WKT_FACTORY_HPP
-#define MAPNIK_WKT_FACTORY_HPP
+#ifndef MAPNIK_FEATURE_COLLECTION_PARSER_HPP
+#define MAPNIK_FEATURE_COLLECTION_PARSER_HPP
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/geometry.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/datasource.hpp>
+
+//#include <mapnik/json/feature_collection_grammar.hpp>
+
 // boost
-#include <boost/utility.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/utility.hpp>
 // stl
-#include <string>
+#include <vector>
 
-namespace mapnik {
+namespace mapnik { namespace json {
 
-namespace wkt {
-template <typename Iterator> struct wkt_collection_grammar;
-}
+template <typename Iterator, typename FeatureType> struct feature_collection_grammar;
 
-MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
-
-#if BOOST_VERSION >= 104700
-
-class wkt_parser : boost::noncopyable
+class feature_collection_parser //: private boost::noncopyable
 {
     typedef std::string::const_iterator iterator_type;
+    typedef mapnik::Feature feature_type;
 public:
-    wkt_parser();
-    bool parse(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
+    feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr);
+    ~feature_collection_parser();
+    bool parse(std::string const& json, std::vector<mapnik::feature_ptr> & features);  
 private:
-    boost::scoped_ptr<mapnik::wkt::wkt_collection_grammar<iterator_type> > grammar_;
+    boost::scoped_ptr<mapnik::json::feature_collection_grammar<iterator_type,feature_type> > grammar_; 
 };
 
-#endif
+}}
 
-}
-
-
-#endif // MAPNIK_WKT_FACTORY_HPP
+#endif //MAPNIK_FEATURE_COLLECTION_PARSER_HPP

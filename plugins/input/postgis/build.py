@@ -38,6 +38,7 @@ plugin_env['LIBS'] = ['pq']
 
 # Link Library to Dependencies
 plugin_env['LIBS'].append('mapnik')
+plugin_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
 plugin_env['LIBS'].append(env['ICU_LIB_NAME'])
 if env['THREADING'] == 'multi':
 	plugin_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])

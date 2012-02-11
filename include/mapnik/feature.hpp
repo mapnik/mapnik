@@ -254,12 +254,16 @@ public:
     std::string to_string() const
     {
         std::stringstream ss;
-        ss << "Feature (" << std::endl;
+        ss << "Feature ( id=" << id_ << std::endl;
         context_type::map_type::const_iterator itr = ctx_->mapping_.begin();
         context_type::map_type::const_iterator end = ctx_->mapping_.end();
         for ( ;itr!=end; ++itr)
         {
-            ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+            std::size_t index = itr->second;
+            if (index < data_.size())
+            {
+                ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+            }          
         }
         ss << ")" << std::endl;
         return ss.str();
