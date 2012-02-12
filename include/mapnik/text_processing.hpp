@@ -113,20 +113,6 @@ private:
     std::vector<node_ptr> children_;
 };
 
-class text_node: public node {
-public:
-    text_node(expression_ptr text): node(), text_(text) {}
-    text_node(std::string text): node(), text_(parse_expression(text)) {}
-    void to_xml(boost::property_tree::ptree &xml) const;
-    static node_ptr from_xml(boost::property_tree::ptree const& xml);
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
-    virtual void add_expressions(expression_set &output) const;
-
-    void set_text(expression_ptr text);
-    expression_ptr get_text() const;
-private:
-    expression_ptr text_;
-};
 
 class format_node: public node {
 public:
