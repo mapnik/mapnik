@@ -128,6 +128,7 @@ protected:
 class text_node: public node {
 public:
     text_node(expression_ptr text): node(), text_(text) {}
+    text_node(std::string text): node(), text_(parse_expression(text)) {}
     void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(boost::property_tree::ptree const& xml);
     virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
