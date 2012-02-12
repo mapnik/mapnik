@@ -86,15 +86,7 @@ enum justify_alignment
 
 DEFINE_ENUM( justify_alignment_e, justify_alignment );
 
-enum text_transform
-{
-    NONE = 0,
-    UPPERCASE,
-    LOWERCASE,
-    CAPITALIZE,
-    text_transform_MAX
-};
-DEFINE_ENUM( text_transform_e, text_transform );
+
 } /* namespace mapnik*/
 
 #endif

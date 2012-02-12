@@ -49,26 +49,6 @@ class text_placements;
 typedef std::pair<double,double> position;
 typedef std::pair<double,double> dimension_type;
 
-struct char_properties
-{
-    char_properties();
-    /** Construct object from XML. */
-    void from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets);
-    /** Write object to XML ptree. */
-    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl=char_properties()) const;
-    std::string face_name;
-    font_set fontset;
-    float text_size;
-    double character_spacing;
-    double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
-    double text_opacity;
-    bool wrap_before;
-    unsigned wrap_char;
-    text_transform_e text_transform; //Per expression
-    color fill;
-    color halo_fill;
-    double halo_radius;
-};
 
 /** Contains all text symbolizer properties which are not directly related to text formating. */
 struct text_symbolizer_properties
