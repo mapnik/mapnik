@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/color.hpp>
-#include <mapnik/gamma.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/image_view.hpp>
