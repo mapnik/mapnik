@@ -42,7 +42,7 @@ namespace mapnik
 class processed_text;
 struct char_properties;
 
-typedef std::set<expression_ptr> expression_set;
+
 
 enum label_placement_enum {
     POINT_PLACEMENT,
@@ -97,17 +97,6 @@ enum text_transform
 DEFINE_ENUM( text_transform_e, text_transform );
 
 namespace formating {
-class node;
-typedef boost::shared_ptr<node> node_ptr;
-class node
-{
-public:
-    virtual ~node() {}
-    virtual void to_xml(boost::property_tree::ptree &xml) const;
-    static node_ptr from_xml(boost::property_tree::ptree const& xml);
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const = 0;
-    virtual void add_expressions(expression_set &output) const;
-};
 
 class list_node: public node {
 public:
