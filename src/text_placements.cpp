@@ -20,12 +20,13 @@
  *
  *****************************************************************************/
 
-#include <mapnik/text_placements.hpp>
-#include <mapnik/text_placements_simple.hpp>
-#include <mapnik/text_placements_list.hpp>
+#include <mapnik/text_placements/simple.hpp>
+#include <mapnik/text_placements/list.hpp>
+#include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/formating/text.hpp>
+#include <mapnik/processed_text.hpp>
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/spirit/include/qi.hpp>

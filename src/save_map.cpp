@@ -28,8 +28,9 @@
 #include <mapnik/expression_string.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/metawriter_factory.hpp>
-#include <mapnik/text_placements_simple.hpp>
-#include <mapnik/text_placements_list.hpp>
+#include <mapnik/text_placements/simple.hpp>
+#include <mapnik/text_placements/list.hpp>
+#include <mapnik/text_placements/dummy.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>

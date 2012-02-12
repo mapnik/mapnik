@@ -36,6 +36,7 @@ namespace mapnik {
 
 typedef std::set<expression_ptr> expression_set;
 class processed_text;
+struct char_properties;
 
 namespace formating {
 

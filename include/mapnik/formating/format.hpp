@@ -24,6 +24,7 @@
 #define FORMAT_HPP
 
 #include <mapnik/formating/base.hpp>
+#include <mapnik/text_properties.hpp>
 
 namespace mapnik {
 namespace formating {

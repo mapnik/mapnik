@@ -29,6 +29,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/processed_text.hpp>
 
 #include <boost/shared_ptr.hpp>
 

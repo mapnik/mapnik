@@ -28,6 +28,8 @@
 #include <mapnik/text_path.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/fastmath.hpp>
+#include <mapnik/text_placements/base.hpp>
+#include <mapnik/ctrans.hpp>
 
 // agg
 #include "agg_path_length.h"

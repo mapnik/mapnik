@@ -24,6 +24,7 @@
 
 // mapnik
 #include <mapnik/text_properties.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 namespace mapnik
 {

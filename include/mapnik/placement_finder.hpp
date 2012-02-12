@@ -24,10 +24,14 @@
 #define MAPNIK_PLACEMENT_FINDER_HPP
 
 #include <mapnik/geometry.hpp>
-#include <mapnik/text_placements.hpp>
+#include <mapnik/text_properties.hpp>
 
 namespace mapnik
 {
+
+class text_placement_info;
+class string_info;
+class text_path;
 
 template <typename DetectorT>
 class placement_finder : boost::noncopyable
