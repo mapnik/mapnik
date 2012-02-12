@@ -103,7 +103,12 @@ struct NodeWrap: formating::node, wrapper<formating::node>
 
 struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
 {
-    TextNodeWrap(expression_ptr text) : formating::text_node(text), wrapper<formating::text_node>()
+    TextNodeWrap(expression_ptr expr) : formating::text_node(expr), wrapper<formating::text_node>()
+    {
+
+    }
+
+    TextNodeWrap(std::string expr_text) : formating::text_node(expr_text), wrapper<formating::text_node>()
     {
 
     }
@@ -410,6 +415,7 @@ void export_text_placement()
            bases<formating::node>,
            boost::noncopyable>
            ("FormatingTextNode", init<expression_ptr>())
+        .def(init<std::string>())
         .def("apply", &formating::text_node::apply, &TextNodeWrap::default_apply)
         .add_property("text",
                       &formating::text_node::get_text,
