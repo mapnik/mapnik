@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,35 +19,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
-#ifndef MAPNIK_BUILDING_SYMBOLIZER_HPP
-#define MAPNIK_BUILDING_SYMBOLIZER_HPP
+#ifndef FORMATING_BASE_HPP
+#define FORMATING_BASE_HPP
 
 // mapnik
-#include <mapnik/color.hpp>
-#include <mapnik/symbolizer.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
 
-namespace mapnik
-{
+// stl
+#include <set>
 
-struct MAPNIK_DECL building_symbolizer : public symbolizer_base
-{
-    building_symbolizer();
-    building_symbolizer(color const& fill, expression_ptr height);
-    color const& get_fill() const;
-    void set_fill(color const& fill);
-    expression_ptr height() const;
-    void set_height(expression_ptr height);
-    void set_opacity(double opacity);
-    double get_opacity() const;
+// boost
+#include <boost/property_tree/ptree.hpp>
 
-private:
-    color fill_;
-    expression_ptr height_;
-    double opacity_;
+namespace mapnik {
+
+typedef std::set<expression_ptr> expression_set;
+class processed_text;
+struct char_properties;
+
+namespace formating {
+
+class node;
+typedef boost::shared_ptr<node> node_ptr;
+
+class node
+{
+public:
+    virtual ~node() {}
+    virtual void to_xml(boost::property_tree::ptree &xml) const;
+    static node_ptr from_xml(boost::property_tree::ptree const& xml);
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const = 0;
+    virtual void add_expressions(expression_set &output) const;
 };
-
-}
-
-#endif // MAPNIK_BUILDING_SYMBOLIZER_HPP
+} //ns formating
+} //ns mapnik
+#endif // FORMATING_BASE_HPP

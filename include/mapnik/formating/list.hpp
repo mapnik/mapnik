@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,35 +19,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef LIST_HPP
+#define LIST_HPP
 
-#ifndef MAPNIK_BUILDING_SYMBOLIZER_HPP
-#define MAPNIK_BUILDING_SYMBOLIZER_HPP
+#include <mapnik/formating/base.hpp>
 
-// mapnik
-#include <mapnik/color.hpp>
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/expression.hpp>
+namespace mapnik {
+namespace formating {
+class list_node: public node {
+public:
+    list_node() : node(), children_() {}
+    virtual void to_xml(boost::property_tree::ptree &xml) const;
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
+    virtual void add_expressions(expression_set &output) const;
 
-namespace mapnik
-{
-
-struct MAPNIK_DECL building_symbolizer : public symbolizer_base
-{
-    building_symbolizer();
-    building_symbolizer(color const& fill, expression_ptr height);
-    color const& get_fill() const;
-    void set_fill(color const& fill);
-    expression_ptr height() const;
-    void set_height(expression_ptr height);
-    void set_opacity(double opacity);
-    double get_opacity() const;
-
+    void push_back(node_ptr n);
+    void set_children(std::vector<node_ptr> const& children);
+    std::vector<node_ptr> const& get_children() const;
+    void clear();
 private:
-    color fill_;
-    expression_ptr height_;
-    double opacity_;
+    std::vector<node_ptr> children_;
 };
+} //ns formating
+} //ns mapnik
 
-}
-
-#endif // MAPNIK_BUILDING_SYMBOLIZER_HPP
+#endif // LIST_HPP

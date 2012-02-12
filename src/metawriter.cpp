@@ -23,7 +23,7 @@
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
-#include <mapnik/text_placements.hpp>
+#include <mapnik/text_placements/base.hpp>
 
 // Boost
 #include <boost/foreach.hpp>

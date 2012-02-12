@@ -28,7 +28,6 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/params.hpp>
-#include <mapnik/filter_factory.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/util/deepcopy.hpp>
 

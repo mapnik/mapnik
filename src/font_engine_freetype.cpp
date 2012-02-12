@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/text_placements.hpp>
+#include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
 

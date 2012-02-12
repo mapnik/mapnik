@@ -20,13 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 //mapnik
 #include <mapnik/text_symbolizer.hpp>
+#include <mapnik/enumeration.hpp>
+
+
 // boost
 #include <boost/scoped_ptr.hpp>
-#include <mapnik/text_processing.hpp>
+
 
 namespace mapnik
 {

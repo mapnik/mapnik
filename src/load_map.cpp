@@ -39,7 +39,7 @@
 #include <mapnik/libxml2_loader.hpp>
 #endif
 
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
@@ -47,9 +47,9 @@
 
 #include <mapnik/metawriter_factory.hpp>
 
-#include <mapnik/text_placements_simple.hpp>
-#include <mapnik/text_placements_list.hpp>
-#include <mapnik/text_processing.hpp>
+#include <mapnik/text_placements/simple.hpp>
+#include <mapnik/text_placements/list.hpp>
+#include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp>
 

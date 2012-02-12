@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,35 +19,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef TEXT_HPP
+#define TEXT_HPP
 
-#ifndef MAPNIK_BUILDING_SYMBOLIZER_HPP
-#define MAPNIK_BUILDING_SYMBOLIZER_HPP
+#include <mapnik/formating/base.hpp>
 
-// mapnik
-#include <mapnik/color.hpp>
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/expression.hpp>
+namespace mapnik {
+namespace formating {
+class text_node: public node {
+public:
+    text_node(expression_ptr text): node(), text_(text) {}
+    text_node(std::string text): node(), text_(parse_expression(text)) {}
+    void to_xml(boost::property_tree::ptree &xml) const;
+    static node_ptr from_xml(boost::property_tree::ptree const& xml);
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
+    virtual void add_expressions(expression_set &output) const;
 
-namespace mapnik
-{
-
-struct MAPNIK_DECL building_symbolizer : public symbolizer_base
-{
-    building_symbolizer();
-    building_symbolizer(color const& fill, expression_ptr height);
-    color const& get_fill() const;
-    void set_fill(color const& fill);
-    expression_ptr height() const;
-    void set_height(expression_ptr height);
-    void set_opacity(double opacity);
-    double get_opacity() const;
-
+    void set_text(expression_ptr text);
+    expression_ptr get_text() const;
 private:
-    color fill_;
-    expression_ptr height_;
-    double opacity_;
+    expression_ptr text_;
 };
+} //ns formating
+} //ns mapnik
 
-}
-
-#endif // MAPNIK_BUILDING_SYMBOLIZER_HPP
+#endif // TEXT_HPP

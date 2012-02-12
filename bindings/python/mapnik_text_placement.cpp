@@ -23,7 +23,7 @@
 
 #include <boost/python.hpp>
 
-#include <mapnik/text_placements.hpp>
+#include <mapnik/text_properties.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/expression_string.hpp>
 

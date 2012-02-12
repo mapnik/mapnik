@@ -14,7 +14,7 @@
 #include <mapnik/svg_renderer.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
 
 // stl
