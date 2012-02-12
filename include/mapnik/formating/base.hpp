@@ -24,7 +24,7 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 
 // stl
 #include <set>

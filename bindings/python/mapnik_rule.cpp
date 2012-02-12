@@ -27,7 +27,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include <mapnik/rule.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>
 
 using mapnik::rule;

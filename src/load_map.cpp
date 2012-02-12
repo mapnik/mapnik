@@ -39,7 +39,7 @@
 #include <mapnik/libxml2_loader.hpp>
 #endif
 
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/raster_colorizer.hpp>
 

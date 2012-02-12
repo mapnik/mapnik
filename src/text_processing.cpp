@@ -26,7 +26,6 @@
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/filter_factory.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/ptree_helpers.hpp>
 

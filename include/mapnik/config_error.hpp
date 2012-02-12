@@ -37,7 +37,7 @@ public:
         what_( what )
     {
     }
-    virtual ~config_error() throw() {};
+    virtual ~config_error() throw() {}
 
     virtual const char * what() const throw()
     {

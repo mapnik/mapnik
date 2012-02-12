@@ -26,7 +26,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/formating/base.hpp>
 
 // stl

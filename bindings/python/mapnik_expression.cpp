@@ -24,7 +24,7 @@
 #include <boost/python.hpp>
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/parse_path.hpp>
