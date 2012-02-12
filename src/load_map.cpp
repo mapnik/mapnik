@@ -47,9 +47,9 @@
 
 #include <mapnik/metawriter_factory.hpp>
 
-#include <mapnik/text_placements_simple.hpp>
-#include <mapnik/text_placements_list.hpp>
-#include <mapnik/text_processing.hpp>
+#include <mapnik/text_placements/simple.hpp>
+#include <mapnik/text_placements/list.hpp>
+#include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp>
 

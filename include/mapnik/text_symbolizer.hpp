@@ -27,7 +27,8 @@
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/text_placements.hpp>
+#include <mapnik/text_placements/base.hpp>
+#include <mapnik/text_placements/dummy.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>

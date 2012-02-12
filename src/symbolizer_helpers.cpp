@@ -1,4 +1,5 @@
 #include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/label_collision_detector.hpp>
 
 namespace mapnik {
 
