@@ -25,9 +25,9 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/text_placements/list.hpp>
-#include <mapnik/formating/text.hpp>
-#include <mapnik/formating/list.hpp>
-#include <mapnik/formating/format.hpp>
+#include <mapnik/formatting/text.hpp>
+#include <mapnik/formatting/list.hpp>
+#include <mapnik/formatting/format.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>
@@ -75,9 +75,9 @@ void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
 }
 
 
-struct NodeWrap: formating::node, wrapper<formating::node>
+struct NodeWrap: formatting::node, wrapper<formatting::node>
 {
-    NodeWrap() : formating::node(), wrapper<formating::node>()
+    NodeWrap() : formatting::node(), wrapper<formatting::node>()
     {
 
     }
@@ -97,25 +97,25 @@ struct NodeWrap: formating::node, wrapper<formating::node>
             o(ptr(&output));
         } else
         {
-            formating::node::add_expressions(output);
+            formatting::node::add_expressions(output);
         }
     }
 
     void default_add_expressions(expression_set &output) const
     {
-        formating::node::add_expressions(output);
+        formatting::node::add_expressions(output);
     }
 };
 
 
-struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
+struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
 {
-    TextNodeWrap(expression_ptr expr) : formating::text_node(expr), wrapper<formating::text_node>()
+    TextNodeWrap(expression_ptr expr) : formatting::text_node(expr), wrapper<formatting::text_node>()
     {
 
     }
 
-    TextNodeWrap(std::string expr_text) : formating::text_node(expr_text), wrapper<formating::text_node>()
+    TextNodeWrap(std::string expr_text) : formatting::text_node(expr_text), wrapper<formatting::text_node>()
     {
 
     }
@@ -129,17 +129,17 @@ struct TextNodeWrap: formating::text_node, wrapper<formating::text_node>
         }
         else
         {
-            formating::text_node::apply(p, feature, output);
+            formatting::text_node::apply(p, feature, output);
         }
     }
 
     void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
-        formating::text_node::apply(p, feature, output);
+        formatting::text_node::apply(p, feature, output);
     }
 };
 
-struct FormatNodeWrap: formating::format_node, wrapper<formating::format_node>
+struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
 {
     virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
@@ -150,27 +150,27 @@ struct FormatNodeWrap: formating::format_node, wrapper<formating::format_node>
         }
         else
         {
-            formating::format_node::apply(p, feature, output);
+            formatting::format_node::apply(p, feature, output);
         }
     }
 
     void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
-        formating::format_node::apply(p, feature, output);
+        formatting::format_node::apply(p, feature, output);
     }
 };
 
-struct ListNodeWrap: formating::list_node, wrapper<formating::list_node>
+struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
 {
     //Default constructor
-    ListNodeWrap() : formating::list_node(), wrapper<formating::list_node>()
+    ListNodeWrap() : formatting::list_node(), wrapper<formatting::list_node>()
     {
     }
 
     //Special constructor: Takes a python sequence as its argument
-    ListNodeWrap(object l) : formating::list_node(), wrapper<formating::list_node>()
+    ListNodeWrap(object l) : formatting::list_node(), wrapper<formatting::list_node>()
     {
-        stl_input_iterator<formating::node_ptr> begin(l), end;
+        stl_input_iterator<formatting::node_ptr> begin(l), end;
         children_.insert(children_.end(), begin, end);
     }
 
@@ -187,13 +187,13 @@ struct ListNodeWrap: formating::list_node, wrapper<formating::list_node>
         }
         else
         {
-            formating::list_node::apply(p, feature, output);
+            formatting::list_node::apply(p, feature, output);
         }
     }
 
     void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
-        formating::list_node::apply(p, feature, output);
+        formatting::list_node::apply(p, feature, output);
     }
 };
 
@@ -333,7 +333,7 @@ void export_text_placement()
         /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
         add_expressions isn't useful in python either. The result is only needed by
         attribute_collector (which isn't exposed in python) and
-        it just calls add_expressions of the associated formating tree.
+        it just calls add_expressions of the associated formatting tree.
         set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
         ;
 
@@ -408,61 +408,61 @@ void export_text_placement()
     class_<NodeWrap,
            boost::shared_ptr<NodeWrap>,
            boost::noncopyable>
-           ("FormatingNode")
-        .def("apply", pure_virtual(&formating::node::apply))
+           ("FormattingNode")
+        .def("apply", pure_virtual(&formatting::node::apply))
         .def("add_expressions",
-             &formating::node::add_expressions,
+             &formatting::node::add_expressions,
              &NodeWrap::default_add_expressions)
         ;
-    register_ptr_to_python<boost::shared_ptr<formating::node> >();
+    register_ptr_to_python<boost::shared_ptr<formatting::node> >();
 
 
     class_<TextNodeWrap,
            boost::shared_ptr<TextNodeWrap>,
-           bases<formating::node>,
+           bases<formatting::node>,
            boost::noncopyable>
-           ("FormatingTextNode", init<expression_ptr>())
+           ("FormattingTextNode", init<expression_ptr>())
         .def(init<std::string>())
-        .def("apply", &formating::text_node::apply, &TextNodeWrap::default_apply)
+        .def("apply", &formatting::text_node::apply, &TextNodeWrap::default_apply)
         .add_property("text",
-                      &formating::text_node::get_text,
-                      &formating::text_node::set_text)
+                      &formatting::text_node::get_text,
+                      &formatting::text_node::set_text)
         ;
-    register_ptr_to_python<boost::shared_ptr<formating::text_node> >();
+    register_ptr_to_python<boost::shared_ptr<formatting::text_node> >();
 
 
     class_with_optional<FormatNodeWrap,
            boost::shared_ptr<FormatNodeWrap>,
-           bases<formating::node>,
+           bases<formatting::node>,
            boost::noncopyable>
-           ("FormatingFormatNode")
-        .def_readwrite_optional("text_size", &formating::format_node::text_size)
-        .def_readwrite_optional("face_name", &formating::format_node::face_name)
-        .def_readwrite_optional("character_spacing", &formating::format_node::character_spacing)
-        .def_readwrite_optional("line_spacing", &formating::format_node::line_spacing)
-        .def_readwrite_optional("text_opacity", &formating::format_node::text_opacity)
-        .def_readwrite_optional("wrap_char", &formating::format_node::wrap_char)
-        .def_readwrite_optional("wrap_before", &formating::format_node::wrap_before)
-        .def_readwrite_optional("text_transform", &formating::format_node::text_transform)
-        .def_readwrite_optional("fill", &formating::format_node::fill)
-        .def_readwrite_optional("halo_fill", &formating::format_node::halo_fill)
-        .def_readwrite_optional("halo_radius", &formating::format_node::halo_radius)
-        .def("apply", &formating::format_node::apply, &FormatNodeWrap::default_apply)
+           ("FormattingFormatNode")
+        .def_readwrite_optional("text_size", &formatting::format_node::text_size)
+        .def_readwrite_optional("face_name", &formatting::format_node::face_name)
+        .def_readwrite_optional("character_spacing", &formatting::format_node::character_spacing)
+        .def_readwrite_optional("line_spacing", &formatting::format_node::line_spacing)
+        .def_readwrite_optional("text_opacity", &formatting::format_node::text_opacity)
+        .def_readwrite_optional("wrap_char", &formatting::format_node::wrap_char)
+        .def_readwrite_optional("wrap_before", &formatting::format_node::wrap_before)
+        .def_readwrite_optional("text_transform", &formatting::format_node::text_transform)
+        .def_readwrite_optional("fill", &formatting::format_node::fill)
+        .def_readwrite_optional("halo_fill", &formatting::format_node::halo_fill)
+        .def_readwrite_optional("halo_radius", &formatting::format_node::halo_radius)
+        .def("apply", &formatting::format_node::apply, &FormatNodeWrap::default_apply)
         .add_property("child",
-                      &formating::format_node::get_child,
-                      &formating::format_node::set_child)
+                      &formatting::format_node::get_child,
+                      &formatting::format_node::set_child)
         ;
-    register_ptr_to_python<boost::shared_ptr<formating::format_node> >();
+    register_ptr_to_python<boost::shared_ptr<formatting::format_node> >();
 
     class_<ListNodeWrap,
             boost::shared_ptr<ListNodeWrap>,
-            bases<formating::node>,
+            bases<formatting::node>,
             boost::noncopyable>
-            ("FormatingListNode", init<>())
+            ("FormattingListNode", init<>())
         .def(init<list>())
-        .def("append", &formating::list_node::push_back)
-        .def("apply", &formating::list_node::apply, &ListNodeWrap::default_apply)
+        .def("append", &formatting::list_node::push_back)
+        .def("apply", &formatting::list_node::apply, &ListNodeWrap::default_apply)
     ;
 
-    register_ptr_to_python<boost::shared_ptr<formating::list_node> >();
+    register_ptr_to_python<boost::shared_ptr<formatting::list_node> >();
 }
