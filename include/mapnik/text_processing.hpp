@@ -95,38 +95,6 @@ enum text_transform
     text_transform_MAX
 };
 DEFINE_ENUM( text_transform_e, text_transform );
-
-namespace formating {
-
-
-class format_node: public node {
-public:
-    void to_xml(boost::property_tree::ptree &xml) const;
-    static node_ptr from_xml(boost::property_tree::ptree const& xml);
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
-    virtual void add_expressions(expression_set &output) const;
-
-    void set_child(node_ptr child);
-    node_ptr get_child() const;
-
-    boost::optional<std::string> face_name;
-    boost::optional<unsigned> text_size;
-    boost::optional<unsigned> character_spacing;
-    boost::optional<unsigned> line_spacing;
-    boost::optional<double> text_opacity;
-    boost::optional<bool> wrap_before;
-    boost::optional<unsigned> wrap_char;
-    boost::optional<text_transform_e> text_transform;
-    boost::optional<color> fill;
-    boost::optional<color> halo_fill;
-    boost::optional<double> halo_radius;
-
-private:
-    node_ptr child_;
-};
-
-} //namespace formating
-
 } /* namespace mapnik*/
 
 #endif
