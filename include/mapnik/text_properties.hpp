@@ -26,6 +26,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
+#include <mapnik/filter_factory.hpp>
 #include <mapnik/formating/base.hpp>
 
 // stl
@@ -113,6 +114,7 @@ enum justify_alignment
 DEFINE_ENUM(justify_alignment_e, justify_alignment);
 
 typedef std::pair<double, double> position;
+class processed_text;
 
 
 /** Contains all text symbolizer properties which are not directly related to text formating. */

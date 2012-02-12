@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,35 +20,21 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_TEXT_PLACEMENTS_HPP
-#define MAPNIK_TEXT_PLACEMENTS_HPP
+#ifndef PLACEMENTS_BASE_HPP
+#define PLACEMENTS_BASE_HPP
 
 // mapnik
-#include <mapnik/color.hpp>
-#include <mapnik/font_set.hpp>
-#include <mapnik/text_path.hpp>
-#include <mapnik/box2d.hpp>
 #include <mapnik/text_properties.hpp>
-#include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/formating/base.hpp>
 
 // stl
-#include <vector>
-#include <string>
 #include <queue>
-#include <set>
 
-// boost
-#include <boost/tuple/tuple.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
-#include <boost/property_tree/ptree.hpp>
-
-namespace mapnik {
-
-class text_placements;
+namespace mapnik
+{
 typedef std::pair<double,double> dimension_type;
 
-
+class text_placements;
 /** Generate a possible placement and store results of placement_finder.
  * This placement has first to be tested by placement_finder to verify it
  * can actually be used.
@@ -148,34 +134,6 @@ public:
 /** Pointer to object of class text_placements */
 typedef boost::shared_ptr<text_placements> text_placements_ptr;
 
+} //ns mapnik
 
-class text_placements_info_dummy;
-
-/** Dummy placement algorithm. Always takes the default value. */
-class MAPNIK_DECL text_placements_dummy: public text_placements
-{
-public:
-    text_placement_info_ptr get_placement_info(
-        double scale_factor, dimension_type dim, bool has_dimensions) const;
-    friend class text_placement_info_dummy;
-};
-
-/** Placement info object for dummy placement algorithm. Always takes the default value. */
-class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
-{
-public:
-    text_placement_info_dummy(text_placements_dummy const* parent,
-                              double scale_factor, dimension_type dim, bool has_dimensions)
-        : text_placement_info(parent, scale_factor, dim, has_dimensions),
-        state(0), parent_(parent) {}
-    bool next();
-private:
-    unsigned state;
-    text_placements_dummy const* parent_;
-};
-
-
-
-} //namespace
-
-#endif // MAPNIK_TEXT_PLACEMENTS_HPP
+#endif // PLACEMENTS_BASE_HPP

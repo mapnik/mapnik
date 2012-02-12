@@ -19,13 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef BASE_HPP
-#define BASE_HPP
+#ifndef FORMATING_BASE_HPP
+#define FORMATING_BASE_HPP
 
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/filter_factory.hpp>
-#include <mapnik/text_placements.hpp>
 
 // stl
 #include <set>
@@ -54,4 +53,4 @@ public:
 };
 } //ns formating
 } //ns mapnik
-#endif // BASE_HPP
+#endif // FORMATING_BASE_HPP
