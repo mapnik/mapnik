@@ -24,8 +24,8 @@
 #include <mapnik/text_placements_simple.hpp>
 #include <mapnik/text_placements_list.hpp>
 #include <mapnik/expression_string.hpp>
-#include <mapnik/text_processing.hpp>
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/formating/text.hpp>
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/spirit/include/qi.hpp>

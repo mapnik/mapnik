@@ -28,7 +28,8 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/text_path.hpp>
 #include <mapnik/box2d.hpp>
-#include <mapnik/text_processing.hpp>
+#include <mapnik/text_properties.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 // stl
 #include <vector>

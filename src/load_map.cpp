@@ -49,7 +49,6 @@
 
 #include <mapnik/text_placements_simple.hpp>
 #include <mapnik/text_placements_list.hpp>
-#include <mapnik/text_processing.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp>
 

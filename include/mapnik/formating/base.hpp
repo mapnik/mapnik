@@ -22,18 +22,27 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
+// mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/filter_factory.hpp>
+#include <mapnik/text_placements.hpp>
 
+// stl
+#include <set>
+
+// boost
 #include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
 
 typedef std::set<expression_ptr> expression_set;
+class processed_text;
 
 namespace formating {
+
 class node;
 typedef boost::shared_ptr<node> node_ptr;
+
 class node
 {
 public:

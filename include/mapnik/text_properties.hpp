@@ -25,8 +25,8 @@
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
+#include <mapnik/enumeration.hpp>
 #include <mapnik/formating/base.hpp>
-
 
 // stl
 #include <map>
@@ -78,7 +78,7 @@ enum label_placement_enum
     label_placement_enum_MAX
 };
 
-DEFINE_ENUM( label_placement_e, label_placement_enum );
+DEFINE_ENUM(label_placement_e, label_placement_enum);
 
 enum vertical_alignment
 {
@@ -89,7 +89,7 @@ enum vertical_alignment
     vertical_alignment_MAX
 };
 
-DEFINE_ENUM( vertical_alignment_e, vertical_alignment );
+DEFINE_ENUM(vertical_alignment_e, vertical_alignment);
 
 enum horizontal_alignment
 {
