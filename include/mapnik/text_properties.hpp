@@ -27,7 +27,7 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/formating/base.hpp>
+#include <mapnik/formatting/base.hpp>
 
 // stl
 #include <map>
@@ -117,7 +117,7 @@ typedef std::pair<double, double> position;
 class processed_text;
 
 
-/** Contains all text symbolizer properties which are not directly related to text formating. */
+/** Contains all text symbolizer properties which are not directly related to text formatting. */
 struct text_symbolizer_properties
 {
     text_symbolizer_properties();
@@ -133,9 +133,9 @@ struct text_symbolizer_properties
     /** Automatically create processing instructions for a single expression. */
     void set_old_style_expression(expression_ptr expr);
     /** Sets new format tree. */
-    void set_format_tree(formating::node_ptr tree);
+    void set_format_tree(formatting::node_ptr tree);
     /** Get format tree. */
-    formating::node_ptr format_tree() const;
+    formatting::node_ptr format_tree() const;
     /** Get a list of all expressions used in any placement.
      * This function is used to collect attributes. */
     void add_expressions(expression_set &output) const;
@@ -164,8 +164,8 @@ struct text_symbolizer_properties
     /** Default values for char_properties. */
     char_properties default_format;
 private:
-    /** A tree of formating::nodes which contain text and formating information. */
-    formating::node_ptr tree_;
+    /** A tree of formatting::nodes which contain text and formatting information. */
+    formatting::node_ptr tree_;
 };
 
 } //ns mapnik

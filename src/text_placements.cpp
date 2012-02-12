@@ -25,7 +25,7 @@
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/ptree_helpers.hpp>
-#include <mapnik/formating/text.hpp>
+#include <mapnik/formatting/text.hpp>
 #include <mapnik/processed_text.hpp>
 
 #include <boost/tuple/tuple.hpp>
@@ -71,17 +71,17 @@ void text_symbolizer_properties::process(processed_text &output, Feature const& 
         tree_->apply(default_format, feature, output);
     } else {
 #ifdef MAPNIK_DEBUG
-        std::cerr << "Warning: text_symbolizer_properties can't produce text: No formating tree!\n";
+        std::cerr << "Warning: text_symbolizer_properties can't produce text: No formatting tree!\n";
 #endif
     }
 }
 
-void text_symbolizer_properties::set_format_tree(formating::node_ptr tree)
+void text_symbolizer_properties::set_format_tree(formatting::node_ptr tree)
 {
     tree_ = tree;
 }
 
-formating::node_ptr text_symbolizer_properties::format_tree() const
+formatting::node_ptr text_symbolizer_properties::format_tree() const
 {
     return tree_;
 }
@@ -131,7 +131,7 @@ void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym
     }
 
     default_format.from_xml(sym, fontsets);
-    formating::node_ptr n(formating::node::from_xml(sym));
+    formatting::node_ptr n(formatting::node::from_xml(sym));
     if (n) set_format_tree(n);
 }
 
@@ -226,7 +226,7 @@ void text_symbolizer_properties::add_expressions(expression_set &output) const
 
 void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 {
-    tree_ = formating::node_ptr(new formating::text_node(expr));
+    tree_ = formatting::node_ptr(new formatting::text_node(expr));
 }
 
 char_properties::char_properties() :

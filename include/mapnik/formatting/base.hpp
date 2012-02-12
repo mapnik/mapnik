@@ -19,41 +19,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef FORMATTING_BASE_HPP
+#define FORMATTING_BASE_HPP
 
-#ifndef FORMAT_HPP
-#define FORMAT_HPP
+// mapnik
+#include <mapnik/feature.hpp>
+#include <mapnik/expression.hpp>
 
-#include <mapnik/formating/base.hpp>
-#include <mapnik/text_properties.hpp>
+// stl
+#include <set>
+
+// boost
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
-namespace formating {
-class format_node: public node {
+
+typedef std::set<expression_ptr> expression_set;
+class processed_text;
+struct char_properties;
+
+namespace formatting {
+
+class node;
+typedef boost::shared_ptr<node> node_ptr;
+
+class node
+{
 public:
-    void to_xml(boost::property_tree::ptree &xml) const;
+    virtual ~node() {}
+    virtual void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(boost::property_tree::ptree const& xml);
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const = 0;
     virtual void add_expressions(expression_set &output) const;
-
-    void set_child(node_ptr child);
-    node_ptr get_child() const;
-
-    boost::optional<std::string> face_name;
-    boost::optional<unsigned> text_size;
-    boost::optional<unsigned> character_spacing;
-    boost::optional<unsigned> line_spacing;
-    boost::optional<double> text_opacity;
-    boost::optional<bool> wrap_before;
-    boost::optional<unsigned> wrap_char;
-    boost::optional<text_transform_e> text_transform;
-    boost::optional<color> fill;
-    boost::optional<color> halo_fill;
-    boost::optional<double> halo_radius;
-
-private:
-    node_ptr child_;
 };
-} //ns formating
+} //ns formatting
 } //ns mapnik
-
-#endif // FORMAT_HPP
+#endif // FORMATTING_BASE_HPP

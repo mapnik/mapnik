@@ -19,28 +19,41 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef LIST_HPP
-#define LIST_HPP
 
-#include <mapnik/formating/base.hpp>
+#ifndef FORMATTING_FORMAT_HPP
+#define FORMATTING_FORMAT_HPP
+
+#include <mapnik/formatting/base.hpp>
+#include <mapnik/text_properties.hpp>
 
 namespace mapnik {
-namespace formating {
-class list_node: public node {
+namespace formatting {
+class format_node: public node {
 public:
-    list_node() : node(), children_() {}
-    virtual void to_xml(boost::property_tree::ptree &xml) const;
+    void to_xml(boost::property_tree::ptree &xml) const;
+    static node_ptr from_xml(boost::property_tree::ptree const& xml);
     virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
     virtual void add_expressions(expression_set &output) const;
 
-    void push_back(node_ptr n);
-    void set_children(std::vector<node_ptr> const& children);
-    std::vector<node_ptr> const& get_children() const;
-    void clear();
+    void set_child(node_ptr child);
+    node_ptr get_child() const;
+
+    boost::optional<std::string> face_name;
+    boost::optional<unsigned> text_size;
+    boost::optional<unsigned> character_spacing;
+    boost::optional<unsigned> line_spacing;
+    boost::optional<double> text_opacity;
+    boost::optional<bool> wrap_before;
+    boost::optional<unsigned> wrap_char;
+    boost::optional<text_transform_e> text_transform;
+    boost::optional<color> fill;
+    boost::optional<color> halo_fill;
+    boost::optional<double> halo_radius;
+
 private:
-    std::vector<node_ptr> children_;
+    node_ptr child_;
 };
-} //ns formating
+} //ns formatting
 } //ns mapnik
 
-#endif // LIST_HPP
+#endif // FORMATTING_FORMAT_HPP
