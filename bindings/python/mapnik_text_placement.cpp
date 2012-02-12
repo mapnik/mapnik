@@ -23,9 +23,16 @@
 #include <boost/python/stl_iterator.hpp>
 
 #include <mapnik/text_properties.hpp>
-#include "mapnik_enumeration.hpp"
+#include <mapnik/text_placements/simple.hpp>
+#include <mapnik/text_placements/list.hpp>
+#include <mapnik/formating/text.hpp>
+#include <mapnik/formating/list.hpp>
+#include <mapnik/formating/format.hpp>
+#include <mapnik/processed_text.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>
+
+#include "mapnik_enumeration.hpp"
 #include "mapnik_threads.hpp"
 #include "python_optional.hpp"
 
