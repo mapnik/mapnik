@@ -48,33 +48,6 @@ namespace mapnik {
 class text_placements;
 typedef std::pair<double,double> dimension_type;
 
-class processed_text : boost::noncopyable
-{
-public:
-    class processed_expression
-    {
-    public:
-        processed_expression(char_properties const& properties, UnicodeString const& text) :
-            p(properties), str(text) {}
-        char_properties p;
-        UnicodeString str;
-    };
-public:
-    processed_text(face_manager<freetype_engine> & font_manager, double scale_factor);
-    void push_back(char_properties const& properties, UnicodeString const& text);
-    unsigned size() const { return expr_list_.size(); }
-    unsigned empty() const { return expr_list_.empty(); }
-    void clear();
-    typedef std::list<processed_expression> expression_list;
-    expression_list::const_iterator begin() const;
-    expression_list::const_iterator end() const;
-    string_info &get_string_info();
-private:
-    expression_list expr_list_;
-    face_manager<freetype_engine> & font_manager_;
-    double scale_factor_;
-    string_info info_;
-};
 
 /** Generate a possible placement and store results of placement_finder.
  * This placement has first to be tested by placement_finder to verify it
