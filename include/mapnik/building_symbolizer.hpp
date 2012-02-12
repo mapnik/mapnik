@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 
 namespace mapnik
 {

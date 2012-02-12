@@ -35,7 +35,7 @@
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>
 
 // boost

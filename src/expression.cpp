@@ -21,7 +21,7 @@
  *****************************************************************************/
 //$Id$
 
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/unicode.hpp>
@@ -32,7 +32,7 @@
 namespace mapnik
 {
 
-class filter_factory
+class expression_factory
 {
 public:
     static expression_ptr compile(std::string const& str,transcoder const& tr)
@@ -58,7 +58,7 @@ public:
 expression_ptr parse_expression (std::string const& wkt,std::string const& encoding)
 {
     transcoder tr(encoding);
-    return filter_factory::compile(wkt,tr);
+    return expression_factory::compile(wkt,tr);
 }
 
 expression_ptr parse_expression (std::string const& wkt)

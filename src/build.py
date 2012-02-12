@@ -109,7 +109,7 @@ source = Split(
     datasource_cache.cpp
     deepcopy.cpp
     expression_string.cpp
-    filter_factory.cpp
+    expression.cpp
     feature_kv_iterator.cpp
     feature_type_style.cpp 
     font_engine_freetype.cpp
