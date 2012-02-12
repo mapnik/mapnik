@@ -98,21 +98,6 @@ DEFINE_ENUM( text_transform_e, text_transform );
 
 namespace formating {
 
-class list_node: public node {
-public:
-    list_node() : node(), children_() {}
-    virtual void to_xml(boost::property_tree::ptree &xml) const;
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
-    virtual void add_expressions(expression_set &output) const;
-
-    void push_back(node_ptr n);
-    void set_children(std::vector<node_ptr> const& children);
-    std::vector<node_ptr> const& get_children() const;
-    void clear();
-private:
-    std::vector<node_ptr> children_;
-};
-
 
 class format_node: public node {
 public:
