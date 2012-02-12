@@ -215,16 +215,11 @@ public:
     }
     inline void blendPixel(int x,int y,unsigned int rgba1,int t)
     {
-        blendPixel2(x,y,rgba1,t,1.0);  // do not change opacity
-    }
-
-    inline void blendPixel2(int x,int y,unsigned int rgba1,int t,double opacity)
-    {
         if (checkBounds(x,y))
         {
             unsigned rgba0 = data_(x,y);
 #ifdef MAPNIK_BIG_ENDIAN
-            unsigned a1 = (int)((rgba1 & 0xff) * opacity) & 0xff; // adjust for desired opacity
+            unsigned a1 = (int)(rgba1 & 0xff);
             a1 = (t*a1) / 255;
             if (a1 == 0) return;
             unsigned r1 = (rgba1 >> 24) & 0xff;
@@ -244,7 +239,7 @@ public:
             a0 = a0 >> 8;
             data_(x,y)= (a0)| (b0 << 8) |  (g0 << 16) | (r0 << 24) ;
 #else
-            unsigned a1 = (int)(((rgba1 >> 24) & 0xff) * opacity) & 0xff; // adjust for desired opacity
+            unsigned a1 = (int)((rgba1 >> 24) & 0xff);
             a1 = (t*a1) / 255;
             if (a1 == 0) return;
             unsigned r1 = rgba1 & 0xff;

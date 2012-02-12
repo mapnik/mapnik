@@ -42,7 +42,6 @@ public:
     boost::optional<unsigned> text_size;
     boost::optional<unsigned> character_spacing;
     boost::optional<unsigned> line_spacing;
-    boost::optional<double> text_opacity;
     boost::optional<bool> wrap_before;
     boost::optional<unsigned> wrap_char;
     boost::optional<text_transform_e> text_transform;

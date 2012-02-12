@@ -76,7 +76,6 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         extras.append(t.get_wrap_before());
         extras.append(t.get_horizontal_alignment());
         extras.append(t.get_justify_alignment());
-        extras.append(t.get_text_opacity());
         extras.append(t.get_minimum_padding());
         extras.append(t.get_minimum_path_length());
 
@@ -135,9 +134,8 @@ struct text_symbolizer_pickle_suite : boost::python::pickle_suite
         t.set_wrap_before(extract<bool>(extras[4]));
         t.set_horizontal_alignment(extract<horizontal_alignment_e>(extras[5]));
         t.set_justify_alignment(extract<justify_alignment_e>(extras[6]));
-        t.set_text_opacity(extract<double>(extras[7]));
-        t.set_minimum_padding(extract<double>(extras[8]));
-        t.set_minimum_path_length(extract<double>(extras[9]));
+        t.set_minimum_padding(extract<double>(extras[7]));
+        t.set_minimum_path_length(extract<double>(extras[8]));
     }
 };
 
@@ -231,10 +229,6 @@ void export_text_symbolizer()
                       &text_symbolizer::set_minimum_path_length)
         .add_property("name",&text_symbolizer::get_name,
                       &text_symbolizer::set_name)
-        .add_property("opacity",
-                      &text_symbolizer::get_text_opacity,
-                      &text_symbolizer::set_text_opacity,
-                      "Set/get the text opacity")
         .add_property("text_transform",
                       &text_symbolizer::get_text_transform,
                       &text_symbolizer::set_text_transform,

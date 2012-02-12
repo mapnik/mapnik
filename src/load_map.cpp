@@ -1408,15 +1408,6 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             shield_symbol.set_opacity(*opacity);
         }
 
-        // text-opacity
-        // TODO: Could be problematic because it is named opacity in TextSymbolizer but opacity has a diffrent meaning here.
-        optional<double> text_opacity =
-            get_opt_attr<double>(sym, "text-opacity");
-        if (text_opacity)
-        {
-            shield_symbol.set_text_opacity( * text_opacity );
-        }
-
         // unlock_image
         optional<boolean> unlock_image =
             get_opt_attr<boolean>(sym, "unlock-image");

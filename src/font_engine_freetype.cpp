@@ -409,7 +409,7 @@ void text_renderer<T>::render(double x0, double y0)
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
                 render_bitmap(&bit->bitmap, pos->properties->halo_fill.rgba(),
                               bit->left,
-                              height - bit->top, pos->properties->text_opacity);
+                              height - bit->top);
             }
         }
         FT_Done_Glyph(g);
@@ -427,7 +427,7 @@ void text_renderer<T>::render(double x0, double y0)
             FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
             render_bitmap(&bit->bitmap, pos->properties->fill.rgba(),
                           bit->left,
-                          height - bit->top, pos->properties->text_opacity);
+                          height - bit->top);
         }
     }
 }

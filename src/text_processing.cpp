@@ -206,7 +206,6 @@ void format_node::to_xml(ptree &xml) const
     if (text_size) set_attr(new_node, "size", *text_size);
     if (character_spacing) set_attr(new_node, "character-spacing", *character_spacing);
     if (line_spacing) set_attr(new_node, "line-spacing", *line_spacing);
-    if (text_opacity) set_attr(new_node, "opacity", *text_opacity);
     if (wrap_before) set_attr(new_node, "wrap-before", *wrap_before);
     if (wrap_char) set_attr(new_node, "wrap-character", *wrap_char);
     if (text_transform) set_attr(new_node, "text-transform", *text_transform);
@@ -230,7 +229,6 @@ node_ptr format_node::from_xml(ptree const& xml)
     n->text_size = get_opt_attr<unsigned>(xml, "size");
     n->character_spacing = get_opt_attr<unsigned>(xml, "character-spacing");
     n->line_spacing = get_opt_attr<unsigned>(xml, "line-spacing");
-    n->text_opacity = get_opt_attr<double>(xml, "opactity");
     boost::optional<boolean> wrap = get_opt_attr<boolean>(xml, "wrap-before");
     if (wrap) n->wrap_before = *wrap;
     n->wrap_char = get_opt_attr<unsigned>(xml, "wrap-character");
@@ -249,7 +247,6 @@ void format_node::apply(char_properties const& p, const Feature &feature, proces
     if (text_size) new_properties.text_size = *text_size;
     if (character_spacing) new_properties.character_spacing = *character_spacing;
     if (line_spacing) new_properties.line_spacing = *line_spacing;
-    if (text_opacity) new_properties.text_opacity = *text_opacity;
     if (wrap_before) new_properties.wrap_before = *wrap_before;
     if (wrap_char) new_properties.wrap_char = *wrap_char;
     if (text_transform) new_properties.text_transform = *text_transform;

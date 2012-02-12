@@ -233,7 +233,6 @@ char_properties::char_properties() :
     text_size(10.0),
     character_spacing(0),
     line_spacing(0),
-    text_opacity(1.0),
     wrap_before(false),
     wrap_char(' '),
     text_transform(NONE),
@@ -262,8 +261,6 @@ void char_properties::from_xml(boost::property_tree::ptree const &sym, std::map<
     if (tconvert_) text_transform = *tconvert_;
     optional<double> line_spacing_ = get_opt_attr<double>(sym, "line-spacing");
     if (line_spacing_) line_spacing = *line_spacing_;
-    optional<double> opacity_ = get_opt_attr<double>(sym, "opacity");
-    if (opacity_) text_opacity = *opacity_;
     optional<std::string> wrap_char_ = get_opt_attr<std::string>(sym, "wrap-character");
     if (wrap_char_ && (*wrap_char_).size() > 0) wrap_char = ((*wrap_char_)[0]);
     optional<std::string> face_name_ = get_opt_attr<std::string>(sym, "face-name");
@@ -342,11 +339,6 @@ void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_de
     if (character_spacing != dfl.character_spacing || explicit_defaults)
     {
         set_attr(node, "character-spacing", character_spacing);
-    }
-    // for shield_symbolizer this is later overridden
-    if (text_opacity != dfl.text_opacity || explicit_defaults)
-    {
-        set_attr(node, "opacity", text_opacity);
     }
 }
 

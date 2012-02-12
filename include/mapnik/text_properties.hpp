@@ -60,7 +60,6 @@ struct char_properties
     float text_size;
     double character_spacing;
     double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
-    double text_opacity;
     bool wrap_before;
     unsigned wrap_char;
     text_transform_e text_transform; //Per expression

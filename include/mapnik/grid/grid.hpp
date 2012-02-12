@@ -266,18 +266,13 @@ public:
 
     inline void blendPixel(value_type feature_id,int x,int y,unsigned int rgba1,int t)
     {
-        blendPixel2(feature_id ,x,y,rgba1,t,1.0);  // do not change opacity
-    }
-
-    inline void blendPixel2(value_type feature_id,int x,int y,unsigned int rgba1,int t,double opacity)
-    {
         if (checkBounds(x,y))
         {
 
 #ifdef MAPNIK_BIG_ENDIAN
-            unsigned a = (int)((rgba1 & 0xff) * opacity) & 0xff; // adjust for desired opacity
+            unsigned a = (int)(rgba1 & 0xff); // adjust for desired opacity
 #else
-            unsigned a = (int)(((rgba1 >> 24) & 0xff) * opacity) & 0xff; // adjust for desired opacity
+            unsigned a = (int)((rgba1 >> 24) & 0xff); // adjust for desired opacity
 #endif
             // if the pixel is more than a tenth
             // opaque then burn in the feature id

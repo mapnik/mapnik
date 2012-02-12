@@ -349,7 +349,7 @@ struct text_renderer : private boost::noncopyable
     void render_id(int feature_id,double x0, double y0, double min_radius=1.0);
 
 private:
-    void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
+    void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y)
     {
         int x_max=x+bitmap->width;
         int y_max=y+bitmap->rows;
@@ -362,7 +362,7 @@ private:
                 int gray=bitmap->buffer[q*bitmap->width+p];
                 if (gray)
                 {
-                    pixmap_.blendPixel2(i, j, rgba, gray, opacity);
+                    pixmap_.blendPixel(i, j, rgba, gray);
                 }
             }
         }

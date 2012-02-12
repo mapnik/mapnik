@@ -197,10 +197,6 @@ void export_shield_symbolizer()
         .add_property("shield_displacement",
                       get_shield_displacement,
                       set_shield_displacement)
-        .add_property("text_opacity",
-                      &shield_symbolizer::get_text_opacity,
-                      &shield_symbolizer::set_text_opacity,
-                      "Set/get the text opacity")
         .add_property("text_transform",
                       &shield_symbolizer::get_text_transform,
                       &shield_symbolizer::set_text_transform,

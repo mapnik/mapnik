@@ -117,8 +117,6 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     double get_minimum_path_length() const;
     void set_allow_overlap(bool overlap);
     bool get_allow_overlap() const func_deprecated;
-    void set_text_opacity(double opacity);
-    double get_text_opacity() const func_deprecated;
     void set_wrap_before(bool wrap_before);
     bool get_wrap_before() const func_deprecated; // wrap text at wrap_char immediately before current work
     void set_horizontal_alignment(horizontal_alignment_e valign);

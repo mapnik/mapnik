@@ -406,16 +406,6 @@ bool text_symbolizer::get_allow_overlap() const
     return placement_options_->properties.allow_overlap;
 }
 
-void text_symbolizer::set_text_opacity(double text_opacity)
-{
-    placement_options_->properties.default_format.text_opacity = text_opacity;
-}
-
-double text_symbolizer::get_text_opacity() const
-{
-    return placement_options_->properties.default_format.text_opacity;
-}
-
 void text_symbolizer::set_vertical_alignment(vertical_alignment_e valign)
 {
     placement_options_->properties.valign = valign;
