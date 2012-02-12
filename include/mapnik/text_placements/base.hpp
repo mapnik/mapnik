@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/text_properties.hpp>
-#include <mapnik/formating/base.hpp>
+#include <mapnik/formatting/base.hpp>
 #include <mapnik/text_path.hpp> //TODO: Remove this again after text_placement_info::placements is moved to a better place.
 
 // stl

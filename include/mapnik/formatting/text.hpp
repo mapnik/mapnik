@@ -19,28 +19,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef FORMATING_LIST_HPP
-#define FORMATING_LIST_HPP
+#ifndef FORMATTING_TEXT_HPP
+#define FORMATTING_TEXT_HPP
 
-#include <mapnik/formating/base.hpp>
+#include <mapnik/formatting/base.hpp>
 
 namespace mapnik {
-namespace formating {
-class list_node: public node {
+namespace formatting {
+class text_node: public node {
 public:
-    list_node() : node(), children_() {}
-    virtual void to_xml(boost::property_tree::ptree &xml) const;
+    text_node(expression_ptr text): node(), text_(text) {}
+    text_node(std::string text): node(), text_(parse_expression(text)) {}
+    void to_xml(boost::property_tree::ptree &xml) const;
+    static node_ptr from_xml(boost::property_tree::ptree const& xml);
     virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
     virtual void add_expressions(expression_set &output) const;
 
-    void push_back(node_ptr n);
-    void set_children(std::vector<node_ptr> const& children);
-    std::vector<node_ptr> const& get_children() const;
-    void clear();
-protected:
-    std::vector<node_ptr> children_;
+    void set_text(expression_ptr text);
+    expression_ptr get_text() const;
+private:
+    expression_ptr text_;
 };
-} //ns formating
+} //ns formatting
 } //ns mapnik
 
-#endif // FORMATING_LIST_HPP
+#endif // FORMATTING_TEXT_HPP

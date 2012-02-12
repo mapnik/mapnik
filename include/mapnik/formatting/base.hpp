@@ -19,28 +19,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef TEXT_HPP
-#define TEXT_HPP
+#ifndef FORMATTING_BASE_HPP
+#define FORMATTING_BASE_HPP
 
-#include <mapnik/formating/base.hpp>
+// mapnik
+#include <mapnik/feature.hpp>
+#include <mapnik/expression.hpp>
+
+// stl
+#include <set>
+
+// boost
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
-namespace formating {
-class text_node: public node {
+
+typedef std::set<expression_ptr> expression_set;
+class processed_text;
+struct char_properties;
+
+namespace formatting {
+
+class node;
+typedef boost::shared_ptr<node> node_ptr;
+
+class node
+{
 public:
-    text_node(expression_ptr text): node(), text_(text) {}
-    text_node(std::string text): node(), text_(parse_expression(text)) {}
-    void to_xml(boost::property_tree::ptree &xml) const;
+    virtual ~node() {}
+    virtual void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(boost::property_tree::ptree const& xml);
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const = 0;
     virtual void add_expressions(expression_set &output) const;
-
-    void set_text(expression_ptr text);
-    expression_ptr get_text() const;
-private:
-    expression_ptr text_;
 };
-} //ns formating
+} //ns formatting
 } //ns mapnik
-
-#endif // TEXT_HPP
+#endif // FORMATTING_BASE_HPP

@@ -19,9 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#include <mapnik/formating/text.hpp>
-#include <mapnik/formating/list.hpp>
-#include <mapnik/formating/format.hpp>
+#include <mapnik/formatting/text.hpp>
+#include <mapnik/formatting/list.hpp>
+#include <mapnik/formatting/format.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
@@ -40,7 +40,7 @@ namespace mapnik {
 using boost::property_tree::ptree;
 using boost::optional;
 
-namespace formating {
+namespace formatting {
 
 void node::to_xml(boost::property_tree::ptree &xml) const
 {
@@ -283,7 +283,7 @@ void format_node::add_expressions(expression_set &output) const
     if (child_) child_->add_expressions(output);
 }
 
-} //namespace formating
+} //namespace formatting
 
 /************************************************************/
 
