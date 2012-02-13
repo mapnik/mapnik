@@ -229,16 +229,17 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
             ("\\\'", '\'')("\\\"", '\"')
             ;
-
+        
+#if BOOST_VERSION > 104200
+        quote_char %= char_('\'') | char_('"');
         ustring %= omit[quote_char[_a = _1]]
             >> *(unesc_char | "\\x" >> hex | (char_ - lit(_a)))
             >> lit(_a);
-
-        quote_char %= char_('\'') | char_('"');
-
-#if BOOST_VERSION > 104200
         attr %= '[' >> no_skip[+~char_(']')] >> ']';
 #else
+        ustring %= lit('\'') 
+            >> *(unesc_char | "\\x" >> hex | (char_ - lit('\'')))
+            >> lit('\'');
         attr %= '[' >> lexeme[+(char_ - ']')] >> ']';
 #endif
 
