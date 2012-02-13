@@ -60,13 +60,18 @@ public:
     attribute_descriptor& operator=(attribute_descriptor const& other)
     {
         if (this == &other)
+        {
             return *this;
-        name_=other.name_;
-        type_=other.type_;
-        primary_key_=other.primary_key_;
-        size_=other.size_;
-        precision_=other.precision_;
-        return *this;
+        }
+        else
+        {
+            name_=other.name_;
+            type_=other.type_;
+            primary_key_=other.primary_key_;
+            size_=other.size_;
+            precision_=other.precision_;
+            return *this;
+        }
     }
 
     std::string const& get_name() const
