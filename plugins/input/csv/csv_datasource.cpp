@@ -857,7 +857,7 @@ boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_typ
     boost::optional<mapnik::datasource::geometry_t> result;
     int multi_type = 0;
     unsigned num_features = features_.size();
-    for (int i = 0; i < num_features && i < 5; ++i)
+    for (unsigned i = 0; i < num_features && i < 5; ++i)
     {
         mapnik::util::to_ds_type(features_[i]->paths(),result);
         if (result)
