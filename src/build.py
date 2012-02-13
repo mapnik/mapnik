@@ -164,6 +164,7 @@ source = Split(
     svg_transform_parser.cpp
     warp.cpp
     json/feature_collection_parser.cpp
+    markers_placement.cpp
     """   
     )
 
