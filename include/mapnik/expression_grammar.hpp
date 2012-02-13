@@ -230,7 +230,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
             ("\\\'", '\'')("\\\"", '\"')
             ;
         
-#if BOOST_VERSION > 104200
+#if BOOST_VERSION > 104500
         quote_char %= char_('\'') | char_('"');
         ustring %= omit[quote_char[_a = _1]]
             >> *(unesc_char | "\\x" >> hex | (char_ - lit(_a)))
