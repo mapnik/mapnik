@@ -30,6 +30,8 @@
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/version.hpp>
+
 // stl
 #include <string>
 
