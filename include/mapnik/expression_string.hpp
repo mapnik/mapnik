@@ -32,7 +32,7 @@
 
 namespace mapnik
 {
-MAPNIK_DECL std::string to_expression_string(expr_node const& );
+MAPNIK_DECL std::string to_expression_string(expr_node const& node);
 }
 
 #endif // MAPNIK_EXPRESSION_STRING_HPP
