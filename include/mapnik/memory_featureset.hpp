@@ -31,7 +31,7 @@
 
 namespace mapnik {
 
-class memory_featureset : public Featureset, private boost::noncopyable
+class memory_featureset : public Featureset
 {
 public:
     memory_featureset(box2d<double> const& bbox, memory_datasource const& ds)

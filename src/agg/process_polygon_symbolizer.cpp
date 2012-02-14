@@ -60,8 +60,9 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     unsigned g=fill_.green();
     unsigned b=fill_.blue();
     unsigned a=fill_.alpha();
+    renb.clip_box(0,0,width_,height_);
     renderer ren(renb);
-
+    
     ras_ptr->reset();
     switch (sym.get_gamma_method())
     {

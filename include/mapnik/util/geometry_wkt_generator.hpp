@@ -46,12 +46,12 @@
 namespace boost { namespace spirit { namespace traits {
 
 // make gcc and darwin toolsets happy.
-        template <>
-        struct is_container<mapnik::geometry_container>
-            : mpl::false_
-        {};
+template <>
+struct is_container<mapnik::geometry_container>
+    : mpl::false_
+{};
 
-        }}}
+}}}
 
 
 namespace mapnik { namespace util {
