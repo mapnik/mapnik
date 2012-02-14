@@ -49,6 +49,13 @@ if env['RUNTIME_LINK'] == 'static':
     plugin_env.ParseConfig(cmd)
     plugin_env['LIBS'].append('proj')
 
+if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+    if boost_version_from_header < 46:
+        # avoid ubuntu issue with boost interprocess:
+        # https://github.com/mapnik/mapnik/issues/1082
+        plugin_env.Append(CXXFLAGS = '-fpermissive')
+
 input_plugin = plugin_env.SharedLibrary('../ogr', source=ogr_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 # if the plugin links to libmapnik ensure it is built first
