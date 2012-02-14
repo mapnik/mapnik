@@ -16,17 +16,18 @@ def test_add_feature():
     featureset = md.features_at_point(mapnik.Coord(2,3))
     retrieved = []
     feat = featureset.next()
-    while featureset.next():
+    while feat:
         retrieved.append(feat)
+        feat = featureset.next()
     
     eq_(len(retrieved), 1)
     f = retrieved[0]
     eq_(f['foo'], 'bar')
 
-    featureset = md.features_at_point(Coord(20,30)).features
+    featureset = md.features_at_point(mapnik.Coord(20,30))
     retrieved = []
     feat = featureset.next()
-    while featureset.next():
+    while feat:
         retrieved.append(feat)
     eq_(len(retrieved), 0)
 
