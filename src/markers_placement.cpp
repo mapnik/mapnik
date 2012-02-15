@@ -12,17 +12,8 @@
 
 namespace mapnik
 {
-
-
-/** Constructor for markers_placement object.
- * \param locator  Path along which markers are placed (type: vertex source)
- * \param size     Size of the marker
- * \param detector Collision detection
- * \param spacing  Distance between markers. If the value is negative it is
- *                 converted to a positive value with similar magnitude, but
- *                 choosen to optimize marker placement. 0 = no markers
- */
-template <typename Locator,  typename Detector> markers_placement<Locator, Detector>::markers_placement(
+template <typename Locator,  typename Detector>
+markers_placement<Locator, Detector>::markers_placement(
     Locator &locator, box2d<double> size, Detector &detector, double spacing, double max_error, bool allow_overlap)
     : locator_(locator), size_(size), detector_(detector), max_error_(max_error), allow_overlap_(allow_overlap)
 {
@@ -36,8 +27,8 @@ template <typename Locator,  typename Detector> markers_placement<Locator, Detec
     rewind();
 }
 
-/** Automatically chooses spacing. */
-template <typename Locator, typename Detector> double markers_placement<Locator, Detector>::find_optimal_spacing(double s)
+template <typename Locator, typename Detector>
+double markers_placement<Locator, Detector>::find_optimal_spacing(double s)
 {
     rewind();
     //Calculate total path length
@@ -62,11 +53,9 @@ template <typename Locator, typename Detector> double markers_placement<Locator,
     return length / points;
 }
 
-/** Start again at first marker.
- * \note Returning the same list of markers only works when they were NOT added
- *       to the detector.
- */
-template <typename Locator, typename Detector> void markers_placement<Locator, Detector>::rewind()
+
+template <typename Locator, typename Detector>
+void markers_placement<Locator, Detector>::rewind()
 {
     locator_.rewind(0);
     //Get first point
@@ -77,54 +66,64 @@ template <typename Locator, typename Detector> void markers_placement<Locator, D
     marker_nr_ = 0;
 }
 
-/** Get a point where the marker should be placed.
- * Each time this function is called a new point is returned.
- * \param x     Return value for x position
- * \param y     Return value for x position
- * \param angle Return value for rotation angle
- * \param add_to_detector Add selected position to detector
- * \return True if a place is found, false if none is found.
- */
-template <typename Locator, typename Detector> bool markers_placement<Locator, Detector>::get_point(
+template <typename Locator, typename Detector>
+bool markers_placement<Locator, Detector>::get_point(
     double *x, double *y, double *angle, bool add_to_detector)
 {
     if (done_) return false;
 
     unsigned cmd;
-    double spacing_left;
+
+    /* This functions starts at the position of the previous marker,
+       walks along the path, counting how far it has to go in spacing_left.
+       If one marker can't be placed at the position it should go to it is
+       moved a bit. The error is compensated for in the next call to this
+       function.
+
+       error > 0: Marker too near to the end of the path.
+       error = 0: Perfect position.
+       error < 0: Marker too near to the beginning of the path.
+    */
+
     if (marker_nr_++ == 0)
     {
         //First marker
-        spacing_left = spacing_ / 2;
+        spacing_left_ = spacing_ / 2;
     } else
     {
-        spacing_left = spacing_;
+        spacing_left_ = spacing_;
     }
 
-    spacing_left -= error_;
+    spacing_left_ -= error_;
     error_ = 0;
 
+    //Loop exits when a position is found or when no more segments are available
     while (true)
     {
-        //Loop exits when a position is found or when no more segments are available
-        if (spacing_left < size_.width()/2)
+        //Do not place markers too close to the beginning of a segment
+        if (spacing_left_ < size_.width()/2)
         {
-            //Do not place markers to close to the beginning of a segment
-            error_ += size_.width()/2 - spacing_left;
-            spacing_left = size_.width()/2;
+            set_spacing_left(size_.width()/2); //Only moves forward
         }
+        //Error for this marker is too large. Skip to the next position.
         if (abs(error_) > max_error_ * spacing_)
         {
-            spacing_left += spacing_ - error_;
+            if (error_ > spacing_) {
+                error_ = 0; //Avoid moving backwards
+#ifdef MAPNIK_DEBUG
+                std::cerr << "WARNING: Extremely large error in markers_placement. Please file a bug report.\n";
+#endif
+            }
+            spacing_left_ += spacing_ - error_;
             error_ = 0;
         }
         double dx = next_x - last_x;
         double dy = next_y - last_y;
-        double d = std::sqrt(dx * dx + dy * dy);
-        if (d <= spacing_left)
+        double segment_length = std::sqrt(dx * dx + dy * dy);
+        if (segment_length <= spacing_left_)
         {
             //Segment is to short to place marker. Find next segment
-            spacing_left -= d;
+            spacing_left_ -= segment_length;
             last_x = next_x;
             last_y = next_y;
             while (agg::is_move_to(cmd = locator_.vertex(&next_x, &next_y)))
@@ -140,14 +139,20 @@ template <typename Locator, typename Detector> bool markers_placement<Locator, D
             }
             continue; //Try again
         }
+
+        /* At this point we know the following things:
+           - segment_length > spacing_left
+           - error is small enough
+           - at least half a marker fits into this segment
+        */
+
         //Check if marker really fits in this segment
-        if (d < size_.width())
+        if (segment_length < size_.width())
         {
             //Segment to short => Skip this segment
-            error_ += d + size_.width()/2 - spacing_left;
-            spacing_left = d + size_.width()/2;
+            set_spacing_left(segment_length + size_.width()/2); //Only moves forward
             continue;
-        } else if (d - spacing_left < size_.width()/2)
+        } else if (segment_length - spacing_left_ < size_.width()/2)
         {
             //Segment is long enough, but we are to close to the end
 
@@ -156,26 +161,23 @@ template <typename Locator, typename Detector> bool markers_placement<Locator, D
             // only move backwards when there is no offset
             if (error_ == 0)
             {
-                error_ += d - size_.width()/2 - spacing_left;
-                spacing_left = d - size_.width()/2;
+                set_spacing_left(segment_length - size_.width()/2, true);
             } else
             {
                 //Skip this segment
-                error_ += d + size_.width()/2 - spacing_left;
-                spacing_left = d + size_.width()/2;
+                set_spacing_left(segment_length + size_.width()/2); //Only moves forward
             }
             continue; //Force checking of max_error constraint
         }
         *angle = atan2(dy, dx);
-        *x = last_x + dx * (spacing_left / d);
-        *y = last_y + dy * (spacing_left / d);
+        *x = last_x + dx * (spacing_left_ / segment_length);
+        *y = last_y + dy * (spacing_left_ / segment_length);
 
         box2d<double> box = perform_transform(*angle, *x, *y);
         if (!allow_overlap_ && !detector_.has_placement(box))
         {
-            //10.0 is choosen arbitrarily
-            error_ += spacing_ * max_error_ / 10.0;
-            spacing_left += spacing_ * max_error_ / 10.0;
+            //10.0 is the approxmiate number of positions tried and choosen arbitrarily
+            set_spacing_left(spacing_left_ + spacing_ * max_error_ / 10.0); //Only moves forward
             continue;
         }
         if (add_to_detector) detector_.insert(box);
@@ -185,8 +187,9 @@ template <typename Locator, typename Detector> bool markers_placement<Locator, D
     }
 }
 
-/** Rotates the size_ box and translates the position. */
-template <typename Locator, typename Detector> box2d<double> markers_placement<Locator, Detector>::perform_transform(double angle, double dx, double dy)
+
+template <typename Locator, typename Detector>
+box2d<double> markers_placement<Locator, Detector>::perform_transform(double angle, double dx, double dy)
 {
     double c = cos(angle), s = sin(angle);
     double x1 = size_.minx();
@@ -200,6 +203,27 @@ template <typename Locator, typename Detector> box2d<double> markers_placement<L
     double y2_ = dy + x2 * s + y2 * c;
 
     return box2d<double>(x1_, y1_, x2_, y2_);
+}
+
+template <typename Locator, typename Detector>
+void markers_placement<Locator, Detector>::set_spacing_left(double sl, bool allow_negative)
+{
+    double delta_error = sl - spacing_left_;
+    if (!allow_negative && delta_error < 0)
+    {
+#ifdef MAPNIK_DEBUG
+        std::cerr << "WARNING: Unexpected negative error in markers_placement. Please file a bug report.\n";
+#endif
+        return;
+    }
+#ifdef MAPNIK_DEBUG
+    if (delta_error == 0.0)
+    {
+        std::cerr << "WARNING: Not moving at all in set_spacing_left()! Please file a bug report.\n";
+    }
+#endif
+    error_ += delta_error;
+    spacing_left_ = sl;
 }
 
 typedef coord_transform2<CoordTransform,geometry_type> path_type;
