@@ -68,7 +68,7 @@ void text_symbolizer_properties::process(processed_text &output, Feature const& 
 {
     output.clear();
     if (tree_) {
-        tree_->apply(default_format, feature, output);
+        tree_->apply(format, feature, output);
     } else {
 #ifdef MAPNIK_DEBUG
         std::cerr << "Warning: text_symbolizer_properties can't produce text: No formatting tree!\n";
@@ -130,7 +130,7 @@ void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym
         set_old_style_expression(parse_expression(*name_, "utf8"));
     }
 
-    default_format.from_xml(sym, fontsets);
+    format.from_xml(sym, fontsets);
     formatting::node_ptr n(formatting::node::from_xml(sym));
     if (n) set_format_tree(n);
 }
@@ -213,7 +213,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool 
     {
         set_attr(node, "vertical-alignment", valign);
     }
-    default_format.to_xml(node, explicit_defaults, dfl.default_format);
+    format.to_xml(node, explicit_defaults, dfl.format);
     if (tree_) tree_->to_xml(node);
 }
 
@@ -352,13 +352,13 @@ void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_de
 
 /************************************************************************/
 
-text_placements::text_placements() : properties()
+text_placements::text_placements() : defaults()
 {
 }
 
 void text_placements::add_expressions(expression_set &output)
 {
-    properties.add_expressions(output);
+    defaults.add_expressions(output);
 }
 
 
@@ -366,7 +366,7 @@ void text_placements::add_expressions(expression_set &output)
 
 text_placement_info::text_placement_info(text_placements const* parent,
                                          double scale_factor_, dimension_type dim, bool has_dimensions_)
-    : properties(parent->properties),
+    : properties(parent->defaults),
       scale_factor(scale_factor_),
       has_dimensions(has_dimensions_),
       dimensions(dim),
@@ -397,7 +397,7 @@ bool text_placement_info_simple::next()
         if (state > 0)
         {
             if (state > parent_->text_sizes_.size()) return false;
-            properties.default_format.text_size = parent_->text_sizes_[state-1];
+            properties.format.text_size = parent_->text_sizes_[state-1];
         }
         if (!next_position_only()) {
             state++;
@@ -411,7 +411,7 @@ bool text_placement_info_simple::next()
 
 bool text_placement_info_simple::next_position_only()
 {
-    const position &pdisp = parent_->properties.displacement;
+    const position &pdisp = parent_->defaults.displacement;
     position &displacement = properties.displacement;
     if (position_state >= parent_->direction_.size()) return false;
     directions_t dir = parent_->direction_[position_state];
@@ -523,7 +523,7 @@ std::string text_placements_simple::get_positions()
 bool text_placement_info_list::next()
 {
     if (state == 0) {
-        properties = parent_->properties;
+        properties = parent_->defaults;
     } else {
         if (state-1 >= parent_->list_.size()) return false;
         properties = parent_->list_[state-1];
@@ -538,7 +538,7 @@ text_symbolizer_properties & text_placements_list::add()
         text_symbolizer_properties &last = list_.back();
         list_.push_back(last); //Preinitialize with old values
     } else {
-        list_.push_back(properties);
+        list_.push_back(defaults);
     }
     return list_.back();
 }
@@ -564,7 +564,7 @@ text_placements_list::text_placements_list() : text_placements(), list_(0)
 
 void text_placements_list::add_expressions(expression_set &output)
 {
-    properties.add_expressions(output);
+    defaults.add_expressions(output);
 
     std::vector<text_symbolizer_properties>::const_iterator it;
     for (it=list_.begin(); it != list_.end(); it++)

@@ -40,7 +40,8 @@ namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
-namespace ascii = boost::spirit::ascii;
+namespace standard_wide =  boost::spirit::standard_wide;
+using standard_wide::space_type;
 
 struct generate_id
 {
@@ -58,7 +59,7 @@ struct generate_id
 
 template <typename Iterator, typename FeatureType>
 struct feature_collection_grammar :
-    qi::grammar<Iterator, std::vector<feature_ptr>(), ascii::space_type>
+    qi::grammar<Iterator, std::vector<feature_ptr>(), space_type>
 {
     feature_collection_grammar(context_ptr const& ctx, mapnik::transcoder const& tr)
         : feature_collection_grammar::base_type(feature_collection,"feature-collection"),
@@ -113,10 +114,10 @@ struct feature_collection_grammar :
     }
     
     context_ptr ctx_;
-    qi::rule<Iterator, std::vector<feature_ptr>(), ascii::space_type> feature_collection; // START
-    qi::rule<Iterator, ascii::space_type> type;
-    qi::rule<Iterator, std::vector<feature_ptr>(), ascii::space_type> features;
-    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(std::vector<feature_ptr>&), ascii::space_type> feature;
+    qi::rule<Iterator, std::vector<feature_ptr>(), space_type> feature_collection; // START
+    qi::rule<Iterator, space_type> type;
+    qi::rule<Iterator, std::vector<feature_ptr>(), space_type> features;
+    qi::rule<Iterator, qi::locals<feature_ptr,int>, void(std::vector<feature_ptr>&), space_type> feature;
     feature_grammar<Iterator,FeatureType> feature_g;
     boost::phoenix::function<generate_id> generate_id_;
 };

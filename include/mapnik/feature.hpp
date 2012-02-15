@@ -128,7 +128,9 @@ public:
             data_[itr->second] = val;
         }
         else
-            throw std::out_of_range("Key doesn't exist");
+        {
+            throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
+        }
     }
 
 
@@ -162,7 +164,10 @@ public:
         {
             return data_[itr->second];
         }
-        throw std::out_of_range("Key doesn't exist");
+        else
+        {
+            throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
+        }
     }
 
     value_type const& get(std::size_t index) const

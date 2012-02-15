@@ -103,7 +103,6 @@ feature_ptr osm_featureset<filterT>::next()
                         geom = new geometry_type(mapnik::LineString);
                     }
 
-                    geom->set_capacity(static_cast<osm_way*>(cur_item)->nodes.size());
                     geom->move_to(static_cast<osm_way*>(cur_item)->nodes[0]->lon,
                                   static_cast<osm_way*>(cur_item)->nodes[0]->lat);
 

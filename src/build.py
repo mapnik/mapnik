@@ -164,6 +164,8 @@ source = Split(
     svg_transform_parser.cpp
     warp.cpp
     json/feature_collection_parser.cpp
+    markers_placement.cpp
+    formatting/expression.cpp
     """   
     )
 
@@ -358,6 +360,8 @@ wkt_includes = glob.glob('../include/mapnik/wkt/*.hpp')
 grid_includes = glob.glob('../include/mapnik/grid/*.hpp')
 json_includes = glob.glob('../include/mapnik/json/*.hpp')
 util_includes = glob.glob('../include/mapnik/util/*.hpp')
+text_placements_includes = glob.glob('../include/mapnik/text_placements/*.hpp')
+formatting_includes = glob.glob('../include/mapnik/formatting/*.hpp')
 
 inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik')
 svg_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/svg')
@@ -365,6 +369,8 @@ wkt_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/wkt')
 grid_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/grid')
 json_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/json')
 util_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/util')
+text_placements_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/text_placements')
+formatting_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/formatting')
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Alias(target='install', source=env.Install(inc_target, includes))
@@ -373,6 +379,8 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
     env.Alias(target='install', source=env.Install(grid_inc_target, grid_includes))
     env.Alias(target='install', source=env.Install(json_inc_target, json_includes))
     env.Alias(target='install', source=env.Install(util_inc_target, util_includes))
+    env.Alias(target='install', source=env.Install(text_placements_inc_target, text_placements_includes))
+    env.Alias(target='install', source=env.Install(formatting_inc_target, formatting_includes))
 
 env['create_uninstall_target'](env, inc_target)
 env['create_uninstall_target'](env, svg_inc_target)
@@ -380,3 +388,5 @@ env['create_uninstall_target'](env, wkt_inc_target)
 env['create_uninstall_target'](env, grid_inc_target)
 env['create_uninstall_target'](env, json_inc_target)
 env['create_uninstall_target'](env, util_inc_target)
+env['create_uninstall_target'](env, text_placements_inc_target)
+env['create_uninstall_target'](env, formatting_inc_target)

@@ -138,312 +138,312 @@ expression_ptr text_symbolizer::get_name() const
 
 void text_symbolizer::set_name(expression_ptr name)
 {
-    placement_options_->properties.set_old_style_expression(name);
+    placement_options_->defaults.set_old_style_expression(name);
 }
 
 expression_ptr text_symbolizer::get_orientation() const
 {
-    return placement_options_->properties.orientation;
+    return placement_options_->defaults.orientation;
 }
 
 void text_symbolizer::set_orientation(expression_ptr orientation)
 {
-    placement_options_->properties.orientation = orientation;
+    placement_options_->defaults.orientation = orientation;
 }
 
 std::string const&  text_symbolizer::get_face_name() const
 {
-    return placement_options_->properties.default_format.face_name;
+    return placement_options_->defaults.format.face_name;
 }
 
 void text_symbolizer::set_face_name(std::string face_name)
 {
-    placement_options_->properties.default_format.face_name = face_name;
+    placement_options_->defaults.format.face_name = face_name;
 }
 
 void text_symbolizer::set_fontset(font_set const& fontset)
 {
-    placement_options_->properties.default_format.fontset = fontset;
+    placement_options_->defaults.format.fontset = fontset;
 }
 
 font_set const& text_symbolizer::get_fontset() const
 {
-    return placement_options_->properties.default_format.fontset;
+    return placement_options_->defaults.format.fontset;
 }
 
 unsigned  text_symbolizer::get_text_ratio() const
 {
-    return placement_options_->properties.text_ratio;
+    return placement_options_->defaults.text_ratio;
 }
 
 void  text_symbolizer::set_text_ratio(unsigned ratio)
 {
-    placement_options_->properties.text_ratio = ratio;
+    placement_options_->defaults.text_ratio = ratio;
 }
 
 unsigned  text_symbolizer::get_wrap_width() const
 {
-    return placement_options_->properties.wrap_width;
+    return placement_options_->defaults.wrap_width;
 }
 
 void  text_symbolizer::set_wrap_width(unsigned width)
 {
-    placement_options_->properties.wrap_width = width;
+    placement_options_->defaults.wrap_width = width;
 }
 
 bool  text_symbolizer::get_wrap_before() const
 {
-    return placement_options_->properties.default_format.wrap_before;
+    return placement_options_->defaults.format.wrap_before;
 }
 
 void  text_symbolizer::set_wrap_before(bool wrap_before)
 {
-    placement_options_->properties.default_format.wrap_before = wrap_before;
+    placement_options_->defaults.format.wrap_before = wrap_before;
 }
 
 unsigned char text_symbolizer::get_wrap_char() const
 {
-    return placement_options_->properties.default_format.wrap_char;
+    return placement_options_->defaults.format.wrap_char;
 }
 
 std::string text_symbolizer::get_wrap_char_string() const
 {
-    return std::string(1, placement_options_->properties.default_format.wrap_char);
+    return std::string(1, placement_options_->defaults.format.wrap_char);
 }
 
 void  text_symbolizer::set_wrap_char(unsigned char character)
 {
-    placement_options_->properties.default_format.wrap_char = character;
+    placement_options_->defaults.format.wrap_char = character;
 }
 
 void  text_symbolizer::set_wrap_char_from_string(std::string const& character)
 {
-    placement_options_->properties.default_format.wrap_char = (character)[0];
+    placement_options_->defaults.format.wrap_char = (character)[0];
 }
 
 text_transform_e  text_symbolizer::get_text_transform() const
 {
-    return placement_options_->properties.default_format.text_transform;
+    return placement_options_->defaults.format.text_transform;
 }
 
 void  text_symbolizer::set_text_transform(text_transform_e convert)
 {
-    placement_options_->properties.default_format.text_transform = convert;
+    placement_options_->defaults.format.text_transform = convert;
 }
 
 unsigned  text_symbolizer::get_line_spacing() const
 {
-    return placement_options_->properties.default_format.line_spacing;
+    return placement_options_->defaults.format.line_spacing;
 }
 
 void  text_symbolizer::set_line_spacing(unsigned spacing)
 {
-    placement_options_->properties.default_format.line_spacing = spacing;
+    placement_options_->defaults.format.line_spacing = spacing;
 }
 
 unsigned  text_symbolizer::get_character_spacing() const
 {
-    return placement_options_->properties.default_format.character_spacing;
+    return placement_options_->defaults.format.character_spacing;
 }
 
 void  text_symbolizer::set_character_spacing(unsigned spacing)
 {
-    placement_options_->properties.default_format.character_spacing = spacing;
+    placement_options_->defaults.format.character_spacing = spacing;
 }
 
 unsigned  text_symbolizer::get_label_spacing() const
 {
-    return placement_options_->properties.label_spacing;
+    return placement_options_->defaults.label_spacing;
 }
 
 void  text_symbolizer::set_label_spacing(unsigned spacing)
 {
-    placement_options_->properties.label_spacing = spacing;
+    placement_options_->defaults.label_spacing = spacing;
 }
 
 unsigned  text_symbolizer::get_label_position_tolerance() const
 {
-    return placement_options_->properties.label_position_tolerance;
+    return placement_options_->defaults.label_position_tolerance;
 }
 
 void  text_symbolizer::set_label_position_tolerance(unsigned tolerance)
 {
-    placement_options_->properties.label_position_tolerance = tolerance;
+    placement_options_->defaults.label_position_tolerance = tolerance;
 }
 
 bool  text_symbolizer::get_force_odd_labels() const
 {
-    return placement_options_->properties.force_odd_labels;
+    return placement_options_->defaults.force_odd_labels;
 }
 
 void  text_symbolizer::set_force_odd_labels(bool force)
 {
-    placement_options_->properties.force_odd_labels = force;
+    placement_options_->defaults.force_odd_labels = force;
 }
 
 double text_symbolizer::get_max_char_angle_delta() const
 {
-    return placement_options_->properties.max_char_angle_delta;
+    return placement_options_->defaults.max_char_angle_delta;
 }
 
 void text_symbolizer::set_max_char_angle_delta(double angle)
 {
-    placement_options_->properties.max_char_angle_delta = angle;
+    placement_options_->defaults.max_char_angle_delta = angle;
 }
 
 void text_symbolizer::set_text_size(float size)
 {
-    placement_options_->properties.default_format.text_size = size;
+    placement_options_->defaults.format.text_size = size;
 }
 
 float text_symbolizer::get_text_size() const
 {
-    return placement_options_->properties.default_format.text_size;
+    return placement_options_->defaults.format.text_size;
 }
 
 void text_symbolizer::set_fill(color const& fill)
 {
-    placement_options_->properties.default_format.fill = fill;
+    placement_options_->defaults.format.fill = fill;
 }
 
 color const&  text_symbolizer::get_fill() const
 {
-    return placement_options_->properties.default_format.fill;
+    return placement_options_->defaults.format.fill;
 }
 
 void  text_symbolizer::set_halo_fill(color const& fill)
 {
-    placement_options_->properties.default_format.halo_fill = fill;
+    placement_options_->defaults.format.halo_fill = fill;
 }
 
 color const&  text_symbolizer::get_halo_fill() const
 {
-    return placement_options_->properties.default_format.halo_fill;
+    return placement_options_->defaults.format.halo_fill;
 }
 
 void  text_symbolizer::set_halo_radius(double radius)
 {
-    placement_options_->properties.default_format.halo_radius = radius;
+    placement_options_->defaults.format.halo_radius = radius;
 }
 
 double text_symbolizer::get_halo_radius() const
 {
-    return placement_options_->properties.default_format.halo_radius;
+    return placement_options_->defaults.format.halo_radius;
 }
 
 void  text_symbolizer::set_label_placement(label_placement_e label_p)
 {
-    placement_options_->properties.label_placement = label_p;
+    placement_options_->defaults.label_placement = label_p;
 }
 
 label_placement_e  text_symbolizer::get_label_placement() const
 {
-    return placement_options_->properties.label_placement;
+    return placement_options_->defaults.label_placement;
 }
 
 void  text_symbolizer::set_displacement(double x, double y)
 {
-    placement_options_->properties.displacement = std::make_pair(x,y);
+    placement_options_->defaults.displacement = std::make_pair(x,y);
 }
 
 void text_symbolizer::set_displacement(position const& p)
 {
-    placement_options_->properties.displacement = p;
+    placement_options_->defaults.displacement = p;
 }
 
 position const& text_symbolizer::get_displacement() const
 {
-    return placement_options_->properties.displacement;
+    return placement_options_->defaults.displacement;
 }
 
 bool text_symbolizer::get_avoid_edges() const
 {
-    return placement_options_->properties.avoid_edges;
+    return placement_options_->defaults.avoid_edges;
 }
 
 void text_symbolizer::set_avoid_edges(bool avoid)
 {
-    placement_options_->properties.avoid_edges = avoid;
+    placement_options_->defaults.avoid_edges = avoid;
 }
 
 double text_symbolizer::get_minimum_distance() const
 {
-    return placement_options_->properties.minimum_distance;
+    return placement_options_->defaults.minimum_distance;
 }
 
 void text_symbolizer::set_minimum_distance(double distance)
 {
-    placement_options_->properties.minimum_distance = distance;
+    placement_options_->defaults.minimum_distance = distance;
 }
 
 double text_symbolizer::get_minimum_padding() const
 {
-    return placement_options_->properties.minimum_padding;
+    return placement_options_->defaults.minimum_padding;
 }
 
 void text_symbolizer::set_minimum_padding(double distance)
 {
-    placement_options_->properties.minimum_padding = distance;
+    placement_options_->defaults.minimum_padding = distance;
 }
 
 double text_symbolizer::get_minimum_path_length() const
 {
-    return placement_options_->properties.minimum_path_length;
+    return placement_options_->defaults.minimum_path_length;
 }
 
 void text_symbolizer::set_minimum_path_length(double size)
 {
-    placement_options_->properties.minimum_path_length = size;
+    placement_options_->defaults.minimum_path_length = size;
 }
 
 void text_symbolizer::set_allow_overlap(bool overlap)
 {
-    placement_options_->properties.allow_overlap = overlap;
+    placement_options_->defaults.allow_overlap = overlap;
 }
 
 bool text_symbolizer::get_allow_overlap() const
 {
-    return placement_options_->properties.allow_overlap;
+    return placement_options_->defaults.allow_overlap;
 }
 
 void text_symbolizer::set_text_opacity(double text_opacity)
 {
-    placement_options_->properties.default_format.text_opacity = text_opacity;
+    placement_options_->defaults.format.text_opacity = text_opacity;
 }
 
 double text_symbolizer::get_text_opacity() const
 {
-    return placement_options_->properties.default_format.text_opacity;
+    return placement_options_->defaults.format.text_opacity;
 }
 
 void text_symbolizer::set_vertical_alignment(vertical_alignment_e valign)
 {
-    placement_options_->properties.valign = valign;
+    placement_options_->defaults.valign = valign;
 }
 
 vertical_alignment_e text_symbolizer::get_vertical_alignment() const
 {
-    return placement_options_->properties.valign;
+    return placement_options_->defaults.valign;
 }
 
 void text_symbolizer::set_horizontal_alignment(horizontal_alignment_e halign)
 {
-    placement_options_->properties.halign = halign;
+    placement_options_->defaults.halign = halign;
 }
 
 horizontal_alignment_e text_symbolizer::get_horizontal_alignment() const
 {
-    return placement_options_->properties.halign;
+    return placement_options_->defaults.halign;
 }
 
 void text_symbolizer::set_justify_alignment(justify_alignment_e jalign)
 {
-    placement_options_->properties.jalign = jalign;
+    placement_options_->defaults.jalign = jalign;
 }
 
 justify_alignment_e text_symbolizer::get_justify_alignment() const
 {
-    return placement_options_->properties.jalign;
+    return placement_options_->defaults.jalign;
 }
 
 text_placements_ptr text_symbolizer::get_placement_options() const

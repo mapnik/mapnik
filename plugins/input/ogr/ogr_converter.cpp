@@ -87,7 +87,6 @@ void ogr_converter::convert_linestring(OGRLineString* geom, feature_ptr feature)
 {
     int num_points = geom->getNumPoints();
     geometry_type* line = new geometry_type(mapnik::LineString);
-    line->set_capacity(num_points);
     line->move_to(geom->getX(0), geom->getY(0));
     for (int i = 1; i < num_points; ++i)
     {
@@ -108,7 +107,6 @@ void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
         capacity += interior->getNumPoints();
     }
     geometry_type* poly = new geometry_type(mapnik::Polygon);
-    poly->set_capacity(num_points + capacity);
     poly->move_to(exterior->getX(0), exterior->getY(0));
     for (int i = 1; i < num_points; ++i)
     {

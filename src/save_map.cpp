@@ -357,7 +357,7 @@ private:
     void add_font_attributes(ptree & node, const text_symbolizer & sym)
     {
         text_placements_ptr p = sym.get_placement_options();
-        p->properties.to_xml(node, explicit_defaults_);
+        p->defaults.to_xml(node, explicit_defaults_);
         /* Known types:
            - text_placements_dummy: no handling required
            - text_placements_simple: positions string
@@ -366,13 +366,14 @@ private:
         text_placements_simple *simple = dynamic_cast<text_placements_simple *>(p.get());
         text_placements_list *list = dynamic_cast<text_placements_list *>(p.get());
         if (simple) {
-            set_attr(node, "placment-type", "simple");
+            set_attr(node, "placement-type", "simple");
             set_attr(node, "placements", simple->get_positions());
         }
         if (list) {
-            set_attr(node, "placment-type", "list");
+            set_attr(node, "placement-type", "list");
             unsigned i;
-            text_symbolizer_properties *dfl = &(list->properties);
+            //dfl = last properties passed as default so only attributes that change are actually written
+            text_symbolizer_properties *dfl = &(list->defaults);
             for (i=0; i < list->size(); i++) {
                 ptree &placement_node = node.push_back(ptree::value_type("Placement", ptree()))->second;
                 list->get(i).to_xml(placement_node, explicit_defaults_, *dfl);

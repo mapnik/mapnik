@@ -43,7 +43,7 @@ bool feature_collection_parser::parse(std::string const& json, std::vector<mapni
     using namespace boost::spirit;
     iterator_type first = json.begin();
     iterator_type last =  json.end();
-    return qi::phrase_parse(first, last, *grammar_, ascii::space, features);
+    return qi::phrase_parse(first, last, *grammar_, standard_wide::space, features);
 #else
     std::ostringstream s;
     s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;

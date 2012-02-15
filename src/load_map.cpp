@@ -1281,10 +1281,10 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
             placement_finder = text_placements_ptr(new text_placements_dummy());
         }
 
-        placement_finder->properties.from_xml(sym, fontsets_);
+        placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
-                !placement_finder->properties.default_format.fontset.size())
-            ensure_font_face(placement_finder->properties.default_format.face_name);
+                !placement_finder->defaults.format.fontset.size())
+            ensure_font_face(placement_finder->defaults.format.face_name);
         if (list) {
             ptree::const_iterator symIter = sym.begin();
             ptree::const_iterator endSym = sym.end();
@@ -1299,8 +1299,8 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
                 text_symbolizer_properties & p = list->add();
                 p.from_xml(symIter->second, fontsets_);
                 if (strict_ &&
-                        !p.default_format.fontset.size())
-                    ensure_font_face(p.default_format.face_name);
+                        !p.format.fontset.size())
+                    ensure_font_face(p.format.face_name);
             }
         }
 
@@ -1354,10 +1354,10 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
             placement_finder = text_placements_ptr(new text_placements_dummy());
         }
 
-        placement_finder->properties.from_xml(sym, fontsets_);
+        placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
-                !placement_finder->properties.default_format.fontset.size())
-            ensure_font_face(placement_finder->properties.default_format.face_name);
+                !placement_finder->defaults.format.fontset.size())
+            ensure_font_face(placement_finder->defaults.format.face_name);
         if (list) {
             ptree::const_iterator symIter = sym.begin();
             ptree::const_iterator endSym = sym.end();
@@ -1372,8 +1372,8 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
                 text_symbolizer_properties & p = list->add();
                 p.from_xml(symIter->second, fontsets_);
                 if (strict_&&
-                        !placement_finder->properties.default_format.fontset.size())
-                    ensure_font_face(p.default_format.face_name);
+                        !p.format.fontset.size())
+                    ensure_font_face(p.format.face_name);
             }
         }
 

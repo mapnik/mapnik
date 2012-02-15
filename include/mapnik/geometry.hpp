@@ -48,6 +48,7 @@ public:
     typedef T coord_type;
     typedef Container<coord_type> container_type;
     typedef typename container_type::value_type value_type;
+    typedef typename container_type::size_type size_type;
 private:
     container_type cont_;
     eGeomType type_;
@@ -389,11 +390,7 @@ public:
         }
         return false;
     }
-
-    void set_capacity(size_t size)
-    {
-        cont_.set_capacity(size);
-    }
+    
 };
 
 typedef geometry<double,vertex_vector> geometry_type;
