@@ -362,7 +362,7 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
     std::ostringstream b;
     if (srid_ > 0)
-        b << "SetSRID(";
+        b << "ST_SetSRID(";
     b << "'BOX3D(";
     b << std::setprecision(16);
     b << env.minx() << " " << env.miny() << ",";
@@ -502,14 +502,17 @@ featureset_ptr postgis_datasource::features(const query& q) const
             std::ostringstream s;
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
+            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+
             if (!key_field_.empty())
+            {
                 mapnik::sql_utils::quote_attr(s,key_field_);
+                ctx->push(key_field_);
+            }
 
             std::set<std::string> const& props=q.property_names();
             std::set<std::string>::const_iterator pos=props.begin();
             std::set<std::string>::const_iterator end=props.end();
-
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
 
             for ( ;pos != end;++pos)
             {
@@ -526,9 +529,6 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }
 
             boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            unsigned num_attr = props.size();
-            if (!key_field_.empty())
-                ++num_attr;
             return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
         else
@@ -574,10 +574,13 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             std::ostringstream s;
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
-            if (!key_field_.empty())
-                mapnik::sql_utils::quote_attr(s,key_field_);
-
             mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+
+            if (!key_field_.empty())
+            {
+                mapnik::sql_utils::quote_attr(s,key_field_);
+                ctx->push(key_field_);
+            }
 
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();

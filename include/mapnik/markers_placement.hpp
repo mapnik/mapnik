@@ -35,25 +35,52 @@ template <typename Locator, typename Detector>
 class markers_placement : boost::noncopyable
 {
 public:
+    /** Constructor for markers_placement object.
+     * \param locator  Path along which markers are placed (type: vertex source)
+     * \param size     Size of the marker
+     * \param detector Collision detection
+     * \param spacing  Distance between markers. If the value is negative it is
+     *                 converted to a positive value with similar magnitude, but
+     *                 choosen to optimize marker placement. 0 = no markers
+     */
     markers_placement(Locator &locator, box2d<double> size, Detector &detector, double spacing, double max_error, bool allow_overlap);
+    /** Start again at first marker.
+     * \note Returns the same list of markers only works when they were NOT added
+     *       to the detector.
+     */
     void rewind();
+    /** Get a point where the marker should be placed.
+     * Each time this function is called a new point is returned.
+     * \param x     Return value for x position
+     * \param y     Return value for x position
+     * \param angle Return value for rotation angle
+     * \param add_to_detector Add selected position to detector
+     * \return True if a place is found, false if none is found.
+     */
     bool get_point(double *x, double *y, double *angle, bool add_to_detector = true);
 private:
     Locator &locator_;
     box2d<double> size_;
     Detector &detector_;
     double spacing_;
+    double max_error_;
+    bool allow_overlap_;
+
     bool done_;
     double last_x, last_y;
     double next_x, next_y;
     /** If a marker could not be placed at the exact point where it should
      * go the next marker's distance will be a bit lower. */
     double error_;
-    double max_error_;
+    double spacing_left_;
     unsigned marker_nr_;
-    bool allow_overlap_;
+
+    /** Rotates the size_ box and translates the position. */
     box2d<double> perform_transform(double angle, double dx, double dy);
+    /** Automatically chooses spacing. */
     double find_optimal_spacing(double s);
+    /** Set spacing_left_, adjusts error_ and performs sanity checks. */
+    void set_spacing_left(double sl, bool allow_negative=false);
 };
 
 }
