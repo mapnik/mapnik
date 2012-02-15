@@ -165,6 +165,7 @@ source = Split(
     warp.cpp
     json/feature_collection_parser.cpp
     markers_placement.cpp
+    formatting/expression.cpp
     """   
     )
 

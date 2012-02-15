@@ -129,7 +129,7 @@ public:
     virtual ~text_placements() {}
 
     /** List of all properties used as the default for the subclasses. */
-    text_symbolizer_properties properties;
+    text_symbolizer_properties defaults;
 };
 
 /** Pointer to object of class text_placements */
