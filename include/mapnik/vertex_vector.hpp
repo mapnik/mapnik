@@ -51,18 +51,20 @@ class vertex_vector : private boost::noncopyable
         block_mask  = block_size - 1,
         grow_by     = 256
     };
-
+public:
+    // required for iterators support
+    typedef boost::tuple<unsigned,coord_type,coord_type> value_type;
+    typedef std::size_t size_type;
+    
 private:
     unsigned num_blocks_;
     unsigned max_blocks_;
     coord_type** vertices_;
     unsigned char** commands_;
-    unsigned pos_;
-
+    size_type pos_;
+    
 public:
-    // required for iterators support
-    typedef typename boost::tuple<unsigned,coord_type,coord_type> value_type;
-
+    
     vertex_vector()
         : num_blocks_(0),
           max_blocks_(0),
@@ -83,7 +85,7 @@ public:
             ::operator delete(vertices_);
         }
     }
-    unsigned size() const
+    size_type size() const
     {
         return pos_;
     }
@@ -112,12 +114,7 @@ public:
         *y = (*vertex);
         return commands_[block] [pos & block_mask];
     }
-
-    void set_capacity(size_t)
-    {
-        //do nothing
-    }
-
+    
 private:
     void allocate_block(unsigned block)
     {

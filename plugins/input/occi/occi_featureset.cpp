@@ -373,8 +373,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
         if (! is_single_geom && elem_size > SDO_ELEM_INFO_SIZE)
         {
             geometry_type* geom = new geometry_type(geom_type);
-            if (geom) geom->set_capacity(ord_size);
-
+            
             for (int i = SDO_ELEM_INFO_SIZE; i < elem_size; i+=3)
             {
                 int next_offset = elem_info[i];
@@ -434,8 +433,6 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                     }
 
                     geom = new geometry_type(gtype);
-                    geom->set_capacity((next_offset - 1) - (offset - 1 - dimensions));
-
                     fill_geometry_type(geom,
                                        offset - 1,
                                        next_offset - 1,
@@ -458,8 +455,6 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
         else
         {
             geometry_type * geom = new geometry_type(geom_type);
-            geom->set_capacity(ord_size);
-
             fill_geometry_type(geom,
                                offset - 1,
                                ord_size,
