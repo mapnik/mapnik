@@ -230,22 +230,22 @@ void insert_expression(expression_set *set, expression_ptr p)
 
 char_properties & get_format(text_symbolizer const& sym)
 {
-    return sym.get_placement_options()->properties.default_format;
+    return sym.get_placement_options()->defaults.format;
 }
 
 void set_format(text_symbolizer const& sym, char_properties & format)
 {
-    sym.get_placement_options()->properties.default_format = format;
+    sym.get_placement_options()->defaults.format = format;
 }
 
 text_symbolizer_properties & get_properties(text_symbolizer const& sym)
 {
-    return sym.get_placement_options()->properties;
+    return sym.get_placement_options()->defaults;
 }
 
-void set_properties(text_symbolizer const& sym, text_symbolizer_properties & properties)
+void set_properties(text_symbolizer const& sym, text_symbolizer_properties & defaults)
 {
-    sym.get_placement_options()->properties = properties;
+    sym.get_placement_options()->defaults = defaults;
 }
 
 }
@@ -326,7 +326,7 @@ void export_text_placement()
         .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
         .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
         .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
-        .def_readwrite("default_format", &text_symbolizer_properties::default_format)
+        .def_readwrite("format", &text_symbolizer_properties::format)
         .add_property ("format_tree",
                        &text_symbolizer_properties::format_tree,
                        &text_symbolizer_properties::set_format_tree);
@@ -359,7 +359,7 @@ void export_text_placement()
             boost::shared_ptr<TextPlacementsWrap>,
             boost::noncopyable>
             ("TextPlacements")
-        .def_readwrite("defaults", &text_placements::properties)
+        .def_readwrite("defaults", &text_placements::defaults)
         .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
         /* TODO: add_expressions() */
         ;
