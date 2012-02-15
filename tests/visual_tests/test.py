@@ -13,7 +13,7 @@ filenames = ["list", "simple"]
 filenames_one_width = ["simple-E", "simple-NE", "simple-NW", "simple-N",
     "simple-SE", "simple-SW", "simple-S", "simple-W",
     "formating-1", "formating-2", "formating-3", "formating-4",
-    "shieldsymbolizer-1"]
+    "shieldsymbolizer-1", "expressionformat"]
     
 def render(filename, width):
     print "Rendering style \"%s\" with width %d" % (filename, width)
