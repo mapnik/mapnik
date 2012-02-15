@@ -27,9 +27,9 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
 #include <mapnik/symbolizer_helpers.hpp>
-
+// stl 
+#include <cmath>
 
 // boost
 #include <boost/make_shared.hpp>
@@ -57,8 +57,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             std::pair<int, int> marker_pos = helper.get_marker_position(placement->placements[ii]);
             render_marker(marker_pos.first, marker_pos.second, helper.get_marker(), helper.get_transform(), sym.get_opacity());
 
-            double x = placement->placements[ii].starting_x;
-            double y = placement->placements[ii].starting_y;
+            double x = std::floor(placement->placements[ii].starting_x);
+            double y = std::floor(placement->placements[ii].starting_y);
             ren.prepare_glyphs(&(placement->placements[ii]));
             ren.render(x, y);
         }
