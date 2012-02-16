@@ -75,6 +75,7 @@
 // boost
 #include <boost/utility.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 // stl
 #ifdef MAPNIK_DEBUG
@@ -223,7 +224,7 @@ void agg_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void agg_renderer<T>::render_marker(int x, int y, marker & marker, agg::trans_affine const& tr, double opacity)
+void agg_renderer<T>::render_marker(double x, double y, marker & marker, agg::trans_affine const& tr, double opacity)
 {
     if (marker.is_vector())
     {
@@ -262,7 +263,11 @@ void agg_renderer<T>::render_marker(int x, int y, marker & marker, agg::trans_af
     }
     else
     {
-        pixmap_.set_rectangle_alpha2(**marker.get_bitmap_data(), x, y, opacity);
+        //TODO: Add subpixel support
+        pixmap_.set_rectangle_alpha2(**marker.get_bitmap_data(),
+                                     boost::math::iround(x),
+                                     boost::math::iround(y),
+                                     opacity);
     }
 }
 
