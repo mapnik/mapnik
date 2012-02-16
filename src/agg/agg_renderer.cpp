@@ -223,7 +223,7 @@ void agg_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void agg_renderer<T>::render_marker(const int x, const int y, marker &marker, const agg::trans_affine & tr, double opacity)
+void agg_renderer<T>::render_marker(int x, int y, marker & marker, agg::trans_affine const& tr, double opacity)
 {
     if (marker.is_vector())
     {
