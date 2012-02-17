@@ -171,6 +171,7 @@ source = Split(
     formatting/text.cpp
     formatting/format.cpp
     formatting/registry.cpp
+    text_placements/registry.cpp
     """   
     )
 
