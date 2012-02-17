@@ -151,7 +151,6 @@ source = Split(
     markers_symbolizer.cpp
     metawriter.cpp
     raster_colorizer.cpp
-    text_placements.cpp
     wkt/wkt_factory.cpp
     metawriter_inmem.cpp
     metawriter_factory.cpp
@@ -172,6 +171,11 @@ source = Split(
     formatting/format.cpp
     formatting/registry.cpp
     text_placements/registry.cpp
+    text_placements/base.cpp
+    text_placements/dummy.cpp
+    text_placements/list.cpp
+    text_placements/simple.cpp
+    text_properties.cpp
     """   
     )
 
