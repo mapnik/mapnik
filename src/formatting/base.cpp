@@ -22,9 +22,7 @@
 // mapnik
 #include <mapnik/formatting/base.hpp>
 #include <mapnik/formatting/list.hpp>
-#include <mapnik/formatting/text.hpp>
-#include <mapnik/formatting/expression.hpp>
-#include <mapnik/formatting/format.hpp>
+#include <mapnik/formatting/registry.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -47,16 +45,11 @@ node_ptr node::from_xml(boost::property_tree::ptree const& xml)
     boost::property_tree::ptree::const_iterator itr = xml.begin();
     boost::property_tree::ptree::const_iterator end = xml.end();
     for (; itr != end; ++itr) {
-        node_ptr n;
-        if (itr->first == "<xmltext>") {
-            n = text_node::from_xml(itr->second);
-        } else if (itr->first == "Format") {
-            n = format_node::from_xml(itr->second);
-        } else if (itr->first == "ExpressionFormat") {
-            n = expression_format::from_xml(itr->second);
-        } else if (itr->first != "<xmlcomment>" && itr->first != "<xmlattr>" && itr->first != "Placement") {
-            throw config_error("Unknown item " + itr->first);
+        if (itr->first == "<xmlcomment>" || itr->first == "<xmlattr>" || itr->first == "Placement")
+        {
+            continue;
         }
+        node_ptr n = registry::instance()->from_xml(itr->first, itr->second);
         if (n) list->push_back(n);
     }
     if (list->get_children().size() == 1) {

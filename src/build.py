@@ -170,6 +170,7 @@ source = Split(
     formatting/list.cpp
     formatting/text.cpp
     formatting/format.cpp
+    formatting/registry.cpp
     """   
     )
 
