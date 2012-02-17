@@ -2,9 +2,9 @@
 import mapnik
 import sys
 
-class MyText(mapnik.FormatingNode):
+class MyText(mapnik.FormattingNode):
     def __init__(self):
-        mapnik.FormatingNode.__init__(self)
+        mapnik.FormattingNode.__init__(self)
         self.expr = mapnik.Expression("[name]")
         self.expr_nr = mapnik.Expression("[nr]")
 
@@ -28,9 +28,9 @@ class MyText(mapnik.FormatingNode):
         output.insert(self.expr_nr)
 
 
-class IfElse(mapnik.FormatingNode):
+class IfElse(mapnik.FormattingNode):
     def __init__(self, condition, if_node, else_node):
-        mapnik.FormatingNode.__init__(self)
+        mapnik.FormattingNode.__init__(self)
         self.condition = mapnik.Expression(condition)
         self.if_node = if_node
         self.else_node = else_node
@@ -52,7 +52,7 @@ m.background = mapnik.Color('white')
 
 text = mapnik.TextSymbolizer()
 text.placements.defaults.displacement = (0, 5)
-text.placements.defaults.default_format.face_name = 'DejaVu Sans Book'
+text.placements.defaults.format.face_name = 'DejaVu Sans Book'
 
 point = mapnik.PointSymbolizer()
 
@@ -74,19 +74,19 @@ m.layers.append(layer)
 bbox = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
 m.zoom_to_box(bbox)
 
-formatnode = mapnik.FormatingFormatNode()
-formatnode.child = mapnik.FormatingTextNode("[name]")
+formatnode = mapnik.FormattingFormatNode()
+formatnode.child = mapnik.FormattingTextNode("[name]")
 formatnode.fill = mapnik.Color("green")
 
 format_trees = [
-    ('TextNode', mapnik.FormatingTextNode("[name]")),
+    ('TextNode', mapnik.FormattingTextNode("[name]")),
     ('MyText', MyText()),
     ('IfElse', IfElse("[nr] != '5'",
-                mapnik.FormatingTextNode("[name]"),
-                mapnik.FormatingTextNode("'SPECIAL!'"))),
+                mapnik.FormattingTextNode("[name]"),
+                mapnik.FormattingTextNode("'SPECIAL!'"))),
     ('Format', formatnode),
-    ('List',   mapnik.FormatingListNode([
-                mapnik.FormatingTextNode("[name]+'\n'"),
+    ('List',   mapnik.FormattingListNode([
+                mapnik.FormattingTextNode("[name]+'\n'"),
                 MyText()
                 ]))
 ]
