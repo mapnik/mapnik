@@ -255,14 +255,14 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
             // remove displacement from image label
             double lx = x - pos.first;
             double ly = y - pos.second;
-            marker_x_ = int(floor(lx - (0.5 * marker_w_))) + 1;
-            marker_y_ = int(floor(ly - (0.5 * marker_h_))) + 1;
+            marker_x_ = lx - 0.5 * marker_w_;
+            marker_y_ = ly - 0.5 * marker_h_;
             marker_ext_.re_center(lx, ly);
         }
         else
         {  // center image at reference location
-            marker_x_ = int(floor(label_x - 0.5 * marker_w_));
-            marker_y_ = int(floor(label_y - 0.5 * marker_h_));
+            marker_x_ = label_x - 0.5 * marker_w_;
+            marker_y_ = label_y - 0.5 * marker_h_;
             marker_ext_.re_center(label_x, label_y);
         }
 
@@ -345,8 +345,8 @@ std::pair<int, int> shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marke
 
         double lx = x - pos.first;
         double ly = y - pos.second;
-        int px = int(floor(lx - (0.5*marker_w_))) + 1;
-        int py = int(floor(ly - (0.5*marker_h_))) + 1;
+        int px = lx - 0.5*marker_w_;
+        int py = ly - 0.5*marker_h_;
         marker_ext_.re_center(lx, ly);
 //        detector_->insert(label_ext); //TODO: Is this done by placement_finder?
 

@@ -713,6 +713,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
     {
         // grab the next character according to the orientation
         char_info const &ci = orientation > 0 ? info_.at(i) : info_.at(info_.num_characters() - i - 1);
+        double cwidth = ci.width + ci.format->character_spacing;
         unsigned c = ci.c;
 
         double last_character_angle = angle;
@@ -728,10 +729,10 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
         double end_x = 0;
         double end_y = 0;
 
-        if (segment_length - distance  >= ci.width)
+        if (segment_length - distance  >= cwidth)
         {
             //if the distance remaining in this segment is enough, we just go further along the segment
-            distance += ci.width;
+            distance += cwidth;
 
             end_x = old_x + dx*distance/segment_length;
             end_y = old_y + dy*distance/segment_length;
@@ -757,11 +758,11 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
 
                 segment_length = path_distances[index];
             }
-            while (std::sqrt(std::pow(start_x - new_x, 2) + std::pow(start_y - new_y, 2)) < ci.width); //Distance from start_ to new_
+            while (std::sqrt(std::pow(start_x - new_x, 2) + std::pow(start_y - new_y, 2)) < cwidth); //Distance from start_ to new_
 
             //Calculate the position to place the end of the character on
             find_line_circle_intersection(
-                start_x, start_y, ci.width,
+                start_x, start_y, cwidth,
                 old_x, old_y, new_x, new_y,
                 end_x, end_y); //results are stored in end_x, end_y
 
@@ -803,8 +804,8 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
         if (orientation < 0)
         {
             // rotate in place
-            render_x += ci.width*cosa - (char_height-2)*sina;
-            render_y -= ci.width*sina + (char_height-2)*cosa;
+            render_x += cwidth*cosa - (char_height-2)*sina;
+            render_y -= cwidth*sina + (char_height-2)*cosa;
             render_angle += M_PI;
         }
         current_placement->add_node(c,render_x - current_placement->starting_x,
@@ -850,6 +851,7 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
     {
         // grab the next character according to the orientation
         char_info const& ci = orientation > 0 ? info_.at(i) : info_.at(info_.num_characters() - i - 1);
+        double cwidth = ci.width + ci.format->character_spacing;
         int c;
         double x, y, angle;
         char_properties *properties;
@@ -863,8 +865,8 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
         {
             // rotate in place
             /* TODO: What's the meaning of -2? */
-            x += ci.width*cosa - (string_height_-2)*sina;
-            y -= ci.width*sina + (string_height_-2)*cosa;
+            x += cwidth*cosa - (string_height_-2)*sina;
+            y -= cwidth*sina + (string_height_-2)*cosa;
             angle += M_PI;
             //sin(x+PI) = -sin(x)
             sina = -sina;
@@ -879,12 +881,12 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
         else
         {
             // put four corners of the letter into envelope
-            e.init(x, y, x + ci.width*cosa,
-                   y - ci.width*sina);
+            e.init(x, y, x + cwidth*cosa,
+                   y - cwidth*sina);
             e.expand_to_include(x - ci.height()*sina,
                                 y - ci.height()*cosa);
-            e.expand_to_include(x + (ci.width*cosa - ci.height()*sina),
-                                y - (ci.width*sina + ci.height()*cosa));
+            e.expand_to_include(x + (cwidth*cosa - ci.height()*sina),
+                                y - (cwidth*sina + ci.height()*cosa));
         }
 
         if (!detector_.extent().intersects(e) ||

@@ -31,7 +31,6 @@
 #include <boost/python/tuple.hpp>
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python.hpp>
-#include <boost/scoped_array.hpp>
 
 // mapnik
 #include <mapnik/feature.hpp>
