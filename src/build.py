@@ -151,8 +151,6 @@ source = Split(
     markers_symbolizer.cpp
     metawriter.cpp
     raster_colorizer.cpp
-    text_placements.cpp
-    text_processing.cpp
     wkt/wkt_factory.cpp
     metawriter_inmem.cpp
     metawriter_factory.cpp
@@ -165,7 +163,19 @@ source = Split(
     warp.cpp
     json/feature_collection_parser.cpp
     markers_placement.cpp
+    processed_text.cpp
+    formatting/base.cpp
     formatting/expression.cpp
+    formatting/list.cpp
+    formatting/text.cpp
+    formatting/format.cpp
+    formatting/registry.cpp
+    text_placements/registry.cpp
+    text_placements/base.cpp
+    text_placements/dummy.cpp
+    text_placements/list.cpp
+    text_placements/simple.cpp
+    text_properties.cpp
     """   
     )
 

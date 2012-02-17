@@ -19,36 +19,33 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+// mapnik
+#include <mapnik/text_placements/registry.hpp>
 
-#include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/feature.hpp>
-#include <boost/optional.hpp>
-
-namespace mapnik {
-
-
-feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
-    : f_(f),
-      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
-
-
-void feature_kv_iterator::increment()
+namespace mapnik
 {
-    ++itr_;
+namespace placements
+{
+
+registry::registry()
+{
+
 }
 
-bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
+void registry::register_name(std::string name, from_xml_function_ptr ptr, bool overwrite)
 {
-    return ( itr_ == other.itr_);
+    if (overwrite) {
+        map_[name] = ptr;
+    } else {
+        map_.insert(make_pair(name, ptr));
+    }
 }
 
-feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
+text_placements_ptr registry::from_xml(std::string name, const boost::property_tree::ptree &xml)
 {
-    boost::get<0>(kv_) = itr_->first;
-    boost::optional<mapnik::value const&> val = f_.get_optional(itr_->second);
-    if (val) boost::get<1>(kv_) = *val;
-    else boost::get<1>(kv_) = value_null();
-    return kv_;
+    std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(name);
+    if (itr == map_.end())  throw config_error("Unknown placement-type '" + name + "'");
+    return itr->second(xml);
 }
-
-} // endof mapnik namespace
+} //ns formatting
+} //ns mapnik

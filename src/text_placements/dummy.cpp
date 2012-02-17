@@ -19,36 +19,21 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-
-#include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/feature.hpp>
-#include <boost/optional.hpp>
-
-namespace mapnik {
-
-
-feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
-    : f_(f),
-      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
-
-
-void feature_kv_iterator::increment()
+#include <mapnik/text_placements/dummy.hpp>
+namespace mapnik
 {
-    ++itr_;
+bool text_placement_info_dummy::next()
+{
+    if (state) return false;
+    state++;
+    return true;
 }
 
-bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
+text_placement_info_ptr text_placements_dummy::get_placement_info(
+    double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return ( itr_ == other.itr_);
+    return text_placement_info_ptr(new text_placement_info_dummy(
+                                       this, scale_factor, dim, has_dimensions));
 }
 
-feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
-{
-    boost::get<0>(kv_) = itr_->first;
-    boost::optional<mapnik::value const&> val = f_.get_optional(itr_->second);
-    if (val) boost::get<1>(kv_) = *val;
-    else boost::get<1>(kv_) = value_null();
-    return kv_;
-}
-
-} // endof mapnik namespace
+} //ns mapnik

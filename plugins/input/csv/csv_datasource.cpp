@@ -498,7 +498,7 @@ void csv_datasource::parse_csv(T& stream,
                                                       (
                                                           qi::lit("POINT") >> '('
                                                           >> double_[ref(x) = _1]
-                                                          >>  double_[ref(y) = _1] >> ')'
+                                                          >> double_[ref(y) = _1] >> ')'
                                                           ),
                                                       ascii::space);
 

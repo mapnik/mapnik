@@ -19,36 +19,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef PLACEMENTS_REGISTRY_HPP
+#define PLACEMENTS_REGISTRY_HPP
 
-#include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/feature.hpp>
-#include <boost/optional.hpp>
+// mapnik
+#include <mapnik/utils.hpp>
+#include <mapnik/text_placements/base.hpp>
 
-namespace mapnik {
+// boost
+#include <boost/utility.hpp>
 
+// stl
+#include <string>
+#include <map>
 
-feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
-    : f_(f),
-      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
-
-
-void feature_kv_iterator::increment()
+namespace mapnik
 {
-    ++itr_;
-}
-
-bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
+namespace placements
 {
-    return ( itr_ == other.itr_);
-}
 
-feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
+typedef text_placements_ptr (*from_xml_function_ptr)(boost::property_tree::ptree const& xml);
+
+class registry : public singleton<registry, CreateStatic>,
+        private boost::noncopyable
 {
-    boost::get<0>(kv_) = itr_->first;
-    boost::optional<mapnik::value const&> val = f_.get_optional(itr_->second);
-    if (val) boost::get<1>(kv_) = *val;
-    else boost::get<1>(kv_) = value_null();
-    return kv_;
-}
+public:
+    registry();
+    ~registry() {}
+    void register_name(std::string name, from_xml_function_ptr ptr, bool overwrite=false);
+    text_placements_ptr from_xml(std::string name, boost::property_tree::ptree const& xml);
+private:
+    std::map<std::string, from_xml_function_ptr> map_;
+};
 
-} // endof mapnik namespace
+} //ns placements
+} //ns mapnik
+#endif // PLACEMENTS_REGISTRY_HPP

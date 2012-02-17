@@ -141,10 +141,10 @@ protected:
     box2d<double> marker_ext_;
     boost::optional<marker_ptr> marker_;
     agg::trans_affine transform_;
-    int marker_w_;
-    int marker_h_;
-    int marker_x_;
-    int marker_y_;
+    double marker_w_;
+    double marker_h_;
+    double marker_x_;
+    double marker_y_;
     // F***ing templates...
     // http://womble.decadent.org.uk/c++/template-faq.html#base-lookup
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
