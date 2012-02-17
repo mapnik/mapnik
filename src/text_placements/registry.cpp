@@ -21,6 +21,8 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/text_placements/registry.hpp>
+#include <mapnik/text_placements/simple.hpp>
+#include <mapnik/text_placements/list.hpp>
 
 namespace mapnik
 {
@@ -29,7 +31,8 @@ namespace placements
 
 registry::registry()
 {
-
+    register_name("simple", &text_placements_simple::from_xml);
+    register_name("list", &text_placements_list::from_xml);
 }
 
 void registry::register_name(std::string name, from_xml_function_ptr ptr, bool overwrite)
@@ -41,11 +44,11 @@ void registry::register_name(std::string name, from_xml_function_ptr ptr, bool o
     }
 }
 
-text_placements_ptr registry::from_xml(std::string name, const boost::property_tree::ptree &xml)
+text_placements_ptr registry::from_xml(std::string name, const boost::property_tree::ptree &xml, fontset_map const& fontsets)
 {
     std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(name);
     if (itr == map_.end())  throw config_error("Unknown placement-type '" + name + "'");
-    return itr->second(xml);
+    return itr->second(xml, fontsets);
 }
 } //ns formatting
 } //ns mapnik

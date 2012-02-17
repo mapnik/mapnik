@@ -72,7 +72,7 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
     return tree_;
 }
 
-void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets)
+void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym, fontset_map const & fontsets)
 {
     optional<label_placement_e> placement_ = get_opt_attr<label_placement_e>(sym, "placement");
     if (placement_) label_placement = *placement_;
@@ -230,7 +230,7 @@ char_properties::char_properties() :
 
 }
 
-void char_properties::from_xml(boost::property_tree::ptree const &sym, std::map<std::string,font_set> const & fontsets)
+void char_properties::from_xml(boost::property_tree::ptree const &sym, fontset_map const & fontsets)
 {
     optional<double> text_size_ = get_opt_attr<double>(sym, "size");
     if (text_size_) text_size = *text_size_;

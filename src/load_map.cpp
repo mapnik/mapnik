@@ -47,8 +47,7 @@
 
 #include <mapnik/metawriter_factory.hpp>
 
-#include <mapnik/text_placements/simple.hpp>
-#include <mapnik/text_placements/list.hpp>
+#include <mapnik/text_placements/registry.hpp>
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp>
@@ -1263,46 +1262,16 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
     try
     {
         text_placements_ptr placement_finder;
-        text_placements_list *list = 0;
         optional<std::string> placement_type = get_opt_attr<std::string>(sym, "placement-type");
         if (placement_type) {
-            if (*placement_type == "simple") {
-                placement_finder = text_placements_ptr(
-                    new text_placements_simple(
-                        get_attr<std::string>(sym, "placements", "X")));
-            } else if (*placement_type == "list") {
-                list = new text_placements_list();
-                placement_finder = text_placements_ptr(list);
-            } else if (*placement_type != "dummy" && *placement_type != "") {
-                throw config_error(std::string("Unknown placement type '"+*placement_type+"'"));
-            }
-        }
-        if (!placement_finder) {
+            placement_finder = placements::registry::instance()->from_xml(*placement_type, sym, fontsets_);
+        } else {
             placement_finder = text_placements_ptr(new text_placements_dummy());
+            placement_finder->defaults.from_xml(sym, fontsets_);
         }
-
-        placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
                 !placement_finder->defaults.format.fontset.size())
             ensure_font_face(placement_finder->defaults.format.face_name);
-        if (list) {
-            ptree::const_iterator symIter = sym.begin();
-            ptree::const_iterator endSym = sym.end();
-            for( ;symIter != endSym; ++symIter) {
-                if (symIter->first.find('<') != std::string::npos) continue;
-                if (symIter->first != "Placement")
-                {
-//                    throw config_error("Unknown element '" + symIter->first + "'"); TODO
-                    continue;
-                }
-                ensure_attrs(symIter->second, "TextSymbolizer/Placement", s_common.str());
-                text_symbolizer_properties & p = list->add();
-                p.from_xml(symIter->second, fontsets_);
-                if (strict_ &&
-                        !p.format.fontset.size())
-                    ensure_font_face(p.format.face_name);
-            }
-        }
 
         text_symbolizer text_symbol = text_symbolizer(placement_finder);
         parse_metawriter_in_symbolizer(text_symbol, sym);
@@ -1336,46 +1305,16 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
     try
     {
         text_placements_ptr placement_finder;
-        text_placements_list *list = 0;
         optional<std::string> placement_type = get_opt_attr<std::string>(sym, "placement-type");
         if (placement_type) {
-            if (*placement_type == "simple") {
-                placement_finder = text_placements_ptr(
-                    new text_placements_simple(
-                        get_attr<std::string>(sym, "placements", "X")));
-            } else if (*placement_type == "list") {
-                list = new text_placements_list();
-                placement_finder = text_placements_ptr(list);
-            } else if (*placement_type != "dummy" && *placement_type != "") {
-                throw config_error(std::string("Unknown placement type '"+*placement_type+"'"));
-            }
-        }
-        if (!placement_finder) {
+            placement_finder = placements::registry::instance()->from_xml(*placement_type, sym, fontsets_);
+        } else {
             placement_finder = text_placements_ptr(new text_placements_dummy());
         }
-
         placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
                 !placement_finder->defaults.format.fontset.size())
             ensure_font_face(placement_finder->defaults.format.face_name);
-        if (list) {
-            ptree::const_iterator symIter = sym.begin();
-            ptree::const_iterator endSym = sym.end();
-            for( ;symIter != endSym; ++symIter) {
-                if (symIter->first.find('<') != std::string::npos) continue;
-                if (symIter->first != "Placement")
-                {
-//                    throw config_error("Unknown element '" + symIter->first + "'"); TODO
-                    continue;
-                }
-                ensure_attrs(symIter->second, "TextSymbolizer/Placement", s_common);
-                text_symbolizer_properties & p = list->add();
-                p.from_xml(symIter->second, fontsets_);
-                if (strict_&&
-                        !p.format.fontset.size())
-                    ensure_font_face(p.format.face_name);
-            }
-        }
 
         shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
         /* Symbolizer specific attributes. */
