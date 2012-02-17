@@ -12,7 +12,7 @@
 
     <Style name="My Style">
     <Rule>
-      <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../data/svg/rect.svg" dx="0" dy="-5">'x'</ShieldSymbolizer>
+      <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../data/svg/rect.svg">'x'</ShieldSymbolizer>
     </Rule>
   </Style>
 
