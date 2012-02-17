@@ -75,10 +75,19 @@ class hextree : private boost::noncopyable
         ~node ()
         {
             for (unsigned i = 0; i < 16; ++i)
-                if (children_[i] != 0) delete children_[i],children_[i]=0;
+            {
+                if (children_[i] != 0)
+                {
+                    delete children_[i];
+                    children_[i]=0;
+                }
+            }
         }
 
-        bool is_leaf() const { return children_count == 0; }
+        bool is_leaf() const
+        {
+            return (children_count == 0);
+        }
         node * children_[16];
         // sum of values for computing mean value using count or pixel_count
         double reds;
@@ -101,8 +110,10 @@ class hextree : private boost::noncopyable
         bool operator() (const node * lhs, const node* rhs) const
         {
             if (lhs->reduce_cost != rhs->reduce_cost)
-                return lhs->reduce_cost > rhs->reduce_cost;
-            return lhs > rhs;
+            {
+                return (lhs->reduce_cost > rhs->reduce_cost);
+            }
+            return (lhs > rhs);
         }
     };
 
@@ -126,13 +137,13 @@ class hextree : private boost::noncopyable
     enum transparency_mode_t {NO_TRANSPARENCY=0, BINARY_TRANSPARENCY=1, FULL_TRANSPARENCY=2};
     unsigned trans_mode_;
 
-    inline double gamma(const double &b, const double &g) const
+    inline double gamma(double b, double g) const
     {
         return 255 * std::pow(b/255, g);
     }
 
 public:
-    explicit hextree(unsigned max_colors=256, const double &g=2.0)
+    explicit hextree(unsigned max_colors=256, double g=2.0)
         : max_colors_(max_colors),
           colors_(0),
           has_holes_(false),
@@ -142,18 +153,23 @@ public:
         setGamma(g);
     }
 
-    ~hextree() { delete root_;}
+    ~hextree()
+    {
+        delete root_;
+    }
 
     void setMaxColors(unsigned max_colors)
     {
         max_colors_ = max_colors;
     }
 
-    void setGamma(const double &g)
+    void setGamma(double g)
     {
         gamma_ = g;
         for (unsigned i=0; i<256; i++)
+        {
             gammaLUT_[i] = gamma(i, 1/gamma_);
+        }
     }
 
     void setTransMode(unsigned t)
@@ -201,7 +217,9 @@ public:
             if (level == InsertPolicy::MAX_LEVELS)
             {
                 if (cur_node->pixel_count == 1)
+                {
                     ++colors_;
+                }
                 break;
             }
 
@@ -222,9 +240,13 @@ public:
         byte a = preprocessAlpha(c.a);
         unsigned ind=0;
         if (a < InsertPolicy::MIN_ALPHA || colors_ == 0)
+        {
             return 0;
+        }
         if (colors_ == 1)
+        {
             return pal_remap_[has_holes_?1:0];
+        }
 
         rgba_hash_table::iterator it = color_hashmap_.find(c);
         if (it == color_hashmap_.end())
@@ -253,8 +275,10 @@ public:
                 db = sorted_pal_[i].b - c.b;
                 da = sorted_pal_[i].a - a;
                 // stop criteria based on properties of used sorting
-                if ((dr+db+dg+da) * (dr+db+dg+da) / 4 > dist)
+                if (((dr+db+dg+da) * (dr+db+dg+da) / 4 > dist))
+                {
                     break;
+                }
                 newdist = dr*dr + dg*dg + db*db + da*da;
                 if (newdist < dist)
                 {
@@ -270,7 +294,9 @@ public:
                 da = sorted_pal_[i].a - a;
                 // stop criteria based on properties of used sorting
                 if ((dr+db+dg+da) * (dr+db+dg+da) / 4 > dist)
+                {
                     break;
+                }
                 newdist = dr*dr + dg*dg + db*db + da*da;
                 if (newdist < dist)
                 {
@@ -282,7 +308,9 @@ public:
             color_hashmap_[c] = ind;
         }
         else
+        {
             ind = it->second;
+        }
 
         return pal_remap_[ind];
     }
@@ -303,7 +331,7 @@ public:
         root_ = new node();
 
         // sort palette for binary searching in quantization
-        std::sort(sorted_pal_.begin(), sorted_pal_.end(),rgba::mean_sort_cmp());
+        std::sort(sorted_pal_.begin(), sorted_pal_.end(), rgba::mean_sort_cmp());
 
         // returned palette is rearanged, so that colors with a<255 are at the begining
         pal_remap_.resize(sorted_pal_.size());
@@ -332,25 +360,34 @@ private:
     void print_tree(node *r, int d=0, int id=0) const
     {
         for (int i=0; i<d; i++)
+        {
             printf("\t");
+        }
         if (r->count>0)
+        {
             printf("%d: (+%d/%d/%.5f) (%d %d %d %d)\n",
                    id, (int)r->count, (int)r->pixel_count, r->reduce_cost,
                    (int)round(gamma(r->reds / r->count, gamma_)),
                    (int)round(gamma(r->greens / r->count, gamma_)),
                    (int)round(gamma(r->blues / r->count, gamma_)),
                    (int)(r->alphas / r->count));
+        }
         else
+        {
             printf("%d: (%d/%d/%.5f) (%d %d %d %d)\n", id,
                    (int)r->count, (int)r->pixel_count, r->reduce_cost,
                    (int)round(gamma(r->reds / r->pixel_count, gamma_)),
                    (int)round(gamma(r->greens / r->pixel_count, gamma_)),
                    (int)round(gamma(r->blues / r->pixel_count, gamma_)),
                    (int)(r->alphas / r->pixel_count));
-        for (unsigned idx=0; idx < 16; ++idx) if (r->children_[idx] != 0)
-                                              {
-                                                  print_tree(r->children_[idx], d+1, idx);
-                                              }
+        }
+        for (unsigned idx=0; idx < 16; ++idx)
+        {
+            if (r->children_[idx] != 0)
+            {
+                print_tree(r->children_[idx], d+1, idx);
+            }
+        }
     }
 
     // traverse tree and search for nodes with count!=0, that represent single color.
@@ -368,10 +405,13 @@ private:
                                    (byte)round(gamma(itr->greens / count, gamma_)),
                                    (byte)round(gamma(itr->blues  / count, gamma_)), a));
         }
-        for (unsigned idx=0; idx < 16; ++idx) if (itr->children_[idx] != 0)
-                                              {
-                                                  create_palette_rek(palette, itr->children_[idx]);
-                                              }
+        for (unsigned idx=0; idx < 16; ++idx)
+        {
+            if (itr->children_[idx] != 0)
+            {
+                create_palette_rek(palette, itr->children_[idx]);
+            }
+        }
     }
 
     // assign value to r, representing some penalty for assigning one
@@ -381,7 +421,9 @@ private:
         //initial small value, so that all nodes have >0 cost
         r->reduce_cost = r->pixel_count/1000.0;
         if (r->children_count==0)
+        {
             return;
+        }
         // mean color of all pixels in subtree
         double mean_r = r->reds   / r->pixel_count;
         double mean_g = r->greens / r->pixel_count;
@@ -421,20 +463,20 @@ private:
 
         std::set<node*,node_rev_cmp> colored_leaves_heap;
         colored_leaves_heap.insert(root_);
-        while(!colored_leaves_heap.empty() && colors_ < max_colors_ && tries < 16)
+        while((!colored_leaves_heap.empty() && (colors_ < max_colors_) && (tries < 16)))
         {
             // select worst node to remove it from palette and replace with children
             node * cur_node = *colored_leaves_heap.begin();
             colored_leaves_heap.erase(colored_leaves_heap.begin());
-            if (cur_node->children_count + colors_ - 1 > max_colors_)
+            if (((cur_node->children_count + colors_ - 1) > max_colors_))
             {
                 tries++;
                 continue; // try few times, maybe next will have less children
             }
-            tries=0;
+            tries = 0;
             // ignore leaves and also nodes with small mean error and not excessive number of pixels
-            if ((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(double(cur_node->pixel_count)) > 15
-                && cur_node->children_count > 0)
+            if (((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(double(cur_node->pixel_count))) > 15
+                && (cur_node->children_count > 0))
             {
                 colors_--;
                 cur_node->count = 0;
