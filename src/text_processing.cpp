@@ -22,6 +22,7 @@
 #include <mapnik/formatting/text.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/format.hpp>
+#include <mapnik/formatting/expression.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
@@ -62,6 +63,8 @@ node_ptr node::from_xml(boost::property_tree::ptree const& xml)
             n = text_node::from_xml(itr->second);
         } else if (itr->first == "Format") {
             n = format_node::from_xml(itr->second);
+        } else if (itr->first == "ExpressionFormat") {
+            n = expression_format::from_xml(itr->second);
         } else if (itr->first != "<xmlcomment>" && itr->first != "<xmlattr>" && itr->first != "Placement") {
             throw config_error("Unknown item " + itr->first);
         }
