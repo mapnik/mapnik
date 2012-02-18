@@ -27,7 +27,6 @@
 #include <mapnik/cairo_renderer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/placement_finder.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/arrow.hpp>
 #include <mapnik/config_error.hpp>

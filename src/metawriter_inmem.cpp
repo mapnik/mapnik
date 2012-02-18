@@ -23,7 +23,6 @@
 // Mapnik
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_inmem.hpp>
-#include <mapnik/placement_finder.hpp>
 #include <mapnik/text_placements/base.hpp>
 
 // Boost
