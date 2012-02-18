@@ -89,6 +89,7 @@ private:
     void init_string_size();
     void init_alignment();
     void adjust_position(text_path *current_placement, double label_x, double label_y);
+    void add_line(double width, double height, bool first_line);
 
     ///General Internals
     DetectorT & detector_;

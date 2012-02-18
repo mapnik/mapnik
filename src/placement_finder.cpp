@@ -248,7 +248,7 @@ void placement_finder<DetectorT>::find_line_breaks()
                 line_width += word_width + last_wrap_char_width;
                 line_height = std::max(line_height, word_height);
                 last_wrap_char_width = last_char_spacing + ci.width + ci.format->character_spacing;
-                last_char_spacing = 0.0;
+                last_char_spacing = 0.0; //Current one is included in last_wrap_char_width
                 word_width = 0.0;
                 word_height = 0.0;
             } else {
@@ -256,6 +256,7 @@ void placement_finder<DetectorT>::find_line_breaks()
                 word_width += last_char_spacing + ci.width;
                 last_char_spacing = ci.format->character_spacing;
                 word_height = std::max(word_height, ci.line_height + ci.format->line_spacing);
+                //TODO: I think this calculation could be wrong if height changes for the first word in the second line
                 if (first_line) first_line_space_ = std::max(first_line_space_, ci.line_height-ci.avg_height);
             }
 
@@ -264,10 +265,8 @@ void placement_finder<DetectorT>::find_line_breaks()
                 (line_width > 0 && ((line_width > wrap_at && !ci.format->wrap_before) ||
                                     ((line_width + last_wrap_char_width + word_width) > wrap_at && ci.format->wrap_before)) ))
             {
-                string_width_ = std::max(string_width_, line_width); //Total width is the longest line
-                string_height_ += line_height;
+                add_line(line_width, line_height, first_line);
                 line_breaks_.push_back(last_wrap_char_pos);
-                line_sizes_.push_back(std::make_pair(line_width, line_height));
                 line_width = 0.0;
                 line_height = 0.0;
                 last_wrap_char_width = 0; //Wrap char supressed
@@ -276,9 +275,7 @@ void placement_finder<DetectorT>::find_line_breaks()
         }
         line_width += last_wrap_char_width + word_width;
         line_height = std::max(line_height, word_height);
-        string_width_ = std::max(string_width_, line_width);
-        string_height_ += line_height;
-        line_sizes_.push_back(std::make_pair(line_width, line_height));
+        add_line(line_width, line_height, first_line);
     } else {
         //No linebreaks
         line_sizes_.push_back(std::make_pair(string_width_, string_height_));
@@ -286,6 +283,14 @@ void placement_finder<DetectorT>::find_line_breaks()
     line_breaks_.push_back(info_.num_characters());
 }
 
+template <typename DetectorT>
+void placement_finder<DetectorT>::add_line(double width, double height, bool first_line)
+{
+    if (first_line) height -= first_line_space_;
+    string_width_ = std::max(string_width_, width); //Total width is the longest line
+    string_height_ += height;
+    line_sizes_.push_back(std::make_pair(width, height));
+}
 
 
 template <typename DetectorT>
@@ -324,10 +329,6 @@ void placement_finder<DetectorT>::adjust_position(text_path *current_placement, 
     } else if (valign_ == V_BOTTOM)
     {
         current_placement->center.y += 0.5 * string_height_;  // move center down by the 1/2 the total height
-        current_placement->center.y -= first_line_space_;
-    } else if (valign_ == V_MIDDLE)
-    {
-        current_placement->center.y -= first_line_space_/2.0;
     }
 
     // set horizontal position to middle of text
@@ -368,17 +369,22 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
     double line_width = line_sizes_[0].first;
     double line_height = line_sizes_[0].second;
 
-    //TODO: Understand and document this
+    /* IMPORTANT NOTE:
+       x and y are relative to the center of the text
+       coordinate system:
+       x: grows from left to right
+       y: grows from bottom to top (opposite of normal computer graphics)
+    */
+
     // set for upper left corner of text envelope for the first line, bottom left of first character
-    y = (string_height_ / 2.0) - line_height;
+    y = (string_height_ + first_line_space_) / 2.0 - line_height;
 
     // adjust for desired justification
-    //TODO: Understand and document this
     if (p.jalign == J_LEFT)
         x = -(string_width_ / 2.0);
     else if (p.jalign == J_RIGHT)
         x = (string_width_ / 2.0) - line_width;
-    else
+    else /* J_MIDDLE */
         x = -(line_width / 2.0);
 
     // save each character rendering position and build envelope as go thru loop
