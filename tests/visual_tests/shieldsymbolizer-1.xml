@@ -16,16 +16,24 @@
             <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../data/images/crosshair16x16.png">'X'</ShieldSymbolizer>
         </Rule>
         <Rule>
+            <Filter>[nr] = '2'</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../data/images/crosshair16x16.png">'X&#10;X&#10;X'</ShieldSymbolizer>
+        </Rule>      
+        <Rule>
             <Filter>[nr] = '3'</Filter>
             <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../data/svg/crosshair16x16.svg">'X'</ShieldSymbolizer>
         </Rule>
         <Rule>
+            <Filter>[nr] = '4'</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../data/svg/crosshair16x16.svg" dx="0" dy="-1">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
             <Filter>[nr] = '5'</Filter>
-            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" fill="red" file="../data/images/checker.jpg" allow-overlap="true">'X'</ShieldSymbolizer>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../data/images/crosshair16x16.png" allow-overlap="true" unlock-image="true">'X'</ShieldSymbolizer>
         </Rule>
         <Rule>
             <Filter>[nr] = '7'</Filter>
-            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../data/svg/rect.svg" allow-overlap="true">'X'</ShieldSymbolizer>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="50" placement="point" file="../data/images/crosshair16x16.png" allow-overlap="true">'X'</ShieldSymbolizer>
         </Rule>
         <Rule>
             <Filter>[nr] = '9'</Filter>
