@@ -38,7 +38,8 @@ namespace mapnik
 namespace placements
 {
 
-typedef text_placements_ptr (*from_xml_function_ptr)(boost::property_tree::ptree const& xml);
+typedef text_placements_ptr (*from_xml_function_ptr)(
+    boost::property_tree::ptree const& xml, fontset_map const & fontsets);
 
 class registry : public singleton<registry, CreateStatic>,
         private boost::noncopyable
@@ -47,7 +48,9 @@ public:
     registry();
     ~registry() {}
     void register_name(std::string name, from_xml_function_ptr ptr, bool overwrite=false);
-    text_placements_ptr from_xml(std::string name, boost::property_tree::ptree const& xml);
+    text_placements_ptr from_xml(std::string name,
+                                 boost::property_tree::ptree const& xml,
+                                 fontset_map const & fontsets);
 private:
     std::map<std::string, from_xml_function_ptr> map_;
 };
