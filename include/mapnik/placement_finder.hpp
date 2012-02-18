@@ -96,8 +96,17 @@ private:
     string_info &info_;
     text_symbolizer_properties &p;
     text_placement_info &pi;
+    /** Length of the longest line after linebreaks.
+      * Before find_line_breaks() this is the total length of the string.
+      */
     double string_width_;
+    /** Height of the string after linebreaks.
+      * Before find_line_breaks() this is the total length of the string.
+      */
     double string_height_;
+    /** Height of the tallest font in the first line not including line spacing.
+      * Used to determine the correct offset for the first line.
+      */
     double first_line_space_;
     vertical_alignment_e valign_;
     horizontal_alignment_e halign_;

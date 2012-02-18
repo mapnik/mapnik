@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/char_info.hpp>
+#include <mapnik/pixel_position.hpp>
 
 //stl
 #include <vector>
@@ -124,18 +125,23 @@ class text_path : boost::noncopyable
     struct character_node
     {
         int c;
-        double x, y, angle;
+        pixel_position pos;
+        double angle;
         char_properties *format;
 
         character_node(int c_, double x_, double y_, double angle_, char_properties *format_)
-            : c(c_), x(x_), y(y_), angle(angle_), format(format_) {}
+            : c(c_), pos(x_, y_), angle(angle_), format(format_)
+        {
+
+        }
+
         ~character_node() {}
 
         void vertex(int *c_, double *x_, double *y_, double *angle_, char_properties **format_)
         {
             *c_ = c;
-            *x_ = x;
-            *y_ = y;
+            *x_ = pos.x;
+            *y_ = pos.y;
             *angle_ = angle;
             *format_ = format;
         }
@@ -145,16 +151,11 @@ class text_path : boost::noncopyable
 public:
     typedef std::vector<character_node> character_nodes_t;
     character_nodes_t nodes_;
-    double starting_x;
-    double starting_y;
 
-//    std::pair<unsigned,unsigned> string_dimensions;
+    pixel_position center;
 
     text_path()
-        : itr_(0),
-          starting_x(0),
-          starting_y(0)
-
+        : itr_(0)
     {
 
     }

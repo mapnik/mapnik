@@ -66,10 +66,8 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                           helper.get_marker(), helper.get_transform(),
                           sym.get_opacity());
 
-            double x = floor(placement->placements[ii].starting_x);
-            double y = floor(placement->placements[ii].starting_y);
             ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render_id(feature->id(), x, y, 2);
+            ren.render_id(feature->id(),placement->placements[ii].center, 2);
         }
     }
     if (placement_found)

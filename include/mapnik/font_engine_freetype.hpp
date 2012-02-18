@@ -345,8 +345,8 @@ struct text_renderer : private boost::noncopyable
 
     text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s);
     box2d<double> prepare_glyphs(text_path *path);
-    void render(double x0, double y0);
-    void render_id(int feature_id,double x0, double y0, double min_radius=1.0);
+    void render(pixel_position pos);
+    void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
 
 private:
     void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)

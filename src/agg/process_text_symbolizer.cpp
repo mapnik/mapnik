@@ -46,10 +46,8 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
     while ((placement = helper.get_placement())) {
         for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
         {
-            double x = placement->placements[ii].starting_x;
-            double y = placement->placements[ii].starting_y;
             ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render(x, y);
+            ren.render(placement->placements[ii].center);
         }
     }
 }

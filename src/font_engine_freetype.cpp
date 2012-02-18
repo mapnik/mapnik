@@ -379,25 +379,25 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
 }
 
 template <typename T>
-void text_renderer<T>::render(double x0, double y0)
+void text_renderer<T>::render(pixel_position pos)
 {
     FT_Error  error;
     FT_Vector start;
     unsigned height = pixmap_.height();
 
-    start.x =  static_cast<FT_Pos>(x0 * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - y0) * (1 << 6));
+    start.x =  static_cast<FT_Pos>(pos.x * (1 << 6));
+    start.y =  static_cast<FT_Pos>((height - pos.y) * (1 << 6));
 
     // now render transformed glyphs
-    typename glyphs_t::iterator pos;
-    for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+    typename glyphs_t::iterator itr;
+    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-        double halo_radius = pos->properties->halo_radius;
+        double halo_radius = itr->properties->halo_radius;
         //make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
         stroker_.init(halo_radius);
         FT_Glyph g;
-        error = FT_Glyph_Copy(pos->image, &g);
+        error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
             FT_Glyph_Transform(g,0,&start);
@@ -407,49 +407,49 @@ void text_renderer<T>::render(double x0, double y0)
             {
 
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                render_bitmap(&bit->bitmap, pos->properties->halo_fill.rgba(),
+                render_bitmap(&bit->bitmap, itr->properties->halo_fill.rgba(),
                               bit->left,
-                              height - bit->top, pos->properties->text_opacity);
+                              height - bit->top, itr->properties->text_opacity);
             }
         }
         FT_Done_Glyph(g);
     }
     //render actual text
-    for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
 
-        FT_Glyph_Transform(pos->image,0,&start);
+        FT_Glyph_Transform(itr->image,0,&start);
 
-        error = FT_Glyph_To_Bitmap( &(pos->image),FT_RENDER_MODE_NORMAL,0,1);
+        error = FT_Glyph_To_Bitmap( &(itr->image),FT_RENDER_MODE_NORMAL,0,1);
         if ( ! error )
         {
 
-            FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
-            render_bitmap(&bit->bitmap, pos->properties->fill.rgba(),
+            FT_BitmapGlyph bit = (FT_BitmapGlyph)itr->image;
+            render_bitmap(&bit->bitmap, itr->properties->fill.rgba(),
                           bit->left,
-                          height - bit->top, pos->properties->text_opacity);
+                          height - bit->top, itr->properties->text_opacity);
         }
     }
 }
 
 
 template <typename T>
-void text_renderer<T>::render_id(int feature_id,double x0, double y0, double min_radius)
+void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_radius)
 {
     FT_Error  error;
     FT_Vector start;
     unsigned height = pixmap_.height();
 
-    start.x =  static_cast<FT_Pos>(x0 * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - y0) * (1 << 6));
+    start.x =  static_cast<FT_Pos>(pos.x * (1 << 6));
+    start.y =  static_cast<FT_Pos>((height - pos.y) * (1 << 6));
 
     // now render transformed glyphs
-    typename glyphs_t::iterator pos;
-    for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+    typename glyphs_t::iterator itr;
+    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-        stroker_.init(std::max(pos->properties->halo_radius, min_radius));
+        stroker_.init(std::max(itr->properties->halo_radius, min_radius));
         FT_Glyph g;
-        error = FT_Glyph_Copy(pos->image, &g);
+        error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
             FT_Glyph_Transform(g,0,&start);
@@ -473,11 +473,11 @@ void text_renderer<T>::render_id(int feature_id,double x0, double y0, double min
 boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-template void text_renderer<image_32>::render(double, double);
+template void text_renderer<image_32>::render(pixel_position);
 template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path*);
 
-template void text_renderer<grid>::render_id(int, double, double, double);
+template void text_renderer<grid>::render_id(int, pixel_position, double);
 template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path*);
 }

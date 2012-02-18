@@ -202,8 +202,8 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
         char_properties *format;
         current_placement.rewind();
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
-            int cx = current_placement.starting_x;
-            int cy = current_placement.starting_y;
+            int cx = current_placement.center.x;
+            int cy = current_placement.center.y;
             current_placement.vertex(&c, &x, &y, &angle, &format);
             if (cx+x >= 0 && cx+x < width_ && cy-y >= 0 && cy-y < height_) inside = true;
             if (angle > 0.001 || angle < -0.001) straight = false;
@@ -225,10 +225,10 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
                 maxy = std::max(maxy, y+ci.ymax);
                 miny = std::min(miny, y+ci.ymin);
             }
-            add_box(box2d<double>(current_placement.starting_x+minx,
-                                  current_placement.starting_y-miny,
-                                  current_placement.starting_x+maxx,
-                                  current_placement.starting_y-maxy), feature, t, properties);
+            add_box(box2d<double>(current_placement.center.x+minx,
+                                  current_placement.center.y-miny,
+                                  current_placement.center.x+maxx,
+                                  current_placement.center.y-maxy), feature, t, properties);
             continue;
         }
 
@@ -247,8 +247,8 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
             double x0, y0, x1, y1, x2, y2, x3, y3;
             double sina = sin(angle);
             double cosa = cos(angle);
-            x0 = current_placement.starting_x + x - sina*ci.ymin;
-            y0 = current_placement.starting_y - y - cosa*ci.ymin;
+            x0 = current_placement.center.x + x - sina*ci.ymin;
+            y0 = current_placement.center.y - y - cosa*ci.ymin;
             x1 = x0 + ci.width * cosa;
             y1 = y0 - ci.width * sina;
             x2 = x0 + (ci.width * cosa - ci.height() * sina);

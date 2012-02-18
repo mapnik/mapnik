@@ -47,10 +47,8 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
         placement_found = true;
         for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
         {
-            double x = placement->placements[ii].starting_x;
-            double y = placement->placements[ii].starting_y;
             ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render_id(feature->id(),x,y,2);
+            ren.render_id(feature->id(), placement->placements[ii].center,2);
         }
     }
     if (placement_found) pixmap_.add_feature(feature);

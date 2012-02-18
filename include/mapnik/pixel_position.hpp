@@ -27,8 +27,8 @@ struct pixel_position
 {
     double x;
     double y;
-    pixel_coord(double x, double y) : x(x), y(y) { }
-    pixel_coord() : x(0), y(0) { }
+    pixel_position(double x, double y) : x(x), y(y) { }
+    pixel_position() : x(0), y(0) { }
 };
 
 #endif // MAPNIK_PIXEL_POSITION_HPP
