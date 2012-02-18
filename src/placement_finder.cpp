@@ -200,6 +200,7 @@ void placement_finder<DetectorT>::init_string_size()
         first_line_space_ = std::max(first_line_space_, ci.line_height-ci.avg_height);
     }
     string_width_ -= info_.at(info_.num_characters()-1).format->character_spacing; //Remove last space
+    string_height_ -= first_line_space_; //First line is a bit smaller
 }
 
 
@@ -377,7 +378,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
     */
 
     // set for upper left corner of text envelope for the first line, bottom left of first character
-    y = (string_height_ + first_line_space_) / 2.0 - line_height;
+    y = string_height_ / 2.0 - line_height;
 
     // adjust for desired justification
     if (p.jalign == J_LEFT)
