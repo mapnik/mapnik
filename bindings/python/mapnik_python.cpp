@@ -95,7 +95,9 @@ static Pycairo_CAPI_t *Pycairo_CAPI;
 
 using mapnik::python_thread;
 using mapnik::python_unblock_auto_block;
+#ifdef MAPNIK_DEBUG
 bool python_thread::thread_support = true;
+#endif
 boost::thread_specific_ptr<PyThreadState> python_thread::state;
 
 void render(const mapnik::Map& map,
