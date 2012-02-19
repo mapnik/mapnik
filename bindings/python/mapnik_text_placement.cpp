@@ -28,6 +28,7 @@
 #include <mapnik/formatting/text.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/format.hpp>
+#include <mapnik/formatting/expression.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>
@@ -160,6 +161,27 @@ struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
     }
 };
 
+struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expression_format>
+{
+    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        if(override o = this->get_override("apply"))
+        {
+            python_block_auto_unblock b;
+            o(ptr(&p), ptr(&feature), ptr(&output));
+        }
+        else
+        {
+            formatting::expression_format::apply(p, feature, output);
+        }
+    }
+
+    void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    {
+        formatting::expression_format::apply(p, feature, output);
+    }
+};
+
 struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
 {
     //Default constructor
@@ -194,6 +216,36 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
     void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
     {
         formatting::list_node::apply(p, feature, output);
+    }
+
+    inline void IndexError(){
+        PyErr_SetString(PyExc_IndexError, "Index out of range");
+        throw_error_already_set();
+    }
+
+    unsigned get_length()
+    {
+        return children_.size();
+    }
+
+    formatting::node_ptr get_item(int i)
+    {
+        if (i<0) i+= children_.size();
+        if (i<children_.size()) return children_[i];
+        IndexError();
+        return formatting::node_ptr(); //Avoid compiler warning
+    }
+
+    void set_item(int i, formatting::node_ptr ptr)
+    {
+        if (i<0) i+= children_.size();
+        if (i<children_.size()) children_[i] = ptr;
+        IndexError();
+    }
+
+    void append(formatting::node_ptr ptr)
+    {
+        children_.push_back(ptr);
     }
 };
 
@@ -421,7 +473,7 @@ void export_text_placement()
            boost::shared_ptr<TextNodeWrap>,
            bases<formatting::node>,
            boost::noncopyable>
-           ("FormattingTextNode", init<expression_ptr>())
+           ("FormattingText", init<expression_ptr>())
         .def(init<std::string>())
         .def("apply", &formatting::text_node::apply, &TextNodeWrap::default_apply)
         .add_property("text",
@@ -435,7 +487,7 @@ void export_text_placement()
            boost::shared_ptr<FormatNodeWrap>,
            bases<formatting::node>,
            boost::noncopyable>
-           ("FormattingFormatNode")
+           ("FormattingFormat")
         .def_readwrite_optional("text_size", &formatting::format_node::text_size)
         .def_readwrite_optional("face_name", &formatting::format_node::face_name)
         .def_readwrite_optional("character_spacing", &formatting::format_node::character_spacing)
@@ -458,11 +510,39 @@ void export_text_placement()
             boost::shared_ptr<ListNodeWrap>,
             bases<formatting::node>,
             boost::noncopyable>
-            ("FormattingListNode", init<>())
+            ("FormattingList", init<>())
         .def(init<list>())
         .def("append", &formatting::list_node::push_back)
         .def("apply", &formatting::list_node::apply, &ListNodeWrap::default_apply)
+        .def("__len__", &ListNodeWrap::get_length)
+        .def("__getitem__", &ListNodeWrap::get_item)
+        .def("__setitem__", &ListNodeWrap::set_item)
+        .def("append", &ListNodeWrap::append)
     ;
 
     register_ptr_to_python<boost::shared_ptr<formatting::list_node> >();
+
+    class_<ExprFormatWrap,
+           boost::shared_ptr<ExprFormatWrap>,
+           bases<formatting::node>,
+           boost::noncopyable>
+           ("FormattingExpressionFormat")
+        .def_readwrite("text_size", &formatting::expression_format::text_size)
+        .def_readwrite("face_name", &formatting::expression_format::face_name)
+        .def_readwrite("character_spacing", &formatting::expression_format::character_spacing)
+        .def_readwrite("line_spacing", &formatting::expression_format::line_spacing)
+        .def_readwrite("text_opacity", &formatting::expression_format::text_opacity)
+        .def_readwrite("wrap_char", &formatting::expression_format::wrap_char)
+        .def_readwrite("wrap_before", &formatting::expression_format::wrap_before)
+        .def_readwrite("fill", &formatting::expression_format::fill)
+        .def_readwrite("halo_fill", &formatting::expression_format::halo_fill)
+        .def_readwrite("halo_radius", &formatting::expression_format::halo_radius)
+        .def("apply", &formatting::expression_format::apply, &ExprFormatWrap::default_apply)
+        .add_property("child",
+                      &formatting::expression_format::get_child,
+                      &formatting::expression_format::set_child)
+        ;
+    register_ptr_to_python<boost::shared_ptr<formatting::expression_format> >();
+
+    //TODO: registry
 }
