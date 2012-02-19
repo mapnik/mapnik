@@ -28,7 +28,6 @@
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/placement_finder.hpp>
 #include <mapnik/map.hpp>
 //#include <mapnik/marker.hpp>
 

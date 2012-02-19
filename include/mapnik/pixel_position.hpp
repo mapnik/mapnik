@@ -19,36 +19,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// mapnik
-#include <mapnik/text_placements/registry.hpp>
-#include <mapnik/text_placements/simple.hpp>
-#include <mapnik/text_placements/list.hpp>
+#ifndef MAPNIK_PIXEL_POSITION_HPP
+#define MAPNIK_PIXEL_POSITION_HPP
 
-namespace mapnik
+/** Store a pixel position. */
+struct pixel_position
 {
-namespace placements
-{
+    double x;
+    double y;
+    pixel_position(double x, double y) : x(x), y(y) { }
+    pixel_position() : x(0), y(0) { }
+};
 
-registry::registry()
-{
-    register_name("simple", &text_placements_simple::from_xml);
-    register_name("list", &text_placements_list::from_xml);
-}
-
-void registry::register_name(std::string name, from_xml_function_ptr ptr, bool overwrite)
-{
-    if (overwrite) {
-        map_[name] = ptr;
-    } else {
-        map_.insert(make_pair(name, ptr));
-    }
-}
-
-text_placements_ptr registry::from_xml(std::string name, const boost::property_tree::ptree &xml, fontset_map const& fontsets)
-{
-    std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(name);
-    if (itr == map_.end())  throw config_error("Unknown placement-type '" + name + "'");
-    return itr->second(xml, fontsets);
-}
-} //ns formatting
-} //ns mapnik
+#endif // MAPNIK_PIXEL_POSITION_HPP

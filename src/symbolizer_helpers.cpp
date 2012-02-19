@@ -1,5 +1,29 @@
+/*****************************************************************************
+ *
+ * This file is part of Mapnik (c++ mapping toolkit)
+ *
+ * Copyright (C) 2011 Artem Pavlenko
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *****************************************************************************/
+
+// mapnik
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
+#include <mapnik/placement_finder.hpp>
 
 namespace mapnik {
 
@@ -231,7 +255,7 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
             point_itr_ = points_.begin();
             continue; //Reexecute size check
         }
-        position const& pos = placement_->properties.displacement;
+        position const& text_disp = placement_->properties.displacement;
         double label_x = point_itr_->first + shield_pos.first;
         double label_y = point_itr_->second + shield_pos.second;
 
@@ -247,14 +271,12 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
         }
         //Found a label placement but not necessarily also a marker placement
         // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
-        double x = floor(placement_->placements[0].starting_x);
-        double y = floor(placement_->placements[0].starting_y);
         if (!sym_.get_unlock_image())
         {
             // center image at text center position
             // remove displacement from image label
-            double lx = x - pos.first;
-            double ly = y - pos.second;
+            double lx = placement_->placements[0].center.x - text_disp.first;
+            double ly = placement_->placements[0].center.y - text_disp.second;
             marker_x_ = lx - 0.5 * marker_w_;
             marker_y_ = ly - 0.5 * marker_h_;
             marker_ext_.re_center(lx, ly);
@@ -340,11 +362,8 @@ std::pair<int, int> shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marke
 {
     position const& pos = placement_->properties.displacement;
     if (placement_->properties.label_placement == LINE_PLACEMENT) {
-        double x = floor(p.starting_x);
-        double y = floor(p.starting_y);
-
-        double lx = x - pos.first;
-        double ly = y - pos.second;
+        double lx = p.center.x - pos.first;
+        double ly = p.center.y - pos.second;
         int px = lx - 0.5*marker_w_;
         int py = ly - 0.5*marker_h_;
         marker_ext_.re_center(lx, ly);
