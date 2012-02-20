@@ -39,7 +39,7 @@ namespace mapnik { namespace json {
 template <typename Iterator, typename FeatureType> struct feature_collection_grammar;
 
 template <typename Iterator>
-class feature_collection_parser //: private boost::noncopyable
+class feature_collection_parser : private boost::noncopyable
 {
     typedef Iterator iterator_type;
     typedef mapnik::Feature feature_type;
@@ -48,7 +48,7 @@ public:
     ~feature_collection_parser();
     bool parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features);  
 private:
-    boost::scoped_ptr<mapnik::json::feature_collection_grammar<iterator_type,feature_type> > grammar_; 
+    boost::scoped_ptr<feature_collection_grammar<iterator_type,feature_type> > grammar_; 
 };
 
 }}
