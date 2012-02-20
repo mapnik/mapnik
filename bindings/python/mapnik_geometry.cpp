@@ -32,6 +32,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/json/geojson_generator.hpp>
 
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 104700
@@ -163,6 +164,16 @@ std::string to_wkt2( path_type const& geom)
 #endif
 }
 
+std::string to_geojson( path_type const& geom)
+{
+    std::string json;
+    mapnik::json::geometry_generator g;
+    if (!g.generate(json,geom))
+    {
+        throw std::runtime_error("Failed to generate GeoJSON");
+    }
+    return json;
+}
 
 void export_geometry()
 {
@@ -200,6 +211,7 @@ void export_geometry()
         .def("to_wkb",&to_wkb2)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)
+        .def("to_geojson",to_geojson)
         .staticmethod("from_wkt")
         .staticmethod("from_wkb")
         ;

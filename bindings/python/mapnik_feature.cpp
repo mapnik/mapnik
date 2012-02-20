@@ -66,7 +66,7 @@ void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
 std::string feature_to_geojson(Feature const& feature)
 {
     std::string json;
-    mapnik::json::geojson_generator g;
+    mapnik::json::feature_generator g;
     if (!g.generate(json,feature))
     {
         throw std::runtime_error("Failed to generate GeoJSON");
