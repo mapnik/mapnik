@@ -20,7 +20,11 @@ def compare_pixels(pixel1, pixel2):
 def compare(fn1, fn2):
     global errors
     im1 = Image.open(fn1)
-    im2 = Image.open(fn2)
+    try:
+        im2 = Image.open(fn2)
+    except IOError:
+        errors.append((fn1, None))
+        return -1
     diff = 0
     pixels = im1.size[0] * im1.size[1]
     im1 = im1.getdata()
@@ -38,6 +42,9 @@ def summary():
         print "-"*80
         print "Summary:"
         for error in errors:
-            print "%s failed: %d different pixels" % error
+            if (error[1] is None):
+                print "Could not verify %s: No reference image found!" % error[0]
+            else:
+                print "%s failed: %d different pixels" % error
         print "-"*80
         sys.exit(1)
