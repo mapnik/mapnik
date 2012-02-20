@@ -54,7 +54,11 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_lin
         placement_finder<DetectorT> finder(*placement_, *info_, detector_, dims_);
         typedef  coord_transform2<CoordTransform,geometry_type> path_type;
         path_type path(t_, **geo_itr_, prj_trans_);
-        finder.find_line_placements(path);
+        if (points_on_line_) {
+            finder.find_point_placements(path);
+        } else {
+            finder.find_line_placements(path);
+        }
         //Keep reference to current object so we can delete it.
         std::list<geometry_type*>::iterator current_object = geo_itr_;
         geo_itr_++;

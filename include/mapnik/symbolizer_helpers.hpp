@@ -60,7 +60,8 @@ public:
           dims_(0, 0, width, height),
           text_(font_manager, scale_factor),
           angle_(0.0),
-          placement_valid_(true)
+          placement_valid_(true),
+          points_on_line_(false)
     {
         initialize_geometries();
         if (!geometries_to_process_.size()) return; //TODO: Test this
@@ -104,6 +105,7 @@ protected:
     string_info *info_;
     bool placement_valid_;
     bool point_placement_;
+    bool points_on_line_;
 
     //Output
     text_placement_info_ptr placement_;
@@ -125,6 +127,7 @@ public:
         text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector),
         sym_(sym)
     {
+        this->points_on_line_ = true;
         init_marker();
     }
 
