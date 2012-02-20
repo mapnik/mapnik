@@ -28,8 +28,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 
-//#include <mapnik/json/feature_collection_grammar.hpp>
-
 // boost
 #include <boost/scoped_ptr.hpp>
 #include <boost/utility.hpp>
