@@ -194,6 +194,7 @@ if env['HAS_PYCAIRO']:
     py_env.ParseConfig('pkg-config --cflags pycairo')
     py_env.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
 
+libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
