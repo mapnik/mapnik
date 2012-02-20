@@ -21,20 +21,33 @@
  *****************************************************************************/
 
 #include <mapnik/json/geojson_generator.hpp>
-#include <mapnik/json/feature_generator.hpp>
+#include <mapnik/json/feature_generator_grammar.hpp>
+#include <mapnik/json/geometry_generator_grammar.hpp>
 #include <boost/spirit/include/karma.hpp>
 
 namespace  mapnik { namespace json {
 
-geojson_generator::geojson_generator()
-    : grammar_(new feature_generator<sink_type>()) {}
+feature_generator::feature_generator()
+    : grammar_(new feature_generator_grammar<sink_type>()) {}
  
-geojson_generator::~geojson_generator() {}
+feature_generator::~feature_generator() {}
 
-bool geojson_generator::generate(std::string & geojson, mapnik::Feature const& f)
+bool feature_generator::generate(std::string & geojson, mapnik::Feature const& f)
 {
     sink_type sink(geojson);
     return karma::generate(sink, *grammar_,f);
+}
+
+
+geometry_generator::geometry_generator()
+    : grammar_(new multi_geometry_generator_grammar<sink_type>()) {}
+
+geometry_generator::~geometry_generator() {}
+
+bool geometry_generator::generate(std::string & geojson, mapnik::geometry_container const& g)
+{
+    sink_type sink(geojson);
+    return karma::generate(sink, *grammar_,g);
 }
 
 }}

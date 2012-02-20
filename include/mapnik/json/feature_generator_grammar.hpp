@@ -19,13 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef MAPNIK_JSON_FEATURE_GENERATOR_HPP
-#define MAPNIK_JSON_FEATURE_GENERATOR_HPP
+
+#ifndef MAPNIK_JSON_FEATURE_GENERATOR_GRAMMAR_HPP
+#define MAPNIK_JSON_FEATURE_GENERATOR_GRAMMAR_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/json/geometry_generator.hpp>
+#include <mapnik/json/geometry_generator_grammar.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
@@ -165,14 +166,14 @@ struct escaped_string
 };
 
 template <typename OutputIterator>
-struct feature_generator:
+struct feature_generator_grammar:
         karma::grammar<OutputIterator, mapnik::Feature const&()>
 {
     typedef boost::tuple<std::string, mapnik::value> pair_type;
     typedef make_properties_range::properties_range_type range_type;
     
-    feature_generator()
-        : feature_generator::base_type(feature)
+    feature_generator_grammar()
+        : feature_generator_grammar::base_type(feature)
         , quote_("\"")
           
     {
@@ -217,7 +218,7 @@ struct feature_generator:
     
     // rules
     karma::rule<OutputIterator, mapnik::Feature const&()> feature;
-    multi_geometry_generator<OutputIterator> geometry;
+    multi_geometry_generator_grammar<OutputIterator> geometry;
     escaped_string<OutputIterator> escaped_string_;
     karma::rule<OutputIterator, mapnik::Feature const&()> properties;
     karma::rule<OutputIterator, pair_type()> pair;
@@ -233,4 +234,4 @@ struct feature_generator:
                       
 }}
 
-#endif // MAPNIK_JSON_FEATURE_GENERATOR_HPP
+#endif // MAPNIK_JSON_FEATURE_GENERATOR_GRAMMAR_HPP

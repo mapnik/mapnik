@@ -29,17 +29,29 @@
 
 namespace mapnik { namespace json {
 
-template <typename OutputIterator> struct feature_generator;
+template <typename OutputIterator> struct feature_generator_grammar;
+template <typename OutputIterator> struct multi_geometry_generator_grammar;
 
-class geojson_generator 
+class feature_generator 
 {
     typedef std::back_insert_iterator<std::string> sink_type;
 public:
-    geojson_generator();
-    ~geojson_generator();
+    feature_generator();
+    ~feature_generator();
     bool generate(std::string & geojson, mapnik::Feature const& f);
 private:
-    boost::scoped_ptr<feature_generator<sink_type> > grammar_;
+    boost::scoped_ptr<feature_generator_grammar<sink_type> > grammar_;
+};
+
+class geometry_generator 
+{
+    typedef std::back_insert_iterator<std::string> sink_type;
+public:
+    geometry_generator();
+    ~geometry_generator();
+    bool generate(std::string & geojson, mapnik::geometry_container const& g);
+private:
+    boost::scoped_ptr<multi_geometry_generator_grammar<sink_type> > grammar_;
 };
 
 }}

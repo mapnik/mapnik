@@ -22,8 +22,8 @@
 
 //$Id$
 
-#ifndef MAPNIK_JSON_GEOMETRY_GENERATOR_HPP
-#define MAPNIK_JSON_GEOMETRY_GENERATOR_HPP
+#ifndef MAPNIK_JSON_GEOMETRY_GENERATOR_GRAMMAR_HPP
+#define MAPNIK_JSON_GEOMETRY_GENERATOR_GRAMMAR_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
@@ -123,12 +123,12 @@ struct json_coordinate_policy : karma::real_policies<T>
 }
 
 template <typename OutputIterator>
-struct geometry_generator :
+struct geometry_generator_grammar :
         karma::grammar<OutputIterator, geometry_type const& ()>
 {
 
-    geometry_generator()
-        : geometry_generator::base_type(coordinates)
+    geometry_generator_grammar()
+        : geometry_generator_grammar::base_type(coordinates)
     {
         using boost::spirit::karma::uint_;
         using boost::spirit::karma::_val;
@@ -200,13 +200,13 @@ struct geometry_generator :
 
 
 template <typename OutputIterator>
-struct multi_geometry_generator :
+struct multi_geometry_generator_grammar :
         karma::grammar<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >, 
                        geometry_container const& ()>
 {
 
-    multi_geometry_generator()
-        : multi_geometry_generator::base_type(start)
+    multi_geometry_generator_grammar()
+        : multi_geometry_generator_grammar::base_type(start)
     {
         using boost::spirit::karma::lit;
         using boost::spirit::karma::eps;
@@ -265,7 +265,7 @@ struct multi_geometry_generator :
     karma::rule<OutputIterator, karma::locals<unsigned>,
                 geometry_type const&()> geometry2;
     karma::rule<OutputIterator, geometry_container const&()> coordinates;
-    geometry_generator<OutputIterator>  path;
+    geometry_generator_grammar<OutputIterator>  path;
     // phoenix
     phoenix::function<multi_geometry_type> _multi_type;
     phoenix::function<get_type > type_;
@@ -275,4 +275,4 @@ struct multi_geometry_generator :
 
 }}
 
-#endif // MAPNIK_JSON_GEOMETRY_GENERATOR_HPP
+#endif // MAPNIK_JSON_GEOMETRY_GENERATOR_GRAMMAR_HPP
