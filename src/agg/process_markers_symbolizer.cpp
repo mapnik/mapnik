@@ -87,8 +87,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             double y1 = bbox.miny();
             double x2 = bbox.maxx();
             double y2 = bbox.maxy();
-            int w = (*mark)->width();
-            int h = (*mark)->height();
+            double w = (*mark)->width();
+            double h = (*mark)->height();
 
             agg::trans_affine recenter = agg::trans_affine_translation(-0.5*(x1+x2),-0.5*(y1+y2));
             tr.transform(&x1,&y1);
@@ -120,7 +120,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         detector_->has_placement(extent))
                     {
 
-                        render_marker(floor(x - 0.5 * w),floor(y - 0.5 * h) ,**mark,tr, sym.get_opacity());
+                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, sym.get_opacity());
 
                         // TODO - impl this for markers?
                         //if (!sym.get_ignore_placement())

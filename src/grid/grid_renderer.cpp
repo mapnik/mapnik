@@ -43,6 +43,7 @@
 
 // boost
 #include <boost/utility.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -118,7 +119,7 @@ void grid_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigned int step, const int x, const int y, marker &marker, const agg::trans_affine & tr, double opacity)
+void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity)
 {
     if (marker.is_vector())
     {
@@ -143,7 +144,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
         mtx *= tr;
         mtx *= agg::trans_affine_scaling(scale_factor_*(1.0/step));
         // render the marker at the center of the marker box
-        mtx.translate(x+0.5 * marker.width(), y+0.5 * marker.height());
+        mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
 
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
@@ -161,7 +162,9 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
         image_data_32 const& data = **marker.get_bitmap_data();
         if (step == 1 && scale_factor_ == 1.0)
         {
-            pixmap_.set_rectangle(feature->id(), data, x, y);
+            pixmap_.set_rectangle(feature->id(), data,
+                                  boost::math::iround(pos.x),
+                                  boost::math::iround(pos.y));
         }
         else
         {
@@ -169,7 +172,9 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
             image_data_32 target(ratio * data.width(), ratio * data.height());
             mapnik::scale_image_agg<image_data_32>(target,data, SCALING_NEAR,
                                                    scale_factor_, 0.0, 0.0, 1.0, ratio);
-            pixmap_.set_rectangle(feature->id(), target, x, y);
+            pixmap_.set_rectangle(feature->id(), target,
+                                  boost::math::iround(pos.x),
+                                  boost::math::iround(pos.y));
         }
     }
     pixmap_.add_feature(feature);

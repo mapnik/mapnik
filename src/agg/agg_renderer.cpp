@@ -223,7 +223,7 @@ void agg_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void agg_renderer<T>::render_marker(double x, double y, marker & marker, agg::trans_affine const& tr, double opacity)
+void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity)
 {
     if (marker.is_vector())
     {
@@ -246,7 +246,7 @@ void agg_renderer<T>::render_marker(double x, double y, marker & marker, agg::tr
         mtx *= tr;
         mtx *= agg::trans_affine_scaling(scale_factor_);
         // render the marker at the center of the marker box
-        mtx.translate(x+0.5 * marker.width(), y+0.5 * marker.height());
+        mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
 
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
@@ -264,8 +264,8 @@ void agg_renderer<T>::render_marker(double x, double y, marker & marker, agg::tr
     {
         //TODO: Add subpixel support
         pixmap_.set_rectangle_alpha2(**marker.get_bitmap_data(),
-                                     boost::math::iround(x),
-                                     boost::math::iround(y),
+                                     boost::math::iround(pos.x),
+                                     boost::math::iround(pos.y),
                                      opacity);
     }
 }

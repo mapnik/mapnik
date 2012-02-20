@@ -129,7 +129,7 @@ public:
     }
 
     text_placement_info_ptr get_placement();
-    std::pair<int, int> get_marker_position(text_path &p);
+    pixel_position get_marker_position(text_path const& p);
     marker &get_marker() const;
     agg::trans_affine const& get_transform() const;
 protected:

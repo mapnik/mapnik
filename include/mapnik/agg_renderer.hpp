@@ -69,7 +69,7 @@ public:
     void end_map_processing(Map const& map);
     void start_layer_processing(layer const& lay);
     void end_layer_processing(layer const& lay);
-    void render_marker(double x, double y, marker & marker, agg::trans_affine const& tr, double opacity);
+    void render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity);
     
     void process(point_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,

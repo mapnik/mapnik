@@ -62,8 +62,8 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
     if (marker)
     {
-        int w = (*marker)->width();
-        int h = (*marker)->height();
+        double w = (*marker)->width();
+        double h = (*marker)->height();
         agg::trans_affine tr;
         boost::array<double,6> const& m = sym.get_transform();
         tr.load_from(&m[0]);
@@ -102,7 +102,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 detector_->has_placement(label_ext))
             {
 
-                render_marker(floor(x - 0.5 * w),floor(y - 0.5 * h) ,**marker,tr, sym.get_opacity());
+                render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**marker,tr, sym.get_opacity());
 
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);

@@ -79,20 +79,20 @@ public:
     {
     }
 
-    inline unsigned width() const
+    inline double width() const
     {
         if (is_bitmap())
             return (*bitmap_data_)->width();
         else if (is_vector())
-            return static_cast<unsigned>((*vector_data_)->bounding_box().width());
+            return (*vector_data_)->bounding_box().width();
         return 0;
     }
-    inline unsigned height() const
+    inline double height() const
     {
         if (is_bitmap())
             return (*bitmap_data_)->height();
         else if (is_vector())
-            return static_cast<unsigned>((*vector_data_)->bounding_box().height());
+            return (*vector_data_)->bounding_box().height();
         return 0;
     }
 
@@ -106,12 +106,12 @@ public:
         return vector_data_;
     }
 
-    boost::optional<mapnik::image_ptr> get_bitmap_data()
+    boost::optional<mapnik::image_ptr> get_bitmap_data() const
     {
         return bitmap_data_;
     }
 
-    boost::optional<mapnik::path_ptr> get_vector_data()
+    boost::optional<mapnik::path_ptr> get_vector_data() const
     {
         return vector_data_;
     }
