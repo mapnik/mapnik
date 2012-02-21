@@ -20,6 +20,12 @@
  *
  *****************************************************************************/
 
+// boost
+#include <boost/version.hpp>
+#include <mapnik/feature.hpp>
+
+#if BOOST_VERSION >= 104700
+
 #include <mapnik/json/geojson_generator.hpp>
 #include <mapnik/json/feature_generator_grammar.hpp>
 #include <mapnik/json/geometry_generator_grammar.hpp>
@@ -51,3 +57,37 @@ bool geometry_generator::generate(std::string & geojson, mapnik::geometry_contai
 }
 
 }}
+
+#else
+
+#include <string>
+#include <sstream>
+#include <exception>
+
+namespace  mapnik { namespace json {
+
+class feature_generator {
+ public:
+    bool generate(std::string & geojson, mapnik::Feature const& f)
+    {
+        std::ostringstream s;
+        s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+        throw std::runtime_error("feature_generator::generate() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+        return false;
+    }
+};
+
+class geometry_generator {
+ public:
+    bool generate(std::string & geojson, mapnik::geometry_container const& g)
+    {
+        std::ostringstream s;
+        s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+        throw std::runtime_error("geometry_generator::generate() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+        return false;
+    }
+};
+
+}}
+
+#endif
