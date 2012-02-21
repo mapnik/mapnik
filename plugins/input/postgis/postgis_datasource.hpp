@@ -31,7 +31,6 @@
 #include <mapnik/feature_layer_desc.hpp>
 
 // boost
-#include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include "connection_manager.hpp"
