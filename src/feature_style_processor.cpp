@@ -475,9 +475,7 @@ void feature_style_processor<Processor>::render_style(
 
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-#if defined(SVG_RENDERER)
                 if(!p.process(symbols,feature,prj_trans))
-#endif
                 {
 
                     BOOST_FOREACH (symbolizer const& sym, symbols)
@@ -505,9 +503,7 @@ void feature_style_processor<Processor>::render_style(
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-#if defined(SVG_RENDERER)
                 if(!p.process(symbols,feature,prj_trans))
-#endif
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
@@ -529,9 +525,7 @@ void feature_style_processor<Processor>::render_style(
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-#if defined(SVG_RENDERER)
                 if(!p.process(symbols,feature,prj_trans))
-#endif
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {

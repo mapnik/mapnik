@@ -111,7 +111,7 @@ public:
                  mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
     inline bool process(rule::symbolizers const& /*syms*/,
-                        Feature const& /*feature*/,
+                        mapnik::feature_ptr const& /*feature*/,
                         proj_transform const& /*prj_trans*/)
     {
         // cairo renderer doesn't support processing of multiple symbolizers.
