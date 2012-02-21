@@ -198,10 +198,11 @@ def test_textsymbolizer_init():
     ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
 
 #    eq_(str(ts.name), str(mapnik2.Expression('[Field_Name]'))) name field is no longer supported
-    eq_(ts.face_name, 'Font Name')
-    eq_(ts.text_size, 8)
-    eq_(ts.fill, mapnik.Color('black'))
-    eq_(ts.label_placement, mapnik.label_placement.POINT_PLACEMENT)
+    eq_(ts.format.face_name, 'Font Name')
+    eq_(ts.format.text_size, 8)
+    eq_(ts.format.fill, mapnik.Color('black'))
+    eq_(ts.properties.label_placement, mapnik.label_placement.POINT_PLACEMENT)
+    eq_(ts.properties.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
 
 # Map initialization
 def test_layer_init():

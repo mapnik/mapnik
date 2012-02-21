@@ -188,6 +188,9 @@ void export_shield_symbolizer()
         .add_property("minimum_distance",
                       &shield_symbolizer::get_minimum_distance,
                       &shield_symbolizer::set_minimum_distance)
+        .add_property("minimum_padding",
+                      &shield_symbolizer::get_minimum_padding,
+                      &shield_symbolizer::set_minimum_padding)
         .add_property("name",&shield_symbolizer::get_name,
                       &shield_symbolizer::set_name)
         .add_property("opacity",

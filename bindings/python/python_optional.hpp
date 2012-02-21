@@ -104,31 +104,31 @@ struct python_optional : public boost::noncopyable
 
   See http://osdir.com/ml/python.c++/2003-11/msg00158.html
   */
-template <typename T, typename X1, typename X2, typename X3>
-class class_with_optional : public boost::python::class_<T, X1, X2, X3>
+template <typename T, typename X1 = boost::python::detail::not_specified, typename X2 = boost::python::detail::not_specified, typename X3 = boost::python::detail::not_specified>
+class class_with_converter : public boost::python::class_<T, X1, X2, X3>
 {
 public:
-    typedef class_with_optional<T,X1,X2,X3> self;
+    typedef class_with_converter<T,X1,X2,X3> self;
     // Construct with the class name, with or without docstring, and default __init__() function
-    class_with_optional(char const* name, char const* doc = 0) : boost::python::class_<T, X1, X2, X3>(name, doc)  { }
+    class_with_converter(char const* name, char const* doc = 0) : boost::python::class_<T, X1, X2, X3>(name, doc)  { }
 
     // Construct with class name, no docstring, and an uncallable __init__ function
-    class_with_optional(char const* name, boost::python::no_init_t y) : boost::python::class_<T, X1, X2, X3>(name, y) { }
+    class_with_converter(char const* name, boost::python::no_init_t y) : boost::python::class_<T, X1, X2, X3>(name, y) { }
 
     // Construct with class name, docstring, and an uncallable __init__ function
-    class_with_optional(char const* name, char const* doc, boost::python::no_init_t y) : boost::python::class_<T, X1, X2, X3>(name, doc, y) { }
+    class_with_converter(char const* name, char const* doc, boost::python::no_init_t y) : boost::python::class_<T, X1, X2, X3>(name, doc, y) { }
 
     // Construct with class name and init<> function
-    template <class DerivedT> class_with_optional(char const* name, boost::python::init_base<DerivedT> const& i)
+    template <class DerivedT> class_with_converter(char const* name, boost::python::init_base<DerivedT> const& i)
         : boost::python::class_<T, X1, X2, X3>(name, i) { }
 
     // Construct with class name, docstring and init<> function
     template <class DerivedT>
-    inline class_with_optional(char const* name, char const* doc, boost::python::init_base<DerivedT> const& i)
+    inline class_with_converter(char const* name, char const* doc, boost::python::init_base<DerivedT> const& i)
         : boost::python::class_<T, X1, X2, X3>(name, doc, i) { }
 
     template <class D>
-    self& def_readwrite_optional(char const* name, D const& d, char const* doc=0)
+    self& def_readwrite_convert(char const* name, D const& d, char const* doc=0)
     {
         this->add_property(name,
                      boost::python::make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),
