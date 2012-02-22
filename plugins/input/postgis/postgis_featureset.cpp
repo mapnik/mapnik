@@ -30,17 +30,16 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 // stl
 #include <sstream>
 #include <string>
 
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 using boost::trim_copy;
 using mapnik::geometry_type;
 using mapnik::byte;
@@ -162,15 +161,9 @@ feature_ptr postgis_featureset::next()
                 else if (oid == 1700) // numeric
                 {
                     std::string str = mapnik::sql_utils::numeric2string(buf);
-                    try
-                    {
-                        double val = boost::lexical_cast<double>(str);
+                    double val;
+                    if (mapnik::conversions::string2double(str,&val))
                         feature->put(name,val);
-                    }
-                    catch (boost::bad_lexical_cast & ex)
-                    {
-                        std::clog << ex.what() << "\n";
-                    }
                 }
                 else
                 {

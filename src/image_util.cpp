@@ -36,9 +36,7 @@ extern "C"
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/map.hpp>
-
-// boost
-#include <boost/spirit/include/qi.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // jpeg
 #if defined(HAVE_JPEG)
@@ -72,9 +70,6 @@ extern "C"
 #include "agg_span_interpolator_linear.h"
 #include "agg_trans_affine.h"
 #include "agg_image_filters.h"
-
-using namespace boost::spirit;
-
 
 namespace mapnik
 {
@@ -163,36 +158,24 @@ void handle_png_options(std::string const& type,
                 if (*colors < 0)
                     throw ImageWriterException("invalid color parameter: unavailable for true color images");
 
-                std::string const& val = t.substr(2);
-                std::string::const_iterator str_beg = val.begin();
-                std::string::const_iterator str_end = val.end();
-                bool r = qi::phrase_parse(str_beg,str_end,qi::int_,ascii::space,*colors);
-                if (!r || (str_beg != str_end) || *colors < 0 || *colors > 256)
-                    throw ImageWriterException("invalid color parameter: " + val);
+                if (!mapnik::conversions::string2int(t.substr(2),colors) || *colors < 0 || *colors > 256)
+                    throw ImageWriterException("invalid color parameter: " + t.substr(2));
             }
             else if (boost::algorithm::starts_with(t, "t="))
             {
                 if (*colors < 0)
                     throw ImageWriterException("invalid trans_mode parameter: unavailable for true color images");
 
-                std::string const& val = t.substr(2);
-                std::string::const_iterator str_beg = val.begin();
-                std::string::const_iterator str_end = val.end();
-                bool r = qi::phrase_parse(str_beg,str_end,qi::int_,ascii::space,*trans_mode);
-                if (!r || (str_beg != str_end) || *trans_mode < 0 || *trans_mode > 2)
-                    throw ImageWriterException("invalid trans_mode parameter: " + val);
+                if (!mapnik::conversions::string2int(t.substr(2),trans_mode) || *trans_mode < 0 || *trans_mode > 2)
+                    throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
             }
             else if (boost::algorithm::starts_with(t, "g="))
             {
                 if (*colors < 0)
                     throw ImageWriterException("invalid gamma parameter: unavailable for true color images");
-                std::string const& val = t.substr(2);
-                std::string::const_iterator str_beg = val.begin();
-                std::string::const_iterator str_end = val.end();
-                bool r = qi::phrase_parse(str_beg,str_end,qi::double_,ascii::space,*gamma);
-                if (!r || (str_beg != str_end) || *gamma < 0)
+                if (!mapnik::conversions::string2double(t.substr(2),gamma) || *gamma < 0)
                 {
-                    throw ImageWriterException("invalid gamma parameter: " + val);
+                    throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
                 }
             }
             else if (boost::algorithm::starts_with(t, "z="))
@@ -203,15 +186,11 @@ void handle_png_options(std::string const& type,
                   #define Z_BEST_COMPRESSION       9
                   #define Z_DEFAULT_COMPRESSION  (-1)
                 */
-                std::string const& val = t.substr(2);
-                std::string::const_iterator str_beg = val.begin();
-                std::string::const_iterator str_end = val.end();
-                bool r = qi::phrase_parse(str_beg,str_end,qi::int_,ascii::space,*compression);
-                if (!r || (str_beg != str_end)
+                if (!mapnik::conversions::string2int(t.substr(2),compression)
                     || *compression < Z_DEFAULT_COMPRESSION
                     || *compression > Z_BEST_COMPRESSION)
                 {
-                    throw ImageWriterException("invalid compression parameter: " + val + " (only -1 through 9 are valid)");
+                    throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 9 are valid)");
                 }
             }
             else if (boost::algorithm::starts_with(t, "s="))
@@ -336,14 +315,11 @@ void save_to_stream(T const& image,
         {
             int quality = 85;
             std::string const& val = t.substr(4);
-            if(!val.empty())
+            if (!val.empty())
             {
-                std::string::const_iterator str_beg = val.begin();
-                std::string::const_iterator str_end = val.end();
-                bool r = qi::phrase_parse(str_beg,str_end,qi::int_,ascii::space,quality);
-                if (!r || (str_beg != str_end) || quality < 0 || quality > 100)
+                if (!mapnik::conversions::string2int(val,&quality) || quality < 0 || quality > 100)
                 {
-                    throw ImageWriterException("invalid jpeg quality: " + val);
+                    throw ImageWriterException("invalid jpeg quality: '" + val + "'");
                 }
             }
             save_as_jpeg(stream, quality, image);

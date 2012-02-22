@@ -357,16 +357,16 @@ void export_text_placement()
         ;
 
 
-    class_<text_symbolizer_properties>
+    class_with_converter<text_symbolizer_properties>
             ("TextSymbolizerProperties")
+        .def_readwrite_convert("label_placement", &text_symbolizer_properties::label_placement)
+        .def_readwrite_convert("horizontal_alignment", &text_symbolizer_properties::halign)
+        .def_readwrite_convert("justify_alignment", &text_symbolizer_properties::jalign)
+        .def_readwrite_convert("vertical_alignment", &text_symbolizer_properties::valign)
         .def_readwrite("orientation", &text_symbolizer_properties::orientation)
         .add_property("displacement",
                       &get_displacement,
                       &set_displacement)
-        .def_readwrite("label_placement", &text_symbolizer_properties::label_placement)
-        .def_readwrite("horizontal_alignment", &text_symbolizer_properties::halign)
-        .def_readwrite("justify_alignment", &text_symbolizer_properties::jalign)
-        .def_readwrite("vertical_alignment", &text_symbolizer_properties::valign)
         .def_readwrite("label_spacing", &text_symbolizer_properties::label_spacing)
         .def_readwrite("label_position_tolerance", &text_symbolizer_properties::label_position_tolerance)
         .def_readwrite("avoid_edges", &text_symbolizer_properties::avoid_edges)
@@ -483,22 +483,22 @@ void export_text_placement()
     register_ptr_to_python<boost::shared_ptr<formatting::text_node> >();
 
 
-    class_with_optional<FormatNodeWrap,
+    class_with_converter<FormatNodeWrap,
            boost::shared_ptr<FormatNodeWrap>,
            bases<formatting::node>,
            boost::noncopyable>
            ("FormattingFormat")
-        .def_readwrite_optional("text_size", &formatting::format_node::text_size)
-        .def_readwrite_optional("face_name", &formatting::format_node::face_name)
-        .def_readwrite_optional("character_spacing", &formatting::format_node::character_spacing)
-        .def_readwrite_optional("line_spacing", &formatting::format_node::line_spacing)
-        .def_readwrite_optional("text_opacity", &formatting::format_node::text_opacity)
-        .def_readwrite_optional("wrap_char", &formatting::format_node::wrap_char)
-        .def_readwrite_optional("wrap_before", &formatting::format_node::wrap_before)
-        .def_readwrite_optional("text_transform", &formatting::format_node::text_transform)
-        .def_readwrite_optional("fill", &formatting::format_node::fill)
-        .def_readwrite_optional("halo_fill", &formatting::format_node::halo_fill)
-        .def_readwrite_optional("halo_radius", &formatting::format_node::halo_radius)
+        .def_readwrite_convert("text_size", &formatting::format_node::text_size)
+        .def_readwrite_convert("face_name", &formatting::format_node::face_name)
+        .def_readwrite_convert("character_spacing", &formatting::format_node::character_spacing)
+        .def_readwrite_convert("line_spacing", &formatting::format_node::line_spacing)
+        .def_readwrite_convert("text_opacity", &formatting::format_node::text_opacity)
+        .def_readwrite_convert("wrap_char", &formatting::format_node::wrap_char)
+        .def_readwrite_convert("wrap_before", &formatting::format_node::wrap_before)
+        .def_readwrite_convert("text_transform", &formatting::format_node::text_transform)
+        .def_readwrite_convert("fill", &formatting::format_node::fill)
+        .def_readwrite_convert("halo_fill", &formatting::format_node::halo_fill)
+        .def_readwrite_convert("halo_radius", &formatting::format_node::halo_radius)
         .def("apply", &formatting::format_node::apply, &FormatNodeWrap::default_apply)
         .add_property("child",
                       &formatting::format_node::get_child,

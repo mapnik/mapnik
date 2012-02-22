@@ -28,10 +28,10 @@
 #include <mapnik/global.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/sql_utils.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
@@ -50,10 +50,7 @@ DATASOURCE_PLUGIN(postgis_datasource)
 const std::string postgis_datasource::GEOMETRY_COLUMNS="geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS="spatial_ref_system";
 
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 using boost::shared_ptr;
-
 using mapnik::PoolGuard;
 using mapnik::attribute_descriptor;
 
@@ -174,13 +171,12 @@ void postgis_datasource::bind() const
 
                     if (srid_ == 0)
                     {
-                        try
+                        const char * srid_c = rs->getValue("srid");
+                        if (srid_c != NULL)
                         {
-                            srid_ = lexical_cast<int>(rs->getValue("srid"));
-                        }
-                        catch (bad_lexical_cast &ex)
-                        {
-                            std::clog << "Postgis Plugin: SRID=" << rs->getValue("srid") << " " << ex.what() << std::endl;
+                            int result;
+                            if (mapnik::conversions::string2int(srid_c,&result))
+                                srid_ = result;
                         }
                     }
                 }
@@ -205,13 +201,12 @@ void postgis_datasource::bind() const
                     shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
                     if (rs->next())
                     {
-                        try
+                        const char * srid_c = rs->getValue("srid");
+                        if (srid_c != NULL)
                         {
-                            srid_ = lexical_cast<int>(rs->getValue("srid"));
-                        }
-                        catch (bad_lexical_cast &ex)
-                        {
-                            std::clog << "Postgis Plugin: SRID=" << rs->getValue("srid") << " " << ex.what() << std::endl;
+                            int result;
+                            if (mapnik::conversions::string2int(srid_c,&result))
+                                srid_ = result;
                         }
                     }
                     rs->close();
@@ -384,8 +379,9 @@ std::string postgis_datasource::populate_tokens(const std::string& sql) const
     }
     if ( boost::algorithm::icontains(sql,scale_denom_token_) )
     {
-        std::string max_denom = lexical_cast<std::string>(FMAX);
-        boost::algorithm::replace_all(populated_sql,scale_denom_token_,max_denom);
+        std::ostringstream ss;
+        ss << FMAX;
+        boost::algorithm::replace_all(populated_sql,scale_denom_token_,ss.str());
     }
     return populated_sql;
 }
@@ -397,8 +393,9 @@ std::string postgis_datasource::populate_tokens(const std::string& sql, double s
 
     if ( boost::algorithm::icontains(populated_sql,scale_denom_token_) )
     {
-        std::string max_denom = lexical_cast<std::string>(scale_denom);
-        boost::algorithm::replace_all(populated_sql,scale_denom_token_,max_denom);
+        std::ostringstream ss;
+        ss << scale_denom;
+        boost::algorithm::replace_all(populated_sql,scale_denom_token_,ss.str());
     }
 
     if ( boost::algorithm::icontains(populated_sql,bbox_token_) )
@@ -684,19 +681,22 @@ box2d<double> postgis_datasource::envelope() const
             shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
             if (rs->next() && !rs->isNull(0))
             {
-                try
-                {
-                    double lox = lexical_cast<double>(rs->getValue(0));
-                    double loy = lexical_cast<double>(rs->getValue(1));
-                    double hix = lexical_cast<double>(rs->getValue(2));
-                    double hiy = lexical_cast<double>(rs->getValue(3));
-                    extent_.init(lox,loy,hix,hiy);
-                    extent_initialized_ = true;
-                }
-                catch (bad_lexical_cast &ex)
-                {
-                    std::clog << boost::format("Postgis Plugin: warning: could not determine extent from query: %s\nError was: '%s'\n") % s.str() % ex.what() << std::endl;
-                }
+                    double lox;
+                    double loy;
+                    double hix;
+                    double hiy;
+                    if (mapnik::conversions::string2double(rs->getValue(0),&lox) &&
+                        mapnik::conversions::string2double(rs->getValue(1),&loy) &&
+                        mapnik::conversions::string2double(rs->getValue(2),&hix) &&
+                        mapnik::conversions::string2double(rs->getValue(3),&hiy))
+                    {
+                        extent_.init(lox,loy,hix,hiy);
+                        extent_initialized_ = true;
+                    }
+                    else
+                    {
+                        std::clog << boost::format("Postgis Plugin: warning: could not determine extent from query: %s\n") % s.str() << std::endl;
+                    }
             }
             rs->close();
         }

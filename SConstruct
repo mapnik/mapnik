@@ -1432,7 +1432,7 @@ if not preconfigured:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts %s' % (env['OPTIMIZATION'],ndebug_flags))
 
             if env['DEBUG_UNDEFINED']:
-                env.Append(CXXFLAGS = '-fcatch-undefined-behavior') #-ftrapv -fwrapv
+                env.Append(CXXFLAGS = '-fcatch-undefined-behavior -ftrapv -fwrapv')
 
         if 'python' in env['BINDINGS']:
             if not os.access(env['PYTHON'], os.X_OK):
