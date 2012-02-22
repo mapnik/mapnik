@@ -487,7 +487,7 @@ void save_as_png8(T1 & file, T2 const& image, T3 const & tree,
     else
     {
         // <=16 colors -> write 4-bit color depth PNG
-        unsigned image_width  = (int(0.5*width) + 3)&~3;
+        unsigned image_width  = width > 3 ? (int(0.5*width) + 3)&~3 : 4;
         unsigned image_height = height;
         image_data_8 reduced_image(image_width, image_height);
         for (unsigned y = 0; y < height; ++y)
