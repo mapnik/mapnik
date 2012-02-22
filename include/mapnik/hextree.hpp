@@ -394,16 +394,7 @@ private:
     // clip extreme alfa values
     void create_palette_rek(std::vector<rgba> & palette, node * itr) const
     {
-        /*
-        NOTE: previous code did:
-        
-            // actually, ignore ones with < 3 pixels
-            if (itr->count >= 3)
-
-        But this could lead to memory corruption
-        */
-        
-        if (itr->count > 0)
+        if (itr->count >= 3)
         {
             unsigned count = itr->count;
             byte a = byte(itr->alphas/float(count));
