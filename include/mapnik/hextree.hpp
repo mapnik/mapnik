@@ -394,8 +394,16 @@ private:
     // clip extreme alfa values
     void create_palette_rek(std::vector<rgba> & palette, node * itr) const
     {
-        // actually, ignore ones with < 3 pixels
-        if (itr->count >= 3)
+        /*
+        NOTE: previous code did:
+        
+            // actually, ignore ones with < 3 pixels
+            if (itr->count >= 3)
+
+        But this could lead to memory corruption
+        */
+        
+        if (itr->count > 0)
         {
             unsigned count = itr->count;
             byte a = byte(itr->alphas/float(count));
@@ -475,8 +483,10 @@ private:
             }
             tries = 0;
             // ignore leaves and also nodes with small mean error and not excessive number of pixels
-            if (((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(double(cur_node->pixel_count))) > 15
-                && (cur_node->children_count > 0))
+            if (cur_node->pixel_count > 0 &&
+                (cur_node->children_count > 0) &&
+                (((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(double(cur_node->pixel_count))) > 15)
+                )
             {
                 colors_--;
                 cur_node->count = 0;
