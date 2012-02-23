@@ -55,6 +55,7 @@
 // boost
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -131,6 +132,23 @@ private:
 
 };
 
+void remove_empty_text_nodes(ptree &pt)
+{
+    ptree::iterator itr = pt.begin();
+    ptree::iterator end = pt.end();
+    for (;itr!=end; itr++)
+    {
+        if (itr->first == "<xmltext>") {
+            std::string trimmed = boost::algorithm::trim_copy(itr->second.data());
+            if (trimmed.empty()) {
+                itr = pt.erase(itr);
+            }
+        } else {
+            remove_empty_text_nodes(itr->second);
+        }
+    }
+}
+
 void load_map(Map & map, std::string const& filename, bool strict)
 {
     ptree pt;
@@ -139,7 +157,8 @@ void load_map(Map & map, std::string const& filename, bool strict)
 #else
     try
     {
-        read_xml(filename, pt);
+        read_xml(filename, pt, boost::property_tree::xml_parser::no_concat_text|boost::property_tree::xml_parser::no_comments);
+        remove_empty_text_nodes(pt);
     }
     catch (const boost::property_tree::xml_parser_error & ex)
     {
@@ -163,7 +182,8 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     {
         std::istringstream s(str);
         // TODO - support base_path?
-        read_xml(s,pt);
+        read_xml(s, pt, boost::property_tree::xml_parser::no_concat_text|boost::property_tree::xml_parser::no_comments);
+        remove_empty_text_nodes(pt);
     }
     catch (const boost::property_tree::xml_parser_error & ex)
     {
@@ -383,7 +403,7 @@ void map_parser::parse_map_include( Map & map, ptree const & include )
                     params[name] = value;
                 }
                 else if( paramIter->first != "<xmlattr>" &&
-                         paramIter->first != "<xmlcomment>" )
+                         paramIter->first != "<xmlcomment>")
                 {
                     throw config_error(std::string("Unknown child node in ") +
                                        "'Datasource'. Expected 'Parameter' but got '" +
