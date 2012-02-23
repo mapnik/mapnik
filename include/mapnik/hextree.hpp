@@ -29,8 +29,11 @@
 
 // boost
 #include <boost/utility.hpp>
+#include <boost/version.hpp>
 #include <boost/unordered_map.hpp>
+#if BOOST_VERSION >= 104600
 #include <boost/range/algorithm.hpp>
+#endif
 #include <boost/scoped_ptr.hpp>
 
 // stl
@@ -255,8 +258,13 @@ public:
             int dist, newdist;
 
             // find closest match based on mean of r,g,b,a
+#if BOOST_VERSION >= 104600
             std::vector<rgba>::const_iterator pit =
                 boost::lower_bound(sorted_pal_, c, rgba::mean_sort_cmp());
+#else
+            std::vector<rgba>::const_iterator pit =
+                std::lower_bound(sorted_pal_.begin(),sorted_pal_.end(), c, rgba::mean_sort_cmp());
+#endif
             ind = pit-sorted_pal_.begin();
             if (ind == sorted_pal_.size())
                 ind--;
@@ -329,8 +337,11 @@ public:
         create_palette_rek(sorted_pal_, root_.get());
    
         // sort palette for binary searching in quantization
+#if BOOST_VERSION >= 104600
         boost::sort(sorted_pal_, rgba::mean_sort_cmp());
-        
+#else
+        std::sort(sorted_pal_.begin(), sorted_pal_.end(), rgba::mean_sort_cmp());
+#endif
         // returned palette is rearanged, so that colors with a<255 are at the begining
         pal_remap_.resize(sorted_pal_.size());
         palette.clear();
