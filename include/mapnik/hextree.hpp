@@ -156,10 +156,11 @@ namespace mapnik {
                 if (t1!=t2)
                     return t1<t2;
 
-                return  (((int)x.a-y.a) >> 24) +
-                        (((int)x.r-y.r) >> 16) +
-                        (((int)x.g-y.g) >> 8) +
-                        ((int)x.b-y.b);
+                // https://github.com/mapnik/mapnik/issues/1087
+                if (x.a != y.a) return x.a < y.a;
+                if (x.r != y.r) return x.r < y.r;
+                if (x.g != y.g) return x.g < y.g;
+                return x.b < y.b;
             }
         };
 
@@ -491,7 +492,7 @@ namespace mapnik {
                     }
                     tries=0;
                     // ignore leaves and also nodes with small mean error and not excessive number of pixels
-                    if ((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(double(cur_node->pixel_count)) > 15
+                    if (cur_node->pixel_count > 0 && (cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(double(cur_node->pixel_count)) > 15
                             && cur_node->children_count > 0)
                     {
                         colors_--;
