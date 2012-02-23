@@ -30,10 +30,12 @@
 
 namespace mapnik { namespace json {
 
+#if BOOST_VERSION >= 104700
+
 template <typename OutputIterator> struct feature_generator_grammar;
 template <typename OutputIterator> struct multi_geometry_generator_grammar;
 
-class feature_generator : private boost::noncopyable 
+class feature_generator : private boost::noncopyable
 {
     typedef std::back_insert_iterator<std::string> sink_type;
 public:
@@ -54,6 +56,26 @@ public:
 private:
     boost::scoped_ptr<multi_geometry_generator_grammar<sink_type> > grammar_;
 };
+
+#else
+
+class feature_generator : private boost::noncopyable
+{
+public:
+    feature_generator() {}
+    ~feature_generator() {}
+    bool generate(std::string & geojson, mapnik::Feature const& f);
+};
+
+class geometry_generator : private boost::noncopyable
+{
+public:
+    geometry_generator() {}
+    ~geometry_generator() {}
+    bool generate(std::string & geojson, mapnik::geometry_container const& g);
+};
+
+#endif
 
 }}
 
