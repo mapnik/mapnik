@@ -3,7 +3,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/label_collision_detector.hpp>
-
+#include <mapnik/global.hpp> //round
 // agg
 #include "agg_basics.h"
 
