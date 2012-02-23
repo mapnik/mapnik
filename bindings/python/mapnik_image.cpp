@@ -122,6 +122,10 @@ bool painted(mapnik::image_32 const& im)
     return im.painted();
 }
 
+void set_pixel(mapnik::image_32 & im, unsigned x, unsigned y, mapnik::color const& c)
+{
+    im.setPixel(x, y, c.rgba());
+} 
 
 boost::shared_ptr<image_32> open_from_file(std::string const& filename)
 {
@@ -208,6 +212,7 @@ void export_image()
         .def("set_alpha",&image_32::set_alpha, "Set the overall alpha channel of the Image")
         .def("blend",&blend)
         .def("composite",&composite)
+        .def("set_pixel",&set_pixel)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 
         .def("tostring",&tostring1)
