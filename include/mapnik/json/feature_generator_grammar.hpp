@@ -27,6 +27,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/json/geometry_generator_grammar.hpp>
+#include <mapnik/feature_kv_iterator.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
@@ -47,26 +48,26 @@ struct is_container<mapnik::Feature const> : mpl::false_ {} ;
 template <>
 struct container_iterator<mapnik::Feature const>
 {
-    typedef mapnik::feature_kv_iterator type;
+    typedef mapnik::feature_kv_iterator2 type;
 };
 
 template <>
 struct begin_container<mapnik::Feature const>
 {
-    static mapnik::feature_kv_iterator
+    static mapnik::feature_kv_iterator2
     call (mapnik::Feature const& f)
     {
-        return f.begin();
+        return mapnik::feature_kv_iterator2(mapnik::value_not_null(),f.begin(),f.end());
     }
 };
 
 template <>
 struct end_container<mapnik::Feature const>
 {
-    static mapnik::feature_kv_iterator
+    static mapnik::feature_kv_iterator2
     call (mapnik::Feature const& f)
     {
-        return f.end();
+        return mapnik::feature_kv_iterator2(mapnik::value_not_null(),f.end(),f.end());
     }
 };
 

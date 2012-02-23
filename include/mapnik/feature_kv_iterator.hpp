@@ -23,12 +23,16 @@
 #ifndef MAPNIK_FEATURE_KV_ITERATOR_HPP
 #define MAPNIK_FEATURE_KV_ITERATOR_HPP
 
+// mapnik
+#include <mapnik/value.hpp>
+// boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/iterator/iterator_facade.hpp>
-
+#include <boost/iterator/filter_iterator.hpp>
+#include <boost/variant.hpp>
+// stl
 #include <map>
-//#include <mapnik/feature.hpp>
-#include <mapnik/value.hpp>
+
 
 namespace mapnik {
 
@@ -56,6 +60,30 @@ private:
     mutable value_type kv_;
 
 };
+
+struct is_null : public boost::static_visitor<bool>
+{
+    bool operator() (value_null const& val) const
+    {
+        return true;
+    }
+
+    template <typename T>
+    bool operator() (T val) const
+    {
+        return false;
+    }
+};
+
+struct value_not_null
+{
+    bool operator() (feature_kv_iterator::value_type const& kv) const
+    {
+        return !boost::apply_visitor(is_null(),boost::get<1>(kv).base());
+    }
+};
+
+typedef boost::filter_iterator<value_not_null, feature_kv_iterator> feature_kv_iterator2;
 
 }
 
