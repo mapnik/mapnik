@@ -24,6 +24,7 @@
 #define PLACEMENTS_BASE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/formatting/base.hpp>
 #include <mapnik/text_path.hpp> //TODO: Remove this again after text_placement_info::placements is moved to a better place.
@@ -35,7 +36,7 @@ namespace mapnik
 {
 typedef std::pair<double,double> dimension_type;
 
-class text_placements;
+class MAPNIK_DECL text_placements;
 /** Generate a possible placement and store results of placement_finder.
  * This placement has first to be tested by placement_finder to verify it
  * can actually be used.
