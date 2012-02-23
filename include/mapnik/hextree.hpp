@@ -31,6 +31,7 @@
 #include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/scoped_ptr.hpp>
 
 // stl
 #include <vector>
@@ -122,7 +123,7 @@ class hextree : private boost::noncopyable
     unsigned colors_;
     // flag indicating existance of invisible pixels (a < InsertPolicy::MIN_ALPHA)
     bool has_holes_;
-    node * root_;
+    boost::scoped_ptr<node> root_;
     // working palette for quantization, sorted on mean(r,g,b,a) for easier searching NN
     std::vector<rgba> sorted_pal_;
     // index remaping of sorted_pal_ indexes to indexes of returned image palette
@@ -155,10 +156,8 @@ public:
     }
 
     ~hextree()
-    {
-        delete root_;
-    }
-
+    {}
+    
     void setMaxColors(unsigned max_colors)
     {
         max_colors_ = max_colors;
@@ -201,7 +200,7 @@ public:
     {
         byte a = preprocessAlpha(data.a);
         unsigned level = 0;
-        node * cur_node = root_;
+        node * cur_node = root_.get();
         if (a < InsertPolicy::MIN_ALPHA)
         {
             has_holes_ = true;
@@ -327,10 +326,8 @@ public:
         assign_node_colors();
 
         sorted_pal_.reserve(colors_);
-        create_palette_rek(sorted_pal_, root_);
-        delete root_;
-        root_ = new node();
-
+        create_palette_rek(sorted_pal_, root_.get());
+   
         // sort palette for binary searching in quantization
         boost::sort(sorted_pal_, rgba::mean_sort_cmp());
         
@@ -453,7 +450,7 @@ private:
     // until all available colors are assigned to processed nodes
     void assign_node_colors()
     {
-        compute_cost(root_);
+        compute_cost(root_.get());
 
         int tries = 0;
 
@@ -462,7 +459,7 @@ private:
         root_->count = root_->pixel_count;
 
         std::set<node*,node_rev_cmp> colored_leaves_heap;
-        colored_leaves_heap.insert(root_);
+        colored_leaves_heap.insert(root_.get());
         while((!colored_leaves_heap.empty() && (colors_ < max_colors_) && (tries < 16)))
         {
             // select worst node to remove it from palette and replace with children
