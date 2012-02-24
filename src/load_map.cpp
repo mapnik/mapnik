@@ -136,19 +136,23 @@ void remove_empty_text_nodes(ptree &pt)
 {
     ptree::iterator itr = pt.begin();
     ptree::iterator end = pt.end();
-    for (;itr!=end; itr++)
+    while (itr!=end)
     {
         if (itr->first == "<xmltext>") {
             std::string trimmed = boost::algorithm::trim_copy(itr->second.data());
             if (trimmed.empty()) {
                 itr = pt.erase(itr);
+            } else {
+                itr++;
             }
         } else {
             remove_empty_text_nodes(itr->second);
+            itr++;
         }
     }
 }
 
+//#include <mapnik/internal/dump_xml.hpp>
 void load_map(Map & map, std::string const& filename, bool strict)
 {
     ptree pt;
