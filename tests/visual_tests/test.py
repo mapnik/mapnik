@@ -42,16 +42,15 @@ def render(filename, width):
 
     print "Rendering style \"%s\" with width %d ... %s" % (filename, width, rms)
     return m
-    
+
 if len(sys.argv) == 2:
     files = [(sys.argv[1], 500)]
 elif len(sys.argv) > 2:
     files = [sys.argv[1:]]
-    
+
 for f in files:
     for width in f[1:]:
         m = render(f[0], width)
     mapnik.save_map(m, "%s-out.xml" % f[0])
 
 summary()
-

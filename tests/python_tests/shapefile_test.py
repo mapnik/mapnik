@@ -12,23 +12,23 @@ def setup():
     os.chdir(execution_path('.'))
 
 if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
-    
+
     # Shapefile initialization
     def test_shapefile_init():
         s = mapnik.Shapefile(file='../../demo/data/boundaries')
-    
+
         e = s.envelope()
-       
+
         assert_almost_equal(e.minx, -11121.6896651, places=7)
         assert_almost_equal(e.miny, -724724.216526, places=6)
         assert_almost_equal(e.maxx, 2463000.67866, places=5)
         assert_almost_equal(e.maxy, 1649661.267, places=3)
-    
+
     # Shapefile properties
     def test_shapefile_properties():
         s = mapnik.Shapefile(file='../../demo/data/boundaries', encoding='latin1')
         f = s.features_at_point(s.envelope().center()).features[0]
-    
+
         eq_(f['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
         eq_(f['COUNTRY'], u'CAN')
         eq_(f['F_CODE'], u'FA001')
@@ -56,4 +56,3 @@ if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
-    

@@ -81,7 +81,7 @@ def test_textsymbolizer_pickle():
     eq_(ts.face_name, 'Font Name')
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik.Color('black'))
-    
+
 
     ts2 = pickle.loads(pickle.dumps(ts,pickle.HIGHEST_PROTOCOL))
     eq_(ts.name, ts2.name)
@@ -103,12 +103,12 @@ def test_textsymbolizer_pickle():
     eq_(ts.label_position_tolerance, ts2.label_position_tolerance)
     # 22.5 * M_PI/180.0 initialized by default
     assert_almost_equal(s.max_char_angle_delta, 0.39269908169872414)
-    
+
     eq_(ts.wrap_character, ts2.wrap_character)
     eq_(ts.text_transform, ts2.text_transform)
     eq_(ts.line_spacing, ts2.line_spacing)
     eq_(ts.character_spacing, ts2.character_spacing)
-    
+
     # r1341
     eq_(ts.wrap_before, ts2.wrap_before)
     eq_(ts.horizontal_alignment, ts2.horizontal_alignment)
@@ -117,7 +117,7 @@ def test_textsymbolizer_pickle():
 
     # r2300
     eq_(s.minimum_padding, 0.0)
-        
+
     eq_(len(ts.fontset.names), 0)
 
 

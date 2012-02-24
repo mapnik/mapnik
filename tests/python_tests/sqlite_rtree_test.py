@@ -23,7 +23,7 @@ def create_ds():
     fs = ds.all_features()
 
 if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
-    
+
     def test_rtree_creation():
 
         index = DB +'.index'
@@ -38,7 +38,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
 
         for i in threads:
             i.join()
-        
+
         eq_(os.path.exists(index),True)
         conn = sqlite3.connect(index)
         cur = conn.cursor()
@@ -75,4 +75,3 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
-    

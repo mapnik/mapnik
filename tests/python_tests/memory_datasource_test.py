@@ -19,7 +19,7 @@ def test_add_feature():
     while feat:
         retrieved.append(feat)
         feat = featureset.next()
-    
+
     eq_(len(retrieved), 1)
     f = retrieved[0]
     eq_(f['foo'], 'bar')

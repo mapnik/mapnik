@@ -18,7 +18,7 @@ def assert_loads_successfully(file):
     try:
         strict = True
         mapnik.load_map(m, file, strict)
-        
+
         # libxml2 is not smart about paths, and clips the last directory off
         # of a path if it does not end in a trailing slash
         base_path = os.path.dirname(file) + '/'
@@ -27,7 +27,7 @@ def assert_loads_successfully(file):
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(e)
-    
+
 
 # We expect these files to raise a RuntimeError
 # and fail if there isn't one (or a different type

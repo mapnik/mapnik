@@ -21,10 +21,10 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
     def test_broken_files(visual=False):
         broken = glob.glob("../data/csv/fails/*.*")
         broken.extend(glob.glob("../data/csv/warns/*.*"))
-    
+
         # Add a filename that doesn't exist 
         broken.append("../data/csv/fails/does_not_exist.csv")
-    
+
         for csv in broken:
             throws = False
             if visual:
@@ -33,11 +33,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
                     print '\x1b[33mfailed\x1b[0m',csv
                 except Exception:
                     print '\x1b[1;32m✓ \x1b[0m', csv
-    
+
     def test_good_files(visual=False):
         good_files = glob.glob("../data/csv/*.*")
         good_files.extend(glob.glob("../data/csv/warns/*.*"))
-    
+
         for csv in good_files:
             if visual:
                 try:
@@ -45,7 +45,7 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
                     print '\x1b[1;32m✓ \x1b[0m', csv
                 except Exception:
                     print '\x1b[33mfailed\x1b[0m',csv
-    
+
     def test_type_detection(**kwargs):
         ds = get_csv_ds('nypd.csv')
         eq_(ds.fields(),['Precinct','Phone','Address','City','geo_longitude','geo_latitude','geo_accuracy'])
@@ -78,7 +78,7 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
             eq_(feat['empty_column'],u'')
             feat = fs.next()
         eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
-    
+
     def test_slashes(**kwargs):
         ds = get_csv_ds('has_attributes_with_slashes.csv')
         eq_(len(ds.fields()),3)
@@ -115,7 +115,7 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(len(fs[7].geometries()),2)
         eq_(fs[7].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
         eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Collection, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
-        
+
 
     def test_handling_of_missing_header(**kwargs):
         ds = get_csv_ds('missing_header.csv')
@@ -137,9 +137,9 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['1990'],1)
         eq_(feat['1991'],2)
         eq_(feat['1992'],3)
-        
+
         eq_(mapnik.Expression("[1991]=2").evaluate(feat),True)
-    
+
     def test_quoted_numbers(**kwargs):
         ds = get_csv_ds('points.csv')
         eq_(len(ds.fields()),3)

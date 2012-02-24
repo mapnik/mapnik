@@ -41,7 +41,7 @@ def test_serializing_arbitrary_parameters():
     m = mapnik.Map(256,256)
     m.parameters.append(mapnik.Parameter('width',m.width))
     m.parameters.append(mapnik.Parameter('height',m.height))
-    
+
     m2 = mapnik.Map(1,1)
     mapnik.load_map_from_string(m2,mapnik.save_map_to_string(m))
     eq_(m2.parameters['width'],m.width)
@@ -50,4 +50,3 @@ def test_serializing_arbitrary_parameters():
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
-    

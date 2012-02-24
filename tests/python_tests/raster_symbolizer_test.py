@@ -9,7 +9,7 @@ def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
-    
+
 
 def test_dataraster_coloring():
     srs = '+init=epsg:32630'
@@ -27,7 +27,7 @@ def test_dataraster_coloring():
         # Assigning a colorizer to the RasterSymbolizer tells the later
         # that it should use it to colorize the raw data raster
         sym.colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_DISCRETE, mapnik.Color("transparent"))
-        
+
         for value, color in [
             (  0, "#0044cc"),
             ( 10, "#00cc00"),
@@ -48,7 +48,7 @@ def test_dataraster_coloring():
         lyr.styles.append('foo')
         _map.layers.append(lyr)
         _map.zoom_to_box(lyr.envelope())
-    
+
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
         # save a png somewhere so we can see it
@@ -68,7 +68,7 @@ def test_dataraster_query_point():
         lyr.srs = srs
         _map = mapnik.Map(256,256, srs)
         _map.layers.append(lyr)
-    
+
         # point inside raster extent with valid data
         x, y = 427417, 4477517
         features = _map.query_point(0,x,y).features
@@ -78,11 +78,11 @@ def test_dataraster_query_point():
         assert center.x==x and center.y==y, center
         value = feat['value']
         assert value == 21.0, value
-    
+
         # point outside raster extent
         features = _map.query_point(0,-427417,4477517).features
         assert len(features) == 0
-    
+
         # point inside raster extent with nodata
         features = _map.query_point(0,126850,4596050).features
         assert len(features) == 0
@@ -92,7 +92,7 @@ def test_load_save_map():
     in_map = "../data/good_maps/raster_symbolizer.xml"
     try:
         mapnik.load_map(map, in_map)
-    
+
         out_map = mapnik.save_map_to_string(map)
         assert 'RasterSymbolizer' in out_map
         assert 'RasterColorizer' in out_map
@@ -128,11 +128,11 @@ def test_raster_with_alpha_blends_correctly_with_background():
         map_layer.datasource = mapnik.Gdal(file=filepath)
         map_layer.styles.append('raster_style')
         map.layers.append(map_layer)
-    
+
         map.zoom_all()
-    
+
         mim = mapnik.Image(WIDTH, HEIGHT)
-    
+
         mapnik.render(map, mim)
         save_data('test_raster_with_alpha_blends_correctly_with_background.png',
                   mim.tostring('png'))
@@ -162,7 +162,7 @@ def test_raster_warping():
         prj_trans = mapnik.ProjTransform(mapnik.Projection(mapSrs),
                                           mapnik.Projection(lyrSrs)) 
         _map.zoom_to_box(prj_trans.backward(lyr.envelope()))
-    
+
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
         # save a png somewhere so we can see it
@@ -191,14 +191,14 @@ def test_raster_warping_does_not_overclip_source():
         lyr.styles.append('foo')
         _map.layers.append(lyr)
         _map.zoom_to_box(mapnik.Box2d(3,42,4,43))
-    
+
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
         # save a png somewhere so we can see it
         save_data('test_raster_warping_does_not_overclip_source.png',
                   im.tostring('png'))
         assert im.view(0,200,1,1).tostring()=='\xff\xff\x00\xff'
-    
+
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]

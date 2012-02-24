@@ -12,24 +12,24 @@ def setup():
     os.chdir(execution_path('.'))
 
 if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
-    
+
     # Shapefile initialization
     def test_shapefile_init():
         s = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0)
-    
+
         e = s.envelope()
-       
+
         assert_almost_equal(e.minx, -11121.6896651, places=7)
         assert_almost_equal(e.miny, -724724.216526, places=6)
         assert_almost_equal(e.maxx, 2463000.67866, places=5)
         assert_almost_equal(e.maxy, 1649661.267, places=3)
-    
+
     # Shapefile properties
     def test_shapefile_properties():
         ds = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0,encoding='latin1')
         f = ds.features_at_point(ds.envelope().center()).features[0]
         eq_(ds.geometry_type(),mapnik.DataGeometryType.Polygon)
-    
+
         eq_(f['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')
         eq_(f['COUNTRY'], u'CAN')
         eq_(f['F_CODE'], u'FA001')
@@ -57,4 +57,3 @@ if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
-    

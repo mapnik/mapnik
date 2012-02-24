@@ -19,7 +19,7 @@ def _pycairo_surface(type,sym):
         surface = getattr(cairo,'%sSurface' % type.upper())(test_cairo_file, m.width,m.height)
         mapnik.render(m, surface)
         surface.finish()        
-        
+
         if os.path.exists(test_cairo_file):
             os.remove(test_cairo_file)
             return True
@@ -32,7 +32,7 @@ def test_pycairo_svg_surface():
 
 def test_pycairo_svg_surface():
     return _pycairo_surface('svg','building')
-    
+
 def test_pycairo_svg_surface():
     return _pycairo_surface('svg','polygon')
 
@@ -41,7 +41,7 @@ def test_pycairo_svg_surface():
 
 def test_pycairo_svg_surface():
     return _pycairo_surface('pdf','building')
-    
+
 def test_pycairo_svg_surface():
     return _pycairo_surface('pdf','polygon')
 
@@ -50,7 +50,7 @@ def test_pycairo_svg_surface():
 
 def test_pycairo_svg_surface():
     return _pycairo_surface('ps','building')
-    
+
 def test_pycairo_svg_surface():
     return _pycairo_surface('ps','polygon')
 

@@ -22,4 +22,3 @@ def test_loading_fontset_from_map():
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
-    

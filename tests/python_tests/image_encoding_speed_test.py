@@ -40,10 +40,10 @@ def do_encoding():
 
     image = None
     iterations = 10
-    
+
     results = {}
     sortable = {}
-    
+
     def run(func, im, format, t):
         global image
         image = im
@@ -81,7 +81,7 @@ def do_encoding():
     for c in combinations:
         t = Timer(many_colors)
         run(many_colors,many_colors_im,c,t)
-    
+
     for key, value in sorted(sortable.iteritems(), key=lambda (k,v): (v,k)):
         s = results[key]
         avg = str(s[0])[:6]
@@ -89,7 +89,7 @@ def do_encoding():
         elapsed = str(s[2])[:6]
         name = s[3]
         print 'avg: %sms | min: %sms | total: %sms <-- %s' % (min_,avg,elapsed,name)
-    
+
 
 if __name__ == "__main__":
     setup()

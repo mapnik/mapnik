@@ -45,21 +45,21 @@ def test_shieldsymbolizer_init():
     eq_(s.label_position_tolerance, 0)
     # 22.5 * M_PI/180.0 initialized by default
     assert_almost_equal(s.max_char_angle_delta, 0.39269908169872414)
-    
+
     eq_(s.wrap_character, ' ')
     eq_(s.text_transform, mapnik.text_transform.NONE)
     eq_(s.line_spacing, 0)
     eq_(s.character_spacing, 0)
-    
+
     # r1341
     eq_(s.wrap_before, False)
     eq_(s.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
     eq_(s.justify_alignment, mapnik.justify_alignment.MIDDLE)
     eq_(s.opacity, 1.0)
-    
+
     # r2300
     eq_(s.minimum_padding, 0.0)
-    
+
     # was mixed with s.opacity
     eq_(s.text_opacity, 1.0)
 
@@ -69,7 +69,7 @@ def test_shieldsymbolizer_init():
     eq_(s.filename, '../data/images/dummy.png')
 
     eq_(s.transform, 'matrix(1, 0, 0, 1, 0, 0)')
-        
+
     eq_(len(s.fontset.names), 0)
 
 
@@ -164,11 +164,11 @@ def test_stroke_dash_arrays():
 
     eq_(s.get_dashes(), [(1,2),(3,4),(5,6)])
 
-    
+
 # LineSymbolizer initialization
 def test_linesymbolizer_init():
     l = mapnik.LineSymbolizer()
-   
+
     eq_(l.stroke.width, 1)
     eq_(l.stroke.opacity, 1)
     eq_(l.stroke.color, mapnik.Color('black'))
@@ -182,10 +182,10 @@ def test_linesymbolizer_init():
     eq_(l.stroke.color, mapnik.Color('blue'))
     eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
     eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
-    
+
     s = mapnik.Stroke(mapnik.Color('blue'), 5.0)
     l = mapnik.LineSymbolizer(s)
-    
+
     eq_(l.stroke.width, 5)
     eq_(l.stroke.opacity, 1)
     eq_(l.stroke.color, mapnik.Color('blue'))
@@ -220,7 +220,7 @@ def test_layer_init():
 # Map initialization
 def test_map_init():
     m = mapnik.Map(256, 256)
-   
+
     eq_(m.width, 256)
     eq_(m.height, 256)
     eq_(m.srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
@@ -259,7 +259,7 @@ def test_map_init_from_string():
         eq_(m.base, './')
         mapnik.load_map_from_string(m, map_string, False, "") # this "" will have no effect
         eq_(m.base, './')
-        
+
         tmp_dir = tempfile.gettempdir()
         try:
             mapnik.load_map_from_string(m, map_string, False, tmp_dir)
@@ -296,7 +296,7 @@ def test_color_init():
     eq_(c.to_hex_string(), '#0000ff')
 
     c = mapnik.Color('#f2eff9')
-    
+
     eq_(c.a, 255)
     eq_(c.r, 242)
     eq_(c.g, 239)
@@ -321,7 +321,7 @@ def test_color_init():
     eq_(c.b, 128)
 
     eq_(c.to_hex_string(), '#004080')
-    
+
     c = mapnik.Color(0, 64, 128, 192)
 
     eq_(c.a, 192)
@@ -333,12 +333,12 @@ def test_color_init():
 
 # Color equality
 def test_color_equality():
-    
+
     c1 = mapnik.Color('blue')
     c2 = mapnik.Color(0,0,255)
     c3 = mapnik.Color('black')
-    
-    
+
+
     c3.r = 0
     c3.g = 0
     c3.b = 255
@@ -350,7 +350,7 @@ def test_color_equality():
     c1 = mapnik.Color(0, 64, 128)
     c2 = mapnik.Color(0, 64, 128)
     c3 = mapnik.Color(0, 0, 0)
-    
+
     c3.r = 0
     c3.g = 64
     c3.b = 128
@@ -369,20 +369,20 @@ def test_color_equality():
 
     eq_(c1, c2)
     eq_(c1, c3)
-    
+
     c1 = mapnik.Color('rgb(50%,50%,50%)')
     c2 = mapnik.Color(128, 128, 128, 255)
     c3 = mapnik.Color('#808080')
     c4 = mapnik.Color('gray')
-    
+
     eq_(c1, c2)
     eq_(c1, c3)
     eq_(c1, c4)
-    
+
     c1 = mapnik.Color('hsl(0, 100%, 50%)')   # red
     c2 = mapnik.Color('hsl(120, 100%, 50%)') # lime
     c3 = mapnik.Color('hsla(240, 100%, 50%, 0.5)') # semi-transparent solid blue
-    
+
     eq_(c1, mapnik.Color('red'))
     eq_(c2, mapnik.Color('lime'))
     eq_(c3, mapnik.Color(0,0,255,128))
@@ -392,59 +392,59 @@ def test_color_equality():
 def test_rule_init():
     min_scale = 5
     max_scale = 10
-    
+
     r = mapnik.Rule()
-   
+
     eq_(r.name, '')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
-    
+
     r = mapnik.Rule()
-    
+
     r.set_else(True)
     eq_(r.has_else(), True)
     eq_(r.has_also(), False)
-    
+
     r = mapnik.Rule()
-    
+
     r.set_also(True)
     eq_(r.has_else(), False)
     eq_(r.has_also(), True)
-    
+
     r = mapnik.Rule("Name")
-    
+
     eq_(r.name, 'Name')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
-    
+
     r = mapnik.Rule("Name")
-    
+
     eq_(r.name, 'Name')
     eq_(r.min_scale, 0)
     eq_(r.max_scale, float('inf'))
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
-    
+
     r = mapnik.Rule("Name", min_scale)
-    
+
     eq_(r.name, 'Name')
     eq_(r.min_scale, min_scale)
     eq_(r.max_scale, float('inf'))
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
-    
+
     r = mapnik.Rule("Name", min_scale, max_scale)
-    
+
     eq_(r.name, 'Name')
     eq_(r.min_scale, min_scale)
     eq_(r.max_scale, max_scale)
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
-    
+
 # Coordinate initialization
 def test_coord_init():
     c = mapnik.Coord(100, 100)
@@ -470,7 +470,7 @@ def test_envelope_init():
     assert_true(e.contains(200, 100))
 
     assert_true(e.contains(e.center()))
-    
+
     assert_false(e.contains(99.9, 99.9))
     assert_false(e.contains(99.9, 200.1))
     assert_false(e.contains(200.1, 200.1))
@@ -484,7 +484,7 @@ def test_envelope_init():
 
     eq_(e.maxx, 200)
     eq_(e.maxy, 200)
-    
+
     eq_(e[0],100)
     eq_(e[1],100)
     eq_(e[2],200)
@@ -493,7 +493,7 @@ def test_envelope_init():
     eq_(e[1],e[-3])
     eq_(e[2],e[-2])
     eq_(e[3],e[-1])
-    
+
     c = e.center()
 
     eq_(c.x, 150)
@@ -513,7 +513,7 @@ def test_envelope_static_init():
     assert_true(e.contains(200, 100))
 
     assert_true(e.contains(e.center()))
-    
+
     assert_false(e.contains(99.9, 99.9))
     assert_false(e.contains(99.9, 200.1))
     assert_false(e.contains(200.1, 200.1))
@@ -527,7 +527,7 @@ def test_envelope_static_init():
 
     eq_(e.maxx, 200)
     eq_(e.maxy, 200)
-    
+
     eq_(e[0],100)
     eq_(e[1],100)
     eq_(e[2],200)
@@ -536,7 +536,7 @@ def test_envelope_static_init():
     eq_(e[1],e[-3])
     eq_(e[2],e[-2])
     eq_(e[3],e[-1])
-    
+
     c = e.center()
 
     eq_(c.x, 150)
@@ -546,7 +546,7 @@ def test_envelope_static_init():
 def test_envelope_multiplication():
     e = mapnik.Box2d(100, 100, 200, 200)
     e *= 2
-    
+
     assert_true(e.contains(50, 50))
     assert_true(e.contains(50, 250))
     assert_true(e.contains(250, 250))
@@ -558,7 +558,7 @@ def test_envelope_multiplication():
     assert_false(e.contains(250.1, 49.9))
 
     assert_true(e.contains(e.center()))
-    
+
     eq_(e.width(), 200)
     eq_(e.height(), 200)
 
@@ -579,13 +579,13 @@ def test_envelope_clipping():
     e2 = mapnik.Box2d(-120,40,-110,48)
     e1.clip(e2)
     eq_(e1,e2)
-    
+
     # madagascar in merc
     e1 = mapnik.Box2d(4772116.5490, -2744395.0631, 5765186.4203, -1609458.0673)
     e2 = mapnik.Box2d(5124338.3753, -2240522.1727, 5207501.8621, -2130452.8520)
     e1.clip(e2)
     eq_(e1,e2)
-    
+
     # nz in lon/lat
     e1 = mapnik.Box2d(163.8062, -47.1897, 179.3628, -33.9069)
     e2 = mapnik.Box2d(173.7378, -39.6395, 174.4849, -38.9252)

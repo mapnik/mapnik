@@ -33,11 +33,11 @@ def main():
             prefix = a
         else:
             assert False, "Unhandled option"
-   
+
     if quiet and verbose:
         usage()
         sys.exit(2)
- 
+
     if prefix:
         # Allow python to find libraries for testing on the buildbot
         sys.path.insert(0, os.path.join(prefix, "lib/python%s/site-packages" % sys.version[:3]))
@@ -63,7 +63,7 @@ def main():
         # 3 * '-v' gets us debugging information from nose
         argv.append('-v')
         argv.append('-v')
-   
+
     dirname = os.path.dirname(sys.argv[0]) 
     argv.extend(['-w', dirname+'/python_tests'])
 

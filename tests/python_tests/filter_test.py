@@ -17,7 +17,7 @@ map_ = '''<Map>
         </Rule>
         <Rule>
             <Filter>
-            
+
             <![CDATA[
 
             ([region] >= 0) 
@@ -26,7 +26,7 @@ map_ = '''<Map>
 
             ([region] <= 50)
             ]]>
-            
+
             </Filter>
         </Rule>
         <Rule>
@@ -77,18 +77,18 @@ def test_filter_init():
     <= 
     50)
     '''))
-    
+
     s = m.find_style('s')
-    
+
     for r in s.rules:
         filters.append(r.filter)
-    
+
     first = filters[0]
     for f in filters:
         eq_(str(first),str(f))
-    
+
     s = m.find_style('s2')
-    
+
     eq_(s.filter_mode,mapnik.filter_mode.FIRST)
 
 
@@ -126,5 +126,3 @@ def test_unicode_regex_replace():
 
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]
-
-

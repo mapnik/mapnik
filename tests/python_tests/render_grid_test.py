@@ -68,7 +68,7 @@ def create_grid_map(width,height):
     m.append_style('places_labels',s)
     m.layers.append(lyr)
     return m
-    
+
 def test_render_grid():
     """ test old method """
     width,height = 256,256
@@ -79,10 +79,10 @@ def test_render_grid():
     grid = mapnik.render_grid(m,0,key='Name',resolution=4,fields=['Name'])
     eq_(grid,grid_correct)
     eq_(resolve(grid,0,0),None)
-    
+
     # check every pixel of the nw symbol
     expected = {"Name": "North West"}
-    
+
     # top row
     eq_(resolve(grid,23,9),expected)
     eq_(resolve(grid,23,10),expected)
@@ -99,7 +99,7 @@ def test_render_grid():
     eq_(resolve(grid,25,10),expected)
     eq_(resolve(grid,25,11),expected)
     eq_(resolve(grid,25,12),expected)
-    
+
     # bottom row
     eq_(resolve(grid,26,9),expected)
     eq_(resolve(grid,26,10),expected)
@@ -127,7 +127,7 @@ def test_render_grid2():
     eq_(len(utf2['grid']),len(utf1['grid']))
     eq_(len(utf2['keys']),len(utf1['keys']))
     eq_(len(utf2['data']),len(utf1['data']))
-    
+
     # check a full view is the same as a full image
     grid_view = grid.view(0,0,width,height)
     # for kicks check at full res too
@@ -136,9 +136,9 @@ def test_render_grid2():
     eq_(utf3['grid'],utf4['grid'])
     eq_(utf3['keys'],utf4['keys'])
     eq_(utf3['data'],utf4['data'])
-    
+
     eq_(resolve(utf4,0,0),None)
-    
+
     # resolve some center points in the
     # resampled view
     utf5 = grid_view.encode('utf',resolution=4)
@@ -173,9 +173,9 @@ def test_render_grid3():
     eq_(utf3['grid'],utf4['grid'])
     eq_(utf3['keys'],utf4['keys'])
     eq_(utf3['data'],utf4['data'])
-    
+
     eq_(resolve(utf4,0,0),None)
-    
+
     # resolve some center points in the
     # resampled view
     utf5 = grid_view.encode('utf',resolution=4)

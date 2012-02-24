@@ -25,7 +25,7 @@ def call(cmd,silent=False):
 
 def psql_can_connect():
     """Test ability to connect to a postgis template db with no options.
-    
+
     Basically, to run these tests your user must have full read
     access over unix sockets without supplying a password. This
     keeps these tests simple and focused on postgis not on postgres
@@ -40,7 +40,7 @@ def psql_can_connect():
 
 def shp2pgsql_on_path():
     """Test for presence of shp2pgsql on the user path.
-    
+
     We require this program to load test data into a temporarily database.
     """
     try:
@@ -52,7 +52,7 @@ def shp2pgsql_on_path():
 
 def createdb_and_dropdb_on_path():
     """Test for presence of dropdb/createdb on user path.
-    
+
     We require these programs to setup and teardown the testing db.
     """
     try:
@@ -89,7 +89,7 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         and createdb_and_dropdb_on_path() \
         and psql_can_connect() \
         and shp2pgsql_on_path():
-    
+
     # initialize test database
     postgis_setup()
 
@@ -188,4 +188,3 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
-    

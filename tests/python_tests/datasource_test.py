@@ -13,7 +13,7 @@ def setup():
 def test_that_datasources_exist():
     if len(mapnik.DatasourceCache.instance().plugin_names()) == 0:
         print '***NOTICE*** - no datasource plugins have been loaded'
-    
+
 def test_field_listing():
     if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
         ds = mapnik.Shapefile(file='../data/shp/poly.shp')
@@ -51,7 +51,7 @@ def test_reading_json_from_string():
         features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 5)
-    
+
 def test_feature_envelope():
     if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
         ds = mapnik.Shapefile(file='../data/shp/poly.shp')
@@ -110,7 +110,7 @@ def test_hit_grid():
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(str(e))
-        
+
 
 if __name__ == '__main__':
     setup()

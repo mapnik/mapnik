@@ -43,7 +43,7 @@ def test_add_geom_wkb():
             e = g.envelope()
         else:
             e +=g.envelope()
-            
+
     eq_(e, f.envelope())
 
 def test_feature_expression_evaluation():
