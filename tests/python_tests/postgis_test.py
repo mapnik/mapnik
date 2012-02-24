@@ -182,7 +182,6 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         query.add_property_name('bogus')
         fs = ds.features(query)
 
-
     atexit.register(postgis_takedown)
 
 if __name__ == "__main__":

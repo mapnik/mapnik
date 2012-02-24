@@ -7,7 +7,6 @@ from utilities import execution_path
 
 import os, mapnik
 
-
 def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
@@ -115,7 +114,6 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(len(fs[7].geometries()),2)
         eq_(fs[7].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
         eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Collection, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
-
 
     def test_handling_of_missing_header(**kwargs):
         ds = get_csv_ds('missing_header.csv')

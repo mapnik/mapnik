@@ -72,7 +72,6 @@ def test_shieldsymbolizer_init():
 
     eq_(len(s.fontset.names), 0)
 
-
 # ShieldSymbolizer missing image file
 # images paths are now PathExpressions are evaluated at runtime
 # so it does not make sense to throw...
@@ -121,7 +120,6 @@ def test_pointsymbolizer_init():
 #def test_pointsymbolizer_missing_image():
  #   p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/broken.png"))
 
-
 # PolygonSymbolizer initialization
 def test_polygonsymbolizer_init():
     p = mapnik.PolygonSymbolizer()
@@ -164,7 +162,6 @@ def test_stroke_dash_arrays():
 
     eq_(s.get_dashes(), [(1,2),(3,4),(5,6)])
 
-
 # LineSymbolizer initialization
 def test_linesymbolizer_init():
     l = mapnik.LineSymbolizer()
@@ -191,7 +188,6 @@ def test_linesymbolizer_init():
     eq_(l.stroke.color, mapnik.Color('blue'))
     eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
     eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
-
 
 # TextSymbolizer initialization
 def test_textsymbolizer_init():
@@ -338,7 +334,6 @@ def test_color_equality():
     c2 = mapnik.Color(0,0,255)
     c3 = mapnik.Color('black')
 
-
     c3.r = 0
     c3.g = 0
     c3.b = 255
@@ -386,7 +381,6 @@ def test_color_equality():
     eq_(c1, mapnik.Color('red'))
     eq_(c2, mapnik.Color('lime'))
     eq_(c3, mapnik.Color(0,0,255,128))
-
 
 # Rule initialization
 def test_rule_init():

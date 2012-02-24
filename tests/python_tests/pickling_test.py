@@ -26,7 +26,6 @@ def test_pointsymbolizer_pickle():
     eq_(p.ignore_placement, p2.ignore_placement)
     eq_(p.placement, p2.placement)
 
-
 # PolygonSymbolizer pickling
 def test_polygonsymbolizer_pickle():
     p = mapnik.PolygonSymbolizer(mapnik.Color('black'))
@@ -36,7 +35,6 @@ def test_polygonsymbolizer_pickle():
     p2 = pickle.loads(pickle.dumps(p,pickle.HIGHEST_PROTOCOL))
     eq_(p.fill, p2.fill)
     eq_(p.fill_opacity, p2.fill_opacity)
-
 
 # Stroke pickling
 def test_stroke_pickle():
@@ -70,8 +68,6 @@ def test_linesymbolizer_pickle():
     eq_(s.line_cap, s2.line_cap)
     eq_(s.line_join, s2.line_join)
 
-
-
 # TextSymbolizer pickling
 def test_textsymbolizer_pickle():
     raise Todo("text_symbolizer pickling currently disabled")
@@ -81,7 +77,6 @@ def test_textsymbolizer_pickle():
     eq_(ts.face_name, 'Font Name')
     eq_(ts.text_size, 8)
     eq_(ts.fill, mapnik.Color('black'))
-
 
     ts2 = pickle.loads(pickle.dumps(ts,pickle.HIGHEST_PROTOCOL))
     eq_(ts.name, ts2.name)
@@ -120,7 +115,6 @@ def test_textsymbolizer_pickle():
 
     eq_(len(ts.fontset.names), 0)
 
-
 def test_map_pickle():
     # Fails due to scale() not matching, possibly other things
     raise(Todo("Map does not support pickling yet (Tickets #345)."))
@@ -146,12 +140,10 @@ def test_color_pickle():
 
     eq_(pickle.loads(pickle.dumps(c)), c)
 
-
 def test_envelope_pickle():
     e = mapnik.Box2d(100, 100, 200, 200)
 
     eq_(pickle.loads(pickle.dumps(e)), e)
-
 
 if __name__ == "__main__":
     setup()
