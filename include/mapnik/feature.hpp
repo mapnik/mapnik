@@ -24,6 +24,7 @@
 #define MAPNIK_FEATURE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/raster.hpp>
@@ -84,10 +85,10 @@ private:
     map_type mapping_;
 };
 
-typedef context<std::map<std::string,std::size_t> > context_type;
-typedef boost::shared_ptr<context_type> context_ptr;
+typedef MAPNIK_DECL context<std::map<std::string,std::size_t> > context_type;
+typedef MAPNIK_DECL boost::shared_ptr<context_type> context_ptr;
 
-class feature_impl : private boost::noncopyable
+class MAPNIK_DECL feature_impl : private boost::noncopyable
 {
     friend class feature_kv_iterator;
 public:
