@@ -37,6 +37,16 @@ void feature_kv_iterator::increment()
     ++itr_;
 }
 
+void feature_kv_iterator::decrement()
+{
+    // dummy //--itr_;
+}
+
+void advance(boost::iterator_difference<feature_kv_iterator>::type )
+{
+    // dummy
+}
+
 bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
 {
     return ( itr_ == other.itr_);

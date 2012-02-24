@@ -27,6 +27,7 @@
 #include <mapnik/value.hpp>
 // boost
 #include <boost/tuple/tuple.hpp>
+#include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/variant.hpp>
@@ -50,7 +51,8 @@ public:
 private:
     friend class boost::iterator_core_access;
     void increment();
-
+    void decrement();
+    void advance(boost::iterator_difference<feature_kv_iterator>::type);
     bool equal( feature_kv_iterator const& other) const;
 
     value_type const& dereference() const;
