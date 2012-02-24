@@ -39,9 +39,16 @@ string_info &processed_text::get_string_info()
     {
         char_properties const &p = itr->p;
         face_set_ptr faces = font_manager_.get_face_set(p.face_name, p.fontset);
-        if (faces->size() <= 0)
+        if (faces->size() == 0)
         {
-            throw config_error("Unable to find specified font face '" + p.face_name + "'");
+            if (!p.fontset.get_name().empty())
+            {
+                throw config_error("Unable to find specified font set '" + p.face_name + "'");
+            } else if (!p.face_name.empty()) {
+                throw config_error("Unable to find specified font face '" + p.face_name + "'");
+            } else {
+                throw config_error("Both font set and face name are empty!");
+            }
         }
         faces->set_character_sizes(p.text_size * scale_factor_);
         faces->get_string_info(info_, itr->str, &(itr->p));
