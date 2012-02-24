@@ -24,6 +24,7 @@
 #define MAPNIK_GRID_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/grid/grid_view.hpp>
