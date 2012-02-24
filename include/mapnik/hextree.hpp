@@ -434,7 +434,7 @@ private:
             }
             tries=0;
             // ignore leaves and also nodes with small mean error and not excessive number of pixels
-            if ((cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(long(cur_node->pixel_count)) > 15
+            if (cur_node->pixel_count > 0 && (cur_node->reduce_cost / cur_node->pixel_count + 1) * std::log(long(cur_node->pixel_count)) > 15
                 && cur_node->children_count > 0)
             {
                 colors_--;

@@ -35,10 +35,11 @@ bool rgba::mean_sort_cmp::operator() (const rgba& x, const rgba& y) const
     int t2 = (int)y.a + y.r + y.g + y.b;
     if (t1 != t2) return t1 < t2;
 
-    return (((int)x.a - y.a) >> 24) +
-           (((int)x.r - y.r) >> 16) +
-           (((int)x.g - y.g) >> 8) +
-           (((int)x.b - y.b));
+    // https://github.com/mapnik/mapnik/issues/1087
+    if (x.a != y.a) return x.a < y.a;
+    if (x.r != y.r) return x.r < y.r;
+    if (x.g != y.g) return x.g < y.g;
+    return x.b < y.b;
 }
 
 std::size_t rgba::hash_func::operator()(rgba const& p) const
