@@ -42,7 +42,7 @@ void feature_kv_iterator::decrement()
     // dummy //--itr_;
 }
 
-void advance(boost::iterator_difference<feature_kv_iterator>::type )
+void feature_kv_iterator::advance(boost::iterator_difference<feature_kv_iterator>::type )
 {
     // dummy
 }

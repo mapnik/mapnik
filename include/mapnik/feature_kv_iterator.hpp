@@ -24,6 +24,7 @@
 #define MAPNIK_FEATURE_KV_ITERATOR_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/value.hpp>
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -39,7 +40,7 @@ namespace mapnik {
 
 class feature_impl;
 
-class feature_kv_iterator :
+class MAPNIK_DECL feature_kv_iterator :
         public boost::iterator_facade<feature_kv_iterator,
                                       boost::tuple<std::string , value> const,
                                       boost::forward_traversal_tag>
