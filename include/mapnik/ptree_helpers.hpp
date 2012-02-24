@@ -40,45 +40,45 @@
 namespace mapnik {
 
 template <typename T>
-T get(const boost::property_tree::ptree & node, const std::string & name, bool is_attribute,
-      const T & default_value);
+T get(boost::property_tree::ptree const& node, std::string const& name, bool is_attribute,
+      T const& default_value);
 template <typename T>
-T get(const boost::property_tree::ptree & node, const std::string & name, bool is_attribute);
+T get(boost::property_tree::ptree const& node, std::string const& name, bool is_attribute);
 template <typename T>
-T get_value(const boost::property_tree::ptree & node, const std::string & name);
+T get_value(boost::property_tree::ptree const& node, std::string const& name);
 template <typename T>
-boost::optional<T> get_optional(const boost::property_tree::ptree & node, const std::string & name,
+boost::optional<T> get_optional(boost::property_tree::ptree const& node, std::string const& name,
                                 bool is_attribute);
 
 template <typename T>
-boost::optional<T> get_opt_attr( const boost::property_tree::ptree & node,
-                                 const std::string & name)
+boost::optional<T> get_opt_attr( boost::property_tree::ptree const& node,
+                                 std::string const& name)
 {
     return get_optional<T>( node, name, true);
 }
 
 template <typename T>
-boost::optional<T> get_opt_child( const boost::property_tree::ptree & node,
-                                  const std::string & name)
+boost::optional<T> get_opt_child( boost::property_tree::ptree const& node,
+                                  std::string const& name)
 {
     return get_optional<T>( node, name, false);
 }
 
 template <typename T>
-T get_attr( const boost::property_tree::ptree & node, const std::string & name,
-            const T & default_value )
+T get_attr( boost::property_tree::ptree const& node, std::string const& name,
+            T const& default_value )
 {
     return get<T>( node, name, true, default_value);
 }
 
 template <typename T>
-T get_attr( const boost::property_tree::ptree & node, const std::string & name )
+T get_attr( boost::property_tree::ptree const& node, std::string const& name )
 {
     return get<T>( node, name, true );
 }
 
 template <typename T>
-T get_css( const boost::property_tree::ptree & node, const std::string & name )
+T get_css( boost::property_tree::ptree const& node, std::string const& name )
 {
     return get_value<T>( node, std::string("CSS parameter '") + name + "'");
 }
@@ -103,7 +103,7 @@ inline color get_css (boost::property_tree::ptree const& node, std::string const
 
 template <typename charT, typename traits>
 std::basic_ostream<charT, traits> &
-operator << ( std::basic_ostream<charT, traits> & s, const mapnik::color & c )
+operator << ( std::basic_ostream<charT, traits> & s, mapnik::color const& c )
 {
     std::string hex_string( c.to_string() );
     s << hex_string;
@@ -115,13 +115,13 @@ class boolean {
 public:
     boolean() {}
     boolean(bool b) : b_(b) {}
-    boolean(const boolean & b) : b_(b.b_) {}
+    boolean(boolean const& b) : b_(b.b_) {}
 
     operator bool() const
     {
         return b_;
     }
-    boolean & operator = (const boolean & other)
+    boolean & operator = (boolean const& other)
     {
         b_ = other.b_;
         return * this;
@@ -164,21 +164,21 @@ operator >> ( std::basic_istream<charT, traits> & s, boolean & b )
 
 template <typename charT, typename traits>
 std::basic_ostream<charT, traits> &
-operator << ( std::basic_ostream<charT, traits> & s, const boolean & b )
+operator << ( std::basic_ostream<charT, traits> & s, boolean const& b )
 {
     s << ( b ? "true" : "false" );
     return s;
 }
 
 template <typename T>
-void set_attr(boost::property_tree::ptree & pt, const std::string & name, const T & v)
+void set_attr(boost::property_tree::ptree & pt, std::string const& name, T const& v)
 {
     pt.put("<xmlattr>." + name, v);
 }
 
 /*
   template <>
-  void set_attr<bool>(boost::property_tree::ptree & pt, const std::string & name, const bool & v)
+  void set_attr<bool>(boost::property_tree::ptree & pt, std::string const& name, const bool & v)
   {
   pt.put("<xmlattr>." + name, boolean(v));
   }
@@ -187,7 +187,7 @@ void set_attr(boost::property_tree::ptree & pt, const std::string & name, const 
 class boolean;
 
 template <typename T>
-void set_css(boost::property_tree::ptree & pt, const std::string & name, const T & v)
+void set_css(boost::property_tree::ptree & pt, std::string const& name, T const& v)
 {
     boost::property_tree::ptree & css_node = pt.push_back(
         boost::property_tree::ptree::value_type("CssParameter",
@@ -248,8 +248,10 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 };
 
 template <typename T>
-T get(const boost::property_tree::ptree & node, const std::string & name, bool is_attribute,
-      const T & default_value)
+T get(boost::property_tree::ptree const& node,
+      std::string const& name,
+      bool is_attribute,
+      T const& default_value)
 {
     boost::optional<std::string> str;
     if (is_attribute)
@@ -261,7 +263,8 @@ T get(const boost::property_tree::ptree & node, const std::string & name, bool i
         str = node.get_optional<std::string>(name+".<xmltext>");
     }
 
-    if ( str ) {
+    if ( str )
+    {
         try
         {
             return boost::lexical_cast<T>( * str );
@@ -273,13 +276,17 @@ T get(const boost::property_tree::ptree & node, const std::string & name, bool i
                                name + "'. Expected " + name_trait<T>::name() +
                                " but got '" + *str + "'");
         }
-    } else {
+    }
+    else
+    {
         return default_value;
     }
 }
 
 template <>
-inline color get(boost::property_tree::ptree const& node, std::string const& name, bool is_attribute,
+inline color get(boost::property_tree::ptree const& node,
+                 std::string const& name,
+                 bool is_attribute,
                  color const& default_value)
 {
     boost::optional<std::string> str;
@@ -313,7 +320,7 @@ inline color get(boost::property_tree::ptree const& node, std::string const& nam
 }
 
 template <typename T>
-T get(const boost::property_tree::ptree & node, const std::string & name, bool is_attribute)
+T get(boost::property_tree::ptree const& node, std::string const& name, bool is_attribute)
 {
     boost::optional<std::string> str;
     if (is_attribute)
@@ -325,7 +332,8 @@ T get(const boost::property_tree::ptree & node, const std::string & name, bool i
         str = node.get_optional<std::string>(name+".<xmltext>");
     }
 
-    if ( ! str ) {
+    if ( ! str )
+    {
         throw config_error(std::string("Required ") +
                            (is_attribute ? "attribute " : "child node ") +
                            "'" + name + "' is missing");
@@ -344,7 +352,7 @@ T get(const boost::property_tree::ptree & node, const std::string & name, bool i
 }
 
 template <typename T>
-T get_value(const boost::property_tree::ptree & node, const std::string & name)
+T get_value(boost::property_tree::ptree const& node, std::string const& name)
 {
     try
     {
@@ -370,7 +378,7 @@ T get_value(const boost::property_tree::ptree & node, const std::string & name)
 }
 
 template <typename T>
-boost::optional<T> get_optional(const boost::property_tree::ptree & node, const std::string & name,
+boost::optional<T> get_optional(boost::property_tree::ptree const& node, std::string const& name,
                                 bool is_attribute)
 {
     boost::optional<std::string> str;
@@ -404,7 +412,7 @@ boost::optional<T> get_optional(const boost::property_tree::ptree & node, const 
 //
 
 template <>
-inline boost::optional<color> get_optional(const boost::property_tree::ptree & node, const std::string & name,
+inline boost::optional<color> get_optional(boost::property_tree::ptree const& node, std::string const& name,
                                            bool is_attribute)
 {
     boost::optional<std::string> str;
