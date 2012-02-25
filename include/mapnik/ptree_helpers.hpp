@@ -27,17 +27,20 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/color_factory.hpp>
-
+#include <mapnik/util/conversions.hpp>
 // boost
 #include <boost/property_tree/ptree.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
+#include <boost/lexical_cast.hpp>
 
 // stl
 #include <iostream>
 #include <sstream>
 
 namespace mapnik {
+
+template <typename T>
+static boost::optional<T> fast_cast(std::string const& value);
 
 template <typename T>
 T get(boost::property_tree::ptree const& node, std::string const& name, bool is_attribute,
@@ -206,6 +209,39 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 };
 
 template <typename T>
+boost::optional<T> fast_cast(std::string const& value)
+{
+    return boost::lexical_cast<T>( value );
+}
+
+template <>
+boost::optional<int> fast_cast(std::string const& value)
+{
+    int result;
+    if (mapnik::conversions::string2int(value,&result))
+        return boost::optional<int>(result);
+    return boost::optional<int>();
+}
+
+template <>
+boost::optional<double> fast_cast(std::string const& value)
+{
+    double result;
+    if (mapnik::conversions::string2double(value,&result))
+        return boost::optional<double>(result);
+    return boost::optional<double>();
+}
+
+template <>
+boost::optional<float> fast_cast(std::string const& value)
+{
+    float result;
+    if (mapnik::conversions::string2float(value,&result))
+        return boost::optional<float>(result);
+    return boost::optional<float>();
+}
+
+template <typename T>
 T get(boost::property_tree::ptree const& node,
       std::string const& name,
       bool is_attribute,
@@ -223,11 +259,12 @@ T get(boost::property_tree::ptree const& node,
 
     if ( str )
     {
-        try
+        boost::optional<T> result = fast_cast<T>(*str);
+        if (result)
         {
-            return boost::lexical_cast<T>( * str );
+            return *result;
         }
-        catch (const boost::bad_lexical_cast & )
+        else
         {
             throw config_error(std::string("Failed to parse ") +
                                (is_attribute ? "attribute" : "child node") + " '" +
@@ -296,11 +333,12 @@ T get(boost::property_tree::ptree const& node, std::string const& name, bool is_
                            (is_attribute ? "attribute " : "child node ") +
                            "'" + name + "' is missing");
     }
-    try
+    boost::optional<T> result = fast_cast<T>(*str);
+    if (result)
     {
-        return boost::lexical_cast<T>( *str );
+        return *result;
     }
-    catch (const boost::bad_lexical_cast & )
+    else
     {
         throw config_error(std::string("Failed to parse ") +
                            (is_attribute ? "attribute" : "child node") + " '" +
@@ -352,11 +390,8 @@ boost::optional<T> get_optional(boost::property_tree::ptree const& node, std::st
     boost::optional<T> result;
     if ( str )
     {
-        try
-        {
-            result = boost::lexical_cast<T>( *str );
-        }
-        catch (const boost::bad_lexical_cast &)
+        result = fast_cast<T>(*str);
+        if (!result)
         {
             throw config_error(std::string("Failed to parse ") +
                                (is_attribute ? "attribute" : "child node") + " '" +
@@ -388,7 +423,6 @@ inline boost::optional<color> get_optional(boost::property_tree::ptree const& no
     {
         try
         {
-            //result = boost::lexical_cast<T>( *str );
             result = mapnik::color_factory::from_string((*str).c_str());
         }
         catch (...)
