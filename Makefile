@@ -20,4 +20,10 @@ uninstall:
 test:
 	@python tests/run_tests.py -q
 
+pep8:
+	# https://gist.github.com/1903033
+	# gsed on osx
+	@pep8 -r --select=W293 -q --filename=*.py `pwd`/tests/ | xargs gsed -i 's/^[ \r\t]*$//'
+	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}'
+
 .PHONY: clean reset uninstall test install
