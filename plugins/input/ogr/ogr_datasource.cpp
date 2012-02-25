@@ -317,12 +317,6 @@ void ogr_datasource::bind() const
 #endif
                 desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Object));
                 break;
-
-            default: // unknown
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
-                break;
             }
         }
     }
