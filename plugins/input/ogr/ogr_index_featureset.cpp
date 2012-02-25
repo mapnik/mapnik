@@ -175,14 +175,6 @@ feature_ptr ogr_index_featureset<filterT>::next()
 #endif
                     break;
                 }
-
-                default: // unknown
-                {
-#ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
-                    break;
-                }
                 }
             }
             return feature;
