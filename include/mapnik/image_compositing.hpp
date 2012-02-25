@@ -172,9 +172,6 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
     case invert_rgb:
         pixf.comp_op(agg::comp_op_invert_rgb);
         break;
-    default:
-        break;
-
     }
     renderer_type ren(pixf);
     agg::renderer_base<pixfmt_type> rb(pixf);

@@ -131,9 +131,6 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
             case SCALING_BLACKMAN:
                 ff = 2.0;
                 break;
-            default:
-                ff = 1.0;
-                break;
             }
             return ff;
         }
