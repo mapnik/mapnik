@@ -301,6 +301,10 @@ public:
             if (face_ptr face = get_face(*name))
             {
                 face_set->add(face);
+            } else {
+#ifdef MAPNIK_DEBUG
+                std::cerr << "Failed to find face '" << *name << "' in font set '" << fset.get_name() << "'\n";
+#endif
             }
         }
         return face_set;
