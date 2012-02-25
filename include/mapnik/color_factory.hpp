@@ -95,8 +95,8 @@ class MAPNIK_DECL color_factory : boost::noncopyable
 {
 public:
 
-    static void parse_from_string(color & c, std::string const& css_color,
-                                 mapnik::css_color_grammar<std::string::const_iterator> g)
+    static bool parse_from_string(color & c, std::string const& css_color,
+                                 mapnik::css_color_grammar<std::string::const_iterator> const& g)
     {
         std::string::const_iterator first = css_color.begin();
         std::string::const_iterator last =  css_color.end();
@@ -107,15 +107,15 @@ public:
                                             g,
                                             boost::spirit::ascii::space,
                                             css_);
-        if (!result)
+        if (result && (first == last))
         {
-            throw config_error(std::string("Failed to parse color value: ") +
-                               "Expected a CSS color, but got '" + css_color + "'");
+            c.set_red(css_.r);
+            c.set_green(css_.g);
+            c.set_blue(css_.b);
+            c.set_alpha(css_.a);
+            return true;
         }
-        c.set_red(css_.r);
-        c.set_green(css_.g);
-        c.set_blue(css_.b);
-        c.set_alpha(css_.a);
+        return false;
     }
 
     static void init_from_string(color & c, std::string const& css_color)
