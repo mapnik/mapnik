@@ -22,38 +22,42 @@
 //$Id$
 
 #include <mapnik/expression.hpp>
-#include <mapnik/expression_grammar.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/unicode.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
 
-class expression_factory
+expression_ptr expression_factory::compile(std::string const& str,transcoder const& tr)
 {
-public:
-    static expression_ptr compile(std::string const& str,transcoder const& tr)
+    expression_ptr expr(boost::make_shared<expr_node>(true));
+    std::string::const_iterator itr = str.begin();
+    std::string::const_iterator end = str.end();
+    mapnik::expression_grammar<std::string::const_iterator> g(tr);
+    bool r = boost::spirit::qi::phrase_parse(itr,end,g, boost::spirit::standard_wide::space,*expr);
+    if (r && itr==end)
     {
-        expression_ptr expr(new expr_node(true));
-
-        std::string::const_iterator itr = str.begin();
-        std::string::const_iterator end = str.end();
-        mapnik::expression_grammar<std::string::const_iterator> g(tr);
-
-        bool r = boost::spirit::qi::phrase_parse(itr,end,g, boost::spirit::standard_wide::space,*expr);
-        if (r  && itr==end)
-        {
-            return expr;
-        }
-        else
-        {
-            throw config_error( "Failed to parse expression: \"" + str + "\"" );
-        }
+        return expr;
     }
-};
+    else
+    {
+        throw config_error( "Failed to parse expression: \"" + str + "\"" );
+    }
+}
+
+bool expression_factory::parse_from_string(expression_ptr const& expr,
+                              std::string const& str,
+                              mapnik::expression_grammar<std::string::const_iterator> const& g)
+{
+    std::string::const_iterator itr = str.begin();
+    std::string::const_iterator end = str.end();
+    bool r = boost::spirit::qi::phrase_parse(itr,end,g, boost::spirit::standard_wide::space,*expr);
+    return (r && itr==end);
+}
 
 expression_ptr parse_expression (std::string const& wkt,std::string const& encoding)
 {

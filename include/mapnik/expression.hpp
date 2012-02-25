@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/expression_node.hpp>
+#include <mapnik/expression_grammar.hpp>
 
 // stl
 #include <string>
@@ -34,6 +35,15 @@ namespace mapnik
 {
 
 typedef boost::shared_ptr<expr_node> expression_ptr;
+
+class expression_factory
+{
+public:
+    static expression_ptr compile(std::string const& str,transcoder const& tr);
+    static bool parse_from_string(expression_ptr const& expr,
+                                  std::string const& str,
+                                  mapnik::expression_grammar<std::string::const_iterator> const& g);
+};
 
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding);
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt);

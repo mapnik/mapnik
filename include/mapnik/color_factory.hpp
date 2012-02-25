@@ -63,6 +63,20 @@ public:
         }
     }
 
+    static bool parse_from_string(color & c, std::string const& css_color,
+                                 mapnik::css_color_grammar<std::string::const_iterator> const& g)
+    {
+        std::string::const_iterator first = css_color.begin();
+        std::string::const_iterator last =  css_color.end();
+        bool result =
+            boost::spirit::qi::phrase_parse(first,
+                                            last,
+                                            g,
+                                            boost::spirit::ascii::space,
+                                            c);
+        return result && (first == last);
+    }
+
     static color from_string(std::string const& css_color)
     {
         color c;
@@ -80,6 +94,29 @@ namespace mapnik {
 class MAPNIK_DECL color_factory : boost::noncopyable
 {
 public:
+
+    static void parse_from_string(color & c, std::string const& css_color,
+                                 mapnik::css_color_grammar<std::string::const_iterator> g)
+    {
+        std::string::const_iterator first = css_color.begin();
+        std::string::const_iterator last =  css_color.end();
+        mapnik::css css_;
+        bool result =
+            boost::spirit::qi::phrase_parse(first,
+                                            last,
+                                            g,
+                                            boost::spirit::ascii::space,
+                                            css_);
+        if (!result)
+        {
+            throw config_error(std::string("Failed to parse color value: ") +
+                               "Expected a CSS color, but got '" + css_color + "'");
+        }
+        c.set_red(css_.r);
+        c.set_green(css_.g);
+        c.set_blue(css_.b);
+        c.set_alpha(css_.a);
+    }
 
     static void init_from_string(color & c, std::string const& css_color)
     {
