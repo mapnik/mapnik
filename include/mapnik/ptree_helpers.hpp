@@ -40,7 +40,7 @@
 namespace mapnik {
 
 template <typename T>
-static boost::optional<T> fast_cast(std::string const& value);
+inline boost::optional<T> fast_cast(std::string const& value);
 
 template <typename T>
 T get(boost::property_tree::ptree const& node, std::string const& name, bool is_attribute,
@@ -209,13 +209,13 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 };
 
 template <typename T>
-boost::optional<T> fast_cast(std::string const& value)
+inline boost::optional<T> fast_cast(std::string const& value)
 {
     return boost::lexical_cast<T>( value );
 }
 
 template <>
-boost::optional<int> fast_cast(std::string const& value)
+inline boost::optional<int> fast_cast(std::string const& value)
 {
     int result;
     if (mapnik::conversions::string2int(value,&result))
@@ -224,7 +224,7 @@ boost::optional<int> fast_cast(std::string const& value)
 }
 
 template <>
-boost::optional<double> fast_cast(std::string const& value)
+inline boost::optional<double> fast_cast(std::string const& value)
 {
     double result;
     if (mapnik::conversions::string2double(value,&result))
@@ -233,7 +233,7 @@ boost::optional<double> fast_cast(std::string const& value)
 }
 
 template <>
-boost::optional<float> fast_cast(std::string const& value)
+inline boost::optional<float> fast_cast(std::string const& value)
 {
     float result;
     if (mapnik::conversions::string2float(value,&result))
