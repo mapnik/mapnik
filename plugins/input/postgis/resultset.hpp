@@ -154,7 +154,7 @@ public:
 
     virtual bool isNull(int index) const
     {
-        return PQgetisnull(res_,pos_,index);
+        return static_cast<bool>(PQgetisnull(res_,pos_,index));
     }
 
     virtual const char* getValue(int index) const
