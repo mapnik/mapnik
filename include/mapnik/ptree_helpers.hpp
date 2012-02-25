@@ -77,29 +77,6 @@ T get_attr( boost::property_tree::ptree const& node, std::string const& name )
     return get<T>( node, name, true );
 }
 
-template <typename T>
-T get_css( boost::property_tree::ptree const& node, std::string const& name )
-{
-    return get_value<T>( node, std::string("CSS parameter '") + name + "'");
-}
-
-// specialization for color type
-template <>
-inline color get_css (boost::property_tree::ptree const& node, std::string const& name)
-{
-    std::string str = get_value<std::string>( node, std::string("CSS parameter '") + name + "'"); ;
-    try
-    {
-        return mapnik::color_factory::from_string(str.c_str());
-    }
-    catch (...)
-    {
-        throw config_error(std::string("Failed to parse ") +
-                           name + "'. Expected CSS color"  +
-                           " but got '" + str + "'");
-    }
-}
-
 
 template <typename charT, typename traits>
 std::basic_ostream<charT, traits> &
@@ -176,25 +153,8 @@ void set_attr(boost::property_tree::ptree & pt, std::string const& name, T const
     pt.put("<xmlattr>." + name, v);
 }
 
-/*
-  template <>
-  void set_attr<bool>(boost::property_tree::ptree & pt, std::string const& name, const bool & v)
-  {
-  pt.put("<xmlattr>." + name, boolean(v));
-  }
-*/
 
 class boolean;
-
-template <typename T>
-void set_css(boost::property_tree::ptree & pt, std::string const& name, T const& v)
-{
-    boost::property_tree::ptree & css_node = pt.push_back(
-        boost::property_tree::ptree::value_type("CssParameter",
-                                                boost::property_tree::ptree()))->second;
-    css_node.put("<xmlattr>.name", name );
-    css_node.put_value( v );
-}
 
 template <typename T>
 struct name_trait
@@ -210,23 +170,21 @@ struct name_trait
     BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 };
 
-#define DEFINE_NAME_TRAIT_WITH_NAME( type, type_name )                  \
+#define DEFINE_NAME_TRAIT( type, type_name )                  \
     template <>                                                         \
     struct name_trait<type>                                             \
     {                                                                   \
         static std::string name() { return std::string("type ") + type_name; } \
     };
 
-#define DEFINE_NAME_TRAIT( type )               \
-    DEFINE_NAME_TRAIT_WITH_NAME( type, #type )
 
-DEFINE_NAME_TRAIT( double )
-DEFINE_NAME_TRAIT( float )
-DEFINE_NAME_TRAIT( unsigned )
-DEFINE_NAME_TRAIT( boolean )
-DEFINE_NAME_TRAIT_WITH_NAME( int, "integer" )
-DEFINE_NAME_TRAIT_WITH_NAME( std::string, "string" )
-DEFINE_NAME_TRAIT_WITH_NAME( color, "color" )
+DEFINE_NAME_TRAIT( double, "double")
+DEFINE_NAME_TRAIT( float, "float")
+DEFINE_NAME_TRAIT( unsigned, "unsigned")
+DEFINE_NAME_TRAIT( boolean, "boolean")
+DEFINE_NAME_TRAIT( int, "integer" )
+DEFINE_NAME_TRAIT( std::string, "string" )
+DEFINE_NAME_TRAIT( color, "color" )
 
 template <typename ENUM, int MAX>
 struct name_trait< mapnik::enumeration<ENUM, MAX> >
