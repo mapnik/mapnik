@@ -54,7 +54,7 @@ normal functions taking a ref to the class as first parameter.
 namespace {
 using namespace boost::python;
 
-tuple get_displacement(text_symbolizer_properties const& t)
+boost::python::tuple get_displacement(text_symbolizer_properties const& t)
 {
     return boost::python::make_tuple(t.displacement.first, t.displacement.second);
 }
