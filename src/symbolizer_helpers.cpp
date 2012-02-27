@@ -40,7 +40,7 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_pla
 template <typename FaceManagerT, typename DetectorT>
 text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement()
 {
-    while (geometries_to_process_.size())
+    while (!geometries_to_process_.empty())
     {
         if (geo_itr_ == geometries_to_process_.end())
         {
@@ -59,20 +59,18 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_lin
         } else {
             finder.find_line_placements(path);
         }
-        //Keep reference to current object so we can delete it.
-        std::list<geometry_type*>::iterator current_object = geo_itr_;
-        geo_itr_++;
-        if (placement_->placements.size())
+        if (!placement_->placements.empty())
         {
             //Found a placement
             finder.update_detector();
-            geometries_to_process_.erase(current_object);
+            geo_itr_ = geometries_to_process_.erase(geo_itr_);
             if (writer_.first) writer_.first->add_text(
                 *placement_, font_manager_,
                 feature_, t_, writer_.second);
             return placement_;
         }
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
+        geo_itr_++;
     }
     return text_placement_info_ptr();
 }
@@ -80,7 +78,7 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_lin
 template <typename FaceManagerT, typename DetectorT>
 text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_point_placement()
 {
-    while (points_.size())
+    while (!points_.empty())
     {
         if (point_itr_ == points_.end())
         {
@@ -92,13 +90,10 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_poi
         }
         placement_finder<DetectorT> finder(*placement_, *info_, detector_, dims_);
         finder.find_point_placement(point_itr_->first, point_itr_->second, angle_);
-        //Keep reference to current object so we can delete it.
-        std::list<position>::iterator current_object = point_itr_;
-        point_itr_++;
-        if (placement_->placements.size())
+        if (!placement_->placements.empty())
         {
             //Found a placement
-            points_.erase(current_object);
+            point_itr_ = points_.erase(point_itr_);
             if (writer_.first) writer_.first->add_text(
                 *placement_, font_manager_,
                 feature_, t_, writer_.second);
@@ -106,7 +101,7 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_poi
             return placement_;
         }
         //No placement for this point. Keep it in points_ for next try.
-
+        point_itr_++;
     }
     return text_placement_info_ptr();
 }
@@ -250,7 +245,7 @@ template <typename FaceManagerT, typename DetectorT>
 text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_point_placement()
 {
     position const& shield_pos = sym_.get_shield_displacement();
-    while (points_.size())
+    while (!points_.empty())
     {
         if (point_itr_ == points_.end())
         {
@@ -266,10 +261,7 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
 
         placement_finder<DetectorT> finder(*placement_, *info_, detector_, dims_);
         finder.find_point_placement(label_x, label_y, angle_);
-        //Keep reference to current object so we can delete it.
-        std::list<position>::iterator current_object = point_itr_;
-        point_itr_++;
-        if (!placement_->placements.size())
+        if (placement_->placements.empty())
         {
             //No placement for this point. Keep it in points_ for next try.
             continue;
@@ -301,9 +293,11 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
                 writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
                 writer_.first->add_text(*placement_, font_manager_, feature_, t_, writer_.second);
             }
-            points_.erase(current_object);
+            point_itr_ = points_.erase(point_itr_);
             return placement_;
         }
+        //No placement found. Try again
+        point_itr_++;
     }
     return text_placement_info_ptr();
 
@@ -314,10 +308,8 @@ template <typename FaceManagerT, typename DetectorT>
 text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement()
 {
     position const& pos = placement_->properties.displacement;
+    //Markers are automatically centered
     placement_->additional_boxes.push_back(
-        /*TODO: I'm not sure this is correct. It's what the old code did, but
-          I think transfroms can make the marker non-centered.
-        */
         box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
                       -0.5 * marker_ext_.height() - pos.second,
                       0.5 * marker_ext_.width()  - pos.first,
