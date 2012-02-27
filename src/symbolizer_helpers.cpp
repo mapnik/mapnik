@@ -65,6 +65,7 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_lin
         if (placement_->placements.size())
         {
             //Found a placement
+            finder.update_detector();
             geometries_to_process_.erase(current_object);
             if (writer_.first) writer_.first->add_text(
                 *placement_, font_manager_,
