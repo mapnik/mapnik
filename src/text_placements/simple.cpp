@@ -28,6 +28,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
@@ -101,7 +102,7 @@ bool text_placement_info_simple::next_position_only()
 text_placement_info_ptr text_placements_simple::get_placement_info(
     double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_simple(this,
+    return text_placement_info_ptr(boost::make_shared<text_placement_info_simple>(this,
                                                                   scale_factor, dim, has_dimensions));
 }
 
@@ -147,7 +148,7 @@ void text_placements_simple::set_positions(std::string positions)
         std::cerr << "WARNING: Could not parse text_placement_simple placement string ('" << positions << "').\n";
     }
     if (direction_.size() == 0) {
-        std::cerr << "WARNING: text_placements_simple with no valid placments! ('"<< positions<<"')\n";
+        std::cerr << "WARNING: text_placements_simple with no valid placements! ('"<< positions<<"')\n";
     }
 }
 
@@ -168,7 +169,7 @@ std::string text_placements_simple::get_positions()
 
 text_placements_ptr text_placements_simple::from_xml(boost::property_tree::ptree const &xml, fontset_map const & fontsets)
 {
-    text_placements_ptr ptr = text_placements_ptr(new text_placements_simple(
+    text_placements_ptr ptr = text_placements_ptr(boost::make_shared<text_placements_simple>(
                     get_attr<std::string>(xml, "placements", "X")));
     ptr->defaults.from_xml(xml, fontsets);
     return ptr;

@@ -366,7 +366,6 @@ pixel_position shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker_pos
         marker_ext_.re_center(lx, ly);
         //label is added to detector by get_line_placement(), but marker isn't
         detector_.insert(marker_ext_);
-
         if (writer_.first) writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
         return pixel_position(px, py);
     } else {
