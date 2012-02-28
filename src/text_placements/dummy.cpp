@@ -19,7 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
 #include <mapnik/text_placements/dummy.hpp>
+#include <boost/make_shared.hpp>
+
 namespace mapnik
 {
 bool text_placement_info_dummy::next()
@@ -32,7 +35,7 @@ bool text_placement_info_dummy::next()
 text_placement_info_ptr text_placements_dummy::get_placement_info(
     double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_dummy(
+    return text_placement_info_ptr(boost::make_shared<text_placement_info_dummy>(
                                        this, scale_factor, dim, has_dimensions));
 }
 

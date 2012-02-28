@@ -19,7 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
 #include <mapnik/text_placements/list.hpp>
+#include <boost/make_shared.hpp>
+
 namespace mapnik
 {
 
@@ -56,7 +59,7 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
 text_placement_info_ptr text_placements_list::get_placement_info(
     double scale_factor, dimension_type dim, bool has_dimensions) const
 {
-    return text_placement_info_ptr(new text_placement_info_list(this,
+    return text_placement_info_ptr(boost::make_shared<text_placement_info_list>(this,
                                                                 scale_factor, dim, has_dimensions));
 }
 
@@ -89,7 +92,8 @@ text_placements_ptr text_placements_list::from_xml(boost::property_tree::ptree c
     list->defaults.from_xml(xml, fontsets);
     ptree::const_iterator itr = xml.begin();
     ptree::const_iterator end = xml.end();
-    for( ;itr != end; ++itr) {
+    for( ;itr != end; ++itr)
+    {
         if ((itr->first.find('<') != std::string::npos) || (itr->first != "Placement")) continue;
 //TODO:       ensure_attrs(symIter->second, "TextSymbolizer/Placement", s_common.str());
         text_symbolizer_properties &p = list->add();
