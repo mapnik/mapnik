@@ -264,6 +264,7 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
         if (placement_->placements.empty())
         {
             //No placement for this point. Keep it in points_ for next try.
+            point_itr_++;
             continue;
         }
         //Found a label placement but not necessarily also a marker placement
@@ -300,7 +301,6 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
         point_itr_++;
     }
     return text_placement_info_ptr();
-
 }
 
 
