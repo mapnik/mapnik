@@ -147,7 +147,7 @@ void text_placements_simple::set_positions(std::string positions)
         std::cerr << "WARNING: Could not parse text_placement_simple placement string ('" << positions << "').\n";
     }
     if (direction_.size() == 0) {
-        std::cerr << "WARNING: text_placements_simple with no valid placments! ('"<< positions<<"')\n";
+        std::cerr << "WARNING: text_placements_simple with no valid placements! ('"<< positions<<"')\n";
     }
 }
 

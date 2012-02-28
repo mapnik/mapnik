@@ -316,7 +316,7 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_l
     position const& pos = placement_->properties.displacement;
     placement_->additional_boxes.push_back(
         /*TODO: I'm not sure this is correct. It's what the old code did, but
-          I think transfroms can make the marker non-centered.
+          I think transforms can make the marker non-centered.
         */
         box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
                       -0.5 * marker_ext_.height() - pos.second,
@@ -372,6 +372,7 @@ pixel_position shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker_pos
         double px = lx - 0.5*marker_w_;
         double py = ly - 0.5*marker_h_;
         marker_ext_.re_center(lx, ly);
+
 //        detector_->insert(label_ext); //TODO: Is this done by placement_finder?
 
         if (writer_.first) writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
