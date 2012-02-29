@@ -88,7 +88,7 @@ protected:
     text_symbolizer const& sym_;
     Feature const& feature_;
     proj_transform const& prj_trans_;
-    CoordTransform const &t_;
+    CoordTransform const& t_;
     FaceManagerT &font_manager_;
     DetectorT &detector_;
     metawriter_with_properties writer_;
