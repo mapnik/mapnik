@@ -254,7 +254,7 @@ T get(boost::property_tree::ptree const& node,
     }
     else
     {
-        str = node.get_optional<std::string>(name+".<xmltext>");
+        str = node.get_optional<std::string>(name + ".<xmltext>");
     }
 
     if ( str )
@@ -291,7 +291,7 @@ inline color get(boost::property_tree::ptree const& node,
     }
     else
     {
-        str = node.get_optional<std::string>(name+".<xmltext>");
+        str = node.get_optional<std::string>(name + ".<xmltext>");
     }
 
     if ( str )
@@ -324,7 +324,7 @@ T get(boost::property_tree::ptree const& node, std::string const& name, bool is_
     }
     else
     {
-        str = node.get_optional<std::string>(name+".<xmltext>");
+        str = node.get_optional<std::string>(name + ".<xmltext>");
     }
 
     if ( ! str )
@@ -374,8 +374,9 @@ T get_value(boost::property_tree::ptree const& node, std::string const& name)
 }
 
 template <typename T>
-boost::optional<T> get_optional(boost::property_tree::ptree const& node, std::string const& name,
-                                bool is_attribute)
+boost::optional<T> get_optional(boost::property_tree::ptree const& node,
+                                                 std::string const& name,
+                                                 bool is_attribute)
 {
     boost::optional<std::string> str;
     if (is_attribute)
@@ -384,7 +385,7 @@ boost::optional<T> get_optional(boost::property_tree::ptree const& node, std::st
     }
     else
     {
-        str = node.get_optional<std::string>(name+".<xmltext>");
+        str = node.get_optional<std::string>(name + ".<xmltext>");
     }
 
     boost::optional<T> result;
@@ -402,11 +403,26 @@ boost::optional<T> get_optional(boost::property_tree::ptree const& node, std::st
 
     return result;
 }
-//
 
 template <>
-inline boost::optional<color> get_optional(boost::property_tree::ptree const& node, std::string const& name,
-                                           bool is_attribute)
+inline boost::optional<std::string> get_optional(boost::property_tree::ptree const& node,
+                                                 std::string const& name,
+                                                 bool is_attribute)
+{
+    if (is_attribute)
+    {
+        return node.get_optional<std::string>( std::string("<xmlattr>.") + name);
+    }
+    else
+    {
+        return node.get_optional<std::string>(name + ".<xmltext>");
+    }
+}
+
+template <>
+inline boost::optional<color> get_optional(boost::property_tree::ptree const& node,
+                                                 std::string const& name,
+                                                 bool is_attribute)
 {
     boost::optional<std::string> str;
     if (is_attribute)
@@ -415,7 +431,7 @@ inline boost::optional<color> get_optional(boost::property_tree::ptree const& no
     }
     else
     {
-        str = node.get_optional<std::string>(name+".<xmltext>");
+        str = node.get_optional<std::string>(name + ".<xmltext>");
     }
 
     boost::optional<color> result;
