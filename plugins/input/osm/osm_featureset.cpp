@@ -56,7 +56,6 @@ template <typename filterT>
 feature_ptr osm_featureset<filterT>::next()
 {
     feature_ptr feature;
-    bool success = false;
 
     osm_item* cur_item = dataset_->next_item();
     if (cur_item != NULL)
@@ -70,7 +69,6 @@ feature_ptr osm_featureset<filterT>::next()
             geometry_type* point = new geometry_type(mapnik::Point);
             point->move_to(lon, lat);
             feature->add_geometry(point);
-            success = true;
         }
         else if (dataset_->current_item_is_way())
         {
@@ -114,29 +112,26 @@ feature_ptr osm_featureset<filterT>::next()
                                       static_cast<osm_way*>(cur_item)->nodes[count]->lat);
                     }
                     feature->add_geometry(geom);
-                    success = true;
                 }
             }
         }
 
         // can feature_ptr be compared to NULL? - no
-        if (success)
+        if (feature)
         {
-            std::map<std::string,std::string>::iterator i = cur_item->keyvals.begin();
+            std::set<std::string>::const_iterator itr = attribute_names_.begin();
+            std::set<std::string>::const_iterator end = attribute_names_.end();
+            std::map<std::string,std::string>::iterator end_keyvals = cur_item->keyvals.end();
 
-            // add the keyvals to the feature. the feature seems to be a map
-            // of some sort so this should work - see dbf_file::add_attribute()
-            while (i != cur_item->keyvals.end())
+            for (; itr != end; itr++)
             {
-                // only add if in the specified set of attribute names
-                if (attribute_names_.find(i->first) != attribute_names_.end())
-                {
-                    feature->put(i->first,tr_->transcode(i->second.c_str()));
+                std::map<std::string,std::string>::iterator i = cur_item->keyvals.find(*itr);
+                if (i != end_keyvals) {
+                    feature->put_new(i->first,tr_->transcode(i->second.c_str()));
+                } else {
+                    feature->put_new(*itr, "");
                 }
-
-                i++;
             }
-
             return feature;
         }
     }
