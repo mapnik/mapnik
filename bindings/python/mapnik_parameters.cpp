@@ -195,6 +195,19 @@ boost::shared_ptr<mapnik::parameter> create_parameter_from_float(std::string con
 }
 
 
+boost::python::dict to_json(const parameters& p)
+{
+    using namespace boost::python;
+    dict d;
+    parameters::const_iterator pos=p.begin();
+    while(pos!=p.end())
+    {
+        d[pos->first] = pos->second;
+        ++pos;
+    }
+    return d;
+}
+
 void export_parameters()
 {
     using namespace boost::python;
@@ -220,5 +233,6 @@ void export_parameters()
         .def("__len__",&parameters::size)
         .def("append",add_parameter)
         .def("iteritems",iterator<parameters>())
+        .def("to_json",&to_json)
         ;
 }

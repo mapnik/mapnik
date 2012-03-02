@@ -135,6 +135,7 @@ source = Split(
     polygon_symbolizer.cpp
     save_map.cpp
     shield_symbolizer.cpp
+    stats_processor.cpp
     text_symbolizer.cpp
     tiff_reader.cpp
     wkb.cpp

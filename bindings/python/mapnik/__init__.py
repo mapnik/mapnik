@@ -588,6 +588,7 @@ def register_plugins(path=inputpluginspath):
     """Register plugins located by specified path"""
     DatasourceCache.instance().register_datasources(path)
 
+# TODO - recurse
 def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont']):
     """Recursively register fonts using path argument as base directory"""
     for dirpath, _, filenames in os.walk(path):
@@ -692,6 +693,7 @@ __all__ = [
     'PathExpression',
     #   load/save/render
     'load_map',
+    'render_stats',
     'load_map_from_string',
     'save_map',
     'save_map_to_string',

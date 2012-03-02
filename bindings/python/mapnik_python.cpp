@@ -88,6 +88,8 @@ void export_label_collision_detector();
 #include "mapnik_threads.hpp"
 #include "python_optional.hpp"
 
+#include <mapnik/stats_processor.hpp>
+
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <pycairo.h>
 static Pycairo_CAPI_t *Pycairo_CAPI;
@@ -99,6 +101,14 @@ using mapnik::python_unblock_auto_block;
 bool python_thread::thread_support = true;
 #endif
 boost::thread_specific_ptr<PyThreadState> python_thread::state;
+
+std::string render_stats(const mapnik::Map& map)
+{
+    python_unblock_auto_block b;
+    mapnik::stats_processor ren(map);
+    ren.apply();
+    return ren.to_json();
+}
 
 void render(const mapnik::Map& map,
             mapnik::image_32& image,
@@ -576,6 +586,8 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_jpeg", &has_jpeg, "Get jpeg read/write support status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
+
+    def("render_stats", &render_stats);
 
     python_optional<mapnik::color>();
     python_optional<mapnik::box2d<double> >();
