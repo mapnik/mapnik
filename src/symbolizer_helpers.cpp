@@ -62,7 +62,10 @@ text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_lin
         if (!placement_->placements.empty())
         {
             //Found a placement
-            finder.update_detector();
+            if (points_on_line_)
+            {
+                finder.update_detector();
+            }
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
             if (writer_.first) writer_.first->add_text(
                 *placement_, font_manager_,
