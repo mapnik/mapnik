@@ -50,8 +50,6 @@ public:
         conn_ = PQconnectdb(connection_str.c_str());
         if (PQstatus(conn_) != CONNECTION_OK)
         {
-            // note: empty ctor is intentional here
-            // as somehow constructor string can dissapear
             std::ostringstream s;
             s << "Postgis Plugin: ";
             if (conn_ )

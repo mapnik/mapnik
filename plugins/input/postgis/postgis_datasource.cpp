@@ -175,7 +175,7 @@ void postgis_datasource::bind() const
                         if (srid_c != NULL)
                         {
                             int result;
-                            if (mapnik::conversions::string2int(srid_c,&result))
+                            if (mapnik::conversions::string2int(srid_c,result))
                                 srid_ = result;
                         }
                     }
@@ -205,7 +205,7 @@ void postgis_datasource::bind() const
                         if (srid_c != NULL)
                         {
                             int result;
-                            if (mapnik::conversions::string2int(srid_c,&result))
+                            if (mapnik::conversions::string2int(srid_c,result))
                                 srid_ = result;
                         }
                     }
@@ -685,10 +685,10 @@ box2d<double> postgis_datasource::envelope() const
                     double loy;
                     double hix;
                     double hiy;
-                    if (mapnik::conversions::string2double(rs->getValue(0),&lox) &&
-                        mapnik::conversions::string2double(rs->getValue(1),&loy) &&
-                        mapnik::conversions::string2double(rs->getValue(2),&hix) &&
-                        mapnik::conversions::string2double(rs->getValue(3),&hiy))
+                    if (mapnik::conversions::string2double(rs->getValue(0),lox) &&
+                        mapnik::conversions::string2double(rs->getValue(1),loy) &&
+                        mapnik::conversions::string2double(rs->getValue(2),hix) &&
+                        mapnik::conversions::string2double(rs->getValue(3),hiy))
                     {
                         extent_.init(lox,loy,hix,hiy);
                         extent_initialized_ = true;
