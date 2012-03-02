@@ -104,6 +104,7 @@ else: # Linux and others
 source = Split(
     """
     color.cpp
+    conversions.cpp
     box2d.cpp
     building_symbolizer.cpp
     datasource_cache.cpp

@@ -25,83 +25,19 @@
 
 // mapnik
 
-// boost
-#include <boost/spirit/include/qi.hpp>
-
 // stl
 #include <string>
 
 namespace mapnik { namespace conversions {
 
-using namespace boost::spirit;
-
-// TODO - convert to templates
-
-static bool string2int(const char * value, int * result)
-{
-    size_t length = strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
-    const char *begin = value;
-    const char *iter  = begin;
-    const char *end   = value + length;
-    bool r = qi::phrase_parse(iter,end,qi::int_,ascii::space,*result);
-    return r && (iter == end);
-}
-
-static bool string2int(std::string const& value, int * result)
-{
-    if (value.empty())
-        return false;
-    std::string::const_iterator str_beg = value.begin();
-    std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,qi::int_,ascii::space,*result);
-    return r && (str_beg == str_end);
-}
-
-static bool string2double(std::string const& value, double * result)
-{
-    if (value.empty())
-        return false;
-    std::string::const_iterator str_beg = value.begin();
-    std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,qi::double_,ascii::space,*result);
-    return r && (str_beg == str_end);
-}
-
-static bool string2double(const char * value, double * result)
-{
-    size_t length = strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
-    const char *begin = value;
-    const char *iter  = begin;
-    const char *end   = value + length;
-    bool r = qi::phrase_parse(iter,end,qi::double_,ascii::space,*result);
-    return r && (iter == end);
-}
-
-static bool string2float(std::string const& value, float * result)
-{
-    if (value.empty())
-        return false;
-    std::string::const_iterator str_beg = value.begin();
-    std::string::const_iterator str_end = value.end();
-    bool r = qi::phrase_parse(str_beg,str_end,qi::float_,ascii::space,*result);
-    return r && (str_beg == str_end);
-}
-
-static bool string2float(const char * value, float * result)
-{
-    size_t length = strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
-    const char *begin = value;
-    const char *iter  = begin;
-    const char *end   = value + length;
-    bool r = qi::phrase_parse(iter,end,qi::float_,ascii::space,*result);
-    return r && (iter == end);
-}
+bool string2int(const char * value, int & result);
+bool string2int(std::string const& value, int & result);
+    
+bool string2double(std::string const& value, double & result);
+bool string2double(const char * value, double & result);
+    
+bool string2float(std::string const& value, float & result);
+bool string2float(const char * value, float & result);
 
 }
 }

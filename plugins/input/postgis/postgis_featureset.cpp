@@ -162,7 +162,7 @@ feature_ptr postgis_featureset::next()
                 {
                     std::string str = mapnik::sql_utils::numeric2string(buf);
                     double val;
-                    if (mapnik::conversions::string2double(str,&val))
+                    if (mapnik::conversions::string2double(str,val))
                         feature->put(name,val);
                 }
                 else
