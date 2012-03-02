@@ -11,6 +11,7 @@ dirname = os.path.dirname(sys.argv[0])
 files = [
     ("list", 800, 600, 400, 300, 250, 200, 150, 100),
     ("simple", 800, 600, 400, 300, 250, 200, 150, 100),
+    ("lines-1", (800, 800), (600, 600), (400, 400), (200, 200)),
     ("simple-E", 500),
     ("simple-NE", 500),
     ("simple-NW", 500),
@@ -26,21 +27,24 @@ files = [
     ("shieldsymbolizer-1", 490, 495, 497, 498, 499, 500, 501, 502, 505, 510),
     ("expressionformat", 500)]
 
-def render(filename, width):
+def render(filename, width, height=100):
+    print "-"*80
+    print "Rendering style \"%s\" with size %dx%d ... " % (filename, width, height)
+    print "-"*80
     width = int(width)
-    m = mapnik.Map(width, 100)
+    height = int(height)
+    m = mapnik.Map(width, height)
     mapnik.load_map(m, os.path.join(dirname, "%s.xml" % filename), False)
     bbox = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
     m.zoom_to_box(bbox)
     basefn = '%s-%d' % (filename, width)
     mapnik.render_to_file(m, basefn+'-agg.png')
     diff = compare(basefn + '-agg.png', basefn + '-reference.png')
-    if diff == 0:
-        rms = 'ok'
-    else:
-        rms = 'error: %u different pixels' % diff
+    if diff > 0:
+        print "-"*80
+        print 'Error: %u different pixels' % diff
+        print "-"*80
 
-    print "Rendering style \"%s\" with width %d ... %s" % (filename, width, rms)
     return m
 
 if len(sys.argv) == 2:
@@ -50,7 +54,10 @@ elif len(sys.argv) > 2:
 
 for f in files:
     for width in f[1:]:
-        m = render(f[0], width)
+        if isinstance(width, tuple):
+            m = render(f[0], width[0], width[1])
+        else:
+            m = render(f[0], width)
     mapnik.save_map(m, "%s-out.xml" % f[0])
 
 summary()
