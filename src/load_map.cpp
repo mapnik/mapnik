@@ -841,16 +841,12 @@ void map_parser::parse_rule( feature_type_style & style, ptree const & r )
             rule.set_filter(parse_expr(*filter_expr));
         }
 
-        optional<std::string> else_filter =
-            get_opt_child<std::string>(r, "ElseFilter");
-        if (else_filter)
+        if (has_child(r, "ElseFilter"))
         {
             rule.set_else(true);
         }
 
-        optional<std::string> also_filter =
-            get_opt_child<std::string>(r, "AlsoFilter");
-        if (also_filter)
+        if (has_child(r, "AlsoFilter"))
         {
             rule.set_also(true);
         }
