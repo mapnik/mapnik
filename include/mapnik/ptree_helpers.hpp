@@ -453,6 +453,12 @@ inline boost::optional<color> get_optional(boost::property_tree::ptree const& no
     return result;
 }
 
+static inline bool has_child(boost::property_tree::ptree const& node, std::string const& name)
+{
+    boost::optional<std::string> str = node.get_optional<std::string>(name);
+    return str;
+}
+
 } // end of namespace mapnik
 
 #endif // MAPNIK_PTREE_HELPERS_HPP
