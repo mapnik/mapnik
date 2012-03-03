@@ -70,10 +70,6 @@ void text_node::apply(char_properties const& p, Feature const& feature, processe
     }
     if (text_str.length() > 0) {
         output.push_back(p, text_str);
-    } else {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "Warning: Empty expression.\n";
-#endif
     }
 }
 
