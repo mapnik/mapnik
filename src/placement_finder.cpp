@@ -817,8 +817,8 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
         if (orientation < 0)
         {
             // rotate in place
-            render_x += cwidth*cosa - (char_height-2)*sina;
-            render_y -= cwidth*sina + (char_height-2)*cosa;
+            render_x += cwidth*cosa - char_height*sina;
+            render_y -= cwidth*sina + char_height*cosa;
             render_angle += M_PI;
         }
         current_placement->add_node(c,render_x - current_placement->center.x,
@@ -877,9 +877,8 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
         if (orientation < 0)
         {
             // rotate in place
-            /* TODO: What's the meaning of -2? */
-            x += cwidth*cosa - (string_height_-2)*sina;
-            y -= cwidth*sina + (string_height_-2)*cosa;
+            x += cwidth*cosa - string_height_*sina;
+            y -= cwidth*sina + string_height_*cosa;
             angle += M_PI;
             //sin(x+PI) = -sin(x)
             sina = -sina;
