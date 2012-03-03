@@ -100,21 +100,26 @@ double get_total_distance(T & shape_path)
 }
 
 template <typename DetectorT>
-placement_finder<DetectorT>::placement_finder(text_placement_info &placement_info, string_info &info, DetectorT & detector)
-    : detector_(detector),
-      dimensions_(detector_.extent()),
-      info_(info), p(placement_info.properties), pi(placement_info), string_width_(0), string_height_(0), first_line_space_(0), valign_(V_AUTO), halign_(H_AUTO), line_breaks_(), line_sizes_()
-{
-    placement_info.placements.clear(); //Remove left overs
-}
-
-template <typename DetectorT>
-placement_finder<DetectorT>::placement_finder(text_placement_info &placement_info, string_info &info, DetectorT & detector, box2d<double> const& extent)
+placement_finder<DetectorT>::placement_finder(Feature const& feature,
+                                              text_placement_info const& placement_info,
+                                              string_info const& info,
+                                              DetectorT & detector,
+                                              box2d<double> const& extent)
     : detector_(detector),
       dimensions_(extent),
-      info_(info), p(placement_info.properties), pi(placement_info), string_width_(0), string_height_(0), first_line_space_(0), valign_(V_AUTO), halign_(H_AUTO), line_breaks_(), line_sizes_()
+      info_(info),
+      p(placement_info.properties),
+      pi(placement_info),
+      string_width_(0),
+      string_height_(0),
+      first_line_space_(0),
+      valign_(V_AUTO),
+      halign_(H_AUTO),
+      line_breaks_(),
+      line_sizes_()
 {
-    placement_info.placements.clear(); //Remove left overs
+    init_string_size();
+    init_alignment();
 }
 
 template <typename DetectorT>
@@ -187,9 +192,6 @@ template <typename DetectorT>
 void placement_finder<DetectorT>::init_string_size()
 {
     // Get total string size
-    string_width_ = 0;
-    string_height_ = 0;
-    first_line_space_ = 0;
     if (!info_.num_characters()) return; //At least one character is required
     for (unsigned i = 0; i < info_.num_characters(); i++)
     {
@@ -209,9 +211,8 @@ void placement_finder<DetectorT>::init_string_size()
 template <typename DetectorT>
 void placement_finder<DetectorT>::find_line_breaks()
 {
+    if (!line_sizes_.empty()) return;
     bool first_line = true;
-    line_breaks_.clear();
-    line_sizes_.clear();
     // check if we need to wrap the string
     double wrap_at = string_width_ + 1.0;
     if (p.wrap_width && string_width_ > p.wrap_width)
@@ -351,9 +352,7 @@ void placement_finder<DetectorT>::adjust_position(text_path *current_placement, 
 template <typename DetectorT>
 void placement_finder<DetectorT>::find_point_placement(double label_x, double label_y, double angle)
 {
-    init_string_size();
     find_line_breaks();
-    init_alignment();
 
     double rad = M_PI * angle/180.0;
     double cosa = std::cos(rad);
@@ -491,13 +490,13 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
     }
 
     // since there was no early exit, add the character envelopes to the placements' envelopes
-    while( !c_envelopes.empty() )
+    while (!c_envelopes.empty())
     {
-        pi.envelopes.push( c_envelopes.front() );
+        envelopes_.push(c_envelopes.front());
         c_envelopes.pop();
     }
 
-    pi.placements.push_back(current_placement.release());
+    placements_.push_back(current_placement.release());
 }
 
 
@@ -505,7 +504,13 @@ template <typename DetectorT>
 template <typename PathT>
 void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 {
-    init_string_size();
+#ifdef MAPNIK_DEBUG
+    if (!line_sizes_.empty())
+    {
+        std::cerr << "WARNING: Internal error. Text contains line breaks, but line placement is used. Please file a bug report!\n";
+    }
+#endif
+
     unsigned cmd;
     double new_x = 0.0;
     double new_y = 0.0;
@@ -640,7 +645,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 
                         if (status) //We have successfully placed one
                         {
-                            pi.placements.push_back(current_placement.release());
+                            placements_.push_back(current_placement.release());
                             update_detector();
 
                             //Totally break out of the loops
@@ -650,8 +655,8 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                         else
                         {
                             //If we've failed to place, remove all the envelopes we've added up
-                            while (!pi.envelopes.empty())
-                                pi.envelopes.pop();
+                            while (!envelopes_.empty())
+                                envelopes_.pop();
                         }
 
                         //Don't need to loop twice when diff = 0
@@ -929,7 +934,7 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
                 break;
             }
         }
-        pi.envelopes.push(e);
+        envelopes_.push(e);
     }
 
     current_placement->rewind();
@@ -987,34 +992,26 @@ void placement_finder<DetectorT>::find_line_circle_intersection(
 template <typename DetectorT>
 void placement_finder<DetectorT>::update_detector()
 {
-    bool first = true;
-
     // add the bboxes to the detector and remove from the placement
-    while (!pi.envelopes.empty())
+    while (!envelopes_.empty())
     {
-        box2d<double> e = pi.envelopes.front();
+        box2d<double> e = envelopes_.front();
         detector_.insert(e, info_.get_string());
-        pi.envelopes.pop();
+        envelopes_.pop();
+        extents_.init(0,0,0,0);
 
         if (pi.collect_extents)
         {
-            if(first)
-            {
-                first = false;
-                pi.extents = e;
-            }
-            else
-            {
-                pi.extents.expand_to_include(e);
-            }
+            extents_.expand_to_include(e);
         }
     }
 }
 
 template <typename DetectorT>
-void placement_finder<DetectorT>::clear()
+void placement_finder<DetectorT>::clear_placements()
 {
-    detector_.clear();
+    placements_.clear();
+    while (!envelopes_.empty()) envelopes_.pop();
 }
 
 typedef coord_transform2<CoordTransform,geometry_type> PathType;

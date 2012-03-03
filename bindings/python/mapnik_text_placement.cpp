@@ -431,10 +431,7 @@ void export_text_placement()
         .def_readwrite("has_dimensions", &text_placement_info::has_dimensions)
         .def_readwrite("dimensions", &text_placement_info::dimensions)
         .def_readwrite("collect_extents", &text_placement_info::collect_extents)
-        .def_readwrite("extents", &text_placement_info::extents)
         .def_readwrite("additional_boxes", &text_placement_info::additional_boxes)
-        .def_readwrite("envelopes", &text_placement_info::envelopes)
-//        .def_readwrite("placements", &text_placement_info::placements)
         ;
     register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 

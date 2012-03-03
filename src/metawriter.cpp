@@ -180,6 +180,7 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
                                       CoordTransform const& t,
                                       metawriter_properties const& properties)
 {
+#if 0
     /* Note:
        Map coordinate system (and starting_{x,y}) starts in upper left corner
        and grows towards lower right corner.
@@ -266,6 +267,7 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
         *f_ << "]";
         write_properties(feature, properties);
     }
+#endif
 }
 
 void metawriter_json_stream::add_polygon(path_type & path,

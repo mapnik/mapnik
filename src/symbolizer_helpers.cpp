@@ -28,85 +28,84 @@
 namespace mapnik {
 
 template <typename FaceManagerT, typename DetectorT>
-text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_placement()
+bool text_symbolizer_helper<FaceManagerT, DetectorT>::next()
 {
-    if (!placement_valid_) return text_placement_info_ptr();
+    if (!placement_valid_) return false;
     if (point_placement_)
-        return get_point_placement();
+        return next_point_placement();
     else
-        return get_line_placement();
+        return next_line_placement();
 }
 
 template <typename FaceManagerT, typename DetectorT>
-text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement()
+bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
     while (!geometries_to_process_.empty())
     {
         if (geo_itr_ == geometries_to_process_.end())
         {
             //Just processed the last geometry. Try next placement.
-            if (!next_placement()) return text_placement_info_ptr(); //No more placements
+            if (!next_placement()) return false; //No more placements
             //Start again from begin of list
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
         }
-        //TODO: Avoid calling constructor repeatedly
-        placement_finder<DetectorT> finder(*placement_, *info_, detector_, dims_);
-        typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+        typedef coord_transform2<CoordTransform,geometry_type> path_type;
         path_type path(t_, **geo_itr_, prj_trans_);
+        finder_->clear_placements();
         if (points_on_line_) {
-            finder.find_point_placements(path);
+            finder_->find_point_placements(path);
         } else {
-            finder.find_line_placements(path);
+            finder_->find_line_placements(path);
         }
-        if (!placement_->placements.empty())
+        if (!finder_->get_results().empty())
         {
             //Found a placement
             if (points_on_line_)
             {
-                finder.update_detector();
+                finder_->update_detector();
             }
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
             if (writer_.first) writer_.first->add_text(
                 *placement_, font_manager_,
                 feature_, t_, writer_.second);
-            return placement_;
+            return true;
         }
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
         geo_itr_++;
     }
-    return text_placement_info_ptr();
+    return false;
 }
 
 template <typename FaceManagerT, typename DetectorT>
-text_placement_info_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::get_point_placement()
+bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
 {
     while (!points_.empty())
     {
         if (point_itr_ == points_.end())
         {
             //Just processed the last point. Try next placement.
-            if (!next_placement()) return text_placement_info_ptr(); //No more placements
+            if (!next_placement()) return false; //No more placements
             //Start again from begin of list
             point_itr_ = points_.begin();
             continue; //Reexecute size check
         }
-        placement_finder<DetectorT> finder(*placement_, *info_, detector_, dims_);
-        finder.find_point_placement(point_itr_->first, point_itr_->second, angle_);
-        if (!placement_->placements.empty())
+        finder_->clear_placements();
+        finder_->find_point_placement(point_itr_->first, point_itr_->second, angle_);
+        if (!finder_->get_results().empty())
         {
             //Found a placement
             point_itr_ = points_.erase(point_itr_);
             if (writer_.first) writer_.first->add_text(
                 *placement_, font_manager_,
                 feature_, t_, writer_.second);
-            finder.update_detector();
-            return placement_;
+            finder_->update_detector();
+            return true;
         }
         //No placement for this point. Keep it in points_ for next try.
         point_itr_++;
     }
-    return text_placement_info_ptr();
+    return false;
 }
 
 struct largest_bbox_first
@@ -227,7 +226,16 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     } else {
         angle_ = 0.0;
     }
+    finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
+//    boost::make_shared<placement_finder<DetectorT> >(feature_, *placement_, *info_, detector_, dims_);
+    placement_valid_ = true;
     return true;
+}
+
+template <typename FaceManagerT, typename DetectorT>
+placements_type &text_symbolizer_helper<FaceManagerT, DetectorT>::placements() const
+{
+    return finder_->get_results();
 }
 
 
@@ -235,17 +243,17 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
 
 
 template <typename FaceManagerT, typename DetectorT>
-text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_placement()
+bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next()
 {
-    if (!placement_valid_ || !marker_) return text_placement_info_ptr();
+    if (!placement_valid_ || !marker_) return false;
     if (point_placement_)
-        return get_point_placement();
+        return next_point_placement();
     else
-        return get_line_placement();
+        return next_line_placement();
 }
 
 template <typename FaceManagerT, typename DetectorT>
-text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_point_placement()
+bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
 {
     position const& shield_pos = sym_.get_shield_displacement();
     while (!points_.empty())
@@ -253,7 +261,7 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
         if (point_itr_ == points_.end())
         {
             //Just processed the last point. Try next placement.
-            if (!next_placement()) return text_placement_info_ptr(); //No more placements
+            if (!next_placement()) return false; //No more placements
             //Start again from begin of list
             point_itr_ = points_.begin();
             continue; //Reexecute size check
@@ -262,9 +270,9 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
         double label_x = point_itr_->first + shield_pos.first;
         double label_y = point_itr_->second + shield_pos.second;
 
-        placement_finder<DetectorT> finder(*placement_, *info_, detector_, dims_);
-        finder.find_point_placement(label_x, label_y, angle_);
-        if (placement_->placements.empty())
+        finder_->clear_placements();
+        finder_->find_point_placement(label_x, label_y, angle_);
+        if (finder_->get_results().empty())
         {
             //No placement for this point. Keep it in points_ for next try.
             point_itr_++;
@@ -276,8 +284,9 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
         {
             // center image at text center position
             // remove displacement from image label
-            double lx = placement_->placements[0].center.x - text_disp.first;
-            double ly = placement_->placements[0].center.y - text_disp.second;
+            placements_type const& p = finder_->get_results();
+            double lx = p[0].center.x - text_disp.first;
+            double ly = p[0].center.y - text_disp.second;
             marker_x_ = lx - 0.5 * marker_w_;
             marker_y_ = ly - 0.5 * marker_h_;
             marker_ext_.re_center(lx, ly);
@@ -292,23 +301,23 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_p
         if (placement_->properties.allow_overlap || detector_.has_placement(marker_ext_))
         {
             detector_.insert(marker_ext_);
-            finder.update_detector();
+            finder_->update_detector();
             if (writer_.first) {
                 writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
                 writer_.first->add_text(*placement_, font_manager_, feature_, t_, writer_.second);
             }
             point_itr_ = points_.erase(point_itr_);
-            return placement_;
+            return true;
         }
         //No placement found. Try again
         point_itr_++;
     }
-    return text_placement_info_ptr();
+    return false;
 }
 
 
 template <typename FaceManagerT, typename DetectorT>
-text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement()
+bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
     position const& pos = placement_->properties.displacement;
     //Markers are automatically centered
@@ -317,7 +326,7 @@ text_placement_info_ptr shield_symbolizer_helper<FaceManagerT, DetectorT>::get_l
                       -0.5 * marker_ext_.height() - pos.second,
                       0.5 * marker_ext_.width()  - pos.first,
                       0.5 * marker_ext_.height() - pos.second));
-    return text_symbolizer_helper<FaceManagerT, DetectorT>::get_line_placement();
+    return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement();
 }
 
 

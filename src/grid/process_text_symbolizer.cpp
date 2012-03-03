@@ -42,13 +42,13 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
 
     text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
 
-    text_placement_info_ptr placement;
-    while ((placement = helper.get_placement())) {
+    while (helper.next()) {
         placement_found = true;
-        for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+        placements_type &placements = helper.placements();
+        for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render_id(feature->id(), placement->placements[ii].center,2);
+            ren.prepare_glyphs(&(placements[ii]));
+            ren.render_id(feature->id(), placements[ii].center, 2);
         }
     }
     if (placement_found) pixmap_.add_feature(feature);

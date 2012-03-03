@@ -50,15 +50,17 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
     text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
 
-    text_placement_info_ptr placement;
-    while ((placement = helper.get_placement())) {
-        for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+    while (helper.next()) {
+        placements_type &placements = helper.placements();
+        for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            pixel_position marker_pos = helper.get_marker_position(placement->placements[ii]);
-            render_marker(marker_pos, helper.get_marker(), helper.get_transform(), sym.get_opacity());
+            render_marker(helper.get_marker_position(placements[ii]),
+                          helper.get_marker(),
+                          helper.get_transform(),
+                          sym.get_opacity());
 
-            ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render(placement->placements[ii].center);
+            ren.prepare_glyphs(&(placements[ii]));
+            ren.render(placements[ii].center);
         }
     }
 }

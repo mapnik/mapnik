@@ -23,8 +23,14 @@
 #ifndef MAPNIK_PLACEMENT_FINDER_HPP
 #define MAPNIK_PLACEMENT_FINDER_HPP
 
+//mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_properties.hpp>
+#include <mapnik/text_placements/base.hpp>
+#include <mapnik/symbolizer_helpers.hpp>
+
+//stl
+#include <queue>
 
 namespace mapnik
 {
@@ -33,12 +39,16 @@ class text_placement_info;
 class string_info;
 class text_path;
 
+
 template <typename DetectorT>
 class placement_finder : boost::noncopyable
 {
 public:
-    placement_finder(text_placement_info &p, string_info &info, DetectorT & detector);
-    placement_finder(text_placement_info &p, string_info &info, DetectorT & detector, box2d<double> const& extent);
+    placement_finder(Feature const& feature,
+                     text_placement_info const& placement_info,
+                     string_info const& info,
+                     DetectorT & detector,
+                     box2d<double> const& extent);
 
     /** Try place a single label at the given point. */
     void find_point_placement(double pos_x, double pos_y, double angle=0.0);
@@ -51,9 +61,13 @@ public:
     template <typename T>
     void find_line_placements(T & path);
 
+    /** Add placements to detector. */
     void update_detector();
 
-    void clear();
+    /** Remove old placements. */
+    void clear_placements();
+
+    inline placements_type &get_results() { return placements_; }
 
 private:
     ///Helpers for find_line_placement
@@ -94,9 +108,9 @@ private:
     ///General Internals
     DetectorT & detector_;
     box2d<double> const& dimensions_;
-    string_info &info_;
-    text_symbolizer_properties &p;
-    text_placement_info &pi;
+    string_info const& info_;
+    text_symbolizer_properties const& p;
+    text_placement_info const& pi;
     /** Length of the longest line after linebreaks.
       * Before find_line_breaks() this is the total length of the string.
       */
@@ -113,6 +127,11 @@ private:
     horizontal_alignment_e halign_;
     std::vector<unsigned> line_breaks_;
     std::vector<std::pair<double, double> > line_sizes_;
+    std::queue< box2d<double> > envelopes_;
+    /** Used to return all placements found. */
+    placements_type placements_;
+    /** Bounding box of all texts placed. */
+    box2d<double> extents_;
 };
 }
 

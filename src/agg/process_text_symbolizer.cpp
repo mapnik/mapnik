@@ -42,12 +42,12 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 
     text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
 
-    text_placement_info_ptr placement;
-    while ((placement = helper.get_placement())) {
-        for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+    while (helper.next()) {
+        placements_type &placements = helper.placements();
+        for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render(placement->placements[ii].center);
+            ren.prepare_glyphs(&(placements[ii]));
+            ren.render(placements[ii].center);
         }
     }
 }

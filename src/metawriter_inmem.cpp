@@ -74,13 +74,17 @@ metawriter_inmem::add_text(text_placement_info const& p,
                            face_manager_freetype & /*face*/,
                            Feature const& feature,
                            CoordTransform const& /*t*/,
-                           metawriter_properties const& properties) {
-    if (p.extents.valid()) {
+                           metawriter_properties const& properties)
+{
+#if 0
+    if (p.extents.valid())
+    {
         meta_instance inst;
         inst.properties = intersect_properties(feature, properties);
         inst.box = p.extents;
         instances_.push_back(inst);
     }
+#endif
 }
 
 void

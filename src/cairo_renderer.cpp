@@ -1058,15 +1058,15 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         cairo_context context(context_);
 
-        text_placement_info_ptr placement;
-        while ((placement = helper.get_placement())) {
-            for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+        while (helper.next()) {
+            placements_type &placements = helper.placements();
+            for (unsigned int ii = 0; ii < placements.size(); ++ii)
             {
-                pixel_position marker_pos = helper.get_marker_position(placement->placements[ii]);
+                pixel_position marker_pos = helper.get_marker_position(placements[ii]);
                 render_marker(marker_pos,
                               helper.get_marker(), helper.get_transform(),
                               sym.get_opacity());
-                context.add_text(placement->placements[ii], face_manager_, font_manager_);
+                context.add_text(placements[ii], face_manager_, font_manager_);
             }
         }
     }
@@ -1255,11 +1255,12 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, *feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_);
 
         cairo_context context(context_);
-        text_placement_info_ptr placement;
-        while ((placement = helper.get_placement())) {
-            for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+
+        while (helper.next()) {
+            placements_type &placements = helper.placements();
+            for (unsigned int ii = 0; ii < placements.size(); ++ii)
             {
-                context.add_text(placement->placements[ii], face_manager_, font_manager_);
+                context.add_text(placements[ii], face_manager_, font_manager_);
             }
         }
     }

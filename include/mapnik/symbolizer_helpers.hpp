@@ -35,6 +35,9 @@
 
 namespace mapnik {
 
+typedef boost::ptr_vector<text_path> placements_type;
+template <typename DetectorT> class placement_finder;
+
 /** Helper object that does all the TextSymbolizer placment finding
  * work except actually rendering the object. */
 template <typename FaceManagerT, typename DetectorT>
@@ -60,11 +63,12 @@ public:
           dims_(0, 0, width, height),
           text_(font_manager, scale_factor),
           angle_(0.0),
-          placement_valid_(true),
-          points_on_line_(false)
+          placement_valid_(false),
+          points_on_line_(false),
+          finder_()
     {
         initialize_geometries();
-        if (!geometries_to_process_.size()) return; //TODO: Test this
+        if (!geometries_to_process_.size()) return;
         placement_ = sym_.get_placement_options()->get_placement_info(
             scale_factor, std::make_pair(width, height), false);
         //TODO: has_dimensions? Why? When?
@@ -76,10 +80,13 @@ public:
     /** Return next placement.
      * If no more placements are found returns null pointer.
      */
-    text_placement_info_ptr get_placement();
-    text_placement_info_ptr get_point_placement();
-    text_placement_info_ptr get_line_placement();
+    bool next();
+
+    /** Get current placement. next() has to be called before! */
+    placements_type &placements() const;
 protected:
+    bool next_point_placement();
+    bool next_line_placement();
     bool next_placement();
     void initialize_geometries();
     void initialize_points();
@@ -97,18 +104,27 @@ protected:
     //Processing
     processed_text text_;
     /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
+    /** Remaining geometries to be processed. */
     std::list<geometry_type*> geometries_to_process_;
+    /** Geometry currently being processed. */
     std::list<geometry_type*>::iterator geo_itr_;
+    /** Remaining points to be processed. */
     std::list<position> points_;
+    /** Point currently being processed. */
     std::list<position>::iterator point_itr_;
+    /** Text rotation. */
     double angle_;
+    /** Text + formatting. */
     string_info *info_;
+    /** Did last call to next_placement return true? */
     bool placement_valid_;
+    /** Use point placement. Otherwise line placement is used. */
     bool point_placement_;
+    /** Place text at points on a line instead of following the line (used for ShieldSymbolizer) .*/
     bool points_on_line_;
 
-    //Output
     text_placement_info_ptr placement_;
+    boost::shared_ptr<placement_finder<DetectorT> > finder_;
 };
 
 template <typename FaceManagerT, typename DetectorT>
@@ -131,13 +147,13 @@ public:
         init_marker();
     }
 
-    text_placement_info_ptr get_placement();
+    bool next();
     pixel_position get_marker_position(text_path const& p);
     marker &get_marker() const;
     agg::trans_affine const& get_transform() const;
 protected:
-    text_placement_info_ptr get_point_placement();
-    text_placement_info_ptr get_line_placement();
+    bool next_point_placement();
+    bool next_line_placement();
     void init_marker();
     shield_symbolizer const& sym_;
     box2d<double> marker_ext_;
@@ -166,6 +182,7 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_valid_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::angle_;
+    using text_symbolizer_helper<FaceManagerT, DetectorT>::finder_;
 };
 } //namespace
 #endif // SYMBOLIZER_HELPERS_HPP
