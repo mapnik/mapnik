@@ -396,7 +396,6 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
 
         double cwidth = ci.width + ci.format->character_spacing;
 
-        unsigned c = ci.c;
         if (i == index_to_wrap_at)
         {
             index_to_wrap_at = line_breaks_[++line_number];
@@ -420,7 +419,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
             double dx = x * cosa - y*sina;
             double dy = x * sina + y*cosa;
 
-            current_placement->add_node(c, dx, dy, rad, ci.format);
+            current_placement->add_node(&ci, dx, dy, rad);
 
             // compute the Bounding Box for each character and test for:
             // overlap, minimum distance or edge avoidance - exit if condition occurs
@@ -732,7 +731,6 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
         // grab the next character according to the orientation
         char_info const &ci = orientation > 0 ? info_.at(i) : info_.at(info_.num_characters() - i - 1);
         double cwidth = ci.width + ci.format->character_spacing;
-        unsigned c = ci.c;
 
         double last_character_angle = angle;
 
@@ -826,9 +824,10 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
             render_y -= cwidth*sina + char_height*cosa;
             render_angle += M_PI;
         }
-        current_placement->add_node(c,render_x - current_placement->center.x,
+        current_placement->add_node(&ci,
+                                     render_x - current_placement->center.x,
                                     -render_y + current_placement->center.y,
-                                    render_angle, ci.format);
+                                    render_angle);
 
         //Normalise to 0 <= angle < 2PI
         while (render_angle >= 2*M_PI)
@@ -867,13 +866,13 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
     bool status = true;
     for (unsigned i = 0; i < info_.num_characters(); ++i)
     {
+        //TODO: I think this can be simplified by taking the char_info from vertex() but this needs to be carefully tested!
         // grab the next character according to the orientation
         char_info const& ci = orientation > 0 ? info_.at(i) : info_.at(info_.num_characters() - i - 1);
         double cwidth = ci.width + ci.format->character_spacing;
-        int c;
+        char_info_ptr c;
         double x, y, angle;
-        char_properties *properties;
-        current_placement->vertex(&c, &x, &y, &angle, &properties);
+        current_placement->vertex(&c, &x, &y, &angle);
         x = current_placement->center.x + x;
         y = current_placement->center.y - y;
 

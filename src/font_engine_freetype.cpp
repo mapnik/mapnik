@@ -313,11 +313,10 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
 
     for (int i = 0; i < path->num_nodes(); i++)
     {
-        int c;
+        char_info_ptr c;
         double x, y, angle;
-        char_properties *properties;
 
-        path->vertex(&c, &x, &y, &angle, &properties);
+        path->vertex(&c, &x, &y, &angle);
 
 #ifdef MAPNIK_DEBUG
         // TODO Enable when we have support for setting verbosity
@@ -331,10 +330,10 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
         pen.x = int(x * 64);
         pen.y = int(y * 64);
 
-        face_set_ptr faces = font_manager_.get_face_set(properties->face_name, properties->fontset);
-        faces->set_character_sizes(properties->text_size);
+        face_set_ptr faces = font_manager_.get_face_set(c->format->face_name, c->format->fontset);
+        faces->set_character_sizes(c->format->text_size);
 
-        glyph_ptr glyph = faces->get_glyph(unsigned(c));
+        glyph_ptr glyph = faces->get_glyph(unsigned(c->c));
         FT_Face face = glyph->get_face()->get_face();
 
         matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
@@ -372,7 +371,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
         }
 
         // take ownership of the glyph
-        glyphs_.push_back(new glyph_t(image, properties));
+        glyphs_.push_back(new glyph_t(image, c->format));
     }
 
     return box2d<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
