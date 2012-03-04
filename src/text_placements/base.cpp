@@ -39,8 +39,7 @@ text_placement_info::text_placement_info(text_placements const* parent,
     : properties(parent->defaults),
       scale_factor(scale_factor_),
       has_dimensions(has_dimensions_),
-      dimensions(dim),
-      collect_extents(false)
+      dimensions(dim)
 {
 
 }

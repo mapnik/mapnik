@@ -116,7 +116,8 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
       valign_(V_AUTO),
       halign_(H_AUTO),
       line_breaks_(),
-      line_sizes_()
+      line_sizes_(),
+      collect_extents_(false)
 {
     init_string_size();
     init_alignment();
@@ -472,9 +473,9 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
     }
 
     // check the placement of any additional envelopes
-    if (!p.allow_overlap && !pi.additional_boxes.empty())
+    if (!p.allow_overlap && !additional_boxes.empty())
     {
-        BOOST_FOREACH(box2d<double> box, pi.additional_boxes)
+        BOOST_FOREACH(box2d<double> box, additional_boxes)
         {
             box2d<double> pt(box.minx() + current_placement->center.x,
                              box.miny() + current_placement->center.y,
@@ -881,8 +882,8 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
         if (orientation < 0)
         {
             // rotate in place
-            x += cwidth*cosa - string_height_*sina;
-            y -= cwidth*sina + string_height_*cosa;
+            x += cwidth * cosa - string_height_ * sina;
+            y -= cwidth * sina + string_height_ * cosa;
             angle += M_PI;
             //sin(x+PI) = -sin(x)
             sina = -sina;
@@ -991,15 +992,15 @@ void placement_finder<DetectorT>::find_line_circle_intersection(
 template <typename DetectorT>
 void placement_finder<DetectorT>::update_detector()
 {
+    if (collect_extents_) extents_.init(0,0,0,0);
     // add the bboxes to the detector and remove from the placement
     while (!envelopes_.empty())
     {
         box2d<double> e = envelopes_.front();
         detector_.insert(e, info_.get_string());
         envelopes_.pop();
-        extents_.init(0,0,0,0);
 
-        if (pi.collect_extents)
+        if (collect_extents_)
         {
             extents_.expand_to_include(e);
         }

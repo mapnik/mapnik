@@ -72,7 +72,6 @@ public:
         placement_ = sym_.get_placement_options()->get_placement_info(
             scale_factor, std::make_pair(width, height), false);
         //TODO: has_dimensions? Why? When?
-        if (writer_.first) placement_->collect_extents = true;
         next_placement();
         initialize_points();
     }

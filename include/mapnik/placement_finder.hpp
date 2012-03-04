@@ -69,6 +69,15 @@ public:
 
     inline placements_type &get_results() { return placements_; }
 
+    /** Additional boxes to take into account when finding placement.
+     * Used for finding line placements where multiple placements are returned.
+     * Boxes are relative to starting point of current placement.
+     */
+    std::vector<box2d<double> > additional_boxes;
+
+    void set_collect_extents(bool collect) { collect_extents_ = collect; }
+    bool get_collect_extents() const { return collect_extents_; }
+
 private:
     ///Helpers for find_line_placement
 
@@ -132,6 +141,8 @@ private:
     placements_type placements_;
     /** Bounding box of all texts placed. */
     box2d<double> extents_;
+    /** Collect a bounding box of all texts placed. */
+    bool collect_extents_;
 };
 }
 

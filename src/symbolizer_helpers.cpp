@@ -226,8 +226,13 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     } else {
         angle_ = 0.0;
     }
+
+
     finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
 //    boost::make_shared<placement_finder<DetectorT> >(feature_, *placement_, *info_, detector_, dims_);
+
+    if (writer_.first) finder_->set_collect_extents(true);
+
     placement_valid_ = true;
     return true;
 }
@@ -320,8 +325,9 @@ template <typename FaceManagerT, typename DetectorT>
 bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
     position const& pos = placement_->properties.displacement;
+    finder_->additional_boxes.clear();
     //Markers are automatically centered
-    placement_->additional_boxes.push_back(
+    finder_->additional_boxes.push_back(
         box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
                       -0.5 * marker_ext_.height() - pos.second,
                       0.5 * marker_ext_.width()  - pos.first,

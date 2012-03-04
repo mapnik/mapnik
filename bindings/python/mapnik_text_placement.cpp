@@ -430,8 +430,6 @@ void export_text_placement()
         .def_readwrite("scale_factor", &text_placement_info::scale_factor)
         .def_readwrite("has_dimensions", &text_placement_info::has_dimensions)
         .def_readwrite("dimensions", &text_placement_info::dimensions)
-        .def_readwrite("collect_extents", &text_placement_info::collect_extents)
-        .def_readwrite("additional_boxes", &text_placement_info::additional_boxes)
         ;
     register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 

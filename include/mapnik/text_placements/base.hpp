@@ -74,15 +74,6 @@ public:
     double get_actual_minimum_distance() const { return scale_factor * properties.minimum_distance; }
     /** Get minimum padding taking the scale factor into account. */
     double get_actual_minimum_padding() const { return scale_factor * properties.minimum_padding; }
-
-    /** Collect a bounding box of all texts placed. */
-    bool collect_extents;
-
-    /** Additional boxes to take into account when finding placement.
-     * Used for finding line placements where multiple placements are returned.
-     * Boxes are relative to starting point of current placement.
-     */
-    std::vector<box2d<double> > additional_boxes;
 };
 
 typedef boost::shared_ptr<text_placement_info> text_placement_info_ptr;
