@@ -251,8 +251,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
 
 struct TextPlacementsWrap: text_placements, wrapper<text_placements>
 {
-    text_placement_info_ptr get_placement_info(double scale_factor_, dimension_type dim,
-                            bool has_dimensions_) const
+    text_placement_info_ptr get_placement_info(double scale_factor_) const
     {
         python_block_auto_unblock b;
         return this->get_override("get_placement_info")();
@@ -262,8 +261,8 @@ struct TextPlacementsWrap: text_placements, wrapper<text_placements>
 struct TextPlacementInfoWrap: text_placement_info, wrapper<text_placement_info>
 {
     TextPlacementInfoWrap(text_placements const* parent,
-                        double scale_factor_, dimension_type dim, bool has_dimensions_)
-        : text_placement_info(parent, scale_factor_, dim, has_dimensions_)
+                        double scale_factor_)
+        : text_placement_info(parent, scale_factor_)
     {
 
     }
@@ -421,15 +420,13 @@ void export_text_placement()
             boost::shared_ptr<TextPlacementInfoWrap>,
             boost::noncopyable>
             ("TextPlacementInfo",
-             init<text_placements const*, double, dimension_type, bool>())
+             init<text_placements const*, double>())
         .def("next", pure_virtual(&text_placement_info::next))
         .def("get_actual_label_spacing", &text_placement_info::get_actual_label_spacing)
         .def("get_actual_minimum_distance", &text_placement_info::get_actual_minimum_distance)
         .def("get_actual_minimum_padding", &text_placement_info::get_actual_minimum_padding)
         .def_readwrite("properties", &text_placement_info::properties)
         .def_readwrite("scale_factor", &text_placement_info::scale_factor)
-        .def_readwrite("has_dimensions", &text_placement_info::has_dimensions)
-        .def_readwrite("dimensions", &text_placement_info::dimensions)
         ;
     register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 

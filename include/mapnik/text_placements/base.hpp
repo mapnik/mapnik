@@ -27,7 +27,6 @@
 #include <mapnik/config.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/formatting/base.hpp>
-#include <mapnik/text_path.hpp> //TODO: Remove this again after text_placement_info::placements is moved to a better place.
 
 namespace mapnik
 {
@@ -43,8 +42,7 @@ class text_placement_info : boost::noncopyable
 public:
     /** Constructor. Takes the parent text_placements object as a parameter
      * to read defaults from it. */
-    text_placement_info(text_placements const* parent,
-                        double scale_factor_, dimension_type dim, bool has_dimensions_);
+    text_placement_info(text_placements const* parent, double scale_factor_);
     /** Get next placement.
      * This function is also called before the first placement is tried.
      * Each class has to return at least one position!
@@ -60,10 +58,6 @@ public:
 
     /** Scale factor used by the renderer. */
     double scale_factor;
-    /* TODO: Don't know what this is used for. */
-    bool has_dimensions;
-    /* TODO: Don't know what this is used for. */
-    dimension_type dimensions;
     /** Set scale factor. */
     void set_scale_factor(double factor) { scale_factor = factor; }
     /** Get scale factor. */
@@ -100,8 +94,7 @@ public:
      * }
      */
     virtual text_placement_info_ptr get_placement_info(
-        double scale_factor_, dimension_type dim,
-        bool has_dimensions_) const =0;
+        double scale_factor_) const =0;
     /** Get a list of all expressions used in any placement.
      * This function is used to collect attributes.
      */

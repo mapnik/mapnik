@@ -72,6 +72,7 @@ public:
     /** Additional boxes to take into account when finding placement.
      * Used for finding line placements where multiple placements are returned.
      * Boxes are relative to starting point of current placement.
+     * Only used for point placements!
      */
     std::vector<box2d<double> > additional_boxes;
 

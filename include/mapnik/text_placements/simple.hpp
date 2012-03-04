@@ -49,8 +49,7 @@ class text_placements_simple: public text_placements
 public:
     text_placements_simple();
     text_placements_simple(std::string positions);
-    text_placement_info_ptr get_placement_info(
-        double scale_factor, dimension_type dim, bool has_dimensions) const;
+    text_placement_info_ptr get_placement_info(double scale_factor) const;
     void set_positions(std::string positions);
     std::string get_positions();
     static text_placements_ptr from_xml(boost::property_tree::ptree const &xml, fontset_map const & fontsets);
@@ -67,8 +66,8 @@ class text_placement_info_simple : public text_placement_info
 {
 public:
     text_placement_info_simple(text_placements_simple const* parent,
-                               double scale_factor, dimension_type dim, bool has_dimensions)
-        : text_placement_info(parent, scale_factor, dim, has_dimensions),
+                               double scale_factor)
+        : text_placement_info(parent, scale_factor),
           state(0), position_state(0), parent_(parent)
     {
     }

@@ -426,22 +426,10 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
             // overlap, minimum distance or edge avoidance - exit if condition occurs
             box2d<double> e;
             /*x axis: left to right, y axis: top to bottom (negative values higher)*/
-            if (pi.has_dimensions)
-            {
-                e.init(current_placement->center.x - (pi.dimensions.first/2.0),     // Top Left
-                       current_placement->center.y - (pi.dimensions.second/2.0),
-
-                       current_placement->center.x + (pi.dimensions.first/2.0),     // Bottom Right
-                       current_placement->center.y + (pi.dimensions.second/2.0));
-            }
-            else
-            {
-                e.init(current_placement->center.x + dx,                    // Bottom Left
-                       current_placement->center.y - dy - ci.ymin, /*ymin usually <0 */
-
-                       current_placement->center.x + dx + ci.width,         // Top Right
-                       current_placement->center.y - dy - ci.ymax);
-            }
+            e.init(current_placement->center.x + dx,                    // Bottom Left
+                   current_placement->center.y - dy - ci.ymin,          // ymin usually <0
+                   current_placement->center.x + dx + ci.width,         // Top Right
+                   current_placement->center.y - dy - ci.ymax);
 
             // if there is an overlap with existing envelopes, then exit - no placement
             if (!detector_.extent().intersects(e) || (!p.allow_overlap && !detector_.has_point_placement(e, pi.get_actual_minimum_distance()))) {
@@ -890,21 +878,12 @@ bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> 
             cosa = -cosa;
         }
 
-        box2d<double> e;
-        if (pi.has_dimensions)
-        {
-            e.init(x, y, x + pi.dimensions.first, y + pi.dimensions.second);
-        }
-        else
-        {
-            // put four corners of the letter into envelope
-            e.init(x, y, x + cwidth*cosa,
-                   y - cwidth*sina);
-            e.expand_to_include(x - ci.height()*sina,
-                                y - ci.height()*cosa);
-            e.expand_to_include(x + (cwidth*cosa - ci.height()*sina),
-                                y - (cwidth*sina + ci.height()*cosa));
-        }
+        box2d<double> e(x, y, x + cwidth*cosa, y - cwidth*sina);
+        // put four corners of the letter into envelope
+        e.expand_to_include(x - ci.height()*sina,
+                            y - ci.height()*cosa);
+        e.expand_to_include(x + (cwidth*cosa - ci.height()*sina),
+                            y - (cwidth*sina + ci.height()*cosa));
 
         if (!detector_.extent().intersects(e) ||
             !detector_.has_placement(e, info_.get_string(), pi.get_actual_minimum_distance()))
