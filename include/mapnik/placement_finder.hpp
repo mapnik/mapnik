@@ -79,6 +79,8 @@ public:
     void set_collect_extents(bool collect) { collect_extents_ = collect; }
     bool get_collect_extents() const { return collect_extents_; }
 
+    box2d<double> const& get_extents() const { return extents_; }
+
 private:
     ///Helpers for find_line_placement
 

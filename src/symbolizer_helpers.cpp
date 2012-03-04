@@ -67,7 +67,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
             }
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
             if (writer_.first) writer_.first->add_text(
-                *placement_, font_manager_,
+                finder_->get_results(), finder_->get_extents(),
                 feature_, t_, writer_.second);
             return true;
         }
@@ -97,7 +97,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
             //Found a placement
             point_itr_ = points_.erase(point_itr_);
             if (writer_.first) writer_.first->add_text(
-                *placement_, font_manager_,
+                finder_->get_results(), finder_->get_extents(),
                 feature_, t_, writer_.second);
             finder_->update_detector();
             return true;
@@ -309,7 +309,8 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
             finder_->update_detector();
             if (writer_.first) {
                 writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
-                writer_.first->add_text(*placement_, font_manager_, feature_, t_, writer_.second);
+                writer_.first->add_text(finder_->get_results(), finder_->get_extents(),
+                                        feature_, t_, writer_.second);
             }
             point_itr_ = points_.erase(point_itr_);
             return true;

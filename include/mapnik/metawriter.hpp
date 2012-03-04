@@ -24,9 +24,8 @@
 #define MAPNIK_METAWRITER_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/ctrans.hpp>
 
 // boost
 #include <boost/utility.hpp>
@@ -42,6 +41,7 @@
 namespace mapnik {
 
 class text_placement_info;
+class text_path;
 
 /** Implementation of std::map that also returns const& for operator[]. */
 class metawriter_property_map
@@ -103,8 +103,8 @@ public:
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties)=0;
-    virtual void add_text(text_placement_info const& placement,
-                          face_manager_freetype &font_manager,
+    virtual void add_text(boost::ptr_vector<text_path> &placements,
+                          box2d<double> const& extents,
                           Feature const& feature,
                           CoordTransform const& t,
                           metawriter_properties const& properties)=0;

@@ -22,6 +22,7 @@
 #ifndef SYMBOLIZER_HELPERS_HPP
 #define SYMBOLIZER_HELPERS_HPP
 
+//mapnik
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
@@ -29,7 +30,9 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/processed_text.hpp>
+#include <mapnik/text_path.hpp>
 
+//boost
 #include <boost/shared_ptr.hpp>
 
 

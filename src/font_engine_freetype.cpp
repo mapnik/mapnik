@@ -25,6 +25,7 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/text_path.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>

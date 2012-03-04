@@ -39,6 +39,7 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/text_path.hpp>
 
 // cairo
 #include <cairomm/context.h>

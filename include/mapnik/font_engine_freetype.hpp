@@ -28,8 +28,9 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/text_path.hpp>
 #include <mapnik/font_set.hpp>
+#include <mapnik/char_info.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // freetype2
 extern "C"
@@ -56,9 +57,14 @@ extern "C"
 #include <iostream>
 #include <algorithm>
 
+// uci
+#include <unicode/unistr.h>
+
 namespace mapnik
 {
 class font_face;
+class text_path;
+class string_info;
 
 typedef boost::shared_ptr<font_face> face_ptr;
 

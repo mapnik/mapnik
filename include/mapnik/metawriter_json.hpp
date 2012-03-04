@@ -45,8 +45,8 @@ public:
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties);
-    virtual void add_text(text_placement_info const& p,
-                          face_manager_freetype &font_manager,
+    virtual void add_text(boost::ptr_vector<text_path> &placements,
+                          box2d<double> const& extents,
                           Feature const& feature,
                           CoordTransform const& t,
                           metawriter_properties const& properties);
