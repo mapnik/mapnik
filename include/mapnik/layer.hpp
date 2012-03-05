@@ -176,13 +176,15 @@ public:
      *
      * @param ds The datasource to attach.
      */
-    void set_datasource(datasource_ptr const& ds);
-
+    void set_datasource_parameters(parameters const& p);
+    
+    parameters const& datasource_parameters() const;
+    
     /*!
      * @return the datasource attached to this layer.
      */
     datasource_ptr datasource() const;
-
+    
     /*!
      * @return the geographic envelope/bounding box of the data in the layer.
      */
@@ -203,7 +205,8 @@ private:
     bool cache_features_;
     std::string group_by_;
     std::vector<std::string>  styles_;
-    datasource_ptr ds_;
+    parameters datasource_params_;
+    mutable datasource_ptr ds_;
 };
 }
 

@@ -45,7 +45,7 @@ layer::layer(std::string const& name, std::string const& srs)
       clear_label_cache_(false),
       cache_features_(false),
       group_by_(""),
-      ds_() {}
+      datasource_params_() {}
 
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
@@ -58,7 +58,7 @@ layer::layer(const layer& rhs)
       cache_features_(rhs.cache_features_),
       group_by_(rhs.group_by_),
       styles_(rhs.styles_),
-      ds_(rhs.ds_) {}
+      datasource_params_(rhs.datasource_params_) {}
 
 layer& layer::operator=(const layer& rhs)
 {
@@ -84,7 +84,7 @@ void layer::swap(const layer& rhs)
     cache_features_ = rhs.cache_features_;
     group_by_ = rhs.group_by_;
     styles_=rhs.styles_;
-    ds_=rhs.ds_;
+    datasource_params_ = rhs.datasource_params_;
 }
 
 layer::~layer() {}
@@ -171,17 +171,38 @@ bool layer::isQueryable() const
 
 datasource_ptr layer::datasource() const
 {
+    if (ds_) return ds_;
+    try
+    {
+        ds_ = datasource_cache::instance()->create(datasource_params_);
+    }
+    catch (const std::exception & ex )
+    {
+        throw config_error( ex.what() );
+    }
+    
+    catch (...)
+    {
+        throw config_error("Unknown exception occured attempting to create datasoure for layer '" + name_ + "'");
+    }
+    
     return ds_;
 }
 
-void layer::set_datasource(datasource_ptr const& ds)
+void layer::set_datasource_parameters(parameters const& p)
 {
-    ds_ = ds;
+    datasource_params_ = p;
+}
+
+parameters const& layer::datasource_parameters() const
+{
+    return datasource_params_;
 }
 
 box2d<double> layer::envelope() const
 {
-    if (ds_) return ds_->envelope();
+    datasource_ptr ds = this->datasource();
+    if (ds) return ds->envelope();
     return box2d<double>();
 }
 

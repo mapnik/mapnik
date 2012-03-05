@@ -37,6 +37,9 @@
 #include <map>
 
 namespace mapnik {
+
+class datasource;
+
 class MAPNIK_DECL datasource_cache :
         public singleton <datasource_cache,CreateStatic>,
         private boost::noncopyable
@@ -55,7 +58,8 @@ public:
     static std::vector<std::string> plugin_names();
     static std::string plugin_directories();
     static void register_datasources(const std::string& path);
-    static boost::shared_ptr<datasource> create(parameters const& params, bool bind=true);
+    
+    static boost::shared_ptr<datasource> create(parameters const& params);
 };
 }
 

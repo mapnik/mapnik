@@ -62,7 +62,7 @@ std::map<std::string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
 bool datasource_cache::registered_=false;
 std::vector<std::string> datasource_cache::plugin_directories_;
 
-datasource_ptr datasource_cache::create(const parameters& params, bool bind)
+datasource_ptr datasource_cache::create(const parameters& params)
 {
     boost::optional<std::string> type = params.get<std::string>("type");
     if ( ! type)
@@ -106,7 +106,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
         std::clog << i->first << "=" << i->second << "\n";
     }
 #endif
-    ds=datasource_ptr(create_datasource(params, bind), datasource_deleter());
+    ds=datasource_ptr(create_datasource(params), datasource_deleter());
 
 #ifdef MAPNIK_DEBUG
     std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;

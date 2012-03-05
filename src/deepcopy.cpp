@@ -96,18 +96,6 @@ namespace mapnik { namespace util {
         BOOST_FOREACH ( layer const& lyr_in, map_in.layers())
         {
             layer lyr_out(lyr_in);
-            datasource_ptr ds_in = lyr_in.datasource();
-            if (ds_in)
-            {
-                parameters p(ds_in->params());
-
-                // TODO : re-use datasource extent if already set.
-                datasource_ptr ds_out = datasource_cache::create(p);
-                if (ds_out)
-                {
-                    lyr_out.set_datasource(ds_out);
-                }
-            }
             map_out.addLayer(lyr_out);
         }
         typedef std::map<std::string, feature_type_style> style_cont;
@@ -120,7 +108,6 @@ namespace mapnik { namespace util {
             feature_type_style style_out(style_in,true); // deep copy
             map_out.insert_style(kv.first, style_out);
         }
-
     }
 
-    }}
+}}
