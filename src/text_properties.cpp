@@ -31,6 +31,7 @@ namespace mapnik
 using boost::optional;
 
 text_symbolizer_properties::text_symbolizer_properties() :
+    orientation(),
     displacement(0,0),
     label_placement(POINT_PLACEMENT),
     halign(H_AUTO),
