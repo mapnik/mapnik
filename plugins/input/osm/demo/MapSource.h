@@ -70,7 +70,7 @@ public:
             (source=="api" && hasBbox() && zoom_start>=0 && tiled==true));
     }
 
-    void setSource(const std::string & src)
+    void setSource(std::string const& src)
     {
         if(src=="api" || src=="osm")
         {

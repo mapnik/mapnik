@@ -122,7 +122,7 @@ private:
     void parse_stroke(stroke & strk, ptree const & sym);
     expression_ptr parse_expr(std::string const& expr);
 
-    void ensure_font_face( const std::string & face_name );
+    void ensure_font_face( std::string const& face_name );
 
     std::string ensure_relative_to_xml( boost::optional<std::string> opt_path );
     void ensure_attrs( ptree const& sym, std::string name, std::string attrs);
@@ -1793,7 +1793,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
     }
 }
 
-void map_parser::ensure_font_face( const std::string & face_name )
+void map_parser::ensure_font_face( std::string const& face_name )
 {
     if ( ! font_manager_.get_face( face_name ) )
     {

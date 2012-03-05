@@ -33,7 +33,7 @@ class config_error : public std::exception
 public:
     config_error() {}
 
-    config_error( const std::string & what ) :
+    config_error( std::string const& what ) :
         what_( what )
     {
     }
@@ -44,7 +44,7 @@ public:
         return what_.c_str();
     }
 
-    void append_context(const std::string & ctx) const
+    void append_context(std::string const& ctx) const
     {
         what_ += " " + ctx;
     }

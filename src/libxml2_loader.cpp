@@ -71,7 +71,7 @@ public:
         }
     }
 
-    void load( const std::string & filename, ptree & pt )
+    void load( std::string const& filename, ptree & pt )
     {
         boost::filesystem::path path(filename);
         if ( !boost::filesystem::exists( path ) ) {
@@ -119,7 +119,7 @@ public:
         load(doc, pt);
     }
 
-    void load_string( const std::string & buffer, ptree & pt, std::string const & base_path )
+    void load_string( std::string const& buffer, ptree & pt, std::string const & base_path )
     {
         if (!base_path.empty())
         {

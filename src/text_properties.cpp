@@ -125,7 +125,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool 
 {
     if (orientation)
     {
-        const std::string & orientationstr = to_expression_string(*orientation);
+        std::string const& orientationstr = to_expression_string(*orientation);
         if (!dfl.orientation || orientationstr != to_expression_string(*(dfl.orientation)) || explicit_defaults) {
             set_attr(node, "orientation", orientationstr);
         }
@@ -280,8 +280,8 @@ void char_properties::from_xml(boost::property_tree::ptree const &sym, fontset_m
 
 void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl) const
 {
-    const std::string & fontset_name = fontset.get_name();
-    const std::string & dfl_fontset_name = dfl.fontset.get_name();
+    std::string const& fontset_name = fontset.get_name();
+    std::string const& dfl_fontset_name = dfl.fontset.get_name();
     if (fontset_name != dfl_fontset_name || explicit_defaults)
     {
         set_attr(node, "fontset-name", fontset_name);

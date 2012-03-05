@@ -39,7 +39,7 @@ class illegal_enum_value : public std::exception
 public:
     illegal_enum_value() {}
 
-    illegal_enum_value( const std::string & what ) :
+    illegal_enum_value( std::string const& what ) :
         what_( what )
     {
     }
@@ -171,7 +171,7 @@ public:
     /** Converts @p str to an enum.
      * @throw illegal_enum_value @p str is not a legal identifier.
      * */
-    void from_string(const std::string & str)
+    void from_string(std::string const& str)
     {
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
@@ -267,7 +267,7 @@ public:
         }
         return true;
     }
-    static const std::string & get_full_qualified_name()
+    static std::string const& get_full_qualified_name()
     {
         return our_name_;
     }
