@@ -68,7 +68,7 @@ m.background = mapnik.Color('white')
 
 provpoly_lyr = mapnik.Layer('Provinces')
 provpoly_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-provpoly_lyr.datasource = mapnik.Shapefile(file='../data/boundaries', encoding='latin1')
+provpoly_lyr.datasource_parameters = {"type":"shape","file":'../data/boundaries', "encoding":'latin1'}
 
 # We then define a style for the layer.  A layer can have one or many styles.
 # Styles are named, so they can be shared across different layers.
@@ -133,7 +133,7 @@ m.layers.append(provpoly_lyr)
 
 qcdrain_lyr = mapnik.Layer('Quebec Hydrography')
 qcdrain_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-qcdrain_lyr.datasource = mapnik.Shapefile(file='../data/qcdrainage')
+qcdrain_lyr.datasource_parameters = {"type":"shape","file":'../data/qcdrainage'}
 
 qcdrain_style = mapnik.Style()
 qcdrain_rule = mapnik.Rule()
@@ -151,7 +151,7 @@ m.layers.append(qcdrain_lyr)
 
 ondrain_lyr = mapnik.Layer('Ontario Hydrography')
 ondrain_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-ondrain_lyr.datasource = mapnik.Shapefile(file='../data/ontdrainage')
+ondrain_lyr.datasource_parameters = {"type":"shape","file":'../data/ontdrainage'}
 
 ondrain_lyr.styles.append('drainage')
 m.layers.append(ondrain_lyr)
@@ -160,7 +160,7 @@ m.layers.append(ondrain_lyr)
 
 provlines_lyr = mapnik.Layer('Provincial borders')
 provlines_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-provlines_lyr.datasource = mapnik.Shapefile(file='../data/boundaries_l')
+provlines_lyr.datasource_parameters = {"type":"shape","file":'../data/boundaries_l'}
 
 # Here we define a "dash dot dot dash" pattern for the provincial boundaries.
 
@@ -186,7 +186,7 @@ roads34_lyr = mapnik.Layer('Roads')
 roads34_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
 # create roads datasource (we're going to re-use it later) 
 
-roads34_lyr.datasource = mapnik.Shapefile(file='../data/roads')
+roads34_lyr.datasource_parameters = {"type":"shape","file":'../data/roads'}
 
 roads34_style = mapnik.Style()
 roads34_rule = mapnik.Rule()
@@ -219,7 +219,7 @@ m.layers.append(roads34_lyr)
 roads2_lyr = mapnik.Layer('Roads')
 roads2_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
 # Just get a copy from roads34_lyr
-roads2_lyr.datasource = roads34_lyr.datasource 
+roads2_lyr.datasource_parameters = {"type":"shape","file":'../data/roads'}#roads34_lyr.datasource 
 
 roads2_style_1 = mapnik.Style()
 roads2_rule_1 = mapnik.Rule()
@@ -254,7 +254,7 @@ m.layers.append(roads2_lyr)
 
 roads1_lyr = mapnik.Layer('Roads')
 roads1_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-roads1_lyr.datasource = roads34_lyr.datasource
+roads1_lyr.datasource_parameters = {"type":"shape","file":'../data/roads'}#roads34_lyr.datasource
 
 roads1_style_1 = mapnik.Style()
 roads1_rule_1 = mapnik.Rule()
@@ -288,7 +288,7 @@ m.layers.append(roads1_lyr)
 
 popplaces_lyr = mapnik.Layer('Populated Places')
 popplaces_lyr.srs = "+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 +datum=NAD83 +units=m +no_defs"
-popplaces_lyr.datasource = mapnik.Shapefile(file='../data/popplaces',encoding='latin1')
+popplaces_lyr.datasource_parameters = {"type":"shape","file":'../data/popplaces',"encoding":'latin1'}
 
 popplaces_style = mapnik.Style()
 popplaces_rule = mapnik.Rule()
