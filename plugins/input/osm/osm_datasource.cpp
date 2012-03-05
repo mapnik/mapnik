@@ -50,26 +50,21 @@ using mapnik::attribute_descriptor;
 
 DATASOURCE_PLUGIN(osm_datasource)
 
-osm_datasource::osm_datasource(const parameters& params, bool bind)
+osm_datasource::osm_datasource(parameters const& params)
 : datasource (params),
     type_(datasource::Vector),
-    desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8"))
+    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8"))
 {
-    if (bind)
-    {
-        this->bind();
-    }
+    init(params);
 }
 
-void osm_datasource::bind() const
+void osm_datasource::init(mapnik::parameters const& params)
 {
-    if (is_bound_) return;
-
     osm_data_ = NULL;
-    std::string osm_filename = *params_.get<std::string>("file", "");
-    std::string parser = *params_.get<std::string>("parser", "libxml2");
-    std::string url = *params_.get<std::string>("url", "");
-    std::string bbox = *params_.get<std::string>("bbox", "");
+    std::string osm_filename = *params.get<std::string>("file", "");
+    std::string parser = *params.get<std::string>("parser", "libxml2");
+    std::string url = *params.get<std::string>("url", "");
+    std::string bbox = *params.get<std::string>("bbox", "");
 
     bool do_process = false;
 
@@ -122,8 +117,6 @@ void osm_datasource::bind() const
         bounds b = osm_data_->get_bounds();
         extent_ =  box2d<double>(b.w, b.s, b.e, b.n);
     }
-
-    is_bound_ = true;
 }
 
 osm_datasource::~osm_datasource()
@@ -149,8 +142,6 @@ layer_descriptor osm_datasource::get_descriptor() const
 
 featureset_ptr osm_datasource::features(const query& q) const
 {
-    if (! is_bound_) bind();
-
     filter_in_box filter(q.get_bbox());
     // so we need to filter osm features by bbox here...
 
@@ -162,8 +153,6 @@ featureset_ptr osm_datasource::features(const query& q) const
 
 featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
 {
-    if (! is_bound_) bind();
-
     filter_at_point filter(pt);
     // collect all attribute names
     std::vector<attribute_descriptor> const& desc_vector = desc_.get_descriptors();
@@ -185,13 +174,10 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
 
 box2d<double> osm_datasource::envelope() const
 {
-    if (! is_bound_) bind();
-
     return extent_;
 }
 
 boost::optional<mapnik::datasource::geometry_t> osm_datasource::get_geometry_type() const
 {
-    if (! is_bound_) bind();
     return boost::optional<mapnik::datasource::geometry_t>(mapnik::datasource::Collection);
 }
