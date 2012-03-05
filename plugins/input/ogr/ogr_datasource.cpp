@@ -63,6 +63,21 @@ ogr_datasource::ogr_datasource(parameters const& params)
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
       indexed_(false)
 {
+    init(params);
+}
+
+ogr_datasource::~ogr_datasource()
+{
+    // free layer before destroying the datasource
+    layer_.free_layer();
+    OGRDataSource::DestroyDataSource (dataset_);
+}
+
+void ogr_datasource::init(mapnik::parameters const& params)
+{
+    // initialize ogr formats
+    OGRRegisterAll();
+    
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
     if (! file && ! string)
@@ -86,19 +101,7 @@ ogr_datasource::ogr_datasource(parameters const& params)
             dataset_name_ = *file;
         }
     }
-}
-
-ogr_datasource::~ogr_datasource()
-{
-    // free layer before destroying the datasource
-    layer_.free_layer();
-    OGRDataSource::DestroyDataSource (dataset_);
-}
-
-void ogr_datasource::init(mapnik::parameters const& params)
-{
-    // initialize ogr formats
-    OGRRegisterAll();
+    
     
     std::string driver = *params.get<std::string>("driver","");
 
