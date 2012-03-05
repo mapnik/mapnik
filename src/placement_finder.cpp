@@ -328,12 +328,9 @@ void placement_finder<DetectorT>::init_alignment()
 
 
 template <typename DetectorT>
-void placement_finder<DetectorT>::adjust_position(text_path *current_placement,
-                                                  double label_x,
-                                                  double label_y)
+void placement_finder<DetectorT>::adjust_position(text_path *current_placement)
 {
     // if needed, adjust for desired vertical alignment
-    current_placement->center.y = label_y;  // no adjustment, default is MIDDLE
     if (valign_ == V_TOP)
     {
         current_placement->center.y -= 0.5 * string_height_;  // move center up by 1/2 the total height
@@ -343,7 +340,6 @@ void placement_finder<DetectorT>::adjust_position(text_path *current_placement,
     }
 
     // set horizontal position to middle of text
-    current_placement->center.x = label_x;  // no adjustment, default is MIDDLE
     if (halign_ == H_LEFT)
     {
         current_placement->center.x -= 0.5 * string_width_;  // move center left by 1/2 the string width
@@ -370,9 +366,9 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     double sina = std::sin(rad);
 
     double x, y;
-    std::auto_ptr<text_path> current_placement(new text_path);
+    std::auto_ptr<text_path> current_placement(new text_path(label_x, label_y));
 
-    adjust_position(current_placement.get(), label_x, label_y);
+    adjust_position(current_placement.get());
 
     // presets for first line
     unsigned int line_number = 0;
@@ -706,8 +702,6 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
     const unsigned initial_index = index;
     const double initial_distance = distance;
 
-    std::auto_ptr<text_path> current_placement(new text_path);
-
     double old_x = path_positions[index-1].x;
     double old_y = path_positions[index-1].y;
 
@@ -723,8 +717,12 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         return std::auto_ptr<text_path>(NULL);
     }
 
-    current_placement->center.x = old_x + dx*distance/segment_length;
-    current_placement->center.y = old_y + dy*distance/segment_length;
+    std::auto_ptr<text_path> current_placement(
+                new text_path((old_x + dx*distance/segment_length),
+                              (old_y + dy*distance/segment_length)
+                             )
+                );
+
     double angle = atan2(-dy, dx);
 
     bool orientation_forced = (orientation != 0); // Whether the orientation was set by the caller

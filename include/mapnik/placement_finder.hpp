@@ -114,7 +114,7 @@ private:
     void find_line_breaks();
     void init_string_size();
     void init_alignment();
-    void adjust_position(text_path *current_placement, double label_x, double label_y);
+    void adjust_position(text_path *current_placement);
     void add_line(double width, double height, bool first_line);
 
     ///General Internals
