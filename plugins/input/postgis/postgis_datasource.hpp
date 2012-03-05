@@ -89,8 +89,8 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    void init(parameters const& params);
 private:
+    void init(parameters const& params);
     std::string sql_bbox(box2d<double> const& env) const;
     std::string populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env) const;
     std::string populate_tokens(const std::string& sql) const;
