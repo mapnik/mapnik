@@ -548,13 +548,13 @@ void serialize_fontset( ptree & map_node, Map::const_fontset_iterator fontset_it
 
 }
 
-void serialize_datasource( ptree & layer_node, datasource_ptr datasource)
+void serialize_datasource( ptree & layer_node, parameters const& params)
 {
     ptree & datasource_node = layer_node.push_back(
         ptree::value_type("Datasource", ptree()))->second;
 
-    parameters::const_iterator it = datasource->params().begin();
-    parameters::const_iterator end = datasource->params().end();
+    parameters::const_iterator it = params.begin();
+    parameters::const_iterator end = params.end();
     for (; it != end; ++it)
     {
         boost::property_tree::ptree & param_node = datasource_node.push_back(
@@ -675,11 +675,8 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         style_node.put_value( style_names[i] );
     }
 
-    datasource_ptr datasource = layer.datasource();
-    if ( datasource )
-    {
-        serialize_datasource( layer_node, datasource );
-    }
+    parameters const& params = layer.datasource_parameters();
+    serialize_datasource( layer_node, params);
 }
 
 void serialize_metawriter(ptree & map_node, Map::const_metawriter_iterator metawriter_it, bool explicit_defaults)

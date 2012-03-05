@@ -785,23 +785,8 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
                     params["file"] = ensure_relative_to_xml(file_param);
                 }
 
-                //now we are ready to create datasource
-                try
-                {
-                    boost::shared_ptr<datasource> ds =
-                        datasource_cache::instance()->create(params);
-                    lyr.set_datasource(ds);
-                }
-
-                catch (const std::exception & ex )
-                {
-                    throw config_error( ex.what() );
-                }
-
-                catch (...)
-                {
-                    throw config_error("Unknown exception occured attempting to create datasoure for layer '" + lyr.name() + "'");
-                }
+                lyr.set_datasource_parameters(params);
+                
             }
             else if (child.first != "<xmlattr>" &&
                      child.first != "<xmlcomment>")
