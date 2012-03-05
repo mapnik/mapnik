@@ -178,6 +178,7 @@ source = Split(
     text_placements/list.cpp
     text_placements/simple.cpp
     text_properties.cpp
+    xml_tree.cpp
     """   
     )
 
