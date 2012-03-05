@@ -56,11 +56,11 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 
 
-ogr_datasource::ogr_datasource(parameters const& params, bool bind)
+ogr_datasource::ogr_datasource(parameters const& params)
     : datasource(params),
       extent_(),
       type_(datasource::Vector),
-      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
+      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
       indexed_(false)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
@@ -86,32 +86,21 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
             dataset_name_ = *file;
         }
     }
-
-    if (bind)
-    {
-        this->bind();
-    }
 }
 
 ogr_datasource::~ogr_datasource()
 {
-    if (is_bound_)
-    {
-        // free layer before destroying the datasource
-        layer_.free_layer();
-
-        OGRDataSource::DestroyDataSource (dataset_);
-    }
+    // free layer before destroying the datasource
+    layer_.free_layer();
+    OGRDataSource::DestroyDataSource (dataset_);
 }
 
-void ogr_datasource::bind() const
+void ogr_datasource::init(mapnik::parameters const& params)
 {
-    if (is_bound_) return;
-
     // initialize ogr formats
     OGRRegisterAll();
-
-    std::string driver = *params_.get<std::string>("driver","");
+    
+    std::string driver = *params.get<std::string>("driver","");
 
     if (! driver.empty())
     {
@@ -142,9 +131,9 @@ void ogr_datasource::bind() const
     }
 
     // initialize layer
-    boost::optional<std::string> layer_by_name = params_.get<std::string>("layer");
-    boost::optional<unsigned> layer_by_index = params_.get<unsigned>("layer_by_index");
-    boost::optional<std::string> layer_by_sql = params_.get<std::string>("layer_by_sql");
+    boost::optional<std::string> layer_by_name = params.get<std::string>("layer");
+    boost::optional<unsigned> layer_by_index = params.get<unsigned>("layer_by_index");
+    boost::optional<std::string> layer_by_sql = params.get<std::string>("layer_by_sql");
 
     int passed_parameters = 0;
     passed_parameters += layer_by_name ? 1 : 0;
@@ -320,8 +309,6 @@ void ogr_datasource::bind() const
             }
         }
     }
-
-    is_bound_ = true;
 }
 
 std::string ogr_datasource::name()
@@ -336,7 +323,6 @@ mapnik::datasource::datasource_t ogr_datasource::type() const
 
 box2d<double> ogr_datasource::envelope() const
 {
-    if (! is_bound_) bind();
     return extent_;
 }
 
@@ -419,7 +405,6 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
 
 layer_descriptor ogr_datasource::get_descriptor() const
 {
-    if (! is_bound_) bind();
     return desc_;
 }
 
@@ -462,8 +447,6 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
 
 featureset_ptr ogr_datasource::features(query const& q) const
 {
-    if (! is_bound_) bind();
-
     if (dataset_ && layer_.is_valid())
     {
         // First we validate query fields: https://github.com/mapnik/mapnik/issues/792
@@ -509,8 +492,6 @@ featureset_ptr ogr_datasource::features(query const& q) const
 
 featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
 {
-    if (!is_bound_) bind();
-
     if (dataset_ && layer_.is_valid())
     {
         std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
