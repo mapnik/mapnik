@@ -39,28 +39,24 @@ layer_info_dialog::layer_info_dialog(mapnik::layer& lay, QWidget *parent)
     // Named Styles : TODO!!!
 
     // Datasource
-    mapnik::datasource_ptr ds = lay.datasource();
-    if (ds)
+    mapnik::parameters const& ps = lay.datasource_parameters();
+    
+    ui.tableWidget->setRowCount(ps.size());
+    ui.tableWidget->setColumnCount(2);
+    
+    mapnik::parameters::const_iterator pos;
+    int index=0;
+    for (pos = ps.begin();pos != ps.end();++pos)
     {
-        mapnik::parameters ps = ds->params();
-
-        ui.tableWidget->setRowCount(ps.size());
-        ui.tableWidget->setColumnCount(2);
-
-        mapnik::parameters::const_iterator pos;
-        int index=0;
-        for (pos = ps.begin();pos != ps.end();++pos)
+        boost::optional<std::string> result;
+        boost::apply_visitor(mapnik::value_extractor_visitor<std::string>(result),pos->second);
+        if (result)
         {
-            boost::optional<std::string> result;
-            boost::apply_visitor(mapnik::value_extractor_visitor<std::string>(result),pos->second);
-            if (result)
-            {
-                QTableWidgetItem *keyItem = new QTableWidgetItem(QString(pos->first.c_str()));
-                QTableWidgetItem *valueItem = new QTableWidgetItem(QString((*result).c_str()));
-                ui.tableWidget->setItem(index,0,keyItem);
-                ui.tableWidget->setItem(index,1,valueItem);
-                ++index;
-            }
+            QTableWidgetItem *keyItem = new QTableWidgetItem(QString(pos->first.c_str()));
+            QTableWidgetItem *valueItem = new QTableWidgetItem(QString((*result).c_str()));
+            ui.tableWidget->setItem(index,0,keyItem);
+            ui.tableWidget->setItem(index,1,valueItem);
+            ++index;
         }
     }
 }
