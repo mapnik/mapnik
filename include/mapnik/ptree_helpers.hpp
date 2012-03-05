@@ -211,7 +211,15 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 template <typename T>
 inline boost::optional<T> fast_cast(std::string const& value)
 {
-    return boost::lexical_cast<T>( value );
+    try
+    {
+        return boost::lexical_cast<T>( value );
+    }
+    catch (boost::bad_lexical_cast const& ex)
+    {
+        return boost::optional<T>();
+    }
+
 }
 
 template <>
