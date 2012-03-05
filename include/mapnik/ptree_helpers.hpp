@@ -93,7 +93,7 @@ operator << ( std::basic_ostream<charT, traits> & s, mapnik::color const& c )
 /** Helper for class bool */
 class boolean {
 public:
-    boolean() {}
+    boolean() : b_(false) {}
     boolean(bool b) : b_(b) {}
     boolean(boolean const& b) : b_(b.b_) {}
 

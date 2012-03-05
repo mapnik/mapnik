@@ -31,7 +31,8 @@ namespace mapnik {
 class config_error : public std::exception
 {
 public:
-    config_error() {}
+    config_error():
+        what_() {}
 
     config_error( std::string const& what ) :
         what_( what )

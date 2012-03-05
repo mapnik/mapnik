@@ -37,7 +37,8 @@ namespace mapnik {
 class illegal_enum_value : public std::exception
 {
 public:
-    illegal_enum_value() {}
+    illegal_enum_value():
+        what_() {}
 
     illegal_enum_value( std::string const& what ) :
         what_( what )
@@ -138,7 +139,8 @@ template <class ENUM, int THE_MAX>
 class MAPNIK_DECL enumeration {
 public:
     typedef ENUM native_type;
-    enumeration() {};
+    enumeration():
+        value_() {};
     enumeration( ENUM v ) : value_(v) {}
     enumeration( const enumeration & other ) : value_(other.value_) {}
 
