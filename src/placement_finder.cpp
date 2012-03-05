@@ -680,7 +680,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 template <typename DetectorT>
 std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::vector<vertex2d> const& path_positions,
                                                                           std::vector<double> const& path_distances,
-                                                                          int &orientation,
+                                                                          int & orientation,
                                                                           unsigned index,
                                                                           double distance)
 {
@@ -727,7 +727,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
     current_placement->center.y = old_y + dy*distance/segment_length;
     double angle = atan2(-dy, dx);
 
-    bool orientation_forced = (orientation != 0); //Wether the orientation was set by the caller
+    bool orientation_forced = (orientation != 0); // Whether the orientation was set by the caller
     if (!orientation_forced)
         orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
 
@@ -872,7 +872,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
 
 template <typename DetectorT>
 bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const& current_placement,
-                                                int const& orientation)
+                                                int orientation)
 {
     //Create and test envelopes
     bool status = true;
