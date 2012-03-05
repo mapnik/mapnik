@@ -946,9 +946,9 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
 
 template <typename DetectorT>
 void placement_finder<DetectorT>::find_line_circle_intersection(
-    const double &cx, const double &cy, const double &radius,
-    const double &x1, const double &y1, const double &x2, const double &y2,
-    double &ix, double &iy)
+    double cx, double cy, double radius,
+    double x1, double y1, double x2, double y2,
+    double & ix, double & iy)
 {
     double dx = x2 - x1;
     double dy = y2 - y1;
