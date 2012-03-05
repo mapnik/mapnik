@@ -184,8 +184,13 @@ void load_map(Map & map, std::string const& filename, bool strict)
     parser.parse_map(map, pt);
 }
 
-void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_path)
+void load_map_string(Map & map, std::string const& str, bool strict, std::string base_path)
 {
+    if (str.empty())
+    {
+        throw config_error( "Cannot load map, XML string is empty" ) ;
+    }
+
     ptree pt;
 #ifdef HAVE_LIBXML2
     if (!base_path.empty())
