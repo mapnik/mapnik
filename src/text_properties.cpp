@@ -31,6 +31,7 @@ namespace mapnik
 using boost::optional;
 
 text_symbolizer_properties::text_symbolizer_properties() :
+    displacement(0,0),
     label_placement(POINT_PLACEMENT),
     halign(H_AUTO),
     jalign(J_MIDDLE),
@@ -40,11 +41,13 @@ text_symbolizer_properties::text_symbolizer_properties() :
     avoid_edges(false),
     minimum_distance(0.0),
     minimum_padding(0.0),
+    minimum_path_length(0.0),
     max_char_angle_delta(22.5 * M_PI/180.0),
     force_odd_labels(false),
     allow_overlap(false),
     text_ratio(0),
     wrap_width(0),
+    format(),
     tree_()
 {
 
@@ -218,6 +221,8 @@ void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 }
 
 char_properties::char_properties() :
+    face_name(),
+    fontset(),
     text_size(10.0),
     character_spacing(0),
     line_spacing(0),

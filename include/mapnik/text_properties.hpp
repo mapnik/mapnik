@@ -56,7 +56,7 @@ struct char_properties
     /** Construct object from XML. */
     void from_xml(boost::property_tree::ptree const &sym, fontset_map const & fontsets);
     /** Write object to XML ptree. */
-    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl=char_properties()) const;
+    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
     std::string face_name;
     font_set fontset;
     float text_size;
