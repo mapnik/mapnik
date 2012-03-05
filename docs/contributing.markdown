@@ -95,6 +95,12 @@ If you see bits of code around that do not follow these please don't hesitate to
     
     (int)value; // no
 
+#### Use const keyword after the type
+
+    std::string const& variable_name // preferred, for consistency
+
+    std::string const& variable_name // no
+
 #### Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/make_shared.html) where possible
 
 #### Function definitions should not be separated from their arguments:
