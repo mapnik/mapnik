@@ -121,7 +121,9 @@ void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym
     if (n) set_format_tree(n);
 }
 
-void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_symbolizer_properties const &dfl) const
+void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
+                                        bool explicit_defaults,
+                                        text_symbolizer_properties const& dfl) const
 {
     if (orientation)
     {
@@ -263,7 +265,8 @@ void char_properties::from_xml(boost::property_tree::ptree const &sym, fontset_m
         if (itr != fontsets.end())
         {
             fontset = itr->second;
-        } else
+        }
+        else
         {
             throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'");
         }

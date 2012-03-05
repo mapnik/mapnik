@@ -219,9 +219,13 @@ void placement_finder<DetectorT>::find_line_breaks()
     if (p.wrap_width && string_width_ > p.wrap_width)
     {
         if (p.text_ratio)
+        {
             for (double i = 1.0; ((wrap_at = string_width_/i)/(string_height_*i)) > p.text_ratio && (string_width_/i) > p.wrap_width; i += 1.0) ;
+        }
         else
+        {
             wrap_at = p.wrap_width;
+        }
     }
 
     // work out where our line breaks need to be and the resultant width to the 'wrapped' string
@@ -265,8 +269,10 @@ void placement_finder<DetectorT>::find_line_breaks()
 
             // wrap text at first wrap_char after (default) the wrap width or immediately before the current word
             if ((c == '\n') ||
-                (line_width > 0 && ((line_width > wrap_at && !ci.format->wrap_before) ||
-                                    ((line_width + last_wrap_char_width + word_width) > wrap_at && ci.format->wrap_before)) ))
+                (line_width > 0 &&
+                ((line_width > wrap_at && !ci.format->wrap_before) ||
+                  ((line_width + last_wrap_char_width + word_width) > wrap_at && ci.format->wrap_before)) )
+               )
             {
                 add_line(line_width, line_height, first_line);
                 line_breaks_.push_back(last_wrap_char_pos);
@@ -322,7 +328,9 @@ void placement_finder<DetectorT>::init_alignment()
 
 
 template <typename DetectorT>
-void placement_finder<DetectorT>::adjust_position(text_path *current_placement, double label_x, double label_y)
+void placement_finder<DetectorT>::adjust_position(text_path *current_placement,
+                                                  double label_x,
+                                                  double label_y)
 {
     // if needed, adjust for desired vertical alignment
     current_placement->center.y = label_y;  // no adjustment, default is MIDDLE
@@ -351,7 +359,9 @@ void placement_finder<DetectorT>::adjust_position(text_path *current_placement, 
 }
 
 template <typename DetectorT>
-void placement_finder<DetectorT>::find_point_placement(double label_x, double label_y, double angle)
+void placement_finder<DetectorT>::find_point_placement(double label_x,
+                                                       double label_y,
+                                                       double angle)
 {
     find_line_breaks();
 
@@ -432,12 +442,16 @@ void placement_finder<DetectorT>::find_point_placement(double label_x, double la
                    current_placement->center.y - dy - ci.ymax);
 
             // if there is an overlap with existing envelopes, then exit - no placement
-            if (!detector_.extent().intersects(e) || (!p.allow_overlap && !detector_.has_point_placement(e, pi.get_actual_minimum_distance()))) {
+            if (!detector_.extent().intersects(e) ||
+                (!p.allow_overlap && !detector_.has_point_placement(e, pi.get_actual_minimum_distance()))
+               )
+            {
                 return;
             }
 
             // if avoid_edges test dimensions contains e
-            if (p.avoid_edges && !dimensions_.contains(e)) {
+            if (p.avoid_edges && !dimensions_.contains(e))
+            {
                 return;
             }
 
@@ -551,7 +565,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
     //If there is no spacing then just do one label, otherwise calculate how many there should be
     int num_labels = 1;
     if (p.label_spacing > 0)
-        num_labels = static_cast<int> (floor(total_distance / (pi.get_actual_label_spacing() + string_width_)));
+        num_labels = static_cast<int>(floor(total_distance / (pi.get_actual_label_spacing() + string_width_)));
 
     if (p.force_odd_labels && (num_labels % 2 == 0))
         num_labels--;
@@ -664,7 +678,11 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 }
 
 template <typename DetectorT>
-std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const std::vector<vertex2d> &path_positions, const std::vector<double> &path_distances, int &orientation, unsigned index, double distance)
+std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::vector<vertex2d> const& path_positions,
+                                                                          std::vector<double> const& path_distances,
+                                                                          int &orientation,
+                                                                          unsigned index,
+                                                                          double distance)
 {
     //Check that the given distance is on the given index and find the correct index and distance if not
     while (distance < 0 && index > 1)
@@ -835,7 +853,11 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
         if (!orientation_forced)
         {
             orientation = -orientation;
-            current_placement = get_placement_offset(path_positions, path_distances, orientation, initial_index, initial_distance);
+            current_placement = get_placement_offset(path_positions,
+                                                     path_distances,
+                                                     orientation,
+                                                     initial_index,
+                                                     initial_distance);
         }
         else
         {
@@ -849,7 +871,8 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(const
 }
 
 template <typename DetectorT>
-bool placement_finder<DetectorT>::test_placement(const std::auto_ptr<text_path> & current_placement, const int & orientation)
+bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const& current_placement,
+                                                int const& orientation)
 {
     //Create and test envelopes
     bool status = true;
