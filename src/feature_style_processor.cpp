@@ -321,8 +321,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             BOOST_FOREACH(rule const& r, style->get_rules())
             {
                 if (r.active(scale_denom) &&
-                    ds->type() == datasource::Raster &&
-                    ds->params().get<double>("filter_factor",0.0) == 0.0)
+                    ds->type() == datasource::Raster) 
+                    //ds->params().get<double>("filter_factor",0.0) == 0.0) // FIXME !!!
                 {
                     rule::symbolizers const& symbols = r.get_symbolizers();
                     rule::symbolizers::const_iterator symIter = symbols.begin();
