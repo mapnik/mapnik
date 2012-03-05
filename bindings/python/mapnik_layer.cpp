@@ -54,7 +54,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
         {
             s.append(style_names[i]);
         }
-        return boost::python::make_tuple(l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource()->params(),l.cache_features(),s);
+        return boost::python::make_tuple(l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource_parameters(),l.cache_features(),s);
     }
 
     static void
@@ -79,8 +79,8 @@ struct layer_pickle_suite : boost::python::pickle_suite
         l.setQueryable(extract<bool>(state[3]));
 
         mapnik::parameters params = extract<parameters>(state[4]);
-        l.set_datasource(datasource_cache::instance()->create(params));
-
+        l.set_datasource_parameters(params);
+        
         boost::python::list s = extract<boost::python::list>(state[5]);
         for (int i=0;i<len(s);++i)
         {
@@ -91,7 +91,46 @@ struct layer_pickle_suite : boost::python::pickle_suite
     }
 };
 
+
+
 std::vector<std::string> & (mapnik::layer::*_styles_)() = &mapnik::layer::styles;
+
+void set_datasource_parameters(layer & lyr, boost::python::dict const& d)
+{
+    mapnik::parameters params;
+    
+    boost::python::list keys = d.keys();
+    for (int i=0;i<len(keys);++i)
+    {
+        boost::python::extract<std::string> k(keys[i]);
+        if (k.check())
+        {
+            std::cout << k() << " : ";
+            boost::python::object obj = d[keys[i]];
+            boost::python::extract<std::string> str_val(obj);
+            if (str_val.check())
+            {
+                std::cout << "STRING:" << str_val() << std::endl;
+                params.insert(std::make_pair(k(),str_val()));
+                continue;
+            }
+            boost::python::extract<int> int_val(obj);
+            if (int_val.check())
+            {
+                std::cout << "INTEGER:" << int_val << std::endl;
+                params.insert(std::make_pair(k(),int_val()));
+                continue;
+            }
+            boost::python::extract<double> dbl_val(obj);
+            if (dbl_val.check())
+            {
+                std::cout << "DOUBLE:" << dbl_val << std::endl;
+                params.insert(std::make_pair(k(),dbl_val()));
+            }
+        }
+    }
+    lyr.set_datasource_parameters(params);
+}
 
 void export_layer()
 {
@@ -185,15 +224,19 @@ void export_layer()
                       ">>> lyr.cache_features = True # set to True to enable feature caching\n"
             )
 
-        .add_property("datasource",
-                      &layer::datasource,
-                      &layer::set_datasource,
-                      "The datasource attached to this layer.\n"
+        .def("datasource",&layer::datasource,
+            "The datasource attached to this layer.\n"
+            )
+        
+        .add_property("datasource_parameters",
+                      make_function(&layer::datasource_parameters,return_value_policy<copy_const_reference>()),
+                      set_datasource_parameters,
+                      "The datasource parameters attached to this layer.\n"
                       "\n"
                       "Usage:\n"
                       ">>> from mapnik import Layer, Datasource\n"
                       ">>> lyr = Layer('My Layer','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')\n"
-                      ">>> lyr.datasource = Datasource(type='shape',file='world_borders')\n"
+                      ">>> lyr.datasource_parameters = {'type':'shape','file':'world_borders'}\n"
                       ">>> lyr.datasource\n"
                       "<mapnik.Datasource object at 0x65470>\n"
             )
@@ -290,6 +333,6 @@ void export_layer()
                       ">>> lyr.styles[0]\n"
                       "'My Style'\n"
             )
-
+        
         ;
 }
