@@ -40,7 +40,7 @@
 class sqlite_datasource : public mapnik::datasource
 {
 public:
-    sqlite_datasource(mapnik::parameters const& params, bool bind = true);
+    sqlite_datasource(mapnik::parameters const& params);
     virtual ~sqlite_datasource ();
     datasource::datasource_t type() const;
     static std::string name();
@@ -49,41 +49,36 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    void bind() const;
-
-private:
-
-    // FIXME: remove mutable qualifier from data members
-    //        by factoring out bind() logic out from
-    //        datasource impl !!!
-
-    mutable mapnik::box2d<double> extent_;
-    mutable bool extent_initialized_;
+    
+private:    
+    void init(mapnik::parameters const& params);
+    mapnik::box2d<double> extent_;
+    bool extent_initialized_;
     mapnik::datasource::datasource_t type_;
-    mutable std::string dataset_name_;
-    mutable boost::shared_ptr<sqlite_connection> dataset_;
-    mutable std::string table_;
+    std::string dataset_name_;
+    boost::shared_ptr<sqlite_connection> dataset_;
+    std::string table_;
     std::string fields_;
     std::string metadata_;
-    mutable std::string geometry_table_;
-    mutable std::string geometry_field_;
-    mutable std::string index_table_;
-    mutable std::string key_field_;
-    mutable int row_offset_;
-    mutable int row_limit_;
+    std::string geometry_table_;
+    std::string geometry_field_;
+    std::string index_table_;
+    std::string key_field_;
+    int row_offset_;
+    int row_limit_;
     // TODO - also add to postgis.input
     const std::string intersects_token_;
-    mutable mapnik::layer_descriptor desc_;
-    mutable mapnik::wkbFormat format_;
-    mutable bool use_spatial_index_;
-    mutable bool has_spatial_index_;
-    mutable bool using_subquery_;
-    mutable std::vector<std::string> init_statements_;
-
+    mapnik::layer_descriptor desc_;
+    mapnik::wkbFormat format_;
+    bool use_spatial_index_;
+    bool has_spatial_index_;
+    bool using_subquery_;
+    std::vector<std::string> init_statements_;
+    
     // Fill init_statements with any statements
     // needed to attach auxillary databases
-    void parse_attachdb(std::string const& attachdb) const;
-    std::string populate_tokens(const std::string& sql) const;
+    void parse_attachdb(std::string const& attachdb);
+    std::string populate_tokens(std::string const& sql) const;
 };
 
 #endif // MAPNIK_SQLITE_DATASOURCE_HPP
