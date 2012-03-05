@@ -55,28 +55,33 @@ class postgis_datasource : public datasource
     const std::string username_;
     const std::string password_;
     const std::string table_;
-    mutable std::string schema_;
-    mutable std::string geometry_table_;
+    std::string schema_;
+    std::string geometry_table_;
     const std::string geometry_field_;
     const std::string key_field_;
     const int cursor_fetch_size_;
     const int row_limit_;
-    mutable std::string geometryColumn_;
+    std::string geometryColumn_;
     mapnik::datasource::datasource_t type_;
-    mutable int srid_;
+    int srid_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
-    mutable layer_descriptor desc_;
+    layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
     const std::string bbox_token_;
     const std::string scale_denom_token_;
     bool persist_connection_;
     bool extent_from_subquery_;
+    bool estimate_extent_;
     // params below are for testing purposes only (will likely be removed at any time)
     int intersect_min_scale_;
     int intersect_max_scale_;
     //bool show_queries_;
 public:
+    // ctor/dtor
+    postgis_datasource(const parameters &params);
+    ~postgis_datasource();
+    
     static std::string name();
     mapnik::datasource::datasource_t type() const;
     featureset_ptr features(const query& q) const;
@@ -84,9 +89,7 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    postgis_datasource(const parameters &params, bool bind=true);
-    ~postgis_datasource();
-    void bind() const;
+    void init(parameters const& params);
 private:
     std::string sql_bbox(box2d<double> const& env) const;
     std::string populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env) const;

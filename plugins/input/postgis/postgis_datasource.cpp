@@ -54,19 +54,19 @@ using boost::shared_ptr;
 using mapnik::PoolGuard;
 using mapnik::attribute_descriptor;
 
-postgis_datasource::postgis_datasource(parameters const& params, bool bind)
+postgis_datasource::postgis_datasource(parameters const& params)
     : datasource(params),
-      table_(*params_.get<std::string>("table","")),
+      table_(*params.get<std::string>("table","")),
       schema_(""),
-      geometry_table_(*params_.get<std::string>("geometry_table","")),
-      geometry_field_(*params_.get<std::string>("geometry_field","")),
-      key_field_(*params_.get<std::string>("key_field","")),
-      cursor_fetch_size_(*params_.get<int>("cursor_size",0)),
-      row_limit_(*params_.get<int>("row_limit",0)),
+      geometry_table_(*params.get<std::string>("geometry_table","")),
+      geometry_field_(*params.get<std::string>("geometry_field","")),
+      key_field_(*params.get<std::string>("key_field","")),
+      cursor_fetch_size_(*params.get<int>("cursor_size",0)),
+      row_limit_(*params.get<int>("row_limit",0)),
       type_(datasource::Vector),
-      srid_(*params_.get<int>("srid",0)),
+      srid_(*params.get<int>("srid",0)),
       extent_initialized_(false),
-      desc_(*params_.get<std::string>("type"),"utf-8"),
+      desc_(*params.get<std::string>("type"),"utf-8"),
       creator_(params.get<std::string>("host"),
                params.get<std::string>("port"),
                params.get<std::string>("dbname"),
@@ -75,30 +75,25 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
                params.get<std::string>("connect_timeout","4")),
       bbox_token_("!bbox!"),
       scale_denom_token_("!scale_denominator!"),
-      persist_connection_(*params_.get<mapnik::boolean>("persist_connection",true)),
-      extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery",false)),
+      persist_connection_(*params.get<mapnik::boolean>("persist_connection",true)),
+      extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery",false)),
+      estimate_extent_(*params.get<mapnik::boolean>("estimate_extent",false)),
       // params below are for testing purposes only (will likely be removed at any time)
-      intersect_min_scale_(*params_.get<int>("intersect_min_scale",0)),
-      intersect_max_scale_(*params_.get<int>("intersect_max_scale",0))
-      //show_queries_(*params_.get<mapnik::boolean>("show_queries",false))
+      intersect_min_scale_(*params.get<int>("intersect_min_scale",0)),
+      intersect_max_scale_(*params.get<int>("intersect_max_scale",0))
+      //show_queries_(*params.get<mapnik::boolean>("show_queries",false))
 {
     if (table_.empty()) throw mapnik::datasource_exception("Postgis Plugin: missing <table> parameter");
 
-    boost::optional<std::string> ext  = params_.get<std::string>("extent");
+    boost::optional<std::string> ext  = params.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
-
-    if (bind)
-    {
-        this->bind();
-    }
+    this->init(params);
 }
 
-void postgis_datasource::bind() const
+void postgis_datasource::init(parameters const& params)
 {
-    if (is_bound_) return;
-
-    boost::optional<int> initial_size = params_.get<int>("initial_size",1);
-    boost::optional<int> max_size = params_.get<int>("max_size",10);
+    boost::optional<int> initial_size = params.get<int>("initial_size",1);
+    boost::optional<int> max_size = params.get<int>("max_size",10);
 
     ConnectionManager *mgr=ConnectionManager::instance();
     mgr->registerPool(creator_, *initial_size, *max_size);
@@ -327,11 +322,7 @@ void postgis_datasource::bind() const
                     }
                 }
             }
-
             rs->close();
-
-            is_bound_ = true;
-
         }
     }
 }
@@ -348,10 +339,8 @@ mapnik::datasource::datasource_t postgis_datasource::type() const
 
 layer_descriptor postgis_datasource::get_descriptor() const
 {
-    if (!is_bound_) bind();
     return desc_;
 }
-
 
 std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
 {
@@ -464,8 +453,6 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
 
 featureset_ptr postgis_datasource::features(const query& q) const
 {
-    if (!is_bound_) bind();
-
     box2d<double> const& box = q.get_bbox();
     double scale_denom = q.scale_denominator();
     ConnectionManager *mgr=ConnectionManager::instance();
@@ -538,8 +525,6 @@ featureset_ptr postgis_datasource::features(const query& q) const
 
 featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
 {
-    if (!is_bound_) bind();
-
     ConnectionManager *mgr=ConnectionManager::instance();
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
@@ -607,8 +592,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
 box2d<double> postgis_datasource::envelope() const
 {
     if (extent_initialized_) return extent_;
-    if (!is_bound_) bind();
-
+    
     ConnectionManager *mgr=ConnectionManager::instance();
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
@@ -618,7 +602,6 @@ box2d<double> postgis_datasource::envelope() const
         {
             PoolGuard<shared_ptr<Connection>,shared_ptr<Pool<Connection,ConnectionCreator> > > guard(conn,pool);
             std::ostringstream s;
-            boost::optional<mapnik::boolean> estimate_extent = params_.get<mapnik::boolean>("estimate_extent",false);
 
             if (!geometryColumn_.length() > 0)
             {
@@ -635,7 +618,7 @@ box2d<double> postgis_datasource::envelope() const
                 throw mapnik::datasource_exception("Postgis Plugin: " + s_error.str());
             }
 
-            if (estimate_extent && *estimate_extent)
+            if (estimate_extent_)
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
                   << " FROM (SELECT ST_Estimated_Extent('";
@@ -706,9 +689,8 @@ box2d<double> postgis_datasource::envelope() const
 
 boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry_type() const
 {
-    if (! is_bound_) bind();
     boost::optional<mapnik::datasource::geometry_t> result;
-
+    
     ConnectionManager *mgr=ConnectionManager::instance();
     shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
     if (pool)
@@ -818,7 +800,7 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
 
 postgis_datasource::~postgis_datasource()
 {
-    if (is_bound_ && !persist_connection_)
+    if (!persist_connection_)
     {
         ConnectionManager *mgr=ConnectionManager::instance();
         shared_ptr<Pool<Connection,ConnectionCreator> > pool=mgr->getPool(creator_.id());
