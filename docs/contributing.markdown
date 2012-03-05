@@ -99,7 +99,7 @@ If you see bits of code around that do not follow these please don't hesitate to
 
     std::string const& variable_name // preferred, for consistency
 
-    std::string const& variable_name // no
+    const std::string & variable_name // no
 
 #### Pass built-in types by value, all others by const&
 
