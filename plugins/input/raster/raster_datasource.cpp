@@ -45,7 +45,7 @@ using mapnik::image_reader;
 
 DATASOURCE_PLUGIN(raster_datasource)
 
-raster_datasource::raster_datasource(const parameters& params, bool bind)
+raster_datasource::raster_datasource(const parameters& params)
 : datasource(params),
     desc_(*params.get<std::string>("type"), "utf-8"),
     extent_initialized_(false)
@@ -54,6 +54,12 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
     std::clog << "Raster Plugin: Initializing..." << std::endl;
 #endif
 
+    this->init(params);
+        
+}
+
+void raster_datasource::init(parameters const& params)
+{
     boost::optional<std::string> file = params.get<std::string>("file");
     if (! file) throw datasource_exception("Raster Plugin: missing <file> parameter ");
 
@@ -63,18 +69,19 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
     else
         filename_ = *file;
 
-    multi_tiles_ = *params_.get<bool>("multi", false);
-    tile_size_ = *params_.get<unsigned>("tile_size", 256);
-    tile_stride_ = *params_.get<unsigned>("tile_stride", 1);
+    multi_tiles_ = *params.get<bool>("multi", false);
+    tile_size_ = *params.get<unsigned>("tile_size", 256);
+    tile_stride_ = *params.get<unsigned>("tile_stride", 1);
 
-    format_ = *params_.get<std::string>("format","tiff");
+    format_ = *params.get<std::string>("format","tiff");
 
-    boost::optional<double> lox = params_.get<double>("lox");
-    boost::optional<double> loy = params_.get<double>("loy");
-    boost::optional<double> hix = params_.get<double>("hix");
-    boost::optional<double> hiy = params_.get<double>("hiy");
-    boost::optional<std::string> ext = params_.get<std::string>("extent");
-
+    boost::optional<double> lox = params.get<double>("lox");
+    boost::optional<double> loy = params.get<double>("loy");
+    boost::optional<double> hix = params.get<double>("hix");
+    boost::optional<double> hiy = params.get<double>("hiy");
+    
+    boost::optional<std::string> ext = params.get<std::string>("extent");
+    
     if (lox && loy && hix && hiy)
     {
         extent_.init(*lox, *loy, *hix, *hiy);
@@ -89,21 +96,11 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
     {
         throw datasource_exception("Raster Plugin: valid <extent> or <lox> <loy> <hix> <hiy> are required");
     }
-
-    if (bind)
-    {
-        this->bind();
-    }
-}
-
-void raster_datasource::bind() const
-{
-    if (is_bound_) return;
-
+    
     if (multi_tiles_)
     {
-        boost::optional<unsigned> x_width = params_.get<unsigned>("x_width");
-        boost::optional<unsigned> y_width = params_.get<unsigned>("y_width");
+        boost::optional<unsigned> x_width = params.get<unsigned>("x_width");
+        boost::optional<unsigned> y_width = params.get<unsigned>("y_width");
 
         if (! x_width)
         {
@@ -151,8 +148,6 @@ void raster_datasource::bind() const
 #ifdef MAPNIK_DEBUG
     std::clog << "Raster Plugin: RASTER SIZE(" << width_ << "," << height_ << ")" << std::endl;
 #endif
-
-    is_bound_ = true;
 }
 
 raster_datasource::~raster_datasource()
@@ -186,8 +181,6 @@ layer_descriptor raster_datasource::get_descriptor() const
 
 featureset_ptr raster_datasource::features(query const& q) const
 {
-    if (! is_bound_) bind();
-
     mapnik::CoordTransform t(width_, height_, extent_, 0, 0);
     mapnik::box2d<double> intersect = extent_.intersect(q.get_bbox());
     mapnik::box2d<double> ext = t.forward(intersect);

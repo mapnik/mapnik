@@ -31,7 +31,7 @@
 class raster_datasource : public mapnik::datasource
 {
 public:
-    raster_datasource(const mapnik::parameters& params, bool bind=true);
+    raster_datasource(mapnik::parameters const& params);
     virtual ~raster_datasource();
     datasource::datasource_t type() const;
     static std::string name();
@@ -40,8 +40,8 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    void bind() const;
 private:
+    void init(mapnik::parameters const& params);
     mapnik::layer_descriptor desc_;
     std::string filename_;
     std::string format_;
@@ -50,11 +50,9 @@ private:
     bool multi_tiles_;
     unsigned tile_size_;
     unsigned tile_stride_;
-    mutable unsigned width_;
-    mutable unsigned height_;
-    //no copying
-    raster_datasource(const raster_datasource&);
-    raster_datasource& operator=(const raster_datasource&);
+    unsigned width_;
+    unsigned height_;
+  
 };
 
 #endif // RASTER_DATASOURCE_HPP
