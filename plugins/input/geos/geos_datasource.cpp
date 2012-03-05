@@ -84,7 +84,7 @@ void geos_error(const char* fmt, ...)
 }
 
 
-geos_datasource::geos_datasource(parameters const& params, bool bind)
+geos_datasource::geos_datasource(parameters const& params)
     : datasource(params),
       extent_(),
       extent_initialized_(false),
@@ -93,47 +93,38 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
       geometry_data_(""),
       geometry_data_name_("name"),
       geometry_id_(1)
-{
-    boost::optional<std::string> geometry = params.get<std::string>("wkt");
-    if (! geometry) throw datasource_exception("missing <wkt> parameter");
-    geometry_string_ = *geometry;
-
-    boost::optional<std::string> ext = params_.get<std::string>("extent");
-    if (ext) extent_initialized_ = extent_.from_string(*ext);
-
-    boost::optional<int> id = params_.get<int>("gid");
-    if (id) geometry_id_ = *id;
-
-    boost::optional<std::string> gdata = params_.get<std::string>("field_data");
-    if (gdata) geometry_data_ = *gdata;
-
-    boost::optional<std::string> gdata_name = params_.get<std::string>("field_name");
-    if (gdata_name) geometry_data_name_ = *gdata_name;
-
-    desc_.add_descriptor(attribute_descriptor(geometry_data_name_, mapnik::String));
-
-    if (bind)
-    {
-        this->bind();
-    }
+{   
+    init(params);
 }
 
 geos_datasource::~geos_datasource()
 {
-    if (is_bound_)
-    {
-        geometry_.set_feature(0);
-
-        finishGEOS();
-    }
+    geometry_.set_feature(0);    
+    finishGEOS();
 }
 
-void geos_datasource::bind() const
+void geos_datasource::init(mapnik::parameters const& params)
 {
-    if (is_bound_) return;
-
     // open geos driver
     initGEOS(geos_notice, geos_error);
+
+    boost::optional<std::string> geometry = params.get<std::string>("wkt");
+    if (! geometry) throw datasource_exception("missing <wkt> parameter");
+    geometry_string_ = *geometry;
+    
+    boost::optional<std::string> ext = params.get<std::string>("extent");
+    if (ext) extent_initialized_ = extent_.from_string(*ext);
+    
+    boost::optional<int> id = params.get<int>("gid");
+    if (id) geometry_id_ = *id;
+
+    boost::optional<std::string> gdata = params.get<std::string>("field_data");
+    if (gdata) geometry_data_ = *gdata;
+    
+    boost::optional<std::string> gdata_name = params.get<std::string>("field_name");
+    if (gdata_name) geometry_data_name_ = *gdata_name;
+
+    desc_.add_descriptor(attribute_descriptor(geometry_data_name_, mapnik::String));
 
     // parse the string into geometry
     geometry_.set_feature(GEOSGeomFromWKT(geometry_string_.c_str()));
@@ -216,8 +207,6 @@ void geos_datasource::bind() const
     {
         throw datasource_exception("GEOS Plugin: cannot determine extent for <wkt> geometry");
     }
-
-    is_bound_ = true;
 }
 
 std::string geos_datasource::name()
@@ -232,14 +221,11 @@ mapnik::datasource::datasource_t geos_datasource::type() const
 
 box2d<double> geos_datasource::envelope() const
 {
-    if (! is_bound_) bind();
-
     return extent_;
 }
 
 boost::optional<mapnik::datasource::geometry_t> geos_datasource::get_geometry_type() const
 {
-    if (! is_bound_) bind();
     boost::optional<mapnik::datasource::geometry_t> result;
 
     // get geometry type
@@ -271,17 +257,13 @@ boost::optional<mapnik::datasource::geometry_t> geos_datasource::get_geometry_ty
 
 layer_descriptor geos_datasource::get_descriptor() const
 {
-    if (! is_bound_) bind();
-
     return desc_;
 }
 
 featureset_ptr geos_datasource::features(query const& q) const
 {
-    if (! is_bound_) bind();
-
-    const mapnik::box2d<double> extent = q.get_bbox();
-
+    mapnik::box2d<double> const& extent = q.get_bbox();
+    
     std::ostringstream s;
     s << "POLYGON(("
       << extent.minx() << " " << extent.miny() << ","
@@ -305,8 +287,6 @@ featureset_ptr geos_datasource::features(query const& q) const
 
 featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
 {
-    if (! is_bound_) bind();
-
     std::ostringstream s;
     s << "POINT(" << pt.x << " " << pt.y << ")";
 
