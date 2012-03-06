@@ -85,7 +85,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
-        geometry_type const& geom = feature->get_geometry(i);
+        geometry_type & geom = feature->get_geometry(i);
         if (geom.num_points() > 1)
         {
             path_type path(t_,geom,prj_trans);

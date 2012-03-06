@@ -38,7 +38,7 @@
 #include "agg_conv_dash.h"
 #include "agg_renderer_outline_aa.h"
 #include "agg_rasterizer_outline_aa.h"
-
+#include "agg_conv_clip_polyline.h"
 
 // stl
 #include <string>
@@ -51,7 +51,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
+    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
 
     stroke const& stroke_ = sym.get_stroke();
     color const& col = stroke_.get_color();
@@ -81,10 +82,12 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
         for (unsigned i=0;i<feature->num_geometries();++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
             if (geom.num_points() > 1)
             {
-                path_type path(t_,geom,prj_trans);
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                path_type path(t_,clipped,prj_trans);
                 ras.add_path(path);
             }
         }
@@ -122,10 +125,12 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         metawriter_with_properties writer = sym.get_metawriter();
         for (unsigned i=0;i<feature->num_geometries();++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
             if (geom.num_points() > 1)
             {
-                path_type path(t_,geom,prj_trans);
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                path_type path(t_,clipped,prj_trans);
 
                 if (stroke_.has_dash())
                 {
@@ -188,7 +193,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                     stroke.generator().miter_limit(4.0);
                     stroke.generator().width(stroke_.get_width() * scale_factor_);
                     ras_ptr->add_path(stroke);
-                    if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
+                    //if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
                 }
             }
         }

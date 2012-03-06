@@ -78,7 +78,7 @@ protected:
 public:
     ~cairo_renderer_base();
     void start_map_processing(Map const& map);
-    void start_layer_processing(layer const& lay);
+    void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
     void process(point_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,

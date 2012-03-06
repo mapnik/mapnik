@@ -72,16 +72,16 @@ template <typename Transform, typename Geometry>
 struct MAPNIK_DECL coord_transform2
 {
     typedef std::size_t size_type;
-    typedef typename Geometry::value_type value_type;
+    //typedef typename Geometry::value_type value_type;
 
     coord_transform2(Transform const& t,
-                     Geometry const& geom,
+                     Geometry & geom,
                      proj_transform const& prj_trans)
         : t_(t),
         geom_(geom),
         prj_trans_(prj_trans)  {}
 
-    unsigned vertex(double *x, double *y) const
+    unsigned vertex(double *x, double *y)
     {
         unsigned command = SEG_MOVETO;
         bool ok = false;
@@ -115,7 +115,7 @@ struct MAPNIK_DECL coord_transform2
 
 private:
     Transform const& t_;
-    Geometry const& geom_;
+    Geometry & geom_;
     proj_transform const& prj_trans_;
 };
 

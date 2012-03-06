@@ -104,7 +104,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
             for (unsigned i=0; i<feature->num_geometries(); ++i)
             {
-                geometry_type const& geom = feature->get_geometry(i);
+                geometry_type & geom = feature->get_geometry(i);
                 // TODO - merge this code with point_symbolizer rendering
                 if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
                 {
@@ -206,7 +206,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
         for (unsigned i=0; i<feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
             //if (geom.num_points() <= 1) continue;
             if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
             {
