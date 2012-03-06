@@ -696,11 +696,12 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         context_->show_page();
     }
 
-    void cairo_renderer_base::start_layer_processing(layer const& lay)
+    void cairo_renderer_base::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
     {
 #ifdef MAPNIK_DEBUG
         std::clog << "start layer processing : " << lay.name()  << "\n";
         std::clog << "datasource = " << lay.datasource().get() << "\n";
+        std::clog << "query_extent = " << query_extent << "\n";
 #endif
         if (lay.clear_label_cache())
         {
@@ -727,7 +728,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
 
             if (geom.num_points() > 2)
             {
@@ -862,7 +863,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
 
             if (geom.num_points() > 1)
             {
@@ -1093,7 +1094,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
 
             if (geom.num_points() > 1)
             {
@@ -1159,7 +1160,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
 
             if (geom.num_points() > 2)
             {
@@ -1229,7 +1230,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
 
             if (geom.num_points() > 1)
             {

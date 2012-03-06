@@ -97,11 +97,12 @@ void grid_renderer<T>::end_map_processing(Map const& )
 }
 
 template <typename T>
-void grid_renderer<T>::start_layer_processing(layer const& lay)
+void grid_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
 #ifdef MAPNIK_DEBUG
     std::clog << "start layer processing : " << lay.name()  << "\n";
     std::clog << "datasource = " << lay.datasource().get() << "\n";
+    std::clog << "query_extent = " << query_extent << "\n";
 #endif
     if (lay.clear_label_cache())
     {

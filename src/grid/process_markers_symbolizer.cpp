@@ -104,7 +104,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             bool placed = false;
             for (unsigned i=0; i<feature->num_geometries(); ++i)
             {
-                geometry_type const& geom = feature->get_geometry(i);
+                geometry_type & geom = feature->get_geometry(i);
                 if (geom.num_points() <= 1)
                 {
                     std::clog << "### Warning svg markers not supported yet for points within markers_symbolizer\n";
@@ -181,7 +181,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 
         for (unsigned i=0; i<feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
             if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
             {
                 geom.label_position(&x,&y);

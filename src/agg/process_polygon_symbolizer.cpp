@@ -34,7 +34,7 @@
 #include "agg_scanline_u.h"
 // for polygon_symbolizer
 #include "agg_renderer_scanline.h"
-
+#include "agg_conv_clip_polygon.h"
 // stl
 #include <string>
 
@@ -45,7 +45,8 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
+    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 
@@ -60,7 +61,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     unsigned g=fill_.green();
     unsigned b=fill_.blue();
     unsigned a=fill_.alpha();
-    renb.clip_box(0,0,width_,height_);
+    //renb.clip_box(0,0,width_,height_);
     renderer ren(renb);
     
     ras_ptr->reset();
@@ -88,12 +89,15 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
-        geometry_type const& geom=feature->get_geometry(i);
+        geometry_type & geom=feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
-            path_type path(t_,geom,prj_trans);
+            clipped_geometry_type clipped(geom);
+            //clipped.clip_box(4211605.95493,7504793.67543,4212017.83704,7505169.29792);
+            clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+            path_type path(t_,clipped,prj_trans);
             ras_ptr->add_path(path);
-            if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
+            //if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
         }
     }
     ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
