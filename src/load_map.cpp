@@ -98,13 +98,13 @@ public:
     void parse_map(Map & map, xml_node const& sty, std::string const& base_path="");
 private:
     void parse_map_include( Map & map, xml_node const& include);
-    void parse_style(Map & map, ptree const & sty);
-    void parse_layer(Map & map, ptree const & lay);
-    void parse_metawriter(Map & map, ptree const & lay);
+    void parse_style(Map & map, xml_node const& sty);
+    void parse_layer(Map & map, xml_node const& lay);
+    void parse_metawriter(Map & map, xml_node const& lay);
     void parse_metawriter_in_symbolizer(symbolizer_base &sym, ptree const &pt);
 
-    void parse_fontset(Map & map, ptree const & fset);
-    void parse_font(font_set & fset, ptree const & f);
+    void parse_fontset(Map & map, xml_node const & fset);
+    void parse_font(font_set & fset, xml_node const& f);
 
     void parse_rule(feature_type_style & style, ptree const & r);
 
@@ -390,6 +390,8 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
 
 void map_parser::parse_map_include(Map & map, xml_node const& include)
 {
+    try
+    {
     xml_node::const_iterator itr = include.begin();
     xml_node::const_iterator end = include.end();
 
@@ -402,7 +404,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
         }
         else if (itr->name() == "Style")
         {
-//            parse_style(map, *itr);
+            parse_style(map, *itr);
         }
         else if (itr->name() == "Layer")
         {
@@ -477,99 +479,73 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             }
         }
     }
+    } catch (const config_error & ex) {
+        ex.append_context(std::string("in map '") + filename_ + "'");
+        throw;
+    }
+
     map.init_metawriters();
 }
 
-void map_parser::parse_style( Map & map, ptree const & sty )
+void map_parser::parse_style(Map & map, xml_node const& sty)
 {
-    std::ostringstream s("");
-    s << "name,"
-      << "filter-mode";
-    ensure_attrs(sty, "Style", s.str());
-
     std::string name("<missing name>");
     try
     {
-        name = get_attr<std::string>(sty, "name");
+        name = sty.get_attr<std::string>("name");
         feature_type_style style;
 
-        filter_mode_e filter_mode = get_attr<filter_mode_e>(sty, "filter-mode", FILTER_ALL);
+        filter_mode_e filter_mode = sty.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
         style.set_filter_mode(filter_mode);
 
-        ptree::const_iterator ruleIter = sty.begin();
-        ptree::const_iterator endRule = sty.end();
+        xml_node::const_iterator ruleIter = sty.begin();
+        xml_node::const_iterator endRule = sty.end();
 
         for (; ruleIter!=endRule; ++ruleIter)
         {
-            ptree::value_type const& rule_tag = *ruleIter;
-            if (rule_tag.first == "Rule")
+            if (ruleIter->is("Rule"))
             {
-                parse_rule( style, rule_tag.second );
-            }
-            else if (rule_tag.first != "<xmlcomment>" &&
-                     rule_tag.first != "<xmlattr>" )
-            {
-                throw config_error(std::string("Unknown child node in 'Style'. ") +
-                                   "Expected 'Rule' but got '" + rule_tag.first + "'");
+//                parse_rule(style, rule_tag.second);
             }
         }
 
         map.insert_style(name, style);
-
     } catch (const config_error & ex) {
-        if ( ! name.empty() ) {
-            ex.append_context(std::string("in style '") + name + "'");
-        }
-        ex.append_context(std::string("in map '") + filename_ + "'");
+        ex.append_context(std::string("in style '") + name + "'");
         throw;
     }
 }
 
-void map_parser::parse_metawriter(Map & map, ptree const & pt)
+void map_parser::parse_metawriter(Map & map, xml_node const& pt)
 {
-    ensure_attrs(pt, "MetaWriter", "name,type,file,default-output,output-empty,pixel-coordinates");
     std::string name("<missing name>");
     metawriter_ptr writer;
     try
     {
-        name = get_attr<std::string>(pt, "name");
-        writer = metawriter_create(pt);
+        name = pt.get_attr<std::string>("name");
+//        writer = metawriter_create(pt);
         map.insert_metawriter(name, writer);
-
     } catch (const config_error & ex) {
-        if (!name.empty()) {
-            ex.append_context(std::string("in meta writer '") + name + "'");
-        }
-        ex.append_context(std::string("in map '") + filename_ + "'");
-        throw;
+        ex.append_context(std::string("in meta writer '") + name + "'");
     }
 }
 
-void map_parser::parse_fontset( Map & map, ptree const & fset )
+void map_parser::parse_fontset(Map & map, xml_node const& fset)
 {
-    ensure_attrs(fset, "FontSet", "name,Font");
     std::string name("<missing name>");
     try
     {
-        name = get_attr<std::string>(fset, "name");
+        name = fset.get_attr<std::string>("name");
         font_set fontset(name);
 
-        ptree::const_iterator itr = fset.begin();
-        ptree::const_iterator end = fset.end();
+        xml_node::const_iterator itr = fset.begin();
+        xml_node::const_iterator end = fset.end();
 
         for (; itr != end; ++itr)
         {
-            ptree::value_type const& font_tag = *itr;
-
-            if (font_tag.first == "Font")
+            if (itr->is("Font"))
             {
-                parse_font(fontset, font_tag.second);
-            }
-            else if (font_tag.first != "<xmlcomment>" &&
-                     font_tag.first != "<xmlattr>" )
-            {
-                throw config_error(std::string("Unknown child node in 'FontSet'. ") +
-                                   "Expected 'Font' but got '" + font_tag.first + "'");
+                parse_font(fontset, *itr);
             }
         }
 
@@ -579,19 +555,14 @@ void map_parser::parse_fontset( Map & map, ptree const & fset )
         // when it's parsed
         fontsets_.insert(pair<std::string, font_set>(name, fontset));
     } catch (const config_error & ex) {
-        if ( ! name.empty() ) {
-            ex.append_context(std::string("in FontSet '") + name + "'");
-        }
-        ex.append_context(std::string("in map '") + filename_ + "'");
+        ex.append_context(std::string("in FontSet '") + name + "'");
         throw;
     }
 }
 
-void map_parser::parse_font(font_set & fset, ptree const & f)
+void map_parser::parse_font(font_set &fset, xml_node const& f)
 {
-    ensure_attrs(f, "Font", "face-name");
-
-    optional<std::string> face_name = get_opt_attr<std::string>(f, "face-name");
+    optional<std::string> face_name = f.get_opt_attr<std::string>("face-name");
     if (face_name)
     {
         if ( strict_ )
@@ -606,85 +577,72 @@ void map_parser::parse_font(font_set & fset, ptree const & f)
     }
 }
 
-void map_parser::parse_layer( Map & map, ptree const & lay )
+void map_parser::parse_layer(Map & map, xml_node const& lay)
 {
     std::string name;
-    std::ostringstream s("");
-    s << "name,"
-      << "srs,"
-      << "status,"
-      << "minzoom,"
-      << "maxzoom,"
-      << "queryable,"
-      << "clear-label-cache,"
-      << "cache-features,"
-      << "group-by";
-    ensure_attrs(lay, "Layer", s.str());
     try
     {
-        name = get_attr(lay, "name", std::string("Unnamed"));
+        name = lay.get_attr("name", std::string("Unnamed"));
 
         // XXX if no projection is given inherit from map? [DS]
-        std::string srs = get_attr(lay, "srs", map.srs());
+        std::string srs = lay.get_attr("srs", map.srs());
 
         layer lyr(name, srs);
 
-        optional<boolean> status = get_opt_attr<boolean>(lay, "status");
+        optional<boolean> status = lay.get_opt_attr<boolean>("status");
         if (status)
         {
-            lyr.setActive( * status );
+            lyr.setActive(*status);
         }
 
-        optional<double> minZoom = get_opt_attr<double>(lay, "minzoom");
+        optional<double> minZoom = lay.get_opt_attr<double>("minzoom");
         if (minZoom)
         {
             lyr.setMinZoom( * minZoom );
         }
 
-        optional<double> maxZoom = get_opt_attr<double>(lay, "maxzoom");
+        optional<double> maxZoom = lay.get_opt_attr<double>("maxzoom");
         if (maxZoom)
         {
             lyr.setMaxZoom( * maxZoom );
         }
 
-        optional<boolean> queryable = get_opt_attr<boolean>(lay, "queryable");
+        optional<boolean> queryable = lay.get_opt_attr<boolean>("queryable");
         if (queryable)
         {
             lyr.setQueryable( * queryable );
         }
 
         optional<boolean> clear_cache =
-            get_opt_attr<boolean>(lay, "clear-label-cache");
+            lay.get_opt_attr<boolean>("clear-label-cache");
         if (clear_cache)
         {
             lyr.set_clear_label_cache( * clear_cache );
         }
 
         optional<boolean> cache_features =
-            get_opt_attr<boolean>(lay, "cache-features");
+            lay.get_opt_attr<boolean>("cache-features");
         if (cache_features)
         {
             lyr.set_cache_features( * cache_features );
         }
 
         optional<std::string> group_by =
-            get_opt_attr<std::string>(lay, "group-by");
+            lay.get_opt_attr<std::string>("group-by");
         if (group_by)
         {
             lyr.set_group_by( * group_by );
         }
 
-        ptree::const_iterator itr2 = lay.begin();
-        ptree::const_iterator end2 = lay.end();
+        xml_node::const_iterator child = lay.begin();
+        xml_node::const_iterator end = lay.end();
 
-        for(; itr2 != end2; ++itr2)
+        for(; child != end; ++child)
         {
-            ptree::value_type const& child = *itr2;
 
-            if (child.first == "StyleName")
+            if (child->is("StyleName"))
             {
-                ensure_attrs(child.second, "StyleName", "none");
-                std::string style_name = get_value<std::string>(child.second, "style name");
+                std::string style_name = child->get_value<std::string>("style name"); //TODO: get_text
                 if (style_name.empty())
                 {
                     std::ostringstream ss;
@@ -699,11 +657,10 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
                     lyr.add_style(style_name);
                 }
             }
-            else if (child.first == "Datasource")
+            else if (child->is("Datasource"))
             {
-                ensure_attrs(child.second, "Datasource", "base");
                 parameters params;
-                optional<std::string> base = get_opt_attr<std::string>( child.second, "base" );
+                optional<std::string> base = child->get_opt_attr<std::string>("base");
                 if( base )
                 {
                     std::map<std::string,parameters>::const_iterator base_itr = datasource_templates_.find(*base);
@@ -711,26 +668,15 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
                         params = base_itr->second;
                 }
 
-                ptree::const_iterator paramIter = child.second.begin();
-                ptree::const_iterator endParam = child.second.end();
+                xml_node::const_iterator paramIter = child->begin();
+                xml_node::const_iterator endParam = child->end();
                 for (; paramIter != endParam; ++paramIter)
                 {
-                    ptree const& param = paramIter->second;
-
-                    if (paramIter->first == "Parameter")
+                    if (paramIter->is("Parameter"))
                     {
-                        ensure_attrs(param, "Parameter", "name");
-                        std::string name = get_attr<std::string>(param, "name");
-                        std::string value = get_value<std::string>( param,
-                                                                    "datasource parameter");
+                        std::string name = paramIter->get_attr<std::string>("name");
+                        std::string value = paramIter->get_text();
                         params[name] = value;
-                    }
-                    else if( paramIter->first != "<xmlattr>"  &&
-                             paramIter->first != "<xmlcomment>" )
-                    {
-                        throw config_error(std::string("Unknown child node in ") +
-                                           "'Datasource'. Expected 'Parameter' but got '" +
-                                           paramIter->first + "'");
                     }
                 }
 
@@ -763,23 +709,14 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
                     throw config_error("Unknown exception occured attempting to create datasoure for layer '" + lyr.name() + "'");
                 }
             }
-            else if (child.first != "<xmlattr>" &&
-                     child.first != "<xmlcomment>")
-            {
-                throw config_error(std::string("Unknown child node in 'Layer'. ") +
-                                   "Expected 'StyleName' or 'Datasource' but got '" +
-                                   child.first + "'");
-            }
         }
-
         map.addLayer(lyr);
-
     }
     catch (const config_error & ex)
     {
-        if ( ! name.empty() )
+        if (!name.empty())
         {
-            ex.append_context(std::string("(encountered during parsing of layer '") + name + "' in map '" + filename_ + "')");
+            ex.append_context(std::string(" encountered during parsing of layer '") + name + "'");
         }
         throw;
     }

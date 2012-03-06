@@ -41,7 +41,7 @@ class xml_attribute
 {
 public:
     std::string value;
-    bool processed;
+    mutable bool processed;
 };
 
 class node_not_found: public std::exception
@@ -66,9 +66,10 @@ public:
     std::string name() const;
     std::string text() const;
     bool is_text() const;
+    bool is(std::string const& name) const;
 
-    xml_node &add_child(std::string name, unsigned line=0, bool text_node = false);
-    void add_attribute(std::string name, std::string value);
+    xml_node &add_child(std::string const& name, unsigned line=0, bool text_node = false);
+    void add_attribute(std::string const& name, std::string const& value);
     void set_processed(bool processed);
 
     const_iterator begin() const;
@@ -96,7 +97,7 @@ private:
     std::map<std::string, xml_attribute> attributes_;
     bool text_node_;
     unsigned line_;
-    bool processed_;
+    mutable bool processed_;
 
 };
 
