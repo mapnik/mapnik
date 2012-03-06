@@ -97,7 +97,7 @@ public:
 
     void parse_map(Map & map, xml_node const& sty, std::string const& base_path="");
 private:
-    void parse_map_include( Map & map, ptree const & include);
+    void parse_map_include( Map & map, xml_node const& include);
     void parse_style(Map & map, ptree const & sty);
     void parse_layer(Map & map, ptree const & lay);
     void parse_metawriter(Map & map, ptree const & lay);
@@ -380,7 +380,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             throw;
         }
 
-//        parse_map_include( map, map_node );
+        parse_map_include(map, map_node);
     }
     catch (node_not_found const&)
     {
@@ -388,124 +388,95 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
     }
 }
 
-void map_parser::parse_map_include(Map & map, xml_node const& include )
+void map_parser::parse_map_include(Map & map, xml_node const& include)
 {
-    ptree::const_iterator itr = include.begin();
-    ptree::const_iterator end = include.end();
+    xml_node::const_iterator itr = include.begin();
+    xml_node::const_iterator end = include.end();
 
     for (; itr != end; ++itr)
     {
-        ptree::value_type const& v = *itr;
-
-        if (v.first == "Include")
+        if (itr->is_text()) continue;
+        if (itr->name() == "Include")
         {
-            parse_map_include( map, v.second );
+            parse_map_include(map, *itr);
         }
-        else if (v.first == "Style")
+        else if (itr->name() == "Style")
         {
-            parse_style( map, v.second );
+//            parse_style(map, *itr);
         }
-        else if (v.first == "Layer")
+        else if (itr->name() == "Layer")
         {
-            parse_layer(map, v.second );
+//            parse_layer(map, *itr);
         }
-        else if (v.first == "FontSet")
+        else if (itr->name() == "FontSet")
         {
-            parse_fontset(map, v.second);
+//            parse_fontset(map, *itr);
         }
-        else if (v.first == "MetaWriter")
+        else if (itr->name() == "MetaWriter")
         {
-            parse_metawriter(map, v.second);
+//            parse_metawriter(map, *itr);
         }
-        else if (v.first == "FileSource")
+        else if (itr->name() == "FileSource")
         {
-            std::string name = get_attr<std::string>( v.second, "name");
-            std::string value = get_value<std::string>( v.second, "");
+            std::string name = itr->get_attr<std::string>("name");
+            std::string value = itr->get_text();
             file_sources_[name] = value;
         }
-        else if (v.first == "Datasource")
+        else if (itr->name() == "Datasource")
         {
-            std::string name = get_attr(v.second, "name", std::string("Unnamed"));
+            std::string name = itr->get_attr("name", std::string("Unnamed"));
             parameters params;
-            ptree::const_iterator paramIter = v.second.begin();
-            ptree::const_iterator endParam = v.second.end();
+            xml_node::const_iterator paramIter = itr->begin();
+            xml_node::const_iterator endParam = itr->end();
             for (; paramIter != endParam; ++paramIter)
             {
-                ptree const& param = paramIter->second;
-
-                if (paramIter->first == "Parameter")
+                if (paramIter->name() == "Parameter")
                 {
-                    std::string name = get_attr<std::string>(param, "name");
-                    std::string value = get_value<std::string>( param,
-                                                                "datasource parameter");
+                    std::string name = paramIter->get_attr<std::string>("name");
+                    std::string value = paramIter->get_text();
                     params[name] = value;
-                }
-                else if( paramIter->first != "<xmlattr>" &&
-                         paramIter->first != "<xmlcomment>")
-                {
-                    throw config_error(std::string("Unknown child node in ") +
-                                       "'Datasource'. Expected 'Parameter' but got '" +
-                                       paramIter->first + "'");
                 }
             }
             datasource_templates_[name] = params;
         }
-        else if (v.first == "Parameters")
+        else if (itr->name() == "Parameters")
         {
-            std::string name = get_attr(v.second, "name", std::string("Unnamed"));
+            std::string name = itr->get_attr("name", std::string("Unnamed"));
             parameters & params = map.get_extra_parameters();
-            ptree::const_iterator paramIter = v.second.begin();
-            ptree::const_iterator endParam = v.second.end();
+            xml_node::const_iterator paramIter = itr->begin();
+            xml_node::const_iterator endParam = itr->end();
             for (; paramIter != endParam; ++paramIter)
             {
-                ptree const& param = paramIter->second;
-
-                if (paramIter->first == "Parameter")
+                if (paramIter->name() == "Parameter")
                 {
-                    std::string name = get_attr<std::string>(param, "name");
+                    std::string name = paramIter->get_attr<std::string>("name");
                     bool is_string = true;
-                    boost::optional<std::string> type = get_opt_attr<std::string>(param, "type");
+                    boost::optional<std::string> type = paramIter->get_opt_attr<std::string>("type");
                     if (type)
                     {
                         if (*type == "int")
                         {
                             is_string = false;
-                            int value = get_value<int>( param,"parameter");
+                            int value = paramIter->get_value<int>("parameter");
                             params[name] = value;
                         }
                         else if (*type == "float")
                         {
                             is_string = false;
-                            double value = get_value<double>( param,"parameter");
+                            double value = paramIter->get_value<double>("parameter");
                             params[name] = value;
                         }
                     }
 
                     if (is_string)
                     {
-                        std::string value = get_value<std::string>( param,
-                                                                    "parameter");
+                        std::string value = paramIter->get_text();
                         params[name] = value;
                     }
                 }
-                else if( paramIter->first != "<xmlattr>" &&
-                         paramIter->first != "<xmlcomment>" )
-                {
-                    throw config_error(std::string("Unknown child node in ") +
-                                       "'Parameters'. Expected 'Parameter' but got '" +
-                                       paramIter->first + "'");
-                }
             }
         }
-        else if (v.first != "<xmlcomment>" &&
-                 v.first != "<xmlattr>")
-        {
-            throw config_error(std::string("Unknown child node in 'Map': '") +
-                               v.first + "'");
-        }
     }
-
-
     map.init_metawriters();
 }
 

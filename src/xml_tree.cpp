@@ -24,6 +24,7 @@
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/enumeration.hpp>
+#include <mapnik/color_factory.hpp>
 
 //boost
 #include <boost/lexical_cast.hpp>
@@ -68,6 +69,12 @@ template <>
 inline boost::optional<std::string> fast_cast(xml_tree const& tree, std::string const& value)
 {
     return value;
+}
+
+template <>
+inline boost::optional<color> fast_cast(xml_tree const& tree, std::string const& value)
+{
+    return mapnik::color_factory::from_string(value);
 }
 
 

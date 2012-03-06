@@ -60,14 +60,19 @@ private:
 class xml_node
 {
 public:
+    typedef std::list<xml_node>::const_iterator const_iterator;
     xml_node(xml_tree &tree, std::string name, unsigned line=0, bool text_node = false);
 
     std::string name() const;
     std::string text() const;
+    bool is_text() const;
 
     xml_node &add_child(std::string name, unsigned line=0, bool text_node = false);
     void add_attribute(std::string name, std::string value);
     void set_processed(bool processed);
+
+    const_iterator begin() const;
+    const_iterator end() const;
 
     xml_node & get_child(std::string name);
     xml_node const& get_child(std::string name) const;
@@ -77,6 +82,13 @@ public:
 
     template <typename T>
     T get_attr(std::string const& name, T const& default_value) const;
+    template <typename T>
+    T get_attr(std::string const& name) const;
+
+    std::string get_text() const;
+
+    template <typename T>
+    T get_value(std::string const& name) const;
 private:
     xml_tree &tree_;
     std::string name_;
