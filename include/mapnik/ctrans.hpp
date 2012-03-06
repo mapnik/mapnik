@@ -380,20 +380,27 @@ class CoordTransform
 private:
     int width_;
     int height_;
-    double sx_;
-    double sy_;
     box2d<double> extent_;
     double offset_x_;
     double offset_y_;
+    double sx_;
+    double sy_;
 
 public:
     CoordTransform(int width, int height, const box2d<double>& extent,
                    double offset_x = 0, double offset_y = 0)
-        : width_(width), height_(height), extent_(extent),
-          offset_x_(offset_x), offset_y_(offset_y)
+        : width_(width),
+          height_(height),
+          extent_(extent),
+          offset_x_(offset_x),
+          offset_y_(offset_y),
+          sx_(1.0),
+          sy_(1.0)
     {
-        sx_ = static_cast<double>(width_) / extent_.width();
-        sy_ = static_cast<double>(height_) / extent_.height();
+        if (extent_.width())
+            sx_ = static_cast<double>(width_) / extent_.width();
+        if (extent_.height())
+            sy_ = static_cast<double>(height_) / extent_.height();
     }
 
     inline int width() const

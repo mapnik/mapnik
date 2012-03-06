@@ -62,7 +62,7 @@ struct map_pickle_suite : boost::python::pickle_suite
         Map::const_style_iterator end = m.styles().end();
         for (; it != end; ++it)
         {
-            const std::string & name = it->first;
+            std::string const& name = it->first;
             const mapnik::feature_type_style & style = it->second;
             boost::python::tuple style_pair = boost::python::make_tuple(name,style);
             s.append(style_pair);
@@ -153,7 +153,7 @@ bool has_metawriter(mapnik::Map const& m)
 
 // returns empty shared_ptr when the metawriter isn't found, or is
 // of the wrong type. empty pointers make it back to Python as a None.
-mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map &m, const std::string &name) {
+mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map &m, std::string const&name) {
     mapnik::metawriter_ptr metawriter = m.find_metawriter(name);
     mapnik::metawriter_inmem_ptr inmem;
 

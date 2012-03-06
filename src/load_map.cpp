@@ -122,7 +122,7 @@ private:
     void parse_stroke(stroke & strk, ptree const & sym);
     expression_ptr parse_expr(std::string const& expr);
 
-    void ensure_font_face( const std::string & face_name );
+    void ensure_font_face( std::string const& face_name );
 
     std::string ensure_relative_to_xml( boost::optional<std::string> opt_path );
     void ensure_attrs( ptree const& sym, std::string name, std::string attrs);
@@ -184,8 +184,13 @@ void load_map(Map & map, std::string const& filename, bool strict)
     parser.parse_map(map, pt);
 }
 
-void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_path)
+void load_map_string(Map & map, std::string const& str, bool strict, std::string base_path)
 {
+    if (str.empty())
+    {
+        throw config_error( "Cannot load map, XML string is empty" ) ;
+    }
+
     ptree pt;
 #ifdef HAVE_LIBXML2
     if (!base_path.empty())
@@ -1773,7 +1778,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
     }
 }
 
-void map_parser::ensure_font_face( const std::string & face_name )
+void map_parser::ensure_font_face( std::string const& face_name )
 {
     if ( ! font_manager_.get_face( face_name ) )
     {

@@ -100,7 +100,9 @@ public:
     feature_impl(context_ptr const& ctx, int id)
         : id_(id),
           ctx_(ctx),
-          data_(ctx_->mapping_.size())
+          data_(ctx_->mapping_.size()),
+          geom_cont_(),
+          raster_()
     {}
 
     inline int id() const { return id_;}
@@ -280,9 +282,9 @@ public:
 private:
     int id_;
     context_ptr ctx_;
+    cont_type data_;
     boost::ptr_vector<geometry_type> geom_cont_;
     raster_ptr raster_;
-    cont_type data_;
 };
 
 

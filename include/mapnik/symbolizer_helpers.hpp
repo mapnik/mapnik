@@ -53,7 +53,7 @@ public:
                            unsigned width,
                            unsigned height,
                            double scale_factor,
-                           CoordTransform const &t,
+                           CoordTransform const& t,
                            FaceManagerT &font_manager,
                            DetectorT &detector)
         : sym_(sym),
@@ -83,7 +83,7 @@ public:
     bool next();
 
     /** Get current placement. next() has to be called before! */
-    placements_type &placements() const;
+    placements_type & placements() const;
 protected:
     bool next_point_placement();
     bool next_line_placement();
@@ -96,8 +96,8 @@ protected:
     Feature const& feature_;
     proj_transform const& prj_trans_;
     CoordTransform const& t_;
-    FaceManagerT &font_manager_;
-    DetectorT &detector_;
+    FaceManagerT & font_manager_;
+    DetectorT & detector_;
     metawriter_with_properties writer_;
     box2d<double> dims_;
 
@@ -137,9 +137,9 @@ public:
                              unsigned width,
                              unsigned height,
                              double scale_factor,
-                             CoordTransform const &t,
-                             FaceManagerT &font_manager,
-                             DetectorT &detector) :
+                             CoordTransform const& t,
+                             FaceManagerT & font_manager,
+                             DetectorT & detector) :
         text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector),
         sym_(sym)
     {
@@ -149,7 +149,7 @@ public:
 
     bool next();
     pixel_position get_marker_position(text_path const& p);
-    marker &get_marker() const;
+    marker & get_marker() const;
     agg::trans_affine const& get_transform() const;
 protected:
     bool next_point_placement();

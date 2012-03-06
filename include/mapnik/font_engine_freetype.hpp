@@ -152,7 +152,8 @@ class MAPNIK_DECL font_face_set : private boost::noncopyable
 {
 public:
     font_face_set(void)
-        : faces_() {}
+        : faces_(),
+          dimension_cache_() {}
 
     void add(face_ptr face)
     {

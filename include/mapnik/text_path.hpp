@@ -131,7 +131,9 @@ class text_path : boost::noncopyable
         double angle;
 
         character_node(char_info_ptr c_, double x_, double y_, double angle_)
-            : c(c_), pos(x_, y_), angle(angle_)
+            : c(c_),
+              pos(x_, y_),
+              angle(angle_)
         {
 
         }
@@ -150,12 +152,13 @@ class text_path : boost::noncopyable
     int itr_;
 public:
     typedef std::vector<character_node> character_nodes_t;
+    pixel_position center;
     character_nodes_t nodes_;
 
-    pixel_position center;
-
-    text_path()
-        : itr_(0)
+    text_path(double x, double y)
+        : itr_(0),
+          center(x,y),
+          nodes_()
     {
 
     }

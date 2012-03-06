@@ -31,6 +31,8 @@ namespace mapnik
 using boost::optional;
 
 text_symbolizer_properties::text_symbolizer_properties() :
+    orientation(),
+    displacement(0,0),
     label_placement(POINT_PLACEMENT),
     halign(H_AUTO),
     jalign(J_MIDDLE),
@@ -40,11 +42,13 @@ text_symbolizer_properties::text_symbolizer_properties() :
     avoid_edges(false),
     minimum_distance(0.0),
     minimum_padding(0.0),
+    minimum_path_length(0.0),
     max_char_angle_delta(22.5 * M_PI/180.0),
     force_odd_labels(false),
     allow_overlap(false),
     text_ratio(0),
     wrap_width(0),
+    format(),
     tree_()
 {
 
@@ -121,11 +125,13 @@ void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym
     if (n) set_format_tree(n);
 }
 
-void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_symbolizer_properties const &dfl) const
+void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
+                                        bool explicit_defaults,
+                                        text_symbolizer_properties const& dfl) const
 {
     if (orientation)
     {
-        const std::string & orientationstr = to_expression_string(*orientation);
+        std::string const& orientationstr = to_expression_string(*orientation);
         if (!dfl.orientation || orientationstr != to_expression_string(*(dfl.orientation)) || explicit_defaults) {
             set_attr(node, "orientation", orientationstr);
         }
@@ -216,6 +222,8 @@ void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 }
 
 char_properties::char_properties() :
+    face_name(),
+    fontset(),
     text_size(10.0),
     character_spacing(0),
     line_spacing(0),
@@ -263,7 +271,8 @@ void char_properties::from_xml(boost::property_tree::ptree const &sym, fontset_m
         if (itr != fontsets.end())
         {
             fontset = itr->second;
-        } else
+        }
+        else
         {
             throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'");
         }
@@ -280,8 +289,8 @@ void char_properties::from_xml(boost::property_tree::ptree const &sym, fontset_m
 
 void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl) const
 {
-    const std::string & fontset_name = fontset.get_name();
-    const std::string & dfl_fontset_name = dfl.fontset.get_name();
+    std::string const& fontset_name = fontset.get_name();
+    std::string const& dfl_fontset_name = dfl.fontset.get_name();
     if (fontset_name != dfl_fontset_name || explicit_defaults)
     {
         set_attr(node, "fontset-name", fontset_name);

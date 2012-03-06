@@ -412,7 +412,7 @@ std::string postgis_datasource::populate_tokens(const std::string& sql, double s
 }
 
 
-boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> const &conn, const std::string &sql) const
+boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> const &conn, std::string const& sql) const
 {
     if (cursor_fetch_size_ > 0)
     {

@@ -206,24 +206,24 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     if (! layer_.is_valid())
     {
-        std::string s("OGR Plugin: ");
+        std::ostringstream s("OGR Plugin: ");
 
         if (layer_by_name)
         {
-            s += "cannot find layer by name '" + *layer_by_name;
+            s << "cannot find layer by name '" << *layer_by_name;
         }
         else if (layer_by_index)
         {
-            s += "cannot find layer by index number '" + *layer_by_index;
+            s << "cannot find layer by index number '" << *layer_by_index;
         }
         else if (layer_by_sql)
         {
-            s += "cannot find layer by sql query '" + *layer_by_sql;
+            s << "cannot find layer by sql query '" << *layer_by_sql;
         }
 
-        s += "' in dataset '" + dataset_name_ + "'";
+        s << "' in dataset '" << dataset_name_ << "'";
 
-        throw datasource_exception(s);
+        throw datasource_exception(s.str());
     }
 
     // work with real OGR layer
