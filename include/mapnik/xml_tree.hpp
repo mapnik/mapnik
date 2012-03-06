@@ -23,19 +23,38 @@
 #ifndef MAPNIK_XML_TREE_H
 #define MAPNIK_XML_TREE_H
 
+//boost
+#include <boost/optional.hpp>
+
+//stl
 #include <list>
 #include <string>
 #include <map>
+#include <exception>
 
 namespace mapnik
 {
 class xml_tree;
+class color;
 
 class xml_attribute
 {
 public:
     std::string value;
     bool processed;
+};
+
+class node_not_found: public std::exception
+{
+public:
+    node_not_found(std::string node_name) : node_name_(node_name) {}
+    virtual const char* what() const throw()
+    {
+        return ("Node "+node_name_+ "not found").c_str();
+    }
+    ~node_not_found() throw ();
+private:
+    std::string node_name_;
 };
 
 class xml_node
@@ -49,6 +68,15 @@ public:
     xml_node &add_child(std::string name, unsigned line=0, bool text_node = false);
     void add_attribute(std::string name, std::string value);
     void set_processed(bool processed);
+
+    xml_node & get_child(std::string name);
+    xml_node const& get_child(std::string name) const;
+
+    template <typename T>
+    boost::optional<T> get_opt_attr(std::string const& name) const;
+
+    template <typename T>
+    T get_attr(std::string const& name, T const& default_value) const;
 private:
     xml_tree &tree_;
     std::string name_;
@@ -66,7 +94,7 @@ public:
     xml_tree();
     void set_filename(std::string fn);
     std::string filename() const;
-    xml_node &node();
+    xml_node &root();
 private:
     xml_node node_;
     std::string file_;

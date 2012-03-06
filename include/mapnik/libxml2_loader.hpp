@@ -23,16 +23,14 @@
 #ifndef MAPNIK_LIBXML2_LOADER_HPP
 #define MAPNIK_LIBXML2_LOADER_HPP
 
-// boost
-#include <boost/property_tree/ptree.hpp>
-
 // stl
 #include <string>
 
 namespace mapnik
 {
-void read_xml2( std::string const & filename, boost::property_tree::ptree & pt);
-void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_path="");
+class xml_node;
+void read_xml2( std::string const & filename, xml_node &node);
+void read_xml2_string( std::string const & str, xml_node &node, std::string const & base_path="");
 }
 
 #endif // MAPNIK_LIBXML2_LOADER_HPP

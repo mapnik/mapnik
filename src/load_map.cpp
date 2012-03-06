@@ -22,6 +22,7 @@
 // mapnik
 #include <mapnik/load_map.hpp>
 
+#include <mapnik/xml_tree.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/color.hpp>
@@ -94,7 +95,7 @@ public:
         expr_grammar_(tr_)
         {}
 
-    void parse_map(Map & map, ptree const & sty, std::string const& base_path="");
+    void parse_map(Map & map, xml_node const& sty, std::string const& base_path="");
 private:
     void parse_map_include( Map & map, ptree const & include);
     void parse_style(Map & map, ptree const & sty);
@@ -166,9 +167,10 @@ void remove_empty_text_nodes(ptree &pt)
 //#include <mapnik/internal/dump_xml.hpp>
 void load_map(Map & map, std::string const& filename, bool strict)
 {
-    ptree pt;
+    xml_tree tree;
+    tree.set_filename(filename);
 #ifdef HAVE_LIBXML2
-    read_xml2(filename, pt);
+    read_xml2(filename, tree.root());
 #else
     try
     {
@@ -180,18 +182,18 @@ void load_map(Map & map, std::string const& filename, bool strict)
         throw config_error( ex.what() );
     }
 #endif
-    map_parser parser( strict, filename);
-    parser.parse_map(map, pt);
+    map_parser parser(strict, filename);
+//    parser.parse_map(map, pt);
 }
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_path)
 {
-    ptree pt;
+    xml_tree tree;
 #ifdef HAVE_LIBXML2
     if (!base_path.empty())
-        read_xml2_string(str, pt, base_path); // accept base_path passed into function
+        read_xml2_string(str, tree.root(), base_path); // accept base_path passed into function
     else
-        read_xml2_string(str, pt, map.base_path()); // default to map base_path
+        read_xml2_string(str, tree.root(), map.base_path()); // default to map base_path
 #else
     try
     {
@@ -206,8 +208,8 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     }
 #endif
 
-    map_parser parser( strict, base_path);
-    parser.parse_map(map, pt, base_path);
+    map_parser parser(strict, base_path);
+//    parser.parse_map(map, tree.root(), base_path);
 }
 
 expression_ptr map_parser::parse_expr(std::string const& str)
@@ -244,44 +246,31 @@ boost::optional<color> map_parser::get_opt_color_attr(boost::property_tree::ptre
     return result;
 }
 
-void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base_path )
+void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& base_path)
 {
     try
     {
-        ptree const & map_node = pt.get_child("Map");
-
-        std::ostringstream s("");
-        s << "background-color,"
-          << "background-image,"
-          << "srs,"
-          << "buffer-size,"
-          << "paths-from-xml,"
-          << "minimum-version,"
-          << "font-directory,"
-          << "maximum-extent,"
-          << "base";
-        ensure_attrs(map_node, "Map", s.str());
-
+        xml_node const& map_node = pt.get_child("Map");
         try
         {
             parameters extra_attr;
 
             // Check if relative paths should be interpreted as relative to/from XML location
             // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
-            optional<boolean> paths_from_xml = get_opt_attr<boolean>(map_node, "paths-from-xml");
+            optional<boolean> paths_from_xml = map_node.get_opt_attr<boolean>("paths-from-xml");
             if (paths_from_xml)
             {
                 relative_to_xml_ = *paths_from_xml;
             }
 
-            optional<std::string> base_path_from_xml = get_opt_attr<std::string>(map_node, "base");
+            optional<std::string> base_path_from_xml = map_node.get_opt_attr<std::string>("base");
             if (!base_path.empty())
             {
-                map.set_base_path( base_path );
+                map.set_base_path(base_path);
             }
             else if (base_path_from_xml)
             {
-                map.set_base_path( *base_path_from_xml );
+                map.set_base_path(*base_path_from_xml);
             }
             else
             {
@@ -293,30 +282,30 @@ void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base
                 std::string base = xml_path.branch_path().string();
 #endif
 
-                map.set_base_path( base );
+                map.set_base_path(base);
             }
 
-            optional<color> bgcolor = get_opt_color_attr(map_node, "background-color");
+            optional<color> bgcolor = map_node.get_opt_attr<color>("background-color");
             if (bgcolor)
             {
-                map.set_background( * bgcolor );
+                map.set_background(*bgcolor);
             }
 
-            optional<std::string> image_filename = get_opt_attr<std::string>(map_node, "background-image");
+            optional<std::string> image_filename = map_node.get_opt_attr<std::string>("background-image");
             if (image_filename)
             {
                 map.set_background_image(ensure_relative_to_xml(image_filename));
             }
 
-            map.set_srs( get_attr(map_node, "srs", map.srs() ));
+            map.set_srs(map_node.get_attr("srs", map.srs()));
 
-            optional<unsigned> buffer_size = get_opt_attr<unsigned>(map_node,"buffer-size");
+            optional<unsigned> buffer_size = map_node.get_opt_attr<unsigned>("buffer-size");
             if (buffer_size)
             {
                 map.set_buffer_size(*buffer_size);
             }
 
-            optional<std::string> maximum_extent = get_opt_attr<std::string>(map_node,"maximum-extent");
+            optional<std::string> maximum_extent = map_node.get_opt_attr<std::string>("maximum-extent");
             if (maximum_extent)
             {
                 box2d<double> box;
@@ -327,33 +316,33 @@ void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base
                 else
                 {
                     std::ostringstream s_err;
-                    s << "failed to parse 'maximum-extent'";
-                    if ( strict_ )
+                    s_err << "failed to parse 'maximum-extent'";
+                    if (strict_)
                         throw config_error(s_err.str());
                     else
-                        std::clog << "### WARNING: " << s.str() << std::endl;
+                        std::clog << "### WARNING: " << s_err.str() << std::endl;
                 }
             }
 
-            optional<std::string> font_directory = get_opt_attr<std::string>(map_node,"font-directory");
+            optional<std::string> font_directory = map_node.get_opt_attr<std::string>("font-directory");
             if (font_directory)
             {
                 extra_attr["font-directory"] = *font_directory;
-                freetype_engine::register_fonts( ensure_relative_to_xml(font_directory), false);
+                freetype_engine::register_fonts(ensure_relative_to_xml(font_directory), false);
             }
 
-            optional<std::string> min_version_string = get_opt_attr<std::string>(map_node, "minimum-version");
+            optional<std::string> min_version_string = map_node.get_opt_attr<std::string>("minimum-version");
 
             if (min_version_string)
             {
                 extra_attr["minimum-version"] = *min_version_string;
                 boost::char_separator<char> sep(".");
-                boost::tokenizer<boost::char_separator<char> > tokens(*min_version_string,sep);
+                boost::tokenizer<boost::char_separator<char> > tokens(*min_version_string, sep);
                 unsigned i = 0;
                 bool success = false;
                 int n[3];
-                for (boost::tokenizer<boost::char_separator<char> >::iterator beg=tokens.begin();
-                     beg!=tokens.end();++beg)
+                for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tokens.begin();
+                     beg != tokens.end(); ++beg)
                 {
                     try
                     {
@@ -391,15 +380,15 @@ void map_parser::parse_map( Map & map, ptree const & pt, std::string const& base
             throw;
         }
 
-        parse_map_include( map, map_node );
+//        parse_map_include( map, map_node );
     }
-    catch (const boost::property_tree::ptree_bad_path &)
+    catch (node_not_found const&)
     {
         throw config_error("Not a map file. Node 'Map' not found.");
     }
 }
 
-void map_parser::parse_map_include( Map & map, ptree const & include )
+void map_parser::parse_map_include(Map & map, xml_node const& include )
 {
     ptree::const_iterator itr = include.begin();
     ptree::const_iterator end = include.end();
