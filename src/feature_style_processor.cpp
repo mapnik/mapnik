@@ -268,8 +268,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                                m_.height()/query_ext.height());
 
     query q(layer_ext,res,scale_denom,unbuffered_extent);
-    box2d<double> ext = query_ext * 1.0;
-    p.start_layer_processing(lay, ext);
+    p.start_layer_processing(lay, query_ext);
     
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
