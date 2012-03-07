@@ -94,7 +94,7 @@ public:
         expr_grammar_(tr_)
         {}
 
-    void parse_map(Map & map, ptree const & sty, std::string const& base_path="");
+    void parse_map(Map & map, ptree const & sty, std::string const& base_path);
 private:
     void parse_map_include( Map & map, ptree const & include);
     void parse_style(Map & map, ptree const & sty);
@@ -181,7 +181,8 @@ void load_map(Map & map, std::string const& filename, bool strict)
     }
 #endif
     map_parser parser( strict, filename);
-    parser.parse_map(map, pt);
+    std::string base_path("");
+    parser.parse_map(map, pt, base_path);
 }
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_path)
