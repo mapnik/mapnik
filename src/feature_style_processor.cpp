@@ -268,8 +268,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                                m_.height()/query_ext.height());
 
     query q(layer_ext,res,scale_denom,unbuffered_extent);
-    p.start_layer_processing(lay, query_ext);
-    
+    p.start_layer_processing(lay, query_ext);    
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
     double filt_factor = 1;

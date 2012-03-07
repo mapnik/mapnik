@@ -1059,15 +1059,15 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
+        box2d<double> query_extent;// FIXME
         shield_symbolizer_helper<face_manager<freetype_engine>,
             label_collision_detector4> helper(
                 sym, *feature, prj_trans,
                 detector_.extent().width(), detector_.extent().height(),
                 1.0 /*scale_factor*/,
                 t_, font_manager_, detector_, query_extent_);
-
         cairo_context context(context_);
-
+        
         while (helper.next()) {
             placements_type &placements = helper.placements();
             for (unsigned int ii = 0; ii < placements.size(); ++ii)
