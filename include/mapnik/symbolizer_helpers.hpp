@@ -55,7 +55,8 @@ public:
                            double scale_factor,
                            CoordTransform const &t,
                            FaceManagerT &font_manager,
-                           DetectorT &detector)
+                           DetectorT &detector,
+                           box2d<double> const& query_extent)
         : sym_(sym),
           feature_(feature),
           prj_trans_(prj_trans),
@@ -68,7 +69,8 @@ public:
           angle_(0.0),
           placement_valid_(false),
           points_on_line_(false),
-          finder_()
+          finder_(),
+          query_extent_(query_extent)
     {
         initialize_geometries();
         if (!geometries_to_process_.size()) return;
@@ -100,7 +102,7 @@ protected:
     DetectorT &detector_;
     metawriter_with_properties writer_;
     box2d<double> dims_;
-
+    box2d<double> const& query_extent_;
     //Processing
     processed_text text_;
     /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */

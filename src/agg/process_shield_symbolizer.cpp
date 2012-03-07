@@ -46,7 +46,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             sym, *feature, prj_trans,
             width_, height_,
             scale_factor_,
-            t_, font_manager_, *detector_);
+            t_, font_manager_, *detector_, query_extent_);
 
     text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
 

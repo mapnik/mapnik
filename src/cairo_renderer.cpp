@@ -1050,12 +1050,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
+        box2d<double> query_extent;// FIXME
         shield_symbolizer_helper<face_manager<freetype_engine>,
             label_collision_detector4> helper(
                 sym, *feature, prj_trans,
                 detector_.extent().width(), detector_.extent().height(),
                 1.0 /*scale_factor*/,
-                t_, font_manager_, detector_);
+                t_, font_manager_, detector_, query_extent);
 
         cairo_context context(context_);
 
@@ -1234,8 +1235,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
             if (geom.num_points() > 1)
             {
+                
                 path_type path(t_, geom, prj_trans);
-
+                
                 markers_placement<path_type, label_collision_detector4> placement(path, arrow_.extent(), detector_, sym.get_spacing(), sym.get_max_error(), sym.get_allow_overlap());
 
                 double x, y, angle;
@@ -1253,7 +1255,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, *feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_);
+        box2d<double> query_extent;
+        text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, *feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_, query_extent);
 
         cairo_context context(context_);
 
