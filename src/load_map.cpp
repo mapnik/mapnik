@@ -35,7 +35,6 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/font_set.hpp>
 
-#include <mapnik/ptree_helpers.hpp>
 #ifdef HAVE_LIBXML2
 #include <mapnik/libxml2_loader.hpp>
 #endif
@@ -501,7 +500,7 @@ void map_parser::parse_metawriter(Map & map, xml_node const& pt)
     try
     {
         name = pt.get_attr<std::string>("name");
-        //TODO: writer = metawriter_create(pt);
+        writer = metawriter_create(pt);
         map.insert_metawriter(name, writer);
     } catch (const config_error & ex) {
         ex.append_context(std::string("in meta writer '") + name + "'");
@@ -620,7 +619,7 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
 
             if (child->is("StyleName"))
             {
-                std::string style_name = child->get_value<std::string>(); //TODO: get_text
+                std::string style_name = child->get_text();
                 if (style_name.empty())
                 {
                     std::ostringstream ss;

@@ -22,14 +22,13 @@
 //$Id$
 
 #include <mapnik/metawriter_factory.hpp>
-#include <mapnik/ptree_helpers.hpp>
-
 #include <mapnik/metawriter_json.hpp>
 #include <mapnik/metawriter_inmem.hpp>
+#include <mapnik/xml_tree.hpp>
+#include <mapnik/ptree_helpers.hpp>
 
 #include <boost/optional.hpp>
 
-using boost::property_tree::ptree;
 using boost::optional;
 using std::string;
 
@@ -37,20 +36,21 @@ namespace mapnik
 {
 
 metawriter_ptr
-metawriter_create(const boost::property_tree::ptree &pt) {
+metawriter_create(xml_node const& pt)
+{
     metawriter_ptr writer;
-    string type = get_attr<string>(pt, "type");
+    string type = pt.get_attr<string>("type");
 
-    optional<string> properties = get_opt_attr<string>(pt, "default-output");
+    optional<string> properties = pt.get_opt_attr<string>("default-output");
     if (type == "json") {
-        string file = get_attr<string>(pt, "file");
+        string file = pt.get_attr<string>("file");
         metawriter_json_ptr json = metawriter_json_ptr(new metawriter_json(properties, parse_path(file)));
-        optional<boolean> output_empty = get_opt_attr<boolean>(pt, "output-empty");
+        optional<boolean> output_empty = pt.get_opt_attr<boolean>("output-empty");
         if (output_empty) {
             json->set_output_empty(*output_empty);
         }
 
-        optional<boolean> pixel_coordinates = get_opt_attr<boolean>(pt, "pixel-coordinates");
+        optional<boolean> pixel_coordinates = pt.get_opt_attr<boolean>("pixel-coordinates");
         if (pixel_coordinates) {
             json->set_pixel_coordinates(*pixel_coordinates);
         }
@@ -67,7 +67,9 @@ metawriter_create(const boost::property_tree::ptree &pt) {
 }
 
 void
-metawriter_save(const metawriter_ptr &metawriter, ptree &metawriter_node, bool explicit_defaults) {
+metawriter_save(const metawriter_ptr &metawriter,
+                boost::property_tree::ptree &metawriter_node, bool explicit_defaults)
+{
 
     metawriter_json *json = dynamic_cast<metawriter_json *>(metawriter.get());
     if (json) {
