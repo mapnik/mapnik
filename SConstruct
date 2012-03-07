@@ -1411,7 +1411,7 @@ if not preconfigured:
             pthread = '-pthread'
         
         # Common debugging flags.
-        debug_flags  = '-g -DDEBUG -DMAPNIK_DEBUG'
+        debug_flags  = '-g -fno-omit-frame-pointer -DDEBUG -DMAPNIK_DEBUG'
         ndebug_flags = '-DNDEBUG'
        
         
