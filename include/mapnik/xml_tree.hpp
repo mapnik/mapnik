@@ -40,6 +40,7 @@ class color;
 class xml_attribute
 {
 public:
+    xml_attribute(std::string const& value);
     std::string value;
     mutable bool processed;
 };
@@ -47,12 +48,30 @@ public:
 class node_not_found: public std::exception
 {
 public:
-    node_not_found(std::string node_name) : node_name_(node_name) {}
-    virtual const char* what() const throw()
-    {
-        return ("Node "+node_name_+ "not found").c_str();
-    }
+    node_not_found(std::string node_name);
+    virtual const char* what() const throw();
     ~node_not_found() throw ();
+private:
+    std::string node_name_;
+};
+
+class attribute_not_found: public std::exception
+{
+public:
+    attribute_not_found(std::string const& node_name, std::string const& attribute_name);
+    virtual const char* what() const throw();
+    ~attribute_not_found() throw ();
+private:
+    std::string node_name_;
+    std::string attribute_name_;
+};
+
+class more_than_one_child: public std::exception
+{
+public:
+    more_than_one_child(std::string const& node_name);
+    virtual const char* what() const throw();
+    ~more_than_one_child() throw ();
 private:
     std::string node_name_;
 };
@@ -70,14 +89,15 @@ public:
 
     xml_node &add_child(std::string const& name, unsigned line=0, bool text_node = false);
     void add_attribute(std::string const& name, std::string const& value);
-    void set_processed(bool processed);
+
+    void set_processed(bool processed) const;
 
     const_iterator begin() const;
     const_iterator end() const;
 
     xml_node & get_child(std::string const& name);
     xml_node const& get_child(std::string const& name) const;
-    xml_node *get_opt_child(std::string const& name) const;
+    xml_node const* get_opt_child(std::string const& name) const;
     bool has_child(std::string const& name) const;
 
     template <typename T>

@@ -708,7 +708,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
         name = r.get_attr("name", std::string());
         rule rule(name);
 
-        xml_node *child = r.get_opt_child("Filter");
+        xml_node const* child = r.get_opt_child("Filter");
         if (child)
         {
             rule.set_filter(child->get_value<expression_ptr>());
