@@ -63,7 +63,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
-
+    
+    box2d<double> ext = query_extent_ * 1.1;
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
         typedef agg::renderer_outline_aa<ren_base> renderer_type;
@@ -86,7 +87,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             if (geom.num_points() > 1)
             {
                 clipped_geometry_type clipped(geom);
-                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
                 path_type path(t_,clipped,prj_trans);
                 ras.add_path(path);
             }
@@ -129,7 +130,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             if (geom.num_points() > 1)
             {
                 clipped_geometry_type clipped(geom);
-                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
                 path_type path(t_,clipped,prj_trans);
 
                 if (stroke_.has_dash())
