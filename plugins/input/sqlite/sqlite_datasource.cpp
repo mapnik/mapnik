@@ -26,7 +26,7 @@
 #include "sqlite_utils.hpp"
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/wkb.hpp>

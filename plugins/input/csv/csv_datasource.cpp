@@ -14,7 +14,8 @@
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
-#include <mapnik/ptree_helpers.hpp>  // mapnik::boolean
+#include <mapnik/boolean.hpp>
+#include <mapnik/color_factory.hpp>
 
 // stl
 #include <sstream>

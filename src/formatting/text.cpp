@@ -45,7 +45,7 @@ void text_node::to_xml(ptree &xml) const
 
 node_ptr text_node::from_xml(xml_node const& xml)
 {
-    std::string data = xml.get_text();
+    std::string data = xml.text();
     if (data.empty()) return node_ptr(); //No text
     return node_ptr(new text_node(parse_expression(data, "utf8")));
 }

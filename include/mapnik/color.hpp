@@ -137,6 +137,14 @@ public:
     std::string to_hex_string() const;
 };
 
+template <typename charT, typename traits>
+std::basic_ostream<charT, traits> &
+operator << ( std::basic_ostream<charT, traits> & s, mapnik::color const& c )
+{
+    std::string hex_string( c.to_string() );
+    s << hex_string;
+    return s;
+}
 
 }
 

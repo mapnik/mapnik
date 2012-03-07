@@ -27,6 +27,8 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/line_symbolizer.hpp>
+#include <mapnik/feature_type_style.hpp>
+#include <mapnik/text_properties.hpp>
 
 //boost
 #include <boost/lexical_cast.hpp>
@@ -79,6 +81,11 @@ inline boost::optional<color> fast_cast(xml_tree const& tree, std::string const&
     return mapnik::color_factory::from_string(value);
 }
 
+template <>
+inline boost::optional<expression_ptr> fast_cast(xml_tree const& tree, std::string const& value)
+{
+    return parse_expression(value);
+}
 
 /****************************************************************************/
 
@@ -112,6 +119,7 @@ DEFINE_NAME_TRAIT( boolean, "boolean")
 DEFINE_NAME_TRAIT( int, "integer" )
 DEFINE_NAME_TRAIT( std::string, "string" )
 DEFINE_NAME_TRAIT( color, "color" )
+DEFINE_NAME_TRAIT(expression_ptr, "expression_ptr" )
 
 template <typename ENUM, int MAX>
 struct name_trait< mapnik::enumeration<ENUM, MAX> >
@@ -376,19 +384,21 @@ std::string xml_node::get_text() const
 template <typename T>
 T xml_node::get_value() const
 {
-    boost::optional<T> result = fast_cast<T>(get_text());
+    boost::optional<T> result = fast_cast<T>(tree_, get_text());
     if (!result)
     {
         throw config_error(std::string("Failed to parse value in node '") +
                            name_ + "'. Expected " + name_trait<T>::name() +
                            " but got '" + get_text() + "'");
     }
-    return result;
+    return *result;
 }
 
 #define compile_get_opt_attr(T) template boost::optional<T> xml_node::get_opt_attr<T>(std::string const&) const
+#define compile_get_attr(T) template T xml_node::get_attr<T>(std::string const&) const; template T xml_node::get_attr<T>(std::string const&, T const&) const
+#define compile_get_value(T) template T xml_node::get_value<T>() const
 
-//compile_get_opt_attr(boolean);
+compile_get_opt_attr(boolean);
 compile_get_opt_attr(std::string);
 compile_get_opt_attr(unsigned);
 compile_get_opt_attr(float);
@@ -396,4 +406,23 @@ compile_get_opt_attr(double);
 compile_get_opt_attr(color);
 compile_get_opt_attr(gamma_method_e);
 compile_get_opt_attr(line_rasterizer_e);
+compile_get_opt_attr(line_join_e);
+compile_get_opt_attr(line_cap_e);
+compile_get_opt_attr(text_transform_e);
+compile_get_opt_attr(label_placement_e);
+compile_get_opt_attr(vertical_alignment_e);
+compile_get_opt_attr(horizontal_alignment_e);
+compile_get_opt_attr(justify_alignment_e);
+compile_get_attr(std::string);
+compile_get_attr(filter_mode_e);
+compile_get_attr(point_placement_e);
+compile_get_attr(marker_placement_e);
+compile_get_attr(marker_type_e);
+compile_get_attr(pattern_alignment_e);
+compile_get_attr(line_rasterizer_e);
+compile_get_attr(colorizer_mode);
+compile_get_attr(double);
+compile_get_value(int);
+compile_get_value(double);
+compile_get_value(expression_ptr);
 } //ns mapnik
