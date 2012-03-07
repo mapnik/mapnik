@@ -51,7 +51,7 @@ public:
 
 private:
     node_ptr child_;
-    static expression_ptr get_expression(boost::property_tree::ptree const& xml, std::string name);
+    static expression_ptr get_expression(xml_node const& xml, std::string name);
 };
 } //ns formatting
 } //ns mapnik

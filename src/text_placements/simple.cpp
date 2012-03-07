@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/xml_tree.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>
@@ -167,10 +168,10 @@ std::string text_placements_simple::get_positions()
     return positions_; //TODO: Build string from data in direction_ and text_sizes_
 }
 
-text_placements_ptr text_placements_simple::from_xml(boost::property_tree::ptree const &xml, fontset_map const & fontsets)
+text_placements_ptr text_placements_simple::from_xml(xml_node const &xml, fontset_map const & fontsets)
 {
     text_placements_ptr ptr = text_placements_ptr(boost::make_shared<text_placements_simple>(
-                    get_attr<std::string>(xml, "placements", "X")));
+                    xml.get_attr<std::string>("placements", "X")));
     ptr->defaults.from_xml(xml, fontsets);
     return ptr;
 }

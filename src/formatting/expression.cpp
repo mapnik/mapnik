@@ -27,6 +27,7 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/xml_tree.hpp>
 
 // boost
 
@@ -51,7 +52,7 @@ void expression_format::to_xml(boost::property_tree::ptree &xml) const
     if (child_) child_->to_xml(new_node);
 }
 
-node_ptr expression_format::from_xml(ptree const& xml)
+node_ptr expression_format::from_xml(xml_node const& xml)
 {
     expression_format *n = new expression_format();
     node_ptr np(n);
@@ -72,9 +73,9 @@ node_ptr expression_format::from_xml(ptree const& xml)
     return np;
 }
 
-expression_ptr expression_format::get_expression(ptree const& xml, std::string name)
+expression_ptr expression_format::get_expression(xml_node const& xml, std::string name)
 {
-    boost::optional<std::string> tmp = get_opt_attr<std::string>(xml, name);
+    boost::optional<std::string> tmp = xml.get_opt_attr<std::string>(name);
     if (tmp) return parse_expression(*tmp);
     return expression_ptr();
 }

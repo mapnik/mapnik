@@ -39,7 +39,7 @@ namespace placements
 {
 
 typedef text_placements_ptr (*from_xml_function_ptr)(
-    boost::property_tree::ptree const& xml, fontset_map const & fontsets);
+    xml_node const& xml, fontset_map const & fontsets);
 
 class registry : public singleton<registry, CreateStatic>,
         private boost::noncopyable

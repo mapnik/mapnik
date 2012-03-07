@@ -191,7 +191,7 @@ xml_node &xml_node::add_child(std::string const& name, unsigned line, bool text_
     return children_.back();
 }
 
-xml_node & xml_node::get_child(std::string name)
+xml_node & xml_node::get_child(std::string const& name)
 {
     std::list<xml_node>::iterator itr = children_.begin();
     std::list<xml_node>::iterator end = children_.end();

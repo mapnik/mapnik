@@ -20,8 +20,13 @@
  *
  *****************************************************************************/
 
+//mapnik
 #include <mapnik/text_placements/list.hpp>
+#include <mapnik/xml_tree.hpp>
+
+//boost
 #include <boost/make_shared.hpp>
+
 
 namespace mapnik
 {
@@ -83,20 +88,19 @@ unsigned text_placements_list::size() const
     return list_.size();
 }
 
-text_placements_ptr text_placements_list::from_xml(boost::property_tree::ptree const &xml, fontset_map const & fontsets)
+text_placements_ptr text_placements_list::from_xml(xml_node const &xml, fontset_map const & fontsets)
 {
     using boost::property_tree::ptree;
     text_placements_list *list = new text_placements_list;
     text_placements_ptr ptr = text_placements_ptr(list);
     list->defaults.from_xml(xml, fontsets);
-    ptree::const_iterator itr = xml.begin();
-    ptree::const_iterator end = xml.end();
+    xml_node::const_iterator itr = xml.begin();
+    xml_node::const_iterator end = xml.end();
     for( ;itr != end; ++itr)
     {
-        if ((itr->first.find('<') != std::string::npos) || (itr->first != "Placement")) continue;
-//TODO:       ensure_attrs(symIter->second, "TextSymbolizer/Placement", s_common.str());
+        if (itr->is_text() || itr->name() != "Placement") continue;
         text_symbolizer_properties &p = list->add();
-        p.from_xml(itr->second, fontsets);
+        p.from_xml(*itr, fontsets);
 //TODO:        if (strict_ &&
 //                !p.format.fontset.size())
 //            ensure_font_face(p.format.face_name);

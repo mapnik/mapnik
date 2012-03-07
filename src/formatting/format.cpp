@@ -21,6 +21,7 @@
  *****************************************************************************/
 #include <mapnik/formatting/format.hpp>
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/xml_tree.hpp>
 
 namespace mapnik {
 using boost::property_tree::ptree;
@@ -44,7 +45,7 @@ void format_node::to_xml(ptree &xml) const
 }
 
 
-node_ptr format_node::from_xml(ptree const& xml)
+node_ptr format_node::from_xml(xml_node const& xml)
 {
     format_node *n = new format_node();
     node_ptr np(n);
@@ -52,19 +53,19 @@ node_ptr format_node::from_xml(ptree const& xml)
     node_ptr child = node::from_xml(xml);
     n->set_child(child);
 
-    n->face_name = get_opt_attr<std::string>(xml, "face-name");
+    n->face_name = xml.get_opt_attr<std::string>("face-name");
     /*TODO: Fontset is problematic. We don't have the fontsets pointer here... */
-    n->text_size = get_opt_attr<unsigned>(xml, "size");
-    n->character_spacing = get_opt_attr<unsigned>(xml, "character-spacing");
-    n->line_spacing = get_opt_attr<unsigned>(xml, "line-spacing");
-    n->text_opacity = get_opt_attr<double>(xml, "opactity");
-    boost::optional<boolean> wrap = get_opt_attr<boolean>(xml, "wrap-before");
+    n->text_size = xml.get_opt_attr<unsigned>("size");
+    n->character_spacing = xml.get_opt_attr<unsigned>("character-spacing");
+    n->line_spacing = xml.get_opt_attr<unsigned>("line-spacing");
+    n->text_opacity = xml.get_opt_attr<double>("opactity");
+    boost::optional<boolean> wrap = xml.get_opt_attr<boolean>("wrap-before");
     if (wrap) n->wrap_before = *wrap;
-    n->wrap_char = get_opt_attr<unsigned>(xml, "wrap-character");
-    n->text_transform = get_opt_attr<text_transform_e>(xml, "text-transform");
-    n->fill = get_opt_attr<color>(xml, "fill");
-    n->halo_fill = get_opt_attr<color>(xml, "halo-fill");
-    n->halo_radius = get_opt_attr<double>(xml, "halo-radius");
+    n->wrap_char = xml.get_opt_attr<unsigned>("wrap-character");
+    n->text_transform = xml.get_opt_attr<text_transform_e>("text-transform");
+    n->fill = xml.get_opt_attr<color>("fill");
+    n->halo_fill = xml.get_opt_attr<color>("halo-fill");
+    n->halo_radius = xml.get_opt_attr<double>("halo-radius");
     return np;
 }
 

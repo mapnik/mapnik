@@ -23,6 +23,7 @@
 #include <mapnik/formatting/base.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/registry.hpp>
+#include <mapnik/xml_tree.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -38,18 +39,18 @@ void node::to_xml(boost::property_tree::ptree &xml) const
 #endif
 }
 
-node_ptr node::from_xml(boost::property_tree::ptree const& xml)
+node_ptr node::from_xml(xml_node const& xml)
 {
     list_node *list = new list_node();
     node_ptr list_ptr(list);
-    boost::property_tree::ptree::const_iterator itr = xml.begin();
-    boost::property_tree::ptree::const_iterator end = xml.end();
+    xml_node::const_iterator itr = xml.begin();
+    xml_node::const_iterator end = xml.end();
     for (; itr != end; ++itr) {
-        if (itr->first == "<xmlcomment>" || itr->first == "<xmlattr>" || itr->first == "Placement")
+        if (itr->name() == "Placement")
         {
             continue;
         }
-        node_ptr n = registry::instance()->from_xml(itr->first, itr->second);
+        node_ptr n = registry::instance()->from_xml(*itr);
         if (n) list->push_back(n);
     }
     if (list->get_children().size() == 1) {
