@@ -41,7 +41,7 @@
 #include "agg_path_storage.h"
 #include "agg_ellipse.h"
 #include "agg_conv_stroke.h"
-
+#include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
 
@@ -50,7 +50,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
+    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+
     typedef agg::pixfmt_rgba32_plain pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
@@ -131,7 +133,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 }
                 else
                 {
-                    path_type path(t_,geom,prj_trans);
+                    clipped_geometry_type clipped(geom);
+                    clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                    path_type path(t_,clipped,prj_trans);
                     markers_placement<path_type, label_collision_detector4> placement(path, extent, *detector_,
                                                                                       sym.get_spacing() * scale_factor_,
                                                                                       sym.get_max_error(),
@@ -248,8 +252,10 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
                 if (marker_type == ARROW)
                     marker.concat_path(arrow_);
-
-                path_type path(t_,geom,prj_trans);
+                
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                path_type path(t_,clipped,prj_trans);
                 markers_placement<path_type, label_collision_detector4> placement(path, extent, *detector_,
                                                                                   sym.get_spacing() * scale_factor_,
                                                                                   sym.get_max_error(),

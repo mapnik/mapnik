@@ -93,7 +93,6 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
         if (geom.num_points() > 2)
         {
             clipped_geometry_type clipped(geom);
-            //clipped.clip_box(4211605.95493,7504793.67543,4212017.83704,7505169.29792);
             clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
             path_type path(t_,clipped,prj_trans);
             ras_ptr->add_path(path);

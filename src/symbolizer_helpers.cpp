@@ -24,6 +24,7 @@
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
+#include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
 
@@ -50,8 +51,12 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
         }
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
-        path_type path(t_, **geo_itr_, prj_trans_);
+        
+        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        clipped_geometry_type clipped(**geo_itr_);
+        clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+        path_type path(t_, clipped, prj_trans_);
         finder_->clear_placements();
         if (points_on_line_) {
             finder_->find_point_placements(path);
