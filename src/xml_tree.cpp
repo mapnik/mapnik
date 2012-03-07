@@ -185,7 +185,7 @@ void xml_node::set_processed(bool processed)
     processed_ = processed;
 }
 
-xml_node &xml_node::add_child(std::string name, unsigned line, bool text_node)
+xml_node &xml_node::add_child(std::string const& name, unsigned line, bool text_node)
 {
     children_.push_back(xml_node(tree_, name, line, text_node));
     return children_.back();

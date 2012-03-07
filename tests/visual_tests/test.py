@@ -51,7 +51,7 @@ def render(filename, width, height=100):
     return m
 
 if len(sys.argv) == 2:
-    files = [(sys.argv[1], 500)]
+    files = [(sys.argv[1], (500, 500))]
 elif len(sys.argv) > 2:
     files = [sys.argv[1:]]
 

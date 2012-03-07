@@ -75,8 +75,10 @@ public:
     const_iterator begin() const;
     const_iterator end() const;
 
-    xml_node & get_child(std::string name);
-    xml_node const& get_child(std::string name) const;
+    xml_node & get_child(std::string const& name);
+    xml_node const& get_child(std::string const& name) const;
+    xml_node *get_opt_child(std::string const& name) const;
+    bool has_child(std::string const& name) const;
 
     template <typename T>
     boost::optional<T> get_opt_attr(std::string const& name) const;
@@ -89,7 +91,7 @@ public:
     std::string get_text() const;
 
     template <typename T>
-    T get_value(std::string const& name) const;
+    T get_value() const;
 private:
     xml_tree &tree_;
     std::string name_;
