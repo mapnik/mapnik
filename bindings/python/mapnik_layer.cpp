@@ -105,26 +105,22 @@ void set_datasource_parameters(layer & lyr, boost::python::dict const& d)
         boost::python::extract<std::string> k(keys[i]);
         if (k.check())
         {
-            std::cout << k() << " : ";
             boost::python::object obj = d[keys[i]];
             boost::python::extract<std::string> str_val(obj);
             if (str_val.check())
             {
-                std::cout << "STRING:" << str_val() << std::endl;
                 params.insert(std::make_pair(k(),str_val()));
                 continue;
             }
             boost::python::extract<int> int_val(obj);
             if (int_val.check())
             {
-                std::cout << "INTEGER:" << int_val << std::endl;
                 params.insert(std::make_pair(k(),int_val()));
                 continue;
             }
             boost::python::extract<double> dbl_val(obj);
             if (dbl_val.check())
             {
-                std::cout << "DOUBLE:" << dbl_val << std::endl;
                 params.insert(std::make_pair(k(),dbl_val()));
             }
         }
