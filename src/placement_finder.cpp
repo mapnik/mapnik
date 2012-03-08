@@ -438,7 +438,9 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
 
             // if there is an overlap with existing envelopes, then exit - no placement
             if (!detector_.extent().intersects(e) ||
-                (!p.allow_overlap && !detector_.has_point_placement(e, pi.get_actual_minimum_distance()))
+                (!p.allow_overlap &&
+                 !detector_.has_point_placement(e, pi.get_actual_minimum_distance())
+                )
                )
             {
                 return;
@@ -906,7 +908,10 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
                             y - (cwidth*sina + ci.height()*cosa));
 
         if (!detector_.extent().intersects(e) ||
-            !detector_.has_placement(e, info_.get_string(), pi.get_actual_minimum_distance()))
+            (!p.allow_overlap &&
+             !detector_.has_placement(e, info_.get_string(), pi.get_actual_minimum_distance())
+            )
+           )
         {
             //std::clog << "No Intersects:" << !dimensions_.intersects(e) << ": " << e << " @ " << dimensions_ << std::endl;
             //std::clog << "No Placements:" << !detector_.has_placement(e, info.get_string(), p.minimum_distance) << std::endl;
