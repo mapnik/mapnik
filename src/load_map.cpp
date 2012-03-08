@@ -141,7 +141,7 @@ private:
 
 };
 
-
+#include <mapnik/internal/dump_xml.hpp>
 void load_map(Map & map, std::string const& filename, bool strict)
 {
     xml_tree tree;
@@ -161,6 +161,7 @@ void load_map(Map & map, std::string const& filename, bool strict)
 #endif
     map_parser parser(strict, filename);
     parser.parse_map(map, tree.root());
+    dump_xml(tree.root());
 }
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_path)

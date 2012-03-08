@@ -278,6 +278,11 @@ void xml_node::add_attribute(std::string const& name, std::string const& value)
     attributes_.insert(std::make_pair(name,xml_attribute(value)));
 }
 
+xml_node::attribute_map const& xml_node::get_attributes() const
+{
+    return attributes_;
+}
+
 void xml_node::set_processed(bool processed) const
 {
     processed_ = processed;

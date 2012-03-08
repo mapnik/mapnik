@@ -84,6 +84,7 @@ class xml_node
 {
 public:
     typedef std::list<xml_node>::const_iterator const_iterator;
+    typedef std::map<std::string, xml_attribute> attribute_map;
     xml_node(xml_tree &tree, std::string name, unsigned line=0, bool text_node = false);
 
     std::string name() const;
@@ -93,6 +94,7 @@ public:
 
     xml_node &add_child(std::string const& name, unsigned line=0, bool text_node = false);
     void add_attribute(std::string const& name, std::string const& value);
+    attribute_map const& get_attributes() const;
 
     void set_processed(bool processed) const;
 
@@ -120,7 +122,7 @@ private:
     xml_tree &tree_;
     std::string name_;
     std::list<xml_node> children_;
-    std::map<std::string, xml_attribute> attributes_;
+    attribute_map attributes_;
     bool text_node_;
     unsigned line_;
     mutable bool processed_;
