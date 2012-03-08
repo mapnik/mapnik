@@ -1059,7 +1059,6 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        box2d<double> query_extent;// FIXME
         shield_symbolizer_helper<face_manager<freetype_engine>,
             label_collision_detector4> helper(
                 sym, *feature, prj_trans,
