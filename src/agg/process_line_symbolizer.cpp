@@ -123,7 +123,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             ras_ptr->gamma(agg::gamma_power(stroke_.get_gamma()));
         }
 
-        metawriter_with_properties writer = sym.get_metawriter();
+        //metawriter_with_properties writer = sym.get_metawriter();
         for (unsigned i=0;i<feature->num_geometries();++i)
         {
             geometry_type & geom = feature->get_geometry(i);

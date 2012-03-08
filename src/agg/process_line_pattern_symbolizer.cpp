@@ -42,6 +42,7 @@
 #include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
 #include "agg_renderer_outline_image.h"
+#include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
 
@@ -50,7 +51,8 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
-    typedef  coord_transform2<CoordTransform,geometry_type> path_type;
+    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> renderer_base;
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
@@ -74,6 +76,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (!pat) return;
 
+    box2d<double> ext = query_extent_ * 1.1;
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
     pattern_source source(*(*pat));
@@ -82,15 +85,17 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     // TODO - should be sensitive to buffer size
     ren.clip_box(0,0,width_,height_);
     rasterizer_type ras(ren);
-    metawriter_with_properties writer = sym.get_metawriter();
+    //metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
         geometry_type & geom = feature->get_geometry(i);
         if (geom.num_points() > 1)
         {
-            path_type path(t_,geom,prj_trans);
+            clipped_geometry_type clipped(geom);
+            clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
+            path_type path(t_,clipped,prj_trans);
             ras.add_path(path);
-            if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
+            //if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
         }
     }
 }
