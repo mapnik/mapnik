@@ -50,6 +50,10 @@
 #include <boost/utility.hpp>
 #include <boost/make_shared.hpp>
 
+// agg
+#include "agg_conv_clip_polyline.h"
+#include "agg_conv_clip_polygon.h"
+
 // stl
 #ifdef MAPNIK_DEBUG
 #include <iostream>
@@ -707,8 +711,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         {
             detector_.clear();
         }
+        query_extent_ = query_extent;
     }
-
+    
     void cairo_renderer_base::end_layer_processing(layer const&)
     {
 #ifdef MAPNIK_DEBUG
@@ -720,7 +725,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
+
+        typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
 
         cairo_context context(context_);
 
@@ -729,17 +736,17 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
         {
             geometry_type & geom = feature->get_geometry(i);
-
             if (geom.num_points() > 2)
             {
-                path_type path(t_, geom, prj_trans);
-
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                path_type path(t_,clipped,prj_trans);                
                 context.add_path(path);
                 context.fill();
             }
         }
     }
-
+    
     void cairo_renderer_base::process(building_symbolizer const& sym,
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
@@ -854,8 +861,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
-
+        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        
         cairo_context context(context_);
         mapnik::stroke const& stroke_ = sym.get_stroke();
 
@@ -868,8 +876,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             if (geom.num_points() > 1)
             {
                 cairo_context context(context_);
-                path_type path(t_, geom, prj_trans);
-
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                path_type path(t_,clipped,prj_trans);
                 if (stroke_.has_dash())
                 {
                     context.set_dash(stroke_.get_dash_array());
@@ -1050,13 +1059,12 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        box2d<double> query_extent;// FIXME
         shield_symbolizer_helper<face_manager<freetype_engine>,
             label_collision_detector4> helper(
                 sym, *feature, prj_trans,
                 detector_.extent().width(), detector_.extent().height(),
                 1.0 /*scale_factor*/,
-                t_, font_manager_, detector_, query_extent);
+                t_, font_manager_, detector_, query_extent_);
 
         cairo_context context(context_);
 
@@ -1077,8 +1085,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
-
+        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        
         std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
         if (!marker && !(*marker)->is_bitmap()) return;
@@ -1099,7 +1108,10 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
             if (geom.num_points() > 1)
             {
-                path_type path(t_, geom, prj_trans);
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                path_type path(t_,clipped,prj_trans);
+                
                 double length(0);
                 double x0(0), y0(0);
                 double x, y;
@@ -1146,8 +1158,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
-
+        typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        
         cairo_context context(context_);
         std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
@@ -1165,8 +1178,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
             if (geom.num_points() > 2)
             {
-                path_type path(t_, geom, prj_trans);
-
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                path_type path(t_,clipped,prj_trans);    
                 context.add_path(path);
                 context.fill();
             }
@@ -1255,8 +1269,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        box2d<double> query_extent;
-        text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, *feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_, query_extent);
+        text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, *feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_, query_extent_);
 
         cairo_context context(context_);
 
