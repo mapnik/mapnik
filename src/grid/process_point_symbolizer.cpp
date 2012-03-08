@@ -29,7 +29,7 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
-
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 
 // stl

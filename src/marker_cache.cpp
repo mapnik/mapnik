@@ -23,11 +23,13 @@
 //$Id$
 
 // mapnik
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_storage.hpp>
-#include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 
@@ -35,6 +37,7 @@
 #include <boost/assert.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
@@ -72,7 +75,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
             using namespace mapnik::svg;
             try
             {
-                path_ptr marker_path(new svg_storage_type);
+                path_ptr marker_path(boost::make_shared<svg_storage_type>());
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());
@@ -84,7 +87,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                 svg.bounding_rect(&lox, &loy, &hix, &hiy);
                 marker_path->set_bounding_box(lox,loy,hix,hiy);
 
-                marker_ptr mark(new marker(marker_path));
+                marker_ptr mark(boost::make_shared<marker>(marker_path));
                 result.reset(mark);
                 if (update_cache)
                 {
@@ -107,9 +110,9 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                     unsigned width = reader->width();
                     unsigned height = reader->height();
                     BOOST_ASSERT(width > 0 && height > 0);
-                    mapnik::image_ptr image(new mapnik::image_data_32(width,height));
+                    mapnik::image_ptr image(boost::make_shared<mapnik::image_data_32>(width,height));
                     reader->read(0,0,*image);
-                    marker_ptr mark(new marker(image));
+                    marker_ptr mark(boost::make_shared<marker>(image));
                     result.reset(mark);
                     if (update_cache)
                     {
