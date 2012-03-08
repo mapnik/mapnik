@@ -29,7 +29,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/arrow.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>

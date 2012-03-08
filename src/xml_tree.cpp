@@ -288,6 +288,11 @@ void xml_node::set_processed(bool processed) const
     processed_ = processed;
 }
 
+bool xml_node::processed() const
+{
+    return processed_;
+}
+
 xml_node::const_iterator xml_node::begin() const
 {
     return children_.begin();
@@ -397,6 +402,11 @@ T xml_node::get_value() const
                            " but got '" + get_text() + "'");
     }
     return *result;
+}
+
+unsigned xml_node::line() const
+{
+    return line_;
 }
 
 #define compile_get_opt_attr(T) template boost::optional<T> xml_node::get_opt_attr<T>(std::string const&) const

@@ -96,7 +96,10 @@ public:
     void add_attribute(std::string const& name, std::string const& value);
     attribute_map const& get_attributes() const;
 
+    bool processed() const;
     void set_processed(bool processed) const;
+
+    unsigned line() const;
 
     const_iterator begin() const;
     const_iterator end() const;

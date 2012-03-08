@@ -28,29 +28,25 @@
 
 namespace mapnik {
 
+class xml_node;
 class config_error : public std::exception
 {
 public:
     config_error() {}
 
-    config_error( const std::string & what ) :
-        what_( what )
-    {
-    }
+    config_error(std::string const& what, xml_node const* node = 0, std::string const& filename="");
+    config_error(unsigned line_number, std::string const& filename, std::string const& what);
     virtual ~config_error() throw() {}
 
-    virtual const char * what() const throw()
-    {
-        return what_.c_str();
-    }
+    virtual const char * what() const throw();
 
-    void append_context(const std::string & ctx) const
-    {
-        what_ += " " + ctx;
-    }
+    void append_context(const std::string & ctx, xml_node const* node = 0, std::string const& filename="") const;
 
 protected:
     mutable std::string what_;
+    mutable unsigned line_number_;
+    mutable std::string file_;
+    mutable std::string node_name_;
 };
 }
 

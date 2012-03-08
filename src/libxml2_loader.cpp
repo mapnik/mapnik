@@ -77,8 +77,7 @@ public:
         boost::filesystem::path path(filename);
         if (!boost::filesystem::exists(path))
         {
-            throw config_error(string("Could not load map file '") +
-                               filename + "': File does not exist");
+            throw config_error(string("Could not load map file: File does not exist"), 0, filename);
         }
 
         xmlDocPtr doc = xmlCtxtReadFile(ctx_, filename.c_str(), encoding_, options_);
@@ -93,15 +92,7 @@ public:
                 os << ": " << std::endl << error->message;
                 // remove CR
                 std::string msg = os.str().substr(0, os.str().size() - 1);
-                config_error ex(msg);
-
-                os.str("");
-                os << "(encountered in file '" << error->file << "' at line "
-                   << error->line << ")";
-
-                ex.append_context(os.str());
-
-                throw ex;
+                throw config_error(error->line, error->file, msg);
             }
         }
 
@@ -148,7 +139,7 @@ public:
             {
                 os << ": " << std::endl << error->message;
             }
-            throw config_error(os.str());
+            throw config_error(error->line, error->file, os.str());
         }
 
         int iXIncludeReturn = xmlXIncludeProcessFlags(doc, options_);

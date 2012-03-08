@@ -195,7 +195,7 @@ expression_ptr map_parser::parse_expr(std::string const& str)
     expression_ptr expr(boost::make_shared<expr_node>(true));
     if (!expression_factory::parse_from_string(expr,str,expr_grammar_))
     {
-        throw mapnik::config_error( "Failed to parse expression: '" + str + "'" );
+        throw mapnik::config_error( "Failed to parse expression '" + str + "'" );
     }
     return expr;
 
@@ -354,7 +354,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
         }
         catch (const config_error & ex)
         {
-            ex.append_context("(in node Map)");
+            ex.append_context("", &map_node, filename_);
             throw;
         }
 
@@ -458,7 +458,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
         }
     }
     } catch (const config_error & ex) {
-        ex.append_context(std::string("in map '") + filename_ + "'");
+        ex.append_context("", &include, filename_);
         throw;
     }
 
@@ -489,7 +489,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
 
         map.insert_style(name, style);
     } catch (const config_error & ex) {
-        ex.append_context(std::string("in style '") + name + "'");
+        ex.append_context(std::string("in style '") + name + "'", &sty, filename_);
         throw;
     }
 }
@@ -504,7 +504,7 @@ void map_parser::parse_metawriter(Map & map, xml_node const& pt)
         writer = metawriter_create(pt);
         map.insert_metawriter(name, writer);
     } catch (const config_error & ex) {
-        ex.append_context(std::string("in meta writer '") + name + "'");
+        ex.append_context(std::string("in meta writer '") + name + "'", &pt, filename_);
     }
 }
 
@@ -533,7 +533,7 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
         // when it's parsed
         fontsets_.insert(pair<std::string, font_set>(name, fontset));
     } catch (const config_error & ex) {
-        ex.append_context(std::string("in FontSet '") + name + "'");
+        ex.append_context(std::string("in FontSet '") + name + "'", &fset, filename_);
         throw;
     }
 }
@@ -551,7 +551,7 @@ void map_parser::parse_font(font_set &fset, xml_node const& f)
     }
     else
     {
-        throw config_error(std::string("Must have 'face-name' set"));
+        throw config_error("Must have 'face-name' set", &f, filename_);
     }
 }
 

@@ -26,6 +26,7 @@
 #include <mapnik/metawriter_inmem.hpp>
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/config_error.hpp>
 
 #include <boost/optional.hpp>
 
@@ -60,7 +61,7 @@ metawriter_create(xml_node const& pt)
         metawriter_inmem_ptr inmem = metawriter_inmem_ptr(new metawriter_inmem(properties));
         writer = inmem;
     } else {
-        throw config_error(string("Unknown type '") + type + "'");
+        throw config_error(string("Unknown type '") + type + "'", &pt);
     }
 
     return writer;
