@@ -866,9 +866,6 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                     tr.store_to(&matrix[0]);
                     symbol.set_transform(matrix);
                 }
-
-                parse_metawriter_in_symbolizer(symbol, sym);
-                rule.append(symbol);
             }
             catch (image_reader_exception const & ex )
             {
