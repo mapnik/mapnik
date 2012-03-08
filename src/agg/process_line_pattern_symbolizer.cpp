@@ -26,6 +26,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_pattern_source.hpp>
 #include <mapnik/expression_evaluator.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
 

@@ -29,10 +29,6 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
-//#include <mapnik/marker.hpp>
-
-// agg
-//#include "agg_trans_affine.h"
 
 // boost
 #include <boost/utility.hpp>

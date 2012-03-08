@@ -29,6 +29,7 @@
 #include <mapnik/grid/grid.hpp>
 
 
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/config_error.hpp>
@@ -144,7 +145,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
         mtx *= agg::trans_affine_scaling(scale_factor_*(1.0/step));
         // render the marker at the center of the marker box
         mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
-
+        using namespace mapnik::svg;
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,

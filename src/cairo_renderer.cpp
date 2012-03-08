@@ -31,6 +31,7 @@
 #include <mapnik/arrow.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
@@ -903,7 +904,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
             typedef coord_transform2<CoordTransform,geometry_type> path_type;
             mapnik::path_ptr vmarker = *marker.get_vector_data();
-
+            using namespace mapnik::svg;
             agg::pod_bvector<path_attributes> const & attributes_ = vmarker->attributes();
             for(unsigned i = 0; i < attributes_.size(); ++i)
             {
