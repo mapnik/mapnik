@@ -132,6 +132,7 @@ protected:
     face_manager<freetype_engine> font_manager_;
     cairo_face_manager face_manager_;
     label_collision_detector4 detector_;
+    box2d<double> query_extent_;
 };
 
 template <typename T>
