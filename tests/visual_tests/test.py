@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import mapnik
-import cairo
 import sys
 import os.path
 from compare import compare, summary
 
-dirname = os.path.dirname(sys.argv[0])
+dirname = os.path.dirname(__file__)
 files = [
     ("list", 800, 600, 400, 300, 250, 200, 150, 100),
     ("simple", 800, 600, 400, 300, 250, 200, 150, 100),
@@ -40,7 +39,7 @@ def render(filename, width, height=100):
     mapnik.load_map(m, os.path.join(dirname, "%s.xml" % filename), False)
     bbox = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
     m.zoom_to_box(bbox)
-    basefn = '%s-%d' % (filename, width)
+    basefn = os.path.join(dirname,'%s-%d' % (filename, width))
     mapnik.render_to_file(m, basefn+'-agg.png')
     diff = compare(basefn + '-agg.png', basefn + '-reference.png')
     if diff > 0:
