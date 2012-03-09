@@ -50,6 +50,7 @@ struct MAPNIK_DECL marker_cache :
     static boost::unordered_map<std::string,marker_ptr> cache_;
     static bool insert(std::string const& key, marker_ptr);
     static boost::optional<marker_ptr> find(std::string const& key, bool update_cache = false);
+    static void clear();
 };
 
 }
