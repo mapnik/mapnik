@@ -60,6 +60,6 @@ for f in files:
             m = render(f[0], width[0], width[1])
         else:
             m = render(f[0], width)
-    mapnik.save_map(m, "%s-out.xml" % f[0])
+    mapnik.save_map(m, os.path.join(dirname,"%s-out.xml" % f[0]))
 
 summary()

@@ -23,6 +23,7 @@
 #include <mapnik/text_placements/registry.hpp>
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/text_placements/list.hpp>
+#include <mapnik/text_placements/dummy.hpp>
 
 namespace mapnik
 {
@@ -33,6 +34,7 @@ registry::registry()
 {
     register_name("simple", &text_placements_simple::from_xml);
     register_name("list", &text_placements_list::from_xml);
+    register_name("dummy", &text_placements_list::from_xml);
 }
 
 void registry::register_name(std::string name, from_xml_function_ptr ptr, bool overwrite)
