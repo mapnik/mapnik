@@ -4,7 +4,7 @@
 namespace mapnik
 {
 config_error::config_error(std::string const& what, xml_node const* node, std::string const& filename)
-    : what_( what ), file_(filename)
+    : what_( what ), line_number_(0), file_(filename), node_name_(), msg_()
 {
     if (node)
     {
@@ -15,7 +15,7 @@ config_error::config_error(std::string const& what, xml_node const* node, std::s
 
 
 config_error::config_error(unsigned line_number, std::string const& filename, std::string const& what)
-    : what_( what ), line_number_(line_number), file_(filename)
+    : what_( what ), line_number_(line_number), file_(filename), node_name_(), msg_()
 {
 
 }
@@ -28,7 +28,8 @@ config_error::config_error(unsigned line_number, std::string const& filename, st
     if (!node_name_.empty()) s << " in node "<< node_name_;
     if (line_number_ > 0 || !file_.empty()) s << ": ";
     s << what_;
-    return s.str().c_str();
+    msg_ = s.str(); //Avoid returning pointer to dead object
+    return msg_.c_str();
 }
 
 void config_error::append_context(const std::string & ctx, xml_node const* node, std::string const& filename) const

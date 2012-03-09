@@ -47,7 +47,9 @@ protected:
     mutable unsigned line_number_;
     mutable std::string file_;
     mutable std::string node_name_;
+    mutable std::string msg_;
 };
+
 }
 
 #endif // MAPNIK_CONFIG_ERROR_HPP
