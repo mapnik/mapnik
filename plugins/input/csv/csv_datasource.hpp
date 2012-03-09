@@ -10,7 +10,7 @@
 class csv_datasource : public mapnik::datasource
 {
 public:
-    csv_datasource(mapnik::parameters const& params);
+    csv_datasource(mapnik::parameters const& params, bool bind=true);
     virtual ~csv_datasource ();
     mapnik::datasource::datasource_t type() const;
     static std::string name();
@@ -19,13 +19,13 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
+    void bind() const;
     template <typename T>
     void parse_csv(T& stream,
                    std::string const& escape,
                    std::string const& separator,
                    std::string const& quote) const;
 private:
-    void init(mapnik::parameters const& params);
     mutable mapnik::layer_descriptor desc_;
     mutable mapnik::box2d<double> extent_;
     mutable std::string filename_;

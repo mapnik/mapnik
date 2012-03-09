@@ -38,7 +38,7 @@
 class occi_datasource : public mapnik::datasource
 {
 public:
-    occi_datasource(mapnik::parameters const& params);
+    occi_datasource(mapnik::parameters const& params, bool bind = true);
     virtual ~occi_datasource ();
     mapnik::datasource::datasource_t type() const;
     static std::string name();
@@ -47,10 +47,9 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
+    void bind() const;
 
 private:
-    void init(mapnik::parameters const& params);
-    mapnik::parameters const& params_;
     mapnik::datasource::datasource_t type_;
     mutable std::string table_;
     mutable std::string table_name_;

@@ -29,23 +29,23 @@ using namespace boost::spirit;
 
 DATASOURCE_PLUGIN(csv_datasource)
 
-csv_datasource::csv_datasource(parameters const& params)
+csv_datasource::csv_datasource(parameters const& params, bool bind)
 : datasource(params),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
+    desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
     extent_(),
     filename_(),
     inline_string_(),
     file_length_(0),
-    row_limit_(*params.get<int>("row_limit", 0)),
+    row_limit_(*params_.get<int>("row_limit", 0)),
     features_(),
-    escape_(*params.get<std::string>("escape", "")),
-    separator_(*params.get<std::string>("separator", "")),
-    quote_(*params.get<std::string>("quote", "")),
+    escape_(*params_.get<std::string>("escape", "")),
+    separator_(*params_.get<std::string>("separator", "")),
+    quote_(*params_.get<std::string>("quote", "")),
     headers_(),
-    manual_headers_(boost::trim_copy(*params.get<std::string>("headers", ""))),
-    strict_(*params.get<mapnik::boolean>("strict", false)),
-    quiet_(*params.get<mapnik::boolean>("quiet", false)),
-    filesize_max_(*params.get<float>("filesize_max", 20.0))  // MB
+    manual_headers_(boost::trim_copy(*params_.get<std::string>("headers", ""))),
+    strict_(*params_.get<mapnik::boolean>("strict", false)),
+    quiet_(*params_.get<mapnik::boolean>("quiet", false)),
+    filesize_max_(*params_.get<float>("filesize_max", 20.0))  // MB
 {
     /* TODO:
        general:
@@ -70,31 +70,36 @@ csv_datasource::csv_datasource(parameters const& params)
        http://boost-spirit.com/home/articles/qi-example/tracking-the-input-position-while-parsing/
     */
 
-    boost::optional<std::string> inline_string = params.get<std::string>("inline");
+    boost::optional<std::string> inline_string = params_.get<std::string>("inline");
     if (inline_string)
     {
         inline_string_ = *inline_string;
     }
     else
     {
-        boost::optional<std::string> file = params.get<std::string>("file");
+        boost::optional<std::string> file = params_.get<std::string>("file");
         if (!file) throw mapnik::datasource_exception("CSV Plugin: missing <file> parameter");
 
-        boost::optional<std::string> base = params.get<std::string>("base");
+        boost::optional<std::string> base = params_.get<std::string>("base");
         if (base)
             filename_ = *base + "/" + *file;
         else
             filename_ = *file;
     }
 
-    this->init(params);
+    if (bind)
+    {
+        this->bind();
+    }
 }
 
 
 csv_datasource::~csv_datasource() { }
 
-void csv_datasource::init(mapnik::parameters const& params)
+void csv_datasource::bind() const
 {
+    if (is_bound_) return;
+
     if (!inline_string_.empty())
     {
         std::istringstream in(inline_string_);
@@ -108,6 +113,7 @@ void csv_datasource::init(mapnik::parameters const& params)
         parse_csv(in,escape_, separator_, quote_);
         in.close();
     }
+    is_bound_ = true;
 }
 
 template <typename T>
@@ -239,7 +245,7 @@ void csv_datasource::parse_csv(T& stream,
         //  grammer = boost::escaped_list_separator<char>('\\', ',', '\"');
         grammer = boost::escaped_list_separator<char>(esc, sep, quo);
     }
-    catch(std::exception const& ex)
+    catch(const std::exception & ex)
     {
         std::ostringstream s;
         s << "CSV Plugin: " << ex.what();
@@ -365,7 +371,7 @@ void csv_datasource::parse_csv(T& stream,
                     break;
                 }
             }
-            catch(std::exception const& ex)
+            catch(const std::exception & ex)
             {
                 std::ostringstream s;
                 s << "CSV Plugin: error parsing headers: " << ex.what();
@@ -806,7 +812,7 @@ void csv_datasource::parse_csv(T& stream,
                 if (!quiet_) std::clog << ex.what() << "\n";
             }
         }
-        catch(std::exception const& ex)
+        catch(const std::exception & ex)
         {
             std::ostringstream s;
             s << "CSV Plugin: unexpected error parsing line: " << line_number
@@ -840,11 +846,14 @@ datasource::datasource_t csv_datasource::type() const
 
 mapnik::box2d<double> csv_datasource::envelope() const
 {
+    if (!is_bound_) bind();
+
     return extent_;
 }
 
 boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_type() const
 {
+    if (! is_bound_) bind();
     boost::optional<mapnik::datasource::geometry_t> result;
     int multi_type = 0;
     unsigned num_features = features_.size();
@@ -867,11 +876,15 @@ boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_typ
 
 mapnik::layer_descriptor csv_datasource::get_descriptor() const
 {
+    if (!is_bound_) bind();
+
     return desc_;
 }
 
 mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
 {
+    if (!is_bound_) bind();
+
     const std::set<std::string>& attribute_names = q.property_names();
     std::set<std::string>::const_iterator pos = attribute_names.begin();
     while (pos != attribute_names.end())
@@ -903,5 +916,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
 
 mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt) const
 {
+    if (!is_bound_) bind();
+
     throw mapnik::datasource_exception("CSV Plugin: features_at_point is not supported yet");
 }

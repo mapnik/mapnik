@@ -67,25 +67,24 @@ const std::string occi_datasource::METADATA_TABLE = "USER_SDO_GEOM_METADATA";
 
 DATASOURCE_PLUGIN(occi_datasource)
 
-occi_datasource::occi_datasource(parameters const& params)
+occi_datasource::occi_datasource(parameters const& params, bool bind)
 : datasource (params),
-    params_(params),
     type_(datasource::Vector),
-    fields_(*params.get<std::string>("fields", "*")),
-    geometry_field_(*params.get<std::string>("geometry_field", "")),
+    fields_(*params_.get<std::string>("fields", "*")),
+    geometry_field_(*params_.get<std::string>("geometry_field", "")),
     srid_initialized_(false),
     extent_initialized_(false),
-    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
-    row_limit_(*params.get<int>("row_limit", 0)),
-    row_prefetch_(*params.get<int>("row_prefetch", 100)),
+    desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
+    row_limit_(*params_.get<int>("row_limit", 0)),
+    row_prefetch_(*params_.get<int>("row_prefetch", 100)),
     pool_(0),
     conn_(0)
 {
-    if (! params.get<std::string>("user")) throw datasource_exception("OCCI Plugin: no <user> specified");
-    if (! params.get<std::string>("password")) throw datasource_exception("OCCI Plugin: no <password> specified");
-    if (! params.get<std::string>("host")) throw datasource_exception("OCCI Plugin: no <host> string specified");
+    if (! params_.get<std::string>("user")) throw datasource_exception("OCCI Plugin: no <user> specified");
+    if (! params_.get<std::string>("password")) throw datasource_exception("OCCI Plugin: no <password> specified");
+    if (! params_.get<std::string>("host")) throw datasource_exception("OCCI Plugin: no <host> string specified");
 
-    boost::optional<std::string> table = params.get<std::string>("table");
+    boost::optional<std::string> table = params_.get<std::string>("table");
     if (! table)
     {
         throw datasource_exception("OCCI Plugin: no <table> parameter specified");
@@ -95,44 +94,52 @@ occi_datasource::occi_datasource(parameters const& params)
         table_ = *table;
     }
 
-    use_spatial_index_ = *params.get<mapnik::boolean>("use_spatial_index",true);
-    use_connection_pool_ = *params.get<mapnik::boolean>("use_connection_pool",true);
+    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
+    use_connection_pool_ = *params_.get<mapnik::boolean>("use_connection_pool",true);
 
-    boost::optional<std::string> ext = params.get<std::string>("extent");
+    boost::optional<std::string> ext = params_.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
-    boost::optional<int> srid = params.get<int>("srid");
+    boost::optional<int> srid = params_.get<int>("srid");
     if (srid)
     {
         srid_ = *srid;
         srid_initialized_ = true;
     }
 
-    this->init(params);
+    if (bind)
+    {
+        this->bind();
+    }
 }
 
 occi_datasource::~occi_datasource()
 {
-    Environment* env = occi_environment::get_environment();
+    if (is_bound_)
+    {
+        Environment* env = occi_environment::get_environment();
 
-    if (use_connection_pool_)
-    {
-        if (pool_ != 0)
+        if (use_connection_pool_)
         {
-            env->terminateStatelessConnectionPool(pool_, StatelessConnectionPool::SPD_FORCE);
+            if (pool_ != 0)
+            {
+                env->terminateStatelessConnectionPool(pool_, StatelessConnectionPool::SPD_FORCE);
+            }
         }
-    }
-    else
-    {
-        if (conn_ != 0)
+        else
         {
-            env->terminateConnection(conn_);
+            if (conn_ != 0)
+            {
+                env->terminateConnection(conn_);
+            }
         }
     }
 }
 
-void occi_datasource::init(mapnik::parameters const& params)
+void occi_datasource::bind() const
 {
+    if (is_bound_) return;
+
     // connect to environment
     if (use_connection_pool_)
     {
@@ -141,11 +148,11 @@ void occi_datasource::init(mapnik::parameters const& params)
             Environment* env = occi_environment::get_environment();
 
             pool_ = env->createStatelessConnectionPool(
-                *params.get<std::string>("user"),
-                *params.get<std::string>("password"),
-                *params.get<std::string>("host"),
-                *params.get<int>("max_size", 10),
-                *params.get<int>("initial_size", 1),
+                *params_.get<std::string>("user"),
+                *params_.get<std::string>("password"),
+                *params_.get<std::string>("host"),
+                *params_.get<int>("max_size", 10),
+                *params_.get<int>("initial_size", 1),
                 1,
                 StatelessConnectionPool::HOMOGENEOUS);
         }
@@ -161,9 +168,9 @@ void occi_datasource::init(mapnik::parameters const& params)
             Environment* env = occi_environment::get_environment();
 
             conn_ = env->createConnection(
-                *params.get<std::string>("user"),
-                *params.get<std::string>("password"),
-                *params.get<std::string>("host"));
+                *params_.get<std::string>("user"),
+                *params_.get<std::string>("password"),
+                *params_.get<std::string>("host"));
         }
         catch (SQLException& ex)
         {
@@ -335,6 +342,8 @@ void occi_datasource::init(mapnik::parameters const& params)
             throw datasource_exception(ex.getMessage());
         }
     }
+
+    is_bound_ = true;
 }
 
 std::string occi_datasource::name()
@@ -350,6 +359,7 @@ mapnik::datasource::datasource_t occi_datasource::type() const
 box2d<double> occi_datasource::envelope() const
 {
     if (extent_initialized_) return extent_;
+    if (! is_bound_) bind();
 
     double lox = 0.0, loy = 0.0, hix = 0.0, hiy = 0.0;
 
@@ -468,17 +478,20 @@ box2d<double> occi_datasource::envelope() const
 boost::optional<mapnik::datasource::geometry_t> occi_datasource::get_geometry_type() const
 {
     // FIXME
+    //if (! is_bound_) bind();
     return boost::optional<mapnik::datasource::geometry_t>();
 }
 
 layer_descriptor occi_datasource::get_descriptor() const
 {
+    if (! is_bound_) bind();
 
     return desc_;
 }
 
 featureset_ptr occi_datasource::features(query const& q) const
 {
+    if (! is_bound_) bind();
 
     box2d<double> const& box = q.get_bbox();
 
@@ -527,18 +540,15 @@ featureset_ptr occi_datasource::features(query const& q) const
 
     if (row_limit_ > 0)
     {
-        std::ostringstream row_limit_string;
-
-        row_limit_string << "rownum < " << row_limit_;
+        std::string row_limit_string = "rownum < " + row_limit_;
 
         if (boost::algorithm::ifind_first(query, "WHERE"))
         {
-            row_limit_string << " AND ";
-            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string.str());
+            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string + " AND ");
         }
         else if (boost::algorithm::ifind_first(query, table_name_))
         {
-            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string.str());
+            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string);
         }
         else
         {
@@ -565,6 +575,7 @@ featureset_ptr occi_datasource::features(query const& q) const
 
 featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 {
+    if (! is_bound_) bind();
 
     std::ostringstream s;
     s << "SELECT " << geometry_field_;
@@ -610,18 +621,15 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 
     if (row_limit_ > 0)
     {
-        std::ostringstream row_limit_string;
-
-        row_limit_string << "rownum < " << row_limit_;
+        std::string row_limit_string = "rownum < " + row_limit_;
 
         if (boost::algorithm::ifind_first(query, "WHERE"))
         {
-            row_limit_string << " AND ";
-            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string.str());
+            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string + " AND ");
         }
         else if (boost::algorithm::ifind_first(query, table_name_))
         {
-            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string.str());
+            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string);
         }
         else
         {
