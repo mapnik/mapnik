@@ -141,8 +141,9 @@ public:
                              double scale_factor,
                              CoordTransform const &t,
                              FaceManagerT &font_manager,
-                             DetectorT &detector) :
-        text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector),
+                             DetectorT &detector,
+                             box2d<double> const& query_extent) :
+        text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector, query_extent),
         sym_(sym)
     {
         this->points_on_line_ = true;
