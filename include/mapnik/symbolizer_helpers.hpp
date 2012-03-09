@@ -69,8 +69,8 @@ public:
           angle_(0.0),
           placement_valid_(false),
           points_on_line_(false),
-          finder_(),
-          query_extent_(query_extent)
+          query_extent_(query_extent),
+          finder_()
     {
         initialize_geometries();
         if (!geometries_to_process_.size()) return;
