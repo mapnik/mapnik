@@ -72,7 +72,7 @@ feature_ptr postgis_featureset::next()
             int oid = rs_->getTypeOID(pos);
             const char* buf = rs_->getValue(pos);
             std::string name = rs_->getFieldName(pos);
-            // validation happens of this type at bind()
+            // validation happens of this type at init()
             int val;
             if (oid == 20)
             {

@@ -43,7 +43,7 @@
 class kismet_datasource : public mapnik::datasource
 {
 public:
-    kismet_datasource(mapnik::parameters const& params, bool bind = true);
+    kismet_datasource(mapnik::parameters const& params);
     virtual ~kismet_datasource ();
     datasource::datasource_t type() const;
     static std::string name();
@@ -52,11 +52,10 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    void bind() const;
 
 private:
+    void init(mapnik::parameters const& params);
     void run (const std::string& host, const unsigned int port);
-
     mapnik::box2d<double> extent_;
     bool extent_initialized_;
     std::string host_;
