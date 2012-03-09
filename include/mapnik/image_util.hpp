@@ -147,7 +147,7 @@ inline boost::optional<std::string> type_from_filename(std::string const& filena
     return result_type();
 }
 
-inline std::string guess_type( const std::string & filename )
+inline std::string guess_type( std::string const& filename )
 {
     std::string::size_type idx = filename.find_last_of(".");
     if ( idx != std::string::npos ) {

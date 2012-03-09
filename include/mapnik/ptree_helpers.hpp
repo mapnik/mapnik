@@ -93,7 +93,7 @@ operator << ( std::basic_ostream<charT, traits> & s, mapnik::color const& c )
 /** Helper for class bool */
 class boolean {
 public:
-    boolean() {}
+    boolean() : b_(false) {}
     boolean(bool b) : b_(b) {}
     boolean(boolean const& b) : b_(b.b_) {}
 
@@ -211,7 +211,15 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 template <typename T>
 inline boost::optional<T> fast_cast(std::string const& value)
 {
-    return boost::lexical_cast<T>( value );
+    try
+    {
+        return boost::lexical_cast<T>( value );
+    }
+    catch (boost::bad_lexical_cast const& ex)
+    {
+        return boost::optional<T>();
+    }
+
 }
 
 template <>

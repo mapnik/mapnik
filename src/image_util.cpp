@@ -57,7 +57,6 @@ extern "C"
 #include <sstream>
 
 // agg
-//#include "agg_conv_transform.h"
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"

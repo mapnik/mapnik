@@ -1411,7 +1411,9 @@ if not preconfigured:
             pthread = '-pthread'
         
         # Common debugging flags.
+        # http://lists.fedoraproject.org/pipermail/devel/2010-November/144952.html
         debug_flags  = '-g -fno-omit-frame-pointer -DDEBUG -DMAPNIK_DEBUG'
+        
         ndebug_flags = '-DNDEBUG'
        
         

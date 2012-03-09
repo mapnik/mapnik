@@ -92,14 +92,14 @@ private:
     //             otherwise it will autodetect the orientation.
     //             If >= 50% of the characters end up upside down, it will be retried the other way.
     //             RETURN: 1/-1 depending which way up the string ends up being.
-    std::auto_ptr<text_path> get_placement_offset(const std::vector<vertex2d> & path_positions,
-                                                  const std::vector<double> & path_distances,
+    std::auto_ptr<text_path> get_placement_offset(std::vector<vertex2d> const& path_positions,
+                                                  std::vector<double> const& path_distances,
                                                   int & orientation, unsigned index, double distance);
 
-    ///Tests wether the given text_path be placed without a collision
+    ///Tests whether the given text_path be placed without a collision
     // Returns true if it can
     // NOTE: This edits p.envelopes so it can be used afterwards (you must clear it otherwise)
-    bool test_placement(const std::auto_ptr<text_path> & current_placement, const int & orientation);
+    bool test_placement(std::auto_ptr<text_path> const& current_placement, int orientation);
 
     ///Does a line-circle intersect calculation
     // NOTE: Follow the strict pre conditions
@@ -107,14 +107,14 @@ private:
     //                 This means there is exactly one intersect point
     // Result is returned in ix, iy
     void find_line_circle_intersection(
-        const double &cx, const double &cy, const double &radius,
-        const double &x1, const double &y1, const double &x2, const double &y2,
-        double &ix, double &iy);
+        double cx, double cy, double radius,
+        double x1, double y1, double x2, double y2,
+        double & ix, double & iy);
 
     void find_line_breaks();
     void init_string_size();
     void init_alignment();
-    void adjust_position(text_path *current_placement, double label_x, double label_y);
+    void adjust_position(text_path *current_placement);
     void add_line(double width, double height, bool first_line);
 
     ///General Internals

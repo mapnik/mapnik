@@ -51,7 +51,7 @@ struct MAPNIK_DECL shield_symbolizer : public text_symbolizer,
 
     bool get_unlock_image() const;              // image is not locked to the text placement
     void set_unlock_image(bool unlock_image);
-    void set_shield_displacement(double shield_dx,double shield_dy);
+    void set_shield_displacement(double shield_dx, double shield_dy);
     position const& get_shield_displacement() const;
 
 private:

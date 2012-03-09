@@ -141,9 +141,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
             largest_box_only = true;
             if (sym_.get_minimum_path_length() > 0)
             {
-                // TODO - find less costly method than fetching full envelope
                 box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
-
                 if (gbox.width() < sym_.get_minimum_path_length())
                 {
                     continue;
@@ -167,10 +165,13 @@ template <typename FaceManagerT, typename DetectorT>
 void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
 {
     label_placement_enum how_placed = placement_->properties.label_placement;
-    if (how_placed == LINE_PLACEMENT) {
+    if (how_placed == LINE_PLACEMENT)
+    {
         point_placement_ = false;
         return;
-    } else {
+    }
+    else
+    {
         point_placement_ = true;
     }
 
@@ -193,14 +194,19 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
                 t_.forward(&label_x, &label_y);
                 points_.push_back(std::make_pair(label_x, label_y));
             }
-        } else {
+        }
+        else
+        {
             if (how_placed == POINT_PLACEMENT)
             {
                 geom.label_position(&label_x, &label_y);
-            } else if (how_placed == INTERIOR_PLACEMENT)
+            }
+            else if (how_placed == INTERIOR_PLACEMENT)
             {
                 geom.label_interior_position(&label_x, &label_y);
-            } else {
+            }
+            else
+            {
 #ifdef MAPNIK_DEBUG
                 std::cerr << "ERROR: Unknown placement type in initialize_points();\n";
 #endif

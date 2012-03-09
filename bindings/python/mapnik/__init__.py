@@ -682,6 +682,7 @@ __all__ = [
     'SQLite',
     'Osm',
     'Kismet',
+    'Geos',
     #   version and environment
     'mapnik_version_string',
     'mapnik_version',
