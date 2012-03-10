@@ -1676,7 +1676,7 @@ void map_parser::parse_raster_symbolizer( rule & rule, ptree const & sym )
 
             if (css_tag.first == "RasterColorizer")
             {
-                raster_colorizer_ptr colorizer(new raster_colorizer());
+                raster_colorizer_ptr colorizer = boost::make_shared<raster_colorizer>();
                 raster_sym.set_colorizer(colorizer);
                 parse_raster_colorizer(colorizer, css_tag.second);
             }

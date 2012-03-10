@@ -29,6 +29,9 @@
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/scale_denominator.hpp>
 
+// boost
+#include <boost/make_shared.hpp>
+
 // icu
 #include <unicode/uversion.h>
 
@@ -584,7 +587,8 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
 #endif
                 featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
                 if (fs)
-                    return featureset_ptr(new filter_featureset<hit_test_filter>(fs,hit_test_filter(x,y,tol)));
+                    return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
+                                        hit_test_filter(x,y,tol));
             }
         }
         catch (...)
@@ -629,7 +633,8 @@ featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
 #endif
                 featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
                 if (fs)
-                    return featureset_ptr(new filter_featureset<hit_test_filter>(fs,hit_test_filter(x,y,tol)));
+                    return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
+                                        hit_test_filter(x,y,tol));
             }
         }
         catch (...)

@@ -29,6 +29,7 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
@@ -50,7 +51,7 @@ node_ptr text_node::from_xml(boost::property_tree::ptree const& xml)
     std::string data = xml.data();
     boost::trim(data);
     if (data.empty()) return node_ptr(); //No text
-    return node_ptr(new text_node(parse_expression(data, "utf8")));
+    return boost::make_shared<text_node>(parse_expression(data, "utf8"));
 }
 
 void text_node::apply(char_properties const& p, Feature const& feature, processed_text &output) const

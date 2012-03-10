@@ -254,7 +254,7 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
     }
     else
     {
-        entry = cairo_face_ptr(new cairo_face(font_engine_, face));
+        entry = cairo_face_ptr(boost::make_shared<cairo_face>(font_engine_, face));
 
         cache_.insert(std::make_pair(face, entry));
     }
@@ -633,7 +633,7 @@ cairo_renderer_base::cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Cont
     : m_(m),
       context_(context),
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
-      font_engine_(new freetype_engine()),
+      font_engine_(boost::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_,font_manager_),
       detector_(box2d<double>(-m.buffer_size() ,-m.buffer_size() , m.width() + m.buffer_size() ,m.height() + m.buffer_size()))

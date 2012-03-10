@@ -191,7 +191,7 @@ stroker_ptr freetype_engine::create_stroker()
     FT_Error error = FT_Stroker_New(library_, &s);
     if (!error)
     {
-        return stroker_ptr(new stroker(s));
+        return boost::make_shared<stroker>(s);
     }
     return stroker_ptr();
 }
