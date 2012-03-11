@@ -24,7 +24,7 @@
 
 // mapnik
 #include <mapnik/libxml2_loader.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 
 // boost

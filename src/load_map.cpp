@@ -73,7 +73,6 @@ using boost::lexical_cast;
 using boost::bad_lexical_cast;
 using boost::tokenizer;
 
-using std::cerr;
 using std::endl;
 
 namespace mapnik
@@ -86,11 +85,7 @@ public:
         strict_( strict ),
         filename_( filename ),
         relative_to_xml_(true),
-        font_manager_(font_engine_),
-        color_grammar_(),
-        // TODO - use xml encoding?
-        tr_("utf8"),
-        expr_grammar_(tr_)
+        font_manager_(font_engine_)
         {}
 
     void parse_map(Map & map, xml_node const& sty, std::string const& base_path="");
@@ -117,13 +112,12 @@ private:
     void parse_raster_symbolizer(rule & rule, xml_node const& sym );
     void parse_markers_symbolizer(rule & rule, xml_node const& sym );
 
-    void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node );
+    void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     void parse_stroke(stroke & strk, xml_node const & sym);
-    expression_ptr parse_expr(std::string const& expr);
 
     void ensure_font_face( const std::string & face_name );
 
-    std::string ensure_relative_to_xml( boost::optional<std::string> opt_path );
+    std::string ensure_relative_to_xml(boost::optional<std::string> opt_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
                                                       std::string const& name);
 
@@ -135,16 +129,13 @@ private:
     face_manager<freetype_engine> font_manager_;
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
-    mapnik::css_color_grammar<std::string::const_iterator> color_grammar_;
-    mapnik::transcoder tr_;
-    mapnik::expression_grammar<std::string::const_iterator> expr_grammar_;
-
 };
 
 #include <mapnik/internal/dump_xml.hpp>
 void load_map(Map & map, std::string const& filename, bool strict)
 {
-    xml_tree tree;
+    // TODO - use xml encoding?
+    xml_tree tree("utf8");
     tree.set_filename(filename);
 #ifdef HAVE_LIBXML2
     read_xml2(filename, tree.root());
@@ -166,7 +157,8 @@ void load_map(Map & map, std::string const& filename, bool strict)
 
 void load_map_string(Map & map, std::string const& str, bool strict, std::string const& base_path)
 {
-    xml_tree tree;
+    // TODO - use xml encoding?
+    xml_tree tree("utf8");
 #ifdef HAVE_LIBXML2
     if (!base_path.empty())
         read_xml2_string(str, tree.root(), base_path); // accept base_path passed into function
@@ -188,40 +180,6 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
 
     map_parser parser(strict, base_path);
     parser.parse_map(map, tree.root(), base_path);
-}
-
-expression_ptr map_parser::parse_expr(std::string const& str)
-{
-    expression_ptr expr(boost::make_shared<expr_node>(true));
-    if (!expression_factory::parse_from_string(expr,str,expr_grammar_))
-    {
-        throw mapnik::config_error( "Failed to parse expression '" + str + "'" );
-    }
-    return expr;
-
-}
-
-boost::optional<color> map_parser::get_opt_color_attr(boost::property_tree::ptree const& node,
-                                                      std::string const& name)
-{
-
-    boost::optional<std::string> str = node.get_optional<std::string>( std::string("<xmlattr>.") + name);
-    boost::optional<color> result;
-    if (str && !str->empty())
-    {
-        mapnik::color c;
-        if (mapnik::color_factory::parse_from_string(c,*str,color_grammar_))
-        {
-            result.reset(c);
-        }
-        else
-        {
-            throw config_error(std::string("Failed to parse attribute ") +
-                               name + "'. Expected color" +
-                               " but got '" + *str + "'");
-        }
-    }
-    return result;
 }
 
 void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& base_path)
@@ -1383,8 +1341,8 @@ void map_parser::parse_building_symbolizer( rule & rule, xml_node const & sym )
         optional<double> opacity = sym.get_opt_attr<double>("fill-opacity");
         if (opacity) building_sym.set_opacity(*opacity);
         // height
-        optional<std::string> height = sym.get_opt_attr<std::string>("height");
-        if (height) building_sym.set_height(parse_expr(*height));
+        optional<expression_ptr> height = sym.get_opt_attr<expression_ptr>("height");
+        if (height) building_sym.set_height(*height);
 
         parse_metawriter_in_symbolizer(building_sym, sym);
         rule.append(building_sym);

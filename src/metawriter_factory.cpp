@@ -24,7 +24,7 @@
 #include <mapnik/metawriter_factory.hpp>
 #include <mapnik/metawriter_json.hpp>
 #include <mapnik/metawriter_inmem.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/config_error.hpp>
 

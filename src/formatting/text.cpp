@@ -26,7 +26,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/processed_text.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 
 namespace mapnik
 {

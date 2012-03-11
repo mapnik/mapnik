@@ -23,7 +23,7 @@
 // mapnik
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/ptree_helpers.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>

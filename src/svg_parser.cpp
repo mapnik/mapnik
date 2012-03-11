@@ -24,6 +24,7 @@
 
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
+#include <mapnik/config_error.hpp>
 
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"

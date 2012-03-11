@@ -78,13 +78,28 @@ inline boost::optional<std::string> fast_cast(xml_tree const& tree, std::string 
 template <>
 inline boost::optional<color> fast_cast(xml_tree const& tree, std::string const& value)
 {
-    return mapnik::color_factory::from_string(value);
+    mapnik::color c;
+    if (mapnik::color_factory::parse_from_string(c, value, tree.color_grammar))
+    {
+        return c;
+    }
+    else
+    {
+        throw config_error("Failed to parse color '"+value+"'");
+    }
 }
 
 template <>
 inline boost::optional<expression_ptr> fast_cast(xml_tree const& tree, std::string const& value)
 {
-    return parse_expression(value);
+    expression_ptr expr(boost::make_shared<expr_node>(true));
+    if (expression_factory::parse_from_string(expr, value, tree.expr_grammar))
+    {
+        return expr;
+    } else
+    {
+        throw mapnik::config_error("Failed to parse expression '" + value + "'");
+    }
 }
 
 /****************************************************************************/
@@ -142,8 +157,12 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
 
 /****************************************************************************/
 
-xml_tree::xml_tree()
-    : node_(*this, "<root>")
+xml_tree::xml_tree(std::string const& encoding)
+    : node_(*this, "<root>"),
+      file_(),
+      tr_(encoding),
+      color_grammar(),
+      expr_grammar(tr_)
 {
 }
 
@@ -428,6 +447,7 @@ compile_get_opt_attr(label_placement_e);
 compile_get_opt_attr(vertical_alignment_e);
 compile_get_opt_attr(horizontal_alignment_e);
 compile_get_opt_attr(justify_alignment_e);
+compile_get_opt_attr(expression_ptr);
 compile_get_attr(std::string);
 compile_get_attr(filter_mode_e);
 compile_get_attr(point_placement_e);

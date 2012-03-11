@@ -25,7 +25,7 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/formatting/text.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 
 namespace mapnik

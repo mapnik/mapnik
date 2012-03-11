@@ -21,7 +21,7 @@
  *****************************************************************************/
 #include <mapnik/formatting/format.hpp>
 #include <mapnik/ptree_helpers.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 
 namespace mapnik {
 using boost::property_tree::ptree;

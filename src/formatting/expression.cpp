@@ -27,7 +27,7 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 
 // boost
 

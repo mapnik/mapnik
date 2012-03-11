@@ -23,7 +23,7 @@
 #include <mapnik/formatting/base.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/registry.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>

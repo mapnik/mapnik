@@ -22,7 +22,7 @@
 
 //mapnik
 #include <mapnik/text_placements/list.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 
 //boost
 #include <boost/make_shared.hpp>
