@@ -54,8 +54,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
         {
             s.append(style_names[i]);
         }
-        return boost::python::make_tuple(l.clear_label_cache(),
-l.min_zoom(),l.max_zoom(),l.queryable(),l.datasource()->params(),l.cache_features(),s);
+        return boost::python::make_tuple(l.clear_label_cache(),l.min_zoom(),l.max_zoom(),l.queryable(),l.datasource_parameters(),l.cache_features(),s);
     }
 
     static void
