@@ -169,8 +169,8 @@ std::string text_placements_simple::get_positions()
 
 text_placements_ptr text_placements_simple::from_xml(boost::property_tree::ptree const &xml, fontset_map const & fontsets)
 {
-    text_placements_ptr ptr = text_placements_ptr(boost::make_shared<text_placements_simple>(
-                    get_attr<std::string>(xml, "placements", "X")));
+    text_placements_ptr ptr = boost::make_shared<text_placements_simple>(
+                    get_attr<std::string>(xml, "placements", "X"));
     ptr->defaults.from_xml(xml, fontsets);
     return ptr;
 }

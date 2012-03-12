@@ -1336,7 +1336,7 @@ void map_parser::parse_text_symbolizer( rule & rule, ptree const & sym )
         if (placement_type) {
             placement_finder = placements::registry::instance()->from_xml(*placement_type, sym, fontsets_);
         } else {
-            placement_finder = text_placements_ptr(boost::make_shared<text_placements_dummy>());
+            placement_finder = boost::make_shared<text_placements_dummy>();
             placement_finder->defaults.from_xml(sym, fontsets_);
         }
         if (strict_ &&
@@ -1379,7 +1379,7 @@ void map_parser::parse_shield_symbolizer( rule & rule, ptree const & sym )
         if (placement_type) {
             placement_finder = placements::registry::instance()->from_xml(*placement_type, sym, fontsets_);
         } else {
-            placement_finder = text_placements_ptr(boost::make_shared<text_placements_dummy>());
+            placement_finder = boost::make_shared<text_placements_dummy>();
         }
         placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
