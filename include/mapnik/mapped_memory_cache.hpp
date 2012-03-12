@@ -49,6 +49,7 @@ struct MAPNIK_DECL mapped_memory_cache :
     static boost::unordered_map<std::string,mapped_region_ptr> cache_;
     static bool insert(std::string const& key, mapped_region_ptr);
     static boost::optional<mapped_region_ptr> find(std::string const& key, bool update_cache = false);
+    static void clear();
 };
 
 }

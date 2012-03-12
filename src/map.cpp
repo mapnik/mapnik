@@ -29,6 +29,9 @@
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/scale_denominator.hpp>
 
+// boost
+#include <boost/make_shared.hpp>
+
 // icu
 #include <unicode/uversion.h>
 
@@ -396,7 +399,7 @@ void Map::zoom_all()
             std::vector<layer>::const_iterator end = layers_.end();
             while (itr != end)
             {
-                if (itr->isActive())
+                if (itr->active())
                 {
                     std::string const& layer_srs = itr->srs();
                     projection proj1(layer_srs);
@@ -451,54 +454,57 @@ void Map::zoom_to_box(const box2d<double> &box)
 
 void Map::fixAspectRatio()
 {
-    double ratio1 = (double) width_ / (double) height_;
-    double ratio2 = current_extent_.width() / current_extent_.height();
-    if (ratio1 == ratio2) return;
-
-    switch(aspectFixMode_)
+    if (current_extent_.width() > 0 && current_extent_.height() > 0)
     {
-    case ADJUST_BBOX_HEIGHT:
-        current_extent_.height(current_extent_.width() / ratio1);
-        break;
-    case ADJUST_BBOX_WIDTH:
-        current_extent_.width(current_extent_.height() * ratio1);
-        break;
-    case ADJUST_CANVAS_HEIGHT:
-        height_ = int (width_ / ratio2 + 0.5);
-        break;
-    case ADJUST_CANVAS_WIDTH:
-        width_ = int (height_ * ratio2 + 0.5);
-        break;
-    case GROW_BBOX:
-        if (ratio2 > ratio1)
+        double ratio1 = static_cast<double>(width_) / static_cast<double>(height_);
+        double ratio2 = current_extent_.width() / current_extent_.height();
+        if (ratio1 == ratio2) return;
+
+        switch(aspectFixMode_)
+        {
+        case ADJUST_BBOX_HEIGHT:
             current_extent_.height(current_extent_.width() / ratio1);
-        else
+            break;
+        case ADJUST_BBOX_WIDTH:
             current_extent_.width(current_extent_.height() * ratio1);
-        break;
-    case SHRINK_BBOX:
-        if (ratio2 < ratio1)
-            current_extent_.height(current_extent_.width() / ratio1);
-        else
-            current_extent_.width(current_extent_.height() * ratio1);
-        break;
-    case GROW_CANVAS:
-        if (ratio2 > ratio1)
-            width_ = (int) (height_ * ratio2 + 0.5);
-        else
+            break;
+        case ADJUST_CANVAS_HEIGHT:
             height_ = int (width_ / ratio2 + 0.5);
-        break;
-    case SHRINK_CANVAS:
-        if (ratio2 > ratio1)
-            height_ = int (width_ / ratio2 + 0.5);
-        else
-            width_ = (int) (height_ * ratio2 + 0.5);
-        break;
-    default:
-        if (ratio2 > ratio1)
-            current_extent_.height(current_extent_.width() / ratio1);
-        else
-            current_extent_.width(current_extent_.height() * ratio1);
-        break;
+            break;
+        case ADJUST_CANVAS_WIDTH:
+            width_ = int (height_ * ratio2 + 0.5);
+            break;
+        case GROW_BBOX:
+            if (ratio2 > ratio1)
+                current_extent_.height(current_extent_.width() / ratio1);
+            else
+                current_extent_.width(current_extent_.height() * ratio1);
+            break;
+        case SHRINK_BBOX:
+            if (ratio2 < ratio1)
+                current_extent_.height(current_extent_.width() / ratio1);
+            else
+                current_extent_.width(current_extent_.height() * ratio1);
+            break;
+        case GROW_CANVAS:
+            if (ratio2 > ratio1)
+                width_ = static_cast<int>(height_ * ratio2 + 0.5);
+            else
+                height_ = int (width_ / ratio2 + 0.5);
+            break;
+        case SHRINK_CANVAS:
+            if (ratio2 > ratio1)
+                height_ = int (width_ / ratio2 + 0.5);
+            else
+                width_ = static_cast<int>(height_ * ratio2 + 0.5);
+            break;
+        default:
+            if (ratio2 > ratio1)
+                current_extent_.height(current_extent_.width() / ratio1);
+            else
+                current_extent_.width(current_extent_.height() * ratio1);
+            break;
+        }
     }
 }
 
@@ -581,7 +587,8 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
 #endif
                 featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
                 if (fs)
-                    return featureset_ptr(new filter_featureset<hit_test_filter>(fs,hit_test_filter(x,y,tol)));
+                    return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
+                                        hit_test_filter(x,y,tol));
             }
         }
         catch (...)
@@ -626,7 +633,8 @@ featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
 #endif
                 featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
                 if (fs)
-                    return featureset_ptr(new filter_featureset<hit_test_filter>(fs,hit_test_filter(x,y,tol)));
+                    return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
+                                        hit_test_filter(x,y,tol));
             }
         }
         catch (...)

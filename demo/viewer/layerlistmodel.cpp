@@ -49,7 +49,7 @@ QVariant LayerListModel::data(QModelIndex const& index,int role) const
     else if (role == Qt::DecorationRole)
     {
         double scale = map_->scale();
-        if (map_->layers().at(index.row()).isVisible(scale))
+        if (map_->layers().at(index.row()).visible(scale))
         {
             return QIcon(":/images/globe.png");
         }
@@ -60,7 +60,7 @@ QVariant LayerListModel::data(QModelIndex const& index,int role) const
     }
     else if (role == Qt::CheckStateRole)
     {
-        if (map_->layers().at(index.row()).isActive())
+        if (map_->layers().at(index.row()).active())
            return QVariant(Qt::Checked);
         else
            return QVariant(Qt::Unchecked);
@@ -92,7 +92,7 @@ bool LayerListModel::setData(const QModelIndex &index,
    {
       int status = value.toInt();
       std::vector<mapnik::layer> & layers = const_cast<std::vector<mapnik::layer>& >(map_->layers());
-      layers.at(index.row()).setActive(status);
+      layers.at(index.row()).set_active(status);
       emit dataChanged(index, index);
       return true;
    }

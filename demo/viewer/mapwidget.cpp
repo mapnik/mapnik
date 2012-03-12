@@ -157,7 +157,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                if (int(index) != selectedLayer_) continue;
 
                layer & layer = map_->layers()[index];
-               if (!layer.isVisible(scale_denom)) continue;
+               if (!layer.visible(scale_denom)) continue;
                std::string name = layer.name();
                double x = e->x();
                double y = e->y();

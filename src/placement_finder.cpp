@@ -437,12 +437,11 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
                    current_placement->center.y - dy - ci.ymax);
 
             // if there is an overlap with existing envelopes, then exit - no placement
+
             if (!detector_.extent().intersects(e) ||
                 (!p.allow_overlap &&
-                 !detector_.has_point_placement(e, pi.get_actual_minimum_distance())
-                )
-               )
-            {
+                 !detector_.has_point_placement(e, pi.get_actual_minimum_distance())))                
+            {              
                 return;
             }
 

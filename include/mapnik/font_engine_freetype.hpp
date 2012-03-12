@@ -263,7 +263,7 @@ template <typename T>
 class MAPNIK_DECL face_manager : private boost::noncopyable
 {
     typedef T font_engine_type;
-    typedef std::map<std::string,face_ptr> faces;
+    typedef std::map<std::string,face_ptr> face_ptr_cache_type;
 
 public:
     face_manager(T & engine)
@@ -272,9 +272,9 @@ public:
 
     face_ptr get_face(std::string const& name)
     {
-        typename faces::iterator itr;
-        itr = faces_.find(name);
-        if (itr != faces_.end())
+        face_ptr_cache_type::iterator itr;
+        itr = face_ptr_cache_.find(name);
+        if (itr != face_ptr_cache_.end())
         {
             return itr->second;
         }
@@ -283,7 +283,7 @@ public:
             face_ptr face = engine_.create_face(name);
             if (face)
             {
-                faces_.insert(make_pair(name,face));
+                face_ptr_cache_.insert(make_pair(name,face));
             }
             return face;
         }
@@ -335,7 +335,7 @@ public:
     }
 
 private:
-    faces faces_;
+    face_ptr_cache_type face_ptr_cache_;
     font_engine_type & engine_;
     stroker_ptr stroker_;
 };

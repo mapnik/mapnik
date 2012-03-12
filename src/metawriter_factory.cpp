@@ -27,6 +27,7 @@
 #include <mapnik/metawriter_json.hpp>
 #include <mapnik/metawriter_inmem.hpp>
 
+#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 
 using boost::property_tree::ptree;
@@ -44,7 +45,7 @@ metawriter_create(const boost::property_tree::ptree &pt) {
     optional<string> properties = get_opt_attr<string>(pt, "default-output");
     if (type == "json") {
         string file = get_attr<string>(pt, "file");
-        metawriter_json_ptr json = metawriter_json_ptr(new metawriter_json(properties, parse_path(file)));
+        metawriter_json_ptr json = boost::make_shared<metawriter_json>(properties, parse_path(file));
         optional<boolean> output_empty = get_opt_attr<boolean>(pt, "output-empty");
         if (output_empty) {
             json->set_output_empty(*output_empty);
@@ -57,7 +58,7 @@ metawriter_create(const boost::property_tree::ptree &pt) {
         writer = json;
 
     } else if (type == "inmem") {
-        metawriter_inmem_ptr inmem = metawriter_inmem_ptr(new metawriter_inmem(properties));
+        metawriter_inmem_ptr inmem = boost::make_shared<metawriter_inmem>(properties);
         writer = inmem;
     } else {
         throw config_error(string("Unknown type '") + type + "'");

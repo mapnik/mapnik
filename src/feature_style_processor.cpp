@@ -112,7 +112,7 @@ void feature_style_processor<Processor>::apply()
 
         BOOST_FOREACH ( layer const& lyr, m_.layers() )
         {
-            if (lyr.isVisible(scale_denom))
+            if (lyr.visible(scale_denom))
             {
                 std::set<std::string> names;
                 apply_to_layer(lyr, p, proj, scale_denom, names);
@@ -146,7 +146,7 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
         double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
         scale_denom *= scale_factor_;
 
-        if (lyr.isVisible(scale_denom))
+        if (lyr.visible(scale_denom))
         {
             apply_to_layer(lyr, p, proj, scale_denom, names);
         }
@@ -264,8 +264,10 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     box2d<double> query_ext = m_.get_current_extent();
     box2d<double> unbuffered_extent = m_.get_current_extent();
     prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS);
-    query::resolution_type res(m_.width()/query_ext.width(),
-                               m_.height()/query_ext.height());
+    double qw = query_ext.width()>0 ? query_ext.width() : 1;
+    double qh = query_ext.height()>0 ? query_ext.height() : 1;
+    query::resolution_type res(m_.width()/qw,
+                               m_.height()/qh);
 
     query q(layer_ext,res,scale_denom,unbuffered_extent);
     p.start_layer_processing(lay, query_ext);

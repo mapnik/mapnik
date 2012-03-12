@@ -44,7 +44,15 @@ namespace mapnik
 
 boost::unordered_map<std::string, marker_ptr> marker_cache::cache_;
 
-bool marker_cache::insert (std::string const& uri, marker_ptr path)
+void marker_cache::clear()
+{
+#ifdef MAPNIK_THREADSAFE
+    mutex::scoped_lock lock(mutex_);
+#endif
+    return cache_.clear();
+}
+
+bool marker_cache::insert(std::string const& uri, marker_ptr path)
 {
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);

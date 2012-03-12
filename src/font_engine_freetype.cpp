@@ -30,6 +30,7 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
 #include <sstream>
 
 // icu
@@ -178,7 +179,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                                       &face);
         if (!error)
         {
-            return face_ptr (new font_face(face));
+            return boost::make_shared<font_face>(face);
         }
     }
     return face_ptr();
@@ -190,7 +191,7 @@ stroker_ptr freetype_engine::create_stroker()
     FT_Error error = FT_Stroker_New(library_, &s);
     if (!error)
     {
-        return stroker_ptr(new stroker(s));
+        return boost::make_shared<stroker>(s);
     }
     return stroker_ptr();
 }
