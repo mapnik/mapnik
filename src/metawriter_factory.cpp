@@ -61,7 +61,7 @@ metawriter_create(xml_node const& pt)
         metawriter_inmem_ptr inmem = metawriter_inmem_ptr(new metawriter_inmem(properties));
         writer = inmem;
     } else {
-        throw config_error(string("Unknown type '") + type + "'", &pt);
+        throw config_error(string("Unknown type '") + type + "'", pt);
     }
 
     return writer;

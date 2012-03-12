@@ -51,6 +51,7 @@
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp>
+#include <mapnik/config_error.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -312,7 +313,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
         }
         catch (const config_error & ex)
         {
-            ex.append_context("", &map_node, filename_);
+            ex.append_context(map_node);
             throw;
         }
 
@@ -416,7 +417,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
         }
     }
     } catch (const config_error & ex) {
-        ex.append_context("", &include, filename_);
+        ex.append_context(include);
         throw;
     }
 
@@ -447,7 +448,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
 
         map.insert_style(name, style);
     } catch (const config_error & ex) {
-        ex.append_context(std::string("in style '") + name + "'", &sty, filename_);
+        ex.append_context(std::string("in style '") + name + "'", sty);
         throw;
     }
 }
@@ -462,7 +463,7 @@ void map_parser::parse_metawriter(Map & map, xml_node const& pt)
         writer = metawriter_create(pt);
         map.insert_metawriter(name, writer);
     } catch (const config_error & ex) {
-        ex.append_context(std::string("in meta writer '") + name + "'", &pt, filename_);
+        ex.append_context(std::string("in meta writer '") + name + "'", pt);
     }
 }
 
@@ -491,7 +492,7 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
         // when it's parsed
         fontsets_.insert(pair<std::string, font_set>(name, fontset));
     } catch (const config_error & ex) {
-        ex.append_context(std::string("in FontSet '") + name + "'", &fset, filename_);
+        ex.append_context(std::string("in FontSet '") + name + "'", fset);
         throw;
     }
 }
@@ -509,7 +510,7 @@ void map_parser::parse_font(font_set &fset, xml_node const& f)
     }
     else
     {
-        throw config_error("Must have 'face-name' set", &f, filename_);
+        throw config_error("Must have 'face-name' set", f);
     }
 }
 
@@ -652,7 +653,7 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
     {
         if (!name.empty())
         {
-            ex.append_context(std::string(" encountered during parsing of layer '") + name + "'");
+            ex.append_context(std::string(" encountered during parsing of layer '") + name + "'", lay);
         }
         throw;
     }
@@ -748,7 +749,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
     {
         if (!name.empty() )
         {
-            ex.append_context(std::string("in rule '") + name + "'");
+            ex.append_context(std::string("in rule '") + name + "'", r);
         }
         throw;
     }
@@ -844,7 +845,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PointSymbolizer");
+        ex.append_context("in PointSymbolizer", sym);
         throw;
     }
 }
@@ -958,7 +959,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in MarkersSymbolizer");
+        ex.append_context("in MarkersSymbolizer", sym);
         throw;
     }
 }
@@ -1004,7 +1005,7 @@ void map_parser::parse_line_pattern_symbolizer( rule & rule, xml_node const & sy
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in LinePatternSymbolizer");
+        ex.append_context("in LinePatternSymbolizer", sym);
         throw;
     }
 }
@@ -1063,7 +1064,7 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PolygonPatternSymbolizer");
+        ex.append_context("in PolygonPatternSymbolizer", sym);
         throw;
     }
 }
@@ -1090,7 +1091,7 @@ void map_parser::parse_text_symbolizer( rule & rule, xml_node const& sym )
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in TextSymbolizer");
+        ex.append_context("in TextSymbolizer", sym);
         throw;
     }
 }
@@ -1195,7 +1196,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym )
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in ShieldSymbolizer");
+        ex.append_context("in ShieldSymbolizer", sym);
         throw;
     }
 }
@@ -1293,7 +1294,7 @@ void map_parser::parse_line_symbolizer( rule & rule, xml_node const & sym )
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in LineSymbolizer");
+        ex.append_context("in LineSymbolizer", sym);
         throw;
     }
 }
@@ -1322,7 +1323,7 @@ void map_parser::parse_polygon_symbolizer( rule & rule, xml_node const & sym )
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PolygonSymbolizer");
+        ex.append_context("in PolygonSymbolizer", sym);
         throw;
     }
 }
@@ -1349,7 +1350,7 @@ void map_parser::parse_building_symbolizer( rule & rule, xml_node const & sym )
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in BuildingSymbolizer");
+        ex.append_context("in BuildingSymbolizer", sym);
         throw;
     }
 }
@@ -1398,13 +1399,13 @@ void map_parser::parse_raster_symbolizer( rule & rule, xml_node const & sym )
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in RasterSymbolizer");
+        ex.append_context("in RasterSymbolizer", sym);
         throw;
     }
 }
 
 void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
-                                        xml_node const& node )
+                                        xml_node const& node)
 {
     try
     {
@@ -1484,7 +1485,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in RasterColorizer");
+        ex.append_context("in RasterColorizer", node);
         throw;
     }
 }

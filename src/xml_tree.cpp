@@ -29,6 +29,7 @@
 #include <mapnik/line_symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/text_properties.hpp>
+#include <mapnik/config_error.hpp>
 
 //boost
 #include <boost/lexical_cast.hpp>
@@ -171,7 +172,7 @@ void xml_tree::set_filename(std::string fn)
     file_ = fn;
 }
 
-std::string xml_tree::filename() const
+std::string const& xml_tree::filename() const
 {
     return file_;
 }
@@ -255,20 +256,27 @@ xml_node::xml_node(xml_tree &tree, std::string name, unsigned line, bool text_no
 
 }
 
-std::string xml_node::name() const
+std::string xml_node::xml_text = "<xmltext>";
+
+std::string const& xml_node::name() const
 {
     if (!text_node_)
         return name_;
     else
-        return "<xmltext>";
+        return xml_text;
 }
 
-std::string xml_node::text() const
+std::string const& xml_node::text() const
 {
     if (text_node_)
         return name_;
     else
-        return "NOT A TEXT NODE"; //TODO: throw
+        throw config_error("text() called on non-text node", *this);
+}
+
+std::string const& xml_node::filename() const
+{
+    return tree_.filename();
 }
 
 bool xml_node::is_text() const
@@ -416,9 +424,9 @@ T xml_node::get_value() const
     boost::optional<T> result = fast_cast<T>(tree_, get_text());
     if (!result)
     {
-        throw config_error(std::string("Failed to parse value in node '") +
-                           name_ + "'. Expected " + name_trait<T>::name() +
-                           " but got '" + get_text() + "'");
+        throw config_error(std::string("Failed to parse value. Expected ")
+                           + name_trait<T>::name() +
+                           " but got '" + get_text() + "'", *this);
     }
     return *result;
 }

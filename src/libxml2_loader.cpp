@@ -92,7 +92,7 @@ public:
                 os << ": " << std::endl << error->message;
                 // remove CR
                 std::string msg = os.str().substr(0, os.str().size() - 1);
-                throw config_error(error->line, error->file, msg);
+                throw config_error(msg, error->line, error->file);
             }
         }
 
@@ -139,7 +139,7 @@ public:
             {
                 os << ": " << std::endl << error->message;
             }
-            throw config_error(error->line, error->file, os.str());
+            throw config_error(os.str(), error->line, error->file);
         }
 
         int iXIncludeReturn = xmlXIncludeProcessFlags(doc, options_);

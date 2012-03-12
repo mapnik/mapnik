@@ -267,16 +267,16 @@ void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
             fontset = itr->second;
         } else
         {
-            throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'", &sym);
+            throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'", sym);
         }
     }
     if (!face_name.empty() && !fontset.get_name().empty())
     {
-        throw config_error("Can't have both face-name and fontset-name", &sym);
+        throw config_error("Can't have both face-name and fontset-name", sym);
     }
     if (face_name.empty() && fontset.get_name().empty())
     {
-        throw config_error("Must have face-name or fontset-name", &sym);
+        throw config_error("Must have face-name or fontset-name", sym);
     }
 }
 

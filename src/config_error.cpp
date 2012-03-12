@@ -3,19 +3,21 @@
 
 namespace mapnik
 {
-config_error::config_error(std::string const& what, xml_node const* node, std::string const& filename)
-    : what_( what ), line_number_(0), file_(filename), node_name_(), msg_()
+
+config_error::config_error(std::string const& what)
+    : what_(what), line_number_(0), file_(), node_name_(), msg_()
 {
-    if (node)
-    {
-        node_name_ = node->name();
-        line_number_ = node->line();
-    }
 }
 
 
-config_error::config_error(unsigned line_number, std::string const& filename, std::string const& what)
-    : what_( what ), line_number_(line_number), file_(filename), node_name_(), msg_()
+config_error::config_error(std::string const& what, xml_node const& node)
+    : what_(what), line_number_(node.line()), file_(node.filename()), node_name_(node.name()), msg_()
+{
+}
+
+
+config_error::config_error(std::string const& what, unsigned line_number, std::string const& filename)
+    : what_(what), line_number_(line_number), file_(filename), node_name_(), msg_()
 {
 
 }
@@ -32,14 +34,22 @@ config_error::config_error(unsigned line_number, std::string const& filename, st
     return msg_.c_str();
 }
 
-void config_error::append_context(const std::string & ctx, xml_node const* node, std::string const& filename) const
+ void config_error::append_context(std::string const& ctx) const
+ {
+     what_ += " " + ctx;
+ }
+
+void config_error::append_context(std::string const& ctx, xml_node const& node) const
 {
-    what_ += " " + ctx;
-    if (node)
-    {
-        if (!line_number_) line_number_ = node->line();
-        if (node_name_.empty()) node_name_ = node->name();
-        if (file_.empty()) file_ = filename;
-    }
+    append_context(ctx);
+    append_context(node);
 }
+
+void config_error::append_context(xml_node const& node) const
+{
+    if (!line_number_) line_number_ = node.line();
+    if (node_name_.empty()) node_name_ = node.name();
+    if (file_.empty()) file_ = node.filename();
+}
+
 }

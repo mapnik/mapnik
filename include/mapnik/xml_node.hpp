@@ -86,8 +86,9 @@ public:
     typedef std::map<std::string, xml_attribute> attribute_map;
     xml_node(xml_tree &tree, std::string name, unsigned line=0, bool text_node = false);
 
-    std::string name() const;
-    std::string text() const;
+    std::string const& name() const;
+    std::string const& text() const;
+    std::string const& filename() const;
     bool is_text() const;
     bool is(std::string const& name) const;
 
@@ -128,7 +129,7 @@ private:
     bool text_node_;
     unsigned line_;
     mutable bool processed_;
-
+    static std::string xml_text;
 };
 
 } //ns mapnik
