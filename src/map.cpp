@@ -399,7 +399,7 @@ void Map::zoom_all()
             std::vector<layer>::const_iterator end = layers_.end();
             while (itr != end)
             {
-                if (itr->isActive())
+                if (itr->active())
                 {
                     std::string const& layer_srs = itr->srs();
                     projection proj1(layer_srs);

@@ -678,25 +678,25 @@ void map_parser::parse_layer( Map & map, ptree const & lay )
         optional<boolean> status = get_opt_attr<boolean>(lay, "status");
         if (status)
         {
-            lyr.setActive( * status );
+            lyr.set_active( * status );
         }
 
-        optional<double> minZoom = get_opt_attr<double>(lay, "minzoom");
-        if (minZoom)
+        optional<double> min_zoom = get_opt_attr<double>(lay, "minzoom");
+        if (min_zoom)
         {
-            lyr.setMinZoom( * minZoom );
+            lyr.set_min_zoom( * min_zoom );
         }
 
-        optional<double> maxZoom = get_opt_attr<double>(lay, "maxzoom");
-        if (maxZoom)
+        optional<double> max_zoom = get_opt_attr<double>(lay, "maxzoom");
+        if (max_zoom)
         {
-            lyr.setMaxZoom( * maxZoom );
+            lyr.set_max_zoom( * max_zoom );
         }
 
         optional<boolean> queryable = get_opt_attr<boolean>(lay, "queryable");
         if (queryable)
         {
-            lyr.setQueryable( * queryable );
+            lyr.set_queryable( * queryable );
         }
 
         optional<boolean> clear_cache =

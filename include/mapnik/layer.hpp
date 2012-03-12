@@ -88,44 +88,44 @@ public:
     std::vector<std::string>& styles();
 
     /*!
-     * @param maxZoom The minimum zoom level to set
+     * @param max_zoom The minimum zoom level to set
      */
-    void setMinZoom(double minZoom);
+    void set_min_zoom(double min_zoom);
 
     /*!
-     * @param maxZoom The maximum zoom level to set
+     * @param max_zoom The maximum zoom level to set
      */
-    void setMaxZoom(double maxZoom);
+    void set_max_zoom(double max_zoom);
 
     /*!
      * @return the minimum zoom level of the layer.
      */
-    double getMinZoom() const;
+    double min_zoom() const;
 
     /*!
      * @return the maximum zoom level of the layer.
      */
-    double getMaxZoom() const;
+    double max_zoom() const;
 
     /*!
      * @brief Set whether this layer is active and will be rendered.
      */
-    void setActive(bool active);
+    void set_active(bool active);
 
     /*!
      * @return whether this layer is active and will be rendered.
      */
-    bool isActive() const;
+    bool active() const;
 
     /*!
      * @brief Set whether this layer is queryable.
      */
-    void setQueryable(bool queryable);
+    void set_queryable(bool queryable);
 
     /*!
      * @return whether this layer is queryable or not.
      */
-    bool isQueryable() const;
+    bool queryable() const;
 
     /*!
      * @brief Get the visability for a specific scale.
@@ -139,7 +139,7 @@ public:
      *         or
      *         scale < maxzoom + 1e-6
      */
-    bool isVisible(double scale) const;
+    bool visible(double scale) const;
 
     /*!
      * @param clear_cache Set whether this layer's labels are cached.
@@ -195,8 +195,8 @@ private:
     std::string name_;
     std::string srs_;
 
-    double minZoom_;
-    double maxZoom_;
+    double min_zoom_;
+    double max_zoom_;
     bool active_;
     bool queryable_;
     bool clear_label_cache_;

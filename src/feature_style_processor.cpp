@@ -112,7 +112,7 @@ void feature_style_processor<Processor>::apply()
 
         BOOST_FOREACH ( layer const& lyr, m_.layers() )
         {
-            if (lyr.isVisible(scale_denom))
+            if (lyr.visible(scale_denom))
             {
                 std::set<std::string> names;
                 apply_to_layer(lyr, p, proj, scale_denom, names);
@@ -146,7 +146,7 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
         double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
         scale_denom *= scale_factor_;
 
-        if (lyr.isVisible(scale_denom))
+        if (lyr.visible(scale_denom))
         {
             apply_to_layer(lyr, p, proj, scale_denom, names);
         }
