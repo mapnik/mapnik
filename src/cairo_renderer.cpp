@@ -254,11 +254,10 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
     }
     else
     {
-        entry = cairo_face_ptr(boost::make_shared<cairo_face>(font_engine_, face));
-
+        entry = boost::make_shared<cairo_face>(font_engine_, face);
         cache_.insert(std::make_pair(face, entry));
     }
-
+    
     return entry;
 }
 
