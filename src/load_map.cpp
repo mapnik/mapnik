@@ -69,6 +69,7 @@
 
 // stl
 #include <iostream>
+#include <sstream>
 
 using boost::lexical_cast;
 using boost::bad_lexical_cast;
@@ -117,6 +118,8 @@ private:
     void parse_stroke(stroke & strk, xml_node const & sym);
 
     void ensure_font_face( const std::string & face_name );
+    void find_unused_nodes(xml_node const& root);
+    void find_unused_nodes_recursive(xml_node const& node, std::stringstream &error_text);
 
     std::string ensure_relative_to_xml(boost::optional<std::string> opt_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
@@ -323,6 +326,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
     {
         throw config_error("Not a map file. Node 'Map' not found.");
     }
+    find_unused_nodes(pt);
 }
 
 void map_parser::parse_map_include(Map & map, xml_node const& include)
@@ -335,33 +339,33 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
     for (; itr != end; ++itr)
     {
         if (itr->is_text()) continue;
-        if (itr->name() == "Include")
+        if (itr->is("Include"))
         {
             parse_map_include(map, *itr);
         }
-        else if (itr->name() == "Style")
+        else if (itr->is("Style"))
         {
             parse_style(map, *itr);
         }
-        else if (itr->name() == "Layer")
+        else if (itr->is("Layer"))
         {
             parse_layer(map, *itr);
         }
-        else if (itr->name() == "FontSet")
+        else if (itr->is("FontSet"))
         {
             parse_fontset(map, *itr);
         }
-        else if (itr->name() == "MetaWriter")
+        else if (itr->is("MetaWriter"))
         {
             parse_metawriter(map, *itr);
         }
-        else if (itr->name() == "FileSource")
+        else if (itr->is("FileSource"))
         {
             std::string name = itr->get_attr<std::string>("name");
             std::string value = itr->get_text();
             file_sources_[name] = value;
         }
-        else if (itr->name() == "Datasource")
+        else if (itr->is("Datasource"))
         {
             std::string name = itr->get_attr("name", std::string("Unnamed"));
             parameters params;
@@ -369,7 +373,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             xml_node::const_iterator endParam = itr->end();
             for (; paramIter != endParam; ++paramIter)
             {
-                if (paramIter->name() == "Parameter")
+                if (paramIter->is("Parameter"))
                 {
                     std::string name = paramIter->get_attr<std::string>("name");
                     std::string value = paramIter->get_text();
@@ -378,7 +382,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             }
             datasource_templates_[name] = params;
         }
-        else if (itr->name() == "Parameters")
+        else if (itr->is("Parameters"))
         {
             std::string name = itr->get_attr("name", std::string("Unnamed"));
             parameters & params = map.get_extra_parameters();
@@ -386,7 +390,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             xml_node::const_iterator endParam = itr->end();
             for (; paramIter != endParam; ++paramIter)
             {
-                if (paramIter->name() == "Parameter")
+                if (paramIter->is("Parameter"))
                 {
                     std::string name = paramIter->get_attr<std::string>("name");
                     bool is_string = true;
@@ -1523,6 +1527,47 @@ std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt
         }
     }
     return *opt_path;
+}
+
+void map_parser::find_unused_nodes(xml_node const& root)
+{
+    std::stringstream error_message;
+    find_unused_nodes_recursive(root, error_message);
+    if (!error_message.str().empty())
+    {
+        throw config_error("The following nodes or attributes were not processed while parsing the xml file:" + error_message.str());
+    }
+}
+
+void map_parser::find_unused_nodes_recursive(xml_node const& node, std::stringstream &error_message)
+{
+    if (!node.processed())
+    {
+        if (node.is_text()) {
+            error_message << "\n* text '" << node.text() << "'";
+        } else {
+            error_message << "\n* node '" << node.name() << "' in line " << node.line();
+        }
+        return; //All attributes and children are automatically unprocessed, too.
+    }
+    xml_node::attribute_map const& attr = node.get_attributes();
+    xml_node::attribute_map::const_iterator aitr = attr.begin();
+    xml_node::attribute_map::const_iterator aend = attr.end();
+    for (;aitr!=aend; aitr++)
+    {
+        if (!aitr->second.processed)
+        {
+            error_message << "\n* attribute '" << aitr->first <<
+                                 "' with value '" << aitr->second.value <<
+                                 "' in line " << node.line();
+        }
+    }
+    xml_node::const_iterator itr = node.begin();
+    xml_node::const_iterator end = node.end();
+    for (; itr!=end; itr++)
+    {
+        find_unused_nodes_recursive(*itr, error_message);
+    }
 }
 
 } // end of namespace mapnik

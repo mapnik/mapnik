@@ -7,7 +7,7 @@
 void dump_xml(xml_node const& xml, unsigned level=0)
 {
     std::string indent;
-    int i;
+    unsigned i;
     for (i=0; i<level; i++)
     {
         indent += "    ";

@@ -38,7 +38,7 @@ namespace formatting
 using boost::property_tree::ptree;
 void expression_format::to_xml(boost::property_tree::ptree &xml) const
 {
-    ptree &new_node = xml.push_back(ptree::value_type("Format", ptree()))->second;
+    ptree &new_node = xml.push_back(ptree::value_type("ExpressionFormat", ptree()))->second;
     if (face_name) set_attr(new_node, "face-name", to_expression_string(*face_name));
     if (text_size) set_attr(new_node, "size", to_expression_string(*text_size));
     if (character_spacing) set_attr(new_node, "character-spacing", to_expression_string*character_spacing);

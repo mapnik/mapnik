@@ -165,6 +165,7 @@ xml_tree::xml_tree(std::string const& encoding)
       color_grammar(),
       expr_grammar(tr_)
 {
+    node_.set_processed(true); //root node is always processed
 }
 
 void xml_tree::set_filename(std::string fn)
@@ -269,9 +270,13 @@ std::string const& xml_node::name() const
 std::string const& xml_node::text() const
 {
     if (text_node_)
+    {
+        processed_ = true;
         return name_;
-    else
+    } else
+    {
         throw config_error("text() called on non-text node", *this);
+    }
 }
 
 std::string const& xml_node::filename() const
@@ -383,7 +388,7 @@ boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
     {
         throw config_error(std::string("Failed to parse attribute '") +
                            name + "'. Expected " + name_trait<T>::name() +
-                           " but got '" + itr->second.value + "'");
+                           " but got '" + itr->second.value + "'", *this);
     }
     return result;
 }

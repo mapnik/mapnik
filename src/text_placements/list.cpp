@@ -98,7 +98,7 @@ text_placements_ptr text_placements_list::from_xml(xml_node const &xml, fontset_
     xml_node::const_iterator end = xml.end();
     for( ;itr != end; ++itr)
     {
-        if (itr->is_text() || itr->name() != "Placement") continue;
+        if (itr->is_text() || !itr->is("Placement")) continue;
         text_symbolizer_properties &p = list->add();
         p.from_xml(*itr, fontsets);
 //TODO:        if (strict_ &&

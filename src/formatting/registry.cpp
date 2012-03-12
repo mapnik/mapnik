@@ -52,6 +52,7 @@ node_ptr registry::from_xml(xml_node const& xml)
 {
     std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(xml.name());
     if (itr == map_.end())  throw config_error("Unknown element '" + xml.name() + "'", xml);
+    xml.set_processed(true);
     return itr->second(xml);
 }
 } //ns formatting
