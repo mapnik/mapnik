@@ -23,7 +23,7 @@
 #ifdef HAVE_LIBXML2
 
 // mapnik
-#include <mapnik/libxml2_loader.hpp>
+#include <mapnik/xml_loader.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 
@@ -205,12 +205,12 @@ private:
     const char *url_;
 };
 
-void read_xml2(std::string const & filename, xml_node &node)
+void read_xml(std::string const & filename, xml_node &node)
 {
     libxml2_loader loader;
     loader.load(filename, node);
 }
-void read_xml2_string(std::string const & str, xml_node &node, std::string const & base_path)
+void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path)
 {
     libxml2_loader loader;
     loader.load_string(str, node, base_path);

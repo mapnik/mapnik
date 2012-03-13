@@ -34,10 +34,7 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/font_set.hpp>
-
-#ifdef HAVE_LIBXML2
-#include <mapnik/libxml2_loader.hpp>
-#endif
+#include <mapnik/xml_loader.hpp>
 
 #include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
@@ -141,19 +138,7 @@ void load_map(Map & map, std::string const& filename, bool strict)
     // TODO - use xml encoding?
     xml_tree tree("utf8");
     tree.set_filename(filename);
-#ifdef HAVE_LIBXML2
-    read_xml2(filename, tree.root());
-#else
-    try
-    {
-        read_xml(filename, pt, boost::property_tree::xml_parser::no_concat_text|boost::property_tree::xml_parser::no_comments);
-        remove_empty_text_nodes(pt);
-    }
-    catch (const boost::property_tree::xml_parser_error & ex)
-    {
-        throw config_error( ex.what() );
-    }
-#endif
+    read_xml(filename, tree.root());
     map_parser parser(strict, filename);
     parser.parse_map(map, tree.root());
     dump_xml(tree.root());
@@ -163,25 +148,10 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
 {
     // TODO - use xml encoding?
     xml_tree tree("utf8");
-#ifdef HAVE_LIBXML2
     if (!base_path.empty())
-        read_xml2_string(str, tree.root(), base_path); // accept base_path passed into function
+        read_xml_string(str, tree.root(), base_path); // accept base_path passed into function
     else
-        read_xml2_string(str, tree.root(), map.base_path()); // default to map base_path
-#else
-    try
-    {
-        std::istringstream s(str);
-        // TODO - support base_path?
-        read_xml(s, pt, boost::property_tree::xml_parser::no_concat_text|boost::property_tree::xml_parser::no_comments);
-        remove_empty_text_nodes(pt);
-    }
-    catch (const boost::property_tree::xml_parser_error & ex)
-    {
-        throw config_error( ex.what() ) ;
-    }
-#endif
-
+        read_xml_string(str, tree.root(), map.base_path()); // default to map base_path
     map_parser parser(strict, base_path);
     parser.parse_map(map, tree.root(), base_path);
 }

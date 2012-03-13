@@ -13,22 +13,22 @@ void dump_xml(xml_node const& xml, unsigned level=0)
         indent += "    ";
     }
     xml_node::attribute_map const& attr = xml.get_attributes();
-    std::cout << indent <<"[" << xml.name();
+    std::cerr << indent <<"[" << xml.name();
     xml_node::attribute_map::const_iterator aitr = attr.begin();
     xml_node::attribute_map::const_iterator aend = attr.end();
     for (;aitr!=aend; aitr++)
     {
-        std::cout << " (" << aitr->first << ", " << aitr->second.value << ", " << aitr->second.processed << ")";
+        std::cerr << " (" << aitr->first << ", " << aitr->second.value << ", " << aitr->second.processed << ")";
     }
-    std::cout << "]" << "\n";
-    if (xml.is_text()) std::cout << indent << "text: '" << xml.text() << "'\n";
+    std::cerr << "]" << "\n";
+    if (xml.is_text()) std::cerr << indent << "text: '" << xml.text() << "'\n";
     xml_node::const_iterator itr = xml.begin();
     xml_node::const_iterator end = xml.end();
     for (; itr!=end; itr++)
     {
         dump_xml(*itr, level+1);
     }
-    std::cout << indent << "[/" << xml.name() << "]" << "\n";
+    std::cerr << indent << "[/" << xml.name() << "]" << "\n";
 }
 
 
