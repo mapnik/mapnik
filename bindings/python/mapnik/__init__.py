@@ -120,7 +120,7 @@ class _Coord(Coord,_injector):
 
         Returns the easting (x) and northing (y) as a 
         coordinate pair.
-        
+
         Example: Project the geographic coordinates of the 
                  city center of Stuttgart into the local
                  map projection (GK Zone 3/DHDN, EPSG 31467)  
@@ -136,7 +136,7 @@ class _Coord(Coord,_injector):
         into the geographic space. The x component is 
         considered to be the easting, the y component 
         to be the northing.
-        
+
         Returns the longitude (x) and latitude (y) as a 
         coordinate pair.
 
@@ -153,8 +153,8 @@ class _Coord(Coord,_injector):
 class _Box2d(Box2d,_injector):
     """
     Represents a spatial envelope (i.e. bounding box). 
-    
-    
+
+
     Following operators are defined for Box2d:
 
     Addition:
@@ -285,12 +285,12 @@ def Datasource(**keywords):
     Create a Mapnik Datasource using a dictionary of parameters.
 
     Keywords must include:
-    
+
       type='plugin_name' # e.g. type='gdal'
-    
+
     See the convenience factory methods of each input plugin for
     details on additional required keyword arguments.
-    
+
     """
 
     return CreateDatasource(keywords)
@@ -322,7 +322,7 @@ def PostGIS(**keywords):
     Required keyword arguments:
       dbname -- database name to connect to
       table -- table name or subselect query
-      
+
       *Note: if using subselects for the 'table' value consider also 
        passing the 'geometry_field' and 'srid' and 'extent_from_subquery'
        options and/or specifying the 'geometry_table' option.
