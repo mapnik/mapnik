@@ -3,7 +3,7 @@
 #include <mapnik/xml_node.hpp>
 
 /* Debug dump ptree XML representation.
-*/
+ */
 void dump_xml(xml_node const& xml, unsigned level=0)
 {
     std::string indent;

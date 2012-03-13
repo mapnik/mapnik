@@ -41,7 +41,7 @@ public:
     static void init_from_string(color & c, std::string const& css_color);
 
     static bool parse_from_string(color & c, std::string const& css_color,
-                                 mapnik::css_color_grammar<std::string::const_iterator> const& g);
+                                  mapnik::css_color_grammar<std::string::const_iterator> const& g);
 
     static color from_string(std::string const& css_color);
 };

@@ -42,7 +42,7 @@ typedef text_placements_ptr (*from_xml_function_ptr)(
     xml_node const& xml, fontset_map const & fontsets);
 
 class registry : public singleton<registry, CreateStatic>,
-        private boost::noncopyable
+                 private boost::noncopyable
 {
 public:
     registry();

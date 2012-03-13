@@ -160,7 +160,7 @@ public:
 
     ~hextree()
     {}
-    
+
     void setMaxColors(unsigned max_colors)
     {
         max_colors_ = max_colors;
@@ -335,7 +335,7 @@ public:
 
         sorted_pal_.reserve(colors_);
         create_palette_rek(sorted_pal_, root_.get());
-   
+
         // sort palette for binary searching in quantization
 #if BOOST_VERSION >= 104600
         boost::sort(sorted_pal_, rgba::mean_sort_cmp());

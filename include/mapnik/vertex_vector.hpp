@@ -55,16 +55,16 @@ public:
     // required for iterators support
     typedef boost::tuple<unsigned,coord_type,coord_type> value_type;
     typedef std::size_t size_type;
-    
+
 private:
     unsigned num_blocks_;
     unsigned max_blocks_;
     coord_type** vertices_;
     unsigned char** commands_;
     size_type pos_;
-    
+
 public:
-    
+
     vertex_vector()
         : num_blocks_(0),
           max_blocks_(0),
@@ -114,7 +114,7 @@ public:
         *y = (*vertex);
         return commands_[block] [pos & block_mask];
     }
-    
+
 private:
     void allocate_block(unsigned block)
     {
