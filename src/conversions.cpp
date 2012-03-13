@@ -29,15 +29,15 @@
     BOOST_SPIRIT_ASSERT_MATCH(                                  \
         boost::spirit::domain_::domain, name##_expr_type);      \
     BOOST_AUTO(name, boost::proto::deep_copy(expr));            \
-                                                                \
-                                                                \
+
+
 namespace mapnik { namespace conversions {
 
 using namespace boost::spirit;
 
-BOOST_SPIRIT_AUTO(qi, INTEGER, qi::int_);
-BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_);
-BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_);
+BOOST_SPIRIT_AUTO(qi, INTEGER, qi::int_)
+BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_)
+BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_)
 
 bool string2int(const char * value, int & result)
 {
