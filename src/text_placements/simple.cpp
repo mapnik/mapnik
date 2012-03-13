@@ -103,8 +103,7 @@ bool text_placement_info_simple::next_position_only()
 text_placement_info_ptr text_placements_simple::get_placement_info(
     double scale_factor) const
 {
-    return text_placement_info_ptr(
-        boost::make_shared<text_placement_info_simple>(this, scale_factor));
+    return boost::make_shared<text_placement_info_simple>(this, scale_factor);
 }
 
 /** Position string: [POS][SIZE]
@@ -145,10 +144,12 @@ void text_placements_simple::set_positions(std::string positions)
                      (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> qi::float_[push_back(phoenix::ref(text_sizes_), _1)]),
                      space
         );
-    if (first != last) {
+    if (first != last)
+    {
         std::cerr << "WARNING: Could not parse text_placement_simple placement string ('" << positions << "').\n";
     }
-    if (direction_.size() == 0) {
+    if (direction_.size() == 0)
+    {
         std::cerr << "WARNING: text_placements_simple with no valid placements! ('"<< positions<<"')\n";
     }
 }
