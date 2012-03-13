@@ -51,8 +51,8 @@ expression_ptr expression_factory::compile(std::string const& str,transcoder con
 }
 
 bool expression_factory::parse_from_string(expression_ptr const& expr,
-                              std::string const& str,
-                              mapnik::expression_grammar<std::string::const_iterator> const& g)
+                                           std::string const& str,
+                                           mapnik::expression_grammar<std::string::const_iterator> const& g)
 {
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();

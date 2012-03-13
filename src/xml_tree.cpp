@@ -127,7 +127,7 @@ struct name_trait
     BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 };
 
-#define DEFINE_NAME_TRAIT( type, type_name )                  \
+#define DEFINE_NAME_TRAIT( type, type_name )                            \
     template <>                                                         \
     struct name_trait<type>                                             \
     {                                                                   \
@@ -220,8 +220,8 @@ attribute_not_found::attribute_not_found(
     std::string const& node_name,
     std::string const& attribute_name)
     :
-      node_name_(node_name),
-      attribute_name_(attribute_name)
+    node_name_(node_name),
+    attribute_name_(attribute_name)
 {
 
 }

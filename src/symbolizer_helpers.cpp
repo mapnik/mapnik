@@ -51,7 +51,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
         }
-        
+
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
         typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
         clipped_geometry_type clipped(**geo_itr_);

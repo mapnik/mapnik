@@ -191,7 +191,7 @@ private:
             }
             break;
             case XML_COMMENT_NODE:
-            break;
+                break;
             default:
                 break;
 

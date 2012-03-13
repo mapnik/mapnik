@@ -64,7 +64,7 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
 text_placement_info_ptr text_placements_list::get_placement_info(double scale_factor) const
 {
     return text_placement_info_ptr(
-                boost::make_shared<text_placement_info_list>(this, scale_factor));
+        boost::make_shared<text_placement_info_list>(this, scale_factor));
 }
 
 text_placements_list::text_placements_list() : text_placements(), list_(0)

@@ -137,7 +137,7 @@ void color_factory::init_from_string(color & c, std::string const& css_color)
 }
 
 bool color_factory::parse_from_string(color & c, std::string const& css_color,
-                             mapnik::css_color_grammar<std::string::const_iterator> const& g)
+                                      mapnik::css_color_grammar<std::string::const_iterator> const& g)
 {
     std::string::const_iterator first = css_color.begin();
     std::string::const_iterator last =  css_color.end();

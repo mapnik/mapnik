@@ -73,7 +73,7 @@ public:
     {
         stream.unsetf(std::ios::skipws);
         std::vector<char> v(std::istreambuf_iterator<char>(stream.rdbuf()),
-                          std::istreambuf_iterator<char>());
+                            std::istreambuf_iterator<char>());
         if (!stream.good())
         {
             throw config_error("Could not load map file", 0, filename_);
@@ -83,7 +83,7 @@ public:
         {
             // Parse using appropriate flags
             const int f_tws = rapidxml::parse_normalize_whitespace
-                            | rapidxml::parse_trim_whitespace;
+                | rapidxml::parse_trim_whitespace;
             rapidxml::xml_document<> doc;
             doc.parse<f_tws>(&v.front());
 

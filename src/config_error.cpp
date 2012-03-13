@@ -22,7 +22,7 @@ config_error::config_error(std::string const& what, unsigned line_number, std::s
 
 }
 
- char const* config_error::what() const throw()
+char const* config_error::what() const throw()
 {
     std::stringstream s;
     s << file_;
@@ -34,10 +34,10 @@ config_error::config_error(std::string const& what, unsigned line_number, std::s
     return msg_.c_str();
 }
 
- void config_error::append_context(std::string const& ctx) const
- {
-     what_ += " " + ctx;
- }
+void config_error::append_context(std::string const& ctx) const
+{
+    what_ += " " + ctx;
+}
 
 void config_error::append_context(std::string const& ctx, xml_node const& node) const
 {

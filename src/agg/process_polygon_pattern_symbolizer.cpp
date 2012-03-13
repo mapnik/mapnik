@@ -134,7 +134,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (align == LOCAL_ALIGNMENT)
     {
         double x0=0,y0=0;
-        if (num_geometries>0) // FIXME: hmm...? 
+        if (num_geometries>0) // FIXME: hmm...?
         {
             clipped_geometry_type clipped(feature->get_geometry(0));
             clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());

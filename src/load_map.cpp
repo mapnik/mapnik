@@ -85,7 +85,7 @@ public:
         filename_( filename ),
         relative_to_xml_(true),
         font_manager_(font_engine_)
-        {}
+    {}
 
     void parse_map(Map & map, xml_node const& sty, std::string const& base_path);
 private:
@@ -121,7 +121,7 @@ private:
 
     std::string ensure_relative_to_xml(boost::optional<std::string> opt_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
-                                                      std::string const& name);
+                                              std::string const& name);
 
     bool strict_;
     std::string filename_;
@@ -306,93 +306,93 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
 {
     try
     {
-    xml_node::const_iterator itr = include.begin();
-    xml_node::const_iterator end = include.end();
+        xml_node::const_iterator itr = include.begin();
+        xml_node::const_iterator end = include.end();
 
-    for (; itr != end; ++itr)
-    {
-        if (itr->is_text()) continue;
-        if (itr->is("Include"))
+        for (; itr != end; ++itr)
         {
-            parse_map_include(map, *itr);
-        }
-        else if (itr->is("Style"))
-        {
-            parse_style(map, *itr);
-        }
-        else if (itr->is("Layer"))
-        {
-            parse_layer(map, *itr);
-        }
-        else if (itr->is("FontSet"))
-        {
-            parse_fontset(map, *itr);
-        }
-        else if (itr->is("MetaWriter"))
-        {
-            parse_metawriter(map, *itr);
-        }
-        else if (itr->is("FileSource"))
-        {
-            std::string name = itr->get_attr<std::string>("name");
-            std::string value = itr->get_text();
-            file_sources_[name] = value;
-        }
-        else if (itr->is("Datasource"))
-        {
-            std::string name = itr->get_attr("name", std::string("Unnamed"));
-            parameters params;
-            xml_node::const_iterator paramIter = itr->begin();
-            xml_node::const_iterator endParam = itr->end();
-            for (; paramIter != endParam; ++paramIter)
+            if (itr->is_text()) continue;
+            if (itr->is("Include"))
             {
-                if (paramIter->is("Parameter"))
-                {
-                    std::string name = paramIter->get_attr<std::string>("name");
-                    std::string value = paramIter->get_text();
-                    params[name] = value;
-                }
+                parse_map_include(map, *itr);
             }
-            datasource_templates_[name] = params;
-        }
-        else if (itr->is("Parameters"))
-        {
-            std::string name = itr->get_attr("name", std::string("Unnamed"));
-            parameters & params = map.get_extra_parameters();
-            xml_node::const_iterator paramIter = itr->begin();
-            xml_node::const_iterator endParam = itr->end();
-            for (; paramIter != endParam; ++paramIter)
+            else if (itr->is("Style"))
             {
-                if (paramIter->is("Parameter"))
+                parse_style(map, *itr);
+            }
+            else if (itr->is("Layer"))
+            {
+                parse_layer(map, *itr);
+            }
+            else if (itr->is("FontSet"))
+            {
+                parse_fontset(map, *itr);
+            }
+            else if (itr->is("MetaWriter"))
+            {
+                parse_metawriter(map, *itr);
+            }
+            else if (itr->is("FileSource"))
+            {
+                std::string name = itr->get_attr<std::string>("name");
+                std::string value = itr->get_text();
+                file_sources_[name] = value;
+            }
+            else if (itr->is("Datasource"))
+            {
+                std::string name = itr->get_attr("name", std::string("Unnamed"));
+                parameters params;
+                xml_node::const_iterator paramIter = itr->begin();
+                xml_node::const_iterator endParam = itr->end();
+                for (; paramIter != endParam; ++paramIter)
                 {
-                    std::string name = paramIter->get_attr<std::string>("name");
-                    bool is_string = true;
-                    boost::optional<std::string> type = paramIter->get_opt_attr<std::string>("type");
-                    if (type)
+                    if (paramIter->is("Parameter"))
                     {
-                        if (*type == "int")
-                        {
-                            is_string = false;
-                            int value = paramIter->get_value<int>();
-                            params[name] = value;
-                        }
-                        else if (*type == "float")
-                        {
-                            is_string = false;
-                            double value = paramIter->get_value<double>();
-                            params[name] = value;
-                        }
-                    }
-
-                    if (is_string)
-                    {
+                        std::string name = paramIter->get_attr<std::string>("name");
                         std::string value = paramIter->get_text();
                         params[name] = value;
                     }
                 }
+                datasource_templates_[name] = params;
+            }
+            else if (itr->is("Parameters"))
+            {
+                std::string name = itr->get_attr("name", std::string("Unnamed"));
+                parameters & params = map.get_extra_parameters();
+                xml_node::const_iterator paramIter = itr->begin();
+                xml_node::const_iterator endParam = itr->end();
+                for (; paramIter != endParam; ++paramIter)
+                {
+                    if (paramIter->is("Parameter"))
+                    {
+                        std::string name = paramIter->get_attr<std::string>("name");
+                        bool is_string = true;
+                        boost::optional<std::string> type = paramIter->get_opt_attr<std::string>("type");
+                        if (type)
+                        {
+                            if (*type == "int")
+                            {
+                                is_string = false;
+                                int value = paramIter->get_value<int>();
+                                params[name] = value;
+                            }
+                            else if (*type == "float")
+                            {
+                                is_string = false;
+                                double value = paramIter->get_value<double>();
+                                params[name] = value;
+                            }
+                        }
+
+                        if (is_string)
+                        {
+                            std::string value = paramIter->get_text();
+                            params[name] = value;
+                        }
+                    }
+                }
             }
         }
-    }
     } catch (const config_error & ex) {
         ex.append_context(include);
         throw;
@@ -1060,7 +1060,7 @@ void map_parser::parse_text_symbolizer( rule & rule, xml_node const& sym )
             placement_finder->defaults.from_xml(sym, fontsets_);
         }
         if (strict_ &&
-                !placement_finder->defaults.format.fontset.size())
+            !placement_finder->defaults.format.fontset.size())
             ensure_font_face(placement_finder->defaults.format.face_name);
 
         text_symbolizer text_symbol = text_symbolizer(placement_finder);
@@ -1087,7 +1087,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym )
         }
         placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
-                !placement_finder->defaults.format.fontset.size())
+            !placement_finder->defaults.format.fontset.size())
             ensure_font_face(placement_finder->defaults.format.face_name);
 
         shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
@@ -1447,7 +1447,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
                 maximumValue = *value;
 
                 optional<std::string> label =
-                   stopIter->get_opt_attr<std::string>("label");
+                    stopIter->get_opt_attr<std::string>("label");
 
                 //append the stop
                 colorizer_stop tmpStop;
@@ -1532,8 +1532,8 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::stringst
         if (!aitr->second.processed)
         {
             error_message << "\n* attribute '" << aitr->first <<
-                                 "' with value '" << aitr->second.value <<
-                                 "' in line " << node.line();
+                "' with value '" << aitr->second.value <<
+                "' in line " << node.line();
         }
     }
     xml_node::const_iterator itr = node.begin();
