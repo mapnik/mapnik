@@ -178,6 +178,8 @@ source = Split(
     text_placements/list.cpp
     text_placements/simple.cpp
     text_properties.cpp
+    xml_tree.cpp
+    config_error.cpp
     """   
     )
 
@@ -299,7 +301,7 @@ if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     env2 = lib_env.Clone()
     env2.Append(CXXFLAGS = '-DHAVE_LIBXML2')
     libmapnik_cxxflags.append('-DHAVE_LIBXML2')
-    fixup = ['load_map.cpp','libxml2_loader.cpp']
+    fixup = ['libxml2_loader.cpp']
     for cpp in fixup:
         if cpp in source:
             source.remove(cpp)
@@ -307,6 +309,12 @@ if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
             source.insert(0,env2.StaticObject(cpp))
         else:
             source.insert(0,env2.SharedObject(cpp))
+else:
+    source += Split(
+        """
+        rapidxml_loader.cpp
+        """
+    )
 
 if env['CUSTOM_LDFLAGS']:
     linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], mapnik_lib_link_flag)

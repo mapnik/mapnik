@@ -30,7 +30,7 @@
 #include <cstdarg>
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
 
 // boost

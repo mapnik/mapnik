@@ -25,7 +25,7 @@
 #include "occi_featureset.hpp"
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/sql_utils.hpp>
 
 // boost

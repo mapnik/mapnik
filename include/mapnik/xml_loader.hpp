@@ -20,36 +20,17 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_METAWRITER_FACTORY_HPP
-#define MAPNIK_METAWRITER_FACTORY_HPP
+#ifndef MAPNIK_LIBXML2_LOADER_HPP
+#define MAPNIK_LIBXML2_LOADER_HPP
 
-// mapnik
-#include <mapnik/metawriter.hpp>
+// stl
+#include <string>
 
-// boost
-#include <boost/property_tree/ptree.hpp>
-
-namespace mapnik {
+namespace mapnik
+{
 class xml_node;
-
-/**
- * Creates a metawriter with the properties specified in the property
- * tree argument. Currently, this is hard-coded to the JSON and inmem
- * metawriters, but should provide an easy point to make them a
- * proper factory method if this is wanted in the future.
- */
-metawriter_ptr metawriter_create(xml_node const& pt);
-
-/**
- * Writes properties into the given property tree representing the
- * metawriter argument, and which can be used to reconstruct it.
- */
-void metawriter_save(
-    const metawriter_ptr &m,
-    boost::property_tree::ptree &pt,
-    bool explicit_defaults);
-
+void read_xml(std::string const & filename, xml_node &node);
+void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path="");
 }
 
-#endif // MAPNIK_METAWRITER_FACTORY_HPP
-
+#endif // MAPNIK_LIBXML2_LOADER_HPP

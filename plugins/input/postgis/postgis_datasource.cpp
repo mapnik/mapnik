@@ -26,7 +26,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/conversions.hpp>
 

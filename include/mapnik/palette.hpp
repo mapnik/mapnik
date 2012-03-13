@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/global.hpp>
-#include <mapnik/config_error.hpp>
 
 // boost
 #include <boost/utility.hpp>
