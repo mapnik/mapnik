@@ -588,7 +588,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
                 featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
                 if (fs)
                     return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                        hit_test_filter(x,y,tol));
+                                                                                   hit_test_filter(x,y,tol));
             }
         }
         catch (...)
@@ -634,7 +634,7 @@ featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
                 featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
                 if (fs)
                     return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                        hit_test_filter(x,y,tol));
+                                                                                   hit_test_filter(x,y,tol));
             }
         }
         catch (...)

@@ -253,7 +253,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
                 if (marker_type == ARROW)
                     marker.concat_path(arrow_);
-                
+
                 clipped_geometry_type clipped(geom);
                 clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                 path_type path(t_,clipped,prj_trans);

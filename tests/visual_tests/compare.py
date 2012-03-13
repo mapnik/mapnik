@@ -1,4 +1,4 @@
-import math, operator
+#import math, operator
 import Image
 import sys
 
@@ -27,6 +27,10 @@ def compare(fn1, fn2):
         return -1
     diff = 0
     pixels = im1.size[0] * im1.size[1]
+    delta_pixels = im2.size[0] * im2.size[1]  - pixels
+    if delta_pixels != 0:
+        errors.append((fn1, delta_pixels))
+        return delta_pixels
     im1 = im1.getdata()
     im2 = im2.getdata()
     for i in range(3, pixels - 1, 3):

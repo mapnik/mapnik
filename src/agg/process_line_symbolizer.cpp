@@ -63,7 +63,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
-    
+
     box2d<double> ext = query_extent_ * 1.1;
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
@@ -132,7 +132,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                 clipped_geometry_type clipped(geom);
                 clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
                 path_type path(t_,clipped,prj_trans);
-                
+
                 if (stroke_.has_dash())
                 {
                     agg::conv_dash<path_type> dash(path);

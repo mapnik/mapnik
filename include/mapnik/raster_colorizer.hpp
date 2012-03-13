@@ -39,7 +39,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>

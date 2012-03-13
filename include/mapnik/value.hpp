@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/config_error.hpp>
 
 // boost
 #include <boost/variant.hpp>

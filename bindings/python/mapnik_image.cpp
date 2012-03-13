@@ -125,7 +125,7 @@ bool painted(mapnik::image_32 const& im)
 void set_pixel(mapnik::image_32 & im, unsigned x, unsigned y, mapnik::color const& c)
 {
     im.setPixel(x, y, c.rgba());
-} 
+}
 
 boost::shared_ptr<image_32> open_from_file(std::string const& filename)
 {

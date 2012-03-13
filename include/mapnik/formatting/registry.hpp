@@ -38,16 +38,16 @@ namespace mapnik
 namespace formatting
 {
 
-typedef node_ptr (*from_xml_function_ptr)(boost::property_tree::ptree const& xml);
+typedef node_ptr (*from_xml_function_ptr)(xml_node const& xml);
 
 class registry : public singleton<registry, CreateStatic>,
-        private boost::noncopyable
+                 private boost::noncopyable
 {
 public:
     registry();
     ~registry() {}
     void register_name(std::string name, from_xml_function_ptr ptr, bool overwrite=false);
-    node_ptr from_xml(std::string name, boost::property_tree::ptree const& xml);
+    node_ptr from_xml(xml_node const& xml);
 private:
     std::map<std::string, from_xml_function_ptr> map_;
 };

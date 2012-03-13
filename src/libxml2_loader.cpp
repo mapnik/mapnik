@@ -22,26 +22,27 @@
 
 #ifdef HAVE_LIBXML2
 
-#include <mapnik/libxml2_loader.hpp>
-
+// mapnik
+#include <mapnik/xml_loader.hpp>
+#include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 
+// boost
 #include <boost/utility.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
+// libxml
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/parserInternals.h>
 #include <libxml/xinclude.h>
 
+// stl
 #include <iostream>
 
-using boost::property_tree::ptree;
 using namespace std;
 
-//#define DEFAULT_OPTIONS (XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 #define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 
 namespace mapnik
@@ -50,14 +51,14 @@ class libxml2_loader : boost::noncopyable
 {
 public:
     libxml2_loader(const char *encoding = NULL, int options = DEFAULT_OPTIONS, const char *url = NULL) :
-        ctx_( 0 ),
-        encoding_( encoding ),
-        options_( options ),
-        url_( url )
+        ctx_(0),
+        encoding_(encoding),
+        options_(options),
+        url_(url)
     {
         LIBXML_TEST_VERSION;
         ctx_ = xmlNewParserCtxt();
-        if ( ! ctx_ )
+        if (!ctx_)
         {
             throw std::runtime_error("Failed to create parser context.");
         }
@@ -71,19 +72,19 @@ public:
         }
     }
 
-    void load( std::string const& filename, ptree & pt )
+    void load(std::string const& filename, xml_node &node)
     {
         boost::filesystem::path path(filename);
-        if ( !boost::filesystem::exists( path ) ) {
-            throw config_error(string("Could not load map file '") +
-                               filename + "': File does not exist");
+        if (!boost::filesystem::exists(path))
+        {
+            throw config_error(string("Could not load map file: File does not exist"), 0, filename);
         }
 
         xmlDocPtr doc = xmlCtxtReadFile(ctx_, filename.c_str(), encoding_, options_);
 
-        if ( !doc )
+        if (!doc)
         {
-            xmlError * error = xmlCtxtGetLastError( ctx_ );
+            xmlError * error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
                 std::ostringstream os;
@@ -91,15 +92,7 @@ public:
                 os << ": " << std::endl << error->message;
                 // remove CR
                 std::string msg = os.str().substr(0, os.str().size() - 1);
-                config_error ex( msg );
-
-                os.str("");
-                os << "(encountered in file '" << error->file << "' at line "
-                   << error->line << ")";
-
-                ex.append_context( os.str() );
-
-                throw ex;
+                throw config_error(msg, error->line, error->file);
             }
         }
 
@@ -110,21 +103,21 @@ public:
           << std::endl;
           }
         */
-        load(doc, pt);
+        load(doc, node);
     }
 
-    void load( const int fd, ptree & pt )
+    void load(const int fd, xml_node &node)
     {
         xmlDocPtr doc = xmlCtxtReadFd(ctx_, fd, url_, encoding_, options_);
-        load(doc, pt);
+        load(doc, node);
     }
 
-    void load_string( std::string const& buffer, ptree & pt, std::string const & base_path )
+    void load_string(std::string const& buffer, xml_node &node, std::string const & base_path)
     {
         if (!base_path.empty())
         {
             boost::filesystem::path path(base_path);
-            if ( ! boost::filesystem::exists( path ) ) {
+            if (!boost::filesystem::exists(path)) {
                 throw config_error(string("Could not locate base_path '") +
                                    base_path + "': file or directory does not exist");
             }
@@ -132,12 +125,12 @@ public:
 
         xmlDocPtr doc = xmlCtxtReadMemory(ctx_, buffer.data(), buffer.length(), base_path.c_str(), encoding_, options_);
 
-        load(doc, pt);
+        load(doc, node);
     }
 
-    void load( const xmlDocPtr doc, ptree & pt )
+    void load(const xmlDocPtr doc, xml_node &node)
     {
-        if ( !doc )
+        if (!doc)
         {
             xmlError * error = xmlCtxtGetLastError( ctx_ );
             std::ostringstream os;
@@ -146,10 +139,10 @@ public:
             {
                 os << ": " << std::endl << error->message;
             }
-            throw config_error(os.str());
+            throw config_error(os.str(), error->line, error->file);
         }
 
-        int iXIncludeReturn = xmlXIncludeProcessFlags( doc, options_ );
+        int iXIncludeReturn = xmlXIncludeProcessFlags(doc, options_);
 
         if (iXIncludeReturn < 0)
         {
@@ -157,64 +150,48 @@ public:
             throw config_error("XML XInclude error.  One or more files failed to load.");
         }
 
-        xmlNode * root = xmlDocGetRootElement( doc );
-        if ( ! root ) {
+        xmlNode * root = xmlDocGetRootElement(doc);
+        if (!root) {
             xmlFreeDoc(doc);
             throw config_error("XML document is empty.");
         }
 
-        populate_tree( root, pt );
+        populate_tree(root, node);
         xmlFreeDoc(doc);
     }
 
 private:
-    void append_attributes( xmlAttr * attributes, ptree & pt)
+    void append_attributes(xmlAttr *attributes, xml_node &node)
     {
-        if (attributes)
+        for (; attributes; attributes = attributes->next )
         {
-            ptree::iterator it = pt.push_back( ptree::value_type( "<xmlattr>", ptree() ));
-            ptree & attr_list = it->second;
-            xmlAttr * cur_attr = attributes;
-            for (; cur_attr; cur_attr = cur_attr->next )
-            {
-                ptree::iterator it = attr_list.push_back(
-                    ptree::value_type( (char*)cur_attr->name, ptree() ));
-                it->second.put_value( (char*) cur_attr->children->content );
-            }
+            node.add_attribute((char *)attributes->name, (char *)attributes->children->content);
         }
     }
 
-    void populate_tree( xmlNode * node, ptree & pt )
+    void populate_tree(xmlNode *cur_node, xml_node &node)
     {
-        xmlNode * cur_node = node;
-
         for (; cur_node; cur_node = cur_node->next )
         {
             switch (cur_node->type)
             {
             case XML_ELEMENT_NODE:
             {
-                ptree::iterator it = pt.push_back( ptree::value_type(
-                                                       (char*)cur_node->name, ptree() ));
-                append_attributes( cur_node->properties, it->second);
-                populate_tree( cur_node->children, it->second );
+
+                xml_node &new_node = node.add_child((char *)cur_node->name, cur_node->line, false);
+                append_attributes(cur_node->properties, new_node);
+                populate_tree(cur_node->children, new_node);
             }
             break;
             case XML_TEXT_NODE:
             {
                 std::string trimmed = boost::algorithm::trim_copy(std::string((char*)cur_node->content));
-                if (trimmed.empty()) break;
-                ptree::iterator it = pt.push_back(ptree::value_type("<xmltext>", ptree()));
-                it->second.put_value(trimmed);
+                if (trimmed.empty()) break; //Don't add empty text nodes
+                node.add_child(trimmed, cur_node->line, true);
             }
             break;
             case XML_COMMENT_NODE:
-            {
-                ptree::iterator it = pt.push_back(
-                    ptree::value_type( "<xmlcomment>", ptree() ));
-                it->second.put_value( (char*) cur_node->content );
-            }
-            break;
+                break;
             default:
                 break;
 
@@ -228,15 +205,15 @@ private:
     const char *url_;
 };
 
-void read_xml2( std::string const & filename, boost::property_tree::ptree & pt)
+void read_xml(std::string const & filename, xml_node &node)
 {
     libxml2_loader loader;
-    loader.load( filename, pt );
+    loader.load(filename, node);
 }
-void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_path)
+void read_xml_string(std::string const & str, xml_node &node, std::string const & base_path)
 {
     libxml2_loader loader;
-    loader.load_string( str, pt, base_path );
+    loader.load_string(str, node, base_path);
 }
 
 } // end of namespace mapnik

@@ -29,8 +29,8 @@ namespace mapnik {
 class python_thread
 {
     /* Docs:
-      http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock
-      */
+       http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock
+    */
 public:
     static void unblock()
     {
@@ -38,8 +38,8 @@ public:
         if (state.get())
         {
             std::cerr << "ERROR: Python threads are already unblocked. "
-                         "Unblocking again will loose the current state and "
-                         "might crash later. Aborting!\n";
+                "Unblocking again will loose the current state and "
+                "might crash later. Aborting!\n";
             abort(); //This is a serious error and can't be handled in any other sane way
         }
 #endif
@@ -59,9 +59,9 @@ public:
         if (thread_support && !state.get())
         {
             std::cerr << "ERROR: Trying to restore python thread state, "
-                         "but no state is saved. Can't continue and also "
-                         "can't raise an exception because the python "
-                         "interpreter might be non-function. Aborting!\n";
+                "but no state is saved. Can't continue and also "
+                "can't raise an exception because the python "
+                "interpreter might be non-function. Aborting!\n";
             abort();
         }
 #endif

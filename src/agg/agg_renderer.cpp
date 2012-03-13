@@ -27,7 +27,6 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/map.hpp>

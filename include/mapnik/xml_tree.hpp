@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,35 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_LIBXML2_LOADER_HPP
-#define MAPNIK_LIBXML2_LOADER_HPP
+#ifndef MAPNIK_XML_TREE_H
+#define MAPNIK_XML_TREE_H
+//mapnik
+#include <mapnik/xml_node.hpp>
+#include <mapnik/expression_grammar.hpp>
+#include <mapnik/css_color_grammar.hpp>
 
-// boost
-#include <boost/property_tree/ptree.hpp>
-
-// stl
+//stl
 #include <string>
+
 
 namespace mapnik
 {
-void read_xml2( std::string const & filename, boost::property_tree::ptree & pt);
-void read_xml2_string( std::string const & str, boost::property_tree::ptree & pt, std::string const & base_path="");
-}
+class xml_tree
+{
+public:
+    xml_tree(std::string const& encoding="utf8");
+    void set_filename(std::string fn);
+    std::string const& filename() const;
+    xml_node &root();
+private:
+    xml_node node_;
+    std::string file_;
+    transcoder tr_;
+public:
+    mapnik::css_color_grammar<std::string::const_iterator> color_grammar;
+    mapnik::expression_grammar<std::string::const_iterator> expr_grammar;
+};
 
-#endif // MAPNIK_LIBXML2_LOADER_HPP
+} //ns mapnik
+
+#endif // MAPNIK_XML_TREE_H

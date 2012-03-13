@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/palette.hpp>
+#include <mapnik/config_error.hpp>
 
 namespace mapnik
 {
