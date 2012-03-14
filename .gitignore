@@ -4,6 +4,8 @@
 *.so
 *.a
 *.dylib
+*.cpp~
+*.hpp~
 plugins/input/*.input
 demo/c++/rundemo
 bindings/python/mapnik/paths.py
