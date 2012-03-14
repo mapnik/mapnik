@@ -23,6 +23,7 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/polygon_symbolizer.hpp>
 
@@ -65,27 +66,9 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     renderer ren(renb);
 
     ras_ptr->reset();
-    switch (sym.get_gamma_method())
-    {
-    case GAMMA_POWER:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-        break;
-    case GAMMA_LINEAR:
-        ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
-        break;
-    case GAMMA_NONE:
-        ras_ptr->gamma(agg::gamma_none());
-        break;
-    case GAMMA_THRESHOLD:
-        ras_ptr->gamma(agg::gamma_threshold(sym.get_gamma()));
-        break;
-    case GAMMA_MULTIPLY:
-        ras_ptr->gamma(agg::gamma_multiply(sym.get_gamma()));
-        break;
-    default:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-    }
 
+    set_gamma_method(sym,ras_ptr);
+    
     //metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
