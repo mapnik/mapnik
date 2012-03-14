@@ -14,10 +14,21 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.1
 ------------
 
+- Switched back to "libmapnik" and "import mapnik" rather than "mapnik2" (#941)
+
+- Support for PostGIS 2.0 (#956,#1083)
+
+- Workaround for boost interprocess compile error with recent gcc versions (#950,#1001,#1082)
+
+- Fix possible memory corruption when using hextree mode for png color reduction (#1087)
+
 - Removed mutex locking during reprojection if using >= proj 4.7 (#1072)
 
 - Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
 
+- Restored Python 2.5 compatibility (#904)
+
+- Fixed ability to save to jpeg format from python (7387afd9)
 
 
 Mapnik 2.0.0
