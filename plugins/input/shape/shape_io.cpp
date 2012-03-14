@@ -103,12 +103,12 @@ void shape_io::read_polyline(mapnik::geometry_container & geom)
 {
     shape_file::record_type record(reclength_ * 2 - 36);
     shp_.read_record(record);
-    
+
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
     if (num_parts == 1)
     {
-        geometry_type* line = new geometry_type(mapnik::LineString);   
+        geometry_type* line = new geometry_type(mapnik::LineString);
         record.skip(4);
         double x = record.read_double();
         double y = record.read_double();
@@ -132,7 +132,7 @@ void shape_io::read_polyline(mapnik::geometry_container & geom)
         int start, end;
         for (int k = 0; k < num_parts; ++k)
         {
-            geometry_type* line = new geometry_type(mapnik::LineString);  
+            geometry_type* line = new geometry_type(mapnik::LineString);
             start = parts[k];
             if (k == num_parts - 1)
             {
@@ -179,11 +179,11 @@ void shape_io::read_polygon(mapnik::geometry_container & geom)
 {
     shape_file::record_type record(reclength_ * 2 - 36);
     shp_.read_record(record);
-    
+
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
     std::vector<int> parts(num_parts);
-    
+
     for (int i = 0; i < num_parts; ++i)
     {
         parts[i] = record.read_ndr_integer();

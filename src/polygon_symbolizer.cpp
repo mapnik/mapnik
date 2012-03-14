@@ -32,14 +32,16 @@ polygon_symbolizer::polygon_symbolizer()
       fill_(color(128,128,128)),
       opacity_(1.0),
       gamma_(1.0),
-      gamma_method_(GAMMA_POWER) {}
+      gamma_method_(GAMMA_POWER),
+      smooth_(0.0) {}
 
 polygon_symbolizer::polygon_symbolizer(color const& fill)
     : symbolizer_base(),
       fill_(fill),
       opacity_(1.0),
       gamma_(1.0),
-      gamma_method_(GAMMA_POWER) {}
+      gamma_method_(GAMMA_POWER),
+      smooth_(0.0) {}
 
 color const& polygon_symbolizer::get_fill() const
 {
@@ -79,6 +81,16 @@ void polygon_symbolizer::set_gamma_method(gamma_method_e gamma_method)
 gamma_method_e polygon_symbolizer::get_gamma_method() const
 {
     return gamma_method_;
+}
+
+void polygon_symbolizer::set_smooth(double smooth)
+{
+    smooth_ = smooth;
+}
+
+double polygon_symbolizer::smooth() const
+{
+    return smooth_;
 }
 
 }

@@ -33,7 +33,7 @@
 #include <cstdio>
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/boolean.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>

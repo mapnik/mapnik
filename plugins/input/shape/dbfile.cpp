@@ -127,7 +127,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
 
     if (col>=0 && col<num_fields_)
     {
-        std::string name=fields_[col].name_;
+        std::string const& name=fields_[col].name_;
 
         switch (fields_[col].type_)
         {

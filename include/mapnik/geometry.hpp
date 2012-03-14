@@ -390,7 +390,7 @@ public:
         }
         return false;
     }
-    
+
 };
 
 typedef geometry<double,vertex_vector> geometry_type;

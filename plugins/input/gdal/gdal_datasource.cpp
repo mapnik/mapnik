@@ -25,7 +25,7 @@
 #include "gdal_featureset.hpp"
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
 
 #include <gdal_version.h>

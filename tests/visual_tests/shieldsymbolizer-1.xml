@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE Map>
-<Map background-color="green" srs="+proj=latlong +datum=WGS84">
+<Map background-color="green" srs="+proj=latlong +datum=WGS84" minimum-version="2.0.0">
 
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
         <StyleName>My Style</StyleName>

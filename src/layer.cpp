@@ -27,6 +27,7 @@
 
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
+#include <mapnik/config_error.hpp>
 
 // stl
 #include <string>

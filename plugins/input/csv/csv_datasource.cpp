@@ -6,6 +6,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 
 // mapnik
 #include <mapnik/feature_layer_desc.hpp>
@@ -14,7 +15,7 @@
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
-#include <mapnik/ptree_helpers.hpp>  // mapnik::boolean
+#include <mapnik/boolean.hpp>
 
 // stl
 #include <sstream>

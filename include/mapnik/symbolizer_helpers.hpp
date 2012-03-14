@@ -65,11 +65,11 @@ public:
           detector_(detector),
           writer_(sym.get_metawriter()),
           dims_(0, 0, width, height),
+          query_extent_(query_extent),
           text_(font_manager, scale_factor),
           angle_(0.0),
           placement_valid_(false),
           points_on_line_(false),
-          query_extent_(query_extent),
           finder_()
     {
         initialize_geometries();

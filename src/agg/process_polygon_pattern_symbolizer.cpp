@@ -23,6 +23,7 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
@@ -72,27 +73,8 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     agg::scanline_u8 sl;
     ras_ptr->reset();
-    switch (sym.get_gamma_method())
-    {
-    case GAMMA_POWER:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-        break;
-    case GAMMA_LINEAR:
-        ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
-        break;
-    case GAMMA_NONE:
-        ras_ptr->gamma(agg::gamma_none());
-        break;
-    case GAMMA_THRESHOLD:
-        ras_ptr->gamma(agg::gamma_threshold(sym.get_gamma()));
-        break;
-    case GAMMA_MULTIPLY:
-        ras_ptr->gamma(agg::gamma_multiply(sym.get_gamma()));
-        break;
-    default:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-    }
-
+    set_gamma_method(sym,ras_ptr);
+    
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
@@ -134,7 +116,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (align == LOCAL_ALIGNMENT)
     {
         double x0=0,y0=0;
-        if (num_geometries>0) // FIXME: hmm...? 
+        if (num_geometries>0) // FIXME: hmm...?
         {
             clipped_geometry_type clipped(feature->get_geometry(0));
             clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());

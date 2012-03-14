@@ -373,7 +373,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
         if (! is_single_geom && elem_size > SDO_ELEM_INFO_SIZE)
         {
             geometry_type* geom = new geometry_type(geom_type);
-            
+
             for (int i = SDO_ELEM_INFO_SIZE; i < elem_size; i+=3)
             {
                 int next_offset = elem_info[i];

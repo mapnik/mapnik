@@ -29,7 +29,7 @@
 #include <boost/make_shared.hpp>
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
 
 using mapnik::datasource;

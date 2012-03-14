@@ -30,6 +30,7 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/config_error.hpp>
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
@@ -487,7 +488,7 @@ void MapWidget::updateMap()
       }
       catch (mapnik::config_error & ex)
       {
-          std::cerr << ex.what() << std::endl;
+         std::cerr << ex.what() << std::endl;
       }
       catch (...)
       {

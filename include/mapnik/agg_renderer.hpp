@@ -66,7 +66,7 @@ public:
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
     void render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity);
-    
+
     void process(point_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);

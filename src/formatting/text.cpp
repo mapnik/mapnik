@@ -26,10 +26,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/processed_text.hpp>
-
-// boost
-#include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
+#include <mapnik/xml_node.hpp>
 
 namespace mapnik
 {
@@ -46,10 +43,9 @@ void text_node::to_xml(ptree &xml) const
 }
 
 
-node_ptr text_node::from_xml(boost::property_tree::ptree const& xml)
+node_ptr text_node::from_xml(xml_node const& xml)
 {
-    std::string data = xml.data();
-    boost::trim(data);
+    std::string data = xml.text();
     if (data.empty()) return node_ptr(); //No text
     return boost::make_shared<text_node>(parse_expression(data, "utf8"));
 }

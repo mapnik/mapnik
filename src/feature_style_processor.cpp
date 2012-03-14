@@ -203,7 +203,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         return;
     }
 
-    
+
 
 #if defined(RENDERING_STATS)
     progress_timer layer_timer(std::clog, "rendering total for layer: '" + lay.name() + "'");
@@ -271,7 +271,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     query q(layer_ext,res,scale_denom,unbuffered_extent);
     p.start_layer_processing(lay, query_ext);
-    
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
     double filt_factor = 1;
