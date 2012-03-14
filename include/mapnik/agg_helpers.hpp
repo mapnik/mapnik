@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,40 +20,38 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_POLYGON_SYMBOLIZER_HPP
-#define MAPNIK_POLYGON_SYMBOLIZER_HPP
+#ifndef MAPNIK_AGG_HELPERS_HPP
+#define MAPNIK_AGG_HELPERS_HPP
 
-// mapnik
-#include <mapnik/color.hpp>
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/enumeration.hpp>
-#include <mapnik/gamma_method.hpp>
+#include "agg_gamma_functions.h"
 
-namespace mapnik
+namespace mapnik {
+
+template <typename T0, typename T1>
+void set_gamma_method(T0 const& obj, T1 & ras_ptr)
 {
-
-struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
-{
-    polygon_symbolizer();
-    explicit polygon_symbolizer(color const& fill);
-    color const& get_fill() const;
-    void set_fill(color const& fill);
-    void set_opacity(double opacity);
-    double get_opacity() const;
-    void set_gamma(double gamma);
-    double get_gamma() const;
-    void set_gamma_method(gamma_method_e gamma_method);
-    gamma_method_e get_gamma_method() const;
-    void set_smooth(double smooth);
-    double smooth() const;
-private:
-    color fill_;
-    double opacity_;
-    double gamma_;
-    gamma_method_e gamma_method_;
-    double smooth_;
-};
+    switch (obj.get_gamma_method())
+    {
+    case GAMMA_POWER:
+        ras_ptr->gamma(agg::gamma_power(obj.get_gamma()));
+        break;
+    case GAMMA_LINEAR:
+        ras_ptr->gamma(agg::gamma_linear(0.0, obj.get_gamma()));
+        break;
+    case GAMMA_NONE:
+        ras_ptr->gamma(agg::gamma_none());
+        break;
+    case GAMMA_THRESHOLD:
+        ras_ptr->gamma(agg::gamma_threshold(obj.get_gamma()));
+        break;
+    case GAMMA_MULTIPLY:
+        ras_ptr->gamma(agg::gamma_multiply(obj.get_gamma()));
+        break;
+    default:
+        ras_ptr->gamma(agg::gamma_power(obj.get_gamma()));
+    }
+} 
 
 }
 
-#endif // MAPNIK_POLYGON_SYMBOLIZER_HPP
+#endif //MAPNIK_AGG_HELPERS_HPP 

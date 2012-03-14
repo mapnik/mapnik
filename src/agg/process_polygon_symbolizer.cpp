@@ -23,6 +23,7 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/polygon_symbolizer.hpp>
 
@@ -35,6 +36,7 @@
 // for polygon_symbolizer
 #include "agg_renderer_scanline.h"
 #include "agg_conv_clip_polygon.h"
+#include "agg_conv_smooth_poly1.h"
 // stl
 #include <string>
 
@@ -45,11 +47,10 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 
+    box2d<double> query_extent = query_extent_ * 1.0;
     color const& fill_ = sym.get_fill();
     agg::scanline_u8 sl;
 
@@ -65,37 +66,36 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     renderer ren(renb);
 
     ras_ptr->reset();
-    switch (sym.get_gamma_method())
-    {
-    case GAMMA_POWER:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-        break;
-    case GAMMA_LINEAR:
-        ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
-        break;
-    case GAMMA_NONE:
-        ras_ptr->gamma(agg::gamma_none());
-        break;
-    case GAMMA_THRESHOLD:
-        ras_ptr->gamma(agg::gamma_threshold(sym.get_gamma()));
-        break;
-    case GAMMA_MULTIPLY:
-        ras_ptr->gamma(agg::gamma_multiply(sym.get_gamma()));
-        break;
-    default:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-    }
 
+    set_gamma_method(sym,ras_ptr);
+    
     //metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
         geometry_type & geom=feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
-            clipped_geometry_type clipped(geom);
-            clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-            path_type path(t_,clipped,prj_trans);
-            ras_ptr->add_path(path);
+            if (sym.smooth() > 0.0)
+            {
+                typedef agg::conv_smooth_poly1_curve<geometry_type> smooth_type;
+                typedef agg::conv_clip_polygon<smooth_type> clipped_geometry_type;
+                typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+                smooth_type smooth(geom);
+                smooth.smooth_value(sym.smooth());                
+                clipped_geometry_type clipped(smooth);
+                clipped.clip_box(query_extent.minx(),query_extent.miny(),query_extent.maxx(),query_extent.maxy());
+                path_type path(t_,clipped,prj_trans);
+                ras_ptr->add_path(path);
+            }
+            else
+            {
+                typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+                typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent.minx(),query_extent.miny(),query_extent.maxx(),query_extent.maxy());
+                path_type path(t_,clipped,prj_trans);
+                ras_ptr->add_path(path);
+            }
             //if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
         }
     }

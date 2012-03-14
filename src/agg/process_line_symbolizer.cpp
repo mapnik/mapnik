@@ -23,6 +23,7 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/line_symbolizer.hpp>
 
@@ -71,7 +72,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
 
         agg::line_profile_aa profile;
-        //agg::line_profile_aa profile(stroke_.get_width() * scale_factor_, agg::gamma_none());
         profile.width(stroke_.get_width() * scale_factor_);
         ren_base base_ren(pixf);
         renderer_type ren(base_ren, profile);
@@ -102,26 +102,10 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         ren_base renb(pixf);
         renderer ren(renb);
         ras_ptr->reset();
-        switch (stroke_.get_gamma_method())
-        {
-        case GAMMA_POWER:
-            ras_ptr->gamma(agg::gamma_power(stroke_.get_gamma()));
-            break;
-        case GAMMA_LINEAR:
-            ras_ptr->gamma(agg::gamma_linear(0.0, stroke_.get_gamma()));
-            break;
-        case GAMMA_NONE:
-            ras_ptr->gamma(agg::gamma_none());
-            break;
-        case GAMMA_THRESHOLD:
-            ras_ptr->gamma(agg::gamma_threshold(stroke_.get_gamma()));
-            break;
-        case GAMMA_MULTIPLY:
-            ras_ptr->gamma(agg::gamma_multiply(stroke_.get_gamma()));
-            break;
-        default:
-            ras_ptr->gamma(agg::gamma_power(stroke_.get_gamma()));
-        }
+
+        set_gamma_method(stroke_, ras_ptr);
+        
+        
 
         //metawriter_with_properties writer = sym.get_metawriter();
         for (unsigned i=0;i<feature->num_geometries();++i)
@@ -129,12 +113,13 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             geometry_type & geom = feature->get_geometry(i);
             if (geom.num_points() > 1)
             {
-                clipped_geometry_type clipped(geom);
-                clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
-                path_type path(t_,clipped,prj_trans);
 
                 if (stroke_.has_dash())
                 {
+                    clipped_geometry_type clipped(geom);
+                    clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
+                    path_type path(t_,clipped,prj_trans);
+                    
                     agg::conv_dash<path_type> dash(path);
                     dash_array const& d = stroke_.get_dash_array();
                     dash_array::const_iterator itr = d.begin();
@@ -172,6 +157,10 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                 }
                 else
                 {
+                    clipped_geometry_type clipped(geom);
+                    clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
+                    path_type path(t_,clipped,prj_trans);
+                    
                     agg::conv_stroke<path_type>  stroke(path);
                     line_join_e join=stroke_.get_line_join();
                     if ( join == MITER_JOIN)
