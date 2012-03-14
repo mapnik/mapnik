@@ -14,6 +14,10 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.1
 ------------
 
+- Fixed SQLite open stability across platforms/versions (#854)
+
+- Fixed `mapnik-config --version` (#903)
+
 - Switched back to "libmapnik" and "import mapnik" rather than "mapnik2" (#941)
 
 - Support for PostGIS 2.0 (#956,#1083)
@@ -28,7 +32,7 @@ Mapnik 2.0.1
 
 - Restored Python 2.5 compatibility (#904)
 
-- Fixed ability to save to jpeg format from python (7387afd9)
+- Fixed ability to save to jpeg format from python (7387afd9) (#896)
 
 
 Mapnik 2.0.0
@@ -237,8 +241,6 @@ Mapnik 0.7.0 Release
 - Python: Exposed ability to write to Cairo formats using 'mapnik.render_to_file()' and without pycairo (#381)
 
 - Python: Fixed potential crash if pycairo support is enabled but python-cairo module is missing (#392)
-
-- Python: Added 'mapnik.mapnik_svn_revision()' function to svn revision of Mapnik was compiled at.
 
 - Python: Added 'mapnik.has_pycairo()' function to test for pycairo support (r1278) (#284)
 
