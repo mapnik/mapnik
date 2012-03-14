@@ -24,6 +24,7 @@
 #define MAPNIK_AGG_HELPERS_HPP
 
 #include "agg_gamma_functions.h"
+#include "agg_math_stroke.h"
 
 namespace mapnik {
 
@@ -52,6 +53,39 @@ void set_gamma_method(T0 const& obj, T1 & ras_ptr)
     }
 }
 
+template <typename Stroke,typename PathType>
+void set_join_caps(Stroke const& stroke_, PathType & stroke)
+{
+    line_join_e join=stroke_.get_line_join();
+    switch (join)
+    {
+    case MITER_JOIN:
+        stroke.generator().line_join(agg::miter_join);
+        break;
+    case MITER_REVERT_JOIN:
+        stroke.generator().line_join(agg::miter_join);
+        break;
+    case ROUND_JOIN:
+        stroke.generator().line_join(agg::round_join);
+        break;
+    default:
+        stroke.generator().line_join(agg::bevel_join);
+    }
+    
+    line_cap_e cap=stroke_.get_line_cap();
+    switch (cap)
+    {
+    case BUTT_CAP:
+        stroke.generator().line_cap(agg::butt_cap);
+        break;
+    case SQUARE_CAP:
+        stroke.generator().line_cap(agg::square_cap);
+        break;
+    default:
+        stroke.generator().line_cap(agg::round_cap);
+    }
+}
+ 
 }
 
 #endif //MAPNIK_AGG_HELPERS_HPP

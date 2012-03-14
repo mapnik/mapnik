@@ -113,7 +113,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             geometry_type & geom = feature->get_geometry(i);
             if (geom.num_points() > 1)
             {
-
                 if (stroke_.has_dash())
                 {
                     clipped_geometry_type clipped(geom);
@@ -129,27 +128,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                         dash.add_dash(itr->first * scale_factor_,
                                       itr->second * scale_factor_);
                     }
-
                     agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
-
-                    line_join_e join=stroke_.get_line_join();
-                    if ( join == MITER_JOIN)
-                        stroke.generator().line_join(agg::miter_join);
-                    else if( join == MITER_REVERT_JOIN)
-                        stroke.generator().line_join(agg::miter_join);
-                    else if( join == ROUND_JOIN)
-                        stroke.generator().line_join(agg::round_join);
-                    else
-                        stroke.generator().line_join(agg::bevel_join);
-
-                    line_cap_e cap=stroke_.get_line_cap();
-                    if (cap == BUTT_CAP)
-                        stroke.generator().line_cap(agg::butt_cap);
-                    else if (cap == SQUARE_CAP)
-                        stroke.generator().line_cap(agg::square_cap);
-                    else
-                        stroke.generator().line_cap(agg::round_cap);
-
+                    set_join_caps(stroke_,stroke);
                     stroke.generator().miter_limit(4.0);
                     stroke.generator().width(stroke_.get_width() * scale_factor_);
                     ras_ptr->add_path(stroke);
@@ -160,26 +140,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                     clipped_geometry_type clipped(geom);
                     clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
                     path_type path(t_,clipped,prj_trans);
-                    
-                    agg::conv_stroke<path_type>  stroke(path);
-                    line_join_e join=stroke_.get_line_join();
-                    if ( join == MITER_JOIN)
-                        stroke.generator().line_join(agg::miter_join);
-                    else if( join == MITER_REVERT_JOIN)
-                        stroke.generator().line_join(agg::miter_join);
-                    else if( join == ROUND_JOIN)
-                        stroke.generator().line_join(agg::round_join);
-                    else
-                        stroke.generator().line_join(agg::bevel_join);
-
-                    line_cap_e cap=stroke_.get_line_cap();
-                    if (cap == BUTT_CAP)
-                        stroke.generator().line_cap(agg::butt_cap);
-                    else if (cap == SQUARE_CAP)
-                        stroke.generator().line_cap(agg::square_cap);
-                    else
-                        stroke.generator().line_cap(agg::round_cap);
-
+                    agg::conv_stroke<path_type> stroke(path);
+                    set_join_caps(stroke_,stroke);
                     stroke.generator().miter_limit(4.0);
                     stroke.generator().width(stroke_.get_width() * scale_factor_);
                     ras_ptr->add_path(stroke);
