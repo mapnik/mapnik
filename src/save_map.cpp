@@ -125,6 +125,10 @@ public:
         {
             set_attr( sym_node, "gamma-method", sym.get_gamma_method() );
         }
+        if ( sym.smooth() != dfl.smooth() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "smooth", sym.smooth() );
+        }
         add_metawriter_attributes(sym_node, sym);
     }
 
