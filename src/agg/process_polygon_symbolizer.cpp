@@ -50,7 +50,6 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 
-    box2d<double> query_extent = query_extent_ * 1.0;
     color const& fill_ = sym.get_fill();
     agg::scanline_u8 sl;
 
@@ -70,6 +69,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     set_gamma_method(sym,ras_ptr);
     
     //metawriter_with_properties writer = sym.get_metawriter();
+    box2d<double> inflated_extent = query_extent_ * 1.1;
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
         geometry_type & geom=feature->get_geometry(i);
@@ -77,22 +77,22 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
         {
             if (sym.smooth() > 0.0)
             {
-                typedef agg::conv_smooth_poly1_curve<geometry_type> smooth_type;
-                typedef agg::conv_clip_polygon<smooth_type> clipped_geometry_type;
+                typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
                 typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-                smooth_type smooth(geom);
-                smooth.smooth_value(sym.smooth());                
-                clipped_geometry_type clipped(smooth);
-                clipped.clip_box(query_extent.minx(),query_extent.miny(),query_extent.maxx(),query_extent.maxy());
+                typedef agg::conv_smooth_poly1_curve<path_type> smooth_type;
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(inflated_extent.minx(),inflated_extent.miny(),inflated_extent.maxx(),inflated_extent.maxy());
                 path_type path(t_,clipped,prj_trans);
-                ras_ptr->add_path(path);
+                smooth_type smooth(path);
+                smooth.smooth_value(sym.smooth());
+                ras_ptr->add_path(smooth);
             }
             else
             {
                 typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
                 typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
                 clipped_geometry_type clipped(geom);
-                clipped.clip_box(query_extent.minx(),query_extent.miny(),query_extent.maxx(),query_extent.maxy());
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                 path_type path(t_,clipped,prj_trans);
                 ras_ptr->add_path(path);
             }
