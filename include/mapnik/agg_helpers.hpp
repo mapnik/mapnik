@@ -50,8 +50,8 @@ void set_gamma_method(T0 const& obj, T1 & ras_ptr)
     default:
         ras_ptr->gamma(agg::gamma_power(obj.get_gamma()));
     }
-} 
+}
 
 }
 
-#endif //MAPNIK_AGG_HELPERS_HPP 
+#endif //MAPNIK_AGG_HELPERS_HPP
