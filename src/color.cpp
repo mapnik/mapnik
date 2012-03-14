@@ -166,6 +166,7 @@ bool color_factory::parse_from_string(color & c, std::string const& css_color,
         c.set_alpha(css_.a);
         return true;
     }
+    return false;
 #endif
 }
 

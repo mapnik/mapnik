@@ -138,7 +138,9 @@ qcdrain_lyr.datasource = mapnik.Shapefile(file='../data/qcdrainage')
 qcdrain_style = mapnik.Style()
 qcdrain_rule = mapnik.Rule()
 qcdrain_rule.filter = mapnik.Expression('[HYC] = 8')
-qcdrain_rule.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color(153, 204, 255)))
+sym = mapnik.PolygonSymbolizer(mapnik.Color(153, 204, 255))
+sym.smooth = 1.0 # very smooth
+qcdrain_rule.symbols.append(sym)
 qcdrain_style.rules.append(qcdrain_rule)
 
 m.append_style('drainage', qcdrain_style)

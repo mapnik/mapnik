@@ -1295,7 +1295,10 @@ void map_parser::parse_polygon_symbolizer( rule & rule, xml_node const & sym )
         // gamma method
         optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
         if (gamma_method) poly_sym.set_gamma_method(*gamma_method);
-
+        // smooth value
+        optional<double> smooth = sym.get_opt_attr<double>("smooth");
+        if (smooth) poly_sym.set_smooth(*smooth);
+        
         parse_metawriter_in_symbolizer(poly_sym, sym);
         rule.append(poly_sym);
     }
