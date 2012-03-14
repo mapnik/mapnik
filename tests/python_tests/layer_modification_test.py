@@ -5,7 +5,7 @@ from nose.tools import *
 import os
 from nose.tools import *
 from utilities import execution_path
-import mapnik2
+import mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -30,9 +30,9 @@ def test_adding_datasource_to_layer():
 
 </Map>
 '''
-    m = mapnik2.Map(256, 256)
+    m = mapnik.Map(256, 256)
     
-    mapnik2.load_map_from_string(m, map_string)
+    mapnik.load_map_from_string(m, map_string)
     
     # validate it loaded fine
     eq_(m.layers[0].styles[0],'world_borders_style')
@@ -53,7 +53,7 @@ def test_adding_datasource_to_layer():
     eq_(lyr.srs,'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     
     # now add a datasource one...
-    ds = mapnik2.Shapefile(file='../data/shp/world_merc.shp')
+    ds = mapnik.Shapefile(file='../data/shp/world_merc.shp')
     m.layers[0].datasource = ds
     
     # now ensure it is attached

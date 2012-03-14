@@ -3,7 +3,7 @@
 from nose.tools import *
 from utilities import execution_path, save_data, contains_word
 
-import os, mapnik2
+import os, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -13,19 +13,19 @@ def setup():
 
 def test_dataraster_coloring():
     srs = '+init=epsg:32630'
-    lyr = mapnik2.Layer('dataraster')
-    lyr.datasource = mapnik2.Gdal(
+    lyr = mapnik.Layer('dataraster')
+    lyr.datasource = mapnik.Gdal(
         file = '../data/raster/dataraster.tif',
         band = 1,
         )
     lyr.srs = srs
-    _map = mapnik2.Map(256,256, srs)
-    style = mapnik2.Style()
-    rule = mapnik2.Rule()
-    sym = mapnik2.RasterSymbolizer()
+    _map = mapnik.Map(256,256, srs)
+    style = mapnik.Style()
+    rule = mapnik.Rule()
+    sym = mapnik.RasterSymbolizer()
     # Assigning a colorizer to the RasterSymbolizer tells the later
     # that it should use it to colorize the raw data raster
-    sym.colorizer = mapnik2.RasterColorizer(mapnik2.COLORIZER_DISCRETE, mapnik2.Color("transparent"))
+    sym.colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_DISCRETE, mapnik.Color("transparent"))
     
     for value, color in [
         (  0, "#0044cc"),
@@ -40,7 +40,7 @@ def test_dataraster_coloring():
         ( 90, "#660066"),
         ( 200, "transparent"),
     ]:
-        sym.colorizer.add_stop(value, mapnik2.Color(color))
+        sym.colorizer.add_stop(value, mapnik.Color(color))
     rule.symbols.append(sym)
     style.rules.append(rule)
     _map.append_style('foo', style)
@@ -48,8 +48,8 @@ def test_dataraster_coloring():
     _map.layers.append(lyr)
     _map.zoom_to_box(lyr.envelope())
 
-    im = mapnik2.Image(_map.width,_map.height)
-    mapnik2.render(_map, im)
+    im = mapnik.Image(_map.width,_map.height)
+    mapnik.render(_map, im)
     # save a png somewhere so we can see it
     save_data('test_dataraster_coloring.png', im.tostring('png'))
     imdata = im.tostring()
@@ -58,13 +58,13 @@ def test_dataraster_coloring():
 
 def test_dataraster_query_point():
     srs = '+init=epsg:32630'
-    lyr = mapnik2.Layer('dataraster')
-    lyr.datasource = mapnik2.Gdal(
+    lyr = mapnik.Layer('dataraster')
+    lyr.datasource = mapnik.Gdal(
         file = '../data/raster/dataraster.tif',
         band = 1,
         )
     lyr.srs = srs
-    _map = mapnik2.Map(256,256, srs)
+    _map = mapnik.Map(256,256, srs)
     _map.layers.append(lyr)
 
     # point inside raster extent with valid data
@@ -86,11 +86,11 @@ def test_dataraster_query_point():
     assert len(features) == 0
 
 def test_load_save_map():
-    map = mapnik2.Map(256,256)
+    map = mapnik.Map(256,256)
     in_map = "../data/good_maps/raster_symbolizer.xml"
-    mapnik2.load_map(map, in_map)
+    mapnik.load_map(map, in_map)
 
-    out_map = mapnik2.save_map_to_string(map)
+    out_map = mapnik.save_map_to_string(map)
     assert 'RasterSymbolizer' in out_map
     assert 'RasterColorizer' in out_map
     assert 'stop' in out_map
@@ -99,13 +99,13 @@ def test_raster_with_alpha_blends_correctly_with_background():
     WIDTH = 500
     HEIGHT = 500
 
-    map = mapnik2.Map(WIDTH, HEIGHT)
-    WHITE = mapnik2.Color(255, 255, 255)
+    map = mapnik.Map(WIDTH, HEIGHT)
+    WHITE = mapnik.Color(255, 255, 255)
     map.background = WHITE
 
-    style = mapnik2.Style()
-    rule = mapnik2.Rule()
-    symbolizer = mapnik2.RasterSymbolizer()
+    style = mapnik.Style()
+    rule = mapnik.Rule()
+    symbolizer = mapnik.RasterSymbolizer()
     #XXX: This fixes it, see http://trac.mapnik.org/ticket/759#comment:3
     #     (and remove comment when this test passes)
     #symbolizer.scaling="bilinear_old"
@@ -115,17 +115,17 @@ def test_raster_with_alpha_blends_correctly_with_background():
 
     map.append_style('raster_style', style)
 
-    map_layer = mapnik2.Layer('test_layer')
+    map_layer = mapnik.Layer('test_layer')
     filepath = '../data/raster/white-alpha.png'
-    map_layer.datasource = mapnik2.Gdal(file=filepath)
+    map_layer.datasource = mapnik.Gdal(file=filepath)
     map_layer.styles.append('raster_style')
     map.layers.append(map_layer)
 
     map.zoom_all()
 
-    mim = mapnik2.Image(WIDTH, HEIGHT)
+    mim = mapnik.Image(WIDTH, HEIGHT)
 
-    mapnik2.render(map, mim)
+    mapnik.render(map, mim)
     save_data('test_raster_with_alpha_blends_correctly_with_background.png',
               mim.tostring('png'))
     imdata = mim.tostring()
@@ -135,27 +135,27 @@ def test_raster_with_alpha_blends_correctly_with_background():
 def test_raster_warping():
     lyrSrs = "+init=epsg:32630"
     mapSrs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-    lyr = mapnik2.Layer('dataraster', lyrSrs)
-    lyr.datasource = mapnik2.Gdal(
+    lyr = mapnik.Layer('dataraster', lyrSrs)
+    lyr.datasource = mapnik.Gdal(
         file = '../data/raster/dataraster.tif',
         band = 1,
         )
-    sym = mapnik2.RasterSymbolizer()
-    sym.colorizer = mapnik2.RasterColorizer(mapnik2.COLORIZER_DISCRETE, mapnik2.Color(255,255,0))
-    rule = mapnik2.Rule()
+    sym = mapnik.RasterSymbolizer()
+    sym.colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_DISCRETE, mapnik.Color(255,255,0))
+    rule = mapnik.Rule()
     rule.symbols.append(sym)
-    style = mapnik2.Style()
+    style = mapnik.Style()
     style.rules.append(rule)
-    _map = mapnik2.Map(256,256, mapSrs)
+    _map = mapnik.Map(256,256, mapSrs)
     _map.append_style('foo', style)
     lyr.styles.append('foo')
     _map.layers.append(lyr)
-    prj_trans = mapnik2.ProjTransform(mapnik2.Projection(mapSrs),
-                                      mapnik2.Projection(lyrSrs)) 
+    prj_trans = mapnik.ProjTransform(mapnik.Projection(mapSrs),
+                                      mapnik.Projection(lyrSrs)) 
     _map.zoom_to_box(prj_trans.backward(lyr.envelope()))
 
-    im = mapnik2.Image(_map.width,_map.height)
-    mapnik2.render(_map, im)
+    im = mapnik.Image(_map.width,_map.height)
+    mapnik.render(_map, im)
     # save a png somewhere so we can see it
     save_data('test_raster_warping.png', im.tostring('png'))
     imdata = im.tostring()
@@ -164,26 +164,26 @@ def test_raster_warping():
 def test_raster_warping_does_not_overclip_source():
     lyrSrs = "+init=epsg:32630"
     mapSrs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-    lyr = mapnik2.Layer('dataraster', lyrSrs)
-    lyr.datasource = mapnik2.Gdal(
+    lyr = mapnik.Layer('dataraster', lyrSrs)
+    lyr.datasource = mapnik.Gdal(
         file = '../data/raster/dataraster.tif',
         band = 1,
         )
-    sym = mapnik2.RasterSymbolizer()
-    sym.colorizer = mapnik2.RasterColorizer(mapnik2.COLORIZER_DISCRETE, mapnik2.Color(255,255,0))
-    rule = mapnik2.Rule()
+    sym = mapnik.RasterSymbolizer()
+    sym.colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_DISCRETE, mapnik.Color(255,255,0))
+    rule = mapnik.Rule()
     rule.symbols.append(sym)
-    style = mapnik2.Style()
+    style = mapnik.Style()
     style.rules.append(rule)
-    _map = mapnik2.Map(256,256, mapSrs)
-    _map.background=mapnik2.Color('white')
+    _map = mapnik.Map(256,256, mapSrs)
+    _map.background=mapnik.Color('white')
     _map.append_style('foo', style)
     lyr.styles.append('foo')
     _map.layers.append(lyr)
-    _map.zoom_to_box(mapnik2.Box2d(3,42,4,43))
+    _map.zoom_to_box(mapnik.Box2d(3,42,4,43))
 
-    im = mapnik2.Image(_map.width,_map.height)
-    mapnik2.render(_map, im)
+    im = mapnik.Image(_map.width,_map.height)
+    mapnik.render(_map, im)
     # save a png somewhere so we can see it
     save_data('test_raster_warping_does_not_overclip_source.png',
               im.tostring('png'))

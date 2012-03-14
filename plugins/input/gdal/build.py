@@ -36,7 +36,7 @@ gdal_src = Split(
 plugin_env['LIBS'] = [env['PLUGINS']['gdal']['lib']]
 
 # Link Library to Dependencies
-plugin_env['LIBS'].append('mapnik2')
+plugin_env['LIBS'].append('mapnik')
 plugin_env['LIBS'].append(env['ICU_LIB_NAME'])
 
 if env['RUNTIME_LINK'] == 'static':
@@ -45,7 +45,7 @@ if env['RUNTIME_LINK'] == 'static':
 
 input_plugin = plugin_env.SharedLibrary('../gdal', source=gdal_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
-# if the plugin links to libmapnik2 ensure it is built first
+# if the plugin links to libmapnik ensure it is built first
 Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import os, mapnik2
+import os, mapnik
 from timeit import Timer, time
 from nose.tools import *
 from utilities import execution_path
@@ -59,7 +59,7 @@ def do_encoding():
 
     def blank():
         eval('image.tostring("%s")' % c)
-    blank_im = mapnik2.Image(512,512)
+    blank_im = mapnik.Image(512,512)
 
     for c in combinations:
         t = Timer(blank)
@@ -67,8 +67,8 @@ def do_encoding():
 
     def solid():
         eval('image.tostring("%s")' % c)
-    solid_im = mapnik2.Image(512,512)
-    solid_im.background = mapnik2.Color("#f2efe9")
+    solid_im = mapnik.Image(512,512)
+    solid_im.background = mapnik.Color("#f2efe9")
 
     for c in combinations:
         t = Timer(solid)
@@ -77,7 +77,7 @@ def do_encoding():
     def many_colors():
         eval('image.tostring("%s")' % c)
     # lots of colors: http://tile.osm.org/13/4194/2747.png
-    many_colors_im = mapnik2.Image.open('../data/images/13_4194_2747.png')
+    many_colors_im = mapnik.Image.open('../data/images/13_4194_2747.png')
 
     for c in combinations:
         t = Timer(many_colors)

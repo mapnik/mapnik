@@ -79,9 +79,9 @@ if not env['RUNTIME_LINK'] == 'static':
     
 
 if env['PLATFORM'] == 'Darwin':
-    mapnik_libname = 'libmapnik2.dylib'
+    mapnik_libname = 'libmapnik.dylib'
 else:
-    mapnik_libname = 'libmapnik2.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1])) 
+    mapnik_libname = 'libmapnik.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1])) 
 
 if env['PLATFORM'] == 'Darwin':
     if env['FULL_LIB_PATH']:
@@ -307,9 +307,9 @@ else:
     linkflags = mapnik_lib_link_flag
 
 if env['LINKING'] == 'static':
-    mapnik = lib_env.StaticLibrary('mapnik2', source, LINKFLAGS=linkflags)
+    mapnik = lib_env.StaticLibrary('mapnik', source, LINKFLAGS=linkflags)
 else:
-    mapnik = lib_env.SharedLibrary('mapnik2', source, LINKFLAGS=linkflags)
+    mapnik = lib_env.SharedLibrary('mapnik', source, LINKFLAGS=linkflags)
 
 # cache library values for other builds to use
 env['LIBMAPNIK_LIBS'] = copy(lib_env['LIBS'])

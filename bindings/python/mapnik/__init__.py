@@ -43,7 +43,7 @@ import os
 import sys
 import warnings
 
-from _mapnik2 import *
+from _mapnik import *
 from paths import inputpluginspath, fontscollectionpath
 
 import printing
@@ -631,105 +631,3 @@ def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.tt
 # auto-register known plugins and fonts
 register_plugins()
 register_fonts()
-
-# Explicitly export API members to avoid namespace pollution
-# and ensure correct documentation processing
-__all__ = [
-    # classes
-    'Color',
-    'Coord',
-    'Palette',
-    #'ColorBand',
-    'CompositeOp',
-    'DatasourceCache',
-    'MemoryDatasource',
-    'Box2d',
-    'Feature',
-    'Featureset',
-    'FontEngine',
-    'Geometry2d',
-    'GlyphSymbolizer',
-    'Image',
-    'ImageView',
-    'Grid',
-    'GridView',
-    'Layer',
-    'Layers',
-    'LinePatternSymbolizer',
-    'LineSymbolizer',
-    'Map',
-    'MarkersSymbolizer',
-    'Names',
-    'Path',
-    'Parameter',
-    'Parameters',
-    'PointDatasource',
-    'PointSymbolizer',
-    'PolygonPatternSymbolizer',
-    'PolygonSymbolizer',
-    'ProjTransform',
-    'Projection',
-    'Query',
-    'RasterSymbolizer',
-    'RasterColorizer',
-    'Rule', 'Rules',
-    'ShieldSymbolizer',
-    'Singleton',
-    'Stroke',
-    'Style',
-    'Symbolizer',
-    'Symbolizers',
-    'TextSymbolizer',
-    'ViewTransform',
-    # enums
-    'aspect_fix_mode',
-    'point_placement',
-    'label_placement',
-    'line_cap',
-    'line_join',
-    'text_transform',
-    'vertical_alignment',
-    'horizontal_alignment',
-    'justify_alignment',
-    'pattern_alignment',
-    'filter_mode',
-    # functions
-    # datasources
-    'Datasource',
-    'CreateDatasource',
-    'Shapefile',
-    'PostGIS',
-    'Raster',
-    'Gdal',
-    'Occi',
-    'Ogr',
-    'SQLite',
-    'Osm',
-    'Kismet',
-    'Describe',
-    #   version and environment
-    'mapnik_version_string',
-    'mapnik_version',
-    'mapnik_svn_revision',
-    'has_cairo',
-    'has_pycairo',
-    #   factory methods
-    'Expression',
-    'PathExpression',
-    #   load/save/render
-    'load_map',
-    'load_map_from_string',
-    'save_map',
-    'save_map_to_string',
-    'render',
-    'render_grid',
-    'render_tile_to_file',
-    'render_to_file',
-    #   other
-    'register_plugins',
-    'register_fonts',
-    'scale_denominator',
-    # deprecated
-    'Filter',
-    'Envelope',
-    ]

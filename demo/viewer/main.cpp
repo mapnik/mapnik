@@ -43,7 +43,7 @@ int main( int argc, char **argv )
     
     // register input plug-ins
     QString plugins_dir = settings.value("mapnik/plugins_dir",
-                                         QVariant("/usr/local/lib/mapnik2/input/")).toString();
+                                         QVariant("/usr/local/lib/mapnik/input/")).toString();
     datasource_cache::instance()->register_datasources(plugins_dir.toStdString());
     // register fonts
     int count = settings.beginReadArray("mapnik/fonts");

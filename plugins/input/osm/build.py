@@ -38,12 +38,12 @@ osm_src = Split(
 
 libraries = [ 'xml2' ]
 libraries.append('curl')
-libraries.append('mapnik2')
+libraries.append('mapnik')
 libraries.append(env['ICU_LIB_NAME'])
 
 input_plugin = plugin_env.SharedLibrary('../osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
-# if the plugin links to libmapnik2 ensure it is built first
+# if the plugin links to libmapnik ensure it is built first
 Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:

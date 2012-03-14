@@ -22,7 +22,7 @@ Import ('env')
 # main SConstruct file where configuration happens
 
 # plugins can go anywhere, and be registered in custom locations by Mapnik
-# but the standard location is '/usr/local/lib/mapnik2/input'
+# but the standard location is '/usr/local/lib/mapnik/input'
 install_dest = env['MAPNIK_INPUT_PLUGINS_DEST']
 
 # clone the environment here
@@ -42,7 +42,7 @@ plugin_sources = Split(
 # directly link to
 libraries = [ '' ] # eg 'libfoo'
 
-libraries.append('mapnik2')
+libraries.append('mapnik')
 # link libicuuc, but ICU_LIB_NAME is used custom builds of icu can
 # have different library names like osx which offers /usr/lib/libicucore.dylib
 libraries.append(env['ICU_LIB_NAME'])

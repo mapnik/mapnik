@@ -4,10 +4,10 @@
 from nose.tools import *
 from utilities import Todo
 
-import mapnik2
+import mapnik
 
-if hasattr(mapnik2,'Expression'):
-    mapnik2.Filter = mapnik2.Expression
+if hasattr(mapnik,'Expression'):
+    mapnik.Filter = mapnik.Expression
 
 map_ = '''<Map>
     <Style name="s">
@@ -52,25 +52,25 @@ map_ = '''<Map>
 </Map>'''
 
 def test_filter_init():    
-    m = mapnik2.Map(1,1)
-    mapnik2.load_map_from_string(m,map_)
+    m = mapnik.Map(1,1)
+    mapnik.load_map_from_string(m,map_)
     filters = []
-    filters.append(mapnik2.Filter("([region]>=0) and ([region]<=50)"))
-    filters.append(mapnik2.Filter("(([region]>=0) and ([region]<=50))"))
-    filters.append(mapnik2.Filter("((([region]>=0) and ([region]<=50)))"))
-    filters.append(mapnik2.Filter('((([region]>=0) and ([region]<=50)))'))
-    filters.append(mapnik2.Filter('''((([region]>=0) and ([region]<=50)))'''))
-    filters.append(mapnik2.Filter('''
+    filters.append(mapnik.Filter("([region]>=0) and ([region]<=50)"))
+    filters.append(mapnik.Filter("(([region]>=0) and ([region]<=50))"))
+    filters.append(mapnik.Filter("((([region]>=0) and ([region]<=50)))"))
+    filters.append(mapnik.Filter('((([region]>=0) and ([region]<=50)))'))
+    filters.append(mapnik.Filter('''((([region]>=0) and ([region]<=50)))'''))
+    filters.append(mapnik.Filter('''
     ((([region]>=0)
     and
     ([region]<=50)))
     '''))
-    filters.append(mapnik2.Filter('''
+    filters.append(mapnik.Filter('''
     ([region]>=0)
     and
     ([region]<=50)
     '''))
-    filters.append(mapnik2.Filter('''
+    filters.append(mapnik.Filter('''
     ([region]
     >=
     0)
@@ -91,31 +91,31 @@ def test_filter_init():
     
     s = m.find_style('s2')
     
-    eq_(s.filter_mode,mapnik2.filter_mode.FIRST)
+    eq_(s.filter_mode,mapnik.filter_mode.FIRST)
 
 
 def test_regex_match():
-    f = mapnik2.Feature(0)
+    f = mapnik.Feature(0)
     f["name"] = 'test'
-    expr = mapnik2.Expression("[name].match('test')")
+    expr = mapnik.Expression("[name].match('test')")
     eq_(expr.evaluate(f),True) # 1 == True
 
 def test_unicode_regex_match():
-    f = mapnik2.Feature(0)
+    f = mapnik.Feature(0)
     f["name"] = 'Québec'
-    expr = mapnik2.Expression("[name].match('Québec')")
+    expr = mapnik.Expression("[name].match('Québec')")
     eq_(expr.evaluate(f),True) # 1 == True
 
 def test_regex_replace():
-    f = mapnik2.Feature(0)
+    f = mapnik.Feature(0)
     f["name"] = 'test'
-    expr = mapnik2.Expression("[name].replace('(\B)|( )','$1 ')")
+    expr = mapnik.Expression("[name].replace('(\B)|( )','$1 ')")
     eq_(expr.evaluate(f),'t e s t')
 
 def test_unicode_regex_replace():
-    f = mapnik2.Feature(0)
+    f = mapnik.Feature(0)
     f["name"] = 'Québec'
-    expr = mapnik2.Expression("[name].replace('(\B)|( )','$1 ')")
+    expr = mapnik.Expression("[name].replace('(\B)|( )','$1 ')")
     eq_(expr.evaluate(f), u'Q u é b e c')
 
 if __name__ == "__main__":

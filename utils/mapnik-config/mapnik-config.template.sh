@@ -1,6 +1,20 @@
 
 ## program below
 
+CONFIG_JSON="{
+  \"prefix\": \"${CONFIG_PREFIX}\",
+  \"mapnik_libname\": \"${CONFIG_MAPNIK_LIBNAME}\",
+  \"mapnik_include\": \"${CONFIG_MAPNIK_INCLUDE}\",
+  \"mapnik_lib\": \"${CONFIG_MAPNIK_LIB}\",
+  \"version\": \"${CONFIG_MAPNIK_VERSION}\",
+  \"ldflags\": \"${CONFIG_MAPNIK_LDFLAGS}\",
+  \"dep_libs\": \"${CONFIG_DEP_LIBS}\",
+  \"other_includes\": \"${CONFIG_OTHER_INCLUDES}\",
+  \"fonts\": \"${CONFIG_FONTS}\",
+  \"input_plugins\": \"${CONFIG_INPUT_PLUGINS}\",
+  \"git_revision\": \"${CONFIG_GIT_REVISION}\"
+}"
+
 usage()
 {
     cat <<EOF
@@ -19,7 +33,7 @@ Known values for OPTION are:
   --json            print all config options as json object
   --help            display this help and exit
   -v --version      output version information
-  --svn-revision    output svn revision information
+  --git-revision    output git hash
 EOF
 
     exit $1
@@ -36,7 +50,7 @@ while test $# -gt 0; do
     esac
 
     case "$1" in
-    
+
     --prefix=*)
       prefix=$optarg
       includedir=$CONFIG_PREFIX/include
@@ -59,8 +73,8 @@ while test $# -gt 0; do
       echo $CONFIG_JSON
       ;;
 
-    --svn-revision)
-      echo ${CONFIG_SVN_REVISION}
+    --git-revision)
+      echo ${CONFIG_GIT_REVISION}
       ;;
 
     --help)
@@ -68,13 +82,13 @@ while test $# -gt 0; do
       ;;
 
     --fonts)
-      echo ${CONFIG_FONTS} 
+      echo ${CONFIG_FONTS}
       ;;
 
     --input-plugins)
-      echo ${CONFIG_INPUT_PLUGINS} 
+      echo ${CONFIG_INPUT_PLUGINS}
       ;;
-      
+
     --cflags)
       echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_OTHER_INCLUDES}
       ;;

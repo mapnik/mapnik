@@ -95,9 +95,9 @@ void export_style()
                       "Usage:\n"
                       ">>> for r in m.find_style('style 1').rules:\n"
                       ">>>    print r\n"
-                      "<mapnik2._mapnik2.Rule object at 0x100549910>\n"
-                      "<mapnik2._mapnik2.Rule object at 0x100549980>\n"
-                   )
+                      "<mapnik._mapnik.Rule object at 0x100549910>\n"
+                      "<mapnik._mapnik.Rule object at 0x100549980>\n"
+            )
         .add_property("filter_mode",
                       &feature_type_style::get_filter_mode,
                       &feature_type_style::set_filter_mode,

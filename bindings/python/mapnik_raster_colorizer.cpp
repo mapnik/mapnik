@@ -105,51 +105,51 @@ void export_raster_colorizer()
             ">>> colorizer.add_stop(stop)\n"
             )
         .def("add_stop", add_stop2,
-            (arg("value")),
-            "Add a colorizer stop to the raster colorizer, using the default mode and color.\n"
-            "\n"
-            "Usage:\n"
-            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-            ">>> colorizer.add_stop(100)\n"
+             (arg("value")),
+             "Add a colorizer stop to the raster colorizer, using the default mode and color.\n"
+             "\n"
+             "Usage:\n"
+             ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100)\n"
             )
         .def("add_stop", add_stop3,
-            (arg("value")),
-            "Add a colorizer stop to the raster colorizer, using the default mode.\n"
-            "\n"
-            "Usage:\n"
-            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-            ">>> colorizer.add_stop(100, mapnik.Color(\"#123456\"))\n"
+             (arg("value")),
+             "Add a colorizer stop to the raster colorizer, using the default mode.\n"
+             "\n"
+             "Usage:\n"
+             ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100, mapnik.Color(\"#123456\"))\n"
             )
         .def("add_stop", add_stop4,
-            (arg("value")),
-            "Add a colorizer stop to the raster colorizer, using the default color.\n"
-            "\n"
-            "Usage:\n"
-            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-            ">>> colorizer.add_stop(100, mapnik2.COLORIZER_EXACT)\n"
+             (arg("value")),
+             "Add a colorizer stop to the raster colorizer, using the default color.\n"
+             "\n"
+             "Usage:\n"
+             ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100, mapnik.COLORIZER_EXACT)\n"
             )
         .def("add_stop", add_stop5,
-            (arg("value")),
-            "Add a colorizer stop to the raster colorizer.\n"
-            "\n"
-            "Usage:\n"
-            ">>> default_color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer = mapnik.RasterColorizer(mapnik2.COLORIZER_LINEAR, default_color)\n"
-            ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#112233\"))\n"
+             (arg("value")),
+             "Add a colorizer stop to the raster colorizer.\n"
+             "\n"
+             "Usage:\n"
+             ">>> default_color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
+             ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#112233\"))\n"
             )
-        .def("get_color", &raster_colorizer::get_color, 
-            "Get the color assigned to a certain value in raster data.\n"
-            "\n"
-            "Usage:\n"
-            ">>> colorizer = mapnik.RasterColorizer()\n"
-            ">>> color = mapnik.Color(\"#0044cc\")\n"
-            ">>> colorizer.add_stop(0, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#000000\"))\n"
-            ">>> colorizer.add_stop(100, mapnik2.COLORIZER_DISCRETE, mapnik.Color(\"#0E0A06\"))\n"
-            ">>> colorizer.get_color(50)\n"
-            "Color('#070503')\n"
+        .def("get_color", &raster_colorizer::get_color,
+             "Get the color assigned to a certain value in raster data.\n"
+             "\n"
+             "Usage:\n"
+             ">>> colorizer = mapnik.RasterColorizer()\n"
+             ">>> color = mapnik.Color(\"#0044cc\")\n"
+             ">>> colorizer.add_stop(0, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#000000\"))\n"
+             ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#0E0A06\"))\n"
+             ">>> colorizer.get_color(50)\n"
+             "Color('#070503')\n"
             )
         ;    
 

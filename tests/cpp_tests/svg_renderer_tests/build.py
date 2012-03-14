@@ -9,7 +9,7 @@ filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 
-libraries =  [filesystem, 'mapnik2']
+libraries =  [filesystem, 'mapnik']
 
 if env['PLATFORM'] == 'Darwin':
     libraries.append(env['ICU_LIB_NAME'])

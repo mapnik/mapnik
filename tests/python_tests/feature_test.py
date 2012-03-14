@@ -6,7 +6,7 @@ from utilities import Todo
 
 class FeatureTest(unittest.TestCase):
     def makeOne(self, *args, **kw):
-        from mapnik2 import Feature
+        from mapnik import Feature
         return Feature(*args, **kw)
     
     def test_default_constructor(self):
@@ -14,7 +14,7 @@ class FeatureTest(unittest.TestCase):
         self.failUnless(f is not None)
 
     def test_python_extended_constructor(self):
-        from mapnik2 import Box2d
+        from mapnik import Box2d
         f = self.makeOne(1, 'POLYGON ((35 10, 10 20, 15 40, 45 45, 35 10),(20 30, 35 35, 30 20, 20 30))', foo="bar")
         self.failUnlessEqual(f['foo'], 'bar')
         self.failUnlessEqual(f.envelope(),Box2d(10.0,10.0,45.0,45.0))
@@ -37,7 +37,7 @@ class FeatureTest(unittest.TestCase):
             test_val(v)
 
     def test_add_wkt_geometry(self):
-        from mapnik2 import Box2d
+        from mapnik import Box2d
         def add_geom_wkt(wkt):
             f = self.makeOne(1)
             self.failUnlessEqual(len(f.geometries()), 0)

@@ -148,10 +148,10 @@ public:
         // shared cache flag not available until >= 3.6.18
         mode |= SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE;
 #endif
-        const int rc = sqlite3_open_v2 (file_.c_str(), &db_, mode, 0);
+        const int rc = sqlite3_open_v2 (file.c_str(), &db_, mode, 0);
 #else
 #warning "Mapnik's sqlite plugin is compiling against a version of sqlite older than 3.5.x which may make rendering slow..."
-        const int rc = sqlite3_open (file_.c_str(), &db_);
+        const int rc = sqlite3_open (file.c_str(), &db_);
 #endif
         if (rc != SQLITE_OK)
         {

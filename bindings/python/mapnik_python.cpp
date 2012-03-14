@@ -319,15 +319,6 @@ unsigned mapnik_version()
     return MAPNIK_VERSION;
 }
 
-unsigned mapnik_svn_revision()
-{
-#if defined(SVN_REVISION)
-    return SVN_REVISION;
-#else
-    return 0;
-#endif
-}
-
 // indicator for jpeg read/write support within libmapnik
 bool has_jpeg()
 {
@@ -375,7 +366,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string, 1, 2)
 BOOST_PYTHON_FUNCTION_OVERLOADS(render_overloads, render, 2, 5)
 
-BOOST_PYTHON_MODULE(_mapnik2)
+BOOST_PYTHON_MODULE(_mapnik)
 {
  
     using namespace boost::python;
@@ -606,7 +597,6 @@ BOOST_PYTHON_MODULE(_mapnik2)
     
     def("save_map_to_string", &save_map_to_string, save_map_to_string_overloads());
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
-    def("mapnik_svn_revision", &mapnik_svn_revision,"Get the Mapnik svn revision");
     def("has_jpeg", &has_jpeg, "Get jpeg read/write support status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");

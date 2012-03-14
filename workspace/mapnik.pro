@@ -1,9 +1,9 @@
 # -------------------------------------------------
-# QtCreator Project For Mapnik2
+# QtCreator Project For Mapnik
 # -------------------------------------------------
 QT -= core gui
 
-TARGET = mapnik2
+TARGET = mapnik
 TEMPLATE = lib
 
 HEADERS += \

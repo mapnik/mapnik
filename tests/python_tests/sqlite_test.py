@@ -3,7 +3,7 @@
 from nose.tools import *
 from utilities import execution_path
 
-import os, mapnik2
+import os, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -17,13 +17,13 @@ def setup():
 def test_attachdb_with_relative_file():
     # The point table and index is in the qgis_spatiallite.sqlite
     # database.  If either is not found, then this fails
-    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+    ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
         table='point',
         attachdb='scratch@qgis_spatiallite.sqlite'
         )
 
 def test_attachdb_with_multiple_files():
-    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+    ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
         table='attachedtest',
         attachdb='scratch1@:memory:,scratch2@:memory:',
         initdb='create table scratch1.attachedtest (the_geom);\n' +
@@ -34,13 +34,13 @@ def test_attachdb_with_multiple_files():
 def test_attachdb_with_absolute_file():
     # The point table and index is in the qgis_spatiallite.sqlite
     # database.  If either is not found, then this fails
-    ds = mapnik2.SQLite(file=os.getcwd() + '/../data/sqlite/world.sqlite', 
+    ds = mapnik.SQLite(file=os.getcwd() + '/../data/sqlite/world.sqlite', 
         table='point',
         attachdb='scratch@qgis_spatiallite.sqlite'
         )
 
 def test_attachdb_with_index():
-    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+    ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
         table='attachedtest',
         attachdb='scratch@:memory:',
         initdb='create table scratch.attachedtest (the_geom);\n' +
@@ -49,7 +49,7 @@ def test_attachdb_with_index():
         )
     
 def test_attachdb_with_explicit_index():
-    ds = mapnik2.SQLite(file='../data/sqlite/world.sqlite', 
+    ds = mapnik.SQLite(file='../data/sqlite/world.sqlite', 
         table='attachedtest',
         index_table='myindex',
         attachdb='scratch@:memory:',

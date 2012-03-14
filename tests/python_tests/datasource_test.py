@@ -3,7 +3,7 @@
 from nose.tools import *
 from utilities import execution_path
 
-import os, mapnik2
+import os, mapnik
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -11,36 +11,36 @@ def setup():
     os.chdir(execution_path('.'))
     
 def test_field_listing():
-    lyr = mapnik2.Layer('test')
-    lyr.datasource = mapnik2.Shapefile(file='../data/shp/poly.shp')
+    lyr = mapnik.Layer('test')
+    lyr.datasource = mapnik.Shapefile(file='../data/shp/poly.shp')
     fields = lyr.datasource.fields()
     eq_(fields, ['AREA', 'EAS_ID', 'PRFEDEA'])
 
 def test_total_feature_count_shp():
-    lyr = mapnik2.Layer('test')
-    lyr.datasource = mapnik2.Shapefile(file='../data/shp/poly.shp')
+    lyr = mapnik.Layer('test')
+    lyr.datasource = mapnik.Shapefile(file='../data/shp/poly.shp')
     features = lyr.datasource.all_features()
     num_feats = len(features)
     eq_(num_feats, 10)
 
 def test_total_feature_count_json():
-    lyr = mapnik2.Layer('test')
-    lyr.datasource = mapnik2.Ogr(file='../data/json/points.json',layer_by_index=0)
+    lyr = mapnik.Layer('test')
+    lyr.datasource = mapnik.Ogr(file='../data/json/points.json',layer_by_index=0)
     features = lyr.datasource.all_features()
     num_feats = len(features)
     eq_(num_feats, 5)
 
 def test_reading_json_from_string():
     json = open('../data/json/points.json','r').read()
-    lyr = mapnik2.Layer('test')
-    lyr.datasource = mapnik2.Ogr(file=json,layer_by_index=0)
+    lyr = mapnik.Layer('test')
+    lyr.datasource = mapnik.Ogr(file=json,layer_by_index=0)
     features = lyr.datasource.all_features()
     num_feats = len(features)
     eq_(num_feats, 5)
     
 def test_feature_envelope():
-    lyr = mapnik2.Layer('test')
-    lyr.datasource = mapnik2.Shapefile(file='../data/shp/poly.shp')
+    lyr = mapnik.Layer('test')
+    lyr.datasource = mapnik.Shapefile(file='../data/shp/poly.shp')
     features = lyr.datasource.all_features()
     for feat in features:
         env = feat.envelope()
@@ -50,8 +50,8 @@ def test_feature_envelope():
         eq_(intersects, True)
 
 def test_feature_attributes():
-    lyr = mapnik2.Layer('test')
-    lyr.datasource = mapnik2.Shapefile(file='../data/shp/poly.shp')
+    lyr = mapnik.Layer('test')
+    lyr.datasource = mapnik.Shapefile(file='../data/shp/poly.shp')
     features = lyr.datasource.all_features()
     feat = features[0]
     attrs = {'PRFEDEA': u'35043411', 'EAS_ID': 168, 'AREA': 215229.266}
@@ -67,8 +67,8 @@ def test_hit_grid():
         """ encode a list of strings with run-length compression """
         return ["%d:%s" % (len(list(group)), name) for name, group in groupby(l)]
 
-    m = mapnik2.Map(256,256);
-    mapnik2.load_map(m,'../data/good_maps/agg_poly_gamma_map.xml');
+    m = mapnik.Map(256,256);
+    mapnik.load_map(m,'../data/good_maps/agg_poly_gamma_map.xml');
     m.zoom_all()
     join_field = 'NAME'
     fg = [] # feature grid

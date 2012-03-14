@@ -14,11 +14,15 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.1
 ------------
 
+- Switched back to "libmapnik" and "import mapnik" rather than "mapnik2" (#941)
+
+- Removed svn_revision info from mapnik-config and python bindings as git is now used
+
+- Removed OGCServer from core - now at https://github.com/mapnik/OGCServer (e7f6267)
+
 - Fixed SQLite open stability across platforms/versions (#854)
 
 - Fixed `mapnik-config --version` (#903)
-
-- Switched back to "libmapnik" and "import mapnik" rather than "mapnik2" (#941)
 
 - Support for PostGIS 2.0 (#956,#1083)
 
