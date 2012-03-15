@@ -110,41 +110,81 @@ public:
      * @param maxZoom The minimum zoom level to set
      */
     void setMinZoom(double minZoom);
+    // forward compatibility with mapnik 2.1.x
+    void set_min_zoom(double minZoom)
+    {
+        setMinZoom(minZoom);
+    }
         
     /*!
      * @param maxZoom The maximum zoom level to set
      */
     void setMaxZoom(double maxZoom);
+    // forward compatibility with mapnik 2.1.x
+    void set_max_zoom(double maxZoom)
+    {
+        setMinZoom(maxZoom);
+    }
         
     /*!
      * @return the minimum zoom level of the layer.
      */
     double getMinZoom() const;
+    // forward compatibility with mapnik 2.1.x
+    double min_zoom() const
+    {
+        return getMinZoom();
+    }
         
     /*!
      * @return the maximum zoom level of the layer.
      */
     double getMaxZoom() const;
+    // forward compatibility with mapnik 2.1.x
+    double max_zoom() const
+    {
+        return getMaxZoom();
+    }
         
     /*!
      * @brief Set whether this layer is active and will be rendered.
      */
     void setActive(bool active);
+    // forward compatibility with mapnik 2.1.x
+    void set_active(bool active)
+    {
+        setActive(active);
+    }
         
     /*!
      * @return whether this layer is active and will be rendered.
      */
     bool isActive() const;
+    // forward compatibility with mapnik 2.1.x
+    bool active() const
+    {
+        return isActive();
+    }
         
     /*!
      * @brief Set whether this layer is queryable.
      */
     void setQueryable(bool queryable);
+    // forward compatibility with mapnik 2.1.x
+    void set_queryable(bool queryable)
+    {
+       setQueryable(queryable);
+    }
         
     /*!
      * @return whether this layer is queryable or not.
      */
     bool isQueryable() const;
+    // forward compatibility with mapnik 2.1.x
+    bool queryable() const
+    {
+        return isQueryable();
+    }
         
     /*!
      * @brief Get the visability for a specific scale.
@@ -159,6 +199,11 @@ public:
      *         scale < maxzoom + 1e-6
      */
     bool isVisible(double scale) const;
+    // forward compatibility with mapnik 2.1.x
+    bool visible(double scale) const
+    {
+        return isVisible(scale);
+    }
         
     /*!
      * @param clear_cache Set whether this layer's labels are cached.
