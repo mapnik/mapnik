@@ -1266,7 +1266,10 @@ void map_parser::parse_line_symbolizer( rule & rule, xml_node const & sym )
         line_rasterizer_e rasterizer = sym.get_attr<line_rasterizer_e>("rasterizer", RASTERIZER_FULL);
         //optional<line_rasterizer_e> rasterizer_method = sym.get_opt_attr<line_rasterizer_e>("full");
         symbol.set_rasterizer(rasterizer);
-
+        // smooth value
+        optional<double> smooth = sym.get_opt_attr<double>("smooth");
+        if (smooth) symbol.set_smooth(*smooth);
+        // meta-writer
         parse_metawriter_in_symbolizer(symbol, sym);
         rule.append(symbol);
     }

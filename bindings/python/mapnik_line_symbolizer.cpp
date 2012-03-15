@@ -62,5 +62,9 @@ void export_line_symbolizer()
                       (&line_symbolizer::get_stroke,
                        return_value_policy<copy_const_reference>()),
                       &line_symbolizer::set_stroke)
+        .add_property("smooth",
+                      &line_symbolizer::smooth,
+                      &line_symbolizer::set_smooth,
+                      "smooth value (0..1.0)")
         ;
 }

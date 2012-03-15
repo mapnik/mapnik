@@ -40,7 +40,7 @@
 #include "agg_renderer_outline_aa.h"
 #include "agg_rasterizer_outline_aa.h"
 #include "agg_conv_clip_polyline.h"
-
+#include "agg_conv_smooth_poly1.h"
 // stl
 #include <string>
 
@@ -105,8 +105,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
         set_gamma_method(stroke_, ras_ptr);
         
-        
-
         //metawriter_with_properties writer = sym.get_metawriter();
         for (unsigned i=0;i<feature->num_geometries();++i)
         {
@@ -137,14 +135,35 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                 }
                 else
                 {
-                    clipped_geometry_type clipped(geom);
-                    clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
-                    path_type path(t_,clipped,prj_trans);
-                    agg::conv_stroke<path_type> stroke(path);
-                    set_join_caps(stroke_,stroke);
-                    stroke.generator().miter_limit(4.0);
-                    stroke.generator().width(stroke_.get_width() * scale_factor_);
-                    ras_ptr->add_path(stroke);
+                    if (sym.smooth() > 0.0)
+                    {
+                        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+                        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+                        typedef agg::conv_smooth_poly1_curve<path_type> smooth_type;
+                        clipped_geometry_type clipped(geom);
+                        clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
+                        path_type path(t_,clipped,prj_trans);
+                        smooth_type smooth(path);
+                        smooth.smooth_value(sym.smooth());
+                        agg::conv_stroke<smooth_type> stroke(smooth);
+                        set_join_caps(stroke_,stroke);
+                        stroke.generator().miter_limit(4.0);
+                        stroke.generator().width(stroke_.get_width() * scale_factor_);
+                        ras_ptr->add_path(stroke);
+                    }
+                    else
+                    {
+                        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+                        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+                        clipped_geometry_type clipped(geom);
+                        clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
+                        path_type path(t_,clipped,prj_trans);
+                        agg::conv_stroke<path_type> stroke(path);
+                        set_join_caps(stroke_,stroke);
+                        stroke.generator().miter_limit(4.0);
+                        stroke.generator().width(stroke_.get_width() * scale_factor_);
+                        ras_ptr->add_path(stroke);                        
+                    }
                     //if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
                 }
             }
