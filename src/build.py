@@ -81,7 +81,7 @@ if not env['RUNTIME_LINK'] == 'static':
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = 'libmapnik.dylib'
 else:
-    mapnik_libname = 'libmapnik.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1])) 
+    mapnik_libname = 'libmapnik.so.' + ("%d.%d" % (int(ABI_VERSION[0]),int(ABI_VERSION[1])))
 
 if env['PLATFORM'] == 'Darwin':
     if env['FULL_LIB_PATH']:
