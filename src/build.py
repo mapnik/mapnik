@@ -342,7 +342,7 @@ if env['PLATFORM'] != 'Darwin':
 
     major, minor, micro = ABI_VERSION
     
-    soFile = "%s.%d.%d.%d" % (os.path.basename(str(mapnik[0])), major, minor, micro)
+    soFile = "%s.%d.%d.%d" % (os.path.basename(str(mapnik[0])), int(major), int(minor), int(micro))
     target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], soFile)
     
     if 'uninstall' not in COMMAND_LINE_TARGETS:
@@ -353,7 +353,7 @@ if env['PLATFORM'] != 'Darwin':
 
     
     # Install symlinks
-    target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % (os.path.basename(str(mapnik[0])),major, minor))
+    target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % (os.path.basename(str(mapnik[0])),int(major), int(minor)))
     target2 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], os.path.basename(str(mapnik[0])))
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if 'install' in COMMAND_LINE_TARGETS:
