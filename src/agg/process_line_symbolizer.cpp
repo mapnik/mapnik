@@ -52,9 +52,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
+  
     stroke const& stroke_ = sym.get_stroke();
     color const& col = stroke_.get_color();
     unsigned r=col.red();
@@ -70,6 +68,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     {
         typedef agg::renderer_outline_aa<ren_base> renderer_type;
         typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
+        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
 
         agg::line_profile_aa profile;
         profile.width(stroke_.get_width() * scale_factor_);
@@ -113,25 +113,54 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             {
                 if (stroke_.has_dash())
                 {
-                    clipped_geometry_type clipped(geom);
-                    clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
-                    path_type path(t_,clipped,prj_trans);
-                    
-                    agg::conv_dash<path_type> dash(path);
-                    dash_array const& d = stroke_.get_dash_array();
-                    dash_array::const_iterator itr = d.begin();
-                    dash_array::const_iterator end = d.end();
-                    for (;itr != end;++itr)
+                    if (sym.smooth() > 0.0)
                     {
-                        dash.add_dash(itr->first * scale_factor_,
-                                      itr->second * scale_factor_);
+                        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+                        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+                        typedef agg::conv_smooth_poly1_curve<path_type> smooth_type;
+                        clipped_geometry_type clipped(geom);
+                        clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
+                        path_type path(t_,clipped,prj_trans);
+                        smooth_type smooth(path);
+                        smooth.smooth_value(sym.smooth());
+                        agg::conv_dash<smooth_type> dash(smooth);
+                        dash_array const& d = stroke_.get_dash_array();
+                        dash_array::const_iterator itr = d.begin();
+                        dash_array::const_iterator end = d.end();
+                        for (;itr != end;++itr)
+                        {
+                            dash.add_dash(itr->first * scale_factor_,
+                                          itr->second * scale_factor_);
+                        }
+                        agg::conv_stroke<agg::conv_dash<smooth_type > > stroke(dash);
+                        set_join_caps(stroke_,stroke);
+                        stroke.generator().miter_limit(4.0);
+                        stroke.generator().width(stroke_.get_width() * scale_factor_);
+                        ras_ptr->add_path(stroke);
                     }
-                    agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
-                    set_join_caps(stroke_,stroke);
-                    stroke.generator().miter_limit(4.0);
-                    stroke.generator().width(stroke_.get_width() * scale_factor_);
-                    ras_ptr->add_path(stroke);
-
+                    else
+                    {
+                        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+                        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+                        clipped_geometry_type clipped(geom);
+                        clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
+                        path_type path(t_,clipped,prj_trans);
+                        
+                        agg::conv_dash<path_type> dash(path);
+                        dash_array const& d = stroke_.get_dash_array();
+                        dash_array::const_iterator itr = d.begin();
+                        dash_array::const_iterator end = d.end();
+                        for (;itr != end;++itr)
+                        {
+                            dash.add_dash(itr->first * scale_factor_,
+                                          itr->second * scale_factor_);
+                        }
+                        agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
+                        set_join_caps(stroke_,stroke);
+                        stroke.generator().miter_limit(4.0);
+                        stroke.generator().width(stroke_.get_width() * scale_factor_);
+                        ras_ptr->add_path(stroke);
+                    }
                 }
                 else
                 {
