@@ -27,7 +27,9 @@ files = [
     ("formating-3", 500),
     ("formating-4", 500),
     ("shieldsymbolizer-1", 490, 495, 497, 498, 499, 500, 501, 502, 505, 510),
-    ("expressionformat", 500)]
+    ("expressionformat", 500),
+    ("rtl-point", (200, 200))
+    ]
 
 def render(filename, width, height=100):
     print "-"*80
