@@ -793,7 +793,7 @@ def GetMapnikLibVersion(context):
 
 int main() 
 {
-    std::cout << MAPNIK_VERSION << std::endl;
+    std::cout << MAPNIK_VERSION_STRING << std::endl;
     return 0;
 }
 
@@ -803,11 +803,7 @@ int main()
     context.Result(ret[0])
     if not ret[1]:
         return []
-    version = int(ret[1].strip())    
-    patch_level = version % 100
-    minor_version = version / 100 % 1000
-    major_version = version / 100000
-    return [major_version,minor_version,patch_level]
+    return ret[1].strip()
 
 def icu_at_least_four_two(context):
     ret = context.TryRun("""
@@ -1372,14 +1368,13 @@ if not preconfigured:
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
         abi = conf.GetMapnikLibVersion()
-        abi_fallback = [2,0,0]
+        abi_fallback = "2.0.1-pre"
         if not abi:
             color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
-            env['ABI_VERSION'] = abi_fallback
-        else:
-            env['ABI_VERSION'] = abi
-        env['MAPNIK_VERSION_STRING'] = '.'.join(['%d' % i for i in env['ABI_VERSION']])
+            abi = abi_fallback
 
+        env['ABI_VERSION'] = abi.replace('-pre','').split('.')
+        env['MAPNIK_VERSION_STRING'] = abi
 
         # Common C++ flags.
         if env['THREADING'] == 'multi':

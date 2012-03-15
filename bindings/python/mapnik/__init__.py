@@ -605,13 +605,6 @@ def Geos(**keywords):
     keywords['type'] = 'geos'
     return CreateDatasource(keywords)
 
-def mapnik_version_string(version=mapnik_version()):
-    """Return the Mapnik version as a string."""
-    patch_level = version % 100
-    minor_version = version / 100 % 1000
-    major_version = version / 100000
-    return '%s.%s.%s' % ( major_version, minor_version,patch_level)
-
 def mapnik_version_from_string(version_string):
     """Return the Mapnik version from a string."""
     n = version_string.split('.')

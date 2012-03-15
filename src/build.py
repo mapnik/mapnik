@@ -89,7 +89,7 @@ if env['PLATFORM'] == 'Darwin':
     else:
         lib_path = mapnik_libname
     mapnik_lib_link_flag += ' -Wl,-install_name,%s' % lib_path
-    _d = {'version':env['MAPNIK_VERSION_STRING']}
+    _d = {'version':env['MAPNIK_VERSION_STRING'].replace('-pre','')}
     mapnik_lib_link_flag += ' -current_version %(version)s -compatibility_version %(version)s' % _d
 elif env['PLATFORM'] == 'SunOS':
     if env['CXX'].startswith('CC'):
