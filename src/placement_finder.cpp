@@ -384,6 +384,9 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
 
     // set for upper left corner of text envelope for the first line, bottom left of first character
     y = string_height_ / 2.0 - line_height;
+    // RTL text is converted to a mirrored representation in get_string_info()
+    // so we have to fix line break order here
+    if (info_.get_rtl()) y = -y;
 
     // adjust for desired justification
     if (p.jalign == J_LEFT)
@@ -408,7 +411,13 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
             line_width = line_sizes_[line_number].first;
             line_height= line_sizes_[line_number].second;
 
-            y -= line_height;  // move position down to line start
+            if (info_.get_rtl())
+            {
+                y += line_height;
+            } else
+            {
+                y -= line_height;  // move position down to line start
+            }
 
             // reset to begining of line position
             if (p.jalign == J_LEFT)
