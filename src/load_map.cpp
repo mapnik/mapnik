@@ -80,16 +80,16 @@ using boost::optional;
 
 class map_parser : boost::noncopyable {
 public:
-    map_parser( bool strict, std::string const& filename = "" ) :
-        strict_( strict ),
-        filename_( filename ),
+    map_parser(bool strict, std::string const& filename = "") :
+        strict_(strict),
+        filename_(filename),
         relative_to_xml_(true),
         font_manager_(font_engine_)
     {}
 
     void parse_map(Map & map, xml_node const& sty, std::string const& base_path);
 private:
-    void parse_map_include( Map & map, xml_node const& include);
+    void parse_map_include(Map & map, xml_node const& include);
     void parse_style(Map & map, xml_node const& sty);
     void parse_layer(Map & map, xml_node const& lay);
     void parse_metawriter(Map & map, xml_node const& lay);
@@ -107,9 +107,9 @@ private:
     void parse_shield_symbolizer(rule & rule, xml_node const& sym);
     void parse_line_symbolizer(rule & rule, xml_node const& sym);
     void parse_polygon_symbolizer(rule & rule, xml_node const& sym);
-    void parse_building_symbolizer(rule & rule, xml_node const& sym );
-    void parse_raster_symbolizer(rule & rule, xml_node const& sym );
-    void parse_markers_symbolizer(rule & rule, xml_node const& sym );
+    void parse_building_symbolizer(rule & rule, xml_node const& sym);
+    void parse_raster_symbolizer(rule & rule, xml_node const& sym);
+    void parse_markers_symbolizer(rule & rule, xml_node const& sym);
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     void parse_stroke(stroke & strk, xml_node const & sym);
@@ -479,7 +479,7 @@ void map_parser::parse_font(font_set &fset, xml_node const& f)
     optional<std::string> face_name = f.get_opt_attr<std::string>("face-name");
     if (face_name)
     {
-        if ( strict_ )
+        if (strict_)
         {
             ensure_font_face(*face_name);
         }
@@ -506,47 +506,47 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
         optional<boolean> status = lay.get_opt_attr<boolean>("status");
         if (status)
         {
-            lyr.set_active(* status );
+            lyr.set_active(* status);
         }
 
         optional<double> min_zoom = lay.get_opt_attr<double>("minzoom");
         if (min_zoom)
         {
-            lyr.set_min_zoom( * min_zoom );
+            lyr.set_min_zoom(* min_zoom);
         }
 
 
         optional<double> max_zoom = lay.get_opt_attr<double>("maxzoom");
         if (max_zoom)
         {
-            lyr.set_max_zoom( * max_zoom );
+            lyr.set_max_zoom(* max_zoom);
         }
 
         optional<boolean> queryable = lay.get_opt_attr<boolean>("queryable");
         if (queryable)
         {
-            lyr.set_queryable( * queryable );
+            lyr.set_queryable(* queryable);
         }
 
         optional<boolean> clear_cache =
             lay.get_opt_attr<boolean>("clear-label-cache");
         if (clear_cache)
         {
-            lyr.set_clear_label_cache( * clear_cache );
+            lyr.set_clear_label_cache(* clear_cache);
         }
 
         optional<boolean> cache_features =
             lay.get_opt_attr<boolean>("cache-features");
         if (cache_features)
         {
-            lyr.set_cache_features( * cache_features );
+            lyr.set_cache_features(* cache_features);
         }
 
         optional<std::string> group_by =
             lay.get_opt_attr<std::string>("group-by");
         if (group_by)
         {
-            lyr.set_group_by( * group_by );
+            lyr.set_group_by(* group_by);
         }
 
         xml_node::const_iterator child = lay.begin();
@@ -576,7 +576,7 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
             {
                 parameters params;
                 optional<std::string> base = child->get_opt_attr<std::string>("base");
-                if( base )
+                if(base)
                 {
                     std::map<std::string,parameters>::const_iterator base_itr = datasource_templates_.find(*base);
                     if (base_itr!=datasource_templates_.end())
@@ -614,9 +614,9 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
                     lyr.set_datasource(ds);
                 }
 
-                catch (const std::exception & ex )
+                catch (const std::exception & ex)
                 {
-                    throw config_error( ex.what() );
+                    throw config_error(ex.what());
                 }
 
                 catch (...)
@@ -676,10 +676,10 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
         xml_node::const_iterator symIter = r.begin();
         xml_node::const_iterator endSym = r.end();
 
-        for( ;symIter != endSym; ++symIter)
+        for(;symIter != endSym; ++symIter)
         {
 
-            if ( symIter->is("PointSymbolizer"))
+            if (symIter->is("PointSymbolizer"))
             {
                 parse_point_symbolizer(rule, *symIter);
             }
@@ -713,7 +713,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
             }
             else if (symIter->is("RasterSymbolizer"))
             {
-                parse_raster_symbolizer( rule, *symIter);
+                parse_raster_symbolizer(rule, *symIter);
             }
             else if (symIter->is("MarkersSymbolizer"))
             {
@@ -725,7 +725,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
     }
     catch (const config_error & ex)
     {
-        if (!name.empty() )
+        if (!name.empty())
         {
             ex.append_context(std::string("in rule '") + name + "'", r);
         }
@@ -755,25 +755,25 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
         point_symbolizer symbol;
         if (allow_overlap)
         {
-            symbol.set_allow_overlap( * allow_overlap );
+            symbol.set_allow_overlap(* allow_overlap);
         }
         if (opacity)
         {
-            symbol.set_opacity( * opacity );
+            symbol.set_opacity(* opacity);
         }
         if (ignore_placement)
         {
-            symbol.set_ignore_placement( * ignore_placement );
+            symbol.set_ignore_placement(* ignore_placement);
         }
         point_placement_e placement =
             sym.get_attr<point_placement_e>("placement", CENTROID_POINT_PLACEMENT);
-        symbol.set_point_placement( placement );
+        symbol.set_point_placement(placement);
 
         if (file)
         {
             try
             {
-                if( base )
+                if(base)
                 {
                     std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
                     if (itr!=file_sources_.end())
@@ -804,7 +804,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                     symbol.set_transform(matrix);
                 }
             }
-            catch (image_reader_exception const & ex )
+            catch (image_reader_exception const & ex)
             {
                 std::string msg("Failed to load image file '" + * file +
                                 "': " + ex.what());
@@ -869,7 +869,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
 
         markers_symbolizer symbol(parse_path(filename));
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        if (opacity) symbol.set_opacity( *opacity );
+        if (opacity) symbol.set_opacity(*opacity);
 
         if (transform_wkt)
         {
@@ -922,7 +922,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         symbol.set_stroke(strk);
 
         marker_placement_e placement = sym.get_attr<marker_placement_e>("placement", MARKER_LINE_PLACEMENT);
-        symbol.set_marker_placement( placement );
+        symbol.set_marker_placement(placement);
 
         marker_type_e dfl_marker_type = ARROW;
 
@@ -930,7 +930,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             dfl_marker_type = ELLIPSE;
 
         marker_type_e marker_type = sym.get_attr<marker_type_e>("marker-type", dfl_marker_type);
-        symbol.set_marker_type( marker_type );
+        symbol.set_marker_type(marker_type);
 
         parse_metawriter_in_symbolizer(symbol, sym);
         rule.append(symbol);
@@ -942,7 +942,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
     }
 }
 
-void map_parser::parse_line_pattern_symbolizer( rule & rule, xml_node const & sym )
+void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym)
 {
     try
     {
@@ -951,7 +951,7 @@ void map_parser::parse_line_pattern_symbolizer( rule & rule, xml_node const & sy
 
         try
         {
-            if( base )
+            if(base)
             {
                 std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
                 if (itr!=file_sources_.end())
@@ -967,7 +967,7 @@ void map_parser::parse_line_pattern_symbolizer( rule & rule, xml_node const & sy
             parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
         }
-        catch (image_reader_exception const & ex )
+        catch (image_reader_exception const & ex)
         {
             std::string msg("Failed to load image file '" + file +
                             "': " + ex.what());
@@ -988,8 +988,8 @@ void map_parser::parse_line_pattern_symbolizer( rule & rule, xml_node const & sy
     }
 }
 
-void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
-                                                   xml_node const & sym )
+void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
+                                                   xml_node const & sym)
 {
     try
     {
@@ -998,7 +998,7 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
 
         try
         {
-            if( base )
+            if(base)
             {
                 std::map<std::string,std::string>::iterator itr = file_sources_.find(*base);
                 if (itr!=file_sources_.end())
@@ -1026,7 +1026,7 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
             parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
         }
-        catch (image_reader_exception const & ex )
+        catch (image_reader_exception const & ex)
         {
             std::string msg("Failed to load image file '" + file +
                             "': " + ex.what());
@@ -1047,7 +1047,7 @@ void map_parser::parse_polygon_pattern_symbolizer( rule & rule,
     }
 }
 
-void map_parser::parse_text_symbolizer( rule & rule, xml_node const& sym )
+void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
 {
     try
     {
@@ -1074,7 +1074,7 @@ void map_parser::parse_text_symbolizer( rule & rule, xml_node const& sym )
     }
 }
 
-void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym )
+void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 {
     try
     {
@@ -1127,7 +1127,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym )
             sym.get_opt_attr<double>("text-opacity");
         if (text_opacity)
         {
-            shield_symbol.set_text_opacity( * text_opacity );
+            shield_symbol.set_text_opacity(* text_opacity);
         }
 
         // unlock_image
@@ -1135,7 +1135,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym )
             sym.get_opt_attr<boolean>("unlock-image");
         if (unlock_image)
         {
-            shield_symbol.set_unlock_image( * unlock_image );
+            shield_symbol.set_unlock_image(* unlock_image);
         }
 
         parse_metawriter_in_symbolizer(shield_symbol, sym);
@@ -1145,7 +1145,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym )
 
         try
         {
-            if( base )
+            if(base)
             {
                 std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
                 if (itr!=file_sources_.end())
@@ -1157,7 +1157,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym )
             image_file = ensure_relative_to_xml(image_file);
             shield_symbol.set_filename(parse_path(image_file));
         }
-        catch (image_reader_exception const & ex )
+        catch (image_reader_exception const & ex)
         {
             std::string msg("Failed to load image file '" + image_file +
                             "': " + ex.what());
@@ -1227,7 +1227,7 @@ void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
                 double f = boost::lexical_cast<double>(*itr);
                 dash_array.push_back(f);
             }
-            catch ( boost::bad_lexical_cast &)
+            catch (boost::bad_lexical_cast &)
             {
                 throw config_error(std::string("Failed to parse dasharray ") +
                                    "'. Expected a " +
@@ -1237,7 +1237,7 @@ void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
         if (dash_array.size())
         {
             size_t size = dash_array.size();
-            if ( size % 2)
+            if (size % 2)
             {
                 for (size_t i=0; i < size ;++i)
                 {
@@ -1254,7 +1254,7 @@ void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
     }
 }
 
-void map_parser::parse_line_symbolizer( rule & rule, xml_node const & sym )
+void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
 {
     try
     {
@@ -1281,7 +1281,7 @@ void map_parser::parse_line_symbolizer( rule & rule, xml_node const & sym )
 }
 
 
-void map_parser::parse_polygon_symbolizer( rule & rule, xml_node const & sym )
+void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
 {
     try
     {
@@ -1313,7 +1313,7 @@ void map_parser::parse_polygon_symbolizer( rule & rule, xml_node const & sym )
 }
 
 
-void map_parser::parse_building_symbolizer( rule & rule, xml_node const & sym )
+void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
 {
     try
     {
@@ -1339,7 +1339,7 @@ void map_parser::parse_building_symbolizer( rule & rule, xml_node const & sym )
     }
 }
 
-void map_parser::parse_raster_symbolizer( rule & rule, xml_node const & sym )
+void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
 {
     try
     {
@@ -1400,13 +1400,13 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
         if(default_mode == COLORIZER_INHERIT) {
             throw config_error("RasterColorizer mode must not be INHERIT. ");
         }
-        rc->set_default_mode( default_mode );
+        rc->set_default_mode(default_mode);
 
         // default colour
         optional<color> default_color = node.get_opt_attr<color>("default-color");
         if (default_color)
         {
-            rc->set_default_color( *default_color );
+            rc->set_default_color(*default_color);
         }
 
 
@@ -1417,7 +1417,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
             if(*eps < 0) {
                 throw config_error("RasterColorizer epsilon must be > 0. ");
             }
-            rc->set_epsilon( *eps );
+            rc->set_epsilon(*eps);
         }
 
 
@@ -1474,22 +1474,22 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
     }
 }
 
-void map_parser::ensure_font_face( std::string const& face_name )
+void map_parser::ensure_font_face(std::string const& face_name)
 {
-    if ( ! font_manager_.get_face( face_name ) )
+    if (! font_manager_.get_face(face_name))
     {
         throw config_error("Failed to find font face '" +
                            face_name + "'");
     }
 }
 
-std::string map_parser::ensure_relative_to_xml( boost::optional<std::string> opt_path )
+std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> opt_path)
 {
     if (relative_to_xml_)
     {
         boost::filesystem::path xml_path = filename_;
         boost::filesystem::path rel_path = *opt_path;
-        if ( !rel_path.has_root_path() )
+        if (!rel_path.has_root_path())
         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
             // TODO - normalize is now deprecated, use make_preferred?
