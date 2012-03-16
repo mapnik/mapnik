@@ -397,9 +397,9 @@ public:
           sx_(1.0),
           sy_(1.0)
     {
-        if (extent_.width())
+        if (extent_.width() > 0)
             sx_ = static_cast<double>(width_) / extent_.width();
-        if (extent_.height())
+        if (extent_.height() > 0)
             sy_ = static_cast<double>(height_) / extent_.height();
     }
 
