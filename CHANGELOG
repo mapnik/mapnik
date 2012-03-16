@@ -14,6 +14,7 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.1
 ------------
 
+
 - Switched back to "libmapnik" and "import mapnik" rather than "mapnik2" (#941)
 
 - Removed svn_revision info from mapnik-config and python bindings as git is now used
@@ -33,6 +34,8 @@ Mapnik 2.0.1
 - Removed mutex locking during reprojection if using >= proj 4.7 (#1072)
 
 - Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
+
+- Fix to avoid modifying a feature if an attribute is requested that does not exist (0f5ab18ed)
 
 - Restored Python 2.5 compatibility (#904)
 
