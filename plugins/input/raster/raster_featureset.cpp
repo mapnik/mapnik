@@ -48,9 +48,9 @@ raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
       extent_(extent),
       bbox_(q.get_bbox()),
       curIter_(policy_.begin()),
-      endIter_(policy_.end())
+      endIter_(policy_.end()),
+      ctx_(boost::make_shared<mapnik::context_type>())
 {
-    ctx_ = boost::make_shared<mapnik::context_type>();
 }
 
 template <typename LookupPolicy>

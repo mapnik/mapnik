@@ -46,7 +46,8 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
     manual_headers_(boost::trim_copy(*params_.get<std::string>("headers", ""))),
     strict_(*params_.get<mapnik::boolean>("strict", false)),
     quiet_(*params_.get<mapnik::boolean>("quiet", false)),
-    filesize_max_(*params_.get<float>("filesize_max", 20.0))  // MB
+    filesize_max_(*params_.get<float>("filesize_max", 20.0)),  // MB
+    ctx_(boost::make_shared<mapnik::context_type>())
 {
     /* TODO:
        general:
@@ -392,7 +393,6 @@ void csv_datasource::parse_csv(T& stream,
     bool extent_initialized = false;
     std::size_t num_headers = headers_.size();
 
-    ctx_ = boost::make_shared<mapnik::context_type>();
     for (std::size_t i = 0; i < headers_.size(); ++i)
     {
         ctx_->push(headers_[i]);
