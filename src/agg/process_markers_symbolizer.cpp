@@ -244,7 +244,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
                         agg::render_scanlines(*ras_ptr, sl_line, ren);
                     }
-                    detector_->insert(label_ext);
+                    if (!sym.get_ignore_placement())
+                        detector_->insert(label_ext);
                     if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
                 }
             }

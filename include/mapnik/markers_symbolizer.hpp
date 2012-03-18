@@ -56,6 +56,8 @@ public:
     explicit markers_symbolizer();
     markers_symbolizer(path_expression_ptr filename);
     markers_symbolizer(markers_symbolizer const& rhs);
+    void set_ignore_placement(bool ignore_placement);
+    bool get_ignore_placement() const;
     void set_allow_overlap(bool overlap);
     bool get_allow_overlap() const;
     void set_spacing(double spacing);
@@ -76,6 +78,7 @@ public:
     marker_type_e get_marker_type() const;
 
 private:
+    bool ignore_placement_;
     bool allow_overlap_;
     color fill_;
     double spacing_;
