@@ -26,7 +26,9 @@ Mapnik 2.1.0
 
 - Added <layer_by_sql> parameter in OGR plugin to select a layer by SQL query (besides name or index): see http://www.gdal.org/ogr/ogr_sql.html for specifications (kunitoki) (#472)
 
-- Added suppport for output maps as tiff files (addresses #967 partially)
+- Added support for output maps as tiff files (addresses #967 partially)
+
+- Added support for justify-alignment=auto. This is the new default. (#1125)
 
 
 Mapnik 2.0.0
