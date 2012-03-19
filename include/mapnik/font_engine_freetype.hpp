@@ -168,13 +168,14 @@ public:
 
     glyph_ptr get_glyph(unsigned c) const
     {
-        for (std::vector<face_ptr>::const_iterator face = faces_.begin(); face != faces_.end(); ++face)
+        std::vector<face_ptr>::const_iterator face = faces_.begin();
+        std::vector<face_ptr>::const_iterator end = faces_.end();
+        for (; face != end; ++face)
         {
             FT_UInt g = (*face)->get_char(c);
-
             if (g) return boost::make_shared<font_glyph>(*face, g);
         }
-
+        
         // Final fallback to empty square if nothing better in any font
         return boost::make_shared<font_glyph>(*faces_.begin(), 0);
     }
