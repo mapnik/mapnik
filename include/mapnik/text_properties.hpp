@@ -110,6 +110,7 @@ enum justify_alignment
     J_LEFT = 0,
     J_MIDDLE,
     J_RIGHT,
+    J_AUTO,
     justify_alignment_MAX
 };
 

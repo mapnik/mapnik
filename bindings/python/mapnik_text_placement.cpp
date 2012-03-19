@@ -329,6 +329,7 @@ void export_text_placement()
         .value("LEFT",J_LEFT)
         .value("MIDDLE",J_MIDDLE)
         .value("RIGHT",J_RIGHT)
+        .value("AUTO", J_AUTO)
         ;
 
     enumeration_<text_transform_e>("text_transform")

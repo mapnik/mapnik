@@ -137,6 +137,7 @@ private:
     double first_line_space_;
     vertical_alignment_e valign_;
     horizontal_alignment_e halign_;
+    justify_alignment_e jalign_;
     std::vector<unsigned> line_breaks_;
     std::vector<std::pair<double, double> > line_sizes_;
     std::queue< box2d<double> > envelopes_;

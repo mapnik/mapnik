@@ -40,7 +40,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     displacement(0,0),
     label_placement(POINT_PLACEMENT),
     halign(H_AUTO),
-    jalign(J_MIDDLE),
+    jalign(J_AUTO),
     valign(V_AUTO),
     label_spacing(0),
     label_position_tolerance(0),

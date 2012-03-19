@@ -69,6 +69,7 @@ static const char * justify_alignment_strings[] = {
     "left",
     "center",
     "right",
+    "auto",
     ""
 };
 
