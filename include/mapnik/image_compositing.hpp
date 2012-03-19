@@ -84,6 +84,7 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
     agg::rendering_buffer mask(im2.getBytes(),im2.width(),im2.height(),im2.width() * 4);
 
     agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf(source);
+    pixf.premultiply();
     agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
 
     switch(mode)
