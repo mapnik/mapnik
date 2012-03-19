@@ -54,7 +54,7 @@ def test_shieldsymbolizer_init():
     # r1341
     eq_(s.wrap_before, False)
     eq_(s.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
-    eq_(s.justify_alignment, mapnik.justify_alignment.MIDDLE)
+    eq_(s.justify_alignment, mapnik.justify_alignment.AUTO)
     eq_(s.opacity, 1.0)
 
     # r2300
