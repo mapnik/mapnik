@@ -6,41 +6,50 @@ import sys
 import os.path
 from compare import compare, summary
 
+defaults = {
+    'sizes': [(500, 100)],
+    'bbox': mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
+}
+
+sizes_many_in_big_range = [(800, 100), (600, 100), (400, 100),
+    (300, 100), (250, 100), (150, 100), (100, 100)]
+
+sizes_few_square = [(800, 800), (600, 600), (400, 400), (200, 200)]
+sizes_many_in_small_range = [(490, 100), (495, 100), (497, 100), (498, 100),
+    (499, 100), (500, 100), (501, 100), (502, 100), (505, 100), (510, 100)]
+
 dirname = os.path.dirname(__file__)
 files = [
-    ("list", 800, 600, 400, 300, 250, 200, 150, 100),
-    ("simple", 800, 600, 400, 300, 250, 200, 150, 100),
-    ("lines-1", (800, 800), (600, 600), (400, 400), (200, 200)),
-    ("lines-2", (800, 800), (600, 600), (400, 400), (200, 200)),
-    ("lines-3", (800, 800), (600, 600), (400, 400), (200, 200)),
-    ("lines-shield", (800, 800), (600, 600), (400, 400), (200, 200)),
-    ("simple-E", 500),
-    ("simple-NE", 500),
-    ("simple-NW", 500),
-    ("simple-N", 500),
-    ("simple-SE", 500),
-    ("simple-SW", 500),
-    ("simple-S", 500),
-    ("simple-W", 500),
-    ("formating-1", 500),
-    ("formating-2", 500),
-    ("formating-3", 500),
-    ("formating-4", 500),
-    ("shieldsymbolizer-1", 490, 495, 497, 498, 499, 500, 501, 502, 505, 510),
-    ("expressionformat", 500),
-    ("rtl-point", (200, 200)),
-    ("jalign-auto", (200, 200))
+    {'name': "list", 'sizes': sizes_many_in_big_range},
+    {'name': "simple", 'sizes': sizes_many_in_big_range},
+    {'name': "lines-1", 'sizes': sizes_few_square},
+    {'name': "lines-2", 'sizes': sizes_few_square},
+    {'name': "lines-3", 'sizes': sizes_few_square},
+    {'name': "lines-shield", 'sizes': sizes_few_square},
+    {'name': "simple-E"},
+    {'name': "simple-NE"},
+    {'name': "simple-NW"},
+    {'name': "simple-N"},
+    {'name': "simple-SE"},
+    {'name': "simple-SW"},
+    {'name': "simple-S"},
+    {'name': "simple-W"},
+    {'name': "formatting-1"},
+    {'name': "formatting-2"},
+    {'name': "formatting-3"},
+    {'name': "formatting-4"},
+    {'name': "expressionformat"},
+    {'name': "shieldsymbolizer-1", 'sizes': sizes_many_in_small_range},
+    {'name': "rtl-point", 'sizes': [(200, 200)]},
+    {'name': "jalign-auto", 'sizes': [(200, 200)]}
     ]
 
-def render(filename, width, height=100):
+def render(filename, width, height, bbox):
     print "-"*80
     print "Rendering style \"%s\" with size %dx%d ... " % (filename, width, height)
     print "-"*80
-    width = int(width)
-    height = int(height)
     m = mapnik.Map(width, height)
     mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
-    bbox = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
     m.zoom_to_box(bbox)
     basefn = os.path.join(dirname, "images", '%s-%d' % (filename, width))
     mapnik.render_to_file(m, basefn+'-agg.png')
@@ -58,11 +67,10 @@ elif len(sys.argv) > 2:
     files = [sys.argv[1:]]
 
 for f in files:
-    for width in f[1:]:
-        if isinstance(width, tuple):
-            m = render(f[0], width[0], width[1])
-        else:
-            m = render(f[0], width)
-    mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % f[0]))
+    config = dict(defaults)
+    config.update(f)
+    for size in config['sizes']:
+        m = render(config['name'], size[0], size[1], config['bbox'])
+    mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
 
 summary()

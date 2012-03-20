@@ -6,7 +6,7 @@
         <StyleName>My Style</StyleName>
         <Datasource>
             <Parameter name="type">shape</Parameter>
-            <Parameter name="file">../../data/points.shp</Parameter>
+            <Parameter name="file">../data/points.shp</Parameter>
         </Datasource>
     </Layer>
 
