@@ -2,7 +2,7 @@
 import mapnik
 import sys
 import os.path
-import compare
+from compare import compare, summary
 
 class MyText(mapnik.FormattingNode):
     def __init__(self):
@@ -98,3 +98,8 @@ format_trees = [
 for format_tree in format_trees:
     text.placements.defaults.format_tree = format_tree[1]
     mapnik.render_to_file(m, os.path.join("images", 'python-%s.png' % format_tree[0]), 'png')
+    compare(os.path.join("images", 'python-%s.png' % format_tree[0]),
+            os.path.join("images", 'python-%s-reference.png' % format_tree[0])
+            )
+
+summary()
