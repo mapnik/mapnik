@@ -656,7 +656,6 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                         if (displacement != 0)
                         {
                             //Average the angle of all characters and then offset them all by that angle
-                            //NOTE: This probably calculates a bad angle due to going around the circle, test this!
                             double anglesum = 0;
                             for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
                             {
