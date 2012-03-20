@@ -41,7 +41,9 @@ files = [
     {'name': "expressionformat"},
     {'name': "shieldsymbolizer-1", 'sizes': sizes_many_in_small_range},
     {'name': "rtl-point", 'sizes': [(200, 200)]},
-    {'name': "jalign-auto", 'sizes': [(200, 200)]}
+    {'name': "jalign-auto", 'sizes': [(200, 200)]},
+    {'name': "line-offset", 'sizes':[(900, 250)],
+        'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)}
     ]
 
 def render(filename, width, height, bbox):
@@ -50,7 +52,10 @@ def render(filename, width, height, bbox):
     print "-"*80
     m = mapnik.Map(width, height)
     mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
-    m.zoom_to_box(bbox)
+    if bbox is not None:
+        m.zoom_to_box(bbox)
+    else:
+        m.zoom_all()
     basefn = os.path.join(dirname, "images", '%s-%d' % (filename, width))
     mapnik.render_to_file(m, basefn+'-agg.png')
     diff = compare(basefn + '-agg.png', basefn + '-reference.png')
