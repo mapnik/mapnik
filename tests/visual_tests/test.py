@@ -39,10 +39,10 @@ def render(filename, width, height=100):
     width = int(width)
     height = int(height)
     m = mapnik.Map(width, height)
-    mapnik.load_map(m, os.path.join(dirname, "%s.xml" % filename), False)
+    mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
     bbox = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
     m.zoom_to_box(bbox)
-    basefn = os.path.join(dirname,'%s-%d' % (filename, width))
+    basefn = os.path.join(dirname, "images", '%s-%d' % (filename, width))
     mapnik.render_to_file(m, basefn+'-agg.png')
     diff = compare(basefn + '-agg.png', basefn + '-reference.png')
     if diff > 0:
@@ -63,6 +63,6 @@ for f in files:
             m = render(f[0], width[0], width[1])
         else:
             m = render(f[0], width)
-    mapnik.save_map(m, os.path.join(dirname,"%s-out.xml" % f[0]))
+    mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % f[0]))
 
 summary()

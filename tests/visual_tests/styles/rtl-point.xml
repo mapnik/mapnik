@@ -10,7 +10,7 @@
                 <Parameter name="file">points.osm</Parameter>
             -->
             <Parameter name="type">shape</Parameter>
-            <Parameter name="file">points.shp</Parameter>
+            <Parameter name="file">../data/points.shp</Parameter>
         </Datasource>
     </Layer>
 

@@ -5,19 +5,16 @@
   <Layer name="layer" srs="+proj=latlong +datum=WGS84">
     <StyleName>My Style</StyleName>
     <Datasource>
-<!--
-      <Parameter name="type">osm</Parameter>
-      <Parameter name="file">points.osm</Parameter>
-      -->
       <Parameter name="type">shape</Parameter>
-      <Parameter name="file">points.shp</Parameter>
+      <Parameter name="file">../data/points.shp</Parameter>
     </Datasource>
   </Layer>
 
     <Style name="My Style">
     <Rule>
+      <Filter>[name] = 'Test five'</Filter>
       <PointSymbolizer/>
-      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="5" dy="16" placement-type="simple" placements="N,S,E,W,SW,10,5">[name]</TextSymbolizer>
+      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="-10" dy="-10" placement-type="simple" placements="NE">[name]</TextSymbolizer>
     </Rule>
   </Style>
 
