@@ -660,15 +660,24 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                             double anglesum = 0;
                             for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
                             {
-                                anglesum += current_placement->nodes_[i].angle;
+                                double angle = current_placement->nodes_[i].angle;
+                                //Normalize angle in range -PI ... PI
+                                while (angle > M_PI) {
+                                    angle -= 2*M_PI;
+                                }
+                                anglesum += angle;
                             }
                             anglesum /= current_placement->nodes_.size(); //Now it is angle average
+                            double cosa = orientation * cos(anglesum);
+                            double sina = orientation * sin(anglesum);
 
                             //Offset all the characters by this angle
                             for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
                             {
-                                current_placement->nodes_[i].pos.x += pi.get_scale_factor() * displacement*cos(anglesum+M_PI/2);
-                                current_placement->nodes_[i].pos.y += pi.get_scale_factor() * displacement*sin(anglesum+M_PI/2);
+                                current_placement->nodes_[i].pos.x -=
+                                        pi.get_scale_factor() * displacement * sina;
+                                current_placement->nodes_[i].pos.y +=
+                                        pi.get_scale_factor() * displacement * cosa;
                             }
                         }
 
