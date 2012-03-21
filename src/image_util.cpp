@@ -45,6 +45,7 @@ extern "C"
 
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo_renderer.hpp>
+#include <cairo-features.h>
 #endif
 
 #include <boost/foreach.hpp>
@@ -371,17 +372,39 @@ void save_to_cairo_file(mapnik::Map const& map,
         unsigned width = map.width();
         unsigned height = map.height();
         if (type == "pdf")
+        {
+#if defined(CAIRO_HAS_PDF_SURFACE)
             surface = Cairo::PdfSurface::create(filename,width,height);
+            throw ImageWriterException("PDFSurface not supported in the cairo backend");
+#endif
+        }
+#if defined(CAIRO_HAS_SVG_SURFACE)
         else if (type == "svg")
+        {
             surface = Cairo::SvgSurface::create(filename,width,height);
+        }
+#endif
+#if defined(CAIRO_HAS_PS_SURFACE)
         else if (type == "ps")
+        {
             surface = Cairo::PsSurface::create(filename,width,height);
+        }
+#endif
+#if defined(CAIRO_HAS_IMAGE_SURFACE)
         else if (type == "ARGB32")
+        {
             surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,width,height);
+        }
         else if (type == "RGB24")
+        {
             surface = Cairo::ImageSurface::create(Cairo::FORMAT_RGB24,width,height);
+        }
+#endif
         else
+        {
             throw ImageWriterException("unknown file type: " + type);
+        }
+
         Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create(surface);
 
         // TODO - expose as user option
