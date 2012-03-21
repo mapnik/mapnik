@@ -6,7 +6,7 @@
     <StyleName>My Style</StyleName>
     <Datasource>
       <Parameter name="type">shape</Parameter>
-      <Parameter name="file">points.shp</Parameter>
+      <Parameter name="file">../data/points.shp</Parameter>
     </Datasource>
   </Layer>
 
@@ -14,7 +14,7 @@
     <Rule>
       <Filter>[name] = 'Test five'</Filter>
       <PointSymbolizer/>
-      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="10" dy="10" placement-type="simple" placements="W">[name]</TextSymbolizer>
+      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="10" dy="10" placement-type="simple" placements="NW">[name]</TextSymbolizer>
     </Rule>
   </Style>
 

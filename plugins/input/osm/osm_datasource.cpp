@@ -52,6 +52,7 @@ DATASOURCE_PLUGIN(osm_datasource)
 
 osm_datasource::osm_datasource(const parameters& params, bool bind)
 : datasource (params),
+    extent_(),
     type_(datasource::Vector),
     desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8"))
 {
@@ -71,13 +72,11 @@ void osm_datasource::bind() const
     std::string url = *params_.get<std::string>("url", "");
     std::string bbox = *params_.get<std::string>("bbox", "");
 
-    bool do_process = false;
 
     // load the data
-    // if we supplied a filename, load from file
     if (url != "" && bbox != "")
     {
-        // otherwise if we supplied a url and a bounding box, load from the url
+        // if we supplied a url and a bounding box, load from the url
 #ifdef MAPNIK_DEBUG
         std::clog << "Osm Plugin: loading_from_url: url=" << url << " bbox=" << bbox << std::endl;
 #endif
@@ -85,44 +84,40 @@ void osm_datasource::bind() const
         {
             throw datasource_exception("Error loading from URL");
         }
-
-        do_process = true;
     }
     else if (osm_filename != "")
     {
-        if ((osm_data_= dataset_deliverer::load_from_file(osm_filename, parser)) == NULL)
+        // if we supplied a filename, load from file
+        if ((osm_data_ = dataset_deliverer::load_from_file(osm_filename, parser)) == NULL)
         {
             std::ostringstream s;
             s << "OSM Plugin: Error loading from file '" << osm_filename << "'";
             throw datasource_exception(s.str());
         }
-
-        do_process = true;
+    } else {
+        throw datasource_exception("OSM Plugin: Neither 'file' nor 'url' and 'bbox' specified");
     }
 
-    if (do_process == true)
+
+    osm_tag_types tagtypes;
+    tagtypes.add_type("maxspeed", mapnik::Integer);
+    tagtypes.add_type("z_order", mapnik::Integer);
+
+    osm_data_->rewind();
+
+    // Need code to get the attributes of all the data
+    std::set<std::string> keys = osm_data_->get_keys();
+
+    // Add the attributes to the datasource descriptor - assume they are
+    // all of type String
+    for (std::set<std::string>::iterator i = keys.begin(); i != keys.end(); i++)
     {
-        osm_tag_types tagtypes;
-        tagtypes.add_type("maxspeed", mapnik::Integer);
-        tagtypes.add_type("z_order", mapnik::Integer);
-
-        osm_data_->rewind();
-
-        // Need code to get the attributes of all the data
-        std::set<std::string> keys = osm_data_->get_keys();
-
-        // Add the attributes to the datasource descriptor - assume they are
-        // all of type String
-        for (std::set<std::string>::iterator i = keys.begin(); i != keys.end(); i++)
-        {
-            desc_.add_descriptor(attribute_descriptor(*i, tagtypes.get_type(*i)));
-        }
-
-        // Get the bounds of the data and set extent_ accordingly
-        bounds b = osm_data_->get_bounds();
-        extent_ =  box2d<double>(b.w, b.s, b.e, b.n);
+        desc_.add_descriptor(attribute_descriptor(*i, tagtypes.get_type(*i)));
     }
 
+    // Get the bounds of the data and set extent_ accordingly
+    bounds b = osm_data_->get_bounds();
+    extent_ =  box2d<double>(b.w, b.s, b.e, b.n);
     is_bound_ = true;
 }
 
@@ -149,7 +144,7 @@ layer_descriptor osm_datasource::get_descriptor() const
 
 featureset_ptr osm_datasource::features(const query& q) const
 {
-    if (! is_bound_) bind();
+    if (!is_bound_) bind();
 
     filter_in_box filter(q.get_bbox());
     // so we need to filter osm features by bbox here...
@@ -162,7 +157,7 @@ featureset_ptr osm_datasource::features(const query& q) const
 
 featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
 {
-    if (! is_bound_) bind();
+    if (!is_bound_) bind();
 
     filter_at_point filter(pt);
     // collect all attribute names
@@ -185,8 +180,7 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
 
 box2d<double> osm_datasource::envelope() const
 {
-    if (! is_bound_) bind();
-
+    if (!is_bound_) bind();
     return extent_;
 }
 

@@ -6,14 +6,14 @@
         <StyleName>My Style</StyleName>
         <Datasource>
             <Parameter name="type">osm</Parameter>
-            <Parameter name="file">lines.osm</Parameter>
+            <Parameter name="file">../data/lines.osm</Parameter>
         </Datasource>
     </Layer>
 
     <Style name="My Style">
         <Rule>
-            <LineSymbolizer stroke-width="12" stroke="red"/>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="line">[name]<Format size="8" fill="blue">[name]</Format></TextSymbolizer>
+            <LineSymbolizer stroke-width="1" stroke="blue"/>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="line" file="../../data/svg/crosshair16x16.svg" spacing="30">'X'</ShieldSymbolizer>
         </Rule>
     </Style>
 
