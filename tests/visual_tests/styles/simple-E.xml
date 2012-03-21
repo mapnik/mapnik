@@ -6,15 +6,15 @@
     <StyleName>My Style</StyleName>
     <Datasource>
       <Parameter name="type">shape</Parameter>
-      <Parameter name="file">points.shp</Parameter>
+      <Parameter name="file">../data/points.shp</Parameter>
     </Datasource>
   </Layer>
 
     <Style name="My Style">
     <Rule>
+      <Filter>[name] = 'Test five'</Filter>
       <PointSymbolizer/>
-      <!-- Empty text -->
-      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="0" dy="5" />
+      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="10" dy="10" placement-type="simple" placements="E">[name]</TextSymbolizer>
     </Rule>
   </Style>
 

@@ -6,7 +6,7 @@
         <StyleName>My Style</StyleName>
         <Datasource>
             <Parameter name="type">osm</Parameter>
-            <Parameter name="file">lines.osm</Parameter>
+            <Parameter name="file">../data/lines.osm</Parameter>
         </Datasource>
     </Layer>
 

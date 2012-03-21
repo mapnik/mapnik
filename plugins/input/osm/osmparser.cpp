@@ -103,6 +103,11 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
         xmlFree(xk);
         xmlFree(xv);
     }
+    if (xmlTextReaderIsEmptyElement(reader))
+    {
+        // Fake endElement for empty nodes
+        endElement(name);
+    }
 }
 
 void osmparser::endElement(const xmlChar* name)
