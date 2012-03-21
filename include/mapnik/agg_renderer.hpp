@@ -97,6 +97,10 @@ public:
     void process(markers_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
+    void process(compositing_symbolizer const& sym,
+                 mapnik::feature_ptr const& feature,
+                 proj_transform const& prj_trans);
+
     inline bool process(rule::symbolizers const& /*syms*/,
                         mapnik::feature_ptr const& /*feature*/,
                         proj_transform const& /*prj_trans*/)

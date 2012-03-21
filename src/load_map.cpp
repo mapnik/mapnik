@@ -25,6 +25,7 @@
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/image_compositing.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -107,6 +108,7 @@ private:
     void parse_shield_symbolizer(rule & rule, xml_node const& sym);
     void parse_line_symbolizer(rule & rule, xml_node const& sym);
     void parse_polygon_symbolizer(rule & rule, xml_node const& sym);
+    void parse_compositing_symbolizer(rule & rule, xml_node const& sym);
     void parse_building_symbolizer(rule & rule, xml_node const& sym);
     void parse_raster_symbolizer(rule & rule, xml_node const& sym);
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
@@ -690,6 +692,10 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
             else if (symIter->is("PolygonPatternSymbolizer"))
             {
                 parse_polygon_pattern_symbolizer(rule, *symIter);
+            }
+            else if (symIter->is("CompositingSymbolizer"))
+            {
+                parse_compositing_symbolizer(rule, *symIter);
             }
             else if (symIter->is("TextSymbolizer"))
             {
@@ -1314,6 +1320,41 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
     }
 }
 
+void map_parser::parse_compositing_symbolizer(rule & rule, xml_node const & sym)
+{
+    try
+    {
+        compositing_symbolizer comp_sym;
+        // fill
+        optional<color> fill = sym.get_opt_attr<color>("fill");
+        if (fill) comp_sym.set_fill(*fill);
+        // fill-opacity
+        optional<double> opacity = sym.get_opt_attr<double>("fill-opacity");
+        if (opacity) comp_sym.set_opacity(*opacity);
+        // gamma
+        optional<double> gamma = sym.get_opt_attr<double>("gamma");
+        if (gamma)  comp_sym.set_gamma(*gamma);
+        // gamma method
+        optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
+        if (gamma_method) comp_sym.set_gamma_method(*gamma_method);
+        // smooth value
+        optional<double> smooth = sym.get_opt_attr<double>("smooth");
+        if (smooth) comp_sym.set_smooth(*smooth);
+
+        optional<std::string> comp_op_name = sym.get_opt_attr<std::string>("comp-op");
+        if (comp_op_name)
+        {
+            composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
+            comp_sym.set_comp_op(comp_op);
+        }
+        rule.append(comp_sym);
+    }
+    catch (const config_error & ex)
+    {
+        ex.append_context("in CompositingSymbolizer", sym);
+        throw;
+    }
+}
 
 void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
 {

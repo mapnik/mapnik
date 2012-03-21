@@ -104,6 +104,7 @@ else: # Linux and others
 source = Split(
     """
     color.cpp
+    compositing_symbolizer.cpp
     conversions.cpp
     image_compositing.cpp
     box2d.cpp
@@ -251,6 +252,7 @@ source += Split(
     agg/process_raster_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
+    agg/process_compositing_symbolizer.cpp
     """ 
     )
 

@@ -321,6 +321,15 @@ public:
         add_metawriter_attributes(sym_node, sym);
     }
 
+    template <typename Symbolizer>
+    void operator () ( Symbolizer const& sym)
+    {
+        // not-supported
+#ifdef MAPNIK_DEBUG
+        std::clog << typeid(sym).name() << " is not supported" << std::endl;
+#endif
+    }
+    
 private:
     serialize_symbolizer();
 

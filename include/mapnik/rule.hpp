@@ -34,6 +34,7 @@
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/compositing_symbolizer.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>
@@ -108,6 +109,12 @@ inline bool operator==(markers_symbolizer const& lhs,
     return (&lhs == &rhs);
 }
 
+inline bool operator==(compositing_symbolizer const& lhs,
+                       compositing_symbolizer const& rhs)
+{
+    return (&lhs == &rhs);
+}
+
 typedef boost::variant<point_symbolizer,
                        line_symbolizer,
                        line_pattern_symbolizer,
@@ -117,10 +124,8 @@ typedef boost::variant<point_symbolizer,
                        shield_symbolizer,
                        text_symbolizer,
                        building_symbolizer,
-                       markers_symbolizer> symbolizer;
-
-
-
+                       markers_symbolizer,
+                       compositing_symbolizer> symbolizer;
 
 class rule
 {
