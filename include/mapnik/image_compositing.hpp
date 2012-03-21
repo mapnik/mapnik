@@ -23,7 +23,8 @@
 #ifndef MAPNIK_IMAGE_COMPOSITING_HPP
 #define MAPNIK_IMAGE_COMPOSITING_HPP
 
-// agg
+// stl
+#include <string>
 
 namespace mapnik
 {
@@ -33,7 +34,7 @@ namespace mapnik
 
 enum composite_mode_e
 {
-    clear = 1,
+    clear = 0,
     src,
     dst,
     src_over,
@@ -62,6 +63,8 @@ enum composite_mode_e
     invert,
     invert_rgb
 };
+
+composite_mode_e comp_op_from_string(std::string const& name);
 
 template <typename T1, typename T2>
 void composite(T1 & im, T2 & im2, composite_mode_e mode);
