@@ -52,7 +52,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-  
+
     stroke const& stroke_ = sym.get_stroke();
     color const& col = stroke_.get_color();
     unsigned r=col.red();
@@ -104,7 +104,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         ras_ptr->reset();
 
         set_gamma_method(stroke_, ras_ptr);
-        
+
         //metawriter_with_properties writer = sym.get_metawriter();
         for (unsigned i=0;i<feature->num_geometries();++i)
         {
@@ -145,7 +145,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                         clipped_geometry_type clipped(geom);
                         clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
                         path_type path(t_,clipped,prj_trans);
-                        
+
                         agg::conv_dash<path_type> dash(path);
                         dash_array const& d = stroke_.get_dash_array();
                         dash_array::const_iterator itr = d.begin();
@@ -191,7 +191,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                         set_join_caps(stroke_,stroke);
                         stroke.generator().miter_limit(4.0);
                         stroke.generator().width(stroke_.get_width() * scale_factor_);
-                        ras_ptr->add_path(stroke);                        
+                        ras_ptr->add_path(stroke);
                     }
                     //if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
                 }

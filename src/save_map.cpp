@@ -96,7 +96,7 @@ public:
             set_attr( sym_node, "smooth", sym.smooth() );
         }
     }
-    
+
     void operator () ( line_pattern_symbolizer const& sym )
     {
         ptree & sym_node = rule_.push_back(

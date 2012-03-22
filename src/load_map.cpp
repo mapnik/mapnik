@@ -991,7 +991,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
 }
 
 void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
-                                                   xml_node const & sym)
+                                                  xml_node const & sym)
 {
     try
     {
@@ -1307,7 +1307,7 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
         // smooth value
         optional<double> smooth = sym.get_opt_attr<double>("smooth");
         if (smooth) poly_sym.set_smooth(*smooth);
-        
+
         parse_metawriter_in_symbolizer(poly_sym, sym);
         rule.append(poly_sym);
     }
