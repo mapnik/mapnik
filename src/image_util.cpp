@@ -375,6 +375,7 @@ void save_to_cairo_file(mapnik::Map const& map,
         {
 #if defined(CAIRO_HAS_PDF_SURFACE)
             surface = Cairo::PdfSurface::create(filename,width,height);
+#else
             throw ImageWriterException("PDFSurface not supported in the cairo backend");
 #endif
         }
