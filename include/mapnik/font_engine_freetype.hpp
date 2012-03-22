@@ -169,12 +169,12 @@ public:
 
     glyph_ptr get_glyph(unsigned c) const
     {
-        BOOST_FOREACH ( face_ptr const& face, faces_)            
+        BOOST_FOREACH ( face_ptr const& face, faces_)
         {
             FT_UInt g = face->get_char(c);
             if (g) return boost::make_shared<font_glyph>(face, g);
         }
-        
+
         // Final fallback to empty square if nothing better in any font
         return boost::make_shared<font_glyph>(*faces_.begin(), 0);
     }
@@ -185,7 +185,7 @@ public:
 
     void set_pixel_sizes(unsigned size)
     {
-        BOOST_FOREACH ( face_ptr const& face, faces_)   
+        BOOST_FOREACH ( face_ptr const& face, faces_)
         {
             face->set_pixel_sizes(size);
         }
@@ -193,7 +193,7 @@ public:
 
     void set_character_sizes(float size)
     {
-        BOOST_FOREACH ( face_ptr const& face, faces_)  
+        BOOST_FOREACH ( face_ptr const& face, faces_)
         {
             face->set_character_sizes(size);
         }

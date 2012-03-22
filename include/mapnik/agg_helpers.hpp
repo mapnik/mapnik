@@ -71,7 +71,7 @@ void set_join_caps(Stroke const& stroke_, PathType & stroke)
     default:
         stroke.generator().line_join(agg::bevel_join);
     }
-    
+
     line_cap_e cap=stroke_.get_line_cap();
     switch (cap)
     {
@@ -85,7 +85,7 @@ void set_join_caps(Stroke const& stroke_, PathType & stroke)
         stroke.generator().line_cap(agg::round_cap);
     }
 }
- 
+
 }
 
 #endif //MAPNIK_AGG_HELPERS_HPP
