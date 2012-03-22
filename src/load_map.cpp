@@ -1069,7 +1069,9 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
         }
         if (strict_ &&
             !placement_finder->defaults.format.fontset.size())
+        {
             ensure_font_face(placement_finder->defaults.format.face_name);
+        }
 
         text_symbolizer text_symbol = text_symbolizer(placement_finder);
         parse_metawriter_in_symbolizer(text_symbol, sym);
@@ -1096,7 +1098,9 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
             !placement_finder->defaults.format.fontset.size())
+        {
             ensure_font_face(placement_finder->defaults.format.face_name);
+        }
 
         shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
         /* Symbolizer specific attributes. */
