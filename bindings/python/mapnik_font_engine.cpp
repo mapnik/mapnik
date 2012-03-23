@@ -42,6 +42,7 @@ void export_font_engine()
         .def("register_fonts",&freetype_engine::register_fonts)
         .def("face_names",&freetype_engine::face_names)
         .staticmethod("register_font")
+        .staticmethod("register_fonts")
         .staticmethod("face_names")
         ;
 }
