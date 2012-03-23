@@ -19,6 +19,7 @@ sizes_many_in_small_range = [(490, 100), (495, 100), (497, 100), (498, 100),
     (499, 100), (500, 100), (501, 100), (502, 100), (505, 100), (510, 100)]
 
 dirname = os.path.dirname(__file__)
+
 files = [
     {'name': "list", 'sizes': sizes_many_in_big_range},
     {'name': "simple", 'sizes': sizes_many_in_big_range},

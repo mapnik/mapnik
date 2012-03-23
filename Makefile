@@ -19,6 +19,7 @@ uninstall:
 
 test:
 	@python tests/run_tests.py -q
+	@python tests/visual_tests/test.py
 
 pep8:
 	# https://gist.github.com/1903033
