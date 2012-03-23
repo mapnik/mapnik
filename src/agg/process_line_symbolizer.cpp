@@ -46,6 +46,7 @@
 
 namespace mapnik {
 
+
 template <typename T>
 void agg_renderer<T>::process(line_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
@@ -94,16 +95,10 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         }
     }
     else
-    {
-        typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-
-        agg::scanline_p8 sl;
-
-        ren_base renb(pixf);
-        renderer ren(renb);
-        ras_ptr->reset();
-
+    {        
+        ras_ptr->reset();        
         set_gamma_method(stroke_, ras_ptr);
+        stroker_.attach(pixf);
         
         //metawriter_with_properties writer = sym.get_metawriter();
         for (unsigned i=0;i<feature->num_geometries();++i)
@@ -197,8 +192,12 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                 }
             }
         }
-        ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
-        agg::render_scanlines(*ras_ptr, sl, ren);
+        
+        stroker_.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
+        stroker_.render(*ras_ptr);
+        
+        //ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
+        //agg::render_scanlines(*ras_ptr, sl, ren);
     }
 }
 
