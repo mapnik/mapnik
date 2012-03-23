@@ -242,7 +242,13 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             if (font_directory)
             {
                 extra_attr["font-directory"] = *font_directory;
-                freetype_engine::register_fonts(ensure_relative_to_xml(font_directory), false);
+                if (!freetype_engine::register_fonts(ensure_relative_to_xml(font_directory), false))
+                {
+                    if (strict_)
+                    {
+                        throw config_error(std::string("Failed to load fonts from: ") << *font_directory);
+                    }
+                }
             }
 
             optional<std::string> min_version_string = map_node.get_opt_attr<std::string>("minimum-version");

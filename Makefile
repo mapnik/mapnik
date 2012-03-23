@@ -27,4 +27,7 @@ pep8:
 	@pep8 -r --select=W293 -q --filename=*.py `pwd`/tests/ | xargs gsed -i 's/^[ \r\t]*$//'
 	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}'
 
+grind:
+	@valgrind --leak-check=full tests/cpp_tests/font_registration_test
+
 .PHONY: clean reset uninstall test install
