@@ -54,7 +54,7 @@ template <>
 inline boost::optional<int> fast_cast(xml_tree const& tree, std::string const& value)
 {
     int result;
-    if (mapnik::conversions::string2int(value, result))
+    if (mapnik::util::string2int(value, result))
         return boost::optional<int>(result);
     return boost::optional<int>();
 }
@@ -63,7 +63,7 @@ template <>
 inline boost::optional<double> fast_cast(xml_tree const& tree, std::string const& value)
 {
     double result;
-    if (mapnik::conversions::string2double(value, result))
+    if (mapnik::util::string2double(value, result))
         return boost::optional<double>(result);
     return boost::optional<double>();
 }
@@ -72,7 +72,7 @@ template <>
 inline boost::optional<float> fast_cast(xml_tree const& tree, std::string const& value)
 {
     float result;
-    if (mapnik::conversions::string2float(value, result))
+    if (mapnik::util::string2float(value, result))
         return boost::optional<float>(result);
     return boost::optional<float>();
 }
