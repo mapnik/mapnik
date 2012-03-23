@@ -20,15 +20,15 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CONVERSIONS_UTIL_HPP
-#define MAPNIK_CONVERSIONS_UTIL_HPP
+#ifndef MAPNIK_UTIL_CONVERSIONS_HPP
+#define MAPNIK_UTIL_CONVERSIONS_HPP
 
 // mapnik
 
 // stl
 #include <string>
 
-namespace mapnik { namespace conversions {
+namespace mapnik { namespace util {
 
     bool string2int(const char * value, int & result);
     bool string2int(std::string const& value, int & result);
@@ -39,7 +39,6 @@ namespace mapnik { namespace conversions {
     bool string2float(std::string const& value, float & result);
     bool string2float(const char * value, float & result);
 
-    }
-}
+}}
 
-#endif // MAPNIK_CONVERSIONS_UTIL_HPP
+#endif // MAPNIK_UTIL_CONVERSIONS_HPP

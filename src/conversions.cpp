@@ -31,7 +31,7 @@
     BOOST_AUTO(name, boost::proto::deep_copy(expr));            \
 
 
-namespace mapnik { namespace conversions {
+namespace mapnik { namespace util {
 
 using namespace boost::spirit;
 
