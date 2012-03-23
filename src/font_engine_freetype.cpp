@@ -83,10 +83,11 @@ bool freetype_engine::register_font(std::string const& file_name)
     }
 
     FT_Face face = 0;
+    int num_faces = 0;
     // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
-    for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
+    for ( int i = 0; face == 0 || i < num_faces; i++ ) {
         // if face is null then this is the first face
         error = FT_New_Face (library,file_name.c_str(),i,&face);
         if (error)
@@ -94,6 +95,9 @@ bool freetype_engine::register_font(std::string const& file_name)
             FT_Done_FreeType(library);
             return false;
         }
+        // store num_faces locally, after FT_Done_Face it can not be accessed any more
+        if (!num_faces)
+            num_faces = face->num_faces;
         // some fonts can lack names, skip them
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
         if (face->family_name && face->style_name) {
