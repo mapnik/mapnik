@@ -18,8 +18,10 @@ uninstall:
 	python scons/scons.py uninstall
 
 test:
-	@python tests/run_tests.py -q
 	@python tests/visual_tests/test.py
+	@tests/cpp_tests/font_registration_test
+	@tests/cpp_tests/params_test
+	@python tests/run_tests.py -q
 
 pep8:
 	# https://gist.github.com/1903033
