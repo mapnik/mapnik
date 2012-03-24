@@ -49,7 +49,13 @@ bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharr
     // no support for 'percentage' as viewport is unknown at load_map
     // 
     bool r = phrase_parse(first, last,
-                          (double_[push_back(phoenix::ref(dasharray), _1)] % lexeme[char_(", ")] | lit("none")),
+                          (double_[push_back(phoenix::ref(dasharray), _1)] %
+#if BOOST_VERSION > 104200
+                          no_skip[char_(", ")]
+#else
+                          lexeme[char_(", ")]
+#endif
+                          | lit("none")),
                           qi::ascii::space);
     
     if (first != last) 
