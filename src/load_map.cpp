@@ -246,7 +246,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 {
                     if (strict_)
                     {
-                        throw config_error(std::string("Failed to load fonts from: ") << *font_directory);
+                        throw config_error(std::string("Failed to load fonts from: ") + *font_directory);
                     }
                 }
             }
