@@ -102,8 +102,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     }
 
     do {
-// https://github.com/mapnik/mapnik/issues/1072
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
         if (pj_transform( source_.proj_, dest_.proj_, point_count,
@@ -154,8 +153,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
     }
 
     do {
-// https://github.com/mapnik/mapnik/issues/1072
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
 
