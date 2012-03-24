@@ -11,8 +11,6 @@ For a complete change history, see the SVN log.
 
 - Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentially radii)
 
-- Removed mutex locking during reprojection if using >= proj 4.7 (#1072)
-
 - Removed PointDatasource - use more robust MemoryDatasource instead (#1032)
 
 - SQLite - Added support for !intersects! token in sql subselects (#809) allow custom positioning of rtree spatial filter.
