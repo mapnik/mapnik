@@ -167,8 +167,6 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
         xml_node const& map_node = pt.get_child("Map");
         try
         {
-            parameters extra_attr;
-
             // Check if relative paths should be interpreted as relative to/from XML location
             // Default is true, and map_parser::ensure_relative_to_xml will be called to modify path
             optional<boolean> paths_from_xml = map_node.get_opt_attr<boolean>("paths-from-xml");
@@ -241,7 +239,6 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             optional<std::string> font_directory = map_node.get_opt_attr<std::string>("font-directory");
             if (font_directory)
             {
-                extra_attr["font-directory"] = *font_directory;
                 if (!freetype_engine::register_fonts(ensure_relative_to_xml(font_directory), false))
                 {
                     if (strict_)
@@ -255,7 +252,6 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
 
             if (min_version_string)
             {
-                extra_attr["minimum-version"] = *min_version_string;
                 boost::char_separator<char> sep(".");
                 boost::tokenizer<boost::char_separator<char> > tokens(*min_version_string, sep);
                 unsigned i = 0;
@@ -291,8 +287,6 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 }
 
             }
-
-            map.set_extra_attributes(extra_attr);
         }
         catch (const config_error & ex)
         {

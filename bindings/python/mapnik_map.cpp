@@ -117,10 +117,7 @@ struct map_pickle_suite : boost::python::pickle_suite
 
 std::vector<layer>& (Map::*layers_nonconst)() =  &Map::layers;
 std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
-
-mapnik::parameters& (Map::*attr_nonconst)() =  &Map::get_extra_attributes;
 mapnik::parameters& (Map::*params_nonconst)() =  &Map::get_extra_parameters;
-
 
 mapnik::feature_type_style find_style(mapnik::Map const& m, std::string const& name)
 {
@@ -482,7 +479,6 @@ void export_map()
             )
 
         .def("__deepcopy__",&map_deepcopy)
-        .add_property("extra_attributes",make_function(attr_nonconst,return_value_policy<reference_existing_object>()),"TODO")
         .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
 
         .add_property("aspect_fix_mode",

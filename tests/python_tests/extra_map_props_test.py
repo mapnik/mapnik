@@ -14,20 +14,9 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-def test_non_member_known_attributes():
-    m = mapnik.Map(256,256)
-    mapnik.load_map(m,'../data/good_maps/extra_known_map_attributes.xml')
-    attr = m.extra_attributes
-    eq_(len(attr),2)
-    eq_(attr['font-directory'],'.')
-    eq_(attr['minimum-version'],'0.0.0')
-
 def test_arbitrary_parameters_attached_to_map():
     m = mapnik.Map(256,256)
     mapnik.load_map(m,'../data/good_maps/extra_arbitary_map_parameters.xml')
-    attr = m.extra_attributes
-    eq_(len(attr),0)
-
     eq_(len(m.parameters),6)
     eq_(m.parameters['key'],'value2')
     eq_(m.parameters['key3'],'value3')

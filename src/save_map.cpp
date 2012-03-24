@@ -756,14 +756,6 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         }
     }
 
-    parameters extra_attr = map.get_extra_attributes();
-    parameters::const_iterator p_it = extra_attr.begin();
-    parameters::const_iterator p_end = extra_attr.end();
-    for (; p_it != p_end; ++p_it)
-    {
-        set_attr( map_node, p_it->first, p_it->second );
-    }
-
     serialize_parameters( map_node, map.get_extra_parameters());
 
     Map::const_style_iterator it = map.styles().begin();

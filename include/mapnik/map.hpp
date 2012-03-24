@@ -79,7 +79,6 @@ private:
     box2d<double> current_extent_;
     boost::optional<box2d<double> > maximum_extent_;
     std::string base_path_;
-    parameters extra_attr_;
     parameters extra_params_;
 
 public:
@@ -439,21 +438,6 @@ public:
      * @brief Get a metawriter property.
      */
     std::string get_metawriter_property(std::string name) const;
-
-    /*!
-     * @brief Get extra valid attributes of the Map that are not true members
-     */
-    parameters const& get_extra_attributes() const;
-
-    /*!
-     * @brief Get non-const extra valid attributes of the Map that are not true members
-     */
-    parameters& get_extra_attributes();
-
-    /*!
-     * @brief Set extra attributes of the Map
-     */
-    void set_extra_attributes(parameters& attr);
 
     /*!
      * @brief Get extra, arbitrary Parameters attached to the Map
