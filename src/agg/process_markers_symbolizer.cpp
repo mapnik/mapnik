@@ -171,6 +171,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         unsigned s_a=col.alpha();
         double w = sym.get_width();
         double h = sym.get_height();
+        double rx = w/2.0;
+        double ry = h/2.0;
 
         arrow arrow_;
         box2d<double> extent;
@@ -225,7 +227,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 if (sym.get_allow_overlap() ||
                     detector_->has_placement(label_ext))
                 {
-                    agg::ellipse c(x, y, w, h);
+                    agg::ellipse c(x, y, rx, ry);
                     marker.concat_path(c);
                     ras_ptr->add_path(marker);
                     ren.color(agg::rgba8(r, g, b, int(a*sym.get_opacity())));
@@ -271,7 +273,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     if (marker_type == ELLIPSE)
                     {
                         // todo proper bbox - this is buggy
-                        agg::ellipse c(x_t, y_t, w, h);
+                        agg::ellipse c(x_t, y_t, rx, ry);
                         marker.concat_path(c);
                         agg::trans_affine matrix;
                         matrix *= agg::trans_affine_translation(-x_t,-y_t);

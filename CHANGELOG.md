@@ -9,6 +9,8 @@ For a complete change history, see the SVN log.
 
 ## Mapnik 2.1.0
 
+- Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentially radii)
+
 - Removed mutex locking during reprojection if using >= proj 4.7 (#1072)
 
 - Removed PointDatasource - use more robust MemoryDatasource instead (#1032)

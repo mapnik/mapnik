@@ -51,8 +51,8 @@ markers_symbolizer::markers_symbolizer()
     fill_(color(0,0,255)),
     spacing_(100.0),
     max_error_(0.2),
-    width_(5.0),
-    height_(5.0),
+    width_(10.0),
+    height_(10.0),
     stroke_(),
     marker_p_(MARKER_LINE_PLACEMENT),
     marker_type_(ARROW) {}
@@ -65,8 +65,8 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
       fill_(color(0,0,255)),
       spacing_(100.0),
       max_error_(0.2),
-      width_(5.0),
-      height_(5.0),
+      width_(10.0),
+      height_(10.0),
       stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT),
       marker_type_(ARROW) {}
