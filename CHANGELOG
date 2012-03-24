@@ -31,8 +31,6 @@ Mapnik 2.0.1
 
 - Fix possible memory corruption when using hextree mode for png color reduction (#1087)
 
-- Removed mutex locking during reprojection if using >= proj 4.7 (#1072)
-
 - Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
 
 - Fix to avoid modifying a feature if an attribute is requested that does not exist (0f5ab18ed)
