@@ -21,7 +21,12 @@
  *****************************************************************************/
 #ifndef MAPNIK_BOOLEAN_HPP
 #define MAPNIK_BOOLEAN_HPP
+
+// std
 #include <istream>
+
+// boost
+#include <boost/algorithm/string.hpp>
 
 namespace mapnik
 {
@@ -36,16 +41,19 @@ public:
     {
         return b_;
     }
+
     boolean & operator = (boolean const& other)
     {
         b_ = other.b_;
         return * this;
     }
+
     boolean & operator = (bool other)
     {
         b_ = other;
         return * this;
     }
+
 private:
     bool b_;
 };
@@ -57,6 +65,7 @@ operator >> ( std::basic_istream<charT, traits> & s, boolean & b )
 {
     std::string word;
     s >> word;
+    boost::algorithm::to_lower(word);
     if ( s )
     {
         if ( word == "true" || word == "yes" || word == "on" ||
