@@ -1716,7 +1716,7 @@ if not HELP_REQUESTED:
     
     # build C++ tests
     # not ready for release
-    #SConscript('tests/cpp_tests/build.py')
+    SConscript('tests/cpp_tests/build.py')
     
     # not ready for release
     #if env['SVG_RENDERER']:

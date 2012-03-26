@@ -96,7 +96,6 @@ Map::Map(const Map& rhs)
       current_extent_(rhs.current_extent_),
       maximum_extent_(rhs.maximum_extent_),
       base_path_(rhs.base_path_),
-      extra_attr_(rhs.extra_attr_),
       extra_params_(rhs.extra_params_) {}
 
 Map& Map::operator=(const Map& rhs)
@@ -115,7 +114,6 @@ Map& Map::operator=(const Map& rhs)
     aspectFixMode_=rhs.aspectFixMode_;
     maximum_extent_=rhs.maximum_extent_;
     base_path_=rhs.base_path_;
-    extra_attr_=rhs.extra_attr_;
     extra_params_=rhs.extra_params_;
     return *this;
 }
@@ -682,21 +680,6 @@ std::string Map::get_metawriter_property(std::string name) const
     std::string result;
     to_utf8(metawriter_output_properties[name], result);
     return result;
-}
-
-parameters const& Map::get_extra_attributes() const
-{
-    return extra_attr_;
-}
-
-parameters& Map::get_extra_attributes()
-{
-    return extra_attr_;
-}
-
-void Map::set_extra_attributes(parameters& attr)
-{
-    extra_attr_ = attr;
 }
 
 parameters const& Map::get_extra_parameters() const

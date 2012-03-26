@@ -226,10 +226,12 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     {
         parse_gradient_stop(reader);
     }
+#ifdef MAPNIK_DEBUG
     else if (!xmlStrEqual(name, BAD_CAST "svg"))
     {
         std::clog << "notice: unhandled svg element: " << name << "\n";
     }
+#endif
 }
 
 void svg_parser::end_element(xmlTextReaderPtr reader)

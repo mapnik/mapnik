@@ -23,13 +23,20 @@
 #ifndef MAPNIK_PLACEMENT_FINDER_HPP
 #define MAPNIK_PLACEMENT_FINDER_HPP
 
-//mapnik
+// mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/text_placements/base.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/label_collision_detector.hpp>
+#include <mapnik/ctrans.hpp>
 
-//stl
+
+// agg
+#include "agg_conv_clip_polyline.h"
+
+
+// stl
 #include <queue>
 
 namespace mapnik
@@ -38,6 +45,12 @@ namespace mapnik
 class text_placement_info;
 class string_info;
 class text_path;
+
+typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+typedef coord_transform2<CoordTransform,clipped_geometry_type> ClippedPathType;
+typedef coord_transform2<CoordTransform,geometry_type> PathType;
+
+typedef label_collision_detector4 DetectorType;
 
 
 template <typename DetectorT>

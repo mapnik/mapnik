@@ -20,10 +20,10 @@ if 'osm' in mapnik.DatasourceCache.instance().plugin_names():
         e = ds.envelope()
 
         # these are hardcoded in the plugin… ugh
-        assert_almost_equal(e.minx, -180.0)
-        assert_almost_equal(e.miny, -90.0)
-        assert_almost_equal(e.maxx, 180.0)
-        assert_almost_equal(e.maxy, 90)
+        eq_(e.minx >= -180.0,True)
+        eq_(e.miny >= -90.0,True)
+        eq_(e.maxx <= 180.0,True)
+        eq_(e.maxy <= 90,True)
 
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):

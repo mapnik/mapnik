@@ -96,7 +96,7 @@ public:
             set_attr( sym_node, "smooth", sym.smooth() );
         }
     }
-    
+
     void operator () ( line_pattern_symbolizer const& sym )
     {
         ptree & sym_node = rule_.push_back(
@@ -763,14 +763,6 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         {
             serialize_fontset( map_node, it);
         }
-    }
-
-    parameters extra_attr = map.get_extra_attributes();
-    parameters::const_iterator p_it = extra_attr.begin();
-    parameters::const_iterator p_end = extra_attr.end();
-    for (; p_it != p_end; ++p_it)
-    {
-        set_attr( map_node, p_it->first, p_it->second );
     }
 
     serialize_parameters( map_node, map.get_extra_parameters());

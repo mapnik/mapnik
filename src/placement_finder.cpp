@@ -26,14 +26,12 @@
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_path.hpp>
-#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/fastmath.hpp>
 #include <mapnik/text_placements/base.hpp>
-#include <mapnik/ctrans.hpp>
 
 // agg
 #include "agg_path_length.h"
-#include "agg_conv_clip_polyline.h"
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
@@ -674,9 +672,9 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                             for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
                             {
                                 current_placement->nodes_[i].pos.x -=
-                                        pi.get_scale_factor() * displacement * sina;
+                                    pi.get_scale_factor() * displacement * sina;
                                 current_placement->nodes_[i].pos.y +=
-                                        pi.get_scale_factor() * displacement * cosa;
+                                    pi.get_scale_factor() * displacement * cosa;
                             }
                         }
 
@@ -1058,11 +1056,9 @@ void placement_finder<DetectorT>::clear_placements()
     while (!envelopes_.empty()) envelopes_.pop();
 }
 
-typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-typedef coord_transform2<CoordTransform,clipped_geometry_type> PathType;
-typedef label_collision_detector4 DetectorType;
-
 template class placement_finder<DetectorType>;
+template void placement_finder<DetectorType>::find_point_placements<ClippedPathType>(ClippedPathType &);
+template void placement_finder<DetectorType>::find_line_placements<ClippedPathType>(ClippedPathType &);
 template void placement_finder<DetectorType>::find_point_placements<PathType>(PathType &);
 template void placement_finder<DetectorType>::find_line_placements<PathType>(PathType &);
 }  // namespace

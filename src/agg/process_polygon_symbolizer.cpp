@@ -67,7 +67,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     ras_ptr->reset();
 
     set_gamma_method(sym,ras_ptr);
-    
+
     //metawriter_with_properties writer = sym.get_metawriter();
     box2d<double> inflated_extent = query_extent_ * 1.1;
     for (unsigned i=0;i<feature->num_geometries();++i)

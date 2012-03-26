@@ -83,12 +83,12 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
     {
         smooth_ = smooth;
     }
-    
+
     double smooth() const
     {
         return smooth_;
     }
-    
+
 private:
     stroke stroke_;
     line_rasterizer_e rasterizer_p_;

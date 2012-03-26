@@ -754,7 +754,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                     path_type path(t_,clipped,prj_trans);
                     context.add_path(path);
-                }                
+                }
             }
         }
         // fill polygon
@@ -877,7 +877,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     {
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
         typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-        
+
         mapnik::stroke const& stroke_ = sym.get_stroke();
         cairo_context context(context_);
         context.set_color(stroke_.get_color(), stroke_.get_opacity());
@@ -889,7 +889,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         {
             context.set_dash(stroke_.get_dash_array());
         }
-        
+
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
         {
             geometry_type & geom = feature->get_geometry(i);
@@ -900,7 +900,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 clipped_geometry_type clipped(geom);
                 clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                 path_type path(t_,clipped,prj_trans);
-                            
+
                 context.add_path(path);
             }
         }

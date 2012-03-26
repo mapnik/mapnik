@@ -224,13 +224,14 @@ public:
 
     box2d<double> envelope() const
     {
+        // TODO - cache this
         box2d<double> result;
         for (unsigned i=0;i<num_geometries();++i)
         {
             geometry_type const& geom = get_geometry(i);
             if (i==0)
             {
-                box2d<double> box = geom.envelope();
+                box2d<double> const& box = geom.envelope();
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
             }
             else

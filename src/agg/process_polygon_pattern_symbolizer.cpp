@@ -74,7 +74,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::scanline_u8 sl;
     ras_ptr->reset();
     set_gamma_method(sym,ras_ptr);
-    
+
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )

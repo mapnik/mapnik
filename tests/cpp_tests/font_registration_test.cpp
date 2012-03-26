@@ -6,8 +6,6 @@ using fs::path;
 namespace sys = boost::system;
 
 #include <boost/detail/lightweight_test.hpp>
-//#include <boost/bind.hpp>
-//#include <fstream>
 #include <iostream>
 #include <mapnik/font_engine_freetype.hpp>
 
@@ -39,14 +37,23 @@ int main( int, char*[] )
 
   // directories without fonts
   std::string src("src");
-  // a legitimate directory will return true even it is does not 
-  // successfully register a font...
-  BOOST_TEST( mapnik::freetype_engine::register_fonts(src , true ) );
-  face_names = mapnik::freetype_engine::face_names();
-  BOOST_TEST( face_names.size() == 0 );
-  std::clog << "number of registered fonts: " << face_names.size() << std::endl;
+  // an empty directory will not return true
+  // we need to register at least one font and not fail on any
+  // to return true
+  BOOST_TEST( mapnik::freetype_engine::register_font(src) == false );
+  BOOST_TEST( mapnik::freetype_engine::register_fonts(src, true) == false );
+  BOOST_TEST( mapnik::freetype_engine::face_names().size() == 0 );
 
-  // register unifont
+  // bogus, emtpy file that looks like font
+  BOOST_TEST( mapnik::freetype_engine::register_font("tests/data/fonts/fake.ttf") == false );
+  BOOST_TEST( mapnik::freetype_engine::register_fonts("tests/data/fonts/fake.ttf") == false );
+  BOOST_TEST( mapnik::freetype_engine::face_names().size() == 0 );
+
+  BOOST_TEST( mapnik::freetype_engine::register_font("tests/data/fonts/intentionally-broken.ttf") == false );
+  BOOST_TEST( mapnik::freetype_engine::register_fonts("tests/data/fonts/intentionally-broken.ttf") == false );
+  BOOST_TEST( mapnik::freetype_engine::face_names().size() == 0 );
+
+  // register unifont, since we know it sits in the root fonts/ dir
   BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir) );
   face_names = mapnik::freetype_engine::face_names();
   std::clog << "number of registered fonts: " << face_names.size() << std::endl;
@@ -71,7 +78,7 @@ int main( int, char*[] )
   BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir, true) );
   face_names = mapnik::freetype_engine::face_names();
   std::clog << "number of registered fonts: " << face_names.size() << std::endl;
-  BOOST_TEST( face_names.size() == 21 );
+  BOOST_TEST( face_names.size() == 22 );
 
   return ::boost::report_errors();
 }

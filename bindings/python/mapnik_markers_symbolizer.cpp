@@ -116,5 +116,13 @@ void export_markers_symbolizer()
         .add_property("transform",
                       &mapnik::get_svg_transform<markers_symbolizer>,
                       &mapnik::set_svg_transform<markers_symbolizer>)
+        .add_property("width",
+                      &markers_symbolizer::get_width,
+                      &markers_symbolizer::set_width,
+                      "Set/get the marker width")
+        .add_property("height",
+                      &markers_symbolizer::get_height,
+                      &markers_symbolizer::set_height,
+                      "Set/get the marker height")
         ;
 }

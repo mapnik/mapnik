@@ -52,8 +52,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-  
+    
     stroke const& stroke_ = sym.get_stroke();
     color const& col = stroke_.get_color();
     unsigned r=col.red();
@@ -67,6 +66,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     box2d<double> ext = query_extent_ * 1.1;
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
+        typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
         typedef agg::renderer_outline_aa<ren_base> renderer_type;
         typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
@@ -98,9 +98,9 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     {        
         ras_ptr->reset();        
         set_gamma_method(stroke_, ras_ptr);
-        stroker_.attach(pixf);
-        
+        renderer_.attach(pixf);
         //metawriter_with_properties writer = sym.get_metawriter();
+
         for (unsigned i=0;i<feature->num_geometries();++i)
         {
             geometry_type & geom = feature->get_geometry(i);
@@ -140,7 +140,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                         clipped_geometry_type clipped(geom);
                         clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
                         path_type path(t_,clipped,prj_trans);
-                        
+
                         agg::conv_dash<path_type> dash(path);
                         dash_array const& d = stroke_.get_dash_array();
                         dash_array::const_iterator itr = d.begin();
@@ -186,18 +186,15 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                         set_join_caps(stroke_,stroke);
                         stroke.generator().miter_limit(4.0);
                         stroke.generator().width(stroke_.get_width() * scale_factor_);
-                        ras_ptr->add_path(stroke);                        
+                        ras_ptr->add_path(stroke);
                     }
                     //if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
                 }
             }
         }
         
-        stroker_.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
-        stroker_.render(*ras_ptr);
-        
-        //ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
-        //agg::render_scanlines(*ras_ptr, sl, ren);
+        renderer_.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
+        renderer_.render(*ras_ptr);
     }
 }
 

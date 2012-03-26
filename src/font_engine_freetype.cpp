@@ -71,11 +71,10 @@ bool freetype_engine::is_font_file(std::string const& file_name)
 
 bool freetype_engine::register_font(std::string const& file_name)
 {
-    if (!boost::filesystem::is_regular_file(file_name) || !is_font_file(file_name)) return false;
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
-    FT_Library library;
+    FT_Library library = 0;
     FT_Error error = FT_Init_FreeType(&library);
     if (error)
     {
@@ -83,36 +82,47 @@ bool freetype_engine::register_font(std::string const& file_name)
     }
 
     FT_Face face = 0;
+    int num_faces = 0;
+    bool success = false;
     // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
-    for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
+    for ( int i = 0; face == 0 || i < num_faces; i++ ) {
         // if face is null then this is the first face
         error = FT_New_Face (library,file_name.c_str(),i,&face);
         if (error)
         {
-            FT_Done_FreeType(library);
-            return false;
+            break;
         }
+        // store num_faces locally, after FT_Done_Face it can not be accessed any more
+        if (!num_faces)
+            num_faces = face->num_faces;
         // some fonts can lack names, skip them
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
-        if (face->family_name && face->style_name) {
+        if (face->family_name && face->style_name)
+        {
+            success = true;
             std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
             name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
-            FT_Done_Face(face);
-            //FT_Done_FreeType(library);
-            //return true;
-        } else {
-            FT_Done_Face(face);
-            FT_Done_FreeType(library);
+        }
+        else
+        {
             std::ostringstream s;
-            s << "Error: unable to load invalid font file which lacks identifiable family and style name: '"
-              << file_name << "'";
-            throw std::runtime_error(s.str());
+            s << "Warning: unable to load font file '" << file_name << "' ";
+            if (!face->family_name && !face->style_name)
+                s << "which lacks both a family name and style name";
+            else if (face->family_name)
+                s << "which reports a family name of '" << std::string(face->family_name) << "' and lacks a style name";
+            else if (face->style_name)
+                s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
+            std::clog << s.str() << std::endl;
         }
     }
-    FT_Done_FreeType(library);
-    return true;
+    if (face)
+        FT_Done_Face(face);
+    if (library)
+        FT_Done_FreeType(library);
+    return success;
 }
 
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
@@ -126,26 +136,24 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
         return mapnik::freetype_engine::register_font(dir);
 
     boost::filesystem::directory_iterator end_itr;
+    bool success = false;
     for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
     {
+#if (BOOST_FILESYSTEM_VERSION == 3)
+        std::string const& file_name = itr->path().string();
+#else // v2
+        std::string const& file_name = itr->string();
+#endif
         if (boost::filesystem::is_directory(*itr) && recurse)
         {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            if (!register_fonts(itr->path().string(), true)) return false;
-#else // v2
-            if (!register_fonts(itr->string(), true)) return false;
-#endif
+            success = register_fonts(file_name, true);
         }
-        else
+        else if (boost::filesystem::is_regular_file(file_name) && is_font_file(file_name))
         {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            mapnik::freetype_engine::register_font(itr->path().string());
-#else // v2
-            mapnik::freetype_engine::register_font(itr->string());
-#endif
+            success = mapnik::freetype_engine::register_font(file_name);
         }
     }
-    return true;
+    return success;
 }
 
 

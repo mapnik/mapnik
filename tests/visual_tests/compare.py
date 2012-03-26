@@ -42,9 +42,9 @@ def compare(fn1, fn2):
 
 def summary():
     global errors
+    print "-"*80
+    print "Summary:"
     if len(errors) != 0:
-        print "-"*80
-        print "Summary:"
         for error in errors:
             if (error[1] is None):
                 print "Could not verify %s: No reference image found!" % error[0]
@@ -52,3 +52,7 @@ def summary():
                 print "%s failed: %d different pixels" % error
         print "-"*80
         sys.exit(1)
+    else:
+        print 'No errors detected!'
+        print "-"*80
+        sys.exit(0)

@@ -148,6 +148,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             h = sym.get_height()/res;
         }
 
+        double rx = w/2.0;
+        double ry = h/2.0;
+
         arrow arrow_;
         box2d<double> extent;
 
@@ -195,7 +198,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 if (sym.get_allow_overlap() ||
                     detector_.has_placement(label_ext))
                 {
-                    agg::ellipse c(x, y, w, h);
+                    agg::ellipse c(x, y, rx, ry);
                     agg::path_storage marker;
                     marker.concat_path(c);
                     ras_ptr->add_path(marker);
@@ -232,7 +235,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     if (marker_type == ELLIPSE)
                     {
                         // todo proper bbox - this is buggy
-                        agg::ellipse c(x_t, y_t, w, h);
+                        agg::ellipse c(x_t, y_t, rx, ry);
                         marker.concat_path(c);
                         agg::trans_affine matrix;
                         matrix *= agg::trans_affine_translation(-x_t,-y_t);
