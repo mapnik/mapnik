@@ -55,6 +55,11 @@
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_smooth_poly1.h"
 
+// markers
+#include "agg_path_storage.h"
+#include "agg_ellipse.h"
+
+
 // stl
 #ifdef MAPNIK_DEBUG
 #include <iostream>
@@ -907,7 +912,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         context.stroke();
     }
 
-    void cairo_renderer_base::render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity)
+    void cairo_renderer_base::render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity, bool recenter)
 
     {
         cairo_context context(context_);
@@ -916,15 +921,21 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             box2d<double> bbox;
             bbox = (*marker.get_vector_data())->bounding_box();
 
-            coord<double,2> c = bbox.center();
-            // center the svg marker on '0,0'
-            agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
-            // apply symbol transformation to get to map space
-            mtx *= tr;
-            // render the marker at the center of the marker box
-            mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
+            agg::trans_affine mtx = tr;
+
+            if (recenter)
+            {
+                coord<double,2> c = bbox.center();
+                // center the svg marker on '0,0'
+                mtx = agg::trans_affine_translation(-c.x,-c.y);
+                // apply symbol transformation to get to map space
+                mtx *= tr;
+                // render the marker at the center of the marker box
+                mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
+            }
 
             typedef coord_transform2<CoordTransform,geometry_type> path_type;
+            agg::trans_affine transform;
             mapnik::path_ptr vmarker = *marker.get_vector_data();
             using namespace mapnik::svg;
             agg::pod_bvector<path_attributes> const & attributes_ = vmarker->attributes();
@@ -936,10 +947,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
                 context.save();
 
-                agg::trans_affine transform = attr.transform;
+                transform = attr.transform;
                 transform *= mtx;
 
-                if (transform.is_valid() && !transform.is_identity())
+                // TODO - this 'is_valid' check is not used in the AGG renderer and also
+                // appears to lead to bogus results with
+                // tests/data/good_maps/markers_symbolizer_lines_file.xml
+                if (/*transform.is_valid() && */ !transform.is_identity())
                 {
                     double m[6];
                     transform.store_to(m);
@@ -973,7 +987,6 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                         context.fill();
                     }
                 }
-
 
                 if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT || attr.stroke_flag)
                 {
@@ -1243,37 +1256,249 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         }
     }
 
-// TODO - this is woefully behind the AGG version.
     void cairo_renderer_base::process(markers_symbolizer const& sym,
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
-        arrow arrow_;
         cairo_context context(context_);
 
-        color const& fill_ = sym.get_fill();
-        context.set_color(fill_.red(), fill_.green(), fill_.blue(), fill_.alpha());
+        double scale_factor_(1);
 
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
+        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+
+        agg::trans_affine tr;
+        boost::array<double,6> const& m = sym.get_transform();
+        tr.load_from(&m[0]);
+        // TODO - use this?
+        //tr = agg::trans_affine_scaling(scale_factor_) * tr;
+        std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
+        marker_placement_e placement_method = sym.get_marker_placement();
+        marker_type_e marker_type = sym.get_marker_type();
+        metawriter_with_properties writer = sym.get_metawriter();
+
+        if (!filename.empty())
         {
-            geometry_type & geom = feature->get_geometry(i);
-
-            if (geom.num_points() > 1)
+            boost::optional<marker_ptr> mark = mapnik::marker_cache::instance()->find(filename, true);
+            if (mark && *mark)
             {
+                if (!(*mark)->is_vector()) {
+                    std::clog << "### Warning only svg markers are supported in the markers_symbolizer\n";
+                    return;
+                }
+                boost::optional<path_ptr> marker = (*mark)->get_vector_data();
+                box2d<double> const& bbox = (*marker)->bounding_box();
+                double x1 = bbox.minx();
+                double y1 = bbox.miny();
+                double x2 = bbox.maxx();
+                double y2 = bbox.maxy();
+                double w = (*mark)->width();
+                double h = (*mark)->height();
 
-                path_type path(t_, geom, prj_trans);
+                agg::trans_affine recenter = agg::trans_affine_translation(-0.5*(x1+x2),-0.5*(y1+y2));
+                tr.transform(&x1,&y1);
+                tr.transform(&x2,&y2);
+                box2d<double> extent(x1,y1,x2,y2);
+                using namespace mapnik::svg;
 
-                markers_placement<path_type, label_collision_detector4> placement(path, arrow_.extent(), detector_, sym.get_spacing(), sym.get_max_error(), sym.get_allow_overlap());
+                for (unsigned i=0; i<feature->num_geometries(); ++i)
+                {
+                    geometry_type & geom = feature->get_geometry(i);
+                    // TODO - merge this code with point_symbolizer rendering
+                    if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
+                    {
+                        double x;
+                        double y;
+                        double z=0;
+                        geom.label_interior_position(&x, &y);
+                        prj_trans.backward(x,y,z);
+                        t_.forward(&x,&y);
+                        extent.re_center(x,y);
 
-                double x, y, angle;
-                while (placement.get_point(&x, &y, &angle)) {
-                    Cairo::Matrix matrix = Cairo::rotation_matrix(angle) * Cairo::translation_matrix(x,y) ;
-                    context.set_matrix(matrix);
-                    context.add_path(arrow_);
+                        if (sym.get_allow_overlap() ||
+                            detector_.has_placement(extent))
+                        {
+                            render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, sym.get_opacity());
+
+                            // TODO - impl this for markers?
+                            //if (!sym.get_ignore_placement())
+                            //    detector_.insert(label_ext);
+                            metawriter_with_properties writer = sym.get_metawriter();
+                            if (writer.first) writer.first->add_box(extent, *feature, t_, writer.second);
+                        }
+                    }
+                    else
+                    {
+                        clipped_geometry_type clipped(geom);
+                        clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                        path_type path(t_,clipped,prj_trans);
+                        markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_,
+                                                                                          sym.get_spacing() * scale_factor_,
+                                                                                          sym.get_max_error(),
+                                                                                          sym.get_allow_overlap());
+                        double x, y, angle;
+
+                        while (placement.get_point(&x, &y, &angle))
+                        {
+                            agg::trans_affine matrix = recenter * tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
+                            render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h), **mark, matrix, sym.get_opacity(),false);
+
+                            if (writer.first)
+                                //writer.first->add_box(label_ext, feature, t_, writer.second);
+                                std::clog << "### Warning metawriter not yet supported for LINE placement\n";
+                        }
+                    }
+                    context.fill();
                 }
             }
-            context.fill();
+        }
+        else
+        {
+            color const& fill_ = sym.get_fill();
+            unsigned r = fill_.red();
+            unsigned g = fill_.green();
+            unsigned b = fill_.blue();
+            unsigned a = fill_.alpha();
+            stroke const& stroke_ = sym.get_stroke();
+            color const& col = stroke_.get_color();
+            double strk_width = stroke_.get_width();
+            unsigned s_r=col.red();
+            unsigned s_g=col.green();
+            unsigned s_b=col.blue();
+            unsigned s_a=col.alpha();
+            double w = sym.get_width();
+            double h = sym.get_height();
+            double rx = w/2.0;
+            double ry = h/2.0;
+
+            arrow arrow_;
+            box2d<double> extent;
+
+            double dx = w + (2*strk_width);
+            double dy = h + (2*strk_width);
+
+            if (marker_type == ARROW)
+            {
+                extent = arrow_.extent();
+                double x1 = extent.minx();
+                double y1 = extent.miny();
+                double x2 = extent.maxx();
+                double y2 = extent.maxy();
+                tr.transform(&x1,&y1);
+                tr.transform(&x2,&y2);
+                extent.init(x1,y1,x2,y2);
+            }
+            else
+            {
+                double x1 = -1 *(dx);
+                double y1 = -1 *(dy);
+                double x2 = dx;
+                double y2 = dy;
+                tr.transform(&x1,&y1);
+                tr.transform(&x2,&y2);
+                extent.init(x1,y1,x2,y2);
+            }
+
+            double x;
+            double y;
+            double z=0;
+
+            agg::path_storage marker;
+
+            for (unsigned i=0; i<feature->num_geometries(); ++i)
+            {
+                geometry_type & geom = feature->get_geometry(i);
+                if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
+                {
+                    geom.label_position(&x,&y);
+                    prj_trans.backward(x,y,z);
+                    t_.forward(&x,&y);
+                    int px = int(floor(x - 0.5 * dx));
+                    int py = int(floor(y - 0.5 * dy));
+                    box2d<double> label_ext (px, py, px + dx +1, py + dy +1);
+                    if (sym.get_allow_overlap() ||
+                        detector_.has_placement(label_ext))
+                    {
+                        agg::ellipse c(x, y, rx, ry);
+                        marker.concat_path(c);
+                        context.set_color(fill_,sym.get_opacity());
+                        context.add_agg_path(marker);
+                        context.fill();
+
+                        if (strk_width)
+                        {
+                            //context.restore();
+                            context.set_color(col,stroke_.get_opacity());
+                            context.set_line_width(stroke_.get_width());
+                            if (stroke_.has_dash())
+                            {
+                                context.set_dash(stroke_.get_dash_array());
+                            }
+                            context.add_agg_path(marker);
+                            context.stroke();
+                        }
+                        if (!sym.get_ignore_placement())
+                            detector_.insert(label_ext);
+                        if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
+                    }
+                }
+                else
+                {
+                    if (marker_type == ARROW)
+                        marker.concat_path(arrow_);
+
+                    clipped_geometry_type clipped(geom);
+                    clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                    path_type path(t_,clipped,prj_trans);
+                    markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_,
+                                                                                      sym.get_spacing() * scale_factor_,
+                                                                                      sym.get_max_error(),
+                                                                                      sym.get_allow_overlap());
+                    double x_t, y_t, angle;
+
+                    while (placement.get_point(&x_t, &y_t, &angle))
+                    {
+                        agg::trans_affine matrix;
+
+                        if (marker_type == ELLIPSE)
+                        {
+                            agg::ellipse c(x_t, y_t, rx, ry);
+                            marker.concat_path(c);
+                            agg::trans_affine matrix;
+                            matrix *= agg::trans_affine_translation(-x_t,-y_t);
+                            matrix *= agg::trans_affine_rotation(angle);
+                            matrix *= agg::trans_affine_translation(x_t,y_t);
+                            marker.transform(matrix);
+                        }
+                        else
+                        {
+                            matrix = tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x_t, y_t);
+                        }
+
+                        // TODO
+                        if (writer.first)
+                            //writer.first->add_box(label_ext, feature, t_, writer.second);
+                            std::clog << "### Warning metawriter not yet supported for LINE placement\n";
+
+                        agg::conv_transform<agg::path_storage, agg::trans_affine> trans(marker, matrix);
+                        context.set_color(fill_,sym.get_opacity());
+                        context.add_agg_path(trans);
+                        context.fill();
+
+                        if (strk_width)
+                        {
+                            context.set_color(col,stroke_.get_opacity());
+                            context.set_line_width(stroke_.get_width());
+                            if (stroke_.has_dash())
+                            {
+                                context.set_dash(stroke_.get_dash_array());
+                            }
+                            context.add_agg_path(trans);
+                            context.stroke();
+                        }
+                    }
+                }
+            }
         }
     }
 
