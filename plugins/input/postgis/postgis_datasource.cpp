@@ -510,7 +510,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
               double px_gw = 1.0/boost::get<0>(q.resolution());
               double px_gh = 1.0/boost::get<1>(q.resolution());
 
-              double tolerance = std::min(px_gw,px_gh);
+              double tolerance = std::min(px_gw,px_gh) / 2;
               s << ", " << tolerance << ")";
             }
 
