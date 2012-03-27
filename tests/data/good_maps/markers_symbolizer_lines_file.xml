@@ -3,7 +3,7 @@
     <Style name="1">
         <Rule>
             <LineSymbolizer stroke-width=".2" stroke="grey"/>
-            <MarkersSymbolizer stroke="green" stroke-width="1.3" fill="yellow"/>
+            <MarkersSymbolizer file="../svg/crosshair16x16.svg"/>
         </Rule>
     </Style>
 
