@@ -54,7 +54,7 @@ def test_shieldsymbolizer_init():
     # r1341
     eq_(s.wrap_before, False)
     eq_(s.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
-    eq_(s.justify_alignment, mapnik.justify_alignment.MIDDLE)
+    eq_(s.justify_alignment, mapnik.justify_alignment.AUTO)
     eq_(s.opacity, 1.0)
 
     # r2300
@@ -230,13 +230,8 @@ def test_map_init_from_string():
     map_string = '''<Map background-color="steelblue" base="./" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
      <Style name="My Style">
       <Rule>
-       <PolygonSymbolizer>
-        <CssParameter name="fill">#f2eff9</CssParameter>
-       </PolygonSymbolizer>
-       <LineSymbolizer>
-        <CssParameter name="stroke">rgb(50%,50%,50%)</CssParameter>
-        <CssParameter name="stroke-width">0.1</CssParameter>
-       </LineSymbolizer>
+       <PolygonSymbolizer fill="#f2eff9"/>
+       <LineSymbolizer stroke="rgb(50%,50%,50%)" stroke-width="0.1"/>
       </Rule>
      </Style>
      <Layer name="boundaries">

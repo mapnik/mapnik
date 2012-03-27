@@ -24,9 +24,9 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/map.hpp>
@@ -201,16 +201,18 @@ void agg_renderer<T>::end_map_processing(Map const& )
 }
 
 template <typename T>
-void agg_renderer<T>::start_layer_processing(layer const& lay)
+void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
 #ifdef MAPNIK_DEBUG
     std::clog << "start layer processing : " << lay.name()  << "\n";
     std::clog << "datasource = " << lay.datasource().get() << "\n";
+    std::clog << "query_extent = " << query_extent << "\n";
 #endif
     if (lay.clear_label_cache())
     {
         detector_->clear();
     }
+    query_extent_ = query_extent;
 }
 
 template <typename T>
@@ -246,7 +248,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         mtx *= agg::trans_affine_scaling(scale_factor_);
         // render the marker at the center of the marker box
         mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
-
+        using namespace mapnik::svg;
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,

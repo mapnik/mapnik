@@ -33,29 +33,29 @@ namespace mapnik { namespace json {
 
 #if BOOST_VERSION >= 104700
 
-template <typename Iterator>
-feature_collection_parser<Iterator>::feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr)
-    : grammar_(new feature_collection_grammar<iterator_type,feature_type>(ctx,tr)) {}
+    template <typename Iterator>
+    feature_collection_parser<Iterator>::feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr)
+        : grammar_(new feature_collection_grammar<iterator_type,feature_type>(ctx,tr)) {}
 
-template <typename Iterator>
-feature_collection_parser<Iterator>::~feature_collection_parser() {}
+    template <typename Iterator>
+    feature_collection_parser<Iterator>::~feature_collection_parser() {}
 #endif
 
-template <typename Iterator>
-bool feature_collection_parser<Iterator>::parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features)
-{
+    template <typename Iterator>
+    bool feature_collection_parser<Iterator>::parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features)
+    {
 #if BOOST_VERSION >= 104700
-    using namespace boost::spirit;
-    return qi::phrase_parse(first, last, *grammar_, standard_wide::space, features);
+        using namespace boost::spirit;
+        return qi::phrase_parse(first, last, *grammar_, standard_wide::space, features);
 #else
-    std::ostringstream s;
-    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-    throw std::runtime_error("mapnik::feature_collection_parser::parse() requires at least boost 1.47 while your build was compiled against boost " + s.str());
-    return false;
+        std::ostringstream s;
+        s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+        throw std::runtime_error("mapnik::feature_collection_parser::parse() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+        return false;
 #endif
-}
+    }
 
-template class feature_collection_parser<std::string::const_iterator> ;
-template class feature_collection_parser<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
-}}
+    template class feature_collection_parser<std::string::const_iterator> ;
+    template class feature_collection_parser<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
+    }}
 

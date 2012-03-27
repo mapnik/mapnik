@@ -36,6 +36,7 @@ namespace mapnik {
 
 typedef std::set<expression_ptr> expression_set;
 class processed_text;
+class xml_node;
 struct char_properties;
 
 namespace formatting {
@@ -48,7 +49,7 @@ class node
 public:
     virtual ~node() {}
     virtual void to_xml(boost::property_tree::ptree &xml) const;
-    static node_ptr from_xml(boost::property_tree::ptree const& xml);
+    static node_ptr from_xml(xml_node const& xml);
     virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const = 0;
     virtual void add_expressions(expression_set &output) const;
 };

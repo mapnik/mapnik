@@ -73,6 +73,7 @@ if env['THREADING'] == 'multi':
 if env['RUNTIME_LINK'] == 'static':
     if 'icuuc' in env['ICU_LIB_NAME']:
         lib_env['LIBS'].append('icudata')
+        lib_env['LIBS'].append('icui18n')
 else:
     if env['INTERNAL_LIBAGG']:
           lib_env['LIBS'].insert(0, 'agg')
@@ -83,7 +84,7 @@ else:
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = 'libmapnik.dylib'
 else:
-    mapnik_libname = 'libmapnik.so.' + ("%d.%d" % (ABI_VERSION[0],ABI_VERSION[1])) 
+    mapnik_libname = 'libmapnik.so.' + ("%d.%d" % (int(ABI_VERSION[0]),int(ABI_VERSION[1])))
 
 if env['PLATFORM'] == 'Darwin':
     if env['FULL_LIB_PATH']:
@@ -91,7 +92,7 @@ if env['PLATFORM'] == 'Darwin':
     else:
         lib_path = mapnik_libname
     mapnik_lib_link_flag += ' -Wl,-install_name,%s' % lib_path
-    _d = {'version':env['MAPNIK_VERSION_STRING']}
+    _d = {'version':env['MAPNIK_VERSION_STRING'].replace('-pre','')}
     mapnik_lib_link_flag += ' -current_version %(version)s -compatibility_version %(version)s' % _d
 elif env['PLATFORM'] == 'SunOS':
     if env['CXX'].startswith('CC'):
@@ -105,6 +106,7 @@ source = Split(
     """
     color.cpp
     conversions.cpp
+    image_compositing.cpp
     box2d.cpp
     building_symbolizer.cpp
     datasource_cache.cpp
@@ -178,6 +180,8 @@ source = Split(
     text_placements/list.cpp
     text_placements/simple.cpp
     text_properties.cpp
+    xml_tree.cpp
+    config_error.cpp
     """   
     )
 
@@ -299,7 +303,7 @@ if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     env2 = lib_env.Clone()
     env2.Append(CXXFLAGS = '-DHAVE_LIBXML2')
     libmapnik_cxxflags.append('-DHAVE_LIBXML2')
-    fixup = ['load_map.cpp','libxml2_loader.cpp']
+    fixup = ['libxml2_loader.cpp']
     for cpp in fixup:
         if cpp in source:
             source.remove(cpp)
@@ -307,6 +311,12 @@ if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
             source.insert(0,env2.StaticObject(cpp))
         else:
             source.insert(0,env2.SharedObject(cpp))
+else:
+    source += Split(
+        """
+        rapidxml_loader.cpp
+        """
+    )
 
 if env['CUSTOM_LDFLAGS']:
     linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], mapnik_lib_link_flag)
@@ -334,7 +344,7 @@ if env['PLATFORM'] != 'Darwin':
 
     major, minor, micro = ABI_VERSION
     
-    soFile = "%s.%d.%d.%d" % (os.path.basename(str(mapnik[0])), major, minor, micro)
+    soFile = "%s.%d.%d.%d" % (os.path.basename(str(mapnik[0])), int(major), int(minor), int(micro))
     target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], soFile)
     
     if 'uninstall' not in COMMAND_LINE_TARGETS:
@@ -345,7 +355,7 @@ if env['PLATFORM'] != 'Darwin':
 
     
     # Install symlinks
-    target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % (os.path.basename(str(mapnik[0])),major, minor))
+    target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % (os.path.basename(str(mapnik[0])),int(major), int(minor)))
     target2 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], os.path.basename(str(mapnik[0])))
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if 'install' in COMMAND_LINE_TARGETS:

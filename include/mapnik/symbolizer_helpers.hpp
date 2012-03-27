@@ -55,7 +55,8 @@ public:
                            double scale_factor,
                            CoordTransform const& t,
                            FaceManagerT &font_manager,
-                           DetectorT &detector)
+                           DetectorT &detector,
+                           box2d<double> const& query_extent)
         : sym_(sym),
           feature_(feature),
           prj_trans_(prj_trans),
@@ -64,6 +65,7 @@ public:
           detector_(detector),
           writer_(sym.get_metawriter()),
           dims_(0, 0, width, height),
+          query_extent_(query_extent),
           text_(font_manager, scale_factor),
           angle_(0.0),
           placement_valid_(false),
@@ -100,7 +102,7 @@ protected:
     DetectorT & detector_;
     metawriter_with_properties writer_;
     box2d<double> dims_;
-
+    box2d<double> const& query_extent_;
     //Processing
     processed_text text_;
     /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
@@ -137,10 +139,11 @@ public:
                              unsigned width,
                              unsigned height,
                              double scale_factor,
-                             CoordTransform const& t,
-                             FaceManagerT & font_manager,
-                             DetectorT & detector) :
-        text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector),
+                             CoordTransform const &t,
+                             FaceManagerT &font_manager,
+                             DetectorT &detector,
+                             box2d<double> const& query_extent) :
+        text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector, query_extent),
         sym_(sym)
     {
         this->points_on_line_ = true;

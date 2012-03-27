@@ -25,6 +25,10 @@
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/feature_factory.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
+
 // stl
 #include <algorithm>
 
@@ -76,7 +80,7 @@ datasource::datasource_t memory_datasource::type() const
 
 featureset_ptr memory_datasource::features(const query& q) const
 {
-    return featureset_ptr(new memory_featureset(q.get_bbox(),*this));
+    return boost::make_shared<memory_featureset>(q.get_bbox(),*this);
 }
 
 
@@ -86,7 +90,7 @@ featureset_ptr memory_datasource::features_at_point(coord2d const& pt) const
 #ifdef MAPNIK_DEBUG
     std::clog << "box=" << box << ", pt x=" << pt.x << ", y=" << pt.y << "\n";
 #endif
-    return featureset_ptr(new memory_featureset(box,*this));
+    return boost::make_shared<memory_featureset>(box,*this);
 }
 
 box2d<double> memory_datasource::envelope() const

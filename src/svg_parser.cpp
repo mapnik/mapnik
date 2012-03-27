@@ -24,6 +24,7 @@
 
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
+#include <mapnik/config_error.hpp>
 
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
@@ -225,10 +226,12 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     {
         parse_gradient_stop(reader);
     }
+#ifdef MAPNIK_DEBUG
     else if (!xmlStrEqual(name, BAD_CAST "svg"))
     {
         std::clog << "notice: unhandled svg element: " << name << "\n";
     }
+#endif
 }
 
 void svg_parser::end_element(xmlTextReaderPtr reader)

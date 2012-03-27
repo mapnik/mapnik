@@ -91,6 +91,10 @@ public:
         {
             set_attr( sym_node, "rasterizer", sym.get_rasterizer() );
         }
+        if ( sym.smooth() != dfl.smooth() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "smooth", sym.smooth() );
+        }
     }
 
     void operator () ( line_pattern_symbolizer const& sym )
@@ -124,6 +128,10 @@ public:
         if ( sym.get_gamma_method() != dfl.get_gamma_method() || explicit_defaults_ )
         {
             set_attr( sym_node, "gamma-method", sym.get_gamma_method() );
+        }
+        if ( sym.smooth() != dfl.smooth() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "smooth", sym.smooth() );
         }
         add_metawriter_attributes(sym_node, sym);
     }
@@ -264,6 +272,10 @@ public:
         if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_)
         {
             set_attr( sym_node, "allow-overlap", sym.get_allow_overlap() );
+        }
+        if (sym.get_ignore_placement() != dfl.get_ignore_placement() || explicit_defaults_)
+        {
+            set_attr( sym_node, "ignore-placement", sym.get_ignore_placement() );
         }
         if (sym.get_spacing() != dfl.get_spacing() || explicit_defaults_)
         {
@@ -631,9 +643,9 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         set_attr( layer_node, "srs", layer.srs() );
     }
 
-    if ( !layer.isActive() || explicit_defaults )
+    if ( !layer.active() || explicit_defaults )
     {
-        set_attr/*<bool>*/( layer_node, "status", layer.isActive() );
+        set_attr/*<bool>*/( layer_node, "status", layer.active() );
     }
 
     if ( layer.clear_label_cache() || explicit_defaults )
@@ -641,19 +653,19 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         set_attr/*<bool>*/( layer_node, "clear-label-cache", layer.clear_label_cache() );
     }
 
-    if ( layer.getMinZoom() )
+    if ( layer.min_zoom() )
     {
-        set_attr( layer_node, "minzoom", layer.getMinZoom() );
+        set_attr( layer_node, "minzoom", layer.min_zoom() );
     }
 
-    if ( layer.getMaxZoom() != std::numeric_limits<double>::max() )
+    if ( layer.max_zoom() != std::numeric_limits<double>::max() )
     {
-        set_attr( layer_node, "maxzoom", layer.getMaxZoom() );
+        set_attr( layer_node, "maxzoom", layer.max_zoom() );
     }
 
-    if ( layer.isQueryable() || explicit_defaults )
+    if ( layer.queryable() || explicit_defaults )
     {
-        set_attr( layer_node, "queryable", layer.isQueryable() );
+        set_attr( layer_node, "queryable", layer.queryable() );
     }
 
     if ( layer.cache_features() || explicit_defaults )
@@ -742,14 +754,6 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         {
             serialize_fontset( map_node, it);
         }
-    }
-
-    parameters extra_attr = map.get_extra_attributes();
-    parameters::const_iterator p_it = extra_attr.begin();
-    parameters::const_iterator p_end = extra_attr.end();
-    for (; p_it != p_end; ++p_it)
-    {
-        set_attr( map_node, p_it->first, p_it->second );
     }
 
     serialize_parameters( map_node, map.get_extra_parameters());

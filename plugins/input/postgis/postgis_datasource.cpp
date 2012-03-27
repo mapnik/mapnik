@@ -26,7 +26,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/conversions.hpp>
 
@@ -175,7 +175,7 @@ void postgis_datasource::bind() const
                         if (srid_c != NULL)
                         {
                             int result;
-                            if (mapnik::conversions::string2int(srid_c,result))
+                            if (mapnik::util::string2int(srid_c,result))
                                 srid_ = result;
                         }
                     }
@@ -205,7 +205,7 @@ void postgis_datasource::bind() const
                         if (srid_c != NULL)
                         {
                             int result;
-                            if (mapnik::conversions::string2int(srid_c,result))
+                            if (mapnik::util::string2int(srid_c,result))
                                 srid_ = result;
                         }
                     }
@@ -681,22 +681,22 @@ box2d<double> postgis_datasource::envelope() const
             shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
             if (rs->next() && !rs->isNull(0))
             {
-                    double lox;
-                    double loy;
-                    double hix;
-                    double hiy;
-                    if (mapnik::conversions::string2double(rs->getValue(0),lox) &&
-                        mapnik::conversions::string2double(rs->getValue(1),loy) &&
-                        mapnik::conversions::string2double(rs->getValue(2),hix) &&
-                        mapnik::conversions::string2double(rs->getValue(3),hiy))
-                    {
-                        extent_.init(lox,loy,hix,hiy);
-                        extent_initialized_ = true;
-                    }
-                    else
-                    {
-                        std::clog << boost::format("Postgis Plugin: warning: could not determine extent from query: %s\n") % s.str() << std::endl;
-                    }
+                double lox;
+                double loy;
+                double hix;
+                double hiy;
+                if (mapnik::util::string2double(rs->getValue(0),lox) &&
+                    mapnik::util::string2double(rs->getValue(1),loy) &&
+                    mapnik::util::string2double(rs->getValue(2),hix) &&
+                    mapnik::util::string2double(rs->getValue(3),hiy))
+                {
+                    extent_.init(lox,loy,hix,hiy);
+                    extent_initialized_ = true;
+                }
+                else
+                {
+                    std::clog << boost::format("Postgis Plugin: warning: could not determine extent from query: %s\n") % s.str() << std::endl;
+                }
             }
             rs->close();
         }

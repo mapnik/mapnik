@@ -6,6 +6,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
 
 // mapnik
 #include <mapnik/feature_layer_desc.hpp>
@@ -14,7 +15,7 @@
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
-#include <mapnik/ptree_helpers.hpp>  // mapnik::boolean
+#include <mapnik/boolean.hpp>
 
 // stl
 #include <sstream>
@@ -45,7 +46,8 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
     manual_headers_(boost::trim_copy(*params_.get<std::string>("headers", ""))),
     strict_(*params_.get<mapnik::boolean>("strict", false)),
     quiet_(*params_.get<mapnik::boolean>("quiet", false)),
-    filesize_max_(*params_.get<float>("filesize_max", 20.0))  // MB
+    filesize_max_(*params_.get<float>("filesize_max", 20.0)),  // MB
+    ctx_(boost::make_shared<mapnik::context_type>())
 {
     /* TODO:
        general:
@@ -391,7 +393,6 @@ void csv_datasource::parse_csv(T& stream,
     bool extent_initialized = false;
     std::size_t num_headers = headers_.size();
 
-    ctx_ = boost::make_shared<mapnik::context_type>();
     for (std::size_t i = 0; i < headers_.size(); ++i)
     {
         ctx_->push(headers_[i]);

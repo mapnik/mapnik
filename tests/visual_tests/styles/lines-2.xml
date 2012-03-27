@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">osm</Parameter>
+            <Parameter name="file">../data/lines.osm</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="My Style">
+        <Rule>
+            <LineSymbolizer stroke-width="12" stroke="red"/>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="line">[name]<Format size="8" fill="blue">[name]</Format></TextSymbolizer>
+        </Rule>
+    </Style>
+
+</Map>

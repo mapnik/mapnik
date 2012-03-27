@@ -25,14 +25,7 @@
 
 // mapnik
 #include <mapnik/utils.hpp>
-#include <mapnik/marker.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/svg/svg_path_attributes.hpp>
-#include <mapnik/svg/svg_storage.hpp>
-#include <mapnik/svg/svg_path_adapter.hpp>
-
-// agg
-#include "agg_path_storage.h"
 
 // boost
 #include <boost/utility.hpp>
@@ -43,7 +36,7 @@
 namespace mapnik
 {
 
-using namespace mapnik::svg;
+class marker;
 
 typedef boost::shared_ptr<marker> marker_ptr;
 
@@ -57,6 +50,7 @@ struct MAPNIK_DECL marker_cache :
     static boost::unordered_map<std::string,marker_ptr> cache_;
     static bool insert(std::string const& key, marker_ptr);
     static boost::optional<marker_ptr> find(std::string const& key, bool update_cache = false);
+    static void clear();
 };
 
 }

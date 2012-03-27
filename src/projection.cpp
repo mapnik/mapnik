@@ -34,7 +34,7 @@
 
 namespace mapnik {
 
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
 boost::mutex projection::mutex_;
 #endif
 
@@ -84,7 +84,7 @@ std::string const& projection::params() const
 
 void projection::forward(double & x, double &y ) const
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
 #endif
     projUV p;
@@ -102,7 +102,7 @@ void projection::forward(double & x, double &y ) const
 
 void projection::inverse(double & x,double & y) const
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
 #endif
     if (is_geographic_)
@@ -120,7 +120,7 @@ void projection::inverse(double & x,double & y) const
 
 projection::~projection()
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
 #endif
     if (proj_) pj_free(proj_);
@@ -131,7 +131,7 @@ projection::~projection()
 
 void projection::init()
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
 #endif
 #if PJ_VERSION >= 480

@@ -120,7 +120,7 @@ class _Coord(Coord,_injector):
 
         Returns the easting (x) and northing (y) as a 
         coordinate pair.
-        
+
         Example: Project the geographic coordinates of the 
                  city center of Stuttgart into the local
                  map projection (GK Zone 3/DHDN, EPSG 31467)  
@@ -136,7 +136,7 @@ class _Coord(Coord,_injector):
         into the geographic space. The x component is 
         considered to be the easting, the y component 
         to be the northing.
-        
+
         Returns the longitude (x) and latitude (y) as a 
         coordinate pair.
 
@@ -153,8 +153,8 @@ class _Coord(Coord,_injector):
 class _Box2d(Box2d,_injector):
     """
     Represents a spatial envelope (i.e. bounding box). 
-    
-    
+
+
     Following operators are defined for Box2d:
 
     Addition:
@@ -285,12 +285,12 @@ def Datasource(**keywords):
     Create a Mapnik Datasource using a dictionary of parameters.
 
     Keywords must include:
-    
+
       type='plugin_name' # e.g. type='gdal'
-    
+
     See the convenience factory methods of each input plugin for
     details on additional required keyword arguments.
-    
+
     """
 
     return CreateDatasource(keywords)
@@ -322,7 +322,7 @@ def PostGIS(**keywords):
     Required keyword arguments:
       dbname -- database name to connect to
       table -- table name or subselect query
-      
+
       *Note: if using subselects for the 'table' value consider also 
        passing the 'geometry_field' and 'srid' and 'extent_from_subquery'
        options and/or specifying the 'geometry_table' option.
@@ -572,13 +572,6 @@ def Geos(**keywords):
     keywords['type'] = 'geos'
     return CreateDatasource(keywords)
 
-def mapnik_version_string(version=mapnik_version()):
-    """Return the Mapnik version as a string."""
-    patch_level = version % 100
-    minor_version = version / 100 % 1000
-    major_version = version / 100000
-    return '%s.%s.%s' % ( major_version, minor_version,patch_level)
-
 def mapnik_version_from_string(version_string):
     """Return the Mapnik version from a string."""
     n = version_string.split('.')
@@ -598,112 +591,3 @@ def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.tt
 # auto-register known plugins and fonts
 register_plugins()
 register_fonts()
-
-# Explicitly export API members to avoid namespace pollution
-# and ensure correct documentation processing
-__all__ = [
-    # classes
-    'CharProperties',
-    'Color',
-    'Coord',
-    'Palette',
-    #'ColorBand',
-    'CompositeOp',
-    'DatasourceCache',
-    'MemoryDatasource',
-    'Box2d',
-    'Feature',
-    'Featureset',
-    'FontEngine',
-    'FontSet',
-    'FormattingNode',
-    'FormattingText',
-    'FormattingFormat',
-    'FormattingList',
-    'FormattingExpressionFormat',
-    'Geometry2d',
-    'Image',
-    'ImageView',
-    'Grid',
-    'GridView',
-    'Layer',
-    'Layers',
-    'LinePatternSymbolizer',
-    'LineSymbolizer',
-    'Map',
-    'MarkersSymbolizer',
-    'Names',
-    'Path',
-    'Parameter',
-    'Parameters',
-    'PointSymbolizer',
-    'PolygonPatternSymbolizer',
-    'PolygonSymbolizer',
-    'ProcessedText',
-    'ProjTransform',
-    'Projection',
-    'Query',
-    'RasterSymbolizer',
-    'RasterColorizer',
-    'Rule', 'Rules',
-    'ShieldSymbolizer',
-    'Singleton',
-    'Stroke',
-    'Style',
-    'Symbolizer',
-    'Symbolizers',
-    'TextPlacements',
-    'TextPlacementInfo',
-    'TextSymbolizer',
-    'TextSymbolizerProperties',
-    'ViewTransform',
-    # enums
-    'aspect_fix_mode',
-    'point_placement',
-    'label_placement',
-    'line_cap',
-    'line_join',
-    'text_transform',
-    'vertical_alignment',
-    'horizontal_alignment',
-    'justify_alignment',
-    'pattern_alignment',
-    'filter_mode',
-    # functions
-    # datasources
-    'Datasource',
-    'CreateDatasource',
-    'Shapefile',
-    'PostGIS',
-    'Raster',
-    'Gdal',
-    'Occi',
-    'Ogr',
-    'SQLite',
-    'Osm',
-    'Kismet',
-    #   version and environment
-    'mapnik_version_string',
-    'mapnik_version',
-    'has_cairo',
-    'has_pycairo',
-    #   factory methods
-    'Expression',
-    'PathExpression',
-    #   load/save/render
-    'load_map',
-    'load_map_from_string',
-    'save_map',
-    'save_map_to_string',
-    'render',
-    'render_grid',
-    'render_tile_to_file',
-    'render_to_file',
-    #   other
-    'register_plugins',
-    'register_fonts',
-    'scale_denominator',
-    # deprecated
-    'Filter',
-    'Envelope',
-    ]

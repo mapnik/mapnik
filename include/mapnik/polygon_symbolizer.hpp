@@ -35,7 +35,7 @@ namespace mapnik
 struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
 {
     polygon_symbolizer();
-    polygon_symbolizer(color const& fill);
+    explicit polygon_symbolizer(color const& fill);
     color const& get_fill() const;
     void set_fill(color const& fill);
     void set_opacity(double opacity);
@@ -44,12 +44,14 @@ struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
     double get_gamma() const;
     void set_gamma_method(gamma_method_e gamma_method);
     gamma_method_e get_gamma_method() const;
-
+    void set_smooth(double smooth);
+    double smooth() const;
 private:
     color fill_;
     double opacity_;
     double gamma_;
     gamma_method_e gamma_method_;
+    double smooth_;
 };
 
 }

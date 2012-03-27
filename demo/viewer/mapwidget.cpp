@@ -30,6 +30,7 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/config_error.hpp>
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
@@ -157,7 +158,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                if (int(index) != selectedLayer_) continue;
 
                layer & layer = map_->layers()[index];
-               if (!layer.isVisible(scale_denom)) continue;
+               if (!layer.visible(scale_denom)) continue;
                std::string name = layer.name();
                double x = e->x();
                double y = e->y();
@@ -487,7 +488,7 @@ void MapWidget::updateMap()
       }
       catch (mapnik::config_error & ex)
       {
-          std::cerr << ex.what() << std::endl;
+         std::cerr << ex.what() << std::endl;
       }
       catch (...)
       {

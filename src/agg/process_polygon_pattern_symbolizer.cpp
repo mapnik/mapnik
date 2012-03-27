@@ -23,7 +23,9 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/expression_evaluator.hpp>
 
@@ -38,8 +40,7 @@
 #include "agg_span_allocator.h"
 #include "agg_span_pattern_rgba.h"
 #include "agg_image_accessors.h"
-
-
+#include "agg_conv_clip_polygon.h"
 
 namespace mapnik {
 
@@ -48,7 +49,8 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
+    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::wrap_mode_repeat wrap_x_type;
     typedef agg::wrap_mode_repeat wrap_y_type;
@@ -71,26 +73,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     agg::scanline_u8 sl;
     ras_ptr->reset();
-    switch (sym.get_gamma_method())
-    {
-    case GAMMA_POWER:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-        break;
-    case GAMMA_LINEAR:
-        ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
-        break;
-    case GAMMA_NONE:
-        ras_ptr->gamma(agg::gamma_none());
-        break;
-    case GAMMA_THRESHOLD:
-        ras_ptr->gamma(agg::gamma_threshold(sym.get_gamma()));
-        break;
-    case GAMMA_MULTIPLY:
-        ras_ptr->gamma(agg::gamma_multiply(sym.get_gamma()));
-        break;
-    default:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-    }
+    set_gamma_method(sym,ras_ptr);
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
     boost::optional<mapnik::marker_ptr> marker;
@@ -133,9 +116,11 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (align == LOCAL_ALIGNMENT)
     {
         double x0=0,y0=0;
-        if (num_geometries>0)
+        if (num_geometries>0) // FIXME: hmm...?
         {
-            path_type path(t_,feature->get_geometry(0),prj_trans);
+            clipped_geometry_type clipped(feature->get_geometry(0));
+            clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+            path_type path(t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
         offset_x = unsigned(width_-x0);
@@ -144,15 +129,17 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     span_gen_type sg(img_src, offset_x, offset_y);
     renderer_type rp(renb,sa, sg);
-    metawriter_with_properties writer = sym.get_metawriter();
+    //metawriter_with_properties writer = sym.get_metawriter();
     for (unsigned i=0;i<num_geometries;++i)
     {
-        geometry_type const& geom = feature->get_geometry(i);
+        geometry_type & geom = feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
-            path_type path(t_,geom,prj_trans);
+            clipped_geometry_type clipped(geom);
+            clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+            path_type path(t_,clipped,prj_trans);
             ras_ptr->add_path(path);
-            if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
+            //if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
         }
     }
     agg::render_scanlines(*ras_ptr, sl, rp);

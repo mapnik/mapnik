@@ -46,6 +46,7 @@ extern "C"
 #include <boost/make_shared.hpp>
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/foreach.hpp>
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
@@ -153,7 +154,7 @@ class MAPNIK_DECL font_face_set : private boost::noncopyable
 public:
     font_face_set(void)
         : faces_(),
-          dimension_cache_() {}
+        dimension_cache_() {}
 
     void add(face_ptr face)
     {
@@ -168,11 +169,10 @@ public:
 
     glyph_ptr get_glyph(unsigned c) const
     {
-        for (std::vector<face_ptr>::const_iterator face = faces_.begin(); face != faces_.end(); ++face)
+        BOOST_FOREACH ( face_ptr const& face, faces_)
         {
-            FT_UInt g = (*face)->get_char(c);
-
-            if (g) return boost::make_shared<font_glyph>(*face, g);
+            FT_UInt g = face->get_char(c);
+            if (g) return boost::make_shared<font_glyph>(face, g);
         }
 
         // Final fallback to empty square if nothing better in any font
@@ -185,17 +185,17 @@ public:
 
     void set_pixel_sizes(unsigned size)
     {
-        for (std::vector<face_ptr>::iterator face = faces_.begin(); face != faces_.end(); ++face)
+        BOOST_FOREACH ( face_ptr const& face, faces_)
         {
-            (*face)->set_pixel_sizes(size);
+            face->set_pixel_sizes(size);
         }
     }
 
     void set_character_sizes(float size)
     {
-        for (std::vector<face_ptr>::iterator face = faces_.begin(); face != faces_.end(); ++face)
+        BOOST_FOREACH ( face_ptr const& face, faces_)
         {
-            (*face)->set_character_sizes(size);
+            face->set_character_sizes(size);
         }
     }
 private:
@@ -263,7 +263,7 @@ template <typename T>
 class MAPNIK_DECL face_manager : private boost::noncopyable
 {
     typedef T font_engine_type;
-    typedef std::map<std::string,face_ptr> faces;
+    typedef std::map<std::string,face_ptr> face_ptr_cache_type;
 
 public:
     face_manager(T & engine)
@@ -272,9 +272,9 @@ public:
 
     face_ptr get_face(std::string const& name)
     {
-        typename faces::iterator itr;
-        itr = faces_.find(name);
-        if (itr != faces_.end())
+        face_ptr_cache_type::iterator itr;
+        itr = face_ptr_cache_.find(name);
+        if (itr != face_ptr_cache_.end())
         {
             return itr->second;
         }
@@ -283,7 +283,7 @@ public:
             face_ptr face = engine_.create_face(name);
             if (face)
             {
-                faces_.insert(make_pair(name,face));
+                face_ptr_cache_.insert(make_pair(name,face));
             }
             return face;
         }
@@ -335,7 +335,7 @@ public:
     }
 
 private:
-    faces faces_;
+    face_ptr_cache_type face_ptr_cache_;
     font_engine_type & engine_;
     stroker_ptr stroker_;
 };

@@ -1,4 +1,4 @@
-import math, operator
+#import math, operator
 import Image
 import sys
 
@@ -27,6 +27,10 @@ def compare(fn1, fn2):
         return -1
     diff = 0
     pixels = im1.size[0] * im1.size[1]
+    delta_pixels = im2.size[0] * im2.size[1]  - pixels
+    if delta_pixels != 0:
+        errors.append((fn1, delta_pixels))
+        return delta_pixels
     im1 = im1.getdata()
     im2 = im2.getdata()
     for i in range(3, pixels - 1, 3):
@@ -38,9 +42,9 @@ def compare(fn1, fn2):
 
 def summary():
     global errors
+    print "-"*80
+    print "Summary:"
     if len(errors) != 0:
-        print "-"*80
-        print "Summary:"
         for error in errors:
             if (error[1] is None):
                 print "Could not verify %s: No reference image found!" % error[0]
@@ -48,3 +52,7 @@ def summary():
                 print "%s failed: %d different pixels" % error
         print "-"*80
         sys.exit(1)
+    else:
+        print 'No errors detected!'
+        print "-"*80
+        sys.exit(0)

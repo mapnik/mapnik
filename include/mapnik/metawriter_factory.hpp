@@ -30,6 +30,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
+class xml_node;
 
 /**
  * Creates a metawriter with the properties specified in the property
@@ -37,7 +38,7 @@ namespace mapnik {
  * metawriters, but should provide an easy point to make them a
  * proper factory method if this is wanted in the future.
  */
-metawriter_ptr metawriter_create(const boost::property_tree::ptree &pt);
+metawriter_ptr metawriter_create(xml_node const& pt);
 
 /**
  * Writes properties into the given property tree representing the

@@ -40,15 +40,15 @@
 using namespace mapnik;
 
 /* Notes:
-Overriding functions in inherited classes:
-boost.python documentation doesn't really tell you how to do it.
-But this helps:
-http://www.gamedev.net/topic/446225-inheritance-in-boostpython/
+   Overriding functions in inherited classes:
+   boost.python documentation doesn't really tell you how to do it.
+   But this helps:
+   http://www.gamedev.net/topic/446225-inheritance-in-boostpython/
 
-register_ptr_to_python is required for wrapped classes, but not for unwrapped.
+   register_ptr_to_python is required for wrapped classes, but not for unwrapped.
 
-Functions don't have to be members of the class, but can also be
-normal functions taking a ref to the class as first parameter.
+   Functions don't have to be members of the class, but can also be
+   normal functions taking a ref to the class as first parameter.
 */
 
 namespace {
@@ -261,7 +261,7 @@ struct TextPlacementsWrap: text_placements, wrapper<text_placements>
 struct TextPlacementInfoWrap: text_placement_info, wrapper<text_placement_info>
 {
     TextPlacementInfoWrap(text_placements const* parent,
-                        double scale_factor_)
+                          double scale_factor_)
         : text_placement_info(parent, scale_factor_)
     {
 
@@ -329,6 +329,7 @@ void export_text_placement()
         .value("LEFT",J_LEFT)
         .value("MIDDLE",J_MIDDLE)
         .value("RIGHT",J_RIGHT)
+        .value("AUTO", J_AUTO)
         ;
 
     enumeration_<text_transform_e>("text_transform")
@@ -339,7 +340,7 @@ void export_text_placement()
         ;
 
     class_<text_symbolizer>("TextSymbolizer",
-           init<>())
+                            init<>())
         .def(init<expression_ptr, std::string const&, unsigned, color const&>())
         .add_property("placements",
                       &text_symbolizer::get_placement_options,
@@ -357,7 +358,7 @@ void export_text_placement()
 
 
     class_with_converter<text_symbolizer_properties>
-            ("TextSymbolizerProperties")
+        ("TextSymbolizerProperties")
         .def_readwrite_convert("label_placement", &text_symbolizer_properties::label_placement)
         .def_readwrite_convert("horizontal_alignment", &text_symbolizer_properties::halign)
         .def_readwrite_convert("justify_alignment", &text_symbolizer_properties::jalign)
@@ -381,15 +382,15 @@ void export_text_placement()
         .add_property ("format_tree",
                        &text_symbolizer_properties::format_tree,
                        &text_symbolizer_properties::set_format_tree);
-        /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
-        add_expressions isn't useful in python either. The result is only needed by
-        attribute_collector (which isn't exposed in python) and
-        it just calls add_expressions of the associated formatting tree.
-        set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
-        ;
+    /* from_xml, to_xml operate on mapnik's internal XML tree and don't make sense in python.
+       add_expressions isn't useful in python either. The result is only needed by
+       attribute_collector (which isn't exposed in python) and
+       it just calls add_expressions of the associated formatting tree.
+       set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
+    ;
 
     class_<char_properties>
-            ("CharProperties")
+        ("CharProperties")
         .def(init<char_properties const&>()) //Copy constructor
         .def_readwrite("face_name", &char_properties::face_name)
         .def_readwrite("fontset", &char_properties::fontset)
@@ -407,9 +408,9 @@ void export_text_placement()
         ;
 
     class_<TextPlacementsWrap,
-            boost::shared_ptr<TextPlacementsWrap>,
-            boost::noncopyable>
-            ("TextPlacements")
+        boost::shared_ptr<TextPlacementsWrap>,
+        boost::noncopyable>
+        ("TextPlacements")
         .def_readwrite("defaults", &text_placements::defaults)
         .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
         /* TODO: add_expressions() */
@@ -417,10 +418,10 @@ void export_text_placement()
     register_ptr_to_python<boost::shared_ptr<text_placements> >();
 
     class_<TextPlacementInfoWrap,
-            boost::shared_ptr<TextPlacementInfoWrap>,
-            boost::noncopyable>
-            ("TextPlacementInfo",
-             init<text_placements const*, double>())
+        boost::shared_ptr<TextPlacementInfoWrap>,
+        boost::noncopyable>
+        ("TextPlacementInfo",
+         init<text_placements const*, double>())
         .def("next", pure_virtual(&text_placement_info::next))
         .def("get_actual_label_spacing", &text_placement_info::get_actual_label_spacing)
         .def("get_actual_minimum_distance", &text_placement_info::get_actual_minimum_distance)
@@ -432,27 +433,27 @@ void export_text_placement()
 
 
     class_<processed_text,
-            boost::shared_ptr<processed_text>,
-            boost::noncopyable>
-            ("ProcessedText", no_init)
+        boost::shared_ptr<processed_text>,
+        boost::noncopyable>
+        ("ProcessedText", no_init)
         .def("push_back", &processed_text::push_back)
         .def("clear", &processed_text::clear)
         ;
 
 
     class_<expression_set,
-            boost::shared_ptr<expression_set>,
-            boost::noncopyable>
-            ("ExpressionSet")
+        boost::shared_ptr<expression_set>,
+        boost::noncopyable>
+        ("ExpressionSet")
         .def("insert", &insert_expression);
-        ;
+    ;
 
 
     //TODO: Python namespace
     class_<NodeWrap,
-           boost::shared_ptr<NodeWrap>,
-           boost::noncopyable>
-           ("FormattingNode")
+        boost::shared_ptr<NodeWrap>,
+        boost::noncopyable>
+        ("FormattingNode")
         .def("apply", pure_virtual(&formatting::node::apply))
         .def("add_expressions",
              &formatting::node::add_expressions,
@@ -462,10 +463,10 @@ void export_text_placement()
 
 
     class_<TextNodeWrap,
-           boost::shared_ptr<TextNodeWrap>,
-           bases<formatting::node>,
-           boost::noncopyable>
-           ("FormattingText", init<expression_ptr>())
+        boost::shared_ptr<TextNodeWrap>,
+        bases<formatting::node>,
+        boost::noncopyable>
+        ("FormattingText", init<expression_ptr>())
         .def(init<std::string>())
         .def("apply", &formatting::text_node::apply, &TextNodeWrap::default_apply)
         .add_property("text",
@@ -476,10 +477,10 @@ void export_text_placement()
 
 
     class_with_converter<FormatNodeWrap,
-           boost::shared_ptr<FormatNodeWrap>,
-           bases<formatting::node>,
-           boost::noncopyable>
-           ("FormattingFormat")
+        boost::shared_ptr<FormatNodeWrap>,
+        bases<formatting::node>,
+        boost::noncopyable>
+        ("FormattingFormat")
         .def_readwrite_convert("text_size", &formatting::format_node::text_size)
         .def_readwrite_convert("face_name", &formatting::format_node::face_name)
         .def_readwrite_convert("character_spacing", &formatting::format_node::character_spacing)
@@ -499,10 +500,10 @@ void export_text_placement()
     register_ptr_to_python<boost::shared_ptr<formatting::format_node> >();
 
     class_<ListNodeWrap,
-            boost::shared_ptr<ListNodeWrap>,
-            bases<formatting::node>,
-            boost::noncopyable>
-            ("FormattingList", init<>())
+        boost::shared_ptr<ListNodeWrap>,
+        bases<formatting::node>,
+        boost::noncopyable>
+        ("FormattingList", init<>())
         .def(init<list>())
         .def("append", &formatting::list_node::push_back)
         .def("apply", &formatting::list_node::apply, &ListNodeWrap::default_apply)
@@ -510,15 +511,15 @@ void export_text_placement()
         .def("__getitem__", &ListNodeWrap::get_item)
         .def("__setitem__", &ListNodeWrap::set_item)
         .def("append", &ListNodeWrap::append)
-    ;
+        ;
 
     register_ptr_to_python<boost::shared_ptr<formatting::list_node> >();
 
     class_<ExprFormatWrap,
-           boost::shared_ptr<ExprFormatWrap>,
-           bases<formatting::node>,
-           boost::noncopyable>
-           ("FormattingExpressionFormat")
+        boost::shared_ptr<ExprFormatWrap>,
+        bases<formatting::node>,
+        boost::noncopyable>
+        ("FormattingExpressionFormat")
         .def_readwrite("text_size", &formatting::expression_format::text_size)
         .def_readwrite("face_name", &formatting::expression_format::face_name)
         .def_readwrite("character_spacing", &formatting::expression_format::character_spacing)
