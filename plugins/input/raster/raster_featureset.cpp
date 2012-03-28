@@ -45,11 +45,11 @@ raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
                                                    query const& q)
     : policy_(policy),
       feature_id_(1),
+      ctx_(boost::make_shared<mapnik::context_type>()),
       extent_(extent),
       bbox_(q.get_bbox()),
       curIter_(policy_.begin()),
-      endIter_(policy_.end()),
-      ctx_(boost::make_shared<mapnik::context_type>())
+      endIter_(policy_.end())
 {
 }
 
