@@ -51,8 +51,8 @@ template <typename T>
 void agg_renderer<T>::process(line_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
+
 {
-    
     stroke const& stroke_ = sym.get_stroke();
     color const& col = stroke_.get_color();
     unsigned r=col.red();
@@ -98,7 +98,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     {        
         ras_ptr->reset();        
         set_gamma_method(stroke_, ras_ptr);
-        renderer_.attach(pixf);
+        renderer_->attach(pixf);
+        
         //metawriter_with_properties writer = sym.get_metawriter();
 
         for (unsigned i=0;i<feature->num_geometries();++i)
@@ -193,8 +194,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             }
         }
         
-        renderer_.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
-        renderer_.render(*ras_ptr);
+        renderer_->color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
+        renderer_->render(*ras_ptr);
     }
 }
 

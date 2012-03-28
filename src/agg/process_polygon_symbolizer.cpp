@@ -47,27 +47,19 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-
     color const& fill_ = sym.get_fill();
-    agg::scanline_u8 sl;
-
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
-
-    ren_base renb(pixf);
+    
     unsigned r=fill_.red();
     unsigned g=fill_.green();
     unsigned b=fill_.blue();
     unsigned a=fill_.alpha();
-    //renb.clip_box(0,0,width_,height_);
-    renderer ren(renb);
 
     ras_ptr->reset();
-
     set_gamma_method(sym,ras_ptr);
-
+    renderer_->attach(pixf);
+    
     //metawriter_with_properties writer = sym.get_metawriter();
     box2d<double> inflated_extent = query_extent_ * 1.1;
     for (unsigned i=0;i<feature->num_geometries();++i)
@@ -92,17 +84,16 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
                 typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
                 typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
                 clipped_geometry_type clipped(geom);
-                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                clipped.clip_box(inflated_extent.minx(),inflated_extent.miny(),inflated_extent.maxx(),inflated_extent.maxy());
                 path_type path(t_,clipped,prj_trans);
                 ras_ptr->add_path(path);
             }
             //if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
         }
     }
-    ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
-    agg::render_scanlines(*ras_ptr, sl, ren);
+    renderer_->color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
+    renderer_->render(*ras_ptr);
 }
-
 
 template void agg_renderer<image_32>::process(polygon_symbolizer const&,
                                               mapnik::feature_ptr const&,

@@ -30,14 +30,6 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
 
-// agg FIXME 
-
-#include "agg_basics.h"
-#include "agg_pixfmt_rgba.h"
-#include "agg_scanline_u.h"
-#include "agg_scanline_p.h"
-//#include "agg_renderer_outline_aa.h"
-#include "agg_renderer_scanline.h"
 // boost
 #include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -51,51 +43,11 @@ namespace agg {
 struct trans_affine;
 }
 
-
 namespace mapnik {
 
 class marker;
-
 struct rasterizer;
-
-
-template <typename PixelFormat>
-struct stroke_renderer
-{
-    typedef PixelFormat pixfmt_type;
-    typedef typename pixfmt_type::color_type color_type;
-    typedef typename pixfmt_type::row_data row_data;
-    typedef agg::renderer_base<pixfmt_type> ren_base;  
-    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
-    typedef agg::scanline_u8 scanline_type;
-    
-    stroke_renderer()
-        : renb_(),
-          ren_(renb_)
-    {}
-    
-    template <typename PF>
-    void attach(PF & pf)
-    {
-        renb_.attach(pf);
-    }
-    
-    void color(color_type const& c)
-    {
-        ren_.color(c);
-    }
-    
-    template <typename Rasterizer>
-    void render(Rasterizer & ras)
-    {
-        agg::render_scanlines(ras, sl_, ren_);
-    }
-
-    scanline_type sl_;
-    ren_base renb_;
-    renderer ren_;
-};
-
+struct aa_renderer;
 
 template <typename T>
 class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
@@ -163,7 +115,7 @@ public:
 
 private:
     T & pixmap_;
-    stroke_renderer<agg::pixfmt_rgba32_plain> stroker_;
+    boost::scoped_ptr<aa_renderer> renderer_;
     unsigned width_;
     unsigned height_;
     double scale_factor_;
@@ -173,6 +125,7 @@ private:
     boost::shared_ptr<label_collision_detector4> detector_;
     boost::scoped_ptr<rasterizer> ras_ptr;
     box2d<double> query_extent_;
+    
     void setup(Map const &m);
 };
 }

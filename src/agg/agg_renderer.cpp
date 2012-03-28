@@ -24,6 +24,7 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
@@ -33,7 +34,6 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
 
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
@@ -115,7 +115,7 @@ template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
-      stroker_(),
+      renderer_(new aa_renderer),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
@@ -133,6 +133,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
+      renderer_(),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),

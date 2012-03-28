@@ -23,8 +23,15 @@
 #ifndef MAPNIK_AGG_HELPERS_HPP
 #define MAPNIK_AGG_HELPERS_HPP
 
+// agg 
+#include "agg_basics.h"
 #include "agg_gamma_functions.h"
 #include "agg_math_stroke.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_scanline_u.h"
+#include "agg_scanline_p.h"
+#include "agg_renderer_outline_aa.h"
+#include "agg_renderer_scanline.h"
 
 namespace mapnik {
 
@@ -85,6 +92,47 @@ void set_join_caps(Stroke const& stroke_, PathType & stroke)
         stroke.generator().line_cap(agg::round_cap);
     }
 }
+
+
+template <typename PixelFormat>
+struct renderer_ : private boost::noncopyable
+{
+    typedef PixelFormat pixfmt_type;
+    typedef typename pixfmt_type::color_type color_type;
+    typedef typename pixfmt_type::row_data row_data;
+    typedef agg::renderer_base<pixfmt_type> ren_base;  
+    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+    typedef agg::scanline_u8 scanline_type;
+    
+    renderer_()
+        : renb_(),
+          ren_(renb_)
+    {}
+    
+    template <typename PF>
+    void attach(PF & pf)
+    {
+        renb_.attach(pf);
+    }
+    
+    void color(color_type const& c)
+    {
+        ren_.color(c);
+    }
+    
+    template <typename Rasterizer>
+    void render(Rasterizer & ras)
+    {
+        agg::render_scanlines(ras, sl_, ren_);
+        sl_. reset_spans();
+    }
+
+    scanline_type sl_;
+    ren_base renb_;
+    renderer ren_;
+};
+
+struct aa_renderer : renderer_<agg::pixfmt_rgba32_plain> {};
 
 }
 
