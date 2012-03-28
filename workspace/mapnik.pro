@@ -35,6 +35,7 @@ HEADERS += \
     ../include/mapnik/svg/svg_renderer.hpp \
     ../include/mapnik/svg/svg_storage.hpp \
     ../include/mapnik/svg/svg_transform_grammar.hpp \
+    ../include/mapnik/util/conversions.hpp \
     ../include/mapnik/wkt/wkt_factory.hpp \
     ../include/mapnik/wkt/wkt_grammar.hpp \
     ../include/mapnik/agg_pattern_source.hpp \
@@ -45,6 +46,7 @@ HEADERS += \
     ../include/mapnik/attribute_descriptor.hpp \
     ../include/mapnik/attribute.hpp \
     ../include/mapnik/box2d.hpp \
+    ../include/mapnik/boolean.hpp \
     ../include/mapnik/cairo_renderer.hpp \
     ../include/mapnik/color_factory.hpp \
     ../include/mapnik/color.hpp \
