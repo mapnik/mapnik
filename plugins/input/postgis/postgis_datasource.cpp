@@ -107,6 +107,7 @@ void postgis_datasource::bind() const
 
     boost::optional<int> initial_size = params_.get<int>("initial_size", 1);
     boost::optional<int> max_size = params_.get<int>("max_size", 10);
+    boost::optional<mapnik::boolean> require_key = params_.get<mapnik::boolean>("require_key", false);
 
     ConnectionManager* mgr = ConnectionManager::instance();
     mgr->registerPool(creator_, *initial_size, *max_size);
@@ -228,6 +229,71 @@ void postgis_datasource::bind() const
                 }
             }
 
+            // detect primary key
+            if (key_field_.empty())
+            {
+                std::ostringstream s;
+                s << "SELECT a.attname, a.attnum, t.typname, t.typname in ('int2','int4','int8') "
+                  "AS is_int FROM pg_class c, pg_attribute a, pg_type t, pg_namespace n, pg_index i "
+                  "WHERE a.attnum > 0 AND a.attrelid = c.oid "
+                  "AND a.atttypid = t.oid AND c.relnamespace = n.oid "
+                  "AND c.oid = i.indrelid AND i.indisprimary = 't' "
+                  "AND t.typname !~ '^geom' AND c.relname ="
+                  << " '" << mapnik::sql_utils::unquote_double(geometry_table_) << "' "
+                  //"AND a.attnum = ANY (i.indkey) " // postgres >= 8.1
+                  << "AND (i.indkey[0]=a.attnum OR i.indkey[1]=a.attnum OR i.indkey[2]=a.attnum "
+                  "OR i.indkey[3]=a.attnum OR i.indkey[4]=a.attnum OR i.indkey[5]=a.attnum "
+                  "OR i.indkey[6]=a.attnum OR i.indkey[7]=a.attnum OR i.indkey[8]=a.attnum "
+                  "OR i.indkey[9]=a.attnum) ";
+                  if (! schema_.empty())
+                  {
+                      s << "AND n.nspname='"
+                        << mapnik::sql_utils::unquote_double(schema_)
+                        << "' ";
+                  }
+                s << "ORDER BY a.attnum";
+
+                shared_ptr<ResultSet> rs_key = conn->executeQuery(s.str());
+                if (rs_key->next())
+                {
+                    unsigned int result_rows = rs_key->size();
+                    if (result_rows == 1)
+                    {
+                        bool is_int = (std::string(rs_key->getValue(3)) == "t");
+                        if (is_int)
+                        {
+                            const char* key_field_string = rs_key->getValue(0);
+                            if (key_field_string)
+                            {
+                                key_field_ = std::string(key_field_string);
+#ifdef MAPNIK_DEBUG
+                                std::clog << "Postgis Plugin: auto-detected key field of '" << key_field_ << "' on '" << geometry_table_ << "'\n";
+#endif
+                            }
+                        }
+                    }
+                    else if (result_rows > 1)
+                    {
+                        std::clog << "PostGIS Plugin: warning, multi column primary key detected but is not supported\n";
+                    }
+                }
+#ifdef MAPNIK_DEBUG
+                else
+                {
+                    std::clog << "Postgis Plugin: no primary key could be detected for '" << geometry_table_ << "'\n";
+                }
+#endif
+                rs_key->close();
+            }
+
+            // if a globally unique key field/primary key is required
+            // but still not known at this point, then throw
+            if (*require_key && key_field_.empty())
+            {
+                throw mapnik::datasource_exception(std::string("PostGIS Plugin: Error: primary key required for table '") +
+                      geometry_table_ + "', please supply 'key_field' option to specify field to use for primary key");
+            }
+
             if (srid_ == 0)
             {
                 srid_ = -1;
@@ -268,9 +334,9 @@ void postgis_datasource::bind() const
                 // validate type of key_field
                 if (! found_key_field && ! key_field_.empty() && fld_name == key_field_)
                 {
-                    found_key_field = true;
                     if (type_oid == 20 || type_oid == 21 || type_oid == 23)
                     {
+                        found_key_field = true;
                         desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Integer));
                     }
                     else
@@ -314,7 +380,7 @@ void postgis_datasource::bind() const
                         break;
                     case 700:   // float4
                     case 701:   // float8
-                    case 1700:  // numeric ??
+                    case 1700:  // numeric
                         desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Double));
                     case 1042:  // bpchar
                     case 1043:  // varchar
@@ -545,21 +611,31 @@ featureset_ptr postgis_datasource::features(const query& q) const
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
             mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+            std::set<std::string> const& props = q.property_names();
+            std::set<std::string>::const_iterator pos = props.begin();
+            std::set<std::string>::const_iterator end = props.end();
 
             if (! key_field_.empty())
             {
                 mapnik::sql_utils::quote_attr(s, key_field_);
                 ctx->push(key_field_);
+
+                for (; pos != end; ++pos)
+                {
+                    if (*pos != key_field_)
+                    {
+                        mapnik::sql_utils::quote_attr(s, *pos);
+                        ctx->push(*pos);
+                    }
+                }
             }
-
-            std::set<std::string> const& props = q.property_names();
-            std::set<std::string>::const_iterator pos = props.begin();
-            std::set<std::string>::const_iterator end = props.end();
-
-            for (; pos != end; ++pos)
+            else
             {
-                mapnik::sql_utils::quote_attr(s, *pos);
-                ctx->push(*pos);
+                for (; pos != end; ++pos)
+                {
+                    mapnik::sql_utils::quote_attr(s, *pos);
+                    ctx->push(*pos);
+                }
             }
 
             std::string table_with_bbox = populate_tokens(table_, scale_denom, box);
@@ -625,20 +701,29 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
             mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+            std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
+            std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
 
             if (! key_field_.empty())
             {
                 mapnik::sql_utils::quote_attr(s, key_field_);
                 ctx->push(key_field_);
+                for (; itr != end; ++itr)
+                {
+                    if (itr->get_name() != key_field_)
+                    {
+                        mapnik::sql_utils::quote_attr(s, itr->get_name());
+                        ctx->push(itr->get_name());
+                    }
+                }
             }
-
-            std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
-            std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
-
-            for (; itr != end; ++itr)
+            else
             {
-                mapnik::sql_utils::quote_attr(s, itr->get_name());
-                ctx->push(itr->get_name());
+                for (; itr != end; ++itr)
+                {
+                    mapnik::sql_utils::quote_attr(s, itr->get_name());
+                    ctx->push(itr->get_name());
+                }
             }
 
             box2d<double> box(pt.x, pt.y, pt.x, pt.y);

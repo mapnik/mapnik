@@ -63,7 +63,8 @@ def createdb_and_dropdb_on_path():
         print 'Notice: skipping postgis tests (createdb/dropdb)'
         return False
 
-insert_sql = """
+insert_table_1 = """
+CREATE TABLE test(gid serial PRIMARY KEY, geom geometry);
 INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;POINT(0 0)'));
 INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;POINT(-2 2)'));
 INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;MULTIPOINT(2 1,1 2)'));
@@ -74,12 +75,46 @@ INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;MULTIPOLYGON(((1 1,3 1,3 
 INSERT INTO test(geom) values (GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POLYGON((1 1, 2 1, 2 2, 1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))'));
 """
 
+insert_table_2 = """
+CREATE TABLE test2(manual_id int4 PRIMARY KEY, geom geometry);
+INSERT INTO test2(manual_id, geom) values (0, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test2(manual_id, geom) values (1, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test2(manual_id, geom) values (1000, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test2(manual_id, geom) values (-1000, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test2(manual_id, geom) values (2147483647, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test2(manual_id, geom) values (-2147483648, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+"""
+
+insert_table_3 = """
+CREATE TABLE test3(non_id bigint, manual_id int4, geom geometry);
+INSERT INTO test3(non_id, manual_id, geom) values (9223372036854775807, 0, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test3(non_id, manual_id, geom) values (9223372036854775807, 1, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test3(non_id, manual_id, geom) values (9223372036854775807, 1000, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test3(non_id, manual_id, geom) values (9223372036854775807, -1000, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test3(non_id, manual_id, geom) values (9223372036854775807, 2147483647, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test3(non_id, manual_id, geom) values (9223372036854775807, -2147483648, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+"""
+
+insert_table_4 = """
+CREATE TABLE test4(non_id int4, manual_id int8 PRIMARY KEY, geom geometry);
+INSERT INTO test4(non_id, manual_id, geom) values (0, 0, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test4(non_id, manual_id, geom) values (0, 1, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test4(non_id, manual_id, geom) values (0, 1000, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test4(non_id, manual_id, geom) values (0, -1000, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test4(non_id, manual_id, geom) values (0, 2147483647, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test4(non_id, manual_id, geom) values (0, -2147483648, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+"""
+
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
     call('createdb -T %s %s' % (POSTGIS_TEMPLATE_DBNAME,MAPNIK_TEST_DBNAME),silent=False)
     call('shp2pgsql -s 3857 -g geom -W LATIN1 %s world_merc | psql -q %s' % (SHAPEFILE,MAPNIK_TEST_DBNAME), silent=True)
     call('''psql -q %s -c "CREATE TABLE \"empty\" (key serial);SELECT AddGeometryColumn('','empty','geom','-1','GEOMETRY',4);"''' % MAPNIK_TEST_DBNAME,silent=False)
-    call('''psql -q %s -c "create table test(gid serial PRIMARY KEY, geom geometry);%s"''' % (MAPNIK_TEST_DBNAME,insert_sql),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_1),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_2),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_3),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_4),silent=False)
+
 def postgis_takedown():
     pass
     # fails as the db is in use: https://github.com/mapnik/mapnik/issues/960
@@ -181,6 +216,98 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
         fs = ds.features(query)
+
+    def test_auto_detection_of_unique_feature_id_32_bit():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test2',
+                            geometry_field='geom')
+        fs = ds.featureset()
+        eq_(fs.next()['manual_id'],0)
+        eq_(fs.next()['manual_id'],1)
+        eq_(fs.next()['manual_id'],1000)
+        eq_(fs.next()['manual_id'],-1000)
+        eq_(fs.next()['manual_id'],2147483647)
+        eq_(fs.next()['manual_id'],-2147483648)
+
+        fs = ds.featureset()
+        eq_(fs.next().id(),0)
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),1000)
+        eq_(fs.next().id(),-1000)
+        eq_(fs.next().id(),2147483647)
+        eq_(fs.next().id(),-2147483648)
+
+    def test_auto_detection_will_fail_since_no_primary_key():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test3',
+                            geometry_field='geom',
+                            require_key=False)
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['manual_id'],0)
+        # will fail: https://github.com/mapnik/mapnik/issues/895
+        #eq_(feat['non_id'],9223372036854775807)
+        eq_(fs.next()['manual_id'],1)
+        eq_(fs.next()['manual_id'],1000)
+        eq_(fs.next()['manual_id'],-1000)
+        eq_(fs.next()['manual_id'],2147483647)
+        eq_(fs.next()['manual_id'],-2147483648)
+
+        # since no valid primary key will be detected the fallback
+        # is auto-incrementing counter
+        fs = ds.featureset()
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),2)
+        eq_(fs.next().id(),3)
+        eq_(fs.next().id(),4)
+        eq_(fs.next().id(),5)
+        eq_(fs.next().id(),6)
+
+    @raises(RuntimeError)
+    def test_auto_detection_will_fail_and_should_throw():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test3',
+                            geometry_field='geom',
+                            require_key=True)
+        fs = ds.featureset()
+
+    def test_auto_detection_of_unique_feature_id_64_bit():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test4',
+                            geometry_field='geom',
+                            require_key=False)
+        fs = ds.featureset()
+        eq_(fs.next()['manual_id'],0)
+        eq_(fs.next()['manual_id'],1)
+        eq_(fs.next()['manual_id'],1000)
+        eq_(fs.next()['manual_id'],-1000)
+        eq_(fs.next()['manual_id'],2147483647)
+        eq_(fs.next()['manual_id'],-2147483648)
+
+        fs = ds.featureset()
+        eq_(fs.next().id(),0)
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),1000)
+        eq_(fs.next().id(),-1000)
+        eq_(fs.next().id(),2147483647)
+        eq_(fs.next().id(),-2147483648)
+
+    def test_manually_specified_feature_id_field():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test4',
+                            geometry_field='geom',
+                            key_field='manual_id',
+                            require_key=True)
+        fs = ds.featureset()
+        eq_(fs.next()['manual_id'],0)
+        eq_(fs.next()['manual_id'],1)
+        eq_(fs.next()['manual_id'],1000)
+        eq_(fs.next()['manual_id'],-1000)
+        eq_(fs.next()['manual_id'],2147483647)
+        eq_(fs.next()['manual_id'],-2147483648)
+
+        fs = ds.featureset()
+        eq_(fs.next().id(),0)
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),1000)
+        eq_(fs.next().id(),-1000)
+        eq_(fs.next().id(),2147483647)
+        eq_(fs.next().id(),-2147483648)
 
     atexit.register(postgis_takedown)
 
