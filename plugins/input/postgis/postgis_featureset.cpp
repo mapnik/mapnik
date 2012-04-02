@@ -147,6 +147,8 @@ feature_ptr postgis_featureset::next()
 
                     case 20: //int8/BigInt
                     {
+                        // TODO - need to support boost::uint64_t in mapnik::value
+                        // https://github.com/mapnik/mapnik/issues/895
                         int val = int8net(buf);
                         feature->put(name, val);
                         break;
