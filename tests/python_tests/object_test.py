@@ -21,6 +21,15 @@ def test_line_symbolizer_init():
     s = mapnik.LineSymbolizer()
     eq_(s.rasterizer, mapnik.line_rasterizer.FULL)
 
+def test_line_symbolizer_stroke_reference():
+    l = mapnik.LineSymbolizer(mapnik.Color('green'),0.1)
+    l.stroke.add_dash(.1,.1)
+    l.stroke.add_dash(.1,.1)
+    eq_(l.stroke.get_dashes(), [(.1,.1),(.1,.1)])
+    eq_(l.stroke.color,mapnik.Color('green'))
+    eq_(l.stroke.opacity,1.0)
+    assert_almost_equal(l.stroke.width,0.1)
+
 # ShieldSymbolizer initialization
 def test_shieldsymbolizer_init():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))

@@ -60,7 +60,7 @@ void export_line_symbolizer()
                       "Set/get the rasterization method of the line of the point")
         .add_property("stroke",make_function
                       (&line_symbolizer::get_stroke,
-                       return_value_policy<copy_const_reference>()),
+                       return_value_policy<reference_existing_object>()),
                       &line_symbolizer::set_stroke)
         .add_property("smooth",
                       &line_symbolizer::smooth,
