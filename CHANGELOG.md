@@ -9,6 +9,8 @@ For a complete change history, see the SVN log.
 
 ## Mapnik 2.1.0
 
+- PostGIS: the primary key, for tables containing one, is now auto-detected allowing for globally unique feature id values (#804)
+
 - Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentially radii)
 
 - Removed PointDatasource - use more robust MemoryDatasource instead (#1032)
