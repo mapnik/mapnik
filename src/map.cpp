@@ -28,6 +28,7 @@
 #include <mapnik/filter_featureset.hpp>
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/scale_denominator.hpp>
+#include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
 
 // boost
 #include <boost/make_shared.hpp>
@@ -405,8 +406,7 @@ void Map::zoom_all()
                     proj_transform prj_trans(proj0,proj1);
 
                     box2d<double> layer_ext = itr->envelope();
-                    // TODO - consider using more robust method: http://trac.mapnik.org/ticket/751
-                    if (prj_trans.backward(layer_ext))
+                    if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
                     {
                         success = true;
 #ifdef MAPNIK_DEBUG
