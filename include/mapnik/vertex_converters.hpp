@@ -54,10 +54,10 @@
 
 namespace mapnik {
 
-struct transform {};
-struct clip_line {};
-struct clip_poly {};
-struct smooth {};
+struct transform_tag {};
+struct clip_line_tag {};
+struct clip_poly_tag {};
+struct smooth_tag {};
 
 namespace  detail {
 
@@ -74,7 +74,7 @@ struct converter_traits
 };
 
 template <typename T>
-struct converter_traits<T,mapnik::smooth>
+struct converter_traits<T,mapnik::smooth_tag>
 {
     typedef T geometry_type;   
     typedef typename agg::conv_smooth_poly1_curve<geometry_type> conv_type;
@@ -86,9 +86,9 @@ struct converter_traits<T,mapnik::smooth>
     }
 };
 
-/*
+
 template <typename T>
-struct converter_traits<T, mapnik::clip_line>
+struct converter_traits<T, mapnik::clip_line_tag>
 {
     typedef T geometry_type;   
     typedef typename agg::conv_clip_polyline<geometry_type> conv_type;
@@ -100,10 +100,10 @@ struct converter_traits<T, mapnik::clip_line>
         geom.clip_box(box.x0,box.y0,box.x1,box.y1);
     }
 };
-*/
+
 
 template <typename T>
-struct converter_traits<T,mapnik::clip_poly>
+struct converter_traits<T,mapnik::clip_poly_tag>
 {
     typedef T geometry_type;   
     typedef typename agg::conv_clip_polygon<geometry_type> conv_type;
@@ -112,7 +112,24 @@ struct converter_traits<T,mapnik::clip_poly>
     static void setup(geometry_type & geom, Args & args) 
     {
         typename boost::mpl::at<Args,boost::mpl::int_<0> >::type const& box = boost::fusion::at_c<0>(args);     
-        geom.clip_box(box.x0,box.y0,box.x1,box.y1);
+        geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
+    }
+};
+
+
+template <typename T>
+struct converter_traits<T,mapnik::transform_tag>
+{
+    typedef T geometry_type;   
+    typedef coord_transform2<CoordTransform, geometry_type> conv_type;
+    
+    template <typename Args>
+    static void setup(geometry_type & geom, Args & args) 
+    {
+        typename boost::mpl::at<Args,boost::mpl::int_<3> >::type const& tr = boost::fusion::at_c<3>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<4> >::type const& prj_trans = boost::fusion::at_c<4>(args);
+        geom.set_proj_trans(prj_trans);
+        geom.set_trans(tr);
     }
 };
 
@@ -196,23 +213,29 @@ struct dispatcher
 
 
 
-template <typename B, typename R, typename S, typename C>
+template <typename B, typename R, typename S, typename P, typename T, typename C >
 struct vertex_converter : private boost::noncopyable
 { 
     typedef C conv_types;
     typedef B bbox_type;
     typedef R rasterizer_type;
     typedef S symbolizer_type;
-    
-    typedef typename boost::fusion::vector3
+    typedef P proj_trans_type;
+    typedef T trans_type;
+    typedef typename boost::fusion::vector
     <
     bbox_type const&, 
     rasterizer_type&, 
-    symbolizer_type const&
+    symbolizer_type const&,
+    trans_type const&,
+    proj_trans_type const&   
     > args_type;
     
-    vertex_converter(bbox_type const& b, rasterizer_type & ras, symbolizer_type const& sym)
-        : disp_(args_type(boost::cref(b),boost::ref(ras),boost::cref(sym))) {}
+    vertex_converter(bbox_type const& b, rasterizer_type & ras, 
+                     symbolizer_type const& sym, trans_type & tr, proj_trans_type const& prj_trans)
+        : disp_(args_type(boost::cref(b),boost::ref(ras),
+                          boost::cref(sym),boost::cref(tr),
+                          boost::cref(prj_trans))) {}
     
     template <typename Geometry>
     void apply(Geometry & geom)
