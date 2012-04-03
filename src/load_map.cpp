@@ -1326,8 +1326,8 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
         if (smooth) poly_sym.set_smooth(*smooth);
 
         // to clip or not to clip value
-        optional<bool> clip = sym.get_opt_attr<bool>("clip");
-        if (clip) poly_sym.set_clip(*clip);
+        //optional<bool> clip = sym.get_opt_attr<bool>("clip");
+        //if (clip) poly_sym.set_clip(*clip);
         
         parse_metawriter_in_symbolizer(poly_sym, sym);
         rule.append(poly_sym);
