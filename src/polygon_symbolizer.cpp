@@ -33,7 +33,8 @@ polygon_symbolizer::polygon_symbolizer()
       opacity_(1.0),
       gamma_(1.0),
       gamma_method_(GAMMA_POWER),
-      smooth_(0.0) {}
+      smooth_(0.0),
+      clip_(true) {}
 
 polygon_symbolizer::polygon_symbolizer(color const& fill)
     : symbolizer_base(),
@@ -41,7 +42,8 @@ polygon_symbolizer::polygon_symbolizer(color const& fill)
       opacity_(1.0),
       gamma_(1.0),
       gamma_method_(GAMMA_POWER),
-      smooth_(0.0) {}
+      smooth_(0.0),
+      clip_(true) {}
 
 color const& polygon_symbolizer::get_fill() const
 {
@@ -93,4 +95,13 @@ double polygon_symbolizer::smooth() const
     return smooth_;
 }
 
+void polygon_symbolizer::set_clip(bool clip)
+{
+    clip_ = clip;
+}
+
+bool polygon_symbolizer::clip() const
+{
+    return clip_;
+}
 }
