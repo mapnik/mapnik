@@ -105,6 +105,12 @@ INSERT INTO test4(non_id, manual_id, geom) values (0, 2147483647, GeomFromEWKT('
 INSERT INTO test4(non_id, manual_id, geom) values (0, -2147483648, GeomFromEWKT('SRID=4326;POINT(0 0)'));
 """
 
+insert_table_5 = """
+CREATE TABLE test5(non_id int4, manual_id numeric PRIMARY KEY, geom geometry);
+INSERT INTO test5(non_id, manual_id, geom) values (0, -1, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test5(non_id, manual_id, geom) values (0, 1, GeomFromEWKT('SRID=4326;POINT(0 0)'));
+"""
+
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
     call('createdb -T %s %s' % (POSTGIS_TEMPLATE_DBNAME,MAPNIK_TEST_DBNAME),silent=False)
@@ -114,6 +120,7 @@ def postgis_setup():
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_2),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_3),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_4),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_5),silent=False)
 
 def postgis_takedown():
     pass
@@ -308,6 +315,18 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(fs.next().id(),-1000)
         eq_(fs.next().id(),2147483647)
         eq_(fs.next().id(),-2147483648)
+
+    def test_numeric_type_feature_id_field():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test5',
+                            geometry_field='geom',
+                            require_key=False)
+        fs = ds.featureset()
+        eq_(fs.next()['manual_id'],-1)
+        eq_(fs.next()['manual_id'],1)
+
+        fs = ds.featureset()
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),2)
 
     atexit.register(postgis_takedown)
 

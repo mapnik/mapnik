@@ -267,9 +267,13 @@ void postgis_datasource::bind() const
                             {
                                 key_field_ = std::string(key_field_string);
 #ifdef MAPNIK_DEBUG
-                                std::clog << "Postgis Plugin: auto-detected key field of '" << key_field_ << "' on '" << geometry_table_ << "'\n";
+                                std::clog << "PostGIS Plugin: auto-detected key field of '" << key_field_ << "' on table '" << geometry_table_ << "'\n";
 #endif
                             }
+                        }
+                        else // warn with odd cases like numeric primary key
+                        {
+                            std::clog << "PostGIS Plugin: Warning: '" << rs_key->getValue(0) << "' on table '" << geometry_table_ << "' is not a valid integer primary key field\n";
                         }
                     }
                     else if (result_rows > 1)
