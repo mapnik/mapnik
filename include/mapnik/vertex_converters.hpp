@@ -33,9 +33,13 @@
 #include <boost/mpl/deref.hpp>
 #include <boost/mpl/find.hpp>
 #include <boost/mpl/size.hpp>
+#include <boost/mpl/at.hpp>
+#include <boost/mpl/int.hpp>
 
 // fusion
-//#include <boost/fusion/container/vector.hpp>
+#include <boost/fusion/container/vector.hpp>
+#include <boost/fusion/include/at_c.hpp>
+#include <boost/fusion/include/make_vector.hpp>
 //#include <boost/fusion/adapted/mpl.hpp>
 
 #include <boost/foreach.hpp>
@@ -62,8 +66,8 @@ struct converter_traits
 {
     typedef T0 geometry_type;
     typedef geometry_type conv_type;
-    template <typename Symbolizer>
-    static void setup(geometry_type & geom,Symbolizer const& sym) 
+    template <typename Args>
+    static void setup(geometry_type & geom, Args & args) 
     {
         throw "BOOM!";
     }
@@ -75,26 +79,25 @@ struct converter_traits<T,mapnik::smooth>
     typedef T geometry_type;   
     typedef typename agg::conv_smooth_poly1_curve<geometry_type> conv_type;
     
-    template <typename Symbolizer>
-    static void setup(geometry_type & geom, Symbolizer const& sym) 
+    template <typename Args>
+    static void setup(geometry_type & geom, Args & args) 
     {
-        //std::cout << "SETUP:" << typeid(geom).name() << std::endl;        
-        geom.smooth_value(sym.smooth());
+        geom.smooth_value(boost::fusion::at_c<2>(args).smooth());
     }
 };
 
 /*
 template <typename T>
-struct converter_traits<T,mapnik::clip_line>
+struct converter_traits<T, mapnik::clip_line>
 {
     typedef T geometry_type;   
     typedef typename agg::conv_clip_polyline<geometry_type> conv_type;
     
-    template <typename Symbolizer>
-    static void setup(geometry_type & geom, Symbolizer const& sym) 
+    template <typename Args>
+    static void setup(geometry_type & geom, Args & args) 
     {
-        //std::cout << "SETUP:" << typeid(geom).name() << std::endl;
-        geom.clip_box(0,0,100,100);
+        typename boost::mpl::at<Args,boost::mpl::int_<0> >::type const& box = boost::fusion::at_c<0>(args);     
+        geom.clip_box(box.x0,box.y0,box.x1,box.y1);
     }
 };
 */
@@ -105,11 +108,11 @@ struct converter_traits<T,mapnik::clip_poly>
     typedef T geometry_type;   
     typedef typename agg::conv_clip_polygon<geometry_type> conv_type;
     
-    template <typename Symbolizer>
-    static void setup(geometry_type & geom, Symbolizer const& sym) 
+    template <typename Args>
+    static void setup(geometry_type & geom, Args & args) 
     {
-        //std::cout << "SETUP:" << typeid(geom).name() << std::endl;
-        geom.clip_box(0,0,100,100);
+        typename boost::mpl::at<Args,boost::mpl::int_<0> >::type const& box = boost::fusion::at_c<0>(args);     
+        geom.clip_box(box.x0,box.y0,box.x1,box.y1);
     }
 };
 
@@ -117,13 +120,13 @@ template <bool>
 struct converter_fwd
 {
     template <typename Base, typename T0,typename T1,typename T2, typename Iter,typename End>
-    static void forward(Base& base, T0 & geom,T1 const& sym)          
+    static void forward(Base& base, T0 & geom,T1 & args)          
     {
         typedef T0 geometry_type;
         typedef T2 conv_tag;
         typedef typename detail::converter_traits<geometry_type,conv_tag>::conv_type conv_type;
         conv_type conv(geom);
-        detail::converter_traits<conv_type,conv_tag>::setup(conv, sym);            
+        detail::converter_traits<conv_type,conv_tag>::setup(conv,args);        
         base.template dispatch<Iter,End>(conv, typename boost::is_same<Iter,End>::type());
     }                
 };
@@ -132,22 +135,21 @@ template <>
 struct converter_fwd<true>
 {
     template <typename Base, typename T0,typename T1,typename T2, typename Iter,typename End>
-    static void forward(Base& base, T0 & geom,T1 const& sym)          
+    static void forward(Base& base, T0 & geom,T1 & args)          
     {
         base.template dispatch<Iter,End>(geom, typename boost::is_same<Iter,End>::type());
     }                
 };
 
-template <typename R, typename S, typename C>
+template <typename A, typename C>
 struct dispatcher 
 {
     typedef dispatcher this_type;    
-    typedef S symbolizer_type;
-    typedef R rasterizer_type;
+    typedef A args_type;
     typedef C conv_types;
-    dispatcher(rasterizer_type & ras, symbolizer_type const& sym)
-        : ras_(ras),
-          sym_(sym) 
+    
+    dispatcher(args_type args)
+        : args_(args) 
     {
         std::memset(&vec_[0], 0,  sizeof(unsigned)*vec_.size());
     }
@@ -155,7 +157,7 @@ struct dispatcher
     template <typename Iter, typename End, typename Geometry> 
     void dispatch(Geometry & geom, boost::mpl::true_)
     {  
-        ras_.add_path(geom);
+        boost::fusion::at_c<1>(args_).add_path(geom);
     }
     
     template <typename Iter, typename End, typename Geometry>
@@ -169,12 +171,12 @@ struct dispatcher
         if (vec_[index] == 1)
         {
             converter_fwd<boost::is_same<Geometry,conv_type>::value>::
-                template forward<this_type,Geometry,symbolizer_type,conv_tag,Next,End>(*this,geom,sym_);
+                template forward<this_type,Geometry,args_type,conv_tag,Next,End>(*this,geom,args_);
         }
         else 
         {
             converter_fwd<boost::mpl::true_::value>::
-                template forward<this_type,Geometry,symbolizer_type,conv_tag,Next,End>(*this,geom,sym_);   
+                template forward<this_type,Geometry,args_type,conv_tag,Next,End>(*this,geom,args_);   
         }
         
     }
@@ -188,25 +190,34 @@ struct dispatcher
     }
 
     boost::array<unsigned, boost::mpl::size<conv_types>::value> vec_;
-    rasterizer_type & ras_;
-    symbolizer_type const& sym_;
-    
+    args_type  args_;    
 };
 }
 
-template <typename R, typename S, typename C>
+
+
+template <typename B, typename R, typename S, typename C>
 struct vertex_converter : private boost::noncopyable
 { 
     typedef C conv_types;
+    typedef B bbox_type;
     typedef R rasterizer_type;
     typedef S symbolizer_type;
-    vertex_converter(rasterizer_type & ras, symbolizer_type const& sym)
-        : disp_(ras,sym) {}
     
-    template <typename T>
-    void apply(T & geom)
+    typedef typename boost::fusion::vector3
+    <
+    bbox_type const&, 
+    rasterizer_type&, 
+    symbolizer_type const&
+    > args_type;
+    
+    vertex_converter(bbox_type const& b, rasterizer_type & ras, symbolizer_type const& sym)
+        : disp_(args_type(boost::cref(b),boost::ref(ras),boost::cref(sym))) {}
+    
+    template <typename Geometry>
+    void apply(Geometry & geom)
     {   
-        typedef T geometry_type;
+        typedef Geometry geometry_type;
         //BOOST_FOREACH(geometry_type & geom, cont)
         {           
             disp_.template apply<geometry_type>(geom);
@@ -223,7 +234,8 @@ struct vertex_converter : private boost::noncopyable
             disp_.vec_[index]=1;
     }
     
-    detail::dispatcher<rasterizer_type,symbolizer_type,conv_types> disp_;
+    
+    detail::dispatcher<args_type,conv_types> disp_;
 };
 
 }

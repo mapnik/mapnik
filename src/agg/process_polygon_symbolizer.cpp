@@ -35,13 +35,6 @@
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 
-// for polygon_symbolizer
-//#include "agg_renderer_scanline.h"
-//#include "agg_conv_clip_polygon.h"
-//#include "agg_conv_smooth_poly1.h"
-// stl
-//#include <string>
-
 namespace mapnik {
 
 template <typename T>
@@ -60,7 +53,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     box2d<double> inflated_extent = query_extent_ * 1.1;
     
     typedef boost::mpl::vector<smooth> conv_types;
-    vertex_converter<rasterizer,polygon_symbolizer,conv_types> converter(*ras_ptr,sym);
+    vertex_converter<box2d<double>, rasterizer,polygon_symbolizer,conv_types> converter(inflated_extent,*ras_ptr,sym);
     if (sym.smooth() > 0.0) converter.set<smooth>();    
     //converter.set<clip_poly>(); //always clip 
     
