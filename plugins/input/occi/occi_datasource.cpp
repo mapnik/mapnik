@@ -540,15 +540,15 @@ featureset_ptr occi_datasource::features(query const& q) const
 
     if (row_limit_ > 0)
     {
-        std::string row_limit_string = "rownum < " + row_limit_;
-
+        std::ostringstream row_limit_string;
+        row_limit_string << "rownum < " << row_limit_;
         if (boost::algorithm::ifind_first(query, "WHERE"))
         {
-            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string + " AND ");
+            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string.str() + " AND ");
         }
         else if (boost::algorithm::ifind_first(query, table_name_))
         {
-            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string);
+            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string.str());
         }
         else
         {
@@ -621,15 +621,15 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 
     if (row_limit_ > 0)
     {
-        std::string row_limit_string = "rownum < " + row_limit_;
-
+        std::ostringstream row_limit_string;
+        row_limit_string << "rownum < " << row_limit_;
         if (boost::algorithm::ifind_first(query, "WHERE"))
         {
-            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string + " AND ");
+            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string.str() + " AND ");
         }
         else if (boost::algorithm::ifind_first(query, table_name_))
         {
-            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string);
+            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string.str());
         }
         else
         {
