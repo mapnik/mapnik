@@ -25,6 +25,7 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/global.hpp>
+#include <mapnik/color.hpp>
 
 // cairo
 #ifdef HAVE_CAIRO
@@ -117,9 +118,23 @@ void image_32::set_grayscale_to_alpha()
     }
 }
 
-void image_32::set_color_to_alpha(const color& /*c*/)
+void image_32::set_color_to_alpha(const color& c)
 {
-    // TODO - function to set all pixels to a % alpha based on distance to a given color
+    for (unsigned y = 0; y < height_; ++y)
+    {
+        unsigned int* row_from = data_.getRow(y);
+        for (unsigned x = 0; x < width_; ++x)
+        {
+            unsigned rgba = row_from[x];
+            unsigned r = rgba & 0xff;
+            unsigned g = (rgba >> 8 ) & 0xff;
+            unsigned b = (rgba >> 16) & 0xff;
+            if (r == c.red() && g == c.green() && b == c.blue())
+            {
+                row_from[x] = 0;
+            }
+        }
+    }
 }
 
 void image_32::set_alpha(float opacity)
