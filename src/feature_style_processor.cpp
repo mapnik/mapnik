@@ -484,6 +484,9 @@ void feature_style_processor<Processor>::render_style(
     proj_transform const& prj_trans,
     double scale_denom)
 {
+
+    p.start_style_processing(*style);
+    
 #if defined(RENDERING_STATS)
     std::ostringstream s1;
     s1 << "rendering style for layer: '" << lay.name()
@@ -608,6 +611,7 @@ void feature_style_processor<Processor>::render_style(
     std::clog << s.str();
     style_timer.discard();
 #endif
+    p.end_style_processing(*style);
 }
 
 
