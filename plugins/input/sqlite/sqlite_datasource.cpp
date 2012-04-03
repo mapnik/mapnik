@@ -548,23 +548,31 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         std::ostringstream s;
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        std::set<std::string> const& props = q.property_names();
+        std::set<std::string>::const_iterator pos = props.begin();
+        std::set<std::string>::const_iterator end = props.end();
 
         s << "SELECT " << geometry_field_;
         if (!key_field_.empty())
         {
             s << "," << key_field_;
             ctx->push(key_field_);
+            for ( ;pos != end;++pos)
+            {
+                if (*pos != key_field_)
+                {
+                    s << ",[" << *pos << "]";
+                    ctx->push(*pos);
+                }
+            }
         }
-        std::set<std::string> const& props = q.property_names();
-        std::set<std::string>::const_iterator pos = props.begin();
-        std::set<std::string>::const_iterator end = props.end();
-
-        for ( ;pos != end;++pos)
+        else
         {
-            // TODO - should we restrict duplicate key query?
-            //if (*pos != key_field_)
-            s << ",[" << *pos << "]";
-            ctx->push(*pos);
+            for ( ;pos != end;++pos)
+            {
+                s << ",[" << *pos << "]";
+                ctx->push(*pos);
+            }
         }
 
         s << " FROM ";

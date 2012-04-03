@@ -359,6 +359,30 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(fs.next().id(),4)
         eq_(fs.next(),None)
 
+    def test_bbox_token_in_subquery1():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
+           (SeLeCt * FrOm "tableWithMixedCase" where geom && !bbox! ) as MixedCaseQuery''',
+                            geometry_field='geom',
+                            require_key=True)
+        fs = ds.featureset()
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),2)
+        eq_(fs.next().id(),3)
+        eq_(fs.next().id(),4)
+        eq_(fs.next(),None)
+
+    def test_bbox_token_in_subquery2():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
+           (SeLeCt * FrOm "tableWithMixedCase" where ST_Intersects(geom,!bbox!) ) as MixedCaseQuery''',
+                            geometry_field='geom',
+                            require_key=True)
+        fs = ds.featureset()
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),2)
+        eq_(fs.next().id(),3)
+        eq_(fs.next().id(),4)
+        eq_(fs.next(),None)
+
     atexit.register(postgis_takedown)
 
 if __name__ == "__main__":
