@@ -34,7 +34,7 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
+#include <mapnik/image_compositing.hpp>
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 #include "agg_rendering_buffer.h"
@@ -68,7 +68,7 @@
 #include "agg_renderer_outline_image.h"
 #include "agg_vpgen_clip_polyline.h"
 #include "agg_arrowhead.h"
-
+#include "agg_blur.h"
 
 // boost
 #include <boost/utility.hpp>
@@ -115,7 +115,8 @@ template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
-      renderer_(new aa_renderer),
+      internal_buffer_(pixmap_.width(),pixmap_.height()),
+      current_buffer_(&pixmap),      
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
@@ -133,7 +134,8 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
-      renderer_(),
+      internal_buffer_(pixmap_.width(),pixmap_.height()),
+      current_buffer_(&pixmap),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
@@ -197,6 +199,9 @@ void agg_renderer<T>::start_map_processing(Map const& map)
 template <typename T>
 void agg_renderer<T>::end_map_processing(Map const& )
 {
+    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    aa_renderer::pixel_format_type pixf(buf);
+    pixf.demultiply();
 #ifdef MAPNIK_DEBUG
     std::clog << "end map processing\n";
 #endif
@@ -210,6 +215,8 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
     std::clog << "datasource = " << lay.datasource().get() << "\n";
     std::clog << "query_extent = " << query_extent << "\n";
 #endif
+    // set current_buffer
+    
     if (lay.clear_label_cache())
     {
         detector_->clear();
@@ -219,9 +226,49 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
 
 template <typename T>
 void agg_renderer<T>::end_layer_processing(layer const&)
-{
+{    
+    
 #ifdef MAPNIK_DEBUG
     std::clog << "end layer processing\n";
+#endif
+}
+
+template <typename T>
+void agg_renderer<T>::start_style_processing(feature_type_style const& st)
+{
+#ifdef MAPNIK_DEBUG
+    std::clog << "start style processing\n";
+#endif
+    if (st.comp_op() != clear || st.blur_radius_x() > 0 || st.blur_radius_y() > 0)
+    {
+        internal_buffer_.set_background(color(0,0,0,0));//
+        current_buffer_ = &internal_buffer_;
+    }
+    else
+    {
+        current_buffer_ = &pixmap_;
+    }
+}
+
+template <typename T>
+void agg_renderer<T>::end_style_processing(feature_type_style const& st)
+{
+    if (st.blur_radius_x() > 0 || st.blur_radius_y() > 0)
+    {
+        agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+        aa_renderer::pixel_format_type pixf(buf);
+        agg::stack_blur_rgba32(pixf,st.blur_radius_x(),st.blur_radius_y());   
+        composite(pixmap_.data(),current_buffer_->data(), st.comp_op());     
+    }
+    
+    else if (st.comp_op() != clear)
+    {
+        // compositing
+        composite(pixmap_.data(),current_buffer_->data(), st.comp_op());
+    }   
+    
+#ifdef MAPNIK_DEBUG
+    std::clog << "end style processing\n";
 #endif
 }
 
@@ -230,7 +277,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
 {
     if (marker.is_vector())
     {
-        typedef agg::pixfmt_rgba32_plain pixfmt;
+        typedef agg::pixfmt_rgba32 pixfmt;
         typedef agg::renderer_base<pixfmt> renderer_base;
         typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
 
@@ -256,11 +303,11 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         svg_renderer<svg_path_adapter,
             agg::pod_bvector<path_attributes>,
             renderer_solid,
-            agg::pixfmt_rgba32_plain> svg_renderer(svg_path,
+            agg::pixfmt_rgba32> svg_renderer(svg_path,
                                                    (*marker.get_vector_data())->attributes());
-
+        
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
-
+        
 
     }
     else

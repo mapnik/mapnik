@@ -54,7 +54,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
 
-    typedef agg::pixfmt_rgba32_plain pixfmt;
+    typedef agg::pixfmt_rgba32 pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
 
@@ -103,7 +103,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             svg_renderer<svg_path_adapter,
                 agg::pod_bvector<path_attributes>,
                 renderer_solid,
-                agg::pixfmt_rgba32_plain > svg_renderer(svg_path,(*marker)->attributes());
+                agg::pixfmt_rgba32 > svg_renderer(svg_path,(*marker)->attributes());
 
             for (unsigned i=0; i<feature->num_geometries(); ++i)
             {

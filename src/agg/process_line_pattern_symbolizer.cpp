@@ -55,12 +55,12 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> renderer_base;
+    typedef agg::renderer_base<agg::pixfmt_rgba32> renderer_base;
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
     typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32_plain pixf(buf);
+    agg::pixfmt_rgba32 pixf(buf);
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
 

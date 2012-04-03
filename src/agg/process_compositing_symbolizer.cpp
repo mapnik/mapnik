@@ -51,16 +51,15 @@ void agg_renderer<T>::process(compositing_symbolizer const& sym,
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type;
+    typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
     typedef agg::renderer_base<pixfmt_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
     
     color const& fill_ = sym.get_fill();
     
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
     pixfmt_type pixf(buf);
-
     
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
 

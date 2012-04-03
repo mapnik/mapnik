@@ -414,7 +414,27 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
 
         filter_mode_e filter_mode = sty.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
         style.set_filter_mode(filter_mode);
-
+        
+        // compositing
+        optional<std::string> comp_op_name = sty.get_opt_attr<std::string>("comp-op");
+        if (comp_op_name)
+        {
+            composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
+            style.set_comp_op(comp_op);
+        }
+        // blur-x
+        optional<unsigned> blur_x = sty.get_opt_attr<unsigned>("blur-radius-x");
+        if (blur_x)
+        {
+            style.set_blur_radius_x(*blur_x);
+        }
+        // blur-y
+        optional<unsigned> blur_y = sty.get_opt_attr<unsigned>("blur-radius-y");
+        if (blur_y)
+        {
+            style.set_blur_radius_y(*blur_y);
+        }
+        
         xml_node::const_iterator ruleIter = sty.begin();
         xml_node::const_iterator endRule = sty.end();
 
@@ -551,7 +571,7 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
         {
             lyr.set_group_by(* group_by);
         }
-
+        
         xml_node::const_iterator child = lay.begin();
         xml_node::const_iterator end = lay.end();
 

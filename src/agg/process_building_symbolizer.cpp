@@ -48,11 +48,11 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
+    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32_plain pixf(buf);
+    agg::pixfmt_rgba32 pixf(buf);
     ren_base renb(pixf);
 
     color const& fill_  = sym.get_fill();

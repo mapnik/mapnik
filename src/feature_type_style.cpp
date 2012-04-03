@@ -36,11 +36,18 @@ IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 
 feature_type_style::feature_type_style()
 : filter_mode_(FILTER_ALL),
-    scale_denom_validity_(-1) {}
+    scale_denom_validity_(-1),
+    blur_radius_x_(0),
+    blur_radius_y_(0),
+    comp_op_(clear)
+{}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
     : filter_mode_(rhs.filter_mode_),
-      scale_denom_validity_(-1)
+      scale_denom_validity_(-1),
+      blur_radius_x_(rhs.blur_radius_x_),
+      blur_radius_y_(rhs.blur_radius_y_),
+      comp_op_(rhs.comp_op_)
 {
     if (!deep_copy) {
         rules_ = rhs.rules_;
@@ -56,8 +63,11 @@ feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_
 feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
 {
     if (this == &rhs) return *this;
-    rules_=rhs.rules_;
+    rules_=rhs.rules_;   
     scale_denom_validity_ = -1;
+    blur_radius_x_ = rhs.blur_radius_x_;
+    blur_radius_y_ = rhs.blur_radius_y_;
+    comp_op_ = rhs.comp_op_;
     return *this;
 }
 
@@ -87,6 +97,35 @@ filter_mode_e feature_type_style::get_filter_mode() const
     return filter_mode_;
 }
 
+void feature_type_style::set_blur_radius_x(unsigned x)
+{
+    blur_radius_x_= x;
+}
+
+void feature_type_style::set_blur_radius_y(unsigned y)
+{
+    blur_radius_y_= y;
+}
+
+unsigned feature_type_style::blur_radius_x() const
+{
+    return blur_radius_x_;
+}
+
+unsigned feature_type_style::blur_radius_y() const
+{
+    return blur_radius_y_;
+}
+
+void feature_type_style::set_comp_op(composite_mode_e comp_op)
+{
+    comp_op_ = comp_op;
+}
+
+composite_mode_e feature_type_style::comp_op() const
+{
+    return comp_op_;
+}
 
 void feature_type_style::update_rule_cache(double scale_denom)
 {

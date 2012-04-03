@@ -51,7 +51,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 {
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
+    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;
     typedef agg::wrap_mode_repeat wrap_x_type;
     typedef agg::wrap_mode_repeat wrap_y_type;
     typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_plain,
@@ -68,7 +68,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32_plain pixf(buf);
+    agg::pixfmt_rgba32 pixf(buf);
     ren_base renb(pixf);
 
     agg::scanline_u8 sl;

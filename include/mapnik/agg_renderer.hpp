@@ -55,6 +55,8 @@ class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> 
 {
 
 public:
+    typedef T buffer_type;
+    
     // create with default, empty placement detector
     agg_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with external placement detector, possibly non-empty
@@ -65,6 +67,10 @@ public:
     void end_map_processing(Map const& map);
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
+
+    void start_style_processing(feature_type_style const& st);
+    void end_style_processing(feature_type_style const& st);
+    
     void render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity);
 
     void process(point_symbolizer const& sym,
@@ -113,9 +119,13 @@ public:
         pixmap_.painted(painted);
     }
 
+    
 private:
-    T & pixmap_;
-    boost::scoped_ptr<aa_renderer> renderer_;
+    buffer_type & pixmap_;
+    buffer_type internal_buffer_;
+    buffer_type * current_buffer_;
+    
+    //boost::scoped_ptr<aa_renderer> renderer_;
     unsigned width_;
     unsigned height_;
     double scale_factor_;
@@ -127,6 +137,9 @@ private:
     box2d<double> query_extent_;
     
     void setup(Map const &m);
+
+    void set_current_buffer(bool per_layer = false);
+    
 };
 }
 

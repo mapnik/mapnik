@@ -60,13 +60,14 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     unsigned b=col.blue();
     unsigned a=col.alpha();
 
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32_plain pixf(buf);
-
+    
+    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    //agg::pixfmt_rgba32 pixf(buf);
+    aa_renderer::pixel_format_type pixf(buf);
     box2d<double> ext = query_extent_ * 1.1;
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
-        typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
+        typedef agg::renderer_base<aa_renderer::pixel_format_type> ren_base;
         typedef agg::renderer_outline_aa<ren_base> renderer_type;
         typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
@@ -98,7 +99,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     {        
         ras_ptr->reset();        
         set_gamma_method(stroke_, ras_ptr);
-        renderer_->attach(pixf);
+        aa_renderer ren;
+        ren.attach(pixf);
         
         //metawriter_with_properties writer = sym.get_metawriter();
 
@@ -194,8 +196,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             }
         }
         
-        renderer_->color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
-        renderer_->render(*ras_ptr);
+        ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
+        ren.render(*ras_ptr);
     }
 }
 

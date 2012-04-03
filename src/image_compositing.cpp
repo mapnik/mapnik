@@ -88,18 +88,16 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
     typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
     typedef agg::renderer_base<pixfmt_type> renderer_type;
-
     agg::rendering_buffer source(im.getBytes(),im.width(),im.height(),im.width() * 4);
     agg::rendering_buffer mask(im2.getBytes(),im2.width(),im2.height(),im2.width() * 4);
-
+    
     agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf(source);
-    pixf.premultiply();
-    agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));
     
+    //agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
+    agg::pixfmt_rgba32 pixf_mask(mask);
     renderer_type ren(pixf);
-    agg::renderer_base<pixfmt_type> rb(pixf);
-    rb.blend_from(pixf_mask,0,0,0,255);
+    ren.blend_from(pixf_mask,0,0,0,255);
 }
 
 
