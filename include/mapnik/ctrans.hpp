@@ -77,10 +77,25 @@ struct MAPNIK_DECL coord_transform2
     coord_transform2(Transform const& t,
                      Geometry & geom,
                      proj_transform const& prj_trans)
-        : t_(t),
+        : t_(&t),
         geom_(geom),
-        prj_trans_(prj_trans)  {}
+        prj_trans_(&prj_trans)  {}
 
+    explicit coord_transform2(Geometry & geom)
+        : t_(0),
+        geom_(geom),
+        prj_trans_(0)  {}
+    
+    void set_proj_trans(proj_transform const& prj_trans)
+    {
+        prj_trans_ = &prj_trans;
+    }
+    
+    void set_trans(Transform  const& t)
+    {
+        t_ = &t;
+    }
+    
     unsigned vertex(double *x, double *y)
     {
         unsigned command = SEG_MOVETO;
@@ -90,7 +105,7 @@ struct MAPNIK_DECL coord_transform2
         while (!ok && command != SEG_END)
         {
             command = geom_.vertex(x, y);
-            ok = prj_trans_.backward(*x, *y, z);
+            ok = prj_trans_->backward(*x, *y, z);
             if (!ok) {
                 skipped_points = true;
             }
@@ -99,7 +114,7 @@ struct MAPNIK_DECL coord_transform2
         {
             command = SEG_MOVETO;
         }
-        t_.forward(x, y);
+        t_->forward(x, y);
         return command;
     }
 
@@ -114,9 +129,9 @@ struct MAPNIK_DECL coord_transform2
     }
 
 private:
-    Transform const& t_;
+    Transform const* t_;
     Geometry & geom_;
-    proj_transform const& prj_trans_;
+    proj_transform const* prj_trans_;
 };
 
 
