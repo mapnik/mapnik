@@ -132,7 +132,10 @@ struct renderer_ : private boost::noncopyable
     renderer ren_;
 };
 
-struct aa_renderer : renderer_<agg::pixfmt_rgba32_plain> {};
+struct aa_renderer : renderer_<agg::pixfmt_rgba32> 
+{
+    typedef agg::pixfmt_rgba32 pixel_format_type;
+};
 
 }
 
