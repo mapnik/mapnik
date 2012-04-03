@@ -111,6 +111,14 @@ INSERT INTO test5(non_id, manual_id, geom) values (0, -1, GeomFromEWKT('SRID=432
 INSERT INTO test5(non_id, manual_id, geom) values (0, 1, GeomFromEWKT('SRID=4326;POINT(0 0)'));
 """
 
+insert_table_6 = '''
+CREATE TABLE "tableWithMixedCase"(gid serial PRIMARY KEY, geom geometry);
+INSERT INTO "tableWithMixedCase"(geom) values (ST_MakePoint(0,0));
+INSERT INTO "tableWithMixedCase"(geom) values (ST_MakePoint(0,1));
+INSERT INTO "tableWithMixedCase"(geom) values (ST_MakePoint(1,0));
+INSERT INTO "tableWithMixedCase"(geom) values (ST_MakePoint(1,1));
+'''
+
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
     call('createdb -T %s %s' % (POSTGIS_TEMPLATE_DBNAME,MAPNIK_TEST_DBNAME),silent=False)
@@ -121,6 +129,7 @@ def postgis_setup():
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_3),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_4),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_5),silent=False)
+    call("""psql -q %s -c '%s'""" % (MAPNIK_TEST_DBNAME,insert_table_6),silent=False)
 
 def postgis_takedown():
     pass
@@ -327,6 +336,28 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         fs = ds.featureset()
         eq_(fs.next().id(),1)
         eq_(fs.next().id(),2)
+
+    def test_querying_table_with_mixed_case():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='"tableWithMixedCase"',
+                            geometry_field='geom',
+                            require_key=True)
+        fs = ds.featureset()
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),2)
+        eq_(fs.next().id(),3)
+        eq_(fs.next().id(),4)
+        eq_(fs.next(),None)
+
+    def test_querying_subquery_with_mixed_case():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(SeLeCt * FrOm "tableWithMixedCase") as MixedCaseQuery',
+                            geometry_field='geom',
+                            require_key=True)
+        fs = ds.featureset()
+        eq_(fs.next().id(),1)
+        eq_(fs.next().id(),2)
+        eq_(fs.next().id(),3)
+        eq_(fs.next().id(),4)
+        eq_(fs.next(),None)
 
     atexit.register(postgis_takedown)
 
