@@ -29,6 +29,7 @@
 
 // boost
 #include <boost/variant.hpp>
+#include <boost/optional.hpp>
 
 class GDALDataset;
 class GDALRasterBand;
@@ -47,7 +48,8 @@ public:
                     int nbands,
                     double dx,
                     double dy,
-                    double filter_factor);
+                    double filter_factor,
+                    boost::optional<double> const& nodata);
     virtual ~gdal_featureset();
     mapnik::feature_ptr next();
 private:
@@ -67,6 +69,7 @@ private:
     double dy_;
     int nbands_;
     double filter_factor_;
+    boost::optional<double> nodata_value_;
     bool first_;
 };
 

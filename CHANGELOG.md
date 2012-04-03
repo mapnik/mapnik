@@ -9,6 +9,10 @@ For a complete change history, see the SVN log.
 
 ## Mapnik 2.1.0
 
+- GDAL: allow setting nodata value on the fly (will override value if nodata is set in data) (#1161)
+ 
+- GDAL: respect nodata for paletted/colormapped images (#1160)
+
 - PostGIS: the primary key, for tables containing one, is now auto-detected allowing for globally unique feature id values (#804)
 
 - Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentially radii)

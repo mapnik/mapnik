@@ -53,7 +53,8 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int nbands,
                                  double dx,
                                  double dy,
-                                 double filter_factor)
+                                 double filter_factor,
+                                 boost::optional<double> const& nodata)
     : dataset_(dataset),
       ctx_(boost::make_shared<mapnik::context_type>()),
       band_(band),
@@ -65,6 +66,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       dy_(dy),
       nbands_(nbands),
       filter_factor_(filter_factor),
+      nodata_value_(nodata),
       first_(true)
 {
     ctx_->push("value");
@@ -241,8 +243,17 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
                 float* imageData = (float*)image.getBytes();
                 GDALRasterBand * band = dataset_.GetRasterBand(band_);
-                int hasNoData;
-                double nodata = band->GetNoDataValue(&hasNoData);
+                int hasNoData(0);
+                double nodata(0);
+                if (nodata_value_)
+                {
+                    hasNoData = 1;
+                    nodata = *nodata_value_;
+                }
+                else
+                {
+                    nodata = band->GetNoDataValue(&hasNoData);
+                }
                 band->RasterIO(GF_Read, x_off, y_off, width, height,
                                imageData, image.width(), image.height(),
                                GDT_Float32, 0, 0);
@@ -340,8 +351,21 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #ifdef MAPNIK_DEBUG
                     std::clog << "GDAL Plugin: processing rgb bands..." << std::endl;
 #endif
-                    int hasNoData;
-                    float nodata = red->GetNoDataValue(&hasNoData);
+                    int hasNoData(0);
+                    double nodata(0);
+                    if (nodata_value_)
+                    {
+                        hasNoData = 1;
+                        nodata = *nodata_value_;
+                    }
+                    else
+                    {
+                        nodata = red->GetNoDataValue(&hasNoData);
+                    }
+                    if (hasNoData)
+                    {
+                        feature->put("NODATA",nodata);
+                    }
                     GDALColorTable *color_table = red->GetColorTable();
 
                     if (! alpha && hasNoData && ! color_table)
@@ -380,12 +404,25 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #ifdef MAPNIK_DEBUG
                     std::clog << "GDAL Plugin: processing gray band..." << std::endl;
 #endif
-                    int hasNoData;
-                    float nodata = grey->GetNoDataValue(&hasNoData);
+                    int hasNoData(0);
+                    double nodata(0);
+                    if (nodata_value_)
+                    {
+                        hasNoData = 1;
+                        nodata = *nodata_value_;
+                    }
+                    else
+                    {
+                        nodata = grey->GetNoDataValue(&hasNoData);
+                    }
                     GDALColorTable* color_table = grey->GetColorTable();
 
                     if (hasNoData && ! color_table)
                     {
+                        if (hasNoData)
+                        {
+                            feature->put("NODATA",nodata);
+                        }
 #ifdef MAPNIK_DEBUG
                         std::clog << "\tno data value for layer: " << nodata << std::endl;
 #endif
@@ -422,23 +459,41 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 #ifdef MAPNIK_DEBUG
                         std::clog << "GDAL Plugin: Loading colour table..." << std::endl;
 #endif
+                        unsigned nodata_value = static_cast<unsigned>(nodata);
+                        if (hasNoData)
+                        {
+                            feature->put("NODATA",static_cast<int>(nodata_value));
+                        }
                         for (unsigned y = 0; y < image.height(); ++y)
                         {
                             unsigned int* row = image.getRow(y);
                             for (unsigned x = 0; x < image.width(); ++x)
                             {
                                 unsigned value = row[x] & 0xff;
-                                const GDALColorEntry *ce = color_table->GetColorEntry(value);
-                                if (ce )
+                                if (hasNoData && (value == nodata_value))
                                 {
-                                    // TODO - big endian support
-                                    row[x] = (ce->c4 << 24)| (ce->c3 << 16) |  (ce->c2 << 8) | (ce->c1) ;
+                                    // make no data fully alpha
+                                    row[x] = 0;
+                                }
+                                else
+                                {
+                                    const GDALColorEntry *ce = color_table->GetColorEntry(value);
+                                    if (ce)
+                                    {
+                                        // TODO - big endian support
+                                        row[x] = (ce->c4 << 24)| (ce->c3 << 16) |  (ce->c2 << 8) | (ce->c1) ;
+                                    }
+                                    else
+                                    {
+                                        // make lacking color entry fully alpha
+                                        // note - gdal_translate makes black
+                                        row[x] = 0;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-
                 if (alpha)
                 {
 #ifdef MAPNIK_DEBUG

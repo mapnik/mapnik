@@ -57,6 +57,7 @@ private:
     mutable int nbands_;
     mutable bool shared_dataset_;
     double filter_factor_;
+    boost::optional<double> nodata_value_;
     inline GDALDataset* open_dataset() const;
 };
 
