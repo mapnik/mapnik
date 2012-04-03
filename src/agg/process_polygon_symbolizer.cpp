@@ -52,25 +52,28 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     
     box2d<double> inflated_extent = query_extent_ * 1.1;
     
-    typedef boost::mpl::vector<smooth> conv_types;
-    vertex_converter<box2d<double>, rasterizer,polygon_symbolizer,conv_types> converter(inflated_extent,*ras_ptr,sym);
-    if (sym.smooth() > 0.0) converter.set<smooth>();    
-    //converter.set<clip_poly>(); //always clip 
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
+    vertex_converter<box2d<double>,rasterizer,polygon_symbolizer, proj_transform, CoordTransform,conv_types> 
+        converter(inflated_extent,*ras_ptr,sym,t_,prj_trans);
+    
+    if (sym.clip()) converter.set<clip_poly_tag>(); //optinal clip (default: true) 
+    converter.set<transform_tag>(); //always transform 
+    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
     
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
         geometry_type & geom=feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
-            typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-            typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+            //typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+            //typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
             
             
-            clipped_geometry_type clipped(geom);
-            clipped.clip_box(inflated_extent.minx(),inflated_extent.miny(),inflated_extent.maxx(),inflated_extent.maxy());
-            path_type path(t_,clipped,prj_trans);
+            //clipped_geometry_type clipped(geom);
+            //clipped.clip_box(inflated_extent.minx(),inflated_extent.miny(),inflated_extent.maxx(),inflated_extent.maxy());
+            //path_type path(t_,clipped,prj_trans);
             
-            converter.apply(path);
+            converter.apply(geom);
             
         }
     }
