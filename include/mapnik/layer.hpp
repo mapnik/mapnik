@@ -83,7 +83,7 @@ public:
 
     /*!
      * @return the styles list attached to this layer
-     *         (const version).
+     *         (non-const version).
      */
     std::vector<std::string>& styles();
 
@@ -202,7 +202,7 @@ private:
     bool clear_label_cache_;
     bool cache_features_;
     std::string group_by_;
-    std::vector<std::string>  styles_;
+    std::vector<std::string> styles_;
     datasource_ptr ds_;
 };
 }
