@@ -1,5 +1,3 @@
-CXX = g++
-
 CXXFLAGS = $(shell mapnik-config --cflags)
 LDFLAGS = $(shell mapnik-config --libs --dep-libs --ldflags)
 
