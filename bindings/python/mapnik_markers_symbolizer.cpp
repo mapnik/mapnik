@@ -60,7 +60,8 @@ struct markers_symbolizer_pickle_suite : boost::python::pickle_suite
     static  boost::python::tuple
     getstate(markers_symbolizer const& p)
     {
-        return boost::python::make_tuple(p.get_allow_overlap());//,p.get_opacity());
+        return boost::python::make_tuple(p.get_allow_overlap(),
+                                         p.get_ignore_placement());//,p.get_opacity());
     }
 
     static void
@@ -77,8 +78,7 @@ struct markers_symbolizer_pickle_suite : boost::python::pickle_suite
         }
                 
         p.set_allow_overlap(extract<bool>(state[0]));
-        //p.set_opacity(extract<float>(state[1]));
-        
+        p.set_ignore_placement(extract<bool>(state[1]));
     }
 
 };
@@ -108,8 +108,19 @@ void export_markers_symbolizer()
                       &markers_symbolizer::get_opacity,
                       &markers_symbolizer::set_opacity,
                       "Set/get the text opacity")
+        .add_property("ignore_placement",
+                      &markers_symbolizer::get_ignore_placement,
+                      &markers_symbolizer::set_ignore_placement)
         .add_property("transform",
                       &mapnik::get_svg_transform<markers_symbolizer>,
                       &mapnik::set_svg_transform<markers_symbolizer>)
+        .add_property("width",
+                      &markers_symbolizer::get_width,
+                      &markers_symbolizer::set_width,
+                      "Set/get the marker width")
+        .add_property("height",
+                      &markers_symbolizer::get_height,
+                      &markers_symbolizer::set_height,
+                      "Set/get the marker height")
         ;
 }

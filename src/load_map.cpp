@@ -1047,7 +1047,9 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
         optional<double> max_error = get_opt_attr<double>(sym, "max-error");
         if (max_error) symbol.set_max_error(*max_error);
         optional<boolean> allow_overlap = get_opt_attr<boolean>(sym, "allow-overlap");
+        optional<boolean> ignore_placement = get_opt_attr<boolean>(sym, "ignore-placement");
         if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
+        if (ignore_placement) symbol.set_ignore_placement(*ignore_placement);
 
         optional<double> w = get_opt_attr<double>(sym, "width");
         optional<double> h = get_opt_attr<double>(sym, "height");

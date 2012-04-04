@@ -47,11 +47,12 @@ markers_symbolizer::markers_symbolizer()
     : symbolizer_with_image(path_expression_ptr(new path_expression)),
       symbolizer_base(),
       allow_overlap_(false),
+      ignore_placement_(false),
       fill_(color(0,0,255)), 
       spacing_(100.0), 
       max_error_(0.2),
-      width_(5.0),
-      height_(5.0),
+      width_(10.0),
+      height_(10.0),
       stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT),
       marker_type_(ARROW) {}
@@ -60,11 +61,12 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
     : symbolizer_with_image(filename), 
       symbolizer_base(),
       allow_overlap_(false),
+      ignore_placement_(false),
       fill_(color(0,0,255)), 
       spacing_(100.0), 
       max_error_(0.2),
-      width_(5.0),
-      height_(5.0),
+      width_(10.0),
+      height_(10.0),
       stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT),
       marker_type_(ARROW) {}
@@ -73,15 +75,26 @@ markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
     : symbolizer_with_image(rhs), 
       symbolizer_base(rhs),
       allow_overlap_(rhs.allow_overlap_),
-      fill_(rhs.fill_), 
-      spacing_(rhs.spacing_), 
+      ignore_placement_(rhs.ignore_placement_),
+      fill_(rhs.fill_),
+      spacing_(rhs.spacing_),
       max_error_(rhs.max_error_),
       width_(rhs.width_),
       height_(rhs.height_),
       stroke_(rhs.stroke_),
       marker_p_(rhs.marker_p_),
       marker_type_(rhs.marker_type_) {}
-    
+
+void markers_symbolizer::set_ignore_placement(bool ignore_placement)
+{
+    ignore_placement_ = ignore_placement;
+}
+
+bool markers_symbolizer::get_ignore_placement() const
+{
+    return ignore_placement_;
+}
+
 void markers_symbolizer::set_allow_overlap(bool overlap)
 {
     allow_overlap_ = overlap;

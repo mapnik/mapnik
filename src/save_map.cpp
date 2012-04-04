@@ -261,6 +261,10 @@ public:
         {
             set_attr( sym_node, "allow-overlap", sym.get_allow_overlap() );
         }
+        if (sym.get_ignore_placement() != dfl.get_ignore_placement() || explicit_defaults_)
+        {
+            set_attr( sym_node, "ignore-placement", sym.get_ignore_placement() );
+        }
         if (sym.get_spacing() != dfl.get_spacing() || explicit_defaults_)
         {
             set_attr( sym_node, "spacing", sym.get_spacing() );
