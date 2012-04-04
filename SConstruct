@@ -359,7 +359,7 @@ opts.AddVariables(
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
-    BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
+    BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
