@@ -357,6 +357,11 @@ boost::optional<box2d<double> > const& Map::maximum_extent() const
     return maximum_extent_;
 }
 
+boost::optional<box2d<double> > & Map::maximum_extent()
+{
+    return maximum_extent_;
+}
+
 std::string const&  Map::base_path() const
 {
     return base_path_;

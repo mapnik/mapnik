@@ -118,6 +118,7 @@ struct map_pickle_suite : boost::python::pickle_suite
 std::vector<layer>& (Map::*layers_nonconst)() =  &Map::layers;
 std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
 mapnik::parameters& (Map::*params_nonconst)() =  &Map::get_extra_parameters;
+boost::optional<mapnik::box2d<double> > const& (Map::*maximum_extent_const)() const =  &Map::maximum_extent;
 
 mapnik::feature_type_style find_style(mapnik::Map const& m, std::string const& name)
 {
@@ -150,7 +151,7 @@ bool has_metawriter(mapnik::Map const& m)
 
 // returns empty shared_ptr when the metawriter isn't found, or is
 // of the wrong type. empty pointers make it back to Python as a None.
-mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map &m, std::string const&name) {
+mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map & m, std::string const& name) {
     mapnik::metawriter_ptr metawriter = m.find_metawriter(name);
     mapnik::metawriter_inmem_ptr inmem;
 
@@ -192,6 +193,18 @@ mapnik::Map map_deepcopy(mapnik::Map & m, boost::python::dict memo)
     return result;
 }
 
+// TODO - find a simplier way to set optional to uninitialized
+void set_maximum_extent(mapnik::Map & m, boost::optional<mapnik::box2d<double> > const& box)
+{
+    if (box)
+    {
+        m.set_maximum_extent(*box);
+    }
+    else
+    {
+        m.maximum_extent().reset();
+    }
+}
 
 void export_map()
 {
@@ -550,8 +563,8 @@ void export_map()
             )
 
         .add_property("maximum_extent",make_function
-                      (&Map::maximum_extent,return_value_policy<copy_const_reference>()),
-                      &Map::set_maximum_extent,
+                      (maximum_extent_const,return_value_policy<copy_const_reference>()),
+                      &set_maximum_extent,
                       "The maximum extent of the map.\n"
                       "\n"
                       "Usage:\n"
