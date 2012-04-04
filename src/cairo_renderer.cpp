@@ -1355,17 +1355,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         else
         {
             color const& fill_ = sym.get_fill();
-            unsigned r = fill_.red();
-            unsigned g = fill_.green();
-            unsigned b = fill_.blue();
-            unsigned a = fill_.alpha();
             stroke const& stroke_ = sym.get_stroke();
             color const& col = stroke_.get_color();
             double strk_width = stroke_.get_width();
-            unsigned s_r=col.red();
-            unsigned s_g=col.green();
-            unsigned s_b=col.blue();
-            unsigned s_a=col.alpha();
             double w = sym.get_width();
             double h = sym.get_height();
             double rx = w/2.0;
