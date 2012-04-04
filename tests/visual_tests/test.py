@@ -47,10 +47,10 @@ files = [
         'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)}
     ]
 
-def render(filename, width, height, bbox):
-    print "-"*80
-    print "Rendering style \"%s\" with size %dx%d ... " % (filename, width, height)
-    print "-"*80
+def render(filename, width, height, bbox, quiet=False):
+    if not quiet:
+        print "Rendering style \"%s\" with size %dx%d ... \x1b[1;32m✓ \x1b[0m" % (filename, width, height)
+        print "-"*80
     m = mapnik.Map(width, height)
     mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
     if bbox is not None:
@@ -62,21 +62,28 @@ def render(filename, width, height, bbox):
     diff = compare(basefn + '-agg.png', basefn + '-reference.png')
     if diff > 0:
         print "-"*80
-        print 'Error: %u different pixels' % diff
+        print '\x1b[33mError:\x1b[0m %u different pixels' % diff
         print "-"*80
 
     return m
 
-if len(sys.argv) == 2:
-    files = [(sys.argv[1], (500, 500))]
-elif len(sys.argv) > 2:
-    files = [sys.argv[1:]]
+if __name__ == "__main__":
+    if '-q' in sys.argv:
+       quiet = True
+       sys.argv.remove('-q')
+    else:
+       quiet = False
 
-for f in files:
-    config = dict(defaults)
-    config.update(f)
-    for size in config['sizes']:
-        m = render(config['name'], size[0], size[1], config['bbox'])
-    mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
+    if len(sys.argv) == 2:
+        files = [(sys.argv[1], (500, 500))]
+    elif len(sys.argv) > 2:
+        files = [sys.argv[1:]]
 
-summary()
+    for f in files:
+        config = dict(defaults)
+        config.update(f)
+        for size in config['sizes']:
+            m = render(config['name'], size[0], size[1], config['bbox'], quiet=quiet)
+        mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
+
+    summary()
