@@ -203,8 +203,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         return;
     }
 
-
-
 #if defined(RENDERING_STATS)
     progress_timer layer_timer(std::clog, "rendering total for layer: '" + lay.name() + "'");
 #endif
@@ -219,20 +217,22 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                   << m_.srs() << "'\n";
 #endif
 
-    box2d<double> map_ext = m_.get_buffered_extent();
+    box2d<double> buffered_query_ext = m_.get_buffered_extent(); // buffered
 
     // clip buffered extent by maximum extent, if supplied
     boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
     if (maximum_extent) {
-        map_ext.clip(*maximum_extent);
+        buffered_query_ext.clip(*maximum_extent);
     }
 
     box2d<double> layer_ext = lay.envelope();
+    bool fw_success = false;
 
     // first, try intersection of map extent forward projected into layer srs
-    if (prj_trans.forward(map_ext, PROJ_ENVELOPE_POINTS) && map_ext.intersects(layer_ext))
+    if (prj_trans.forward(buffered_query_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
     {
-        layer_ext.clip(map_ext);
+        fw_success = true;
+        layer_ext.clip(buffered_query_ext);
     }
     // if no intersection and projections are also equal, early return
     else if (prj_trans.equal())
@@ -243,9 +243,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         return;
     }
     // next try intersection of layer extent back projected into map srs
-    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && map_ext.intersects(layer_ext))
+    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
     {
-        layer_ext.clip(map_ext);
+        layer_ext.clip(buffered_query_ext);
         // forward project layer extent back into native projection
         if (!prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
         {
@@ -263,15 +263,37 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         return;
     }
 
-    box2d<double> query_ext = m_.get_current_extent();
-    prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS);
+    // if we've got this far, now prepare the unbuffered extent
+    // which is used as a bbox for clipping geometries
+    box2d<double> query_ext = m_.get_current_extent(); // unbuffered
+    if (maximum_extent) {
+        query_ext.clip(*maximum_extent);
+    }
+    box2d<double> layer_ext2 = lay.envelope();
+    if (fw_success)
+    {
+        if (prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS))
+        {
+            layer_ext2.clip(query_ext);
+        }
+    }
+    else
+    {
+        if (prj_trans.backward(layer_ext2, PROJ_ENVELOPE_POINTS))
+        {
+            layer_ext2.clip(query_ext);
+            prj_trans.forward(layer_ext2, PROJ_ENVELOPE_POINTS);
+        }
+    }
+
+    p.start_layer_processing(lay, layer_ext2);
+
     double qw = query_ext.width()>0 ? query_ext.width() : 1;
     double qh = query_ext.height()>0 ? query_ext.height() : 1;
     query::resolution_type res(m_.width()/qw,
                                m_.height()/qh);
 
     query q(layer_ext,res,scale_denom,m_.get_current_extent());
-    p.start_layer_processing(lay, query_ext);
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
     double filt_factor = 1;
