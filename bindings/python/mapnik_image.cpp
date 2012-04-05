@@ -40,9 +40,6 @@ extern "C"
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
 
-// stl
-#include <sstream>
-
 // jpeg
 #if defined(HAVE_JPEG)
 #include <mapnik/jpeg_io.hpp>
