@@ -34,6 +34,8 @@ pep8:
 	@pep8 -r --select=W391 -q --filename=*.py `pwd`/tests/ | xargs gsed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}'
 
 grind:
-	@valgrind --leak-check=full tests/cpp_tests/font_registration_test
+	@for FILE in tests/cpp_tests/*-bin; do \
+		valgrind --leak-check=full --log-fd=1 $${FILE} | grep definitely; \
+	done
 
 .PHONY: clean reset uninstall test install
