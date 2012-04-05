@@ -53,5 +53,9 @@ int main( int, char*[] )
   params["bool"] = "no";
   BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
 
-  return ::boost::report_errors();
+  if (!::boost::detail::test_errors()) {
+      std::clog << "C++ parameters: \x1b[1;32m✓ \x1b[0m\n";
+  } else {
+      return ::boost::report_errors();
+  }
 }
