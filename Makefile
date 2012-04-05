@@ -18,8 +18,13 @@ uninstall:
 	python scons/scons.py uninstall
 
 test:
+	@echo "*** Running visual tests…"
 	@python tests/visual_tests/test.py -q
-	@tests/cpp_tests/*-bin
+	@echo "*** Running C++ tests..."
+	@for FILE in tests/cpp_tests/*-bin; do \
+		$${FILE}; \
+	done
+	@echo "*** Running python tests..."
 	@python tests/run_tests.py -q
 
 pep8:
