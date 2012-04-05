@@ -109,7 +109,6 @@ private:
     void parse_shield_symbolizer(rule & rule, xml_node const& sym);
     void parse_line_symbolizer(rule & rule, xml_node const& sym);
     void parse_polygon_symbolizer(rule & rule, xml_node const& sym);
-    void parse_compositing_symbolizer(rule & rule, xml_node const& sym);
     void parse_building_symbolizer(rule & rule, xml_node const& sym);
     void parse_raster_symbolizer(rule & rule, xml_node const& sym);
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
@@ -414,7 +413,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
 
         filter_mode_e filter_mode = sty.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
         style.set_filter_mode(filter_mode);
-        
+
         // compositing
         optional<std::string> comp_op_name = sty.get_opt_attr<std::string>("comp-op");
         if (comp_op_name)
@@ -434,7 +433,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         {
             style.set_blur_radius_y(*blur_y);
         }
-        
+
         xml_node::const_iterator ruleIter = sty.begin();
         xml_node::const_iterator endRule = sty.end();
 
@@ -571,7 +570,7 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
         {
             lyr.set_group_by(* group_by);
         }
-        
+
         xml_node::const_iterator child = lay.begin();
         xml_node::const_iterator end = lay.end();
 
@@ -714,10 +713,6 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
             {
                 parse_polygon_pattern_symbolizer(rule, *symIter);
             }
-            else if (symIter->is("CompositingSymbolizer"))
-            {
-                parse_compositing_symbolizer(rule, *symIter);
-            }
             else if (symIter->is("TextSymbolizer"))
             {
                 parse_text_symbolizer(rule, *symIter);
@@ -768,14 +763,11 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node c
         composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
         sym.set_comp_op(comp_op);
     }
-    
+
     optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
     if (!writer) return;
     optional<std::string> output = pt.get_opt_attr<std::string>("meta-output");
     sym.add_metawriter(*writer, output);
-
-    
-
 }
 
 void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
@@ -1266,17 +1258,17 @@ void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
             if (!dash_array.empty())
             {
                 size_t size = dash_array.size();
-                if (size % 2 == 1) 
+                if (size % 2 == 1)
                     dash_array.insert(dash_array.end(),dash_array.begin(),dash_array.end());
-                
+
                 std::vector<double>::const_iterator pos = dash_array.begin();
                 while (pos != dash_array.end())
                 {
-                    if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0                        
+                    if (*pos > 0.0 || *(pos+1) > 0.0) // avoid both dash and gap eq 0.0
                         strk.add_dash(*pos,*(pos + 1));
                     pos +=2;
                 }
-            }   
+            }
         }
         else
         {
@@ -1338,43 +1330,13 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
         // to clip or not to clip value
         //optional<bool> clip = sym.get_opt_attr<bool>("clip");
         //if (clip) poly_sym.set_clip(*clip);
-        
+
         parse_metawriter_in_symbolizer(poly_sym, sym);
         rule.append(poly_sym);
     }
     catch (const config_error & ex)
     {
         ex.append_context("in PolygonSymbolizer", sym);
-        throw;
-    }
-}
-
-void map_parser::parse_compositing_symbolizer(rule & rule, xml_node const & sym)
-{
-    try
-    {
-        compositing_symbolizer comp_sym;
-        // fill
-        optional<color> fill = sym.get_opt_attr<color>("fill");
-        if (fill) comp_sym.set_fill(*fill);
-        // fill-opacity
-        optional<double> opacity = sym.get_opt_attr<double>("fill-opacity");
-        if (opacity) comp_sym.set_opacity(*opacity);
-        // gamma
-        optional<double> gamma = sym.get_opt_attr<double>("gamma");
-        if (gamma)  comp_sym.set_gamma(*gamma);
-        // gamma method
-        optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
-        if (gamma_method) comp_sym.set_gamma_method(*gamma_method);
-        // smooth value
-        optional<double> smooth = sym.get_opt_attr<double>("smooth");
-        if (smooth) comp_sym.set_smooth(*smooth);
-
-        rule.append(comp_sym);
-    }
-    catch (const config_error & ex)
-    {
-        ex.append_context("in CompositingSymbolizer", sym);
         throw;
     }
 }
