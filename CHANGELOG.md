@@ -13,7 +13,9 @@ For a complete change history, see the SVN log.
  
 - GDAL: respect nodata for paletted/colormapped images (#1160)
 
-- PostGIS: the primary key, for tables containing one, is now auto-detected allowing for globally unique feature id values (#804)
+- PostGIS: Added a new option called 'autodetect_key_field' (by default false) that if true will
+  trigger autodetection of a given tables' primary key allowing for feature.id() to represent
+  globally unique ids. This option has no effect if the user has not manually supplied the 'key_field' option. (#804)
 
 - Cairo: Add full rendering support for markers to match AGG renderer functionality (#1071)
 

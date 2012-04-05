@@ -107,7 +107,7 @@ void postgis_datasource::bind() const
 
     boost::optional<int> initial_size = params_.get<int>("initial_size", 1);
     boost::optional<int> max_size = params_.get<int>("max_size", 10);
-    boost::optional<mapnik::boolean> require_key = params_.get<mapnik::boolean>("require_key", false);
+    boost::optional<mapnik::boolean> autodetect_key_field = params_.get<mapnik::boolean>("autodetect_key_field", false);
 
     ConnectionManager* mgr = ConnectionManager::instance();
     mgr->registerPool(creator_, *initial_size, *max_size);
@@ -230,7 +230,7 @@ void postgis_datasource::bind() const
             }
 
             // detect primary key
-            if (key_field_.empty())
+            if (*autodetect_key_field && key_field_.empty())
             {
                 std::ostringstream s;
                 s << "SELECT a.attname, a.attnum, t.typname, t.typname in ('int2','int4','int8') "
@@ -267,34 +267,42 @@ void postgis_datasource::bind() const
                             {
                                 key_field_ = std::string(key_field_string);
 #ifdef MAPNIK_DEBUG
-                                std::clog << "PostGIS Plugin: auto-detected key field of '" << key_field_ << "' on table '" << geometry_table_ << "'\n";
+                                std::clog << "PostGIS Plugin: auto-detected key field of '"
+                                          << key_field_ << "' on table '"
+                                          << geometry_table_ << "'\n";
 #endif
                             }
                         }
-                        else // warn with odd cases like numeric primary key
+                        else
                         {
-                            std::clog << "PostGIS Plugin: Warning: '" << rs_key->getValue(0) << "' on table '" << geometry_table_ << "' is not a valid integer primary key field\n";
+                            // throw for cases like a numeric primary key, which is invalid
+                            // as it should be floating point (int numerics are useless)
+                            std::ostringstream err;
+                            err << "PostGIS Plugin: Error: '"
+                                << rs_key->getValue(0)
+                                << "' on table '"
+                                << geometry_table_
+                                << "' is not a valid integer primary key field\n";
+                            throw mapnik::datasource_exception(err.str());
                         }
                     }
                     else if (result_rows > 1)
                     {
-                        std::clog << "PostGIS Plugin: warning, multi column primary key detected but is not supported\n";
+                        std::ostringstream err;
+                        err << "PostGIS Plugin: Error: '"
+                            << "multi column primary key detected but is not supported";
+                        throw mapnik::datasource_exception(err.str());
                     }
                 }
-#ifdef MAPNIK_DEBUG
-                else
-                {
-                    std::clog << "Postgis Plugin: no primary key could be detected for '" << geometry_table_ << "'\n";
-                }
-#endif
                 rs_key->close();
             }
 
             // if a globally unique key field/primary key is required
             // but still not known at this point, then throw
-            if (*require_key && key_field_.empty())
+            if (*autodetect_key_field && key_field_.empty())
             {
-                throw mapnik::datasource_exception(std::string("PostGIS Plugin: Error: primary key required for table '") +
+                throw mapnik::datasource_exception(std::string("PostGIS Plugin: Error: primary key required")
+                      + " but could not be detected for table '" +
                       geometry_table_ + "', please supply 'key_field' option to specify field to use for primary key");
             }
 
