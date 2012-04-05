@@ -28,7 +28,6 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/gamma_method.hpp>
-#include <mapnik/image_compositing.hpp>
 
 namespace mapnik
 {
@@ -47,15 +46,12 @@ struct MAPNIK_DECL compositing_symbolizer : public symbolizer_base
     gamma_method_e get_gamma_method() const;
     void set_smooth(double smooth);
     double smooth() const;
-    void set_comp_op(composite_mode_e comp_op);
-    composite_mode_e comp_op() const;
 private:
     color fill_;
     double opacity_;
     double gamma_;
     gamma_method_e gamma_method_;
     double smooth_;
-    composite_mode_e comp_op_;
 };
 
 }

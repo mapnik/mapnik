@@ -52,23 +52,18 @@ void agg_renderer<T>::process(compositing_symbolizer const& sym,
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
-    typedef agg::renderer_base<pixfmt_type> renderer_base;
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
     
     color const& fill_ = sym.get_fill();
     
-    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
-    pixfmt_type pixf(buf);
     
-    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
-
-    renderer_base renb(pixf);
+    
     unsigned r=fill_.red();
     unsigned g=fill_.green();
     unsigned b=fill_.blue();
     unsigned a=fill_.alpha();
-    renderer_type ren(renb);
     
     ras_ptr->reset();
 
@@ -105,9 +100,28 @@ void agg_renderer<T>::process(compositing_symbolizer const& sym,
             }
         }
     }
-    ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
-    agg::scanline_u8 sl;
-    agg::render_scanlines(*ras_ptr, sl, ren);
+    
+    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    
+    if (sym.comp_op() == clear)
+    {
+        aa_renderer::pixfmt_type pixf(buf);
+        aa_renderer ren;
+        ren.attach(pixf);
+        ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
+        ren.render(*ras_ptr);
+    }
+    else
+    {        
+        pixfmt_comp_type pixf(buf);
+        pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+        renderer_base renb(pixf);
+        renderer_type ren(renb);
+        ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
+        agg::scanline_u8 sl;
+        agg::render_scanlines(*ras_ptr, sl, ren);
+    }
+
 }
 
 

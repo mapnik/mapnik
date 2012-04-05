@@ -65,10 +65,22 @@ void symbolizer_base::cache_metawriters(Map const &m)
     }
 }
 
+
 metawriter_with_properties symbolizer_base::get_metawriter() const
 {
     return metawriter_with_properties(writer_ptr_, properties_complete_);
 }
+
+void symbolizer_base::set_comp_op(composite_mode_e comp_op)
+{
+    comp_op_ = comp_op;
+}
+
+composite_mode_e symbolizer_base::comp_op() const
+{
+    return comp_op_;
+}
+
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
     : image_filename_( file ),

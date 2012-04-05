@@ -125,8 +125,34 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             }
         }
         
-        ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
-        ren.render(*ras_ptr);
+ 
+        agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+
+        if (sym.comp_op() == clear)
+        {
+            aa_renderer::pixfmt_type pixf(buf);
+            aa_renderer ren;
+            ren.attach(pixf);
+            ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
+            ren.render(*ras_ptr);
+        }
+        else
+        {        
+            typedef agg::rgba8 color_type;
+            typedef agg::order_rgba order_type;
+            typedef agg::pixel32_type pixel_type;
+            typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+            typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+            typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+            typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;     
+            pixfmt_comp_type pixf(buf);
+            pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+            renderer_base renb(pixf);
+            renderer_type ren(renb);
+            ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
+            agg::scanline_u8 sl;
+            agg::render_scanlines(*ras_ptr, sl, ren);
+        }
     }
 }
 

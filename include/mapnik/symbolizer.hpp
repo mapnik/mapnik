@@ -27,6 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/metawriter.hpp>
+#include <mapnik/image_compositing.hpp>
 
 // boost
 #include <boost/array.hpp>
@@ -42,8 +43,9 @@ public:
         properties_(),
         properties_complete_(),
         writer_name_(),
-        writer_ptr_() {}
-
+        writer_ptr_(), 
+        comp_op_(clear) {}
+    
     /** Add a metawriter to this symbolizer using a name. */
     void add_metawriter(std::string const& name, metawriter_properties const& properties);
     /** Add a metawriter to this symbolizer using a pointer.
@@ -77,11 +79,15 @@ public:
     metawriter_properties const& get_metawriter_properties_overrides() const { return properties_; }
     /** Get metawriter name. */
     std::string const& get_metawriter_name() const { return writer_name_; }
+
+    void set_comp_op(composite_mode_e comp_op);
+    composite_mode_e comp_op() const;
 private:
     metawriter_properties properties_;
     metawriter_properties properties_complete_;
     std::string writer_name_;
     metawriter_ptr writer_ptr_;
+    composite_mode_e comp_op_;
 };
 
 typedef boost::array<double,6> transform_type;

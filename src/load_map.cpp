@@ -762,10 +762,20 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
 
 void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node const &pt)
 {
+    optional<std::string> comp_op_name = pt.get_opt_attr<std::string>("comp-op");
+    if (comp_op_name)
+    {
+        composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
+        sym.set_comp_op(comp_op);
+    }
+    
     optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
     if (!writer) return;
     optional<std::string> output = pt.get_opt_attr<std::string>("meta-output");
     sym.add_metawriter(*writer, output);
+
+    
+
 }
 
 void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
@@ -1360,12 +1370,6 @@ void map_parser::parse_compositing_symbolizer(rule & rule, xml_node const & sym)
         optional<double> smooth = sym.get_opt_attr<double>("smooth");
         if (smooth) comp_sym.set_smooth(*smooth);
 
-        optional<std::string> comp_op_name = sym.get_opt_attr<std::string>("comp-op");
-        if (comp_op_name)
-        {
-            composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
-            comp_sym.set_comp_op(comp_op);
-        }
         rule.append(comp_sym);
     }
     catch (const config_error & ex)

@@ -33,8 +33,7 @@ compositing_symbolizer::compositing_symbolizer()
       opacity_(1.0),
       gamma_(1.0),
       gamma_method_(GAMMA_POWER),
-      smooth_(0.0),
-      comp_op_(clear) {}
+      smooth_(0.0) {}
 
 compositing_symbolizer::compositing_symbolizer(color const& fill)
     : symbolizer_base(),
@@ -42,8 +41,7 @@ compositing_symbolizer::compositing_symbolizer(color const& fill)
       opacity_(1.0),
       gamma_(1.0),
       gamma_method_(GAMMA_POWER),
-      smooth_(0.0),
-      comp_op_(clear) {}
+      smooth_(0.0) {}
 
 color const& compositing_symbolizer::get_fill() const
 {
@@ -93,16 +91,6 @@ void compositing_symbolizer::set_smooth(double smooth)
 double compositing_symbolizer::smooth() const
 {
     return smooth_;
-}
-
-void compositing_symbolizer::set_comp_op(composite_mode_e comp_op)
-{
-    comp_op_ = comp_op;
-}
-
-composite_mode_e compositing_symbolizer::comp_op() const
-{
-    return comp_op_;
 }
 
 }
