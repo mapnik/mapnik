@@ -119,6 +119,11 @@ public:
 
     std::string get_text() const;
 
+    xml_tree const& get_tree() const
+    {
+        return tree_;
+    }
+
     template <typename T>
     T get_value() const;
 private:

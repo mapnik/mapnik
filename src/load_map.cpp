@@ -782,7 +782,13 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
 
                 *file = ensure_relative_to_xml(file);
 
-                symbol.set_filename(parse_path(*file));
+                path_expression_ptr expr(boost::make_shared<path_expression>());
+                if (!parse_path_from_string(expr, *file, sym.get_tree().path_expr_grammar))
+                {
+                    throw mapnik::config_error("Failed to parse path_expression '" + *file + "'");
+                }
+
+                symbol.set_filename(expr);
 
                 if (transform_wkt)
                 {
@@ -865,7 +871,13 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             }
         }
 
-        markers_symbolizer symbol(parse_path(filename));
+        path_expression_ptr expr(boost::make_shared<path_expression>());
+        if (!parse_path_from_string(expr, filename, sym.get_tree().path_expr_grammar))
+        {
+            throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
+        }
+        markers_symbolizer symbol(expr);
+
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) symbol.set_opacity(*opacity);
 
@@ -961,8 +973,12 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
             }
 
             file = ensure_relative_to_xml(file);
-
-            line_pattern_symbolizer symbol(parse_path(file));
+            path_expression_ptr expr(boost::make_shared<path_expression>());
+            if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
+            {
+                throw mapnik::config_error("Failed to parse path_expression '" + file + "'");
+            }
+            line_pattern_symbolizer symbol(expr);
 
             parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
@@ -1009,7 +1025,12 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
 
             file = ensure_relative_to_xml(file);
 
-            polygon_pattern_symbolizer symbol(parse_path(file));
+            path_expression_ptr expr(boost::make_shared<path_expression>());
+            if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
+            {
+                throw mapnik::config_error("Failed to parse path_expression '" + file + "'");
+            }
+            polygon_pattern_symbolizer symbol(expr);
 
             // pattern alignment
             pattern_alignment_e p_alignment = sym.get_attr<pattern_alignment_e>("alignment",LOCAL_ALIGNMENT);
@@ -1159,7 +1180,12 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             }
 
             image_file = ensure_relative_to_xml(image_file);
-            shield_symbol.set_filename(parse_path(image_file));
+            path_expression_ptr expr(boost::make_shared<path_expression>());
+            if (!parse_path_from_string(expr, image_file, sym.get_tree().path_expr_grammar))
+            {
+                throw mapnik::config_error("Failed to parse path_expression '" + image_file + "'");
+            }
+            shield_symbol.set_filename(expr);
         }
         catch (image_reader_exception const & ex)
         {
