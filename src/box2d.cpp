@@ -21,6 +21,7 @@
  *****************************************************************************/
 //$Id: envelope.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
+// mapnik
 #include <mapnik/box2d.hpp>
 
 // stl
@@ -28,8 +29,8 @@
 
 // boost
 #include <boost/tokenizer.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 namespace mapnik
 {
@@ -332,31 +333,31 @@ inline
 #endif
 bool box2d<T>::from_string(const std::string& s)
 {
-    bool success = false;
-
-    boost::char_separator<char> sep(", ");
-    boost::tokenizer<boost::char_separator<char> > tok(s, sep);
-
     unsigned i = 0;
     double d[4];
+    bool success = false;
+    boost::char_separator<char> sep(", ");
+    boost::tokenizer<boost::char_separator<char> > tok(s, sep);
     for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
          beg != tok.end(); ++beg)
     {
-        try
-        {
-            d[i] = boost::lexical_cast<double>(boost::trim_copy(*beg));
-        }
-        catch (boost::bad_lexical_cast & ex)
+        std::string item(*beg);
+        boost::trim(item);
+        // note: we intentionally do not use mapnik::util::conversions::string2double
+        // here to ensure that shapeindex can statically compile mapnik::box2d without
+        // needing to link to libmapnik
+        std::string::const_iterator str_beg = item.begin();
+        std::string::const_iterator str_end = item.end();
+        bool r = boost::spirit::qi::phrase_parse(str_beg,str_end,boost::spirit::qi::double_,boost::spirit::ascii::space,d[i]);
+        if (!(r && (str_beg == str_end)))
         {
             break;
         }
-
         if (i == 3)
         {
             success = true;
             break;
         }
-
         ++i;
     }
 

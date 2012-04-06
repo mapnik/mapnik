@@ -149,7 +149,8 @@ std::string projection::expanded() const
     if (proj_) {
         std::string def(pj_get_def( proj_, 0 ));
         //boost::algorithm::ireplace_first(def,params_,"");
-        return boost::trim_copy(def);
+        boost::trim(def);
+        return def;
     }
     return std::string("");
 }

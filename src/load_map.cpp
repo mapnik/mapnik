@@ -50,12 +50,12 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -69,8 +69,6 @@
 #include <iostream>
 #include <sstream>
 
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 using boost::tokenizer;
 
 using std::endl;
@@ -260,13 +258,12 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tokens.begin();
                      beg != tokens.end(); ++beg)
                 {
-                    try
+                    std::string item(*beg);
+                    boost::trim(item);
+                    if (!mapnik::util::string2int(item,n[i]))
                     {
-                        n[i] = boost::lexical_cast<int>(boost::trim_copy(*beg));
-                    }
-                    catch (boost::bad_lexical_cast & ex)
-                    {
-                        std::clog << *beg << " : " << ex.what() << "\n";
+                        throw config_error(std::string("Invalid version string encountered: '")
+                            + *beg + "' in '" + *min_version_string + "'");
                         break;
                     }
                     if (i==2)
