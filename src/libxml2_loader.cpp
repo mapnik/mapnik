@@ -165,7 +165,7 @@ private:
     {
         for (; attributes; attributes = attributes->next )
         {
-            node.add_attribute((char *)attributes->name, (char *)attributes->children->content);
+            node.add_attribute((const char *)attributes->name, (const char *)attributes->children->content);
         }
     }
 
@@ -178,14 +178,14 @@ private:
             case XML_ELEMENT_NODE:
             {
 
-                xml_node &new_node = node.add_child((char *)cur_node->name, cur_node->line, false);
+                xml_node &new_node = node.add_child((const char *)cur_node->name, cur_node->line, false);
                 append_attributes(cur_node->properties, new_node);
                 populate_tree(cur_node->children, new_node);
             }
             break;
             case XML_TEXT_NODE:
             {
-                std::string trimmed((char*)cur_node->content);
+                std::string trimmed((const char*)cur_node->content);
                 boost::algorithm::trim(trimmed);
                 if (trimmed.empty()) break; //Don't add empty text nodes
                 node.add_child(trimmed, cur_node->line, true);
