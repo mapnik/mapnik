@@ -200,7 +200,7 @@ xml_attribute::xml_attribute(std::string const& value_)
 
 /****************************************************************************/
 
-node_not_found::node_not_found(std::string node_name)
+node_not_found::node_not_found(std::string const& node_name)
     : node_name_(node_name)
 {
 
@@ -255,7 +255,7 @@ more_than_one_child::~more_than_one_child() throw()
 
 /****************************************************************************/
 
-xml_node::xml_node(xml_tree &tree, std::string name, unsigned line, bool text_node)
+xml_node::xml_node(xml_tree &tree, std::string const& name, unsigned line, bool text_node)
     : tree_(tree),
       name_(name),
       text_node_(text_node),

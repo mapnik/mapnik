@@ -185,7 +185,8 @@ private:
             break;
             case XML_TEXT_NODE:
             {
-                std::string trimmed = boost::algorithm::trim_copy(std::string((char*)cur_node->content));
+                std::string trimmed((char*)cur_node->content);
+                boost::algorithm::trim(trimmed);
                 if (trimmed.empty()) break; //Don't add empty text nodes
                 node.add_child(trimmed, cur_node->line, true);
             }
