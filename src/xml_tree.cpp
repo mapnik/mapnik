@@ -104,7 +104,8 @@ inline boost::optional<expression_ptr> fast_cast(xml_tree const& tree, std::stri
     if (expression_factory::parse_from_string(expr, value, tree.expr_grammar))
     {
         return expr;
-    } else
+    }
+    else
     {
         throw mapnik::config_error("Failed to parse expression '" + value + "'");
     }
