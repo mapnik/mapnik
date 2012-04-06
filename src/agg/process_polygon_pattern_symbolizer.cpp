@@ -28,7 +28,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/expression_evaluator.hpp>
-
+#include <mapnik/vertex_converters.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -129,19 +129,28 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     span_gen_type sg(img_src, offset_x, offset_y);
     renderer_type rp(renb,sa, sg);
+
     //metawriter_with_properties writer = sym.get_metawriter();
+
+    box2d<double> inflated_extent = query_extent_ * 1.1;
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag> conv_types;
+    vertex_converter<box2d<double>,rasterizer,polygon_pattern_symbolizer, proj_transform, CoordTransform,conv_types> 
+        converter(inflated_extent,*ras_ptr,sym,t_,prj_trans);
+    
+    //if (sym.clip()) 
+    converter.set<clip_poly_tag>(); //optional clip (default: true) 
+    converter.set<transform_tag>(); //always transform 
+    //if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+
     for (unsigned i=0;i<num_geometries;++i)
     {
         geometry_type & geom = feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
-            clipped_geometry_type clipped(geom);
-            clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-            path_type path(t_,clipped,prj_trans);
-            ras_ptr->add_path(path);
-            //if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
+            converter.apply(geom);        
         }
     }
+    
     agg::render_scanlines(*ras_ptr, sl, rp);
 }
 
