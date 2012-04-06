@@ -40,7 +40,6 @@
 #include <sstream>
 #include <string>
 
-using boost::trim_copy;
 using mapnik::geometry_type;
 using mapnik::byte;
 using mapnik::geometry_utils;
@@ -179,7 +178,9 @@ feature_ptr postgis_featureset::next()
 
                     case 1042: //bpchar
                     {
-                        feature->put(name, tr_->transcode(trim_copy(std::string(buf)).c_str()));
+                        std::string str(buf);
+                        boost::trim(str);
+                        feature->put(name, tr_->transcode(str.c_str()));
                         break;
                     }
 
