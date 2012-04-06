@@ -53,6 +53,22 @@ int main( int, char*[] )
   params["bool"] = "no";
   BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
 
+  // strings
+  params["string"] = "hello";
+  BOOST_TEST( (params.get<std::string>("string") && *params.get<std::string>("string") == "hello") );
+
+  // int
+  params["int"] = 1;
+  BOOST_TEST( (params.get<int>("int") && *params.get<int>("int") == 1) );
+
+  // double
+  params["double"] = 1.5;
+  BOOST_TEST( (params.get<double>("double") && *params.get<double>("double") == 1.5) );
+
+  // value_null
+  params["null"] = mapnik::value_null();
+  //BOOST_TEST( (params.get<mapnik::value_null>("null")/* && *params.get<mapnik::value_null>("null") == mapnik::value_null()*/) );
+
   if (!::boost::detail::test_errors()) {
       std::clog << "C++ parameters: \x1b[1;32m✓ \x1b[0m\n";
   } else {
