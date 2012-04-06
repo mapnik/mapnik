@@ -26,12 +26,12 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/variant.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp>
-#include <boost/lexical_cast.hpp>
 
 // stl
 #include <iostream>
@@ -651,13 +651,17 @@ struct to_double : public boost::static_visitor<double>
 
     double operator() (std::string const& val) const
     {
-        return boost::lexical_cast<double>(val);
+        double ret(0);
+        mapnik::util::string2double(val,ret);
+        return ret;
     }
     double operator() (UnicodeString const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
-        return boost::lexical_cast<double>(utf8);
+        double ret(0);
+        mapnik::util::string2double(utf8,ret);
+        return ret;
     }
 
     double operator() (value_null const& val) const
@@ -681,13 +685,17 @@ struct to_int : public boost::static_visitor<double>
 
     int operator() (std::string const& val) const
     {
-        return boost::lexical_cast<int>(val);
+        int ret(0);
+        mapnik::util::string2int(val,ret);
+        return ret;
     }
     int operator() (UnicodeString const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
-        return boost::lexical_cast<int>(utf8);
+        int ret(0);
+        mapnik::util::string2int(utf8,ret);
+        return ret;
     }
 
     int operator() (value_null const& val) const
