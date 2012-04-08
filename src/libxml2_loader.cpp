@@ -23,6 +23,7 @@
 #ifdef HAVE_LIBXML2
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
@@ -99,8 +100,7 @@ public:
         /*
           if ( ! ctx->valid )
           {
-          std::clog << "### ERROR: Failed to validate DTD."
-          << std::endl;
+            mapnik::log() << "libxml2_loader: Failed to validate DTD.";
           }
         */
         load(doc, node);

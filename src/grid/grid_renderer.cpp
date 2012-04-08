@@ -19,16 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
-
-
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
@@ -39,7 +37,6 @@
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 
-
 // boost
 #include <boost/utility.hpp>
 #include <boost/math/special_functions/round.hpp>
@@ -48,7 +45,7 @@
 #include "agg_trans_affine.h"
 
 // stl
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
 #include <iostream>
 #endif
 
@@ -70,8 +67,8 @@ grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, u
       detector_(box2d<double>(-m.buffer_size(), -m.buffer_size(), pixmap_.width() + m.buffer_size(), pixmap_.height() + m.buffer_size())),
       ras_ptr(new grid_rasterizer)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "scale=" << m.scale() << "\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "grid_renderer: Scale=" << m.scale();
 #endif
 }
 
@@ -79,31 +76,32 @@ template <typename T>
 grid_renderer<T>::~grid_renderer() {}
 
 template <typename T>
-void grid_renderer<T>::start_map_processing(Map const& map)
+void grid_renderer<T>::start_map_processing(Map const& m)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start map processing bbox="
-              << map.get_current_extent() << "\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "grid_renderer: Start map processing bbox=" << m.get_current_extent();
 #endif
+
     ras_ptr->clip_box(0,0,width_,height_);
 }
 
 template <typename T>
-void grid_renderer<T>::end_map_processing(Map const& )
+void grid_renderer<T>::end_map_processing(Map const& m)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "end map processing\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "grid_renderer: End map processing";
 #endif
 }
 
 template <typename T>
 void grid_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start layer processing : " << lay.name()  << "\n";
-    std::clog << "datasource = " << lay.datasource().get() << "\n";
-    std::clog << "query_extent = " << query_extent << "\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "grid_renderer: Start processing layer=" << lay.name();
+    mapnik::log() << "grid_renderer: datasource=" << lay.datasource().get();
+    mapnik::log() << "grid_renderer: query_extent = " << query_extent;
 #endif
+
     if (lay.clear_label_cache())
     {
         detector_.clear();
@@ -113,8 +111,8 @@ void grid_renderer<T>::start_layer_processing(layer const& lay, box2d<double> co
 template <typename T>
 void grid_renderer<T>::end_layer_processing(layer const&)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "end layer processing\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "grid_renderer: End layer processing";
 #endif
 }
 

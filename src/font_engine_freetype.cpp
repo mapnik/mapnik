@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
@@ -115,7 +116,10 @@ bool freetype_engine::register_font(std::string const& file_name)
                 s << "which reports a family name of '" << std::string(face->family_name) << "' and lacks a style name";
             else if (face->style_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
-            std::clog << s.str() << std::endl;
+
+#ifdef MAPNIK_LOG
+            mapnik::log() << "grid_renderer: " << s.str();
+#endif
         }
     }
     if (face)
@@ -328,10 +332,10 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
 
         path->vertex(&c, &x, &y, &angle);
 
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
         // TODO Enable when we have support for setting verbosity
-        //std::clog << "prepare_glyphs: " << c << "," << x <<
-        //    "," << y << "," << angle << std::endl;
+        //mapnik::log() << "text_renderer: prepare_glyphs="
+        //              << c << "," << x << "," << y << "," << angle;
 #endif
 
         FT_BBox glyph_bbox;

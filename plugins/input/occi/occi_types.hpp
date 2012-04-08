@@ -24,6 +24,7 @@
 #define OCCI_TYPES_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/utils.hpp>
 
 // occi
@@ -87,8 +88,8 @@ public:
     {
         if (env_ == 0)
         {
-#ifdef MAPNIK_DEBUG
-            std::clog << "OCCI Plugin: occi_environment constructor" << std::endl;
+#ifdef MAPNIK_LOG
+            mapnik::log() << "occi_environment: constructor";
 #endif
 
             const int mode = oracle::occi::Environment::OBJECT
@@ -111,8 +112,8 @@ private:
     {
         if (env_)
         {
-#ifdef MAPNIK_DEBUG
-            std::clog << "OCCI Plugin: occi_environment destructor" << std::endl;
+#ifdef MAPNIK_LOG
+            mapnik::log() << "occi_environment: destructor";
 #endif
 
             oracle::occi::Environment::terminateEnvironment(env_);

@@ -46,6 +46,7 @@ public:
     mapnik::layer_descriptor get_descriptor() const;
     void bind() const;
 private:
+    GDALDataset* open_dataset() const;
     mutable mapnik::box2d<double> extent_;
     std::string dataset_name_;
     mutable int band_;
@@ -58,8 +59,6 @@ private:
     mutable bool shared_dataset_;
     double filter_factor_;
     boost::optional<double> nodata_value_;
-    inline GDALDataset* open_dataset() const;
 };
-
 
 #endif // GDAL_DATASOURCE_HPP

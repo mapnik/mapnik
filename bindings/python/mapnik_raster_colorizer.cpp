@@ -19,10 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// boost
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+
+// mapnik
 #include <mapnik/raster_colorizer.hpp>
 
 using mapnik::raster_colorizer;

@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 //mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
 
@@ -128,7 +129,11 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     if (this == &other)
         return *this;
     placement_options_ = other.placement_options_; /*TODO: Copy options? */
-    std::clog << "TODO: Metawriter (text_symbolizer::operator=)\n";
+
+#ifdef MAPNIK_LOG
+    mapnik::log() << "text_symbolizer: TODO - Metawriter (text_symbolizer::operator=)";
+#endif
+
     return *this;
 }
 

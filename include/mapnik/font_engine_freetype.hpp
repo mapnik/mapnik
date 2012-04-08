@@ -24,6 +24,7 @@
 #define MAPNIK_FONT_ENGINE_FREETYPE_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/ctrans.hpp>
@@ -138,9 +139,8 @@ public:
 
     ~font_face()
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "~font_face: Clean up face \"" << family_name()
-                  << " " << style_name() << "\"" << std::endl;
+#ifdef MAPNIK_LOG
+        mapnik::log() << "font_face: Clean up face \"" << family_name() << " " << style_name() << "\"";
 #endif
         FT_Done_Face(face_);
     }
@@ -225,9 +225,10 @@ public:
 
     ~stroker()
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "~stroker: destroy stroker:" << s_ << std::endl;
+#ifdef MAPNIK_LOG
+        mapnik::log() << "stroker: Destroy stroker=" << s_;
 #endif
+
         FT_Stroker_Done(s_);
     }
 private:
@@ -310,6 +311,7 @@ public:
                 face_set->add(face);
             } else {
 #ifdef MAPNIK_DEBUG
+                // TODO - handle with mapnik::log
                 std::cerr << "Failed to find face '" << *name << "' in font set '" << fset.get_name() << "'\n";
 #endif
             }

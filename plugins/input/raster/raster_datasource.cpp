@@ -26,7 +26,9 @@
 #include <boost/make_shared.hpp>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/boolean.hpp>
 
 #include "raster_featureset.hpp"
 #include "raster_info.hpp"
@@ -46,12 +48,14 @@ using mapnik::image_reader;
 DATASOURCE_PLUGIN(raster_datasource)
 
 raster_datasource::raster_datasource(const parameters& params, bool bind)
-: datasource(params),
-    desc_(*params.get<std::string>("type"), "utf-8"),
-    extent_initialized_(false)
+    : datasource(params),
+      desc_(*params.get<std::string>("type"), "utf-8"),
+      extent_initialized_(false)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "Raster Plugin: Initializing..." << std::endl;
+    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
+
+#ifdef MAPNIK_LOG
+    if (log_enabled_) mapnik::log() << "raster_datasource: Initializing...";
 #endif
 
     boost::optional<std::string> file = params.get<std::string>("file");
@@ -148,8 +152,8 @@ void raster_datasource::bind() const
         }
     }
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Raster Plugin: RASTER SIZE(" << width_ << "," << height_ << ")" << std::endl;
+#ifdef MAPNIK_LOG
+    if (log_enabled_) mapnik::log() << "raster_datasource: Raster size=" << width_ << "," << height_;
 #endif
 
     is_bound_ = true;
@@ -195,14 +199,14 @@ featureset_ptr raster_datasource::features(query const& q) const
     const int width  = int(ext.maxx() + 0.5) - int(ext.minx() + 0.5);
     const int height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Raster Plugin: BOX SIZE(" << width << " " << height << ")" << std::endl;
+#ifdef MAPNIK_LOG
+    if (log_enabled_) mapnik::log() << "raster_datasource: Box size=" << width << "," << height;
 #endif
 
     if (multi_tiles_)
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "Raster Plugin: MULTI-TILED policy" << std::endl;
+#ifdef MAPNIK_LOG
+        if (log_enabled_) mapnik::log() << "raster_datasource: Multi-Tiled policy";
 #endif
 
         tiled_multi_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_, tile_stride_);
@@ -211,8 +215,8 @@ featureset_ptr raster_datasource::features(query const& q) const
     }
     else if (width * height > 512*512)
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "Raster Plugin: TILED policy" << std::endl;
+#ifdef MAPNIK_LOG
+        if (log_enabled_) mapnik::log() << "raster_datasource: Tiled policy";
 #endif
 
         tiled_file_policy policy(filename_, format_, 256, extent_, q.get_bbox(), width_, height_);
@@ -221,8 +225,8 @@ featureset_ptr raster_datasource::features(query const& q) const
     }
     else
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "Raster Plugin: SINGLE FILE" << std::endl;
+#ifdef MAPNIK_LOG
+        if (log_enabled_) mapnik::log() << "raster_datasource: Single file";
 #endif
 
         raster_info info(filename_, format_, extent_, width_, height_);
@@ -234,8 +238,8 @@ featureset_ptr raster_datasource::features(query const& q) const
 
 featureset_ptr raster_datasource::features_at_point(coord2d const&) const
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "Raster Plugin: feature_at_point not supported for raster.input" << std::endl;
+#ifdef MAPNIK_LOG
+    if (log_enabled_) mapnik::log() << "raster_datasource: feature_at_point not supported";
 #endif
 
     return featureset_ptr();

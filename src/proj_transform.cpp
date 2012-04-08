@@ -133,7 +133,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         int i;
         for(i=0; i<point_count; i++) {
             x[i] = x[i] * MAXEXTENTby180;
-            y[i] = log(tan((90 + y[i]) * M_PIby360)) / D2R;
+            y[i] = std::log(tan((90 + y[i]) * M_PIby360)) / D2R;
             y[i] = y[i] * MAXEXTENTby180;
             if (x[i] > MAXEXTENT) x[i] = MAXEXTENT;
             if (x[i] < -MAXEXTENT) x[i] = -MAXEXTENT;

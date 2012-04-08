@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/sql_utils.hpp>
@@ -197,8 +198,8 @@ feature_ptr postgis_featureset::next()
 
                     default:
                     {
-#ifdef MAPNIK_DEBUG
-                        std::clog << "Postgis Plugin: uknown OID = " << oid << std::endl;
+#ifdef MAPNIK_LOG
+                        mapnik::log() << "postgis_featureset: Uknown type_oid=" << oid;
 #endif
                         break;
                     }

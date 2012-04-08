@@ -24,6 +24,7 @@
 #define MAPNIK_SVG_RENDERER_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
@@ -141,11 +142,13 @@ public:
         BOOST_FOREACH ( mapnik::stop_pair const& st, grad.get_stop_array() )
         {
             mapnik::color const& stop_color = st.second;
-            unsigned r= stop_color.red();
-            unsigned g= stop_color.green();
-            unsigned b= stop_color.blue();
-            unsigned a= stop_color.alpha();
-            //std::clog << "r: " << r << " g: " << g << " b: " << b << "a: " << a << "\n";
+            unsigned r = stop_color.red();
+            unsigned g = stop_color.green();
+            unsigned b = stop_color.blue();
+            unsigned a = stop_color.alpha();
+#ifdef MAPNIK_LOG
+            //mapnik::log() << "svg_renderer: r=" << r << ",g=" << g << ",b=" << b << ",a=" << a;
+#endif
             m_gradient_lut.add_color(st.first, agg::rgba8(r, g, b, int(a * opacity)));
         }
         m_gradient_lut.build_lut();

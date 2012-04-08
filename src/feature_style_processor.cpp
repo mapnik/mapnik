@@ -24,12 +24,12 @@
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/memory_datasource.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/scale_denominator.hpp>
-
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 
@@ -92,7 +92,6 @@ feature_style_processor<Processor>::feature_style_processor(Map const& m, double
 template <typename Processor>
 void feature_style_processor<Processor>::apply()
 {
-
 #if defined(RENDERING_STATS)
     std::clog << "\n//-- starting rendering timer...\n";
     mapnik::progress_timer t(std::clog, "total map rendering");
@@ -123,7 +122,9 @@ void feature_style_processor<Processor>::apply()
     }
     catch (proj_init_error& ex)
     {
-        std::clog << "proj_init_error:" << ex.what() << "\n";
+#ifdef MAPNIK_LOG
+        mapnik::log() << "feature_style_processor: proj_init_error=" << ex.what();
+#endif
     }
 
     p.end_map_processing(m_);
@@ -153,7 +154,9 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
     }
     catch (proj_init_error& ex)
     {
-        std::clog << "proj_init_error:" << ex.what() << "\n";
+#ifdef MAPNIK_LOG
+        mapnik::log() << "feature_style_processor: proj_init_error=" << ex.what();
+#endif
     }
     p.end_map_processing(m_);
 }
@@ -191,15 +194,20 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     std::vector<std::string> const& style_names = lay.styles();
 
     unsigned int num_styles = style_names.size();
-    if (!num_styles) {
-        std::clog << "WARNING: No style for layer '" << lay.name() << "'\n";
+    if (! num_styles)
+    {
+#ifdef MAPNIK_LOG
+        mapnik::log() << "feature_style_processor: No style for layer=" << lay.name();
+#endif
         return;
     }
 
     mapnik::datasource_ptr ds = lay.datasource();
-    if (!ds)
+    if (! ds)
     {
-        std::clog << "WARNING: No datasource for layer '" << lay.name() << "'\n";
+#ifdef MAPNIK_LOG
+        mapnik::log() << "feature_style_processor: No datasource for layer=" << lay.name();
+#endif
         return;
     }
 
@@ -249,9 +257,11 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         // forward project layer extent back into native projection
         if (!prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
         {
-            std::clog << "WARNING: layer " << lay.name()
-                      << " extent " << layer_ext << " in map projection "
-                      << " did not reproject properly back to layer projection\n";
+#ifdef MAPNIK_LOG
+            mapnik::log() << "feature_style_processor: Layer=" << lay.name()
+                          << " extent=" << layer_ext << " in map projection "
+                          << " did not reproject properly back to layer projection";
+#endif
         }
     }
     else
@@ -305,8 +315,10 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         boost::optional<feature_type_style const&> style=m_.find_style(style_name);
         if (!style)
         {
-            std::clog << "WARNING: style '" << style_name << "' required for layer '"
-                      << lay.name() << "' does not exist.\n";
+#ifdef MAPNIK_LOG
+            mapnik::log() << "feature_style_processor: Style=" << style_name << " required for layer="
+                          << lay.name() << " does not exist.";
+#endif
             continue;
         }
 

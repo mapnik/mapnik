@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
@@ -102,11 +103,10 @@ feature_ptr ogr_featureset::next()
         {
             ogr_converter::convert_geometry(geom, feature);
         }
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
         else
         {
-            std::clog << "OGR Plugin: feature with null geometry: "
-                      << (*feat)->GetFID() << std::endl;
+            mapnik::log() << "ogr_featureset: Feature with null geometry=" << (*feat)->GetFID();
         }
 #endif
         ++count_;
@@ -145,16 +145,16 @@ feature_ptr ogr_featureset::next()
             case OFTStringList:
             case OFTWideStringList: // deprecated !
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+#ifdef MAPNIK_LOG
+                mapnik::log() << "ogr_featureset: Unhandled type_oid=" << type_oid;
 #endif
                 break;
             }
 
             case OFTBinary:
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+#ifdef MAPNIK_LOG
+                mapnik::log() << "ogr_featureset: Unhandled type_oid=" << type_oid;
 #endif
                 //feature->put(name,feat->GetFieldAsBinary (i, size));
                 break;
@@ -164,16 +164,16 @@ feature_ptr ogr_featureset::next()
             case OFTTime:
             case OFTDateTime:       // unhandled !
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
+#ifdef MAPNIK_LOG
+                mapnik::log() << "ogr_featureset: Unhandled type_oid=" << type_oid;
 #endif
                 break;
             }
 
             default: // unknown
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
+#ifdef MAPNIK_LOG
+                mapnik::log() << "ogr_featureset: Unknown type_oid=" << type_oid;
 #endif
                 break;
             }
@@ -182,8 +182,9 @@ feature_ptr ogr_featureset::next()
         return feature;
     }
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "OGR Plugin: " << count_ << " features" << std::endl;
+#ifdef MAPNIK_LOG
+    mapnik::log() << "ogr_featureset: " << count_ << " features";
 #endif
+
     return feature_ptr();
 }

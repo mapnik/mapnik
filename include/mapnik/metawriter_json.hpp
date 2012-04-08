@@ -87,7 +87,7 @@ protected:
     bool pixel_coordinates_;
     virtual void write_header();
     inline void write_feature_header(std::string type) {
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
         if (count_ == STOPPED)
         {
             std::cerr << "WARNING: Metawriter not started before using it.\n";

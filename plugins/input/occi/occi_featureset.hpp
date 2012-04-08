@@ -35,6 +35,8 @@
 // oci
 #include "occi_types.hpp"
 
+#include <vector>
+
 class occi_featureset : public mapnik::Featureset
 {
 public:
@@ -44,6 +46,7 @@ public:
                     std::string const& sqlstring,
                     std::string const& encoding,
                     bool use_connection_pool,
+                    bool use_wkb,
                     unsigned prefetch_rows);
     virtual ~occi_featureset();
     mapnik::feature_ptr next();
@@ -70,6 +73,8 @@ private:
     const char* fidcolumn_;
     mutable int feature_id_;
     mapnik::context_ptr ctx_;
+    bool use_wkb_;
+    std::vector<char> buffer_;
 };
 
 #endif // OCCI_FEATURESET_HPP

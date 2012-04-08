@@ -53,14 +53,22 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         attr = {'City': u'New York, NY', 'geo_accuracy': u'house', 'Phone': u'(212) 334-0711', 'Address': u'19 Elizabeth Street', 'Precinct': u'5th Precinct', 'geo_longitude': -70, 'geo_latitude': 40}
         eq_(feat.attributes,attr)
         eq_(len(ds.all_features()),2)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_skipping_blank_rows(**kwargs):
         ds = get_csv_ds('blank_rows.csv')
         eq_(ds.fields(),['x','y','name'])
         eq_(ds.field_types(),['int','int','str'])
         eq_(len(ds.all_features()),2)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_empty_rows(**kwargs):
         ds = get_csv_ds('empty_rows.csv')
@@ -76,7 +84,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
             eq_(len(feat),10)
             eq_(feat['empty_column'],u'')
             feat = fs.next()
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_slashes(**kwargs):
         ds = get_csv_ds('has_attributes_with_slashes.csv')
@@ -85,7 +97,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(fs[0].attributes,{'x':0,'y':0,'name':u'a/a'})
         eq_(fs[1].attributes,{'x':1,'y':4,'name':u'b/b'})
         eq_(fs[2].attributes,{'x':10,'y':2.5,'name':u'c/c'})
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_wkt_field(**kwargs):
         ds = get_csv_ds('wkt.csv')
@@ -113,7 +129,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(fs[6].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
         eq_(len(fs[7].geometries()),2)
         eq_(fs[7].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Collection, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Collection)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_handling_of_missing_header(**kwargs):
         ds = get_csv_ds('missing_header.csv')
@@ -122,7 +142,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         fs = ds.featureset()
         feat = fs.next()
         eq_(feat['_4'],'missing')
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_handling_of_headers_that_are_numbers(**kwargs):
         ds = get_csv_ds('numbers_for_headers.csv')
@@ -148,7 +172,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(fs[2]['label'],"0,5")
         eq_(fs[3]['label'],"5,0")
         eq_(fs[4]['label'],"2.5,2.5")
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_windows_newlines(**kwargs):
         ds = get_csv_ds('windows_newlines.csv')
@@ -160,7 +188,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['x'],1)
         eq_(feat['y'],10)
         eq_(feat['z'],9999.9999)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_mac_newlines(**kwargs):
         ds = get_csv_ds('windows_newlines.csv')
@@ -172,7 +204,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['x'],1)
         eq_(feat['y'],10)
         eq_(feat['z'],9999.9999)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_tabs(**kwargs):
         ds = get_csv_ds('tabs_in_csv.csv')
@@ -183,7 +219,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['x'],-122)
         eq_(feat['y'],48)
         eq_(feat['z'],0)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_separator_pipes(**kwargs):
         ds = get_csv_ds('pipe_delimiters.csv')
@@ -194,7 +234,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['x'],0)
         eq_(feat['y'],0)
         eq_(feat['z'],'hello')
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_separator_semicolon(**kwargs):
         ds = get_csv_ds('semicolon_delimiters.csv')
@@ -205,7 +249,11 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['x'],0)
         eq_(feat['y'],0)
         eq_(feat['z'],'hello')
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
     def test_that_null_and_bool_keywords_are_empty_strings(**kwargs):
         ds = get_csv_ds('nulls_and_booleans_as_strings.csv')
@@ -223,7 +271,8 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['y'],0)
         eq_(feat['null'],'')
         eq_(feat['boolean'],'false')
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
@@ -237,7 +286,8 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
         fs = ds.features(query)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 
     def test_that_leading_zeros_mean_strings(**kwargs):
         ds = get_csv_ds('leading_zeros.csv')
@@ -257,7 +307,8 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feat['x'],0)
         eq_(feat['y'],0)
         eq_(feat['fips'],'005')
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'csv', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 
     def test_advanced_geometry_detection(**kwargs):
         ds = get_csv_ds('point_wkt.csv')

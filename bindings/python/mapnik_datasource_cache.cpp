@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #include <boost/python.hpp>
 #include <mapnik/datasource_cache.hpp>
 

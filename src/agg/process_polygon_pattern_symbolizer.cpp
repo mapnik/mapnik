@@ -22,6 +22,7 @@
 //$Id$
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
@@ -83,14 +84,18 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     }
     else
     {
-        std::clog << "### Warning: file not found: " << filename << "\n";
+#ifdef MAPNIK_LOG
+        mapnik::log() << "agg_renderer: File not found=" << filename;
+#endif
     }
 
     if (!marker) return;
 
     if (!(*marker)->is_bitmap())
     {
-        std::clog << "### Warning only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer\n";
+#ifdef MAPNIK_LOG
+        mapnik::log() << "agg_renderer: Only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer";
+#endif
         return;
     }
 

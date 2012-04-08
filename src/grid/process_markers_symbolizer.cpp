@@ -22,6 +22,7 @@
 //$Id$
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_pixfmt.hpp>
@@ -29,7 +30,6 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/markers_symbolizer.hpp>
-
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
@@ -108,7 +108,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 geometry_type & geom = feature->get_geometry(i);
                 if (geom.num_points() <= 1)
                 {
-                    std::clog << "### Warning svg markers not supported yet for points within markers_symbolizer\n";
+#ifdef MAPNIK_LOG
+                    mapnik::log() << "grid_renderer: markers_symbolizer points do not yet support SVG markers";
+#endif
                     continue;
                 }
 
