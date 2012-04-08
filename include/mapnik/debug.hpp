@@ -23,6 +23,12 @@
 #ifndef MAPNIK_DEBUG_HPP
 #define MAPNIK_DEBUG_HPP
 
+#ifdef MAPNIK_DEBUG
+#define MAPNIK_DEBUG_AS_BOOL true
+#else
+#define MAPNIK_DEBUG_AS_BOOL false
+#endif
+
 // mapnik (should not depend on anything else)
 #include <mapnik/config.hpp>
 
@@ -39,11 +45,7 @@
 #include <ostream>
 #include <fstream>
 
-#ifdef MAPNIK_DEBUG
-#define MAPNIK_DEBUG_AS_BOOL true
-#else
-#define MAPNIK_DEBUG_AS_BOOL false
-#endif
+#ifdef MAPNIK_LOG
 
 #ifndef MAPNIK_LOG_FORMAT
 #error Must run configure again to regenerate the correct log format string. See LOG_FORMAT_STRING scons option.
@@ -168,4 +170,6 @@ namespace mapnik {
 
 }
 
-#endif
+#endif // MAPNIK_LOG
+
+#endif // MAPNIK_DEBUG_HPP
