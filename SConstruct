@@ -325,7 +325,7 @@ opts.AddVariables(
     # Variables affecting rendering back-ends
     
     BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
-    
+
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
 
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
@@ -345,7 +345,12 @@ opts.AddVariables(
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
-    
+
+    # Variables for logging and statistics
+    BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
+    BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
+    ('LOG_FORMAT_STRING', 'The format string used before log output string, piped through strftime (max length of 255 characters)', 'Mapnik LOG> %Y-%m-%d %H:%M:%S:'),
+
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
@@ -1163,7 +1168,7 @@ if not preconfigured:
             env.Append(CXXFLAGS = '-DBOOST_REGEX_HAS_ICU')
         else:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
-    
+
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
     
     if len(env['REQUESTED_PLUGINS']):
@@ -1411,10 +1416,26 @@ if not preconfigured:
         # Common debugging flags.
         # http://lists.fedoraproject.org/pipermail/devel/2010-November/144952.html
         debug_flags  = '-g -fno-omit-frame-pointer -DDEBUG -DMAPNIK_DEBUG'
-        
         ndebug_flags = '-DNDEBUG'
-       
-        
+
+        # Enable logging in debug mode (always) and release mode (when specified)
+        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_LOG_FORMAT="%s"' % env['LOG_FORMAT_STRING']
+
+        if env['DEBUG']:
+            debug_flags += log_enabled
+        else:
+            if env['ENABLE_LOG']:
+                ndebug_flags += log_enabled
+
+        # Enable statistics reporting
+        if env['ENABLE_STATS']:
+            debug_flags += ' -DMAPNIK_STATS'
+            ndebug_flags += ' -DMAPNIK_STATS'
+
+        # Add rdynamic to allow using statics between application and plugins
+        # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
+        env.MergeFlags('-rdynamic')
+
         # Customizing the C++ compiler flags depending on: 
         #  (1) the C++ compiler used; and
         #  (2) whether debug binaries are requested.

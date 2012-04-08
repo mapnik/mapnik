@@ -20,8 +20,9 @@
  *
  *****************************************************************************/
 
-// mapnik
-#include <mapnik/geom_util.hpp>
+#include "shape_datasource.hpp"
+#include "shape_featureset.hpp"
+#include "shape_index_featureset.hpp"
 
 // boost
 #include <boost/version.hpp>
@@ -30,14 +31,19 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
+// mapnik
+#include <mapnik/debug.hpp>
+#include <mapnik/global.hpp>
+#include <mapnik/boolean.hpp>
+#include <mapnik/sql_utils.hpp>
+#include <mapnik/util/conversions.hpp>
+#include <mapnik/geom_util.hpp>
+#include <mapnik/timer.hpp>
+
 // stl
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-
-#include "shape_datasource.hpp"
-#include "shape_featureset.hpp"
-#include "shape_index_featureset.hpp"
 
 DATASOURCE_PLUGIN(shape_datasource)
 
@@ -57,6 +63,8 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
       row_limit_(*params_.get<int>("row_limit",0)),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
+    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
+
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("Shape Plugin: missing <file> parameter");
 
@@ -78,6 +86,10 @@ void shape_datasource::bind() const
 {
     if (is_bound_) return;
 
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "shape_datasource::bind");
+#endif
+
     if (!boost::filesystem::exists(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
@@ -96,6 +108,10 @@ void shape_datasource::bind() const
 
     try
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats2__(std::clog, "shape_datasource::bind(get_column_description)");
+#endif
+
         boost::shared_ptr<shape_io> shape_ref = boost::make_shared<shape_io>(shape_name_);
         init(*shape_ref);
         for (int i=0;i<shape_ref->dbf().num_fields();++i)
@@ -126,11 +142,11 @@ void shape_datasource::bind() const
                 break;
             }
             default:
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
                 // I - long
                 // G - ole
                 // + - autoincrement
-                std::clog << "Shape Plugin: unknown type " << fd.type_ << std::endl;
+                if (log_enabled_) mapnik::log() << "shape_datasource: Unknown type=" << fd.type_;
 #endif
                 break;
             }
@@ -143,17 +159,17 @@ void shape_datasource::bind() const
     }
     catch (const datasource_exception& ex)
     {
-        std::clog << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
+        std::cerr << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
         throw;
     }
     catch (const std::exception& ex)
     {
-        std::clog << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
+        std::cerr << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
         throw;
     }
     catch (...) // exception: pipe_select_interrupter: Too many open files
     {
-        std::clog << "Shape Plugin: error processing field attributes" << std::endl;
+        std::cerr << "Shape Plugin: error processing field attributes" << std::endl;
         throw;
     }
 
@@ -162,8 +178,12 @@ void shape_datasource::bind() const
 
 shape_datasource::~shape_datasource() {}
 
-void  shape_datasource::init(shape_io& shape) const
+void shape_datasource::init(shape_io& shape) const
 {
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "shape_datasource::init");
+#endif
+
     //first read header from *.shp
     int file_code=shape.shp().read_xdr_integer();
     if (file_code!=9994)
@@ -188,14 +208,17 @@ void  shape_datasource::init(shape_io& shape) const
 
     shape.shp().read_envelope(extent_);
 
-#ifdef MAPNIK_DEBUG
-    double zmin = shape.shp().read_double();
-    double zmax = shape.shp().read_double();
-    double mmin = shape.shp().read_double();
-    double mmax = shape.shp().read_double();
+#ifdef MAPNIK_LOG
+    if (log_enabled_)
+    {
+        double zmin = shape.shp().read_double();
+        double zmax = shape.shp().read_double();
+        double mmin = shape.shp().read_double();
+        double mmax = shape.shp().read_double();
 
-    std::clog << "Shape Plugin: Z min/max " << zmin << "," << zmax << std::endl;
-    std::clog << "Shape Plugin: M min/max " << mmin << "," << mmax << "\n";
+        mapnik::log() << "shape_datasource: Z min/max=" << zmin << "," << zmax;
+        mapnik::log() << "shape_datasource: M min/max=" << mmin << "," << mmax;
+    }
 #else
     shape.shp().skip(4*8);
 #endif
@@ -213,13 +236,19 @@ void  shape_datasource::init(shape_io& shape) const
     //}
     //else
     //{
-    //    std::clog << "### Notice: no .index file found for " + shape_name_ + ".shp, use the 'shapeindex' program to build an index for faster rendering\n";
+    // #ifdef MAPNIK_LOG
+    //    mapnik::log() << "shape_datasource: No .index file found for "
+    //                  << shape_name_ << ".shp, use the 'shapeindex' program to build an index for faster rendering";
+    // #endif
     //}
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Shape Plugin: extent=" << extent_ << std::endl;
-    std::clog << "Shape Plugin: file_length=" << file_length_ << std::endl;
-    std::clog << "Shape Plugin: shape_type=" << shape_type_ << std::endl;
+#ifdef MAPNIK_LOG
+    if (log_enabled_)
+    {
+        mapnik::log() << "shape_datasource: Extent=" << extent_;
+        mapnik::log() << "shape_datasource: File length=" << file_length_;
+        mapnik::log() << "shape_datasource: Shape type=" << shape_type_;
+    }
 #endif
 
 }
@@ -243,6 +272,10 @@ layer_descriptor shape_datasource::get_descriptor() const
 featureset_ptr shape_datasource::features(const query& q) const
 {
     if (!is_bound_) bind();
+
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "shape_datasource::features");
+#endif
 
     filter_in_box filter(q.get_bbox());
     if (indexed_)
@@ -271,6 +304,10 @@ featureset_ptr shape_datasource::features(const query& q) const
 featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
 {
     if (!is_bound_) bind();
+
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "shape_datasource::features_at_point");
+#endif
 
     filter_at_point filter(pt);
     // collect all attribute names
@@ -317,6 +354,10 @@ box2d<double> shape_datasource::envelope() const
 
 boost::optional<mapnik::datasource::geometry_t> shape_datasource::get_geometry_type() const
 {
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "shape_datasource::get_geometry_type");
+#endif
+
     boost::optional<mapnik::datasource::geometry_t> result;
     switch (shape_type_)
     {

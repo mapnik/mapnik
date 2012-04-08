@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id: memory.cpp 17 2005-03-08 23:58:43Z pavlenko $
-
 #include <mapnik/memory.hpp>
 
 namespace mapnik
@@ -48,7 +46,7 @@ void Object::operator delete(void* p)
 
 void Object::operator delete(void* , MemoryManager* )
 {
-    //std::clog <<"operator delete with Manager "<<std::hex<<p<<" "<<manager<<std::endl;
+    //std::cerr << "operator delete with Manager " << std::hex << p << " " << manager << std::endl;
 }
 
 inline size_t MemoryUtils::alignPointerSize(size_t ptrSize)

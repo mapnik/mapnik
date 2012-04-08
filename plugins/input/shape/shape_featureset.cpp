@@ -24,6 +24,7 @@
 #include <iostream>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/feature_factory.hpp>
 
 #include "shape_featureset.hpp"
@@ -145,8 +146,8 @@ feature_ptr shape_featureset<filterT>::next()
                 }
                 else
                 {
-#ifdef MAPNIK_DEBUG
-                    std::clog << "Shape Plugin: total shapes read=" << count_ << std::endl;
+#ifdef MAPNIK_LOG
+                    mapnik::log() << "shape_featureset: Total shapes read=" << count_;
 #endif
                     return feature_ptr();
                 }
@@ -247,7 +248,7 @@ feature_ptr shape_featureset<filterT>::next()
             }
             catch (...)
             {
-                std::clog << "Shape Plugin: error processing attributes " << std::endl;
+                std::cerr << "Shape Plugin: error processing attributes " << std::endl;
             }
         }
 
@@ -255,8 +256,8 @@ feature_ptr shape_featureset<filterT>::next()
     }
     else
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "Shape Plugin: total shapes read=" << count_ << std::endl;
+#ifdef MAPNIK_LOG
+        mapnik::log() << "shape_featureset: Total shapes read=" << count_;
 #endif
         return feature_ptr();
     }

@@ -1,3 +1,25 @@
+/*****************************************************************************
+ *
+ * This file is part of Mapnik (c++ mapping toolkit)
+ *
+ * Copyright (C) 2011 Artem Pavlenko
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *****************************************************************************/
+
 #ifndef MAPNIK_CSV_DATASOURCE_HPP
 #define MAPNIK_CSV_DATASOURCE_HPP
 
@@ -20,11 +42,13 @@ public:
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
     void bind() const;
+
     template <typename T>
     void parse_csv(T& stream,
                    std::string const& escape,
                    std::string const& separator,
                    std::string const& quote) const;
+
 private:
     mutable mapnik::layer_descriptor desc_;
     mutable mapnik::box2d<double> extent_;
@@ -43,6 +67,5 @@ private:
     mutable double filesize_max_;
     mutable mapnik::context_ptr ctx_;
 };
-
 
 #endif // MAPNIK_CSV_DATASOURCE_HPP

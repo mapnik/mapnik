@@ -120,8 +120,9 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
 
     optional<std::string> name_ = sym.get_opt_attr<std::string>("name");
-    if (name_) {
-        std::clog << "### WARNING: Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!\n";
+    if (name_)
+    {
+        std::cerr << "### WARNING: Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!\n";
         set_old_style_expression(parse_expression(*name_, "utf8"));
     }
 

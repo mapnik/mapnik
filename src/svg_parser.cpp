@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
+#include <mapnik/debug.hpp>
 #include <mapnik/color_factory.hpp>
-
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/config_error.hpp>
@@ -226,10 +226,10 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     {
         parse_gradient_stop(reader);
     }
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
     else if (!xmlStrEqual(name, BAD_CAST "svg"))
     {
-        std::clog << "notice: unhandled svg element: " << name << "\n";
+        mapnik::log() << "svg_parser: Unhandled svg element=" << name;
     }
 #endif
 }

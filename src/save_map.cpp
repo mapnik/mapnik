@@ -207,7 +207,6 @@ public:
         // repeating the default values here.
         // maybe add a real, explicit default-ctor?
 
-
         shield_symbolizer dfl;
 
         if (sym.get_unlock_image() != dfl.get_unlock_image() || explicit_defaults_)

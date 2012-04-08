@@ -19,10 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
+
 // boost
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
+
 // stl
 #include <sstream>
 #include <vector>
@@ -89,6 +90,7 @@ boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
     description["name"] = ld.get_name();
     description["geometry_type"] = ds->get_geometry_type();
     description["encoding"] = ld.get_encoding();
+    description["log"] = ds->log_enabled();
     return description;
 }
 

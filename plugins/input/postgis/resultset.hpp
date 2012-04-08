@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef RESULTSET_HPP
-#define RESULTSET_HPP
+#ifndef POSTGIS_RESULTSET_HPP
+#define POSTGIS_RESULTSET_HPP
 
 extern "C" {
 #include "libpq-fe.h"
@@ -187,4 +187,4 @@ private:
     int *refCount_;
 };
 
-#endif //RESULTSET_HPP
+#endif // POSTGIS_RESULTSET_HPP
