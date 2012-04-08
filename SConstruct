@@ -1432,7 +1432,8 @@ if not preconfigured:
 
         # Add rdynamic to allow using statics between application and plugins
         # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
-        env.MergeFlags('-rdynamic')
+        if env['PLATFORM'] != 'Darwin':
+            env.MergeFlags('-rdynamic')
 
         # Customizing the C++ compiler flags depending on: 
         #  (1) the C++ compiler used; and
