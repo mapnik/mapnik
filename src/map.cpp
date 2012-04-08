@@ -28,6 +28,7 @@
 #include <mapnik/filter_featureset.hpp>
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/scale_denominator.hpp>
+#include <mapnik/config_error.hpp>
 #include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
 
 // boost
@@ -444,7 +445,7 @@ void Map::zoom_all()
         }
         catch (proj_init_error & ex)
         {
-            mapnik::log() << "map: proj_init_error=" << ex.what();
+            throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
         }
     }
 }
