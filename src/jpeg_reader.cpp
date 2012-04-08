@@ -39,10 +39,6 @@ extern "C"
 // std
 #include <cstdio>
 
-#ifdef MAPNIK_DEBUG
-#include <iostream>
-#endif
-
 namespace mapnik
 {
 class JpegReader : public image_reader, boost::noncopyable

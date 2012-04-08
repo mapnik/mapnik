@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id: postgis.hpp 44 2005-04-22 18:53:54Z pavlenko $
-
 #ifndef POSTGIS_DATASOURCE_HPP
 #define POSTGIS_DATASOURCE_HPP
 
@@ -67,12 +65,11 @@ private:
     std::string populate_tokens(const std::string& sql) const;
     static std::string unquote(const std::string& sql);
     boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, std::string const& sql) const;
-    postgis_datasource(const postgis_datasource&);
-    postgis_datasource& operator=(const postgis_datasource&);
 
     static const std::string GEOMETRY_COLUMNS;
     static const std::string SPATIAL_REF_SYS;
     static const double FMAX;
+
     const std::string uri_;
     const std::string username_;
     const std::string password_;
@@ -100,4 +97,4 @@ private:
     //bool show_queries_;
 };
 
-#endif //POSTGIS_DATASOURCE_HPP
+#endif // POSTGIS_DATASOURCE_HPP

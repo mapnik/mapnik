@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: wkb.cpp 19 2005-03-22 13:53:27Z pavlenko $
-
+// mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/geom_util.hpp>
@@ -30,6 +30,8 @@
 // boost
 #include <boost/utility.hpp>
 #include <boost/format.hpp>
+
+// #define MAPNIK_DEBUG_WKB
 
 namespace mapnik
 {
@@ -93,18 +95,12 @@ public:
         case wkbSpatiaLite:
             byteOrder_ = (wkbByteOrder) wkb_[1];
             pos_ = 39;
-#ifdef MAPNIK_DEBUG_WKB
-            std::clog << "wkb_reader: format is wkbSpatiaLite" << std::endl;
-#endif
             break;
 
         case wkbGeneric:
         default:
             byteOrder_ = (wkbByteOrder) wkb_[0];
             pos_ = 1;
-#ifdef MAPNIK_DEBUG_WKB
-            std::clog << "wkb_reader: format is wkbGeneric" << std::endl;
-#endif
             break;
         }
 
@@ -119,8 +115,8 @@ public:
     {
         int type = read_integer();
 
-#ifdef MAPNIK_DEBUG_WKB
-        std::clog << "wkb_reader: read " << wkb_geometry_type_string(type) << " " << type << std::endl;
+#if defined(MAPNIK_LOG) && defined(MAPNIK_DEBUG_WKB)
+        mapnik::log() << "wkb_reader: Read=" << wkb_geometry_type_string(type) << "," << type;
 #endif
 
         switch (type)
@@ -409,7 +405,7 @@ private:
         }
     }
 
-#ifdef MAPNIK_DEBUG_WKB
+#if defined(MAPNIK_LOG) && defined(MAPNIK_DEBUG_WKB)
     std::string wkb_geometry_type_string(int type)
     {
         std::stringstream s;

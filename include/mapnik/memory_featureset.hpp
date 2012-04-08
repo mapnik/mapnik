@@ -24,6 +24,7 @@
 #define MAPNIK_MEMORY_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/memory_datasource.hpp>
 
 // boost
@@ -52,10 +53,11 @@ public:
     {
         while (pos_ != end_)
         {
-            for  (unsigned i=0; i<(*pos_)->num_geometries();++i) {
+            for  (unsigned i=0; i<(*pos_)->num_geometries();++i)
+            {
                 geometry_type & geom = (*pos_)->get_geometry(i);
-#ifdef MAPNIK_DEBUG
-                std::clog << "bbox_=" << bbox_ << ", geom.envelope=" << geom.envelope() << "\n";
+#ifdef MAPNIK_LOG
+                mapnik::log() << "memory_featureset: BBox=" << bbox_ << ",Envelope=" << geom.envelope();
 #endif
                 if (bbox_.intersects(geom.envelope()))
                 {

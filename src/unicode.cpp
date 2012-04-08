@@ -27,10 +27,6 @@
 
 #include <string>
 
-#ifdef MAPNIK_DEBUG
-#include <iostream>
-#endif
-
 namespace mapnik {
 
 transcoder::transcoder (std::string const& encoding)

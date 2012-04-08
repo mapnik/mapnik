@@ -22,6 +22,7 @@
 //$Id$
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_pattern_source.hpp>
@@ -69,7 +70,9 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (!(*mark)->is_bitmap())
     {
-        std::clog << "### Warning only images (not '" << filename << "') are supported in the line_pattern_symbolizer\n";
+#ifdef MAPNIK_LOG
+        mapnik::log() << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
+#endif
         return;
     }
 

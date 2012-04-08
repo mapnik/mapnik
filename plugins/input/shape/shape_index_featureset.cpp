@@ -24,6 +24,7 @@
 #include <fstream>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // boost
@@ -66,8 +67,8 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
 
     std::sort(ids_.begin(), ids_.end());
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Shape Plugin: query size=" << ids_.size() << std::endl;
+#ifdef MAPNIK_LOG
+    mapnik::log() << "shape_index_featureset: Query size=" << ids_.size();
 #endif
 
     itr_ = ids_.begin();
@@ -202,8 +203,8 @@ feature_ptr shape_index_featureset<filterT>::next()
     else
     {
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Shape Plugin: " << count_ << " features" << std::endl;
+#ifdef MAPNIK_LOG
+        mapnik::log() << "shape_index_featureset: " << count_ << " features";
 #endif
         return feature_ptr();
     }

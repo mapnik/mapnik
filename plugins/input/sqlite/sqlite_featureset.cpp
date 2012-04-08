@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
@@ -124,9 +125,8 @@ feature_ptr sqlite_featureset::next()
                 break;
 
             default:
-#ifdef MAPNIK_DEBUG
-                std::clog << "Sqlite Plugin: field " << fld_name_str
-                          << " unhandled type_oid=" << type_oid << std::endl;
+#ifdef MAPNIK_LOG
+                mapnik::log() << "sqlite_featureset: Field=" << fld_name_str << " unhandled type_oid=" << type_oid;
 #endif
                 break;
             }

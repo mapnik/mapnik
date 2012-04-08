@@ -26,6 +26,9 @@
 #include "raster_datasource.hpp"
 #include "raster_info.hpp"
 
+// mapnik
+#include <mapnik/debug.hpp>
+
 // stl
 #include <vector>
 
@@ -137,8 +140,8 @@ public:
         double pixel_x = extent.width() / double(width);
         double pixel_y = extent.height() / double(height);
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Raster Plugin: PIXEL SIZE("<< pixel_x << "," << pixel_y << ")" << std::endl;
+#ifdef MAPNIK_LOG
+        mapnik::log() << "tiled_file_policy: Raster Plugin PIXEL SIZE("<< pixel_x << "," << pixel_y << ")";
 #endif
 
         box2d<double> e = bbox.intersect(extent);
@@ -160,8 +163,9 @@ public:
                 }
             }
         }
-#ifdef MAPNIK_DEBUG
-        std::clog << "Raster Plugin: INFO SIZE=" << infos_.size() << " " << file << std::endl;
+
+#ifdef MAPNIK_LOG
+        mapnik::log() << "tiled_file_policy: Raster Plugin INFO SIZE=" << infos_.size() << " " << file;
 #endif
     }
 
@@ -223,8 +227,8 @@ public:
         double pixel_x = extent.width() / double(width);
         double pixel_y = extent.height() / double(height);
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Raster Plugin: PIXEL SIZE("<< pixel_x << "," << pixel_y << ")" << std::endl;
+#ifdef MAPNIK_LOG
+        mapnik::log() << "tiled_multi_file_policy: Raster Plugin PIXEL SIZE(" << pixel_x << "," << pixel_y << ")";
 #endif
 
         // intersection of query with extent => new query
@@ -256,8 +260,9 @@ public:
                 }
             }
         }
-#ifdef MAPNIK_DEBUG
-        std::clog << "Raster Plugin: INFO SIZE=" << infos_.size() << " " << file_pattern << std::endl;
+
+#ifdef MAPNIK_LOG
+        mapnik::log() << "tiled_multi_file_policy: Raster Plugin INFO SIZE=" << infos_.size() << " " << file_pattern;
 #endif
     }
 

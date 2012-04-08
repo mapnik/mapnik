@@ -46,7 +46,8 @@ public:
     void bind() const;
 
 private:
-    inline void* open_dataset() const;
+    void* open_dataset() const;
+
     mutable mapnik::box2d<double> extent_;
     std::string dataset_name_;
     std::string table_name_;

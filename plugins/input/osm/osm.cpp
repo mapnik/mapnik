@@ -24,6 +24,8 @@
 #include "osmparser.h"
 #include "basiccurl.h"
 
+#include <mapnik/debug.hpp>
+
 #include <libxml/parser.h>
 #include <iostream>
 #include <fstream>
@@ -47,8 +49,8 @@ bool osm_dataset::load_from_url(const std::string& url,
 {
     if (parser == "libxml2")
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "Osm Plugin: osm_dataset::load_from_url url=" << url << " bbox=" << bbox << std::endl;
+#ifdef MAPNIK_LOG
+        mapnik::log() << "osm_dataset: load_from_url url=" << url << ",bbox=" << bbox;
 #endif
 
         std::ostringstream str;
@@ -57,8 +59,8 @@ bool osm_dataset::load_from_url(const std::string& url,
 
         str << url << "?bbox=" << bbox;
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Osm Plugin: FULL URL " << str.str() << std::endl;
+#ifdef MAPNIK_LOG
+        mapnik::log() << "osm_dataset: Full url=" << str.str();
 #endif
 
         CURL_LOAD_DATA* resp = grab_http_response(str.str().c_str());
@@ -69,8 +71,8 @@ bool osm_dataset::load_from_url(const std::string& url,
             memcpy(blx, resp->data, resp->nbytes);
             blx[resp->nbytes] = '\0';
 
-#ifdef MAPNIK_DEBUG
-            std::clog << "Osm Plugin: CURL RESPONSE: " << blx << std::endl;
+#ifdef MAPNIK_LOG
+            mapnik::log() << "osm_dataset: CURL Response=" << blx;
 #endif
 
             delete[] blx;
@@ -88,36 +90,32 @@ osm_dataset::~osm_dataset()
 
 void osm_dataset::clear()
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "Osm Plugin: osm_dataset::clear()" << std::endl;
-    std::clog << "Osm Plugin: deleting ways" << std::endl;
+#ifdef MAPNIK_LOG
+    mapnik::log() << "osm_dataset: Clear";
 #endif
 
+#ifdef MAPNIK_LOG
+    mapnik::log() << "osm_dataset: -- Deleting ways";
+#endif
     for (unsigned int count = 0; count < ways.size(); ++count)
     {
         delete ways[count];
         ways[count] = NULL;
     }
+    ways.clear();
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Osm Plugin: deleting nodes" << std::endl;
+#ifdef MAPNIK_LOG
+    mapnik::log() << "osm_dataset: -- Deleting nodes";
 #endif
-
     for (unsigned int count = 0; count < nodes.size(); ++count)
     {
         delete nodes[count];
         nodes[count] = NULL;
     }
-
-#ifdef MAPNIK_DEBUG
-    std::clog << "Osm Plugin: clearing ways/nodes" << std::endl;
-#endif
-
-    ways.clear();
     nodes.clear();
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Osm Plugin: done" << std::endl;
+#ifdef MAPNIK_LOG
+    mapnik::log() << "osm_dataset: Clear done";
 #endif
 }
 

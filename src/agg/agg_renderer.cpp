@@ -76,7 +76,7 @@
 #include <boost/math/special_functions/round.hpp>
 
 // stl
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
 #include <iostream>
 #endif
 
@@ -174,8 +174,9 @@ void agg_renderer<T>::setup(Map const &m)
             }
         }
     }
-#ifdef MAPNIK_DEBUG
-    std::clog << "scale=" << m.scale() << "\n";
+
+#ifdef MAPNIK_LOG
+    mapnik::log() << "agg_renderer: Scale=" << m.scale();
 #endif
 }
 
@@ -185,9 +186,8 @@ agg_renderer<T>::~agg_renderer() {}
 template <typename T>
 void agg_renderer<T>::start_map_processing(Map const& map)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start map processing bbox="
-              << map.get_current_extent() << "\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "agg_renderer: Start map processing bbox=" << map.get_current_extent();
 #endif
     ras_ptr->clip_box(0,0,width_,height_);
 }
@@ -195,18 +195,18 @@ void agg_renderer<T>::start_map_processing(Map const& map)
 template <typename T>
 void agg_renderer<T>::end_map_processing(Map const& )
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "end map processing\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "agg_renderer: End map processing";
 #endif
 }
 
 template <typename T>
 void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start layer processing : " << lay.name()  << "\n";
-    std::clog << "datasource = " << lay.datasource().get() << "\n";
-    std::clog << "query_extent = " << query_extent << "\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "agg_renderer: Start processing layer=" << lay.name();
+    mapnik::log() << "agg_renderer: -- datasource=" << lay.datasource().get();
+    mapnik::log() << "agg_renderer: -- query_extent=" << query_extent;
 #endif
     if (lay.clear_label_cache())
     {
@@ -218,8 +218,8 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
 template <typename T>
 void agg_renderer<T>::end_layer_processing(layer const&)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "end layer processing\n";
+#ifdef MAPNIK_LOG
+    mapnik::log() << "agg_renderer: End layer processing";
 #endif
 }
 
@@ -258,8 +258,6 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
                                                    (*marker.get_vector_data())->attributes());
 
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
-
-
     }
     else
     {
