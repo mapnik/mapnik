@@ -21,6 +21,8 @@
  *****************************************************************************/
 //$Id$
 
+// boost
+#include <boost/foreach.hpp>
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_helpers.hpp>
@@ -142,9 +144,8 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     converter.set<transform_tag>(); //always transform 
     //if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    for (unsigned i=0;i<num_geometries;++i)
+    BOOST_FOREACH( geometry_type & geom, feature->paths())
     {
-        geometry_type & geom = feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
             converter.apply(geom);        

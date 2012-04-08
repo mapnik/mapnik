@@ -21,6 +21,8 @@
  *****************************************************************************/
 //$Id$
 
+// boost
+#include <boost/foreach.hpp>
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_helpers.hpp>
@@ -116,16 +118,14 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         if (stroke_.has_dash()) converter.set<dash_tag>();        
         converter.set<stroke_tag>(); //always stroke
         
-        for (unsigned i=0;i<feature->num_geometries();++i)
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
         {
-            geometry_type & geom = feature->get_geometry(i);
             if (geom.num_points() > 1)
             {
                 converter.apply(geom);                
             }
         }
         
- 
         agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
 
         if (sym.comp_op() == clear)
