@@ -68,8 +68,8 @@ lib_env['LIBS'].append('xml2')
 
 if env['THREADING'] == 'multi':
     lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
-        
-    
+
+
 if env['RUNTIME_LINK'] == 'static':
     if 'icuuc' in env['ICU_LIB_NAME']:
         lib_env['LIBS'].append('icudata')
@@ -79,7 +79,7 @@ else:
           lib_env['LIBS'].insert(0, 'agg')
     else:
         lib_env['LIBS'].append([lib for lib in env['LIBS'] if lib.startswith('agg')])
-    
+
 
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = 'libmapnik.dylib'
@@ -110,11 +110,12 @@ source = Split(
     box2d.cpp
     building_symbolizer.cpp
     datasource_cache.cpp
+    debug.cpp
     deepcopy.cpp
     expression_string.cpp
     expression.cpp
     feature_kv_iterator.cpp
-    feature_type_style.cpp 
+    feature_type_style.cpp
     font_engine_freetype.cpp
     font_set.cpp
     gamma_method.cpp
@@ -161,7 +162,7 @@ source = Split(
     marker_cache.cpp
     svg_parser.cpp
     svg_path_parser.cpp
-    svg_points_parser.cpp 
+    svg_points_parser.cpp
     svg_transform_parser.cpp
     warp.cpp
     json/feature_collection_parser.cpp
@@ -182,7 +183,7 @@ source = Split(
     text_properties.cpp
     xml_tree.cpp
     config_error.cpp
-    """   
+    """
     )
 
 if env['HAS_CAIRO']:
@@ -237,7 +238,7 @@ if env['JPEG']:
         """
         jpeg_reader.cpp
         """)
-        
+
 # agg backend
 source += Split(
     """
@@ -252,7 +253,7 @@ source += Split(
     agg/process_raster_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
-    """ 
+    """
     )
 
 if env['RUNTIME_LINK'] == "static":
@@ -271,14 +272,14 @@ source += Split(
     grid/process_polygon_symbolizer.cpp
     grid/process_raster_symbolizer.cpp
     grid/process_shield_symbolizer.cpp
-    grid/process_text_symbolizer.cpp	
+    grid/process_text_symbolizer.cpp
     """)
 
 if env['SVG_RENDERER']: # svg backend
     source += Split(
               """
       	svg/svg_renderer.cpp
-      	svg/svg_generator.cpp	
+      	svg/svg_generator.cpp
       	svg/svg_output_attributes.cpp
       	svg/process_symbolizers.cpp
       	svg/process_building_symbolizer.cpp
@@ -290,7 +291,7 @@ if env['SVG_RENDERER']: # svg backend
       	svg/process_polygon_symbolizer.cpp
       	svg/process_raster_symbolizer.cpp
       	svg/process_shield_symbolizer.cpp
-      	svg/process_text_symbolizer.cpp	
+      	svg/process_text_symbolizer.cpp
       	""")
     lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
     libmapnik_cxxflags.append('-DSVG_RENDERER')
@@ -343,17 +344,17 @@ if env['PLATFORM'] != 'Darwin':
         os.symlink(os.path.basename(src), trgt)
 
     major, minor, micro = ABI_VERSION
-    
+
     soFile = "%s.%d.%d.%d" % (os.path.basename(str(mapnik[0])), int(major), int(minor), int(micro))
     target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], soFile)
-    
+
     if 'uninstall' not in COMMAND_LINE_TARGETS:
       result = env.InstallAs(target=target, source=mapnik)
       env.Alias(target='install', source=result)
       if result:
             env.AddPostAction(result, ldconfig)
 
-    
+
     # Install symlinks
     target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % (os.path.basename(str(mapnik[0])),int(major), int(minor)))
     target2 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], os.path.basename(str(mapnik[0])))

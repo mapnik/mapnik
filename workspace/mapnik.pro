@@ -251,6 +251,7 @@ SOURCES += \
     ../src/config_error.cpp \
     ../src/conversions.cpp \
     ../src/datasource_cache.cpp \
+    ../src/debug.cpp \
     ../src/deepcopy.cpp \
     ../src/distance.cpp \
     ../src/expression.cpp \

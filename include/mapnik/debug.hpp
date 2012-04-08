@@ -23,8 +23,8 @@
 #ifndef MAPNIK_DEBUG_HPP
 #define MAPNIK_DEBUG_HPP
 
-// mapnik
-#include <mapnik/global.hpp>
+// mapnik (should not depend on anything else)
+#include <mapnik/config.hpp>
 
 // boost
 #ifdef MAPNIK_THREADSAFE
@@ -53,6 +53,31 @@ namespace mapnik {
 
     namespace logger {
 
+        class severity
+        {
+        public:
+            enum type
+            {
+                info,
+                debug,
+                warn,
+                error,
+                fatal,
+                none
+            };
+
+            static type get() {
+                return severity_level_;
+            }
+            static void set(const type& severity_level) {
+                severity_level_ = severity_level;
+            }
+
+        private:
+            static type severity_level_;
+        };
+
+
 #define __xstr__(s) __str__(s)
 #define __str__(s) #s
 
@@ -66,6 +91,7 @@ namespace mapnik {
 #undef __xstr__
 #undef __str__
 
+
         template<class Ch, class Tr, class A>
         class no_output {
         private:
@@ -77,11 +103,11 @@ namespace mapnik {
             };
         public:
             typedef null_buffer stream_buffer;
-
         public:
             void operator()(const stream_buffer &) {
             }
         };
+
 
         template<class Ch, class Tr, class A>
         class output_to_clog {
@@ -97,7 +123,9 @@ namespace mapnik {
             }
         };
 
+
         template<template <class Ch, class Tr, class A> class OutputPolicy,
+                 severity::type Severity,
                  class Ch = char,
                  class Tr = std::char_traits<Ch>,
                  class A = std::allocator<Ch> >
@@ -105,7 +133,8 @@ namespace mapnik {
             typedef OutputPolicy<Ch, Tr, A> output_policy;
         public:
             ~base_log() {
-                output_policy()(streambuf_);
+                if (Severity >= severity::get())
+                    output_policy()(streambuf_);
             }
         public:
             template<class T>
@@ -118,9 +147,24 @@ namespace mapnik {
         };
     }
 
-    class log : public logger::base_log<logger::output_to_clog>
-    {
-    };
+
+    class MAPNIK_DECL log : public logger::base_log<logger::output_to_clog,
+            logger::severity::debug> {};
+
+    class MAPNIK_DECL info : public logger::base_log<logger::output_to_clog,
+            logger::severity::info> {};
+
+    class MAPNIK_DECL debug : public logger::base_log<logger::output_to_clog,
+            logger::severity::debug> {};
+
+    class MAPNIK_DECL warn : public logger::base_log<logger::output_to_clog,
+            logger::severity::warn> {};
+
+    class MAPNIK_DECL error : public logger::base_log<logger::output_to_clog,
+            logger::severity::error> {};
+
+    class MAPNIK_DECL fatal : public logger::base_log<logger::output_to_clog,
+            logger::severity::fatal> {};
 
 }
 
