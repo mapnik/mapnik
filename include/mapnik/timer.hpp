@@ -30,11 +30,12 @@
 #include <iomanip>
 #include <ctime>
 
-#ifndef WIN32
+#ifdef _WINDOWS
+#define NOMINMAX
+#include <windows.h>
+#else
 #include <sys/time.h> // for gettimeofday() on unix
 #include <sys/resource.h>
-#else
-#include <windows.h>
 #endif
 
 
@@ -44,16 +45,16 @@ namespace mapnik {
 // Try to return the time now
 inline double time_now()
 {
-#ifndef WIN32
-    struct timeval t;
-    struct timezone tzp;
-    gettimeofday(&t, &tzp);
-    return t.tv_sec + t.tv_usec * 1e-6;
-#else
+#ifdef _WINDOWS
     LARGE_INTEGER t, f;
     QueryPerformanceCounter(&t);
     QueryPerformanceFrequency(&f);
     return double(t.QuadPart) / double(f.QuadPart);
+#else
+    struct timeval t;
+    struct timezone tzp;
+    gettimeofday(&t, &tzp);
+    return t.tv_sec + t.tv_usec * 1e-6;
 #endif
 }
 
