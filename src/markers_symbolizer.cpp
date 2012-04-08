@@ -20,8 +20,7 @@
  *
  *****************************************************************************/
 
-//$Id$
-
+// mapnik
 #include <mapnik/markers_symbolizer.hpp>
 
 namespace mapnik {

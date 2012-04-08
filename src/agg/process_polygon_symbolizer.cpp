@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
@@ -37,6 +36,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_smooth_poly1.h"
+
 // stl
 #include <string>
 

@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
 #include <mapnik/projection.hpp>
 #include <mapnik/utils.hpp>

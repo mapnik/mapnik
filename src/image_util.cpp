@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id: image_util.cpp 36 2005-04-05 14:32:18Z pavlenko $
-
 extern "C"
 {
 #include <png.h>
@@ -48,6 +46,7 @@ extern "C"
 #include <cairo-features.h>
 #endif
 
+// boost
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 

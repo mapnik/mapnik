@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #if defined(HAVE_CAIRO)
 
@@ -60,11 +59,8 @@
 #include "agg_path_storage.h"
 #include "agg_ellipse.h"
 
-
 // stl
-#ifdef MAPNIK_LOG
 #include <iostream>
-#endif
 
 namespace mapnik
 {

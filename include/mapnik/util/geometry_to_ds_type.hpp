@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_GEOMETRY_TO_DS_TYPE
 #define MAPNIK_GEOMETRY_TO_DS_TYPE
 

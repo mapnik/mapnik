@@ -20,8 +20,7 @@
  *
  *****************************************************************************/
 
-//$Id$
-
+// mapnik
 #include <mapnik/map.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/layer.hpp>

@@ -19,11 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// $Id$
-
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
 
 #include "ogr_datasource.hpp"
 #include "ogr_featureset.hpp"
@@ -41,6 +36,11 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
+
+// stl
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
 
 using mapnik::datasource;
 using mapnik::parameters;

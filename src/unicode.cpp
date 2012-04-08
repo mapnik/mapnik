@@ -20,11 +20,11 @@
  *
  *****************************************************************************/
 
-//$Id$
-
-#include <cstdlib>
+// mapnik
 #include <mapnik/unicode.hpp>
 
+// stl
+#include <cstdlib>
 #include <string>
 
 namespace mapnik {

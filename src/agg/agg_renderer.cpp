@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
@@ -33,7 +32,6 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
 
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
@@ -68,7 +66,6 @@
 #include "agg_renderer_outline_image.h"
 #include "agg_vpgen_clip_polyline.h"
 #include "agg_arrowhead.h"
-
 
 // boost
 #include <boost/utility.hpp>

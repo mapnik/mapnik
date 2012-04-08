@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef GRID_RENDERER_HPP
 #define GRID_RENDERER_HPP
 
@@ -32,7 +30,6 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
 //#include <mapnik/marker.hpp>
-
 #include <mapnik/grid/grid.hpp>
 
 // boost

@@ -20,14 +20,14 @@
  *
  *****************************************************************************/
 
-// $Id$
-
 #ifndef SHAPE_HPP
 #define SHAPE_HPP
 
+// mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 
+// boost
 #include <boost/shared_ptr.hpp>
 
 #include "shape_io.hpp"

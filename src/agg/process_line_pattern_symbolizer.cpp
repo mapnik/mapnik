@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/debug.hpp>
@@ -38,7 +37,6 @@
 #include "agg_rasterizer_outline.h"
 #include "agg_rasterizer_outline_aa.h"
 #include "agg_scanline_u.h"
-//
 #include "agg_renderer_scanline.h"
 #include "agg_pattern_filters_rgba.h"
 #include "agg_span_allocator.h"

@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 //mapnik
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/geometry.hpp>

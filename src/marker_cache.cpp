@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>

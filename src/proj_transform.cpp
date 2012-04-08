@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/proj_transform.hpp>

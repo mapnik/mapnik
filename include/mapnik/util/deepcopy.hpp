@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_DEEPCOPY_HPP
 #define MAPNIK_DEEPCOPY_HPP
 
