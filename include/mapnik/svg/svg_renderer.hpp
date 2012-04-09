@@ -106,8 +106,8 @@ class svg_renderer : boost::noncopyable
     typedef agg::conv_transform<curved_stroked_type> curved_stroked_trans_type;
     typedef agg::conv_transform<curved_type>         curved_trans_type;
     typedef agg::conv_contour<curved_trans_type>     curved_trans_contour_type;
-    typedef agg::renderer_base<PixelFormat> renderer_base;
-
+    typedef agg::renderer_base<PixelFormat>          renderer_base;
+    
 public:
     svg_renderer(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
