@@ -23,13 +23,45 @@
 // mapnik
 #include <mapnik/debug.hpp>
 
+// stl
+#include <ctime>
+
+#ifndef MAPNIK_LOG_FORMAT
+#define MAPNIK_LOG_FORMAT "Mapnik LOG> %Y-%m-%d %H:%M:%S:"
+#endif
+
 namespace mapnik { namespace logger {
 
+// severity
 
 severity::type severity::severity_level_ =
-    MAPNIK_DEBUG_AS_BOOL ? severity::debug : severity::error;
+#ifdef MAPNIK_DEBUG
+    severity::debug
+#else
+    severity::error
+#endif
+;
 
 severity::severity_map severity::object_severity_level_ = severity::severity_map();
+
+
+// format
+
+#define __xstr__(s) __str__(s)
+#define __str__(s) #s
+
+std::string format::format_ = __xstr__(MAPNIK_LOG_FORMAT);
+
+#undef __xstr__
+#undef __str__
+
+std::string format::str()
+{
+    char buf[256];
+    const time_t tm = time(0);
+    strftime(buf, sizeof(buf), format::format_.c_str(), localtime(&tm));
+    return buf;
+}
 
 
 }

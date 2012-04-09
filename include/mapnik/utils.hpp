@@ -125,9 +125,7 @@ template <typename T,
         pInstance_ = 0;
         destroyed_=true;
 
-#ifdef MAPNIK_LOG
-        mapnik::log() << "singleton: Destroyed instance";
-#endif
+        MAPNIK_LOG_DEBUG(utils) << "singleton: Destroyed instance";
     }
 
 protected:
@@ -153,9 +151,7 @@ public:
                 {
                     pInstance_ = CreatePolicy<T>::create();
 
-#ifdef MAPNIK_LOG
-                    mapnik::log() << "singleton: Created instance";
-#endif
+                    MAPNIK_LOG_DEBUG(utils) << "singleton: Created instance";
 
                     // register destruction
                     std::atexit(&DestroySingleton);

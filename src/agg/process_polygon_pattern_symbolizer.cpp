@@ -83,18 +83,15 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     }
     else
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "agg_renderer: File not found=" << filename;
-#endif
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: File not found=" << filename;
     }
 
     if (!marker) return;
 
     if (!(*marker)->is_bitmap())
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "agg_renderer: Only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer";
-#endif
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer";
+
         return;
     }
 

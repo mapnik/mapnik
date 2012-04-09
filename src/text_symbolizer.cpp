@@ -130,9 +130,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
         return *this;
     placement_options_ = other.placement_options_; /*TODO: Copy options? */
 
-#ifdef MAPNIK_LOG
-    mapnik::log() << "text_symbolizer: TODO - Metawriter (text_symbolizer::operator=)";
-#endif
+    MAPNIK_LOG_DEBUG(text_symbolizer) << "text_symbolizer: TODO - Metawriter (text_symbolizer::operator=)";
 
     return *this;
 }

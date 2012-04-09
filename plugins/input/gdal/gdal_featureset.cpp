@@ -76,9 +76,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
 
 gdal_featureset::~gdal_featureset()
 {
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << &dataset_;
-#endif
 
     GDALClose(&dataset_);
 }
@@ -89,9 +87,7 @@ feature_ptr gdal_featureset::next()
     {
         first_ = false;
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Next feature in Dataset=" << &dataset_;
-#endif
 
         query *q = boost::get<query>(&gquery_);
         if (q)
@@ -122,7 +118,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     GDALRasterBand * grey = 0;
 
     /*
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
       double tr[6];
       dataset_.GetGeoTransform(tr);
 
@@ -188,12 +184,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     box2d<double> feature_raster_extent(x_off, y_off, x_off + width, y_off + height);
     intersect = t.backward(feature_raster_extent);
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Raster extent=" << raster_extent_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: View extent=" << intersect;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Query resolution=" << boost::get<0>(q.resolution()) << "," << boost::get<1>(q.resolution());
-    MAPNIK_LOG_DEBUG(gdal) << boost::format("gdal_featureset: StartX=%d StartY=%d Width=%d Height=%d") % x_off % y_off % width % height;
-#endif
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: StartX=" << x_off << " StartY=" << y_off << " Width=" << width << " Height=" << height;
 
     if (width > 0 && height > 0)
     {
@@ -208,9 +202,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             im_width *= filter_factor_;
             im_height *= filter_factor_;
 
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Applying layer filter_factor=" << filter_factor_;
-#endif
         }
         // otherwise respect symbolizer level factor applied to query, default of 1.0
         else
@@ -233,10 +225,9 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
             mapnik::image_data_32 image(im_width, im_height);
             image.set(0xffffffff);
 
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Image Size=(" << im_width << "," << im_height << ")";
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Reading band=" << band_;
-#endif
+
             typedef std::vector<int,int> pallete;
 
             if (band_ > 0) // we are querying a single band
@@ -284,78 +275,74 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     {
                     case GCI_RedBand:
                         red = band;
-#ifdef MAPNIK_LOG
+
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found red band";
-#endif
+
                         break;
                     case GCI_GreenBand:
                         green = band;
-#ifdef MAPNIK_LOG
+
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found green band";
-#endif
+
                         break;
                     case GCI_BlueBand:
                         blue = band;
-#ifdef MAPNIK_LOG
+
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found blue band";
-#endif
+
                         break;
                     case GCI_AlphaBand:
                         alpha = band;
-#ifdef MAPNIK_LOG
+
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found alpha band";
-#endif
+
                         break;
                     case GCI_GrayIndex:
                         grey = band;
-#ifdef MAPNIK_LOG
+
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found gray band";
-#endif
+
                         break;
                     case GCI_PaletteIndex:
                     {
                         grey = band;
-#ifdef MAPNIK_LOG
+
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found gray band, and colortable...";
-#endif
+
                         GDALColorTable *color_table = band->GetColorTable();
 
                         if (color_table)
                         {
                             int count = color_table->GetColorEntryCount();
-#ifdef MAPNIK_LOG
+
                             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Color Table count=" << count;
-#endif
+
                             for (int j = 0; j < count; j++)
                             {
                                 const GDALColorEntry *ce = color_table->GetColorEntry (j);
                                 if (! ce) continue;
-#ifdef MAPNIK_LOG
+
                                 MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Color entry RGB=" << ce->c1 << "," <<ce->c2 << "," << ce->c3;
-#endif
                             }
                         }
                         break;
                     }
                     case GCI_Undefined:
-#ifdef MAPNIK_LOG
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found undefined band (assumming gray band)";
-#endif
+
                         grey = band;
                         break;
                     default:
-#ifdef MAPNIK_LOG
                         MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Band type unknown!";
-#endif
+
                         break;
                     }
                 }
 
                 if (red && green && blue)
                 {
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Processing rgb bands...";
-#endif
+
                     int hasNoData(0);
                     double nodata(0);
                     if (nodata_value_)
@@ -406,9 +393,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 }
                 else if (grey)
                 {
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Processing gray band...";
-#endif
+
                     int hasNoData(0);
                     double nodata(0);
                     if (nodata_value_)
@@ -424,9 +410,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
                     if (hasNoData && ! color_table)
                     {
-#ifdef MAPNIK_LOG
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: No data value for layer=" << nodata;
-#endif
+
                         feature->put("NODATA",nodata);
                         // first read the data in and create an alpha channel from the nodata values
                         float* imageData = (float*)image.getBytes();
@@ -458,9 +443,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
                     if (color_table)
                     {
-#ifdef MAPNIK_LOG
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Loading colour table...";
-#endif
+
                         unsigned nodata_value = static_cast<unsigned>(nodata);
                         if (hasNoData)
                         {
@@ -498,9 +482,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 }
                 if (alpha)
                 {
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: processing alpha band...";
-#endif
+
                     alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 3,
                                     image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                 }
@@ -535,10 +518,9 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
 
         if (x < raster_xsize && y < raster_ysize)
         {
-#ifdef MAPNIK_LOG
-            MAPNIK_LOG_DEBUG(gdal) << boost::format("gdal_featureset: pt.x=%f pt.y=%f") % pt.x % pt.y;
-            MAPNIK_LOG_DEBUG(gdal) << boost::format("gdal_featureset: x=%f y=%f") % x % y;
-#endif
+            MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: pt.x=" << pt.x << " pt.y=" << pt.y;
+            MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: x=" << x << " y=" << y;
+
             GDALRasterBand* band = dataset_.GetRasterBand(band_);
             int hasNoData;
             double nodata = band->GetNoDataValue(&hasNoData);

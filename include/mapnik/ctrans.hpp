@@ -240,10 +240,10 @@ struct MAPNIK_DECL coord_transform_parallel
                     angle_a = atan2((m_pre_y-m_cur_y),(m_pre_x-m_cur_x));
                     dx_pre = cos(angle_a + pi_by_2);
                     dy_pre = sin(angle_a + pi_by_2);
-#ifdef MAPNIK_LOG
-                    mapnik::log() << "coord_transform_parallel: Offsetting line by=" << offset_;
-                    mapnik::log() << "coord_transform_parallel: Initial dx=" << (dx_pre * offset_) << ",dy=" << (dy_pre * offset_);
-#endif
+
+                    MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: Offsetting line by=" << offset_;
+                    MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: Initial dx=" << (dx_pre * offset_) << ",dy=" << (dy_pre * offset_);
+
                     *x = m_pre_x + (dx_pre * offset_);
                     *y = m_pre_y + (dy_pre * offset_);
                     m_status = process;
@@ -290,15 +290,14 @@ struct MAPNIK_DECL coord_transform_parallel
                     }
                     else // skip sharp spikes
                     {
-
 #ifdef MAPNIK_LOG
                         dx_curr = cos(angle_a + pi_by_2);
                         dy_curr = sin(angle_a + pi_by_2);
                         sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
-                        mapnik::log() << "coord_transform_parallel: angle a=" << angle_a;
-                        mapnik::log() << "coord_transform_parallel: angle b=" << angle_b;
-                        mapnik::log() << "coord_transform_parallel: h=" << h;
-                        mapnik::log() << "coord_transform_parallel: sin_curve=" << sin_curve;
+                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: angle a=" << angle_a;
+                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: angle b=" << angle_b;
+                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: h=" << h;
+                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: sin_curve=" << sin_curve;
 #endif
                         m_status = process;
                         break;
@@ -310,9 +309,7 @@ struct MAPNIK_DECL coord_transform_parallel
                       sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
                       cos_curve = -dx_pre*dx_curr-dy_pre*dy_curr;
 
-                      #ifdef MAPNIK_LOG
-                        mapnik::log() << "coord_transform_parallel: sin_curve value=" << sin_curve;
-                      #endif
+                      MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: sin_curve value=" << sin_curve;
                       if(sin_curve > -0.3 && sin_curve < 0.3) {
                         angle_b = atan2((m_cur_y-m_next_y),(m_cur_x-m_next_x));
                         h = tan((angle_b - angle_a)/2.0);

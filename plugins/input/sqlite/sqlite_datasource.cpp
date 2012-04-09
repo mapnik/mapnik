@@ -215,9 +215,8 @@ void sqlite_datasource::bind() const
     for (std::vector<std::string>::const_iterator iter = init_statements_.begin();
          iter != init_statements_.end(); ++iter)
     {
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: Execute init sql=" << *iter;
-#endif
+
         dataset_->execute(*iter);
     }
 
@@ -613,9 +612,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
             s << " OFFSET " << row_offset_;
         }
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
-#endif
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
@@ -697,9 +694,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
             s << " OFFSET " << row_offset_;
         }
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
-#endif
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 

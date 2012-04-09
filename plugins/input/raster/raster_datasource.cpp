@@ -52,9 +52,7 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
       desc_(*params.get<std::string>("type"), "utf-8"),
       extent_initialized_(false)
 {
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Initializing...";
-#endif
 
     boost::optional<std::string> file = params.get<std::string>("file");
     if (! file) throw datasource_exception("Raster Plugin: missing <file> parameter ");
@@ -150,9 +148,7 @@ void raster_datasource::bind() const
         }
     }
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Raster size=" << width_ << "," << height_;
-#endif
 
     is_bound_ = true;
 }
@@ -197,15 +193,11 @@ featureset_ptr raster_datasource::features(query const& q) const
     const int width  = int(ext.maxx() + 0.5) - int(ext.minx() + 0.5);
     const int height = int(ext.maxy() + 0.5) - int(ext.miny() + 0.5);
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Box size=" << width << "," << height;
-#endif
 
     if (multi_tiles_)
     {
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Multi-Tiled policy";
-#endif
 
         tiled_multi_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_, tile_stride_);
 
@@ -213,9 +205,7 @@ featureset_ptr raster_datasource::features(query const& q) const
     }
     else if (width * height > 512*512)
     {
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Tiled policy";
-#endif
 
         tiled_file_policy policy(filename_, format_, 256, extent_, q.get_bbox(), width_, height_);
 
@@ -223,9 +213,7 @@ featureset_ptr raster_datasource::features(query const& q) const
     }
     else
     {
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Single file";
-#endif
 
         raster_info info(filename_, format_, extent_, width_, height_);
         single_file_policy policy(info);
@@ -236,9 +224,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 
 featureset_ptr raster_datasource::features_at_point(coord2d const&) const
 {
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_WARN(raster) << "raster_datasource: feature_at_point not supported";
-#endif
 
     return featureset_ptr();
 }

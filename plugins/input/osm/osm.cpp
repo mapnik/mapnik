@@ -49,9 +49,7 @@ bool osm_dataset::load_from_url(const std::string& url,
 {
     if (parser == "libxml2")
     {
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(osm) << "osm_dataset: load_from_url url=" << url << ",bbox=" << bbox;
-#endif
 
         std::ostringstream str;
         // use curl to grab the data
@@ -59,9 +57,7 @@ bool osm_dataset::load_from_url(const std::string& url,
 
         str << url << "?bbox=" << bbox;
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(osm) << "osm_dataset: Full url=" << str.str();
-#endif
 
         CURL_LOAD_DATA* resp = grab_http_response(str.str().c_str());
 
@@ -71,9 +67,7 @@ bool osm_dataset::load_from_url(const std::string& url,
             memcpy(blx, resp->data, resp->nbytes);
             blx[resp->nbytes] = '\0';
 
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(osm) << "osm_dataset: CURL Response=" << blx;
-#endif
 
             delete[] blx;
             bool success = osmparser::parse(this, resp->data, resp->nbytes);
@@ -90,13 +84,9 @@ osm_dataset::~osm_dataset()
 
 void osm_dataset::clear()
 {
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(osm) << "osm_dataset: Clear";
-#endif
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(osm) << "osm_dataset: -- Deleting ways";
-#endif
     for (unsigned int count = 0; count < ways.size(); ++count)
     {
         delete ways[count];
@@ -104,9 +94,7 @@ void osm_dataset::clear()
     }
     ways.clear();
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(osm) << "osm_dataset: -- Deleting nodes";
-#endif
     for (unsigned int count = 0; count < nodes.size(); ++count)
     {
         delete nodes[count];
@@ -114,9 +102,7 @@ void osm_dataset::clear()
     }
     nodes.clear();
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(osm) << "osm_dataset: Clear done";
-#endif
 }
 
 std::string osm_dataset::to_string()

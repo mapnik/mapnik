@@ -105,9 +105,7 @@ feature_ptr geos_featureset::next()
                     break;
 
                 default:
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_DEBUG(geos) << "geos_featureset: Unknown extent geometry_type=" << type;
-#endif
                     break;
                 }
             }

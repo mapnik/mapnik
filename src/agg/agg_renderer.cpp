@@ -73,10 +73,6 @@
 #include <boost/math/special_functions/round.hpp>
 
 // stl
-#ifdef MAPNIK_LOG
-#include <iostream>
-#endif
-
 #include <cmath>
 
 namespace mapnik
@@ -172,9 +168,7 @@ void agg_renderer<T>::setup(Map const &m)
         }
     }
 
-#ifdef MAPNIK_LOG
-    mapnik::log() << "agg_renderer: Scale=" << m.scale();
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
 
 template <typename T>
@@ -183,28 +177,24 @@ agg_renderer<T>::~agg_renderer() {}
 template <typename T>
 void agg_renderer<T>::start_map_processing(Map const& map)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "agg_renderer: Start map processing bbox=" << map.get_current_extent();
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start map processing bbox=" << map.get_current_extent();
+
     ras_ptr->clip_box(0,0,width_,height_);
 }
 
 template <typename T>
 void agg_renderer<T>::end_map_processing(Map const& )
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "agg_renderer: End map processing";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
 template <typename T>
 void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "agg_renderer: Start processing layer=" << lay.name();
-    mapnik::log() << "agg_renderer: -- datasource=" << lay.datasource().get();
-    mapnik::log() << "agg_renderer: -- query_extent=" << query_extent;
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing layer=" << lay.name();
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: -- datasource=" << lay.datasource().get();
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: -- query_extent=" << query_extent;
+
     if (lay.clear_label_cache())
     {
         detector_->clear();
@@ -215,9 +205,7 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
 template <typename T>
 void agg_renderer<T>::end_layer_processing(layer const&)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "agg_renderer: End layer processing";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End layer processing";
 }
 
 template <typename T>

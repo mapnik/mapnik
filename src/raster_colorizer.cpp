@@ -266,19 +266,17 @@ color raster_colorizer::get_color(float value) const
     }
 
 
-#ifdef MAPNIK_LOG
     /*
-      mapnik::log() << "raster_colorizer: get_color " << value;
-      mapnik::log() << "\tstopIdx: " << stopIdx;
-      mapnik::log() << "\tnextStopIdx: " << nextStopIdx;
-      mapnik::log() << "\tstopValue: " << stopValue;
-      mapnik::log() << "\tnextStopValue: " << nextStopValue;
-      mapnik::log() << "\tstopColor: " << stopColor.to_string();
-      mapnik::log() << "\tnextStopColor: " << nextStopColor.to_string();
-      mapnik::log() << "\tstopMode: " << stopMode.as_string();
-      mapnik::log() << "\toutputColor: " << outputColor.to_string();
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "raster_colorizer: get_color " << value;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopIdx: " << stopIdx;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tnextStopIdx: " << nextStopIdx;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopValue: " << stopValue;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tnextStopValue: " << nextStopValue;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopColor: " << stopColor.to_string();
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tnextStopColor: " << nextStopColor.to_string();
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopMode: " << stopMode.as_string();
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\toutputColor: " << outputColor.to_string();
     */
-#endif
 
     return outputColor;
 }

@@ -78,9 +78,7 @@ public:
             layer_ = ogr_layer;
             is_valid_ = true;
 
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_name layer=" << layer_name_;
-#endif
         }
 
 #ifdef MAPNIK_LOG
@@ -105,9 +103,7 @@ public:
                 layer_name_ = def->GetName();
                 is_valid_ = true;
 
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_index layer=" << layer_name_;
-#endif
             }
         }
 
@@ -141,9 +137,7 @@ public:
                 layer_name_ = def->GetName();
                 is_valid_ = true;
 
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_sql layer=" << layer_name_;
-#endif
             }
         }
 

@@ -269,7 +269,6 @@ void ogr_datasource::bind() const
         indexed_ = true;
         index_file.close();
     }
-#ifdef MAPNIK_LOG
 #if 0
     // TODO - enable this warning once the ogrindex tool is a bit more stable/mature
     else
@@ -278,7 +277,6 @@ void ogr_datasource::bind() const
                               << ", use the 'ogrindex' program to build an index for faster rendering";
     }
 #endif
-#endif // MAPNIK_LOG
 
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats2__(std::clog, "ogr_datasource::bind(get_column_description)");
@@ -319,18 +317,14 @@ void ogr_datasource::bind() const
             case OFTRealList:
             case OFTStringList:
             case OFTWideStringList: // deprecated !
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
-#endif
                 break;
 
             case OFTDate:
             case OFTTime:
             case OFTDateTime: // unhandled !
-#ifdef MAPNIK_LOG
-                MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
-#endif
                 desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Object));
+                MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
                 break;
             }
         }

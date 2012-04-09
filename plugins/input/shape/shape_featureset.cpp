@@ -147,9 +147,8 @@ feature_ptr shape_featureset<filterT>::next()
                 }
                 else
                 {
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_DEBUG(shape) << "shape_featureset: Total shapes read=" << count_;
-#endif
+
                     return feature_ptr();
                 }
             }
@@ -257,9 +256,8 @@ feature_ptr shape_featureset<filterT>::next()
     }
     else
     {
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(shape) << "shape_featureset: Total shapes read=" << count_;
-#endif
+
         return feature_ptr();
     }
 }

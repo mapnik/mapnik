@@ -31,8 +31,6 @@
 #include <boost/utility.hpp>
 #include <boost/format.hpp>
 
-// #define MAPNIK_DEBUG_WKB
-
 namespace mapnik
 {
 struct wkb_reader : boost::noncopyable
@@ -115,9 +113,7 @@ public:
     {
         int type = read_integer();
 
-#if defined(MAPNIK_LOG) && defined(MAPNIK_DEBUG_WKB)
-        mapnik::log() << "wkb_reader: Read=" << wkb_geometry_type_string(type) << "," << type;
-#endif
+        MAPNIK_LOG_DEBUG(wkb_reader) << "wkb_reader: Read=" << wkb_geometry_type_string(type) << "," << type;
 
         switch (type)
         {
@@ -405,7 +401,6 @@ private:
         }
     }
 
-#if defined(MAPNIK_LOG) && defined(MAPNIK_DEBUG_WKB)
     std::string wkb_geometry_type_string(int type)
     {
         std::stringstream s;
@@ -431,8 +426,6 @@ private:
 
         return s.str();
     }
-#endif
-
 };
 
 void geometry_utils::from_wkb (boost::ptr_vector<geometry_type>& paths,

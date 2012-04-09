@@ -198,9 +198,8 @@ feature_ptr postgis_featureset::next()
 
                     default:
                     {
-#ifdef MAPNIK_LOG
                         MAPNIK_LOG_WARN(postgis) << "postgis_featureset: Uknown type_oid=" << oid;
-#endif
+
                         break;
                     }
                 }

@@ -68,9 +68,8 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (!(*mark)->is_bitmap())
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
-#endif
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
+
         return;
     }
 

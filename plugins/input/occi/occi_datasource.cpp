@@ -203,9 +203,7 @@ void occi_datasource::bind() const
             s << " AND LOWER(column_name) = LOWER('" << geometry_field_ << "')";
         }
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
-#endif
 
         try
         {
@@ -243,9 +241,7 @@ void occi_datasource::bind() const
         std::ostringstream s;
         s << "SELECT " << fields_ << " FROM (" << table_name_ << ") WHERE rownum < 1";
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
-#endif
 
         try
         {
@@ -335,17 +331,13 @@ void occi_datasource::bind() const
                     case oracle::occi::OCCI_SQLT_CLOB:
                     case oracle::occi::OCCI_SQLT_BLOB:
                     case oracle::occi::OCCI_SQLT_RSET:
-#ifdef MAPNIK_LOG
                         MAPNIK_LOG_WARN(occi) << "occi_datasource: Unsupported datatype "
                                               << occi_enums::resolve_datatype(type_oid)
                                               << " (type_oid=" << type_oid << ")";
-#endif
                         break;
                     default:
-#ifdef MAPNIK_LOG
                         MAPNIK_LOG_WARN(occi) << "occi_datasource: Unknown datatype "
                                               << "(type_oid=" << type_oid << ")";
-#endif
                         break;
                     }
                 }
@@ -391,9 +383,7 @@ box2d<double> occi_datasource::envelope() const
         s << " (SELECT SDO_AGGR_MBR(" << geometry_field_ << ") shape FROM " << table_ << ") a, ";
         s << " TABLE(SDO_UTIL.GETVERTICES(a.shape)) c";
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
-#endif
 
         try
         {
@@ -439,9 +429,7 @@ box2d<double> occi_datasource::envelope() const
         s << METADATA_TABLE << " m, TABLE(m.diminfo) dim ";
         s << " WHERE LOWER(m.table_name) = LOWER('" << table_name_ << "') AND dim.sdo_dimname = 'Y'";
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
-#endif
 
         try
         {
@@ -590,9 +578,7 @@ featureset_ptr occi_datasource::features(query const& q) const
 
     s << query;
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
-#endif
 
     return boost::make_shared<occi_featureset>(pool_,
                                                conn_,
@@ -680,9 +666,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
 
     s << query;
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
-#endif
 
     return boost::make_shared<occi_featureset>(pool_,
                                                conn_,

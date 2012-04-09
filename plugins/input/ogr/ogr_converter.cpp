@@ -70,10 +70,8 @@ void ogr_converter::convert_geometry(OGRGeometry* geom, feature_ptr feature)
     case wkbUnknown:
     default:
         {
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_WARN(ogr) << "ogr_converter: unknown <ogr> geometry_type="
                                  << wkbFlatten(geom->getGeometryType());
-#endif
         }
         break;
     }

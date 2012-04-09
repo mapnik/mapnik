@@ -221,9 +221,7 @@ void csv_datasource::parse_csv(T& stream,
             {
                 sep = "\t";
 
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
-#endif
             }
         }
         else // pipes
@@ -233,9 +231,7 @@ void csv_datasource::parse_csv(T& stream,
             {
                 sep = "|";
 
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
-#endif
             }
             else // semicolons
             {
@@ -244,9 +240,7 @@ void csv_datasource::parse_csv(T& stream,
                 {
                     sep = ";";
 
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
-#endif
                 }
             }
         }
@@ -263,9 +257,7 @@ void csv_datasource::parse_csv(T& stream,
     std::string quo = boost::trim_copy(quote);
     if (quo.empty()) quo = "\"";
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammer: sep: '" << sep << "' quo: '" << quo << "' esc: '" << esc;
-#endif
 
     boost::escaped_list_separator<char> grammer;
     try
@@ -430,9 +422,8 @@ void csv_datasource::parse_csv(T& stream,
     {
         if ((row_limit_ > 0) && (line_number > row_limit_))
         {
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
-#endif
+
             break;
         }
 
@@ -447,9 +438,7 @@ void csv_datasource::parse_csv(T& stream,
             {
                 ++line_number;
 
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_DEBUG(csv) << "csv_datasource: empty row encountered at line: " << line_number;
-#endif
 
                 continue;
             }
