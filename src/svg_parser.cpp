@@ -128,7 +128,8 @@ bool parse_style (const char* str, pairs_type & v)
 svg_parser::svg_parser(svg_converter<svg_path_adapter,
                        agg::pod_bvector<mapnik::svg::path_attributes> > & path)
     : path_(path),
-      is_defs_(false) {}
+      is_defs_(false)
+{}
 
 svg_parser::~svg_parser() {}
 
@@ -366,6 +367,10 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
     else if (xmlStrEqual(name, BAD_CAST "visibility"))
     {
         path_.visibility(!xmlStrEqual(value, BAD_CAST "hidden"));
+    }
+    else if (xmlStrEqual(name, BAD_CAST "display") && xmlStrEqual(value, BAD_CAST "none"))
+    {
+        path_.visibility(false);        
     }
 }
 
