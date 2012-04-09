@@ -7,6 +7,7 @@
 *.cpp~
 *.hpp~
 plugins/input/*.input
+plugins/input/templates/hello.input
 demo/c++/rundemo
 bindings/python/mapnik/paths.py
 config.cache
