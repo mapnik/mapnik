@@ -56,9 +56,9 @@ public:
             for  (unsigned i=0; i<(*pos_)->num_geometries();++i)
             {
                 geometry_type & geom = (*pos_)->get_geometry(i);
-#ifdef MAPNIK_LOG
-                mapnik::log() << "memory_featureset: BBox=" << bbox_ << ",Envelope=" << geom.envelope();
-#endif
+
+                MAPNIK_LOG_DEBUG(memory_featureset) << "memory_featureset: BBox=" << bbox_ << ",Envelope=" << geom.envelope();
+
                 if (bbox_.intersects(geom.envelope()))
                 {
                     return *pos_++;

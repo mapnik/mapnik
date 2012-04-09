@@ -103,9 +103,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             }
             else
             {
-#ifdef MAPNIK_LOG
-                mapnik::log() << "parameters_pickle_suite: Could not unpickle key=" << key;
-#endif
+                MAPNIK_LOG_DEBUG(bindings) << "parameters_pickle_suite: Could not unpickle key=" << key;
             }
         }
     }

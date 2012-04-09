@@ -83,9 +83,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         {
             if (!(*mark)->is_vector())
             {
-#ifdef MAPNIK_LOG
-                mapnik::log() << "agg_renderer: markers_symbolizer do not yet support SVG markers";
-#endif
+                MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: markers_symbolizer do not yet support SVG markers";
+
                 return;
             }
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
@@ -154,9 +153,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         if (writer.first)
                         {
                             //writer.first->add_box(label_ext, feature, t_, writer.second);
-#ifdef MAPNIK_LOG
-                            mapnik::log() << "agg_renderer: metawriter do not yet supported for line placement";
-#endif
+
+                            MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
                         }
                     }
                 }
@@ -300,9 +298,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     if (writer.first)
                     {
                         //writer.first->add_box(label_ext, feature, t_, writer.second);
-#ifdef MAPNIK_LOG
-                        mapnik::log() << "agg_renderer: metawriter do not yet supported for line placement";
-#endif
+
+                        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
                     }
 
                     agg::conv_transform<agg::path_storage, agg::trans_affine> trans(marker, matrix);

@@ -415,10 +415,10 @@ void Map::zoom_all()
                     if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
                     {
                         success = true;
-#ifdef MAPNIK_LOG
-                        mapnik::log() << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
-                        mapnik::log() << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
-#endif
+
+                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
+                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
+
                         if (first)
                         {
                             ext = layer_ext;
@@ -586,9 +586,8 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             mapnik::datasource_ptr ds = layer.datasource();
             if (ds)
             {
-#ifdef MAPNIK_LOG
-                mapnik::log() << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
-#endif
+                MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
+
                 featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
                 if (fs)
                     return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
@@ -630,9 +629,8 @@ featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
             mapnik::datasource_ptr ds = layer.datasource();
             if (ds)
             {
-#ifdef MAPNIK_LOG
-                mapnik::log() << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
-#endif
+                MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
+
                 featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
                 if (fs)
                     return boost::make_shared<filter_featureset<hit_test_filter> >(fs,

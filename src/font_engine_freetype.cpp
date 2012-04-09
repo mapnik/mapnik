@@ -117,9 +117,7 @@ bool freetype_engine::register_font(std::string const& file_name)
             else if (face->style_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
 
-#ifdef MAPNIK_LOG
-            mapnik::log() << "grid_renderer: " << s.str();
-#endif
+            MAPNIK_LOG_DEBUG(font_engine_freetype) << "freetype_engine: " << s.str();
         }
     }
     if (face)
@@ -332,11 +330,9 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
 
         path->vertex(&c, &x, &y, &angle);
 
-#ifdef MAPNIK_LOG
         // TODO Enable when we have support for setting verbosity
-        //mapnik::log() << "text_renderer: prepare_glyphs="
-        //              << c << "," << x << "," << y << "," << angle;
-#endif
+        // MAPNIK_LOG_DEBUG(font_engine_freetype) << "text_renderer: prepare_glyphs="
+        //                                        << c << "," << x << "," << y << "," << angle;
 
         FT_BBox glyph_bbox;
         FT_Glyph image;

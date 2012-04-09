@@ -229,7 +229,7 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
 #ifdef MAPNIK_LOG
     else if (!xmlStrEqual(name, BAD_CAST "svg"))
     {
-        mapnik::log() << "svg_parser: Unhandled svg element=" << name;
+        MAPNIK_LOG_WARN(svg_parser) << "svg_parser: Unhandled svg element=" << name;
     }
 #endif
 }

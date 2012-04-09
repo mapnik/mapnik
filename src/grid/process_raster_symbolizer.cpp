@@ -32,9 +32,7 @@ void grid_renderer<T>::process(raster_symbolizer const& sym,
                                mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "grid_renderer: raster_symbolizer is not yet supported";
-#endif
+    MAPNIK_LOG_WARN(grid_renderer) << "grid_renderer: raster_symbolizer is not yet supported";
 }
 
 template void grid_renderer<grid>::process(raster_symbolizer const&,

@@ -122,9 +122,7 @@ void feature_style_processor<Processor>::apply()
     }
     catch (proj_init_error& ex)
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "feature_style_processor: proj_init_error=" << ex.what();
-#endif
+        MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
     }
 
     p.end_map_processing(m_);
@@ -154,9 +152,7 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
     }
     catch (proj_init_error& ex)
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "feature_style_processor: proj_init_error=" << ex.what();
-#endif
+        MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
     }
     p.end_map_processing(m_);
 }
@@ -196,18 +192,16 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     unsigned int num_styles = style_names.size();
     if (! num_styles)
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "feature_style_processor: No style for layer=" << lay.name();
-#endif
+        MAPNIK_LOG_DEBUG(feature_style_processor) << "feature_style_processor: No style for layer=" << lay.name();
+
         return;
     }
 
     mapnik::datasource_ptr ds = lay.datasource();
     if (! ds)
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "feature_style_processor: No datasource for layer=" << lay.name();
-#endif
+        MAPNIK_LOG_DEBUG(feature_style_processor) << "feature_style_processor: No datasource for layer=" << lay.name();
+
         return;
     }
 
@@ -219,10 +213,12 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     proj_transform prj_trans(proj0,proj1);
 
 #if defined(RENDERING_STATS)
-    if (!prj_trans.equal())
+    if (! prj_trans.equal())
+    {
         std::clog << "notice: reprojecting layer: '" << lay.name() << "' from/to:\n\t'"
                   << lay.srs() << "'\n\t'"
                   << m_.srs() << "'\n";
+    }
 #endif
 
     box2d<double> buffered_query_ext = m_.get_buffered_extent(); // buffered
@@ -255,13 +251,12 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     {
         layer_ext.clip(buffered_query_ext);
         // forward project layer extent back into native projection
-        if (!prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
+        if (! prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
         {
-#ifdef MAPNIK_LOG
-            mapnik::log() << "feature_style_processor: Layer=" << lay.name()
-                          << " extent=" << layer_ext << " in map projection "
-                          << " did not reproject properly back to layer projection";
-#endif
+            MAPNIK_LOG_DEBUG(feature_style_processor)
+                    << "feature_style_processor: Layer=" << lay.name()
+                    << " extent=" << layer_ext << " in map projection "
+                    << " did not reproject properly back to layer projection";
         }
     }
     else
@@ -315,10 +310,10 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         boost::optional<feature_type_style const&> style=m_.find_style(style_name);
         if (!style)
         {
-#ifdef MAPNIK_LOG
-            mapnik::log() << "feature_style_processor: Style=" << style_name << " required for layer="
-                          << lay.name() << " does not exist.";
-#endif
+            MAPNIK_LOG_DEBUG(feature_style_processor)
+                    << "feature_style_processor: Style=" << style_name
+                    << " required for layer=" << lay.name() << " does not exist.";
+
             continue;
         }
 

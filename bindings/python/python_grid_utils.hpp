@@ -272,9 +272,7 @@ static void write_features(T const& grid_type,
         }
         else
         {
-#ifdef MAPNIK_LOG
-            mapnik::log() << "write_features: Should not get here: key " << key << " not found in grid feature properties";
-#endif
+            MAPNIK_LOG_DEBUG(bindings) << "write_features: Should not get here: key " << key << " not found in grid feature properties";
         }
     }
 }

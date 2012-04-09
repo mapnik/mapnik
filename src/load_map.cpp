@@ -234,9 +234,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                     }
                     else
                     {
-#ifdef MAPNIK_LOG
-                        mapnik::log() << "map_parser: Warning - " << s_err.str();
-#endif
+                        MAPNIK_LOG_WARN(load_map) << "map_parser: " << s_err.str();
                     }
                 }
             }
@@ -574,9 +572,7 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
                     }
                     else
                     {
-#ifdef MAPNIK_LOG
-                        mapnik::log() << "map_parser: Warning - " << ss.str();
-#endif
+                        MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss.str();
                     }
                 }
                 else
@@ -818,9 +814,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                         }
                         else
                         {
-#ifdef MAPNIK_LOG
-                            mapnik::log() << "map_parser: Warning - " << ss;
-#endif
+                            MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                         }
                     }
                     boost::array<double,6> matrix;
@@ -838,9 +832,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                 }
                 else
                 {
-#ifdef MAPNIK_LOG
-                    mapnik::log() << "map_parser: Warning - " << msg;
-#endif
+                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
                 }
             }
         }
@@ -888,9 +880,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
                 }
                 else
                 {
-#ifdef MAPNIK_LOG
-                    mapnik::log() << "map_parser: Warning - " << msg;
-#endif
+                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
                 }
             }
         }
@@ -919,9 +909,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
                 }
                 else
                 {
-#ifdef MAPNIK_LOG
-                    mapnik::log() << "map_parser: Warning - " << ss;
-#endif
+                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                 }
             }
             boost::array<double,6> matrix;
@@ -1023,9 +1011,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
             }
             else
             {
-#ifdef MAPNIK_LOG
-                mapnik::log() << "map_parser: Warning - " << msg;
-#endif
+                MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
             }
         }
     }
@@ -1089,9 +1075,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
             }
             else
             {
-#ifdef MAPNIK_LOG
-                mapnik::log() << "map_parser: Warning - " << msg;
-#endif
+                MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
             }
         }
     }
@@ -1165,9 +1149,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
                 }
                 else
                 {
-#ifdef MAPNIK_LOG
-                    mapnik::log() << "map_parser: Warning - " << ss;
-#endif
+                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                 }
             }
             boost::array<double,6> matrix;
@@ -1237,9 +1219,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             }
             else
             {
-#ifdef MAPNIK_LOG
-                mapnik::log() << "map_parser: Warning - " << msg;
-#endif
+                MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
             }
         }
         rule.append(shield_symbol);
@@ -1560,11 +1540,10 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> opt_
             boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
 #endif
 
-#ifdef MAPNIK_LOG
-            mapnik::log() << "map_parser: Modifying relative paths to be relative to xml...";
-            mapnik::log() << "map_parser: -- Original base path=" << *opt_path;
-            mapnik::log() << "map_parser: -- Relative base path=" << full.string();
-#endif
+            MAPNIK_LOG_DEBUG(load_map) << "map_parser: Modifying relative paths to be relative to xml...";
+            MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Original base path=" << *opt_path;
+            MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Relative base path=" << full.string();
+
             return full.string();
         }
     }

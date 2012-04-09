@@ -44,13 +44,6 @@
 // agg
 #include "agg_trans_affine.h"
 
-// stl
-#ifdef MAPNIK_LOG
-#include <iostream>
-#endif
-
-//#include <cmath>
-
 namespace mapnik
 {
 
@@ -67,9 +60,7 @@ grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, u
       detector_(box2d<double>(-m.buffer_size(), -m.buffer_size(), pixmap_.width() + m.buffer_size(), pixmap_.height() + m.buffer_size())),
       ras_ptr(new grid_rasterizer)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "grid_renderer: Scale=" << m.scale();
-#endif
+    MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: Scale=" << m.scale();
 }
 
 template <typename T>
@@ -78,9 +69,7 @@ grid_renderer<T>::~grid_renderer() {}
 template <typename T>
 void grid_renderer<T>::start_map_processing(Map const& m)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "grid_renderer: Start map processing bbox=" << m.get_current_extent();
-#endif
+    MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: Start map processing bbox=" << m.get_current_extent();
 
     ras_ptr->clip_box(0,0,width_,height_);
 }
@@ -88,19 +77,15 @@ void grid_renderer<T>::start_map_processing(Map const& m)
 template <typename T>
 void grid_renderer<T>::end_map_processing(Map const& m)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "grid_renderer: End map processing";
-#endif
+    MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: End map processing";
 }
 
 template <typename T>
 void grid_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "grid_renderer: Start processing layer=" << lay.name();
-    mapnik::log() << "grid_renderer: datasource=" << lay.datasource().get();
-    mapnik::log() << "grid_renderer: query_extent = " << query_extent;
-#endif
+    MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: Start processing layer=" << lay.name();
+    MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: datasource=" << lay.datasource().get();
+    MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: query_extent = " << query_extent;
 
     if (lay.clear_label_cache())
     {
@@ -111,9 +96,7 @@ void grid_renderer<T>::start_layer_processing(layer const& lay, box2d<double> co
 template <typename T>
 void grid_renderer<T>::end_layer_processing(layer const&)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "grid_renderer: End layer processing";
-#endif
+    MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: End layer processing";
 }
 
 template <typename T>

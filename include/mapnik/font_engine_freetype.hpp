@@ -139,9 +139,8 @@ public:
 
     ~font_face()
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "font_face: Clean up face \"" << family_name() << " " << style_name() << "\"";
-#endif
+        MAPNIK_LOG_DEBUG(font_engine_freetype) << "font_face: Clean up face \"" << family_name() << " " << style_name() << "\"";
+
         FT_Done_Face(face_);
     }
 
@@ -225,9 +224,7 @@ public:
 
     ~stroker()
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "stroker: Destroy stroker=" << s_;
-#endif
+        MAPNIK_LOG_DEBUG(font_engine_freetype) << "stroker: Destroy stroker=" << s_;
 
         FT_Stroker_Done(s_);
     }

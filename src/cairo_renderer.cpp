@@ -639,9 +639,7 @@ cairo_renderer_base::cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Cont
       face_manager_(font_engine_,font_manager_),
       detector_(box2d<double>(-m.buffer_size() ,-m.buffer_size() , m.width() + m.buffer_size() ,m.height() + m.buffer_size()))
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "cairo_renderer_base: Scale=" << m.scale();
-#endif
+    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Scale=" << m.scale();
 }
 
 template <>
@@ -662,9 +660,7 @@ cairo_renderer_base::~cairo_renderer_base() {}
 
 void cairo_renderer_base::start_map_processing(Map const& map)
 {
-#ifdef MAPNIK_LOG
-    mapnik::log() << "cairo_renderer_base: Start map processing bbox=" << map.get_current_extent();
-#endif
+    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Start map processing bbox=" << map.get_current_extent();
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
         box2d<double> bounds = t_.forward(t_.extent());
@@ -684,27 +680,23 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     template <>
         void cairo_renderer<Cairo::Context>::end_map_processing(Map const& )
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "cairo_renderer_base: End map processing";
-#endif
+        MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: End map processing";
     }
 
     template <>
         void cairo_renderer<Cairo::Surface>::end_map_processing(Map const& )
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "cairo_renderer_base: End map processing";
-#endif
+        MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: End map processing";
+
         context_->show_page();
     }
 
     void cairo_renderer_base::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "cairo_renderer_base: Start processing layer=" << lay.name() ;
-        mapnik::log() << "cairo_renderer_base: -- datasource=" << lay.datasource().get();
-        mapnik::log() << "cairo_renderer_base: -- query_extent=" << query_extent;
-#endif
+        MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Start processing layer=" << lay.name() ;
+        MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: -- datasource=" << lay.datasource().get();
+        MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: -- query_extent=" << query_extent;
+
         if (lay.clear_label_cache())
         {
             detector_.clear();
@@ -714,9 +706,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
     void cairo_renderer_base::end_layer_processing(layer const&)
     {
-#ifdef MAPNIK_LOG
-        mapnik::log() << "cairo_renderer_base: End layer processing";
-#endif
+        MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: End layer processing";
     }
 
     void cairo_renderer_base::process(polygon_symbolizer const& sym,
@@ -1276,9 +1266,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             {
                 if (!(*mark)->is_vector())
                 {
-#ifdef MAPNIK_LOG
-                    mapnik::log() << "cairo_renderer_base: markers_symbolizer does not yet support SVG markers";
-#endif
+                    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: markers_symbolizer does not yet support SVG markers";
+
                     return;
                 }
                 boost::optional<path_ptr> marker = (*mark)->get_vector_data();

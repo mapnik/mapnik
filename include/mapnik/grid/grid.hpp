@@ -136,9 +136,7 @@ public:
             }
             else
             {
-#ifdef MAPNIK_LOG
-                mapnik::log() << "hit_grid: Should not get here: key '" << key_ << "' not found in feature properties";
-#endif
+                MAPNIK_LOG_DEBUG(grid) << "hit_grid: Should not get here: key '" << key_ << "' not found in feature properties";
             }
         }
 
@@ -155,9 +153,7 @@ public:
         }
         else
         {
-#ifdef MAPNIK_LOG
-            mapnik::log() << "hit_grid: Warning - key '" << key_ << "' was blank for " << *feature;
-#endif
+            MAPNIK_LOG_DEBUG(grid) << "hit_grid: Warning - key '" << key_ << "' was blank for " << *feature;
         }
     }
 

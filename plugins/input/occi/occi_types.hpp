@@ -160,9 +160,7 @@ public:
     {
         close_query(false);
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(occi) << "occi_connection_ptr: " << s;
-#endif
 
         stmt_ = conn_->createStatement(s);
 

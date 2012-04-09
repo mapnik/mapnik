@@ -31,10 +31,6 @@ extern "C"
 #include <boost/scoped_array.hpp>
 #include <boost/utility.hpp>
 
-#ifdef MAPNIK_LOG
-#include <iostream>
-#endif
-
 namespace mapnik
 {
 class png_reader : public image_reader, boost::noncopyable
@@ -134,9 +130,7 @@ void png_reader::init()
     width_=width;
     height_=height;
 
-#ifdef MAPNIK_LOG
-    mapnik::log() << "png_reader: bit_depth=" << bit_depth_ << ",color_type=" << color_type_;
-#endif
+    MAPNIK_LOG_DEBUG(png_reader) << "png_reader: bit_depth=" << bit_depth_ << ",color_type=" << color_type_;
 
     png_destroy_read_struct(&png_ptr,&info_ptr,0);
     fclose(fp);
