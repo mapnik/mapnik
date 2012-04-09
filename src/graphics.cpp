@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/global.hpp>
@@ -60,7 +61,7 @@ image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
     painted_ = true;
     if (rhs->get_format() != Cairo::FORMAT_ARGB32)
     {
-        std::cerr << "Unable to convert this Cairo format\n";
+        MAPNIK_LOG_WARN(graphics) << "Unable to convert this Cairo format";
         return; // throw exception ??
     }
 

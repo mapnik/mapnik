@@ -414,7 +414,9 @@ public:
                 {
                     double end_x=0;
                     double end_y=0;
-                    std::cerr << "Curve 3 not implemented" << std::endl;
+
+                    MAPNIK_LOG_WARN(cairo_renderer) << "Curve 3 not implemented";
+
                     path.vertex(&end_x, &end_y);
 
                     curve_to(x,y,x,y,end_x,end_y);
@@ -437,7 +439,7 @@ public:
                 }
                 else
                 {
-                    std::cerr << "Unimplemented drawing command: " << cm << std::endl;
+                    MAPNIK_LOG_WARN(cairo_renderer) << "Unimplemented drawing command: " << cm;
                     move_to(x, y);
                 }
             }
@@ -447,7 +449,7 @@ public:
             }
             else
             {
-                std::cerr << "Unimplemented path command: " << cm << std::endl;
+                MAPNIK_LOG_WARN(cairo_renderer) << "Unimplemented path command: " << cm;
             }
         }
     }
@@ -1330,7 +1332,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                             if (writer.first)
                             {
                                 //writer.first->add_box(label_ext, feature, t_, writer.second);
-                                std::cerr << "### Warning metawriter not yet supported for LINE placement\n";
+                                MAPNIK_LOG_WARN(cairo_renderer) << "metawriter not yet supported for LINE placement";
                             }
                         }
                     }
@@ -1457,7 +1459,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                         if (writer.first)
                         {
                             //writer.first->add_box(label_ext, feature, t_, writer.second);
-                            std::cerr << "### Warning metawriter not yet supported for LINE placement\n";
+                            MAPNIK_LOG_WARN(cairo_renderer) << "metawriter not yet supported for LINE placement";
                         }
 
                         agg::conv_transform<agg::path_storage, agg::trans_affine> trans(marker, matrix);

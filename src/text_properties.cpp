@@ -65,9 +65,7 @@ void text_symbolizer_properties::process(processed_text &output, Feature const& 
     if (tree_) {
         tree_->apply(format, feature, output);
     } else {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "Warning: text_symbolizer_properties can't produce text: No formatting tree!\n";
-#endif
+        MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
     }
 }
 
@@ -122,7 +120,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     optional<std::string> name_ = sym.get_opt_attr<std::string>("name");
     if (name_)
     {
-        std::cerr << "### WARNING: Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!\n";
+        MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
+
         set_old_style_expression(parse_expression(*name_, "utf8"));
     }
 

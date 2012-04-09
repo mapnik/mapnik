@@ -596,7 +596,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
         }
         catch (...)
         {
-            std::cerr << "Exception caught in \"query_point\"" << std::endl;
+            MAPNIK_LOG_ERROR(map) << "Exception caught in \"query_point\"";
         }
     }
     return featureset_ptr();
@@ -639,7 +639,7 @@ featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
         }
         catch (...)
         {
-            std::cerr << "Exception caught in \"query_map_point\"" << std::endl;
+            MAPNIK_LOG_ERROR(map) << "Exception caught in \"query_map_point\"";
         }
     }
     return featureset_ptr();

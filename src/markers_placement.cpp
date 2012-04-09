@@ -108,11 +108,11 @@ bool markers_placement<Locator, Detector>::get_point(
         //Error for this marker is too large. Skip to the next position.
         if (abs(error_) > max_error_ * spacing_)
         {
-            if (error_ > spacing_) {
+            if (error_ > spacing_)
+            {
                 error_ = 0; //Avoid moving backwards
-#ifdef MAPNIK_DEBUG
-                std::cerr << "WARNING: Extremely large error in markers_placement. Please file a bug report.\n";
-#endif
+
+                MAPNIK_LOG_WARN(markers_placement) << "Extremely large error in markers_placement. Please file a bug report.";
             }
             spacing_left_ += spacing_ - error_;
             error_ = 0;
@@ -211,15 +211,14 @@ void markers_placement<Locator, Detector>::set_spacing_left(double sl, bool allo
     double delta_error = sl - spacing_left_;
     if (!allow_negative && delta_error < 0)
     {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "WARNING: Unexpected negative error in markers_placement. Please file a bug report.\n";
-#endif
+        MAPNIK_LOG_WARN(markers_placement) << "Unexpected negative error in markers_placement. Please file a bug report.";
+
         return;
     }
 #ifdef MAPNIK_DEBUG
     if (delta_error == 0.0)
     {
-        std::cerr << "WARNING: Not moving at all in set_spacing_left()! Please file a bug report.\n";
+        MAPNIK_LOG_WARN(markers_placement) << "Not moving at all in set_spacing_left()! Please file a bug report.";
     }
 #endif
     error_ += delta_error;

@@ -19,7 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/formatting/base.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/registry.hpp>
@@ -34,9 +36,7 @@ namespace formatting {
 void node::to_xml(boost::property_tree::ptree &xml) const
 {
     //TODO: Should this throw a config_error?
-#ifdef MAPNIK_DEBUG
-    std::cerr << "Error: Trying to write unsupported node type to XML.\n";
-#endif
+    MAPNIK_LOG_ERROR(base) << "Trying to write unsupported node type to XML.";
 }
 
 node_ptr node::from_xml(xml_node const& xml)

@@ -316,7 +316,7 @@ struct feature_grammar :
         on_error<fail>
             (
                 feature
-                , std::cerr
+                , std::clog
                 << phoenix::val("Error! Expecting ")
                 << _4                               // what failed?
                 << phoenix::val(" here: \"")

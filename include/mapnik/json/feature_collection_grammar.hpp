@@ -103,7 +103,7 @@ struct feature_collection_grammar :
         qi::on_error<qi::fail>
             (
                 feature_collection
-                , std::cerr
+                , std::clog
                 << phoenix::val("Error parsing GeoJSON ")
                 << qi::_4                       
                 << phoenix::val(" here: \"")

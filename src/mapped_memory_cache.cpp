@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 
 // boost
@@ -82,13 +83,15 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         }
         catch (...)
         {
-            std::cerr << "Exception caught while loading mapping memory file: " << uri << std::endl;
+            MAPNIK_LOG_ERROR(mapped_memory_cache) << "Exception caught while loading mapping memory file: " << uri;
         }
     }
-    /*else
-      {
-      std::cerr << "### WARNING Memory region does not exist file: " << uri << std::endl;
-      }*/
+    /*
+    else
+    {
+        MAPNIK_LOG_WARN(mapped_memory_cache) << "Memory region does not exist file: " << uri;
+    }
+    */
     return result;
 }
 

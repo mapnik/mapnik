@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_parser.hpp>
@@ -103,7 +104,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
             }
             catch (...)
             {
-                std::cerr << "Exception caught while loading SVG: " << uri << std::endl;
+                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading SVG: " << uri;
             }
         }
         else
@@ -129,13 +130,13 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
 
             catch (...)
             {
-                std::cerr << "Exception caught while loading image: " << uri << std::endl;
+                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading image: " << uri;
             }
         }
     }
     else
     {
-        std::cerr << "### WARNING Marker does not exist: " << uri << std::endl;
+        MAPNIK_LOG_WARN(marker_cache) << "Marker does not exist: " << uri;
     }
     return result;
 }

@@ -806,7 +806,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
                 index++;
                 if (index >= path_positions.size()) //Bail out if we run off the end of the shape
                 {
-                    //std::cerr << "FAIL: Out of space" << std::endl;
+                    //MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Out of space";
                     return std::auto_ptr<text_path>(NULL);
                 }
                 new_x = path_positions[index].x;
@@ -843,7 +843,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         if (p.max_char_angle_delta > 0 &&
             fabs(angle_delta) > p.max_char_angle_delta)
         {
-            //std::cerr << "FAIL: Too Bendy!" << std::endl;
+            //MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Too Bendy!";
             return std::auto_ptr<text_path>(NULL);
         }
 
@@ -897,7 +897,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         else
         {
             //Otherwise we have failed to find a placement
-            //std::cerr << "FAIL: Double upside-down!" << std::endl;
+            //MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Double upside-down!";
             return std::auto_ptr<text_path>(NULL);
         }
     }
@@ -949,15 +949,15 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
                 )
             )
         {
-            //std::cerr << "No Intersects:" << !dimensions_.intersects(e) << ": " << e << " @ " << dimensions_ << std::endl;
-            //std::cerr << "No Placements:" << !detector_.has_placement(e, info.get_string(), p.minimum_distance) << std::endl;
+            //MAPNIK_LOG_ERROR(placement_finder) << "No Intersects:" << !dimensions_.intersects(e) << ": " << e << " @ " << dimensions_;
+            //MAPNIK_LOG_ERROR(placement_finder) << "No Placements:" << !detector_.has_placement(e, info.get_string(), p.minimum_distance);
             status = false;
             break;
         }
 
         if (p.avoid_edges && !dimensions_.contains(e))
         {
-            //std::cerr << "Fail avoid edges" << std::endl;
+            //MAPNIK_LOG_ERROR(placement_finder) << "Fail avoid edges";
             status = false;
             break;
         }
