@@ -89,7 +89,7 @@ public:
         if (env_ == 0)
         {
 #ifdef MAPNIK_LOG
-            mapnik::log() << "occi_environment: constructor";
+            MAPNIK_LOG_DEBUG(occi) << "occi_environment: constructor";
 #endif
 
             const int mode = oracle::occi::Environment::OBJECT
@@ -113,7 +113,7 @@ private:
         if (env_)
         {
 #ifdef MAPNIK_LOG
-            mapnik::log() << "occi_environment: destructor";
+            MAPNIK_LOG_DEBUG(occi) << "occi_environment: destructor";
 #endif
 
             oracle::occi::Environment::terminateEnvironment(env_);
@@ -163,6 +163,10 @@ public:
     oracle::occi::ResultSet* execute_query(const std::string& s, const unsigned prefetch = 0)
     {
         close_query(false);
+
+#ifdef MAPNIK_LOG
+        MAPNIK_LOG_DEBUG(occi) << "occi_connection_ptr: " << s;
+#endif
 
         stmt_ = conn_->createStatement(s);
 

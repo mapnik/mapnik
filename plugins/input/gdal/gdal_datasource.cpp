@@ -51,7 +51,7 @@ using mapnik::datasource_exception;
 inline GDALDataset* gdal_datasource::open_dataset() const
 {
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "gdal_datasource: Opening " << dataset_name_;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Opening " << dataset_name_;
 #endif
 
     GDALDataset *dataset;
@@ -81,10 +81,8 @@ gdal_datasource::gdal_datasource(parameters const& params, bool bind)
       filter_factor_(*params_.get<double>("filter_factor", 0.0)),
       nodata_value_(params_.get<double>("nodata"))
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "gdal_datasource: Initializing...";
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
 #endif
 
     GDALAllRegister();
@@ -131,7 +129,7 @@ void gdal_datasource::bind() const
     if (bbox_s)
     {
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "gdal_datasource: BBox Parameter=" << *bbox_s;
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: BBox Parameter=" << *bbox_s;
 #endif
 
         bbox_override = extent_.from_string(*bbox_s);
@@ -156,12 +154,10 @@ void gdal_datasource::bind() const
     }
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_)
-    {
-        mapnik::log() << "gdal_datasource Geotransform=" << tr[0] << "," << tr[1] << ","
-                      << tr[2] << "," << tr[3] << ","
-                      << tr[4] << "," << tr[5];
-    }
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource Geotransform="
+                           << tr[0] << "," << tr[1] << ","
+                           << tr[2] << "," << tr[3] << ","
+                           << tr[4] << "," << tr[5];
 #endif
 
     // TODO - We should throw for true non-north up images, but the check
@@ -198,11 +194,8 @@ void gdal_datasource::bind() const
     GDALClose(dataset);
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_)
-    {
-        mapnik::log() << "gdal_datasource: Raster Size=" << width_ << "," << height_;
-        mapnik::log() << "gdal_datasource: Raster Extent=" << extent_;
-    }
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Size=" << width_ << "," << height_;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Extent=" << extent_;
 #endif
 
     is_bound_ = true;

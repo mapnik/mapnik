@@ -82,8 +82,6 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
       pool_(0),
       conn_(0)
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
     if (! params_.get<std::string>("user")) throw datasource_exception("OCCI Plugin: no <user> specified");
     if (! params_.get<std::string>("password")) throw datasource_exception("OCCI Plugin: no <password> specified");
     if (! params_.get<std::string>("host")) throw datasource_exception("OCCI Plugin: no <host> string specified");
@@ -206,7 +204,7 @@ void occi_datasource::bind() const
         }
 
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "occi_datasource: " << s.str();
+        MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 #endif
 
         try
@@ -246,7 +244,7 @@ void occi_datasource::bind() const
         s << "SELECT " << fields_ << " FROM (" << table_name_ << ") WHERE rownum < 1";
 
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "occi_datasource: " << s.str();
+        MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 #endif
 
         try
@@ -338,21 +336,15 @@ void occi_datasource::bind() const
                     case oracle::occi::OCCI_SQLT_BLOB:
                     case oracle::occi::OCCI_SQLT_RSET:
 #ifdef MAPNIK_LOG
-                        if (log_enabled_)
-                        {
-                            mapnik::log() << "occi_datasource: Unsupported datatype "
-                                          << occi_enums::resolve_datatype(type_oid)
-                                          << " (type_oid=" << type_oid << ")";
-                        }
+                        MAPNIK_LOG_WARN(occi) << "occi_datasource: Unsupported datatype "
+                                              << occi_enums::resolve_datatype(type_oid)
+                                              << " (type_oid=" << type_oid << ")";
 #endif
                         break;
                     default:
 #ifdef MAPNIK_LOG
-                        if (log_enabled_)
-                        {
-                            mapnik::log() << "occi_datasource: Unknown datatype "
-                                          << "(type_oid=" << type_oid << ")";
-                        }
+                        MAPNIK_LOG_WARN(occi) << "occi_datasource: Unknown datatype "
+                                              << "(type_oid=" << type_oid << ")";
 #endif
                         break;
                     }
@@ -400,7 +392,7 @@ box2d<double> occi_datasource::envelope() const
         s << " TABLE(SDO_UTIL.GETVERTICES(a.shape)) c";
 
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "occi_datasource: " << s.str();
+        MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 #endif
 
         try
@@ -423,7 +415,7 @@ box2d<double> occi_datasource::envelope() const
                 }
                 catch (bad_lexical_cast& ex)
                 {
-                    std::cerr << "OCCI Plugin: " << ex.what() << std::endl;
+                    MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
                 }
             }
         }
@@ -448,7 +440,7 @@ box2d<double> occi_datasource::envelope() const
         s << " WHERE LOWER(m.table_name) = LOWER('" << table_name_ << "') AND dim.sdo_dimname = 'Y'";
 
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "occi_datasource: " << s.str();
+        MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 #endif
 
         try
@@ -469,7 +461,7 @@ box2d<double> occi_datasource::envelope() const
                     }
                     catch (bad_lexical_cast& ex)
                     {
-                        std::cerr << "OCCI Plugin: " << ex.what() << std::endl;
+                        MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
                     }
                 }
 
@@ -482,7 +474,7 @@ box2d<double> occi_datasource::envelope() const
                     }
                     catch (bad_lexical_cast& ex)
                     {
-                        std::cerr << "OCCI Plugin: " << ex.what() << std::endl;
+                        MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
                     }
                 }
 
@@ -574,9 +566,7 @@ featureset_ptr occi_datasource::features(query const& q) const
         }
         else
         {
-#ifdef MAPNIK_LOG
-            if (log_enabled_) mapnik::log() << "occi_datasource: cannot determine where to add the spatial filter declaration";
-#endif
+            MAPNIK_LOG_WARN(occi) << "occi_datasource: cannot determine where to add the spatial filter declaration";
         }
     }
 
@@ -594,16 +584,14 @@ featureset_ptr occi_datasource::features(query const& q) const
         }
         else
         {
-#ifdef MAPNIK_LOG
-            if (log_enabled_) mapnik::log() << "occi_datasource: Cannot determine where to add the row limit declaration";
-#endif
+            MAPNIK_LOG_WARN(occi) << "occi_datasource: Cannot determine where to add the row limit declaration";
         }
     }
 
     s << query;
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "occi_datasource: " << s.str();
+    MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 #endif
 
     return boost::make_shared<occi_featureset>(pool_,
@@ -668,9 +656,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         }
         else
         {
-#ifdef MAPNIK_LOG
-            if (log_enabled_) mapnik::log() << "occi_datasource: Cannot determine where to add the spatial filter declaration";
-#endif
+            MAPNIK_LOG_WARN(occi) << "occi_datasource: Cannot determine where to add the spatial filter declaration";
         }
     }
 
@@ -688,16 +674,14 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
         }
         else
         {
-#ifdef MAPNIK_LOG
-            if (log_enabled_) mapnik::log() << "occi_datasource: Cannot determine where to add the row limit declaration";
-#endif
+            MAPNIK_LOG_WARN(occi) << "occi_datasource: Cannot determine where to add the row limit declaration";
         }
     }
 
     s << query;
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "occi_datasource: " << s.str();
+    MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 #endif
 
     return boost::make_shared<occi_featureset>(pool_,

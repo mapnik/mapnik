@@ -59,7 +59,7 @@ shape_io::shape_io(const std::string& shape_name, bool open_index)
         catch (...)
         {
 #ifdef MAPNIK_LOG
-            mapnik::log() << "shape_io: Could not open index=" << shape_name << INDEX;
+            MAPNIK_LOG_WARN(shape) << "shape_io: Could not open index=" << shape_name << INDEX;
 #endif
         }
     }
@@ -233,5 +233,3 @@ void shape_io::read_polygon(mapnik::geometry_container & geom)
     //   double m=record.read_double();
     //}
 }
-
-

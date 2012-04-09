@@ -106,7 +106,7 @@ feature_ptr ogr_featureset::next()
 #ifdef MAPNIK_LOG
         else
         {
-            mapnik::log() << "ogr_featureset: Feature with null geometry=" << (*feat)->GetFID();
+            MAPNIK_LOG_DEBUG(ogr) << "ogr_featureset: Feature with null geometry=" << (*feat)->GetFID();
         }
 #endif
         ++count_;
@@ -146,7 +146,7 @@ feature_ptr ogr_featureset::next()
             case OFTWideStringList: // deprecated !
             {
 #ifdef MAPNIK_LOG
-                mapnik::log() << "ogr_featureset: Unhandled type_oid=" << type_oid;
+                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
 #endif
                 break;
             }
@@ -154,7 +154,7 @@ feature_ptr ogr_featureset::next()
             case OFTBinary:
             {
 #ifdef MAPNIK_LOG
-                mapnik::log() << "ogr_featureset: Unhandled type_oid=" << type_oid;
+                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
 #endif
                 //feature->put(name,feat->GetFieldAsBinary (i, size));
                 break;
@@ -165,7 +165,7 @@ feature_ptr ogr_featureset::next()
             case OFTDateTime:       // unhandled !
             {
 #ifdef MAPNIK_LOG
-                mapnik::log() << "ogr_featureset: Unhandled type_oid=" << type_oid;
+                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
 #endif
                 break;
             }
@@ -173,7 +173,7 @@ feature_ptr ogr_featureset::next()
             default: // unknown
             {
 #ifdef MAPNIK_LOG
-                mapnik::log() << "ogr_featureset: Unknown type_oid=" << type_oid;
+                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unknown type_oid=" << type_oid;
 #endif
                 break;
             }
@@ -183,7 +183,7 @@ feature_ptr ogr_featureset::next()
     }
 
 #ifdef MAPNIK_LOG
-    mapnik::log() << "ogr_featureset: " << count_ << " features";
+    MAPNIK_LOG_DEBUG(ogr) << "ogr_featureset: " << count_ << " features";
 #endif
 
     return feature_ptr();

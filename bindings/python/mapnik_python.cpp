@@ -67,6 +67,7 @@ void export_view_transform();
 void export_raster_colorizer();
 void export_inmem_metawriter();
 void export_label_collision_detector();
+void export_logger();
 
 #include <mapnik/version.hpp>
 #include <mapnik/value_error.hpp>
@@ -386,6 +387,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_raster_colorizer();
     export_inmem_metawriter();
     export_label_collision_detector();
+    export_logger();
 
     def("render_grid",&render_grid,
         ( arg("map"),

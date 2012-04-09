@@ -49,11 +49,14 @@ using mapnik::datasource_exception;
  * Opens a GDALDataset and returns a pointer to it.
  * Caller is responsible for calling GDALClose on it
  */
-inline void *rasterlite_datasource::open_dataset() const
+inline void* rasterlite_datasource::open_dataset() const
 {
-    void *dataset = rasterliteOpen (dataset_name_.c_str(), table_name_.c_str());
+    void* dataset = rasterliteOpen (dataset_name_.c_str(), table_name_.c_str());
 
-    if (! dataset) throw datasource_exception("Rasterlite Plugin: Error opening dataset");
+    if (! dataset)
+    {
+        throw datasource_exception("Rasterlite Plugin: Error opening dataset");
+    }
 
     if (rasterliteIsError (dataset))
     {
@@ -68,15 +71,12 @@ inline void *rasterlite_datasource::open_dataset() const
 }
 
 
-
 rasterlite_datasource::rasterlite_datasource(parameters const& params, bool bind)
     : datasource(params),
       desc_(*params.get<std::string>("type"),"utf-8")
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "rasterlite_datasource: Initializing...";
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Initializing...";
 #endif
 
     boost::optional<std::string> file = params.get<std::string>("file");
@@ -120,42 +120,41 @@ void rasterlite_datasource::bind() const
     extent_.init(x0,y0,x1,y1);
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_)
+    int srid, auth_srid;
+    const char *auth_name;
+    const char *ref_sys_name;
+    const char *proj4text;
+
+    int tile_count;
+    double pixel_x_size, pixel_y_size;
+    int levels = rasterliteGetLevels (dataset);
+
+    if (rasterliteGetSrid(dataset, &srid, &auth_name, &auth_srid, &ref_sys_name, &proj4text) != RASTERLITE_OK)
     {
-        int srid, auth_srid;
-        const char *auth_name;
-        const char *ref_sys_name;
-        const char *proj4text;
+        std::string error (rasterliteGetLastError(dataset));
 
-        int tile_count;
-        double pixel_x_size, pixel_y_size;
-        int levels = rasterliteGetLevels (dataset);
+        rasterliteClose (dataset);
 
-        if (rasterliteGetSrid(dataset, &srid, &auth_name, &auth_srid, &ref_sys_name, &proj4text) != RASTERLITE_OK)
+        throw datasource_exception(error);
+    }
+
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Data Source=" << rasterliteGetTablePrefix(dataset);
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: SRID=" << srid;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Authority=" << auth_name;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: AuthSRID=" << auth_srid;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: RefSys Name=" << ref_sys_name;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Proj4Text=" << proj4text;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Extent=" << x0 << "," << y0 << " " << x1 << "," << y1 << ")";
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Levels=" << levels;
+
+    for (int i = 0; i < levels; i++)
+    {
+        if (rasterliteGetResolution(dataset, i, &pixel_x_size, &pixel_y_size, &tile_count) == RASTERLITE_OK)
         {
-            std::string error (rasterliteGetLastError(dataset));
-
-            rasterliteClose (dataset);
-
-            throw datasource_exception(error);
-        }
-
-        mapnik::log() << "rasterlite_datasource: Data Source=" << rasterliteGetTablePrefix(dataset);
-        mapnik::log() << "rasterlite_datasource: SRID=" << srid;
-        mapnik::log() << "rasterlite_datasource: Authority=" << auth_name;
-        mapnik::log() << "rasterlite_datasource: AuthSRID=" << auth_srid;
-        mapnik::log() << "rasterlite_datasource: RefSys Name=" << ref_sys_name;
-        mapnik::log() << "rasterlite_datasource: Proj4Text=" << proj4text;
-        mapnik::log() << "rasterlite_datasource: Extent=" << x0 << "," << y0 << " " << x1 << "," << y1 << ")";
-        mapnik::log() << "rasterlite_datasource: Levels=" << levels;
-
-        for (int i = 0; i < levels; i++)
-        {
-            if (rasterliteGetResolution(dataset, i, &pixel_x_size, &pixel_y_size, &tile_count) == RASTERLITE_OK)
-            {
-                mapnik::log() << "rasterlite_datasource: Level=" << i
-                              << " x=" << pixel_x_size << " y=" << pixel_y_size << " tiles=" << tile_count;
-            }
+            MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Level=" << i
+                                         << " x=" << pixel_x_size
+                                         << " y=" << pixel_y_size
+                                         << " tiles=" << tile_count;
         }
     }
 #endif

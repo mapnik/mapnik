@@ -128,8 +128,9 @@ feature_ptr shape_featureset<filterT>::next()
                 if (shape_.type() == shape_io::shape_null)
                 {
                     pos += std::streampos(12);
+
                     // TODO handle the shapes
-                    std::cerr << "NULL SHAPE len=" << shape_.reclength_ << std::endl;
+                    MAPNIK_LOG_WARN(shape) << "shape_featureset: NULL SHAPE len=" << shape_.reclength_;
                 }
                 else if (filter_.pass(shape_.current_extent()))
                 {
@@ -147,7 +148,7 @@ feature_ptr shape_featureset<filterT>::next()
                 else
                 {
 #ifdef MAPNIK_LOG
-                    mapnik::log() << "shape_featureset: Total shapes read=" << count_;
+                    MAPNIK_LOG_DEBUG(shape) << "shape_featureset: Total shapes read=" << count_;
 #endif
                     return feature_ptr();
                 }
@@ -248,7 +249,7 @@ feature_ptr shape_featureset<filterT>::next()
             }
             catch (...)
             {
-                std::cerr << "Shape Plugin: error processing attributes " << std::endl;
+                MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing attributes";
             }
         }
 
@@ -257,7 +258,7 @@ feature_ptr shape_featureset<filterT>::next()
     else
     {
 #ifdef MAPNIK_LOG
-        mapnik::log() << "shape_featureset: Total shapes read=" << count_;
+        MAPNIK_LOG_DEBUG(shape) << "shape_featureset: Total shapes read=" << count_;
 #endif
         return feature_ptr();
     }

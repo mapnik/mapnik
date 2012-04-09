@@ -20,13 +20,17 @@
  *
  *****************************************************************************/
 
+// mapnik
 #include <mapnik/debug.hpp>
 
-#ifdef MAPNIK_LOG
-namespace mapnik {
-    namespace logger {
-        severity::type severity::severity_level_ =
-            MAPNIK_DEBUG_AS_BOOL ? severity::debug : severity::error;
-    }
+namespace mapnik { namespace logger {
+
+
+severity::type severity::severity_level_ =
+    MAPNIK_DEBUG_AS_BOOL ? severity::debug : severity::error;
+
+severity::severity_map severity::object_severity_level_ = severity::severity_map();
+
+
 }
-#endif
+}

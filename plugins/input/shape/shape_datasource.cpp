@@ -63,8 +63,6 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
       row_limit_(*params_.get<int>("row_limit",0)),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("Shape Plugin: missing <file> parameter");
 
@@ -146,7 +144,7 @@ void shape_datasource::bind() const
                 // I - long
                 // G - ole
                 // + - autoincrement
-                if (log_enabled_) mapnik::log() << "shape_datasource: Unknown type=" << fd.type_;
+                MAPNIK_LOG_WARN(shape) << "shape_datasource: Unknown type=" << fd.type_;
 #endif
                 break;
             }
@@ -159,17 +157,17 @@ void shape_datasource::bind() const
     }
     catch (const datasource_exception& ex)
     {
-        std::cerr << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
+        MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;
     }
     catch (const std::exception& ex)
     {
-        std::cerr << "Shape Plugin: error processing field attributes, " << ex.what() << std::endl;
+        MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;
     }
     catch (...) // exception: pipe_select_interrupter: Too many open files
     {
-        std::cerr << "Shape Plugin: error processing field attributes" << std::endl;
+        MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes";
         throw;
     }
 
@@ -209,16 +207,13 @@ void shape_datasource::init(shape_io& shape) const
     shape.shp().read_envelope(extent_);
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_)
-    {
-        double zmin = shape.shp().read_double();
-        double zmax = shape.shp().read_double();
-        double mmin = shape.shp().read_double();
-        double mmax = shape.shp().read_double();
+    const double zmin = shape.shp().read_double();
+    const double zmax = shape.shp().read_double();
+    const double mmin = shape.shp().read_double();
+    const double mmax = shape.shp().read_double();
 
-        mapnik::log() << "shape_datasource: Z min/max=" << zmin << "," << zmax;
-        mapnik::log() << "shape_datasource: M min/max=" << mmin << "," << mmax;
-    }
+    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Z min/max=" << zmin << "," << zmax;
+    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: M min/max=" << mmin << "," << mmax;
 #else
     shape.shp().skip(4*8);
 #endif
@@ -237,18 +232,15 @@ void shape_datasource::init(shape_io& shape) const
     //else
     //{
     // #ifdef MAPNIK_LOG
-    //    mapnik::log() << "shape_datasource: No .index file found for "
-    //                  << shape_name_ << ".shp, use the 'shapeindex' program to build an index for faster rendering";
+    //    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: No .index file found for "
+    //                            << shape_name_ << ".shp, use the 'shapeindex' program to build an index for faster rendering";
     // #endif
     //}
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_)
-    {
-        mapnik::log() << "shape_datasource: Extent=" << extent_;
-        mapnik::log() << "shape_datasource: File length=" << file_length_;
-        mapnik::log() << "shape_datasource: Shape type=" << shape_type_;
-    }
+    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Extent=" << extent_;
+    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: File length=" << file_length_;
+    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Shape type=" << shape_type_;
 #endif
 
 }
@@ -390,4 +382,3 @@ boost::optional<mapnik::datasource::geometry_t> shape_datasource::get_geometry_t
     }
     return result;
 }
-

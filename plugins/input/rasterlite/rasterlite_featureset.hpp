@@ -36,7 +36,8 @@ typedef boost::variant<mapnik::query,mapnik::coord2d> rasterlite_query;
 class rasterlite_featureset : public mapnik::Featureset
 {
 public:
-    rasterlite_featureset(void* dataset, rasterlite_query q);
+    rasterlite_featureset(void* dataset,
+                          rasterlite_query q);
     virtual ~rasterlite_featureset();
     mapnik::feature_ptr next();
 

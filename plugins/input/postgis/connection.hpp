@@ -82,7 +82,7 @@ public:
             PQfinish(conn_);
 
 #ifdef MAPNIK_LOG
-            mapnik::log() << "postgis_connection: postgresql connection closed - " << conn_;
+            MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: postgresql connection closed - " << conn_;
 #endif
             closed_ = true;
         }
@@ -163,7 +163,7 @@ public:
             PQfinish(conn_);
 
 #ifdef MAPNIK_LOG
-            mapnik::log() << "postgis_connection: datasource closed, also closing connection - " << conn_;
+            MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: datasource closed, also closing connection - " << conn_;
 #endif
             closed_ = true;
         }

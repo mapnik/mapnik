@@ -79,7 +79,7 @@ public:
             is_valid_ = true;
 
 #ifdef MAPNIK_LOG
-            mapnik::log() << "ogr_layer_ptr: layer_from_name layer=" << layer_name_;
+            MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_name layer=" << layer_name_;
 #endif
         }
 
@@ -106,7 +106,7 @@ public:
                 is_valid_ = true;
 
 #ifdef MAPNIK_LOG
-                mapnik::log() << "ogr_layer_ptr: layer_from_index layer=" << layer_name_;
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_index layer=" << layer_name_;
 #endif
             }
         }
@@ -142,7 +142,7 @@ public:
                 is_valid_ = true;
 
 #ifdef MAPNIK_LOG
-                mapnik::log() << "ogr_layer_ptr: layer_from_sql layer=" << layer_name_;
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_sql layer=" << layer_name_;
 #endif
             }
         }
@@ -177,11 +177,11 @@ private:
             const std::string err = CPLGetLastErrorMsg();
             if (err.size() == 0)
             {
-                mapnik::log() << "ogr_layer_ptr: Error getting layer";
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: Error getting layer";
             }
             else
             {
-                mapnik::log() << "ogr_layer_ptr: " << err;
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: " << err;
             }
         }
     }

@@ -79,8 +79,6 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
       srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
     boost::optional<std::string> host = params_.get<std::string>("host");
     if (host)
     {
@@ -159,7 +157,7 @@ featureset_ptr kismet_datasource::features(query const& q) const
     if (! is_bound_) bind();
 
 #ifdef MAPNIK_LOG
-    // mapnik::log() << "kismet_datasource::features()";
+    // MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource::features()";
 #endif
 
     // TODO: use box2d to filter bbox before adding to featureset_ptr
@@ -179,7 +177,7 @@ featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
     if (! is_bound_) bind();
 
 #ifdef MAPNIK_LOG
-    // mapnik::log() << "kismet_datasource::features_at_point()";
+    // MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource::features_at_point()";
 #endif
 
     return featureset_ptr();
@@ -188,7 +186,7 @@ featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
 void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
 {
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "kismet_datasource: Enter run";
+    MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource: Enter run";
 #endif
 
     int sockfd, n;
@@ -209,7 +207,7 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
 
     if (host == NULL)
     {
-        std::cerr << "Kismet Plugin: error while searching host" << std::endl;
+        MAPNIK_LOG_ERROR(kismet) << "Kismet Plugin: error while searching host";
         return;
     }
 
@@ -219,13 +217,13 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
 
     if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) < 0)
     {
-        std::cerr << "Kismet Plugin: error while creating socket" << std::endl;
+        MAPNIK_LOG_ERROR(kismet) << "Kismet Plugin: error while creating socket";
         return;
     }
 
     if (connect(sockfd, (struct sockaddr*) &sock_addr, sizeof(sock_addr)))
     {
-        std::cerr << "Kismet Plugin: Error while connecting" << std::endl;
+        MAPNIK_LOG_ERROR(kismet) << "Kismet Plugin: Error while connecting";
         return;
     }
 
@@ -233,7 +231,7 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
 
     if (write(sockfd, command.c_str(), command.length()) != (signed)command.length())
     {
-        std::cerr << "Kismet Plugin: Error sending command to " << ip_host << std::endl;
+        MAPNIK_LOG_ERROR(kismet) << "Kismet Plugin: Error sending command to " << ip_host;
 
         close(sockfd);
         return;
@@ -255,7 +253,7 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
         std::string bufferObj(buffer); // TCP data send from kismet_server as STL string
 
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "kismet_datasource: buffer_obj=" << bufferObj;
+        MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource: buffer_obj=" << bufferObj;
 #endif
 
         std::string::size_type found = 0;
@@ -269,7 +267,7 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
                 kismet_line.assign(bufferObj, search_start, found - search_start);
 
 #ifdef MAPNIK_LOG
-                if (log_enabled_) mapnik::log() << "kismet_datasource: line=" << kismet_line;
+                MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource: line=" << kismet_line;
 #endif
 
                 int param_number = 5; // the number of parameters to parse
@@ -284,11 +282,11 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
                             &bestlon) == param_number)
                 {
 #ifdef MAPNIK_LOG
-                    if (log_enabled_)
-                    {
-                        mapnik::log() << "kismet_datasource: ssid=" << ssid << ", bssid=" << bssid
-                                      << ", crypt=" << crypt << ", bestlat=" << bestlat << ", bestlon=" << bestlon;
-                    }
+                    MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource: ssid=" << ssid
+                                             << ", bssid=" << bssid
+                                             << ", crypt=" << crypt
+                                             << ", bestlat=" << bestlat
+                                             << ", bestlon=" << bestlon;
 #endif
 
                     kismet_network_data knd(ssid, bssid, bestlat, bestlon, crypt);
@@ -316,13 +314,13 @@ void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
 
     if (n < 0)
     {
-        std::cerr << "Kismet Plugin: error while reading from socket" << std::endl;
+        MAPNIK_LOG_ERROR(kismet) << "Kismet Plugin: error while reading from socket";
     }
 
     close(sockfd);
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "kismet_datasource: Exit run";
+    MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource: Exit run";
 #endif
 }
 

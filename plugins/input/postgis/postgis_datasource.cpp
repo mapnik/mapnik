@@ -82,8 +82,6 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
       intersect_min_scale_(*params_.get<int>("intersect_min_scale", 0)),
       intersect_max_scale_(*params_.get<int>("intersect_max_scale", 0))
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
     if (table_.empty())
     {
         throw mapnik::datasource_exception("Postgis Plugin: missing <table> parameter");
@@ -267,12 +265,9 @@ void postgis_datasource::bind() const
                             if (key_field_string)
                             {
                                 key_field_ = std::string(key_field_string);
-#ifdef MAPNIK_DEBUG
-                                if (log_enabled_)
-                                {
-                                    mapnik::log() << "postgis_datasource: auto-detected key field of '"
-                                                  << key_field_ << "' on table '" << geometry_table_ << "'";
-                                }
+#ifdef MAPNIK_LOG
+                                MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: auto-detected key field of '"
+                                                          << key_field_ << "' on table '" << geometry_table_ << "'";
 #endif
                             }
                         }
@@ -314,18 +309,15 @@ void postgis_datasource::bind() const
                 srid_ = -1;
 
 #ifdef MAPNIK_LOG
-                if (log_enabled_) mapnik::log() << "postgis_datasource: Table " << table_ << " is using SRID=-1";
+                MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Table " << table_ << " is using SRID=-1";
 #endif
             }
 
             // At this point the geometry_field may still not be known
             // but we'll catch that where more useful...
 #ifdef MAPNIK_LOG
-            if (log_enabled_)
-            {
-                mapnik::log() << "postgis_datasource: Using SRID=" << srid_;
-                mapnik::log() << "postgis_datasource: Using geometry_column=" << geometryColumn_;
-            }
+            MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Using SRID=" << srid_;
+            MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Using geometry_column=" << geometryColumn_;
 #endif
 
             // collect attribute desc
@@ -402,23 +394,20 @@ void postgis_datasource::bind() const
                         break;
                     default: // should not get here
 #ifdef MAPNIK_LOG
-                        if (log_enabled_)
-                        {
-                            s.str("");
-                            s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
+                        s.str("");
+                        s << "SELECT oid, typname FROM pg_type WHERE oid = " << type_oid;
 
-                            shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
-                            if (rs_oid->next())
-                            {
-                                mapnik::log() << "postgis_datasource: Unknown type=" << rs_oid->getValue("typname")
-                                              << " (oid:" << rs_oid->getValue("oid") << ")";
-                            }
-                            else
-                            {
-                                mapnik::log() << "postgis_datasource: Unknown type_oid=" << type_oid;
-                            }
-                            rs_oid->close();
+                        shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
+                        if (rs_oid->next())
+                        {
+                            MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type=" << rs_oid->getValue("typname")
+                                                     << " (oid:" << rs_oid->getValue("oid") << ")";
                         }
+                        else
+                        {
+                            MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type_oid=" << type_oid;
+                        }
+                        rs_oid->close();
 #endif
                         break;
                     }
@@ -573,7 +562,6 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
     else
     {
         // no cursor
-
         return conn->executeQuery(sql, 1);
     }
 }
@@ -859,7 +847,7 @@ box2d<double> postgis_datasource::envelope() const
                 else
                 {
 #ifdef MAPNIK_LOG
-                    mapnik::log() << boost::format("Mapnik LOG> postgis_datasource: Could not determine extent from query: %s") % s.str();
+                    MAPNIK_LOG_DEBUG(postgis) << boost::format("postgis_datasource: Could not determine extent from query: %s") % s.str();
 #endif
                 }
             }

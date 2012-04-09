@@ -323,5 +323,5 @@ include(plugins.pri)
 include(bindings.pri)
 
 unix {
-    DEFINES += LINUX=1
+    DEFINES += LINUX=1 MAPNIK_LOG=1
 }

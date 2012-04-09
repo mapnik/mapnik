@@ -100,8 +100,6 @@ geos_datasource::geos_datasource(parameters const& params, bool bind)
       geometry_data_name_("name"),
       geometry_id_(1)
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
     boost::optional<std::string> geometry = params.get<std::string>("wkt");
     if (! geometry) throw datasource_exception("missing <wkt> parameter");
     geometry_string_ = *geometry;
@@ -162,7 +160,7 @@ void geos_datasource::bind() const
 #endif
 
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "geos_datasource: Initializing extent from geometry";
+        MAPNIK_LOG_DEBUG(geos) << "geos_datasource: Initializing extent from geometry";
 #endif
 
         if (GEOSGeomTypeId(*geometry_) == GEOS_POINT)
@@ -185,12 +183,9 @@ void geos_datasource::bind() const
             if (*envelope != NULL && GEOSisValid(*envelope))
             {
 #ifdef MAPNIK_LOG
-                if (log_enabled_)
-                {
-                    char* wkt = GEOSGeomToWKT(*envelope);
-                    mapnik::log() << "geos_datasource: Getting coord sequence from=" << wkt;
-                    GEOSFree(wkt);
-                }
+                char* wkt = GEOSGeomToWKT(*envelope);
+                MAPNIK_LOG_DEBUG(geos) << "geos_datasource: Getting coord sequence from=" << wkt;
+                GEOSFree(wkt);
 #endif
 
                 const GEOSGeometry* exterior = GEOSGetExteriorRing(*envelope);
@@ -200,7 +195,7 @@ void geos_datasource::bind() const
                     if (cs != NULL)
                     {
 #ifdef MAPNIK_LOG
-                        if (log_enabled_) mapnik::log() << "geos_datasource: Iterating boundary points";
+                        MAPNIK_LOG_DEBUG(geos) << "geos_datasource: Iterating boundary points";
 #endif
 
                         double x, y;
@@ -319,7 +314,7 @@ featureset_ptr geos_datasource::features(query const& q) const
       << "))";
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "geos_datasource: Using extent=" << s.str();
+    MAPNIK_LOG_DEBUG(geos) << "geos_datasource: Using extent=" << s.str();
 #endif
 
     return boost::make_shared<geos_featureset>(*geometry_,
@@ -342,7 +337,7 @@ featureset_ptr geos_datasource::features_at_point(coord2d const& pt) const
     s << "POINT(" << pt.x << " " << pt.y << ")";
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "geos_datasource: Using point=" << s.str();
+    MAPNIK_LOG_DEBUG(geos) << "geos_datasource: Using point=" << s.str();
 #endif
 
     return boost::make_shared<geos_featureset>(*geometry_,

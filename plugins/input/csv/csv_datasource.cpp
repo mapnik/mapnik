@@ -72,8 +72,6 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
       filesize_max_(*params_.get<float>("filesize_max", 20.0)),  // MB
       ctx_(boost::make_shared<mapnik::context_type>())
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
     /* TODO:
        general:
        - refactor parser into generic class
@@ -224,7 +222,7 @@ void csv_datasource::parse_csv(T& stream,
                 sep = "\t";
 
 #ifdef MAPNIK_LOG
-                if (log_enabled_) mapnik::log() << "csv_datasource: auto detected tab separator";
+                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected tab separator";
 #endif
             }
         }
@@ -236,7 +234,7 @@ void csv_datasource::parse_csv(T& stream,
                 sep = "|";
 
 #ifdef MAPNIK_LOG
-                if (log_enabled_) mapnik::log() << "csv_datasource: auto detected '|' separator";
+                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected '|' separator";
 #endif
             }
             else // semicolons
@@ -247,7 +245,7 @@ void csv_datasource::parse_csv(T& stream,
                     sep = ";";
 
 #ifdef MAPNIK_LOG
-                    if (log_enabled_) mapnik::log() << "csv_datasource: auto detected ';' separator";
+                    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: auto detected ';' separator";
 #endif
                 }
             }
@@ -266,7 +264,7 @@ void csv_datasource::parse_csv(T& stream,
     if (quo.empty()) quo = "\"";
 
 #ifdef MAPNIK_LOG
-    if (log_enabled_) mapnik::log() << "csv_datasource: csv grammer: sep: '" << sep << "' quo: '" << quo << "' esc: '" << esc;
+    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammer: sep: '" << sep << "' quo: '" << quo << "' esc: '" << esc;
 #endif
 
     boost::escaped_list_separator<char> grammer;
@@ -433,7 +431,7 @@ void csv_datasource::parse_csv(T& stream,
         if ((row_limit_ > 0) && (line_number > row_limit_))
         {
 #ifdef MAPNIK_LOG
-            if (log_enabled_) mapnik::log() << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
+            MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
 #endif
             break;
         }
@@ -450,7 +448,7 @@ void csv_datasource::parse_csv(T& stream,
                 ++line_number;
 
 #ifdef MAPNIK_LOG
-                if (log_enabled_) mapnik::log() << "csv_datasource: empty row encountered at line: " << line_number;
+                MAPNIK_LOG_DEBUG(csv) << "csv_datasource: empty row encountered at line: " << line_number;
 #endif
 
                 continue;
@@ -555,8 +553,7 @@ void csv_datasource::parse_csv(T& stream,
                                 }
                                 else
                                 {
-                                    // TODO - handle this with mapnik::log
-                                    if (!quiet_) std::cerr << s.str() << "\n";
+                                    MAPNIK_LOG_ERROR(csv) << s.str();
                                 }
                             }
                         }
@@ -580,8 +577,7 @@ void csv_datasource::parse_csv(T& stream,
                                 }
                                 else
                                 {
-                                    // TODO - handle this with mapnik::log
-                                    if (!quiet_) std::cerr << s.str() << "\n";
+                                    MAPNIK_LOG_ERROR(csv) << s.str();
                                 }
                             }
                         }
@@ -618,8 +614,7 @@ void csv_datasource::parse_csv(T& stream,
                             }
                             else
                             {
-                                // TODO - handle this with mapnik::log
-                                if (!quiet_) std::cerr << s.str() << "\n";
+                                MAPNIK_LOG_ERROR(csv) << s.str();
                             }
                         }
                     }
@@ -652,8 +647,7 @@ void csv_datasource::parse_csv(T& stream,
                             }
                             else
                             {
-                                // TODO - handle this with mapnik::log
-                                if (!quiet_) std::cerr << s.str() << "\n";
+                                MAPNIK_LOG_ERROR(csv) << s.str();
                             }
                         }
                     }
@@ -746,8 +740,7 @@ void csv_datasource::parse_csv(T& stream,
                 }
                 else
                 {
-                    // TODO - handle this with mapnik::log
-                    if (!quiet_) std::cerr << s.str() << "\n";
+                    MAPNIK_LOG_ERROR(csv) << s.str();
                     continue;
                 }
             }
@@ -780,8 +773,7 @@ void csv_datasource::parse_csv(T& stream,
                     }
                     else
                     {
-                        // TODO - handle this with mapnik::log
-                        if (!quiet_) std::cerr << s.str() << "\n";
+                        MAPNIK_LOG_ERROR(csv) << s.str();
                         continue;
                     }
                 }
@@ -832,8 +824,7 @@ void csv_datasource::parse_csv(T& stream,
                     }
                     else
                     {
-                        // TODO - handle this with mapnik::log
-                        if (!quiet_) std::cerr << s.str() << "\n";
+                        MAPNIK_LOG_ERROR(csv) << s.str();
                         continue;
                     }
                 }
@@ -848,8 +839,7 @@ void csv_datasource::parse_csv(T& stream,
             }
             else
             {
-                // TODO - handle this with mapnik::log
-                if (!quiet_) std::cerr << ex.what() << "\n";
+                MAPNIK_LOG_ERROR(csv) << ex.what();
             }
         }
         catch(const std::exception & ex)
@@ -864,15 +854,13 @@ void csv_datasource::parse_csv(T& stream,
             }
             else
             {
-                // TODO - handle this with mapnik::log
-                if (!quiet_) std::cerr << s.str() << "\n";
+                MAPNIK_LOG_ERROR(csv) << s.str();
             }
         }
     }
     if (!feature_count > 0)
     {
-        // TODO - handle this with mapnik::log
-        if (!quiet_) std::cerr << "CSV Plugin: could not parse any lines of data\n";
+        MAPNIK_LOG_ERROR(csv) << "CSV Plugin: could not parse any lines of data";
     }
 }
 

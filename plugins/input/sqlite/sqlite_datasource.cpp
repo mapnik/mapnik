@@ -70,8 +70,6 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
       desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
       format_(mapnik::wkbAuto)
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
     /* TODO
        - throw if no primary key but spatial index is present?
        - remove auto-indexing
@@ -218,7 +216,7 @@ void sqlite_datasource::bind() const
          iter != init_statements_.end(); ++iter)
     {
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "sqlite_datasource: Execute init sql=" << *iter;
+        MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: Execute init sql=" << *iter;
 #endif
         dataset_->execute(*iter);
     }
@@ -616,11 +614,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         }
 
 #ifdef MAPNIK_LOG
-        if (log_enabled_)
-        {
-            mapnik::log() << "sqlite_datasource: Table=" << table_;
-            mapnik::log() << "sqlite_datasource: Query=" << s.str();
-        }
+        MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
 #endif
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
@@ -704,7 +698,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         }
 
 #ifdef MAPNIK_LOG
-        if (log_enabled_) mapnik::log() << "sqlite_datasource: " << s.str();
+        MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
 #endif
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));

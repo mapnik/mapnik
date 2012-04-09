@@ -84,7 +84,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
     }
     catch (SQLException &ex)
     {
-        std::cerr << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage() << std::endl;
+        MAPNIK_LOG_ERROR(occi) << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage();
     }
 }
 
@@ -206,17 +206,17 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCI_SQLT_RSET:
                 {
 #ifdef MAPNIK_LOG
-                    mapnik::log() << "occi_featureset: Unsupported datatype "
-                                  << occi_enums::resolve_datatype(type_oid)
-                                  << " (type_oid=" << type_oid << ")";
+                    MAPNIK_LOG_WARN(occi) << "occi_featureset: Unsupported datatype "
+                                          << occi_enums::resolve_datatype(type_oid)
+                                          << " (type_oid=" << type_oid << ")";
 #endif
                     break;
                 }
             default: // shouldn't get here
                 {
 #ifdef MAPNIK_LOG
-                    mapnik::log() << "occi_featureset: Unknown datatype "
-                                  << "(type_oid=" << type_oid << ")";
+                    MAPNIK_LOG_WARN(occi) << "occi_featureset: Unknown datatype "
+                                          << "(type_oid=" << type_oid << ")";
 #endif
                     break;
                 }
@@ -360,9 +360,9 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
     default:
     {
 #ifdef MAPNIK_LOG
-        mapnik::log() << "occi_featureset: Unknown oracle enum "
-                      << occi_enums::resolve_gtype(geomtype)
-                      << "(gtype=" << gtype << ")";
+        MAPNIK_LOG_WARN(occi) << "occi_featureset: Unknown oracle enum "
+                              << occi_enums::resolve_gtype(geomtype)
+                              << "(gtype=" << gtype << ")";
 #endif
     }
     break;

@@ -141,7 +141,7 @@ public:
         double pixel_y = extent.height() / double(height);
 
 #ifdef MAPNIK_LOG
-        mapnik::log() << "tiled_file_policy: Raster Plugin PIXEL SIZE("<< pixel_x << "," << pixel_y << ")";
+        MAPNIK_LOG_DEBUG(raster) << "tiled_file_policy: Raster Plugin PIXEL SIZE("<< pixel_x << "," << pixel_y << ")";
 #endif
 
         box2d<double> e = bbox.intersect(extent);
@@ -165,7 +165,7 @@ public:
         }
 
 #ifdef MAPNIK_LOG
-        mapnik::log() << "tiled_file_policy: Raster Plugin INFO SIZE=" << infos_.size() << " " << file;
+        MAPNIK_LOG_DEBUG(raster) << "tiled_file_policy: Raster Plugin INFO SIZE=" << infos_.size() << " " << file;
 #endif
     }
 
@@ -228,7 +228,7 @@ public:
         double pixel_y = extent.height() / double(height);
 
 #ifdef MAPNIK_LOG
-        mapnik::log() << "tiled_multi_file_policy: Raster Plugin PIXEL SIZE(" << pixel_x << "," << pixel_y << ")";
+        MAPNIK_LOG_DEBUG(raster) << "tiled_multi_file_policy: Raster Plugin PIXEL SIZE(" << pixel_x << "," << pixel_y << ")";
 #endif
 
         // intersection of query with extent => new query
@@ -262,7 +262,7 @@ public:
         }
 
 #ifdef MAPNIK_LOG
-        mapnik::log() << "tiled_multi_file_policy: Raster Plugin INFO SIZE=" << infos_.size() << " " << file_pattern;
+        MAPNIK_LOG_DEBUG(raster) << "tiled_multi_file_policy: Raster Plugin INFO SIZE=" << infos_.size() << " " << file_pattern;
 #endif
     }
 
@@ -313,6 +313,15 @@ template <typename LookupPolicy>
 class raster_featureset : public mapnik::Featureset
 {
     typedef typename LookupPolicy::const_iterator iterator_type;
+
+public:
+    raster_featureset(LookupPolicy const& policy,
+                      box2d<double> const& exttent,
+                      mapnik::query const& q);
+    virtual ~raster_featureset();
+    mapnik::feature_ptr next();
+
+private:
     LookupPolicy policy_;
     int feature_id_;
     mapnik::context_ptr ctx_;
@@ -320,10 +329,6 @@ class raster_featureset : public mapnik::Featureset
     mapnik::box2d<double> bbox_;
     iterator_type curIter_;
     iterator_type endIter_;
-public:
-    raster_featureset(LookupPolicy const& policy,box2d<double> const& exttent, mapnik::query const& q);
-    virtual ~raster_featureset();
-    mapnik::feature_ptr next();
 };
 
 #endif // RASTER_FEATURESET_HPP

@@ -89,7 +89,7 @@ public:
             s << "CLOSE " << cursorName_;
 
 #ifdef MAPNIK_LOG
-            mapnik::log() << "postgis_cursor_resultset: " << s.str();
+            MAPNIK_LOG_DEBUG(postgis) << "postgis_cursor_resultset: " << s.str();
 #endif
             conn_->execute(s.str());
             is_closed_ = true;
@@ -160,13 +160,13 @@ private:
         s << "FETCH FORWARD " << fetch_size_ << " FROM " << cursorName_;
 
 #ifdef MAPNIK_LOG
-        mapnik::log() << "postgis_cursor_resultset: " << s.str();
+        MAPNIK_LOG_DEBUG(postgis) << "postgis_cursor_resultset: " << s.str();
 #endif
         rs_ = conn_->executeQuery(s.str());
         is_closed_ = false;
 
 #ifdef MAPNIK_LOG
-        mapnik::log() << "postgis_cursor_resultset: FETCH result (" << cursorName_ << "): " << rs_->size() << " rows";
+        MAPNIK_LOG_DEBUG(postgis) << "postgis_cursor_resultset: FETCH result (" << cursorName_ << "): " << rs_->size() << " rows";
 #endif
     }
 

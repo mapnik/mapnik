@@ -84,7 +84,7 @@ osm_dataset* dataset_deliverer::load_from_url(const string& url, const string& b
     else if (bbox != last_bbox)
     {
 #ifdef MAPNIK_LOG
-        mapnik::log() << "osm_dataset_deliverer: BBoxes are different=" << last_bbox << "," << bbox;
+        MAPNIK_LOG_WARN(osm) << "osm_dataset_deliverer: BBoxes are different=" << last_bbox << "," << bbox;
 #endif
 
         // Reload the dataset

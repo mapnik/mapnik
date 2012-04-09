@@ -88,7 +88,6 @@ public:
 
     datasource (parameters const& params)
       : params_(params),
-        log_enabled_(false),
         is_bound_(false)
     {
     }
@@ -103,15 +102,6 @@ public:
     parameters const& params() const
     {
         return params_;
-    }
-
-    /*!
-     * @brief Get the status of detasource logging
-     * @return Return true if log is enabled, false otherwise
-     */
-    bool log_enabled() const
-    {
-        return log_enabled_;
     }
 
     /*!
@@ -133,7 +123,6 @@ public:
     virtual ~datasource() {}
 protected:
     parameters params_;
-    bool log_enabled_;
     mutable bool is_bound_;
 };
 

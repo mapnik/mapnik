@@ -65,8 +65,6 @@ ogr_datasource::ogr_datasource(parameters const& params, bool bind)
       desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
       indexed_(false)
 {
-    log_enabled_ = *params_.get<mapnik::boolean>("log", MAPNIK_DEBUG_AS_BOOL);
-
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
     if (! file && ! string)
@@ -276,11 +274,8 @@ void ogr_datasource::bind() const
     // TODO - enable this warning once the ogrindex tool is a bit more stable/mature
     else
     {
-        if (log_enabled_)
-        {
-            mapnik::log() << "ogr_datasource: no ogrindex file found for " << dataset_name_
-                          << ", use the 'ogrindex' program to build an index for faster rendering";
-        }
+        MAPNIK_LOG_DEBUG(ogr) << "ogr_datasource: no ogrindex file found for " << dataset_name_
+                              << ", use the 'ogrindex' program to build an index for faster rendering";
     }
 #endif
 #endif // MAPNIK_LOG
@@ -325,7 +320,7 @@ void ogr_datasource::bind() const
             case OFTStringList:
             case OFTWideStringList: // deprecated !
 #ifdef MAPNIK_LOG
-                if (log_enabled_) mapnik::log() << "ogr_datasource: Unhandled type_oid=" << type_oid;
+                MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
 #endif
                 break;
 
@@ -333,7 +328,7 @@ void ogr_datasource::bind() const
             case OFTTime:
             case OFTDateTime: // unhandled !
 #ifdef MAPNIK_LOG
-                if (log_enabled_) mapnik::log() << "ogr_datasource: Unhandled type_oid=" << type_oid;
+                MAPNIK_LOG_WARN(ogr) << "ogr_datasource: Unhandled type_oid=" << type_oid;
 #endif
                 desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Object));
                 break;
@@ -514,8 +509,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
                                                                           *layer,
                                                                           filter,
                                                                           index_name_,
-                                                                          desc_.get_encoding()
-                                      ));
+                                                                          desc_.get_encoding()));
         }
         else
         {
@@ -523,8 +517,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
                                                       *dataset_,
                                                       *layer,
                                                       q.get_bbox(),
-                                                      desc_.get_encoding()
-                                      ));
+                                                      desc_.get_encoding()));
         }
     }
 

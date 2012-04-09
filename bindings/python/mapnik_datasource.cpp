@@ -90,7 +90,6 @@ boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
     description["name"] = ld.get_name();
     description["geometry_type"] = ds->get_geometry_type();
     description["encoding"] = ld.get_encoding();
-    description["log"] = ds->log_enabled();
     return description;
 }
 

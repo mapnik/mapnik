@@ -94,7 +94,6 @@ private:
     // params below are for testing purposes only (will likely be removed at any time)
     int intersect_min_scale_;
     int intersect_max_scale_;
-    //bool show_queries_;
 };
 
 #endif // POSTGIS_DATASOURCE_HPP
