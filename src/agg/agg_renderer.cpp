@@ -37,37 +37,10 @@
 #include <mapnik/image_compositing.hpp>
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
+#include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
-#include "agg_rasterizer_scanline_aa.h"
-#include "agg_basics.h"
-#include "agg_scanline_p.h"
 #include "agg_scanline_u.h"
-#include "agg_renderer_scanline.h"
-#include "agg_path_storage.h"
-#include "agg_span_allocator.h"
-#include "agg_span_pattern_rgba.h"
-#include "agg_image_accessors.h"
-#include "agg_conv_stroke.h"
-#include "agg_conv_dash.h"
-#include "agg_conv_contour.h"
-#include "agg_conv_clip_polyline.h"
-#include "agg_vcgen_stroke.h"
-#include "agg_conv_adaptor_vcgen.h"
-#include "agg_conv_smooth_poly1.h"
-#include "agg_conv_marker.h"
-#include "agg_vcgen_markers_term.h"
-#include "agg_renderer_outline_aa.h"
-#include "agg_rasterizer_outline_aa.h"
-#include "agg_rasterizer_outline.h"
-#include "agg_renderer_outline_image.h"
-#include "agg_span_allocator.h"
-#include "agg_span_pattern_rgba.h"
-#include "agg_renderer_scanline.h"
-#include "agg_pattern_filters_rgba.h"
-#include "agg_renderer_outline_image.h"
-#include "agg_vpgen_clip_polyline.h"
-#include "agg_arrowhead.h"
 #include "agg_blur.h"
 
 // boost
@@ -241,7 +214,7 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 #endif
     if (st.comp_op() != clear || st.blur_radius_x() > 0 || st.blur_radius_y() > 0)
     {
-        internal_buffer_.set_background(color(0,0,0,0));//
+        internal_buffer_.set_background(color(0,0,0,0)); // transparent 
         current_buffer_ = &internal_buffer_;
     }
     else
