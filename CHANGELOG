@@ -14,6 +14,8 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.1
 ------------
 
+(Packaged from 5cd3cb2efdaf7e9990a57e8e00b652a81aaa39ae)
+
 - Support for PostGIS 2.0 (#956,#1083)
 
 - Switched back to "libmapnik" and "import mapnik" rather than "mapnik2" (mapnik2 will still work from python) (#941)
