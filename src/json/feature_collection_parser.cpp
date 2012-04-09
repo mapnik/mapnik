@@ -57,5 +57,6 @@ namespace mapnik { namespace json {
 
     template class feature_collection_parser<std::string::const_iterator> ;
     template class feature_collection_parser<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
-    }}
+
+}}
 
