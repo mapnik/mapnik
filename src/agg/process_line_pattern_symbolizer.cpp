@@ -21,6 +21,8 @@
  *****************************************************************************/
 //$Id$
 
+// boost
+#include <boost/foreach.hpp>
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
@@ -29,7 +31,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
-
+#include <mapnik/vertex_converters.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -52,16 +54,11 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32> renderer_base;
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
     typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
-
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
-
+    
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
@@ -78,24 +75,30 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (!pat) return;
 
     box2d<double> ext = query_extent_ * 1.1;
+
+    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+    agg::pixfmt_rgba32 pixf(buf);
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
+
     pattern_source source(*(*pat));
     pattern_type pattern (filter,source);
-    renderer_type ren(ren_base, pattern);
-    
+    renderer_type ren(ren_base, pattern);    
     rasterizer_type ras(ren);
-    //metawriter_with_properties writer = sym.get_metawriter();
-    for (unsigned i=0;i<feature->num_geometries();++i)
+    
+    typedef boost::mpl::vector<clip_line_tag,transform_tag> conv_types;
+    vertex_converter<box2d<double>,rasterizer_type,line_pattern_symbolizer, proj_transform, CoordTransform, conv_types> 
+        converter(ext,ras,sym,t_,prj_trans);
+    
+    converter.set<clip_line_tag>(); //FIXME make an optinal clip (default: true) 
+    converter.set<transform_tag>(); //always transform 
+    //if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter FIXME !
+    
+    BOOST_FOREACH(geometry_type & geom, feature->paths())
     {
-        geometry_type & geom = feature->get_geometry(i);
         if (geom.num_points() > 1)
         {
-            clipped_geometry_type clipped(geom);
-            clipped.clip_box(ext.minx(),ext.miny(),ext.maxx(),ext.maxy());
-            path_type path(t_,clipped,prj_trans);
-            ras.add_path(path);
-            //if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
+            converter.apply(geom);        
         }
     }
 }
