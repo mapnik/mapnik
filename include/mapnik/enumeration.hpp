@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/debug.hpp>
 
 // stl
 #include <vector>
@@ -260,18 +261,20 @@ public:
         {
             if (our_strings_[i] == 0 )
             {
-                std::cerr << "### FATAL: Not enough strings for enum "
-                          << our_name_ << " defined in file '" << filename
-                          << "' at line " << line_no << std::endl;
+                MAPNIK_LOG_FATAL(enumeration)
+                        << "### FATAL: Not enough strings for enum "
+                        << our_name_ << " defined in file '" << filename
+                        << "' at line " << line_no;
                 //std::exit(1);
             }
         }
         if ( std::string("") != our_strings_[THE_MAX])
         {
-            std::cerr << "### FATAL: The string array for enum " << our_name_
-                      << " defined in file '" << filename << "' at line " << line_no
-                      << " has too many items or is not terminated with an "
-                      << "empty string." << std::endl;
+            MAPNIK_LOG_FATAL(enumeration)
+                    << "### FATAL: The string array for enum " << our_name_
+                    << " defined in file '" << filename << "' at line " << line_no
+                    << " has too many items or is not terminated with an "
+                    << "empty string";
             //std::exit(1);
         }
         return true;
