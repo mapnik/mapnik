@@ -63,30 +63,26 @@ using mapnik::filter_at_point;
 
 DATASOURCE_PLUGIN(geos_datasource)
 
-void geos_notice(const char* fmt, ...)
+void geos_notice(const char* format, ...)
 {
-    // TODO - handle with mapnik::log
+    char buffer[512];
 
-    va_list ap;
-    fprintf( stdout, "Mapnik LOG> geos_datasource: (GEOS NOTICE) ");
+    va_list args;
+    va_start(args, fmt);
+    vsprintf(buffer, format, args);
+    va_end(args);
 
-    va_start (ap, fmt);
-    vfprintf( stdout, fmt, ap);
-    va_end(ap);
-    fprintf( stdout, "\n" );
+    MAPNIK_LOG_WARN(geos) << "geos_datasource: " << buffer;
 }
 
-void geos_error(const char* fmt, ...)
+void geos_error(const char* format, ...)
 {
-    // TODO - handle with mapnik::log
+    va_list args;
+    va_start(args, fmt);
+    vsprintf(buffer, format, args);
+    va_end(args);
 
-    va_list ap;
-    fprintf( stdout, "Mapnik LOG> geos_datasource: (GEOS ERROR) ");
-
-    va_start (ap, fmt);
-    vfprintf( stdout, fmt, ap);
-    va_end(ap);
-    fprintf( stdout, "\n" );
+    MAPNIK_LOG_ERROR(geos) << "geos_datasource: " << buffer;
 }
 
 

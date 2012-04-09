@@ -100,7 +100,7 @@ public:
         /*
           if ( ! ctx->valid )
           {
-            mapnik::log() << "libxml2_loader: Failed to validate DTD.";
+            MAPNIK_LOG_WARN(libxml2_loader) << "libxml2_loader: Failed to validate DTD.";
           }
         */
         load(doc, node);

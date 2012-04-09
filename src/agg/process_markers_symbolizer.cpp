@@ -196,7 +196,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             tr.transform(&x1,&y1);
             tr.transform(&x2,&y2);
             extent.init(x1,y1,x2,y2);
-            //mapnik::log() << "agg_renderer: " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+
+            //MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
         }
         else
         {
@@ -207,7 +208,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             tr.transform(&x1,&y1);
             tr.transform(&x2,&y2);
             extent.init(x1,y1,x2,y2);
-            //mapnik::log() << "agg_renderer: " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+
+            //MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
         }
 
 

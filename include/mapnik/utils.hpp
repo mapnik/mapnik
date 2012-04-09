@@ -28,9 +28,6 @@
 #include <boost/thread/mutex.hpp>
 #endif
 
-// mapnik
-#include <mapnik/debug.hpp>
-
 // stl
 #include <stdexcept>
 #include <cstdlib>
@@ -123,9 +120,7 @@ template <typename T,
     {
         CreatePolicy<T>::destroy(pInstance_);
         pInstance_ = 0;
-        destroyed_=true;
-
-        MAPNIK_LOG_DEBUG(utils) << "singleton: Destroyed instance";
+        destroyed_ = true;
     }
 
 protected:
@@ -150,8 +145,6 @@ public:
                 else
                 {
                     pInstance_ = CreatePolicy<T>::create();
-
-                    MAPNIK_LOG_DEBUG(utils) << "singleton: Created instance";
 
                     // register destruction
                     std::atexit(&DestroySingleton);

@@ -23,43 +23,111 @@
 #include <boost/python.hpp>
 #include <mapnik/debug.hpp>
 
+using mapnik::logger::severity;
+using mapnik::logger::format;
+using mapnik::logger::output;
+
+void set_severity(const severity::type& s)
+{
+    severity::set(s);
+}
+
+severity::type get_severity()
+{
+    return severity::get();
+}
+
+void set_object_severity(const std::string& object_name, const severity::type& s)
+{
+    severity::set_object(object_name, s);
+}
+
+severity::type get_object_severity(const std::string& object_name)
+{
+    return severity::get_object(object_name);
+}
+
+
 void export_logger()
 {
-    // TODO - expose the logger global class
-
-    /*
     using namespace boost::python;
 
-    enum_<mapnik::logger::severity::type>("severity")
-        .value("Info", mapnik::logger::severity::info)
-        .value("Debug", mapnik::logger::severity::debug)
-        .value("Warn", mapnik::logger::severity::warn)
-        .value("Error", mapnik::logger::severity::error)
-        .value("Fatal", mapnik::logger::severity::fatal)
-        .value("None", mapnik::logger::severity::none)
+    enum_<mapnik::logger::severity::type>("SeverityType")
+        .value("Info", severity::info)
+        .value("Debug", severity::debug)
+        .value("Warn", severity::warn)
+        .value("Error", severity::error)
+        .value("Fatal", severity::fatal)
+        .value("None", severity::none)
         ;
-    */
 
-    /*
-    using mapnik::freetype_engine;
+/*
     using mapnik::singleton;
     using mapnik::CreateStatic;
     using namespace boost::python;
-    class_<singleton<freetype_engine,CreateStatic>,boost::noncopyable>("Singleton",no_init)
-        .def("instance",&singleton<freetype_engine,CreateStatic>::instance,
+
+    class_<singleton<severity,CreateStatic>,boost::noncopyable>("Singleton",no_init)
+        .def("instance",&singleton<severity,CreateStatic>::instance,
              return_value_policy<reference_existing_object>())
         .staticmethod("instance")
         ;
 
-    class_<freetype_engine,bases<singleton<freetype_engine,CreateStatic> >,
-        boost::noncopyable>("FontEngine",no_init)
-        .def("register_font",&freetype_engine::register_font)
-        .def("register_fonts",&freetype_engine::register_fonts)
-        .def("face_names",&freetype_engine::face_names)
-        .staticmethod("register_font")
-        .staticmethod("register_fonts")
-        .staticmethod("face_names")
+    class_<severity,bases<singleton<severity,CreateStatic> >,
+        boost::noncopyable>("Severity",no_init)
+        .def("get",&severity::get)
+        .def("set",&severity::set)
+        .def("get_object",&severity::get_object)
+        .def("set_object",&severity::set_object)
+        .staticmethod("get")
+        .staticmethod("set")
+        .staticmethod("get_object")
+        .staticmethod("set_object")
         ;
+*/
 
-    */
+    def("set_severity", &set_severity,
+        "\n"
+        "Set global logger severity.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import SeverityType, set_severity\n"
+        ">>> set_severity(SeverityType.None)\n"
+        ">>> set_severity(SeverityType.Info)\n"
+        ">>> set_severity(SeverityType.Debug)\n"
+        ">>> set_severity(SeverityType.Warn)\n"
+        ">>> set_severity(SeverityType.Error)\n"
+        ">>> set_severity(SeverityType.Fatal)\n"
+        );
+
+    def("get_severity", &get_severity,
+        "\n"
+        "Get global logger severity.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import get_severity\n"
+        ">>> get_severity()\n"
+        );
+
+    def("set_object_severity", &set_object_severity,
+        "\n"
+        "Set logger severity for a single object.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import SeverityType, set_object_severity\n"
+        ">>> set_object_severity('ogr', SeverityType.None)\n"
+        ">>> set_object_severity('gdal', SeverityType.Info)\n"
+        ">>> set_object_severity('cairo_renderer', SeverityType.Debug)\n"
+        ">>> set_object_severity('agg_renderer', SeverityType.Warn)\n"
+        ">>> set_object_severity('bindings', SeverityType.Error)\n"
+        );
+
+    def("get_object_severity", &get_object_severity,
+        "\n"
+        "Get logger severity for a single object.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import get_object_severity"
+        ">>> get_object_severity('ogr')\n"
+        );
+
 }

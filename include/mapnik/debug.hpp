@@ -23,8 +23,9 @@
 #ifndef MAPNIK_DEBUG_HPP
 #define MAPNIK_DEBUG_HPP
 
-// mapnik (should not depend on anything else)
+// mapnik (should not depend on anything that need to use this)
 #include <mapnik/config.hpp>
+#include <mapnik/utils.hpp>
 
 // boost
 #include <boost/utility.hpp>
@@ -35,7 +36,6 @@
 
 // std
 #include <iostream>
-#include <cassert>
 #include <sstream>
 #include <ostream>
 #include <fstream>
@@ -45,7 +45,9 @@
 namespace mapnik {
     namespace logger {
 
-        class severity
+        class MAPNIK_DECL severity :
+            public singleton<severity,CreateStatic>,
+            private boost::noncopyable
         {
         public:
             enum type
@@ -113,7 +115,9 @@ namespace mapnik {
         };
 
 
-        class format
+        class MAPNIK_DECL format :
+            public singleton<format,CreateStatic>,
+            private boost::noncopyable
         {
         public:
 
@@ -141,8 +145,23 @@ namespace mapnik {
         };
 
 
+        class MAPNIK_DECL output :
+            public singleton<output,CreateStatic>,
+            private boost::noncopyable
+        {
+        public:
+            static void use_file(const std::string& filepath);
+            static void use_console();
+
+        private:
+            static std::ofstream file_output_;
+            static std::string file_name_;
+            static std::streambuf* saved_buf_;
+        };
+
+
         template<class Ch, class Tr, class A>
-        class output_to_clog
+        class clog_sink
         {
         public:
             typedef std::basic_ostringstream<Ch, Tr, A> stream_buffer;
@@ -210,55 +229,43 @@ namespace mapnik {
             std::string object_name_;
 #endif
         };
+
+        typedef base_log<clog_sink, severity::info> base_log_info;
+        typedef base_log<clog_sink, severity::debug> base_log_debug;
+        typedef base_log<clog_sink, severity::warn> base_log_warn;
+        typedef base_log<clog_sink, severity::error> base_log_error;
+        typedef base_log<clog_sink, severity::fatal> base_log_fatal;
     }
 
 
-    class MAPNIK_DECL log : public logger::base_log<logger::output_to_clog,
-            logger::severity::debug> {
+    class MAPNIK_DECL info : public logger::base_log_info {
     public:
-        typedef logger::base_log<logger::output_to_clog, logger::severity::debug> base_class;
-        log(const char* object_name) : base_class(object_name) {}
-        log() : base_class() {}
+        info() : logger::base_log_info() {}
+        info(const char* object_name) : logger::base_log_info(object_name) {}
     };
 
-    class MAPNIK_DECL info : public logger::base_log<logger::output_to_clog,
-            logger::severity::info> {
+    class MAPNIK_DECL debug : public logger::base_log_debug {
     public:
-        typedef logger::base_log<logger::output_to_clog, logger::severity::info> base_class;
-        info(const char* object_name) : base_class(object_name) {}
-        info() : base_class() {}
+        debug() : logger::base_log_debug() {}
+        debug(const char* object_name) : logger::base_log_debug(object_name) {}
     };
 
-    class MAPNIK_DECL debug : public logger::base_log<logger::output_to_clog,
-            logger::severity::debug> {
+    class MAPNIK_DECL warn : public logger::base_log_warn {
     public:
-        typedef logger::base_log<logger::output_to_clog, logger::severity::debug> base_class;
-        debug(const char* object_name) : base_class(object_name) {}
-        debug() : base_class() {}
+        warn() : logger::base_log_warn() {}
+        warn(const char* object_name) : logger::base_log_warn(object_name) {}
     };
 
-    class MAPNIK_DECL warn : public logger::base_log<logger::output_to_clog,
-            logger::severity::warn> {
+    class MAPNIK_DECL error : public logger::base_log_error {
     public:
-        typedef logger::base_log<logger::output_to_clog, logger::severity::warn> base_class;
-        warn(const char* object_name) : base_class(object_name) {}
-        warn() : base_class() {}
+        error() : logger::base_log_error() {}
+        error(const char* object_name) : logger::base_log_error(object_name) {}
     };
 
-    class MAPNIK_DECL error : public logger::base_log<logger::output_to_clog,
-            logger::severity::error> {
+    class MAPNIK_DECL fatal : public logger::base_log_fatal {
     public:
-        typedef logger::base_log<logger::output_to_clog, logger::severity::error> base_class;
-        error(const char* object_name) : base_class(object_name) {}
-        error() : base_class() {}
-    };
-
-    class MAPNIK_DECL fatal : public logger::base_log<logger::output_to_clog,
-            logger::severity::fatal> {
-    public:
-        typedef logger::base_log<logger::output_to_clog, logger::severity::fatal> base_class;
-        fatal(const char* object_name) : base_class(object_name) {}
-        fatal() : base_class() {}
+        fatal() : logger::base_log_fatal() {}
+        fatal(const char* object_name) : logger::base_log_fatal(object_name) {}
     };
 
 
@@ -267,7 +274,6 @@ namespace mapnik {
     #define MAPNIK_LOG_WARN(s) mapnik::warn(#s)
     #define MAPNIK_LOG_ERROR(s) mapnik::error(#s)
     #define MAPNIK_LOG_FATAL(s) mapnik::fatal(#s)
-
 }
 
 #endif // MAPNIK_DEBUG_HPP
