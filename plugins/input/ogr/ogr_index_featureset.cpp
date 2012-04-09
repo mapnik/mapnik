@@ -76,9 +76,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & 
 
     std::sort(ids_.begin(),ids_.end());
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(ogr) << "ogr_index_featureset: Query size=" << ids_.size();
-#endif
 
     itr_ = ids_.begin();
 
@@ -110,12 +108,10 @@ feature_ptr ogr_index_featureset<filterT>::next()
             {
                 ogr_converter::convert_geometry (geom, feature);
             }
-#ifdef MAPNIK_LOG
             else
             {
                 MAPNIK_LOG_DEBUG(ogr) << "ogr_index_featureset: Feature with null geometry=" << (*feat)->GetFID();
             }
-#endif
 
             int fld_count = layerdef_->GetFieldCount();
             for (int i = 0; i < fld_count; i++)
@@ -151,17 +147,13 @@ feature_ptr ogr_index_featureset<filterT>::next()
                 case OFTStringList:
                 case OFTWideStringList: // deprecated !
                 {
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
-#endif
                     break;
                 }
 
                 case OFTBinary:
                 {
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
-#endif
                     //feature->put(name,feat->GetFieldAsBinary (i, size));
                     break;
                 }
@@ -170,9 +162,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
                 case OFTTime:
                 case OFTDateTime:       // unhandled !
                 {
-#ifdef MAPNIK_LOG
                     MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
-#endif
                     break;
                 }
                 }

@@ -125,9 +125,7 @@ feature_ptr sqlite_featureset::next()
                 break;
 
             default:
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_WARN(sqlite) << "sqlite_featureset: Field=" << fld_name_str << " unhandled type_oid=" << type_oid;
-#endif
                 break;
             }
         }

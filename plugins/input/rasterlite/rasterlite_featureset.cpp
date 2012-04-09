@@ -55,9 +55,7 @@ rasterlite_featureset::rasterlite_featureset(void* dataset,
 
 rasterlite_featureset::~rasterlite_featureset()
 {
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Closing";
-#endif
 
     rasterliteClose(dataset_);
 }
@@ -88,9 +86,7 @@ feature_ptr rasterlite_featureset::next()
 
 feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
 {
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Running get_feature";
-#endif
 
     feature_ptr feature(feature_factory::create(ctx_,1));
 
@@ -106,14 +102,12 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     const double pixel_size = (intersect.width() >= intersect.height()) ?
         (intersect.width() / (double) width) : (intersect.height() / (double) height);
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Raster extent=" << raster_extent;
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: View extent=" << q.get_bbox();
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Intersect extent=" << intersect;
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Query resolution=" << boost::get<0>(q.resolution())  << "," << boost::get<1>(q.resolution());
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Size=" << width << " " << height;
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Pixel Size=" << pixel_size;
-#endif
 
     if (width > 0 && height > 0)
     {
@@ -146,9 +140,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
 
                 free (raster);
 
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Done";
-#endif
             }
             else
             {

@@ -140,12 +140,10 @@ void shape_datasource::bind() const
                 break;
             }
             default:
-#ifdef MAPNIK_LOG
                 // I - long
                 // G - ole
                 // + - autoincrement
                 MAPNIK_LOG_WARN(shape) << "shape_datasource: Unknown type=" << fd.type_;
-#endif
                 break;
             }
         }
@@ -231,18 +229,13 @@ void shape_datasource::init(shape_io& shape) const
     //}
     //else
     //{
-    // #ifdef MAPNIK_LOG
     //    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: No .index file found for "
     //                            << shape_name_ << ".shp, use the 'shapeindex' program to build an index for faster rendering";
-    // #endif
     //}
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Extent=" << extent_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: File length=" << file_length_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Shape type=" << shape_type_;
-#endif
-
 }
 
 std::string shape_datasource::name()

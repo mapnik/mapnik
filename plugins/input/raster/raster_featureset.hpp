@@ -140,9 +140,7 @@ public:
         double pixel_x = extent.width() / double(width);
         double pixel_y = extent.height() / double(height);
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(raster) << "tiled_file_policy: Raster Plugin PIXEL SIZE("<< pixel_x << "," << pixel_y << ")";
-#endif
 
         box2d<double> e = bbox.intersect(extent);
 
@@ -164,9 +162,7 @@ public:
             }
         }
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(raster) << "tiled_file_policy: Raster Plugin INFO SIZE=" << infos_.size() << " " << file;
-#endif
     }
 
     const_iterator begin()
@@ -227,9 +223,7 @@ public:
         double pixel_x = extent.width() / double(width);
         double pixel_y = extent.height() / double(height);
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(raster) << "tiled_multi_file_policy: Raster Plugin PIXEL SIZE(" << pixel_x << "," << pixel_y << ")";
-#endif
 
         // intersection of query with extent => new query
         box2d<double> e = bbox.intersect(extent);
@@ -261,9 +255,7 @@ public:
             }
         }
 
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(raster) << "tiled_multi_file_policy: Raster Plugin INFO SIZE=" << infos_.size() << " " << file_pattern;
-#endif
     }
 
     const_iterator begin()

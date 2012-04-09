@@ -265,10 +265,9 @@ void postgis_datasource::bind() const
                             if (key_field_string)
                             {
                                 key_field_ = std::string(key_field_string);
-#ifdef MAPNIK_LOG
+
                                 MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: auto-detected key field of '"
                                                           << key_field_ << "' on table '" << geometry_table_ << "'";
-#endif
                             }
                         }
                         else
@@ -308,17 +307,13 @@ void postgis_datasource::bind() const
             {
                 srid_ = -1;
 
-#ifdef MAPNIK_LOG
                 MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Table " << table_ << " is using SRID=-1";
-#endif
             }
 
             // At this point the geometry_field may still not be known
             // but we'll catch that where more useful...
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Using SRID=" << srid_;
             MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Using geometry_column=" << geometryColumn_;
-#endif
 
             // collect attribute desc
 #ifdef MAPNIK_STATS
@@ -846,9 +841,7 @@ box2d<double> postgis_datasource::envelope() const
                 }
                 else
                 {
-#ifdef MAPNIK_LOG
-                    MAPNIK_LOG_DEBUG(postgis) << boost::format("postgis_datasource: Could not determine extent from query: %s") % s.str();
-#endif
+                    MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Could not determine extent from query: " << s.str();
                 }
             }
             rs->close();

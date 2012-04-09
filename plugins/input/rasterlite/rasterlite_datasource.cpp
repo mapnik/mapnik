@@ -75,9 +75,7 @@ rasterlite_datasource::rasterlite_datasource(parameters const& params, bool bind
     : datasource(params),
       desc_(*params.get<std::string>("type"),"utf-8")
 {
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Initializing...";
-#endif
 
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("missing <file> parameter");

@@ -23,16 +23,6 @@
 #ifndef MAPNIK_DEBUG_HPP
 #define MAPNIK_DEBUG_HPP
 
-#ifdef MAPNIK_DEBUG
-#define MAPNIK_DEBUG_AS_BOOL true
-#else
-#define MAPNIK_DEBUG_AS_BOOL false
-#endif
-
-#ifndef MAPNIK_LOG_FORMAT
-#define MAPNIK_LOG_FORMAT "Mapnik LOG> %Y-%m-%d %H:%M:%S:"
-#endif
-
 // mapnik (should not depend on anything else)
 #include <mapnik/config.hpp>
 
@@ -47,7 +37,6 @@
 #include <iostream>
 #include <cassert>
 #include <sstream>
-#include <ctime>
 #include <ostream>
 #include <fstream>
 #include <string>
@@ -124,42 +113,32 @@ namespace mapnik {
         };
 
 
-#define __xstr__(s) __str__(s)
-#define __str__(s) #s
-
-        static inline std::string format_logger()
+        class format
         {
-            char buf[256];
-            const time_t tm = time(0);
-            strftime(buf, sizeof(buf), __xstr__(MAPNIK_LOG_FORMAT), localtime(&tm));
-            return buf;
-        }
+        public:
 
-#undef __xstr__
-#undef __str__
-
-
-#if 0
-        template<class Ch, class Tr, class A>
-        class no_output
-        {
-        private:
-            struct null_buffer
+            static std::string get()
             {
-                template<class T>
-                null_buffer &operator<<(const T &)
-                {
-                    return *this;
-                }
-            };
-
-            typedef null_buffer stream_buffer;
-
-            void operator()(const stream_buffer &)
-            {
+                return format_;
             }
-        };
+
+            static void set(const std::string& format)
+            {
+#ifdef MAPNIK_THREADSAFE
+                boost::mutex::scoped_lock lock(mutex_);
 #endif
+                format_ = format;
+            }
+
+            static std::string str();
+
+        private:
+            static std::string format_;
+
+#ifdef MAPNIK_THREADSAFE
+            static boost::mutex mutex_;
+#endif
+        };
 
 
         template<class Ch, class Tr, class A>
@@ -174,7 +153,7 @@ namespace mapnik {
                 static boost::mutex mutex;
                 boost::mutex::scoped_lock lock(mutex);
 #endif
-                std::clog << format_logger() << " " << s.str() << std::endl;
+                std::clog << format::str() << " " << s.str() << std::endl;
             }
         };
 
@@ -193,28 +172,35 @@ namespace mapnik {
 
             base_log(const char* object_name)
             {
+#ifdef MAPNIK_LOG
                 if (object_name != NULL)
                 {
                     object_name_ = object_name;
                 }
+#endif
             }
 
             ~base_log()
             {
+#ifdef MAPNIK_LOG
                 if (check_severity())
                 {
                     output_policy()(streambuf_);
                 }
+#endif
             }
 
             template<class T>
             base_log &operator<<(const T &x)
             {
+#ifdef MAPNIK_LOG
                 streambuf_ << x;
+#endif
                 return *this;
             }
 
         private:
+#ifdef MAPNIK_LOG
             inline bool check_severity()
             {
                 return Severity >= severity::get_object(object_name_);
@@ -222,6 +208,7 @@ namespace mapnik {
 
             typename output_policy::stream_buffer streambuf_;
             std::string object_name_;
+#endif
         };
     }
 

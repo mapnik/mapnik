@@ -88,9 +88,7 @@ public:
     {
         if (env_ == 0)
         {
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(occi) << "occi_environment: constructor";
-#endif
 
             const int mode = oracle::occi::Environment::OBJECT
                 | oracle::occi::Environment::THREADED_MUTEXED;
@@ -112,9 +110,7 @@ private:
     {
         if (env_)
         {
-#ifdef MAPNIK_LOG
             MAPNIK_LOG_DEBUG(occi) << "occi_environment: destructor";
-#endif
 
             oracle::occi::Environment::terminateEnvironment(env_);
             env_ = 0;

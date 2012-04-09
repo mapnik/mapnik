@@ -67,9 +67,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
 
     std::sort(ids_.begin(), ids_.end());
 
-#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: Query size=" << ids_.size();
-#endif
 
     itr_ = ids_.begin();
 }
@@ -202,10 +200,8 @@ feature_ptr shape_index_featureset<filterT>::next()
     }
     else
     {
-
-#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: " << count_ << " features";
-#endif
+
         return feature_ptr();
     }
 }
