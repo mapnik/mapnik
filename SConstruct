@@ -348,6 +348,7 @@ opts.AddVariables(
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
     ('LOG_FORMAT_STRING', 'The format string used before log output string, piped through strftime (max length of 255 characters)', 'Mapnik LOG> %Y-%m-%d %H:%M:%S:'),
+    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. "info", "debug", "warn", "error", "fatal", "none")', 'error'),
 
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -1417,7 +1418,20 @@ if not preconfigured:
         ndebug_flags = '-DNDEBUG'
 
         # Enable logging in debug mode (always) and release mode (when specified)
-        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_LOG_FORMAT="%s"' % env['LOG_FORMAT_STRING']
+        if env['DEFAULT_LOG_SEVERITY']:
+            severities = ['info', 'debug', 'warn', 'error', 'fatal', 'none']
+            if env['DEFAULT_LOG_SEVERITY'] not in severities:
+                color_print(1,"Cannot set default logger severity to '%s', available options are 'info', 'debug', 'warn', 'error', 'fatal', 'none'." % env['DEFAULT_LOG_SEVERITY'])
+                Exit(1)
+            else:
+                log_severity = severities.index(env['DEFAULT_LOG_SEVERITY'])
+        else:
+            if env['DEBUG']:
+                log_severity = 1 # debug
+            else:
+                log_severity = 3 # error
+
+        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_LOG_FORMAT="%s" -DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % (env['LOG_FORMAT_STRING'], log_severity)
 
         if env['DEBUG']:
             debug_flags += log_enabled

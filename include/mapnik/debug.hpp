@@ -125,6 +125,7 @@ namespace mapnik {
             format_ = format;
         }
 
+        // interpolate the format string for output
         static std::string str();
 
         // output
@@ -134,7 +135,11 @@ namespace mapnik {
     private:
         static severity_type severity_level_;
         static severity_map object_severity_level_;
+        static bool severity_env_check_;
+
         static std::string format_;
+        static bool format_env_check_;
+
         static std::ofstream file_output_;
         static std::string file_name_;
         static std::streambuf* saved_buf_;

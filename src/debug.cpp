@@ -30,7 +30,17 @@
 #define MAPNIK_LOG_FORMAT "Mapnik LOG> %Y-%m-%d %H:%M:%S:"
 #endif
 
+#ifndef MAPNIK_DEFAULT_LOG_SEVERITY
+  #ifdef MAPNIK_DEBUG
+    #define MAPNIK_DEFAULT_LOG_SEVERITY 1
+  #else
+    #define MAPNIK_DEFAULT_LOG_SEVERITY 3
+  #endif
+#endif
+
 namespace mapnik {
+
+// mutexes
 
 #ifdef MAPNIK_THREADSAFE
 boost::mutex logger::severity_mutex_;
@@ -38,14 +48,30 @@ boost::mutex logger::format_mutex_;
 #endif
 
 
+// first time checks
+
+bool logger::severity_env_check_ = true;
+bool logger::format_env_check_ = true;
+
+
 // severity
 
 logger::severity_type logger::severity_level_ =
-#ifdef MAPNIK_DEBUG
-    logger::debug
-#else
-    logger::error
-#endif
+    #if MAPNIK_DEFAULT_LOG_SEVERITY == 0
+        logger::info
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
+        logger::debug
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
+        logger::warn
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 3
+        logger::error
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 4
+        logger::fatal
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 5
+        logger::none
+    #else
+        #error "Wrong default log severity level specified!"
+    #endif
 ;
 
 logger::severity_map logger::object_severity_level_ = logger::severity_map();
@@ -61,6 +87,20 @@ std::string logger::format_ = __xstr__(MAPNIK_LOG_FORMAT);
 
 std::string logger::str()
 {
+#if 0
+    // update the format from getenv if this is the first time
+    if (logger::format_env_check_)
+    {
+        logger::format_env_check_ = false;
+
+        const char* log_format = getenv("MAPNIK_LOG_FORMAT");
+        if (log_format != NULL)
+        {
+            logger::format_ = log_format;
+        }
+    }
+#endif
+
     char buf[256];
     const time_t tm = time(0);
     strftime(buf, sizeof(buf), logger::format_.c_str(), localtime(&tm));
