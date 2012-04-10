@@ -193,7 +193,6 @@ void stats_processor::apply_to_layer(layer const& lay, projection const& proj0,
         {
             boost::property_tree::ptree stree;
             stree.put("name",style_names[i++]);
-            
             featureset_ptr features = ds->features(q);
             if (features) {
                 feature_ptr feature;
@@ -205,8 +204,7 @@ void stats_processor::apply_to_layer(layer const& lay, projection const& proj0,
                         value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
                         if (result.to_bool())
                         {
-                            
-                        
+                        // todo
                         }
                     }
                 }

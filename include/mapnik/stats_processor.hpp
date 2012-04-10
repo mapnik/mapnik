@@ -68,7 +68,6 @@ public:
         write_json(ss,tree);
         return ss.str();
     }
-    
 private:
     void apply_to_layer(layer const& lay,
                         projection const& proj0,
