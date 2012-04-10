@@ -60,14 +60,12 @@ void stats_processor::apply()
 
     BOOST_FOREACH ( layer const& lyr, m_.layers() )
     {
-        if (lyr.isVisible(scale_denom))
+        if (lyr.visible(scale_denom))
         {
             std::set<std::string> names;
             apply_to_layer(lyr, proj, scale_denom, names);
         }
     }
-    //tree.put("wall_clock_elapsed", t.wall_clock_elapsed());
-    //tree.put("cpu_elapsed", t.cpu_elapsed());
 }
 
 void stats_processor::apply_to_layer(layer const& lay, projection const& proj0,
