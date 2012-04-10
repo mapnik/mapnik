@@ -22,112 +22,48 @@
 
 #include <boost/python.hpp>
 #include <mapnik/debug.hpp>
-
-using mapnik::logger::severity;
-using mapnik::logger::format;
-using mapnik::logger::output;
-
-void set_severity(const severity::type& s)
-{
-    severity::set(s);
-}
-
-severity::type get_severity()
-{
-    return severity::get();
-}
-
-void set_object_severity(const std::string& object_name, const severity::type& s)
-{
-    severity::set_object(object_name, s);
-}
-
-severity::type get_object_severity(const std::string& object_name)
-{
-    return severity::get_object(object_name);
-}
-
+#include <mapnik/utils.hpp>
 
 void export_logger()
 {
-    using namespace boost::python;
-
-    enum_<mapnik::logger::severity::type>("SeverityType")
-        .value("Info", severity::info)
-        .value("Debug", severity::debug)
-        .value("Warn", severity::warn)
-        .value("Error", severity::error)
-        .value("Fatal", severity::fatal)
-        .value("None", severity::none)
-        ;
-
-/*
+    using mapnik::logger;
     using mapnik::singleton;
     using mapnik::CreateStatic;
     using namespace boost::python;
 
-    class_<singleton<severity,CreateStatic>,boost::noncopyable>("Singleton",no_init)
-        .def("instance",&singleton<severity,CreateStatic>::instance,
+    class_<singleton<logger,CreateStatic>,boost::noncopyable>("Singleton",no_init)
+        .def("instance",&singleton<logger,CreateStatic>::instance,
              return_value_policy<reference_existing_object>())
         .staticmethod("instance")
         ;
 
-    class_<severity,bases<singleton<severity,CreateStatic> >,
-        boost::noncopyable>("Severity",no_init)
-        .def("get",&severity::get)
-        .def("set",&severity::set)
-        .def("get_object",&severity::get_object)
-        .def("set_object",&severity::set_object)
-        .staticmethod("get")
-        .staticmethod("set")
-        .staticmethod("get_object")
-        .staticmethod("set_object")
+    class_<logger,bases<singleton<logger,CreateStatic> >,
+        boost::noncopyable>("logger",no_init)
+        .def_readonly("Info", logger::info)
+        .def_readonly("Debug", logger::debug)
+        .def_readonly("Warn", logger::warn)
+        .def_readonly("Error", logger::error)
+        .def_readonly("Fatal", logger::fatal)
+        .def_readonly("None", logger::none)
+        .def("get_severity", &logger::get_severity)
+        .def("set_severity", &logger::set_severity)
+        .def("get_object_severity", &logger::get_object_severity)
+        .def("set_object_severity", &logger::set_object_severity)
+        .def("clear_object_severity", &logger::clear_object_severity)
+        .def("get_format", &logger::get_format)
+        .def("set_format", &logger::set_format)
+        .def("str", &logger::str)
+        .def("use_file", &logger::use_file)
+        .def("use_console", &logger::use_console)
+        .staticmethod("get_severity")
+        .staticmethod("set_severity")
+        .staticmethod("get_object_severity")
+        .staticmethod("set_object_severity")
+        .staticmethod("clear_object_severity")
+        .staticmethod("get_format")
+        .staticmethod("set_format")
+        .staticmethod("str")
+        .staticmethod("use_file")
+        .staticmethod("use_console")
         ;
-*/
-
-    def("set_severity", &set_severity,
-        "\n"
-        "Set global logger severity.\n"
-        "\n"
-        "Usage:\n"
-        ">>> from mapnik import SeverityType, set_severity\n"
-        ">>> set_severity(SeverityType.None)\n"
-        ">>> set_severity(SeverityType.Info)\n"
-        ">>> set_severity(SeverityType.Debug)\n"
-        ">>> set_severity(SeverityType.Warn)\n"
-        ">>> set_severity(SeverityType.Error)\n"
-        ">>> set_severity(SeverityType.Fatal)\n"
-        );
-
-    def("get_severity", &get_severity,
-        "\n"
-        "Get global logger severity.\n"
-        "\n"
-        "Usage:\n"
-        ">>> from mapnik import get_severity\n"
-        ">>> get_severity()\n"
-        );
-
-    def("set_object_severity", &set_object_severity,
-        "\n"
-        "Set logger severity for a single object.\n"
-        "\n"
-        "Usage:\n"
-        ">>> from mapnik import SeverityType, set_object_severity\n"
-        ">>> set_object_severity('ogr', SeverityType.None)\n"
-        ">>> set_object_severity('gdal', SeverityType.Info)\n"
-        ">>> set_object_severity('cairo_renderer', SeverityType.Debug)\n"
-        ">>> set_object_severity('agg_renderer', SeverityType.Warn)\n"
-        ">>> set_object_severity('bindings', SeverityType.Error)\n"
-        );
-
-    def("get_object_severity", &get_object_severity,
-        "\n"
-        "Get logger severity for a single object.\n"
-        "\n"
-        "Usage:\n"
-        ">>> from mapnik import get_object_severity"
-        ">>> get_object_severity('ogr')\n"
-        );
-
 }
