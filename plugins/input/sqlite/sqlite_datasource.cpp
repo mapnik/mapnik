@@ -26,9 +26,11 @@
 #include "sqlite_utils.hpp"
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/debug.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
+#include <mapnik/timer.hpp>
 #include <mapnik/wkb.hpp>
 
 // boost
@@ -51,22 +53,22 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(sqlite_datasource)
 
 sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
-: datasource(params),
-    extent_(),
-    extent_initialized_(false),
-    type_(datasource::Vector),
-    table_(*params_.get<std::string>("table", "")),
-    fields_(*params_.get<std::string>("fields", "*")),
-    metadata_(*params_.get<std::string>("metadata", "")),
-    geometry_table_(*params_.get<std::string>("geometry_table", "")),
-    geometry_field_(*params_.get<std::string>("geometry_field", "")),
-    index_table_(*params_.get<std::string>("index_table", "")),
-    key_field_(*params_.get<std::string>("key_field", "")),
-    row_offset_(*params_.get<int>("row_offset", 0)),
-    row_limit_(*params_.get<int>("row_limit", 0)),
-    intersects_token_("!intersects!"),
-    desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
-    format_(mapnik::wkbAuto)
+    : datasource(params),
+      extent_(),
+      extent_initialized_(false),
+      type_(datasource::Vector),
+      table_(*params_.get<std::string>("table", "")),
+      fields_(*params_.get<std::string>("fields", "*")),
+      metadata_(*params_.get<std::string>("metadata", "")),
+      geometry_table_(*params_.get<std::string>("geometry_table", "")),
+      geometry_field_(*params_.get<std::string>("geometry_field", "")),
+      index_table_(*params_.get<std::string>("index_table", "")),
+      key_field_(*params_.get<std::string>("key_field", "")),
+      row_offset_(*params_.get<int>("row_offset", 0)),
+      row_limit_(*params_.get<int>("row_limit", 0)),
+      intersects_token_("!intersects!"),
+      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
+      format_(mapnik::wkbAuto)
 {
     /* TODO
        - throw if no primary key but spatial index is present?
@@ -86,6 +88,10 @@ sqlite_datasource::sqlite_datasource(parameters const& params, bool bind)
 void sqlite_datasource::bind() const
 {
     if (is_bound_) return;
+
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::bind");
+#endif
 
     boost::optional<std::string> file = params_.get<std::string>("file");
     if (! file) throw datasource_exception("Sqlite Plugin: missing <file> parameter");
@@ -209,9 +215,8 @@ void sqlite_datasource::bind() const
     for (std::vector<std::string>::const_iterator iter = init_statements_.begin();
          iter != init_statements_.end(); ++iter)
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "Sqlite Plugin: Execute init sql: " << *iter << std::endl;
-#endif
+        MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: Execute init sql=" << *iter;
+
         dataset_->execute(*iter);
     }
 
@@ -283,6 +288,10 @@ void sqlite_datasource::bind() const
     has_spatial_index_ = false;
     if (use_spatial_index_)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::bind(use_spatial_index)");
+#endif
+
         if (boost::filesystem::exists(index_db))
         {
             dataset_->execute("attach database '" + index_db + "' as " + index_table_);
@@ -315,8 +324,6 @@ void sqlite_datasource::bind() const
                   dataset_->execute("attach database '" + index_db + "' as " + index_table_);
                   }
                   }
-
-
                 */
                 boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
                 if (sqlite_utils::create_spatial_index(index_db,index_table_,rs))
@@ -343,7 +350,6 @@ void sqlite_datasource::bind() const
 
     if (! extent_initialized_)
     {
-
         // TODO - clean this up - reducing arguments
         std::string query = populate_tokens(table_);
         if (!sqlite_utils::detect_extent(dataset_,
@@ -487,8 +493,12 @@ box2d<double> sqlite_datasource::envelope() const
 boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_type() const
 {
     if (! is_bound_) bind();
-    boost::optional<mapnik::datasource::geometry_t> result;
 
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::get_geometry_type");
+#endif
+
+    boost::optional<mapnik::datasource::geometry_t> result;
     if (dataset_)
     {
         // finally, get geometry type by querying first feature
@@ -542,6 +552,10 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();
 
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::features");
+#endif
+
     if (dataset_)
     {
         mapnik::box2d<double> const& e = q.get_bbox();
@@ -566,7 +580,6 @@ featureset_ptr sqlite_datasource::features(query const& q) const
             s << ",[" << *pos << "]";
             ctx->push(*pos);
         }
-
         s << " FROM ";
 
         std::string query(table_);
@@ -580,7 +593,8 @@ featureset_ptr sqlite_datasource::features(query const& q) const
                                                key_field_,
                                                index_table_,
                                                geometry_table_,
-                                               intersects_token_);        }
+                                               intersects_token_);
+        }
         else
         {
             query = populate_tokens(table_);
@@ -598,10 +612,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
             s << " OFFSET " << row_offset_;
         }
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Sqlite Plugin: table: " << table_ << "\n\n";
-        std::clog << "Sqlite Plugin: query: " << s.str() << "\n\n";
-#endif
+        MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
@@ -618,6 +629,10 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
 {
     if (! is_bound_) bind();
+
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "sqlite_datasource::features_at_point");
+#endif
 
     if (dataset_)
     {
@@ -679,9 +694,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
             s << " OFFSET " << row_offset_;
         }
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Sqlite Plugin: " << s.str() << std::endl;
-#endif
+        MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
 
         boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 

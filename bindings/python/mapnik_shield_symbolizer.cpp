@@ -20,9 +20,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// boost
 #include <boost/python.hpp>
+
+// mapnik
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/path_expression_grammar.hpp>

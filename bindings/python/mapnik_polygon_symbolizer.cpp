@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #include <boost/python.hpp>
 #include "mapnik_enumeration.hpp"
@@ -84,7 +83,11 @@ void export_polygon_symbolizer()
         .add_property("gamma_method",
                       &polygon_symbolizer::get_gamma_method,
                       &polygon_symbolizer::set_gamma_method,
-                      "Set/get the gamma correction method of the polygon")
+                      "gamma correction method")
+        .add_property("smooth",
+                      &polygon_symbolizer::smooth,
+                      &polygon_symbolizer::set_smooth,
+                      "smooth value (0..1.0)")
         ;
 
 }

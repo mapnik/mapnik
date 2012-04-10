@@ -24,6 +24,7 @@
 #define MAPNIK_CTRANS_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/coord_array.hpp>
@@ -72,16 +73,16 @@ template <typename Transform, typename Geometry>
 struct MAPNIK_DECL coord_transform2
 {
     typedef std::size_t size_type;
-    typedef typename Geometry::value_type value_type;
+    //typedef typename Geometry::value_type value_type;
 
     coord_transform2(Transform const& t,
-                     Geometry const& geom,
+                     Geometry & geom,
                      proj_transform const& prj_trans)
         : t_(t),
         geom_(geom),
         prj_trans_(prj_trans)  {}
 
-    unsigned vertex(double *x, double *y) const
+    unsigned vertex(double *x, double *y)
     {
         unsigned command = SEG_MOVETO;
         bool ok = false;
@@ -115,7 +116,7 @@ struct MAPNIK_DECL coord_transform2
 
 private:
     Transform const& t_;
-    Geometry const& geom_;
+    Geometry & geom_;
     proj_transform const& prj_trans_;
 };
 
@@ -239,10 +240,10 @@ struct MAPNIK_DECL coord_transform_parallel
                     angle_a = atan2((m_pre_y-m_cur_y),(m_pre_x-m_cur_x));
                     dx_pre = cos(angle_a + pi_by_2);
                     dy_pre = sin(angle_a + pi_by_2);
-#ifdef MAPNIK_DEBUG
-                    std::clog << "offsetting line by: " << offset_ << "\n";
-                    std::clog << "initial dx=" << (dx_pre * offset_) << " dy=" << (dy_pre * offset_) << "\n";
-#endif
+
+                    MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: Offsetting line by=" << offset_;
+                    MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: Initial dx=" << (dx_pre * offset_) << ",dy=" << (dy_pre * offset_);
+
                     *x = m_pre_x + (dx_pre * offset_);
                     *y = m_pre_y + (dy_pre * offset_);
                     m_status = process;
@@ -289,15 +290,14 @@ struct MAPNIK_DECL coord_transform_parallel
                     }
                     else // skip sharp spikes
                     {
-
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
                         dx_curr = cos(angle_a + pi_by_2);
                         dy_curr = sin(angle_a + pi_by_2);
                         sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
-                        std::clog << "angle a: " << angle_a << "\n";
-                        std::clog << "angle b: " << angle_b << "\n";
-                        std::clog << "h: " << h << "\n";
-                        std::clog << "sin_curve: " << sin_curve << "\n";
+                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: angle a=" << angle_a;
+                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: angle b=" << angle_b;
+                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: h=" << h;
+                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: sin_curve=" << sin_curve;
 #endif
                         m_status = process;
                         break;
@@ -309,21 +309,19 @@ struct MAPNIK_DECL coord_transform_parallel
                       sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
                       cos_curve = -dx_pre*dx_curr-dy_pre*dy_curr;
 
-                      #ifdef MAPNIK_DEBUG
-                      std::clog << "sin_curve value: " << sin_curve << "\n";
-                      #endif
+                      MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: sin_curve value=" << sin_curve;
                       if(sin_curve > -0.3 && sin_curve < 0.3) {
-                      angle_b = atan2((m_cur_y-m_next_y),(m_cur_x-m_next_x));
-                      h = tan((angle_b - angle_a)/2.0);
-                      *x = m_cur_x + (dx_curr * offset_) - h * (dy_curr * offset_);
-                      *y = m_cur_y + (dy_curr * offset_) + h * (dx_curr * offset_);
+                        angle_b = atan2((m_cur_y-m_next_y),(m_cur_x-m_next_x));
+                        h = tan((angle_b - angle_a)/2.0);
+                        *x = m_cur_x + (dx_curr * offset_) - h * (dy_curr * offset_);
+                        *y = m_cur_y + (dy_curr * offset_) + h * (dx_curr * offset_);
                       } else {
-                      if (angle_b - angle_a > 0)
-                      h = -1.0*(1.0+cos_curve)/sin_curve;
-                      else
-                      h = (1.0+cos_curve)/sin_curve;
-                      *x = m_cur_x + (dx_curr + base_shift*dy_curr)*offset_;
-                      *y = m_cur_y + (dy_curr - base_shift*dx_curr)*offset_;
+                        if (angle_b - angle_a > 0)
+                          h = -1.0*(1.0+cos_curve)/sin_curve;
+                        else
+                          h = (1.0+cos_curve)/sin_curve;
+                        *x = m_cur_x + (dx_curr + base_shift*dy_curr)*offset_;
+                        *y = m_cur_y + (dy_curr - base_shift*dx_curr)*offset_;
                       }
                     */
 
@@ -380,20 +378,27 @@ class CoordTransform
 private:
     int width_;
     int height_;
-    double sx_;
-    double sy_;
     box2d<double> extent_;
     double offset_x_;
     double offset_y_;
+    double sx_;
+    double sy_;
 
 public:
     CoordTransform(int width, int height, const box2d<double>& extent,
                    double offset_x = 0, double offset_y = 0)
-        : width_(width), height_(height), extent_(extent),
-          offset_x_(offset_x), offset_y_(offset_y)
+        : width_(width),
+          height_(height),
+          extent_(extent),
+          offset_x_(offset_x),
+          offset_y_(offset_y),
+          sx_(1.0),
+          sy_(1.0)
     {
-        sx_ = static_cast<double>(width_) / extent_.width();
-        sy_ = static_cast<double>(height_) / extent_.height();
+        if (extent_.width() > 0)
+            sx_ = static_cast<double>(width_) / extent_.width();
+        if (extent_.height() > 0)
+            sy_ = static_cast<double>(height_) / extent_.height();
     }
 
     inline int width() const

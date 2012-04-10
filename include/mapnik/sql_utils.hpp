@@ -31,14 +31,14 @@ namespace mapnik { namespace sql_utils {
 
     inline std::string unquote_double(const std::string& sql)
     {
-        std::string table_name = boost::algorithm::to_lower_copy(sql);
+        std::string table_name = sql;
         boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\""));
         return table_name;
     }
 
     inline std::string unquote(const std::string& sql)
     {
-        std::string table_name = boost::algorithm::to_lower_copy(sql);
+        std::string table_name = sql;
         boost::algorithm::trim_if(table_name,boost::algorithm::is_any_of("\"\'"));
         return table_name;
     }
@@ -58,10 +58,11 @@ namespace mapnik { namespace sql_utils {
 
     inline std::string table_from_sql(const std::string& sql)
     {
-        std::string table_name = boost::algorithm::to_lower_copy(sql);
+        std::string table_name = sql;
         boost::algorithm::replace_all(table_name,"\n"," ");
+        boost::algorithm::ireplace_all(table_name," from "," FROM ");
 
-        std::string::size_type idx = table_name.rfind(" from ");
+        std::string::size_type idx = table_name.rfind(" FROM ");
         if (idx!=std::string::npos)
         {
             idx = table_name.find_first_not_of(" ",idx+5);

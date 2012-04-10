@@ -20,14 +20,15 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
+#include <mapnik/debug.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_storage.hpp>
-#include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 
@@ -35,13 +36,22 @@
 #include <boost/assert.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
 
 boost::unordered_map<std::string, marker_ptr> marker_cache::cache_;
 
-bool marker_cache::insert (std::string const& uri, marker_ptr path)
+void marker_cache::clear()
+{
+#ifdef MAPNIK_THREADSAFE
+    mutex::scoped_lock lock(mutex_);
+#endif
+    return cache_.clear();
+}
+
+bool marker_cache::insert(std::string const& uri, marker_ptr path)
 {
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
@@ -72,7 +82,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
             using namespace mapnik::svg;
             try
             {
-                path_ptr marker_path(new svg_storage_type);
+                path_ptr marker_path(boost::make_shared<svg_storage_type>());
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());
@@ -84,7 +94,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                 svg.bounding_rect(&lox, &loy, &hix, &hiy);
                 marker_path->set_bounding_box(lox,loy,hix,hiy);
 
-                marker_ptr mark(new marker(marker_path));
+                marker_ptr mark(boost::make_shared<marker>(marker_path));
                 result.reset(mark);
                 if (update_cache)
                 {
@@ -94,7 +104,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
             }
             catch (...)
             {
-                std::cerr << "Exception caught while loading SVG: " << uri << std::endl;
+                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading SVG: " << uri;
             }
         }
         else
@@ -107,9 +117,9 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                     unsigned width = reader->width();
                     unsigned height = reader->height();
                     BOOST_ASSERT(width > 0 && height > 0);
-                    mapnik::image_ptr image(new mapnik::image_data_32(width,height));
+                    mapnik::image_ptr image(boost::make_shared<mapnik::image_data_32>(width,height));
                     reader->read(0,0,*image);
-                    marker_ptr mark(new marker(image));
+                    marker_ptr mark(boost::make_shared<marker>(image));
                     result.reset(mark);
                     if (update_cache)
                     {
@@ -120,13 +130,13 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
 
             catch (...)
             {
-                std::cerr << "Exception caught while loading image: " << uri << std::endl;
+                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading image: " << uri;
             }
         }
     }
     else
     {
-        std::cerr << "### WARNING Marker does not exist: " << uri << std::endl;
+        MAPNIK_LOG_WARN(marker_cache) << "Marker does not exist: " << uri;
     }
     return result;
 }

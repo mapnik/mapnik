@@ -20,11 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: layer.cpp 17 2005-03-08 23:58:43Z pavlenko $
-
 // mapnik
 #include <mapnik/layer.hpp>
-
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 
@@ -38,8 +35,8 @@ namespace mapnik
 layer::layer(std::string const& name, std::string const& srs)
     : name_(name),
       srs_(srs),
-      minZoom_(0),
-      maxZoom_(std::numeric_limits<double>::max()),
+      min_zoom_(0),
+      max_zoom_(std::numeric_limits<double>::max()),
       active_(true),
       queryable_(false),
       clear_label_cache_(false),
@@ -50,8 +47,8 @@ layer::layer(std::string const& name, std::string const& srs)
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
       srs_(rhs.srs_),
-      minZoom_(rhs.minZoom_),
-      maxZoom_(rhs.maxZoom_),
+      min_zoom_(rhs.min_zoom_),
+      max_zoom_(rhs.max_zoom_),
       active_(rhs.active_),
       queryable_(rhs.queryable_),
       clear_label_cache_(rhs.clear_label_cache_),
@@ -76,8 +73,8 @@ void layer::swap(const layer& rhs)
 {
     name_=rhs.name_;
     srs_ = rhs.srs_;
-    minZoom_=rhs.minZoom_;
-    maxZoom_=rhs.maxZoom_;
+    min_zoom_=rhs.min_zoom_;
+    max_zoom_=rhs.max_zoom_;
     active_=rhs.active_;
     queryable_=rhs.queryable_;
     clear_label_cache_ = rhs.clear_label_cache_;
@@ -124,47 +121,47 @@ std::vector<std::string> & layer::styles()
     return styles_;
 }
 
-void layer::setMinZoom(double minZoom)
+void layer::set_min_zoom(double min_zoom)
 {
-    minZoom_=minZoom;
+    min_zoom_=min_zoom;
 }
 
-void layer::setMaxZoom(double maxZoom)
+void layer::set_max_zoom(double max_zoom)
 {
-    maxZoom_=maxZoom;
+    max_zoom_=max_zoom;
 }
 
-double layer::getMinZoom() const
+double layer::min_zoom() const
 {
-    return minZoom_;
+    return min_zoom_;
 }
 
-double layer::getMaxZoom() const
+double layer::max_zoom() const
 {
-    return maxZoom_;
+    return max_zoom_;
 }
 
-void layer::setActive(bool active)
+void layer::set_active(bool active)
 {
     active_=active;
 }
 
-bool layer::isActive() const
+bool layer::active() const
 {
     return active_;
 }
 
-bool layer::isVisible(double scale) const
+bool layer::visible(double scale) const
 {
-    return isActive() && scale >= minZoom_ - 1e-6 && scale < maxZoom_ + 1e-6;
+    return active() && scale >= min_zoom_ - 1e-6 && scale < max_zoom_ + 1e-6;
 }
 
-void layer::setQueryable(bool queryable)
+void layer::set_queryable(bool queryable)
 {
     queryable_=queryable;
 }
 
-bool layer::isQueryable() const
+bool layer::queryable() const
 {
     return queryable_;
 }

@@ -118,44 +118,47 @@ public:
     }
 };
 
+typedef char_info const * char_info_ptr;
+
 
 /** List of all characters and their positions and formats for a placement. */
 class text_path : boost::noncopyable
 {
     struct character_node
     {
-        int c;
+        char_info_ptr c;
         pixel_position pos;
         double angle;
-        char_properties *format;
 
-        character_node(int c_, double x_, double y_, double angle_, char_properties *format_)
-            : c(c_), pos(x_, y_), angle(angle_), format(format_)
+        character_node(char_info_ptr c_, double x_, double y_, double angle_)
+            : c(c_),
+              pos(x_, y_),
+              angle(angle_)
         {
 
         }
 
         ~character_node() {}
 
-        void vertex(int *c_, double *x_, double *y_, double *angle_, char_properties **format_)
+        void vertex(char_info_ptr *c_, double *x_, double *y_, double *angle_)
         {
             *c_ = c;
             *x_ = pos.x;
             *y_ = pos.y;
             *angle_ = angle;
-            *format_ = format;
         }
     };
 
     int itr_;
 public:
     typedef std::vector<character_node> character_nodes_t;
+    pixel_position center;
     character_nodes_t nodes_;
 
-    pixel_position center;
-
-    text_path()
-        : itr_(0)
+    text_path(double x, double y)
+        : itr_(0),
+          center(x,y),
+          nodes_()
     {
 
     }
@@ -163,15 +166,15 @@ public:
     ~text_path() {}
 
     /** Adds a new char to the list. */
-    void add_node(int c, double x, double y, double angle, char_properties *format)
+    void add_node(char_info_ptr c, double x, double y, double angle)
     {
-        nodes_.push_back(character_node(c, x, y, angle, format));
+        nodes_.push_back(character_node(c, x, y, angle));
     }
 
     /** Return node. Always returns a new node. Has no way to report that there are no more nodes. */
-    void vertex(int *c, double *x, double *y, double *angle, char_properties **format)
+    void vertex(char_info_ptr *c, double *x, double *y, double *angle)
     {
-        nodes_[itr_++].vertex(c, x, y, angle, format);
+        nodes_[itr_++].vertex(c, x, y, angle);
     }
 
     /** Start again at first node. */

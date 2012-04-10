@@ -54,9 +54,9 @@ struct char_properties
 {
     char_properties();
     /** Construct object from XML. */
-    void from_xml(boost::property_tree::ptree const &sym, fontset_map const & fontsets);
+    void from_xml(xml_node const &sym, fontset_map const & fontsets);
     /** Write object to XML ptree. */
-    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl=char_properties()) const;
+    void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
     std::string face_name;
     font_set fontset;
     float text_size;
@@ -110,6 +110,7 @@ enum justify_alignment
     J_LEFT = 0,
     J_MIDDLE,
     J_RIGHT,
+    J_AUTO,
     justify_alignment_MAX
 };
 
@@ -124,7 +125,7 @@ struct text_symbolizer_properties
 {
     text_symbolizer_properties();
     /** Load all values from XML ptree. */
-    void from_xml(boost::property_tree::ptree const &sym, fontset_map const & fontsets);
+    void from_xml(xml_node const &sym, fontset_map const & fontsets);
     /** Save all values to XML ptree (but does not create a new parent node!). */
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_symbolizer_properties const &dfl=text_symbolizer_properties()) const;
 

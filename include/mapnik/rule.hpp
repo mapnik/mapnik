@@ -203,9 +203,7 @@ private:
         template <class T>
         void copy_text_ptr(T & sym) const
         {
-#ifdef MAPNIK_DEBUG
-            std::cerr << "Warning: Deep copying TextSymbolizers is broken!\n";
-#endif
+            MAPNIK_LOG_WARN(rule) << "rule: deep copying TextSymbolizers is broken!";
         }
 
         template <class T>

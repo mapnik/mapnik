@@ -146,6 +146,8 @@ def test_render_grid():
     s = mapnik.Style()
     r = mapnik.Rule()
     symb = mapnik.MarkersSymbolizer()
+    symb.width = 10
+    symb.height = 10
     symb.allow_overlap = True
     r.symbols.append(symb)
     s.rules.append(r)

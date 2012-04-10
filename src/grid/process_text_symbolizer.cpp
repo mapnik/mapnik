@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/grid/grid_renderer.hpp>
@@ -32,23 +31,25 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
                                mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
+    box2d<double> query_extent;
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, *feature, prj_trans,
             width_, height_,
             scale_factor_ * (1.0/pixmap_.get_resolution()),
-            t_, font_manager_, detector_);
+            t_, font_manager_, detector_,
+            query_extent);
     bool placement_found = false;
 
     text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
 
-    text_placement_info_ptr placement;
-    while ((placement = helper.get_placement())) {
+    while (helper.next()) {
         placement_found = true;
-        for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+        placements_type &placements = helper.placements();
+        for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render_id(feature->id(), placement->placements[ii].center,2);
+            ren.prepare_glyphs(&(placements[ii]));
+            ren.render_id(feature->id(), placements[ii].center, 2);
         }
     }
     if (placement_found) pixmap_.add_feature(feature);

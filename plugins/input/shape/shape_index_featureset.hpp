@@ -52,9 +52,7 @@ public:
                            std::string const& encoding,
                            std::string const& shape_name,
                            int row_limit);
-
     virtual ~shape_index_featureset();
-
     feature_ptr next();
 
 private:

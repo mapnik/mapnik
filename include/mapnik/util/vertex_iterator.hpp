@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_VERTEX_ITERATOR_HPP
 #define MAPNIK_VERTEX_ITERATOR_HPP
 

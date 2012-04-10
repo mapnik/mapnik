@@ -19,16 +19,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/svg_renderer.hpp>
 #include <mapnik/map.hpp>
 
 // stl
-#ifdef MAPNIK_DEBUG
-#include <iostream>
-#endif
 #include <ostream>
 
 namespace mapnik
@@ -49,9 +46,7 @@ svg_renderer<T>::~svg_renderer() {}
 template <typename T>
 void svg_renderer<T>::start_map_processing(Map const& map)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start map processing" << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: Start map processing";
 
     // generate XML header.
     generator_.generate_header();
@@ -77,25 +72,19 @@ void svg_renderer<T>::end_map_processing(Map const& map)
     // generate SVG root element closing tag.
     generator_.generate_closing_root();
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "end map processing" << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: End map processing";
 }
 
 template <typename T>
 void svg_renderer<T>::start_layer_processing(layer const& lay)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start layer processing: " << lay.name() << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: Start layer processing=" << lay.name();
 }
 
 template <typename T>
 void svg_renderer<T>::end_layer_processing(layer const& lay)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "end layer processing: " << lay.name() << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: End layer processing=" << lay.name();
 }
 
 template class svg_renderer<std::ostream_iterator<char> >;

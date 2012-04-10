@@ -20,19 +20,19 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_GEOMETRY_TO_WKB_HPP
 #define MAPNIK_GEOMETRY_TO_WKB_HPP
 
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 #include <boost/foreach.hpp>
+
 // stl
 #include <vector>
 #include <cstdio>

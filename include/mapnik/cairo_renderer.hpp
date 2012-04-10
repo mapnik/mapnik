@@ -78,7 +78,7 @@ protected:
 public:
     ~cairo_renderer_base();
     void start_map_processing(Map const& map);
-    void start_layer_processing(layer const& lay);
+    void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
     void process(point_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,
@@ -123,7 +123,7 @@ public:
     }
 
 protected:
-    void render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & mtx, double opacity=1.0);
+    void render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & mtx, double opacity=1.0, bool recenter=true);
 
     Map const& m_;
     Cairo::RefPtr<Cairo::Context> context_;
@@ -132,6 +132,7 @@ protected:
     face_manager<freetype_engine> font_manager_;
     cairo_face_manager face_manager_;
     label_collision_detector4 detector_;
+    box2d<double> query_extent_;
 };
 
 template <typename T>

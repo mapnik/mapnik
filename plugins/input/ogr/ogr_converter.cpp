@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
@@ -68,10 +69,10 @@ void ogr_converter::convert_geometry(OGRGeometry* geom, feature_ptr feature)
     case wkbNone:
     case wkbUnknown:
     default:
-#ifdef MAPNIK_DEBUG
-        std::clog << "OGR Plugin: unknown <ogr> geometry_type="
-                  << wkbFlatten(geom->getGeometryType()) << std::endl;
-#endif
+        {
+            MAPNIK_LOG_WARN(ogr) << "ogr_converter: unknown <ogr> geometry_type="
+                                 << wkbFlatten(geom->getGeometryType());
+        }
         break;
     }
 }

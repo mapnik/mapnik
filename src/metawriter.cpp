@@ -21,9 +21,11 @@
  *****************************************************************************/
 
 // Mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
 #include <mapnik/text_placements/base.hpp>
+#include <mapnik/text_path.hpp>
 
 // Boost
 #include <boost/foreach.hpp>
@@ -76,7 +78,8 @@ void metawriter_json_stream::write_header()
 
 void metawriter_json_stream::stop()
 {
-    if (count_ >= STARTED && f_) {
+    if (count_ >= STARTED && f_)
+    {
         *f_ << " ] }\n";
     }
     count_ = STOPPED;
@@ -84,10 +87,10 @@ void metawriter_json_stream::stop()
 
 metawriter_json_stream::~metawriter_json_stream()
 {
-    if (count_ >= STARTED) {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "WARNING: GeoJSON metawriter not stopped before destroying it.";
-#endif
+    if (count_ >= STARTED)
+    {
+        MAPNIK_LOG_WARN(metawriter) << "WARNING: GeoJSON metawriter not stopped before destroying it.";
+
         stop();
     }
     if (trans_) delete trans_;
@@ -174,11 +177,10 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
 
 }
 
-void metawriter_json_stream::add_text(text_placement_info const& p,
-                                      face_manager_freetype &font_manager,
-                                      Feature const& feature,
-                                      CoordTransform const& t,
-                                      metawriter_properties const& properties)
+void metawriter_json_stream::add_text(
+    boost::ptr_vector<text_path> &placements, box2d<double> const& extents,
+    Feature const& feature, CoordTransform const& t,
+    metawriter_properties const& properties)
 {
     /* Note:
        Map coordinate system (and starting_{x,y}) starts in upper left corner
@@ -192,19 +194,19 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
        Hightest y = baseline of top line
 
     */
-    for (unsigned n = 0; n < p.placements.size(); n++) {
-        text_path & current_placement = const_cast<text_path &>(p.placements[n]);
+    for (unsigned n = 0; n < placements.size(); n++)
+    {
+        text_path &current_placement = placements[n];
 
         bool inside = false; /* Part of text is inside rendering region */
         bool straight = true;
-        int c;
+        char_info_ptr c;
         double x, y, angle;
-        char_properties *format;
         current_placement.rewind();
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
             int cx = current_placement.center.x;
             int cy = current_placement.center.y;
-            current_placement.vertex(&c, &x, &y, &angle, &format);
+            current_placement.vertex(&c, &x, &y, &angle);
             if (cx+x >= 0 && cx+x < width_ && cy-y >= 0 && cy-y < height_) inside = true;
             if (angle > 0.001 || angle < -0.001) straight = false;
             if (inside && !straight) break;
@@ -217,13 +219,11 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
             //Reduce number of polygons
             double minx = INT_MAX, miny = INT_MAX, maxx = INT_MIN, maxy = INT_MIN;
             for (int i = 0; i < current_placement.num_nodes(); ++i) {
-                current_placement.vertex(&c, &x, &y, &angle, &format);
-                face_set_ptr face = font_manager.get_face_set(format->face_name, format->fontset);
-                char_info ci = face->character_dimensions(c);
+                current_placement.vertex(&c, &x, &y, &angle);
                 minx = std::min(minx, x);
-                maxx = std::max(maxx, x+ci.width);
-                maxy = std::max(maxy, y+ci.ymax);
-                miny = std::min(miny, y+ci.ymin);
+                maxx = std::max(maxx, x+c->width);
+                maxy = std::max(maxy, y+c->ymax);
+                miny = std::min(miny, y+c->ymin);
             }
             add_box(box2d<double>(current_placement.center.x+minx,
                                   current_placement.center.y-miny,
@@ -234,27 +234,22 @@ void metawriter_json_stream::add_text(text_placement_info const& p,
 
         write_feature_header("MultiPolygon");
         *f_ << "[";
-        c = ' ';
         for (int i = 0; i < current_placement.num_nodes(); ++i) {
-            if (c != ' ') {
-                *f_ << ",";
-            }
-            current_placement.vertex(&c, &x, &y, &angle, &format);
-            if (c == ' ') continue;
-            face_set_ptr face = font_manager.get_face_set(format->face_name, format->fontset);
-            char_info ci = face->character_dimensions(c);
+            current_placement.vertex(&c, &x, &y, &angle);
+            if (c->c == ' ') continue;
+            *f_ << ",";
 
             double x0, y0, x1, y1, x2, y2, x3, y3;
             double sina = sin(angle);
             double cosa = cos(angle);
-            x0 = current_placement.center.x + x - sina*ci.ymin;
-            y0 = current_placement.center.y - y - cosa*ci.ymin;
-            x1 = x0 + ci.width * cosa;
-            y1 = y0 - ci.width * sina;
-            x2 = x0 + (ci.width * cosa - ci.height() * sina);
-            y2 = y0 - (ci.width * sina + ci.height() * cosa);
-            x3 = x0 - ci.height() * sina;
-            y3 = y0 - ci.height() * cosa;
+            x0 = current_placement.center.x + x - sina*c->ymin;
+            y0 = current_placement.center.y - y - cosa*c->ymin;
+            x1 = x0 + c->width * cosa;
+            y1 = y0 - c->width * sina;
+            x2 = x0 + (c->width * cosa - c->height() * sina);
+            y2 = y0 - (c->width * sina + c->height() * cosa);
+            x3 = x0 - c->height() * sina;
+            y3 = y0 - c->height() * cosa;
 
             *f_ << "\n     [[";
             write_point(t, x0, y0);
@@ -330,9 +325,9 @@ metawriter_json::metawriter_json(metawriter_properties dflt_properties, path_exp
 void metawriter_json::start(metawriter_property_map const& properties)
 {
     filename_ = path_processor<metawriter_property_map>::evaluate(*fn_, properties);
-#ifdef MAPNIK_DEBUG
-    std::clog << "Metawriter JSON: filename=" << filename_ << "\n";
-#endif
+
+    MAPNIK_LOG_DEBUG(metawriter) << "metawriter_json: Filename=" << filename_;
+
     metawriter_json_stream::start(properties);
 }
 
@@ -348,14 +343,14 @@ void metawriter_json::write_header()
 void metawriter_json::stop()
 {
     metawriter_json_stream::stop();
-    if (f_.is_open()) {
+    if (f_.is_open())
+    {
         f_.close();
     }
-#ifdef MAPNIK_DEBUG
-    else if (count_ >= STARTED){
-        std::clog << "WARNING: File not open in metawriter_json::stop()!\n";
+    else if (count_ >= STARTED)
+    {
+        MAPNIK_LOG_DEBUG(metawriter) << "metawriter_json: File not open when stopping";
     }
-#endif
 }
 
 void metawriter_json::set_filename(path_expression_ptr fn)

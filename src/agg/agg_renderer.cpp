@@ -19,22 +19,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/parse_path.hpp>
-#include <mapnik/text_path.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
 
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
@@ -70,17 +67,12 @@
 #include "agg_vpgen_clip_polyline.h"
 #include "agg_arrowhead.h"
 
-
 // boost
 #include <boost/utility.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 // stl
-#ifdef MAPNIK_DEBUG
-#include <iostream>
-#endif
-
 #include <cmath>
 
 namespace mapnik
@@ -175,9 +167,8 @@ void agg_renderer<T>::setup(Map const &m)
             }
         }
     }
-#ifdef MAPNIK_DEBUG
-    std::clog << "scale=" << m.scale() << "\n";
-#endif
+
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
 
 template <typename T>
@@ -186,40 +177,35 @@ agg_renderer<T>::~agg_renderer() {}
 template <typename T>
 void agg_renderer<T>::start_map_processing(Map const& map)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start map processing bbox="
-              << map.get_current_extent() << "\n";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start map processing bbox=" << map.get_current_extent();
+
     ras_ptr->clip_box(0,0,width_,height_);
 }
 
 template <typename T>
 void agg_renderer<T>::end_map_processing(Map const& )
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "end map processing\n";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
 template <typename T>
-void agg_renderer<T>::start_layer_processing(layer const& lay)
+void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start layer processing : " << lay.name()  << "\n";
-    std::clog << "datasource = " << lay.datasource().get() << "\n";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing layer=" << lay.name();
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: -- datasource=" << lay.datasource().get();
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: -- query_extent=" << query_extent;
+
     if (lay.clear_label_cache())
     {
         detector_->clear();
     }
+    query_extent_ = query_extent;
 }
 
 template <typename T>
 void agg_renderer<T>::end_layer_processing(layer const&)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "end layer processing\n";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End layer processing";
 }
 
 template <typename T>
@@ -247,7 +233,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         mtx *= agg::trans_affine_scaling(scale_factor_);
         // render the marker at the center of the marker box
         mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
-
+        using namespace mapnik::svg;
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,
@@ -257,8 +243,6 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
                                                    (*marker.get_vector_data())->attributes());
 
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
-
-
     }
     else
     {

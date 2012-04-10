@@ -19,10 +19,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/formatting/base.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/registry.hpp>
+#include <mapnik/xml_node.hpp>
 
 // boost
 #include <boost/property_tree/ptree.hpp>
@@ -33,23 +36,21 @@ namespace formatting {
 void node::to_xml(boost::property_tree::ptree &xml) const
 {
     //TODO: Should this throw a config_error?
-#ifdef MAPNIK_DEBUG
-    std::cerr << "Error: Trying to write unsupported node type to XML.\n";
-#endif
+    MAPNIK_LOG_ERROR(base) << "Trying to write unsupported node type to XML.";
 }
 
-node_ptr node::from_xml(boost::property_tree::ptree const& xml)
+node_ptr node::from_xml(xml_node const& xml)
 {
     list_node *list = new list_node();
     node_ptr list_ptr(list);
-    boost::property_tree::ptree::const_iterator itr = xml.begin();
-    boost::property_tree::ptree::const_iterator end = xml.end();
+    xml_node::const_iterator itr = xml.begin();
+    xml_node::const_iterator end = xml.end();
     for (; itr != end; ++itr) {
-        if (itr->first == "<xmlcomment>" || itr->first == "<xmlattr>" || itr->first == "Placement")
+        if (itr->name() == "Placement")
         {
             continue;
         }
-        node_ptr n = registry::instance()->from_xml(itr->first, itr->second);
+        node_ptr n = registry::instance()->from_xml(*itr);
         if (n) list->push_back(n);
     }
     if (list->get_children().size() == 1) {

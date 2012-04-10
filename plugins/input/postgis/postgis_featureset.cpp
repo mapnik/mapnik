@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/sql_utils.hpp>
@@ -40,7 +41,6 @@
 #include <sstream>
 #include <string>
 
-using boost::trim_copy;
 using mapnik::geometry_type;
 using mapnik::byte;
 using mapnik::geometry_utils;
@@ -56,22 +56,25 @@ postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
       tr_(new transcoder(encoding)),
       totalGeomSize_(0),
       feature_id_(1),
-      key_field_(key_field)  {}
+      key_field_(key_field)
+{
+}
 
 feature_ptr postgis_featureset::next()
 {
     if (rs_->next())
     {
         // new feature
+        unsigned pos = 1;
         feature_ptr feature;
 
-        unsigned pos = 1;
-
-        if (key_field_) {
+        if (key_field_)
+        {
             // create feature with user driven id from attribute
             int oid = rs_->getTypeOID(pos);
             const char* buf = rs_->getValue(pos);
             std::string name = rs_->getFieldName(pos);
+
             // validation happens of this type at bind()
             int val;
             if (oid == 20)
@@ -86,15 +89,18 @@ feature_ptr postgis_featureset::next()
             {
                 val = int4net(buf);
             }
+
             feature = feature_factory::create(ctx_, val);
             // TODO - extend feature class to know
             // that its id is also an attribute to avoid
             // this duplication
             feature->put(name,val);
             ++pos;
-        } else {
+        }
+        else
+        {
             // fallback to auto-incrementing id
-            feature = feature_factory::create(ctx_,feature_id_);
+            feature = feature_factory::create(ctx_, feature_id_);
             ++feature_id_;
         }
 
@@ -102,74 +108,100 @@ feature_ptr postgis_featureset::next()
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
         geometry_utils::from_wkb(feature->paths(), data, size);
-        totalGeomSize_+=size;
+        totalGeomSize_ += size;
 
         int num_attrs = ctx_->size() + 1;
-        for ( ; pos < num_attrs; ++pos)
+        for (; pos < num_attrs; ++pos)
         {
             std::string name = rs_->getFieldName(pos);
 
             if (rs_->isNull(pos))
             {
-                feature->put(name,mapnik::value_null());
+                feature->put(name, mapnik::value_null());
             }
             else
             {
                 const char* buf = rs_->getValue(pos);
-                int oid = rs_->getTypeOID(pos);
+                const int oid = rs_->getTypeOID(pos);
+                switch (oid)
+                {
+                    case 16: //bool
+                    {
+                        feature->put(name, (buf[0] != 0));
+                        break;
+                    }
 
-                if (oid==16) //bool
-                {
-                    feature->put(name,(buf[0] != 0));
-                }
-                else if (oid==23) //int4
-                {
-                    int val = int4net(buf);
-                    feature->put(name,val);
-                }
-                else if (oid==21) //int2
-                {
-                    int val = int2net(buf);
-                    feature->put(name,val);
-                }
-                else if (oid==20) //int8/BigInt
-                {
-                    int val = int8net(buf);
-                    feature->put(name,val);
-                }
-                else if (oid == 700) // float4
-                {
-                    float val;
-                    float4net(val,buf);
-                    feature->put(name,val);
-                }
-                else if (oid == 701) // float8
-                {
-                    double val;
-                    float8net(val,buf);
-                    feature->put(name,val);
-                }
-                else if (oid==25 || oid==1043) // text or varchar
-                {
-                    feature->put(name,tr_->transcode(buf));
-                }
-                else if (oid==1042)
-                {
-                    // bpchar
-                    feature->put(name,tr_->transcode(trim_copy(std::string(buf)).c_str()));
-                }
-                else if (oid == 1700) // numeric
-                {
-                    std::string str = mapnik::sql_utils::numeric2string(buf);
-                    double val;
-                    if (mapnik::conversions::string2double(str,val))
-                        feature->put(name,val);
-                }
-                else
-                {
-#ifdef MAPNIK_DEBUG
-                    std::clog << "Postgis Plugin: uknown OID = " << oid << " FIXME " << std::endl;
-#endif
+                    case 23: //int4
+                    {
+                        int val = int4net(buf);
+                        feature->put(name, val);
+                        break;
+                    }
+
+                    case 21: //int2
+                    {
+                        int val = int2net(buf);
+                        feature->put(name, val);
+                        break;
+                    }
+
+                    case 20: //int8/BigInt
+                    {
+                        // TODO - need to support boost::uint64_t in mapnik::value
+                        // https://github.com/mapnik/mapnik/issues/895
+                        int val = int8net(buf);
+                        feature->put(name, val);
+                        break;
+                    }
+
+                    case 700: //float4
+                    {
+                        float val;
+                        float4net(val, buf);
+                        feature->put(name, val);
+                        break;
+                    }
+
+                    case 701: //float8
+                    {
+                        double val;
+                        float8net(val, buf);
+                        feature->put(name, val);
+                        break;
+                    }
+
+                    case 25:   //text
+                    case 1043: //varchar
+                    {
+                        feature->put(name, tr_->transcode(buf));
+                        break;
+                    }
+
+                    case 1042: //bpchar
+                    {
+                        std::string str(buf);
+                        boost::trim(str);
+                        feature->put(name, tr_->transcode(str.c_str()));
+                        break;
+                    }
+
+                    case 1700: //numeric
+                    {
+                        double val;
+                        std::string str = mapnik::sql_utils::numeric2string(buf);
+                        if (mapnik::util::string2double(str, val))
+                        {
+                            feature->put(name, val);
+                        }
+                        break;
+                    }
+
+                    default:
+                    {
+                        MAPNIK_LOG_WARN(postgis) << "postgis_featureset: Uknown type_oid=" << oid;
+
+                        break;
+                    }
                 }
             }
         }

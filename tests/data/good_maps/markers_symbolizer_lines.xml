@@ -2,8 +2,8 @@
 <Map background-color="white" srs="+init=epsg:4326" minimum-version="0.7.2">
     <Style name="1">
         <Rule>
-            <MarkersSymbolizer stroke="green" stroke-width="1.3" fill="yellow"/>
             <LineSymbolizer stroke-width=".2" stroke="grey"/>
+            <MarkersSymbolizer stroke="green" stroke-width="1.3" fill="yellow"/>
         </Rule>
     </Style>
 

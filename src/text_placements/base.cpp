@@ -35,12 +35,9 @@ void text_placements::add_expressions(expression_set &output)
 /************************************************************************/
 
 text_placement_info::text_placement_info(text_placements const* parent,
-                                         double scale_factor_, dimension_type dim, bool has_dimensions_)
+                                         double scale_factor_)
     : properties(parent->defaults),
-      scale_factor(scale_factor_),
-      has_dimensions(has_dimensions_),
-      dimensions(dim),
-      collect_extents(false)
+      scale_factor(scale_factor_)
 {
 
 }

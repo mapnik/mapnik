@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/expression_node.hpp>
-#include <mapnik/expression_grammar.hpp>
 
 // stl
 #include <string>
@@ -35,6 +34,7 @@ namespace mapnik
 {
 
 typedef boost::shared_ptr<expr_node> expression_ptr;
+template <typename Iterator> struct expression_grammar;
 
 class expression_factory
 {

@@ -53,6 +53,7 @@ public:
                    std::string const& encoding);
     virtual ~osm_featureset();
     feature_ptr next();
+
 private:
     filterT filter_;
     box2d<double> query_ext_;
@@ -64,7 +65,7 @@ private:
     osm_dataset *dataset_;
     std::set<std::string> attribute_names_;
     mapnik::context_ptr ctx_;
-    // no copying
+
     osm_featureset(const osm_featureset&);
     const osm_featureset& operator=(const osm_featureset&);
 };

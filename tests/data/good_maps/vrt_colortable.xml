@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map srs="+init=epsg:32630" background-color="rgb(255,255,255)">
+    <Style name="2011_5km_vrt_nodata_style">
+        <Rule>
+            <RasterSymbolizer/>
+        </Rule>
+    </Style>
+    <Layer name="2011_5km_vrt_nodata" srs="+init=epsg:32630">
+        <StyleName>2011_5km_vrt_nodata_style</StyleName>
+        <Datasource>
+            <Parameter name="file">../raster/dataraster.vrt</Parameter>
+            <Parameter name="type">gdal</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

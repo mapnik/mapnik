@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/grid/grid_view.hpp>
@@ -71,7 +72,6 @@ private:
     bool painted_;
 
 public:
-
 
     hit_grid(int width, int height, std::string const& key, unsigned int resolution)
         :width_(width),
@@ -136,7 +136,7 @@ public:
             }
             else
             {
-                std::clog << "should not get here: key '" << key_ << "' not found in feature properties\n";
+                MAPNIK_LOG_DEBUG(grid) << "hit_grid: Should not get here: key '" << key_ << "' not found in feature properties";
             }
         }
 
@@ -153,7 +153,7 @@ public:
         }
         else
         {
-            std::clog << "### Warning: key '" << key_ << "' was blank for " << *feature << "\n";
+            MAPNIK_LOG_DEBUG(grid) << "hit_grid: Warning - key '" << key_ << "' was blank for " << *feature;
         }
     }
 

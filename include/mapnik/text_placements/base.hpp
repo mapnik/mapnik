@@ -27,10 +27,6 @@
 #include <mapnik/config.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/formatting/base.hpp>
-#include <mapnik/text_path.hpp> //TODO: Remove this again after text_placement_info::placements is moved to a better place.
-
-// stl
-#include <queue>
 
 namespace mapnik
 {
@@ -46,8 +42,7 @@ class text_placement_info : boost::noncopyable
 public:
     /** Constructor. Takes the parent text_placements object as a parameter
      * to read defaults from it. */
-    text_placement_info(text_placements const* parent,
-                        double scale_factor_, dimension_type dim, bool has_dimensions_);
+    text_placement_info(text_placements const* parent, double scale_factor_);
     /** Get next placement.
      * This function is also called before the first placement is tried.
      * Each class has to return at least one position!
@@ -63,36 +58,16 @@ public:
 
     /** Scale factor used by the renderer. */
     double scale_factor;
-    /* TODO: Don't know what this is used for. */
-    bool has_dimensions;
-    /* TODO: Don't know what this is used for. */
-    dimension_type dimensions;
     /** Set scale factor. */
     void set_scale_factor(double factor) { scale_factor = factor; }
     /** Get scale factor. */
-    double get_scale_factor() { return scale_factor; }
+    double get_scale_factor() const { return scale_factor; }
     /** Get label spacing taking the scale factor into account. */
-    double get_actual_label_spacing() { return scale_factor * properties.label_spacing; }
+    double get_actual_label_spacing() const { return scale_factor * properties.label_spacing; }
     /** Get minimum distance taking the scale factor into account. */
-    double get_actual_minimum_distance() { return scale_factor * properties.minimum_distance; }
+    double get_actual_minimum_distance() const { return scale_factor * properties.minimum_distance; }
     /** Get minimum padding taking the scale factor into account. */
-    double get_actual_minimum_padding() { return scale_factor * properties.minimum_padding; }
-
-    /** Collect a bounding box of all texts placed. */
-    bool collect_extents;
-    //Output by placement finder
-    /** Bounding box of all texts placed. */
-    box2d<double> extents;
-    /** Additional boxes to take into account when finding placement.
-     * Used for finding line placements where multiple placements are returned.
-     * Boxes are relative to starting point of current placement.
-     */
-    std::vector<box2d<double> > additional_boxes;
-
-    /* TODO */
-    std::queue< box2d<double> > envelopes;
-    /** Used to return all placements found. */
-    boost::ptr_vector<text_path> placements;
+    double get_actual_minimum_padding() const { return scale_factor * properties.minimum_padding; }
 };
 
 typedef boost::shared_ptr<text_placement_info> text_placement_info_ptr;
@@ -119,8 +94,7 @@ public:
      * }
      */
     virtual text_placement_info_ptr get_placement_info(
-        double scale_factor_, dimension_type dim,
-        bool has_dimensions_) const =0;
+        double scale_factor_) const =0;
     /** Get a list of all expressions used in any placement.
      * This function is used to collect attributes.
      */

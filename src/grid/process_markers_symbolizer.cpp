@@ -19,16 +19,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/marker.hpp>
 #include <mapnik/markers_symbolizer.hpp>
-
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
@@ -46,7 +46,6 @@
 
 // stl
 #include <algorithm>
-
 
 
 namespace mapnik {
@@ -104,10 +103,11 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             bool placed = false;
             for (unsigned i=0; i<feature->num_geometries(); ++i)
             {
-                geometry_type const& geom = feature->get_geometry(i);
+                geometry_type & geom = feature->get_geometry(i);
                 if (geom.num_points() <= 1)
                 {
-                    std::clog << "### Warning svg markers not supported yet for points within markers_symbolizer\n";
+                    MAPNIK_LOG_WARN(grid_renderer) << "grid_renderer: markers_symbolizer points do not yet support SVG markers";
+
                     continue;
                 }
 
@@ -147,6 +147,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             h = sym.get_height()/res;
         }
 
+        double rx = w/2.0;
+        double ry = h/2.0;
+
         arrow arrow_;
         box2d<double> extent;
 
@@ -181,7 +184,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 
         for (unsigned i=0; i<feature->num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature->get_geometry(i);
             if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
             {
                 geom.label_position(&x,&y);
@@ -194,7 +197,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 if (sym.get_allow_overlap() ||
                     detector_.has_placement(label_ext))
                 {
-                    agg::ellipse c(x, y, w, h);
+                    agg::ellipse c(x, y, rx, ry);
                     agg::path_storage marker;
                     marker.concat_path(c);
                     ras_ptr->add_path(marker);
@@ -231,7 +234,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     if (marker_type == ELLIPSE)
                     {
                         // todo proper bbox - this is buggy
-                        agg::ellipse c(x_t, y_t, w, h);
+                        agg::ellipse c(x_t, y_t, rx, ry);
                         marker.concat_path(c);
                         agg::trans_affine matrix;
                         matrix *= agg::trans_affine_translation(-x_t,-y_t);

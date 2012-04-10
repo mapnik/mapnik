@@ -19,14 +19,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// $Id$
 
 #include "gdal_datasource.hpp"
 #include "gdal_featureset.hpp"
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/debug.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
+#include <mapnik/timer.hpp>
 
 #include <gdal_version.h>
 
@@ -49,10 +50,7 @@ using mapnik::datasource_exception;
  */
 inline GDALDataset* gdal_datasource::open_dataset() const
 {
-
-#ifdef MAPNIK_DEBUG
-    std::clog << "GDAL Plugin: opening: " << dataset_name_ << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Opening " << dataset_name_;
 
     GDALDataset *dataset;
 #if GDAL_VERSION_NUM >= 1600
@@ -78,11 +76,10 @@ inline GDALDataset* gdal_datasource::open_dataset() const
 gdal_datasource::gdal_datasource(parameters const& params, bool bind)
     : datasource(params),
       desc_(*params.get<std::string>("type"), "utf-8"),
-      filter_factor_(*params_.get<double>("filter_factor", 0.0))
+      filter_factor_(*params_.get<double>("filter_factor", 0.0)),
+      nodata_value_(params_.get<double>("nodata"))
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "GDAL Plugin: Initializing..." << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
 
     GDALAllRegister();
 
@@ -109,6 +106,10 @@ void gdal_datasource::bind() const
 {
     if (is_bound_) return;
 
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "gdal_datasource::bind");
+#endif
+
     shared_dataset_ = *params_.get<mapnik::boolean>("shared", false);
     band_ = *params_.get<int>("band", -1);
 
@@ -123,9 +124,7 @@ void gdal_datasource::bind() const
     boost::optional<std::string> bbox_s = params_.get<std::string>("bbox");
     if (bbox_s)
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "GDAL Plugin: bbox parameter=" << *bbox_s << std::endl;
-#endif
+        MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: BBox Parameter=" << *bbox_s;
 
         bbox_override = extent_.from_string(*bbox_s);
         if (! bbox_override)
@@ -148,11 +147,10 @@ void gdal_datasource::bind() const
         dataset->GetGeoTransform(tr);
     }
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "GDAL Plugin: geotransform=" << tr[0] << "," << tr[1] << ","
-              << tr[2] << "," << tr[3] << ","
-              << tr[4] << "," << tr[5] << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource Geotransform="
+                           << tr[0] << "," << tr[1] << ","
+                           << tr[2] << "," << tr[3] << ","
+                           << tr[4] << "," << tr[5];
 
     // TODO - We should throw for true non-north up images, but the check
     // below is clearly too restrictive.
@@ -187,10 +185,8 @@ void gdal_datasource::bind() const
 
     GDALClose(dataset);
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "GDAL Plugin: Raster Size=" << width_ << "," << height_ << std::endl;
-    std::clog << "GDAL Plugin: Raster Extent=" << extent_ << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Size=" << width_ << "," << height_;
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Extent=" << extent_;
 
     is_bound_ = true;
 }
@@ -230,6 +226,10 @@ featureset_ptr gdal_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();
 
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "gdal_datasource::features");
+#endif
+
     gdal_query gq = q;
 
     // TODO - move to boost::make_shared, but must reduce # of args to <= 9
@@ -242,12 +242,17 @@ featureset_ptr gdal_datasource::features(query const& q) const
                                               nbands_,
                                               dx_,
                                               dy_,
-                                              filter_factor_));
+                                              filter_factor_,
+                                              nodata_value_));
 }
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
 {
     if (! is_bound_) bind();
+
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "gdal_datasource::features_at_point");
+#endif
 
     gdal_query gq = pt;
 
@@ -261,5 +266,6 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
                                               nbands_,
                                               dx_,
                                               dy_,
-                                              filter_factor_));
+                                              filter_factor_,
+                                              nodata_value_));
 }

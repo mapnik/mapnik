@@ -43,7 +43,7 @@ except ImportError:
 
 class centering:
     """Style of centering to use with the map, the default is constrained
-    
+
     none: map will be placed flush with the margin/box in the top left corner
     constrained: map will be centered on the most constrained axis (for a portrait page
                  and a square map this will be horizontally)
@@ -167,7 +167,7 @@ def sequence_scale(scale,scale_sequence):
     """Default scale helper, this rounds scale to a 'sensible' value"""
     factor = math.floor(math.log10(scale))
     norm = scale/(10**factor)
-    
+
     for s in scale_sequence:
         if norm <= s:
             return s*10**factor
@@ -199,7 +199,7 @@ def deg_min_sec_scale(scale):
             return x
     else:
         return x
-    
+
 def format_deg_min_sec(value):
     deg = math.floor(value)
     min = math.floor((value-deg)/(1.0/60))
@@ -219,12 +219,12 @@ def convert_pdf_pages_to_layers(filename,output_name=None,layer_names=(),reverse
     opens the given multipage PDF and converts each page to be a layer in a single page PDF
     layer_names should be a sequence of the user visible names of the layers, if not given
     or if shorter than num pages generic names will be given to the unnamed layers
-    
+
     if output_name is not provided a temporary file will be used for the conversion which
     will then be copied back over the source file.
-    
+
     requires pyPdf >= 1.13 to be available"""
-    
+
 
     if not HAS_PYPDF:
         raise Exception("pyPdf Not available")
@@ -235,13 +235,13 @@ def convert_pdf_pages_to_layers(filename,output_name=None,layer_names=(),reverse
     else:
         (outfd,outfilename) = tempfile.mkstemp(dir=os.path.dirname(filename))
         outfile = os.fdopen(outfd,'wb')
-        
+
     i = pyPdf.PdfFileReader(infile)
     o = pyPdf.PdfFileWriter()
-    
+
     template_page_size = i.pages[0].mediaBox
     op = o.addBlankPage(width=template_page_size.getWidth(),height=template_page_size.getHeight())
-    
+
     contentkey = pyPdf.generic.NameObject('/Contents')
     resourcekey = pyPdf.generic.NameObject('/Resources')
     propertieskey = pyPdf.generic.NameObject('/Properties')
@@ -249,7 +249,7 @@ def convert_pdf_pages_to_layers(filename,output_name=None,layer_names=(),reverse
     op[resourcekey] = pyPdf.generic.DictionaryObject()
     properties = pyPdf.generic.DictionaryObject()
     ocgs = pyPdf.generic.ArrayObject()
-    
+
     for (i, p) in enumerate(i.pages):
         # first start an OCG for the layer
         ocgname = pyPdf.generic.NameObject('/oc%d' % i)
@@ -262,9 +262,9 @@ def convert_pdf_pages_to_layers(filename,output_name=None,layer_names=(),reverse
             p[pyPdf.generic.NameObject('/Contents')].append(ocgend)
         else:
             p[pyPdf.generic.NameObject('/Contents')] = pyPdf.generic.ArrayObject((ocgstart,p['/Contents'],ocgend))
-            
+
         op.mergePage(p)
-        
+
         ocg = pyPdf.generic.DictionaryObject()
         ocg[pyPdf.generic.NameObject('/Type')] = pyPdf.generic.NameObject('/OCG')
         if len(layer_names) > i:
@@ -274,9 +274,9 @@ def convert_pdf_pages_to_layers(filename,output_name=None,layer_names=(),reverse
         indirect_ocg = o._addObject(ocg)
         properties[ocgname] = indirect_ocg
         ocgs.append(indirect_ocg)
-    
+
     op[resourcekey][propertieskey] = o._addObject(properties)
-    
+
     ocproperties = pyPdf.generic.DictionaryObject()
     ocproperties[pyPdf.generic.NameObject('/OCGs')] = ocgs
     defaultview = pyPdf.generic.DictionaryObject()
@@ -289,16 +289,16 @@ def convert_pdf_pages_to_layers(filename,output_name=None,layer_names=(),reverse
     else:
         defaultview[pyPdf.generic.NameObject('/Order')] = pyPdf.generic.ArrayObject(reversed(ocgs))
     defaultview[pyPdf.generic.NameObject('/OFF')] = pyPdf.generic.ArrayObject()
-    
+
     ocproperties[pyPdf.generic.NameObject('/D')] = o._addObject(defaultview)
-    
+
     o._root.getObject()[pyPdf.generic.NameObject('/OCProperties')] = o._addObject(ocproperties)
-    
+
     o.write(outfile)
-    
+
     outfile.close()
     infile.close()
-    
+
     if not output_name:
         os.rename(outfilename, filename)
 
@@ -318,7 +318,7 @@ class PDFPrinter:
                  is_latlon=False,
                  use_ocg_layers=False):
         """Creates a cairo surface and context to render a PDF with.
-        
+
         pagesize: tuple of page size in meters, see predefined sizes in pagessizes dict (default a4)
         margin: page margin in meters (default 0.01)
         box: box within the page to render the map into (will not render over margin). This should be 
@@ -348,54 +348,54 @@ class PDFPrinter:
         self._centering = centering
         self._is_latlon = is_latlon
         self._use_ocg_layers = use_ocg_layers
-        
+
         self._s = None
         self._layer_names = []
         self._filename = None
-        
+
         self.map_box = None
         self.scale = None
-        
+
         # don't both to round the scale if they are not preserving the aspect ratio
         if not preserve_aspect:
             self._scale = any_scale
-        
+
         if percent_box:
             self._box = Box2d(percent_box[0]*pagesize[0],percent_box[1]*pagesize[1],
                          percent_box[2]*pagesize[0],percent_box[3]*pagesize[1])
 
         if not HAS_PYCAIRO_MODULE:
             raise Exception("PDF rendering only available when pycairo is available")
-        
+
         self.font_name = "DejaVu Sans"
-    
+
     def finish(self):
         if self._s:
             self._s.finish()
             self._s = None
-        
+
         if self._use_ocg_layers:
             convert_pdf_pages_to_layers(self._filename,layer_names=self._layer_names + ["Legend and Information"],reverse_all_but_last=True)
-    
+
     def add_geospatial_pdf_header(self,m,filename,epsg=None,wkt=None):
         """ Postprocessing step to add geospatial PDF information to PDF file as per
         PDF standard 1.7 extension level 3 (also in draft PDF v2 standard at time of writing)
-        
+
         one of either the epsg code or wkt text for the projection must be provided
-        
+
         Should be called *after* the page has had .finish() called"""
         if HAS_PYPDF and (epsg or wkt):
             infile=file(filename,'rb')
             (outfd,outfilename) = tempfile.mkstemp(dir=os.path.dirname(filename))
             outfile = os.fdopen(outfd,'wb')
-            
+
             i=pyPdf.PdfFileReader(infile)
             o=pyPdf.PdfFileWriter()
-            
+
             # preserve OCProperties at document root if we have one
             if i.trailer['/Root'].has_key(pyPdf.generic.NameObject('/OCProperties')):
                 o._root.getObject()[pyPdf.generic.NameObject('/OCProperties')] = i.trailer['/Root'].getObject()[pyPdf.generic.NameObject('/OCProperties')]
-            
+
             for p in i.pages:
                 gcs = pyPdf.generic.DictionaryObject()
                 gcs[pyPdf.generic.NameObject('/Type')]=pyPdf.generic.NameObject('/PROJCS')
@@ -403,7 +403,7 @@ class PDFPrinter:
                     gcs[pyPdf.generic.NameObject('/EPSG')]=pyPdf.generic.NumberObject(int(epsg))
                 if wkt:
                     gcs[pyPdf.generic.NameObject('/WKT')]=pyPdf.generic.TextStringObject(wkt)
-                
+
                 measure = pyPdf.generic.DictionaryObject()
                 measure[pyPdf.generic.NameObject('/Type')]=pyPdf.generic.NameObject('/Measure')
                 measure[pyPdf.generic.NameObject('/Subtype')]=pyPdf.generic.NameObject('/GEO')
@@ -414,7 +414,7 @@ class PDFPrinter:
                 measure[pyPdf.generic.NameObject('/Bounds')]=bounds
                 measure[pyPdf.generic.NameObject('/LPTS')]=bounds
                 gpts=pyPdf.generic.ArrayObject()
-                
+
                 proj=Projection(m.srs)
                 env=m.envelope()
                 for x in ((env.minx, env.miny), (env.minx, env.maxy), (env.maxx, env.maxy), (env.maxx, env.miny)):
@@ -423,31 +423,31 @@ class PDFPrinter:
                     gpts.append(pyPdf.generic.FloatObject(str(latlon_corner.y)))
                     gpts.append(pyPdf.generic.FloatObject(str(latlon_corner.x)))
                 measure[pyPdf.generic.NameObject('/GPTS')]=gpts
-                
+
                 vp=pyPdf.generic.DictionaryObject()
                 vp[pyPdf.generic.NameObject('/Type')]=pyPdf.generic.NameObject('/Viewport')
                 bbox=pyPdf.generic.ArrayObject()
-                
+
                 for x in self.map_box:
                     bbox.append(pyPdf.generic.FloatObject(str(x)))
                 vp[pyPdf.generic.NameObject('/BBox')]=bbox
                 vp[pyPdf.generic.NameObject('/Measure')]=measure
-                
+
                 vpa = pyPdf.generic.ArrayObject()
                 vpa.append(vp)
                 p[pyPdf.generic.NameObject('/VP')]=vpa
                 o.addPage(p)
-                
+
             o.write(outfile)
             infile=None
             outfile.close()
             os.rename(outfilename,filename)
-        
-    
+
+
     def get_context(self):
         """allow access so that extra 'bits' can be rendered to the page directly"""
         return cairo.Context(self._s)
-    
+
     def get_width(self):
         return self._pagesize[0]
 
@@ -456,7 +456,7 @@ class PDFPrinter:
 
     def get_margin(self):
         return self._margin
-    
+
     def write_text(self,ctx,text,box_width=None,size=10, fill_color=(0.0, 0.0, 0.0), alignment=None):
         if HAS_PANGOCAIRO_MODULE:
             (attr,t,accel) = pango.parse_markup(text)
@@ -474,7 +474,7 @@ class PDFPrinter:
             pctx.set_source_rgb(*fill_color)
             pctx.show_layout(l)
             return l.get_pixel_extents()[0]
-            
+
         else:
             ctx.rel_move_to(0,size)
             ctx.select_font_face(self.font_name, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
@@ -489,18 +489,18 @@ class PDFPrinter:
         elif HAS_PYCAIRO_MODULE:
             return cairo.Context(self._s)
         return None
-    
+
     def _get_render_area(self):
         """return a bounding box with the area of the page we are allowed to render out map to
         in page coordinates (i.e. meters)
         """
         # take off our page margins
         render_area = Box2d(self._margin,self._margin,self._pagesize[0]-self._margin,self._pagesize[1]-self._margin)
-        
+
         #then if user specified a box to render get intersection with that
         if self._box:
             return render_area.intersect(self._box)
-        
+
         return render_area
 
     def _get_render_area_size(self):
@@ -513,7 +513,7 @@ class PDFPrinter:
         available_area = self._get_render_area_size()
         map_aspect = m.envelope().width()/m.envelope().height()
         page_aspect = available_area[0]/available_area[1]
-        
+
         return map_aspect > page_aspect
 
     def _get_meta_info_corner(self,render_size,m):
@@ -526,7 +526,7 @@ class PDFPrinter:
         else:
             x += render_size[0]+0.005
             y = self._margin
-            
+
         return (x,y)
 
     def _get_render_corner(self,render_size,m):
@@ -535,9 +535,9 @@ class PDFPrinter:
 
         x=available_area[0]
         y=available_area[1]
-        
+
         h_is_contrained = self._is_h_contrained(m)
-        
+
         if (self._centering == centering.both or
             self._centering == centering.horizontal or
             (self._centering == centering.constrained and h_is_contrained) or
@@ -550,26 +550,26 @@ class PDFPrinter:
             (self._centering == centering.unconstrained and h_is_contrained)):
             y+=(available_area.height()-render_size[1])/2
         return (x,y)
-    
+
     def _get_map_pixel_size(self, width_page_m, height_page_m):
         """for a given map size in paper coordinates return a tuple of the map 'pixel' size we
         should create at the defined resolution"""
         return (int(m2px(width_page_m,self._resolution)), int(m2px(height_page_m,self._resolution)))
-        
+
     def render_map(self,m, filename):
         """Render the given map to filename"""
-        
+
         # store this for later so we can post process the PDF
         self._filename = filename
-        
+
         # work out the best scale to render out map at given the available space
         (eff_width,eff_height) = self._get_render_area_size()
         map_aspect = m.envelope().width()/m.envelope().height()
         page_aspect = eff_width/eff_height
-        
+
         scalex=m.envelope().width()/eff_width
         scaley=m.envelope().height()/eff_height
-        
+
         scale=max(scalex,scaley)
 
         rounded_mapscale=self._scale(scale)
@@ -581,26 +581,26 @@ class PDFPrinter:
                 maph=mapw*(1/map_aspect)
             else:
                 mapw=maph*map_aspect
-        
+
         # set the map size so that raster elements render at the correct resolution
         m.resize(*self._get_map_pixel_size(mapw,maph))
         # calculate the translation for the map starting point
         (tx,ty) = self._get_render_corner((mapw,maph),m)
-        
+
         # create our cairo surface and context and then render the map into it
         self._s = cairo.PDFSurface(filename, m2pt(self._pagesize[0]),m2pt(self._pagesize[1]))
         ctx=cairo.Context(self._s)
-        
+
         for l in m.layers:
             # extract the layer names for naming layers if we use OCG
             self._layer_names.append(l.name)
-        
+
             layer_map = Map(m.width,m.height,m.srs)
             layer_map.layers.append(l)
             for s in l.styles:
                 layer_map.append_style(s,m.find_style(s))
             layer_map.zoom_to_box(m.envelope())
-        
+
             def render_map():
                 ctx.save()
                 ctx.translate(m2pt(tx),m2pt(ty))
@@ -608,7 +608,7 @@ class PDFPrinter:
                 ctx.scale(72.0/self._resolution,72.0/self._resolution)
                 render(layer_map, ctx)
                 ctx.restore()
-            
+
             # antimeridian
             render_map()
             if self._is_latlon and (m.envelope().minx < -180 or m.envelope().maxx > 180):
@@ -621,10 +621,10 @@ class PDFPrinter:
                 render_map()
                 # restore the original env
                 m.zoom_to_box(old_env)
-            
+
             if self._use_ocg_layers:
                 self._s.show_page()
-        
+
         self.scale = rounded_mapscale
         self.map_box = Box2d(tx,ty,tx+mapw,ty+maph)
 
@@ -640,7 +640,7 @@ class PDFPrinter:
 
         if p2.inverse(m.envelope().center()).y > latlon_bounds.maxy:
             latlon_bounds = Box2d(latlon_bounds.miny,latlon_bounds.maxy,latlon_bounds.maxx,latlon_bounds.miny+360)
-            
+
         latlon_mapwidth = latlon_bounds.width()
         # render an extra 20% so we generally won't miss the ends of lines
         latlon_buffer = 0.2*latlon_mapwidth
@@ -649,7 +649,7 @@ class PDFPrinter:
         else:
             latlon_divsize = deg_min_sec_scale(latlon_mapwidth/7.0)
         latlon_interpsize = latlon_mapwidth/m.width
-        
+
         self._render_lat_lon_axis(m,p2,latlon_bounds.minx,latlon_bounds.maxx,latlon_bounds.miny,latlon_bounds.maxy,latlon_buffer,latlon_interpsize,latlon_divsize,dec_degrees,True)
         self._render_lat_lon_axis(m,p2,latlon_bounds.miny,latlon_bounds.maxy,latlon_bounds.minx,latlon_bounds.maxx,latlon_buffer,latlon_interpsize,latlon_divsize,dec_degrees,False)
 
@@ -658,21 +658,21 @@ class PDFPrinter:
         ctx.set_source_rgb(1,0,0)
         ctx.set_line_width(1)
         latlon_labelsize = 6
-        
+
         ctx.translate(m2pt(self.map_box.minx),m2pt(self.map_box.miny))
         ctx.rectangle(0,0,m2pt(self.map_box.width()),m2pt(self.map_box.height()))
         ctx.clip()
-        
+
         ctx.select_font_face("DejaVu", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
         ctx.set_font_size(latlon_labelsize)
-        
+
         box_top = self.map_box.height()
         if not is_x_axis:
             ctx.translate(m2pt(self.map_box.width()/2),m2pt(self.map_box.height()/2))
             ctx.rotate(-math.pi/2)
             ctx.translate(-m2pt(self.map_box.height()/2),-m2pt(self.map_box.width()/2))
             box_top = self.map_box.width()
-        
+
         for xvalue in round_grid_generator(x1 - latlon_buffer,x2 + latlon_buffer,latlon_divsize):
             yvalue = y1 - latlon_buffer
             start_cross = None
@@ -693,12 +693,12 @@ class PDFPrinter:
                 ctx.move_to(start.x,start.y)
                 ctx.line_to(end.x,end.y)
                 ctx.stroke()
-                
+
                 if cmp(start.y, 0) != cmp(end.y,0):
                     start_cross = end.x
                 if cmp(start.y,m2pt(self.map_box.height())) != cmp(end.y, m2pt(self.map_box.height())):
                     end_cross = end.x
-            
+
             if dec_degrees:
                 line_text = "%g" % (xvalue)
             else:
@@ -712,19 +712,19 @@ class PDFPrinter:
 
     def render_on_map_scale(self,m):
         (div_size,page_div_size) = self._get_sensible_scalebar_size(m)
-        
+
         first_value_x = (math.floor(m.envelope().minx / div_size) + 1) * div_size
         first_value_x_percent = (first_value_x-m.envelope().minx)/m.envelope().width()
         self._render_scale_axis(first_value_x,first_value_x_percent,self.map_box.minx,self.map_box.maxx,page_div_size,div_size,self.map_box.miny,self.map_box.maxy,True)
-        
+
         first_value_y = (math.floor(m.envelope().miny / div_size) + 1) * div_size
         first_value_y_percent = (first_value_y-m.envelope().miny)/m.envelope().height()
         self._render_scale_axis(first_value_y,first_value_y_percent,self.map_box.miny,self.map_box.maxy,page_div_size,div_size,self.map_box.minx,self.map_box.maxx,False)
-        
+
         if self._use_ocg_layers:
             self._s.show_page()
             self._layer_names.append("Coordinate Grid Overlay")
-            
+
     def _get_sensible_scalebar_size(self,m,width=-1):
         # aim for about 8 divisions across the map
         # also make sure we can fit the bar with in page area width if specified
@@ -744,7 +744,7 @@ class PDFPrinter:
         ctx.set_source_rgb(*stroke_color)
         ctx.rectangle(x,y,w,h)
         ctx.stroke()
-        
+
         if text:
             ctx.move_to(x+1,y)
             self.write_text(ctx,text,fill_color=[1-z for z in fill_color],size=h-2)
@@ -758,14 +758,14 @@ class PDFPrinter:
         label_value = first-div_size
         if self._is_latlon and label_value < -180:
             label_value += 360
-        
+
         ctx=cairo.Context(self._s)
-        
+
         if not is_x_axis:
             ctx.translate(m2pt(self.map_box.center().x),m2pt(self.map_box.center().y))
             ctx.rotate(-math.pi/2)
             ctx.translate(-m2pt(self.map_box.center().y),-m2pt(self.map_box.center().x))
-        
+
         while value < end:
             ctx.move_to(m2pt(value),m2pt(boundary_start))
             ctx.line_to(m2pt(value),m2pt(boundary_end))
@@ -775,7 +775,7 @@ class PDFPrinter:
 
             for bar in (m2pt(boundary_start)-border_size,m2pt(boundary_end)):
                 self._render_box(ctx,m2pt(prev),bar,m2pt(value-prev),border_size,text,fill_color=fill)
-            
+
             prev = value
             value+=page_div_size
             fill = [1-z for z in fill]
@@ -787,18 +787,18 @@ class PDFPrinter:
             for bar in (m2pt(boundary_start)-border_size,m2pt(boundary_end)):
                 self._render_box(ctx,m2pt(prev),bar,m2pt(end-prev),border_size,fill_color=fill)
 
-    
+
     def render_scale(self,m,ctx=None,width=0.05):
         """ m: map to render scale for
         ctx: A cairo context to render the scale to. If this is None (the default) then
             automatically create a context and choose the best location for the scale bar.
         width: Width of area available to render scale bar in (in m)
-        
+
         will return the size of the rendered scale block in pts
         """
-        
+
         (w,h) = (0,0)
-        
+
         # don't render scale if we are lat lon
         # dont report scale if we have warped the aspect ratio
         if self._preserve_aspect and not self._is_latlon:
@@ -808,15 +808,15 @@ class PDFPrinter:
                 ctx=cairo.Context(self._s)
                 (tx,ty) = self._get_meta_info_corner((self.map_box.width(),self.map_box.height()),m)
                 ctx.translate(tx,ty)
-            
+
             (div_size,page_div_size) = self._get_sensible_scalebar_size(m, width/box_count)
 
-    
+
             div_unit = "m"
             if div_size > 1000:
                 div_size /= 1000
                 div_unit = "km"
-            
+
             text = "0%s" % div_unit
             ctx.save()
             if width > 0:
@@ -846,7 +846,7 @@ class PDFPrinter:
 
             text_ext=self.write_text(ctx,"Scale 1:%d" % self.scale,box_width=box_width,size=font_size, alignment=alignment)
             h+=text_ext[3]+2
-        
+
         return (w,h)
 
     def render_legend(self,m, page_break=False, ctx=None, collumns=1,width=None, height=None, item_per_rule=False, attribution={}, legend_item_box_size=(0.015,0.0075)):
@@ -858,7 +858,7 @@ class PDFPrinter:
         collumns: number of collumns available in legend box
         attribution: additional text that will be rendered in gray under the layer name. keyed by layer name
         legend_item_box_size:  two tuple with width and height of legend item box size in meters
-        
+
         will return the size of the rendered block in pts
         """
 
@@ -879,7 +879,7 @@ class PDFPrinter:
             else:
                 cwidth = None
             current_collumn = 0
-            
+
             processed_layers = []
             for l in reversed(m.layers):
                 have_layer_header = False
@@ -888,7 +888,7 @@ class PDFPrinter:
                 if layer_title in processed_layers:
                     continue
                 processed_layers.append(layer_title)
-                
+
                 # check through the features to find which combinations of styles are active
                 # for each unique combination add a legend entry
                 for f in l.datasource.all_features():
@@ -913,20 +913,20 @@ class PDFPrinter:
                         active_rules = tuple(active_rules)
                         if added_styles.has_key(active_rules):
                             continue
-                        
+
                         added_styles[active_rules] = (f,rule_text)
                         if not item_per_rule:
                             break
                     else:
                         added_styles[l] = (None,None)
-                
+
                 legend_items = added_styles.keys()
                 legend_items.sort()
                 for li in legend_items:
                     if True:
                         (f,rule_text) = added_styles[li]
-                    
-                        
+
+
                         legend_map_size = (int(m2pt(legend_item_box_size[0])),int(m2pt(legend_item_box_size[1])))
                         lemap=Map(legend_map_size[0],legend_map_size[1],srs=m.srs)
                         if m.background:
@@ -967,11 +967,11 @@ class PDFPrinter:
                         for s in l.styles:
                             lelayer.styles.append(s)
                         lemap.layers.append(lelayer)
-                        
+
                         if f is None or f.envelope().width() != 0:
                             lemap.zoom_all()
                             lemap.zoom(1.1)
-                        
+
                         item_size = legend_map_size[1]
                         if not have_layer_header:
                             item_size += 8
@@ -998,7 +998,7 @@ class PDFPrinter:
                         ctx.save()
                         render(lemap, ctx)
                         ctx.restore()
-                        
+
                         ctx.rectangle(0,0,*legend_map_size)
                         ctx.set_source_rgb(0.5,0.5,0.5)
                         ctx.set_line_width(1)
@@ -1017,12 +1017,12 @@ class PDFPrinter:
                         if attribution.has_key(layer_title):
                             e=self.write_text(ctx, attribution[layer_title], m2pt(cwidth-legend_item_box_size[0]-0.005), 6, fill_color=(0.5,0.5,0.5))
                             legend_text_size += e[3]
-                        
+
                         if legend_text_size > legend_entry_size:
                             legend_entry_size=legend_text_size
-                        
+
                         y+=legend_entry_size +2
                         if y > h:
                             h = y
         return (w,h)
-        
+

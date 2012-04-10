@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/grid/grid_rasterizer.hpp>
@@ -27,9 +26,7 @@
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
-
 #include <mapnik/symbolizer_helpers.hpp>
-
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
@@ -44,30 +41,31 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                                 mapnik::feature_ptr const& feature,
                                 proj_transform const& prj_trans)
 {
+    box2d<double> query_extent;
     shield_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, *feature, prj_trans,
             width_, height_,
             scale_factor_,
-            t_, font_manager_, detector_);
+            t_, font_manager_, detector_, query_extent);
 
     bool placement_found = false;
 
     text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
 
     text_placement_info_ptr placement;
-    while ((placement = helper.get_placement())) {
+    while (helper.next()) {
         placement_found = true;
-        for (unsigned int ii = 0; ii < placement->placements.size(); ++ii)
+        placements_type &placements = helper.placements();
+        for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            pixel_position marker_pos = helper.get_marker_position(placement->placements[ii]);
             render_marker(feature, pixmap_.get_resolution(),
-                          marker_pos,
+                          helper.get_marker_position(placements[ii]),
                           helper.get_marker(), helper.get_transform(),
                           sym.get_opacity());
 
-            ren.prepare_glyphs(&(placement->placements[ii]));
-            ren.render_id(feature->id(),placement->placements[ii].center, 2);
+            ren.prepare_glyphs(&(placements[ii]));
+            ren.render_id(feature->id(), placements[ii].center, 2);
         }
     }
     if (placement_found)

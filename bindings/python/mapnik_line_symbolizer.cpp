@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #include <boost/python.hpp>
 #include "mapnik_enumeration.hpp"
@@ -62,5 +61,9 @@ void export_line_symbolizer()
                       (&line_symbolizer::get_stroke,
                        return_value_policy<copy_const_reference>()),
                       &line_symbolizer::set_stroke)
+        .add_property("smooth",
+                      &line_symbolizer::smooth,
+                      &line_symbolizer::set_smooth,
+                      "smooth value (0..1.0)")
         ;
 }

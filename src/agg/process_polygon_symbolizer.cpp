@@ -19,10 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/polygon_symbolizer.hpp>
 
@@ -34,6 +34,8 @@
 #include "agg_scanline_u.h"
 // for polygon_symbolizer
 #include "agg_renderer_scanline.h"
+#include "agg_conv_clip_polygon.h"
+#include "agg_conv_smooth_poly1.h"
 
 // stl
 #include <string>
@@ -45,7 +47,6 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
 
@@ -60,40 +61,42 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     unsigned g=fill_.green();
     unsigned b=fill_.blue();
     unsigned a=fill_.alpha();
-    renb.clip_box(0,0,width_,height_);
+    //renb.clip_box(0,0,width_,height_);
     renderer ren(renb);
-    
-    ras_ptr->reset();
-    switch (sym.get_gamma_method())
-    {
-    case GAMMA_POWER:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-        break;
-    case GAMMA_LINEAR:
-        ras_ptr->gamma(agg::gamma_linear(0.0, sym.get_gamma()));
-        break;
-    case GAMMA_NONE:
-        ras_ptr->gamma(agg::gamma_none());
-        break;
-    case GAMMA_THRESHOLD:
-        ras_ptr->gamma(agg::gamma_threshold(sym.get_gamma()));
-        break;
-    case GAMMA_MULTIPLY:
-        ras_ptr->gamma(agg::gamma_multiply(sym.get_gamma()));
-        break;
-    default:
-        ras_ptr->gamma(agg::gamma_power(sym.get_gamma()));
-    }
 
-    metawriter_with_properties writer = sym.get_metawriter();
+    ras_ptr->reset();
+
+    set_gamma_method(sym,ras_ptr);
+
+    //metawriter_with_properties writer = sym.get_metawriter();
+    box2d<double> inflated_extent = query_extent_ * 1.1;
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
-        geometry_type const& geom=feature->get_geometry(i);
+        geometry_type & geom=feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
-            path_type path(t_,geom,prj_trans);
-            ras_ptr->add_path(path);
-            if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
+            if (sym.smooth() > 0.0)
+            {
+                typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+                typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+                typedef agg::conv_smooth_poly1_curve<path_type> smooth_type;
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(inflated_extent.minx(),inflated_extent.miny(),inflated_extent.maxx(),inflated_extent.maxy());
+                path_type path(t_,clipped,prj_trans);
+                smooth_type smooth(path);
+                smooth.smooth_value(sym.smooth());
+                ras_ptr->add_path(smooth);
+            }
+            else
+            {
+                typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+                typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+                clipped_geometry_type clipped(geom);
+                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+                path_type path(t_,clipped,prj_trans);
+                ras_ptr->add_path(path);
+            }
+            //if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
         }
     }
     ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));

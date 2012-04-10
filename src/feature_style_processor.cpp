@@ -24,12 +24,12 @@
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/memory_datasource.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/scale_denominator.hpp>
-
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 
@@ -92,7 +92,6 @@ feature_style_processor<Processor>::feature_style_processor(Map const& m, double
 template <typename Processor>
 void feature_style_processor<Processor>::apply()
 {
-
 #if defined(RENDERING_STATS)
     std::clog << "\n//-- starting rendering timer...\n";
     mapnik::progress_timer t(std::clog, "total map rendering");
@@ -112,7 +111,7 @@ void feature_style_processor<Processor>::apply()
 
         BOOST_FOREACH ( layer const& lyr, m_.layers() )
         {
-            if (lyr.isVisible(scale_denom))
+            if (lyr.visible(scale_denom))
             {
                 std::set<std::string> names;
                 apply_to_layer(lyr, p, proj, scale_denom, names);
@@ -123,7 +122,7 @@ void feature_style_processor<Processor>::apply()
     }
     catch (proj_init_error& ex)
     {
-        std::clog << "proj_init_error:" << ex.what() << "\n";
+        MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
     }
 
     p.end_map_processing(m_);
@@ -146,14 +145,14 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
         double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
         scale_denom *= scale_factor_;
 
-        if (lyr.isVisible(scale_denom))
+        if (lyr.visible(scale_denom))
         {
             apply_to_layer(lyr, p, proj, scale_denom, names);
         }
     }
     catch (proj_init_error& ex)
     {
-        std::clog << "proj_init_error:" << ex.what() << "\n";
+        MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
     }
     p.end_map_processing(m_);
 }
@@ -191,19 +190,20 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     std::vector<std::string> const& style_names = lay.styles();
 
     unsigned int num_styles = style_names.size();
-    if (!num_styles) {
-        std::clog << "WARNING: No style for layer '" << lay.name() << "'\n";
+    if (! num_styles)
+    {
+        MAPNIK_LOG_DEBUG(feature_style_processor) << "feature_style_processor: No style for layer=" << lay.name();
+
         return;
     }
 
     mapnik::datasource_ptr ds = lay.datasource();
-    if (!ds)
+    if (! ds)
     {
-        std::clog << "WARNING: No datasource for layer '" << lay.name() << "'\n";
+        MAPNIK_LOG_DEBUG(feature_style_processor) << "feature_style_processor: No datasource for layer=" << lay.name();
+
         return;
     }
-
-    p.start_layer_processing(lay);
 
 #if defined(RENDERING_STATS)
     progress_timer layer_timer(std::clog, "rendering total for layer: '" + lay.name() + "'");
@@ -213,26 +213,30 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     proj_transform prj_trans(proj0,proj1);
 
 #if defined(RENDERING_STATS)
-    if (!prj_trans.equal())
+    if (! prj_trans.equal())
+    {
         std::clog << "notice: reprojecting layer: '" << lay.name() << "' from/to:\n\t'"
                   << lay.srs() << "'\n\t'"
                   << m_.srs() << "'\n";
+    }
 #endif
 
-    box2d<double> map_ext = m_.get_buffered_extent();
+    box2d<double> buffered_query_ext = m_.get_buffered_extent(); // buffered
 
     // clip buffered extent by maximum extent, if supplied
     boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
     if (maximum_extent) {
-        map_ext.clip(*maximum_extent);
+        buffered_query_ext.clip(*maximum_extent);
     }
 
     box2d<double> layer_ext = lay.envelope();
+    bool fw_success = false;
 
     // first, try intersection of map extent forward projected into layer srs
-    if (prj_trans.forward(map_ext, PROJ_ENVELOPE_POINTS) && map_ext.intersects(layer_ext))
+    if (prj_trans.forward(buffered_query_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
     {
-        layer_ext.clip(map_ext);
+        fw_success = true;
+        layer_ext.clip(buffered_query_ext);
     }
     // if no intersection and projections are also equal, early return
     else if (prj_trans.equal())
@@ -243,14 +247,17 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         return;
     }
     // next try intersection of layer extent back projected into map srs
-    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && map_ext.intersects(layer_ext))
+    else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
     {
-        layer_ext.clip(map_ext);
+        layer_ext.clip(buffered_query_ext);
         // forward project layer extent back into native projection
-        if (!prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
-            std::clog << "WARNING: layer " << lay.name()
-                      << " extent " << layer_ext << " in map projection "
-                      << " did not reproject properly back to layer projection\n";
+        if (! prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
+        {
+            MAPNIK_LOG_DEBUG(feature_style_processor)
+                    << "feature_style_processor: Layer=" << lay.name()
+                    << " extent=" << layer_ext << " in map projection "
+                    << " did not reproject properly back to layer projection";
+        }
     }
     else
     {
@@ -261,14 +268,37 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         return;
     }
 
-    box2d<double> query_ext = m_.get_current_extent();
-    box2d<double> unbuffered_extent = m_.get_current_extent();
-    prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS);
-    query::resolution_type res(m_.width()/query_ext.width(),
-                               m_.height()/query_ext.height());
+    // if we've got this far, now prepare the unbuffered extent
+    // which is used as a bbox for clipping geometries
+    box2d<double> query_ext = m_.get_current_extent(); // unbuffered
+    if (maximum_extent) {
+        query_ext.clip(*maximum_extent);
+    }
+    box2d<double> layer_ext2 = lay.envelope();
+    if (fw_success)
+    {
+        if (prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS))
+        {
+            layer_ext2.clip(query_ext);
+        }
+    }
+    else
+    {
+        if (prj_trans.backward(layer_ext2, PROJ_ENVELOPE_POINTS))
+        {
+            layer_ext2.clip(query_ext);
+            prj_trans.forward(layer_ext2, PROJ_ENVELOPE_POINTS);
+        }
+    }
 
-    query q(layer_ext,res,scale_denom,unbuffered_extent);
+    p.start_layer_processing(lay, layer_ext2);
 
+    double qw = query_ext.width()>0 ? query_ext.width() : 1;
+    double qh = query_ext.height()>0 ? query_ext.height() : 1;
+    query::resolution_type res(m_.width()/qw,
+                               m_.height()/qh);
+
+    query q(layer_ext,res,scale_denom,m_.get_current_extent());
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
     double filt_factor = 1;
@@ -280,8 +310,10 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         boost::optional<feature_type_style const&> style=m_.find_style(style_name);
         if (!style)
         {
-            std::clog << "WARNING: style '" << style_name << "' required for layer '"
-                      << lay.name() << "' does not exist.\n";
+            MAPNIK_LOG_DEBUG(feature_style_processor)
+                    << "feature_style_processor: Style=" << style_name
+                    << " required for layer=" << lay.name() << " does not exist.";
+
             continue;
         }
 

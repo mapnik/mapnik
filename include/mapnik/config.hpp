@@ -25,8 +25,6 @@
 
 // Windows DLL support
 
-#define MAPNIK_SUPPORTS_GRID_RENDERER
-
 #ifdef _WINDOWS
 #  define MAPNIK_EXP __declspec (dllexport)
 #  define MAPNIK_IMP __declspec (dllimport)

@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id: jpeg_reader.cpp 33 2005-04-04 13:01:03Z dane $
-
 // mapnik
 #include <mapnik/image_reader.hpp>
 #include <mapnik/color.hpp>
@@ -38,10 +36,6 @@ extern "C"
 
 // std
 #include <cstdio>
-
-#ifdef MAPNIK_DEBUG
-#include <iostream>
-#endif
 
 namespace mapnik
 {

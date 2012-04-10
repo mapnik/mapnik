@@ -171,7 +171,7 @@ namespace mapnik { namespace svg {
       template <typename T>
       void operator()(T const& c, qi::unused_type, qi::unused_type) const
       {
-      std::cerr << typeid(c).name() << std::endl;
+        MAPNIK_LOG_DEBUG(svg) << typeid(c).name();
       }
       };
     */

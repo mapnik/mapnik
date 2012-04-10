@@ -1,0 +1,33 @@
+<!DOCTYPE Map>
+<Map background-color="white" srs="+init=epsg:4326" minimum-version="0.7.2">
+
+    <Style name="1">
+        <Rule>
+            <MarkersSymbolizer file="../svg/ellipses.svg"/>
+        </Rule>
+    </Style>
+    <Layer name="point" srs="+init=epsg:4326">
+        <StyleName>1</StyleName>
+        <Datasource>
+            <Parameter name="type">sqlite</Parameter>
+            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
+            <Parameter name="table">point</Parameter>
+        </Datasource>
+    </Layer>
+<!--
+  <Style name="meta_point_bboxs">
+    <Rule>
+          <LineSymbolizer stroke="green" stroke-width=".5"/>
+    </Rule>
+  </Style>
+
+  <Layer name="points" status="on" srs="+proj=latlong +datum=WGS84">
+    <StyleName>meta_point_bboxs</StyleName>
+    <Datasource>
+      <Parameter name="type">ogr</Parameter>
+      <Parameter name="layer">OGRGeoJSON</Parameter>
+      <Parameter name="file">../../../markers.json</Parameter>
+    </Datasource>
+  </Layer>  
+-->
+</Map>

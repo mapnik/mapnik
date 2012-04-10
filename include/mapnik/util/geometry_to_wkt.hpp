@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_GEOMETRY_TO_WKT_HPP
 #define MAPNIK_GEOMETRY_TO_WKT_HPP
 

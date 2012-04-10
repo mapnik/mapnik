@@ -25,6 +25,7 @@
 #include <boost/make_shared.hpp>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
@@ -102,7 +103,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             }
             else
             {
-                std::clog <<  "could not unpickle key: " << key << "\n";
+                MAPNIK_LOG_DEBUG(bindings) << "parameters_pickle_suite: Could not unpickle key=" << key;
             }
         }
     }

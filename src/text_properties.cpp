@@ -25,26 +25,35 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/formatting/text.hpp>
+#include <mapnik/xml_node.hpp>
+#include <mapnik/config_error.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
 using boost::optional;
 
 text_symbolizer_properties::text_symbolizer_properties() :
+    orientation(),
+    displacement(0,0),
     label_placement(POINT_PLACEMENT),
     halign(H_AUTO),
-    jalign(J_MIDDLE),
+    jalign(J_AUTO),
     valign(V_AUTO),
     label_spacing(0),
     label_position_tolerance(0),
     avoid_edges(false),
     minimum_distance(0.0),
     minimum_padding(0.0),
+    minimum_path_length(0.0),
     max_char_angle_delta(22.5 * M_PI/180.0),
     force_odd_labels(false),
     allow_overlap(false),
     text_ratio(0),
     wrap_width(0),
+    format(),
     tree_()
 {
 
@@ -56,9 +65,7 @@ void text_symbolizer_properties::process(processed_text &output, Feature const& 
     if (tree_) {
         tree_->apply(format, feature, output);
     } else {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "Warning: text_symbolizer_properties can't produce text: No formatting tree!\n";
-#endif
+        MAPNIK_LOG_WARN(text_properties) << "text_symbolizer_properties can't produce text: No formatting tree!";
     }
 }
 
@@ -72,47 +79,49 @@ formatting::node_ptr text_symbolizer_properties::format_tree() const
     return tree_;
 }
 
-void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym, fontset_map const & fontsets)
+void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const & fontsets)
 {
-    optional<label_placement_e> placement_ = get_opt_attr<label_placement_e>(sym, "placement");
+    optional<label_placement_e> placement_ = sym.get_opt_attr<label_placement_e>("placement");
     if (placement_) label_placement = *placement_;
-    optional<vertical_alignment_e> valign_ = get_opt_attr<vertical_alignment_e>(sym, "vertical-alignment");
+    optional<vertical_alignment_e> valign_ = sym.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     if (valign_) valign = *valign_;
-    optional<unsigned> text_ratio_ = get_opt_attr<unsigned>(sym, "text-ratio");
+    optional<unsigned> text_ratio_ = sym.get_opt_attr<unsigned>("text-ratio");
     if (text_ratio_) text_ratio = *text_ratio_;
-    optional<unsigned> wrap_width_ = get_opt_attr<unsigned>(sym, "wrap-width");
+    optional<unsigned> wrap_width_ = sym.get_opt_attr<unsigned>("wrap-width");
     if (wrap_width_) wrap_width = *wrap_width_;
-    optional<unsigned> label_position_tolerance_ = get_opt_attr<unsigned>(sym, "label-position-tolerance");
+    optional<unsigned> label_position_tolerance_ = sym.get_opt_attr<unsigned>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
-    optional<unsigned> spacing_ = get_opt_attr<unsigned>(sym, "spacing");
+    optional<unsigned> spacing_ = sym.get_opt_attr<unsigned>("spacing");
     if (spacing_) label_spacing = *spacing_;
-    optional<unsigned> minimum_distance_ = get_opt_attr<unsigned>(sym, "minimum-distance");
+    optional<unsigned> minimum_distance_ = sym.get_opt_attr<unsigned>("minimum-distance");
     if (minimum_distance_) minimum_distance = *minimum_distance_;
-    optional<unsigned> min_padding_ = get_opt_attr<unsigned>(sym, "minimum-padding");
+    optional<unsigned> min_padding_ = sym.get_opt_attr<unsigned>("minimum-padding");
     if (min_padding_) minimum_padding = *min_padding_;
-    optional<unsigned> min_path_length_ = get_opt_attr<unsigned>(sym, "minimum-path-length");
+    optional<unsigned> min_path_length_ = sym.get_opt_attr<unsigned>("minimum-path-length");
     if (min_path_length_) minimum_path_length = *min_path_length_;
-    optional<boolean> avoid_edges_ = get_opt_attr<boolean>(sym, "avoid-edges");
+    optional<boolean> avoid_edges_ = sym.get_opt_attr<boolean>("avoid-edges");
     if (avoid_edges_) avoid_edges = *avoid_edges_;
-    optional<boolean> allow_overlap_ = get_opt_attr<boolean>(sym, "allow-overlap");
+    optional<boolean> allow_overlap_ = sym.get_opt_attr<boolean>("allow-overlap");
     if (allow_overlap_) allow_overlap = *allow_overlap_;
-    optional<horizontal_alignment_e> halign_ = get_opt_attr<horizontal_alignment_e>(sym, "horizontal-alignment");
+    optional<horizontal_alignment_e> halign_ = sym.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     if (halign_) halign = *halign_;
-    optional<justify_alignment_e> jalign_ = get_opt_attr<justify_alignment_e>(sym, "justify-alignment");
+    optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
     if (jalign_) jalign = *jalign_;
     /* Attributes needing special care */
-    optional<std::string> orientation_ = get_opt_attr<std::string>(sym, "orientation");
+    optional<std::string> orientation_ = sym.get_opt_attr<std::string>("orientation");
     if (orientation_) orientation = parse_expression(*orientation_, "utf8");
-    optional<double> dx = get_opt_attr<double>(sym, "dx");
+    optional<double> dx = sym.get_opt_attr<double>("dx");
     if (dx) displacement.first = *dx;
-    optional<double> dy = get_opt_attr<double>(sym, "dy");
+    optional<double> dy = sym.get_opt_attr<double>("dy");
     if (dy) displacement.second = *dy;
-    optional<double> max_char_angle_delta_ = get_opt_attr<double>(sym, "max-char-angle-delta");
+    optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
 
-    optional<std::string> name_ = get_opt_attr<std::string>(sym, "name");
-    if (name_) {
-        std::clog << "### WARNING: Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!\n";
+    optional<std::string> name_ = sym.get_opt_attr<std::string>("name");
+    if (name_)
+    {
+        MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
+
         set_old_style_expression(parse_expression(*name_, "utf8"));
     }
 
@@ -121,11 +130,13 @@ void text_symbolizer_properties::from_xml(boost::property_tree::ptree const &sym
     if (n) set_format_tree(n);
 }
 
-void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, text_symbolizer_properties const &dfl) const
+void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
+                                        bool explicit_defaults,
+                                        text_symbolizer_properties const& dfl) const
 {
     if (orientation)
     {
-        const std::string & orientationstr = to_expression_string(*orientation);
+        std::string const& orientationstr = to_expression_string(*orientation);
         if (!dfl.orientation || orientationstr != to_expression_string(*(dfl.orientation)) || explicit_defaults) {
             set_attr(node, "orientation", orientationstr);
         }
@@ -212,10 +223,12 @@ void text_symbolizer_properties::add_expressions(expression_set &output) const
 
 void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 {
-    tree_ = formatting::node_ptr(new formatting::text_node(expr));
+    tree_ = boost::make_shared<formatting::text_node>(expr);
 }
 
 char_properties::char_properties() :
+    face_name(),
+    fontset(),
     text_size(10.0),
     character_spacing(0),
     line_spacing(0),
@@ -230,58 +243,59 @@ char_properties::char_properties() :
 
 }
 
-void char_properties::from_xml(boost::property_tree::ptree const &sym, fontset_map const & fontsets)
+void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
 {
-    optional<double> text_size_ = get_opt_attr<double>(sym, "size");
+    optional<double> text_size_ = sym.get_opt_attr<double>("size");
     if (text_size_) text_size = *text_size_;
-    optional<double> character_spacing_ = get_opt_attr<double>(sym, "character-spacing");
+    optional<double> character_spacing_ = sym.get_opt_attr<double>("character-spacing");
     if (character_spacing_) character_spacing = *character_spacing_;
-    optional<color> fill_ = get_opt_attr<color>(sym, "fill");
+    optional<color> fill_ = sym.get_opt_attr<color>("fill");
     if (fill_) fill = *fill_;
-    optional<color> halo_fill_ = get_opt_attr<color>(sym, "halo-fill");
+    optional<color> halo_fill_ = sym.get_opt_attr<color>("halo-fill");
     if (halo_fill_) halo_fill = *halo_fill_;
-    optional<double> halo_radius_ = get_opt_attr<double>(sym, "halo-radius");
+    optional<double> halo_radius_ = sym.get_opt_attr<double>("halo-radius");
     if (halo_radius_) halo_radius = *halo_radius_;
-    optional<boolean> wrap_before_ = get_opt_attr<boolean>(sym, "wrap-before");
+    optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
     if (wrap_before_) wrap_before = *wrap_before_;
-    optional<text_transform_e> tconvert_ = get_opt_attr<text_transform_e>(sym, "text-transform");
+    optional<text_transform_e> tconvert_ = sym.get_opt_attr<text_transform_e>("text-transform");
     if (tconvert_) text_transform = *tconvert_;
-    optional<double> line_spacing_ = get_opt_attr<double>(sym, "line-spacing");
+    optional<double> line_spacing_ = sym.get_opt_attr<double>("line-spacing");
     if (line_spacing_) line_spacing = *line_spacing_;
-    optional<double> opacity_ = get_opt_attr<double>(sym, "opacity");
+    optional<double> opacity_ = sym.get_opt_attr<double>("opacity");
     if (opacity_) text_opacity = *opacity_;
-    optional<std::string> wrap_char_ = get_opt_attr<std::string>(sym, "wrap-character");
+    optional<std::string> wrap_char_ = sym.get_opt_attr<std::string>("wrap-character");
     if (wrap_char_ && (*wrap_char_).size() > 0) wrap_char = ((*wrap_char_)[0]);
-    optional<std::string> face_name_ = get_opt_attr<std::string>(sym, "face-name");
+    optional<std::string> face_name_ = sym.get_opt_attr<std::string>("face-name");
     if (face_name_)
     {
         face_name = *face_name_;
     }
-    optional<std::string> fontset_name_ = get_opt_attr<std::string>(sym, "fontset-name");
+    optional<std::string> fontset_name_ = sym.get_opt_attr<std::string>("fontset-name");
     if (fontset_name_) {
         std::map<std::string,font_set>::const_iterator itr = fontsets.find(*fontset_name_);
         if (itr != fontsets.end())
         {
             fontset = itr->second;
-        } else
+        }
+        else
         {
-            throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'");
+            throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'", sym);
         }
     }
     if (!face_name.empty() && !fontset.get_name().empty())
     {
-        throw config_error(std::string("Can't have both face-name and fontset-name"));
+        throw config_error("Can't have both face-name and fontset-name", sym);
     }
     if (face_name.empty() && fontset.get_name().empty())
     {
-        throw config_error(std::string("Must have face-name or fontset-name"));
+        throw config_error("Must have face-name or fontset-name", sym);
     }
 }
 
 void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl) const
 {
-    const std::string & fontset_name = fontset.get_name();
-    const std::string & dfl_fontset_name = dfl.fontset.get_name();
+    std::string const& fontset_name = fontset.get_name();
+    std::string const& dfl_fontset_name = dfl.fontset.get_name();
     if (fontset_name != dfl_fontset_name || explicit_defaults)
     {
         set_attr(node, "fontset-name", fontset_name);

@@ -19,17 +19,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// mapnik
 #include <mapnik/metawriter_factory.hpp>
-#include <mapnik/ptree_helpers.hpp>
-
 #include <mapnik/metawriter_json.hpp>
 #include <mapnik/metawriter_inmem.hpp>
+#include <mapnik/xml_node.hpp>
+#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/config_error.hpp>
 
+// boost
+#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 
-using boost::property_tree::ptree;
 using boost::optional;
 using std::string;
 
@@ -37,37 +39,40 @@ namespace mapnik
 {
 
 metawriter_ptr
-metawriter_create(const boost::property_tree::ptree &pt) {
+metawriter_create(xml_node const& pt)
+{
     metawriter_ptr writer;
-    string type = get_attr<string>(pt, "type");
+    string type = pt.get_attr<string>("type");
 
-    optional<string> properties = get_opt_attr<string>(pt, "default-output");
+    optional<string> properties = pt.get_opt_attr<string>("default-output");
     if (type == "json") {
-        string file = get_attr<string>(pt, "file");
-        metawriter_json_ptr json = metawriter_json_ptr(new metawriter_json(properties, parse_path(file)));
-        optional<boolean> output_empty = get_opt_attr<boolean>(pt, "output-empty");
+        string file = pt.get_attr<string>("file");
+        metawriter_json_ptr json = boost::make_shared<metawriter_json>(properties, parse_path(file));
+        optional<boolean> output_empty = pt.get_opt_attr<boolean>("output-empty");
         if (output_empty) {
             json->set_output_empty(*output_empty);
         }
 
-        optional<boolean> pixel_coordinates = get_opt_attr<boolean>(pt, "pixel-coordinates");
+        optional<boolean> pixel_coordinates = pt.get_opt_attr<boolean>("pixel-coordinates");
         if (pixel_coordinates) {
             json->set_pixel_coordinates(*pixel_coordinates);
         }
         writer = json;
 
     } else if (type == "inmem") {
-        metawriter_inmem_ptr inmem = metawriter_inmem_ptr(new metawriter_inmem(properties));
+        metawriter_inmem_ptr inmem = boost::make_shared<metawriter_inmem>(properties);
         writer = inmem;
     } else {
-        throw config_error(string("Unknown type '") + type + "'");
+        throw config_error(string("Unknown type '") + type + "'", pt);
     }
 
     return writer;
 }
 
 void
-metawriter_save(const metawriter_ptr &metawriter, ptree &metawriter_node, bool explicit_defaults) {
+metawriter_save(const metawriter_ptr &metawriter,
+                boost::property_tree::ptree &metawriter_node, bool explicit_defaults)
+{
 
     metawriter_json *json = dynamic_cast<metawriter_json *>(metawriter.get());
     if (json) {

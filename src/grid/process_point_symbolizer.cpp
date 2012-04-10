@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/grid/grid_rasterizer.hpp>
@@ -29,7 +28,7 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
-
+#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 
 // stl

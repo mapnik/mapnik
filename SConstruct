@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# $Id$
 
 
 import os
@@ -325,7 +323,7 @@ opts.AddVariables(
     # Variables affecting rendering back-ends
     
     BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
-    
+
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
 
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
@@ -345,7 +343,12 @@ opts.AddVariables(
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
-    
+
+    # Variables for logging and statistics
+    BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
+    BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
+    ('LOG_FORMAT_STRING', 'The format string used before log output string, piped through strftime (max length of 255 characters)', 'Mapnik LOG> %Y-%m-%d %H:%M:%S:'),
+
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
@@ -359,7 +362,7 @@ opts.AddVariables(
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
-    BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
+    BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
@@ -768,7 +771,7 @@ def GetMapnikLibVersion(context):
 
 int main() 
 {
-    std::cout << MAPNIK_VERSION << std::endl;
+    std::cout << MAPNIK_VERSION_STRING << std::endl;
     return 0;
 }
 
@@ -778,11 +781,7 @@ int main()
     context.Result(ret[0])
     if not ret[1]:
         return []
-    version = int(ret[1].strip())    
-    patch_level = version % 100
-    minor_version = version / 100 % 1000
-    major_version = version / 100000
-    return [major_version,minor_version,patch_level]
+    return ret[1].strip()
 
 def icu_at_least_four_two(context):
     ret = context.TryRun("""
@@ -814,6 +813,9 @@ int main()
     return False
 
 def boost_regex_has_icu(context):
+    if env['RUNTIME_LINK'] == 'static':
+        context.env.Append(LIBS='icui18n')
+        context.env.Append(LIBS='icudata')
     ret = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
@@ -1072,7 +1074,7 @@ if not preconfigured:
 
     # libxml2 should be optional but is currently not
     # https://github.com/mapnik/mapnik/issues/913
-    if conf.parse_config('XML2_CONFIG'):
+    if conf.parse_config('XML2_CONFIG',checks='--cflags'):
         env['HAS_LIBXML2'] = True
 
     LIBSHEADERS = [
@@ -1164,7 +1166,7 @@ if not preconfigured:
             env.Append(CXXFLAGS = '-DBOOST_REGEX_HAS_ICU')
         else:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
-    
+
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
     
     if len(env['REQUESTED_PLUGINS']):
@@ -1382,14 +1384,13 @@ if not preconfigured:
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
         abi = conf.GetMapnikLibVersion()
-        abi_fallback = [2,0,0]
+        abi_fallback = "2.0.1-pre"
         if not abi:
             color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
-            env['ABI_VERSION'] = abi_fallback
-        else:
-            env['ABI_VERSION'] = abi
-        env['MAPNIK_VERSION_STRING'] = '.'.join(['%d' % i for i in env['ABI_VERSION']])
+            abi = abi_fallback
 
+        env['ABI_VERSION'] = abi.replace('-pre','').split('.')
+        env['MAPNIK_VERSION_STRING'] = abi
 
         # Common C++ flags.
         if env['THREADING'] == 'multi':
@@ -1411,10 +1412,29 @@ if not preconfigured:
             pthread = '-pthread'
         
         # Common debugging flags.
-        debug_flags  = '-g -DDEBUG -DMAPNIK_DEBUG'
+        # http://lists.fedoraproject.org/pipermail/devel/2010-November/144952.html
+        debug_flags  = '-g -fno-omit-frame-pointer -DDEBUG -DMAPNIK_DEBUG'
         ndebug_flags = '-DNDEBUG'
-       
-        
+
+        # Enable logging in debug mode (always) and release mode (when specified)
+        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_LOG_FORMAT="%s"' % env['LOG_FORMAT_STRING']
+
+        if env['DEBUG']:
+            debug_flags += log_enabled
+        else:
+            if env['ENABLE_LOG']:
+                ndebug_flags += log_enabled
+
+        # Enable statistics reporting
+        if env['ENABLE_STATS']:
+            debug_flags += ' -DMAPNIK_STATS'
+            ndebug_flags += ' -DMAPNIK_STATS'
+
+        # Add rdynamic to allow using statics between application and plugins
+        # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
+        if env['PLATFORM'] != 'Darwin':
+            env.MergeFlags('-rdynamic')
+
         # Customizing the C++ compiler flags depending on: 
         #  (1) the C++ compiler used; and
         #  (2) whether debug binaries are requested.
@@ -1719,7 +1739,7 @@ if not HELP_REQUESTED:
     
     # build C++ tests
     # not ready for release
-    #SConscript('tests/cpp_tests/build.py')
+    SConscript('tests/cpp_tests/build.py')
     
     # not ready for release
     #if env['SVG_RENDERER']:

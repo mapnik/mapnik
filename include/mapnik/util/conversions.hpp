@@ -20,26 +20,26 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CONVERSIONS_UTIL_HPP
-#define MAPNIK_CONVERSIONS_UTIL_HPP
+#ifndef MAPNIK_UTIL_CONVERSIONS_HPP
+#define MAPNIK_UTIL_CONVERSIONS_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 
 // stl
 #include <string>
 
-namespace mapnik { namespace conversions {
+namespace mapnik { namespace util {
 
-bool string2int(const char * value, int & result);
-bool string2int(std::string const& value, int & result);
-    
-bool string2double(std::string const& value, double & result);
-bool string2double(const char * value, double & result);
-    
-bool string2float(std::string const& value, float & result);
-bool string2float(const char * value, float & result);
+    MAPNIK_DECL bool string2int(std::string const& value, int & result);
+    MAPNIK_DECL bool string2int(const char * value, int & result);
 
-}
-}
+    MAPNIK_DECL bool string2double(std::string const& value, double & result);
+    MAPNIK_DECL bool string2double(const char * value, double & result);
 
-#endif // MAPNIK_CONVERSIONS_UTIL_HPP
+    MAPNIK_DECL bool string2float(std::string const& value, float & result);
+    MAPNIK_DECL bool string2float(const char * value, float & result);
+
+}}
+
+#endif // MAPNIK_UTIL_CONVERSIONS_HPP

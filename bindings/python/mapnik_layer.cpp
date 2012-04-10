@@ -19,8 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: mapnik_layer.cc 17 2005-03-08 23:58:43Z pavlenko $
-
 
 // boost
 #include <boost/python.hpp>
@@ -54,7 +52,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
         {
             s.append(style_names[i]);
         }
-        return boost::python::make_tuple(l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource()->params(),l.cache_features(),s);
+        return boost::python::make_tuple(l.clear_label_cache(),l.min_zoom(),l.max_zoom(),l.queryable(),l.datasource()->params(),l.cache_features(),s);
     }
 
     static void
@@ -72,11 +70,11 @@ struct layer_pickle_suite : boost::python::pickle_suite
 
         l.set_clear_label_cache(extract<bool>(state[0]));
 
-        l.setMinZoom(extract<double>(state[1]));
+        l.set_min_zoom(extract<double>(state[1]));
 
-        l.setMaxZoom(extract<double>(state[2]));
+        l.set_max_zoom(extract<double>(state[2]));
 
-        l.setQueryable(extract<bool>(state[3]));
+        l.set_queryable(extract<bool>(state[3]));
 
         mapnik::parameters params = extract<parameters>(state[4]);
         l.set_datasource(datasource_cache::instance()->create(params));
@@ -128,7 +126,7 @@ void export_layer()
              "box2d(-1.0,-1.0,0.0,0.0) # default until a datasource is loaded\n"
             )
 
-        .def("visible", &layer::isVisible,
+        .def("visible", &layer::visible,
              "Return True if this layer's data is active and visible at a given scale.\n"
              "\n"
              "Otherwise returns False.\n"
@@ -149,8 +147,8 @@ void export_layer()
             )
 
         .add_property("active",
-                      &layer::isActive,
-                      &layer::setActive,
+                      &layer::active,
+                      &layer::set_active,
                       "Get/Set whether this layer is active and will be rendered.\n"
                       "\n"
                       "Usage:\n"
@@ -199,8 +197,8 @@ void export_layer()
             )
 
         .add_property("maxzoom",
-                      &layer::getMaxZoom,
-                      &layer::setMaxZoom,
+                      &layer::max_zoom,
+                      &layer::set_max_zoom,
                       "Get/Set the maximum zoom lever of the layer.\n"
                       "\n"
                       "Usage:\n"
@@ -214,8 +212,8 @@ void export_layer()
             )
 
         .add_property("minzoom",
-                      &layer::getMinZoom,
-                      &layer::setMinZoom,
+                      &layer::min_zoom,
+                      &layer::set_min_zoom,
                       "Get/Set the minimum zoom lever of the layer.\n"
                       "\n"
                       "Usage:\n"
@@ -244,8 +242,8 @@ void export_layer()
             )
 
         .add_property("queryable",
-                      &layer::isQueryable,
-                      &layer::setQueryable,
+                      &layer::queryable,
+                      &layer::set_queryable,
                       "Get/Set whether this layer is queryable.\n"
                       "\n"
                       "Usage:\n"

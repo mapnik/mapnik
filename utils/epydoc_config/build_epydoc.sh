@@ -1,6 +1,6 @@
 #!/bin/sh
 
-API_DOCS_DIR="../api_docs/python"
+API_DOCS_DIR="mapnik-python-`mapnik-config --version`"
 
 if [ ! -d $API_DOCS_DIR ]
     then 

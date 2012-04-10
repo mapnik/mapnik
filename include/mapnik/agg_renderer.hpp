@@ -29,10 +29,6 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
-//#include <mapnik/marker.hpp>
-
-// agg
-//#include "agg_trans_affine.h"
 
 // boost
 #include <boost/utility.hpp>
@@ -67,10 +63,10 @@ public:
     ~agg_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
-    void start_layer_processing(layer const& lay);
+    void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
     void render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity);
-    
+
     void process(point_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
@@ -123,7 +119,7 @@ private:
     face_manager<freetype_engine> font_manager_;
     boost::shared_ptr<label_collision_detector4> detector_;
     boost::scoped_ptr<rasterizer> ras_ptr;
-
+    box2d<double> query_extent_;
     void setup(Map const &m);
 };
 }

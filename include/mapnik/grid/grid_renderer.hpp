@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef GRID_RENDERER_HPP
 #define GRID_RENDERER_HPP
 
@@ -32,7 +30,6 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
 //#include <mapnik/marker.hpp>
-
 #include <mapnik/grid/grid.hpp>
 
 // boost
@@ -63,7 +60,7 @@ public:
     ~grid_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
-    void start_layer_processing(layer const& lay);
+    void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
     void render_marker(mapnik::feature_ptr const& feature, unsigned int step, pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity);
 

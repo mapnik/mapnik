@@ -43,13 +43,6 @@ class IResultSet;
 
 class postgis_featureset : public mapnik::Featureset
 {
-private:
-    boost::shared_ptr<IResultSet> rs_;
-    context_ptr ctx_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
-    int totalGeomSize_;
-    int feature_id_;
-    bool key_field_;
 public:
     postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
                        context_ptr const& ctx,
@@ -57,6 +50,14 @@ public:
                        bool key_field = false);
     feature_ptr next();
     ~postgis_featureset();
+
+private:
+    boost::shared_ptr<IResultSet> rs_;
+    context_ptr ctx_;
+    boost::scoped_ptr<mapnik::transcoder> tr_;
+    int totalGeomSize_;
+    int feature_id_;
+    bool key_field_;
 };
 
 #endif // POSTGIS_FEATURESET_HPP

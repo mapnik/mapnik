@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
 // mapnik
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/enumeration.hpp>

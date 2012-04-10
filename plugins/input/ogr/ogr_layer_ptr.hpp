@@ -23,6 +23,9 @@
 #ifndef OGR_LAYER_PTR_HPP
 #define OGR_LAYER_PTR_HPP
 
+// mapnik
+#include <mapnik/debug.hpp>
+
 // stl
 #include <iostream>
 #include <fstream>
@@ -75,12 +78,10 @@ public:
             layer_ = ogr_layer;
             is_valid_ = true;
 
-#ifdef MAPNIK_DEBUG
-            std::clog << "OGR Plugin: layer_from_name layer is " << layer_name_ << std::endl;
-#endif
+            MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_name layer=" << layer_name_;
         }
 
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
         debug_print_last_error();
 #endif
     }
@@ -102,13 +103,11 @@ public:
                 layer_name_ = def->GetName();
                 is_valid_ = true;
 
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: layer_from_index layer is " << layer_name_ << std::endl;
-#endif
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_index layer=" << layer_name_;
             }
         }
 
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
         debug_print_last_error();
 #endif
     }
@@ -138,13 +137,11 @@ public:
                 layer_name_ = def->GetName();
                 is_valid_ = true;
 
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: layer_from_sql layer is " << layer_name_ << std::endl;
-#endif
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: layer_from_sql layer=" << layer_name_;
             }
         }
 
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
         debug_print_last_error();
 #endif
     }
@@ -166,7 +163,7 @@ public:
 
 private:
 
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
     void debug_print_last_error()
     {
         if (! is_valid_)
@@ -174,11 +171,11 @@ private:
             const std::string err = CPLGetLastErrorMsg();
             if (err.size() == 0)
             {
-                std::clog << "OGR Plugin: error getting layer" << std::endl;
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: Error getting layer";
             }
             else
             {
-                std::clog << "OGR Plugin: " << err << std::endl;
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_layer_ptr: " << err;
             }
         }
     }

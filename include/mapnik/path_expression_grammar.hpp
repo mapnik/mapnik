@@ -60,6 +60,7 @@ namespace standard_wide =  boost::spirit::standard_wide;
 
 using standard_wide::space_type;
 using standard_wide::space;
+typedef boost::variant<std::string, attribute> path_component;
 
 template <typename Iterator>
 struct path_expression_grammar : qi::grammar<Iterator, std::vector<path_component>(), space_type>

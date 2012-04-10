@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/proj_transform.hpp>
@@ -102,8 +100,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     }
 
     do {
-// https://github.com/mapnik/mapnik/issues/1072
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
         if (pj_transform( source_.proj_, dest_.proj_, point_count,
@@ -134,7 +131,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         int i;
         for(i=0; i<point_count; i++) {
             x[i] = x[i] * MAXEXTENTby180;
-            y[i] = log(tan((90 + y[i]) * M_PIby360)) / D2R;
+            y[i] = std::log(tan((90 + y[i]) * M_PIby360)) / D2R;
             y[i] = y[i] * MAXEXTENTby180;
             if (x[i] > MAXEXTENT) x[i] = MAXEXTENT;
             if (x[i] < -MAXEXTENT) x[i] = -MAXEXTENT;
@@ -154,8 +151,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
     }
 
     do {
-// https://github.com/mapnik/mapnik/issues/1072
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
 

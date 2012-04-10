@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
 #include <mapnik/projection.hpp>
 #include <mapnik/utils.hpp>
@@ -34,7 +32,7 @@
 
 namespace mapnik {
 
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
 boost::mutex projection::mutex_;
 #endif
 
@@ -84,7 +82,7 @@ std::string const& projection::params() const
 
 void projection::forward(double & x, double &y ) const
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
 #endif
     projUV p;
@@ -102,7 +100,7 @@ void projection::forward(double & x, double &y ) const
 
 void projection::inverse(double & x,double & y) const
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
 #endif
     if (is_geographic_)
@@ -120,7 +118,7 @@ void projection::inverse(double & x,double & y) const
 
 projection::~projection()
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
 #endif
     if (proj_) pj_free(proj_);
@@ -131,7 +129,7 @@ projection::~projection()
 
 void projection::init()
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 470
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
 #endif
 #if PJ_VERSION >= 480
@@ -149,7 +147,8 @@ std::string projection::expanded() const
     if (proj_) {
         std::string def(pj_get_def( proj_, 0 ));
         //boost::algorithm::ireplace_first(def,params_,"");
-        return boost::trim_copy(def);
+        boost::trim(def);
+        return def;
     }
     return std::string("");
 }

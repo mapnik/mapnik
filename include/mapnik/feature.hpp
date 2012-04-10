@@ -99,9 +99,11 @@ public:
 
     feature_impl(context_ptr const& ctx, int id)
         : id_(id),
-          ctx_(ctx),
-          data_(ctx_->mapping_.size())
-    {}
+        ctx_(ctx),
+        data_(ctx_->mapping_.size()),
+        geom_cont_(),
+        raster_()
+        {}
 
     inline int id() const { return id_;}
 
@@ -161,25 +163,25 @@ public:
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end())
-            return get(itr->second);        
-        else        
-            throw std::out_of_range(std::string("Key does not exist: '") + key + "'");    
+            return get(itr->second);
+        else
+            throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
     }
-    
+
     value_type const& get(std::size_t index) const
     {
         if (index < data_.size())
             return data_[index];
         throw std::out_of_range("Index out of range");
     }
-    
+
     boost::optional<value_type const&> get_optional(std::size_t index) const
     {
         if (index < data_.size())
             return boost::optional<value_type const&>(data_[index]);
         return boost::optional<value_type const&>();
     }
-    
+
     std::size_t size() const
     {
         return data_.size();
@@ -222,13 +224,14 @@ public:
 
     box2d<double> envelope() const
     {
+        // TODO - cache this
         box2d<double> result;
         for (unsigned i=0;i<num_geometries();++i)
         {
             geometry_type const& geom = get_geometry(i);
             if (i==0)
             {
-                box2d<double> box = geom.envelope();
+                box2d<double> const& box = geom.envelope();
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
             }
             else
@@ -271,7 +274,7 @@ public:
             if (index < data_.size())
             {
                 ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
-            }          
+            }
         }
         ss << ")" << std::endl;
         return ss.str();
@@ -280,9 +283,9 @@ public:
 private:
     int id_;
     context_ptr ctx_;
+    cont_type data_;
     boost::ptr_vector<geometry_type> geom_cont_;
     raster_ptr raster_;
-    cont_type data_;
 };
 
 

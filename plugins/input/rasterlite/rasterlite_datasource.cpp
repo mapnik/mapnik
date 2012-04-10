@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// $Id$
 
 #include "rasterlite_datasource.hpp"
 #include "rasterlite_featureset.hpp"
@@ -29,7 +28,8 @@
 #include <boost/make_shared.hpp>
 
 // mapnik
-#include <mapnik/ptree_helpers.hpp>
+#include <mapnik/debug.hpp>
+#include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
 
 using mapnik::datasource;
@@ -45,16 +45,18 @@ using mapnik::layer_descriptor;
 using mapnik::datasource_exception;
 
 
-
 /*
  * Opens a GDALDataset and returns a pointer to it.
  * Caller is responsible for calling GDALClose on it
  */
-inline void *rasterlite_datasource::open_dataset() const
+inline void* rasterlite_datasource::open_dataset() const
 {
-    void *dataset = rasterliteOpen (dataset_name_.c_str(), table_name_.c_str());
+    void* dataset = rasterliteOpen (dataset_name_.c_str(), table_name_.c_str());
 
-    if (! dataset) throw datasource_exception("Rasterlite Plugin: Error opening dataset");
+    if (! dataset)
+    {
+        throw datasource_exception("Rasterlite Plugin: Error opening dataset");
+    }
 
     if (rasterliteIsError (dataset))
     {
@@ -69,14 +71,11 @@ inline void *rasterlite_datasource::open_dataset() const
 }
 
 
-
 rasterlite_datasource::rasterlite_datasource(parameters const& params, bool bind)
     : datasource(params),
       desc_(*params.get<std::string>("type"),"utf-8")
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "Rasterlite Plugin: Initializing..." << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Initializing...";
 
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("missing <file> parameter");
@@ -118,7 +117,7 @@ void rasterlite_datasource::bind() const
 
     extent_.init(x0,y0,x1,y1);
 
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
     int srid, auth_srid;
     const char *auth_name;
     const char *ref_sys_name;
@@ -137,21 +136,23 @@ void rasterlite_datasource::bind() const
         throw datasource_exception(error);
     }
 
-    std::clog << "Rasterlite Plugin: Data Source=" << rasterliteGetTablePrefix(dataset) << std::endl;
-    std::clog << "Rasterlite Plugin: SRID=" << srid << std::endl;
-    std::clog << "Rasterlite Plugin: Authority=" << auth_name << std::endl;
-    std::clog << "Rasterlite Plugin: AuthSRID=" << auth_srid << std::endl;
-    std::clog << "Rasterlite Plugin: RefSys Name=" << ref_sys_name << std::endl;
-    std::clog << "Rasterlite Plugin: Proj4Text=" << proj4text << std::endl;
-    std::clog << "Rasterlite Plugin: Extent(" << x0 << "," << y0 << " " << x1 << "," << y1 << ")" << std::endl;
-    std::clog << "Rasterlite Plugin: Levels=" << levels << std::endl;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Data Source=" << rasterliteGetTablePrefix(dataset);
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: SRID=" << srid;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Authority=" << auth_name;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: AuthSRID=" << auth_srid;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: RefSys Name=" << ref_sys_name;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Proj4Text=" << proj4text;
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Extent=" << x0 << "," << y0 << " " << x1 << "," << y1 << ")";
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Levels=" << levels;
 
     for (int i = 0; i < levels; i++)
     {
         if (rasterliteGetResolution(dataset, i, &pixel_x_size, &pixel_y_size, &tile_count) == RASTERLITE_OK)
         {
-            std::clog << "Rasterlite Plugin: Level=" << i
-                      << " x=" << pixel_x_size << " y=" << pixel_y_size << " tiles=" << tile_count << std::endl;
+            MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_datasource: Level=" << i
+                                         << " x=" << pixel_x_size
+                                         << " y=" << pixel_y_size
+                                         << " tiles=" << tile_count;
         }
     }
 #endif

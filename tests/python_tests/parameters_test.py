@@ -24,6 +24,11 @@ def test_parameter():
     eq_(p[0],'float')
     eq_(p[1],1.0777)
 
+    p = mapnik.Parameter('bool_string','True')
+    eq_(p[0],'bool_string')
+    eq_(p[1],'True')
+    eq_(bool(p[1]),True)
+
 
 def test_parameters():
     params = mapnik.Parameters()

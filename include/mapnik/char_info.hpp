@@ -31,11 +31,24 @@ struct char_properties;
 class char_info {
 public:
     char_info(unsigned c_, double width_, double ymax_, double ymin_, double line_height_)
-        :  c(c_), width(width_), line_height(line_height_), ymin(ymin_), ymax(ymax_)
+        :  c(c_),
+           width(width_),
+           line_height(line_height_),
+           ymin(ymin_),
+           ymax(ymax_),
+           avg_height(ymax_-ymin_),
+           format()
     {
     }
+
     char_info()
-        : c(0), width(0), line_height(0), ymin(0), ymax(0)
+        :  c(0),
+           width(0),
+           line_height(0),
+           ymin(0),
+           ymax(0),
+           avg_height(0),
+           format()
     {
     }
 

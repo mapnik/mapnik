@@ -95,6 +95,18 @@ If you see bits of code around that do not follow these please don't hesitate to
     
     (int)value; // no
 
+#### Use const keyword after the type
+
+    std::string const& variable_name // preferred, for consistency
+
+    const std::string & variable_name // no
+
+#### Pass built-in types by value, all others by const&
+
+    void my_function(int double val); // if int, char, double, etc pass by value
+
+    void my_function(std::string const& val); // if std::string or user type, pass by const&
+
 #### Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/make_shared.html) where possible
 
 #### Function definitions should not be separated from their arguments:

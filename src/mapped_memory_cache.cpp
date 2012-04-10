@@ -20,22 +20,30 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 
 // boost
 #include <boost/assert.hpp>
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
 
 boost::unordered_map<std::string, mapped_region_ptr> mapped_memory_cache::cache_;
 
-bool mapped_memory_cache::insert (std::string const& uri, mapped_region_ptr mem)
+void mapped_memory_cache::clear()
+{
+#ifdef MAPNIK_THREADSAFE
+    mutex::scoped_lock lock(mutex_);
+#endif
+    return cache_.clear();
+}
+
+bool mapped_memory_cache::insert(std::string const& uri, mapped_region_ptr mem)
 {
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
@@ -63,7 +71,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         try
         {
             file_mapping mapping(uri.c_str(),read_only);
-            mapped_region_ptr region(new mapped_region(mapping,read_only));
+            mapped_region_ptr region(boost::make_shared<mapped_region>(mapping,read_only));
 
             result.reset(region);
 
@@ -75,13 +83,15 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         }
         catch (...)
         {
-            std::cerr << "Exception caught while loading mapping memory file: " << uri << std::endl;
+            MAPNIK_LOG_ERROR(mapped_memory_cache) << "Exception caught while loading mapping memory file: " << uri;
         }
     }
-    /*else
-      {
-      std::cerr << "### WARNING Memory region does not exist file: " << uri << std::endl;
-      }*/
+    /*
+    else
+    {
+        MAPNIK_LOG_WARN(mapped_memory_cache) << "Memory region does not exist file: " << uri;
+    }
+    */
     return result;
 }
 

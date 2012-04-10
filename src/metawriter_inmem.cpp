@@ -70,15 +70,18 @@ metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
 }
 
 void
-metawriter_inmem::add_text(text_placement_info const& p,
-                           face_manager_freetype & /*face*/,
-                           Feature const& feature,
-                           CoordTransform const& /*t*/,
-                           metawriter_properties const& properties) {
-    if (p.extents.valid()) {
+metawriter_inmem::add_text(
+    boost::ptr_vector<text_path> & /*text*/,
+    box2d<double> const& extents,
+    Feature const& feature,
+    CoordTransform const& /*t*/,
+    metawriter_properties const& properties)
+{
+    if (extents.valid())
+    {
         meta_instance inst;
         inst.properties = intersect_properties(feature, properties);
-        inst.box = p.extents;
+        inst.box = extents;
         instances_.push_back(inst);
     }
 }

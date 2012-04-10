@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/grid/grid_rasterizer.hpp>
@@ -64,7 +63,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     for (unsigned i=0;i<feature->num_geometries();++i)
     {
-        geometry_type const& geom = feature->get_geometry(i);
+        geometry_type & geom = feature->get_geometry(i);
         if (geom.num_points() > 1)
         {
             path_type path(t_,geom,prj_trans);

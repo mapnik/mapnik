@@ -20,10 +20,9 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 //mapnik
 #include <mapnik/font_set.hpp>
+
 //stl
 #include <string>
 #include <iostream>

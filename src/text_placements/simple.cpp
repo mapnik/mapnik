@@ -21,8 +21,10 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/ptree_helpers.hpp>
+#include <mapnik/xml_node.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>
@@ -93,17 +95,16 @@ bool text_placement_info_simple::next_position_only()
         displacement = std::make_pair(-abs(pdisp.first), abs(pdisp.second));
         break;
     default:
-        std::cerr << "WARNING: Unknown placement\n";
+        MAPNIK_LOG_WARN(text_placements) << "Unknown placement";
     }
     position_state++;
     return true;
 }
 
 text_placement_info_ptr text_placements_simple::get_placement_info(
-    double scale_factor, dimension_type dim, bool has_dimensions) const
+    double scale_factor) const
 {
-    return text_placement_info_ptr(boost::make_shared<text_placement_info_simple>(this,
-                                                                  scale_factor, dim, has_dimensions));
+    return boost::make_shared<text_placement_info_simple>(this, scale_factor);
 }
 
 /** Position string: [POS][SIZE]
@@ -144,11 +145,13 @@ void text_placements_simple::set_positions(std::string positions)
                      (direction_name[push_back(phoenix::ref(direction_), _1)] % ',') >> *(',' >> qi::float_[push_back(phoenix::ref(text_sizes_), _1)]),
                      space
         );
-    if (first != last) {
-        std::cerr << "WARNING: Could not parse text_placement_simple placement string ('" << positions << "').\n";
+    if (first != last)
+    {
+        MAPNIK_LOG_WARN(text_placements) << "Could not parse text_placement_simple placement string ('" << positions << "')";
     }
-    if (direction_.size() == 0) {
-        std::cerr << "WARNING: text_placements_simple with no valid placements! ('"<< positions<<"')\n";
+    if (direction_.size() == 0)
+    {
+        MAPNIK_LOG_WARN(text_placements) << "text_placements_simple with no valid placements! ('"<< positions<<"')";
     }
 }
 
@@ -167,10 +170,10 @@ std::string text_placements_simple::get_positions()
     return positions_; //TODO: Build string from data in direction_ and text_sizes_
 }
 
-text_placements_ptr text_placements_simple::from_xml(boost::property_tree::ptree const &xml, fontset_map const & fontsets)
+text_placements_ptr text_placements_simple::from_xml(xml_node const &xml, fontset_map const & fontsets)
 {
-    text_placements_ptr ptr = text_placements_ptr(boost::make_shared<text_placements_simple>(
-                    get_attr<std::string>(xml, "placements", "X")));
+    text_placements_ptr ptr = boost::make_shared<text_placements_simple>(
+        xml.get_attr<std::string>("placements", "X"));
     ptr->defaults.from_xml(xml, fontsets);
     return ptr;
 }

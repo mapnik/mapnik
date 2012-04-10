@@ -24,6 +24,7 @@
 #define MAPNIK_POOL_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/utils.hpp>
 
 // boost
@@ -100,9 +101,8 @@ public:
         typename ContType::iterator itr=unusedPool_.begin();
         while ( itr!=unusedPool_.end())
         {
-#ifdef MAPNIK_DEBUG
-            std::clog<<"borrow "<<(*itr).get()<<"\n";
-#endif
+            MAPNIK_LOG_DEBUG(pool) << "pool: Borrow instance=" << (*itr).get();
+
             if ((*itr)->isOK())
             {
                 usedPool_.push_back(*itr);
@@ -111,9 +111,8 @@ public:
             }
             else
             {
-#ifdef MAPNIK_DEBUG
-                std::clog<<"bad connection (erase)" << (*itr).get()<<"\n";
-#endif
+                MAPNIK_LOG_DEBUG(pool) << "pool: Bad connection (erase) instance=" << (*itr).get();
+
                 itr=unusedPool_.erase(itr);
             }
         }
@@ -123,9 +122,9 @@ public:
             if (conn->isOK())
             {
                 usedPool_.push_back(conn);
-#ifdef MAPNIK_DEBUG
-                std::clog << "create << " << conn.get() << "\n";
-#endif
+
+                MAPNIK_LOG_DEBUG(pool) << "pool: Create connection=" << conn.get();
+
                 return conn;
             }
         }
@@ -142,9 +141,8 @@ public:
         {
             if (obj.get()==(*itr).get())
             {
-#ifdef MAPNIK_DEBUG
-                std::clog<<"return "<<(*itr).get()<<"\n";
-#endif
+                MAPNIK_LOG_DEBUG(pool) << "pool: Return instance=" << (*itr).get();
+
                 unusedPool_.push_back(*itr);
                 usedPool_.erase(itr);
                 return;

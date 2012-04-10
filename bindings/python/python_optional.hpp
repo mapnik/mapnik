@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #include <boost/optional/optional.hpp>
 #include <boost/python.hpp>
@@ -102,8 +101,8 @@ struct python_optional : public boost::noncopyable
 
 /** This class works around a bug in boost python.
 
-  See http://osdir.com/ml/python.c++/2003-11/msg00158.html
-  */
+    See http://osdir.com/ml/python.c++/2003-11/msg00158.html
+*/
 template <typename T, typename X1 = boost::python::detail::not_specified, typename X2 = boost::python::detail::not_specified, typename X3 = boost::python::detail::not_specified>
 class class_with_converter : public boost::python::class_<T, X1, X2, X3>
 {
@@ -131,8 +130,8 @@ public:
     self& def_readwrite_convert(char const* name, D const& d, char const* doc=0)
     {
         this->add_property(name,
-                     boost::python::make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),
-                     boost::python::make_setter(d, boost::python::default_call_policies()));
+                           boost::python::make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),
+                           boost::python::make_setter(d, boost::python::default_call_policies()));
         return *this;
     }
 };

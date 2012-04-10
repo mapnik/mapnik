@@ -34,8 +34,7 @@ class text_placements_info_dummy;
 class MAPNIK_DECL text_placements_dummy: public text_placements
 {
 public:
-    text_placement_info_ptr get_placement_info(
-        double scale_factor, dimension_type dim, bool has_dimensions) const;
+    text_placement_info_ptr get_placement_info(double scale_factor) const;
     friend class text_placement_info_dummy;
 };
 
@@ -43,9 +42,8 @@ public:
 class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
 {
 public:
-    text_placement_info_dummy(text_placements_dummy const* parent,
-                              double scale_factor, dimension_type dim, bool has_dimensions)
-        : text_placement_info(parent, scale_factor, dim, has_dimensions),
+    text_placement_info_dummy(text_placements_dummy const* parent, double scale_factor)
+        : text_placement_info(parent, scale_factor),
         state(0), parent_(parent) {}
     bool next();
 private:

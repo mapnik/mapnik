@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id: image_util.cpp 36 2005-04-05 14:32:18Z pavlenko $
-
 extern "C"
 {
 #include <png.h>
@@ -45,8 +43,10 @@ extern "C"
 
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo_renderer.hpp>
+#include <cairo-features.h>
 #endif
 
+// boost
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 
@@ -57,7 +57,6 @@ extern "C"
 #include <sstream>
 
 // agg
-//#include "agg_conv_transform.h"
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
@@ -158,7 +157,7 @@ void handle_png_options(std::string const& type,
                 if (*colors < 0)
                     throw ImageWriterException("invalid color parameter: unavailable for true color images");
 
-                if (!mapnik::conversions::string2int(t.substr(2),*colors) || *colors < 0 || *colors > 256)
+                if (!mapnik::util::string2int(t.substr(2),*colors) || *colors < 0 || *colors > 256)
                     throw ImageWriterException("invalid color parameter: " + t.substr(2));
             }
             else if (boost::algorithm::starts_with(t, "t="))
@@ -166,14 +165,14 @@ void handle_png_options(std::string const& type,
                 if (*colors < 0)
                     throw ImageWriterException("invalid trans_mode parameter: unavailable for true color images");
 
-                if (!mapnik::conversions::string2int(t.substr(2),*trans_mode) || *trans_mode < 0 || *trans_mode > 2)
+                if (!mapnik::util::string2int(t.substr(2),*trans_mode) || *trans_mode < 0 || *trans_mode > 2)
                     throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
             }
             else if (boost::algorithm::starts_with(t, "g="))
             {
                 if (*colors < 0)
                     throw ImageWriterException("invalid gamma parameter: unavailable for true color images");
-                if (!mapnik::conversions::string2double(t.substr(2),*gamma) || *gamma < 0)
+                if (!mapnik::util::string2double(t.substr(2),*gamma) || *gamma < 0)
                 {
                     throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
                 }
@@ -186,7 +185,7 @@ void handle_png_options(std::string const& type,
                   #define Z_BEST_COMPRESSION       9
                   #define Z_DEFAULT_COMPRESSION  (-1)
                 */
-                if (!mapnik::conversions::string2int(t.substr(2),*compression)
+                if (!mapnik::util::string2int(t.substr(2),*compression)
                     || *compression < Z_DEFAULT_COMPRESSION
                     || *compression > Z_BEST_COMPRESSION)
                 {
@@ -317,7 +316,7 @@ void save_to_stream(T const& image,
             std::string const& val = t.substr(4);
             if (!val.empty())
             {
-                if (!mapnik::conversions::string2int(val,quality) || quality < 0 || quality > 100)
+                if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
                 {
                     throw ImageWriterException("invalid jpeg quality: '" + val + "'");
                 }
@@ -372,17 +371,40 @@ void save_to_cairo_file(mapnik::Map const& map,
         unsigned width = map.width();
         unsigned height = map.height();
         if (type == "pdf")
+        {
+#if defined(CAIRO_HAS_PDF_SURFACE)
             surface = Cairo::PdfSurface::create(filename,width,height);
+#else
+            throw ImageWriterException("PDFSurface not supported in the cairo backend");
+#endif
+        }
+#if defined(CAIRO_HAS_SVG_SURFACE)
         else if (type == "svg")
+        {
             surface = Cairo::SvgSurface::create(filename,width,height);
+        }
+#endif
+#if defined(CAIRO_HAS_PS_SURFACE)
         else if (type == "ps")
+        {
             surface = Cairo::PsSurface::create(filename,width,height);
+        }
+#endif
+#if defined(CAIRO_HAS_IMAGE_SURFACE)
         else if (type == "ARGB32")
+        {
             surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,width,height);
+        }
         else if (type == "RGB24")
+        {
             surface = Cairo::ImageSurface::create(Cairo::FORMAT_RGB24,width,height);
+        }
+#endif
         else
+        {
             throw ImageWriterException("unknown file type: " + type);
+        }
+
         Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create(surface);
 
         // TODO - expose as user option

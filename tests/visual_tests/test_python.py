@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 import mapnik
 import sys
+import os.path
+from compare import compare, summary
+
+dirname = os.path.dirname(__file__)
 
 class MyText(mapnik.FormattingNode):
     def __init__(self):
@@ -67,7 +71,7 @@ m.append_style('Style', style)
 
 
 layer = mapnik.Layer('Layer')
-layer.datasource = mapnik.Shapefile(file="points.shp")
+layer.datasource = mapnik.Shapefile(file=os.path.join(dirname,"data/points.shp"))
 layer.styles.append('Style')
 m.layers.append(layer)
 
@@ -95,4 +99,9 @@ format_trees = [
 
 for format_tree in format_trees:
     text.placements.defaults.format_tree = format_tree[1]
-    mapnik.render_to_file(m, 'python-%s.png' % format_tree[0], 'png')
+    mapnik.render_to_file(m, os.path.join(dirname,"images", 'python-%s.png' % format_tree[0]), 'png')
+    compare(os.path.join(dirname,"images", 'python-%s.png' % format_tree[0]),
+            os.path.join(dirname,"images", 'python-%s-reference.png' % format_tree[0])
+            )
+
+summary()

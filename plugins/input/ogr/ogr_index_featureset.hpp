@@ -52,7 +52,6 @@ private:
     std::vector<int>::iterator itr_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
-
 };
 
 #endif // OGR_INDEX_FEATURESET_HPP

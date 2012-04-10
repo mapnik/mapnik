@@ -52,11 +52,14 @@ public:
     void bind() const;
 
 private:
+    // Fill init_statements with any statements
+    // needed to attach auxillary databases
+    void parse_attachdb(std::string const& attachdb) const;
+    std::string populate_tokens(const std::string& sql) const;
 
     // FIXME: remove mutable qualifier from data members
     //        by factoring out bind() logic out from
     //        datasource impl !!!
-
     mutable mapnik::box2d<double> extent_;
     mutable bool extent_initialized_;
     mapnik::datasource::datasource_t type_;
@@ -79,11 +82,6 @@ private:
     mutable bool has_spatial_index_;
     mutable bool using_subquery_;
     mutable std::vector<std::string> init_statements_;
-
-    // Fill init_statements with any statements
-    // needed to attach auxillary databases
-    void parse_attachdb(std::string const& attachdb) const;
-    std::string populate_tokens(const std::string& sql) const;
 };
 
 #endif // MAPNIK_SQLITE_DATASOURCE_HPP

@@ -28,6 +28,7 @@
 #include <boost/foreach.hpp>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/grid/grid_util.hpp>
@@ -271,7 +272,7 @@ static void write_features(T const& grid_type,
         }
         else
         {
-            std::clog << "should not get here: key '" << key << "' not found in grid feature properties\n";
+            MAPNIK_LOG_DEBUG(bindings) << "write_features: Should not get here: key " << key << " not found in grid feature properties";
         }
     }
 }

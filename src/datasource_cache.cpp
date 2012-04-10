@@ -19,11 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: datasource_cache.cpp 23 2005-03-22 22:16:34Z pavlenko $
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource_cache.hpp>
-
 #include <mapnik/config_error.hpp>
 
 // boost
@@ -74,6 +73,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
+
     datasource_ptr ds;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
     if ( itr == plugins_.end() )
@@ -81,11 +81,13 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
         throw config_error(std::string("Could not create datasource. No plugin ") +
                            "found for type '" + * type + "' (searched in: " + plugin_directories() + ")");
     }
+
     if ( ! itr->second->handle())
     {
         throw std::runtime_error(std::string("Cannot load library: ") +
                                  lt_dlerror());
     }
+
     // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
 #ifdef __GNUC__
     __extension__
@@ -93,24 +95,26 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
         create_ds* create_datasource =
         reinterpret_cast<create_ds*>(lt_dlsym(itr->second->handle(), "create"));
 
-    if ( ! create_datasource)
+    if (! create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") +
                                  lt_dlerror());
     }
-#ifdef MAPNIK_DEBUG
-    std::clog << "size = " << params.size() << "\n";
+
+#ifdef MAPNIK_LOG
+    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Size=" << params.size();
+
     parameters::const_iterator i = params.begin();
-    for (;i!=params.end();++i)
+    for (; i != params.end(); ++i)
     {
-        std::clog << i->first << "=" << i->second << "\n";
+        MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: -- " << i->first << "=" << i->second;
     }
 #endif
-    ds=datasource_ptr(create_datasource(params, bind), datasource_deleter());
 
-#ifdef MAPNIK_DEBUG
-    std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
-#endif
+    ds = datasource_ptr(create_datasource(params, bind), datasource_deleter());
+
+    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Datasource=" << ds << " type=" << type;
+
     return ds;
 }
 
@@ -175,24 +179,27 @@ void datasource_cache::register_datasources(const std::string& str)
                                 reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
                             if (ds_name && insert(ds_name(),module))
                             {
-#ifdef MAPNIK_DEBUG
-                                std::clog << "Datasource loader: registered: " << ds_name() << std::endl;
-#endif
+                                MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << ds_name();
+
                                 registered_=true;
                             }
                             else if (!ds_name)
                             {
-                                std::clog << "Problem loading plugin library '" << itr->path().string() << "' (plugin is lacking compatible interface)" << std::endl;
+                                MAPNIK_LOG_ERROR(datasource_cache)
+                                        << "Problem loading plugin library '"
+                                        << itr->path().string() << "' (plugin is lacking compatible interface)";
                             }
                         }
                         else
                         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
-                            std::clog << "Problem loading plugin library: " << itr->path().string()
-                                      << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;
+                            MAPNIK_LOG_ERROR(datasource_cache)
+                                    << "Problem loading plugin library: " << itr->path().string()
+                                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
 #else // v2
-                            std::clog << "Problem loading plugin library: " << itr->string()
-                                      << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;
+                            MAPNIK_LOG_ERROR(datasource_cache)
+                                    << "Problem loading plugin library: " << itr->string()
+                                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
 #endif
                         }
                     }
