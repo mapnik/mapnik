@@ -19,7 +19,7 @@ For a complete change history, see the SVN log.
 
 - Cairo: Add full rendering support for markers to match AGG renderer functionality (#1071)
 
-- Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentially radii) (#1134)
+- Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentionally radii) (#1134)
 
 - Added 'ignore-placement` attribute to markers-symbolizer (#1135)
 
