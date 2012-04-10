@@ -154,7 +154,14 @@ void logger::use_console()
         saved_buf_ = std::clog.rdbuf();
     }
 
+    // close the file to force a flush
+    if (file_output_.is_open())
+    {
+        file_output_.close();
+    }
+
     std::clog.rdbuf(saved_buf_);
 }
 
-}
+
+} // namespace mapnik
