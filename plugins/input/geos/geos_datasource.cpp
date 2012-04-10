@@ -65,24 +65,28 @@ DATASOURCE_PLUGIN(geos_datasource)
 
 void geos_notice(const char* format, ...)
 {
+#ifdef MAPNIK_LOG
     char buffer[512];
     va_list args;
     va_start(args, format);
-    vsprintf(buffer, format, args);
+    vsnprintf(buffer, 512, format, args);
     va_end(args);
 
     MAPNIK_LOG_WARN(geos) << "geos_datasource: " << buffer;
+#endif
 }
 
 void geos_error(const char* format, ...)
 {
+#ifdef MAPNIK_LOG
     char buffer[512];
     va_list args;
     va_start(args, format);
-    vsprintf(buffer, format, args);
+    vsnprintf(buffer, 512, format, args);
     va_end(args);
 
     MAPNIK_LOG_ERROR(geos) << "geos_datasource: " << buffer;
+#endif
 }
 
 
