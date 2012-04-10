@@ -157,7 +157,7 @@ void occi_datasource::bind() const
                 *params_.get<std::string>("user"),
                 *params_.get<std::string>("password"),
                 *params_.get<std::string>("host"),
-                *params_.get<int>("max_size", 10),
+                *params_.get<int>("max_size", 5),
                 *params_.get<int>("initial_size", 1),
                 1,
                 StatelessConnectionPool::HOMOGENEOUS);
