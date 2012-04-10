@@ -66,9 +66,8 @@ DATASOURCE_PLUGIN(geos_datasource)
 void geos_notice(const char* format, ...)
 {
     char buffer[512];
-
     va_list args;
-    va_start(args, fmt);
+    va_start(args, format);
     vsprintf(buffer, format, args);
     va_end(args);
 
@@ -77,8 +76,9 @@ void geos_notice(const char* format, ...)
 
 void geos_error(const char* format, ...)
 {
+    char buffer[512];
     va_list args;
-    va_start(args, fmt);
+    va_start(args, format);
     vsprintf(buffer, format, args);
     va_end(args);
 
