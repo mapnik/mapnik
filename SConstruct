@@ -347,7 +347,6 @@ opts.AddVariables(
     # Variables for logging and statistics
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
-    ('LOG_FORMAT_STRING', 'The format string used before log output string, piped through strftime (max length of 255 characters)', 'Mapnik LOG> %Y-%m-%d %H:%M:%S:'),
     ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. "info", "debug", "warn", "error", "fatal", "none")', 'error'),
 
     # Other variables
@@ -1431,7 +1430,7 @@ if not preconfigured:
             else:
                 log_severity = 3 # error
 
-        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_LOG_FORMAT="%s" -DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % (env['LOG_FORMAT_STRING'], log_severity)
+        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % log_severity
 
         if env['DEBUG']:
             debug_flags += log_enabled
