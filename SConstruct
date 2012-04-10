@@ -1732,7 +1732,7 @@ if not HELP_REQUESTED:
         
         # devtools not ready for public 
         #SConscript('utils/ogrindex/build.py')
-        #SConscript('utils/svg2png/build.py')
+        SConscript('utils/svg2png/build.py')
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
         color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
