@@ -1054,6 +1054,10 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
             optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
             if (gamma_method) symbol.set_gamma_method(*gamma_method);
 
+            // smooth value
+            optional<double> smooth = sym.get_opt_attr<double>("smooth");
+            if (smooth) symbol.set_smooth(*smooth);
+
             parse_metawriter_in_symbolizer(symbol, sym);
             rule.append(symbol);
         }

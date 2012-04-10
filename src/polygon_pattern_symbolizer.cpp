@@ -39,13 +39,15 @@ polygon_pattern_symbolizer::polygon_pattern_symbolizer(path_expression_ptr file)
 : symbolizer_with_image(file), symbolizer_base(),
     alignment_(LOCAL_ALIGNMENT),
     gamma_(1.0),
-    gamma_method_(GAMMA_POWER) {}
+    gamma_method_(GAMMA_POWER),
+    smooth_(0.0) {}
 
 polygon_pattern_symbolizer::polygon_pattern_symbolizer(polygon_pattern_symbolizer const& rhs)
     : symbolizer_with_image(rhs), symbolizer_base(rhs),
       alignment_(rhs.alignment_),
       gamma_(rhs.gamma_),
-      gamma_method_(rhs.gamma_method_) {}
+      gamma_method_(rhs.gamma_method_),
+      smooth_(rhs.smooth_) {}
 
 pattern_alignment_e polygon_pattern_symbolizer::get_alignment() const
 {
@@ -75,6 +77,16 @@ void polygon_pattern_symbolizer::set_gamma_method(gamma_method_e gamma_method)
 gamma_method_e polygon_pattern_symbolizer::get_gamma_method() const
 {
     return gamma_method_;
+}
+
+void polygon_pattern_symbolizer::set_smooth(double smooth)
+{
+    smooth_ = smooth;
+}
+
+double polygon_pattern_symbolizer::smooth() const
+{
+    return smooth_;
 }
 
 }
