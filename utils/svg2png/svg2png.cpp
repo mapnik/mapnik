@@ -23,8 +23,9 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-//#include <string>
+#include <string>
 
+#include <mapnik/version.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/image_util.hpp>
@@ -52,6 +53,7 @@ int main (int argc,char** argv)
     namespace po = boost::program_options;
 
     bool verbose=false;
+    bool auto_open=false;
     std::vector<std::string> svg_files;
     xmlInitParser();
 
@@ -62,6 +64,7 @@ int main (int argc,char** argv)
             ("help,h", "produce usage message")
             ("version,V","print version string")
             ("verbose,v","verbose output")
+            ("open","automatically open the file after rendering (os x only)")
             ("svg",po::value<std::vector<std::string> >(),"svg file to read")
             ;
 
@@ -73,7 +76,7 @@ int main (int argc,char** argv)
 
         if (vm.count("version"))
         {
-            std::clog<<"version 0.3.0" << std::endl;
+            std::clog <<"version " << MAPNIK_VERSION_STRING << std::endl;
             return 1;
         }
 
@@ -82,9 +85,15 @@ int main (int argc,char** argv)
             std::clog << desc << std::endl;
             return 1;
         }
+
         if (vm.count("verbose"))
         {
             verbose = true;
+        }
+
+        if (vm.count("open"))
+        {
+            auto_open = true;
         }
 
         if (vm.count("svg"))
@@ -105,13 +114,19 @@ int main (int argc,char** argv)
         }
         while (itr != svg_files.end())
         {
-
             std::string svg_name (*itr++);
-            boost::optional<mapnik::marker_ptr> marker_ptr = mapnik::marker_cache::instance()->find(svg_name, false);
-            if (marker_ptr) {
+            if (verbose)
+            {
+                std::clog << "found: " << svg_name << "\n";
+            }
 
-                mapnik::marker marker  = **marker_ptr;
-                if (marker.is_vector()) {
+            boost::optional<mapnik::marker_ptr> marker_ptr =
+                mapnik::marker_cache::instance()->find(svg_name, false);
+            if (marker_ptr)
+            {
+                mapnik::marker marker = **marker_ptr;
+                if (marker.is_vector())
+                {
 
                     typedef agg::pixfmt_rgba32_plain pixfmt;
                     typedef agg::renderer_base<pixfmt> renderer_base;
@@ -123,6 +138,10 @@ int main (int argc,char** argv)
                     double scale_factor_ = .95;
                     int w = marker.width();
                     int h = marker.height();
+                    if (verbose)
+                    {
+                        std::clog << "found width of '" << w << "' and height of '" << h << "'\n";
+                    }
                     mapnik::image_32 im(w,h);
                     agg::rendering_buffer buf(im.raw_data(), w, h, w * 4);
                     pixfmt pixf(buf);
@@ -150,9 +169,12 @@ int main (int argc,char** argv)
                     boost::algorithm::ireplace_last(svg_name,".svg",".png");
                     mapnik::save_to_file<mapnik::image_data_32>(im.data(),svg_name,"png");
 #ifdef DARWIN
-                    std::ostringstream s;
-                    s << "open " << svg_name;
-                    //system(s.str().c_str());
+                    if (auto_open)
+                    {
+                        std::ostringstream s;
+                        s << "open " << svg_name;
+                        system(s.str().c_str());
+                    }
 #endif
                     std::clog << "rendered to: " << svg_name << "\n";
                 }
