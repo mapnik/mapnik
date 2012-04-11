@@ -345,7 +345,7 @@ opts.AddVariables(
     PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
 
     # Variables for logging and statistics
-    BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
+    BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'True'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
     ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. "info", "debug", "warn", "error", "fatal", "none")', 'error'),
 
