@@ -428,11 +428,21 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
     if (value)
     {
         path_.begin_path();
-
         if (!mapnik::svg::parse_path((const char*) value, path_))
         {
             xmlFree(value);
-            throw std::runtime_error("can't parse PATH\n");
+            xmlChar *id_value;
+            id_value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
+            if (id_value)
+            {
+                std::string id_string((const char *) id_value);
+                xmlFree(id_value);
+                throw std::runtime_error(std::string("unable to parse invalid svg <path> with id '") + id_string + "'");
+            }
+            else
+            {
+                throw std::runtime_error("unable to parse invalid svg <path>");
+            }
         }
         path_.end_path();
         xmlFree(value);
@@ -450,7 +460,7 @@ void svg_parser::parse_polygon(xmlTextReaderPtr reader)
         if (!mapnik::svg::parse_points((const char*) value, path_))
         {
             xmlFree(value);
-            throw std::runtime_error("Failed to parse <polygon>\n");
+            throw std::runtime_error("Failed to parse <polygon>");
         }
         path_.close_subpath();
         path_.end_path();
@@ -469,7 +479,7 @@ void svg_parser::parse_polyline(xmlTextReaderPtr reader)
         if (!mapnik::svg::parse_points((const char*) value, path_))
         {
             xmlFree(value);
-            throw std::runtime_error("Failed to parse <polygon>\n");
+            throw std::runtime_error("Failed to parse <polygon>");
         }
 
         path_.end_path();
