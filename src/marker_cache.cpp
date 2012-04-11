@@ -102,9 +102,13 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                 }
                 return result;
             }
+            catch (std::exception const& ex)
+            {
+                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading svg: '" << uri << "' (" << ex.what() << ")";
+            }
             catch (...)
             {
-                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading SVG: " << uri;
+                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading SVG: '" << uri << "'";
             }
         }
         else
@@ -126,11 +130,18 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                         cache_.insert(std::make_pair(uri,*result));
                     }
                 }
+                else
+                {
+                    MAPNIK_LOG_ERROR(marker_cache) << "could not intialize reader for: '" << uri << "'";
+                }
             }
-
+            catch (std::exception const& ex)
+            {
+                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading image: '" << uri << "' (" << ex.what() << ")";
+            }
             catch (...)
             {
-                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading image: " << uri;
+                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading image: '" << uri << "'";
             }
         }
     }
