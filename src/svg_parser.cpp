@@ -433,7 +433,8 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
 
         if (!mapnik::svg::parse_path((const char*) value, path_))
         {
-            std::runtime_error("can't parse PATH\n");
+            xmlFree(value);
+            throw std::runtime_error("can't parse PATH\n");
         }
         path_.end_path();
         xmlFree(value);
@@ -450,6 +451,7 @@ void svg_parser::parse_polygon(xmlTextReaderPtr reader)
         path_.begin_path();
         if (!mapnik::svg::parse_points((const char*) value, path_))
         {
+            xmlFree(value);
             throw std::runtime_error("Failed to parse <polygon>\n");
         }
         path_.close_subpath();
@@ -468,6 +470,7 @@ void svg_parser::parse_polyline(xmlTextReaderPtr reader)
         path_.begin_path();
         if (!mapnik::svg::parse_points((const char*) value, path_))
         {
+            xmlFree(value);
             throw std::runtime_error("Failed to parse <polygon>\n");
         }
 
