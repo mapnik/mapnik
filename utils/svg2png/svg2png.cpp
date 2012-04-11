@@ -44,6 +44,8 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_scanline_u.h"
 
+#include <libxml/parser.h> // for xmlInitParser(), xmlCleanupParser()
+
 
 int main (int argc,char** argv)
 {
@@ -51,6 +53,7 @@ int main (int argc,char** argv)
 
     bool verbose=false;
     std::vector<std::string> svg_files;
+    xmlInitParser();
 
     try
     {
@@ -149,7 +152,7 @@ int main (int argc,char** argv)
 #ifdef DARWIN
                     std::ostringstream s;
                     s << "open " << svg_name;
-                    system(s.str().c_str());
+                    //system(s.str().c_str());
 #endif
                     std::clog << "rendered to: " << svg_name << "\n";
                 }
@@ -159,8 +162,14 @@ int main (int argc,char** argv)
     catch (...)
     {
         std::clog << "Exception of unknown type!" << std::endl;
+        xmlCleanupParser();
         return -1;
     }
+
+    // only call this once, on exit
+    // to make sure valgrind output is clean
+    // http://xmlsoft.org/xmlmem.html
+    xmlCleanupParser();
 
     return 0;
 }
