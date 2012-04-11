@@ -104,7 +104,6 @@ int main (int argc,char** argv)
         {
 
             std::string svg_name (*itr++);
-
             boost::optional<mapnik::marker_ptr> marker_ptr = mapnik::marker_cache::instance()->find(svg_name, false);
             if (marker_ptr) {
 
@@ -147,9 +146,12 @@ int main (int argc,char** argv)
 
                     boost::algorithm::ireplace_last(svg_name,".svg",".png");
                     mapnik::save_to_file<mapnik::image_data_32>(im.data(),svg_name,"png");
+#ifdef DARWIN
                     std::ostringstream s;
                     s << "open " << svg_name;
-                    return system(s.str().c_str());
+                    system(s.str().c_str());
+#endif
+                    std::clog << "rendered to: " << svg_name << "\n";
                 }
             }
         }
