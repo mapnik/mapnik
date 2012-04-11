@@ -9,6 +9,8 @@ For a complete change history, see the SVN log.
 
 ## Mapnik 2.1.0
 
+- Fixed rendering of thin svg lines (#1129)
+
 - Improved logging/debugging system with release logs and file redirection (#937 and partially #986, #467)
 
 - GDAL: allow setting nodata value on the fly (will override value if nodata is set in data) (#1161)
