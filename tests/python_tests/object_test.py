@@ -113,6 +113,27 @@ def test_pointsymbolizer_init():
     eq_(p.ignore_placement,True)
     eq_(p.placement, mapnik.point_placement.INTERIOR)
 
+
+# PointSymbolizer initialization
+def test_markersymbolizer_init():
+    p = mapnik.MarkersSymbolizer() 
+    eq_(p.allow_overlap, False)
+    eq_(p.opacity,1)
+    eq_(p.filename,'')
+
+    stroke = mapnik.Stroke()
+    stroke.color = mapnik.Color('black')
+    stroke.width = 1.0
+    
+    p.stroke = stroke
+    p.fill = mapnik.Color('white')
+    p.allow_overlap = True
+    p.opacity = 0.5
+
+    eq_(p.allow_overlap, True)
+    eq_(p.opacity, 0.5)
+
+
 # PointSymbolizer missing image file
 # images paths are now PathExpressions are evaluated at runtime
 # so it does not make sense to throw...

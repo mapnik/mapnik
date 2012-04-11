@@ -124,5 +124,15 @@ void export_markers_symbolizer()
                       &markers_symbolizer::get_height,
                       &markers_symbolizer::set_height,
                       "Set/get the marker height")
+        .add_property("fill",
+                      make_function(&markers_symbolizer::get_fill,
+                      return_value_policy<copy_const_reference>()),
+                      &markers_symbolizer::set_fill,
+                      "Set/get the marker fill color")
+        .add_property("stroke",
+                      make_function(&markers_symbolizer::get_stroke,
+                      return_value_policy<copy_const_reference>()),
+                      &markers_symbolizer::set_stroke,
+                      "Set/get the marker stroke (outline)")
         ;
 }
