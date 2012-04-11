@@ -135,12 +135,17 @@ void projection::init()
     mutex::scoped_lock lock(mutex_);
 #endif
 #if PJ_VERSION >= 480
-    proj_ctx_=pj_ctx_alloc();
-    proj_=pj_init_plus_ctx(proj_ctx_, params_.c_str());
+    proj_ctx_ = pj_ctx_alloc();
+    proj_ = pj_init_plus_ctx(proj_ctx_, params_.c_str());
+    if (!proj_)
+    {
+        if (proj_ctx_) pj_ctx_free(proj_ctx_);
+        throw proj_init_error(params_);
+    }
 #else
-    proj_=pj_init_plus(params_.c_str());
-#endif
+    proj_ = pj_init_plus(params_.c_str());
     if (!proj_) throw proj_init_error(params_);
+#endif
     is_geographic_ = pj_is_latlong(proj_) ? true : false;
 }
 
