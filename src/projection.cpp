@@ -33,19 +33,20 @@
 namespace mapnik {
 
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
+#warning mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8
 boost::mutex projection::mutex_;
 #endif
 
 projection::projection(std::string const& params)
     : params_(params)
 {
-    init(); //
+    init();
 }
 
 projection::projection(projection const& rhs)
     : params_(rhs.params_)
 {
-    init(); //
+    init();
 }
 
 projection& projection::operator=(projection const& rhs)
@@ -158,9 +159,9 @@ std::string projection::expanded() const
     return std::string("");
 }
 
-void projection::swap (projection& rhs)
+void projection::swap(projection& rhs)
 {
     std::swap(params_,rhs.params_);
-    init ();
+    init();
 }
 }
