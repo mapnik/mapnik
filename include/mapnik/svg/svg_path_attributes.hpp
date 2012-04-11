@@ -45,6 +45,7 @@ struct path_attributes
     bool         stroke_flag;
     bool         even_odd_flag;
     bool         visibility_flag;
+    bool         display_flag;
     agg::line_join_e  line_join;
     agg::line_cap_e   line_cap;
     double       miter_limit;
@@ -63,6 +64,7 @@ struct path_attributes
         stroke_flag(false),
         even_odd_flag(false),
         visibility_flag(true),
+        display_flag(true),
         line_join(agg::miter_join),
         line_cap(agg::butt_cap),
         miter_limit(4.0),
@@ -83,6 +85,7 @@ struct path_attributes
           stroke_flag(attr.stroke_flag),
           even_odd_flag(attr.even_odd_flag),
           visibility_flag(attr.visibility_flag),
+          display_flag(attr.display_flag),
           line_join(attr.line_join),
           line_cap(attr.line_cap),
           miter_limit(attr.miter_limit),
@@ -102,6 +105,7 @@ struct path_attributes
           stroke_flag(attr.stroke_flag),
           even_odd_flag(attr.even_odd_flag),
           visibility_flag(attr.visibility_flag),
+          display_flag(attr.display_flag),
           line_join(attr.line_join),
           line_cap(attr.line_cap),
           miter_limit(attr.miter_limit),

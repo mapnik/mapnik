@@ -43,122 +43,115 @@
 
 
 namespace mapnik {
-    namespace logger {
 
-        class MAPNIK_DECL severity :
-            public singleton<severity,CreateStatic>,
-            private boost::noncopyable
+    class MAPNIK_DECL logger :
+        public singleton<logger,CreateStatic>,
+        private boost::noncopyable
+    {
+    public:
+        enum severity_type
         {
-        public:
-            enum type
-            {
-                info,
-                debug,
-                warn,
-                error,
-                fatal,
-                none
-            };
+            info,
+            debug,
+            warn,
+            error,
+            fatal,
+            none
+        };
 
-            typedef boost::unordered_map<std::string, type> severity_map;
+        typedef boost::unordered_map<std::string, severity_type> severity_map;
 
-            // globally get security level
-            static type get()
+        // global security level
+        static severity_type get_severity()
+        {
+            return severity_level_;
+        }
+
+        static void set_severity(const severity_type& severity_level)
+        {
+#ifdef MAPNIK_THREADSAFE
+            boost::mutex::scoped_lock lock(severity_mutex_);
+#endif
+
+            severity_level_ = severity_level;
+        }
+
+        // per object security levels
+        static severity_type get_object_severity(const std::string& object_name)
+        {
+            severity_map::iterator it = object_severity_level_.find(object_name);
+            if (object_name.empty() || it == object_severity_level_.end())
             {
                 return severity_level_;
             }
-
-            // globally set security level
-            static void set(const type& severity_level)
+            else
             {
-#ifdef MAPNIK_THREADSAFE
-                boost::mutex::scoped_lock lock(mutex_);
-#endif
-
-                severity_level_ = severity_level;
+                return it->second;
             }
+        }
 
-            // per object get security level
-            static type get_object(const std::string& object_name)
-            {
-                severity_map::iterator it = object_severity_level_.find(object_name);
-                if (object_name.empty() || it == object_severity_level_.end())
-                {
-                    return severity_level_;
-                }
-                else
-                {
-                    return it->second;
-                }
-            }
-
-            // per object set security level
-            static void set_object(const std::string& object_name,
-                                   const type& security_level)
-            {
-#ifdef MAPNIK_THREADSAFE
-                boost::mutex::scoped_lock lock(mutex_);
-#endif
-                if (! object_name.empty())
-                {
-                    object_severity_level_[object_name] = security_level;
-                }
-            }
-
-        private:
-            static type severity_level_;
-            static severity_map object_severity_level_;
-
-#ifdef MAPNIK_THREADSAFE
-            static boost::mutex mutex_;
-#endif
-        };
-
-
-        class MAPNIK_DECL format :
-            public singleton<format,CreateStatic>,
-            private boost::noncopyable
+        static void set_object_severity(const std::string& object_name,
+                                        const severity_type& security_level)
         {
-        public:
-
-            static std::string get()
-            {
-                return format_;
-            }
-
-            static void set(const std::string& format)
-            {
 #ifdef MAPNIK_THREADSAFE
-                boost::mutex::scoped_lock lock(mutex_);
+            boost::mutex::scoped_lock lock(severity_mutex_);
 #endif
-                format_ = format;
+            if (! object_name.empty())
+            {
+                object_severity_level_[object_name] = security_level;
             }
+        }
 
-            static std::string str();
-
-        private:
-            static std::string format_;
-
-#ifdef MAPNIK_THREADSAFE
-            static boost::mutex mutex_;
-#endif
-        };
-
-
-        class MAPNIK_DECL output :
-            public singleton<output,CreateStatic>,
-            private boost::noncopyable
+        static void clear_object_severity()
         {
-        public:
-            static void use_file(const std::string& filepath);
-            static void use_console();
+#ifdef MAPNIK_THREADSAFE
+            boost::mutex::scoped_lock lock(severity_mutex_);
+#endif
 
-        private:
-            static std::ofstream file_output_;
-            static std::string file_name_;
-            static std::streambuf* saved_buf_;
-        };
+            object_severity_level_.clear();
+        }
 
+        // format
+        static std::string get_format()
+        {
+            return format_;
+        }
+
+        static void set_format(const std::string& format)
+        {
+#ifdef MAPNIK_THREADSAFE
+            boost::mutex::scoped_lock lock(format_mutex_);
+#endif
+            format_ = format;
+        }
+
+        // interpolate the format string for output
+        static std::string str();
+
+        // output
+        static void use_file(const std::string& filepath);
+        static void use_console();
+
+    private:
+        static severity_type severity_level_;
+        static severity_map object_severity_level_;
+        static bool severity_env_check_;
+
+        static std::string format_;
+        static bool format_env_check_;
+
+        static std::ofstream file_output_;
+        static std::string file_name_;
+        static std::streambuf* saved_buf_;
+
+#ifdef MAPNIK_THREADSAFE
+        static boost::mutex severity_mutex_;
+        static boost::mutex format_mutex_;
+#endif
+    };
+
+
+    namespace detail {
 
         template<class Ch, class Tr, class A>
         class clog_sink
@@ -166,19 +159,19 @@ namespace mapnik {
         public:
             typedef std::basic_ostringstream<Ch, Tr, A> stream_buffer;
 
-            void operator()(const stream_buffer &s)
+            void operator()(const logger::severity_type& severity, const stream_buffer &s)
             {
 #ifdef MAPNIK_THREADSAFE
                 static boost::mutex mutex;
                 boost::mutex::scoped_lock lock(mutex);
 #endif
-                std::clog << format::str() << " " << s.str() << std::endl;
+                std::clog << logger::str() << " " << s.str() << std::endl;
             }
         };
 
 
         template<template <class Ch, class Tr, class A> class OutputPolicy,
-                 severity::type Severity,
+                 logger::severity_type Severity,
                  class Ch = char,
                  class Tr = std::char_traits<Ch>,
                  class A = std::allocator<Ch> >
@@ -204,7 +197,7 @@ namespace mapnik {
 #ifdef MAPNIK_LOG
                 if (check_severity())
                 {
-                    output_policy()(streambuf_);
+                    output_policy()(Severity, streambuf_);
                 }
 #endif
             }
@@ -222,7 +215,7 @@ namespace mapnik {
 #ifdef MAPNIK_LOG
             inline bool check_severity()
             {
-                return Severity >= severity::get_object(object_name_);
+                return Severity >= logger::get_object_severity(object_name_);
             }
 
             typename output_policy::stream_buffer streambuf_;
@@ -230,45 +223,46 @@ namespace mapnik {
 #endif
         };
 
-        typedef base_log<clog_sink, severity::info> base_log_info;
-        typedef base_log<clog_sink, severity::debug> base_log_debug;
-        typedef base_log<clog_sink, severity::warn> base_log_warn;
-        typedef base_log<clog_sink, severity::error> base_log_error;
-        typedef base_log<clog_sink, severity::fatal> base_log_fatal;
-    }
+        typedef base_log<clog_sink, logger::info> base_log_info;
+        typedef base_log<clog_sink, logger::debug> base_log_debug;
+        typedef base_log<clog_sink, logger::warn> base_log_warn;
+        typedef base_log<clog_sink, logger::error> base_log_error;
+        typedef base_log<clog_sink, logger::fatal> base_log_fatal;
 
+    } // namespace detail
 
-    class MAPNIK_DECL info : public logger::base_log_info {
+    // real interfaces
+    class MAPNIK_DECL info : public detail::base_log_info {
     public:
-        info() : logger::base_log_info() {}
-        info(const char* object_name) : logger::base_log_info(object_name) {}
+        info() : detail::base_log_info() {}
+        info(const char* object_name) : detail::base_log_info(object_name) {}
     };
 
-    class MAPNIK_DECL debug : public logger::base_log_debug {
+    class MAPNIK_DECL debug : public detail::base_log_debug {
     public:
-        debug() : logger::base_log_debug() {}
-        debug(const char* object_name) : logger::base_log_debug(object_name) {}
+        debug() : detail::base_log_debug() {}
+        debug(const char* object_name) : detail::base_log_debug(object_name) {}
     };
 
-    class MAPNIK_DECL warn : public logger::base_log_warn {
+    class MAPNIK_DECL warn : public detail::base_log_warn {
     public:
-        warn() : logger::base_log_warn() {}
-        warn(const char* object_name) : logger::base_log_warn(object_name) {}
+        warn() : detail::base_log_warn() {}
+        warn(const char* object_name) : detail::base_log_warn(object_name) {}
     };
 
-    class MAPNIK_DECL error : public logger::base_log_error {
+    class MAPNIK_DECL error : public detail::base_log_error {
     public:
-        error() : logger::base_log_error() {}
-        error(const char* object_name) : logger::base_log_error(object_name) {}
+        error() : detail::base_log_error() {}
+        error(const char* object_name) : detail::base_log_error(object_name) {}
     };
 
-    class MAPNIK_DECL fatal : public logger::base_log_fatal {
+    class MAPNIK_DECL fatal : public detail::base_log_fatal {
     public:
-        fatal() : logger::base_log_fatal() {}
-        fatal(const char* object_name) : logger::base_log_fatal(object_name) {}
+        fatal() : detail::base_log_fatal() {}
+        fatal(const char* object_name) : detail::base_log_fatal(object_name) {}
     };
 
-
+    // logging helpers
     #define MAPNIK_LOG_INFO(s) mapnik::info(#s)
     #define MAPNIK_LOG_DEBUG(s) mapnik::debug(#s)
     #define MAPNIK_LOG_WARN(s) mapnik::warn(#s)

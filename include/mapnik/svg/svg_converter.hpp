@@ -56,11 +56,10 @@ public:
 
     void begin_path()
     {
-        push_attr();
         unsigned idx = source_.start_new_path();
         attributes_.add(path_attributes(cur_attr(), idx));
     }
-
+    
     void end_path()
     {
         if(attributes_.size() == 0)
@@ -71,7 +70,6 @@ public:
         unsigned idx = attributes_[attributes_.size() - 1].index;
         attr.index = idx;
         attributes_[attributes_.size() - 1] = attr;
-        pop_attr();
     }
 
     void move_to(double x, double y, bool rel=false)  // M, m
@@ -235,7 +233,21 @@ public:
         cur_attr().visibility_flag = flag;
     }
 
+    bool visibility()
+    {
+        return cur_attr().visibility_flag;
+    }
 
+    void display(bool flag)
+    {
+        cur_attr().display_flag = flag;
+    }
+
+    bool display()
+    {
+        return cur_attr().display_flag;
+    }
+    
     void stroke_width(double w)
     {
         cur_attr().stroke_width = w;

@@ -347,7 +347,7 @@ opts.AddVariables(
     # Variables for logging and statistics
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
-    ('LOG_FORMAT_STRING', 'The format string used before log output string, piped through strftime (max length of 255 characters)', 'Mapnik LOG> %Y-%m-%d %H:%M:%S:'),
+    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. "info", "debug", "warn", "error", "fatal", "none")', 'error'),
 
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -1417,7 +1417,20 @@ if not preconfigured:
         ndebug_flags = '-DNDEBUG'
 
         # Enable logging in debug mode (always) and release mode (when specified)
-        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_LOG_FORMAT="%s"' % env['LOG_FORMAT_STRING']
+        if env['DEFAULT_LOG_SEVERITY']:
+            severities = ['info', 'debug', 'warn', 'error', 'fatal', 'none']
+            if env['DEFAULT_LOG_SEVERITY'] not in severities:
+                color_print(1,"Cannot set default logger severity to '%s', available options are 'info', 'debug', 'warn', 'error', 'fatal', 'none'." % env['DEFAULT_LOG_SEVERITY'])
+                Exit(1)
+            else:
+                log_severity = severities.index(env['DEFAULT_LOG_SEVERITY'])
+        else:
+            if env['DEBUG']:
+                log_severity = 1 # debug
+            else:
+                log_severity = 3 # error
+
+        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % log_severity
 
         if env['DEBUG']:
             debug_flags += log_enabled
@@ -1432,7 +1445,7 @@ if not preconfigured:
 
         # Add rdynamic to allow using statics between application and plugins
         # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
-        if env['PLATFORM'] != 'Darwin':
+        if env['PLATFORM'] != 'Darwin' and env['CXX'] == 'g++':
             env.MergeFlags('-rdynamic')
 
         # Customizing the C++ compiler flags depending on: 
@@ -1719,7 +1732,7 @@ if not HELP_REQUESTED:
         
         # devtools not ready for public 
         #SConscript('utils/ogrindex/build.py')
-        #SConscript('utils/svg2png/build.py')
+        SConscript('utils/svg2png/build.py')
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
         color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")

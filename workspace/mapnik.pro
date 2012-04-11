@@ -316,7 +316,8 @@ SOURCES += \
 
 OTHER_FILES += \
     ../SConstruct \
-    ../config.py
+    ../config.py \
+    ../CHANGELOG.md
 
 include(agg.pri)
 include(plugins.pri)

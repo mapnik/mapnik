@@ -30,54 +30,91 @@
 #define MAPNIK_LOG_FORMAT "Mapnik LOG> %Y-%m-%d %H:%M:%S:"
 #endif
 
-namespace mapnik { namespace logger {
+#ifndef MAPNIK_DEFAULT_LOG_SEVERITY
+  #ifdef MAPNIK_DEBUG
+    #define MAPNIK_DEFAULT_LOG_SEVERITY 1
+  #else
+    #define MAPNIK_DEFAULT_LOG_SEVERITY 3
+  #endif
+#endif
+
+namespace mapnik {
+
+// mutexes
+
+#ifdef MAPNIK_THREADSAFE
+boost::mutex logger::severity_mutex_;
+boost::mutex logger::format_mutex_;
+#endif
+
+
+// first time checks
+
+bool logger::severity_env_check_ = true;
+bool logger::format_env_check_ = true;
 
 
 // severity
 
-severity::type severity::severity_level_ =
-#ifdef MAPNIK_DEBUG
-    severity::debug
-#else
-    severity::error
-#endif
+logger::severity_type logger::severity_level_ =
+    #if MAPNIK_DEFAULT_LOG_SEVERITY == 0
+        logger::info
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
+        logger::debug
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
+        logger::warn
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 3
+        logger::error
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 4
+        logger::fatal
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 5
+        logger::none
+    #else
+        #error "Wrong default log severity level specified!"
+    #endif
 ;
 
-severity::severity_map severity::object_severity_level_ = severity::severity_map();
-
-#ifdef MAPNIK_THREADSAFE
-boost::mutex severity::mutex_;
-#endif
+logger::severity_map logger::object_severity_level_ = logger::severity_map();
 
 
 // format
 
 #define __xstr__(s) __str__(s)
 #define __str__(s) #s
-std::string format::format_ = __xstr__(MAPNIK_LOG_FORMAT);
+std::string logger::format_ = __xstr__(MAPNIK_LOG_FORMAT);
 #undef __xstr__
 #undef __str__
 
-#ifdef MAPNIK_THREADSAFE
-boost::mutex format::mutex_;
+std::string logger::str()
+{
+#if 0
+    // update the format from getenv if this is the first time
+    if (logger::format_env_check_)
+    {
+        logger::format_env_check_ = false;
+
+        const char* log_format = getenv("MAPNIK_LOG_FORMAT");
+        if (log_format != NULL)
+        {
+            logger::format_ = log_format;
+        }
+    }
 #endif
 
-std::string format::str()
-{
     char buf[256];
     const time_t tm = time(0);
-    strftime(buf, sizeof(buf), format::format_.c_str(), localtime(&tm));
+    strftime(buf, sizeof(buf), logger::format_.c_str(), localtime(&tm));
     return buf;
 }
 
 
 // output
 
-std::ofstream output::file_output_;
-std::string output::file_name_;
-std::streambuf* output::saved_buf_ = 0;
+std::ofstream logger::file_output_;
+std::string logger::file_name_;
+std::streambuf* logger::saved_buf_ = 0;
 
-void output::use_file(const std::string& filepath)
+void logger::use_file(const std::string& filepath)
 {
     // save clog rdbuf
     if (saved_buf_ == 0)
@@ -109,7 +146,7 @@ void output::use_file(const std::string& filepath)
     }
 }
 
-void output::use_console()
+void logger::use_console()
 {
     // save clog rdbuf
     if (saved_buf_ == 0)
@@ -117,9 +154,14 @@ void output::use_console()
         saved_buf_ = std::clog.rdbuf();
     }
 
+    // close the file to force a flush
+    if (file_output_.is_open())
+    {
+        file_output_.close();
+    }
+
     std::clog.rdbuf(saved_buf_);
 }
 
 
-}
-}
+} // namespace mapnik
