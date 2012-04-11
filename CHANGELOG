@@ -10,6 +10,11 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the SVN log.
 
+Mapnik 2.0.2
+------------
+
+- Fixed memory leak in the case of proj >= 4.8 and a projection initialization error (#1173) 
+
 
 Mapnik 2.0.1
 ------------
