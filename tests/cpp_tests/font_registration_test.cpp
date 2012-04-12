@@ -1,5 +1,3 @@
-//#include <boost/config/warning_disable.hpp>
-
 #include <boost/filesystem/convenience.hpp>
 namespace fs = boost::filesystem;
 using fs::path;
@@ -9,15 +7,8 @@ namespace sys = boost::system;
 #include <iostream>
 #include <mapnik/font_engine_freetype.hpp>
 
-
-//  --------------------------------------------------------------------------//
-
 int main( int, char*[] )
 {
-
-
-//  font registration() tests  ----------------------------------------------//
-
   std::string fontdir("fonts/");
   
   BOOST_TEST( fs::exists( fontdir ) );
@@ -49,9 +40,9 @@ int main( int, char*[] )
   BOOST_TEST( mapnik::freetype_engine::register_fonts("tests/data/fonts/fake.ttf") == false );
   BOOST_TEST( mapnik::freetype_engine::face_names().size() == 0 );
 
-  //BOOST_TEST( mapnik::freetype_engine::register_font("tests/data/fonts/intentionally-broken.ttf") == false );
-  //BOOST_TEST( mapnik::freetype_engine::register_fonts("tests/data/fonts/intentionally-broken.ttf") == false );
-  //BOOST_TEST( mapnik::freetype_engine::face_names().size() == 0 );
+  BOOST_TEST( mapnik::freetype_engine::register_font("tests/data/fonts/intentionally-broken.ttf") == false );
+  BOOST_TEST( mapnik::freetype_engine::register_fonts("tests/data/fonts/intentionally-broken.ttf") == false );
+  BOOST_TEST( mapnik::freetype_engine::face_names().size() == 0 );
 
   // register unifont, since we know it sits in the root fonts/ dir
   BOOST_TEST( mapnik::freetype_engine::register_fonts(fontdir) );
