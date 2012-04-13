@@ -139,7 +139,9 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
         using qi::_a;
         using qi::_b;
         using qi::_r1;
+#if BOOST_VERSION > 104200
         using qi::no_skip;
+#endif
         using qi::lexeme;
         using qi::_val;
         using qi::lit;
