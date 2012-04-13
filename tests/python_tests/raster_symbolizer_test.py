@@ -69,17 +69,20 @@ def test_dataraster_query_point():
         _map = mapnik.Map(256,256, srs)
         _map.layers.append(lyr)
 
-        # point inside raster extent with valid data
-        x, y = 427417, 4477517
+        x, y = 556113.0,4381428.0 # center of extent of raster
+        _map.zoom_all()
         features = _map.query_point(0,x,y).features
         assert len(features) == 1
         feat = features[0]
         center = feat.envelope().center()
         assert center.x==x and center.y==y, center
         value = feat['value']
-        assert value == 21.0, value
+        assert value == 18.0, value
 
-        # point outside raster extent
+        # point inside map extent but outside raster extent
+        current_box = _map.envelope()
+        current_box.expand_to_include(-427417,4477517)
+        _map.zoom_to_box(current_box)
         features = _map.query_point(0,-427417,4477517).features
         assert len(features) == 0
 
