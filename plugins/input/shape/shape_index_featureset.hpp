@@ -51,7 +51,8 @@ public:
                            std::set<std::string> const& attribute_names,
                            std::string const& encoding,
                            std::string const& shape_name,
-                           int row_limit);
+                           int row_limit,
+                           int & in_use);
     virtual ~shape_index_featureset();
     feature_ptr next();
 
@@ -65,6 +66,7 @@ private:
     std::vector<int> attr_ids_;
     const int row_limit_;
     mutable int count_;
+    int & in_use_;
 };
 
 #endif // SHAPE_INDEX_FEATURESET_HPP

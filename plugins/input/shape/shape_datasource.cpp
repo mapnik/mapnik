@@ -61,7 +61,8 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
       file_length_(0),
       indexed_(false),
       row_limit_(*params_.get<int>("row_limit",0)),
-      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
+      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+      in_use_(0)
 {
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("Shape Plugin: missing <file> parameter");
@@ -273,7 +274,8 @@ featureset_ptr shape_datasource::features(const query& q) const
                                                        q.property_names(),
                                                        desc_.get_encoding(),
                                                        shape_name_,
-                                                       row_limit_));
+                                                       row_limit_,
+                                                       in_use_));
     }
     else
     {
@@ -317,7 +319,8 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
                                                          names,
                                                          desc_.get_encoding(),
                                                          shape_name_,
-                                                         row_limit_));
+                                                         row_limit_,
+                                                         in_use_));
     }
     else
     {

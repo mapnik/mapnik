@@ -65,6 +65,10 @@ private:
     mutable bool indexed_;
     const int row_limit_;
     mutable layer_descriptor desc_;
+    // shape_datasource should not be used between threads
+    // because for indexed files shape_ is kept open for speed
+    // since this condition is so hard to debug we'll track and warn
+    mutable int in_use_;
 };
 
 #endif //SHAPE_HPP

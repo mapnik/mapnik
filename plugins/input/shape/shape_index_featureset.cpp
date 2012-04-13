@@ -43,14 +43,17 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
                                                         std::set<std::string> const& attribute_names,
                                                         std::string const& encoding,
                                                         std::string const& shape_name,
-                                                        int row_limit)
+                                                        int row_limit,
+                                                        int & in_use)
     : filter_(filter),
       ctx_(boost::make_shared<mapnik::context_type>()),
       shape_(shape),
       tr_(new transcoder(encoding)),
       row_limit_(row_limit),
-      count_(0)
+      count_(0),
+      in_use_(in_use)
 {
+    in_use_++;
     shape_.shp().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
     
@@ -75,8 +78,12 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
 template <typename filterT>
 feature_ptr shape_index_featureset<filterT>::next()
 {
+    if (in_use_ > 1)
+        MAPNIK_LOG_ERROR(shape) << "*** Warning: indexed shape_featureset appears to be being used by more than one thread\n";
+
     if (row_limit_ && count_ > row_limit_)
     {
+        in_use_--;
         return feature_ptr();
     }
 
@@ -135,6 +142,7 @@ feature_ptr shape_index_featureset<filterT>::next()
                 }
                 else
                 {
+                    in_use_--;
                     return feature_ptr();
                 }
             }
@@ -201,7 +209,7 @@ feature_ptr shape_index_featureset<filterT>::next()
     else
     {
         MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: " << count_ << " features";
-
+        in_use_--;
         return feature_ptr();
     }
 }
