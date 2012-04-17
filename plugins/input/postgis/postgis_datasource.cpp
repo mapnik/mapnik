@@ -233,23 +233,23 @@ void postgis_datasource::bind() const
 
                 std::ostringstream s;
                 s << "SELECT a.attname, a.attnum, t.typname, t.typname in ('int2','int4','int8') "
-                  "AS is_int FROM pg_class c, pg_attribute a, pg_type t, pg_namespace n, pg_index i "
-                  "WHERE a.attnum > 0 AND a.attrelid = c.oid "
-                  "AND a.atttypid = t.oid AND c.relnamespace = n.oid "
-                  "AND c.oid = i.indrelid AND i.indisprimary = 't' "
-                  "AND t.typname !~ '^geom' AND c.relname ="
+                    "AS is_int FROM pg_class c, pg_attribute a, pg_type t, pg_namespace n, pg_index i "
+                    "WHERE a.attnum > 0 AND a.attrelid = c.oid "
+                    "AND a.atttypid = t.oid AND c.relnamespace = n.oid "
+                    "AND c.oid = i.indrelid AND i.indisprimary = 't' "
+                    "AND t.typname !~ '^geom' AND c.relname ="
                   << " '" << mapnik::sql_utils::unquote_double(geometry_table_) << "' "
-                  //"AND a.attnum = ANY (i.indkey) " // postgres >= 8.1
+                    //"AND a.attnum = ANY (i.indkey) " // postgres >= 8.1
                   << "AND (i.indkey[0]=a.attnum OR i.indkey[1]=a.attnum OR i.indkey[2]=a.attnum "
-                  "OR i.indkey[3]=a.attnum OR i.indkey[4]=a.attnum OR i.indkey[5]=a.attnum "
-                  "OR i.indkey[6]=a.attnum OR i.indkey[7]=a.attnum OR i.indkey[8]=a.attnum "
-                  "OR i.indkey[9]=a.attnum) ";
-                  if (! schema_.empty())
-                  {
-                      s << "AND n.nspname='"
-                        << mapnik::sql_utils::unquote_double(schema_)
-                        << "' ";
-                  }
+                    "OR i.indkey[3]=a.attnum OR i.indkey[4]=a.attnum OR i.indkey[5]=a.attnum "
+                    "OR i.indkey[6]=a.attnum OR i.indkey[7]=a.attnum OR i.indkey[8]=a.attnum "
+                    "OR i.indkey[9]=a.attnum) ";
+                if (! schema_.empty())
+                {
+                    s << "AND n.nspname='"
+                      << mapnik::sql_utils::unquote_double(schema_)
+                      << "' ";
+                }
                 s << "ORDER BY a.attnum";
 
                 shared_ptr<ResultSet> rs_key = conn->executeQuery(s.str());
@@ -299,8 +299,8 @@ void postgis_datasource::bind() const
             if (*autodetect_key_field && key_field_.empty())
             {
                 throw mapnik::datasource_exception(std::string("PostGIS Plugin: Error: primary key required")
-                      + " but could not be detected for table '" +
-                      geometry_table_ + "', please supply 'key_field' option to specify field to use for primary key");
+                                                   + " but could not be detected for table '" +
+                                                   geometry_table_ + "', please supply 'key_field' option to specify field to use for primary key");
             }
 
             if (srid_ == 0)
