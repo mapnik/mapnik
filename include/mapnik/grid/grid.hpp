@@ -63,13 +63,13 @@ private:
     unsigned width_;
     unsigned height_;
     std::string key_;
-    feature_key_type f_keys_;
-    feature_type features_;
     data_type data_;
-    std::set<std::string> names_;
     unsigned int resolution_;
     std::string id_name_;
     bool painted_;
+    std::set<std::string> names_;
+    feature_key_type f_keys_;
+    feature_type features_;
 
 public:
 
@@ -80,7 +80,10 @@ public:
         data_(width,height),
         resolution_(resolution),
         id_name_("__id__"),
-        painted_(false)
+        painted_(false),
+        names_(),
+        f_keys_(),
+        features_()
         {
             // this only works if each datasource's
             // feature count starts at 1
@@ -94,7 +97,10 @@ public:
         data_(rhs.data_),
         resolution_(rhs.resolution_),
         id_name_("__id__"),
-        painted_(rhs.painted_)
+        painted_(rhs.painted_),
+        names_(rhs.names_),
+        f_keys_(rhs.f_keys_),
+        features_(rhs.features_)
         {
             f_keys_[0] = "";
         }

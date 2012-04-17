@@ -140,7 +140,7 @@ class label_collision_detector4 : boost::noncopyable
 public:
     struct label
     {
-        label(box2d<double> const& b) : box(b) {}
+        label(box2d<double> const& b) : box(b), text() {}
         label(box2d<double> const& b, UnicodeString const& t) : box(b), text(t) {}
 
         box2d<double> box;

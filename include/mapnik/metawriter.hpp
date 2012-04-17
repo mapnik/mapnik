@@ -50,13 +50,18 @@ public:
     typedef std::map<std::string, UnicodeString> property_map;
     typedef property_map::const_iterator const_iterator;
 
-    metawriter_property_map() {}
+    metawriter_property_map() :
+        m_(),
+        not_found_() {}
+
     UnicodeString const& operator[](std::string const& key) const;
     UnicodeString& operator[](std::string const& key) {return m_[key];}
+
     std::map<std::string, UnicodeString>::const_iterator find(std::string const& key) const
     {
         return m_.find(key);
     }
+
     std::map<std::string, UnicodeString>::const_iterator end() const
     {
         return m_.end();
@@ -66,6 +71,7 @@ public:
     {
         return (*this)[key];
     }
+
 private:
     property_map m_;
     UnicodeString not_found_;

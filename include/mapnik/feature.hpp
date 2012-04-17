@@ -68,7 +68,8 @@ public:
     typedef typename map_type::const_iterator const_iterator;
 
     context()
-        : base_type(mapping_) {}
+        : mapping_(),
+        base_type(mapping_) {}
 
     size_type push(key_type const& name)
     {

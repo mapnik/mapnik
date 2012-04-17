@@ -266,7 +266,8 @@ class MAPNIK_DECL face_manager : private boost::noncopyable
 public:
     face_manager(T & engine)
         : engine_(engine),
-        stroker_(engine_.create_stroker())  {}
+        stroker_(engine_.create_stroker()),
+        face_ptr_cache_()  {}
 
     face_ptr get_face(std::string const& name)
     {
@@ -335,9 +336,9 @@ public:
     }
 
 private:
-    face_ptr_cache_type face_ptr_cache_;
     font_engine_type & engine_;
     stroker_ptr stroker_;
+    face_ptr_cache_type face_ptr_cache_;
 };
 
 template <typename T>
