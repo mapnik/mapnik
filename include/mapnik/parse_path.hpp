@@ -47,8 +47,8 @@ template <typename Iterator> struct path_expression_grammar;
 
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
 MAPNIK_DECL bool parse_path_from_string(path_expression_ptr const& path,
-                                           std::string const & str,
-                                           path_expression_grammar<std::string::const_iterator> const& g);
+                                        std::string const & str,
+                                        path_expression_grammar<std::string::const_iterator> const& g);
 
 
 template <typename T>
