@@ -721,6 +721,20 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 #endif
     }
 
+    void cairo_renderer_base::start_style_processing(feature_type_style const& st)
+    {
+    #ifdef MAPNIK_DEBUG
+        std::clog << "start style processing\n";
+    #endif
+    }
+    
+    void cairo_renderer_base::end_style_processing(feature_type_style const& st)
+    {
+    #ifdef MAPNIK_DEBUG
+        std::clog << "end style processing\n";
+    #endif
+    }
+
     void cairo_renderer_base::process(polygon_symbolizer const& sym,
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
