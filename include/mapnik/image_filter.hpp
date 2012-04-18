@@ -71,7 +71,7 @@
 //if (out_value < 0) out_value = 0;
 //if (out_value > 255) out_value = 255;
     
-// embose
+// emboss
 // -2 -1  0
 // -1  1  1
 //  0  1  2
@@ -121,14 +121,14 @@ using namespace boost::gil;
 namespace mapnik {  namespace filter { namespace detail {
 
 static const float blur_matrix[] = {0.1111,0.1111,0.1111,0.1111,0.1111,0.1111,0.1111,0.1111,0.1111};
-static const float embose_matrix[] = {-2,-1,0,-1,1,1,0,1,2};
+static const float emboss_matrix[] = {-2,-1,0,-1,1,1,0,1,2};
 static const float sharpen_matrix[] = {0,-1,0,-1,5,-1,0,-1,0 };
 static const float edge_detect_matrix[] = {0,1,0,1,-4,1,0,1,0 };
 
 }
 
 struct blur {};
-struct embose {};
+struct emboss {};
 struct sharpen {};
 struct edge_detect {};
 struct sobel {};
@@ -172,9 +172,9 @@ void process_channel (Src const& src, Dst & dst, mapnik::filter::blur)
 }
 
 template <typename Src, typename Dst>
-void process_channel (Src const& src, Dst & dst, mapnik::filter::embose)
+void process_channel (Src const& src, Dst & dst, mapnik::filter::emboss)
 {
-    process_channel_impl(src,dst,mapnik::filter::detail::embose_matrix);
+    process_channel_impl(src,dst,mapnik::filter::detail::emboss_matrix);
 }
 
 template <typename Src, typename Dst>
@@ -385,7 +385,7 @@ void apply_filter(Src & src, invert)
 typedef boost::variant<filter::blur,
                        filter::gray,
                        filter::agg_stack_blur,
-                       filter::embose,
+                       filter::emboss,
                        filter::sharpen,
                        filter::edge_detect,
                        filter::sobel,
