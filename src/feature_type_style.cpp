@@ -36,16 +36,16 @@ IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 
 feature_type_style::feature_type_style()
 : filter_mode_(FILTER_ALL),
-    scale_denom_validity_(-1),
     filters_(),
-    comp_op_(clear)
+    comp_op_(clear),
+    scale_denom_validity_(-1)
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
     : filter_mode_(rhs.filter_mode_),
-      scale_denom_validity_(-1),
       filters_(rhs.filters_),
-      comp_op_(rhs.comp_op_)
+      comp_op_(rhs.comp_op_),
+      scale_denom_validity_(-1)
 {
     if (!deep_copy) {
         rules_ = rhs.rules_;
@@ -62,9 +62,9 @@ feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
 {
     if (this == &rhs) return *this;
     rules_=rhs.rules_;   
-    scale_denom_validity_ = -1;
     filters_ = rhs.filters_;
     comp_op_ = rhs.comp_op_;
+    scale_denom_validity_ = -1;
     return *this;
 }
 
