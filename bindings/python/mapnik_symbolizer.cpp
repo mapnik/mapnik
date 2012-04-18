@@ -40,6 +40,7 @@ using mapnik::shield_symbolizer;
 using mapnik::text_symbolizer;
 using mapnik::building_symbolizer;
 using mapnik::markers_symbolizer;
+using mapnik::group_symbolizer;
 
 struct get_symbolizer_type : public boost::static_visitor<std::string>
 {
@@ -94,6 +95,11 @@ public:
     std::string operator () ( const markers_symbolizer & /*sym*/ )
     {
         return "markers";
+    }
+
+    std::string operator () ( const group_symbolizer & /*sym*/ )
+    {
+        return "group";
     }
 };
 

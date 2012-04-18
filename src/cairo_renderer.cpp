@@ -1501,6 +1501,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         }
     }
 
+    void cairo_renderer_base::process(group_symbolizer const& sym,
+                                      mapnik::feature_ptr const& feature,
+                                      proj_transform const& prj_trans)
+    {
+       // TODO: write me!
+    }
+
     template class cairo_renderer<Cairo::Surface>;
     template class cairo_renderer<Cairo::Context>;
 }

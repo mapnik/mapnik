@@ -83,6 +83,9 @@ public:
     void process(markers_symbolizer const& sym,
                  Feature const& feature,
                  proj_transform const& prj_trans);
+    void process(group_symbolizer const& sym,
+                 Feature const& feature,
+                 proj_transform const& prj_trans);
 
     /*!
      * @brief Overload that process the whole set of symbolizers of a rule.

@@ -319,6 +319,11 @@ public:
         add_metawriter_attributes(sym_node, sym);
     }
 
+    void operator () ( group_symbolizer const& sym)
+    {
+       // TODO: write me!
+    }
+
 private:
     serialize_symbolizer();
 

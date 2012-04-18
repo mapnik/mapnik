@@ -140,6 +140,8 @@ source = Split(
     save_map.cpp
     shield_symbolizer.cpp
     text_symbolizer.cpp
+    group_symbolizer.cpp
+    group_rule.cpp
     tiff_reader.cpp
     wkb.cpp
     projection.cpp
@@ -244,6 +246,7 @@ source += Split(
     """
     agg/agg_renderer.cpp
     agg/process_building_symbolizer.cpp
+    agg/process_group_symbolizer.cpp
     agg/process_line_symbolizer.cpp
     agg/process_line_pattern_symbolizer.cpp
     agg/process_text_symbolizer.cpp
@@ -264,6 +267,7 @@ source += Split(
     """
     grid/grid_renderer.cpp
     grid/process_building_symbolizer.cpp
+    grid/process_group_symbolizer.cpp
     grid/process_line_pattern_symbolizer.cpp
     grid/process_line_symbolizer.cpp
     grid/process_markers_symbolizer.cpp
@@ -283,6 +287,7 @@ if env['SVG_RENDERER']: # svg backend
       	svg/svg_output_attributes.cpp
       	svg/process_symbolizers.cpp
       	svg/process_building_symbolizer.cpp
+      	svg/process_group_symbolizer.cpp
       	svg/process_line_pattern_symbolizer.cpp
       	svg/process_line_symbolizer.cpp
       	svg/process_markers_symbolizer.cpp

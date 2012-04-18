@@ -1,0 +1,51 @@
+/*****************************************************************************
+ *
+ * This file is part of Mapnik (c++ mapping toolkit)
+ *
+ * Copyright (C) 2012 Artem Pavlenko
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *****************************************************************************/
+
+// mapnik
+#include <mapnik/grid/grid_rasterizer.hpp>
+#include <mapnik/grid/grid_renderer.hpp>
+#include <mapnik/grid/grid_pixfmt.hpp>
+#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid.hpp>
+#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
+
+// agg
+#include "agg_trans_affine.h"
+
+namespace mapnik {
+
+template <typename T>
+void  grid_renderer<T>::process(group_symbolizer const& sym,
+                                mapnik::feature_ptr const& feature,
+                                proj_transform const& prj_trans)
+{
+   // TODO: write me!
+}
+
+template void grid_renderer<grid>::process(group_symbolizer const&,
+                                           mapnik::feature_ptr const&,
+                                           proj_transform const&);
+
+}
