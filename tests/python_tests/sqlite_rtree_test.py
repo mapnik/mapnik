@@ -71,6 +71,54 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(os.path.exists(index),True)
         os.unlink(index)
 
+    def test_geometry_round_trip():
+        test_db = '/tmp/mapnik-sqlite-point.db'
+
+        # create test db
+        conn = sqlite3.connect(test_db)
+        cur = conn.cursor()
+        cur.execute('''
+             CREATE TABLE IF NOT EXISTS "point_table"
+             (id INTEGER PRIMARY KEY AUTOINCREMENT, geometry BLOB, "name" varchar)
+             ''')
+        conn.commit()
+        cur.close()
+
+        # add a point as wkb to match how an ogr created db looks
+        cur = conn.cursor()
+        wkb = mapnik.Path.from_wkt('POINT(-122 48)').to_wkb(mapnik.wkbByteOrder.XDR)
+        values = (None,sqlite3.Binary(wkb),"test point")
+        cur.execute('''INSERT into "point_table" (id,geometry,name) values (?,?,?)''',values)
+        conn.commit()
+        cur.close()
+
+        # ensure we can read this data back out properly with mapnik
+        ds = mapnik.Datasource(**{'type':'sqlite','file':test_db, 'table':'point_table'})
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat.id(),1)
+        eq_(feat['name'],'test point')
+        geoms = feat.geometries()
+        eq_(len(geoms),1)
+        eq_(geoms.to_wkt(),'Point(-122.0 48.0)')
+
+        # ensure it matches data read with just sqlite
+        cur = conn.cursor()
+        cur.execute('''SELECT * from point_table''')
+        conn.commit()
+        result = cur.fetchone()
+        feat_id = result[0]
+        eq_(feat_id,1)
+        name = result[2]
+        eq_(name,'test point')
+        geom_wkb_blob = result[1]
+        eq_(str(geom_wkb_blob),geoms.to_wkb(mapnik.wkbByteOrder.XDR))
+        new_geom = mapnik.Path.from_wkb(str(geom_wkb_blob))
+        eq_(new_geom.to_wkt(),geoms.to_wkt())
+
+        # cleanup
+        cur.close()
+        os.unlink(test_db)
 
 if __name__ == "__main__":
     setup()
