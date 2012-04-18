@@ -43,7 +43,6 @@ struct image_filter_grammar :
         using qi::lit;
         using qi::_val;
         using qi::_1;
-        using qi::int_;
         using qi::_a;
         using qi::_b;
         using qi::eps;
@@ -61,20 +60,20 @@ struct image_filter_grammar :
             |
             lit("gray")[push_back(_val,construct<mapnik::filter::gray>())]
             |
-            lit("edge_detect")[push_back(_val,construct<mapnik::filter::edge_detect>())]
+            lit("edge-detect")[push_back(_val,construct<mapnik::filter::edge_detect>())]
             |
             lit("sobel")[push_back(_val,construct<mapnik::filter::sobel>())]
             |
             lit("sharpen")[push_back(_val,construct<mapnik::filter::sharpen>())]
             |
-            lit("x_gradient")[push_back(_val,construct<mapnik::filter::x_gradient>())]
+            lit("x-gradient")[push_back(_val,construct<mapnik::filter::x_gradient>())]
             |
-            lit("y_gradient")[push_back(_val,construct<mapnik::filter::y_gradient>())]
+            lit("y-gradient")[push_back(_val,construct<mapnik::filter::y_gradient>())]
             |
             (lit("agg-stack-blur")[_a = 1, _b = 1] 
-             >> -( lit(':') >> lit("rx") >> lit('=') >> int_[_a = _1] 
+             >> -( lit(':') >> lit("rx") >> lit('=') >> radius_[_a = _1] 
                    >> lit(',') 
-                   >> lit("ry") >> lit('=') >> int_[_b = _1])             
+                   >> lit("ry") >> lit('=') >> radius_[_b = _1])             
              [push_back(_val,construct<mapnik::filter::agg_stack_blur>(_a,_b))])
             |
             lit("invert")[push_back(_val,construct<mapnik::filter::invert>())]
@@ -83,6 +82,7 @@ struct image_filter_grammar :
     //  
     qi::rule<Iterator, ContType(), qi::ascii::space_type> start;
     qi::rule<Iterator, ContType(), qi::locals<int,int>, qi::ascii::space_type> filter;
+    qi::uint_parser< unsigned, 10, 1, 3 > radius_;
 };
 
 }
