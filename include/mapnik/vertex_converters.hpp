@@ -55,6 +55,7 @@
 #include "agg_conv_smooth_poly1.h"
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
+#include "agg_conv_transform.h"
 
 namespace mapnik {
 
@@ -64,6 +65,7 @@ struct clip_poly_tag {};
 struct smooth_tag {};
 struct stroke_tag {};
 struct dash_tag {};
+struct affine_transform_tag {};
 
 namespace  detail {
 
@@ -179,6 +181,24 @@ struct converter_traits<T,mapnik::transform_tag>
         typename boost::mpl::at<Args,boost::mpl::int_<4> >::type prj_trans = boost::fusion::at_c<4>(args);
         geom.set_proj_trans(prj_trans);
         geom.set_trans(tr);
+    }
+};
+
+
+template <typename T>
+struct converter_traits<T,mapnik::affine_transform_tag>
+{
+    typedef T geometry_type;
+    typedef typename agg::conv_transform<geometry_type> conv_type;
+
+    template <typename Args>
+    static void setup(geometry_type & geom, Args & args)
+    {
+        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
+        agg::trans_affine tr;
+        boost::array<double,6> const& m = sym.get_transform();
+        tr.load_from(&m[0]);
+        geom.transformer(tr);
     }
 };
 
