@@ -23,6 +23,12 @@
 #ifndef MAPNIK_IMAGE_COMPOSITING_HPP
 #define MAPNIK_IMAGE_COMPOSITING_HPP
 
+#include <mapnik/config.hpp>
+
+#ifdef _MSC_VER
+#include <mapnik/image_data.hpp>
+#endif
+
 // agg
 
 namespace mapnik
@@ -64,7 +70,11 @@ enum composite_mode_e
 };
 
 template <typename T1, typename T2>
-void composite(T1 & im, T2 & im2, composite_mode_e mode);
+MAPNIK_DECL void composite(T1 & im, T2 & im2, composite_mode_e mode);
+
+#ifdef _MSC_VER
+template MAPNIK_DECL void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & im, mapnik::image_data_32 & im2, composite_mode_e mode);
+#endif
 
 }
 #endif // MAPNIK_IMAGE_COMPOSITING_HPP
