@@ -69,14 +69,15 @@ static const comp_op_lookup_type comp_lookup = boost::assign::list_of<comp_op_lo
     (invert,"invert")
     (invert_rgb,"invert_rgb");
 
-composite_mode_e comp_op_from_string(std::string const& name)
+boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
 {
+    boost::optional<composite_mode_e> mode;
     comp_op_lookup_type::right_const_iterator right_iter = comp_lookup.right.find(name);
     if (right_iter != comp_lookup.right.end())
     {
-        return right_iter->second;
+        mode.reset(right_iter->second);
     }
-    return clear;
+    return mode;
 }
 
 template <typename T1, typename T2>
