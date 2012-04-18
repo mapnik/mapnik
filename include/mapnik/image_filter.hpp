@@ -25,13 +25,8 @@
 #define MAPNIK_IMAGE_FILTER_HPP
 
 #include <boost/gil/gil_all.hpp>
-//#include <boost/gil/image.hpp>
-//#include <boost/gil/typedefs.hpp>
-//#include <boost/gil/extension/numeric/kernel.hpp>
-//#include <boost/gil/extension/numeric/convolve.hpp>
-//#include <boost/mpl/for_each.hpp>
-//#include <boost/bind.hpp>
 #include <boost/variant.hpp>
+#include <boost/concept_check.hpp>
 
 // agg 
 #include "agg_basics.h"
@@ -162,8 +157,12 @@ void process_channel_impl (Src const& src, Dst & dst, Conv const& k)
 }
 
 template <typename Src, typename Dst, typename Conv>
-void process_channel (Src const& src, Dst & dst, Conv const& k) {}
-
+void process_channel (Src const& src, Dst & dst, Conv const& k) 
+{
+    boost::ignore_unused_variable_warning(src);
+    boost::ignore_unused_variable_warning(dst);
+    boost::ignore_unused_variable_warning(k);
+}
 
 template <typename Src, typename Dst>
 void process_channel (Src const& src, Dst & dst, mapnik::filter::blur)
