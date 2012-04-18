@@ -23,7 +23,11 @@
 #define STYLE_MODEL_HPP
 
 #include <QAbstractItemModel>
+
+#ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
+#endif
+
 #include <boost/scoped_ptr.hpp>
 
 class node;

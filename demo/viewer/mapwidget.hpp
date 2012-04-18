@@ -31,7 +31,10 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+
+#ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
+#endif
 
 class MapWidget : public QWidget
 {

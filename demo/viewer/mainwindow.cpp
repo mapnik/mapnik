@@ -33,9 +33,12 @@
 #include <QSlider>
 
 // mapnik
+
+#ifndef Q_MOC_RUN // QT moc chokes on BOOST_JOIN
 #include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
+#endif
 
 // qt
 #include "mainwindow.hpp"
