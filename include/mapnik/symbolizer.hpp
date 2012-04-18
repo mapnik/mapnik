@@ -35,16 +35,31 @@
 namespace mapnik
 {
 
+typedef boost::array<double,6> transform_type;
+
 class Map;
 
-class MAPNIK_DECL symbolizer_base {
+class MAPNIK_DECL symbolizer_base 
+{
 public:
-    symbolizer_base():
-        properties_(),
+    symbolizer_base()
+        : properties_(),
         properties_complete_(),
         writer_name_(),
         writer_ptr_(), 
-        comp_op_(clear) {}
+        comp_op_(clear) 
+        {
+            affine_transform_[0] = 1.0;
+            affine_transform_[1] = 0.0;
+            affine_transform_[2] = 0.0;
+            affine_transform_[3] = 1.0;
+            affine_transform_[4] = 0.0;
+            affine_transform_[5] = 0.0;
+        }
+    
+    symbolizer_base(symbolizer_base const& other)
+        : comp_op_(other.comp_op_),
+        affine_transform_(other.affine_transform_) {}
     
     /** Add a metawriter to this symbolizer using a name. */
     void add_metawriter(std::string const& name, metawriter_properties const& properties);
@@ -82,23 +97,24 @@ public:
 
     void set_comp_op(composite_mode_e comp_op);
     composite_mode_e comp_op() const;
+    void set_transform(transform_type const& );
+    transform_type const& get_transform() const;
+    std::string get_transform_string() const;
 private:
     metawriter_properties properties_;
     metawriter_properties properties_complete_;
     std::string writer_name_;
     metawriter_ptr writer_ptr_;
     composite_mode_e comp_op_;
+    transform_type affine_transform_;
 };
 
-typedef boost::array<double,6> transform_type;
 
-class MAPNIK_DECL symbolizer_with_image {
+class MAPNIK_DECL symbolizer_with_image 
+{
 public:
     path_expression_ptr get_filename() const;
     void set_filename(path_expression_ptr filename);
-    void set_transform(transform_type const& );
-    transform_type const& get_transform() const;
-    std::string const get_transform_string() const;
     void set_opacity(float opacity);
     float get_opacity() const;
 protected:
@@ -106,7 +122,6 @@ protected:
     symbolizer_with_image(symbolizer_with_image const& rhs);
     path_expression_ptr image_filename_;
     float image_opacity_;
-    transform_type matrix_;
 };
 }
 

@@ -65,7 +65,6 @@ void symbolizer_base::cache_metawriters(Map const &m)
     }
 }
 
-
 metawriter_with_properties symbolizer_base::get_metawriter() const
 {
     return metawriter_with_properties(writer_ptr_, properties_complete_);
@@ -81,24 +80,36 @@ composite_mode_e symbolizer_base::comp_op() const
     return comp_op_;
 }
 
+void symbolizer_base::set_transform(transform_type const& affine_transform)
+{
+    affine_transform_ = affine_transform;
+}
+
+transform_type const& symbolizer_base::get_transform() const
+{
+    return affine_transform_;
+}
+
+std::string symbolizer_base::get_transform_string() const
+{
+    std::stringstream ss;
+    ss << "matrix(" << affine_transform_[0] << ", " << affine_transform_[1] << ", "
+       << affine_transform_[2] << ", " << affine_transform_[3] << ", "
+       << affine_transform_[4] << ", " << affine_transform_[5] << ")";
+    return ss.str();
+}
+
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
     : image_filename_( file ),
       image_opacity_(1.0f)
 
 {
-    matrix_[0] = 1.0;
-    matrix_[1] = 0.0;
-    matrix_[2] = 0.0;
-    matrix_[3] = 1.0;
-    matrix_[4] = 0.0;
-    matrix_[5] = 0.0;
 }
 
 symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
     : image_filename_(rhs.image_filename_),
-      image_opacity_(rhs.image_opacity_),
-      matrix_(rhs.matrix_) {}
+      image_opacity_(rhs.image_opacity_) {}
 
 path_expression_ptr symbolizer_with_image::get_filename() const
 {
@@ -109,26 +120,6 @@ void symbolizer_with_image::set_filename(path_expression_ptr image_filename)
 {
     image_filename_ = image_filename;
 }
-
-void symbolizer_with_image::set_transform(transform_type const& matrix)
-{
-    matrix_ = matrix;
-}
-
-transform_type const& symbolizer_with_image::get_transform() const
-{
-    return matrix_;
-}
-
-std::string const symbolizer_with_image::get_transform_string() const
-{
-    std::stringstream ss;
-    ss << "matrix(" << matrix_[0] << ", " << matrix_[1] << ", "
-       << matrix_[2] << ", " << matrix_[3] << ", "
-       << matrix_[4] << ", " << matrix_[5] << ")";
-    return ss.str();
-}
-
 
 void symbolizer_with_image::set_opacity(float opacity)
 {
