@@ -34,6 +34,7 @@
 #include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 // FIXME
 // forward declare so that
@@ -119,10 +120,9 @@ public:
     
 private:
     buffer_type & pixmap_;
-    buffer_type internal_buffer_;
-    buffer_type * current_buffer_;
+    boost::shared_ptr<buffer_type> internal_buffer_;
+    mutable buffer_type * current_buffer_;
     
-    //boost::scoped_ptr<aa_renderer> renderer_;
     unsigned width_;
     unsigned height_;
     double scale_factor_;

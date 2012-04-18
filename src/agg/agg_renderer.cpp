@@ -88,7 +88,7 @@ template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
-      internal_buffer_(pixmap_.width(),pixmap_.height()),
+      internal_buffer_(),
       current_buffer_(&pixmap),      
       width_(pixmap_.width()),
       height_(pixmap_.height()),
@@ -107,7 +107,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
-      internal_buffer_(pixmap_.width(),pixmap_.height()),
+      internal_buffer_(),
       current_buffer_(&pixmap),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
@@ -214,8 +214,11 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 #endif
     if (st.comp_op() != clear || st.blur_radius_x() > 0 || st.blur_radius_y() > 0)
     {
-        internal_buffer_.set_background(color(0,0,0,0)); // transparent 
-        current_buffer_ = &internal_buffer_;
+        if (!internal_buffer_)
+            internal_buffer_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height());
+        else
+            internal_buffer_->set_background(color(0,0,0,0)); // transparent        
+        current_buffer_ = internal_buffer_.get();
     }
     else
     {
