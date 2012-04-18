@@ -77,6 +77,11 @@ public:
         return index;
     }
 
+    const_iterator find(key_type const &key) const
+    {
+        return mapping_.find(key);
+    }
+
     size_type size() const { return mapping_.size(); }
     const_iterator begin() const { return mapping_.begin();}
     const_iterator end() const { return mapping_.end();}

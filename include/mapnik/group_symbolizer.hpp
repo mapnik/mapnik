@@ -44,7 +44,9 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
 {
    typedef std::vector<mapnik::group_rule> rules;
 
-   explicit group_symbolizer(text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
+   explicit group_symbolizer(size_t column_index_start, 
+                             size_t column_index_end,
+                             text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
 
    text_placements_ptr get_placement_options() const;
    void set_placement_options(text_placements_ptr placement_options);
@@ -66,7 +68,20 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
       return group_rules_.end();
    }
 
+   inline size_t get_column_index_start() const
+   {
+      return column_index_start_;
+   }
+
+   inline size_t get_column_index_end() const
+   {
+      return column_index_end_;
+   }
+
 private:
+
+   // start and end column indexes
+   size_t column_index_start_, column_index_end_;
 
    // placement parameters?
    text_placements_ptr placements_;
