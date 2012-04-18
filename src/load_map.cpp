@@ -763,7 +763,26 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node c
         composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
         sym.set_comp_op(comp_op);
     }
-
+    
+    optional<std::string> transform_wkt = pt.get_opt_attr<std::string>("transform");
+    if (transform_wkt)
+    {
+        agg::trans_affine tr;
+        if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+        {
+            std::stringstream ss;
+            ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+            if (strict_)
+                throw config_error(ss.str()); // value_error here?
+            else
+                std::clog << "### WARNING: " << ss.str() << endl;
+        }
+        boost::array<double,6> matrix;
+        tr.store_to(&matrix[0]);
+        sym.set_transform(matrix);
+        std::clog << " ---> " << sym.get_transform_string() << std::endl;
+    }
+    
     optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
     if (!writer) return;
     optional<std::string> output = pt.get_opt_attr<std::string>("meta-output");
@@ -779,8 +798,9 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
         optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
         optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
-
+        
+        //optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
+        
         point_symbolizer symbol;
         if (allow_overlap)
         {
@@ -815,6 +835,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
 
                 symbol.set_filename(parse_path(*file));
 
+#if 0
                 if (transform_wkt)
                 {
                     agg::trans_affine tr;
@@ -832,6 +853,8 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                     tr.store_to(&matrix[0]);
                     symbol.set_transform(matrix);
                 }
+#endif 
+
             }
             catch (image_reader_exception const & ex)
             {
@@ -865,7 +888,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         std::string filename("");
         optional<std::string> file = sym.get_opt_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
-        optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
+        //optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
 
         if (file)
         {
@@ -899,7 +922,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         markers_symbolizer symbol(parse_path(filename));
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) symbol.set_opacity(*opacity);
-
+#if 0
         if (transform_wkt)
         {
             agg::trans_affine tr;
@@ -917,6 +940,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             tr.store_to(&matrix[0]);
             symbol.set_transform(matrix);
         }
+#endif
 
         optional<color> c = sym.get_opt_attr<color>("fill");
         if (c) symbol.set_fill(*c);
@@ -1131,6 +1155,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 
         shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
         /* Symbolizer specific attributes. */
+#if 0
         optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
         if (transform_wkt)
         {
@@ -1148,6 +1173,8 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             tr.store_to(&matrix[0]);
             shield_symbol.set_transform(matrix);
         }
+#endif 
+
         // shield displacement
         double shield_dx = sym.get_attr("shield-dx", 0.0);
         double shield_dy = sym.get_attr("shield-dy", 0.0);
