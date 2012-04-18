@@ -30,7 +30,7 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
-
+#include <mapnik/image_filter_parser.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -421,19 +421,23 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
             style.set_comp_op(comp_op);
         }
-        // blur-x
-        optional<unsigned> blur_x = sty.get_opt_attr<unsigned>("blur-radius-x");
-        if (blur_x)
-        {
-            style.set_blur_radius_x(*blur_x);
-        }
-        // blur-y
-        optional<unsigned> blur_y = sty.get_opt_attr<unsigned>("blur-radius-y");
-        if (blur_y)
-        {
-            style.set_blur_radius_y(*blur_y);
-        }
 
+        // image filters
+        optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
+        if (filters)
+        {
+            std::string::const_iterator itr = (*filters).begin();
+            std::string::const_iterator end = (*filters).end();
+            mapnik::image_filter_grammar<std::string::const_iterator,std::vector<mapnik::filter::filter_type> > g;
+
+            bool result = boost::spirit::qi::phrase_parse(itr,end, g, boost::spirit::qi::ascii::space, style.image_filters());
+            if (!result || itr!=end)
+            {
+                throw config_error("failed to parse:" + std::string(itr,end));
+            }            
+        }
+        
+        // rules
         xml_node::const_iterator ruleIter = sty.begin();
         xml_node::const_iterator endRule = sty.end();
 

@@ -27,6 +27,7 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>
+#include <mapnik/image_filter.hpp>
 
 // stl
 #include <vector>
@@ -50,9 +51,8 @@ class MAPNIK_DECL feature_type_style
 private:
     rules  rules_;
     filter_mode_e filter_mode_;
-    // blur 
-    unsigned blur_radius_x_;
-    unsigned blur_radius_y_;
+    // image_filters
+    std::vector<filter::filter_type> filters_;
     // comp-op
     composite_mode_e comp_op_;
     // The rule_ptrs vectors are only valid for the scale_denom_validity_.
@@ -79,10 +79,9 @@ public:
     void set_filter_mode(filter_mode_e mode);
 
     filter_mode_e get_filter_mode() const;
-    void set_blur_radius_x(unsigned );
-    void set_blur_radius_y(unsigned );
-    unsigned blur_radius_x() const;
-    unsigned blur_radius_y() const;
+    // filters
+    std::vector<filter::filter_type> const& image_filters() const;
+    std::vector<filter::filter_type> & image_filters();
     // compositing
     void set_comp_op(composite_mode_e comp_op);
     composite_mode_e comp_op() const;     

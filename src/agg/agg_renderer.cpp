@@ -41,7 +41,6 @@
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_scanline_u.h"
-#include "agg_blur.h"
 
 // boost
 #include <boost/utility.hpp>
@@ -212,7 +211,7 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 #ifdef MAPNIK_DEBUG
     std::clog << "start style processing\n";
 #endif
-    if (st.comp_op() != clear || st.blur_radius_x() > 0 || st.blur_radius_y() > 0)
+    if (st.comp_op() != clear || st.image_filters().size() > 0)
     {
         if (!internal_buffer_)
             internal_buffer_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height());
@@ -229,17 +228,17 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 template <typename T>
 void agg_renderer<T>::end_style_processing(feature_type_style const& st)
 {
-    if (st.blur_radius_x() > 0 || st.blur_radius_y() > 0)
+    if (st.image_filters().size() > 0)
     {
-        agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
-        aa_renderer::pixel_format_type pixf(buf);
-        agg::stack_blur_rgba32(pixf,st.blur_radius_x(),st.blur_radius_y());   
-        composite(pixmap_.data(),current_buffer_->data(), st.comp_op());     
+        mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
+        BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.image_filters())
+        {
+            boost::apply_visitor(visitor, filter_tag);
+        }         
     }
     
-    else if (st.comp_op() != clear)
+    if (st.comp_op() != clear) // compositing
     {
-        // compositing
         composite(pixmap_.data(),current_buffer_->data(), st.comp_op());
     }   
     
