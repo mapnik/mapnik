@@ -367,13 +367,6 @@ private:
         {
             set_attr( node, "opacity", sym.get_opacity() );
         }
-
-        std::string tr_str = sym.get_transform_string();
-        if (tr_str != "matrix(1, 0, 0, 1, 0, 0)" || explicit_defaults_ )
-        {
-            set_attr( node, "transform", tr_str );
-        }
-
     }
     void add_font_attributes(ptree & node, const text_symbolizer & sym)
     {
@@ -453,7 +446,7 @@ private:
         }
 
     }
-    void add_metawriter_attributes(ptree &node, symbolizer_base const& sym)
+    void add_metawriter_attributes(ptree & node, symbolizer_base const& sym)
     {
         if (!sym.get_metawriter_name().empty() || explicit_defaults_) {
             set_attr(node, "meta-writer", sym.get_metawriter_name());
@@ -461,6 +454,13 @@ private:
         if (!sym.get_metawriter_properties_overrides().empty() || explicit_defaults_) {
             set_attr(node, "meta-output", sym.get_metawriter_properties_overrides().to_string());
         }
+
+        std::string tr_str = sym.get_transform_string();
+        if (tr_str != "matrix(1, 0, 0, 1, 0, 0)" || explicit_defaults_ ) // FIXME !! 
+        {
+            set_attr( node, "transform", tr_str );
+        }
+
     }
 
     ptree & rule_;
