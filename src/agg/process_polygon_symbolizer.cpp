@@ -50,12 +50,13 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
 
     box2d<double> inflated_extent = query_extent_ * 1.1;
     
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>,rasterizer,polygon_symbolizer, proj_transform, CoordTransform,conv_types> 
         converter(inflated_extent,*ras_ptr,sym,t_,prj_trans);
     
     if (sym.clip()) converter.set<clip_poly_tag>(); //optinal clip (default: true) 
     converter.set<transform_tag>(); //always transform 
+    converter.set<affine_transform_tag>();
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
     
     BOOST_FOREACH( geometry_type & geom, feature->paths())
