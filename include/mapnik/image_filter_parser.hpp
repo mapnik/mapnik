@@ -54,7 +54,7 @@ struct image_filter_grammar :
         start = -(filter % no_skip[*char_("; ")])
             ;
         filter = 
-            lit("embose")[push_back(_val,construct<mapnik::filter::embose>())]
+            lit("emboss")[push_back(_val,construct<mapnik::filter::emboss>())]
             |
             lit("blur")[push_back(_val,construct<mapnik::filter::blur>())]
             |

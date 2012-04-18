@@ -418,22 +418,34 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         optional<std::string> comp_op_name = sty.get_opt_attr<std::string>("comp-op");
         if (comp_op_name)
         {
-            composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
-            style.set_comp_op(comp_op);
+            optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
+            if (comp_op)
+            {
+                style.set_comp_op(*comp_op);
+            }
+            else
+            {
+                throw config_error("failed to parse comp-op: '" + *comp_op_name + "'");
+            }
         }
 
         // image filters
         optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
-            std::string::const_iterator itr = (*filters).begin();
-            std::string::const_iterator end = (*filters).end();
+            std::string filter_mode = *filters;
+            if (filter_mode.empty())
+            {
+                throw config_error("failed to parse empty image-filter");
+            }
+            std::string::const_iterator itr = filter_mode.begin();
+            std::string::const_iterator end = filter_mode.end();
             mapnik::image_filter_grammar<std::string::const_iterator,std::vector<mapnik::filter::filter_type> > g;
 
             bool result = boost::spirit::qi::phrase_parse(itr,end, g, boost::spirit::qi::ascii::space, style.image_filters());
             if (!result || itr!=end)
             {
-                throw config_error("failed to parse:" + std::string(itr,end));
+                throw config_error("failed to parse image-filter: '" + std::string(itr,end) + "'");
             }            
         }
         
@@ -764,8 +776,15 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node c
     optional<std::string> comp_op_name = pt.get_opt_attr<std::string>("comp-op");
     if (comp_op_name)
     {
-        composite_mode_e comp_op = comp_op_from_string(*comp_op_name);
-        sym.set_comp_op(comp_op);
+        optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
+        if (comp_op)
+        {
+            sym.set_comp_op(*comp_op);
+        }
+        else
+        {
+            throw config_error("failed to parse comp-op: '" + *comp_op_name + "'");
+        }
     }
     
     optional<std::string> transform_wkt = pt.get_opt_attr<std::string>("transform");

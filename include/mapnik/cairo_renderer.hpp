@@ -80,6 +80,8 @@ public:
     void start_map_processing(Map const& map);
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
+    void start_style_processing(feature_type_style const& st);
+    void end_style_processing(feature_type_style const& st);
     void process(point_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);

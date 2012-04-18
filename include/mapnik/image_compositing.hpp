@@ -26,6 +26,8 @@
 // stl
 #include <string>
 
+#include <boost/optional.hpp>
+
 namespace mapnik
 {
 
@@ -64,7 +66,7 @@ enum composite_mode_e
     invert_rgb
 };
 
-composite_mode_e comp_op_from_string(std::string const& name);
+boost::optional<composite_mode_e> comp_op_from_string(std::string const& name);
 
 template <typename T1, typename T2>
 void composite(T1 & im, T2 & im2, composite_mode_e mode);
