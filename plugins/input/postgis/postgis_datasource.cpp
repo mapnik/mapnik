@@ -606,8 +606,29 @@ featureset_ptr postgis_datasource::features(const query& q) const
                 throw mapnik::datasource_exception(s_error.str());
             }
 
+            boost::optional<mapnik::boolean> simplify_opt =
+                params_.get<mapnik::boolean>("simplify", false);
+
+            bool simplify = simplify_opt && *simplify_opt;
+
             std::ostringstream s;
-            s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
+            s << "SELECT ST_AsBinary(";
+
+            if (simplify) { 
+              s << "ST_Simplify(";
+            }
+
+            s << "\"" << geometryColumn_ << "\"";
+
+            if (simplify) { 
+              double px_gw = 1.0/boost::get<0>(q.resolution());
+              double px_gh = 1.0/boost::get<1>(q.resolution());
+
+              double tolerance = std::min(px_gw,px_gh) / 2;
+              s << ", " << tolerance << ")";
+            }
+
+            s << ") AS geom";
 
             mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
             std::set<std::string> const& props = q.property_names();
