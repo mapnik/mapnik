@@ -9,6 +9,8 @@ For a complete change history, see the SVN log.
 
 ## Mapnik 2.1.0
 
+- PostGIS: Added 'simplify' option - will trigger ST_Simplify on geometries before returning to Mapnik (#1179)
+
 - Improved error feedback for invalid values passed to map.query_point
 
 - Fixed rendering of thin svg lines (#1129)
