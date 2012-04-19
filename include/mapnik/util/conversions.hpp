@@ -23,21 +23,50 @@
 #ifndef MAPNIK_UTIL_CONVERSIONS_HPP
 #define MAPNIK_UTIL_CONVERSIONS_HPP
 
-// mapnik
-
 // stl
 #include <string>
+// boost
+#include <boost/config/warning_disable.hpp>
+#include <boost/spirit/include/karma.hpp>
 
 namespace mapnik { namespace util {
 
-    bool string2int(const char * value, int & result);
-    bool string2int(std::string const& value, int & result);
+bool string2int(const char * value, int & result);
+bool string2int(std::string const& value, int & result);
 
-    bool string2double(std::string const& value, double & result);
-    bool string2double(const char * value, double & result);
+bool string2double(std::string const& value, double & result);
+bool string2double(const char * value, double & result);
 
-    bool string2float(std::string const& value, float & result);
-    bool string2float(const char * value, float & result);
+bool string2float(std::string const& value, float & result);
+bool string2float(const char * value, float & result);
+
+// generic
+template <typename T>
+bool to_string(std::string & str, T value)
+{
+  namespace karma = boost::spirit::karma;
+  std::back_insert_iterator<std::string> sink(str);
+  return karma::generate(sink, value);
+}
+
+template <typename T>
+struct double_policy : boost::spirit::karma::real_policies<T>
+{
+    typedef boost::spirit::karma::real_policies<T> base_type;
+    static int floatfield(T n) { return base_type::fmtflags::fixed; }
+    static unsigned precision(T n) { return 16 ;}
+};
+
+
+// specialisation for double
+template <>
+inline bool to_string(std::string & str, double value)
+{
+    namespace karma = boost::spirit::karma;
+    typedef boost::spirit::karma::real_generator<double, double_policy<double> > double_type;
+    std::back_insert_iterator<std::string> sink(str);
+    return karma::generate(sink, double_type(), value);
+}
 
 }}
 
