@@ -78,7 +78,7 @@ struct feature_overlay
 
    void put_new(context_type::key_type const& key, value const& val)
    {
-      xcontext_type::map_type::const_iterator itr = ctx_->find(key);
+      context_type::map_type::const_iterator itr = ctx_->find(key);
       if (itr != ctx_->end()
           && itr->second < data_.size())
       {
