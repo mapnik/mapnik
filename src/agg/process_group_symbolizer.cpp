@@ -96,6 +96,25 @@ struct feature_overlay
    context_ptr ctx_;
    cont_type data_;
 };
+
+// a visitor to extract the bboxes that a symbolizer would use,
+// were it to be rendered at 0,0 and merge them together.
+struct place_bboxes : public boost::static_visitor<>
+{
+   // boxes vector that we will push_back to.
+   box2d<double> &box_;
+
+   place_bboxes(box2d<double> &box)
+      : box_(box)
+   {}
+
+   template <typename T>
+   void operator()(T const &) const
+   {
+      // some warning here about unimplemented
+   }
+};
+
 }
 
 template <typename T>
@@ -112,6 +131,10 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       // TODO: also go down to symbolizers too?
    }
 
+   // the rules which we'll want to symbolize
+   std::vector<const group_rule *> matched_rules;
+
+   // filter the right rules to symbolize
    for (size_t col_idx = sym.get_column_index_start(); 
         col_idx != sym.get_column_index_end(); ++col_idx)
    {
@@ -140,20 +163,44 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       // if all columns were present
       if (have_columns)
       {
+         bool match = false;
+
          for (group_symbolizer::rules::const_iterator itr = sym.begin();
               itr != sym.end(); ++itr)
          {
             const group_rule &rule = *itr;
-            bool match = boost::apply_visitor(evaluate<feature_overlay,value_type>(overlay), 
+            match = boost::apply_visitor(evaluate<feature_overlay,value_type>(overlay), 
                                               *rule.get_filter()).to_bool();
             if (match)
             {
                // add this to the list of things to layout
-               std::cerr << "Foo!\n";
+               matched_rules.push_back(&rule);
+               break;
             }
          }
       }
    }
+
+   // figure out what the bboxes should be.
+   std::vector<box2d<double> > boxes;
+   BOOST_FOREACH(const group_rule *rule, matched_rules)
+   {
+      box2d<double> box;
+      for (group_rule::symbolizers::const_iterator itr = rule->begin();
+           itr != rule->end(); ++itr)
+      {
+         boost::apply_visitor(place_bboxes(box), *itr);
+      }
+
+      boxes.push_back(box);
+   }
+
+   // lay them out.
+
+   // find placements which can accomodate the bboxes.
+
+   // for each placement:
+   //    render the symbolizer at that point.
 }
 
 
