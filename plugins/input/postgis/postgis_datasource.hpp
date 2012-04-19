@@ -85,6 +85,7 @@ private:
     mutable int srid_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
+    mutable bool simplify_geometries_;
     mutable layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
     const std::string bbox_token_;

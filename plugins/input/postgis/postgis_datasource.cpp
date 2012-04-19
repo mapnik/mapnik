@@ -67,6 +67,7 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
       type_(datasource::Vector),
       srid_(*params_.get<int>("srid", 0)),
       extent_initialized_(false),
+      simplify_geometries_(false),
       desc_(*params_.get<std::string>("type"), "utf-8"),
       creator_(params.get<std::string>("host"),
                params.get<std::string>("port"),
@@ -113,6 +114,9 @@ void postgis_datasource::bind() const
     boost::optional<int> initial_size = params_.get<int>("initial_size", 1);
     boost::optional<int> max_size = params_.get<int>("max_size", 10);
     boost::optional<mapnik::boolean> autodetect_key_field = params_.get<mapnik::boolean>("autodetect_key_field", false);
+
+    boost::optional<mapnik::boolean> simplify_opt = params_.get<mapnik::boolean>("simplify_geometries", false);
+    simplify_geometries_ = simplify_opt && *simplify_opt;
 
     ConnectionManager* mgr = ConnectionManager::instance();
     mgr->registerPool(creator_, *initial_size, *max_size);
@@ -606,25 +610,20 @@ featureset_ptr postgis_datasource::features(const query& q) const
                 throw mapnik::datasource_exception(s_error.str());
             }
 
-            boost::optional<mapnik::boolean> simplify_opt =
-                params_.get<mapnik::boolean>("simplify", false);
-
-            bool simplify = simplify_opt && *simplify_opt;
-
             std::ostringstream s;
             s << "SELECT ST_AsBinary(";
 
-            if (simplify) { 
+            if (simplify_geometries_) {
               s << "ST_Simplify(";
             }
 
             s << "\"" << geometryColumn_ << "\"";
 
-            if (simplify) { 
-              double px_gw = 1.0/boost::get<0>(q.resolution());
-              double px_gh = 1.0/boost::get<1>(q.resolution());
+            if (simplify_geometries_) {
+              const double px_gw = 1.0 / boost::get<0>(q.resolution());
+              const double px_gh = 1.0 / boost::get<1>(q.resolution());
 
-              double tolerance = std::min(px_gw,px_gh) / 2;
+              const double tolerance = std::min(px_gw, px_gh) / 2.0;
               s << ", " << tolerance << ")";
             }
 
