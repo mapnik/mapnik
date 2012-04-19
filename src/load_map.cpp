@@ -803,7 +803,6 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node c
         boost::array<double,6> matrix;
         tr.store_to(&matrix[0]);
         sym.set_transform(matrix);
-        std::clog << " ---> " << sym.get_transform_string() << std::endl;
     }
     
     optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
