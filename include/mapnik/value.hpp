@@ -26,18 +26,16 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/variant.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp>
-#include <boost/lexical_cast.hpp>
 
 // stl
 #include <iostream>
 #include <string>
-#include <sstream>
-#include <iomanip>
 #include <cmath>
 
 // uci
@@ -338,20 +336,34 @@ struct add : public boost::static_visitor<V>
         return lhs + rhs;
     }
 
+    value_type operator() (UnicodeString const& lhs, value_null rhs) const    
+    {
+        boost::ignore_unused_variable_warning(rhs);
+        return lhs;
+    }
+    
+    value_type operator() (value_null lhs, UnicodeString const& rhs) const    
+    {
+        boost::ignore_unused_variable_warning(lhs);
+        return rhs;
+    }
+    
     template <typename R>
     value_type operator() (UnicodeString const& lhs, R const& rhs) const
     {
-        std::basic_ostringstream<char> out;
-        out << rhs;
-        return lhs + UnicodeString(out.str().c_str());
+        std::string val;
+        if (util::to_string(val,rhs))
+            return lhs + UnicodeString(val.c_str());
+        return lhs;
     }
-
+    
     template <typename L>
     value_type operator() (L const& lhs , UnicodeString const& rhs) const
     {
-        std::basic_ostringstream<char> out;
-        out << lhs;
-        return UnicodeString(out.str().c_str()) + rhs;
+        std::string val;
+        if (util::to_string(val,lhs))
+            return UnicodeString(val.c_str()) + rhs;
+        return rhs;
     }
 
     template <typename T1, typename T2>
@@ -540,14 +552,14 @@ struct to_bool : public boost::static_visitor<bool>
 
 struct to_string : public boost::static_visitor<std::string>
 {
-
     template <typename T>
     std::string operator() (T val) const
     {
-        std::stringstream ss;
-        ss << val;
-        return ss.str();
+        std::string str;
+        util::to_string(str, val);
+        return str;
     }
+    
     // specializations
     std::string operator() (UnicodeString const& val) const
     {
@@ -555,14 +567,14 @@ struct to_string : public boost::static_visitor<std::string>
         to_utf8(val,utf8);
         return utf8;
     }
-
+    
     std::string operator() (double val) const
     {
-        std::stringstream ss;
-        ss << std::setprecision(16) << val;
-        return ss.str();
+        std::string str;
+        util::to_string(str, val); // TODO set precision(16)
+        return str;
     }
-
+    
     std::string operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
@@ -576,9 +588,9 @@ struct to_unicode : public boost::static_visitor<UnicodeString>
     template <typename T>
     UnicodeString operator() (T val) const
     {
-        std::basic_ostringstream<char> out;
-        out << val;
-        return UnicodeString(out.str().c_str());
+        std::string str;
+        util::to_string(str,val);
+        return UnicodeString(str.c_str());
     }
 
     // specializations
@@ -589,11 +601,11 @@ struct to_unicode : public boost::static_visitor<UnicodeString>
 
     UnicodeString operator() (double val) const
     {
-        std::basic_ostringstream<char> out;
-        out << std::setprecision(16) << val;
-        return UnicodeString(out.str().c_str());
+        std::string str;
+        util::to_string(str,val);
+        return UnicodeString(str.c_str());
     }
-
+    
     UnicodeString operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
@@ -612,11 +624,11 @@ struct to_expression_string : public boost::static_visitor<std::string>
 
     std::string operator() (double val) const
     {
-        std::stringstream ss;
-        ss << std::setprecision(16) << val;
-        return ss.str();
+        std::string output;
+        util::to_string(output,val); // TODO precision(16)
+        return output;        
     }
-
+    
     std::string operator() (bool val) const
     {
         return val ? "true":"false";
@@ -651,15 +663,19 @@ struct to_double : public boost::static_visitor<double>
 
     double operator() (std::string const& val) const
     {
-        return boost::lexical_cast<double>(val);
+        double result;
+        if (util::string2double(val,result))
+            return result;
+        return 0;
     }
+    
     double operator() (UnicodeString const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
-        return boost::lexical_cast<double>(utf8);
+        return operator()(utf8);
     }
-
+    
     double operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
@@ -681,15 +697,19 @@ struct to_int : public boost::static_visitor<double>
 
     int operator() (std::string const& val) const
     {
-        return boost::lexical_cast<int>(val);
+        int result;
+        if (util::string2int(val,result))
+            return result;
+        return 0;
     }
+    
     int operator() (UnicodeString const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
-        return boost::lexical_cast<int>(utf8);
+        return operator()(utf8);
     }
-
+    
     int operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
