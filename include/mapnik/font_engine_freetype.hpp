@@ -304,16 +304,19 @@ public:
         face_set_ptr face_set = boost::make_shared<font_face_set>();
         for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
         {
-            if (face_ptr face = get_face(*name))
+            face_ptr face = get_face(*name);
+            if (face)
             {
                 face_set->add(face);
             }
+#ifdef MAPNIK_LOG
             else
             {
-                MAPNIK_LOG_ERROR(font_engine_freetype)
+                MAPNIK_LOG_DEBUG(font_engine_freetype)
                         << "Failed to find face '" << *name
                         << "' in font set '" << fset.get_name() << "'\n";
             }
+#endif
         }
         return face_set;
     }
