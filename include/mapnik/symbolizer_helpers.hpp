@@ -25,6 +25,7 @@
 //mapnik
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/shield_symbolizer.hpp>
+#include <mapnik/point_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
@@ -187,5 +188,33 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::angle_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::finder_;
 };
+
+/**
+ * helper for positioning the label bounding box for symbolizers
+ * with an image component.
+ */
+class symbolizer_with_image_helper
+{
+public:
+   symbolizer_with_image_helper(symbolizer_with_image const& sym,
+                                Feature const& feature);
+   
+   inline boost::optional<mapnik::marker_ptr> const& get_marker() const 
+   {
+      return marker_;
+   }
+
+   inline agg::trans_affine const& get_transform() const
+   {
+      return tr_;
+   }
+
+   box2d<double> get_label_ext() const;
+
+private:
+   boost::optional<mapnik::marker_ptr> marker_;
+   agg::trans_affine tr_;
+};
+
 } //namespace
 #endif // SYMBOLIZER_HELPERS_HPP

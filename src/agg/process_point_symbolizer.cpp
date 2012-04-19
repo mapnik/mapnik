@@ -28,6 +28,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/expression_evaluator.hpp>
+#include <mapnik/symbolizer_helpers.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -49,40 +50,12 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
                               proj_transform const& prj_trans)
 {
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
+    symbolizer_with_image_helper helper(sym, *feature);
 
-    boost::optional<mapnik::marker_ptr> marker;
-    if ( !filename.empty() )
+    if (helper.get_marker())
     {
-        marker = marker_cache::instance()->find(filename, true);
-    }
-    else
-    {
-        marker.reset(boost::make_shared<mapnik::marker>());
-    }
-
-    if (marker)
-    {
-        double w = (*marker)->width();
-        double h = (*marker)->height();
-        agg::trans_affine tr;
-        boost::array<double,6> const& m = sym.get_transform();
-        tr.load_from(&m[0]);
-        double px0 = - 0.5 * w;
-        double py0 = - 0.5 * h;
-        double px1 = 0.5 * w;
-        double py1 = 0.5 * h;
-        double px2 = px1;
-        double py2 = py0;
-        double px3 = px0;
-        double py3 = py1;
-        tr.transform(&px0,&py0);
-        tr.transform(&px1,&py1);
-        tr.transform(&px2,&py2);
-        tr.transform(&px3,&py3);
-        box2d<double> label_ext (px0, py0, px1, py1);
-        label_ext.expand_to_include(px2, py2);
-        label_ext.expand_to_include(px3, py3);
+        box2d<double> label_ext = helper.get_label_ext();
+        mapnik::marker const& marker = **helper.get_marker();
 
         for (unsigned i=0; i<feature->num_geometries(); ++i)
         {
@@ -103,7 +76,9 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 detector_->has_placement(label_ext))
             {
 
-                render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**marker,tr, sym.get_opacity());
+                render_marker(pixel_position(x - 0.5 * marker.width(), 
+                                             y - 0.5 * marker.height()), 
+                              marker, helper.get_transform(), sym.get_opacity());
 
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);

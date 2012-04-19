@@ -349,37 +349,21 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 template <typename FaceManagerT, typename DetectorT>
 void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
 {
-    std::string filename = path_processor_type::evaluate(*sym_.get_filename(), this->feature_);
-    boost::array<double,6> const& m = sym_.get_transform();
-    transform_.load_from(&m[0]);
-    marker_.reset();
-    if (!filename.empty())
-    {
-        marker_ = marker_cache::instance()->find(filename, true);
-    }
-    if (!marker_) {
-        marker_w_ = 0;
-        marker_h_ = 0;
-        marker_ext_.init(0, 0, 0, 0);
-        return;
-    }
-    marker_w_ = (*marker_)->width();
-    marker_h_ = (*marker_)->height();
-    double px0 = - 0.5 * marker_w_;
-    double py0 = - 0.5 * marker_h_;
-    double px1 = 0.5 * marker_w_;
-    double py1 = 0.5 * marker_h_;
-    double px2 = px1;
-    double py2 = py0;
-    double px3 = px0;
-    double py3 = py1;
-    transform_.transform(&px0,&py0);
-    transform_.transform(&px1,&py1);
-    transform_.transform(&px2,&py2);
-    transform_.transform(&px3,&py3);
-    marker_ext_.init(px0, py0, px1, py1);
-    marker_ext_.expand_to_include(px2, py2);
-    marker_ext_.expand_to_include(px3, py3);
+   symbolizer_with_image_helper helper(sym_, this->feature_);
+   marker_ = helper.get_marker();
+   if (marker_)
+   {
+      marker_w_ = (*marker_)->width();
+      marker_h_ = (*marker_)->height();
+      transform_ = helper.get_transform();
+      marker_ext_ = helper.get_label_ext();
+   }
+   else 
+   {
+      marker_w_ = 0;
+      marker_h_ = 0;
+      marker_ext_.init(0, 0, 0, 0);
+   }
 }
 
 template <typename FaceManagerT, typename DetectorT>
@@ -414,6 +398,54 @@ agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_
 {
     return transform_;
 }
+
+/*****************************************************************************/
+
+symbolizer_with_image_helper::symbolizer_with_image_helper(symbolizer_with_image const& sym,
+                                                           Feature const& feature)
+{
+   std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
+   
+   if ( !filename.empty() )
+   {
+      marker_ = marker_cache::instance()->find(filename, true);
+   }
+   else
+   {
+      marker_.reset(boost::make_shared<mapnik::marker>());
+   }
+   
+   boost::array<double,6> const& m = sym.get_transform();
+   tr_.load_from(&m[0]);   
+}
+
+box2d<double> symbolizer_with_image_helper::get_label_ext() const
+{
+   double w = (*marker_)->width();
+   double h = (*marker_)->height();
+
+   double px0 = - 0.5 * w;
+   double py0 = - 0.5 * h;
+   double px1 = 0.5 * w;
+   double py1 = 0.5 * h;
+   double px2 = px1;
+   double py2 = py0;
+   double px3 = px0;
+   double py3 = py1;
+   
+   tr_.transform(&px0,&py0);
+   tr_.transform(&px1,&py1);
+   tr_.transform(&px2,&py2);
+   tr_.transform(&px3,&py3);
+   
+   box2d<double> label_ext (px0, py0, px1, py1);
+   label_ext.expand_to_include(px2, py2);
+   label_ext.expand_to_include(px3, py3);
+
+   return label_ext;
+}
+
+/*****************************************************************************/
 
 template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
 template class shield_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
