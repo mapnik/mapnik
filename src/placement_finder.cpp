@@ -813,13 +813,13 @@ text_place_boxes_at_point::text_place_boxes_at_point(text_placement_info const& 
    init_alignment();   
 }
 
-template <typename CheckerT>
 boost::optional<std::queue< box2d<double> > > 
-text_place_boxes_at_point::check_point_placement(CheckerT const& check, 
-                           text_path *current_placement,
-                           double label_x,
-                           double label_y,
-                           double angle)
+text_place_boxes_at_point::check_point_placement(
+   boost::function<bool(box2d<double> const&)> const& check, 
+   text_path *current_placement,
+   double label_x,
+   double label_y,
+   double angle)
 {
    find_line_breaks();
 

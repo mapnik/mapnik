@@ -78,8 +78,7 @@ struct text_place_boxes_at_point {
    std::vector<unsigned> line_breaks_;
    std::vector<std::pair<double, double> > line_sizes_;
    
-   template <typename CheckerT>
-   boost::optional<std::queue< box2d<double> > > check_point_placement(CheckerT const& check, text_path *current_placement, double label_x, double label_y, double angle);
+   boost::optional<std::queue< box2d<double> > > check_point_placement(boost::function<bool(box2d<double> const&)> const& check, text_path *current_placement, double label_x, double label_y, double angle);
    
    void find_line_breaks();
    void init_string_size();

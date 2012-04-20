@@ -29,11 +29,16 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/attribute_collector.hpp>
+#include <mapnik/placement_finder.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
+#include <boost/optional.hpp>
+
+// stl
+#include <queue>
 
 namespace mapnik {
 
@@ -97,6 +102,14 @@ struct feature_overlay
    cont_type data_;
 };
 
+struct true_functor
+{
+   bool operator()(box2d<double> const&) const
+   {
+      return true;
+   }
+};
+
 // a visitor to extract the bboxes that a symbolizer would use,
 // were it to be rendered at 0,0 and merge them together.
 struct place_bboxes : public boost::static_visitor<>
@@ -107,8 +120,16 @@ struct place_bboxes : public boost::static_visitor<>
    // the feature we've evaluating
    Feature const& feature_;
 
-   place_bboxes(box2d<double> &box, Feature const &feature)
-      : box_(box), feature_(feature)
+   // ???
+   processed_text &text_;
+
+   double scale_factor_;
+
+   place_bboxes(box2d<double> &box, 
+                Feature const &feature,
+                processed_text &text,
+                double scale_factor)
+      : box_(box), feature_(feature), text_(text), scale_factor_(scale_factor)
    {}
 
    void operator()(point_symbolizer const& sym) const
@@ -120,6 +141,29 @@ struct place_bboxes : public boost::static_visitor<>
 
    void operator()(text_symbolizer const& sym) const
    {
+      text_placement_info_ptr placement_ = sym.get_placement_options()->get_placement_info(scale_factor_);
+      string_info *info_ = &(text_.get_string_info());
+
+      text_place_boxes_at_point box_placer(*placement_, *info_);
+      true_functor check;
+      std::auto_ptr<text_path> current_placement(new text_path(0, 0));
+
+      boost::optional<std::queue< box2d<double> > > maybe_boxes = 
+         box_placer.check_point_placement(check, current_placement.get(), 0, 0, 0);
+
+      if (maybe_boxes)
+      {
+         std::queue< box2d<double> > boxes = *maybe_boxes;
+         while (!boxes.empty())
+         {
+            box_.expand_to_include(boxes.front());
+            boxes.pop();
+         }
+      }
+      else
+      {
+         // some sort of error? weren't expecting to get here.
+      }
    }
 
    void operator()(shield_symbolizer const &sym) const
@@ -206,13 +250,15 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 
    // figure out what the bboxes should be.
    std::vector<box2d<double> > boxes;
+   processed_text text(font_manager_, scale_factor_);
+
    BOOST_FOREACH(const group_rule *rule, matched_rules)
    {
       box2d<double> box;
       for (group_rule::symbolizers::const_iterator itr = rule->begin();
            itr != rule->end(); ++itr)
       {
-         boost::apply_visitor(place_bboxes(box, *feature), *itr);
+         boost::apply_visitor(place_bboxes(box, *feature, text, scale_factor_), *itr);
       }
 
       boxes.push_back(box);
