@@ -104,9 +104,27 @@ struct place_bboxes : public boost::static_visitor<>
    // boxes vector that we will push_back to.
    box2d<double> &box_;
 
-   place_bboxes(box2d<double> &box)
-      : box_(box)
+   // the feature we've evaluating
+   Feature const& feature_;
+
+   place_bboxes(box2d<double> &box, Feature const &feature)
+      : box_(box), feature_(feature)
    {}
+
+   void operator()(point_symbolizer const& sym) const
+   {
+      symbolizer_with_image_helper helper(sym, feature_);
+
+      box_.expand_to_include(helper.get_label_ext());
+   }
+
+   void operator()(text_symbolizer const& sym) const
+   {
+   }
+
+   void operator()(shield_symbolizer const &sym) const
+   {
+   }
 
    template <typename T>
    void operator()(T const &) const
@@ -194,7 +212,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       for (group_rule::symbolizers::const_iterator itr = rule->begin();
            itr != rule->end(); ++itr)
       {
-         boost::apply_visitor(place_bboxes(box), *itr);
+         boost::apply_visitor(place_bboxes(box, *feature), *itr);
       }
 
       boxes.push_back(box);
