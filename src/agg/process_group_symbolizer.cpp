@@ -124,11 +124,13 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 {
    // find dependant columns in the rules
    std::set<std::string> columns;
+   attribute_collector collector(columns);
    for (group_symbolizer::rules::const_iterator itr = sym.begin();
         itr != sym.end(); ++itr)
    {
-      boost::apply_visitor(expression_attributes(columns), *(itr->get_filter()));
-      // TODO: also go down to symbolizers too?
+      // note that this recurses down on to the symbolizer
+      // internals too, so we get all free variables.
+      collector(*itr);
    }
 
    // the rules which we'll want to symbolize
@@ -147,17 +149,20 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       BOOST_FOREACH(const std::string &col_name, columns)
       {
          const std::string col_idx_name = (boost::format("%1%%2%") % col_name % col_idx).str();
-         const bool have_column = feature->has_key(col_idx_name);
+         const bool have_numbered_column = feature->has_key(col_idx_name);
 
-         if (have_column) 
+         if (have_numbered_column) 
          {
             overlay.put_new(col_name, feature->get(col_idx_name));
          }
-         else
+         else if (!feature->has_key(col_name))
          {
             have_columns = false;
             break;
          }
+         // otherwise, the column is present, but isn't a renumbered
+         // column and we can ignore it - it's already present in the
+         // feature.
       }
 
       // if all columns were present
