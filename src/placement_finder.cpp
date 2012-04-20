@@ -48,6 +48,55 @@
 namespace mapnik
 {
 
+template <typename DetectorT>
+struct point_placement_check
+{
+   DetectorT & detector_;
+   box2d<double> const& dimensions_;
+   text_place_boxes_at_point &point_place_box_;
+
+   point_placement_check(DetectorT &detector, 
+                         box2d<double> const& dimensions,
+                         text_place_boxes_at_point &f)
+      : detector_(detector),
+        dimensions_(dimensions),
+        point_place_box_(f)
+   {}
+
+   bool operator()(box2d<double> const& e) const
+   {
+      // if there is an overlap with existing envelopes, then exit - no placement
+      
+      if (!detector_.extent().intersects(e) ||
+          (!point_place_box_.p.allow_overlap &&
+           !detector_.has_point_placement(e, point_place_box_.pi.get_actual_minimum_distance())))
+      {
+         return false;
+      }
+      
+      // if avoid_edges test dimensions contains e
+      if (point_place_box_.p.avoid_edges && !dimensions_.contains(e))
+      {
+         return false;
+      }
+      
+      if (point_place_box_.p.minimum_padding > 0)
+      {
+         double min_pad = point_place_box_.pi.get_actual_minimum_padding();
+         box2d<double> epad(e.minx()-min_pad,
+                            e.miny()-min_pad,
+                            e.maxx()+min_pad,
+                            e.maxy()+min_pad);
+         if (!dimensions_.contains(epad))
+         {
+            return false;
+         }
+      }
+
+      return true;
+   }
+};
+
 template<typename T>
 std::pair<double, double> get_position_at_distance(double target_distance, T & shape_path)
 {
@@ -105,17 +154,9 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
       info_(info),
       p(placement_info.properties),
       pi(placement_info),
-      string_width_(0),
-      string_height_(0),
-      first_line_space_(0),
-      valign_(V_AUTO),
-      halign_(H_AUTO),
-      line_breaks_(),
-      line_sizes_(),
+      point_place_box_(placement_info, info),
       collect_extents_(false)
 {
-    init_string_size();
-    init_alignment();
 }
 
 template <typename DetectorT>
@@ -185,345 +226,46 @@ void placement_finder<DetectorT>::find_point_placements(T & shape_path)
 }
 
 template <typename DetectorT>
-void placement_finder<DetectorT>::init_string_size()
-{
-    // Get total string size
-    if (!info_.num_characters()) return; //At least one character is required
-    for (unsigned i = 0; i < info_.num_characters(); i++)
-    {
-        char_info const& ci = info_.at(i);
-        if (!ci.width || !ci.line_height) continue; //Skip empty chars (add no character_spacing for them)
-        string_width_ += ci.width + ci.format->character_spacing;
-        string_height_ = std::max(string_height_, ci.line_height+ci.format->line_spacing);
-        first_line_space_ = std::max(first_line_space_, ci.line_height-ci.avg_height);
-    }
-    string_width_ -= info_.at(info_.num_characters()-1).format->character_spacing; //Remove last space
-    string_height_ -= first_line_space_; //First line is a bit smaller
-}
-
-
-
-
-template <typename DetectorT>
-void placement_finder<DetectorT>::find_line_breaks()
-{
-    if (!line_sizes_.empty()) return;
-    bool first_line = true;
-    // check if we need to wrap the string
-    double wrap_at = string_width_ + 1.0;
-    if (p.wrap_width && string_width_ > p.wrap_width)
-    {
-        if (p.text_ratio)
-        {
-            for (double i = 1.0; ((wrap_at = string_width_/i)/(string_height_*i)) > p.text_ratio && (string_width_/i) > p.wrap_width; i += 1.0) ;
-        }
-        else
-        {
-            wrap_at = p.wrap_width;
-        }
-    }
-
-    // work out where our line breaks need to be and the resultant width to the 'wrapped' string
-    if ((wrap_at < string_width_) || info_.has_line_breaks())
-    {
-        first_line_space_ = 0.0;
-        int last_wrap_char_pos = 0; //Position of last char where wrapping is possible
-        double last_char_spacing = 0.0;
-        double last_wrap_char_width = 0.0; //Include char_spacing before and after
-        string_width_ = 0.0;
-        string_height_ = 0.0;
-        double line_width = 0.0;
-        double line_height = 0.0; //Height of tallest char in line
-        double word_width = 0.0; //Current unfinished word width
-        double word_height = 0.0;
-        //line_width and word_width include char width + spacing, but not the spacing after the last char
-
-        for (unsigned int ii = 0; ii < info_.num_characters(); ii++)
-        {
-            char_info const& ci = info_.at(ii);
-            unsigned c = ci.c;
-
-            if ((c == ci.format->wrap_char) || (c == '\n'))
-            {
-                last_wrap_char_pos = ii;
-                //No wrap at previous position
-                line_width += word_width + last_wrap_char_width;
-                line_height = std::max(line_height, word_height);
-                last_wrap_char_width = last_char_spacing + ci.width + ci.format->character_spacing;
-                last_char_spacing = 0.0; //Current one is included in last_wrap_char_width
-                word_width = 0.0;
-                word_height = 0.0;
-            } else {
-                //No wrap char
-                word_width += last_char_spacing + ci.width;
-                last_char_spacing = ci.format->character_spacing;
-                word_height = std::max(word_height, ci.line_height + ci.format->line_spacing);
-                //TODO: I think this calculation could be wrong if height changes for the first word in the second line
-                if (first_line) first_line_space_ = std::max(first_line_space_, ci.line_height-ci.avg_height);
-            }
-
-            // wrap text at first wrap_char after (default) the wrap width or immediately before the current word
-            if ((c == '\n') ||
-                (line_width > 0 &&
-                 ((line_width > wrap_at && !ci.format->wrap_before) ||
-                  ((line_width + last_wrap_char_width + word_width) > wrap_at && ci.format->wrap_before)) )
-                )
-            {
-                add_line(line_width, line_height, first_line);
-                line_breaks_.push_back(last_wrap_char_pos);
-                line_width = 0.0;
-                line_height = 0.0;
-                last_wrap_char_width = 0; //Wrap char supressed
-                first_line = false;
-            }
-        }
-        line_width += last_wrap_char_width + word_width;
-        line_height = std::max(line_height, word_height);
-        add_line(line_width, line_height, first_line);
-    } else {
-        //No linebreaks
-        line_sizes_.push_back(std::make_pair(string_width_, string_height_));
-    }
-    line_breaks_.push_back(info_.num_characters());
-}
-
-template <typename DetectorT>
-void placement_finder<DetectorT>::add_line(double width, double height, bool first_line)
-{
-    if (first_line) height -= first_line_space_;
-    string_width_ = std::max(string_width_, width); //Total width is the longest line
-    string_height_ += height;
-    line_sizes_.push_back(std::make_pair(width, height));
-}
-
-
-template <typename DetectorT>
-void placement_finder<DetectorT>::init_alignment()
-{
-    valign_ = p.valign;
-    if (valign_ == V_AUTO)
-    {
-        if (p.displacement.second > 0.0)
-        {
-            valign_ = V_BOTTOM;
-        } else if (p.displacement.second < 0.0)
-        {
-            valign_ = V_TOP;
-        } else
-        {
-            valign_ = V_MIDDLE;
-        }
-    }
-
-    halign_ = p.halign;
-    if (halign_ == H_AUTO)
-    {
-        if (p.displacement.first > 0.0)
-        {
-            halign_ = H_RIGHT;
-        } else if (p.displacement.first < 0.0)
-        {
-            halign_ = H_LEFT;
-        } else
-        {
-            halign_ = H_MIDDLE;
-        }
-    }
-
-    jalign_ = p.jalign;
-    if (jalign_ == J_AUTO)
-    {
-        if (p.displacement.first > 0.0)
-        {
-            jalign_ = J_LEFT;
-        } else if (p.displacement.first < 0.0)
-        {
-            jalign_ = J_RIGHT;
-        } else {
-            jalign_ = J_MIDDLE;
-        }
-    }
-}
-
-
-template <typename DetectorT>
-void placement_finder<DetectorT>::adjust_position(text_path *current_placement)
-{
-    // if needed, adjust for desired vertical alignment
-    if (valign_ == V_TOP)
-    {
-        current_placement->center.y -= 0.5 * string_height_;  // move center up by 1/2 the total height
-    } else if (valign_ == V_BOTTOM)
-    {
-        current_placement->center.y += 0.5 * string_height_;  // move center down by the 1/2 the total height
-    }
-
-    // set horizontal position to middle of text
-    if (halign_ == H_LEFT)
-    {
-        current_placement->center.x -= 0.5 * string_width_;  // move center left by 1/2 the string width
-    } else if (halign_ == H_RIGHT)
-    {
-        current_placement->center.x += 0.5 * string_width_;  // move center right by 1/2 the string width
-    }
-
-    // adjust text envelope position by user's x-y displacement (dx, dy)
-    current_placement->center.x += pi.get_scale_factor() * p.displacement.first;
-    current_placement->center.y += pi.get_scale_factor() * p.displacement.second;
-
-}
-
-template <typename DetectorT>
 void placement_finder<DetectorT>::find_point_placement(double label_x,
                                                        double label_y,
                                                        double angle)
 {
-    find_line_breaks();
+   point_placement_check<DetectorT> check(detector_, dimensions_, point_place_box_);
+   std::auto_ptr<text_path> current_placement(new text_path(label_x, label_y));
+   
+   boost::optional<std::queue< box2d<double> > > result = 
+      point_place_box_.check_point_placement(check, current_placement.get(), label_x, label_y, angle);
 
-    double rad = M_PI * angle/180.0;
-    double cosa = std::cos(rad);
-    double sina = std::sin(rad);
+   if (result)
+   {
+      std::queue< box2d<double> > &c_envelopes = *result;
 
-    double x, y;
-    std::auto_ptr<text_path> current_placement(new text_path(label_x, label_y));
-
-    adjust_position(current_placement.get());
-
-    // presets for first line
-    unsigned int line_number = 0;
-    unsigned int index_to_wrap_at = line_breaks_[0];
-    double line_width = line_sizes_[0].first;
-    double line_height = line_sizes_[0].second;
-
-    /* IMPORTANT NOTE:
-       x and y are relative to the center of the text
-       coordinate system:
-       x: grows from left to right
-       y: grows from bottom to top (opposite of normal computer graphics)
-    */
-
-    // set for upper left corner of text envelope for the first line, bottom left of first character
-    y = string_height_ / 2.0 - line_height;
-    // RTL text is converted to a mirrored representation in get_string_info()
-    // so we have to fix line break order here
-    if (info_.get_rtl()) y = -y;
-
-    // adjust for desired justification
-    if (jalign_ == J_LEFT)
-        x = -(string_width_ / 2.0);
-    else if (jalign_ == J_RIGHT)
-        x = (string_width_ / 2.0) - line_width;
-    else /* J_MIDDLE */
-        x = -(line_width / 2.0);
-
-    // save each character rendering position and build envelope as go thru loop
-    std::queue< box2d<double> > c_envelopes;
-
-    for (unsigned i = 0; i < info_.num_characters(); i++)
-    {
-        char_info const& ci = info_.at(i);
-
-        double cwidth = ci.width + ci.format->character_spacing;
-
-        if (i == index_to_wrap_at)
-        {
-            index_to_wrap_at = line_breaks_[++line_number];
-            line_width = line_sizes_[line_number].first;
-            line_height= line_sizes_[line_number].second;
-
-            if (info_.get_rtl())
-            {
-                y += line_height;
-            } else
-            {
-                y -= line_height;  // move position down to line start
-            }
-
-            // reset to begining of line position
-            if (jalign_ == J_LEFT)
-                x = -(string_width_ / 2.0);
-            else if (jalign_ == J_RIGHT)
-                x = (string_width_ / 2.0) - line_width;
-            else
-                x = -(line_width / 2.0);
-            continue;
-        }
-        else
-        {
-            // place the character relative to the center of the string envelope
-            double dx = x * cosa - y*sina;
-            double dy = x * sina + y*cosa;
-
-            current_placement->add_node(&ci, dx, dy, rad);
-
-            // compute the Bounding Box for each character and test for:
-            // overlap, minimum distance or edge avoidance - exit if condition occurs
-            box2d<double> e;
-            /*x axis: left to right, y axis: top to bottom (negative values higher)*/
-            e.init(current_placement->center.x + dx,                    // Bottom Left
-                   current_placement->center.y - dy - ci.ymin,          // ymin usually <0
-                   current_placement->center.x + dx + ci.width,         // Top Right
-                   current_placement->center.y - dy - ci.ymax);
-
-            // if there is an overlap with existing envelopes, then exit - no placement
-
-            if (!detector_.extent().intersects(e) ||
-                (!p.allow_overlap &&
-                 !detector_.has_point_placement(e, pi.get_actual_minimum_distance())))
-            {
-                return;
-            }
-
-            // if avoid_edges test dimensions contains e
-            if (p.avoid_edges && !dimensions_.contains(e))
-            {
-                return;
-            }
-
-            if (p.minimum_padding > 0)
-            {
-                double min_pad = pi.get_actual_minimum_padding();
-                box2d<double> epad(e.minx()-min_pad,
-                                   e.miny()-min_pad,
-                                   e.maxx()+min_pad,
-                                   e.maxy()+min_pad);
-                if (!dimensions_.contains(epad))
-                {
-                    return;
-                }
-            }
-
-
-            c_envelopes.push(e);  // add character's envelope to temp storage
-        }
-        x += cwidth;  // move position to next character
-    }
-
-    // check the placement of any additional envelopes
-    if (!p.allow_overlap && !additional_boxes.empty())
-    {
-        BOOST_FOREACH(box2d<double> box, additional_boxes)
-        {
+      // check the placement of any additional envelopes
+      if (!p.allow_overlap && !additional_boxes.empty())
+      {
+         BOOST_FOREACH(box2d<double> const& box, additional_boxes)
+         {
             box2d<double> pt(box.minx() + current_placement->center.x,
                              box.miny() + current_placement->center.y,
                              box.maxx() + current_placement->center.x,
                              box.maxy() + current_placement->center.y);
-
+            
             // abort the whole placement if the additional envelopes can't be placed.
             if (!detector_.has_point_placement(pt, p.minimum_distance)) return;
-
+            
             c_envelopes.push(pt);
-        }
-    }
-
-    // since there was no early exit, add the character envelopes to the placements' envelopes
-    while (!c_envelopes.empty())
-    {
-        envelopes_.push(c_envelopes.front());
-        c_envelopes.pop();
-    }
-
-    placements_.push_back(current_placement.release());
+         }
+      }
+      
+      // since there was no early exit, add the character envelopes to the placements' envelopes
+      while (!c_envelopes.empty())
+      {
+         envelopes_.push(c_envelopes.front());
+         c_envelopes.pop();
+      }
+      
+      placements_.push_back(current_placement.release());
+   }
 }
 
 
@@ -532,7 +274,7 @@ template <typename PathT>
 void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 {
 #ifdef MAPNIK_LOG
-    if (! line_sizes_.empty())
+    if (! point_place_box_.line_sizes_.empty())
     {
         MAPNIK_LOG_WARN(placement_finder) << "Internal error. Text contains line breaks, but line placement is used. Please file a bug report!";
     }
@@ -584,13 +326,13 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
     double displacement = p.displacement.second; // displace by dy
 
     //Calculate a target_distance that will place the labels centered evenly rather than offset from the start of the linestring
-    if (total_distance < string_width_) //Can't place any strings
+    if (total_distance < point_place_box_.string_width_) //Can't place any strings
         return;
 
     //If there is no spacing then just do one label, otherwise calculate how many there should be
     int num_labels = 1;
     if (p.label_spacing > 0)
-        num_labels = static_cast<int>(floor(total_distance / (pi.get_actual_label_spacing() + string_width_)));
+        num_labels = static_cast<int>(floor(total_distance / (pi.get_actual_label_spacing() + point_place_box_.string_width_)));
 
     if (p.force_odd_labels && (num_labels % 2 == 0))
         num_labels--;
@@ -599,7 +341,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 
     //Now we know how many labels we are going to place, calculate the spacing so that they will get placed evenly
     double spacing = total_distance / num_labels;
-    double target_distance = (spacing - string_width_) / 2; // first label should be placed at half the spacing
+    double target_distance = (spacing - point_place_box_.string_width_) / 2; // first label should be placed at half the spacing
 
     //Calculate or read out the tolerance
     double tolerance_delta, tolerance;
@@ -928,8 +670,8 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
         if (orientation < 0)
         {
             // rotate in place
-            x += cwidth * cosa - string_height_ * sina;
-            y -= cwidth * sina + string_height_ * cosa;
+            x += cwidth * cosa - point_place_box_.string_height_ * sina;
+            y -= cwidth * sina + point_place_box_.string_height_ * cosa;
             angle += M_PI;
             //sin(x+PI) = -sin(x)
             sina = -sina;
@@ -1052,6 +794,309 @@ void placement_finder<DetectorT>::clear_placements()
 {
     placements_.clear();
     while (!envelopes_.empty()) envelopes_.pop();
+}
+
+text_place_boxes_at_point::text_place_boxes_at_point(text_placement_info const& placement_info,
+                                                     string_info const& info)
+   : info_(info),
+     p(placement_info.properties),
+     pi(placement_info),
+     string_width_(0),
+     string_height_(0),
+     first_line_space_(0),
+     valign_(V_AUTO),
+     halign_(H_AUTO),
+     line_breaks_(),
+     line_sizes_()
+{
+   init_string_size();
+   init_alignment();   
+}
+
+template <typename CheckerT>
+boost::optional<std::queue< box2d<double> > > 
+text_place_boxes_at_point::check_point_placement(CheckerT const& check, 
+                           text_path *current_placement,
+                           double label_x,
+                           double label_y,
+                           double angle)
+{
+   find_line_breaks();
+
+   double rad = M_PI * angle/180.0;
+   double cosa = std::cos(rad);
+   double sina = std::sin(rad);
+   
+   double x, y;
+   
+   adjust_position(current_placement);
+
+   // presets for first line
+   unsigned int line_number = 0;
+   unsigned int index_to_wrap_at = line_breaks_[0];
+   double line_width = line_sizes_[0].first;
+   double line_height = line_sizes_[0].second;
+   
+   /* IMPORTANT NOTE:
+      x and y are relative to the center of the text
+      coordinate system:
+      x: grows from left to right
+      y: grows from bottom to top (opposite of normal computer graphics)
+   */
+   
+   // set for upper left corner of text envelope for the first line, bottom left of first character
+   y = string_height_ / 2.0 - line_height;
+   // RTL text is converted to a mirrored representation in get_string_info()
+   // so we have to fix line break order here
+   if (info_.get_rtl()) y = -y;
+   
+   // adjust for desired justification
+   if (jalign_ == J_LEFT)
+      x = -(string_width_ / 2.0);
+   else if (jalign_ == J_RIGHT)
+      x = (string_width_ / 2.0) - line_width;
+   else /* J_MIDDLE */
+      x = -(line_width / 2.0);
+   
+   // save each character rendering position and build envelope as go thru loop
+   std::queue< box2d<double> > c_envelopes;
+   
+   for (unsigned i = 0; i < info_.num_characters(); i++)
+   {
+      char_info const& ci = info_.at(i);
+      
+      double cwidth = ci.width + ci.format->character_spacing;
+      
+      if (i == index_to_wrap_at)
+      {
+         index_to_wrap_at = line_breaks_[++line_number];
+         line_width = line_sizes_[line_number].first;
+         line_height= line_sizes_[line_number].second;
+         
+         if (info_.get_rtl())
+         {
+            y += line_height;
+         } else
+         {
+            y -= line_height;  // move position down to line start
+         }
+         
+         // reset to begining of line position
+         if (jalign_ == J_LEFT)
+            x = -(string_width_ / 2.0);
+         else if (jalign_ == J_RIGHT)
+            x = (string_width_ / 2.0) - line_width;
+         else
+            x = -(line_width / 2.0);
+         continue;
+      }
+      else
+      {
+         // place the character relative to the center of the string envelope
+         double dx = x * cosa - y*sina;
+         double dy = x * sina + y*cosa;
+         
+         current_placement->add_node(&ci, dx, dy, rad);
+         
+         // compute the Bounding Box for each character and test for:
+         // overlap, minimum distance or edge avoidance - exit if condition occurs
+         box2d<double> e;
+         /*x axis: left to right, y axis: top to bottom (negative values higher)*/
+         e.init(current_placement->center.x + dx,                    // Bottom Left
+                current_placement->center.y - dy - ci.ymin,          // ymin usually <0
+                current_placement->center.x + dx + ci.width,         // Top Right
+                current_placement->center.y - dy - ci.ymax);
+         
+         if (!check(e))
+         {
+            return boost::none;
+         }
+         
+         c_envelopes.push(e);  // add character's envelope to temp storage
+      }
+      x += cwidth;  // move position to next character
+   }
+
+   return boost::optional<std::queue< box2d<double> > >(c_envelopes);
+}
+
+void text_place_boxes_at_point::init_alignment()
+{
+    valign_ = p.valign;
+    if (valign_ == V_AUTO)
+    {
+        if (p.displacement.second > 0.0)
+        {
+            valign_ = V_BOTTOM;
+        } else if (p.displacement.second < 0.0)
+        {
+            valign_ = V_TOP;
+        } else
+        {
+            valign_ = V_MIDDLE;
+        }
+    }
+
+    halign_ = p.halign;
+    if (halign_ == H_AUTO)
+    {
+        if (p.displacement.first > 0.0)
+        {
+            halign_ = H_RIGHT;
+        } else if (p.displacement.first < 0.0)
+        {
+            halign_ = H_LEFT;
+        } else
+        {
+            halign_ = H_MIDDLE;
+        }
+    }
+
+    jalign_ = p.jalign;
+    if (jalign_ == J_AUTO)
+    {
+        if (p.displacement.first > 0.0)
+        {
+            jalign_ = J_LEFT;
+        } else if (p.displacement.first < 0.0)
+        {
+            jalign_ = J_RIGHT;
+        } else {
+            jalign_ = J_MIDDLE;
+        }
+    }
+}
+
+void text_place_boxes_at_point::adjust_position(text_path *current_placement)
+{
+    // if needed, adjust for desired vertical alignment
+    if (valign_ == V_TOP)
+    {
+        current_placement->center.y -= 0.5 * string_height_;  // move center up by 1/2 the total height
+    } else if (valign_ == V_BOTTOM)
+    {
+        current_placement->center.y += 0.5 * string_height_;  // move center down by the 1/2 the total height
+    }
+
+    // set horizontal position to middle of text
+    if (halign_ == H_LEFT)
+    {
+        current_placement->center.x -= 0.5 * string_width_;  // move center left by 1/2 the string width
+    } else if (halign_ == H_RIGHT)
+    {
+        current_placement->center.x += 0.5 * string_width_;  // move center right by 1/2 the string width
+    }
+
+    // adjust text envelope position by user's x-y displacement (dx, dy)
+    current_placement->center.x += pi.get_scale_factor() * p.displacement.first;
+    current_placement->center.y += pi.get_scale_factor() * p.displacement.second;
+
+}
+
+void text_place_boxes_at_point::init_string_size()
+{
+    // Get total string size
+    if (!info_.num_characters()) return; //At least one character is required
+    for (unsigned i = 0; i < info_.num_characters(); i++)
+    {
+        char_info const& ci = info_.at(i);
+        if (!ci.width || !ci.line_height) continue; //Skip empty chars (add no character_spacing for them)
+        string_width_ += ci.width + ci.format->character_spacing;
+        string_height_ = std::max(string_height_, ci.line_height+ci.format->line_spacing);
+        first_line_space_ = std::max(first_line_space_, ci.line_height-ci.avg_height);
+    }
+    string_width_ -= info_.at(info_.num_characters()-1).format->character_spacing; //Remove last space
+    string_height_ -= first_line_space_; //First line is a bit smaller
+}
+
+void text_place_boxes_at_point::find_line_breaks()
+{
+    if (!line_sizes_.empty()) return;
+    bool first_line = true;
+    // check if we need to wrap the string
+    double wrap_at = string_width_ + 1.0;
+    if (p.wrap_width && string_width_ > p.wrap_width)
+    {
+        if (p.text_ratio)
+        {
+            for (double i = 1.0; ((wrap_at = string_width_/i)/(string_height_*i)) > p.text_ratio && (string_width_/i) > p.wrap_width; i += 1.0) ;
+        }
+        else
+        {
+            wrap_at = p.wrap_width;
+        }
+    }
+
+    // work out where our line breaks need to be and the resultant width to the 'wrapped' string
+    if ((wrap_at < string_width_) || info_.has_line_breaks())
+    {
+        first_line_space_ = 0.0;
+        int last_wrap_char_pos = 0; //Position of last char where wrapping is possible
+        double last_char_spacing = 0.0;
+        double last_wrap_char_width = 0.0; //Include char_spacing before and after
+        string_width_ = 0.0;
+        string_height_ = 0.0;
+        double line_width = 0.0;
+        double line_height = 0.0; //Height of tallest char in line
+        double word_width = 0.0; //Current unfinished word width
+        double word_height = 0.0;
+        //line_width and word_width include char width + spacing, but not the spacing after the last char
+
+        for (unsigned int ii = 0; ii < info_.num_characters(); ii++)
+        {
+            char_info const& ci = info_.at(ii);
+            unsigned c = ci.c;
+
+            if ((c == ci.format->wrap_char) || (c == '\n'))
+            {
+                last_wrap_char_pos = ii;
+                //No wrap at previous position
+                line_width += word_width + last_wrap_char_width;
+                line_height = std::max(line_height, word_height);
+                last_wrap_char_width = last_char_spacing + ci.width + ci.format->character_spacing;
+                last_char_spacing = 0.0; //Current one is included in last_wrap_char_width
+                word_width = 0.0;
+                word_height = 0.0;
+            } else {
+                //No wrap char
+                word_width += last_char_spacing + ci.width;
+                last_char_spacing = ci.format->character_spacing;
+                word_height = std::max(word_height, ci.line_height + ci.format->line_spacing);
+                //TODO: I think this calculation could be wrong if height changes for the first word in the second line
+                if (first_line) first_line_space_ = std::max(first_line_space_, ci.line_height-ci.avg_height);
+            }
+
+            // wrap text at first wrap_char after (default) the wrap width or immediately before the current word
+            if ((c == '\n') ||
+                (line_width > 0 &&
+                 ((line_width > wrap_at && !ci.format->wrap_before) ||
+                  ((line_width + last_wrap_char_width + word_width) > wrap_at && ci.format->wrap_before)) )
+                )
+            {
+                add_line(line_width, line_height, first_line);
+                line_breaks_.push_back(last_wrap_char_pos);
+                line_width = 0.0;
+                line_height = 0.0;
+                last_wrap_char_width = 0; //Wrap char supressed
+                first_line = false;
+            }
+        }
+        line_width += last_wrap_char_width + word_width;
+        line_height = std::max(line_height, word_height);
+        add_line(line_width, line_height, first_line);
+    } else {
+        //No linebreaks
+        line_sizes_.push_back(std::make_pair(string_width_, string_height_));
+    }
+    line_breaks_.push_back(info_.num_characters());
+}
+
+void text_place_boxes_at_point::add_line(double width, double height, bool first_line)
+{
+    if (first_line) height -= first_line_space_;
+    string_width_ = std::max(string_width_, width); //Total width is the longest line
+    string_height_ += height;
+    line_sizes_.push_back(std::make_pair(width, height));
 }
 
 template class placement_finder<DetectorType>;

@@ -53,6 +53,41 @@ typedef coord_transform2<CoordTransform,geometry_type> PathType;
 typedef label_collision_detector4 DetectorType;
 
 
+struct text_place_boxes_at_point {
+   text_place_boxes_at_point(text_placement_info const &,
+       string_info const &);
+   
+   string_info const& info_;
+   text_symbolizer_properties const& p;
+   text_placement_info const& pi;
+   /** Length of the longest line after linebreaks.
+    * Before find_line_breaks() this is the total length of the string.
+    */
+   double string_width_;
+   /** Height of the string after linebreaks.
+    * Before find_line_breaks() this is the total length of the string.
+    */
+   double string_height_;
+   /** Height of the tallest font in the first line not including line spacing.
+    * Used to determine the correct offset for the first line.
+    */
+   double first_line_space_;
+   vertical_alignment_e valign_;
+   horizontal_alignment_e halign_;
+   justify_alignment_e jalign_;
+   std::vector<unsigned> line_breaks_;
+   std::vector<std::pair<double, double> > line_sizes_;
+   
+   template <typename CheckerT>
+   boost::optional<std::queue< box2d<double> > > check_point_placement(CheckerT const& check, text_path *current_placement, double label_x, double label_y, double angle);
+   
+   void find_line_breaks();
+   void init_string_size();
+   void init_alignment();
+   void adjust_position(text_path *current_placement);
+   void add_line(double width, double height, bool first_line);
+};
+
 template <typename DetectorT>
 class placement_finder : boost::noncopyable
 {
@@ -124,35 +159,16 @@ private:
         double x1, double y1, double x2, double y2,
         double & ix, double & iy);
 
-    void find_line_breaks();
-    void init_string_size();
-    void init_alignment();
-    void adjust_position(text_path *current_placement);
-    void add_line(double width, double height, bool first_line);
-
     ///General Internals
     DetectorT & detector_;
     box2d<double> const& dimensions_;
-    string_info const& info_;
-    text_symbolizer_properties const& p;
-    text_placement_info const& pi;
-    /** Length of the longest line after linebreaks.
-     * Before find_line_breaks() this is the total length of the string.
-     */
-    double string_width_;
-    /** Height of the string after linebreaks.
-     * Before find_line_breaks() this is the total length of the string.
-     */
-    double string_height_;
-    /** Height of the tallest font in the first line not including line spacing.
-     * Used to determine the correct offset for the first line.
-     */
-    double first_line_space_;
-    vertical_alignment_e valign_;
-    horizontal_alignment_e halign_;
-    justify_alignment_e jalign_;
-    std::vector<unsigned> line_breaks_;
-    std::vector<std::pair<double, double> > line_sizes_;
+
+   string_info const& info_;
+   text_symbolizer_properties const& p;
+   text_placement_info const& pi;
+
+   text_place_boxes_at_point point_place_box_;
+   
     std::queue< box2d<double> > envelopes_;
     /** Used to return all placements found. */
     placements_type placements_;
