@@ -81,7 +81,7 @@ boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
 }
 
 template <typename T1, typename T2>
-void composite(T1 & im, T2 & im2, composite_mode_e mode)
+void composite(T1 & im, T2 & im2, composite_mode_e mode, bool premultiply_src, bool premultiply_dst)
 {
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
@@ -97,11 +97,14 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
     
     //agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
     agg::pixfmt_rgba32 pixf_mask(mask);
+    if (premultiply_src)  pixf_mask.premultiply();
+    if (premultiply_dst)  pixf.premultiply();
     renderer_type ren(pixf);
     ren.blend_from(pixf_mask,0,0,0,255);
 }
 
 
-template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & im, mapnik::image_data_32 & im2, composite_mode_e mode);
+template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & im, mapnik::image_data_32 & im2, composite_mode_e mode,
+                                                                     bool premultiply_src, bool premultiply_dst);
 
 }

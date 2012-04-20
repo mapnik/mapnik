@@ -100,7 +100,7 @@ struct renderer_ : private boost::noncopyable
     typedef PixelFormat pixfmt_type;
     typedef typename pixfmt_type::color_type color_type;
     typedef typename pixfmt_type::row_data row_data;
-    typedef agg::renderer_base<pixfmt_type> ren_base;  
+    typedef agg::renderer_base<pixfmt_type> ren_base; 
     typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
     typedef agg::scanline_u8 scanline_type;
     

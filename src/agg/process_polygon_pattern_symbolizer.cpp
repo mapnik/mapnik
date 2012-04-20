@@ -54,22 +54,8 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;
-    typedef agg::wrap_mode_repeat wrap_x_type;
-    typedef agg::wrap_mode_repeat wrap_y_type;
-    typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_plain,
-        agg::row_accessor<agg::int8u>, agg::pixel32_type> rendering_buffer;
-    typedef agg::image_accessor_wrap<rendering_buffer,
-        wrap_x_type,
-        wrap_y_type> img_source_type;
-
-    typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
-
-    typedef agg::renderer_scanline_aa<ren_base,
-        agg::span_allocator<agg::rgba8>,
-        span_gen_type> renderer_type;
-
-
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+    
+    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
     agg::pixfmt_rgba32 pixf(buf);
     ren_base renb(pixf);
 
@@ -101,14 +87,29 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     if (!pat) return;
 
+    typedef agg::wrap_mode_repeat wrap_x_type;
+    typedef agg::wrap_mode_repeat wrap_y_type;
+    
+    typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
+                                         agg::row_accessor<agg::int8u>, agg::pixel32_type> rendering_buffer;
+    typedef agg::image_accessor_wrap<rendering_buffer,
+                                     wrap_x_type,
+                                     wrap_y_type> img_source_type;
+    
+    typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
+    
+    typedef agg::renderer_scanline_aa<ren_base,
+        agg::span_allocator<agg::rgba8>,
+        span_gen_type> renderer_type;
+    
     unsigned w=(*pat)->width();
     unsigned h=(*pat)->height();
     agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
     agg::span_allocator<agg::rgba8> sa;
-    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_plain,
-        agg::row_accessor<agg::int8u>, agg::pixel32_type> pixf_pattern(pattern_rbuf);
+    rendering_buffer pixf_pattern(pattern_rbuf);
+    pixf_pattern.premultiply();
     img_source_type img_src(pixf_pattern);
-
+    
     unsigned num_geometries = feature->num_geometries();
 
     pattern_alignment_e align = sym.get_alignment();

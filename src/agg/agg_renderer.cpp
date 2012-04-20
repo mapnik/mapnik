@@ -228,8 +228,10 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 template <typename T>
 void agg_renderer<T>::end_style_processing(feature_type_style const& st)
 {
+    bool blend = false;
     if (st.image_filters().size() > 0)
     {
+        blend = true;
         mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
         BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.image_filters())
         {
@@ -237,11 +239,23 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
         }         
     }
     
-    if (st.comp_op() != clear) // compositing
+    if (st.comp_op() != clear) // compositing FIXME: add 'none' to comp-op enum
     {
-        composite(pixmap_.data(),current_buffer_->data(), st.comp_op());
+        composite(pixmap_.data(),current_buffer_->data(), st.comp_op(),false,false);
     }   
-    
+    else if (blend)
+    {                
+        agg::rendering_buffer in(current_buffer_->raw_data(), current_buffer_->width(), 
+                                 current_buffer_->height(), current_buffer_->width() * 4);
+        
+        agg::rendering_buffer out(pixmap_.raw_data(), pixmap_.width(), 
+                                  pixmap_.height(), pixmap_.width() * 4);
+        
+        agg::pixfmt_rgba32 pixf_in(in);
+        agg::pixfmt_rgba32 pixf_out(out);        
+        agg::renderer_base<agg::pixfmt_rgba32> ren(pixf_out);
+        ren.blend_from(pixf_in,0,0,0,255);
+    }
 #ifdef MAPNIK_DEBUG
     std::clog << "end style processing\n";
 #endif
