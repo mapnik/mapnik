@@ -102,9 +102,13 @@ bool freetype_engine::register_font(std::string const& file_name)
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
         if (face->family_name && face->style_name)
         {
-            success = true;
             std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-            name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
+            // skip fonts with leading . in name
+            if (!boost::algorithm::starts_with(name,"."))
+            {
+                success = true;
+                name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
+            }
         }
         else
         {
@@ -150,9 +154,19 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
         {
             success = register_fonts(file_name, true);
         }
-        else if (boost::filesystem::is_regular_file(file_name) && is_font_file(file_name))
+        else
         {
-            success = mapnik::freetype_engine::register_font(file_name);
+#if (BOOST_FILESYSTEM_VERSION == 3)
+            std::string const& base_name = itr->path().filename().string();
+#else // v2
+            std::string const& base_name = itr->filename().string();
+#endif
+            if (!boost::algorithm::starts_with(base_name,".") &&
+                     boost::filesystem::is_regular_file(file_name) &&
+                     is_font_file(file_name))
+            {
+                success = mapnik::freetype_engine::register_font(file_name);
+            }
         }
     }
     return success;
