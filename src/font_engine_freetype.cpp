@@ -159,7 +159,7 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 #if (BOOST_FILESYSTEM_VERSION == 3)
             std::string const& base_name = itr->path().filename().string();
 #else // v2
-            std::string const& base_name = itr->filename().string();
+            std::string const& base_name = itr->filename();
 #endif
             if (!boost::algorithm::starts_with(base_name,".") &&
                      boost::filesystem::is_regular_file(file_name) &&
