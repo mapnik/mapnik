@@ -250,15 +250,7 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
     }   
     else if (blend_from)
     {                
-        agg::rendering_buffer in(current_buffer_->raw_data(), current_buffer_->width(), 
-                                 current_buffer_->height(), current_buffer_->width() * 4);
-        
-        agg::rendering_buffer out(pixmap_.raw_data(), pixmap_.width(), 
-                                  pixmap_.height(), pixmap_.width() * 4);
-        
-        agg::pixfmt_rgba32_plain pixf_in(in);
-        agg::pixfmt_rgba32_plain pixf_out(out);
-        pixf_out.blend_from(pixf_in,0,0,0,0,0,255);
+        composite(pixmap_.data(),current_buffer_->data(), src_over,false,false);
     }
 #ifdef MAPNIK_DEBUG
     std::clog << "end style processing\n";
