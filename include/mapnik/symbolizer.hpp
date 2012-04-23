@@ -31,6 +31,7 @@
 
 // boost
 #include <boost/array.hpp>
+#include <boost/optional.hpp>
 
 namespace mapnik
 {
@@ -46,8 +47,7 @@ public:
         : properties_(),
         properties_complete_(),
         writer_name_(),
-        writer_ptr_(), 
-        comp_op_(clear) 
+        writer_ptr_()
         {
             affine_transform_[0] = 1.0;
             affine_transform_[1] = 0.0;
@@ -96,7 +96,7 @@ public:
     std::string const& get_metawriter_name() const { return writer_name_; }
 
     void set_comp_op(composite_mode_e comp_op);
-    composite_mode_e comp_op() const;
+    boost::optional<composite_mode_e> comp_op() const;
     void set_transform(transform_type const& );
     transform_type const& get_transform() const;
     std::string get_transform_string() const;
@@ -105,7 +105,7 @@ private:
     metawriter_properties properties_complete_;
     std::string writer_name_;
     metawriter_ptr writer_ptr_;
-    composite_mode_e comp_op_;
+    boost::optional<composite_mode_e> comp_op_;
     transform_type affine_transform_;
 };
 

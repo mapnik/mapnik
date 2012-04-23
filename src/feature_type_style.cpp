@@ -37,7 +37,6 @@ IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 feature_type_style::feature_type_style()
 : filter_mode_(FILTER_ALL),
     filters_(),
-    comp_op_(clear),
     scale_denom_validity_(-1)
 {}
 
@@ -109,7 +108,7 @@ void feature_type_style::set_comp_op(composite_mode_e comp_op)
     comp_op_ = comp_op;
 }
 
-composite_mode_e feature_type_style::comp_op() const
+boost::optional<composite_mode_e> feature_type_style::comp_op() const
 {
     return comp_op_;
 }

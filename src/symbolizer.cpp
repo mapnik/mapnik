@@ -75,7 +75,7 @@ void symbolizer_base::set_comp_op(composite_mode_e comp_op)
     comp_op_ = comp_op;
 }
 
-composite_mode_e symbolizer_base::comp_op() const
+boost::optional<composite_mode_e> symbolizer_base::comp_op() const
 {
     return comp_op_;
 }

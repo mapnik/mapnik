@@ -75,16 +75,8 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     unsigned b=fill.blue();
     unsigned a=fill.alpha();
     
-    if (sym.comp_op() == clear)
+    if (sym.comp_op())
     {
-        aa_renderer::pixfmt_type pixf(buf);
-        aa_renderer ren;
-        ren.attach(pixf);
-        ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
-        ren.render(*ras_ptr);
-    }
-    else
-    {   
         typedef agg::rgba8 color_type;
         typedef agg::order_rgba order_type;
         typedef agg::pixel32_type pixel_type;
@@ -93,14 +85,30 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
         typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
         typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;     
         pixfmt_comp_type pixf(buf);
-        pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+        pixf.comp_op(static_cast<agg::comp_op_e>(*sym.comp_op()));
         renderer_base renb(pixf);
         renderer_type ren(renb);
         ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
         agg::scanline_u8 sl;
         agg::render_scanlines(*ras_ptr, sl, ren);
     }
-    
+    else if (style_level_compositing_)
+    {   
+        // use plain pixel format
+        agg::pixfmt_rgba32_plain pixf(buf);
+        renderer_scanline_solid<agg::pixfmt_rgba32_plain> ren;
+        ren.attach(pixf);
+        ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
+        ren.render(*ras_ptr);        
+    }    
+    else
+    {
+        agg::pixfmt_rgba32 pixf(buf);
+        renderer_scanline_solid<agg::pixfmt_rgba32> ren;
+        ren.attach(pixf);
+        ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
+        ren.render(*ras_ptr);    
+    }
 }
 
 template void agg_renderer<image_32>::process(polygon_symbolizer const&,

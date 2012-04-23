@@ -48,7 +48,6 @@ namespace mapnik {
 
 class marker;
 struct rasterizer;
-struct aa_renderer;
 
 template <typename T>
 class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
@@ -122,7 +121,7 @@ private:
     buffer_type & pixmap_;
     boost::shared_ptr<buffer_type> internal_buffer_;
     mutable buffer_type * current_buffer_;
-    
+    mutable bool style_level_compositing_;
     unsigned width_;
     unsigned height_;
     double scale_factor_;
@@ -132,11 +131,7 @@ private:
     boost::shared_ptr<label_collision_detector4> detector_;
     boost::scoped_ptr<rasterizer> ras_ptr;
     box2d<double> query_extent_;
-    
     void setup(Map const &m);
-
-    void set_current_buffer(bool per_layer = false);
-    
 };
 }
 

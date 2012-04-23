@@ -29,6 +29,8 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/image_filter.hpp>
 
+// boost
+#include <boost/optional.hpp>
 // stl
 #include <vector>
 
@@ -54,7 +56,7 @@ private:
     // image_filters
     std::vector<filter::filter_type> filters_;
     // comp-op
-    composite_mode_e comp_op_;
+    boost::optional<composite_mode_e> comp_op_;
     // The rule_ptrs vectors are only valid for the scale_denom_validity_.
     double scale_denom_validity_;
     rule_ptrs if_rules_;
@@ -84,7 +86,7 @@ public:
     std::vector<filter::filter_type> & image_filters();
     // compositing
     void set_comp_op(composite_mode_e comp_op);
-    composite_mode_e comp_op() const;     
+    boost::optional<composite_mode_e> comp_op() const;     
     
     ~feature_type_style() {}
 

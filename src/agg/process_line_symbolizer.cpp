@@ -62,8 +62,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
     
     agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
-    //agg::pixfmt_rgba32 pixf(buf);
-    aa_renderer::pixel_format_type pixf(buf);
+   
     box2d<double> ext = query_extent_ * 1.1;
     
     if (sym.get_rasterizer() == RASTERIZER_FAST)
@@ -103,9 +102,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     {        
         ras_ptr->reset();        
         set_gamma_method(stroke_, ras_ptr);
-        aa_renderer ren;
-        ren.attach(pixf);
-        
         //metawriter_with_properties writer = sym.get_metawriter();
         typedef boost::mpl::vector<clip_line_tag,transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
         vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types> 
@@ -129,16 +125,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         
         agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
 
-        if (sym.comp_op() == clear)
+        if (sym.comp_op())
         {
-            aa_renderer::pixfmt_type pixf(buf);
-            aa_renderer ren;
-            ren.attach(pixf);
-            ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
-            ren.render(*ras_ptr);
-        }
-        else
-        {        
             typedef agg::rgba8 color_type;
             typedef agg::order_rgba order_type;
             typedef agg::pixel32_type pixel_type;
@@ -147,12 +135,28 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
             typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;     
             pixfmt_comp_type pixf(buf);
-            pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+            pixf.comp_op(static_cast<agg::comp_op_e>(*sym.comp_op()));
             renderer_base renb(pixf);
             renderer_type ren(renb);
             ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
             agg::scanline_u8 sl;
             agg::render_scanlines(*ras_ptr, sl, ren);
+        }
+        else if (style_level_compositing_)
+        {       
+            agg::pixfmt_rgba32_plain pixf(buf);
+            renderer_scanline_solid<agg::pixfmt_rgba32_plain> ren;
+            ren.attach(pixf);
+            ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
+            ren.render(*ras_ptr);
+        }
+        else
+        {
+            agg::pixfmt_rgba32 pixf(buf);
+            renderer_scanline_solid<agg::pixfmt_rgba32> ren;
+            ren.attach(pixf);
+            ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
+            ren.render(*ras_ptr);
         }
     }
 }
