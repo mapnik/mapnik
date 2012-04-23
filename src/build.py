@@ -365,7 +365,7 @@ else:
 
     # Install symlinks
     target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % \
-        (os.path.basename(env.subst((env['MAPNIK_LIB_NAME'])),int(major), int(minor))))
+        (os.path.basename(env.subst(env['MAPNIK_LIB_NAME'])),int(major), int(minor)))
     target2 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], os.path.basename(env.subst(env['MAPNIK_LIB_NAME'])))
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if 'install' in COMMAND_LINE_TARGETS:
