@@ -43,65 +43,9 @@
 namespace mapnik {
 
 namespace {
-/*
- * this is some nasty stuff. basically, we can't change feature 
- * or copy it by the time the code gets to here, so we have to
- * overlay the data on top and use the template system to hide
- * the fact that we're doing this.
- */
-struct feature_overlay
-{
-   typedef mapnik::value value_type;
-   typedef std::vector<value_type> cont_type;
-
-   feature_overlay(mapnik::feature_ptr const& feature)
-      : feature_(feature),
-        ctx_(new context_type)
-   {}
-
-   value_type const& get(context_type::key_type const &key) const
-   {
-      context_type::map_type::const_iterator itr = ctx_->find(key);
-      if (itr != ctx_->end())
-         return get(itr->second);
-      else
-         return feature_->get(key);
-   }
-
-   value_type const& get(std::size_t index) const
-   {
-      if (index < data_.size())
-         return data_[index];
-      throw std::out_of_range("Index out of range");
-   }
-   
-   template <typename T>
-   void put_new(context_type::key_type const& key, T const& val)
-   {
-      put_new(key,value(val));
-   }
-
-   void put_new(context_type::key_type const& key, value const& val)
-   {
-      context_type::map_type::const_iterator itr = ctx_->find(key);
-      if (itr != ctx_->end()
-          && itr->second < data_.size())
-      {
-         data_[itr->second] = val;
-      }
-      else
-      {
-         cont_type::size_type index = ctx_->push(key);
-         if (index == data_.size())
-            data_.push_back(val);
-      }
-   }   
-   
-   const mapnik::feature_ptr feature_;
-   context_ptr ctx_;
-   cont_type data_;
-};
-
+// needed for replacing check to box placement in the
+// bit of code where we're pre-generating the text 
+// boxes.
 struct true_functor
 {
    bool operator()(box2d<double> const&) const
@@ -177,6 +121,53 @@ struct place_bboxes : public boost::static_visitor<>
    }
 };
 
+/**
+ * visitor to render symbolizers - this is the other
+ * "half" of the process, where the first half is the
+ * placement of the boxes.
+ */
+template <class RendererT>
+struct render_visitor : public boost::static_visitor<>
+{
+   // the actual renderer object - here, an agg_renderer
+   RendererT &renderer_;
+
+   // position to render at
+   // TODO: extend this for text rendering too
+   pixel_position pixel_;
+
+   // the feature we've evaluating
+   Feature const& feature_;
+
+   // some text settings needed for text rendering
+   processed_text &text_;
+
+   double scale_factor_;
+
+   render_visitor(RendererT &renderer,
+                  pixel_position const &pixel,
+                  Feature const &feature,
+                  processed_text &text,
+                  double scale_factor)
+      : renderer_(renderer), pixel_(pixel), feature_(feature), text_(text), scale_factor_(scale_factor)
+   {}
+
+   void operator()(point_symbolizer const &sym) const
+   {
+      symbolizer_with_image_helper helper(sym, feature_);
+      const marker &m = **helper.get_marker();
+      pixel_position pos(pixel_.x - 0.5 * m.width(),
+                         pixel_.y - 0.5 * m.height());
+
+      renderer_.render_marker(pos, m, helper.get_transform(), sym.get_opacity());
+   }
+   
+   template <typename T>
+   void operator()(T const &) const
+   {
+   }
+};
+
 }
 
 template <typename T>
@@ -197,27 +188,37 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 
    // the rules which we'll want to symbolize
    std::vector<const group_rule *> matched_rules;
+   std::vector<size_t> matched_indices;
 
    // filter the right rules to symbolize
+   // figure out what the bboxes should be.
+   std::vector<box2d<double> > boxes;
+   processed_text text(font_manager_, scale_factor_);
+
+   // loop over the columns, finding whether it's possible to
+   // move the columns that each rule/group needs into place.
    for (size_t col_idx = sym.get_column_index_start(); 
         col_idx != sym.get_column_index_end(); ++col_idx)
    {
       bool have_columns = true;
-      
-      // make a copy of feature
-      feature_overlay overlay(feature);
 
+      // ugly nasty cast to be able to change the attributes on
+      // a feature! a better way to do this would be to copy 
+      // and/or facade the feature, but i haven't found a decent
+      // way to do that yet.
+      Feature &mutable_feature = const_cast<Feature&>(*feature);
+      
       // copy over columns
       BOOST_FOREACH(const std::string &col_name, columns)
       {
          const std::string col_idx_name = (boost::format("%1%%2%") % col_name % col_idx).str();
-         const bool have_numbered_column = feature->has_key(col_idx_name);
+         const bool have_numbered_column = mutable_feature.has_key(col_idx_name);
 
          if (have_numbered_column) 
          {
-            overlay.put_new(col_name, feature->get(col_idx_name));
+            mutable_feature.put_new(col_name, mutable_feature.get(col_idx_name));
          }
-         else if (!feature->has_key(col_name))
+         else if (!mutable_feature.has_key(col_name))
          {
             have_columns = false;
             break;
@@ -236,40 +237,108 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
               itr != sym.end(); ++itr)
          {
             const group_rule &rule = *itr;
-            match = boost::apply_visitor(evaluate<feature_overlay,value_type>(overlay), 
+            match = boost::apply_visitor(evaluate<Feature,value_type>(mutable_feature), 
                                               *rule.get_filter()).to_bool();
             if (match)
             {
                // add this to the list of things to layout
                matched_rules.push_back(&rule);
+               matched_indices.push_back(col_idx);
+
+               box2d<double> box;
+               for (group_rule::symbolizers::const_iterator itr = rule.begin();
+                    itr != rule.end(); ++itr)
+               {
+                  boost::apply_visitor(place_bboxes(box, mutable_feature, text, scale_factor_), *itr);
+               }
+
+               boxes.push_back(box);
                break;
             }
          }
       }
    }
 
-   // figure out what the bboxes should be.
-   std::vector<box2d<double> > boxes;
-   processed_text text(font_manager_, scale_factor_);
-
-   BOOST_FOREACH(const group_rule *rule, matched_rules)
+   // lay them out. this is a really simple horizontal
+   // layout and will be replaced soon.
+   double x_width = 0.0;
+   BOOST_FOREACH(const box2d<double> &box, boxes)
    {
-      box2d<double> box;
-      for (group_rule::symbolizers::const_iterator itr = rule->begin();
-           itr != rule->end(); ++itr)
-      {
-         boost::apply_visitor(place_bboxes(box, *feature, text, scale_factor_), *itr);
-      }
-
-      boxes.push_back(box);
+      x_width += box.width();
+   }
+   double x_left = -x_width / 2.0;
+   vector<double> x_offsets;
+   BOOST_FOREACH(const box2d<double> &box, boxes)
+   {
+      x_offsets.push_back(x_left - box.minx());
+      x_left += box.width();
    }
 
-   // lay them out.
-
    // find placements which can accomodate the bboxes.
+   string_info empty_info;
+   text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
+   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, query_extent_);
+   for (size_t i = 0; i < boxes.size(); ++i)
+   {
+      const box2d<double> &box = boxes[i];
+      double offset = x_offsets.at(i);
+      finder.additional_boxes.push_back(box2d<double>(box.minx() + offset, box.miny(),
+                                                      box.maxx() + offset, box.maxy()));
+   }
 
    // for each placement:
    //    render the symbolizer at that point.
+   unsigned int num_geoms = feature->num_geometries();
+   for (unsigned int i = 0; i < num_geoms; ++i)
+   {
+      typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+      typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+
+      geometry_type const &geom = feature->get_geometry(i);
+      clipped_geometry_type clipped(const_cast<geometry_type &>(geom));
+      clipped.clip_box(query_extent_.minx(),query_extent_.miny(),
+                       query_extent_.maxx(),query_extent_.maxy());
+      path_type path(t_, clipped, prj_trans);
+
+      finder.clear_placements();
+      finder.find_point_placements(path);
+      finder.update_detector();
+
+      BOOST_FOREACH(text_path const &p, finder.get_results())
+      {
+         for (size_t j = 0; j < matched_rules.size(); ++j)
+         {
+            const group_rule *rule = matched_rules[j];
+            const size_t col_idx = matched_indices.at(j);
+            pixel_position pos = p.center;
+            pos.x += x_offsets.at(j);
+
+            // again with the nasty mutable feature hack.
+            Feature &mutable_feature = const_cast<Feature&>(*feature);
+            
+            // copy over columns
+            BOOST_FOREACH(const std::string &col_name, columns)
+            {
+               const std::string col_idx_name = (boost::format("%1%%2%") % col_name % col_idx).str();
+               const bool have_numbered_column = mutable_feature.has_key(col_idx_name);
+               
+               if (have_numbered_column) 
+               {
+                  mutable_feature.put_new(col_name, mutable_feature.get(col_idx_name));
+               }
+            }
+            
+            // finally, do the actual rendering.
+            render_visitor<agg_renderer> symbolize(*this, pos, mutable_feature, text, scale_factor_);
+
+            for (group_rule::symbolizers::const_iterator itr = rule->begin();
+                 itr != rule->end(); ++itr)
+            {
+               boost::apply_visitor(symbolize, *itr);
+            }
+         }
+      }
+   }
 }
 
 
