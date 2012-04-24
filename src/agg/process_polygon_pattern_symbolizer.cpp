@@ -53,11 +53,10 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 {
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32> ren_base;
-    
+
+
     agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
-    ren_base renb(pixf);
+    agg::pixfmt_rgba32_plain pixf(buf);
 
     agg::scanline_u8 sl;
     ras_ptr->reset();
@@ -89,19 +88,18 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     typedef agg::wrap_mode_repeat wrap_x_type;
     typedef agg::wrap_mode_repeat wrap_y_type;
-    
     typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
                                          agg::row_accessor<agg::int8u>, agg::pixel32_type> rendering_buffer;
     typedef agg::image_accessor_wrap<rendering_buffer,
                                      wrap_x_type,
                                      wrap_y_type> img_source_type;
-    
     typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
-    
+    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
     typedef agg::renderer_scanline_aa<ren_base,
         agg::span_allocator<agg::rgba8>,
         span_gen_type> renderer_type;
-    
+
+    ren_base renb(pixf);
     unsigned w=(*pat)->width();
     unsigned h=(*pat)->height();
     agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
@@ -109,17 +107,17 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     rendering_buffer pixf_pattern(pattern_rbuf);
     pixf_pattern.premultiply();
     img_source_type img_src(pixf_pattern);
-    
+
     unsigned num_geometries = feature->num_geometries();
 
     pattern_alignment_e align = sym.get_alignment();
     unsigned offset_x=0;
     unsigned offset_y=0;
-
+    
     if (align == LOCAL_ALIGNMENT)
     {
         double x0=0,y0=0;
-        if (num_geometries>0) // FIXME: hmm...?
+        if (num_geometries>0)
         {
             clipped_geometry_type clipped(feature->get_geometry(0));
             clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
@@ -137,22 +135,21 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     box2d<double> inflated_extent = query_extent_ * 1.1;
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
-    vertex_converter<box2d<double>,rasterizer,polygon_pattern_symbolizer, proj_transform, CoordTransform,conv_types> 
+    vertex_converter<box2d<double>,rasterizer,polygon_pattern_symbolizer, proj_transform, CoordTransform,conv_types>
         converter(inflated_extent,*ras_ptr,sym,t_,prj_trans);
     
-    //if (sym.clip()) 
-    converter.set<clip_poly_tag>(); //optional clip (default: true) 
-    converter.set<transform_tag>(); //always transform 
+    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    converter.set<transform_tag>(); //always transform
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     BOOST_FOREACH( geometry_type & geom, feature->paths())
     {
         if (geom.num_points() > 2)
         {
-            converter.apply(geom);        
+            converter.apply(geom);
         }
     }
-    
+
     agg::render_scanlines(*ras_ptr, sl, rp);
 }
 

@@ -47,7 +47,8 @@ public:
         : properties_(),
         properties_complete_(),
         writer_name_(),
-        writer_ptr_()
+        writer_ptr_(),
+        clip_(true)
         {
             affine_transform_[0] = 1.0;
             affine_transform_[1] = 0.0;
@@ -59,7 +60,8 @@ public:
     
     symbolizer_base(symbolizer_base const& other)
         : comp_op_(other.comp_op_),
-        affine_transform_(other.affine_transform_) {}
+        affine_transform_(other.affine_transform_),
+        clip_(other.clip_) {}
     
     /** Add a metawriter to this symbolizer using a name. */
     void add_metawriter(std::string const& name, metawriter_properties const& properties);
@@ -94,12 +96,13 @@ public:
     metawriter_properties const& get_metawriter_properties_overrides() const { return properties_; }
     /** Get metawriter name. */
     std::string const& get_metawriter_name() const { return writer_name_; }
-
     void set_comp_op(composite_mode_e comp_op);
     boost::optional<composite_mode_e> comp_op() const;
     void set_transform(transform_type const& );
     transform_type const& get_transform() const;
     std::string get_transform_string() const;
+    void set_clip(bool clip);
+    bool clip() const;
 private:
     metawriter_properties properties_;
     metawriter_properties properties_complete_;
@@ -107,6 +110,7 @@ private:
     metawriter_ptr writer_ptr_;
     boost::optional<composite_mode_e> comp_op_;
     transform_type affine_transform_;
+    bool clip_;
 };
 
 

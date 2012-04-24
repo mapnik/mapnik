@@ -46,8 +46,6 @@ struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
     gamma_method_e get_gamma_method() const;
     void set_smooth(double smooth);
     double smooth() const;
-    void set_clip(bool clip);
-    bool clip() const;
 private:
     color fill_;
     double opacity_;

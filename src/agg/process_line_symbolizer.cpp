@@ -107,8 +107,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types> 
             converter(ext,*ras_ptr,sym,t_,prj_trans);
         
-        //if (sym.clip()) 
-        converter.set<clip_line_tag>(); //FIXME make an optinal clip (default: true) 
+        if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true) 
         converter.set<transform_tag>(); //always transform
         converter.set<affine_transform_tag>(); // optional affine transform
         if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter

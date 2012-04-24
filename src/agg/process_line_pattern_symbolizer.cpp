@@ -90,9 +90,9 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     vertex_converter<box2d<double>,rasterizer_type,line_pattern_symbolizer, proj_transform, CoordTransform, conv_types> 
         converter(ext,ras,sym,t_,prj_trans);
     
-    converter.set<clip_line_tag>(); //FIXME make an optinal clip (default: true) 
+    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform 
-    //if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter FIXME !
+    //if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // FIXME optional smooth converter
     
     BOOST_FOREACH(geometry_type & geom, feature->paths())
     {

@@ -99,6 +99,18 @@ std::string symbolizer_base::get_transform_string() const
     return ss.str();
 }
 
+void symbolizer_base::set_clip(bool clip)
+{
+    clip_ = clip;
+}
+
+bool symbolizer_base::clip() const
+{
+    return clip_;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
     : image_filename_( file ),

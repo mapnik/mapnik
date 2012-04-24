@@ -805,6 +805,9 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node c
         sym.set_transform(matrix);
     }
     
+    optional<boolean> clip = pt.get_opt_attr<boolean>("clip");
+    if (clip) sym.set_clip(*clip);
+    
     optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
     if (!writer) return;
     optional<std::string> output = pt.get_opt_attr<std::string>("meta-output");
@@ -1379,11 +1382,7 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
         // smooth value
         optional<double> smooth = sym.get_opt_attr<double>("smooth");
         if (smooth) poly_sym.set_smooth(*smooth);
-
-        // to clip or not to clip value
-        //optional<bool> clip = sym.get_opt_attr<bool>("clip");
-        //if (clip) poly_sym.set_clip(*clip);
-
+        
         parse_metawriter_in_symbolizer(poly_sym, sym);
         rule.append(poly_sym);
     }
