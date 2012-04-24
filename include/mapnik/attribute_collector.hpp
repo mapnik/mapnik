@@ -29,6 +29,7 @@
 #include <boost/utility.hpp>
 #include <boost/variant.hpp>
 #include <boost/concept_check.hpp>
+#include <boost/format.hpp>
 // stl
 #include <set>
 #include <iostream>
@@ -174,6 +175,9 @@ struct symbolizer_attributes : public boost::static_visitor<>
         }
         collect_metawriter(sym);
     }
+
+    void operator () (group_symbolizer const& sym);
+
     // TODO - support remaining syms
 
 private:
@@ -227,6 +231,31 @@ struct directive_collector : public boost::static_visitor<>
 private:
     double * filter_factor_;
 };
+
+inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
+{
+     // find unindexed column names in the group rules and symbolizers
+     std::set<std::string> group_columns;
+     attribute_collector column_collector(group_columns);
+     for (group_symbolizer::rules::const_iterator ruleItr = sym.begin();
+          ruleItr != sym.end(); ++ruleItr)
+     {
+         column_collector(*ruleItr);
+     }
+
+     // insert each column name appended with each index value
+     // these are the actual column names needed from the data
+     BOOST_FOREACH(const std::string &col_name, group_columns)
+     {
+         for (size_t col_idx = sym.get_column_index_start(); 
+              col_idx != sym.get_column_index_end(); ++col_idx)
+         {
+             names_.insert((boost::format("%1%%2%") % col_name % col_idx).str());
+         }
+     }
+
+     collect_metawriter(sym);
+}
 
 } // namespace mapnik
 
