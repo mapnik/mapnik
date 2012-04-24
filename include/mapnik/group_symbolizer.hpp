@@ -27,6 +27,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/group_rule.hpp>
+#include <mapnik/group_layout.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -46,6 +47,7 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
 
    explicit group_symbolizer(size_t column_index_start, 
                              size_t column_index_end,
+                             const group_layout &layout = simple_row_layout(),
                              text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
 
    text_placements_ptr get_placement_options() const;
@@ -78,6 +80,16 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
       return column_index_end_;
    }
 
+   inline const group_layout &get_layout() const
+   {
+      return layout_;
+   }
+
+   inline void set_layout_(const group_layout &layout)
+   {
+      layout_ = layout;
+   }
+
 private:
 
    // start and end column indexes
@@ -85,6 +97,9 @@ private:
 
    // placement parameters?
    text_placements_ptr placements_;
+
+   // object to represent the type of layout for the group, and it's parameters
+   group_layout layout_;
 
    // the rules which are evaluated as part of the symbolizer
    rules group_rules_;

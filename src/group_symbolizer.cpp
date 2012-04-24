@@ -31,9 +31,11 @@ namespace mapnik
 
 group_symbolizer::group_symbolizer(size_t column_index_start, 
                                    size_t column_index_end,
+                                   const group_layout &layout,
                                    text_placements_ptr placements)
    : column_index_start_(column_index_start),
      column_index_end_(column_index_end),
+     layout_(layout),
      placements_(placements)
 {
 }
