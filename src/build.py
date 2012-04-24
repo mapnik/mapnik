@@ -352,15 +352,14 @@ else:
     target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], soFile)
 
     if 'uninstall' not in COMMAND_LINE_TARGETS:
-        if 'install' in COMMAND_LINE_TARGETS:
-            if env['LINKING'] == 'static':
-                mapnik = lib_env.StaticLibrary('mapnik', source, LINKFLAGS=linkflags)
-            else:
-                mapnik = lib_env.SharedLibrary('mapnik', source, LINKFLAGS=linkflags)
-            result = env.InstallAs(target=target, source=mapnik)
-            env.Alias(target='install', source=result)
-            if result:
-                  env.AddPostAction(result, ldconfig)
+        if env['LINKING'] == 'static':
+            mapnik = lib_env.StaticLibrary('mapnik', source, LINKFLAGS=linkflags)
+        else:
+            mapnik = lib_env.SharedLibrary('mapnik', source, LINKFLAGS=linkflags)
+        result = env.InstallAs(target=target, source=mapnik)
+        env.Alias(target='install', source=result)
+        if result:
+              env.AddPostAction(result, ldconfig)
 
 
     # Install symlinks
@@ -368,11 +367,10 @@ else:
         (os.path.basename(env.subst(env['MAPNIK_LIB_NAME'])),int(major), int(minor)))
     target2 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], os.path.basename(env.subst(env['MAPNIK_LIB_NAME'])))
     if 'uninstall' not in COMMAND_LINE_TARGETS:
-        if 'install' in COMMAND_LINE_TARGETS:
-            link1 = env.Command(target1, target, symlink)
-            env.Alias(target='install', source=link1)
-            link2 = env.Command(target2, target1, symlink)
-            env.Alias(target='install', source=link2)
+        link1 = env.Command(target1, target, symlink)
+        env.Alias(target='install', source=link1)
+        link2 = env.Command(target2, target1, symlink)
+        env.Alias(target='install', source=link2)
     # delete in reverse order..
     env['create_uninstall_target'](env, target2)
     env['create_uninstall_target'](env, target1)
@@ -397,15 +395,14 @@ text_placements_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/ma
 formatting_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/formatting')
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:
-    if 'install' in COMMAND_LINE_TARGETS:
-        env.Alias(target='install', source=env.Install(inc_target, includes))
-        env.Alias(target='install', source=env.Install(svg_inc_target, svg_includes))
-        env.Alias(target='install', source=env.Install(wkt_inc_target, wkt_includes))
-        env.Alias(target='install', source=env.Install(grid_inc_target, grid_includes))
-        env.Alias(target='install', source=env.Install(json_inc_target, json_includes))
-        env.Alias(target='install', source=env.Install(util_inc_target, util_includes))
-        env.Alias(target='install', source=env.Install(text_placements_inc_target, text_placements_includes))
-        env.Alias(target='install', source=env.Install(formatting_inc_target, formatting_includes))
+    env.Alias(target='install', source=env.Install(inc_target, includes))
+    env.Alias(target='install', source=env.Install(svg_inc_target, svg_includes))
+    env.Alias(target='install', source=env.Install(wkt_inc_target, wkt_includes))
+    env.Alias(target='install', source=env.Install(grid_inc_target, grid_includes))
+    env.Alias(target='install', source=env.Install(json_inc_target, json_includes))
+    env.Alias(target='install', source=env.Install(util_inc_target, util_includes))
+    env.Alias(target='install', source=env.Install(text_placements_inc_target, text_placements_includes))
+    env.Alias(target='install', source=env.Install(formatting_inc_target, formatting_includes))
 
 env['create_uninstall_target'](env, inc_target)
 env['create_uninstall_target'](env, svg_inc_target)
