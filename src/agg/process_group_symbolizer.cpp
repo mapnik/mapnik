@@ -86,6 +86,7 @@ struct place_bboxes : public boost::static_visitor<>
    void operator()(text_symbolizer const& sym) const
    {
       text_placement_info_ptr placement_ = sym.get_placement_options()->get_placement_info(scale_factor_);
+      placement_->properties.process(text_, feature_);
       string_info *info_ = &(text_.get_string_info());
 
       text_place_boxes_at_point box_placer(*placement_, *info_);
@@ -144,12 +145,20 @@ struct render_visitor : public boost::static_visitor<>
 
    double scale_factor_;
 
+   face_manager<freetype_engine> &font_manager_;
+
+   image_32 &pixmap_;
+
    render_visitor(RendererT &renderer,
                   pixel_position const &pixel,
                   Feature const &feature,
                   processed_text &text,
-                  double scale_factor)
-      : renderer_(renderer), pixel_(pixel), feature_(feature), text_(text), scale_factor_(scale_factor)
+                  double scale_factor,
+                  face_manager<freetype_engine> &font_manager,
+                  image_32 &pixmap)
+      : renderer_(renderer), pixel_(pixel), feature_(feature), text_(text), 
+        scale_factor_(scale_factor), font_manager_(font_manager),
+        pixmap_(pixmap)
    {}
 
    void operator()(point_symbolizer const &sym) const
@@ -160,6 +169,24 @@ struct render_visitor : public boost::static_visitor<>
                          pixel_.y - 0.5 * m.height());
 
       renderer_.render_marker(pos, m, helper.get_transform(), sym.get_opacity());
+   }
+
+   void operator()(text_symbolizer const &sym) const
+   {
+      text_placement_info_ptr placement_ = sym.get_placement_options()->get_placement_info(scale_factor_);
+      placement_->properties.process(text_, feature_);
+      string_info *info_ = &(text_.get_string_info());
+
+      text_place_boxes_at_point box_placer(*placement_, *info_);
+      true_functor check;
+      std::auto_ptr<text_path> current_placement(new text_path(pixel_.x, pixel_.y));
+
+      box_placer.check_point_placement(check, current_placement.get(), 0, 0, 0);
+
+      text_renderer<image_32> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
+      
+      ren.prepare_glyphs(current_placement.get());
+      ren.render(current_placement->center);
    }
    
    template <typename T>
@@ -329,7 +356,9 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
             }
             
             // finally, do the actual rendering.
-            render_visitor<agg_renderer> symbolize(*this, pos, mutable_feature, text, scale_factor_);
+            render_visitor<agg_renderer> symbolize(*this, pos, mutable_feature, text, 
+                                                   scale_factor_, font_manager_,
+                                                   pixmap_);
 
             for (group_rule::symbolizers::const_iterator itr = rule->begin();
                  itr != rule->end(); ++itr)
