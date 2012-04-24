@@ -146,9 +146,9 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
     {
 #if (BOOST_FILESYSTEM_VERSION == 3)
-        std::string const& file_name = itr->path().string();
+        std::string file_name = itr->path().string();
 #else // v2
-        std::string const& file_name = itr->string();
+        std::string file_name = itr->string();
 #endif
         if (boost::filesystem::is_directory(*itr) && recurse)
         {
@@ -157,9 +157,9 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
         else
         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
-            std::string const& base_name = itr->path().filename().string();
+            std::string base_name = itr->path().filename().string();
 #else // v2
-            std::string const& base_name = itr->filename();
+            std::string base_name = itr->filename();
 #endif
             if (!boost::algorithm::starts_with(base_name,".") &&
                      boost::filesystem::is_regular_file(file_name) &&
