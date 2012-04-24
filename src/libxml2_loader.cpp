@@ -135,13 +135,13 @@ public:
             xmlError * error = xmlCtxtGetLastError( ctx_ );
             std::ostringstream os;
             os << "XML document not well formed";
-	    int line=0;
-	    std::string file;
+            int line=0;
+            std::string file;
             if (error)
             {
                 os << ": " << std::endl << error->message;
-		line = error->line;
-		file = error->file;
+                line = error->line;
+                file = error->file;
             }
             throw config_error(os.str(), line, file);
         }
