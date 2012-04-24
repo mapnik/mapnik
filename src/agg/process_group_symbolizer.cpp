@@ -30,6 +30,7 @@
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/placement_finder.hpp>
+#include <mapnik/group_layout_manager.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
@@ -217,9 +218,10 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    std::vector<const group_rule *> matched_rules;
    std::vector<size_t> matched_indices;
 
-   // filter the right rules to symbolize
-   // figure out what the bboxes should be.
-   std::vector<box2d<double> > boxes;
+   // filter the right rules to symbolize.
+   // figure out what the bboxes should be 
+   //   and add them to layout manager.
+   group_layout_manager layout_manager(sym.get_layout());
    processed_text text(font_manager_, scale_factor_);
 
    // loop over the columns, finding whether it's possible to
@@ -268,10 +270,11 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
                                               *rule.get_filter()).to_bool();
             if (match)
             {
-               // add this to the list of things to layout
+               // add this to the list of things to draw
                matched_rules.push_back(&rule);
                matched_indices.push_back(col_idx);
 
+               // construct a bounding box around all symbolizers for the matched rule
                box2d<double> box;
                for (group_rule::symbolizers::const_iterator itr = rule.begin();
                     itr != rule.end(); ++itr)
@@ -279,38 +282,21 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
                   boost::apply_visitor(place_bboxes(box, mutable_feature, text, scale_factor_), *itr);
                }
 
-               boxes.push_back(box);
+               // add the bounding box to the layout manager
+               layout_manager.add_member_bound_box(box);
                break;
             }
          }
       }
    }
 
-   // lay them out. this is a really simple horizontal
-   // layout and will be replaced soon.
-   double x_width = 0.0;
-   BOOST_FOREACH(const box2d<double> &box, boxes)
-   {
-      x_width += box.width();
-   }
-   double x_left = -x_width / 2.0;
-   vector<double> x_offsets;
-   BOOST_FOREACH(const box2d<double> &box, boxes)
-   {
-      x_offsets.push_back(x_left - box.minx());
-      x_left += box.width();
-   }
-
-   // find placements which can accomodate the bboxes.
+   // find placements which can accomodate the offset bboxes from the layout manager.
    string_info empty_info;
    text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
    placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, query_extent_);
-   for (size_t i = 0; i < boxes.size(); ++i)
+   for (size_t i = 0; i < matched_rules.size(); ++i)
    {
-      const box2d<double> &box = boxes[i];
-      double offset = x_offsets.at(i);
-      finder.additional_boxes.push_back(box2d<double>(box.minx() + offset, box.miny(),
-                                                      box.maxx() + offset, box.maxy()));
+      finder.additional_boxes.push_back(layout_manager.offset_box_at(i));
    }
 
    // for each placement:
@@ -338,7 +324,9 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
             const group_rule *rule = matched_rules[j];
             const size_t col_idx = matched_indices.at(j);
             pixel_position pos = p.center;
-            pos.x += x_offsets.at(j);
+            const layout_offset &offset = layout_manager.offset_at(j);
+            pos.x += offset.x;
+            pos.y += offset.y;
 
             // again with the nasty mutable feature hack.
             Feature &mutable_feature = const_cast<Feature&>(*feature);
