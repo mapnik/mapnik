@@ -126,7 +126,7 @@ struct MAPNIK_DECL group_layout_manager
         return member_offsets_.at(i);
     }
     
-    const bound_box &offset_box_at(size_t i)
+    bound_box offset_box_at(size_t i)
     {
         handle_update();
         const layout_offset &offset = member_offsets_.at(i);
