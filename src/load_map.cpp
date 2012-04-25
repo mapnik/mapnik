@@ -1022,25 +1022,34 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const &sym)
 
 void map_parser::parse_group_layout(group_symbolizer &sym, xml_node const &nd)
 {
-   // by default, a simple layout
-   std::string layout_name = nd.get_attr<std::string>("layout", "simple");
-   if (layout_name == "simple")
+   xml_node const* simple_child = nd.get_opt_child("SimpleLayout");
+   xml_node const* pair_child   = nd.get_opt_child("PairLayout");
+
+   size_t count = 0;
+   if (simple_child)
    {
       simple_row_layout layout;
 
-      optional<double> item_margin = nd.get_opt_attr<double>("item-margin");
+      optional<double> item_margin = simple_child->get_opt_attr<double>("item-margin");
       if (item_margin) layout.set_item_margin(*item_margin);
 
       sym.set_layout(layout);
+      ++count;
    }
-   else if (layout_name == "pair")
+
+   if (pair_child)
    {
+      if (count > 0) 
+      {
+         throw config_error("Provide only one layout in a GroupSymbolizer.");
+      }
+
       pair_layout layout;
 
-      optional<double> item_margin = nd.get_opt_attr<double>("item-margin");
+      optional<double> item_margin = pair_child->get_opt_attr<double>("item-margin");
       if (item_margin) layout.set_item_margin(*item_margin);
 
-      optional<double> max_difference = nd.get_opt_attr<double>("max-difference");
+      optional<double> max_difference = pair_child->get_opt_attr<double>("max-difference");
       if (max_difference) layout.set_max_difference(*max_difference);
 
       sym.set_layout(layout);
