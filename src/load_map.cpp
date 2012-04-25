@@ -430,22 +430,45 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         }
 
         // image filters
+
+        mapnik::image_filter_grammar<std::string::const_iterator,
+                                     std::vector<mapnik::filter::filter_type> > filter_grammar;
+        
         optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
             std::string filter_mode = *filters;
-            if (filter_mode.empty())
-            {
-                throw config_error("failed to parse empty image-filter");
-            }
             std::string::const_iterator itr = filter_mode.begin();
             std::string::const_iterator end = filter_mode.end();
-            mapnik::image_filter_grammar<std::string::const_iterator,std::vector<mapnik::filter::filter_type> > g;
+            
 
-            bool result = boost::spirit::qi::phrase_parse(itr,end, g, boost::spirit::qi::ascii::space, style.image_filters());
+            bool result = boost::spirit::qi::phrase_parse(itr,end, 
+                                                          filter_grammar, 
+                                                          boost::spirit::qi::ascii::space, 
+                                                          style.image_filters());
             if (!result || itr!=end)
             {
-                throw config_error("failed to parse image-filter: '" + std::string(itr,end) + "'");
+                throw config_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
+            }            
+        }
+        
+        // direct image filters (applied directly on main image buffer 
+        // TODO : consider creating a separate XML node e.g 
+        // <ImageFilter name="myfilter" op="blur emboss"/> 
+        // 
+        optional<std::string> direct_filters = sty.get_opt_attr<std::string>("direct-image-filters");
+        if (direct_filters)
+        {
+            std::string filter_mode = *direct_filters;
+            std::string::const_iterator itr = filter_mode.begin();
+            std::string::const_iterator end = filter_mode.end();                        
+            bool result = boost::spirit::qi::phrase_parse(itr,end, 
+                                                          filter_grammar, 
+                                                          boost::spirit::qi::ascii::space, 
+                                                          style.direct_image_filters());
+            if (!result || itr!=end)
+            {
+                throw config_error("failed to parse direct-image-filters: '" + std::string(itr,end) + "'");
             }            
         }
         
