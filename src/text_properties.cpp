@@ -126,8 +126,13 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     }
 
     format.from_xml(sym, fontsets);
-    formatting::node_ptr n(formatting::node::from_xml(sym));
-    if (n) set_format_tree(n);
+    // ugly hack, but GroupSymbolizer doesn't directly embed any
+    // text.
+    if (!sym.is("GroupSymbolizer"))
+    {
+       formatting::node_ptr n(formatting::node::from_xml(sym));
+       if (n) set_format_tree(n);
+    }
 }
 
 void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
