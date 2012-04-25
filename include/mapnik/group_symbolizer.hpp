@@ -85,7 +85,7 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
       return layout_;
    }
 
-   inline void set_layout_(const group_layout &layout)
+   inline void set_layout(const group_layout &layout)
    {
       layout_ = layout;
    }

@@ -42,7 +42,7 @@ public:
       return item_margin_;
    }
 
-   void set_itme_margin(double item_margin)
+   void set_item_margin(double item_margin)
    {
       item_margin_ = item_margin;
    }
