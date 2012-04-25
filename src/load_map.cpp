@@ -101,6 +101,8 @@ private:
     void parse_font(font_set & fset, xml_node const& f);
 
     void parse_rule(feature_type_style & style, xml_node const & r);
+    void parse_group_rule(group_symbolizer &sym, xml_node const &r);
+    void parse_group_layout(group_symbolizer &sym, xml_node const &nd);
 
     void parse_point_symbolizer(rule & rule, xml_node const& sym);
     void parse_line_pattern_symbolizer(rule & rule, xml_node const& sym);
@@ -112,6 +114,7 @@ private:
     void parse_building_symbolizer(rule & rule, xml_node const& sym);
     void parse_raster_symbolizer(rule & rule, xml_node const& sym);
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
+    void parse_group_symbolizer(rule &rule, xml_node const& sym);
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     void parse_stroke(stroke & strk, xml_node const & sym);
@@ -120,6 +123,7 @@ private:
     void find_unused_nodes(xml_node const& root);
     void find_unused_nodes_recursive(xml_node const& node, std::stringstream &error_text);
 
+    void parse_symbolizer(rule &rule, xml_node::const_iterator &symIter);
 
     std::string ensure_relative_to_xml(boost::optional<std::string> opt_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
@@ -645,6 +649,54 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
     }
 }
 
+void map_parser::parse_symbolizer(rule &rule, xml_node::const_iterator &symIter)
+{
+   if (symIter->is("PointSymbolizer"))
+   {
+      parse_point_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("LinePatternSymbolizer"))
+   {
+      parse_line_pattern_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("PolygonPatternSymbolizer"))
+   {
+      parse_polygon_pattern_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("TextSymbolizer"))
+   {
+      parse_text_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("ShieldSymbolizer"))
+   {
+      parse_shield_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("LineSymbolizer"))
+   {
+      parse_line_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("PolygonSymbolizer"))
+   {
+      parse_polygon_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("BuildingSymbolizer"))
+   {
+      parse_building_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("RasterSymbolizer"))
+   {
+      parse_raster_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("MarkersSymbolizer"))
+   {
+      parse_markers_symbolizer(rule, *symIter);
+   }
+   else if (symIter->is("GroupSymbolizer"))
+   {
+      parse_group_symbolizer(rule, *symIter);
+   }
+}
+
 void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
 {
     std::string name;
@@ -686,47 +738,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
 
         for(;symIter != endSym; ++symIter)
         {
-
-            if (symIter->is("PointSymbolizer"))
-            {
-                parse_point_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("LinePatternSymbolizer"))
-            {
-                parse_line_pattern_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("PolygonPatternSymbolizer"))
-            {
-                parse_polygon_pattern_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("TextSymbolizer"))
-            {
-                parse_text_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("ShieldSymbolizer"))
-            {
-                parse_shield_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("LineSymbolizer"))
-            {
-                parse_line_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("PolygonSymbolizer"))
-            {
-                parse_polygon_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("BuildingSymbolizer"))
-            {
-                parse_building_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("RasterSymbolizer"))
-            {
-                parse_raster_symbolizer(rule, *symIter);
-            }
-            else if (symIter->is("MarkersSymbolizer"))
-            {
-                parse_markers_symbolizer(rule, *symIter);
-            }
+           parse_symbolizer(rule, symIter);
         }
         style.add_rule(rule);
 
@@ -971,6 +983,103 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         throw;
     }
 }
+
+void map_parser::parse_group_symbolizer(rule &rule, xml_node const &sym)
+{
+   try
+   {
+      unsigned num_columns = sym.get_attr<unsigned>("num-columns");
+      unsigned start_column = sym.get_attr<unsigned>("start-column", 1);
+
+      group_symbolizer symbol(start_column, start_column + num_columns);
+
+      parse_group_layout(symbol, sym);
+
+      text_placements_ptr placements = boost::make_shared<text_placements_dummy>();
+      placements->defaults.from_xml(sym, fontsets_);
+      symbol.set_placement_options(placements);
+
+      xml_node::const_iterator ruleIter = sym.begin();
+      xml_node::const_iterator endRule = sym.end();
+      
+      for(;ruleIter != endRule; ++ruleIter)
+      {
+         if (ruleIter->is("GroupRule"))
+         {
+            parse_group_rule(symbol, *ruleIter);
+         }
+      }
+
+      parse_metawriter_in_symbolizer(symbol, sym);
+      rule.append(symbol);
+   }
+   catch (const config_error & ex)
+   {
+      ex.append_context("in GroupSymbolizer", sym);
+      throw;
+   }
+}
+
+void map_parser::parse_group_layout(group_symbolizer &sym, xml_node const &nd)
+{
+   // by default, a simple layout
+   std::string layout_name = nd.get_attr<std::string>("layout", "simple");
+   if (layout_name == "simple")
+   {
+      simple_row_layout layout;
+
+      optional<double> item_margin = nd.get_opt_attr<double>("item-margin");
+      if (item_margin) layout.set_item_margin(*item_margin);
+
+      sym.set_layout(layout);
+   }
+   else if (layout_name == "pair")
+   {
+      pair_layout layout;
+
+      optional<double> item_margin = nd.get_opt_attr<double>("item-margin");
+      if (item_margin) layout.set_item_margin(*item_margin);
+
+      optional<double> max_difference = nd.get_opt_attr<double>("max-difference");
+      if (max_difference) layout.set_max_difference(*max_difference);
+
+      sym.set_layout(layout);
+   }
+}
+
+void map_parser::parse_group_rule(group_symbolizer &sym, xml_node const &r)
+{
+   try 
+   {
+      rule fake_rule;
+
+      expression_ptr filter = r.get_attr<expression_ptr>("filter");
+      group_rule rule(filter);
+
+      xml_node::const_iterator symIter = r.begin();
+      xml_node::const_iterator endSym = r.end();
+      
+      for(;symIter != endSym; ++symIter)
+      {
+         parse_symbolizer(fake_rule, symIter);
+      }
+
+      size_t count = 0;
+      for (rule::symbolizers::iterator itr = fake_rule.begin();
+           itr != fake_rule.end(); ++itr) 
+      {
+         ++count;
+         rule.append(*itr);
+      }
+
+      sym.add_rule(rule);
+   }
+   catch (const config_error & ex)
+   {
+      ex.append_context("in GroupRule", r);
+      throw;
+   }
+}   
 
 void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym)
 {
