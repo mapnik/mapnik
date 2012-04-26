@@ -242,7 +242,6 @@ else:
     LIBDIR_SCHEMA='lib'
 
 
-    
 def pretty_dep(dep):
     pretty = pretty_dep_names.get(dep)
     if pretty:
