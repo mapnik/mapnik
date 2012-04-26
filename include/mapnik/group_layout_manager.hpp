@@ -32,9 +32,8 @@
 #include <boost/foreach.hpp>
 #include <boost/variant.hpp>
 
-//std
+// std
 #include <cmath>
-#include <limits>
 
 // stl
 #include <vector>
@@ -46,12 +45,11 @@ namespace mapnik
 
 typedef box2d<double> bound_box;
 typedef coord<double,2> layout_offset;
-//typedef vector<bound_box> bound_box_vector;
-//typedef vector<layout_offset> layout_vector<layout_offset>;
 
 // This visitor will process offsets for the given layout
 struct process_layout : public boost::static_visitor<>
 {
+
     // The vector containing the existing, centered item bounding boxes
     const vector<bound_box> &member_boxes_;
     
@@ -65,7 +63,7 @@ struct process_layout : public boost::static_visitor<>
     {
     }
 
-    // Arrange group memebers in centered, horizontal row
+    // arrange group memebers in centered, horizontal row
     void operator()(simple_row_layout const& layout) const
     {
         double total_width = (member_boxes_.size() - 1) * layout.get_item_margin();
@@ -83,10 +81,80 @@ struct process_layout : public boost::static_visitor<>
         }
     }
 
+    // arrange group members in x horizontal pairs of 2,
+    // one to the left and one to the right of center in each pair
     void operator()(pair_layout const& layout) const
     {
-        // Implemention in progress
         member_offsets_.resize(member_boxes_.size());
+        double y_margin = layout.get_item_margin();
+        double x_margin = y_margin / 2.0;
+
+        if (member_boxes_.size() == 1)
+        {
+            member_offsets_[0] = layout_offset(0, 0);
+            return;
+        }
+
+        bound_box layout_box;
+        int middle_ifirst = (member_boxes_.size() - 1) >> 1, top_i = 0, bottom_i = 0;
+        if (middle_ifirst % 2 == 0)
+        {
+            layout_box = make_horiz_pair(0, 0.0, 0, x_margin, layout.get_max_difference());
+            top_i = middle_ifirst - 2;
+            bottom_i = middle_ifirst + 2;
+        }
+        else
+        {
+            top_i = middle_ifirst - 1;
+            bottom_i = middle_ifirst + 1;
+        }
+
+        while (bottom_i >= 0 && top_i < member_offsets_.size())
+        {
+            layout_box.expand_to_include(make_horiz_pair(top_i, layout_box.miny() - y_margin, -1, x_margin, layout.get_max_difference()));
+            layout_box.expand_to_include(make_horiz_pair(bottom_i, layout_box.maxy() + y_margin, 1, x_margin, layout.get_max_difference()));
+            top_i -= 2;
+            bottom_i += 2;
+        }
+
+    }
+  
+private:
+
+    // Place member bound boxes at [ifirst] and [ifirst + 1] in a horizontal pairi, vertically
+    //   align with pair_y, store corresponding offsets, and return bound box of combined pair
+    // Note: x_margin is the distance between box edge and x center
+    bound_box make_horiz_pair(size_t ifirst, double pair_y, int y_dir, double x_margin, double max_diff) const
+    {
+        // two boxes available for pair
+        if (ifirst + 1 < member_boxes_.size())
+        {
+            double x_center = member_boxes_[ifirst].width() - member_boxes_[ifirst + 1].width();
+            if (max_diff < 0.0 || std::abs(x_center) <= max_diff)
+            {
+                x_center = 0.0;
+            }
+
+            bound_box pair_box = box_offset_align(ifirst, x_center - x_margin, pair_y, -1, y_dir);
+            pair_box.expand_to_include(box_offset_align(ifirst + 1, x_center + x_margin, pair_y, 1, y_dir));
+            return pair_box;
+        }
+        
+        // only one box available for this "pair", so keep x-centered and handle y-offset
+        return box_offset_align(ifirst, 0, pair_y, 0, y_dir);
+    }
+
+
+    // Offsets member bound box at [i] and align with (x, y), in direction <x_dir, y_dir>
+    // stores corresponding offset, and returns modified bounding box
+    bound_box box_offset_align(size_t i, double x, double y, int x_dir, int y_dir) const
+    {
+        const bound_box &box = member_boxes_[i];
+        layout_offset offset((x_dir == 0 ? x : x - (x_dir < 0 ? box.maxx() : box.minx())),
+                             (y_dir == 0 ? y : y - (y_dir < 0 ? box.maxy() : box.miny())));
+
+        member_offsets_[i] = offset;
+        return bound_box(box.minx() + offset.x, box.miny() + offset.y, box.maxx() + offset.x, box.maxy() + offset.y);
     }
 };
 

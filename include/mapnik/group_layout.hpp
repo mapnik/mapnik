@@ -54,9 +54,9 @@ private:
 struct pair_layout
 {
 public:
-   pair_layout(double item_margin = 1.0, double max_difference = 0.0)
-      : item_margin_(1.0),
-        max_difference_(0.0)
+   pair_layout(double item_margin = 1.0, double max_difference = - 1.0)
+      : item_margin_(item_margin),
+        max_difference_(max_difference)
    {
    }
 
