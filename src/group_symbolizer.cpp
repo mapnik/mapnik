@@ -29,12 +29,12 @@
 namespace mapnik
 {
 
-group_symbolizer::group_symbolizer(size_t column_index_start, 
-                                   size_t column_index_end,
+group_symbolizer::group_symbolizer(size_t column_index_count,
+                                   size_t column_index_start, 
                                    const group_layout &layout,
                                    text_placements_ptr placements)
-   : column_index_start_(column_index_start),
-     column_index_end_(column_index_end),
+   : column_index_count_(column_index_count),
+     column_index_start_(column_index_start),
      layout_(layout),
      placements_(placements)
 {

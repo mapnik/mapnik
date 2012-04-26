@@ -988,10 +988,13 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const &sym)
 {
    try
    {
-      unsigned num_columns = sym.get_attr<unsigned>("num-columns");
-      unsigned start_column = sym.get_attr<unsigned>("start-column", 1);
+      group_symbolizer symbol;
 
-      group_symbolizer symbol(start_column, start_column + num_columns);
+      unsigned num_columns = sym.get_attr<unsigned>("num-columns");
+      symbol.set_column_index_count(num_columns);
+
+      optional<unsigned> start_column = sym.get_opt_attr<unsigned>("start-column");
+      if (start_column) symbol.set_column_index_start(*start_column);
 
       parse_group_layout(symbol, sym);
 

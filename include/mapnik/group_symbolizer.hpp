@@ -45,11 +45,11 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
 {
    typedef std::vector<mapnik::group_rule> rules;
 
-   explicit group_symbolizer(size_t column_index_start, 
-                             size_t column_index_end,
-                             const group_layout &layout = simple_row_layout(),
-                             text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
-
+   group_symbolizer(size_t column_index_count = 0,
+                    size_t column_index_start = 1, 
+                    const group_layout &layout = simple_row_layout(),
+                    text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
+   
    text_placements_ptr get_placement_options() const;
    void set_placement_options(text_placements_ptr placement_options);
 
@@ -75,9 +75,24 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
       return column_index_start_;
    }
 
+   inline void set_column_index_start(size_t i)
+   {
+      column_index_start_ = i;
+   }
+
+   inline size_t get_column_index_count() const
+   {
+      return column_index_count_;
+   }
+
+   inline void set_column_index_count(size_t i)
+   {
+      column_index_count_ = i;
+   }
+
    inline size_t get_column_index_end() const
    {
-      return column_index_end_;
+      return column_index_start_ + column_index_count_;
    }
 
    inline const group_layout &get_layout() const
@@ -93,7 +108,7 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
 private:
 
    // start and end column indexes
-   size_t column_index_start_, column_index_end_;
+   size_t column_index_count_, column_index_start_;
 
    // placement parameters?
    text_placements_ptr placements_;

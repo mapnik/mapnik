@@ -45,6 +45,41 @@ namespace mapnik
 using boost::property_tree::ptree;
 using boost::optional;
 
+struct layout_serializer : public boost::static_visitor<>
+{
+   layout_serializer(ptree &gsym, bool explicit_defaults)
+      : group_sym_(gsym), explicit_defaults_(explicit_defaults)
+   {}
+
+   void operator()(simple_row_layout const& lay) 
+   {
+      ptree &lay_node = group_sym_.push_back(ptree::value_type("SimpleLayout", ptree()))->second;
+      simple_row_layout dfl;
+
+      if (lay.get_item_margin() != dfl.get_item_margin() || explicit_defaults_)
+      {
+         set_attr(lay_node, "item-margin", lay.get_item_margin());
+      }
+   }
+
+   void operator()(pair_layout const &lay)
+   {
+      ptree &lay_node = group_sym_.push_back(ptree::value_type("PairLayout", ptree()))->second;
+      pair_layout dfl;
+
+      if (lay.get_item_margin() != dfl.get_item_margin() || explicit_defaults_)
+      {
+         set_attr(lay_node, "item-margin", lay.get_item_margin());
+      }
+      if (lay.get_max_difference() != dfl.get_max_difference() || explicit_defaults_)
+      {
+         set_attr(lay_node, "max-difference", lay.get_max_difference());
+      }
+   }
+
+   ptree &group_sym_;
+   bool explicit_defaults_;
+};
 
 class serialize_symbolizer : public boost::static_visitor<>
 {
@@ -321,7 +356,35 @@ public:
 
     void operator () ( group_symbolizer const& sym)
     {
-       // TODO: write me!
+       ptree &sym_node = rule_.push_back(ptree::value_type("GroupSymbolizer", ptree()))->second;
+       group_symbolizer dfl;
+
+       set_attr(sym_node, "num-columns", sym.get_column_index_count());
+       if (sym.get_column_index_start() != dfl.get_column_index_start() || explicit_defaults_)
+       {
+          set_attr(sym_node, "start-column", sym.get_column_index_start());
+       }
+       layout_serializer serializer(sym_node, explicit_defaults_);
+       boost::apply_visitor(serializer, sym.get_layout());
+       text_placements_ptr p = sym.get_placement_options();
+       p->defaults.to_xml(sym_node, explicit_defaults_);
+       add_metawriter_attributes(sym_node, sym);
+
+       for (group_symbolizer::rules::const_iterator itr = sym.begin();
+            itr != sym.end(); ++itr)
+       {
+          ptree &rule_node = sym_node.push_back(ptree::value_type("GroupRule", ptree()))->second;
+          expression_ptr const& expr = itr->get_filter();
+          std::string filter = mapnik::to_expression_string(*expr);
+          set_attr(rule_node, "filter", filter);
+          serialize_symbolizer serializer(rule_node, explicit_defaults_);
+
+          for (group_rule::symbolizers::const_iterator jtr = itr->begin();
+               jtr != itr->end(); ++jtr)
+          {
+             boost::apply_visitor(serializer, *jtr);
+          }
+       }
     }
 
 private:
