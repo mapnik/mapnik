@@ -29,7 +29,8 @@
 #include <boost/utility.hpp>
 #include <boost/variant.hpp>
 #include <boost/concept_check.hpp>
-#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 // stl
 #include <set>
 #include <iostream>
@@ -234,7 +235,7 @@ private:
 
 inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
 {
-     // find unindexed column names in the group rules and symbolizers
+     // find all column names referenced in the group rules and symbolizers
      std::set<std::string> group_columns;
      attribute_collector column_collector(group_columns);
      for (group_symbolizer::rules::const_iterator ruleItr = sym.begin();
@@ -243,14 +244,23 @@ inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
          column_collector(*ruleItr);
      }
 
-     // insert each column name appended with each index value
-     // these are the actual column names needed from the data
      BOOST_FOREACH(const std::string &col_name, group_columns)
      {
-         for (size_t col_idx = sym.get_column_index_start(); 
-              col_idx != sym.get_column_index_end(); ++col_idx)
+         if (col_name.find('%') != std::string::npos)
          {
-             names_.insert((boost::format("%1%%2%") % col_name % col_idx).str());
+             // indexed column name. add column name for each index value.
+             for (size_t col_idx = sym.get_column_index_start(); 
+                  col_idx != sym.get_column_index_end(); ++col_idx)
+             {
+                 std::string col_idx_name = col_name;
+                 boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
+                 names_.insert(col_idx_name);
+             }
+         }
+         else
+         {
+             // non indexed column name. insert as is.
+             names_.insert(col_name);
          }
      }
 

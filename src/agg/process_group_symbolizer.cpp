@@ -35,8 +35,9 @@
 // boost
 #include <boost/make_shared.hpp>
 #include <boost/foreach.hpp>
-#include <boost/format.hpp>
 #include <boost/optional.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 // stl
 #include <queue>
@@ -203,15 +204,26 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
                                mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
-   // find dependant columns in the rules
+   // find all column names referenced in the group rules and symbolizers
    std::set<std::string> columns;
    attribute_collector collector(columns);
+   
    for (group_symbolizer::rules::const_iterator itr = sym.begin();
         itr != sym.end(); ++itr)
    {
       // note that this recurses down on to the symbolizer
       // internals too, so we get all free variables.
       collector(*itr);
+   }
+   
+   // find the indexed column names (i.e. name contains the % character).
+   std::vector<const std::string *> indexed_columns;
+   BOOST_FOREACH(const std::string &col_name, columns)
+   {
+      if (col_name.find('%') != std::string::npos)
+      {
+         indexed_columns.push_back(&col_name);
+      }
    }
 
    // the rules which we'll want to symbolize
@@ -229,7 +241,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    for (size_t col_idx = sym.get_column_index_start(); 
         col_idx != sym.get_column_index_end(); ++col_idx)
    {
-      bool have_columns = true;
+      bool have_indexed_columns = true;
 
       // ugly nasty cast to be able to change the attributes on
       // a feature! a better way to do this would be to copy 
@@ -237,28 +249,25 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       // way to do that yet.
       Feature &mutable_feature = const_cast<Feature&>(*feature);
       
-      // copy over columns
-      BOOST_FOREACH(const std::string &col_name, columns)
+      // copy over indexed columns
+      BOOST_FOREACH(const std::string *&col_name, indexed_columns)
       {
-         const std::string col_idx_name = (boost::format("%1%%2%") % col_name % col_idx).str();
-         const bool have_numbered_column = mutable_feature.has_key(col_idx_name);
+         std::string col_idx_name = *col_name;
+         boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
 
-         if (have_numbered_column) 
+         if (mutable_feature.has_key(col_idx_name)) 
          {
-            mutable_feature.put_new(col_name, mutable_feature.get(col_idx_name));
+            mutable_feature.put_new(*col_name, mutable_feature.get(col_idx_name));
          }
-         else if (!mutable_feature.has_key(col_name))
+         else
          {
-            have_columns = false;
+            have_indexed_columns = false;
             break;
          }
-         // otherwise, the column is present, but isn't a renumbered
-         // column and we can ignore it - it's already present in the
-         // feature.
       }
 
-      // if all columns were present
-      if (have_columns)
+      // if all indexed columns were present in feature
+      if (have_indexed_columns)
       {
          bool match = false;
 
@@ -332,26 +341,35 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
             Feature &mutable_feature = const_cast<Feature&>(*feature);
             
             // copy over columns
-            BOOST_FOREACH(const std::string &col_name, columns)
+            bool have_indexed_columns = true;
+            BOOST_FOREACH(const std::string *&col_name, indexed_columns)
             {
-               const std::string col_idx_name = (boost::format("%1%%2%") % col_name % col_idx).str();
-               const bool have_numbered_column = mutable_feature.has_key(col_idx_name);
+               std::string col_idx_name = *col_name;
+               boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
                
-               if (have_numbered_column) 
+               if (mutable_feature.has_key(col_idx_name)) 
                {
-                  mutable_feature.put_new(col_name, mutable_feature.get(col_idx_name));
+                  mutable_feature.put_new(*col_name, mutable_feature.get(col_idx_name));
+               }
+               else
+               {
+                  have_indexed_columns = false;
+                  break;
                }
             }
             
-            // finally, do the actual rendering.
-            render_visitor<agg_renderer> symbolize(*this, pos, mutable_feature, text, 
-                                                   scale_factor_, font_manager_,
-                                                   pixmap_);
-
-            for (group_rule::symbolizers::const_iterator itr = rule->begin();
-                 itr != rule->end(); ++itr)
+            if (have_indexed_columns)
             {
-               boost::apply_visitor(symbolize, *itr);
+               // finally, do the actual rendering.
+               render_visitor<agg_renderer> symbolize(*this, pos, mutable_feature, text, 
+                                                      scale_factor_, font_manager_,
+                                                      pixmap_);
+
+               for (group_rule::symbolizers::const_iterator itr = rule->begin();
+                    itr != rule->end(); ++itr)
+               {
+                  boost::apply_visitor(symbolize, *itr);
+               }
             }
          }
       }
