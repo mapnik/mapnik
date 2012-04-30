@@ -77,6 +77,8 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
                params.get<std::string>("connect_timeout", "4")),
       bbox_token_("!bbox!"),
       scale_denom_token_("!scale_denominator!"),
+      pixel_width_token_("!pixel_width!"),
+      pixel_height_token_("!pixel_height!"),
       persist_connection_(*params_.get<mapnik::boolean>("persist_connection", true)),
       extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery", false)),
       // params below are for testing purposes only (will likely be removed at any time)
@@ -497,10 +499,24 @@ std::string postgis_datasource::populate_tokens(const std::string& sql) const
         boost::algorithm::replace_all(populated_sql, scale_denom_token_, ss.str());
     }
 
+    if (boost::algorithm::icontains(sql, pixel_width_token_))
+    {
+        std::ostringstream ss;
+        ss << 0;
+        boost::algorithm::replace_all(populated_sql, pixel_width_token_, ss.str());
+    }
+
+    if (boost::algorithm::icontains(sql, pixel_height_token_))
+    {
+        std::ostringstream ss;
+        ss << 0;
+        boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
+    }
+
     return populated_sql;
 }
 
-std::string postgis_datasource::populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env) const
+std::string postgis_datasource::populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
 {
     std::string populated_sql = sql;
     std::string box = sql_bbox(env);
@@ -510,6 +526,20 @@ std::string postgis_datasource::populate_tokens(const std::string& sql, double s
         std::ostringstream ss;
         ss << scale_denom;
         boost::algorithm::replace_all(populated_sql, scale_denom_token_, ss.str());
+    }
+
+    if (boost::algorithm::icontains(sql, pixel_width_token_))
+    {
+        std::ostringstream ss;
+        ss << pixel_width;
+        boost::algorithm::replace_all(populated_sql, pixel_width_token_, ss.str());
+    }
+
+    if (boost::algorithm::icontains(sql, pixel_height_token_))
+    {
+        std::ostringstream ss;
+        ss << pixel_height;
+        boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
     }
 
     if (boost::algorithm::icontains(populated_sql, bbox_token_))
@@ -611,6 +641,10 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }
 
             std::ostringstream s;
+
+            const double px_gw = 1.0 / boost::get<0>(q.resolution());
+            const double px_gh = 1.0 / boost::get<1>(q.resolution());
+
             s << "SELECT ST_AsBinary(";
 
             if (simplify_geometries_) {
@@ -620,9 +654,6 @@ featureset_ptr postgis_datasource::features(const query& q) const
             s << "\"" << geometryColumn_ << "\"";
 
             if (simplify_geometries_) {
-              const double px_gw = 1.0 / boost::get<0>(q.resolution());
-              const double px_gh = 1.0 / boost::get<1>(q.resolution());
-
               const double tolerance = std::min(px_gw, px_gh) / 2.0;
               s << ", " << tolerance << ")";
             }
@@ -657,7 +688,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
                 }
             }
 
-            std::string table_with_bbox = populate_tokens(table_, scale_denom, box);
+            std::string table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
 
             s << " FROM " << table_with_bbox;
 
@@ -750,7 +781,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             }
 
             box2d<double> box(pt.x, pt.y, pt.x, pt.y);
-            std::string table_with_bbox = populate_tokens(table_, FMAX, box);
+            std::string table_with_bbox = populate_tokens(table_, FMAX, box, 0, 0);
 
             s << " FROM " << table_with_bbox;
 
