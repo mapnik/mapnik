@@ -307,10 +307,10 @@ public:
         {
             set_attr( sym_node, "placement", sym.get_marker_placement() );
         }
-        std::string tr_str = sym.get_transform_string();
+        std::string tr_str = sym.get_image_transform_string();
         if (tr_str != "matrix(1, 0, 0, 1, 0, 0)" || explicit_defaults_ )
         {
-            set_attr( sym_node, "transform", tr_str );
+            set_attr( sym_node, "image-transform", tr_str );
         }
 
         const stroke & strk =  sym.get_stroke();
