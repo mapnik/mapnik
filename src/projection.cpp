@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
 #include <mapnik/projection.hpp>
 #include <mapnik/utils.hpp>
@@ -35,19 +33,20 @@
 namespace mapnik {
 
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
+#warning mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8
 boost::mutex projection::mutex_;
 #endif
 
 projection::projection(std::string const& params)
     : params_(params)
 {
-    init(); //
+    init();
 }
 
 projection::projection(projection const& rhs)
     : params_(rhs.params_)
 {
-    init(); //
+    init();
 }
 
 projection& projection::operator=(projection const& rhs)
@@ -135,12 +134,17 @@ void projection::init()
     mutex::scoped_lock lock(mutex_);
 #endif
 #if PJ_VERSION >= 480
-    proj_ctx_=pj_ctx_alloc();
-    proj_=pj_init_plus_ctx(proj_ctx_, params_.c_str());
+    proj_ctx_ = pj_ctx_alloc();
+    proj_ = pj_init_plus_ctx(proj_ctx_, params_.c_str());
+    if (!proj_)
+    {
+        if (proj_ctx_) pj_ctx_free(proj_ctx_);
+        throw proj_init_error(params_);
+    }
 #else
-    proj_=pj_init_plus(params_.c_str());
-#endif
+    proj_ = pj_init_plus(params_.c_str());
     if (!proj_) throw proj_init_error(params_);
+#endif
     is_geographic_ = pj_is_latlong(proj_) ? true : false;
 }
 
@@ -149,14 +153,15 @@ std::string projection::expanded() const
     if (proj_) {
         std::string def(pj_get_def( proj_, 0 ));
         //boost::algorithm::ireplace_first(def,params_,"");
-        return boost::trim_copy(def);
+        boost::trim(def);
+        return def;
     }
     return std::string("");
 }
 
-void projection::swap (projection& rhs)
+void projection::swap(projection& rhs)
 {
     std::swap(params_,rhs.params_);
-    init ();
+    init();
 }
 }

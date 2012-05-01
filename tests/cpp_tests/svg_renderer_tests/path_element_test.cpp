@@ -25,54 +25,54 @@ namespace filesystem = boost::filesystem;
 using namespace mapnik;
 
 void prepare_map(Map& m)
-{      
+{
     const std::string mapnik_dir("/usr/local/lib/mapnik/");
     std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "input/" << "\n";
-    datasource_cache::instance()->register_datasources(mapnik_dir + "input/"); 
+    datasource_cache::instance()->register_datasources(mapnik_dir + "input/");
 
     // create styles
 
     // Provinces (polygon)
     feature_type_style provpoly_style;
-       
+
     rule provpoly_rule_on;
     provpoly_rule_on.set_filter(parse_expression("[NAME_EN] = 'Ontario'"));
     provpoly_rule_on.append(polygon_symbolizer(color(250, 190, 183)));
     provpoly_style.add_rule(provpoly_rule_on);
-        
+
     rule provpoly_rule_qc;
     provpoly_rule_qc.set_filter(parse_expression("[NOM_FR] = 'Québec'"));
     provpoly_rule_qc.append(polygon_symbolizer(color(217, 235, 203)));
     provpoly_style.add_rule(provpoly_rule_qc);
-        
+
     m.insert_style("provinces",provpoly_style);
 
     // Provinces (polyline)
     feature_type_style provlines_style;
-        
+
     stroke provlines_stk (color(0,0,0),1.0);
     provlines_stk.add_dash(8, 4);
     provlines_stk.add_dash(2, 2);
     provlines_stk.add_dash(2, 2);
-        
+
     rule provlines_rule;
     provlines_rule.append(line_symbolizer(provlines_stk));
     provlines_style.add_rule(provlines_rule);
-        
+
     m.insert_style("provlines",provlines_style);
-        
-    // Drainage 
+
+    // Drainage
     feature_type_style qcdrain_style;
-        
+
     rule qcdrain_rule;
     qcdrain_rule.set_filter(parse_expression("[HYC] = 8"));
     qcdrain_rule.append(polygon_symbolizer(color(153, 204, 255)));
     qcdrain_style.add_rule(qcdrain_rule);
-        
+
     m.insert_style("drainage",qcdrain_style);
-        
+
     // Roads 3 and 4 (The "grey" roads)
-    feature_type_style roads34_style;    
+    feature_type_style roads34_style;
     rule roads34_rule;
     roads34_rule.set_filter(parse_expression("[CLASS] = 3 or [CLASS] = 4"));
     stroke roads34_rule_stk(color(171,158,137),2.0);
@@ -80,9 +80,9 @@ void prepare_map(Map& m)
     roads34_rule_stk.set_line_join(ROUND_JOIN);
     roads34_rule.append(line_symbolizer(roads34_rule_stk));
     roads34_style.add_rule(roads34_rule);
-        
+
     m.insert_style("smallroads",roads34_style);
-        
+
     // Roads 2 (The thin yellow ones)
     feature_type_style roads2_style_1;
     rule roads2_rule_1;
@@ -92,9 +92,9 @@ void prepare_map(Map& m)
     roads2_rule_stk_1.set_line_join(ROUND_JOIN);
     roads2_rule_1.append(line_symbolizer(roads2_rule_stk_1));
     roads2_style_1.add_rule(roads2_rule_1);
-        
+
     m.insert_style("road-border", roads2_style_1);
-        
+
     feature_type_style roads2_style_2;
     rule roads2_rule_2;
     roads2_rule_2.set_filter(parse_expression("[CLASS] = 2"));
@@ -103,9 +103,9 @@ void prepare_map(Map& m)
     roads2_rule_stk_2.set_line_join(ROUND_JOIN);
     roads2_rule_2.append(line_symbolizer(roads2_rule_stk_2));
     roads2_style_2.add_rule(roads2_rule_2);
-        
+
     m.insert_style("road-fill", roads2_style_2);
-        
+
     // Roads 1 (The big orange ones, the highways)
     feature_type_style roads1_style_1;
     rule roads1_rule_1;
@@ -116,7 +116,7 @@ void prepare_map(Map& m)
     roads1_rule_1.append(line_symbolizer(roads1_rule_stk_1));
     roads1_style_1.add_rule(roads1_rule_1);
     m.insert_style("highway-border", roads1_style_1);
-        
+
     feature_type_style roads1_style_2;
     rule roads1_rule_2;
     roads1_rule_2.set_filter(parse_expression("[CLASS] = 1"));
@@ -125,21 +125,21 @@ void prepare_map(Map& m)
     roads1_rule_stk_2.set_line_join(ROUND_JOIN);
     roads1_rule_2.append(line_symbolizer(roads1_rule_stk_2));
     roads1_style_2.add_rule(roads1_rule_2);
-    m.insert_style("highway-fill", roads1_style_2);        
-       
+    m.insert_style("highway-fill", roads1_style_2);
+
     // layers
     // Provincial  polygons
     {
         parameters p;
         p["type"]="shape";
         p["file"]="../../../demo/data/boundaries";
-                
-        layer lyr("Provinces"); 
+
+        layer lyr("Provinces");
         lyr.set_datasource(datasource_cache::instance()->create(p));
-        lyr.add_style("provinces");    
+        lyr.add_style("provinces");
         m.addLayer(lyr);
     }
-        
+
     // Drainage
     {
         parameters p;
@@ -147,46 +147,46 @@ void prepare_map(Map& m)
         p["file"]="../../../demo/data/qcdrainage";
         layer lyr("Quebec Hydrography");
         lyr.set_datasource(datasource_cache::instance()->create(p));
-        lyr.add_style("drainage");    
+        lyr.add_style("drainage");
         m.addLayer(lyr);
     }
-        
+
     {
         parameters p;
         p["type"]="shape";
         p["file"]="../../../demo/data/ontdrainage";
-                
-        layer lyr("Ontario Hydrography"); 
+
+        layer lyr("Ontario Hydrography");
         lyr.set_datasource(datasource_cache::instance()->create(p));
-        lyr.add_style("drainage");    
+        lyr.add_style("drainage");
         m.addLayer(lyr);
     }
-        
+
     // Provincial boundaries
     {
         parameters p;
         p["type"]="shape";
         p["file"]="../../../demo/data/boundaries_l";
-        layer lyr("Provincial borders"); 
+        layer lyr("Provincial borders");
         lyr.set_datasource(datasource_cache::instance()->create(p));
-        lyr.add_style("provlines");    
+        lyr.add_style("provlines");
         m.addLayer(lyr);
     }
-    
+
     // Roads
     {
         parameters p;
         p["type"]="shape";
-        p["file"]="../../../demo/data/roads";        
-        layer lyr("Roads"); 
+        p["file"]="../../../demo/data/roads";
+        layer lyr("Roads");
         lyr.set_datasource(datasource_cache::instance()->create(p));
         lyr.add_style("smallroads");
         lyr.add_style("road-border");
         lyr.add_style("road-fill");
         lyr.add_style("highway-border");
         lyr.add_style("highway-fill");
-    
-        m.addLayer(lyr);        
+
+        m.addLayer(lyr);
     }
 }
 
@@ -197,19 +197,19 @@ void render_to_file(Map const& m, const std::string output_filename)
     if(output_stream)
     {
         typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
-    
+
         std::ostream_iterator<char> output_stream_iterator(output_stream);
-    
+
         svg_ren renderer(m, output_stream_iterator);
         renderer.apply();
-    
+
         output_stream.close();
-    
-        filesystem::path output_filename_path = 
+
+        filesystem::path output_filename_path =
             filesystem::system_complete(filesystem::path(".")) / filesystem::path(output_filename);
-    
-        BOOST_CHECK_MESSAGE(filesystem::exists(output_filename_path), 
-           "File '"+output_filename_path.string()+"' was created.");
+
+        BOOST_CHECK_MESSAGE(filesystem::exists(output_filename_path),
+                            "File '"+output_filename_path.string()+"' was created.");
     }
     else
     {
@@ -220,12 +220,12 @@ void render_to_file(Map const& m, const std::string output_filename)
 BOOST_AUTO_TEST_CASE(path_element_test_case_1)
 {
     Map m(800,600);
-    m.set_background(color_factory::from_string("steelblue"));      
+    m.set_background(color_factory::from_string("steelblue"));
 
     prepare_map(m);
-        
+
     //m.zoom_to_box(box2d<double>(1405120.04127408, -247003.813399447,
-                //1706357.31328276, -25098.593149577));
-    m.zoom_all();    
+    //1706357.31328276, -25098.593149577));
+    m.zoom_all();
     render_to_file(m, "path_element_test_case_1.svg");
 }

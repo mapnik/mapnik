@@ -19,11 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // boost
 #include <boost/foreach.hpp>
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_pattern_source.hpp>
@@ -39,7 +39,6 @@
 #include "agg_rasterizer_outline.h"
 #include "agg_rasterizer_outline_aa.h"
 #include "agg_scanline_u.h"
-//
 #include "agg_renderer_scanline.h"
 #include "agg_pattern_filters_rgba.h"
 #include "agg_span_allocator.h"
@@ -66,7 +65,8 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (!(*mark)->is_bitmap())
     {
-        std::clog << "### Warning only images (not '" << filename << "') are supported in the line_pattern_symbolizer\n";
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
+
         return;
     }
 

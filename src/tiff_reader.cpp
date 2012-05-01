@@ -20,17 +20,18 @@
  *
  *****************************************************************************/
 
-//$Id: tiff_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
 #include <boost/filesystem/operations.hpp>
+
+// stl
+#include <iostream>
 
 extern "C"
 {
 #include <tiffio.h>
 }
-// stl
-#include <iostream>
 
 namespace mapnik
 {
@@ -165,7 +166,8 @@ void tiff_reader::read_generic(unsigned /*x*/,unsigned /*y*/,image_data_32& /*im
     TIFF* tif = load_if_exists(file_name_);
     if (tif)
     {
-        std::clog << "TODO:tiff is not stripped or tiled\n";
+        MAPNIK_LOG_DEBUG(tiff_reader) << "tiff_reader: TODO - tiff is not stripped or tiled";
+
         TIFFClose(tif);
     }
 }

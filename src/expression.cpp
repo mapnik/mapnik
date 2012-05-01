@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// mapnik
 #include <mapnik/expression.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/unicode.hpp>

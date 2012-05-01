@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/formatting/expression.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
@@ -29,12 +30,10 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/xml_node.hpp>
 
-// boost
 
-namespace mapnik
-{
-namespace formatting
-{
+namespace mapnik {
+namespace formatting {
+
 using boost::property_tree::ptree;
 void expression_format::to_xml(boost::property_tree::ptree &xml) const
 {
@@ -108,9 +107,7 @@ void expression_format::apply(char_properties const& p, const Feature &feature, 
     if (child_) {
         child_->apply(new_properties, feature, output);
     } else {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "Warning: Useless format: No text to format\n";
-#endif
+        MAPNIK_LOG_WARN(expression) << "Useless format: No text to format";
     }
 }
 

@@ -19,9 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #include <boost/python.hpp>
+
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/markers_symbolizer.hpp>
@@ -124,5 +124,15 @@ void export_markers_symbolizer()
                       &markers_symbolizer::get_height,
                       &markers_symbolizer::set_height,
                       "Set/get the marker height")
+        .add_property("fill",
+                      make_function(&markers_symbolizer::get_fill,
+                      return_value_policy<copy_const_reference>()),
+                      &markers_symbolizer::set_fill,
+                      "Set/get the marker fill color")
+        .add_property("stroke",
+                      make_function(&markers_symbolizer::get_stroke,
+                      return_value_policy<copy_const_reference>()),
+                      &markers_symbolizer::set_stroke,
+                      "Set/get the marker stroke (outline)")
         ;
 }

@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 #define MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 
@@ -30,6 +28,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/vertex_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
+
 // boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/spirit/include/karma.hpp>

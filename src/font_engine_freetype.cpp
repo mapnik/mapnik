@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
@@ -101,9 +102,13 @@ bool freetype_engine::register_font(std::string const& file_name)
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
         if (face->family_name && face->style_name)
         {
-            success = true;
             std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-            name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
+            // skip fonts with leading . in name
+            if (!boost::algorithm::starts_with(name,"."))
+            {
+                success = true;
+                name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
+            }
         }
         else
         {
@@ -115,7 +120,8 @@ bool freetype_engine::register_font(std::string const& file_name)
                 s << "which reports a family name of '" << std::string(face->family_name) << "' and lacks a style name";
             else if (face->style_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
-            std::clog << s.str() << std::endl;
+
+            MAPNIK_LOG_DEBUG(font_engine_freetype) << "freetype_engine: " << s.str();
         }
     }
     if (face)
@@ -140,17 +146,27 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
     {
 #if (BOOST_FILESYSTEM_VERSION == 3)
-        std::string const& file_name = itr->path().string();
+        std::string file_name = itr->path().string();
 #else // v2
-        std::string const& file_name = itr->string();
+        std::string file_name = itr->string();
 #endif
         if (boost::filesystem::is_directory(*itr) && recurse)
         {
             success = register_fonts(file_name, true);
         }
-        else if (boost::filesystem::is_regular_file(file_name) && is_font_file(file_name))
+        else
         {
-            success = mapnik::freetype_engine::register_font(file_name);
+#if (BOOST_FILESYSTEM_VERSION == 3)
+            std::string base_name = itr->path().filename().string();
+#else // v2
+            std::string base_name = itr->filename();
+#endif
+            if (!boost::algorithm::starts_with(base_name,".") &&
+                     boost::filesystem::is_regular_file(file_name) &&
+                     is_font_file(file_name))
+            {
+                success = mapnik::freetype_engine::register_font(file_name);
+            }
         }
     }
     return success;
@@ -328,11 +344,9 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
 
         path->vertex(&c, &x, &y, &angle);
 
-#ifdef MAPNIK_DEBUG
         // TODO Enable when we have support for setting verbosity
-        //std::clog << "prepare_glyphs: " << c << "," << x <<
-        //    "," << y << "," << angle << std::endl;
-#endif
+        // MAPNIK_LOG_DEBUG(font_engine_freetype) << "text_renderer: prepare_glyphs="
+        //                                        << c << "," << x << "," << y << "," << angle;
 
         FT_BBox glyph_bbox;
         FT_Glyph image;

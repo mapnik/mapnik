@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/map.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 // stl
 #include <string>

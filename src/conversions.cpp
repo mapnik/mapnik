@@ -20,6 +20,9 @@
  *
  *****************************************************************************/
 
+// mapnik
+#include <mapnik/util/conversions.hpp>
+
 // boost
 #include <boost/spirit/include/qi.hpp>
 

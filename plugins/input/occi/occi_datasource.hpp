@@ -50,6 +50,8 @@ public:
     void bind() const;
 
 private:
+    static const std::string METADATA_TABLE;
+
     mapnik::datasource::datasource_t type_;
     mutable std::string table_;
     mutable std::string table_name_;
@@ -60,13 +62,13 @@ private:
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
     mutable mapnik::layer_descriptor desc_;
+    mutable bool use_wkb_;
     int row_limit_;
     int row_prefetch_;
     mutable oracle::occi::StatelessConnectionPool* pool_;
     mutable oracle::occi::Connection* conn_;
     bool use_connection_pool_;
     bool use_spatial_index_;
-    static const std::string METADATA_TABLE;
 };
 
 #endif // OCCI_DATASOURCE_HPP

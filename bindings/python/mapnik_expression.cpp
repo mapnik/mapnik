@@ -19,9 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// boost
 #include <boost/python.hpp>
+#include <boost/variant.hpp>
+
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
@@ -30,7 +32,6 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/value.hpp>
 
-#include <boost/variant.hpp>
 
 using mapnik::Feature;
 using mapnik::expression_ptr;

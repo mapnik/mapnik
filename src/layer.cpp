@@ -20,11 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: layer.cpp 17 2005-03-08 23:58:43Z pavlenko $
-
 // mapnik
 #include <mapnik/layer.hpp>
-
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 

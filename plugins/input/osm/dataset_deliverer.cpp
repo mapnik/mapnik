@@ -20,11 +20,18 @@
  *
  *****************************************************************************/
 
+// mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
+
+// boost
 #include <boost/filesystem/operations.hpp>
+
+// std
+#include <sstream>
+
 #include "dataset_deliverer.h"
 #include "basiccurl.h"
-#include <sstream>
 
 osm_dataset * dataset_deliverer::dataset = NULL;
 std::string dataset_deliverer::last_bbox = "";
@@ -76,9 +83,7 @@ osm_dataset* dataset_deliverer::load_from_url(const string& url, const string& b
     }
     else if (bbox != last_bbox)
     {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "Osm Plugin: BBOXES ARE DIFFERENT: " << last_bbox << "," << bbox << std::endl;
-#endif
+        MAPNIK_LOG_WARN(osm) << "osm_dataset_deliverer: BBoxes are different=" << last_bbox << "," << bbox;
 
         // Reload the dataset
         dataset->clear();

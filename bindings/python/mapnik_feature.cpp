@@ -19,13 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // boost
-
 #include <boost/python/suite/indexing/indexing_suite.hpp>
 //#include <boost/python/suite/indexing/map_indexing_suite.hpp>
-
 #include <boost/python/iterator.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/tuple.hpp>

@@ -23,7 +23,7 @@
 #ifndef KISMET_DATASOURCE_HPP
 #define KISMET_DATASOURCE_HPP
 
-// STL
+// stl
 #include <list>
 
 // mapnik

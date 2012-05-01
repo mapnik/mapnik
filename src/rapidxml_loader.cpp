@@ -144,7 +144,8 @@ private:
         case rapidxml::node_data:
         case rapidxml::node_cdata:
         {
-            std::string trimmed = boost::algorithm::trim_copy(std::string(cur_node->value()));
+            std::string trimmed(cur_node->value());
+            boost::trim(trimmed);
             if (trimmed.empty()) break; //Don't add empty text nodes
             node.add_child(trimmed, 0, true);
         }

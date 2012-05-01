@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/grid/grid_view.hpp>
@@ -62,16 +63,15 @@ private:
     unsigned width_;
     unsigned height_;
     std::string key_;
-    feature_key_type f_keys_;
-    feature_type features_;
     data_type data_;
-    std::set<std::string> names_;
     unsigned int resolution_;
     std::string id_name_;
     bool painted_;
+    std::set<std::string> names_;
+    feature_key_type f_keys_;
+    feature_type features_;
 
 public:
-
 
     hit_grid(int width, int height, std::string const& key, unsigned int resolution)
         :width_(width),
@@ -80,7 +80,10 @@ public:
         data_(width,height),
         resolution_(resolution),
         id_name_("__id__"),
-        painted_(false)
+        painted_(false),
+        names_(),
+        f_keys_(),
+        features_()
         {
             // this only works if each datasource's
             // feature count starts at 1
@@ -94,7 +97,10 @@ public:
         data_(rhs.data_),
         resolution_(rhs.resolution_),
         id_name_("__id__"),
-        painted_(rhs.painted_)
+        painted_(rhs.painted_),
+        names_(rhs.names_),
+        f_keys_(rhs.f_keys_),
+        features_(rhs.features_)
         {
             f_keys_[0] = "";
         }
@@ -136,7 +142,7 @@ public:
             }
             else
             {
-                std::clog << "should not get here: key '" << key_ << "' not found in feature properties\n";
+                MAPNIK_LOG_DEBUG(grid) << "hit_grid: Should not get here: key '" << key_ << "' not found in feature properties";
             }
         }
 
@@ -153,7 +159,7 @@ public:
         }
         else
         {
-            std::clog << "### Warning: key '" << key_ << "' was blank for " << *feature << "\n";
+            MAPNIK_LOG_DEBUG(grid) << "hit_grid: Warning - key '" << key_ << "' was blank for " << *feature;
         }
     }
 

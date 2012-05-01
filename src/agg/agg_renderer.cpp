@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
@@ -35,9 +34,9 @@
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/image_compositing.hpp>
+
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
-#include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_scanline_u.h"
@@ -48,10 +47,6 @@
 #include <boost/math/special_functions/round.hpp>
 
 // stl
-#ifdef MAPNIK_DEBUG
-#include <iostream>
-#endif
-
 #include <cmath>
 
 namespace mapnik
@@ -152,9 +147,8 @@ void agg_renderer<T>::setup(Map const &m)
             }
         }
     }
-#ifdef MAPNIK_DEBUG
-    std::clog << "scale=" << m.scale() << "\n";
-#endif
+
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
 
 template <typename T>
@@ -163,34 +157,28 @@ agg_renderer<T>::~agg_renderer() {}
 template <typename T>
 void agg_renderer<T>::start_map_processing(Map const& map)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start map processing bbox="
-              << map.get_current_extent() << "\n";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start map processing bbox=" << map.get_current_extent();
+
     ras_ptr->clip_box(0,0,width_,height_);
 }
 
 template <typename T>
 void agg_renderer<T>::end_map_processing(Map const& )
 {
+
     agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32 pixf(buf);
     pixf.demultiply();
-#ifdef MAPNIK_DEBUG
-    std::clog << "end map processing\n";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
 template <typename T>
 void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start layer processing : " << lay.name()  << "\n";
-    std::clog << "datasource = " << lay.datasource().get() << "\n";
-    std::clog << "query_extent = " << query_extent << "\n";
-#endif
-    // set current_buffer
-    
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing layer=" << lay.name();
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: -- datasource=" << lay.datasource().get();
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: -- query_extent=" << query_extent;
+
     if (lay.clear_label_cache())
     {
         detector_->clear();
@@ -200,19 +188,14 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
 
 template <typename T>
 void agg_renderer<T>::end_layer_processing(layer const&)
-{    
-    
-#ifdef MAPNIK_DEBUG
-    std::clog << "end layer processing\n";
-#endif
+{
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End layer processing";
 }
 
 template <typename T>
 void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "start style processing\n";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing style";
     if (st.comp_op()) style_level_compositing_ = true;
     else style_level_compositing_ = false;
     
@@ -260,9 +243,7 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
         boost::apply_visitor(visitor, filter_tag);
     }   
     
-#ifdef MAPNIK_DEBUG
-    std::clog << "end style processing\n";
-#endif
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }
 
 template <typename T>
@@ -300,8 +281,6 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
                                                    (*marker.get_vector_data())->attributes());
         
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
-        
-
     }
     else
     {

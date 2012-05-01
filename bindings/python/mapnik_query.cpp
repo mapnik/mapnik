@@ -19,11 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// boost
 #include <boost/python.hpp>
+
+// mapnik
 #include <mapnik/query.hpp>
 #include <mapnik/box2d.hpp>
+
 using mapnik::query;
 using mapnik::box2d;
 

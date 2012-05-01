@@ -23,6 +23,7 @@
 #ifdef HAVE_LIBXML2
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
@@ -99,8 +100,7 @@ public:
         /*
           if ( ! ctx->valid )
           {
-          std::clog << "### ERROR: Failed to validate DTD."
-          << std::endl;
+            MAPNIK_LOG_WARN(libxml2_loader) << "libxml2_loader: Failed to validate DTD.";
           }
         */
         load(doc, node);
@@ -135,11 +135,15 @@ public:
             xmlError * error = xmlCtxtGetLastError( ctx_ );
             std::ostringstream os;
             os << "XML document not well formed";
+            int line=0;
+            std::string file;
             if (error)
             {
                 os << ": " << std::endl << error->message;
+                line = error->line;
+                file = error->file;
             }
-            throw config_error(os.str(), error->line, error->file);
+            throw config_error(os.str(), line, file);
         }
 
         int iXIncludeReturn = xmlXIncludeProcessFlags(doc, options_);
@@ -165,7 +169,7 @@ private:
     {
         for (; attributes; attributes = attributes->next )
         {
-            node.add_attribute((char *)attributes->name, (char *)attributes->children->content);
+            node.add_attribute((const char *)attributes->name, (const char *)attributes->children->content);
         }
     }
 
@@ -178,14 +182,15 @@ private:
             case XML_ELEMENT_NODE:
             {
 
-                xml_node &new_node = node.add_child((char *)cur_node->name, cur_node->line, false);
+                xml_node &new_node = node.add_child((const char *)cur_node->name, cur_node->line, false);
                 append_attributes(cur_node->properties, new_node);
                 populate_tree(cur_node->children, new_node);
             }
             break;
             case XML_TEXT_NODE:
             {
-                std::string trimmed = boost::algorithm::trim_copy(std::string((char*)cur_node->content));
+                std::string trimmed((const char*)cur_node->content);
+                boost::algorithm::trim(trimmed);
                 if (trimmed.empty()) break; //Don't add empty text nodes
                 node.add_child(trimmed, cur_node->line, true);
             }

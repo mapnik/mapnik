@@ -19,8 +19,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
@@ -80,8 +81,10 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         boost::optional<marker_ptr> mark = mapnik::marker_cache::instance()->find(filename, true);
         if (mark && *mark)
         {
-            if (!(*mark)->is_vector()) {
-                std::clog << "### Warning only svg markers are supported in the markers_symbolizer\n";
+            if (!(*mark)->is_vector())
+            {
+                MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: markers_symbolizer do not yet support SVG markers";
+
                 return;
             }
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
@@ -148,8 +151,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         agg::trans_affine matrix = recenter * tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
                         svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(),bbox);
                         if (writer.first)
+                        {
                             //writer.first->add_box(label_ext, feature, t_, writer.second);
-                            std::clog << "### Warning metawriter not yet supported for LINE placement\n";
+
+                            MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
+                        }
                     }
                 }
             }
@@ -190,7 +196,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             tr.transform(&x1,&y1);
             tr.transform(&x2,&y2);
             extent.init(x1,y1,x2,y2);
-            //std::clog << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+
+            //MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
         }
         else
         {
@@ -201,7 +208,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             tr.transform(&x1,&y1);
             tr.transform(&x2,&y2);
             extent.init(x1,y1,x2,y2);
-            //std::clog << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
+
+            //MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
         }
 
 
@@ -290,8 +298,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
                     // TODO
                     if (writer.first)
+                    {
                         //writer.first->add_box(label_ext, feature, t_, writer.second);
-                        std::clog << "### Warning metawriter not yet supported for LINE placement\n";
+
+                        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
+                    }
 
                     agg::conv_transform<agg::path_storage, agg::trans_affine> trans(marker, matrix);
                     ras_ptr->add_path(trans);

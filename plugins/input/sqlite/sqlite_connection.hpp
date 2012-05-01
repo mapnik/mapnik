@@ -29,7 +29,7 @@
 // mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/sql_utils.hpp>
-
+#include <mapnik/timer.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -120,6 +120,9 @@ public:
 
     boost::shared_ptr<sqlite_resultset> execute_query(const std::string& sql)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute_query ") + sql);
+#endif
         sqlite3_stmt* stmt = 0;
 
         const int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
@@ -133,6 +136,10 @@ public:
 
     void execute(const std::string& sql)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute ") + sql);
+#endif
+
         const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         if (rc != SQLITE_OK)
         {
@@ -142,6 +149,10 @@ public:
 
     int execute_with_code(const std::string& sql)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute_with_code ") + sql);
+#endif
+
         const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         return rc;
     }

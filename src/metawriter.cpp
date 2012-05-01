@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // Mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
 #include <mapnik/text_placements/base.hpp>
@@ -77,7 +78,8 @@ void metawriter_json_stream::write_header()
 
 void metawriter_json_stream::stop()
 {
-    if (count_ >= STARTED && f_) {
+    if (count_ >= STARTED && f_)
+    {
         *f_ << " ] }\n";
     }
     count_ = STOPPED;
@@ -85,10 +87,10 @@ void metawriter_json_stream::stop()
 
 metawriter_json_stream::~metawriter_json_stream()
 {
-    if (count_ >= STARTED) {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "WARNING: GeoJSON metawriter not stopped before destroying it.";
-#endif
+    if (count_ >= STARTED)
+    {
+        MAPNIK_LOG_WARN(metawriter) << "WARNING: GeoJSON metawriter not stopped before destroying it.";
+
         stop();
     }
     if (trans_) delete trans_;
@@ -323,9 +325,9 @@ metawriter_json::metawriter_json(metawriter_properties dflt_properties, path_exp
 void metawriter_json::start(metawriter_property_map const& properties)
 {
     filename_ = path_processor<metawriter_property_map>::evaluate(*fn_, properties);
-#ifdef MAPNIK_DEBUG
-    std::clog << "Metawriter JSON: filename=" << filename_ << "\n";
-#endif
+
+    MAPNIK_LOG_DEBUG(metawriter) << "metawriter_json: Filename=" << filename_;
+
     metawriter_json_stream::start(properties);
 }
 
@@ -341,14 +343,14 @@ void metawriter_json::write_header()
 void metawriter_json::stop()
 {
     metawriter_json_stream::stop();
-    if (f_.is_open()) {
+    if (f_.is_open())
+    {
         f_.close();
     }
-#ifdef MAPNIK_DEBUG
-    else if (count_ >= STARTED){
-        std::clog << "WARNING: File not open in metawriter_json::stop()!\n";
+    else if (count_ >= STARTED)
+    {
+        MAPNIK_LOG_DEBUG(metawriter) << "metawriter_json: File not open when stopping";
     }
-#endif
 }
 
 void metawriter_json::set_filename(path_expression_ptr fn)

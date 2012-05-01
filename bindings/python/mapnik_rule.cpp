@@ -19,13 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// boost
 #include <boost/python.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
+// mapnik
 #include <mapnik/rule.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>

@@ -47,7 +47,6 @@ rundemo = demo_env.Program('rundemo', source, LIBS=libraries, LINKFLAGS=env["CUS
 
 Depends(rundemo, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
-# we don't install this app because the datasource paths are relative
-# and we're not going to install the sample data.
-#env.Install(install_prefix + '/bin', rundemo)
-#env.Alias('install', install_prefix + '/bin')
+# build locally if installing
+if 'install' in COMMAND_LINE_TARGETS:
+    env.Alias('install',rundemo)

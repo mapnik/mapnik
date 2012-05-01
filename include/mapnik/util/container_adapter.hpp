@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef CONTAINER_ADAPTER_HPP
 #define CONTAINER_ADAPTER_HPP
 

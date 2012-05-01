@@ -19,7 +19,11 @@ def test_field_listing():
         ds = mapnik.Shapefile(file='../data/shp/poly.shp')
         fields = ds.fields()
         eq_(fields, ['AREA', 'EAS_ID', 'PRFEDEA'])
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Polygon, 'type': mapnik.DataType.Vector, 'name': 'shape', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Polygon)
+        eq_(desc['name'],'shape')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
 def test_total_feature_count_shp():
     if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
@@ -31,7 +35,11 @@ def test_total_feature_count_shp():
 def test_total_feature_count_json():
     if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
         ds = mapnik.Ogr(file='../data/json/points.json',layer_by_index=0)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'ogr', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'ogr')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
         features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 5)
@@ -39,7 +47,11 @@ def test_total_feature_count_json():
 def test_sqlite_reading():
     if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',table_by_index=0)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Polygon, 'type': mapnik.DataType.Vector, 'name': 'sqlite', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Polygon)
+        eq_(desc['name'],'sqlite')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
         features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 245)

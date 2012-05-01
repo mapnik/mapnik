@@ -20,14 +20,16 @@
  *
  *****************************************************************************/
 
-//$Id: map.cpp 17 2005-03-08 23:58:43Z pavlenko $,
+//mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/map.hpp>
-
 #include <mapnik/datasource.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/filter_featureset.hpp>
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/scale_denominator.hpp>
+#include <mapnik/config_error.hpp>
+#include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
 
 // boost
 #include <boost/make_shared.hpp>
@@ -356,6 +358,11 @@ boost::optional<box2d<double> > const& Map::maximum_extent() const
     return maximum_extent_;
 }
 
+boost::optional<box2d<double> > & Map::maximum_extent()
+{
+    return maximum_extent_;
+}
+
 std::string const&  Map::base_path() const
 {
     return base_path_;
@@ -405,14 +412,13 @@ void Map::zoom_all()
                     proj_transform prj_trans(proj0,proj1);
 
                     box2d<double> layer_ext = itr->envelope();
-                    // TODO - consider using more robust method: http://trac.mapnik.org/ticket/751
-                    if (prj_trans.backward(layer_ext))
+                    if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
                     {
                         success = true;
-#ifdef MAPNIK_DEBUG
-                        std::clog << " layer " << itr->name() << " original ext: " << itr->envelope() << "\n";
-                        std::clog << " layer " << itr->name() << " transformed to map srs: " << layer_ext << "\n";
-#endif
+
+                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
+                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
+
                         if (first)
                         {
                             ext = layer_ext;
@@ -439,7 +445,7 @@ void Map::zoom_all()
         }
         catch (proj_init_error & ex)
         {
-            std::clog << "proj_init_error:" << ex.what() << "\n";
+            throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
         }
     }
 }
@@ -558,91 +564,66 @@ CoordTransform Map::view_transform() const
 
 featureset_ptr Map::query_point(unsigned index, double x, double y) const
 {
-    if ( index< layers_.size())
+    if (!current_extent_.valid())
+    {
+        throw std::runtime_error("query_point: map extent is not intialized, you need to set a valid extent before querying");
+    }
+    if (!current_extent_.intersects(x,y))
+    {
+        throw std::runtime_error("query_point: x,y coords do not intersect map extent");
+    }
+    if (index < layers_.size())
     {
         mapnik::layer const& layer = layers_[index];
-        try
+        mapnik::datasource_ptr ds = layer.datasource();
+        if (ds)
         {
-            double z = 0;
             mapnik::projection dest(srs_);
             mapnik::projection source(layer.srs());
             proj_transform prj_trans(source,dest);
-            prj_trans.backward(x,y,z);
-
-            double minx = current_extent_.minx();
-            double miny = current_extent_.miny();
-            double maxx = current_extent_.maxx();
-            double maxy = current_extent_.maxy();
-
-            prj_trans.backward(minx,miny,z);
-            prj_trans.backward(maxx,maxy,z);
-            double tol = (maxx - minx) / width_ * 3;
-            mapnik::datasource_ptr ds = layer.datasource();
-            if (ds)
+            double z = 0;
+            if (!prj_trans.equal() && !prj_trans.backward(x,y,z))
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << " query at point tol = " << tol << " (" << x << "," << y << ")\n";
-#endif
-                featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
-                if (fs)
-                    return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                                                                   hit_test_filter(x,y,tol));
+                throw std::runtime_error("query_point: could not project x,y into layer srs");
+            }
+            // TODO - pass tolerance to features_at_point as well
+            featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
+            if (fs)
+            {
+                mapnik::box2d<double> map_ex = current_extent_;
+                if (maximum_extent_) {
+                    map_ex.clip(*maximum_extent_);
+                }
+                if (!prj_trans.backward(map_ex,PROJ_ENVELOPE_POINTS))
+                {
+                    std::ostringstream s;
+                    s << "query_point: could not project map extent '" << map_ex
+                      << "' into layer srs for tolerance calculation";
+                    throw std::runtime_error(s.str());
+                }
+                double tol = (map_ex.maxx() - map_ex.minx()) / width_ * 3;
+                MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
+                return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
+                                                                               hit_test_filter(x,y,tol));
             }
         }
-        catch (...)
-        {
-#ifdef MAPNIK_DEBUG
-            std::clog << "exception caught in \"query_point\"\n";
-#endif
-        }
+    }
+    else
+    {
+        std::ostringstream s;
+        s << "Invalid layer index passed to query_point: '" << index << "'";
+        if (layers_.size() > 0) s << " for map with " << layers_.size() << " layers(s)";
+        else s << " (map has no layers)";
+        throw std::out_of_range(s.str());
     }
     return featureset_ptr();
 }
 
 featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
 {
-    if ( index< layers_.size())
-    {
-        mapnik::layer const& layer = layers_[index];
-        CoordTransform tr = view_transform();
-        tr.backward(&x,&y);
-
-        try
-        {
-            mapnik::projection dest(srs_);
-            mapnik::projection source(layer.srs());
-            proj_transform prj_trans(source,dest);
-            double z = 0;
-            prj_trans.backward(x,y,z);
-
-            double minx = current_extent_.minx();
-            double miny = current_extent_.miny();
-            double maxx = current_extent_.maxx();
-            double maxy = current_extent_.maxy();
-
-            prj_trans.backward(minx,miny,z);
-            prj_trans.backward(maxx,maxy,z);
-            double tol = (maxx - minx) / width_ * 3;
-            mapnik::datasource_ptr ds = layer.datasource();
-            if (ds)
-            {
-#ifdef MAPNIK_DEBUG
-                std::clog << " query at point tol = " << tol << " (" << x << "," << y << ")\n";
-#endif
-                featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
-                if (fs)
-                    return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                                                                   hit_test_filter(x,y,tol));
-            }
-        }
-        catch (...)
-        {
-#ifdef MAPNIK_DEBUG
-            std::clog << "exception caught in \"query_map_point\"\n";
-#endif
-        }
-    }
-    return featureset_ptr();
+    CoordTransform tr = view_transform();
+    tr.backward(&x,&y);
+    return query_point(index,x,y);
 }
 
 Map::~Map() {}

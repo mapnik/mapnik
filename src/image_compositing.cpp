@@ -104,7 +104,6 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode, bool premultiply_src, b
 }
 
 
-template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & im, mapnik::image_data_32 & im2, composite_mode_e mode,
-                                                                     bool premultiply_src, bool premultiply_dst);
+template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & im, mapnik::image_data_32 & im2, composite_mode_e mode, bool premultiply_src, bool premultiply_dst);
 
 }

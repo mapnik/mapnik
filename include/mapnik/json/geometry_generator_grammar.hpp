@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_JSON_GEOMETRY_GENERATOR_GRAMMAR_HPP
 #define MAPNIK_JSON_GEOMETRY_GENERATOR_GRAMMAR_HPP
 
@@ -30,6 +28,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/vertex_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
+
 // boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/spirit/include/karma.hpp>

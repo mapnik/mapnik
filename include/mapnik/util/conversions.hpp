@@ -23,23 +23,37 @@
 #ifndef MAPNIK_UTIL_CONVERSIONS_HPP
 #define MAPNIK_UTIL_CONVERSIONS_HPP
 
+// mapnik
+#include <mapnik/config.hpp>
+
 // stl
 #include <string>
 // boost
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/karma.hpp>
 
+// boost
+#include <boost/version.hpp>
+
+#if BOOST_VERSION >= 104500
+#include <boost/config/warning_disable.hpp>
+#include <boost/spirit/include/karma.hpp>
+#else
+#include <boost/lexical_cast.hpp>
+#endif
+
 namespace mapnik { namespace util {
 
-bool string2int(const char * value, int & result);
-bool string2int(std::string const& value, int & result);
+MAPNIK_DECL bool string2int(const char * value, int & result);
+MAPNIK_DECL bool string2int(std::string const& value, int & result);
 
-bool string2double(std::string const& value, double & result);
-bool string2double(const char * value, double & result);
+MAPNIK_DECL bool string2double(std::string const& value, double & result);
+MAPNIK_DECL bool string2double(const char * value, double & result);
 
-bool string2float(std::string const& value, float & result);
-bool string2float(const char * value, float & result);
+MAPNIK_DECL bool string2float(std::string const& value, float & result);
+MAPNIK_DECL bool string2float(const char * value, float & result);
 
+#if BOOST_VERSION >= 104500
 // generic
 template <typename T>
 bool to_string(std::string & str, T value)
@@ -67,6 +81,24 @@ inline bool to_string(std::string & str, double value)
     std::back_insert_iterator<std::string> sink(str);
     return karma::generate(sink, double_type(), value);
 }
+
+#else
+
+template <typename T>
+bool to_string(std::string & str, T value)
+{
+    try
+    {
+        str = boost::lexical_cast<T>(value);
+        return true;
+    }
+    catch (std::exception const& ex)
+    {
+        return false;
+    }
+}
+
+#endif
 
 }}
 

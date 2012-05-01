@@ -266,12 +266,12 @@ struct feature_grammar :
             //
             ;
         
-        coordinates = eps(_r2 == 1) > point_coordinates(extract_geometry_(_r1))
-            | eps(_r2 == 2) > linestring_coordinates(extract_geometry_(_r1))
-            | eps(_r2 == 3) > polygon_coordinates(extract_geometry_(_r1))
-            | eps(_r2 == 4) > multipoint_coordinates(extract_geometry_(_r1))
-            | eps(_r2 == 5) > multilinestring_coordinates(extract_geometry_(_r1))
-            | eps(_r2 == 6) > multipolygon_coordinates(extract_geometry_(_r1))
+        coordinates = (eps(_r2 == 1) > point_coordinates(extract_geometry_(_r1)))
+            | (eps(_r2 == 2) > linestring_coordinates(extract_geometry_(_r1)))
+            | (eps(_r2 == 3) > polygon_coordinates(extract_geometry_(_r1)))
+            | (eps(_r2 == 4) > multipoint_coordinates(extract_geometry_(_r1)))
+            | (eps(_r2 == 5) > multilinestring_coordinates(extract_geometry_(_r1)))
+            | (eps(_r2 == 6) > multipolygon_coordinates(extract_geometry_(_r1)))
             ;
         
         point_coordinates =  eps[ _a = new_<geometry_type>(Point) ]
@@ -316,7 +316,7 @@ struct feature_grammar :
         on_error<fail>
             (
                 feature
-                , std::cerr
+                , std::clog
                 << phoenix::val("Error! Expecting ")
                 << _4                               // what failed?
                 << phoenix::val(" here: \"")

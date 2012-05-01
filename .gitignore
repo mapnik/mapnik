@@ -39,7 +39,8 @@ tests/data/sqlite/*index
 demo/c++/cairo-demo.pdf
 demo/c++/cairo-demo.png
 demo/c++/cairo-demo256.png
+demo/c++/demo.tif
 demo/c++/demo.jpg
 demo/c++/demo.png
 demo/c++/demo256.png
-
+tests/cpp_tests/*-bin

@@ -335,19 +335,19 @@ struct add : public boost::static_visitor<V>
     {
         return lhs + rhs;
     }
-
-    value_type operator() (UnicodeString const& lhs, value_null rhs) const    
+    
+    value_type operator() (UnicodeString const& lhs, value_null rhs) const
     {
         boost::ignore_unused_variable_warning(rhs);
         return lhs;
     }
-    
-    value_type operator() (value_null lhs, UnicodeString const& rhs) const    
+
+    value_type operator() (value_null lhs, UnicodeString const& rhs) const
     {
         boost::ignore_unused_variable_warning(lhs);
         return rhs;
     }
-    
+
     template <typename R>
     value_type operator() (UnicodeString const& lhs, R const& rhs) const
     {
@@ -356,7 +356,7 @@ struct add : public boost::static_visitor<V>
             return lhs + UnicodeString(val.c_str());
         return lhs;
     }
-    
+
     template <typename L>
     value_type operator() (L const& lhs , UnicodeString const& rhs) const
     {
@@ -559,7 +559,7 @@ struct to_string : public boost::static_visitor<std::string>
         util::to_string(str, val);
         return str;
     }
-    
+
     // specializations
     std::string operator() (UnicodeString const& val) const
     {
@@ -567,14 +567,14 @@ struct to_string : public boost::static_visitor<std::string>
         to_utf8(val,utf8);
         return utf8;
     }
-    
+
     std::string operator() (double val) const
     {
         std::string str;
         util::to_string(str, val); // TODO set precision(16)
         return str;
     }
-    
+
     std::string operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
@@ -605,7 +605,7 @@ struct to_unicode : public boost::static_visitor<UnicodeString>
         util::to_string(str,val);
         return UnicodeString(str.c_str());
     }
-    
+
     UnicodeString operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
@@ -626,9 +626,9 @@ struct to_expression_string : public boost::static_visitor<std::string>
     {
         std::string output;
         util::to_string(output,val); // TODO precision(16)
-        return output;        
+        return output;
     }
-    
+
     std::string operator() (bool val) const
     {
         return val ? "true":"false";
@@ -668,14 +668,13 @@ struct to_double : public boost::static_visitor<double>
             return result;
         return 0;
     }
-    
     double operator() (UnicodeString const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
         return operator()(utf8);
     }
-    
+
     double operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
@@ -702,14 +701,13 @@ struct to_int : public boost::static_visitor<double>
             return result;
         return 0;
     }
-    
     int operator() (UnicodeString const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
         return operator()(utf8);
     }
-    
+
     int operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);

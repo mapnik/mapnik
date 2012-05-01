@@ -23,6 +23,7 @@ SOURCES += \
 	$$PWD/../bindings/python/mapnik_image_view.cpp \
 	$$PWD/../bindings/python/mapnik_inmem_metawriter.cpp \
 	$$PWD/../bindings/python/mapnik_layer.cpp \
+	$$PWD/../bindings/python/mapnik_logger.cpp \
 	$$PWD/../bindings/python/mapnik_line_pattern_symbolizer.cpp \
 	$$PWD/../bindings/python/mapnik_line_symbolizer.cpp \
 	$$PWD/../bindings/python/mapnik_map.cpp \

@@ -84,14 +84,6 @@ struct osm_way : public osm_item
 
 class osm_dataset
 {
-private:
-    int next_item_mode;
-    enum { Node, Way };
-    std::vector<osm_node*>::iterator node_i;
-    std::vector<osm_way*>::iterator way_i;
-    std::vector<osm_node*> nodes;
-    std::vector<osm_way*> ways; 
-
 public:
     osm_dataset()
     {
@@ -128,6 +120,14 @@ public:
     osm_item * next_item();
     bool current_item_is_node() { return next_item_mode == Node; }
     bool current_item_is_way() { return next_item_mode == Way; }
+
+private:
+    int next_item_mode;
+    enum { Node, Way };
+    std::vector<osm_node*>::iterator node_i;
+    std::vector<osm_way*>::iterator way_i;
+    std::vector<osm_node*> nodes;
+    std::vector<osm_way*> ways;
 };
 
 #endif // OSM_H

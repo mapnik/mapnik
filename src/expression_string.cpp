@@ -20,12 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id$
-
+// mapnik
 #include <mapnik/expression_string.hpp>
-#include <boost/variant.hpp>
-#include <unicode/uversion.h>
 
+// boost
+#include <boost/variant.hpp>
+
+// icu
+#include <unicode/uversion.h>
 
 
 namespace mapnik

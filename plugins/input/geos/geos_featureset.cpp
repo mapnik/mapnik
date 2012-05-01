@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
@@ -104,9 +105,7 @@ feature_ptr geos_featureset::next()
                     break;
 
                 default:
-#ifdef MAPNIK_DEBUG
-                    std::clog << "GEOS Plugin: unknown extent geometry_type=" << type << std::endl;
-#endif
+                    MAPNIK_LOG_DEBUG(geos) << "geos_featureset: Unknown extent geometry_type=" << type;
                     break;
                 }
             }

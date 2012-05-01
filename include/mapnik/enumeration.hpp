@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/debug.hpp>
 
 // stl
 #include <vector>
@@ -73,7 +74,7 @@ protected:
  *      underscores (<i>_</i>) and dashes (<i>-</i>).
  *
  *
- * @warning At the moment the verify() method is called during static initialization.
+ * @warning At the moment the verify_mapnik_enum() method is called during static initialization.
  * It quits the application with exit code 1 if any error is detected. The other solution
  * i thought of is to do the checks at compile time (using boost::mpl).
  *
@@ -139,22 +140,27 @@ template <class ENUM, int THE_MAX>
 class MAPNIK_DECL enumeration {
 public:
     typedef ENUM native_type;
-    enumeration():
-        value_() {};
-    enumeration( ENUM v ) : value_(v) {}
-    enumeration( const enumeration & other ) : value_(other.value_) {}
+
+    enumeration()
+      :  value_() {}
+
+    enumeration( ENUM v )
+      :  value_(v) {}
+
+    enumeration( const enumeration & other )
+      : value_(other.value_) {}
 
     /** Assignment operator for native enum values. */
     void operator=(ENUM v)
-        {
-            value_ = v;
-        }
+    {
+        value_ = v;
+    }
 
     /** Assignment operator. */
     void operator=(const enumeration & other)
-        {
-            value_ = other.value_;
-        }
+    {
+        value_ = other.value_;
+    }
 
     /** Conversion operator for native enum values. */
     operator ENUM() const
@@ -166,10 +172,12 @@ public:
     {
         MAX = THE_MAX
     };
+
     ENUM max() const
     {
         return THE_MAX;
     }
+
     /** Converts @p str to an enum.
      * @throw illegal_enum_value @p str is not a legal identifier.
      * */
@@ -247,32 +255,36 @@ public:
     /** Performs some simple checks and quits the application if
      * any error is detected. Tries to print helpful error messages.
      */
-    static bool verify(const char * filename, unsigned line_no)
+    static bool verify_mapnik_enum(const char * filename, unsigned line_no)
     {
         for (unsigned i = 0; i < THE_MAX; ++i)
         {
             if (our_strings_[i] == 0 )
             {
-                std::cerr << "### FATAL: Not enough strings for enum "
-                          << our_name_ << " defined in file '" << filename
-                          << "' at line " << line_no << std::endl;
+                MAPNIK_LOG_FATAL(enumeration)
+                        << "### FATAL: Not enough strings for enum "
+                        << our_name_ << " defined in file '" << filename
+                        << "' at line " << line_no;
                 //std::exit(1);
             }
         }
         if ( std::string("") != our_strings_[THE_MAX])
         {
-            std::cerr << "### FATAL: The string array for enum " << our_name_
-                      << " defined in file '" << filename << "' at line " << line_no
-                      << " has too many items or is not terminated with an "
-                      << "empty string." << std::endl;
+            MAPNIK_LOG_FATAL(enumeration)
+                    << "### FATAL: The string array for enum " << our_name_
+                    << " defined in file '" << filename << "' at line " << line_no
+                    << " has too many items or is not terminated with an "
+                    << "empty string";
             //std::exit(1);
         }
         return true;
     }
+
     static std::string const& get_full_qualified_name()
     {
         return our_name_;
     }
+
     static std::string get_name()
     {
         std::string::size_type idx = our_name_.find_last_of(":");
@@ -283,6 +295,7 @@ public:
             return our_name_.substr( idx + 1 );
         }
     }
+
 private:
     ENUM value_;
     static const char ** our_strings_ ;
@@ -320,13 +333,13 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
 #define DEFINE_ENUM( name, e)                   \
     typedef enumeration<e, e ## _MAX> name
 
-/** Helper macro. Runs the verify() method during static initialization.
+/** Helper macro. Runs the verify_mapnik_enum() method during static initialization.
  * @relates mapnik::enumeration
  */
 
 #define IMPLEMENT_ENUM( name, strings )                                 \
     template <> const char ** name ::our_strings_ = strings;            \
     template <> std::string name ::our_name_ = #name;                   \
-    template <> bool name ::our_verified_flag_( name ::verify(__FILE__, __LINE__));
+    template <> bool name ::our_verified_flag_( name ::verify_mapnik_enum(__FILE__, __LINE__));
 
 #endif // MAPNIK_ENUMERATION_HPP

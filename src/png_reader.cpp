@@ -20,8 +20,7 @@
  *
  *****************************************************************************/
 
-//$Id: png_reader.cpp 33 2005-04-04 13:01:03Z pavlenko $
-
+#include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
 
 extern "C"
@@ -31,10 +30,6 @@ extern "C"
 
 #include <boost/scoped_array.hpp>
 #include <boost/utility.hpp>
-
-#ifdef MAPNIK_DEBUG
-#include <iostream>
-#endif
 
 namespace mapnik
 {
@@ -134,9 +129,9 @@ void png_reader::init()
 
     width_=width;
     height_=height;
-#ifdef MAPNIK_DEBUG
-    std::clog<<"bit_depth="<<bit_depth_<<" color_type="<<color_type_<<std::endl;
-#endif
+
+    MAPNIK_LOG_DEBUG(png_reader) << "png_reader: bit_depth=" << bit_depth_ << ",color_type=" << color_type_;
+
     png_destroy_read_struct(&png_ptr,&info_ptr,0);
     fclose(fp);
 }

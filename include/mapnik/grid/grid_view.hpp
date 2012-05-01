@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_GRID_VIEW_HPP
 #define MAPNIK_GRID_VIEW_HPP
 
@@ -34,6 +32,7 @@
 
 // boost
 #include <boost/cstdint.hpp>
+
 // stl
 #include <map>
 #include <set>

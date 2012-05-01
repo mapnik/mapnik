@@ -43,8 +43,13 @@ namespace mapnik {
 typedef boost::variant<std::string, attribute> path_component;
 typedef std::vector<path_component> path_expression;
 typedef boost::shared_ptr<path_expression> path_expression_ptr;
+template <typename Iterator> struct path_expression_grammar;
 
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
+MAPNIK_DECL bool parse_path_from_string(path_expression_ptr const& path,
+                                        std::string const & str,
+                                        path_expression_grammar<std::string::const_iterator> const& g);
+
 
 template <typename T>
 struct path_processor

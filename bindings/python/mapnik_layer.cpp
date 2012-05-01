@@ -19,8 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: mapnik_layer.cc 17 2005-03-08 23:58:43Z pavlenko $
-
 
 // boost
 #include <boost/python.hpp>

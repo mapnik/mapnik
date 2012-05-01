@@ -40,7 +40,9 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
+    bool log_enabled() const;
     void bind() const;
+
 private:
     mapnik::layer_descriptor desc_;
     std::string filename_;
@@ -52,9 +54,6 @@ private:
     unsigned tile_stride_;
     mutable unsigned width_;
     mutable unsigned height_;
-    //no copying
-    raster_datasource(const raster_datasource&);
-    raster_datasource& operator=(const raster_datasource&);
 };
 
 #endif // RASTER_DATASOURCE_HPP

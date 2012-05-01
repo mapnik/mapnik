@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_SVG_OUTPUT_ATTRIBUTES
 #define MAPNIK_SVG_OUTPUT_ATTRIBUTES
 

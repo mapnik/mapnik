@@ -72,12 +72,14 @@ public:
     void set_pixel_coordinates(bool on) { pixel_coordinates_ = on; }
     bool get_pixel_coordinates() { return pixel_coordinates_; }
     virtual void set_map_srs(projection const& proj);
+
 protected:
     enum {
         HEADER_NOT_WRITTEN = -1,
         STOPPED = -2,
         STARTED = 0
     };
+
     /** Features written. */
     int count_;
     bool output_empty_;
@@ -85,20 +87,23 @@ protected:
     proj_transform *trans_;
     projection output_srs_;
     bool pixel_coordinates_;
+
     virtual void write_header();
+
     inline void write_feature_header(std::string type) {
-#ifdef MAPNIK_DEBUG
         if (count_ == STOPPED)
         {
-            std::cerr << "WARNING: Metawriter not started before using it.\n";
+            MAPNIK_LOG_WARN(metawrite_json) << "Metawriter: instance not started before using it.";
         }
-#endif
+
         if (count_ == HEADER_NOT_WRITTEN) write_header();
         if (count_++) *f_ << ",\n";
 
         *f_  << "{ \"type\": \"Feature\",\n  \"geometry\": { \"type\": \"" << type << "\",\n    \"coordinates\":";
     }
+
     void write_properties(Feature const& feature, metawriter_properties const& properties);
+
     inline void write_point(CoordTransform const& t, double x, double y, bool last = false)
     {
         double z = 0.0;
@@ -111,6 +116,7 @@ protected:
             *f_ << ",";
         }
     }
+
     void write_line_polygon(path_type & path, CoordTransform const& t, bool polygon);
 
 private:
@@ -136,10 +142,12 @@ public:
     void set_filename(path_expression_ptr fn);
     /** Get filename template. */
     path_expression_ptr get_filename() const;
+
 private:
     path_expression_ptr fn_;
     std::fstream f_;
     std::string filename_;
+
 protected:
     virtual void write_header();
 };

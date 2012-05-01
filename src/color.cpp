@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>

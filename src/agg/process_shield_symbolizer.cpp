@@ -19,17 +19,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
 #include <mapnik/symbolizer_helpers.hpp>
-
 
 // boost
 #include <boost/make_shared.hpp>

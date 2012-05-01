@@ -19,14 +19,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
+// mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/formatting/format.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
 
 namespace mapnik {
+namespace formatting {
+
 using boost::property_tree::ptree;
 
-namespace formatting {
 void format_node::to_xml(ptree &xml) const
 {
     ptree &new_node = xml.push_back(ptree::value_type("Format", ptree()))->second;
@@ -88,9 +92,7 @@ void format_node::apply(char_properties const& p, const Feature &feature, proces
     if (child_) {
         child_->apply(new_properties, feature, output);
     } else {
-#ifdef MAPNIK_DEBUG
-        std::cerr << "Warning: Useless format: No text to format\n";
-#endif
+        MAPNIK_LOG_WARN(format) << "Useless format: No text to format";
     }
 }
 

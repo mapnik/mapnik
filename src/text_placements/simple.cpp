@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
@@ -94,7 +95,7 @@ bool text_placement_info_simple::next_position_only()
         displacement = std::make_pair(-abs(pdisp.first), abs(pdisp.second));
         break;
     default:
-        std::cerr << "WARNING: Unknown placement\n";
+        MAPNIK_LOG_WARN(text_placements) << "Unknown placement";
     }
     position_state++;
     return true;
@@ -146,11 +147,11 @@ void text_placements_simple::set_positions(std::string positions)
         );
     if (first != last)
     {
-        std::cerr << "WARNING: Could not parse text_placement_simple placement string ('" << positions << "').\n";
+        MAPNIK_LOG_WARN(text_placements) << "Could not parse text_placement_simple placement string ('" << positions << "')";
     }
     if (direction_.size() == 0)
     {
-        std::cerr << "WARNING: text_placements_simple with no valid placements! ('"<< positions<<"')\n";
+        MAPNIK_LOG_WARN(text_placements) << "text_placements_simple with no valid placements! ('"<< positions<<"')";
     }
 }
 

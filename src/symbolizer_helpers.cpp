@@ -207,9 +207,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
             }
             else
             {
-#ifdef MAPNIK_DEBUG
-                std::cerr << "ERROR: Unknown placement type in initialize_points();\n";
-#endif
+                MAPNIK_LOG_ERROR(symbolizer_helpers) << "ERROR: Unknown placement type in initialize_points()";
             }
             prj_trans_.backward(label_x, label_y, z);
             t_.forward(&label_x, &label_y);

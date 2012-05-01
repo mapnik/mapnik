@@ -9,7 +9,27 @@ For a complete change history, see the SVN log.
 
 ## Mapnik 2.1.0
 
-- Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentially radii)
+- PostGIS: Added 'simplify_geometries' option - will trigger ST_Simplify on geometries before returning to Mapnik (#1179)
+
+- Improved error feedback for invalid values passed to map.query_point
+
+- Fixed rendering of thin svg lines (#1129)
+
+- Improved logging/debugging system with release logs and file redirection (#937 and partially #986, #467)
+
+- GDAL: allow setting nodata value on the fly (will override value if nodata is set in data) (#1161)
+ 
+- GDAL: respect nodata for paletted/colormapped images (#1160)
+
+- PostGIS: Added a new option called 'autodetect_key_field' (by default false) that if true will
+  trigger autodetection of a given tables' primary key allowing for feature.id() to represent
+  globally unique ids. This option has no effect if the user has not manually supplied the 'key_field' option. (#804)
+
+- Cairo: Add full rendering support for markers to match AGG renderer functionality (#1071)
+
+- Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentionally radii) (#1134)
+
+- Added 'ignore-placement` attribute to markers-symbolizer (#1135)
 
 - Removed PointDatasource - use more robust MemoryDatasource instead (#1032)
 
@@ -24,6 +44,41 @@ For a complete change history, see the SVN log.
 - Added support for output maps as tiff files (addresses #967 partially)
 
 - Added support for justify-alignment=auto. This is the new default. (#1125)
+
+
+## Mapnik 2.0.1
+
+(Packaged from 5cd3cb2efdaf7e9990a57e8e00b652a81aaa39ae)
+
+- Support for PostGIS 2.0 (#956,#1083)
+
+- Switched back to "libmapnik" and "import mapnik" rather than "mapnik2" (mapnik2 will still work from python) (#941)
+
+- Restored Python 2.5 compatibility (#904)
+
+- Fixed `mapnik-config --version` (#903)
+
+- Cairo: Add full rendering support for markers to match AGG renderer functionality (#1071)
+
+- Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentially radii) (#1134)
+
+- Added 'ignore-placement` attribute to markers-symbolizer (#1135)
+
+- Removed svn_revision info from mapnik-config and python bindings as git is now used
+
+- Removed OGCServer from core - now at https://github.com/mapnik/OGCServer (e7f6267)
+
+- Fixed SQLite open stability across platforms/versions (#854)
+
+- Workaround for boost interprocess compile error with recent gcc versions (#950,#1001,#1082)
+
+- Fix possible memory corruption when using hextree mode for png color reduction (#1087)
+
+- Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
+
+- Fix to avoid modifying a feature if an attribute is requested that does not exist (0f5ab18ed)
+
+- Fixed ability to save to jpeg format from python (7387afd9) (#896)
 
 
 ## Mapnik 2.0.0

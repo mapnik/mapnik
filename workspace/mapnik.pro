@@ -9,9 +9,15 @@ TEMPLATE = lib
 INCLUDEPATH = \
     ../deps/agg/include \
     ../deps/threadpool \
-    ../include/mapnik
+    ../include \
 
 HEADERS += \
+    ../include/mapnik/formatting/base.hpp \
+    ../include/mapnik/formatting/expression.hpp \
+    ../include/mapnik/formatting/format.hpp \
+    ../include/mapnik/formatting/list.hpp \
+    ../include/mapnik/formatting/registry.hpp \
+    ../include/mapnik/formatting/text.hpp \
     ../include/mapnik/grid/grid.hpp \
     ../include/mapnik/grid/grid_pixel.hpp \
     ../include/mapnik/grid/grid_pixfmt.hpp \
@@ -20,6 +26,13 @@ HEADERS += \
     ../include/mapnik/grid/grid_rendering_buffer.hpp \
     ../include/mapnik/grid/grid_util.hpp \
     ../include/mapnik/grid/grid_view.hpp \
+    ../include/mapnik/internal/dump_xml.hpp \
+    ../include/mapnik/json/feature_collection_grammar.hpp \
+    ../include/mapnik/json/feature_collection_parser.hpp \
+    ../include/mapnik/json/feature_generator_grammar.hpp \
+    ../include/mapnik/json/feature_grammar.hpp \
+    ../include/mapnik/json/geojson_generator.hpp \
+    ../include/mapnik/json/geometry_generator_grammar.hpp \
     ../include/mapnik/svg/svg_converter.hpp \
     ../include/mapnik/svg/svg_generator.hpp \
     ../include/mapnik/svg/svg_output_attributes.hpp \
@@ -35,28 +48,48 @@ HEADERS += \
     ../include/mapnik/svg/svg_renderer.hpp \
     ../include/mapnik/svg/svg_storage.hpp \
     ../include/mapnik/svg/svg_transform_grammar.hpp \
+    ../include/mapnik/text_placements/base.hpp \
+    ../include/mapnik/text_placements/dummy.hpp \
+    ../include/mapnik/text_placements/list.hpp \
+    ../include/mapnik/text_placements/registry.hpp \
+    ../include/mapnik/text_placements/simple.hpp \
+    ../include/mapnik/util/container_adapter.hpp \
+    ../include/mapnik/util/conversions.hpp \
+    ../include/mapnik/util/dasharray_parser.hpp \
+    ../include/mapnik/util/deepcopy.hpp \
+    ../include/mapnik/util/geometry_svg_generator.hpp \
+    ../include/mapnik/util/geometry_to_ds_type.hpp \
+    ../include/mapnik/util/geometry_to_wkb.hpp \
+    ../include/mapnik/util/geometry_to_wkt.hpp \
+    ../include/mapnik/util/geometry_wkt_generator.hpp \
+    ../include/mapnik/util/vertex_iterator.hpp \
     ../include/mapnik/wkt/wkt_factory.hpp \
     ../include/mapnik/wkt/wkt_grammar.hpp \
+    ../include/mapnik/agg_helpers.hpp \
     ../include/mapnik/agg_pattern_source.hpp \
     ../include/mapnik/agg_rasterizer.hpp \
     ../include/mapnik/agg_renderer.hpp \
     ../include/mapnik/arrow.hpp \
+    ../include/mapnik/attribute.hpp \
     ../include/mapnik/attribute_collector.hpp \
     ../include/mapnik/attribute_descriptor.hpp \
-    ../include/mapnik/attribute.hpp \
+    ../include/mapnik/boolean.hpp \
     ../include/mapnik/box2d.hpp \
+    ../include/mapnik/building_symbolizer.hpp \
     ../include/mapnik/cairo_renderer.hpp \
-    ../include/mapnik/color_factory.hpp \
+    ../include/mapnik/char_info.hpp \
     ../include/mapnik/color.hpp \
-    ../include/mapnik/config_error.hpp \
+    ../include/mapnik/color_factory.hpp \
     ../include/mapnik/config.hpp \
-    ../include/mapnik/coord_array.hpp \
+    ../include/mapnik/config_error.hpp \
     ../include/mapnik/coord.hpp \
-    ../include/mapnik/css_color_grammar_deprecated.hpp \
+    ../include/mapnik/coord_array.hpp \
     ../include/mapnik/css_color_grammar.hpp \
+    ../include/mapnik/css_color_grammar_deprecated.hpp \
     ../include/mapnik/ctrans.hpp \
-    ../include/mapnik/datasource_cache.hpp \
+    ../include/mapnik/debug.hpp \
     ../include/mapnik/datasource.hpp \
+    ../include/mapnik/datasource_cache.hpp \
     ../include/mapnik/distance.hpp \
     ../include/mapnik/ellipsoid.hpp \
     ../include/mapnik/enumeration.hpp \
@@ -66,19 +99,19 @@ HEADERS += \
     ../include/mapnik/expression_string.hpp \
     ../include/mapnik/factory.hpp \
     ../include/mapnik/fastmath.hpp \
-    ../include/mapnik/feature_factory.hpp \
     ../include/mapnik/feature.hpp \
+    ../include/mapnik/feature_factory.hpp \
+    ../include/mapnik/feature_kv_iterator.hpp \
     ../include/mapnik/feature_layer_desc.hpp \
     ../include/mapnik/feature_style_processor.hpp \
     ../include/mapnik/feature_type_style.hpp \
-    ../include/mapnik/fill.hpp \
     ../include/mapnik/filter_factory.hpp \
     ../include/mapnik/filter_featureset.hpp \
     ../include/mapnik/font_engine_freetype.hpp \
     ../include/mapnik/font_set.hpp \
-    ../include/mapnik/gamma.hpp \
-    ../include/mapnik/geometry.hpp \
+    ../include/mapnik/gamma_method.hpp \
     ../include/mapnik/geom_util.hpp \
+    ../include/mapnik/geometry.hpp \
     ../include/mapnik/global.hpp \
     ../include/mapnik/gradient.hpp \
     ../include/mapnik/graphics.hpp \
@@ -92,21 +125,20 @@ HEADERS += \
     ../include/mapnik/jpeg_io.hpp \
     ../include/mapnik/label_collision_detector.hpp \
     ../include/mapnik/layer.hpp \
-    ../include/mapnik/libxml2_loader.hpp \
     ../include/mapnik/line_pattern_symbolizer.hpp \
     ../include/mapnik/line_symbolizer.hpp \
     ../include/mapnik/load_map.hpp \
     ../include/mapnik/map.hpp \
     ../include/mapnik/mapped_memory_cache.hpp \
-    ../include/mapnik/marker_cache.hpp \
     ../include/mapnik/marker.hpp \
+    ../include/mapnik/marker_cache.hpp \
     ../include/mapnik/markers_placement.hpp \
     ../include/mapnik/markers_symbolizer.hpp \
+    ../include/mapnik/memory.hpp \
     ../include/mapnik/memory_datasource.hpp \
     ../include/mapnik/memory_featureset.hpp \
-    ../include/mapnik/memory.hpp \
-    ../include/mapnik/metawriter_factory.hpp \
     ../include/mapnik/metawriter.hpp \
+    ../include/mapnik/metawriter_factory.hpp \
     ../include/mapnik/metawriter_inmem.hpp \
     ../include/mapnik/metawriter_json.hpp \
     ../include/mapnik/octree.hpp \
@@ -114,6 +146,7 @@ HEADERS += \
     ../include/mapnik/params.hpp \
     ../include/mapnik/parse_path.hpp \
     ../include/mapnik/path_expression_grammar.hpp \
+    ../include/mapnik/pixel_position.hpp \
     ../include/mapnik/placement_finder.hpp \
     ../include/mapnik/plugin.hpp \
     ../include/mapnik/png_io.hpp \
@@ -121,13 +154,14 @@ HEADERS += \
     ../include/mapnik/polygon_pattern_symbolizer.hpp \
     ../include/mapnik/polygon_symbolizer.hpp \
     ../include/mapnik/pool.hpp \
-    ../include/mapnik/projection.hpp \
+    ../include/mapnik/processed_text.hpp \
     ../include/mapnik/proj_transform.hpp \
+    ../include/mapnik/projection.hpp \
     ../include/mapnik/ptree_helpers.hpp \
     ../include/mapnik/quad_tree.hpp \
     ../include/mapnik/query.hpp \
-    ../include/mapnik/raster_colorizer.hpp \
     ../include/mapnik/raster.hpp \
+    ../include/mapnik/raster_colorizer.hpp \
     ../include/mapnik/raster_symbolizer.hpp \
     ../include/mapnik/rule.hpp \
     ../include/mapnik/save_map.hpp \
@@ -136,25 +170,26 @@ HEADERS += \
     ../include/mapnik/shield_symbolizer.hpp \
     ../include/mapnik/sql_utils.hpp \
     ../include/mapnik/stroke.hpp \
-    ../include/mapnik/style_factory.hpp \
     ../include/mapnik/svg_renderer.hpp \
     ../include/mapnik/symbolizer.hpp \
+    ../include/mapnik/symbolizer_helpers.hpp \
     ../include/mapnik/text_path.hpp \
-    ../include/mapnik/text_placements.hpp \
-    ../include/mapnik/text_placements_simple.hpp \
+    ../include/mapnik/text_properties.hpp \
     ../include/mapnik/text_symbolizer.hpp \
     ../include/mapnik/tiff_io.hpp \
     ../include/mapnik/timer.hpp \
     ../include/mapnik/unicode.hpp \
     ../include/mapnik/utils.hpp \
-    ../include/mapnik/value_error.hpp \
     ../include/mapnik/value.hpp \
+    ../include/mapnik/value_error.hpp \
     ../include/mapnik/version.hpp \
     ../include/mapnik/vertex.hpp \
-    ../include/mapnik/vertex_transform.hpp \
     ../include/mapnik/vertex_vector.hpp \
     ../include/mapnik/warp.hpp \
-    ../include/mapnik/wkb.hpp
+    ../include/mapnik/wkb.hpp \
+    ../include/mapnik/xml_loader.hpp \
+    ../include/mapnik/xml_node.hpp \
+    ../include/mapnik/xml_tree.hpp
 
 
 SOURCES += \
@@ -164,49 +199,72 @@ SOURCES += \
     ../src/agg/process_line_symbolizer.cpp \
     ../src/agg/process_markers_symbolizer.cpp \
     ../src/agg/process_point_symbolizer.cpp \
-    ../src/agg/process_polygon_symbolizer.cpp \
     ../src/agg/process_polygon_pattern_symbolizer.cpp \
+    ../src/agg/process_polygon_symbolizer.cpp \
     ../src/agg/process_raster_symbolizer.cpp \
     ../src/agg/process_shield_symbolizer.cpp \
     ../src/agg/process_text_symbolizer.cpp \
+    ../src/formatting/base.cpp \
+    ../src/formatting/expression.cpp \
+    ../src/formatting/format.cpp \
+    ../src/formatting/list.cpp \
+    ../src/formatting/registry.cpp \
+    ../src/formatting/text.cpp \
     ../src/grid/grid_renderer.cpp \
     ../src/grid/process_building_symbolizer.cpp \
     ../src/grid/process_line_pattern_symbolizer.cpp \
     ../src/grid/process_line_symbolizer.cpp \
     ../src/grid/process_markers_symbolizer.cpp \
     ../src/grid/process_point_symbolizer.cpp \
+    ../src/grid/process_polygon_pattern_symbolizer.cpp \
     ../src/grid/process_polygon_symbolizer.cpp \
     ../src/grid/process_raster_symbolizer.cpp \
     ../src/grid/process_shield_symbolizer.cpp \
     ../src/grid/process_text_symbolizer.cpp \
-    ../src/svg/svg_renderer.cpp \
-    ../src/svg/svg_generator.cpp \
-    ../src/svg/svg_output_attributes.cpp \
-    ../src/svg/process_symbolizers.cpp \
+    ../src/json/feature_collection_parser.cpp \
+    ../src/json/geojson_generator.cpp \
     ../src/svg/process_building_symbolizer.cpp \
     ../src/svg/process_line_pattern_symbolizer.cpp \
     ../src/svg/process_line_symbolizer.cpp \
     ../src/svg/process_markers_symbolizer.cpp \
     ../src/svg/process_point_symbolizer.cpp \
+    ../src/svg/process_polygon_pattern_symbolizer.cpp \
     ../src/svg/process_polygon_symbolizer.cpp \
     ../src/svg/process_raster_symbolizer.cpp \
     ../src/svg/process_shield_symbolizer.cpp \
+    ../src/svg/process_symbolizers.cpp \
     ../src/svg/process_text_symbolizer.cpp \
+    ../src/svg/svg_generator.cpp \
+    ../src/svg/svg_output_attributes.cpp \
+    ../src/svg/svg_renderer.cpp \
+    ../src/text_placements/base.cpp \
+    ../src/text_placements/dummy.cpp \
+    ../src/text_placements/list.cpp \
+    ../src/text_placements/registry.cpp \
+    ../src/text_placements/simple.cpp \
     ../src/wkt/wkt_factory.cpp \
     ../src/arrow.cpp \
     ../src/box2d.cpp \
+    ../src/building_symbolizer.cpp \
     ../src/cairo_renderer.cpp \
     ../src/color.cpp \
+    ../src/config_error.cpp \
+    ../src/conversions.cpp \
     ../src/datasource_cache.cpp \
+    ../src/debug.cpp \
+    ../src/deepcopy.cpp \
     ../src/distance.cpp \
+    ../src/expression.cpp \
     ../src/expression_string.cpp \
+    ../src/feature_kv_iterator.cpp \
     ../src/feature_style_processor.cpp \
     ../src/feature_type_style.cpp \
-    ../src/filter_factory.cpp \
     ../src/font_engine_freetype.cpp \
     ../src/font_set.cpp \
+    ../src/gamma_method.cpp \
     ../src/gradient.cpp \
     ../src/graphics.cpp \
+    ../src/image_compositing.cpp \
     ../src/image_reader.cpp \
     ../src/image_util.cpp \
     ../src/jpeg_reader.cpp \
@@ -218,6 +276,7 @@ SOURCES += \
     ../src/map.cpp \
     ../src/mapped_memory_cache.cpp \
     ../src/marker_cache.cpp \
+    ../src/markers_placement.cpp \
     ../src/markers_symbolizer.cpp \
     ../src/memory.cpp \
     ../src/memory_datasource.cpp \
@@ -231,8 +290,11 @@ SOURCES += \
     ../src/png_reader.cpp \
     ../src/point_symbolizer.cpp \
     ../src/polygon_pattern_symbolizer.cpp \
-    ../src/projection.cpp \
+    ../src/polygon_symbolizer.cpp \
+    ../src/processed_text.cpp \
     ../src/proj_transform.cpp \
+    ../src/projection.cpp \
+    ../src/rapidxml_loader.cpp \
     ../src/raster_colorizer.cpp \
     ../src/save_map.cpp \
     ../src/scale_denominator.cpp \
@@ -243,21 +305,24 @@ SOURCES += \
     ../src/svg_points_parser.cpp \
     ../src/svg_transform_parser.cpp \
     ../src/symbolizer.cpp \
-    ../src/text_placements.cpp \
+    ../src/symbolizer_helpers.cpp \
+    ../src/text_properties.cpp \
     ../src/text_symbolizer.cpp \
     ../src/tiff_reader.cpp \
     ../src/unicode.cpp \
     ../src/warp.cpp \
-    ../src/wkb.cpp
+    ../src/wkb.cpp \
+    ../src/xml_tree.cpp
 
 OTHER_FILES += \
     ../SConstruct \
-    ../config.py
+    ../config.py \
+    ../CHANGELOG.md
 
 include(agg.pri)
 include(plugins.pri)
 include(bindings.pri)
 
 unix {
-    DEFINES += LINUX=1
+    DEFINES += LINUX=1 MAPNIK_LOG=1
 }

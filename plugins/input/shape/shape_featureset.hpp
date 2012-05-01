@@ -42,16 +42,6 @@ using mapnik::context_ptr;
 template <typename filterT>
 class shape_featureset : public Featureset
 {
-    filterT filter_;
-    shape_io shape_;
-    box2d<double> query_ext_;
-    boost::scoped_ptr<transcoder> tr_;
-    long file_length_;
-    std::vector<int> attr_ids_;
-    const int row_limit_;
-    mutable int count_;
-    context_ptr ctx_;
-
 public:
     shape_featureset(filterT const& filter,
                      std::string const& shape_file,
@@ -61,6 +51,17 @@ public:
                      int row_limit);
     virtual ~shape_featureset();
     feature_ptr next();
+
+private:
+    filterT filter_;
+    shape_io shape_;
+    box2d<double> query_ext_;
+    boost::scoped_ptr<transcoder> tr_;
+    long file_length_;
+    std::vector<int> attr_ids_;
+    const int row_limit_;
+    mutable int count_;
+    context_ptr ctx_;
 };
 
 #endif //SHAPE_FEATURESET_HPP

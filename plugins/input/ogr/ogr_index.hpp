@@ -23,9 +23,10 @@
 #ifndef OGR_INDEX_HH
 #define OGR_INDEX_HH
 
-// st
+// stl
 #include <fstream>
 #include <vector>
+
 // mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/query.hpp>

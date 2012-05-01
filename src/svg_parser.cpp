@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
+#include <mapnik/debug.hpp>
 #include <mapnik/color_factory.hpp>
-
 #include <mapnik/svg/svg_parser.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/config_error.hpp>
@@ -79,7 +79,7 @@ agg::rgba8 parse_color(const char* str)
     }
     catch (mapnik::config_error & ex)
     {
-        std::cerr << ex.what() << std::endl;
+        MAPNIK_LOG_ERROR(svg_parser) << ex.what();
     }
     return agg::rgba8(c.red(), c.green(), c.blue(), c.alpha());
 }
@@ -147,10 +147,10 @@ void svg_parser::parse(std::string const& filename)
         xmlFreeTextReader(reader);
         if (ret != 0)
         {
-            std::cerr << "Failed to parse " << filename << std::endl;
+            MAPNIK_LOG_ERROR(svg_parser) << "Failed to parse " << filename;
         }
     } else {
-        std::cerr << "Unable to open " <<  filename << std::endl;
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to open " << filename;
     }
 }
 
@@ -194,7 +194,6 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     {
         parse_gradient_stop(reader);
     }
-
     if ( !is_defs_ )
     {
 
@@ -237,10 +236,10 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
                 {
                     parse_ellipse(reader);
                 }
-#ifdef MAPNIK_DEBUG
+#ifdef MAPNIK_LOG
                 else if (!xmlStrEqual(name, BAD_CAST "svg"))
                 {
-                    std::clog << "notice: unhandled svg element: " << name << "\n";
+                    MAPNIK_LOG_WARN(svg_parser) << "svg_parser: Unhandled svg element=" << name;
                 }
 #endif
             }
@@ -296,7 +295,7 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
             }
             else
             {
-                std::clog << "Failed to find gradient fill: " << id << std::endl;
+                MAPNIK_LOG_ERROR(svg_parser) << "Failed to find gradient fill: " << id;
             }
         }
         else
@@ -333,7 +332,7 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
             }
             else
             {
-                std::clog << "Failed to find gradient fill: " << id << std::endl;
+                MAPNIK_LOG_ERROR(svg_parser) << "Failed to find gradient fill: " << id;
             }
         }
         else
@@ -434,7 +433,18 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
         if (!mapnik::svg::parse_path((const char*) value, path_))
         {
             xmlFree(value);
-            throw std::runtime_error("can't parse PATH\n");
+            xmlChar *id_value;
+            id_value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
+            if (id_value)
+            {
+                std::string id_string((const char *) id_value);
+                xmlFree(id_value);
+                throw std::runtime_error(std::string("unable to parse invalid svg <path> with id '") + id_string + "'");
+            }
+            else
+            {
+                throw std::runtime_error("unable to parse invalid svg <path>");
+            }
         }
         path_.end_path();
         xmlFree(value);
@@ -452,7 +462,7 @@ void svg_parser::parse_polygon(xmlTextReaderPtr reader)
         if (!mapnik::svg::parse_points((const char*) value, path_))
         {
             xmlFree(value);
-            throw std::runtime_error("Failed to parse <polygon>\n");
+            throw std::runtime_error("Failed to parse <polygon>");
         }
         path_.close_subpath();
         path_.end_path();
@@ -471,7 +481,7 @@ void svg_parser::parse_polyline(xmlTextReaderPtr reader)
         if (!mapnik::svg::parse_points((const char*) value, path_))
         {
             xmlFree(value);
-            throw std::runtime_error("Failed to parse <polygon>\n");
+            throw std::runtime_error("Failed to parse <polygon>");
         }
 
         path_.end_path();
@@ -740,7 +750,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
                 }
                 catch (mapnik::config_error & ex)
                 {
-                    std::clog << ex.what() << std::endl;
+                    MAPNIK_LOG_ERROR(svg_parser) << ex.what();
                 }
             }
             else if (kv.first == "stop-opacity")
@@ -760,7 +770,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
         }
         catch (mapnik::config_error & ex)
         {
-            std::clog << ex.what() << std::endl;
+            MAPNIK_LOG_ERROR(svg_parser) << ex.what();
         }
         xmlFree(value);
     }
@@ -777,8 +787,13 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
 
     temporary_gradient_.second.add_stop(offset, stop_color);
 
-    //std::cerr << "\tFound Stop: " << offset << " " << (unsigned)stop_color.red() << " " << (unsigned)stop_color.green() << " " << (unsigned)stop_color.blue() << " " << (unsigned)stop_color.alpha() << std::endl;
-
+    /*
+    MAPNIK_LOG_DEBUG(svg_parser) << "\tFound Stop: " << offset << " "
+        << (unsigned)stop_color.red() << " "
+        << (unsigned)stop_color.green() << " "
+        << (unsigned)stop_color.blue() << " "
+        << (unsigned)stop_color.alpha();
+    */
 }
 
 bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
@@ -810,12 +825,11 @@ bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
             std::string linkid = (const char *) &value[1];
             if (gradient_map_.count(linkid))
             {
-                //std::cerr << "\tLoading linked gradient properties from " << linkid << std::endl;
                 temporary_gradient_.second = gradient_map_[linkid];
             }
             else
             {
-                std::cerr << "Failed to find linked gradient " << linkid << std::endl;
+                MAPNIK_LOG_ERROR(svg_parser) << "Failed to find linked gradient " << linkid;
             }
         }
         xmlFree(value);
@@ -921,7 +935,7 @@ void svg_parser::parse_radial_gradient(xmlTextReaderPtr reader)
     // add this here in case we have no end tag, will be replaced if we do
     gradient_map_[temporary_gradient_.first] = temporary_gradient_.second;
 
-    //std::cerr << "Found Radial Gradient: " << " " << cx << " " << cy << " " << fx << " " << fy << " " << r << std::endl;
+    //MAPNIK_LOG_DEBUG(svg_parser) << "Found Radial Gradient: " << " " << cx << " " << cy << " " << fx << " " << fy << " " << r;
 }
 
 void svg_parser::parse_linear_gradient(xmlTextReaderPtr reader)
@@ -974,7 +988,7 @@ void svg_parser::parse_linear_gradient(xmlTextReaderPtr reader)
     // add this here in case we have no end tag, will be replaced if we do
     gradient_map_[temporary_gradient_.first] = temporary_gradient_.second;
 
-    //std::cerr << "Found Linear Gradient: " << "(" << x1 << " " << y1 << "),(" << x2 << " " << y2 << ")" << std::endl;
+    //MAPNIK_LOG_DEBUG(svg_parser) << "Found Linear Gradient: " << "(" << x1 << " " << y1 << "),(" << x2 << " " << y2 << ")";
 }
 
 void svg_parser::parse_pattern(xmlTextReaderPtr reader)

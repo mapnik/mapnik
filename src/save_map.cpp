@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// $Id$
 
 // mapnik
 #include <mapnik/save_map.hpp>
@@ -206,7 +205,6 @@ public:
         // to avoid printing of attributes with default values without
         // repeating the default values here.
         // maybe add a real, explicit default-ctor?
-
 
         shield_symbolizer dfl;
 

@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// mapnik
 #include <mapnik/metawriter_factory.hpp>
 #include <mapnik/metawriter_json.hpp>
 #include <mapnik/metawriter_inmem.hpp>
@@ -28,6 +28,7 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/config_error.hpp>
 
+// boost
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 

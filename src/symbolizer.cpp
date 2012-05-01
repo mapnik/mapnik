@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 //mapnik
 #include <mapnik/symbolizer.hpp>
@@ -61,7 +60,7 @@ void symbolizer_base::cache_metawriters(Map const &m)
         properties_complete_.insert(properties_.begin(), properties_.end());
     } else {
         properties_complete_.clear();
-        std::cerr << "WARNING: Metawriter '" << writer_name_ << "' used but not defined.\n";
+        MAPNIK_LOG_WARN(symbolizer) << "Metawriter '" << writer_name_ << "' used but not defined.";
     }
 }
 

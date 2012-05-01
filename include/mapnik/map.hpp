@@ -337,6 +337,10 @@ public:
      */
     boost::optional<box2d<double> > const& maximum_extent() const;
 
+    /*! \brief Get the non-const map maximum extent as box2d<double>
+     */
+    boost::optional<box2d<double> > & maximum_extent();
+
     /*! \brief Get the map base path where paths should be relative to.
      */
     std::string const& base_path() const;

@@ -51,7 +51,7 @@ public:
 class node_not_found: public std::exception
 {
 public:
-    node_not_found(std::string node_name);
+    node_not_found(std::string const& node_name);
     virtual const char* what() const throw();
     ~node_not_found() throw ();
 private:
@@ -84,7 +84,7 @@ class xml_node
 public:
     typedef std::list<xml_node>::const_iterator const_iterator;
     typedef std::map<std::string, xml_attribute> attribute_map;
-    xml_node(xml_tree &tree, std::string name, unsigned line=0, bool text_node = false);
+    xml_node(xml_tree &tree, std::string const& name, unsigned line=0, bool text_node = false);
 
     std::string const& name() const;
     std::string const& text() const;
@@ -118,6 +118,11 @@ public:
     T get_attr(std::string const& name) const;
 
     std::string get_text() const;
+
+    xml_tree const& get_tree() const
+    {
+        return tree_;
+    }
 
     template <typename T>
     T get_value() const;

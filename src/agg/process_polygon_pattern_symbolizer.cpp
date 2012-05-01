@@ -19,11 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // boost
 #include <boost/foreach.hpp>
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
@@ -70,14 +70,15 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     }
     else
     {
-        std::clog << "### Warning: file not found: " << filename << "\n";
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: File not found=" << filename;
     }
 
     if (!marker) return;
 
     if (!(*marker)->is_bitmap())
     {
-        std::clog << "### Warning only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer\n";
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the polygon_pattern_symbolizer";
+
         return;
     }
 

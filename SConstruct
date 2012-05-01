@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-#
-# $Id$
 
 
 import os
@@ -98,7 +96,7 @@ PLUGINS = { # plugins with external dependencies
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
             
             # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
-            'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
+            'osm':     {'default':True,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
 
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
@@ -244,7 +242,6 @@ else:
     LIBDIR_SCHEMA='lib'
 
 
-    
 def pretty_dep(dep):
     pretty = pretty_dep_names.get(dep)
     if pretty:
@@ -325,7 +322,7 @@ opts.AddVariables(
     # Variables affecting rendering back-ends
     
     BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
-    
+
     BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
 
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
@@ -345,7 +342,12 @@ opts.AddVariables(
     PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
     PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
-    
+
+    # Variables for logging and statistics
+    BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
+    BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
+    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. "info", "debug", "warn", "error", "fatal", "none")', 'error'),
+
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
     ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
@@ -359,7 +361,7 @@ opts.AddVariables(
     EnumVariable('THREADING','Set threading support','multi', ['multi','single']),
     EnumVariable('XMLPARSER','Set xml parser','libxml2', ['libxml2','ptree']),
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
-    BoolVariable('DEMO', 'Compile demo c++ application', 'False'),
+    BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
@@ -810,6 +812,9 @@ int main()
     return False
 
 def boost_regex_has_icu(context):
+    if env['RUNTIME_LINK'] == 'static':
+        context.env.Append(LIBS='icui18n')
+        context.env.Append(LIBS='icudata')
     ret = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
@@ -1160,7 +1165,7 @@ if not preconfigured:
             env.Append(CXXFLAGS = '-DBOOST_REGEX_HAS_ICU')
         else:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
-    
+
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
     
     if len(env['REQUESTED_PLUGINS']):
@@ -1408,10 +1413,40 @@ if not preconfigured:
         # Common debugging flags.
         # http://lists.fedoraproject.org/pipermail/devel/2010-November/144952.html
         debug_flags  = '-g -fno-omit-frame-pointer -DDEBUG -DMAPNIK_DEBUG'
-        
         ndebug_flags = '-DNDEBUG'
-       
-        
+
+        # Enable logging in debug mode (always) and release mode (when specified)
+        if env['DEFAULT_LOG_SEVERITY']:
+            severities = ['info', 'debug', 'warn', 'error', 'fatal', 'none']
+            if env['DEFAULT_LOG_SEVERITY'] not in severities:
+                color_print(1,"Cannot set default logger severity to '%s', available options are 'info', 'debug', 'warn', 'error', 'fatal', 'none'." % env['DEFAULT_LOG_SEVERITY'])
+                Exit(1)
+            else:
+                log_severity = severities.index(env['DEFAULT_LOG_SEVERITY'])
+        else:
+            if env['DEBUG']:
+                log_severity = 1 # debug
+            else:
+                log_severity = 3 # error
+
+        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % log_severity
+
+        if env['DEBUG']:
+            debug_flags += log_enabled
+        else:
+            if env['ENABLE_LOG']:
+                ndebug_flags += log_enabled
+
+        # Enable statistics reporting
+        if env['ENABLE_STATS']:
+            debug_flags += ' -DMAPNIK_STATS'
+            ndebug_flags += ' -DMAPNIK_STATS'
+
+        # Add rdynamic to allow using statics between application and plugins
+        # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
+        if env['PLATFORM'] != 'Darwin' and env['CXX'] == 'g++':
+            env.MergeFlags('-rdynamic')
+
         # Customizing the C++ compiler flags depending on: 
         #  (1) the C++ compiler used; and
         #  (2) whether debug binaries are requested.
@@ -1696,7 +1731,7 @@ if not HELP_REQUESTED:
         
         # devtools not ready for public 
         #SConscript('utils/ogrindex/build.py')
-        #SConscript('utils/svg2png/build.py')
+        SConscript('utils/svg2png/build.py')
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
         color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
