@@ -1062,7 +1062,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     detector_.has_placement(label_ext))
                 {
                     agg::trans_affine mtx;
-                    boost::array<double,6> const& m = sym.get_transform();
+                    boost::array<double,6> const& m = sym.get_image_transform();
                     mtx.load_from(&m[0]);
 
                     render_marker(pixel_position(px,py),**marker, mtx, sym.get_opacity());
@@ -1097,7 +1097,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             {
                 pixel_position marker_pos = helper.get_marker_position(placements[ii]);
                 render_marker(marker_pos,
-                              helper.get_marker(), helper.get_transform(),
+                              helper.get_marker(), helper.get_image_transform(),
                               sym.get_opacity());
                 context.add_text(placements[ii], face_manager_, font_manager_);
             }
@@ -1266,7 +1266,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
 
         agg::trans_affine tr;
-        boost::array<double,6> const& m = sym.get_transform();
+        boost::array<double,6> const& m = sym.get_image_transform();
         tr.load_from(&m[0]);
         // TODO - use this?
         //tr = agg::trans_affine_scaling(scale_factor_) * tr;

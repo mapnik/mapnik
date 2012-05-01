@@ -842,7 +842,7 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node c
         if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
         {
             std::stringstream ss;
-            ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+            ss << "Could not parse transform from '" << transform_wkt << "', expected SVG transform attribute";
             if (strict_)
                 throw config_error(ss.str()); // value_error here?
             else
@@ -871,8 +871,6 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
         optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
         optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        
-        //optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
         
         point_symbolizer symbol;
         if (allow_overlap)
@@ -914,15 +912,15 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
 
                 symbol.set_filename(expr);
 
-#if 0
-                if (transform_wkt)
+                optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+                if (image_transform_wkt)
                 {
                     agg::trans_affine tr;
-                    if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+                    if (!mapnik::svg::parse_transform((*image_transform_wkt).c_str(),tr))
                     {
                         std::stringstream ss;
-                        ss << "Could not parse transform from '" << transform_wkt
-                           << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                        ss << "Could not parse transform from '" << *image_transform_wkt
+                           << "', expected SVG transform attribute";
                         if (strict_)
                         {
                             throw config_error(ss.str()); // value_error here?
@@ -936,8 +934,6 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                     tr.store_to(&matrix[0]);
                     symbol.set_transform(matrix);
                 }
-#endif 
-
             }
             catch (image_reader_exception const & ex)
             {
@@ -971,7 +967,6 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         std::string filename("");
         optional<std::string> file = sym.get_opt_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
-        //optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
 
         if (file)
         {
@@ -1011,15 +1006,16 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
 
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) symbol.set_opacity(*opacity);
-#if 0
-        if (transform_wkt)
+
+        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+        if (image_transform_wkt)
         {
             agg::trans_affine tr;
-            if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+            if (!mapnik::svg::parse_transform((*image_transform_wkt).c_str(),tr))
             {
                 std::stringstream ss;
-                ss << "Could not parse transform from '" << transform_wkt
-                   << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                ss << "Could not parse transform from '" << *image_transform_wkt
+                   << "', expected SVG transform attribute";
                 if (strict_)
                 {
                     throw config_error(ss.str()); // value_error here?
@@ -1033,8 +1029,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             tr.store_to(&matrix[0]);
             symbol.set_transform(matrix);
         }
-#endif
-
+        
         optional<color> c = sym.get_opt_attr<color>("fill");
         if (c) symbol.set_fill(*c);
         optional<double> spacing = sym.get_opt_attr<double>("spacing");
@@ -1256,16 +1251,16 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         }
 
         shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
-        /* Symbolizer specific attributes. */
-#if 0
-        optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
-        if (transform_wkt)
+        
+        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+        if (image_transform_wkt)
         {
             agg::trans_affine tr;
-            if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+            if (!mapnik::svg::parse_transform((*image_transform_wkt).c_str(),tr))
             {
                 std::stringstream ss;
-                ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                ss << "Could not parse transform from '" << *image_transform_wkt 
+                   << "', expected SVG transform attribute";
                 if (strict_)
                 {
                     throw config_error(ss.str()); // value_error here?
@@ -1277,10 +1272,9 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             }
             boost::array<double,6> matrix;
             tr.store_to(&matrix[0]);
-            shield_symbol.set_transform(matrix);
+            shield_symbol.set_image_transform(matrix);
         }
-#endif 
-
+        
         // shield displacement
         double shield_dx = sym.get_attr("shield-dx", 0.0);
         double shield_dy = sym.get_attr("shield-dy", 0.0);

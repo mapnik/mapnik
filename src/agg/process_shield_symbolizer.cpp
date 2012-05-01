@@ -54,7 +54,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         {
             render_marker(helper.get_marker_position(placements[ii]),
                           helper.get_marker(),
-                          helper.get_transform(),
+                          helper.get_image_transform(),
                           sym.get_opacity());
 
             ren.prepare_glyphs(&(placements[ii]));

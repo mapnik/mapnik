@@ -79,7 +79,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
                 detector_.has_placement(label_ext))
             {
                 agg::trans_affine tr;
-                boost::array<double,6> const& m = sym.get_transform();
+                boost::array<double,6> const& m = sym.get_image_transform();
                 tr.load_from(&m[0]);
 
                 render_marker(feature, pixmap_.get_resolution(),

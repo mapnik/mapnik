@@ -350,7 +350,7 @@ template <typename FaceManagerT, typename DetectorT>
 void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
 {
     std::string filename = path_processor_type::evaluate(*sym_.get_filename(), this->feature_);
-    boost::array<double,6> const& m = sym_.get_transform();
+    boost::array<double,6> const& m = sym_.get_image_transform();
     transform_.load_from(&m[0]);
     marker_.reset();
     if (!filename.empty())
@@ -410,7 +410,7 @@ marker& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker() const
 }
 
 template <typename FaceManagerT, typename DetectorT>
-agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_transform() const
+agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_image_transform() const
 {
     return transform_;
 }

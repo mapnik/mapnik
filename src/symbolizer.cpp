@@ -113,14 +113,22 @@ bool symbolizer_base::clip() const
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
     : image_filename_( file ),
-      image_opacity_(1.0f)
-
+      image_opacity_(1.0f)   
 {
+    image_transform_[0] = 1.0;
+    image_transform_[1] = 0.0;
+    image_transform_[2] = 0.0;
+    image_transform_[3] = 1.0;
+    image_transform_[4] = 0.0;
+    image_transform_[5] = 0.0;
 }
 
 symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
     : image_filename_(rhs.image_filename_),
-      image_opacity_(rhs.image_opacity_) {}
+      image_opacity_(rhs.image_opacity_),
+      image_transform_(rhs.image_transform_)
+{
+}
 
 path_expression_ptr symbolizer_with_image::get_filename() const
 {
@@ -140,6 +148,25 @@ void symbolizer_with_image::set_opacity(float opacity)
 float symbolizer_with_image::get_opacity() const
 {
     return image_opacity_;
+}
+
+void symbolizer_with_image::set_image_transform(transform_type const& tr) 
+{
+    image_transform_ = tr;
+}
+
+transform_type const& symbolizer_with_image::get_image_transform() const
+{
+    return image_transform_;
+}
+
+std::string symbolizer_with_image::get_image_transform_string() const
+{
+    std::stringstream ss;
+    ss << "matrix(" << image_transform_[0] << ", " << image_transform_[1] << ", "
+       << image_transform_[2] << ", " << image_transform_[3] << ", "
+       << image_transform_[4] << ", " << image_transform_[5] << ")";
+    return ss.str();
 }
 
 } // end of namespace mapnik

@@ -36,7 +36,7 @@ using namespace boost::python;
 template <class T>
 const std::string get_svg_transform(T& symbolizer)
 {
-    return symbolizer.get_transform_string();
+    return symbolizer.get_image_transform_string();
 }
 
 template <class T>
@@ -46,12 +46,14 @@ void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
     if (!mapnik::svg::parse_transform(transform_wkt.c_str(), tr))
     {
         std::stringstream ss;
-        ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+        ss << "Could not parse transform from '" 
+           << transform_wkt 
+           << "', expected SVG transform attribute";
         throw mapnik::value_error(ss.str());
     }
     mapnik::transform_type matrix;
     tr.store_to(&matrix[0]);
-    symbolizer.set_transform(matrix);
+    symbolizer.set_image_transform(matrix);
 }
 
 } // end of namespace mapnik

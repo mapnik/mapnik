@@ -68,7 +68,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     renderer_base renb(pixf);
     renderer_solid ren(renb);
     agg::trans_affine tr;
-    boost::array<double,6> const& m = sym.get_transform();
+    boost::array<double,6> const& m = sym.get_image_transform();
     tr.load_from(&m[0]);
     tr = agg::trans_affine_scaling(scale_factor_) * tr;
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);

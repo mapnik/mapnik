@@ -153,7 +153,7 @@ public:
     bool next();
     pixel_position get_marker_position(text_path const& p);
     marker & get_marker() const;
-    agg::trans_affine const& get_transform() const;
+    agg::trans_affine const& get_image_transform() const;
 protected:
     bool next_point_placement();
     bool next_line_placement();
@@ -166,8 +166,7 @@ protected:
     double marker_h_;
     double marker_x_;
     double marker_y_;
-    // F***ing templates...
-    // http://womble.decadent.org.uk/c++/template-faq.html#base-lookup
+    
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement;

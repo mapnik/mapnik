@@ -66,7 +66,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
         double w = (*marker)->width();
         double h = (*marker)->height();
         agg::trans_affine tr;
-        boost::array<double,6> const& m = sym.get_transform();
+        boost::array<double,6> const& m = sym.get_image_transform();
         tr.load_from(&m[0]);
         double px0 = - 0.5 * w;
         double py0 = - 0.5 * h;

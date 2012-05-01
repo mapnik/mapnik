@@ -121,11 +121,15 @@ public:
     void set_filename(path_expression_ptr filename);
     void set_opacity(float opacity);
     float get_opacity() const;
+    void  set_image_transform(transform_type const& tr);
+    transform_type const& get_image_transform() const;
+    std::string get_image_transform_string() const;
 protected:
     symbolizer_with_image(path_expression_ptr filename = path_expression_ptr());
     symbolizer_with_image(symbolizer_with_image const& rhs);
     path_expression_ptr image_filename_;
     float image_opacity_;
+    transform_type image_transform_;
 };
 }
 
