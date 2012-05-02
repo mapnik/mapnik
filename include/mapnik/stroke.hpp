@@ -73,9 +73,10 @@ class MAPNIK_DECL stroke
     gamma_method_e gamma_method_;
     dash_array dash_;
     double dash_offset_;
+    double miterlimit_;
 public:
-    explicit stroke();
-    stroke(color const& c, double width=1.0);
+    stroke();
+    explicit stroke(color const& c, double width=1.0);
     stroke(stroke const& other);
     stroke& operator=(const stroke& rhs);
 
@@ -107,7 +108,10 @@ public:
     double dash_offset() const;
 
     dash_array const& get_dash_array() const;
-
+    
+    void set_miterlimit(double val);
+    double get_miterlimit() const;
+    
 private:
     void swap(const stroke& other) throw();
 };

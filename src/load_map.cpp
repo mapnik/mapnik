@@ -1413,6 +1413,10 @@ void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
                                "list of floats or 'none' but got '" + (*str) + "'");
         }
     }
+    
+    // stroke-miterlimit
+    optional<double> miterlimit = sym.get_opt_attr<double>("stroke-miterlimit");
+    if (miterlimit) strk.set_miterlimit(*miterlimit);
 }
 
 void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
