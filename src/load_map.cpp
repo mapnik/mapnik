@@ -1430,6 +1430,11 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
         // smooth value
         optional<double> smooth = sym.get_opt_attr<double>("smooth");
         if (smooth) symbol.set_smooth(*smooth);
+        
+        // offset value
+        optional<double> offset = sym.get_opt_attr<double>("offset");
+        if (offset) symbol.set_offset(*offset);
+        
         // meta-writer
         parse_metawriter_in_symbolizer(symbol, sym);
         rule.append(symbol);

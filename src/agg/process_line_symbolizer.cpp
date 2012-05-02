@@ -102,13 +102,15 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         ras_ptr->reset();        
         set_gamma_method(stroke_, ras_ptr);
         //metawriter_with_properties writer = sym.get_metawriter();
-        typedef boost::mpl::vector<clip_line_tag,transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag,smooth_tag, dash_tag, stroke_tag> conv_types;
         vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types> 
             converter(ext,*ras_ptr,sym,t_,prj_trans);
         
-        if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true) 
-        converter.set<transform_tag>(); //always transform
-        converter.set<affine_transform_tag>(); // optional affine transform
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true) 
+        converter.set<transform_tag>(); // always transform        
+        
+        if (sym.offset() > 0.0) converter.set<offset_transform_tag>(); // parallel offset        
+//converter.set<affine_transform_tag>(); // optional affine transform        
         if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
         if (stroke_.has_dash()) converter.set<dash_tag>();        
         converter.set<stroke_tag>(); //always stroke

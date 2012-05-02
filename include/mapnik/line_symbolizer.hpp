@@ -45,19 +45,25 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
         : symbolizer_base(),
         stroke_(),
         rasterizer_p_(RASTERIZER_FULL),
-        smooth_(0.0) {}
+        smooth_(0.0),
+        offset_(0.0)
+        {}
 
     line_symbolizer(stroke const& stroke)
         : symbolizer_base(),
         stroke_(stroke),
         rasterizer_p_(RASTERIZER_FULL),
-        smooth_(0.0) {}
+        smooth_(0.0),
+        offset_(0.0) 
+        {}
 
     line_symbolizer(color const& pen,float width=1.0)
         : symbolizer_base(),
         stroke_(pen,width),
         rasterizer_p_(RASTERIZER_FULL),
-        smooth_(0.0) {}
+        smooth_(0.0),
+        offset_(0.0)
+        {}
 
     stroke const& get_stroke() const
     {
@@ -89,10 +95,21 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
         return smooth_;
     }
 
+    void set_offset(double val)
+    {
+        offset_ = val;
+    }
+    
+    double offset() const
+    {
+        return offset_;
+    }
+    
 private:
     stroke stroke_;
     line_rasterizer_e rasterizer_p_;
     double smooth_;
+    double offset_;
 };
 }
 

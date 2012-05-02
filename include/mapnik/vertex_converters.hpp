@@ -48,7 +48,7 @@
 
 // mapnik
 #include <mapnik/agg_helpers.hpp>
-
+#include <mapnik/offset_converter.hpp>
 // agg
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_clip_polyline.h"
@@ -66,6 +66,7 @@ struct smooth_tag {};
 struct stroke_tag {};
 struct dash_tag {};
 struct affine_transform_tag {};
+struct offset_transform_tag {};
 
 namespace  detail {
 
@@ -199,6 +200,20 @@ struct converter_traits<T,mapnik::affine_transform_tag>
         boost::array<double,6> const& m = sym.get_transform();
         tr.load_from(&m[0]);
         geom.transformer(tr);
+    }
+};
+
+template <typename T>
+struct converter_traits<T,mapnik::offset_transform_tag>
+{
+    typedef T geometry_type;
+    typedef offset_converter<geometry_type> conv_type;
+    
+    template <typename Args>
+    static void setup(geometry_type & geom, Args & args)
+    {     
+        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
+        geom.set_offset(sym.offset());
     }
 };
 
