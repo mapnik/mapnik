@@ -102,7 +102,7 @@ void export_style()
         .add_property("filter_mode",
                       &feature_type_style::get_filter_mode,
                       &feature_type_style::set_filter_mode,
-                      "Set/get the placement of the label")
+                      "Set/get the filter mode of the style")
         ;
 
 }
