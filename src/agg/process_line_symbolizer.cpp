@@ -42,6 +42,7 @@
 #include "agg_rasterizer_outline_aa.h"
 // stl
 #include <string>
+#include <cmath>
 
 namespace mapnik {
 
@@ -59,11 +60,11 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     unsigned b=col.blue();
     unsigned a=col.alpha();
 
-    
+
     agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
-   
+
     box2d<double> ext = query_extent_ * 1.1;
-    
+
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
         /*
@@ -83,7 +84,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         rasterizer_type ras(ren);
         ras.line_join(agg::outline_miter_accurate_join);
         ras.round_cap(true);
-        
+
         for (unsigned i=0;i<feature->num_geometries();++i)
         {
             geometry_type & geom = feature->get_geometry(i);
@@ -98,31 +99,31 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         */
     }
     else
-    {        
-        ras_ptr->reset();        
+    {
+        ras_ptr->reset();
         set_gamma_method(stroke_, ras_ptr);
         //metawriter_with_properties writer = sym.get_metawriter();
-        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag,smooth_tag, dash_tag, stroke_tag> conv_types;
-        vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types> 
+        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+        vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types>
             converter(ext,*ras_ptr,sym,t_,prj_trans);
-        
-        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true) 
-        converter.set<transform_tag>(); // always transform        
-        
-        if (sym.offset() > 0.0) converter.set<offset_transform_tag>(); // parallel offset        
-//converter.set<affine_transform_tag>(); // optional affine transform        
+
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+        converter.set<transform_tag>(); // always transform
+
+        if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
         if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-        if (stroke_.has_dash()) converter.set<dash_tag>();        
+        if (stroke_.has_dash()) converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
-        
+
         BOOST_FOREACH( geometry_type & geom, feature->paths())
         {
             if (geom.num_points() > 1)
             {
-                converter.apply(geom);                
+                converter.apply(geom);
             }
         }
-        
+
         agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
 
         if (sym.comp_op())
@@ -133,7 +134,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
             typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
             typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-            typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;     
+            typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
             pixfmt_comp_type pixf(buf);
             pixf.comp_op(static_cast<agg::comp_op_e>(*sym.comp_op()));
             renderer_base renb(pixf);
@@ -143,7 +144,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             agg::render_scanlines(*ras_ptr, sl, ren);
         }
         else if (style_level_compositing_)
-        {       
+        {
             agg::pixfmt_rgba32_plain pixf(buf);
             renderer_scanline_solid<agg::pixfmt_rgba32_plain> ren;
             ren.attach(pixf);
@@ -167,4 +168,3 @@ template void agg_renderer<image_32>::process(line_symbolizer const&,
                                               proj_transform const&);
 
 }
-
