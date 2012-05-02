@@ -121,7 +121,7 @@ struct converter_traits<T, mapnik::dash_tag>
     static void setup(geometry_type & geom, Args & args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        double scale_factor = 1.0; //FIXME
+        double scale_factor = boost::fusion::at_c<5>(args); 
         stroke const& stroke_ = sym.get_stroke();
         dash_array const& d = stroke_.get_dash_array();
         dash_array::const_iterator itr = d.begin();
@@ -312,15 +312,18 @@ struct vertex_converter : private boost::noncopyable
     rasterizer_type&,
     symbolizer_type const&,
     trans_type const&,
-    proj_trans_type const&
+    proj_trans_type const&,
+    double //scale-factor
     > args_type;
-
+    
     vertex_converter(bbox_type const& b, rasterizer_type & ras,
-                     symbolizer_type const& sym, trans_type & tr, proj_trans_type const& prj_trans)
+                     symbolizer_type const& sym, trans_type & tr, 
+                     proj_trans_type const& prj_trans,
+                     double scale_factor)
         : disp_(args_type(boost::cref(b),boost::ref(ras),
                           boost::cref(sym),boost::cref(tr),
-                          boost::cref(prj_trans))) {}
-
+                          boost::cref(prj_trans),scale_factor)) {}
+    
     template <typename Geometry>
     void apply(Geometry & geom)
     {

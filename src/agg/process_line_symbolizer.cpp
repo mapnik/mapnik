@@ -105,7 +105,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         //metawriter_with_properties writer = sym.get_metawriter();
         typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
         vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types>
-            converter(ext,*ras_ptr,sym,t_,prj_trans);
+            converter(ext,*ras_ptr,sym,t_,prj_trans,scale_factor_);
 
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform

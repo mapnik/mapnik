@@ -51,7 +51,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>,rasterizer,polygon_symbolizer, proj_transform, CoordTransform,conv_types> 
-        converter(inflated_extent,*ras_ptr,sym,t_,prj_trans);
+        converter(inflated_extent,*ras_ptr,sym,t_,prj_trans,scale_factor_);
     
     if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true) 
     converter.set<transform_tag>(); //always transform 

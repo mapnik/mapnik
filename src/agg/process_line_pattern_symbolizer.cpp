@@ -88,7 +88,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     
     typedef boost::mpl::vector<clip_line_tag,transform_tag> conv_types;
     vertex_converter<box2d<double>,rasterizer_type,line_pattern_symbolizer, proj_transform, CoordTransform, conv_types> 
-        converter(ext,ras,sym,t_,prj_trans);
+        converter(ext,ras,sym,t_,prj_trans,scale_factor_);
     
     if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform 

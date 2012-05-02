@@ -46,6 +46,30 @@
 
 namespace mapnik {
 
+template <typename ColorT,typename Order> 
+struct multiplier
+{
+    typedef typename ColorT::value_type value_type;
+    typedef typename ColorT::calc_type calc_type;
+    
+    void operator() (value_type * p) const
+    {
+        calc_type a = p[Order::A];    
+        if(a < ColorT::base_mask)
+        {
+            if(a == 0)
+            {
+                p[Order::R] = p[Order::G] = p[Order::B] = 0;
+                return;
+            }
+            p[Order::R] = value_type((p[Order::R] * a + ColorT::base_mask) >> ColorT::base_shift);
+            p[Order::G] = value_type((p[Order::G] * a + ColorT::base_mask) >> ColorT::base_shift);
+            p[Order::B] = value_type((p[Order::B] * a + ColorT::base_mask) >> ColorT::base_shift);
+        }
+    }
+};
+
+
 template <typename T>
 void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
@@ -53,8 +77,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 {
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
-
+    
     agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
     agg::pixfmt_rgba32_plain pixf(buf);
 
@@ -82,9 +105,8 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         return;
     }
 
-
     boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
-
+    
     if (!pat) return;
 
     typedef agg::wrap_mode_repeat wrap_x_type;
@@ -106,7 +128,9 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
     agg::span_allocator<agg::rgba8> sa;
     rendering_buffer pixf_pattern(pattern_rbuf);
-    pixf_pattern.premultiply();
+    
+    pixf_pattern.for_each_pixel(multiplier<agg::rgba8,agg::order_rgba>());
+    
     img_source_type img_src(pixf_pattern);
 
     unsigned num_geometries = feature->num_geometries();
@@ -133,11 +157,11 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     renderer_type rp(renb,sa, sg);
 
     //metawriter_with_properties writer = sym.get_metawriter();
-
+    
     box2d<double> inflated_extent = query_extent_ * 1.1;
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>,rasterizer,polygon_pattern_symbolizer, proj_transform, CoordTransform,conv_types>
-        converter(inflated_extent,*ras_ptr,sym,t_,prj_trans);
+        converter(inflated_extent,*ras_ptr,sym,t_,prj_trans, scale_factor_);
     
     if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
