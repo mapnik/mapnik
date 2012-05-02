@@ -49,7 +49,7 @@ struct MAPNIK_DECL offset_converter
         offset_(0.0),
         threshold_(10),
         status_(initial) {}
-    
+
     enum status
     {
         initial,
@@ -85,7 +85,7 @@ struct MAPNIK_DECL offset_converter
     {
         if (offset_==0.0)
         {
-            unsigned command = geom_.vertex(x,y);          
+            unsigned command = geom_.vertex(x,y);
             return command;
         }
         else
@@ -96,22 +96,16 @@ struct MAPNIK_DECL offset_converter
                 {
                 case end:
                     return SEG_END;
-                    break;
                 case initial:
                     pre_cmd_ = geom_.vertex(x,y);
                     pre_x_ = *x;
                     pre_y_ = *y;
-                    //status_ = (pre_cmd_!=SEG_END)?start:end; //
-                case start:
                     cur_cmd_ = geom_.vertex(&cur_x_, &cur_y_);
-                case first:
                     angle_a = atan2((pre_y_-cur_y_),(pre_x_-cur_x_));
                     dx_pre = cos(angle_a + half_pi);
                     dy_pre = sin(angle_a + half_pi);
-
                     MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: Offsetting line by=" << offset_;
                     MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: Initial dx=" << (dx_pre * offset_) << ",dy=" << (dy_pre * offset_);
-
                     *x = pre_x_ + (dx_pre * offset_);
                     *y = pre_y_ + (dy_pre * offset_);
                     status_ = process;
@@ -145,7 +139,7 @@ struct MAPNIK_DECL offset_converter
                     return cur_cmd_;
                 case angle_joint:
                     angle_b = atan2((cur_y_-next_y_),(cur_x_-next_x_));
-                    h = tan((angle_b - angle_a)/2.0);
+                    double h = tan((angle_b - angle_a)/2.0);
 
                     if (fabs(h) < threshold_)
                     {
@@ -156,40 +150,9 @@ struct MAPNIK_DECL offset_converter
                     }
                     else // skip sharp spikes
                     {
-#ifdef MAPNIK_LOG
-                        dx_curr = cos(angle_a + half_pi);
-                        dy_curr = sin(angle_a + half_pi);
-                        sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
-                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: angle a=" << angle_a;
-                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: angle b=" << angle_b;
-                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: h=" << h;
-                        MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: sin_curve=" << sin_curve;
-#endif
                         status_ = process;
                         break;
                     }
-
-                    // alternate sharp spike fix, but suboptimal...
-
-                    /*
-                      sin_curve = dx_curr*dy_pre-dy_curr*dx_pre;
-                      cos_curve = -dx_pre*dx_curr-dy_pre*dy_curr;
-
-                      MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: sin_curve value=" << sin_curve;
-                      if(sin_curve > -0.3 && sin_curve < 0.3) {
-                        angle_b = atan2((cur_y_-next_y_),(cur_x_-next_x_));
-                        h = tan((angle_b - angle_a)/2.0);
-                        *x = cur_x_ + (dx_curr * offset_) - h * (dy_curr * offset_);
-                        *y = cur_y_ + (dy_curr * offset_) + h * (dx_curr * offset_);
-                      } else {
-                        if (angle_b - angle_a > 0)
-                          h = -1.0*(1.0+cos_curve)/sin_curve;
-                        else
-                          h = (1.0+cos_curve)/sin_curve;
-                        *x = cur_x_ + (dx_curr + base_shift*dy_curr)*offset_;
-                        *y = cur_y_ + (dy_curr - base_shift*dx_curr)*offset_;
-                      }
-                    */
 
                     pre_x_ = *x;
                     pre_x_ = *y;
@@ -213,18 +176,15 @@ struct MAPNIK_DECL offset_converter
 
 private:
     Geometry & geom_;
-    int           offset_;
+    double        offset_;
     unsigned int  threshold_;
     status        status_;
     double        dx_pre;
     double        dy_pre;
     double        dx_curr;
     double        dy_curr;
-    double        sin_curve;
-    double        cos_curve;
     double        angle_a;
     double        angle_b;
-    double        h;
     unsigned      pre_cmd_;
     double        pre_x_;
     double        pre_y_;
