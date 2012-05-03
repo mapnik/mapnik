@@ -148,7 +148,7 @@ struct converter_traits<T, mapnik::stroke_tag>
         stroke const& stroke_ = sym.get_stroke();
         set_join_caps(stroke_,geom);
         geom.generator().miter_limit(stroke_.get_miterlimit());
-        double scale_factor = 1.0; //FIXME
+        double scale_factor = boost::fusion::at_c<5>(args);
         geom.generator().width(stroke_.get_width() * scale_factor);
     }
 };
