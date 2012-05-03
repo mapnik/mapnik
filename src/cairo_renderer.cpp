@@ -286,6 +286,90 @@ public:
     {
         context_->set_source_rgba(r / 255.0, g / 255.0, b / 255.0, opacity);
     }
+    
+    void set_operator(composite_mode_e comp_op)
+    {
+        switch (comp_op)
+        {
+        case clear:
+            context_->set_operator(Cairo::OPERATOR_CLEAR);
+            break;
+        case src:
+            context_->set_operator(Cairo::OPERATOR_SOURCE);
+            break;
+        case dst:
+            context_->set_operator(Cairo::OPERATOR_DEST);
+            break;
+        case src_over:
+            context_->set_operator(Cairo::OPERATOR_OVER);
+            break;
+        case dst_over:
+            context_->set_operator(Cairo::OPERATOR_DEST_OVER);
+            break; 
+        case src_in:
+            context_->set_operator(Cairo::OPERATOR_IN);
+            break;
+        case dst_in:
+            context_->set_operator(Cairo::OPERATOR_DEST_IN);
+            break; 
+        case src_out:
+            context_->set_operator(Cairo::OPERATOR_OUT);
+            break;
+        case dst_out:
+            context_->set_operator(Cairo::OPERATOR_DEST_OUT);
+            break;  
+        case src_atop:
+            context_->set_operator(Cairo::OPERATOR_ATOP);
+            break;
+        case dst_atop:
+            context_->set_operator(Cairo::OPERATOR_DEST_ATOP);
+            break;     
+        case _xor:
+            context_->set_operator(Cairo::OPERATOR_XOR);
+            break;
+        case plus:
+            context_->set_operator(Cairo::OPERATOR_ADD);
+            break;             
+        case multiply:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_MULTIPLY));
+            break;  
+        case screen:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_SCREEN));
+            break;    
+        case overlay:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_OVERLAY));
+            break;
+        case darken:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_DARKEN));
+            break;
+        case lighten:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_LIGHTEN));
+            break;
+        case color_dodge:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_COLOR_DODGE));
+            break;
+        case color_burn:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_COLOR_BURN));
+            break;
+        case hard_light:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_HARD_LIGHT));
+            break;
+        case soft_light:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_SOFT_LIGHT));
+            break;
+        case difference:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_DIFFERENCE));
+            break;
+        case exclusion:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_EXCLUSION));
+            break;
+        case contrast:
+        case minus:
+        case invert:
+        case invert_rgb:
+            break;              
+        }        
+    }
 
     void set_line_join(line_join_e join)
     {
@@ -725,8 +809,10 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-
         cairo_context context(context_);
+        if (sym.comp_op()) context.set_operator(*sym.comp_op());
+        else context.set_operator(src_over);
+
         context.set_color(sym.get_fill(), sym.get_opacity());
         box2d<double> inflated_extent = query_extent_ * 1.1;
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
@@ -768,7 +854,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
         cairo_context context(context_);
-
+        if (sym.comp_op()) context.set_operator(*sym.comp_op());
+        else context.set_operator(src_over);
         color const& fill = sym.get_fill();
         double height = 0.0;
         expression_ptr height_expr = sym.height();
@@ -879,6 +966,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         mapnik::stroke const& stroke_ = sym.get_stroke();
         cairo_context context(context_);
+        if (sym.comp_op()) context.set_operator(*sym.comp_op());
+        else context.set_operator(src_over);
+
         context.set_color(stroke_.get_color(), stroke_.get_opacity());
         context.set_line_join(stroke_.get_line_join());
         context.set_line_cap(stroke_.get_line_cap());
@@ -910,6 +1000,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
     {
         cairo_context context(context_);
+        
         if (marker.is_vector())
         {
             box2d<double> bbox;
@@ -1086,7 +1177,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 1.0 /*scale_factor*/,
                 t_, font_manager_, detector_, query_extent_);
         cairo_context context(context_);
-
+        if (sym.comp_op()) context.set_operator(*sym.comp_op());
+        else context.set_operator(src_over);
+        
         while (helper.next()) {
             placements_type &placements = helper.placements();
             for (unsigned int ii = 0; ii < placements.size(); ++ii)
@@ -1115,6 +1208,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         unsigned height((*marker)->height());
 
         cairo_context context(context_);
+        if (sym.comp_op()) context.set_operator(*sym.comp_op());
+        else context.set_operator(src_over);
+        
         cairo_pattern pattern(**((*marker)->get_bitmap_data()));
 
         pattern.set_extend(Cairo::EXTEND_REPEAT);
@@ -1181,6 +1277,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
 
         cairo_context context(context_);
+        if (sym.comp_op()) context.set_operator(*sym.comp_op());
+        else context.set_operator(src_over);
+        
         std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
         if (!marker && !(*marker)->is_bitmap()) return;
@@ -1244,6 +1343,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                  sym.get_scaling());
 
                 cairo_context context(context_);
+                if (sym.comp_op()) context.set_operator(*sym.comp_op());
+                else context.set_operator(src_over);
                 //TODO -- support for advanced image merging
                 context.add_image(start_x, start_y, target.data_, sym.get_opacity());
             }
@@ -1255,7 +1356,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       proj_transform const& prj_trans)
     {
         cairo_context context(context_);
-
+        if (sym.comp_op()) context.set_operator(*sym.comp_op());
+        else context.set_operator(src_over);
+        
         double scale_factor_(1);
 
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
@@ -1501,7 +1604,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, *feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_, query_extent_);
 
         cairo_context context(context_);
-
+        if (sym.comp_op()) context.set_operator(*sym.comp_op());
+        else context.set_operator(src_over);
+        
         while (helper.next()) {
             placements_type &placements = helper.placements();
             for (unsigned int ii = 0; ii < placements.size(); ++ii)
