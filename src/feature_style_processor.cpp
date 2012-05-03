@@ -98,7 +98,7 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
         : output_(output),
           f_(f),
           prj_trans_(prj_trans)  {}
-
+    
     template <typename T>
     void operator () (T const& sym) const
     {
@@ -122,8 +122,9 @@ template <typename T0, typename T1> yes_tag has_process_helper(process_memfun_he
 template<typename T0,typename T1> 
 struct has_process
 {      
+    typedef typename T0::processor_impl_type processor_impl_type;
     BOOST_STATIC_CONSTANT(bool 
-                          , value = sizeof(has_process_helper<T0,T1>(0)) == sizeof(yes_tag) 
+                          , value = sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag) 
         ); 
 }; 
 
