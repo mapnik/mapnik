@@ -1300,9 +1300,11 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                 path_type path(t_,clipped,prj_trans);
                 context.add_path(path);
-                context.fill();
+                
             }
         }
+        // fill polygon
+        context.fill();
     }
 
     void cairo_renderer_base::process(raster_symbolizer const& sym,
