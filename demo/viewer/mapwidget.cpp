@@ -24,6 +24,7 @@
 #include <boost/bind.hpp>
 
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
@@ -458,6 +459,7 @@ void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::strin
    //agg_renderer renderer(map,image);
    //renderer.apply();
    //image.saveToFile(filename,type);
+    std::cout << "Export to file .." << std::endl;
 }
 
 void MapWidget::set_scaling_factor(double scaling_factor)
@@ -490,6 +492,42 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 }
 
 
+void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
+{
+    unsigned width=map.width();
+    unsigned height=map.height();
+    
+    mapnik::grid buf(width,height,"F_CODE", 1);
+    mapnik::grid_renderer<mapnik::grid> ren(map,buf,scaling_factor);
+    
+    try
+    {          
+        ren.apply();
+        boost::uint16_t *imdata = static_cast<boost::uint16_t*>(buf.raw_data());
+        
+        QImage image(width,height,QImage::Format_RGB32);
+        for (unsigned i = 0 ; i < height ; ++i)
+        {           
+            for (unsigned j = 0 ; j < width ; ++j)
+            {
+                image.setPixel(j,i,qRgb((uint8_t)(imdata[i*width+j]>>8),
+                                        (uint8_t)(imdata[i*width+j+1]>>8),
+                                        (uint8_t)(imdata[i*width+j+2]>>8)));                
+            }
+        }
+        pix = QPixmap::fromImage(image);
+    }
+    catch (mapnik::config_error & ex)
+    {
+        std::cerr << ex.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unknown exception caught!\n";
+    }
+}
+
+
 void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
 
@@ -510,6 +548,7 @@ void MapWidget::updateRenderer(QString const& txt)
 {
     if (txt == "AGG") cur_renderer_ = AGG;
     else if (txt == "Cairo") cur_renderer_ = Cairo;
+    else if (txt == "Grid") cur_renderer_ = Grid;
     std::cerr << "Update renderer called" << std::endl;
     updateMap();
 }
@@ -525,6 +564,10 @@ void MapWidget::updateMap()
        else if (cur_renderer_ == Cairo)
        {
            render_cairo(*map_, scaling_factor_, pix_);
+       }
+       else if (cur_renderer_ == Grid)
+       {
+           render_grid(*map_, scaling_factor_, pix_);
        }
        else
        {
