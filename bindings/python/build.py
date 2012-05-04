@@ -143,10 +143,7 @@ paths += "__all__ = [mapniklibpath,inputpluginspath,fontscollectionpath]\n"
 if not os.path.exists('mapnik'):
     os.mkdir('mapnik')
 
-if hasattr(os.path,'relpath'): # python 2.6 and above
-    file('mapnik/paths.py','w').write(paths % (os.path.relpath(env['MAPNIK_LIB_DIR'],target_path)))
-else:
-    file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
+file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
 
 # force open perms temporarily so that `sudo scons install`
 # does not later break simple non-install non-sudo rebuild
