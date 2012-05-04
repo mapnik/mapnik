@@ -946,8 +946,9 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
         if (ignore_placement) symbol.set_ignore_placement(*ignore_placement);
 
-        optional<double> w = sym.get_opt_attr<double>("width");
-        optional<double> h = sym.get_opt_attr<double>("height");
+        optional<expression_ptr> w = sym.get_opt_attr<expression_ptr>("width");
+        optional<expression_ptr> h = sym.get_opt_attr<expression_ptr>("height");
+
         if (w && h)
         {
             symbol.set_width(*w);

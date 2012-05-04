@@ -23,6 +23,9 @@
 // mapnik
 #include <mapnik/markers_symbolizer.hpp>
 
+// boost
+#include <boost/make_shared.hpp>
+
 namespace mapnik {
 
 static const char * marker_placement_strings[] = {
@@ -50,8 +53,8 @@ markers_symbolizer::markers_symbolizer()
       fill_(color(0,0,255)),
       spacing_(100.0),
       max_error_(0.2),
-      width_(10.0),
-      height_(10.0),
+      width_(boost::make_shared<expr_node>(10.0)),
+      height_(boost::make_shared<expr_node>(10.0)),
       stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT),
       marker_type_(ARROW) {}
@@ -64,8 +67,8 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
       fill_(color(0,0,255)),
       spacing_(100.0),
       max_error_(0.2),
-      width_(10.0),
-      height_(10.0),
+      width_(boost::make_shared<expr_node>(10.0)),
+      height_(boost::make_shared<expr_node>(10.0)),
       stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT),
       marker_type_(ARROW) {}
@@ -134,22 +137,22 @@ color const& markers_symbolizer::get_fill() const
     return fill_;
 }
 
-void markers_symbolizer::set_width(double width)
+void markers_symbolizer::set_width(expression_ptr width)
 {
     width_ = width;
 }
 
-double markers_symbolizer::get_width() const
+expression_ptr markers_symbolizer::get_width() const
 {
     return width_;
 }
 
-void markers_symbolizer::set_height(double height)
+void markers_symbolizer::set_height(expression_ptr height)
 {
     height_ = height;
 }
 
-double markers_symbolizer::get_height() const
+expression_ptr markers_symbolizer::get_height() const
 {
     return height_;
 }

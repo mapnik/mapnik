@@ -1346,8 +1346,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             stroke const& stroke_ = sym.get_stroke();
             color const& col = stroke_.get_color();
             double strk_width = stroke_.get_width();
-            double w = sym.get_width();
-            double h = sym.get_height();
+            double w = (boost::apply_visitor(evaluate<Feature,value_type>(*feature), *(sym.get_width()))).to_double() * scale_factor_;
+            double h = (boost::apply_visitor(evaluate<Feature,value_type>(*feature), *(sym.get_height()))).to_double() * scale_factor_;
             double rx = w/2.0;
             double ry = h/2.0;
 

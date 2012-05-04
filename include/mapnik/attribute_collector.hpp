@@ -161,6 +161,18 @@ struct symbolizer_attributes : public boost::static_visitor<>
 
     void operator () (markers_symbolizer const& sym)
     {
+        expression_ptr const& height_expr = sym.get_height();
+        if (height_expr)
+        {
+            expression_attributes f_attr(names_);
+            boost::apply_visitor(f_attr,*height_expr);
+        }
+        expression_ptr const& width_expr = sym.get_width();
+        if (width_expr)
+        {
+            expression_attributes f_attr(names_);
+            boost::apply_visitor(f_attr,*width_expr);
+        }
         collect_metawriter(sym);
     }
 

@@ -293,11 +293,11 @@ public:
         }
         if (sym.get_width() != dfl.get_width() || explicit_defaults_)
         {
-            set_attr( sym_node, "width", sym.get_width() );
+            set_attr( sym_node, "width", to_expression_string(*sym.get_width()) );
         }
         if (sym.get_height() != dfl.get_height() || explicit_defaults_)
         {
-            set_attr( sym_node, "height", sym.get_height() );
+            set_attr( sym_node, "height", to_expression_string(*sym.get_height()) );
         }
         if (sym.get_marker_type() != dfl.get_marker_type() || explicit_defaults_)
         {

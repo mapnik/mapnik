@@ -175,8 +175,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         unsigned s_g=col.green();
         unsigned s_b=col.blue();
         unsigned s_a=col.alpha();
-        double w = sym.get_width();
-        double h = sym.get_height();
+        double w = (boost::apply_visitor(evaluate<Feature,value_type>(*feature), *(sym.get_width()))).to_double() * scale_factor_;
+        double h = (boost::apply_visitor(evaluate<Feature,value_type>(*feature), *(sym.get_height()))).to_double() * scale_factor_;
+
         double rx = w/2.0;
         double ry = h/2.0;
 
