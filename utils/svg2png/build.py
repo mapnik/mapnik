@@ -33,13 +33,17 @@ source = Split(
     """
     )
 
-headers = env['CPPPATH'] 
+program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
+
+if env['HAS_CAIRO']:
+    program_env.PrependUnique(CPPPATH=env['CAIROMM_CPPPATHS'])
+    program_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
 
 libraries =  copy(env['LIBMAPNIK_LIBS'])
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 libraries.extend([boost_program_options,'mapnik'])
 
-svg2png = program_env.Program('svg2png', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+svg2png = program_env.Program('svg2png', source, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 Depends(svg2png, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 

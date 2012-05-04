@@ -53,7 +53,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
 {
     shape_.shp().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
-    
+
     boost::shared_ptr<shape_file> index = shape_.index();
     if (index)
     {

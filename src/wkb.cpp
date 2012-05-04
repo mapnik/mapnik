@@ -113,8 +113,9 @@ public:
     {
         int type = read_integer();
 
+#ifdef MAPNIK_LOG
         MAPNIK_LOG_DEBUG(wkb_reader) << "wkb_reader: Read=" << wkb_geometry_type_string(type) << "," << type;
-
+#endif
         switch (type)
         {
         case wkbPoint:
@@ -401,6 +402,7 @@ private:
         }
     }
 
+#ifdef MAPNIK_LOG
     std::string wkb_geometry_type_string(int type)
     {
         std::stringstream s;
@@ -426,6 +428,7 @@ private:
 
         return s.str();
     }
+#endif
 };
 
 void geometry_utils::from_wkb (boost::ptr_vector<geometry_type>& paths,

@@ -39,7 +39,8 @@ class layer_descriptor
 public:
     layer_descriptor(std::string const& name, std::string const& encoding)
         : name_(name),
-          encoding_(encoding) {}
+          encoding_(encoding),
+          desc_ar_() {}
 
     layer_descriptor(layer_descriptor const& other)
         : name_(other.name_),

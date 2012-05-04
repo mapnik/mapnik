@@ -386,6 +386,9 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                 if (dataset_ && layer_.is_valid())
                 {
                     OGRLayer* layer = layer_.layer();
+                    // only new either reset of setNext
+                    //layer->ResetReading();
+                    layer->SetNextByIndex(0);
                     ogr_feature_ptr feat(layer->GetNextFeature());
                     if ((*feat) != NULL)
                     {

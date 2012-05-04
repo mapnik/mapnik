@@ -44,6 +44,10 @@
 
 namespace mapnik {
 
+    /*
+        Global logger class that holds the configuration of severity, format
+        and file/console redirection.
+    */
     class MAPNIK_DECL logger :
         public singleton<logger,CreateStatic>,
         private boost::noncopyable
@@ -153,6 +157,9 @@ namespace mapnik {
 
     namespace detail {
 
+        /*
+          Default sink, it regulates access to clog
+        */
         template<class Ch, class Tr, class A>
         class clog_sink
         {
@@ -170,6 +177,12 @@ namespace mapnik {
         };
 
 
+        /*
+          Base log class, should not log anything when no MAPNIK_LOG is defined
+
+          This is used for info/debug/warn reporting that should not output
+          anything when not compiling for speed.
+        */
         template<template <class Ch, class Tr, class A> class OutputPolicy,
                  logger::severity_type Severity,
                  class Ch = char,
@@ -223,13 +236,66 @@ namespace mapnik {
 #endif
         };
 
+
+        /*
+          Base log class that always log, regardless of MAPNIK_LOG.
+
+          This is used for error/fatal reporting that should always log something
+        */
+        template<template <class Ch, class Tr, class A> class OutputPolicy,
+                 logger::severity_type Severity,
+                 class Ch = char,
+                 class Tr = std::char_traits<Ch>,
+                 class A = std::allocator<Ch> >
+        class base_log_always : public boost::noncopyable
+        {
+        public:
+            typedef OutputPolicy<Ch, Tr, A> output_policy;
+
+            base_log_always() {}
+
+            base_log_always(const char* object_name)
+            {
+                if (object_name != NULL)
+                {
+                    object_name_ = object_name;
+                }
+            }
+
+            ~base_log_always()
+            {
+                if (check_severity())
+                {
+                    output_policy()(Severity, streambuf_);
+                }
+            }
+
+            template<class T>
+            base_log_always &operator<<(const T &x)
+            {
+                streambuf_ << x;
+                return *this;
+            }
+
+        private:
+            inline bool check_severity()
+            {
+                return Severity >= logger::get_object_severity(object_name_);
+            }
+
+            typename output_policy::stream_buffer streambuf_;
+            std::string object_name_;
+        };
+
+
         typedef base_log<clog_sink, logger::info> base_log_info;
         typedef base_log<clog_sink, logger::debug> base_log_debug;
         typedef base_log<clog_sink, logger::warn> base_log_warn;
-        typedef base_log<clog_sink, logger::error> base_log_error;
-        typedef base_log<clog_sink, logger::fatal> base_log_fatal;
+        typedef base_log_always<clog_sink, logger::error> base_log_error;
+        typedef base_log_always<clog_sink, logger::fatal> base_log_fatal;
 
     } // namespace detail
+
 
     // real interfaces
     class MAPNIK_DECL info : public detail::base_log_info {
@@ -261,6 +327,7 @@ namespace mapnik {
         fatal() : detail::base_log_fatal() {}
         fatal(const char* object_name) : detail::base_log_fatal(object_name) {}
     };
+
 
     // logging helpers
     #define MAPNIK_LOG_INFO(s) mapnik::info(#s)

@@ -96,7 +96,7 @@ PLUGINS = { # plugins with external dependencies
             'rasterlite':  {'default':False,'path':'RASTERLITE','inc':['sqlite3.h','rasterlite.h'],'lib':'rasterlite','lang':'C'},
             
             # todo: osm plugin does also depend on libxml2 (but there is a separate check for that)
-            'osm':     {'default':False,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
+            'osm':     {'default':True,'path':None,'inc':'curl/curl.h','lib':'curl','lang':'C'},
 
             # plugins without external dependencies requiring CheckLibWithHeader...
             'shape':   {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
@@ -242,7 +242,6 @@ else:
     LIBDIR_SCHEMA='lib'
 
 
-    
 def pretty_dep(dep):
     pretty = pretty_dep_names.get(dep)
     if pretty:

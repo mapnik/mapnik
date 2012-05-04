@@ -279,7 +279,8 @@ public:
             {
                 ras.reset();
 
-                if(fabs(curved_trans_contour.width()) < 0.0001)
+                // https://github.com/mapnik/mapnik/issues/1129
+                if(fabs(curved_trans_contour.width()) <= 1)
                 {
                     ras.add_path(curved_trans, attr.index);
                 }
@@ -384,7 +385,7 @@ public:
             {
                 ras.reset();
 
-                if(fabs(curved_trans_contour.width()) < 0.0001)
+                if(fabs(curved_trans_contour.width()) <= 1)
                 {
                     ras.add_path(curved_trans, attr.index);
                 }

@@ -266,7 +266,8 @@ class MAPNIK_DECL face_manager : private boost::noncopyable
 public:
     face_manager(T & engine)
         : engine_(engine),
-        stroker_(engine_.create_stroker())  {}
+        stroker_(engine_.create_stroker()),
+        face_ptr_cache_()  {}
 
     face_ptr get_face(std::string const& name)
     {
@@ -303,16 +304,19 @@ public:
         face_set_ptr face_set = boost::make_shared<font_face_set>();
         for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
         {
-            if (face_ptr face = get_face(*name))
+            face_ptr face = get_face(*name);
+            if (face)
             {
                 face_set->add(face);
             }
+#ifdef MAPNIK_LOG
             else
             {
-                MAPNIK_LOG_ERROR(font_engine_freetype)
+                MAPNIK_LOG_DEBUG(font_engine_freetype)
                         << "Failed to find face '" << *name
                         << "' in font set '" << fset.get_name() << "'\n";
             }
+#endif
         }
         return face_set;
     }
@@ -335,9 +339,9 @@ public:
     }
 
 private:
-    face_ptr_cache_type face_ptr_cache_;
     font_engine_type & engine_;
     stroker_ptr stroker_;
+    face_ptr_cache_type face_ptr_cache_;
 };
 
 template <typename T>

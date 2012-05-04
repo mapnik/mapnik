@@ -18,7 +18,7 @@ uninstall:
 	python scons/scons.py uninstall
 
 test:
-	@echo "*** Running visual tests…"
+	@echo "*** Running visual tests..."
 	@python tests/visual_tests/test.py -q
 	@echo "*** Running C++ tests..."
 	@for FILE in tests/cpp_tests/*-bin; do \

@@ -40,14 +40,6 @@ class query
 {
 public:
     typedef boost::tuple<double,double> resolution_type;
-private:
-    box2d<double> bbox_;
-    resolution_type resolution_;
-    double scale_denominator_;
-    double filter_factor_;
-    box2d<double> unbuffered_bbox_;
-    std::set<std::string> names_;
-public:
 
     query(box2d<double> const& bbox,
           resolution_type const& resolution,
@@ -57,7 +49,8 @@ public:
           resolution_(resolution),
           scale_denominator_(scale_denominator),
           filter_factor_(1.0),
-          unbuffered_bbox_(unbuffered_bbox)
+          unbuffered_bbox_(unbuffered_bbox),
+          names_()
     {}
 
     query(box2d<double> const& bbox,
@@ -67,7 +60,8 @@ public:
           resolution_(resolution),
           scale_denominator_(scale_denominator),
           filter_factor_(1.0),
-          unbuffered_bbox_(bbox)
+          unbuffered_bbox_(bbox),
+          names_()
     {}
 
     query(box2d<double> const& bbox)
@@ -75,7 +69,8 @@ public:
           resolution_(resolution_type(1.0,1.0)),
           scale_denominator_(1.0),
           filter_factor_(1.0),
-          unbuffered_bbox_(bbox)
+          unbuffered_bbox_(bbox),
+          names_()
     {}
 
     query(query const& other)
@@ -94,8 +89,8 @@ public:
         resolution_=other.resolution_;
         scale_denominator_=other.scale_denominator_;
         filter_factor_=other.filter_factor_;
-        names_=other.names_;
         unbuffered_bbox_=other.unbuffered_bbox_;
+        names_=other.names_;
         return *this;
     }
 
@@ -119,12 +114,12 @@ public:
         return unbuffered_bbox_;
     }
 
-    void set_unbuffered_bbox(const box2d<double>& bbox)
+    void set_unbuffered_bbox(box2d<double> const& bbox)
     {
         unbuffered_bbox_ = bbox;
     }
 
-    void set_bbox(const box2d<double>& bbox)
+    void set_bbox(box2d<double> const& bbox)
     {
         bbox_ = bbox;
     }
@@ -148,6 +143,14 @@ public:
     {
         return names_;
     }
+
+private:
+    box2d<double> bbox_;
+    resolution_type resolution_;
+    double scale_denominator_;
+    double filter_factor_;
+    box2d<double> unbuffered_bbox_;
+    std::set<std::string> names_;
 };
 
 }

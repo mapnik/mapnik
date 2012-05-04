@@ -23,6 +23,7 @@
 #include <boost/python.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/utils.hpp>
+#include "mapnik_enumeration.hpp"
 
 void export_logger()
 {
@@ -35,6 +36,15 @@ void export_logger()
         .def("instance",&singleton<logger,CreateStatic>::instance,
              return_value_policy<reference_existing_object>())
         .staticmethod("instance")
+        ;
+
+    enum_<mapnik::logger::severity_type>("severity_type")
+        .value("Info", logger::info)
+        .value("Debug", logger::debug)
+        .value("Warn", logger::warn)
+        .value("Error", logger::error)
+        .value("Fatal", logger::fatal)
+        .value("None", logger::none)
         ;
 
     class_<logger,bases<singleton<logger,CreateStatic> >,

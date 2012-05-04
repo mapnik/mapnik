@@ -57,9 +57,12 @@ def render(filename, width, height, bbox, quiet=False):
         m.zoom_to_box(bbox)
     else:
         m.zoom_all()
-    basefn = os.path.join(dirname, "images", '%s-%d' % (filename, width))
-    mapnik.render_to_file(m, basefn+'-agg.png')
-    diff = compare(basefn + '-agg.png', basefn + '-reference.png')
+    expected = os.path.join(dirname, "images", '%s-%d-reference.png' % (filename, width))
+    if not os.path.exists('/tmp/mapnik-visual-images'):
+        os.makedirs('/tmp/mapnik-visual-images')
+    actual = os.path.join("/tmp/mapnik-visual-images", '%s-%d-agg.png' % (filename, width))
+    mapnik.render_to_file(m, actual)
+    diff = compare(actual, expected)
     if diff > 0:
         print "-"*80
         print '\x1b[33mError:\x1b[0m %u different pixels' % diff

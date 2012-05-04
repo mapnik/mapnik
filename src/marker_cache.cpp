@@ -73,43 +73,37 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
         return result;
     }
 
-    // we can't find marker in cache, lets try to load it from filesystem
-    boost::filesystem::path path(uri);
-    if (exists(path))
+    try
     {
-        if (is_svg(uri))
+        // we can't find marker in cache, lets try to load it from filesystem
+        boost::filesystem::path path(uri);
+        if (!exists(path))
         {
-            using namespace mapnik::svg;
-            try
+            MAPNIK_LOG_ERROR(marker_cache) << "Marker does not exist: " << uri;
+        }
+        else
+        {
+            if (is_svg(uri))
             {
+                using namespace mapnik::svg;
                 path_ptr marker_path(boost::make_shared<svg_storage_type>());
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());
-
                 svg_parser p(svg);
                 p.parse(uri);
                 //svg.arrange_orientations();
                 double lox,loy,hix,hiy;
                 svg.bounding_rect(&lox, &loy, &hix, &hiy);
                 marker_path->set_bounding_box(lox,loy,hix,hiy);
-
                 marker_ptr mark(boost::make_shared<marker>(marker_path));
                 result.reset(mark);
                 if (update_cache)
                 {
                     cache_.insert(std::make_pair(uri,*result));
                 }
-                return result;
             }
-            catch (...)
-            {
-                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading SVG: " << uri;
-            }
-        }
-        else
-        {
-            try
+            else
             {
                 std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(uri));
                 if (reader.get())
@@ -126,17 +120,20 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                         cache_.insert(std::make_pair(uri,*result));
                     }
                 }
-            }
-
-            catch (...)
-            {
-                MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading image: " << uri;
+                else
+                {
+                    MAPNIK_LOG_ERROR(marker_cache) << "could not intialize reader for: '" << uri << "'";
+                }
             }
         }
     }
-    else
+    catch (std::exception const& ex)
     {
-        MAPNIK_LOG_WARN(marker_cache) << "Marker does not exist: " << uri;
+        MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading: '" << uri << "' (" << ex.what() << ")";
+    }
+    catch (...)
+    {
+        MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading: '" << uri << "'";
     }
     return result;
 }

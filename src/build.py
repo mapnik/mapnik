@@ -80,13 +80,8 @@ else:
     else:
         lib_env['LIBS'].append([lib for lib in env['LIBS'] if lib.startswith('agg')])
 
-
 if env['PLATFORM'] == 'Darwin':
-    mapnik_libname = 'libmapnik.dylib'
-else:
-    mapnik_libname = 'libmapnik.so.' + ("%d.%d" % (int(ABI_VERSION[0]),int(ABI_VERSION[1])))
-
-if env['PLATFORM'] == 'Darwin':
+    mapnik_libname = env.subst(env['MAPNIK_LIB_NAME'])
     if env['FULL_LIB_PATH']:
         lib_path = '%s/%s' % (env['MAPNIK_LIB_BASE'],mapnik_libname)
     else:
@@ -94,13 +89,15 @@ if env['PLATFORM'] == 'Darwin':
     mapnik_lib_link_flag += ' -Wl,-install_name,%s' % lib_path
     _d = {'version':env['MAPNIK_VERSION_STRING'].replace('-pre','')}
     mapnik_lib_link_flag += ' -current_version %(version)s -compatibility_version %(version)s' % _d
-elif env['PLATFORM'] == 'SunOS':
-    if env['CXX'].startswith('CC'):
-        mapnik_lib_link_flag += ' -R. -h %s' % mapnik_libname
-    else:
-        mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
-else: # Linux and others
-    mapnik_lib_link_flag += ' -Wl,-rpath-link,. -Wl,-soname,%s' % mapnik_libname
+else: # unix, non-macos
+    mapnik_libname = env.subst(env['MAPNIK_LIB_NAME']) + (".%d.%d" % (int(ABI_VERSION[0]),int(ABI_VERSION[1])))
+    if env['PLATFORM'] == 'SunOS':
+        if env['CXX'].startswith('CC'):
+            mapnik_lib_link_flag += ' -R. -h %s' % mapnik_libname
+        else:
+            mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
+    else: # Linux and others
+        mapnik_lib_link_flag += ' -Wl,-rpath-link,. -Wl,-soname,%s' % mapnik_libname
 
 source = Split(
     """
@@ -324,16 +321,22 @@ if env['CUSTOM_LDFLAGS']:
 else:
     linkflags = mapnik_lib_link_flag
 
-if env['LINKING'] == 'static':
-    mapnik = lib_env.StaticLibrary('mapnik', source, LINKFLAGS=linkflags)
-else:
-    mapnik = lib_env.SharedLibrary('mapnik', source, LINKFLAGS=linkflags)
-
 # cache library values for other builds to use
 env['LIBMAPNIK_LIBS'] = copy(lib_env['LIBS'])
 env['LIBMAPNIK_CXXFLAGS'] = libmapnik_cxxflags
 
-if env['PLATFORM'] != 'Darwin':
+if env['PLATFORM'] == 'Darwin':
+    target_path = env['MAPNIK_LIB_BASE_DEST']
+    if 'uninstall' not in COMMAND_LINE_TARGETS:
+        if env['LINKING'] == 'static':
+            mapnik = lib_env.StaticLibrary('mapnik', source, LINKFLAGS=linkflags)
+        else:
+            mapnik = lib_env.SharedLibrary('mapnik', source, LINKFLAGS=linkflags)
+        result = env.Install(target_path, mapnik)
+        env.Alias(target='install', source=result)
+
+    env['create_uninstall_target'](env, os.path.join(target_path,env.subst(env['MAPNIK_LIB_NAME'])))
+else:
     # Symlink command, only works if both files are in same directory
     def symlink(env, target, source):
         trgt = str(target[0])
@@ -345,37 +348,33 @@ if env['PLATFORM'] != 'Darwin':
 
     major, minor, micro = ABI_VERSION
 
-    soFile = "%s.%d.%d.%d" % (os.path.basename(str(mapnik[0])), int(major), int(minor), int(micro))
+    soFile = "%s.%d.%d.%d" % (os.path.basename(env.subst(env['MAPNIK_LIB_NAME'])), int(major), int(minor), int(micro))
     target = os.path.join(env['MAPNIK_LIB_BASE_DEST'], soFile)
 
     if 'uninstall' not in COMMAND_LINE_TARGETS:
-      result = env.InstallAs(target=target, source=mapnik)
-      env.Alias(target='install', source=result)
-      if result:
-            env.AddPostAction(result, ldconfig)
+        if env['LINKING'] == 'static':
+            mapnik = lib_env.StaticLibrary('mapnik', source, LINKFLAGS=linkflags)
+        else:
+            mapnik = lib_env.SharedLibrary('mapnik', source, LINKFLAGS=linkflags)
+        result = env.InstallAs(target=target, source=mapnik)
+        env.Alias(target='install', source=result)
+        if result:
+              env.AddPostAction(result, ldconfig)
 
 
     # Install symlinks
-    target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % (os.path.basename(str(mapnik[0])),int(major), int(minor)))
-    target2 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], os.path.basename(str(mapnik[0])))
+    target1 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], "%s.%d.%d" % \
+        (os.path.basename(env.subst(env['MAPNIK_LIB_NAME'])),int(major), int(minor)))
+    target2 = os.path.join(env['MAPNIK_LIB_BASE_DEST'], os.path.basename(env.subst(env['MAPNIK_LIB_NAME'])))
     if 'uninstall' not in COMMAND_LINE_TARGETS:
-        if 'install' in COMMAND_LINE_TARGETS:
-            link1 = env.Command(target1, target, symlink)
-            env.Alias(target='install', source=link1)
-            link2 = env.Command(target2, target1, symlink)
-            env.Alias(target='install', source=link2)
+        link1 = env.Command(target1, target, symlink)
+        env.Alias(target='install', source=link1)
+        link2 = env.Command(target2, target1, symlink)
+        env.Alias(target='install', source=link2)
     # delete in reverse order..
     env['create_uninstall_target'](env, target2)
     env['create_uninstall_target'](env, target1)
     env['create_uninstall_target'](env, target)
-
-else:
-    target_path = env['MAPNIK_LIB_BASE_DEST']
-    if 'uninstall' not in COMMAND_LINE_TARGETS:
-        result = env.Install(target_path, mapnik)
-        env.Alias(target='install', source=result)
-
-    env['create_uninstall_target'](env, os.path.join(target_path,mapnik_libname))
 
 includes = glob.glob('../include/mapnik/*.hpp')
 svg_includes = glob.glob('../include/mapnik/svg/*.hpp')

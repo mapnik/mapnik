@@ -98,7 +98,7 @@ private:
     void parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node const& pt);
 
     void parse_fontset(Map & map, xml_node const & fset);
-    void parse_font(font_set & fset, xml_node const& f);
+    bool parse_font(font_set & fset, xml_node const& f);
 
     void parse_rule(feature_type_style & style, xml_node const & r);
 
@@ -455,16 +455,25 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
     {
         name = fset.get_attr<std::string>("name");
         font_set fontset(name);
-
         xml_node::const_iterator itr = fset.begin();
         xml_node::const_iterator end = fset.end();
 
+        bool success = false;
         for (; itr != end; ++itr)
         {
             if (itr->is("Font"))
             {
-                parse_font(fontset, *itr);
+                if (parse_font(fontset, *itr))
+                {
+                    success = true;
+                }
             }
+        }
+
+        // if not at least one face-name is valid
+        if (!success)
+        {
+            throw mapnik::config_error("no valid fonts could be loaded");
         }
 
         map.insert_fontset(name, fontset);
@@ -472,27 +481,36 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
         // XXX Hack because map object isn't accessible by text_symbolizer
         // when it's parsed
         fontsets_.insert(pair<std::string, font_set>(name, fontset));
-    } catch (const config_error & ex) {
+    }
+    catch (const config_error & ex)
+    {
         ex.append_context(std::string("in FontSet '") + name + "'", fset);
         throw;
     }
 }
 
-void map_parser::parse_font(font_set &fset, xml_node const& f)
+bool map_parser::parse_font(font_set &fset, xml_node const& f)
 {
     optional<std::string> face_name = f.get_opt_attr<std::string>("face-name");
     if (face_name)
     {
-        if (strict_)
+        face_ptr face = font_manager_.get_face(*face_name);
+        if (face)
         {
-            ensure_font_face(*face_name);
+            fset.add_face_name(*face_name);
+            return true;
         }
-        fset.add_face_name(*face_name);
+        else if (strict_)
+        {
+            throw config_error("Failed to find font face '" +
+                               *face_name + "'");
+        }
     }
     else
     {
         throw config_error("Must have 'face-name' set", f);
     }
+    return false;
 }
 
 void map_parser::parse_layer(Map & map, xml_node const& lay)
