@@ -34,7 +34,7 @@
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/image_compositing.hpp>
-
+#include <mapnik/image_filter.hpp>
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 #include "agg_rendering_buffer.h"

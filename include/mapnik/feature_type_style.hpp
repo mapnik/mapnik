@@ -27,7 +27,7 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/image_filter.hpp>
+#include <mapnik/image_filter_types.hpp>
 
 // boost
 #include <boost/optional.hpp>

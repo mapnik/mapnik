@@ -24,10 +24,11 @@
 #ifndef MAPNIK_IMAGE_FILTER_HPP
 #define MAPNIK_IMAGE_FILTER_HPP
 
+//mapnik
+#include <mapnik/image_filter_types.hpp>
+// boost
 #include <boost/gil/gil_all.hpp>
-#include <boost/variant.hpp>
 #include <boost/concept_check.hpp>
-
 // agg 
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -122,24 +123,6 @@ static const float edge_detect_matrix[] = {0,1,0,1,-4,1,0,1,0 };
 
 }
 
-struct blur {};
-struct emboss {};
-struct sharpen {};
-struct edge_detect {};
-struct sobel {};
-
-struct agg_stack_blur 
-{
-    agg_stack_blur(unsigned rx_, unsigned ry_)
-        : rx(rx_),ry(ry_) {}
-    unsigned rx;
-    unsigned ry;
-};
-
-struct gray {};
-struct x_gradient {};
-struct y_gradient {};
-struct invert {};
 
 template <typename Src, typename Dst, typename Conv>
 void process_channel_impl (Src const& src, Dst & dst, Conv const& k)
@@ -380,18 +363,6 @@ void apply_filter(Src & src, invert)
         }
     }
 }
-
-typedef boost::variant<filter::blur,
-                       filter::gray,
-                       filter::agg_stack_blur,
-                       filter::emboss,
-                       filter::sharpen,
-                       filter::edge_detect,
-                       filter::sobel,
-                       filter::x_gradient,
-                       filter::y_gradient,
-                       filter::invert> filter_type;
-
 
 template <typename Src>
 struct filter_visitor : boost::static_visitor<void>
