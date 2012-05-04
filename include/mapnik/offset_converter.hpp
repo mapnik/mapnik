@@ -53,8 +53,6 @@ struct MAPNIK_DECL offset_converter
     enum status
     {
         initial,
-        start,
-        first,
         process,
         last_vertex,
         angle_joint,
