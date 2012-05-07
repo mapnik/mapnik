@@ -337,7 +337,7 @@ public:
     {
         return stroker_;
     }
-
+    
 private:
     font_engine_type & engine_;
     stroker_ptr stroker_;
@@ -351,10 +351,11 @@ struct text_renderer : private boost::noncopyable
     {
         FT_Glyph image;
         char_properties *properties;
-        glyph_t(FT_Glyph image_, char_properties *properties_) : image(image_), properties(properties_) {}
+        glyph_t(FT_Glyph image_, char_properties *properties_) 
+            : image(image_), properties(properties_) {}
         ~glyph_t () { FT_Done_Glyph(image);}
     };
-
+    
     typedef boost::ptr_vector<glyph_t> glyphs_t;
     typedef T pixmap_type;
 
