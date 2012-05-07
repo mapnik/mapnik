@@ -93,7 +93,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     renderer_type ren(ren_base, pattern);    
     rasterizer_type ras(ren);
     
-    typedef boost::mpl::vector<clip_line_tag,transform_tag> conv_types;
+    typedef boost::mpl::vector<clip_line_tag,transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>,rasterizer_type,line_pattern_symbolizer, proj_transform, CoordTransform, conv_types> 
         converter(ext,ras,sym,t_,prj_trans,scale_factor_);
     
