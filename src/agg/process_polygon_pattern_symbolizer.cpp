@@ -46,30 +46,6 @@
 
 namespace mapnik {
 
-template <typename ColorT,typename Order> 
-struct multiplier
-{
-    typedef typename ColorT::value_type value_type;
-    typedef typename ColorT::calc_type calc_type;
-    
-    void operator() (value_type * p) const
-    {
-        calc_type a = p[Order::A];    
-        if(a < ColorT::base_mask)
-        {
-            if(a == 0)
-            {
-                p[Order::R] = p[Order::G] = p[Order::B] = 0;
-                return;
-            }
-            p[Order::R] = value_type((p[Order::R] * a + ColorT::base_mask) >> ColorT::base_shift);
-            p[Order::G] = value_type((p[Order::G] * a + ColorT::base_mask) >> ColorT::base_shift);
-            p[Order::B] = value_type((p[Order::B] * a + ColorT::base_mask) >> ColorT::base_shift);
-        }
-    }
-};
-
-
 template <typename T>
 void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                               mapnik::feature_ptr const& feature,
@@ -130,9 +106,8 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     unsigned w=(*pat)->width();
     unsigned h=(*pat)->height();
     agg::rendering_buffer pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
-    agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);    
-    pixf_pattern.for_each_pixel(multiplier<agg::rgba8,agg::order_rgba>());
-    
+    agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);
+    pixf_pattern.premultiply();
     img_source_type img_src(pixf_pattern);
 
     unsigned num_geometries = feature->num_geometries();
