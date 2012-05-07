@@ -53,8 +53,14 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
-    typedef agg::line_image_pattern<agg::pattern_filter_bilinear_rgba8> pattern_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32> renderer_base;
+    typedef agg::rgba8 color;
+    typedef agg::order_rgba order;
+    typedef agg::pixel32_type pixel_type;    
+    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;     
+    typedef agg::pattern_filter_bilinear_rgba8 filter_type;
+    typedef agg::line_image_pattern<filter_type> pattern_type;
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;    
+    typedef agg::renderer_base<pixfmt_type> renderer_base;
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
     typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
     
@@ -77,7 +83,8 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     box2d<double> ext = query_extent_ * 1.0;
     
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
+    pixfmt_type pixf(buf);
+    if (sym.comp_op()) pixf.comp_op(static_cast<agg::comp_op_e>(*sym.comp_op()));
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
 
