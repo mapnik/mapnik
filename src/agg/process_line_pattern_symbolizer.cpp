@@ -99,7 +99,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     
     if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform 
-    //if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // FIXME optional smooth converter
+    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
     
     BOOST_FOREACH(geometry_type & geom, feature->paths())
     {
