@@ -28,6 +28,7 @@
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/feature_factory.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/group_layout_manager.hpp>
@@ -216,85 +217,86 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       collector(*itr);
    }
    
-   // find the indexed column names (i.e. name contains the % character).
-   std::vector<const std::string *> indexed_columns;
+   // create a new context for the sub features of this group
+   mapnik::context_ptr sub_feature_ctx = boost::make_shared<mapnik::context_type>();
+   
+   // populate new context with column names referenced in the group rules and symbolizers
+   // and determine if any indexed columns are present
+   bool has_idx_cols = false;
    BOOST_FOREACH(const std::string &col_name, columns)
    {
+      sub_feature_ctx->push(col_name);
       if (col_name.find('%') != std::string::npos)
       {
-         indexed_columns.push_back(&col_name);
+         has_idx_cols = true;
       }
    }
 
-   // the rules which we'll want to symbolize
-   std::vector<const group_rule *> matched_rules;
-   std::vector<size_t> matched_indices;
+   // keep track of the sub features that we'll want to symbolize
+   // along with the group rules that they matched
+   std::vector< std::pair<const group_rule *, feature_ptr> > matches;
 
-   // filter the right rules to symbolize.
-   // figure out what the bboxes should be 
-   //   and add them to layout manager.
+   // layout manager to store and arrange bboxes of matched features
    group_layout_manager layout_manager(sym.get_layout());
    processed_text text(font_manager_, scale_factor_);
 
-   // loop over the columns, finding whether it's possible to
-   // move the columns that each rule/group needs into place.
+   // run feature or sub feature through the group rules & symbolizers
+   // for each index value in the range
    for (size_t col_idx = sym.get_column_index_start(); 
         col_idx != sym.get_column_index_end(); ++col_idx)
    {
-      bool have_indexed_columns = true;
-
-      // ugly nasty cast to be able to change the attributes on
-      // a feature! a better way to do this would be to copy 
-      // and/or facade the feature, but i haven't found a decent
-      // way to do that yet.
-      Feature &mutable_feature = const_cast<Feature&>(*feature);
+      feature_ptr sub_feature;
       
-      // copy over indexed columns
-      BOOST_FOREACH(const std::string *&col_name, indexed_columns)
+      if (has_idx_cols)
       {
-         std::string col_idx_name = *col_name;
-         boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
-
-         if (mutable_feature.has_key(col_idx_name)) 
-         {
-            mutable_feature.put_new(*col_name, mutable_feature.get(col_idx_name));
-         }
-         else
-         {
-            have_indexed_columns = false;
-            break;
-         }
+          // create sub feature with indexed column values
+          sub_feature = feature_factory::create(sub_feature_ctx, col_idx);
+          
+          // copy the necessary columns to sub feature
+          BOOST_FOREACH(const std::string &col_name, columns)
+          {
+             if (col_name.find('%') != std::string::npos)
+             {
+                // indexed column
+                std::string col_idx_name = col_name;
+                boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
+                sub_feature->put(col_name, feature->get(col_idx_name));
+             }
+             else
+             {
+                // non-indexed column
+                sub_feature->put(col_name, feature->get(col_name));
+             }
+          }
+      }
+      else
+      {
+          // no indexed columns, so use the existing feature instead of copying
+          sub_feature = feature;
       }
 
-      // if all indexed columns were present in feature
-      if (have_indexed_columns)
+      for (group_symbolizer::rules::const_iterator itr = sym.begin();
+           itr != sym.end(); ++itr)
       {
-         bool match = false;
-
-         for (group_symbolizer::rules::const_iterator itr = sym.begin();
-              itr != sym.end(); ++itr)
+         const group_rule &rule = *itr;
+         
+         if (boost::apply_visitor(evaluate<Feature,value_type>(*sub_feature), 
+                                           *rule.get_filter()).to_bool())
          {
-            const group_rule &rule = *itr;
-            match = boost::apply_visitor(evaluate<Feature,value_type>(mutable_feature), 
-                                              *rule.get_filter()).to_bool();
-            if (match)
+            // add matched rule and feature to the list of things to draw
+            matches.push_back(std::make_pair(&rule, sub_feature));
+
+            // construct a bounding box around all symbolizers for the matched rule
+            box2d<double> box;
+            for (group_rule::symbolizers::const_iterator itr = rule.begin();
+                 itr != rule.end(); ++itr)
             {
-               // add this to the list of things to draw
-               matched_rules.push_back(&rule);
-               matched_indices.push_back(col_idx);
-
-               // construct a bounding box around all symbolizers for the matched rule
-               box2d<double> box;
-               for (group_rule::symbolizers::const_iterator itr = rule.begin();
-                    itr != rule.end(); ++itr)
-               {
-                  boost::apply_visitor(place_bboxes(box, mutable_feature, text, scale_factor_), *itr);
-               }
-
-               // add the bounding box to the layout manager
-               layout_manager.add_member_bound_box(box);
-               break;
+               boost::apply_visitor(place_bboxes(box, *sub_feature, text, scale_factor_), *itr);
             }
+
+            // add the bounding box to the layout manager
+            layout_manager.add_member_bound_box(box);
+            break;
          }
       }
    }
@@ -303,7 +305,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    string_info empty_info;
    text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
    placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, query_extent_);
-   for (size_t i = 0; i < matched_rules.size(); ++i)
+   for (size_t i = 0; i < matches.size(); ++i)
    {
       finder.additional_boxes.push_back(layout_manager.offset_box_at(i));
    }
@@ -328,48 +330,24 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 
       BOOST_FOREACH(text_path const &p, finder.get_results())
       {
-         for (size_t j = 0; j < matched_rules.size(); ++j)
+         for (size_t j = 0; j < matches.size(); ++j)
          {
-            const group_rule *rule = matched_rules[j];
-            const size_t col_idx = matched_indices.at(j);
+            const group_rule *match_rule = matches[j].first;
+            feature_ptr match_feature = matches[j].second;
             pixel_position pos = p.center;
             const layout_offset &offset = layout_manager.offset_at(j);
             pos.x += offset.x;
             pos.y += offset.y;
-
-            // again with the nasty mutable feature hack.
-            Feature &mutable_feature = const_cast<Feature&>(*feature);
             
-            // copy over columns
-            bool have_indexed_columns = true;
-            BOOST_FOREACH(const std::string *&col_name, indexed_columns)
-            {
-               std::string col_idx_name = *col_name;
-               boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
-               
-               if (mutable_feature.has_key(col_idx_name)) 
-               {
-                  mutable_feature.put_new(*col_name, mutable_feature.get(col_idx_name));
-               }
-               else
-               {
-                  have_indexed_columns = false;
-                  break;
-               }
-            }
-            
-            if (have_indexed_columns)
-            {
-               // finally, do the actual rendering.
-               render_visitor<agg_renderer> symbolize(*this, pos, mutable_feature, text, 
-                                                      scale_factor_, font_manager_,
-                                                      pixmap_);
+            // finally, do the actual rendering.
+            render_visitor<agg_renderer> symbolize(*this, pos, *match_feature, text, 
+                                                    scale_factor_, font_manager_,
+                                                    pixmap_);
 
-               for (group_rule::symbolizers::const_iterator itr = rule->begin();
-                    itr != rule->end(); ++itr)
-               {
-                  boost::apply_visitor(symbolize, *itr);
-               }
+            for (group_rule::symbolizers::const_iterator itr = match_rule->begin();
+                itr != match_rule->end(); ++itr)
+            {
+               boost::apply_visitor(symbolize, *itr);
             }
          }
       }
