@@ -47,7 +47,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     ras_ptr->reset();
     set_gamma_method(sym,ras_ptr);
 
-    box2d<double> inflated_extent = query_extent_ * 1.1;
+    box2d<double> inflated_extent = query_extent_ * 1.0;
     
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>,rasterizer,polygon_symbolizer, proj_transform, CoordTransform,conv_types> 

@@ -63,7 +63,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
 
-    box2d<double> ext = query_extent_ * 1.1;
+    box2d<double> ext = query_extent_ * 1.0;
 
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
