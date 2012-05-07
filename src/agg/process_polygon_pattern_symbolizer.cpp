@@ -79,7 +79,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     
     agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
-    agg::pixfmt_rgba32_plain pixf(buf);
+    //agg::pixfmt_rgba32_plain pixf(buf);
 
     agg::scanline_u8 sl;
     ras_ptr->reset();
@@ -109,26 +109,31 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     
     if (!pat) return;
 
+    typedef agg::rgba8 color;
+    typedef agg::order_rgba order;
+    typedef agg::pixel32_type pixel_type;    
+    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;    
     typedef agg::wrap_mode_repeat wrap_x_type;
-    typedef agg::wrap_mode_repeat wrap_y_type;
-    typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32,
-                                         agg::row_accessor<agg::int8u>, agg::pixel32_type> rendering_buffer;
-    typedef agg::image_accessor_wrap<rendering_buffer,
+    typedef agg::wrap_mode_repeat wrap_y_type;       
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;    
+    typedef agg::image_accessor_wrap<agg::pixfmt_rgba32,
                                      wrap_x_type,
-                                     wrap_y_type> img_source_type;
+                                     wrap_y_type> img_source_type;    
     typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
+    typedef agg::renderer_base<pixfmt_type> ren_base;
+    
     typedef agg::renderer_scanline_aa<ren_base,
         agg::span_allocator<agg::rgba8>,
         span_gen_type> renderer_type;
-
+    
+    pixfmt_type pixf(buf);
+    if (sym.comp_op()) pixf.comp_op(static_cast<agg::comp_op_e>(*sym.comp_op()));
     ren_base renb(pixf);
+    
     unsigned w=(*pat)->width();
     unsigned h=(*pat)->height();
-    agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
-    agg::span_allocator<agg::rgba8> sa;
-    rendering_buffer pixf_pattern(pattern_rbuf);
-    
+    agg::rendering_buffer pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
+    agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);    
     pixf_pattern.for_each_pixel(multiplier<agg::rgba8,agg::order_rgba>());
     
     img_source_type img_src(pixf_pattern);
@@ -154,11 +159,11 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     }
 
     span_gen_type sg(img_src, offset_x, offset_y);
-    renderer_type rp(renb,sa, sg);
 
-    //metawriter_with_properties writer = sym.get_metawriter();
+    agg::span_allocator<agg::rgba8> sa;
+    renderer_type rp(renb,sa, sg);    
     
-    box2d<double> inflated_extent = query_extent_ * 1.1;
+    box2d<double> inflated_extent = query_extent_ * 1.0;
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>,rasterizer,polygon_pattern_symbolizer, proj_transform, CoordTransform,conv_types>
         converter(inflated_extent,*ras_ptr,sym,t_,prj_trans, scale_factor_);
@@ -166,7 +171,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-
+    
     BOOST_FOREACH( geometry_type & geom, feature->paths())
     {
         if (geom.num_points() > 2)
@@ -174,7 +179,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             converter.apply(geom);
         }
     }
-
+    
     agg::render_scanlines(*ras_ptr, sl, rp);
 }
 
