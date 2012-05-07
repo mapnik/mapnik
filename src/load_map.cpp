@@ -1064,8 +1064,16 @@ void map_parser::parse_group_rule(group_symbolizer &sym, xml_node const &r)
    try 
    {
       rule fake_rule;
-
-      expression_ptr filter = r.get_attr<expression_ptr>("filter");
+      expression_ptr filter;
+      xml_node const* child = r.get_opt_child("Filter");
+      if (child)
+      {
+          filter = child->get_value<expression_ptr>();
+      }
+      else
+      {
+          filter = boost::make_shared<mapnik::expr_node>(true);
+      }
       group_rule rule(filter);
 
       xml_node::const_iterator symIter = r.begin();
