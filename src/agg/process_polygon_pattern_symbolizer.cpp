@@ -79,9 +79,6 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
     
     agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
-    //agg::pixfmt_rgba32_plain pixf(buf);
-
-    agg::scanline_u8 sl;
     ras_ptr->reset();
     set_gamma_method(sym,ras_ptr);
 
@@ -179,7 +176,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             converter.apply(geom);
         }
     }
-    
+    agg::scanline_u8 sl;
     agg::render_scanlines(*ras_ptr, sl, rp);
 }
 
