@@ -59,13 +59,10 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     unsigned g=col.green();
     unsigned b=col.blue();
     unsigned a=col.alpha();
-
-
-    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
-
+    
     ras_ptr->reset();
     set_gamma_method(stroke_, ras_ptr);
-    //metawriter_with_properties writer = sym.get_metawriter();
+    
     typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
     vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types>
         converter(query_extent_,*ras_ptr,sym,t_,prj_trans,scale_factor_);

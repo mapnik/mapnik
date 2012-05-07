@@ -31,37 +31,23 @@
 namespace mapnik
 {
 
-enum line_rasterizer_enum {
-    RASTERIZER_FULL,           // agg::renderer_scanline_aa_solid
-    RASTERIZER_FAST,           // agg::rasterizer_outline_aa, twice as fast but only good for thin lines
-    line_rasterizer_enum_MAX
-};
-
-DEFINE_ENUM( line_rasterizer_e, line_rasterizer_enum );
-
 struct MAPNIK_DECL line_symbolizer : public symbolizer_base
 {
     explicit line_symbolizer()
         : symbolizer_base(),
         stroke_(),
-        rasterizer_p_(RASTERIZER_FULL),
-        smooth_(0.0),
         offset_(0.0)
         {}
-
+    
     line_symbolizer(stroke const& stroke)
         : symbolizer_base(),
         stroke_(stroke),
-        rasterizer_p_(RASTERIZER_FULL),
-        smooth_(0.0),
         offset_(0.0) 
         {}
 
     line_symbolizer(color const& pen,float width=1.0)
         : symbolizer_base(),
         stroke_(pen,width),
-        rasterizer_p_(RASTERIZER_FULL),
-        smooth_(0.0),
         offset_(0.0)
         {}
 
@@ -74,27 +60,7 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
     {
         stroke_ = stk;
     }
-
-    void set_rasterizer(line_rasterizer_e rasterizer_p)
-    {
-        rasterizer_p_ = rasterizer_p;
-    }
-
-    line_rasterizer_e get_rasterizer() const
-    {
-        return rasterizer_p_;
-    }
-
-    void set_smooth(double smooth)
-    {
-        smooth_ = smooth;
-    }
-
-    double smooth() const
-    {
-        return smooth_;
-    }
-
+    
     void set_offset(double val)
     {
         offset_ = val;
@@ -107,8 +73,6 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
     
 private:
     stroke stroke_;
-    line_rasterizer_e rasterizer_p_;
-    double smooth_;
     double offset_;
 };
 }

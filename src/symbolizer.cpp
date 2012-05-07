@@ -108,6 +108,15 @@ bool symbolizer_base::clip() const
     return clip_;
 }
 
+void symbolizer_base::set_smooth(double smooth)
+{
+    smooth_value_ = smooth;
+}
+
+double symbolizer_base::smooth() const
+{
+    return smooth_value_;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

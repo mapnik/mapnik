@@ -96,7 +96,7 @@ private:
     void parse_style(Map & map, xml_node const& sty);
     void parse_layer(Map & map, xml_node const& lay);
     void parse_metawriter(Map & map, xml_node const& lay);
-    void parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node const& pt);
+    void parse_symbolizer_base(symbolizer_base &sym, xml_node const& pt);
 
     void parse_fontset(Map & map, xml_node const & fset);
     bool parse_font(font_set & fset, xml_node const& f);
@@ -819,7 +819,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
     }
 }
 
-void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node const &pt)
+void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
 {
     optional<std::string> comp_op_name = pt.get_opt_attr<std::string>("comp-op");
     if (comp_op_name)
@@ -855,6 +855,10 @@ void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node c
     
     optional<boolean> clip = pt.get_opt_attr<boolean>("clip");
     if (clip) sym.set_clip(*clip);
+    
+    // smooth value
+    optional<double> smooth = pt.get_opt_attr<double>("smooth");
+    if (smooth) sym.set_smooth(*smooth);
     
     optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
     if (!writer) return;
@@ -949,7 +953,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                 }
             }
         }
-        parse_metawriter_in_symbolizer(symbol, sym);
+        parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
     catch (const config_error & ex)
@@ -1075,7 +1079,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         marker_type_e marker_type = sym.get_attr<marker_type_e>("marker-type", dfl_marker_type);
         symbol.set_marker_type(marker_type);
 
-        parse_metawriter_in_symbolizer(symbol, sym);
+        parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
     catch (const config_error & ex)
@@ -1111,7 +1115,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
             }
             line_pattern_symbolizer symbol(expr);
 
-            parse_metawriter_in_symbolizer(symbol, sym);
+            parse_symbolizer_base(symbol, sym);
             rule.append(symbol);
         }
         catch (image_reader_exception const & ex)
@@ -1175,11 +1179,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
             optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
             if (gamma_method) symbol.set_gamma_method(*gamma_method);
 
-            // smooth value
-            optional<double> smooth = sym.get_opt_attr<double>("smooth");
-            if (smooth) symbol.set_smooth(*smooth);
-
-            parse_metawriter_in_symbolizer(symbol, sym);
+            parse_symbolizer_base(symbol, sym);
             rule.append(symbol);
         }
         catch (image_reader_exception const & ex)
@@ -1222,7 +1222,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
         }
 
         text_symbolizer text_symbol = text_symbolizer(placement_finder);
-        parse_metawriter_in_symbolizer(text_symbol, sym);
+        parse_symbolizer_base(text_symbol, sym);
         rule.append(text_symbol);
     }
     catch (const config_error & ex)
@@ -1304,7 +1304,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             shield_symbol.set_unlock_image(* unlock_image);
         }
 
-        parse_metawriter_in_symbolizer(shield_symbol, sym);
+        parse_symbolizer_base(shield_symbol, sym);
 
         std::string image_file = sym.get_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
@@ -1426,21 +1426,13 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
         stroke strk;
         parse_stroke(strk,sym);
         line_symbolizer symbol = line_symbolizer(strk);
-
-        // rasterizer method
-        line_rasterizer_e rasterizer = sym.get_attr<line_rasterizer_e>("rasterizer", RASTERIZER_FULL);
-        //optional<line_rasterizer_e> rasterizer_method = sym.get_opt_attr<line_rasterizer_e>("full");
-        symbol.set_rasterizer(rasterizer);
-        // smooth value
-        optional<double> smooth = sym.get_opt_attr<double>("smooth");
-        if (smooth) symbol.set_smooth(*smooth);
         
         // offset value
         optional<double> offset = sym.get_opt_attr<double>("offset");
         if (offset) symbol.set_offset(*offset);
         
         // meta-writer
-        parse_metawriter_in_symbolizer(symbol, sym);
+        parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
     catch (const config_error & ex)
@@ -1468,11 +1460,8 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
         // gamma method
         optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
         if (gamma_method) poly_sym.set_gamma_method(*gamma_method);
-        // smooth value
-        optional<double> smooth = sym.get_opt_attr<double>("smooth");
-        if (smooth) poly_sym.set_smooth(*smooth);
         
-        parse_metawriter_in_symbolizer(poly_sym, sym);
+        parse_symbolizer_base(poly_sym, sym);
         rule.append(poly_sym);
     }
     catch (const config_error & ex)
@@ -1498,7 +1487,7 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
         optional<expression_ptr> height = sym.get_opt_attr<expression_ptr>("height");
         if (height) building_sym.set_height(*height);
 
-        parse_metawriter_in_symbolizer(building_sym, sym);
+        parse_symbolizer_base(building_sym, sym);
         rule.append(building_sym);
     }
     catch (const config_error & ex)

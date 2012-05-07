@@ -84,16 +84,6 @@ public:
         const stroke & strk =  sym.get_stroke();
         add_stroke_attributes(sym_node, strk);
         add_metawriter_attributes(sym_node, sym);
-
-        line_symbolizer dfl;
-        if ( sym.get_rasterizer() != dfl.get_rasterizer() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "rasterizer", sym.get_rasterizer() );
-        }
-        if ( sym.smooth() != dfl.smooth() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "smooth", sym.smooth() );
-        }
     }
 
     void operator () ( line_pattern_symbolizer const& sym )
@@ -127,10 +117,6 @@ public:
         if ( sym.get_gamma_method() != dfl.get_gamma_method() || explicit_defaults_ )
         {
             set_attr( sym_node, "gamma-method", sym.get_gamma_method() );
-        }
-        if ( sym.smooth() != dfl.smooth() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "smooth", sym.smooth() );
         }
         add_metawriter_attributes(sym_node, sym);
     }

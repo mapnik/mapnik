@@ -103,6 +103,8 @@ public:
     std::string get_transform_string() const;
     void set_clip(bool clip);
     bool clip() const;
+    void set_smooth(double smooth);
+    double smooth() const;
 private:
     metawriter_properties properties_;
     metawriter_properties properties_complete_;
@@ -111,6 +113,7 @@ private:
     boost::optional<composite_mode_e> comp_op_;
     transform_type affine_transform_;
     bool clip_;
+    double smooth_value_;
 };
 
 
