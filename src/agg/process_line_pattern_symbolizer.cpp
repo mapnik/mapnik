@@ -74,8 +74,8 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (!pat) return;
 
-    box2d<double> ext = query_extent_ * 1.1;
-
+    box2d<double> ext = query_extent_ * 1.0;
+    
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32 pixf(buf);
     renderer_base ren_base(pixf);
@@ -90,7 +90,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     vertex_converter<box2d<double>,rasterizer_type,line_pattern_symbolizer, proj_transform, CoordTransform, conv_types> 
         converter(ext,ras,sym,t_,prj_trans,scale_factor_);
     
-    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform 
     //if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // FIXME optional smooth converter
     
