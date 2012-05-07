@@ -48,7 +48,8 @@ public:
         properties_complete_(),
         writer_name_(),
         writer_ptr_(),
-        clip_(true)
+        clip_(true),
+        smooth_value_(0.0)
         {
             affine_transform_[0] = 1.0;
             affine_transform_[1] = 0.0;
@@ -61,7 +62,8 @@ public:
     symbolizer_base(symbolizer_base const& other)
         : comp_op_(other.comp_op_),
         affine_transform_(other.affine_transform_),
-        clip_(other.clip_) {}
+        clip_(other.clip_),
+        smooth_value_(other.smooth_value_) {}
     
     /** Add a metawriter to this symbolizer using a name. */
     void add_metawriter(std::string const& name, metawriter_properties const& properties);
