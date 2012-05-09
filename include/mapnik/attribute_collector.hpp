@@ -248,13 +248,19 @@ inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
      {
          if (col_name.find('%') != std::string::npos)
          {
-             // indexed column name. add column name for each index value.
-             for (size_t col_idx = sym.get_column_index_start(); 
-                  col_idx != sym.get_column_index_end(); ++col_idx)
+             // Note: ignore column name if it is '%' by itself.
+             // '%' is a special case to access the index value itself,
+             // rather than acessing indexed columns from data source.
+             if (col_name.size() > 1)
              {
-                 std::string col_idx_name = col_name;
-                 boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
-                 names_.insert(col_idx_name);
+                 // indexed column name. add column name for each index value.
+                 for (size_t col_idx = sym.get_column_index_start(); 
+                      col_idx != sym.get_column_index_end(); ++col_idx)
+                 {
+                     std::string col_idx_name = col_name;
+                     boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
+                     names_.insert(col_idx_name);
+                 }
              }
          }
          else

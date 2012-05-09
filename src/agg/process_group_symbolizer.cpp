@@ -257,10 +257,18 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
           {
              if (col_name.find('%') != std::string::npos)
              {
-                // indexed column
-                std::string col_idx_name = col_name;
-                boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
-                sub_feature->put(col_name, feature->get(col_idx_name));
+                if (col_name.size() == 1)
+                {
+                   // column name is '%' by itself, so give the index as the value
+                   sub_feature->put(col_name, (int)col_idx);
+                }
+                else
+                {
+                   // indexed column
+                   std::string col_idx_name = col_name;
+                   boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
+                   sub_feature->put(col_name, feature->get(col_idx_name));
+                }
              }
              else
              {
