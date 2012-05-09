@@ -111,11 +111,8 @@ public:
         // agg renderer doesn't support processing of multiple symbolizers.
         return false;
     };
-    void painted(bool painted)
-    {
-        pixmap_.painted(painted);
-    }
-
+    
+    void painted(bool painted);
     
 private:
     buffer_type & pixmap_;

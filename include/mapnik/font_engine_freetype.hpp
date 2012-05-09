@@ -32,6 +32,7 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/image_compositing.hpp>
 
 // freetype2
 extern "C"
@@ -337,7 +338,7 @@ public:
     {
         return stroker_;
     }
-    
+
 private:
     font_engine_type & engine_;
     stroker_ptr stroker_;
@@ -351,20 +352,21 @@ struct text_renderer : private boost::noncopyable
     {
         FT_Glyph image;
         char_properties *properties;
-        glyph_t(FT_Glyph image_, char_properties *properties_) 
+        glyph_t(FT_Glyph image_, char_properties *properties_)
             : image(image_), properties(properties_) {}
         ~glyph_t () { FT_Done_Glyph(image);}
     };
-    
+
     typedef boost::ptr_vector<glyph_t> glyphs_t;
     typedef T pixmap_type;
 
-    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s);
+    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s, composite_mode_e comp_op = src_over);
     box2d<double> prepare_glyphs(text_path *path);
     void render(pixel_position pos);
     void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
 
 private:
+    
     void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
     {
         int x_max=x+bitmap->width;
@@ -408,8 +410,11 @@ private:
     face_manager<freetype_engine> &font_manager_;
     stroker & stroker_;
     glyphs_t glyphs_;
+    composite_mode_e comp_op_;
 };
+
 typedef face_manager<freetype_engine> face_manager_freetype;
+
 }
 
 #endif // MAPNIK_FONT_ENGINE_FREETYPE_HPP

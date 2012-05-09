@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/map.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -250,11 +251,11 @@ int main ( int argc , char** argv)
         agg_renderer<image_32> ren(m,buf);
         ren.apply();
 
-        save_to_file<image_data_32>(buf.data(),"demo.jpg","jpeg");
-        save_to_file<image_data_32>(buf.data(),"demo.png","png");
-        save_to_file<image_data_32>(buf.data(),"demo256.png","png256");
-        save_to_file<image_data_32>(buf.data(),"demo.tif","tiff");
-
+        save_to_file(buf,"demo.jpg","jpeg");
+        save_to_file(buf,"demo.png","png");
+        save_to_file(buf,"demo256.png","png256");
+        save_to_file(buf,"demo.tif","tiff");
+        
         std::cout << "Three maps have been rendered using AGG in the current directory:\n"
             "- demo.jpg\n"
             "- demo.png\n"

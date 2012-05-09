@@ -24,6 +24,7 @@
 #include <boost/bind.hpp>
 
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/projection.hpp>

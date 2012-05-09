@@ -73,6 +73,7 @@ extern "C"
 namespace mapnik
 {
 
+
 template <typename T>
 std::string save_to_string(T const& image,
                            std::string const& type,
@@ -772,6 +773,40 @@ void scale_image_agg (Image& target,const Image& source, scaling_method_e scalin
     typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
     span_gen_type sg(img_src, interpolator, filter);
     agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
+}
+
+
+void save_to_file(image_32 const& image,std::string const& file)
+{
+    save_to_file<image_data_32>(image.data(), file);
+}
+
+void save_to_file (image_32 const& image,
+                   std::string const& file,
+                   std::string const& type)
+{
+    save_to_file<image_data_32>(image.data(), file, type);
+}
+
+void save_to_file (image_32 const& image,
+                   std::string const& file,
+                   std::string const& type,
+                   rgba_palette const& palette)
+{
+    save_to_file<image_data_32>(image.data(), file, type, palette);
+}
+
+std::string save_to_string(image_32 const& image,
+                           std::string const& type)
+{
+    return save_to_string<image_data_32>(image.data(), type);
+}
+
+std::string save_to_string(image_32 const& image,
+                           std::string const& type,
+                           rgba_palette const& palette)
+{
+    return save_to_string<image_data_32>(image.data(), type, palette);
 }
 
 template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio);

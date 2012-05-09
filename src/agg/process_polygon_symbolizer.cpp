@@ -24,6 +24,7 @@
 #include <boost/foreach.hpp>
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/polygon_symbolizer.hpp>

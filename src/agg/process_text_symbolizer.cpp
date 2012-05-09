@@ -38,9 +38,12 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             width_, height_,
             scale_factor_,
             t_, font_manager_, *detector_, query_extent_);
-
-    text_renderer<T> ren(*current_buffer_, font_manager_, *(font_manager_.get_stroker()));
-
+    
+    composite_mode_e comp_op = src_over;
+    if ( sym.comp_op() ) comp_op = *sym.comp_op();
+    
+    text_renderer<T> ren(*current_buffer_, font_manager_, *(font_manager_.get_stroker()), comp_op);
+    
     while (helper.next()) {
         placements_type &placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)

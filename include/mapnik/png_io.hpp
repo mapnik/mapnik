@@ -28,7 +28,7 @@
 #include <mapnik/palette.hpp>
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
-
+#include <mapnik/image_data.hpp>
 // zlib
 #include <zlib.h>
 

@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_helpers.hpp>
@@ -290,6 +291,12 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
                                      boost::math::iround(pos.y),
                                      opacity);
     }
+}
+
+template <typename T>
+void agg_renderer<T>::painted(bool painted)
+{
+    pixmap_.painted(painted);
 }
 
 template class agg_renderer<image_32>;
