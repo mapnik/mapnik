@@ -40,6 +40,7 @@
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/vertex_converters.hpp>
 
 // cairo
 #include <cairomm/context.h>
@@ -51,6 +52,7 @@
 #include <boost/make_shared.hpp>
 
 // agg
+
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_smooth_poly1.h"
@@ -58,9 +60,6 @@
 // markers
 #include "agg_path_storage.h"
 #include "agg_ellipse.h"
-
-// stl
-#include <iostream>
 
 namespace mapnik
 {
@@ -814,33 +813,21 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         else context.set_operator(src_over);
 
         context.set_color(sym.get_fill(), sym.get_opacity());
-        box2d<double> inflated_extent = query_extent_ * 1.1;
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
+        
+        typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
+        vertex_converter<box2d<double>,cairo_context,polygon_symbolizer, proj_transform, CoordTransform, conv_types> 
+            converter(query_extent_,context,sym,t_,prj_trans,1.0);
+    
+        if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true) 
+        converter.set<transform_tag>(); //always transform 
+        converter.set<affine_transform_tag>();
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+        
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
         {
-            geometry_type & geom = feature->get_geometry(i);
             if (geom.num_points() > 2)
-            {
-                if (sym.smooth() > 0.0)
-                {
-                    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-                    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-                    typedef agg::conv_smooth_poly1_curve<path_type> smooth_type;
-                    clipped_geometry_type clipped(geom);
-                    clipped.clip_box(inflated_extent.minx(),inflated_extent.miny(),inflated_extent.maxx(),inflated_extent.maxy());
-                    path_type path(t_,clipped,prj_trans);
-                    smooth_type smooth(path);
-                    smooth.smooth_value(sym.smooth());
-                    context.add_agg_path(smooth);
-                }
-                else
-                {
-                    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-                    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-                    clipped_geometry_type clipped(geom);
-                    clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-                    path_type path(t_,clipped,prj_trans);
-                    context.add_path(path);
-                }
+            {          
+                converter.apply(geom);
             }
         }
         // fill polygon
@@ -961,11 +948,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
-        mapnik::stroke const& stroke_ = sym.get_stroke();
         cairo_context context(context_);
+        mapnik::stroke const& stroke_ = sym.get_stroke();        
         if (sym.comp_op()) context.set_operator(*sym.comp_op());
         else context.set_operator(src_over);
 
@@ -979,20 +963,26 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             context.set_dash(stroke_.get_dash_array());
         }
 
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
-        {
-            geometry_type & geom = feature->get_geometry(i);
 
+        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
+        vertex_converter<box2d<double>,cairo_context,line_symbolizer, proj_transform, CoordTransform,conv_types>
+            converter(query_extent_,context ,sym,t_,prj_trans,1.0);
+        
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+        converter.set<transform_tag>(); // always transform
+
+        if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+        
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        {
             if (geom.num_points() > 1)
             {
-                //cairo_context context(context_);
-                clipped_geometry_type clipped(geom);
-                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-                path_type path(t_,clipped,prj_trans);
-
-                context.add_path(path);
+                converter.apply(geom);
             }
         }
+        // stroke
         context.stroke();
     }
 
@@ -1180,7 +1170,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         if (sym.comp_op()) context.set_operator(*sym.comp_op());
         else context.set_operator(src_over);
         
-        while (helper.next()) {
+        while (helper.next()) 
+        {
             placements_type &placements = helper.placements();
             for (unsigned int ii = 0; ii < placements.size(); ++ii)
             {
@@ -1199,7 +1190,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     {
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
         typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
+        
         std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
         if (!marker && !(*marker)->is_bitmap()) return;
@@ -1216,7 +1207,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         pattern.set_extend(Cairo::EXTEND_REPEAT);
         pattern.set_filter(Cairo::FILTER_BILINEAR);
         context.set_line_width(height);
-
+        
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
         {
             geometry_type & geom = feature->get_geometry(i);
@@ -1273,9 +1264,6 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
         cairo_context context(context_);
         if (sym.comp_op()) context.set_operator(*sym.comp_op());
         else context.set_operator(src_over);
@@ -1290,20 +1278,24 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         context.set_pattern(pattern);
 
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
+        typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
+        vertex_converter<box2d<double>,cairo_context,polygon_pattern_symbolizer, proj_transform, CoordTransform, conv_types> 
+            converter(query_extent_,context,sym,t_,prj_trans,1.0);
+    
+        if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true) 
+        converter.set<transform_tag>(); //always transform 
+        converter.set<affine_transform_tag>();
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+        
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
         {
-            geometry_type & geom = feature->get_geometry(i);
-
             if (geom.num_points() > 2)
-            {
-                clipped_geometry_type clipped(geom);
-                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-                path_type path(t_,clipped,prj_trans);
-                context.add_path(path);
-                
+            {          
+                converter.apply(geom);
             }
         }
-        // fill polygon
+        
+        // fill polygon        
         context.fill();
     }
 
