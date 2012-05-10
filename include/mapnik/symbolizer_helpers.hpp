@@ -161,7 +161,7 @@ protected:
     shield_symbolizer const& sym_;
     box2d<double> marker_ext_;
     boost::optional<marker_ptr> marker_;
-    agg::trans_affine transform_;
+    agg::trans_affine image_transform_;
     double marker_w_;
     double marker_h_;
     double marker_x_;
