@@ -230,13 +230,13 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
     
     if (st.comp_op())
     {
-        composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(),false,false);
+        composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(), 1.0f, false,false);
     }   
     else if (blend_from)
     {                
-        composite(pixmap_.data(),current_buffer_->data(), src_over,false,false);
+        composite(pixmap_.data(),current_buffer_->data(), src_over, 1.0f,false,false);
     }
-
+    
     // apply any 'direct' image filters    
     mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
     BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.direct_image_filters())
