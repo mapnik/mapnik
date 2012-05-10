@@ -43,27 +43,8 @@ class Map;
 class MAPNIK_DECL symbolizer_base 
 {
 public:
-    symbolizer_base()
-        : properties_(),
-        properties_complete_(),
-        writer_name_(),
-        writer_ptr_(),
-        clip_(true),
-        smooth_value_(0.0)
-        {
-            affine_transform_[0] = 1.0;
-            affine_transform_[1] = 0.0;
-            affine_transform_[2] = 0.0;
-            affine_transform_[3] = 1.0;
-            affine_transform_[4] = 0.0;
-            affine_transform_[5] = 0.0;
-        }
-    
-    symbolizer_base(symbolizer_base const& other)
-        : comp_op_(other.comp_op_),
-        affine_transform_(other.affine_transform_),
-        clip_(other.clip_),
-        smooth_value_(other.smooth_value_) {}
+    symbolizer_base();    
+    symbolizer_base(symbolizer_base const& other);
     
     /** Add a metawriter to this symbolizer using a name. */
     void add_metawriter(std::string const& name, metawriter_properties const& properties);
@@ -99,7 +80,7 @@ public:
     /** Get metawriter name. */
     std::string const& get_metawriter_name() const { return writer_name_; }
     void set_comp_op(composite_mode_e comp_op);
-    boost::optional<composite_mode_e> comp_op() const;
+    composite_mode_e comp_op() const;
     void set_transform(transform_type const& );
     transform_type const& get_transform() const;
     std::string get_transform_string() const;
@@ -112,7 +93,7 @@ private:
     metawriter_properties properties_complete_;
     std::string writer_name_;
     metawriter_ptr writer_ptr_;
-    boost::optional<composite_mode_e> comp_op_;
+    composite_mode_e comp_op_;
     transform_type affine_transform_;
     bool clip_;
     double smooth_value_;

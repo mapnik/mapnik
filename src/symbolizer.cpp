@@ -26,6 +26,31 @@
 
 namespace mapnik {
 
+// default ctor
+symbolizer_base::symbolizer_base()
+    : properties_(),
+      properties_complete_(),
+      writer_name_(),
+      writer_ptr_(),
+      comp_op_(src_over),
+      clip_(true),
+      smooth_value_(0.0)
+{
+    affine_transform_[0] = 1.0;
+    affine_transform_[1] = 0.0;
+    affine_transform_[2] = 0.0;
+    affine_transform_[3] = 1.0;
+    affine_transform_[4] = 0.0;
+    affine_transform_[5] = 0.0;
+}
+
+// copy ctor
+symbolizer_base::symbolizer_base(symbolizer_base const& other)
+    : comp_op_(other.comp_op_),
+      affine_transform_(other.affine_transform_),
+      clip_(other.clip_),
+      smooth_value_(other.smooth_value_) {}
+
 void symbolizer_base::add_metawriter(std::string const& name, metawriter_properties const& properties)
 {
     writer_name_ = name;
@@ -74,7 +99,7 @@ void symbolizer_base::set_comp_op(composite_mode_e comp_op)
     comp_op_ = comp_op;
 }
 
-boost::optional<composite_mode_e> symbolizer_base::comp_op() const
+composite_mode_e symbolizer_base::comp_op() const
 {
     return comp_op_;
 }
@@ -122,7 +147,7 @@ double symbolizer_base::smooth() const
 
 symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
     : image_filename_( file ),
-      image_opacity_(1.0f)   
+      image_opacity_(1.0f)
 {
     image_transform_[0] = 1.0;
     image_transform_[1] = 0.0;
@@ -159,7 +184,7 @@ float symbolizer_with_image::get_opacity() const
     return image_opacity_;
 }
 
-void symbolizer_with_image::set_image_transform(transform_type const& tr) 
+void symbolizer_with_image::set_image_transform(transform_type const& tr)
 {
     image_transform_ = tr;
 }
@@ -179,6 +204,3 @@ std::string symbolizer_with_image::get_image_transform_string() const
 }
 
 } // end of namespace mapnik
-
-
-
