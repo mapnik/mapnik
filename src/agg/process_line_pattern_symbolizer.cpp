@@ -85,7 +85,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     pixfmt_type pixf(buf);
-    if (sym.comp_op()) pixf.comp_op(static_cast<agg::comp_op_e>(*sym.comp_op()));
+    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base ren_base(pixf);
     agg::pattern_filter_bilinear_rgba8 filter;
 
