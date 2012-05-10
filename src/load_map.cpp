@@ -1537,6 +1537,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
             }
         }
         //Note: raster_symbolizer doesn't support metawriters
+        parse_symbolizer_base(raster_sym, sym);
         rule.append(raster_sym);
     }
     catch (const config_error & ex)
