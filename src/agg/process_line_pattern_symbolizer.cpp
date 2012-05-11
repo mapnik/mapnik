@@ -58,8 +58,8 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     typedef agg::order_rgba order;
     typedef agg::pixel32_type pixel_type;    
     typedef agg::comp_op_adaptor_rgba<color, order> blender_type;     
-    typedef agg::pattern_filter_bilinear_rgba8 filter_type;
-    typedef agg::line_image_pattern<filter_type> pattern_type;
+    typedef agg::pattern_filter_bilinear_rgba8 pattern_filter_type;
+    typedef agg::line_image_pattern<pattern_filter_type> pattern_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;    
     typedef agg::renderer_base<pixfmt_type> renderer_base;
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
