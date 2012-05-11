@@ -47,12 +47,18 @@ struct image_filter_grammar :
         using qi::_b;
         using qi::eps;
         using qi::char_;
-        using qi::no_skip;
         using phoenix::push_back;
         using phoenix::construct;
-        
+
+#if BOOST_VERSION > 104600
+        using qi::no_skip;
         start = -(filter % no_skip[*char_("; ")])
             ;
+#else
+        start = -(filter)
+            ;
+#endif
+
         filter = 
             lit("emboss")[push_back(_val,construct<mapnik::filter::emboss>())]
             |
