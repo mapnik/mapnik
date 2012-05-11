@@ -114,10 +114,6 @@ struct place_bboxes : public boost::static_visitor<>
       }
    }
 
-   void operator()(shield_symbolizer const &sym) const
-   {
-   }
-
    template <typename T>
    void operator()(T const &) const
    {
@@ -312,7 +308,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    // find placements which can accomodate the offset bboxes from the layout manager.
    string_info empty_info;
    text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
-   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, query_extent_);
+   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, detector_->extent());
    for (size_t i = 0; i < matches.size(); ++i)
    {
       finder.additional_boxes.push_back(layout_manager.offset_box_at(i));

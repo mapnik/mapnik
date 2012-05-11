@@ -241,7 +241,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
       std::queue< box2d<double> > &c_envelopes = *result;
 
       // check the placement of any additional envelopes
-      if (!p.allow_overlap && !additional_boxes.empty())
+      if (!additional_boxes.empty() && (p.avoid_edges || !p.allow_overlap || p.minimum_padding > 0))
       {
          BOOST_FOREACH(box2d<double> const& box, additional_boxes)
          {
@@ -251,7 +251,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
                              box.maxy() + current_placement->center.y);
             
             // abort the whole placement if the additional envelopes can't be placed.
-            if (!detector_.has_point_placement(pt, p.minimum_distance)) return;
+            if (!check(pt)) return;
             
             c_envelopes.push(pt);
          }
