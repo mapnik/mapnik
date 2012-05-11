@@ -77,8 +77,8 @@ template <typename T1, typename T2>
 MAPNIK_DECL void composite(T1 & im, T2 & im2,
                            composite_mode_e mode,
                            float opacity=1,
-                           int xdst=0,
-                           int ydst=0,
+                           int dx=0,
+                           int dy=0,
                            bool premultiply_src=true,
                            bool premultiply_dst=true);
 
@@ -87,8 +87,8 @@ template MAPNIK_DECL void composite<mapnik::image_data_32,mapnik::image_data_32>
                            mapnik::image_data_32 & im2,
                            composite_mode_e mode,
                            float opacity,
-                           int xdst,
-                           int ydst,
+                           int dx,
+                           int dy,
                            bool premultiply_src,
                            bool premultiply_dst);
 #endif

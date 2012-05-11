@@ -83,8 +83,8 @@ boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
 template <typename T1, typename T2>
 void composite(T1 & im, T2 & im2, composite_mode_e mode,
                float opacity,
-               int xdst,
-               int ydst,
+               int dx,
+               int dy,
                bool premultiply_src,
                bool premultiply_dst)
 {
@@ -105,7 +105,8 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode,
     if (premultiply_src)  pixf_mask.premultiply();
     if (premultiply_dst)  pixf.premultiply();
     renderer_type ren(pixf);
-    ren.blend_from(pixf_mask,0, xdst,ydst,unsigned(255*opacity));
+    // TODO - is this really opacity, or agg::cover?
+    ren.blend_from(pixf_mask,0, dx,dy,unsigned(255*opacity));
 }
 
 template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&, mapnik::image_data_32& ,composite_mode_e, float, int, int, bool, bool);
