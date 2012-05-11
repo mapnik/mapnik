@@ -81,7 +81,12 @@ boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
 }
 
 template <typename T1, typename T2>
-void composite(T1 & im, T2 & im2, int xdst, int ydst, composite_mode_e mode, float opacity, bool premultiply_src, bool premultiply_dst)
+void composite(T1 & im, T2 & im2, composite_mode_e mode,
+               float opacity,
+               int xdst,
+               int ydst,
+               bool premultiply_src,
+               bool premultiply_dst)
 {
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
@@ -103,14 +108,6 @@ void composite(T1 & im, T2 & im2, int xdst, int ydst, composite_mode_e mode, flo
     ren.blend_from(pixf_mask,0, xdst,ydst,unsigned(255*opacity));
 }
 
-template <typename T1, typename T2>
-void composite(T1 & im, T2 & im2, composite_mode_e mode, float opacity, bool premultiply_src, bool premultiply_dst)
-{
-    composite(im, im2, 0, 0, mode, opacity, premultiply_src, premultiply_dst);
-}
-
-template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&, mapnik::image_data_32& , int, int,composite_mode_e, float, bool, bool);
-
-template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&, mapnik::image_data_32&, composite_mode_e, float, bool, bool);
+template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&, mapnik::image_data_32& ,composite_mode_e, float, int, int, bool, bool);
 
 }
