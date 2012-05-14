@@ -35,7 +35,7 @@ extern "C"
 #include <mapnik/palette.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/util/conversions.hpp>
-
+#include <mapnik/span_image_filter.hpp>
 // jpeg
 #if defined(HAVE_JPEG)
 #include <mapnik/jpeg_io.hpp>
@@ -690,7 +690,8 @@ template <typename Image>
 void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio)
 {
     typedef agg::pixfmt_rgba32 pixfmt;
-    typedef agg::renderer_base<pixfmt> renderer_base;
+    typedef agg::pixfmt_rgba32_pre pixfmt_pre;
+    typedef agg::renderer_base<pixfmt_pre> renderer_base;
 
     // define some stuff we'll use soon
     agg::rasterizer_scanline_aa<> ras;
@@ -701,13 +702,12 @@ void scale_image_agg (Image& target,const Image& source, scaling_method_e scalin
     // initialize source AGG buffer
     agg::rendering_buffer rbuf_src((unsigned char*)source.getBytes(), source.width(), source.height(), source.width() * 4);
     pixfmt pixf_src(rbuf_src);
-
     typedef agg::image_accessor_clone<pixfmt> img_src_type;
     img_src_type img_src(pixf_src);
 
     // initialise destination AGG buffer (with transparency)
     agg::rendering_buffer rbuf_dst((unsigned char*)target.getBytes(), target.width(), target.height(), target.width() * 4);
-    pixfmt pixf_dst(rbuf_dst);
+    pixfmt_pre pixf_dst(rbuf_dst);
     renderer_base rb_dst(pixf_dst);
     rb_dst.clear(agg::rgba(0, 0, 0, 0));
 
@@ -770,7 +770,7 @@ void scale_image_agg (Image& target,const Image& source, scaling_method_e scalin
     case SCALING_BLACKMAN:
         filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
     }
-    typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
+    typedef mapnik::span_image_resample_rgba_affine<img_src_type> span_gen_type;
     span_gen_type sg(img_src, interpolator, filter);
     agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
 }
