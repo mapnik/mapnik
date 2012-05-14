@@ -1430,7 +1430,10 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
         // offset value
         optional<double> offset = sym.get_opt_attr<double>("offset");
         if (offset) symbol.set_offset(*offset);
-        
+
+        line_rasterizer_e rasterizer = sym.get_attr<line_rasterizer_e>("rasterizer", RASTERIZER_FULL);
+        symbol.set_rasterizer(rasterizer);
+
         // meta-writer
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);

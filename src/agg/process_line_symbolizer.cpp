@@ -63,45 +63,81 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     
     ras_ptr->reset();
     set_gamma_method(stroke_, ras_ptr);
-    
-    typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
-    vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types>
-        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,scale_factor_);
-
-    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
-    converter.set<transform_tag>(); // always transform
-
-    if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
-    converter.set<affine_transform_tag>(); // optional affine transform
-    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-    if (stroke_.has_dash()) converter.set<dash_tag>();
-    converter.set<stroke_tag>(); //always stroke
-
-    BOOST_FOREACH( geometry_type & geom, feature->paths())
-    {
-        if (geom.num_points() > 1)
-        {
-            converter.apply(geom);
-        }
-    }
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
 
-    
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+
     pixfmt_comp_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
-    renderer_type ren(renb);
-    ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
-    agg::scanline_u8 sl;
-    agg::render_scanlines(*ras_ptr, sl, ren);
+    
+    if (sym.get_rasterizer() == RASTERIZER_FAST)
+    {
+        typedef agg::renderer_outline_aa<renderer_base> renderer_type;
+        typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
+        // need to reduce width by half to match standard rasterizer look
+        double scaled = scale_factor_ * .5;
+        agg::line_profile_aa profile(stroke_.get_width() * scaled, agg::gamma_power(stroke_.get_gamma()));
+        renderer_type ren(renb, profile);
+        ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
+        rasterizer_type ras(ren);
+        set_join_caps_aa(stroke_,ras);
+
+        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+        vertex_converter<box2d<double>,rasterizer_type,line_symbolizer, proj_transform, CoordTransform,conv_types>
+            converter(query_extent_,ras,sym,t_,prj_trans,scaled);
+
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+        converter.set<transform_tag>(); // always transform
+        if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+        if (stroke_.has_dash()) converter.set<dash_tag>();
+        converter.set<stroke_tag>(); //always stroke
+
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        {
+            if (geom.num_points() > 1)
+            {
+                converter.apply(geom);
+            }
+        }
+    }
+    else
+    {
+        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+        vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types>
+            converter(query_extent_,*ras_ptr,sym,t_,prj_trans,scale_factor_);
+
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+        converter.set<transform_tag>(); // always transform
+        if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+        if (stroke_.has_dash()) converter.set<dash_tag>();
+        converter.set<stroke_tag>(); //always stroke
+
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        {
+            if (geom.num_points() > 1)
+            {
+                converter.apply(geom);
+            }
+        }
+
+        typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+        pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+        renderer_base renb(pixf);
+        renderer_type ren(renb);
+        ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
+        agg::scanline_u8 sl;
+        agg::render_scanlines(*ras_ptr, sl, ren);
+    }
 }
 
 
