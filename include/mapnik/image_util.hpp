@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-//#include <mapnik/graphics.hpp>
 #include <mapnik/palette.hpp>
 
 // boost
