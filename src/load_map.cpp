@@ -1031,7 +1031,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             }
             boost::array<double,6> matrix;
             tr.store_to(&matrix[0]);
-            symbol.set_transform(matrix);
+            symbol.set_image_transform(matrix);
         }
         
         optional<color> c = sym.get_opt_attr<color>("fill");
