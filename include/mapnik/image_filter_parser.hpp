@@ -50,7 +50,7 @@ struct image_filter_grammar :
         using phoenix::push_back;
         using phoenix::construct;
 
-#if BOOST_VERSION > 104600
+#if BOOST_VERSION >= 104700
         using qi::no_skip;
         start = -(filter % no_skip[*char_("; ")])
             ;
