@@ -70,8 +70,9 @@ public:
 
     void start_style_processing(feature_type_style const& st);
     void end_style_processing(feature_type_style const& st);
-    
-    void render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity);
+
+    void render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr,
+                       double opacity, composite_mode_e comp_op);
 
     void process(point_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,
@@ -103,7 +104,7 @@ public:
     void process(markers_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
-    
+
     inline bool process(rule::symbolizers const& /*syms*/,
                         mapnik::feature_ptr const& /*feature*/,
                         proj_transform const& /*prj_trans*/)
@@ -111,9 +112,9 @@ public:
         // agg renderer doesn't support processing of multiple symbolizers.
         return false;
     };
-    
+
     void painted(bool painted);
-    
+
 private:
     buffer_type & pixmap_;
     boost::shared_ptr<buffer_type> internal_buffer_;

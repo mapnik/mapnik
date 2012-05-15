@@ -248,21 +248,27 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
 }
 
 template <typename T>
-void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity)
+void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, 
+                                    double opacity, composite_mode_e comp_op)
 {
     if (marker.is_vector())
     {
-        typedef agg::pixfmt_rgba32 pixfmt;
-        typedef agg::renderer_base<pixfmt> renderer_base;
-        typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
+        typedef agg::rgba8 color_type;
+        typedef agg::order_rgba order_type;
+        typedef agg::pixel32_type pixel_type;
+        typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+        typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+        typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+        typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 
         ras_ptr->reset();
         ras_ptr->gamma(agg::gamma_power());
         agg::scanline_u8 sl;
-        agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
-        pixfmt pixf(buf);
+        agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+        pixfmt_comp_type pixf(buf);
+        pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
         renderer_base renb(pixf);
-
+        
         box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
         coord<double,2> c = bbox.center();
         // center the svg marker on '0,0'
@@ -277,19 +283,19 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,
             agg::pod_bvector<path_attributes>,
-            renderer_solid,
+            renderer_type,
             agg::pixfmt_rgba32> svg_renderer(svg_path,
                                                    (*marker.get_vector_data())->attributes());
         
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
     }
     else
-    {
-        //TODO: Add subpixel support
-        pixmap_.set_rectangle_alpha2(**marker.get_bitmap_data(),
-                                     boost::math::iround(pos.x),
-                                     boost::math::iround(pos.y),
-                                     opacity);
+    {        
+        composite(current_buffer_->data(), **marker.get_bitmap_data(), 
+                  comp_op, opacity,
+                  boost::math::iround(pos.x),
+                  boost::math::iround(pos.y), 
+                  false, false);
     }
 }
 
