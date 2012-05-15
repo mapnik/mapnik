@@ -55,19 +55,23 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 {
     typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
     typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
-    typedef agg::pixfmt_rgba32 pixfmt;
-    typedef agg::renderer_base<pixfmt> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
-
+    typedef agg::rgba8 color_type;
+    typedef agg::order_rgba order_type;
+    typedef agg::pixel32_type pixel_type;
+    typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+    
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_power());
     agg::scanline_u8 sl;
     agg::scanline_p8 sl_line;
     agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
-    pixfmt pixf(buf);
+    pixfmt_comp_type pixf(buf);
+    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
-    renderer_solid ren(renb);
+    renderer_type ren(renb);
     agg::trans_affine tr;
     boost::array<double,6> const& m = sym.get_image_transform();
     tr.load_from(&m[0]);
@@ -104,9 +108,10 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             using namespace mapnik::svg;
             vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
             svg_path_adapter svg_path(stl_storage);
+            
             svg_renderer<svg_path_adapter,
                 agg::pod_bvector<path_attributes>,
-                renderer_solid,
+                renderer_type,
                 agg::pixfmt_rgba32 > svg_renderer(svg_path,(*marker)->attributes());
 
             for (unsigned i=0; i<feature->num_geometries(); ++i)
@@ -127,7 +132,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         detector_->has_placement(extent))
                     {
 
-                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, sym.get_opacity());
+                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, sym.get_opacity(), sym.comp_op());
 
                         // TODO - impl this for markers?
                         //if (!sym.get_ignore_placement())

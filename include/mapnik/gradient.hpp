@@ -77,15 +77,15 @@ class MAPNIK_DECL gradient
     // transform
     agg::trans_affine transform_;
 public:
-    explicit gradient();
+    gradient();
     gradient(gradient const& other);
     gradient& operator=(const gradient& rhs);
 
     void set_gradient_type(gradient_e grad);
     gradient_e get_gradient_type() const;
 
-    void set_transform(agg::trans_affine transform);
-    agg::trans_affine get_transform() const;
+    void set_transform(agg::trans_affine const& transform);
+    agg::trans_affine const&  get_transform() const;
 
     void set_units(gradient_unit_e units);
     gradient_unit_e get_units() const;

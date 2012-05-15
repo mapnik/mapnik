@@ -103,7 +103,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 detector_->has_placement(label_ext))
             {
 
-                render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**marker,tr, sym.get_opacity());
+                render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**marker,tr, sym.get_opacity(), sym.comp_op());
 
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);
