@@ -72,6 +72,7 @@ int main( int, char*[] )
 
     if (!::boost::detail::test_errors()) {
         std::clog << "C++ fonts registration: \x1b[1;32m✓ \x1b[0m\n";
+        ::boost::detail::report_errors_remind().called_report_errors_function = true;
     } else {
         return ::boost::report_errors();
     }
