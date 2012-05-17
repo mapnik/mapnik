@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 
+#include <boost/cstdint.hpp>
 #include "agg_span_image_filter_rgba.h"
 
 namespace mapnik { 
@@ -70,7 +71,7 @@ public:
             (diameter * base_type::m_rx + image_subpixel_mask) >>
             image_subpixel_shift;
 
-        const int16* weight_array = base_type::filter().weight_array();
+        const boost::int16_t* weight_array = base_type::filter().weight_array();
 
         do
         {
