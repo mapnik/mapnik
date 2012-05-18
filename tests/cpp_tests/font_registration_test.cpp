@@ -1,3 +1,4 @@
+#include <boost/version.hpp>
 #include <boost/filesystem/convenience.hpp>
 namespace fs = boost::filesystem;
 using fs::path;
@@ -72,7 +73,9 @@ int main( int, char*[] )
 
     if (!::boost::detail::test_errors()) {
         std::clog << "C++ fonts registration: \x1b[1;32m✓ \x1b[0m\n";
+#if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
+#endif
     } else {
         return ::boost::report_errors();
     }
