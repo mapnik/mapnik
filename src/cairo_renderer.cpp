@@ -329,6 +329,7 @@ public:
         case plus:
             context_->set_operator(Cairo::OPERATOR_ADD);
             break;
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 10, 0)
         case multiply:
             context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_MULTIPLY));
             break;
@@ -362,6 +363,21 @@ public:
         case exclusion:
             context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_EXCLUSION));
             break;
+#else
+#warning building against cairo older that 1.10.0, some compositing options are disabled
+        case multiply:
+        case screen:
+        case overlay:
+        case darken:
+        case lighten:
+        case color_dodge:
+        case color_burn:
+        case hard_light:
+        case soft_light:
+        case difference:
+        case exclusion:
+            break;
+#endif
         case contrast:
         case minus:
         case invert:
@@ -751,6 +767,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         box2d<double> bounds = t_.forward(t_.extent());
         context_->rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
         context_->clip();
+#else
+#warning building against cairo older that 1.6.0, map clipping is disabled
 #endif
 
         boost::optional<color> bg = m_.background();
