@@ -59,6 +59,7 @@ namespace boost { namespace python {
             
         PyObject * operator() (mapnik::value_null const& /*s*/) const
         {
+            Py_INCREF(Py_None);
             return Py_None;
         }
     };
