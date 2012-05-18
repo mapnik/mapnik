@@ -13,6 +13,10 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.2
 ------------
 
+- Fixed reference counting of Py_None when returning null attributes from Postgres during UTFGrid encoding, which could cause a Fatal Python error: deallocating None (#1221)
+
+- Fixed possible breakage registering plugins via python if a custom PREFIX or DESTDIR was used (e.g. macports/homebrew) (#1171)
+
 - Fixed memory leak in the case of proj >= 4.8 and a projection initialization error (#1173) 
 
 
