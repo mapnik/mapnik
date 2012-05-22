@@ -231,7 +231,6 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    // keep track of the sub features that we'll want to symbolize
    // along with the group rules that they matched
    std::vector< std::pair<const group_rule *, feature_ptr> > matches;
-   std::vector< UnicodeString > repeat_keys;
 
    // layout manager to store and arrange bboxes of matched features
    group_layout_manager layout_manager(sym.get_layout());
@@ -243,7 +242,6 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
         col_idx != sym.get_column_index_end(); ++col_idx)
    {
       feature_ptr sub_feature;
-      UnicodeString repeat_key("rpt");
       
       if (has_idx_cols)
       {
@@ -266,14 +264,12 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
                    std::string col_idx_name = col_name;
                    boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
                    sub_feature->put(col_name, feature->get(col_idx_name));
-                   repeat_key += '-' + feature->get(col_idx_name).to_unicode();
                 }
              }
              else
              {
                 // non-indexed column
                 sub_feature->put(col_name, feature->get(col_name));
-                repeat_key += '-' + feature->get(col_name).to_unicode();
              }
           }
       }
@@ -281,10 +277,6 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       {
           // no indexed columns, so use the existing feature instead of copying
           sub_feature = feature;
-          BOOST_FOREACH(const std::string &col_name, columns)
-          {
-             repeat_key += '-' + feature->get(col_name).to_unicode();
-          }
       }
 
       for (group_symbolizer::rules::const_iterator itr = sym.begin();
@@ -297,7 +289,6 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
          {
             // add matched rule and feature to the list of things to draw
             matches.push_back(std::make_pair(&rule, sub_feature));
-            repeat_keys.push_back(repeat_key);
 
             // construct a bounding box around all symbolizers for the matched rule
             box2d<double> box;
