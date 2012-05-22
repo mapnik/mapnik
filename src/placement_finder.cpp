@@ -54,14 +54,20 @@ struct point_placement_check
    DetectorT & detector_;
    box2d<double> const& dimensions_;
    text_place_boxes_at_point &point_place_box_;
+   UnicodeString const& repeat_key_;
+   bool check_repeat_;
 
    point_placement_check(DetectorT &detector, 
                          box2d<double> const& dimensions,
-                         text_place_boxes_at_point &f)
+                         text_place_boxes_at_point &f,
+                         UnicodeString const& repeat_key = "")
       : detector_(detector),
         dimensions_(dimensions),
-        point_place_box_(f)
-   {}
+        point_place_box_(f),
+        repeat_key_(repeat_key)
+   {
+       check_repeat_ = !repeat_key_.isEmpty();
+   }
 
    bool operator()(box2d<double> const& e) const
    {
@@ -69,7 +75,8 @@ struct point_placement_check
       
       if (!detector_.extent().intersects(e) ||
           (!point_place_box_.p.allow_overlap &&
-           !detector_.has_point_placement(e, point_place_box_.pi.get_actual_minimum_distance())))
+           !(check_repeat_ && detector_.has_placement(e, repeat_key_, point_place_box_.pi.get_actual_minimum_distance())
+             || !check_repeat_ && detector_.has_point_placement(e, point_place_box_.pi.get_actual_minimum_distance()))))
       {
          return false;
       }
@@ -148,15 +155,18 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
                                               text_placement_info const& placement_info,
                                               string_info const& info,
                                               DetectorT & detector,
-                                              box2d<double> const& extent)
+                                              box2d<double> const& extent,
+                                              UnicodeString const& repeat_key_)
     : detector_(detector),
       dimensions_(extent),
       info_(info),
       p(placement_info.properties),
       pi(placement_info),
       point_place_box_(placement_info, info),
-      collect_extents_(false)
+      collect_extents_(false),
+      repeat_key_(repeat_key_)
 {
+    check_repeat_ = !repeat_key_.isEmpty();
 }
 
 template <typename DetectorT>
@@ -230,7 +240,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
                                                        double label_y,
                                                        double angle)
 {
-   point_placement_check<DetectorT> check(detector_, dimensions_, point_place_box_);
+   point_placement_check<DetectorT> check(detector_, dimensions_, point_place_box_, repeat_key_);
    std::auto_ptr<text_path> current_placement(new text_path(label_x, label_y));
    
    boost::optional<std::queue< box2d<double> > > result = 
@@ -239,7 +249,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
    if (result)
    {
       std::queue< box2d<double> > &c_envelopes = *result;
-
+      
       // check the placement of any additional envelopes
       if (!additional_boxes.empty() && (p.avoid_edges || !p.allow_overlap || p.minimum_padding > 0))
       {
@@ -779,7 +789,14 @@ void placement_finder<DetectorT>::update_detector()
     while (!envelopes_.empty())
     {
         box2d<double> e = envelopes_.front();
-        detector_.insert(e, info_.get_string());
+        if (check_repeat_)
+        {
+            detector_.insert(e, repeat_key_);
+        }
+        else
+        {
+            detector_.insert(e, info_.get_string());
+        }
         envelopes_.pop();
 
         if (collect_extents_)

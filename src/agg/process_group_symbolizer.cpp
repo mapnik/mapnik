@@ -231,6 +231,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    // keep track of the sub features that we'll want to symbolize
    // along with the group rules that they matched
    std::vector< std::pair<const group_rule *, feature_ptr> > matches;
+   std::vector< UnicodeString > repeat_keys;
 
    // layout manager to store and arrange bboxes of matched features
    group_layout_manager layout_manager(sym.get_layout());
@@ -242,6 +243,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
         col_idx != sym.get_column_index_end(); ++col_idx)
    {
       feature_ptr sub_feature;
+      UnicodeString repeat_key("rpt");
       
       if (has_idx_cols)
       {
@@ -264,12 +266,14 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
                    std::string col_idx_name = col_name;
                    boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
                    sub_feature->put(col_name, feature->get(col_idx_name));
+                   repeat_key += '-' + feature->get(col_idx_name).to_unicode();
                 }
              }
              else
              {
                 // non-indexed column
                 sub_feature->put(col_name, feature->get(col_name));
+                repeat_key += '-' + feature->get(col_name).to_unicode();
              }
           }
       }
@@ -277,6 +281,10 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       {
           // no indexed columns, so use the existing feature instead of copying
           sub_feature = feature;
+          BOOST_FOREACH(const std::string &col_name, columns)
+          {
+             repeat_key += '-' + feature->get(col_name).to_unicode();
+          }
       }
 
       for (group_symbolizer::rules::const_iterator itr = sym.begin();
@@ -289,6 +297,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
          {
             // add matched rule and feature to the list of things to draw
             matches.push_back(std::make_pair(&rule, sub_feature));
+            repeat_keys.push_back(repeat_key);
 
             // construct a bounding box around all symbolizers for the matched rule
             box2d<double> box;
@@ -307,8 +316,9 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 
    // find placements which can accomodate the offset bboxes from the layout manager.
    string_info empty_info;
+   UnicodeString repeat_key = boost::apply_visitor(evaluate<Feature,value_type>(*feature), *sym.get_repeat_key()).to_unicode();
    text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
-   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, detector_->extent());
+   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, box2d<double>(0, 0, width_, height_), repeat_key);
    for (size_t i = 0; i < matches.size(); ++i)
    {
       finder.additional_boxes.push_back(layout_manager.offset_box_at(i));

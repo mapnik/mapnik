@@ -104,6 +104,16 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
    {
       layout_ = layout;
    }
+   
+   inline expression_ptr get_repeat_key() const
+   {
+       return repeat_key_;
+   }
+   
+   inline void set_repeat_key(expression_ptr repeat_key)
+   {
+       repeat_key_ = repeat_key;
+   }
 
 private:
 
@@ -112,6 +122,9 @@ private:
 
    // placement parameters?
    text_placements_ptr placements_;
+   
+   // expression representation of the repeat key for each shield
+   expression_ptr repeat_key_;
 
    // object to represent the type of layout for the group, and it's parameters
    group_layout layout_;

@@ -95,7 +95,8 @@ public:
                      text_placement_info const& placement_info,
                      string_info const& info,
                      DetectorT & detector,
-                     box2d<double> const& extent);
+                     box2d<double> const& extent,
+                     UnicodeString const& repeat_key = "");
 
     /** Try place a single label at the given point. */
     void find_point_placement(double pos_x, double pos_y, double angle=0.0);
@@ -116,11 +117,12 @@ public:
 
     inline placements_type &get_results() { return placements_; }
 
-    /** Additional boxes to take into account when finding placement.
+    /** Additional boxes and repeat keys to take into account when finding placement.
      * Used for finding line placements where multiple placements are returned.
      * Boxes are relative to starting point of current placement.
      * Only used for point placements!
      */
+    //std::vector<std::pair<UnicodeString, box2d<double> > > additional_placements;
     std::vector<box2d<double> > additional_boxes;
 
     void set_collect_extents(bool collect) { collect_extents_ = collect; }
@@ -175,6 +177,10 @@ private:
     box2d<double> extents_;
     /** Collect a bounding box of all texts placed. */
     bool collect_extents_;
+    /** Use repeat key to check minimum distance between repeating labels */
+    bool check_repeat_;
+    /** Repeat key for repeat distance check */
+    UnicodeString repeat_key_;
 };
 }
 

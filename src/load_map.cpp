@@ -995,6 +995,16 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const &sym)
 
       optional<unsigned> start_column = sym.get_opt_attr<unsigned>("start-column");
       if (start_column) symbol.set_column_index_start(*start_column);
+      
+      optional<expression_ptr> repeat_key = sym.get_opt_attr<expression_ptr>("repeat-key");
+      if (repeat_key)
+      {
+          symbol.set_repeat_key(*repeat_key);
+      }
+      else
+      {
+          symbol.set_repeat_key(boost::make_shared<mapnik::expr_node>(""));
+      }
 
       parse_group_layout(symbol, sym);
 
