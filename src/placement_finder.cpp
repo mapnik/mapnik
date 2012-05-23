@@ -54,53 +54,63 @@ struct point_placement_check
    DetectorT & detector_;
    box2d<double> const& dimensions_;
    text_place_boxes_at_point &point_place_box_;
-   UnicodeString const& repeat_key_;
-   bool check_repeat_;
 
    point_placement_check(DetectorT &detector, 
                          box2d<double> const& dimensions,
-                         text_place_boxes_at_point &f,
-                         UnicodeString const& repeat_key = "")
+                         text_place_boxes_at_point &f)
       : detector_(detector),
         dimensions_(dimensions),
-        point_place_box_(f),
-        repeat_key_(repeat_key)
-   {
-       check_repeat_ = !repeat_key_.isEmpty();
-   }
+        point_place_box_(f)
+   {}
 
    bool operator()(box2d<double> const& e) const
    {
-      // if there is an overlap with existing envelopes, then exit - no placement
-      
+      // if there is an overlap with existing envelopes, then exit - no placementx
       if (!detector_.extent().intersects(e) ||
           (!point_place_box_.p.allow_overlap &&
-           !(check_repeat_ && detector_.has_placement(e, repeat_key_, point_place_box_.pi.get_actual_minimum_distance())
-             || !check_repeat_ && detector_.has_point_placement(e, point_place_box_.pi.get_actual_minimum_distance()))))
+           !detector_.has_point_placement(e, point_place_box_.pi.get_actual_minimum_distance())))
       {
          return false;
       }
-      
-      // if avoid_edges test dimensions contains e
-      if (point_place_box_.p.avoid_edges && !dimensions_.contains(e))
+
+      return check_bounds(e);
+   }
+   
+   bool operator()(box2d<double> const& e, UnicodeString const& repeat_key) const
+   {
+      // if box overlaps or is within min repeat distance of another placement,
+      // then exit - no placement
+      if (!detector_.extent().intersects(e) ||
+          (!point_place_box_.p.allow_overlap &&
+           !(repeat_key.isEmpty() ? detector_.has_placement(e) :
+              detector_.has_placement(e, repeat_key, point_place_box_.pi.get_actual_minimum_distance()))))
       {
          return false;
       }
-      
+
+      return check_bounds(e);
+   }
+   
+private:
+
+   bool check_bounds(box2d<double> const& e) const
+   {
+      // check minimum padding
       if (point_place_box_.p.minimum_padding > 0)
       {
+         // min padding is set, so create padded box from bounds
          double min_pad = point_place_box_.pi.get_actual_minimum_padding();
          box2d<double> epad(e.minx()-min_pad,
                             e.miny()-min_pad,
                             e.maxx()+min_pad,
                             e.maxy()+min_pad);
-         if (!dimensions_.contains(epad))
-         {
-            return false;
-         }
+                            
+         // return true if within padded bounds.
+         return dimensions_.contains(epad);
       }
-
-      return true;
+      
+      // otherwise, return true if avoid_edges is false or the box is inside of bounds 
+      return !point_place_box_.p.avoid_edges || dimensions_.contains(e);
    }
 };
 
@@ -156,7 +166,8 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
                                               string_info const& info,
                                               DetectorT & detector,
                                               box2d<double> const& extent,
-                                              UnicodeString const& repeat_key_)
+                                              UnicodeString const& repeat_key_,
+                                              bool check_repeat)
     : detector_(detector),
       dimensions_(extent),
       info_(info),
@@ -164,10 +175,8 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
       pi(placement_info),
       point_place_box_(placement_info, info),
       collect_extents_(false),
-      repeat_key_(repeat_key_)
-{
-    check_repeat_ = !repeat_key_.isEmpty();
-}
+      repeat_key_(repeat_key_),
+      check_repeat_(check_repeat) {}
 
 template <typename DetectorT>
 template <typename T>
@@ -240,7 +249,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
                                                        double label_y,
                                                        double angle)
 {
-   point_placement_check<DetectorT> check(detector_, dimensions_, point_place_box_, repeat_key_);
+   point_placement_check<DetectorT> check(detector_, dimensions_, point_place_box_);
    std::auto_ptr<text_path> current_placement(new text_path(label_x, label_y));
    
    boost::optional<std::queue< box2d<double> > > result = 
@@ -249,29 +258,59 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
    if (result)
    {
       std::queue< box2d<double> > &c_envelopes = *result;
+      std::queue< box2d<double> > rel_envelopes;
       
       // check the placement of any additional envelopes
-      if (!additional_boxes.empty() && (p.avoid_edges || !p.allow_overlap || p.minimum_padding > 0))
+      if (!additional_placements_.empty() && (p.minimum_distance > 0 || !p.allow_overlap || p.avoid_edges || p.minimum_padding > 0))
       {
-         BOOST_FOREACH(box2d<double> const& box, additional_boxes)
+         BOOST_FOREACH(relative_placement const& p, additional_placements_)
          {
-            box2d<double> pt(box.minx() + current_placement->center.x,
-                             box.miny() + current_placement->center.y,
-                             box.maxx() + current_placement->center.x,
-                             box.maxy() + current_placement->center.y);
+            box2d<double> pt(p.box.minx() + current_placement->center.x,
+                             p.box.miny() + current_placement->center.y,
+                             p.box.maxx() + current_placement->center.x,
+                             p.box.maxy() + current_placement->center.y);
             
             // abort the whole placement if the additional envelopes can't be placed.
-            if (!check(pt)) return;
+            if (!(check_repeat_ && check(pt, p.repeat_key) || check(pt))) return;
             
-            c_envelopes.push(pt);
+            rel_envelopes.push(pt);
          }
       }
       
-      // since there was no early exit, add the character envelopes to the placements' envelopes
-      while (!c_envelopes.empty())
+      // since there was no early exit,
+      if (check_repeat_)
       {
-         envelopes_.push(c_envelopes.front());
-         c_envelopes.pop();
+          // tracking repeats, so add envelopes and keys directly to detector
+          while (!c_envelopes.empty())
+          {
+             if (repeat_key_.isEmpty())
+                detector_.insert(c_envelopes.front());
+             else
+                detector_.insert(c_envelopes.front(), repeat_key_);
+             c_envelopes.pop();
+          }    
+          BOOST_FOREACH(relative_placement const& p, additional_placements_)
+          {
+             if (p.repeat_key.isEmpty())
+                detector_.insert(rel_envelopes.front());
+             else
+                detector_.insert(rel_envelopes.front(), p.repeat_key);
+             rel_envelopes.pop();
+          }
+      }
+      else
+      {
+          // no repeat tracking, so add the character and additional envelopes to the placements' envelopes
+          while (!c_envelopes.empty())
+          {
+             envelopes_.push(c_envelopes.front());
+             c_envelopes.pop();
+          }
+          BOOST_FOREACH(relative_placement const& p, additional_placements_)
+          {
+             envelopes_.push(rel_envelopes.front());
+             rel_envelopes.pop();
+          }
       }
       
       placements_.push_back(current_placement.release());
@@ -789,14 +828,7 @@ void placement_finder<DetectorT>::update_detector()
     while (!envelopes_.empty())
     {
         box2d<double> e = envelopes_.front();
-        if (check_repeat_)
-        {
-            detector_.insert(e, repeat_key_);
-        }
-        else
-        {
-            detector_.insert(e, info_.get_string());
-        }
+        detector_.insert(e, repeat_key_);
         envelopes_.pop();
 
         if (collect_extents_)

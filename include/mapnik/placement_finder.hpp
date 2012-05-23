@@ -91,12 +91,21 @@ template <typename DetectorT>
 class placement_finder : boost::noncopyable
 {
 public:
+    struct relative_placement
+    {
+        relative_placement(box2d<double> const& b) : box(b) {}
+        relative_placement(box2d<double> const& b, UnicodeString const& rk) : box(b), repeat_key(rk) {}
+        box2d<double> box;
+        UnicodeString repeat_key;
+    };
+
     placement_finder(Feature const& feature,
                      text_placement_info const& placement_info,
                      string_info const& info,
                      DetectorT & detector,
                      box2d<double> const& extent,
-                     UnicodeString const& repeat_key = "");
+                     UnicodeString const& repeat_key = "",
+                     bool check_repeat = false);
 
     /** Try place a single label at the given point. */
     void find_point_placement(double pos_x, double pos_y, double angle=0.0);
@@ -117,18 +126,25 @@ public:
 
     inline placements_type &get_results() { return placements_; }
 
-    /** Additional boxes and repeat keys to take into account when finding placement.
-     * Used for finding line placements where multiple placements are returned.
-     * Boxes are relative to starting point of current placement.
-     * Only used for point placements!
-     */
-    //std::vector<std::pair<UnicodeString, box2d<double> > > additional_placements;
-    std::vector<box2d<double> > additional_boxes;
-
     void set_collect_extents(bool collect) { collect_extents_ = collect; }
     bool get_collect_extents() const { return collect_extents_; }
 
     box2d<double> const& get_extents() const { return extents_; }
+    
+    inline void add_relative_placement(box2d<double> const& b)
+    {
+        additional_placements_.push_back(relative_placement(b));
+    }
+    
+    inline void add_relative_placement(box2d<double> const& b, UnicodeString const& rk)
+    {
+        additional_placements_.push_back(relative_placement(b, rk));
+    }
+    
+    inline void clear_relative_placements()
+    {
+        additional_placements_.clear();
+    }
 
 private:
     ///Helpers for find_line_placement
@@ -169,6 +185,13 @@ private:
    text_placement_info const& pi;
 
    text_place_boxes_at_point point_place_box_;
+
+    /** Additional boxes and repeat keys to take into account when finding placement.
+     * Used for finding line placements where multiple placements are returned.
+     * Boxes are relative to starting point of current placement.
+     * Only used for point placements!
+     */
+    std::vector<relative_placement> additional_placements_;
    
     std::queue< box2d<double> > envelopes_;
     /** Used to return all placements found. */

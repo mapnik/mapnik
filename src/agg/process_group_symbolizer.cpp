@@ -304,15 +304,25 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
          }
       }
    }
+   
+   // determine if we should be tracking repeat distance
+   bool check_repeat = true; // fix this
 
    // find placements which can accomodate the offset bboxes from the layout manager.
    string_info empty_info;
-   UnicodeString repeat_key = boost::apply_visitor(evaluate<Feature,value_type>(*feature), *sym.get_repeat_key()).to_unicode();
    text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
-   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, box2d<double>(0, 0, width_, height_), repeat_key);
+   UnicodeString sym_rpt_key = (check_repeat ? boost::apply_visitor(evaluate<Feature,value_type>(*feature), *sym.get_repeat_key()).to_unicode() : "");
+   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, box2d<double>(0, 0, width_, height_), sym_rpt_key, check_repeat);
    for (size_t i = 0; i < matches.size(); ++i)
    {
-      finder.additional_boxes.push_back(layout_manager.offset_box_at(i));
+      UnicodeString rule_rpt_key = "";
+      if (check_repeat)
+      {
+         const group_rule *match_rule = matches[i].first;
+         feature_ptr match_feature = matches[i].second;
+         rule_rpt_key = boost::apply_visitor(evaluate<Feature,value_type>(*match_feature), *(match_rule->get_repeat_key())).to_unicode();
+      }
+      finder.add_relative_placement(layout_manager.offset_box_at(i), rule_rpt_key);
    }
 
    // for each placement:

@@ -43,7 +43,7 @@ struct group_rule
 {
    typedef std::vector<mapnik::symbolizer> symbolizers;
 
-   explicit group_rule(const expression_ptr& filter);
+   explicit group_rule(const expression_ptr& filter, const expression_ptr& repeat_key);
 
    group_rule &operator=(const group_rule &rhs);
    bool operator==(const group_rule &rhs) const;
@@ -74,12 +74,25 @@ struct group_rule
    {
       return filter_;
    }
+
+   inline void set_repeat_key(const expression_ptr& repeat_key)
+   {
+      repeat_key_ = repeat_key;
+   }
+   
+   inline expression_ptr const& get_repeat_key() const
+   {
+      return repeat_key_;
+   }
    
 private:
 
    // expression filter - when data matches this then
    // the symbolizers should be drawn.
    expression_ptr filter_;
+   
+   // expression repeat key - repeat key to be used with minimum distance
+   expression_ptr repeat_key_;
 
    // the atomic set of symbolizers
    symbolizers symbolizers_;

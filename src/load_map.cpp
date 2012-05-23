@@ -1003,7 +1003,7 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const &sym)
       }
       else
       {
-          symbol.set_repeat_key(boost::make_shared<mapnik::expr_node>(""));
+          symbol.set_repeat_key(boost::make_shared<mapnik::expr_node>(UnicodeString()));
       }
 
       parse_group_layout(symbol, sym);
@@ -1074,17 +1074,30 @@ void map_parser::parse_group_rule(group_symbolizer &sym, xml_node const &r)
    try 
    {
       rule fake_rule;
-      expression_ptr filter;
-      xml_node const* child = r.get_opt_child("Filter");
-      if (child)
+      expression_ptr filter, repeat_key;
+      
+      xml_node const *filter_child = r.get_opt_child("Filter"),
+                     *rptkey_child = r.get_opt_child("RepeatKey");
+                    
+      if (filter_child)
       {
-          filter = child->get_value<expression_ptr>();
+          filter = filter_child->get_value<expression_ptr>();
       }
       else
       {
           filter = boost::make_shared<mapnik::expr_node>(true);
       }
-      group_rule rule(filter);
+      
+      if (rptkey_child)
+      {
+          repeat_key = rptkey_child->get_value<expression_ptr>();
+      }
+      else
+      {
+          repeat_key = boost::make_shared<mapnik::expr_node>(UnicodeString());
+      }
+      
+      group_rule rule(filter, repeat_key);
 
       xml_node::const_iterator symIter = r.begin();
       xml_node::const_iterator endSym = r.end();
