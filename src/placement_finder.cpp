@@ -65,7 +65,7 @@ struct point_placement_check
 
    bool operator()(box2d<double> const& e) const
    {
-      // if there is an overlap with existing envelopes, then exit - no placementx
+      // if there is an overlap with existing envelopes, then exit - no placement
       if (!detector_.extent().intersects(e) ||
           (!point_place_box_.p.allow_overlap &&
            !detector_.has_point_placement(e, point_place_box_.pi.get_actual_minimum_distance())))

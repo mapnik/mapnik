@@ -204,6 +204,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    // find all column names referenced in the group rules and symbolizers
    std::set<std::string> columns;
    attribute_collector collector(columns);
+   expression_attributes rk_attr(columns);
    
    for (group_symbolizer::rules::const_iterator itr = sym.begin();
         itr != sym.end(); ++itr)
@@ -211,6 +212,8 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       // note that this recurses down on to the symbolizer
       // internals too, so we get all free variables.
       collector(*itr);
+      // still need to collect repeat key columns
+      boost::apply_visitor(rk_attr, *itr->get_repeat_key());
    }
    
    // create a new context for the sub features of this group
@@ -306,12 +309,12 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    }
    
    // determine if we should be tracking repeat distance
-   bool check_repeat = true; // fix this
+   text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
+   bool check_repeat = (placement->properties.minimum_distance > 0);
+   UnicodeString sym_rpt_key = (check_repeat ? boost::apply_visitor(evaluate<Feature,value_type>(*feature), *sym.get_repeat_key()).to_unicode() : "");
 
    // find placements which can accomodate the offset bboxes from the layout manager.
    string_info empty_info;
-   text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
-   UnicodeString sym_rpt_key = (check_repeat ? boost::apply_visitor(evaluate<Feature,value_type>(*feature), *sym.get_repeat_key()).to_unicode() : "");
    placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, box2d<double>(0, 0, width_, height_), sym_rpt_key, check_repeat);
    for (size_t i = 0; i < matches.size(); ++i)
    {
@@ -341,7 +344,10 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 
       finder.clear_placements();
       finder.find_point_placements(path);
-      finder.update_detector();
+      if (!check_repeat)
+      {
+         finder.update_detector();
+      }
 
       BOOST_FOREACH(text_path const &p, finder.get_results())
       {
