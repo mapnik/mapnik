@@ -572,6 +572,412 @@ def Geos(**keywords):
     keywords['type'] = 'geos'
     return CreateDatasource(keywords)
 
+class _TextSymbolizer(TextSymbolizer,_injector):
+    @property
+    def text_size(self):
+        warnings.warn("'text_size' is deprecated, use format.text_size",
+        DeprecationWarning, 2)
+        return self.format.text_size
+
+    @text_size.setter
+    def text_size(self, text_size):
+        warnings.warn("'text_size' is deprecated, use format.text_size",
+        DeprecationWarning, 2)
+        self.format.text_size = text_size
+
+    @property
+    def face_name(self):
+        warnings.warn("'face_name' is deprecated, use format.face_name",
+        DeprecationWarning, 2)
+        return self.format.face_name
+
+    @face_name.setter
+    def face_name(self, face_name):
+        warnings.warn("'face_name' is deprecated, use format.face_name",
+        DeprecationWarning, 2)
+        self.format.face_name = face_name
+
+
+
+    @property
+    def fontset(self):
+        warnings.warn("'fontset' is deprecated, use format.fontset",
+        DeprecationWarning, 2)
+        return self.format.fontset
+
+    @fontset.setter
+    def fontset(self, fontset):
+        warnings.warn("'fontset' is deprecated, use format.fontset",
+        DeprecationWarning, 2)
+        self.format.fontset = fontset
+
+
+
+    @property
+    def character_spacing(self):
+        warnings.warn("'character_spacing' is deprecated, use format.character_spacing",
+        DeprecationWarning, 2)
+        return self.format.character_spacing
+
+    @character_spacing.setter
+    def character_spacing(self, character_spacing):
+        warnings.warn("'character_spacing' is deprecated, use format.character_spacing",
+        DeprecationWarning, 2)
+        self.format.character_spacing = character_spacing
+
+
+
+    @property
+    def line_spacing(self):
+        warnings.warn("'line_spacing' is deprecated, use format.line_spacing",
+        DeprecationWarning, 2)
+        return self.format.line_spacing
+
+    @line_spacing.setter
+    def line_spacing(self, line_spacing):
+        warnings.warn("'line_spacing' is deprecated, use format.line_spacing",
+        DeprecationWarning, 2)
+        self.format.line_spacing = line_spacing
+
+
+
+    @property
+    def text_opacity(self):
+        warnings.warn("'text_opacity' is deprecated, use format.text_opacity",
+        DeprecationWarning, 2)
+        return self.format.text_opacity
+
+    @text_opacity.setter
+    def text_opacity(self, text_opacity):
+        warnings.warn("'text_opacity' is deprecated, use format.text_opacity",
+        DeprecationWarning, 2)
+        self.format.text_opacity = text_opacity
+
+
+
+    @property
+    def wrap_char(self):
+        warnings.warn("'wrap_char' is deprecated, use format.wrap_char",
+        DeprecationWarning, 2)
+        return self.format.wrap_char
+
+    @wrap_char.setter
+    def wrap_char(self, wrap_char):
+        warnings.warn("'wrap_char' is deprecated, use format.wrap_char",
+        DeprecationWarning, 2)
+        self.format.wrap_char = wrap_char
+
+
+
+    @property
+    def wrap_before(self):
+        warnings.warn("'wrap_before' is deprecated, use format.wrap_before",
+        DeprecationWarning, 2)
+        return self.format.wrap_before
+
+    @wrap_before.setter
+    def wrap_before(self, wrap_before):
+        warnings.warn("'wrap_before' is deprecated, use format.wrap_before",
+        DeprecationWarning, 2)
+        self.format.wrap_before = wrap_before
+
+
+
+    @property
+    def text_transform(self):
+        warnings.warn("'text_transform' is deprecated, use format.text_transform",
+        DeprecationWarning, 2)
+        return self.format.text_transform
+
+    @text_transform.setter
+    def text_transform(self, text_transform):
+        warnings.warn("'text_transform' is deprecated, use format.text_transform",
+        DeprecationWarning, 2)
+        self.format.text_transform = text_transform
+
+
+
+    @property
+    def fill(self):
+        warnings.warn("'fill' is deprecated, use format.fill",
+        DeprecationWarning, 2)
+        return self.format.fill
+
+    @fill.setter
+    def fill(self, fill):
+        warnings.warn("'fill' is deprecated, use format.fill",
+        DeprecationWarning, 2)
+        self.format.fill = fill
+
+
+
+    @property
+    def halo_fill(self):
+        warnings.warn("'halo_fill' is deprecated, use format.halo_fill",
+        DeprecationWarning, 2)
+        return self.format.halo_fill
+
+    @halo_fill.setter
+    def halo_fill(self, halo_fill):
+        warnings.warn("'halo_fill' is deprecated, use format.halo_fill",
+        DeprecationWarning, 2)
+        self.format.halo_fill = halo_fill
+
+
+
+    @property
+    def halo_radius(self):
+        warnings.warn("'halo_radius' is deprecated, use format.halo_radius",
+        DeprecationWarning, 2)
+        return self.format.halo_radius
+
+    @halo_radius.setter
+    def halo_radius(self, halo_radius):
+        warnings.warn("'halo_radius' is deprecated, use format.halo_radius",
+        DeprecationWarning, 2)
+        self.format.halo_radius = halo_radius
+
+
+    @property
+    def label_placement(self):
+        warnings.warn("'label_placement' is deprecated, use properties.label_placement",
+        DeprecationWarning, 2)
+        return self.properties.label_placement
+
+    @label_placement.setter
+    def label_placement(self, label_placement):
+        warnings.warn("'label_placement' is deprecated, use properties.label_placement",
+        DeprecationWarning, 2)
+        self.properties.label_placement = label_placement
+
+
+
+    @property
+    def horizontal_alignment(self):
+        warnings.warn("'horizontal_alignment' is deprecated, use properties.horizontal_alignment",
+        DeprecationWarning, 2)
+        return self.properties.horizontal_alignment
+
+    @horizontal_alignment.setter
+    def horizontal_alignment(self, horizontal_alignment):
+        warnings.warn("'horizontal_alignment' is deprecated, use properties.horizontal_alignment",
+        DeprecationWarning, 2)
+        self.properties.horizontal_alignment = horizontal_alignment
+
+
+
+    @property
+    def justify_alignment(self):
+        warnings.warn("'justify_alignment' is deprecated, use properties.justify_alignment",
+        DeprecationWarning, 2)
+        return self.properties.justify_alignment
+
+    @justify_alignment.setter
+    def justify_alignment(self, justify_alignment):
+        warnings.warn("'justify_alignment' is deprecated, use properties.justify_alignment",
+        DeprecationWarning, 2)
+        self.properties.justify_alignment = justify_alignment
+
+
+
+    @property
+    def vertical_alignment(self):
+        warnings.warn("'vertical_alignment' is deprecated, use properties.vertical_alignment",
+        DeprecationWarning, 2)
+        return self.properties.vertical_alignment
+
+    @vertical_alignment.setter
+    def vertical_alignment(self, vertical_alignment):
+        warnings.warn("'vertical_alignment' is deprecated, use properties.vertical_alignment",
+        DeprecationWarning, 2)
+        self.properties.vertical_alignment = vertical_alignment
+
+
+
+    @property
+    def orientation(self):
+        warnings.warn("'orientation' is deprecated, use properties.orientation",
+        DeprecationWarning, 2)
+        return self.properties.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        warnings.warn("'orientation' is deprecated, use properties.orientation",
+        DeprecationWarning, 2)
+        self.properties.orientation = orientation
+
+
+
+    @property
+    def displacement(self):
+        warnings.warn("'displacement' is deprecated, use properties.displacement",
+        DeprecationWarning, 2)
+        return self.properties.displacement
+
+    @displacement.setter
+    def displacement(self, displacement):
+        warnings.warn("'displacement' is deprecated, use properties.displacement",
+        DeprecationWarning, 2)
+        self.properties.displacement = displacement
+
+
+
+    @property
+    def label_spacing(self):
+        warnings.warn("'label_spacing' is deprecated, use properties.label_spacing",
+        DeprecationWarning, 2)
+        return self.properties.label_spacing
+
+    @label_spacing.setter
+    def label_spacing(self, label_spacing):
+        warnings.warn("'label_spacing' is deprecated, use properties.label_spacing",
+        DeprecationWarning, 2)
+        self.properties.label_spacing = label_spacing
+
+
+
+    @property
+    def label_position_tolerance(self):
+        warnings.warn("'label_position_tolerance' is deprecated, use properties.label_position_tolerance",
+        DeprecationWarning, 2)
+        return self.properties.label_position_tolerance
+
+    @label_position_tolerance.setter
+    def label_position_tolerance(self, label_position_tolerance):
+        warnings.warn("'label_position_tolerance' is deprecated, use properties.label_position_tolerance",
+        DeprecationWarning, 2)
+        self.properties.label_position_tolerance = label_position_tolerance
+
+
+
+    @property
+    def avoid_edges(self):
+        warnings.warn("'avoid_edges' is deprecated, use properties.avoid_edges",
+        DeprecationWarning, 2)
+        return self.properties.avoid_edges
+
+    @avoid_edges.setter
+    def avoid_edges(self, avoid_edges):
+        warnings.warn("'avoid_edges' is deprecated, use properties.avoid_edges",
+        DeprecationWarning, 2)
+        self.properties.avoid_edges = avoid_edges
+
+
+
+    @property
+    def minimum_distance(self):
+        warnings.warn("'minimum_distance' is deprecated, use properties.minimum_distance",
+        DeprecationWarning, 2)
+        return self.properties.minimum_distance
+
+    @minimum_distance.setter
+    def minimum_distance(self, minimum_distance):
+        warnings.warn("'minimum_distance' is deprecated, use properties.minimum_distance",
+        DeprecationWarning, 2)
+        self.properties.minimum_distance = minimum_distance
+
+
+
+    @property
+    def minimum_padding(self):
+        warnings.warn("'minimum_padding' is deprecated, use properties.minimum_padding",
+        DeprecationWarning, 2)
+        return self.properties.minimum_padding
+
+    @minimum_padding.setter
+    def minimum_padding(self, minimum_padding):
+        warnings.warn("'minimum_padding' is deprecated, use properties.minimum_padding",
+        DeprecationWarning, 2)
+        self.properties.minimum_padding = minimum_padding
+
+
+
+    @property
+    def minimum_path_length(self):
+        warnings.warn("'minimum_path_length' is deprecated, use properties.minimum_path_length",
+        DeprecationWarning, 2)
+        return self.properties.minimum_path_length
+
+    @minimum_path_length.setter
+    def minimum_path_length(self, minimum_path_length):
+        warnings.warn("'minimum_path_length' is deprecated, use properties.minimum_path_length",
+        DeprecationWarning, 2)
+        self.properties.minimum_path_length = minimum_path_length
+
+
+
+    @property
+    def maximum_angle_char_delta(self):
+        warnings.warn("'maximum_angle_char_delta' is deprecated, use properties.maximum_angle_char_delta",
+        DeprecationWarning, 2)
+        return self.properties.maximum_angle_char_delta
+
+    @maximum_angle_char_delta.setter
+    def maximum_angle_char_delta(self, maximum_angle_char_delta):
+        warnings.warn("'maximum_angle_char_delta' is deprecated, use properties.maximum_angle_char_delta",
+        DeprecationWarning, 2)
+        self.properties.maximum_angle_char_delta = maximum_angle_char_delta
+
+
+
+    @property
+    def force_odd_labels(self):
+        warnings.warn("'force_odd_labels' is deprecated, use properties.force_odd_labels",
+        DeprecationWarning, 2)
+        return self.properties.force_odd_labels
+
+    @force_odd_labels.setter
+    def force_odd_labels(self, force_odd_labels):
+        warnings.warn("'force_odd_labels' is deprecated, use properties.force_odd_labels",
+        DeprecationWarning, 2)
+        self.properties.force_odd_labels = force_odd_labels
+
+
+
+    @property
+    def allow_overlap(self):
+        warnings.warn("'allow_overlap' is deprecated, use properties.allow_overlap",
+        DeprecationWarning, 2)
+        return self.properties.allow_overlap
+
+    @allow_overlap.setter
+    def allow_overlap(self, allow_overlap):
+        warnings.warn("'allow_overlap' is deprecated, use properties.allow_overlap",
+        DeprecationWarning, 2)
+        self.properties.allow_overlap = allow_overlap
+
+
+
+    @property
+    def text_ratio(self):
+        warnings.warn("'text_ratio' is deprecated, use properties.text_ratio",
+        DeprecationWarning, 2)
+        return self.properties.text_ratio
+
+    @text_ratio.setter
+    def text_ratio(self, text_ratio):
+        warnings.warn("'text_ratio' is deprecated, use properties.text_ratio",
+        DeprecationWarning, 2)
+        self.properties.text_ratio = text_ratio
+
+
+
+    @property
+    def wrap_width(self):
+        warnings.warn("'wrap_width' is deprecated, use properties.wrap_width",
+        DeprecationWarning, 2)
+        return self.properties.wrap_width
+
+    @wrap_width.setter
+    def wrap_width(self, wrap_width):
+        warnings.warn("'wrap_width' is deprecated, use properties.wrap_width",
+        DeprecationWarning, 2)
+        self.properties.wrap_width = wrap_width
+
+
+
+
+
 def mapnik_version_from_string(version_string):
     """Return the Mapnik version from a string."""
     n = version_string.split('.')
