@@ -409,7 +409,17 @@ void x_gradient_impl(Src const& src_view, Dst const& dst_view)
     {
         typename Src::x_iterator src_it = src_view.row_begin(y);
         typename Dst::x_iterator dst_it = dst_view.row_begin(y);
-        
+
+        dst_it[0][0] = 127 + (src_it[0][0] - src_it[1][0]) / 2;
+        dst_it[0][1] = 127 + (src_it[0][1] - src_it[1][1]) / 2;
+        dst_it[0][2] = 127 + (src_it[0][2] - src_it[1][2]) / 2;
+
+        dst_it[dst_view.width()-1][0] = 127 + (src_it[src_view.width()-2][0] - src_it[src_view.width()-1][0]) / 2;
+        dst_it[dst_view.width()-1][1] = 127 + (src_it[src_view.width()-2][1] - src_it[src_view.width()-1][1]) / 2;
+        dst_it[dst_view.width()-1][2] = 127 + (src_it[src_view.width()-2][2] - src_it[src_view.width()-1][2]) / 2;
+
+        dst_it[0][3] = dst_it[src_view.width()-1][3] = 255;
+
         for (int x=1; x<src_view.width()-1; ++x)
         {
             dst_it[x][0] = 127 + (src_it[x-1][0] - src_it[x+1][0]) / 2;
@@ -431,7 +441,7 @@ void apply_filter(Src & src, x_gradient)
 
     rgba8_image_t temp_buffer(src_view.dimensions());
     rgba8_view_t dst_view = view(temp_buffer);
-    
+
     x_gradient_impl(src_view, dst_view);
     boost::gil::copy_pixels(view(temp_buffer), src_view);
 }
@@ -444,9 +454,9 @@ void apply_filter(Src & src, y_gradient)
                                              (rgba8_pixel_t*) src.raw_data(),
                                              src.width()*4);
     rgba8_image_t temp_buffer(src_view.dimensions());
-    rgba8_view_t dst_view = view(temp_buffer);   
+    rgba8_view_t dst_view = view(temp_buffer);
     x_gradient_impl(rotated90ccw_view(src_view), rotated90ccw_view(dst_view));
-    boost::gil::copy_pixels(view(temp_buffer), src_view);   
+    boost::gil::copy_pixels(view(temp_buffer), src_view);
 }
 
 template <typename Src>
