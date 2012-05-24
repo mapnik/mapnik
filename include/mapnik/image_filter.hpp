@@ -410,21 +410,21 @@ void x_gradient_impl(Src const& src_view, Dst const& dst_view)
         typename Src::x_iterator src_it = src_view.row_begin(y);
         typename Dst::x_iterator dst_it = dst_view.row_begin(y);
 
-        dst_it[0][0] = 127 + (src_it[0][0] - src_it[1][0]) / 2;
-        dst_it[0][1] = 127 + (src_it[0][1] - src_it[1][1]) / 2;
-        dst_it[0][2] = 127 + (src_it[0][2] - src_it[1][2]) / 2;
+        dst_it[0][0] = 128 + (src_it[0][0] - src_it[1][0]) / 2;
+        dst_it[0][1] = 128 + (src_it[0][1] - src_it[1][1]) / 2;
+        dst_it[0][2] = 128 + (src_it[0][2] - src_it[1][2]) / 2;
 
-        dst_it[dst_view.width()-1][0] = 127 + (src_it[src_view.width()-2][0] - src_it[src_view.width()-1][0]) / 2;
-        dst_it[dst_view.width()-1][1] = 127 + (src_it[src_view.width()-2][1] - src_it[src_view.width()-1][1]) / 2;
-        dst_it[dst_view.width()-1][2] = 127 + (src_it[src_view.width()-2][2] - src_it[src_view.width()-1][2]) / 2;
+        dst_it[dst_view.width()-1][0] = 128 + (src_it[src_view.width()-2][0] - src_it[src_view.width()-1][0]) / 2;
+        dst_it[dst_view.width()-1][1] = 128 + (src_it[src_view.width()-2][1] - src_it[src_view.width()-1][1]) / 2;
+        dst_it[dst_view.width()-1][2] = 128 + (src_it[src_view.width()-2][2] - src_it[src_view.width()-1][2]) / 2;
 
         dst_it[0][3] = dst_it[src_view.width()-1][3] = 255;
 
         for (int x=1; x<src_view.width()-1; ++x)
         {
-            dst_it[x][0] = 127 + (src_it[x-1][0] - src_it[x+1][0]) / 2;
-            dst_it[x][1] = 127 + (src_it[x-1][1] - src_it[x+1][1]) / 2;
-            dst_it[x][2] = 127 + (src_it[x-1][2] - src_it[x+1][2]) / 2;
+            dst_it[x][0] = 128 + (src_it[x-1][0] - src_it[x+1][0]) / 2;
+            dst_it[x][1] = 128 + (src_it[x-1][1] - src_it[x+1][1]) / 2;
+            dst_it[x][2] = 128 + (src_it[x-1][2] - src_it[x+1][2]) / 2;
             dst_it[x][3] = 255;
         }
     }
