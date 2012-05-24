@@ -193,8 +193,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
     ListNodeWrap(object l) : formatting::list_node(), wrapper<formatting::list_node>()
     {
         stl_input_iterator<formatting::node_ptr> begin(l), end;
-        // FIXME c++11 :  error: call to 'make_move_iterator' is ambiguous 
-        // children_.insert(children_.end(), begin, end);
+        children_.insert(children_.end(), begin, end);
     }
 
     /* TODO: Add constructor taking variable number of arguments.
