@@ -402,6 +402,23 @@ void apply_filter(Src & src, gray)
     boost::gil::copy_and_convert_pixels(color_converted_view<gray_pixel_t>(src_view), src_view);
 }
 
+template <typename Src, typename Dst>
+void x_gradient_impl(Src const& src_view, Dst const& dst_view)
+{
+    for (int y=0; y<src_view.height(); ++y)
+    {
+        typename Src::x_iterator src_it = src_view.row_begin(y);
+        typename Dst::x_iterator dst_it = dst_view.row_begin(y);
+        
+        for (int x=1; x<src_view.width()-1; ++x)
+        {
+            dst_it[x][0] = 127 + (src_it[x-1][0] - src_it[x+1][0]) / 2;
+            dst_it[x][1] = 127 + (src_it[x-1][1] - src_it[x+1][1]) / 2;
+            dst_it[x][2] = 127 + (src_it[x-1][2] - src_it[x+1][2]) / 2;
+            dst_it[x][3] = 255;
+        }
+    }
+}
 
 template <typename Src>
 void apply_filter(Src & src, x_gradient)
@@ -414,20 +431,8 @@ void apply_filter(Src & src, x_gradient)
 
     rgba8_image_t temp_buffer(src_view.dimensions());
     rgba8_view_t dst_view = view(temp_buffer);
-    for (int y=0; y<src_view.height(); ++y)
-    {
-        rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
-        rgba8_view_t::x_iterator dst_it = dst_view.row_begin(y);
-
-        for (int x=1; x<src_view.width()-1; ++x)
-        {
-            dst_it[x][0] = 127 + (src_it[x-1][0] - src_it[x+1][0]) / 2;
-            dst_it[x][1] = 127 + (src_it[x-1][1] - src_it[x+1][1]) / 2;
-            dst_it[x][2] = 127 + (src_it[x-1][2] - src_it[x+1][2]) / 2;
-            dst_it[x][3] = 255;
-        }
-    }
-
+    
+    x_gradient_impl(src_view, dst_view);
     boost::gil::copy_pixels(view(temp_buffer), src_view);
 }
 
@@ -435,29 +440,13 @@ template <typename Src>
 void apply_filter(Src & src, y_gradient)
 {
     using namespace boost::gil;
-
-    rgba8_view_t in = interleaved_view(src.width(),src.height(),
-                                       (rgba8_pixel_t*) src.raw_data(),
-                                       src.width()*4);
-    rgba8_image_t temp_buffer(in.dimensions());
-    dynamic_xy_step_type<rgba8_view_t>::type src_view = rotated90ccw_view(in);
-    dynamic_xy_step_type<rgba8_view_t>::type dst_view = rotated90ccw_view(view(temp_buffer));
-
-    for (int y=0; y<src_view.height(); ++y)
-    {
-        dynamic_xy_step_type<rgba8_view_t>::type::x_iterator src_it = src_view.row_begin(y);
-        dynamic_xy_step_type<rgba8_view_t>::type::x_iterator dst_it = dst_view.row_begin(y);
-
-        for (int x=1; x<src_view.width()-1; ++x)
-        {
-            dst_it[x][0] = 127 + (src_it[x-1][0] - src_it[x+1][0]) / 2;
-            dst_it[x][1] = 127 + (src_it[x-1][1] - src_it[x+1][1]) / 2;
-            dst_it[x][2] = 127 + (src_it[x-1][2] - src_it[x+1][2]) / 2;
-            dst_it[x][3] = 255;
-        }
-    }
-
-    boost::gil::copy_pixels(view(temp_buffer), in);
+    rgba8_view_t src_view = interleaved_view(src.width(),src.height(),
+                                             (rgba8_pixel_t*) src.raw_data(),
+                                             src.width()*4);
+    rgba8_image_t temp_buffer(src_view.dimensions());
+    rgba8_view_t dst_view = view(temp_buffer);   
+    x_gradient_impl(rotated90ccw_view(src_view), rotated90ccw_view(dst_view));
+    boost::gil::copy_pixels(view(temp_buffer), src_view);   
 }
 
 template <typename Src>
