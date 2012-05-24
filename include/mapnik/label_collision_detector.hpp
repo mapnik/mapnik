@@ -206,6 +206,32 @@ public:
 
         return true;
     }
+    
+    bool has_point_placement(box2d<double> const& box, double min_distance, UnicodeString const& repeat_key, double repeat_distance)
+    {
+        box2d<double> min_box(box.minx() - min_distance, box.miny() - min_distance, box.maxx() + min_distance, box.maxy() + min_distance);
+        box2d<double> repeat_box(box.minx() - repeat_distance, box.miny() - repeat_distance, box.maxx() + repeat_distance, box.maxy() + repeat_distance);
+        
+        tree_t::query_iterator itr = (repeat_distance > min_distance ? tree_.query_in_box(repeat_box) : tree_.query_in_box(min_box));
+        tree_t::query_iterator end = tree_.query_end();
+
+        for ( ;itr != end; ++itr)
+        {
+            if (repeat_key == itr->text)
+            {
+                if (itr->box.intersects(repeat_box))
+                {
+                    return false;
+                }
+            }
+            else if (itr->box.intersects(min_box))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     void insert(box2d<double> const& box)
     {
@@ -230,6 +256,7 @@ public:
     query_iterator begin() { return tree_.query_in_box(extent()); }
     query_iterator end() { return tree_.query_end(); }
 };
+
 }
 
 #endif // MAPNIK_LABEL_COLLISION_DETECTOR_HPP

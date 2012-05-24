@@ -64,6 +64,8 @@ public:
     double get_scale_factor() const { return scale_factor; }
     /** Get label spacing taking the scale factor into account. */
     double get_actual_label_spacing() const { return scale_factor * properties.label_spacing; }
+    /** Get margin taking the scale factor into account. */
+    double get_actual_margin() const { return scale_factor * properties.margin; }
     /** Get minimum distance taking the scale factor into account. */
     double get_actual_minimum_distance() const { return scale_factor * properties.minimum_distance; }
     /** Get minimum padding taking the scale factor into account. */

@@ -93,6 +93,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
     optional<unsigned> spacing_ = sym.get_opt_attr<unsigned>("spacing");
     if (spacing_) label_spacing = *spacing_;
+    optional<unsigned> margin_ = sym.get_opt_attr<unsigned>("margin");
+    if (margin_) margin = *margin_;
     optional<unsigned> minimum_distance_ = sym.get_opt_attr<unsigned>("minimum-distance");
     if (minimum_distance_) minimum_distance = *minimum_distance_;
     optional<unsigned> min_padding_ = sym.get_opt_attr<unsigned>("minimum-padding");
@@ -178,6 +180,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (label_spacing != dfl.label_spacing || explicit_defaults)
     {
         set_attr(node, "spacing", label_spacing);
+    }
+    if (margin != dfl.margin || explicit_defaults)
+    {
+        set_attr(node, "margin", margin);
     }
     if (minimum_distance != dfl.minimum_distance || explicit_defaults)
     {

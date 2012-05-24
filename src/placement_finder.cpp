@@ -82,8 +82,8 @@ struct point_placement_check
       // then exit - no placement
       if (!detector_.extent().intersects(e) ||
           (!point_place_box_.p.allow_overlap &&
-           !(repeat_key.isEmpty() ? detector_.has_placement(e) :
-              detector_.has_placement(e, repeat_key, point_place_box_.pi.get_actual_minimum_distance()))))
+           !(repeat_key.isEmpty() ? detector_.has_point_placement(e, point_place_box_.pi.get_actual_margin()) :
+              detector_.has_point_placement(e, point_place_box_.pi.get_actual_margin(), repeat_key, point_place_box_.pi.get_actual_minimum_distance()))))
       {
          return false;
       }

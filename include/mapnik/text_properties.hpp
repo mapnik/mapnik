@@ -154,6 +154,7 @@ struct text_symbolizer_properties
     unsigned label_spacing;
     /** distance the label can be moved on the line to fit, if 0 the default is used */
     unsigned label_position_tolerance;
+    double margin;
     bool avoid_edges;
     double minimum_distance;
     double minimum_padding;

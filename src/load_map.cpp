@@ -102,7 +102,8 @@ private:
 
     void parse_rule(feature_type_style & style, xml_node const & r);
     void parse_group_rule(group_symbolizer &sym, xml_node const &r);
-    void parse_group_layout(group_symbolizer &sym, xml_node const &nd);
+    void parse_simple_layout(group_symbolizer &sym, xml_node const &nd);
+    void parse_pair_layout(group_symbolizer &sym, xml_node const &nd);
 
     void parse_point_symbolizer(rule & rule, xml_node const& sym);
     void parse_line_pattern_symbolizer(rule & rule, xml_node const& sym);
@@ -1006,20 +1007,34 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const &sym)
           symbol.set_repeat_key(boost::make_shared<mapnik::expr_node>(UnicodeString()));
       }
 
-      parse_group_layout(symbol, sym);
-
       text_placements_ptr placements = boost::make_shared<text_placements_dummy>();
       placements->defaults.from_xml(sym, fontsets_);
       symbol.set_placement_options(placements);
 
-      xml_node::const_iterator ruleIter = sym.begin();
-      xml_node::const_iterator endRule = sym.end();
+      xml_node::const_iterator nodeIter = sym.begin();
+      xml_node::const_iterator endNodes = sym.end();
       
-      for(;ruleIter != endRule; ++ruleIter)
+      size_t layout_count = 0;
+      
+      for(;nodeIter != endNodes; ++nodeIter)
       {
-         if (ruleIter->is("GroupRule"))
+         if (nodeIter->is("GroupRule"))
          {
-            parse_group_rule(symbol, *ruleIter);
+            parse_group_rule(symbol, *nodeIter);
+         }
+         else if (nodeIter->is("SimpleLayout"))
+         {
+            parse_simple_layout(symbol, *nodeIter);
+            ++layout_count;
+         }
+         else if (nodeIter->is("PairLayout"))
+         {
+            parse_pair_layout(symbol, *nodeIter);
+            ++layout_count;
+         }
+         if (layout_count > 1)
+         {
+             throw config_error("Provide only one layout for a GroupSymbolizer.");
          }
       }
 
@@ -1033,40 +1048,27 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const &sym)
    }
 }
 
-void map_parser::parse_group_layout(group_symbolizer &sym, xml_node const &nd)
+void map_parser::parse_simple_layout(group_symbolizer &sym, xml_node const &nd)
 {
-   xml_node const* simple_child = nd.get_opt_child("SimpleLayout");
-   xml_node const* pair_child   = nd.get_opt_child("PairLayout");
+   simple_row_layout layout;
 
-   size_t count = 0;
-   if (simple_child)
-   {
-      simple_row_layout layout;
+   optional<double> item_margin = nd.get_opt_attr<double>("item-margin");
+   if (item_margin) layout.set_item_margin(*item_margin);
 
-      optional<double> item_margin = simple_child->get_opt_attr<double>("item-margin");
-      if (item_margin) layout.set_item_margin(*item_margin);
+   sym.set_layout(layout);
+}
 
-      sym.set_layout(layout);
-      ++count;
-   }
+void map_parser::parse_pair_layout(group_symbolizer &sym, xml_node const &nd)
+{
+   pair_layout layout;
 
-   if (pair_child)
-   {
-      if (count > 0) 
-      {
-         throw config_error("Provide only one layout in a GroupSymbolizer.");
-      }
+   optional<double> item_margin = nd.get_opt_attr<double>("item-margin");
+   if (item_margin) layout.set_item_margin(*item_margin);
 
-      pair_layout layout;
+   optional<double> max_difference = nd.get_opt_attr<double>("max-difference");
+   if (max_difference) layout.set_max_difference(*max_difference);
 
-      optional<double> item_margin = pair_child->get_opt_attr<double>("item-margin");
-      if (item_margin) layout.set_item_margin(*item_margin);
-
-      optional<double> max_difference = pair_child->get_opt_attr<double>("max-difference");
-      if (max_difference) layout.set_max_difference(*max_difference);
-
-      sym.set_layout(layout);
-   }
+   sym.set_layout(layout);
 }
 
 void map_parser::parse_group_rule(group_symbolizer &sym, xml_node const &r)
