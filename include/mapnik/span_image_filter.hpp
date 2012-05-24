@@ -27,9 +27,9 @@ namespace mapnik {
 
 using namespace agg;
 
-template<class Source> 
-class span_image_resample_rgba_affine : 
-public span_image_resample_affine<Source>
+template<class Source>
+class span_image_resample_rgba_affine :
+        public span_image_resample_affine<Source>
 {
 public:
     typedef Source source_type;
@@ -48,17 +48,17 @@ public:
 
     //--------------------------------------------------------------------
     span_image_resample_rgba_affine() {}
-    span_image_resample_rgba_affine(source_type& src, 
+    span_image_resample_rgba_affine(source_type& src,
                                     interpolator_type& inter,
                                     const image_filter_lut& filter) :
-        base_type(src, inter, filter) 
+        base_type(src, inter, filter)
     {}
 
 
     //--------------------------------------------------------------------
     void generate(color_type* span, int x, int y, unsigned len)
     {
-        base_type::interpolator().begin(x + base_type::filter_dx_dbl(), 
+        base_type::interpolator().begin(x + base_type::filter_dx_dbl(),
                                         y + base_type::filter_dy_dbl(), len);
 
         long_type fg[4];
@@ -67,11 +67,11 @@ public:
         int filter_scale = diameter << image_subpixel_shift;
         int radius_x     = (diameter * base_type::m_rx) >> 1;
         int radius_y     = (diameter * base_type::m_ry) >> 1;
-        int len_x_lr     = 
-            (diameter * base_type::m_rx + image_subpixel_mask) >> 
-                image_subpixel_shift;
+        int len_x_lr     =
+            (diameter * base_type::m_rx + image_subpixel_mask) >>
+            image_subpixel_shift;
 
-        const int16* weight_array = base_type::filter().weight_array();
+        const boost::int16_t* weight_array = base_type::filter().weight_array();
 
         do
         {
@@ -83,17 +83,17 @@ public:
             fg[0] = fg[1] = fg[2] = fg[3] = image_filter_scale / 2;
 
             int y_lr = y >> image_subpixel_shift;
-            int y_hr = ((image_subpixel_mask - (y & image_subpixel_mask)) * 
-                            base_type::m_ry_inv) >> 
-                                image_subpixel_shift;
+            int y_hr = ((image_subpixel_mask - (y & image_subpixel_mask)) *
+                        base_type::m_ry_inv) >>
+                image_subpixel_shift;
             int total_weight = 0;
             int x_lr = x >> image_subpixel_shift;
-            int x_hr = ((image_subpixel_mask - (x & image_subpixel_mask)) * 
-                            base_type::m_rx_inv) >> 
-                                image_subpixel_shift;
+            int x_hr = ((image_subpixel_mask - (x & image_subpixel_mask)) *
+                        base_type::m_rx_inv) >>
+                image_subpixel_shift;
 
             int x_hr2 = x_hr;
-            const value_type* fg_ptr = 
+            const value_type* fg_ptr =
                 (const value_type*)base_type::source().span(x_lr, y_lr, len_x_lr);
             for(;;)
             {
@@ -101,14 +101,15 @@ public:
                 x_hr = x_hr2;
                 for(;;)
                 {
-                    int weight = (weight_y * weight_array[x_hr] + 
-                                 image_filter_scale / 2) >> 
-                                 downscale_shift;
-
+                    int weight = (weight_y * weight_array[x_hr] +
+                                  image_filter_scale / 2) >>
+                        downscale_shift;
+                    
                     fg[0] += *fg_ptr++ * weight;
                     fg[1] += *fg_ptr++ * weight;
                     fg[2] += *fg_ptr++ * weight;
-                    fg[3] += *fg_ptr++ * weight;
+                    fg[3] += *fg_ptr   * weight;
+
                     total_weight += weight;
                     x_hr  += base_type::m_rx_inv;
                     if(x_hr >= filter_scale) break;
@@ -119,21 +120,31 @@ public:
                 fg_ptr = (const value_type*)base_type::source().next_y();
             }
 
-            fg[0] /= total_weight;
-            fg[1] /= total_weight;
-            fg[2] /= total_weight;
-            fg[3] /= total_weight;
+            if (total_weight)
+            {
+                fg[3] /= total_weight;
+                fg[0] /= total_weight;
+                fg[1] /= total_weight;
+                fg[2] /= total_weight;
 
-            if(fg[0] < 0) fg[0] = 0;
-            if(fg[1] < 0) fg[1] = 0;
-            if(fg[2] < 0) fg[2] = 0;
-            if(fg[3] < 0) fg[3] = 0;
+                if(fg[0] < 0) fg[0] = 0;
+                if(fg[1] < 0) fg[1] = 0;
+                if(fg[2] < 0) fg[2] = 0;
+                if(fg[3] < 0) fg[3] = 0;
+            }
+            else
+            {
+                fg[0] = 0;
+                fg[1] = 0;
+                fg[2] = 0;
+                fg[3] = 0;
+            }
 
+            if(fg[order_type::R] > base_mask)         fg[order_type::R] = base_mask;
+            if(fg[order_type::G] > base_mask)         fg[order_type::G] = base_mask;
+            if(fg[order_type::B] > base_mask)         fg[order_type::B] = base_mask;
             if(fg[order_type::A] > base_mask)         fg[order_type::A] = base_mask;
-            if(fg[order_type::R] > fg[order_type::A]) fg[order_type::R] = fg[order_type::A];
-            if(fg[order_type::G] > fg[order_type::A]) fg[order_type::G] = fg[order_type::A];
-            if(fg[order_type::B] > fg[order_type::A]) fg[order_type::B] = fg[order_type::A];
-
+            
             span->r = (value_type)fg[order_type::R];
             span->g = (value_type)fg[order_type::G];
             span->b = (value_type)fg[order_type::B];
