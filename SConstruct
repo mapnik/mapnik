@@ -323,8 +323,6 @@ opts.AddVariables(
 
     BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
 
-    BoolVariable('INTERNAL_LIBAGG', 'Use provided libagg', 'True'),
-
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
 
     # Variables for optional dependencies
@@ -1244,15 +1242,10 @@ if not preconfigured:
             env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
             env['PGSQL2SQLITE'] = False
 
-    # Decide which libagg to use
-    # if we are using internal agg, then prepend to make sure
-    # we link locally
-
-    if env['INTERNAL_LIBAGG']:
-        env.Prepend(CPPPATH = '#deps/agg/include')
-        env.Prepend(LIBPATH = '#deps/agg')
-    else:
-        env.ParseConfig('pkg-config --libs --cflags libagg')
+    # we rely on an internal, patched copy of agg with critical fixes
+    # prepend to make sure we link locally
+    env.Prepend(CPPPATH = '#deps/agg/include')
+    env.Prepend(LIBPATH = '#deps/agg')
 
     if env['CAIRO']:
         if env['CAIRO_LIBS'] or env['CAIRO_INCLUDES']:
@@ -1677,7 +1670,7 @@ if not HELP_REQUESTED:
         SetOption("num_jobs", env['JOBS'])
 
     # Build agg first, doesn't need anything special
-    if env['RUNTIME_LINK'] == 'shared' and env['INTERNAL_LIBAGG']:
+    if env['RUNTIME_LINK'] == 'shared':
         SConscript('deps/agg/build.py')
 
     # Build the core library

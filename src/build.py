@@ -75,10 +75,7 @@ if env['RUNTIME_LINK'] == 'static':
         lib_env['LIBS'].append('icudata')
         lib_env['LIBS'].append('icui18n')
 else:
-    if env['INTERNAL_LIBAGG']:
-          lib_env['LIBS'].insert(0, 'agg')
-    else:
-        lib_env['LIBS'].append([lib for lib in env['LIBS'] if lib.startswith('agg')])
+    lib_env['LIBS'].insert(0, 'agg')
 
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = env.subst(env['MAPNIK_LIB_NAME'])
