@@ -382,6 +382,7 @@ public:
         case minus:
         case invert:
         case invert_rgb:
+        case grain_merge:
             break;
         }
     }
