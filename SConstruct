@@ -44,7 +44,7 @@ SCONS_CONFIGURE_CACHE = 'config.cache'
 SCONF_TEMP_DIR = '.sconf_temp'
 # auto-search directories for boost libs/headers
 BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
-BOOST_MIN_VERSION = '1.41'
+BOOST_MIN_VERSION = '1.47'
 CAIROMM_MIN_VERSION = '1.8.0'
 
 DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
