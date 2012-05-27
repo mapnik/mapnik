@@ -190,16 +190,21 @@ template <typename T>
 struct converter_traits<T,mapnik::affine_transform_tag>
 {
     typedef T geometry_type;
-    typedef typename agg::conv_transform<geometry_type> conv_type;
+
+    struct conv_type : public agg::conv_transform<geometry_type>
+    {
+        agg::trans_affine trans_;
+
+        conv_type(geometry_type& geom)
+            : agg::conv_transform<geometry_type>(geom, trans_) {}
+    };
 
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        agg::trans_affine tr;
         boost::array<double,6> const& m = sym.get_transform();
-        tr.load_from(&m[0]);
-        geom.transformer(tr);
+        geom.trans_.load_from(&m[0]);
     }
 };
 
