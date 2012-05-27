@@ -23,9 +23,13 @@
 #define MAPNIK_PYTHON_BINDING_SVG_INCLUDED
 
 // mapnik
+#include <mapnik/parse_transform.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/value_error.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -51,9 +55,9 @@ void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
            << "', expected SVG transform attribute";
         throw mapnik::value_error(ss.str());
     }
-    mapnik::transform_type matrix;
-    tr.store_to(&matrix[0]);
-    symbolizer.set_image_transform(matrix);
+    transform_list_ptr trans = boost::make_shared<transform_list>();
+    trans->push_back(matrix_node(tr));
+    symbolizer.set_image_transform(trans);
 }
 
 } // end of namespace mapnik

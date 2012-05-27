@@ -20,47 +20,27 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_XML_TREE_H
-#define MAPNIK_XML_TREE_H
-//mapnik
-#include <mapnik/xml_node.hpp>
-#include <mapnik/expression_grammar.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_transform.hpp>
 #include <mapnik/transform_expression_grammar.hpp>
 
-// boost
-#include <boost/format.hpp>
+#include <boost/make_shared.hpp>
 
-#if BOOST_VERSION >= 104500
-#include <mapnik/css_color_grammar.hpp>
-#else
-#include <mapnik/css_color_grammar_deprecated.hpp>
-#endif
+namespace mapnik {
 
-//stl
-#include <string>
-
-
-namespace mapnik
+bool parse_transform(transform_list& transform,
+                     std::string const & str,
+                     transform_expression_grammar<std::string::const_iterator> const& g)
 {
-class xml_tree
-{
-public:
-    xml_tree(std::string const& encoding="utf8");
-    void set_filename(std::string fn);
-    std::string const& filename() const;
-    xml_node &root();
-private:
-    xml_node node_;
-    std::string file_;
-    transcoder tr_;
-public:
-    mapnik::css_color_grammar<std::string::const_iterator> color_grammar;
-    mapnik::expression_grammar<std::string::const_iterator> expr_grammar;
-    path_expression_grammar<std::string::const_iterator> path_expr_grammar;
-    transform_expression_grammar<std::string::const_iterator> transform_expr_grammar;
-};
+    std::string::const_iterator itr = str.begin();
+    std::string::const_iterator end = str.end();
+    bool r = qi::phrase_parse(itr, end, g, space_type(), transform);
 
-} //ns mapnik
+    #ifdef MAPNIK_LOG
+    MAPNIK_LOG_DEBUG(load_map) << "map_parser: Parsed transform [ "
+        << transform_processor_type::to_string(transform) << " ]";
+    #endif
 
-#endif // MAPNIK_XML_TREE_H
+    return (r && itr==end);
+}
+
+}

@@ -277,7 +277,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         mtx *= tr;
         mtx *= agg::trans_affine_scaling(scale_factor_);
         // render the marker at the center of the marker box
-        mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
+        mtx.translate(pos.x, pos.y);
         using namespace mapnik::svg;
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
@@ -291,10 +291,12 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
     }
     else
     {        
+        double cx = 0.5 * (*marker.get_bitmap_data())->width();
+        double cy = 0.5 * (*marker.get_bitmap_data())->height();
         composite(current_buffer_->data(), **marker.get_bitmap_data(), 
                   comp_op, opacity,
-                  boost::math::iround(pos.x),
-                  boost::math::iround(pos.y), 
+                  boost::math::iround(pos.x - cx),
+                  boost::math::iround(pos.y - cy),
                   false, false);
     }
 }
@@ -305,5 +307,57 @@ void agg_renderer<T>::painted(bool painted)
     pixmap_.painted(painted);
 }
 
+template <typename T>
+void agg_renderer<T>::debug_draw_box(box2d<double> const& box,
+                                     double x, double y, double angle)
+{
+    agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+    debug_draw_box(buf, box, x, y, angle);
+}
+
+template <typename T> template <typename R>
+void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
+                                     double x, double y, double angle)
+{
+    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::renderer_base<pixfmt> renderer_base;
+    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+
+    agg::scanline_p8 sl_line;
+    pixfmt pixf(buf);
+    renderer_base renb(pixf);
+    renderer_type ren(renb);
+
+    // compute tranformation matrix
+    agg::trans_affine_rotation tr(angle);
+    tr.translate(x, y);
+
+    // prepare path
+    agg::path_storage pbox;
+    pbox.start_new_path();
+    pbox.move_to(box.minx(), box.miny());
+    pbox.line_to(box.maxx(), box.miny());
+    pbox.line_to(box.maxx(), box.maxy());
+    pbox.line_to(box.minx(), box.maxy());
+    pbox.line_to(box.minx(), box.miny());
+
+    // prepare stroke with applied transformation
+    typedef agg::conv_transform<agg::path_storage> conv_transform;
+    typedef agg::conv_stroke<conv_transform> conv_stroke;
+    conv_transform tbox(pbox, tr);
+    conv_stroke sbox(tbox);
+    sbox.generator().width(1.0 * scale_factor_);
+
+    // render the outline
+    ras_ptr->reset();
+    ras_ptr->add_path(sbox);
+    ren.color(agg::rgba8(0x33, 0x33, 0xff, 0xcc)); // blue is fine
+    agg::render_scanlines(*ras_ptr, sl_line, ren);
+}
+
 template class agg_renderer<image_32>;
+template void agg_renderer<image_32>::debug_draw_box<agg::rendering_buffer>(
+                agg::rendering_buffer& buf,
+                box2d<double> const& box,
+                double x, double y, double angle);
 }

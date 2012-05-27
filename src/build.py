@@ -110,6 +110,7 @@ source = Split(
     deepcopy.cpp
     expression_string.cpp
     expression.cpp
+    transform_expression.cpp
     feature_kv_iterator.cpp
     feature_type_style.cpp
     font_engine_freetype.cpp
@@ -126,6 +127,7 @@ source = Split(
     load_map.cpp
     memory.cpp
     parse_path.cpp
+    parse_transform.cpp
     palette.cpp
     placement_finder.cpp
     plugin.cpp

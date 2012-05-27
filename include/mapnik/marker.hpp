@@ -79,6 +79,21 @@ public:
     {
     }
 
+    box2d<double> bounding_box() const
+    {
+        if (is_vector())
+        {
+            return (*vector_data_)->bounding_box();
+        }
+        if (is_bitmap())
+        {
+            double width = (*bitmap_data_)->width();
+            double height = (*bitmap_data_)->height();
+            return box2d<double>(0, 0, width, height);
+        }
+        return box2d<double>();
+    }
+
     inline double width() const
     {
         if (is_bitmap())

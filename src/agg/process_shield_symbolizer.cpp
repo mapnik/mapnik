@@ -52,7 +52,15 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
         placements_type &placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            render_marker(helper.get_marker_position(placements[ii]),
+            // get_marker_position returns (minx,miny) corner position,
+            // while (currently only) agg_renderer::render_marker newly
+            // expects center position;
+            // until all renderers and shield_symbolizer_helper are
+            // modified accordingly, we must adjust the position here
+            pixel_position pos = helper.get_marker_position(placements[ii]);
+            pos.x += 0.5 * helper.get_marker_width();
+            pos.y += 0.5 * helper.get_marker_height();
+            render_marker(pos,
                           helper.get_marker(),
                           helper.get_image_transform(),
                           sym.get_opacity(),

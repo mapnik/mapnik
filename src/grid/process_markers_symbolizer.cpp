@@ -69,8 +69,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     ras_ptr->reset();
 
     agg::trans_affine tr;
-    boost::array<double,6> const& m = sym.get_image_transform();
-    tr.load_from(&m[0]);
+    evaluate_transform(tr, *feature, sym.get_image_transform());
     unsigned int res = pixmap_.get_resolution();
     tr = agg::trans_affine_scaling(scale_factor_*(1.0/res)) * tr;
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);

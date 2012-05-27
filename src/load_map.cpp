@@ -42,6 +42,7 @@
 
 #include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
 #include <mapnik/svg/svg_path_parser.hpp>
@@ -838,8 +839,8 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     optional<std::string> transform_wkt = pt.get_opt_attr<std::string>("transform");
     if (transform_wkt)
     {
-        agg::trans_affine tr;
-        if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+        mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+        if (!mapnik::parse_transform(*tl, *transform_wkt, pt.get_tree().transform_expr_grammar))
         {
             std::stringstream ss;
             ss << "Could not parse transform from '" << transform_wkt << "', expected SVG transform attribute";
@@ -848,9 +849,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
             else
                 std::clog << "### WARNING: " << ss.str() << endl;
         }
-        boost::array<double,6> matrix;
-        tr.store_to(&matrix[0]);
-        sym.set_transform(matrix);
+        sym.set_transform(tl);
     }
     
     optional<boolean> clip = pt.get_opt_attr<boolean>("clip");
@@ -919,8 +918,8 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                 optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
                 if (image_transform_wkt)
                 {
-                    agg::trans_affine tr;
-                    if (!mapnik::svg::parse_transform((*image_transform_wkt).c_str(),tr))
+                    mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+                    if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
                     {
                         std::stringstream ss;
                         ss << "Could not parse transform from '" << *image_transform_wkt
@@ -934,9 +933,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                             MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                         }
                     }
-                    boost::array<double,6> matrix;
-                    tr.store_to(&matrix[0]);
-                    symbol.set_image_transform(matrix);
+                    symbol.set_image_transform(tl);
                 }
             }
             catch (image_reader_exception const & ex)
@@ -1014,8 +1011,8 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
         if (image_transform_wkt)
         {
-            agg::trans_affine tr;
-            if (!mapnik::svg::parse_transform((*image_transform_wkt).c_str(),tr))
+            mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
             {
                 std::stringstream ss;
                 ss << "Could not parse transform from '" << *image_transform_wkt
@@ -1029,9 +1026,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
                     MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                 }
             }
-            boost::array<double,6> matrix;
-            tr.store_to(&matrix[0]);
-            symbol.set_image_transform(matrix);
+            symbol.set_image_transform(tl);
         }
         
         optional<color> c = sym.get_opt_attr<color>("fill");
@@ -1257,8 +1252,8 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
         if (image_transform_wkt)
         {
-            agg::trans_affine tr;
-            if (!mapnik::svg::parse_transform((*image_transform_wkt).c_str(),tr))
+            mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
             {
                 std::stringstream ss;
                 ss << "Could not parse transform from '" << *image_transform_wkt 
@@ -1272,9 +1267,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
                     MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                 }
             }
-            boost::array<double,6> matrix;
-            tr.store_to(&matrix[0]);
-            shield_symbol.set_image_transform(matrix);
+            shield_symbol.set_image_transform(tl);
         }
         
         // shield displacement

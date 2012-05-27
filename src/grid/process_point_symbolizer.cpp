@@ -55,6 +55,9 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
 
     if (marker)
     {
+        agg::trans_affine tr;
+        evaluate_transform(tr, *feature, sym.get_image_transform());
+
         for (unsigned i=0; i<feature->num_geometries(); ++i)
         {
             geometry_type const& geom = feature->get_geometry(i);
@@ -78,10 +81,6 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
             if (sym.get_allow_overlap() ||
                 detector_.has_placement(label_ext))
             {
-                agg::trans_affine tr;
-                boost::array<double,6> const& m = sym.get_image_transform();
-                tr.load_from(&m[0]);
-
                 render_marker(feature, pixmap_.get_resolution(),
                               pixel_position(px, py),
                               **marker, tr,
