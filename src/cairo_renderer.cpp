@@ -46,6 +46,7 @@
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
 #include <cairo-ft.h>
+#include <cairo-version.h>
 
 // boost
 #include <boost/utility.hpp>
