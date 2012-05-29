@@ -117,15 +117,6 @@ namespace agg
         const GammaLut& m_gamma;
     };
 
-
-
-
-
-
-
-
-
-
     //=============================================================blender_rgba
     template<class ColorT, class Order> struct blender_rgba
     {
@@ -1416,28 +1407,69 @@ namespace agg
                                          unsigned sa, unsigned cover)
         {
 
-            if(cover < 255)
+            if (cover < 255)
             {
                 sr = (sr * cover + 255) >> 8;
                 sg = (sg * cover + 255) >> 8;
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            if (sa)
+            if (sa > 0)
             {
                 calc_type da = p[Order::A];
-
-                p[Order::R] = (sr + p[Order::R] > 128) ? sr + p[Order::R]-128 : 0;
-                p[Order::G] = (sg + p[Order::G] > 128) ? sg + p[Order::G]-128 : 0;
-                p[Order::B] = (sb + p[Order::B] > 128) ? sb + p[Order::B]-128 : 0;
+                int dr = sr + p[Order::R] - 128;
+                int dg = sg + p[Order::G] - 128;
+                int db = sb + p[Order::B] - 128;
+                p[Order::R] = dr < 0 ? 0 : (dr > 255 ? 255 : dr);
+                p[Order::G] = dg < 0 ? 0 : (dg > 255 ? 255 : dg);
+                p[Order::B] = db < 0 ? 0 : (db > 255 ? 255 : db);
                 p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
-                if (p[Order::R] > 255) p[Order::R] = 255;
-                if (p[Order::G] > 255) p[Order::G] = 255;
-                if (p[Order::B] > 255) p[Order::B] = 255;
             }
         }
     };
 
+    // grain extract (GIMP)
+    // E = I - M + 128
+
+    template <typename ColorT, typename Order>
+    struct comp_op_rgba_grain_extract
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
+
+        static AGG_INLINE void blend_pix(value_type* p,
+                                         unsigned sr, unsigned sg, unsigned sb,
+                                         unsigned sa, unsigned cover)
+        {
+            if (cover < 255)
+            {
+                sr = (sr * cover + 255) >> 8;
+                sg = (sg * cover + 255) >> 8;
+                sb = (sb * cover + 255) >> 8;
+                sa = (sa * cover + 255) >> 8;
+            }
+            if (sa > 0)
+            {
+                calc_type da = p[Order::A];
+                int dr = p[Order::R] - sr + 128;
+                int dg = p[Order::G] - sg + 128;
+                int db = p[Order::B] - sb + 128;
+
+                p[Order::R] = dr < 0 ? 0 : (dr > 255 ? 255 : dr);
+                p[Order::G] = dg < 0 ? 0 : (dg > 255 ? 255 : dg);
+                p[Order::B] = db < 0 ? 0 : (db > 255 ? 255 : db);
+                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            }
+        }
+    };
 
 
     //======================================================comp_op_table_rgba
@@ -1487,6 +1519,7 @@ namespace agg
         comp_op_rgba_invert     <ColorT,Order>::blend_pix,
         comp_op_rgba_invert_rgb <ColorT,Order>::blend_pix,
         comp_op_rgba_grain_merge<ColorT,Order>::blend_pix,
+        comp_op_rgba_grain_extract<ColorT,Order>::blend_pix,
         0
     };
 
@@ -1523,6 +1556,7 @@ namespace agg
         comp_op_invert,        //----comp_op_invert
         comp_op_invert_rgb,    //----comp_op_invert_rgb
         comp_op_grain_merge,   //----comp_op_grain_merge_rgb
+        comp_op_grain_extract, //----comp_op_grain_extract_rgb
         end_of_comp_op_e
     };
 
