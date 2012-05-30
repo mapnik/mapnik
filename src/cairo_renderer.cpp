@@ -1075,12 +1075,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     }
                     else if(attr.fill_flag)
                     {
-                        context.set_color(attr.fill_color.r,attr.fill_color.g,attr.fill_color.b,attr.opacity*opacity);
+                        double fill_opacity = attr.opacity * opacity * attr.fill_color.opacity();
+                        context.set_color(attr.fill_color.r,attr.fill_color.g,attr.fill_color.b, fill_opacity);
                         context.fill();
                     }
                 }
 
-                if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT || attr.stroke_flag)
+                if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT || attr.stroke_flag)
                 {
                     context.add_agg_path(svg_path,attr.index);
                     if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
@@ -1093,9 +1094,10 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                         context.set_gradient(g,bbox);
                         context.stroke();
                     }
-                    else if(attr.stroke_flag)
+                    else if (attr.stroke_flag)
                     {
-                        context.set_color(attr.stroke_color.r,attr.stroke_color.g,attr.stroke_color.b,attr.opacity*opacity);
+                        double stroke_opacity = attr.opacity * opacity * attr.stroke_color.opacity();
+                        context.set_color(attr.stroke_color.r,attr.stroke_color.g,attr.stroke_color.b, stroke_opacity);
                         context.set_line_width(attr.stroke_width);
                         context.set_line_cap(line_cap_enum(attr.line_cap));
                         context.set_line_join(line_join_enum(attr.line_join));
