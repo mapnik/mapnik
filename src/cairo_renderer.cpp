@@ -867,7 +867,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         if (height_expr)
         {
             value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature), *height_expr);
-            height = 0.7071 * result.to_double();
+            height = result.to_double(); //scale_factor is always 1.0 atm
         }
 
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
