@@ -949,11 +949,11 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     }
                 }
 
-                path_type path(t_, *frame, prj_trans);
-                context.set_color(128, 128, 128, sym.get_opacity());
-                context.add_path(path);
-                context.stroke();
-
+                //path_type path(t_, *frame, prj_trans);
+                //context.set_color(128, 128, 128, sym.get_opacity());
+                //context.add_path(path);
+                //context.stroke();
+                
                 path_type roof_path(t_, *roof, prj_trans);
                 context.set_color(sym.get_fill(), sym.get_opacity());
                 context.add_path(roof_path);
