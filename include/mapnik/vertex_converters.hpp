@@ -105,7 +105,7 @@ struct converter_traits<T, mapnik::clip_line_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
-        typename boost::mpl::at<Args,boost::mpl::int_<0> >::type box = boost::fusion::at_c<0>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<0> >::type const& box = boost::fusion::at_c<0>(args);
         geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
     }
 };
@@ -120,7 +120,7 @@ struct converter_traits<T, mapnik::dash_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
-        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type const& sym = boost::fusion::at_c<2>(args);
         double scale_factor = boost::fusion::at_c<5>(args); 
         stroke const& stroke_ = sym.get_stroke();
         dash_array const& d = stroke_.get_dash_array();
@@ -144,7 +144,7 @@ struct converter_traits<T, mapnik::stroke_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
-        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type const& sym = boost::fusion::at_c<2>(args);
         stroke const& stroke_ = sym.get_stroke();
         set_join_caps(stroke_,geom);
         geom.generator().miter_limit(stroke_.get_miterlimit());
@@ -163,7 +163,7 @@ struct converter_traits<T,mapnik::clip_poly_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
-        typename boost::mpl::at<Args,boost::mpl::int_<0> >::type box = boost::fusion::at_c<0>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<0> >::type const& box = boost::fusion::at_c<0>(args);
         geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
     }
 };
@@ -178,8 +178,8 @@ struct converter_traits<T,mapnik::transform_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
-        typename boost::mpl::at<Args,boost::mpl::int_<3> >::type tr = boost::fusion::at_c<3>(args);
-        typename boost::mpl::at<Args,boost::mpl::int_<4> >::type prj_trans = boost::fusion::at_c<4>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<3> >::type const& tr = boost::fusion::at_c<3>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<4> >::type const& prj_trans = boost::fusion::at_c<4>(args);
         geom.set_proj_trans(prj_trans);
         geom.set_trans(tr);
     }
@@ -202,7 +202,7 @@ struct converter_traits<T,mapnik::affine_transform_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
-        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type const& sym = boost::fusion::at_c<2>(args);
         boost::array<double,6> const& m = sym.get_transform();
         geom.trans_.load_from(&m[0]);
     }
@@ -217,7 +217,7 @@ struct converter_traits<T,mapnik::offset_transform_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {     
-        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
+        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type const& sym = boost::fusion::at_c<2>(args);
         geom.set_offset(sym.offset());
     }
 };
