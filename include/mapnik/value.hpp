@@ -524,6 +524,29 @@ struct mod: public boost::static_visitor<V>
     }
 };
 
+template <typename V>
+struct negate : public boost::static_visitor<V>
+{
+    typedef V value_type;
+
+    template <typename T>
+    value_type operator() (T val) const
+    {
+        return -val;
+    }
+
+    value_type operator() (value_null const& val) const
+    {
+        return val;
+    }
+
+    value_type operator() (UnicodeString const& ustr) const
+    {
+        UnicodeString inplace(ustr);
+        return inplace.reverse();
+    }
+};
+
 struct to_bool : public boost::static_visitor<bool>
 {
     bool operator() (bool val) const
@@ -761,6 +784,11 @@ public:
     bool operator<=(value const& other) const
     {
         return boost::apply_visitor(impl::less_or_equal(),base_,other.base_);
+    }
+
+    value operator- () const
+    {
+        return boost::apply_visitor(impl::negate<value>(), base_);
     }
 
     value_base const& base() const
