@@ -486,6 +486,10 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     {
         std::cerr << ex.what() << std::endl;
     }
+    catch (const std::exception & ex)
+    {
+        std::cerr << "exception: " << ex.what() << std::endl;
+    }
     catch (...)
     {
         std::cerr << "Unknown exception caught!\n";
@@ -521,6 +525,10 @@ void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     catch (mapnik::config_error & ex)
     {
         std::cerr << ex.what() << std::endl;
+    }
+    catch (const std::exception & ex)
+    {
+        std::cerr << "exception: " << ex.what() << std::endl;
     }
     catch (...)
     {
