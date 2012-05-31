@@ -121,7 +121,7 @@ struct converter_traits<T, mapnik::dash_tag>
     static void setup(geometry_type & geom, Args & args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type const& sym = boost::fusion::at_c<2>(args);
-        double scale_factor = boost::fusion::at_c<5>(args); 
+        double scale_factor = boost::fusion::at_c<5>(args);
         stroke const& stroke_ = sym.get_stroke();
         dash_array const& d = stroke_.get_dash_array();
         dash_array::const_iterator itr = d.begin();
@@ -213,10 +213,10 @@ struct converter_traits<T,mapnik::offset_transform_tag>
 {
     typedef T geometry_type;
     typedef offset_converter<geometry_type> conv_type;
-    
+
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
-    {     
+    {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type const& sym = boost::fusion::at_c<2>(args);
         geom.set_offset(sym.offset());
     }
@@ -320,23 +320,20 @@ struct vertex_converter : private boost::noncopyable
     proj_trans_type const&,
     double //scale-factor
     > args_type;
-    
+
     vertex_converter(bbox_type const& b, rasterizer_type & ras,
-                     symbolizer_type const& sym, trans_type & tr, 
+                     symbolizer_type const& sym, trans_type & tr,
                      proj_trans_type const& prj_trans,
                      double scale_factor)
         : disp_(args_type(boost::cref(b),boost::ref(ras),
                           boost::cref(sym),boost::cref(tr),
                           boost::cref(prj_trans),scale_factor)) {}
-    
+
     template <typename Geometry>
     void apply(Geometry & geom)
     {
         typedef Geometry geometry_type;
-        //BOOST_FOREACH(geometry_type & geom, cont)
-        {
-            disp_.template apply<geometry_type>(geom);
-        }
+        disp_.template apply<geometry_type>(geom);
     }
 
     template <typename Conv>
