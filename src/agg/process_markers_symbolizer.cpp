@@ -54,7 +54,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;

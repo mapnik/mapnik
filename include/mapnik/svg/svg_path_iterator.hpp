@@ -174,7 +174,7 @@ private:
  * Each coordinate is stored twice to match the needs of the grammar.
  */
 typedef path_iterator<boost::tuple<unsigned, geometry_type::value_type, geometry_type::value_type>,
-                      coord_transform2<CoordTransform, geometry_type> > path_iterator_type;
+                      coord_transform<CoordTransform, geometry_type> > path_iterator_type;
 
 }}
 

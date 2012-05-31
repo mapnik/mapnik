@@ -104,7 +104,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
 {
     if (marker.is_vector())
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
+        typedef coord_transform<CoordTransform,geometry_type> path_type;
         typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
         typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
         agg::scanline_bin sl;

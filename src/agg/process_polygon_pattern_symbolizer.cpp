@@ -53,7 +53,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
     
     agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
     ras_ptr->reset();

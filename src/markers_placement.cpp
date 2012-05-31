@@ -232,8 +232,8 @@ void markers_placement<Locator, Detector>::set_spacing_left(double sl, bool allo
 }
 
 typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-typedef coord_transform2<CoordTransform,geometry_type> path_type;
-typedef coord_transform2<CoordTransform,clipped_geometry_type> clipped_path_type;
+typedef coord_transform<CoordTransform,geometry_type> path_type;
+typedef coord_transform<CoordTransform,clipped_geometry_type> clipped_path_type;
 
 template class markers_placement<path_type, label_collision_detector4>;
 template class markers_placement<clipped_path_type, label_collision_detector4>;

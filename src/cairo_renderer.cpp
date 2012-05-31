@@ -857,7 +857,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
+        typedef coord_transform<CoordTransform,geometry_type> path_type;
 
         cairo_context context(context_);
         context.set_operator(sym.comp_op());
@@ -1026,7 +1026,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
             }
 
-            typedef coord_transform2<CoordTransform,geometry_type> path_type;
+            typedef coord_transform<CoordTransform,geometry_type> path_type;
             agg::trans_affine transform;
             mapnik::path_ptr vmarker = *marker.get_vector_data();
             using namespace mapnik::svg;
@@ -1207,7 +1207,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       proj_transform const& prj_trans)
     {
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
         std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
@@ -1368,7 +1368,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         double scale_factor_ = 1;
 
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
         agg::trans_affine tr;
         boost::array<double,6> const& m = sym.get_image_transform();

@@ -173,7 +173,7 @@ template <typename T>
 struct converter_traits<T,mapnik::transform_tag>
 {
     typedef T geometry_type;
-    typedef coord_transform2<CoordTransform, geometry_type> conv_type;
+    typedef coord_transform<CoordTransform, geometry_type> conv_type;
 
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
