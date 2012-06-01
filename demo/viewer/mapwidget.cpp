@@ -289,6 +289,32 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
    }
 }
 
+void MapWidget::wheelEvent(QWheelEvent* e)
+{
+   if (!map_)
+   {
+      return;
+   }
+
+   QPoint corner(map_->width(), map_->height());
+   QPoint zoomCoords;
+   double zoom;
+   if (e->delta() > 0)
+   {
+      zoom = 0.5;
+      QPoint center = corner / 2;
+      QPoint delta = e->pos() - center;
+      zoomCoords = zoom * delta + center;
+   }
+   else
+   {
+      zoom = 2.0;
+      zoomCoords = corner - e->pos();
+   }
+
+   map_->pan_and_zoom(zoomCoords.x(), zoomCoords.y(), zoom);
+   updateMap();
+}
 
 void MapWidget::keyPressEvent(QKeyEvent *e)
 {
