@@ -76,7 +76,7 @@ struct converter_traits
     typedef T0 geometry_type;
     typedef geometry_type conv_type;
     template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
+    static void setup(geometry_type & geom, Args const& args)
     {
         throw "BOOM!";
     }
@@ -89,7 +89,7 @@ struct converter_traits<T,mapnik::smooth_tag>
     typedef typename agg::conv_smooth_poly1_curve<geometry_type> conv_type;
 
     template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
+    static void setup(geometry_type & geom, Args const& args)
     {
         geom.smooth_value(boost::fusion::at_c<2>(args).smooth());
     }
@@ -103,7 +103,7 @@ struct converter_traits<T, mapnik::clip_line_tag>
     typedef typename agg::conv_clip_polyline<geometry_type> conv_type;
 
     template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
+    static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<0> >::type box = boost::fusion::at_c<0>(args);
         geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
@@ -118,10 +118,11 @@ struct converter_traits<T, mapnik::dash_tag>
     typedef typename agg::conv_dash<geometry_type> conv_type;
 
     template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
+    static void setup(geometry_type & geom, Args const& args)
     {
+
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        double scale_factor = boost::fusion::at_c<5>(args); 
+        double scale_factor = boost::fusion::at_c<5>(args);
         stroke const& stroke_ = sym.get_stroke();
         dash_array const& d = stroke_.get_dash_array();
         dash_array::const_iterator itr = d.begin();
@@ -142,7 +143,7 @@ struct converter_traits<T, mapnik::stroke_tag>
     typedef typename agg::conv_stroke<geometry_type> conv_type;
 
     template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
+    static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         stroke const& stroke_ = sym.get_stroke();
@@ -161,7 +162,7 @@ struct converter_traits<T,mapnik::clip_poly_tag>
     typedef typename agg::conv_clip_polygon<geometry_type> conv_type;
 
     template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
+    static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<0> >::type box = boost::fusion::at_c<0>(args);
         geom.clip_box(box.minx(),box.miny(),box.maxx(),box.maxy());
@@ -173,10 +174,10 @@ template <typename T>
 struct converter_traits<T,mapnik::transform_tag>
 {
     typedef T geometry_type;
-    typedef coord_transform2<CoordTransform, geometry_type> conv_type;
+    typedef coord_transform<CoordTransform, geometry_type> conv_type;
 
     template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
+    static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<3> >::type tr = boost::fusion::at_c<3>(args);
         typename boost::mpl::at<Args,boost::mpl::int_<4> >::type prj_trans = boost::fusion::at_c<4>(args);
@@ -190,16 +191,21 @@ template <typename T>
 struct converter_traits<T,mapnik::affine_transform_tag>
 {
     typedef T geometry_type;
-    typedef typename agg::conv_transform<geometry_type> conv_type;
+
+    struct conv_type : public agg::conv_transform<geometry_type>
+    {
+        agg::trans_affine trans_;
+
+        conv_type(geometry_type& geom)
+            : agg::conv_transform<geometry_type>(geom, trans_) {}
+    };
 
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        agg::trans_affine tr;
         boost::array<double,6> const& m = sym.get_transform();
-        tr.load_from(&m[0]);
-        geom.transformer(tr);
+        geom.trans_.load_from(&m[0]);
     }
 };
 
@@ -208,10 +214,10 @@ struct converter_traits<T,mapnik::offset_transform_tag>
 {
     typedef T geometry_type;
     typedef offset_converter<geometry_type> conv_type;
-    
+
     template <typename Args>
-    static void setup(geometry_type & geom, Args & args)
-    {     
+    static void setup(geometry_type & geom, Args const& args)
+    {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
         geom.set_offset(sym.offset());
     }
@@ -221,7 +227,7 @@ template <bool>
 struct converter_fwd
 {
     template <typename Base, typename T0,typename T1,typename T2, typename Iter,typename End>
-    static void forward(Base& base, T0 & geom,T1 & args)
+    static void forward(Base& base, T0 & geom,T1 const& args)
     {
         typedef T0 geometry_type;
         typedef T2 conv_tag;
@@ -236,7 +242,7 @@ template <>
 struct converter_fwd<true>
 {
     template <typename Base, typename T0,typename T1,typename T2, typename Iter,typename End>
-    static void forward(Base& base, T0 & geom,T1 & args)
+    static void forward(Base& base, T0 & geom,T1 const& args)
     {
         base.template dispatch<Iter,End>(geom, typename boost::is_same<Iter,End>::type());
     }
@@ -249,7 +255,7 @@ struct dispatcher
     typedef A args_type;
     typedef C conv_types;
 
-    dispatcher(args_type args)
+    dispatcher(args_type const& args)
         : args_(args)
     {
         std::memset(&vec_[0], 0,  sizeof(unsigned)*vec_.size());
@@ -291,7 +297,7 @@ struct dispatcher
     }
 
     boost::array<unsigned, boost::mpl::size<conv_types>::value> vec_;
-    args_type  args_;
+    args_type args_;
 };
 }
 
@@ -315,23 +321,20 @@ struct vertex_converter : private boost::noncopyable
     proj_trans_type const&,
     double //scale-factor
     > args_type;
-    
+
     vertex_converter(bbox_type const& b, rasterizer_type & ras,
-                     symbolizer_type const& sym, trans_type & tr, 
+                     symbolizer_type const& sym, trans_type & tr,
                      proj_trans_type const& prj_trans,
                      double scale_factor)
         : disp_(args_type(boost::cref(b),boost::ref(ras),
                           boost::cref(sym),boost::cref(tr),
                           boost::cref(prj_trans),scale_factor)) {}
-    
+
     template <typename Geometry>
     void apply(Geometry & geom)
     {
         typedef Geometry geometry_type;
-        //BOOST_FOREACH(geometry_type & geom, cont)
-        {
-            disp_.template apply<geometry_type>(geom);
-        }
+        disp_.template apply<geometry_type>(geom);
     }
 
     template <typename Conv>

@@ -106,7 +106,7 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
     }
     
     Processor & output_;
-    mapnik::feature_ptr f_;
+    mapnik::feature_ptr const& f_;
     proj_transform const& prj_trans_;
 };
 

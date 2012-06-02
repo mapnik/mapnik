@@ -428,7 +428,7 @@ void save_as_png8_oct(T1 & file, T2 const& image, const unsigned max_colors = 25
     else if (palette.size() == 1)
     {
         // 1 color image ->  write 1-bit color depth PNG
-        unsigned image_width  = width > 7 ? (int(0.125*width) + 1)&~1 : 1;
+        unsigned image_width  = ((width + 15) >> 3) & ~1U; // 1-bit image, round up to 16-bit boundary
         unsigned image_height = height;
         image_data_8 reduced_image(image_width,image_height);
         reduce_1(image,reduced_image,trees, limits, alphaTable);
@@ -441,7 +441,7 @@ void save_as_png8_oct(T1 & file, T2 const& image, const unsigned max_colors = 25
     else
     {
         // <=16 colors -> write 4-bit color depth PNG
-        unsigned image_width  = width > 3 ? (int(0.5*width) + 3)&~3 : 4;
+        unsigned image_width  = ((width + 7) >> 1) & ~3U; // 4-bit image, round up to 32-bit boundary
         unsigned image_height = height;
         image_data_8 reduced_image(image_width,image_height);
         reduce_4(image, reduced_image, trees, limits, TRANSPARENCY_LEVELS, alphaTable);
@@ -478,7 +478,7 @@ void save_as_png8(T1 & file, T2 const& image, T3 const & tree,
     else if (palette.size() == 1)
     {
         // 1 color image ->  write 1-bit color depth PNG
-        unsigned image_width  = width > 7 ? (int(0.125*width) + 1)&~1 : 1;
+        unsigned image_width  = ((width + 15) >> 3) & ~1U; // 1-bit image, round up to 16-bit boundary
         unsigned image_height = height;
         image_data_8 reduced_image(image_width, image_height);
         reduced_image.set(0);
@@ -487,7 +487,7 @@ void save_as_png8(T1 & file, T2 const& image, T3 const & tree,
     else
     {
         // <=16 colors -> write 4-bit color depth PNG
-        unsigned image_width  = width > 3 ? (int(0.5*width) + 3)&~3 : 4;
+        unsigned image_width  = ((width + 7) >> 1) & ~3U; // 4-bit image, round up to 32-bit boundary
         unsigned image_height = height;
         image_data_8 reduced_image(image_width, image_height);
         for (unsigned y = 0; y < height; ++y)

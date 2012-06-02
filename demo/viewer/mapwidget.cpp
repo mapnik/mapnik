@@ -194,7 +194,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                                                                 boost::get<1>(*itr).to_string().c_str()));
                       }
                       
-                      typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry_type> path_type;
+                      typedef mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type> path_type;
 
                      for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
@@ -289,6 +289,32 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
    }
 }
 
+void MapWidget::wheelEvent(QWheelEvent* e)
+{
+   if (!map_)
+   {
+      return;
+   }
+
+   QPoint corner(map_->width(), map_->height());
+   QPoint zoomCoords;
+   double zoom;
+   if (e->delta() > 0)
+   {
+      zoom = 0.5;
+      QPoint center = corner / 2;
+      QPoint delta = e->pos() - center;
+      zoomCoords = zoom * delta + center;
+   }
+   else
+   {
+      zoom = 2.0;
+      zoomCoords = corner - e->pos();
+   }
+
+   map_->pan_and_zoom(zoomCoords.x(), zoomCoords.y(), zoom);
+   updateMap();
+}
 
 void MapWidget::keyPressEvent(QKeyEvent *e)
 {
@@ -486,6 +512,10 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     {
         std::cerr << ex.what() << std::endl;
     }
+    catch (const std::exception & ex)
+    {
+        std::cerr << "exception: " << ex.what() << std::endl;
+    }
     catch (...)
     {
         std::cerr << "Unknown exception caught!\n";
@@ -521,6 +551,10 @@ void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     catch (mapnik::config_error & ex)
     {
         std::cerr << ex.what() << std::endl;
+    }
+    catch (const std::exception & ex)
+    {
+        std::cerr << "exception: " << ex.what() << std::endl;
     }
     catch (...)
     {

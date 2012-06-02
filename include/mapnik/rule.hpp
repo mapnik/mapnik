@@ -206,7 +206,7 @@ private:
         template <class T>
         void copy_height_ptr(T & sym) const
         {
-            std::string height_expr = to_expression_string(sym.height());
+            std::string height_expr = to_expression_string(*sym.height());
             sym.set_height(parse_expression(height_expr,"utf8"));
         }
     };

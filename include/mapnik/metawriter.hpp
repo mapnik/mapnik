@@ -93,7 +93,7 @@ public:
 class metawriter
 {
 public:
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
+    typedef coord_transform<CoordTransform,geometry_type> path_type;
     metawriter(metawriter_properties dflt_properties) :
         dflt_properties_(dflt_properties),
         width_(0),

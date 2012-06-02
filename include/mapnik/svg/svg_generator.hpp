@@ -44,7 +44,7 @@ namespace mapnik { namespace svg {
     template <typename OutputIterator>
     class svg_generator : private boost::noncopyable
     {
-        typedef coord_transform2<CoordTransform, geometry_type> path_type;
+        typedef coord_transform<CoordTransform, geometry_type> path_type;
 
         typedef svg::svg_root_attributes_grammar<OutputIterator> root_attributes_grammar;
         typedef svg::svg_rect_attributes_grammar<OutputIterator> rect_attributes_grammar;

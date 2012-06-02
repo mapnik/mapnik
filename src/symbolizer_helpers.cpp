@@ -53,7 +53,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
         }
 
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
         clipped_geometry_type clipped(**geo_itr_);
         clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
         path_type path(t_, clipped, prj_trans_);

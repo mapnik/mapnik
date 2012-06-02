@@ -27,6 +27,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/palette.hpp>
 
+#ifdef _MSC_VER
+#include <mapnik/graphics.hpp>
+#endif
+
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>

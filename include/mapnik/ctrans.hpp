@@ -38,45 +38,20 @@ namespace mapnik
 
 typedef coord_array<coord2d> CoordinateArray;
 
-
 template <typename Transform, typename Geometry>
 struct MAPNIK_DECL coord_transform
-{
-    coord_transform(Transform const& t, Geometry& geom)
-        : t_(t), geom_(geom) {}
-
-    unsigned vertex(double *x, double *y) const
-    {
-        unsigned command = geom_.vertex(x, y);
-        t_.forward(x, y);
-        return command;
-    }
-
-    void rewind(unsigned pos)
-    {
-        geom_.rewind(pos);
-    }
-
-private:
-    Transform const& t_;
-    Geometry& geom_;
-};
-
-
-template <typename Transform, typename Geometry>
-struct MAPNIK_DECL coord_transform2
 {
     typedef std::size_t size_type;
     //typedef typename Geometry::value_type value_type;
 
-    coord_transform2(Transform const& t,
+    coord_transform(Transform const& t,
                      Geometry & geom,
                      proj_transform const& prj_trans)
         : t_(&t),
         geom_(geom),
         prj_trans_(&prj_trans)  {}
 
-    explicit coord_transform2(Geometry & geom)
+    explicit coord_transform(Geometry & geom)
         : t_(0),
         geom_(geom),
         prj_trans_(0)  {}
@@ -91,7 +66,7 @@ struct MAPNIK_DECL coord_transform2
         t_ = &t;
     }
     
-    unsigned vertex(double *x, double *y)
+    unsigned vertex(double *x, double *y) const
     {
         unsigned command = SEG_MOVETO;
         bool ok = false;
@@ -113,7 +88,7 @@ struct MAPNIK_DECL coord_transform2
         return command;
     }
 
-    void rewind(unsigned pos)
+    void rewind(unsigned pos) const
     {
         geom_.rewind(pos);
     }
@@ -128,44 +103,6 @@ private:
     Geometry & geom_;
     proj_transform const* prj_trans_;
 };
-
-
-template <typename Transform, typename Geometry>
-struct MAPNIK_DECL coord_transform3
-{
-    coord_transform3(Transform const& t,
-                     Geometry const& geom,
-                     proj_transform const& prj_trans,
-                     int dx, int dy)
-        : t_(t),
-        geom_(geom),
-        prj_trans_(prj_trans),
-        dx_(dx), dy_(dy) {}
-
-    unsigned vertex(double *x, double *y) const
-    {
-        unsigned command = geom_.vertex(x, y);
-        double z = 0;
-        prj_trans_.backward(*x, *y, z);
-        t_.forward(x, y);
-        *x += dx_;
-        *y += dy_;
-        return command;
-    }
-
-    void rewind(unsigned pos)
-    {
-        geom_.rewind(pos);
-    }
-
-private:
-    Transform const& t_;
-    Geometry const& geom_;
-    proj_transform const& prj_trans_;
-    int dx_;
-    int dy_;
-};
-
 
 class CoordTransform
 {

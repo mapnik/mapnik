@@ -40,6 +40,14 @@ namespace mapnik
 {
 
 namespace tags  {
+struct negate
+{
+    static const char* str()
+    {
+        return "-";
+    }
+};
+
 struct plus
 {
     static const char* str()
@@ -166,6 +174,7 @@ typedef mapnik::value value_type;
 typedef boost::variant <
 value_type,
 attribute,
+boost::recursive_wrapper<unary_node<tags::negate> >,
 boost::recursive_wrapper<binary_node<tags::plus> >,
 boost::recursive_wrapper<binary_node<tags::minus> >,
 boost::recursive_wrapper<binary_node<tags::mult> >,
@@ -185,6 +194,7 @@ boost::recursive_wrapper<regex_replace_node>
 > expr_node;
 
 template <typename Tag> struct make_op;
+template <> struct make_op<tags::negate> { typedef std::negate<value_type> type;};
 template <> struct make_op<tags::plus> { typedef std::plus<value_type> type;};
 template <> struct make_op<tags::minus> { typedef std::minus<value_type> type;};
 template <> struct make_op<tags::mult> { typedef std::multiplies<value_type> type;};
@@ -288,6 +298,11 @@ struct function_call
 };
 
 // ops
+
+inline expr_node& operator- (expr_node& expr)
+{
+    return expr = unary_node<tags::negate>(expr);
+}
 
 inline expr_node & operator += ( expr_node &left ,const expr_node &right)
 {

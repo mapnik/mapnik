@@ -269,8 +269,6 @@ public:
 
             transform *= mtx;
             double scl = transform.scale();
-            curved_stroked_trans.transformer(transform);
-            curved_trans.transformer(transform);
             //curved_.approximation_method(curve_inc);
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
@@ -377,8 +375,6 @@ public:
 
             transform *= mtx;
             double scl = transform.scale();
-            curved_stroked_trans.transformer(transform);
-            curved_trans.transformer(transform);
             //curved_.approximation_method(curve_inc);
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
