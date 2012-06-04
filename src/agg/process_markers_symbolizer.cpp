@@ -88,7 +88,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         {
             if (!(*mark)->is_vector())
             {
-                MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: markers_symbolizer do not yet support SVG markers";
+                MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: markers_symbolizer does not yet support non-SVG markers";
 
                 return;
             }

@@ -1387,7 +1387,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             {
                 if (!(*mark)->is_vector())
                 {
-                    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: markers_symbolizer does not yet support SVG markers";
+                    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: markers_symbolizer does not yet support non-SVG markers";
 
                     return;
                 }
