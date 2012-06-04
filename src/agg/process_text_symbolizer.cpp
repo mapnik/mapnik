@@ -35,7 +35,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, *feature, prj_trans,
-            width_, height_,
+            detector_->extent().width(), detector_->extent().height(),
             scale_factor_,
             t_, font_manager_, *detector_, query_extent_);
 
