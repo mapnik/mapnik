@@ -362,7 +362,7 @@ bool box2d<T>::from_string(const std::string& s)
 
     if (success)
     {
-        init(d[0], d[1], d[2], d[3]);
+        init(static_cast<T>(d[0]),static_cast<T>(d[1]),static_cast<T>(d[2]),static_cast<T>(d[3]));
     }
 
     return success;
