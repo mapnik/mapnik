@@ -42,8 +42,8 @@ enum marker_placement_enum {
 DEFINE_ENUM( marker_placement_e, marker_placement_enum );
 
 enum marker_type_enum {
-    ARROW,
-    ELLIPSE,
+    MARKER_ARROW,
+    MARKER_ELLIPSE,
     marker_type_enum_MAX
 };
 

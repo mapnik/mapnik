@@ -178,7 +178,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
         double dx = w + (2*strk_width);
         double dy = h + (2*strk_width);
 
-        if (marker_type == ARROW)
+        if (marker_type == MARKER_ARROW)
         {
             extent = arrow_.extent();
             double x1 = extent.minx();
@@ -239,7 +239,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             {
 
                 agg::path_storage marker;
-                if (marker_type == ARROW)
+                if (marker_type == MARKER_ARROW)
                     marker.concat_path(arrow_);
 
                 path_type path(t_,geom,prj_trans);
@@ -253,7 +253,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 {
                     agg::trans_affine matrix;
 
-                    if (marker_type == ELLIPSE)
+                    if (marker_type == MARKER_ELLIPSE)
                     {
                         // todo proper bbox - this is buggy
                         agg::ellipse c(x_t, y_t, rx, ry);
