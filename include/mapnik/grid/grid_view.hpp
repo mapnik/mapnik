@@ -201,7 +201,7 @@ private:
     feature_type const& features_;
 };
 
-typedef hit_grid_view<mapnik::ImageData<boost::uint16_t> > grid_view;
+typedef hit_grid_view<mapnik::ImageData<int> > grid_view;
 
 }
 
