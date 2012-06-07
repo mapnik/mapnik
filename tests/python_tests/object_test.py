@@ -68,7 +68,8 @@ def test_shieldsymbolizer_init():
     # strings for PathExpressions... should we pass objects?
     eq_(s.filename, '../data/images/dummy.png')
 
-    eq_(s.transform, 'matrix(1, 0, 0, 1, 0, 0)')
+    # 11c34b1: default transform list is empty, not identity matrix
+    eq_(s.transform, '')
 
     eq_(len(s.fontset.names), 0)
 
@@ -78,6 +79,13 @@ def test_shieldsymbolizer_init():
 #@raises(RuntimeError)
 #def test_shieldsymbolizer_missing_image():
 #    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../#data/images/broken.png'))
+
+# ShieldSymbolizer modification
+def test_shieldsymbolizer_modify():
+    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
+    # transform expression
+    s.transform = "rotate(30+[a]) scale(2*[sx] [sy])"
+    eq_(s.transform, "rotate((30+[a])) scale(2*[sx], [sy])")
 
 def test_polygonsymbolizer_init():
     p = mapnik.PolygonSymbolizer()
