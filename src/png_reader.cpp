@@ -119,6 +119,13 @@ void png_reader::init()
         throw image_reader_exception("failed to create info_ptr");
     }
 
+    if (setjmp(png_jmpbuf(png_ptr)))
+    {
+        png_destroy_read_struct(&png_ptr,0,0);
+        fclose(fp);
+        throw image_reader_exception("failed to read");
+    }
+
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
 
     png_set_sig_bytes(png_ptr,8);
@@ -166,6 +173,13 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
         png_destroy_read_struct(&png_ptr,0,0);
         fclose(fp);
         throw image_reader_exception("failed to create info_ptr");
+    }
+
+    if (setjmp(png_jmpbuf(png_ptr)))
+    {
+        png_destroy_read_struct(&png_ptr,0,0);
+        fclose(fp);
+        throw image_reader_exception("failed to read");
     }
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
