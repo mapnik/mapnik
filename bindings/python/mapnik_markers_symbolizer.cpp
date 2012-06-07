@@ -27,6 +27,7 @@
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 #include "mapnik_svg.hpp"
+#include "mapnik_enumeration.hpp"
 
 using mapnik::markers_symbolizer;
 using mapnik::symbolizer_with_image;
@@ -90,6 +91,16 @@ void export_markers_symbolizer()
 {
     using namespace boost::python;
 
+    mapnik::enumeration_<mapnik::marker_placement_e>("marker_placement")
+        .value("POINT_PLACEMENT",mapnik::MARKER_POINT_PLACEMENT)
+        .value("LINE_PLACEMENT",mapnik::MARKER_LINE_PLACEMENT)
+        ;
+
+    mapnik::enumeration_<mapnik::marker_type_e>("marker_type")
+        .value("ARROW",mapnik::MARKER_ARROW)
+        .value("ELLIPSE",mapnik::MARKER_ELLIPSE)
+        ;
+
     class_<markers_symbolizer>("MarkersSymbolizer",
                                init<>("Default Markers Symbolizer - blue arrow"))
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
@@ -134,5 +145,13 @@ void export_markers_symbolizer()
                       return_value_policy<copy_const_reference>()),
                       &markers_symbolizer::set_stroke,
                       "Set/get the marker stroke (outline)")
+        .add_property("marker_type",
+                      &markers_symbolizer::get_marker_type,
+                      &markers_symbolizer::set_marker_type,
+                      "Set/get the marker-type")
+        .add_property("placement",
+                      &markers_symbolizer::get_marker_placement,
+                      &markers_symbolizer::set_marker_placement,
+                      "Set/get the marker placement")
         ;
 }

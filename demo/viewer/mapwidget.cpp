@@ -534,7 +534,7 @@ void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     try
     {          
         ren.apply();
-        boost::uint16_t *imdata = static_cast<boost::uint16_t*>(buf.raw_data());
+        int * imdata = static_cast<int*>(buf.raw_data());
         
         QImage image(width,height,QImage::Format_RGB32);
         for (unsigned i = 0 ; i < height ; ++i)

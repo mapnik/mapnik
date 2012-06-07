@@ -45,12 +45,12 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
                                proj_transform const& prj_trans)
 {
     typedef coord_transform<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
+    typedef agg::renderer_base<mapnik::pixfmt_gray32> ren_base;
     typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    mapnik::pixfmt_gray16 pixf(buf);
+    mapnik::pixfmt_gray32 pixf(buf);
 
     ren_base renb(pixf);
     renderer ren(renb);
@@ -67,7 +67,7 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     }
 
     // render id
-    ren.color(mapnik::gray16(feature->id()));
+    ren.color(mapnik::gray32(feature->id()));
     agg::render_scanlines(*ras_ptr, sl, ren);
 
     // add feature properties to grid cache

@@ -26,6 +26,7 @@
 #include <mapnik/xml_node.hpp>
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/transform_expression_grammar.hpp>
 
 // boost
 #include <boost/format.hpp>
@@ -57,6 +58,7 @@ public:
     mapnik::css_color_grammar<std::string::const_iterator> color_grammar;
     mapnik::expression_grammar<std::string::const_iterator> expr_grammar;
     path_expression_grammar<std::string::const_iterator> path_expr_grammar;
+    transform_expression_grammar<std::string::const_iterator> transform_expr_grammar;
 };
 
 } //ns mapnik

@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/projection.hpp>
 
 // boost
 #include <boost/utility.hpp>

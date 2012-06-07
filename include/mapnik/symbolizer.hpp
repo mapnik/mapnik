@@ -28,6 +28,7 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/metawriter.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/transform_expression.hpp>
 
 // boost
 #include <boost/array.hpp>
@@ -36,7 +37,10 @@
 namespace mapnik
 {
 
-typedef boost::array<double,6> transform_type;
+typedef transform_list_ptr transform_type;
+
+MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr, Feature const& feature,
+                                    transform_type const& trans_expr);
 
 class Map;
 

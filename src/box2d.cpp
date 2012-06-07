@@ -31,6 +31,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
 
+// agg
+#include "agg_trans_affine.h"
+
 namespace mapnik
 {
 template <typename T>
@@ -60,6 +63,22 @@ box2d<T>::box2d(const box2d &rhs)
 /*{
   init(rhs.minx_,rhs.miny_,rhs.maxx_,rhs.maxy_);
   }*/
+
+template <typename T>
+box2d<T>::box2d(const box2d_type &rhs, const agg::trans_affine& tr)
+{
+    double x0 = rhs.minx_, y0 = rhs.miny_;
+    double x1 = rhs.maxx_, y1 = rhs.miny_;
+    double x2 = rhs.maxx_, y2 = rhs.maxy_;
+    double x3 = rhs.minx_, y3 = rhs.maxy_;
+    tr.transform(&x0, &y0);
+    tr.transform(&x1, &y1);
+    tr.transform(&x2, &y2);
+    tr.transform(&x3, &y3);
+    init(x0, y0, x2, y2);
+    expand_to_include(x1, y1);
+    expand_to_include(x3, y3);
+}
 
 template <typename T>
 #if !defined(__SUNPRO_CC)
@@ -362,7 +381,7 @@ bool box2d<T>::from_string(const std::string& s)
 
     if (success)
     {
-        init(d[0], d[1], d[2], d[3]);
+        init(static_cast<T>(d[0]),static_cast<T>(d[1]),static_cast<T>(d[2]),static_cast<T>(d[3]));
     }
 
     return success;
@@ -435,6 +454,29 @@ T box2d<T>::operator[] (int index) const
     default:
         throw std::out_of_range("index out of range, max value is 3, min value is -4 ");
     }
+}
+
+template <typename T>
+box2d<T> box2d<T>::operator*(agg::trans_affine const& tr) const
+{
+    return box2d<T>(*this, tr);
+}
+
+template <typename T>
+box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
+{
+    double x0 = minx_, y0 = miny_;
+    double x1 = maxx_, y1 = miny_;
+    double x2 = maxx_, y2 = maxy_;
+    double x3 = minx_, y3 = maxy_;
+    tr.transform(&x0, &y0);
+    tr.transform(&x1, &y1);
+    tr.transform(&x2, &y2);
+    tr.transform(&x3, &y3);
+    init(x0, y0, x2, y2);
+    expand_to_include(x1, y1);
+    expand_to_include(x3, y3);
+    return *this;
 }
 
 template class box2d<int>;

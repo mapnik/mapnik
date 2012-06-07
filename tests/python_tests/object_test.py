@@ -114,12 +114,18 @@ def test_pointsymbolizer_init():
     eq_(p.placement, mapnik.point_placement.INTERIOR)
 
 
-# PointSymbolizer initialization
+# MarkersSymbolizer initialization
 def test_markersymbolizer_init():
     p = mapnik.MarkersSymbolizer() 
     eq_(p.allow_overlap, False)
     eq_(p.opacity,1)
     eq_(p.filename,'')
+    eq_(p.marker_type,mapnik.marker_type.ARROW)
+    eq_(p.placement,mapnik.marker_placement.LINE_PLACEMENT)
+    eq_(p.fill,mapnik.Color(0,0,255))
+    eq_(p.ignore_placement,False)
+    eq_(p.spacing,100)
+    eq_(p.max_error,0.2)
 
     stroke = mapnik.Stroke()
     stroke.color = mapnik.Color('black')
@@ -290,7 +296,6 @@ def test_map_init_from_string():
         m.base = 'foo'
         mapnik.load_map_from_string(m, map_string, True, ".")
         eq_(m.base, '.')
-        raise(Todo("Need to write more map property tests in 'object_test.py'..."))
     except RuntimeError, e:
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):

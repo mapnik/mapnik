@@ -120,9 +120,8 @@ struct converter_traits<T, mapnik::dash_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
-
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        double scale_factor = boost::fusion::at_c<5>(args);
+        double scale_factor = boost::fusion::at_c<6>(args);
         stroke const& stroke_ = sym.get_stroke();
         dash_array const& d = stroke_.get_dash_array();
         dash_array::const_iterator itr = d.begin();
@@ -149,7 +148,7 @@ struct converter_traits<T, mapnik::stroke_tag>
         stroke const& stroke_ = sym.get_stroke();
         set_join_caps(stroke_,geom);
         geom.generator().miter_limit(stroke_.get_miterlimit());
-        double scale_factor = boost::fusion::at_c<5>(args);
+        double scale_factor = boost::fusion::at_c<6>(args);
         geom.generator().width(stroke_.get_width() * scale_factor);
     }
 };
@@ -179,10 +178,8 @@ struct converter_traits<T,mapnik::transform_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
-        typename boost::mpl::at<Args,boost::mpl::int_<3> >::type tr = boost::fusion::at_c<3>(args);
-        typename boost::mpl::at<Args,boost::mpl::int_<4> >::type prj_trans = boost::fusion::at_c<4>(args);
-        geom.set_proj_trans(prj_trans);
-        geom.set_trans(tr);
+        geom.set_proj_trans(boost::fusion::at_c<4>(args));
+        geom.set_trans(boost::fusion::at_c<3>(args));
     }
 };
 
@@ -191,21 +188,19 @@ template <typename T>
 struct converter_traits<T,mapnik::affine_transform_tag>
 {
     typedef T geometry_type;
+    typedef agg::conv_transform<geometry_type, agg::trans_affine const>
+        conv_base_type;
 
-    struct conv_type : public agg::conv_transform<geometry_type>
+    struct conv_type : public conv_base_type
     {
-        agg::trans_affine trans_;
-
         conv_type(geometry_type& geom)
-            : agg::conv_transform<geometry_type>(geom, trans_) {}
+            : conv_base_type(geom, agg::trans_affine::identity) {}
     };
 
     template <typename Args>
     static void setup(geometry_type & geom, Args & args)
     {
-        typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        boost::array<double,6> const& m = sym.get_transform();
-        geom.trans_.load_from(&m[0]);
+        geom.transformer(boost::fusion::at_c<5>(args));
     }
 };
 
@@ -303,15 +298,16 @@ struct dispatcher
 
 
 
-template <typename B, typename R, typename S, typename P, typename T, typename C >
+template <typename B, typename R, typename S, typename T, typename P, typename A, typename C >
 struct vertex_converter : private boost::noncopyable
 {
     typedef C conv_types;
     typedef B bbox_type;
     typedef R rasterizer_type;
     typedef S symbolizer_type;
-    typedef P proj_trans_type;
     typedef T trans_type;
+    typedef P proj_trans_type;
+    typedef A affine_trans_type;
     typedef typename boost::fusion::vector
     <
     bbox_type const&,
@@ -319,16 +315,20 @@ struct vertex_converter : private boost::noncopyable
     symbolizer_type const&,
     trans_type const&,
     proj_trans_type const&,
+    affine_trans_type const&,
     double //scale-factor
     > args_type;
 
     vertex_converter(bbox_type const& b, rasterizer_type & ras,
                      symbolizer_type const& sym, trans_type & tr,
                      proj_trans_type const& prj_trans,
+                     affine_trans_type const& affine_trans,
                      double scale_factor)
-        : disp_(args_type(boost::cref(b),boost::ref(ras),
-                          boost::cref(sym),boost::cref(tr),
-                          boost::cref(prj_trans),scale_factor)) {}
+        : disp_(args_type(boost::cref(b), boost::ref(ras),
+                          boost::cref(sym), boost::cref(tr),
+                          boost::cref(prj_trans),
+                          boost::cref(affine_trans),
+                          scale_factor)) {}
 
     template <typename Geometry>
     void apply(Geometry & geom)

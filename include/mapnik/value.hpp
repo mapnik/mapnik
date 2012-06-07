@@ -68,11 +68,28 @@ inline void to_utf8(UnicodeString const& input, std::string & target)
     }
 }
 
-struct value_null {};
+struct value_null
+{
+    template <typename T>
+    value_null operator+ (T const& other) const { return *this; }
+
+    template <typename T>
+    value_null operator- (T const& other) const { return *this; }
+
+    template <typename T>
+    value_null operator* (T const& other) const { return *this; }
+
+    template <typename T>
+    value_null operator/ (T const& other) const { return *this; }
+
+    template <typename T>
+    value_null operator% (T const& other) const { return *this; }
+};
 
 typedef boost::variant<value_null,bool,int,double,UnicodeString> value_base;
 
 namespace impl {
+
 struct equals
     : public boost::static_visitor<bool>
 {
@@ -738,7 +755,9 @@ struct to_int : public boost::static_visitor<double>
     }
 };
 
-}
+} // namespace impl
+
+namespace value_adl_barrier {
 
 class value
 {
@@ -795,6 +814,8 @@ public:
     {
         return base_;
     }
+
+    bool is_null() const;
 
     bool to_bool() const
     {
@@ -866,6 +887,52 @@ operator << (std::basic_ostream<charT,traits>& out,
     out << v.to_string();
     return out;
 }
+
+} // namespace value_adl_barrier
+
+using value_adl_barrier::value;
+using value_adl_barrier::operator<<;
+
+namespace impl {
+
+struct is_null : public boost::static_visitor<bool>
+{
+    bool operator() (value const& val) const
+    {
+        return val.is_null();
+    }
+
+    bool operator() (value_null const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return true;
+    }
+
+    template <typename T>
+    bool operator() (T const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return false;
+    }
+
+    template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
+    bool operator() (boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& val)
+        const
+    {
+        return boost::apply_visitor(*this, val);
+    }
+};
+
+} // namespace impl
+
+// constant visitor instance substitutes overloaded function
+impl::is_null const is_null = impl::is_null();
+
+inline bool value::is_null() const
+{
+    return boost::apply_visitor(impl::is_null(), base_);
 }
+
+} // namespace mapnik
 
 #endif // MAPNIK_VALUE_HPP

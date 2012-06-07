@@ -379,7 +379,7 @@ public:
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
 
-            mapnik::gray16 color(feature_id);
+            mapnik::gray32 color(feature_id);
 
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
