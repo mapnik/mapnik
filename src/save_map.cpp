@@ -244,8 +244,10 @@ public:
         {
             set_attr( sym_node, "fill-opacity", sym.get_opacity() );
         }
-
-        set_attr( sym_node, "height", to_expression_string(*sym.height()) );
+        if (sym.height())
+        {
+            set_attr( sym_node, "height", mapnik::to_expression_string(*sym.height()) );
+        }
 
         add_metawriter_attributes(sym_node, sym);
     }
@@ -255,8 +257,9 @@ public:
         ptree & sym_node = rule_.push_back(
             ptree::value_type("MarkersSymbolizer", ptree()))->second;
         markers_symbolizer dfl(parse_path("")); //TODO: Parameter?
-        std::string const& filename = path_processor_type::to_string( *sym.get_filename());
-        if ( ! filename.empty() ) {
+        if (sym.get_filename())
+        {
+            std::string filename = path_processor_type::to_string(*sym.get_filename());
             set_attr( sym_node, "file", filename );
         }
         if (sym.get_allow_overlap() != dfl.get_allow_overlap() || explicit_defaults_)
@@ -299,9 +302,9 @@ public:
         {
             set_attr( sym_node, "placement", sym.get_marker_placement() );
         }
-        std::string tr_str = sym.get_image_transform_string();
-        if (tr_str != "matrix(1, 0, 0, 1, 0, 0)" || explicit_defaults_ )
+        if (sym.get_image_transform())
         {
+            std::string tr_str = sym.get_image_transform_string();
             set_attr( sym_node, "image-transform", tr_str );
         }
 
@@ -349,8 +352,9 @@ private:
 
     void add_image_attributes(ptree & node, const symbolizer_with_image & sym)
     {
-        std::string const& filename = path_processor_type::to_string( *sym.get_filename());
-        if ( ! filename.empty() ) {
+        if (sym.get_filename())
+        {
+            std::string filename = path_processor_type::to_string( *sym.get_filename());
             set_attr( node, "file", filename );
         }
         if (sym.get_opacity() != 1.0 || explicit_defaults_ )
@@ -358,6 +362,7 @@ private:
             set_attr( node, "opacity", sym.get_opacity() );
         }
     }
+
     void add_font_attributes(ptree & node, const text_symbolizer & sym)
     {
         text_placements_ptr p = sym.get_placement_options();
@@ -385,7 +390,6 @@ private:
             }
         }
     }
-
 
     void add_stroke_attributes(ptree & node, const stroke & strk)
     {
@@ -434,8 +438,8 @@ private:
             }
             set_attr( node, "stroke-dasharray", os.str() );
         }
-
     }
+
     void add_metawriter_attributes(ptree & node, symbolizer_base const& sym)
     {
         if (!sym.get_metawriter_name().empty() || explicit_defaults_) {
@@ -444,13 +448,11 @@ private:
         if (!sym.get_metawriter_properties_overrides().empty() || explicit_defaults_) {
             set_attr(node, "meta-output", sym.get_metawriter_properties_overrides().to_string());
         }
-
-        std::string tr_str = sym.get_transform_string();
-        if (tr_str != "matrix(1, 0, 0, 1, 0, 0)" || explicit_defaults_ ) // FIXME !! 
+        if (sym.get_transform())
         {
+            std::string tr_str = sym.get_transform_string();
             set_attr( node, "transform", tr_str );
         }
-
     }
 
     ptree & rule_;

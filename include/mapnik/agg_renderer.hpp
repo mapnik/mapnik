@@ -115,6 +115,13 @@ public:
 
     void painted(bool painted);
 
+protected:
+    template <typename R>
+    void debug_draw_box(R& buf, box2d<double> const& extent,
+                        double x, double y, double angle = 0.0);
+    void debug_draw_box(box2d<double> const& extent,
+                        double x, double y, double angle = 0.0);
+
 private:
     buffer_type & pixmap_;
     boost::shared_ptr<buffer_type> internal_buffer_;

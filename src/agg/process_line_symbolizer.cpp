@@ -76,6 +76,9 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     pixfmt_comp_type pixf(buf);
     renderer_base renb(pixf);
     
+    agg::trans_affine tr;
+    evaluate_transform(tr, *feature, sym.get_transform());
+
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
         typedef agg::renderer_outline_aa<renderer_base> renderer_type;
@@ -89,8 +92,9 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         set_join_caps_aa(stroke_,ras);
 
         typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
-        vertex_converter<box2d<double>,rasterizer_type,line_symbolizer, proj_transform, CoordTransform,conv_types>
-            converter(query_extent_,ras,sym,t_,prj_trans,scaled);
+        vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
+            converter(query_extent_,ras,sym,t_,prj_trans,tr,scaled);
 
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
@@ -111,8 +115,9 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     else
     {
         typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
-        vertex_converter<box2d<double>,rasterizer,line_symbolizer, proj_transform, CoordTransform,conv_types>
-            converter(query_extent_,*ras_ptr,sym,t_,prj_trans,scale_factor_);
+        vertex_converter<box2d<double>, rasterizer, line_symbolizer,
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
+            converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
