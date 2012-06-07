@@ -23,7 +23,7 @@
 //mapnik
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/map.hpp>
-#include <mapnik/parse_transform.hpp>
+#include <mapnik/transform_processor.hpp>
 
 namespace mapnik {
 

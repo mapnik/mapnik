@@ -27,9 +27,28 @@
 
 namespace mapnik {
 
+transform_list_ptr parse_transform(std::string const& str)
+{
+    return parse_transform(str, "utf-8");
+}
+
+transform_list_ptr parse_transform(std::string const& str, std::string const& encoding)
+{
+    transform_list_ptr tl = boost::make_shared<transform_list>();
+    transcoder tc(encoding);
+    expression_grammar<std::string::const_iterator> ge(tc);
+    transform_expression_grammar__string gte(ge);
+
+    if (!parse_transform(*tl, str, gte))
+    {
+        tl.reset();
+    }
+    return tl;
+}
+
 bool parse_transform(transform_list& transform,
-                     std::string const & str,
-                     transform_expression_grammar<std::string::const_iterator> const& g)
+                     std::string const& str,
+                     transform_expression_grammar__string const& g)
 {
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
@@ -43,4 +62,4 @@ bool parse_transform(transform_list& transform,
     return (r && itr==end);
 }
 
-}
+} // namespace mapnik
