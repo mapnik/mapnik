@@ -67,13 +67,13 @@ class _MapnikMetaclass(BoostPythonMetaclass):
 _injector = _MapnikMetaclass('_injector', (object, ), {})
 
 def Filter(*args,**kwargs):
-    warnings.warn("'Filter' is deprecated and will be removed in Mapnik 2.0.1, use 'Expression' instead",
+    warnings.warn("'Filter' is deprecated and will be removed in Mapnik 3.x, use 'Expression' instead",
     DeprecationWarning, 2)
     return Expression(*args, **kwargs)
 
 class Envelope(Box2d):
     def __init__(self, *args, **kwargs):
-        warnings.warn("'Envelope' is deprecated and will be removed in Mapnik 2.0.1, use 'Box2d' instead",
+        warnings.warn("'Envelope' is deprecated and will be removed in Mapnik 3.x, use 'Box2d' instead",
         DeprecationWarning, 2)
         Box2d.__init__(self, *args, **kwargs)
 
