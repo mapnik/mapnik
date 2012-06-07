@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/rule.hpp>
-#include <mapnik/parse_transform.hpp>
+#include <mapnik/transform_processor.hpp>
 // boost
 #include <boost/utility.hpp>
 #include <boost/variant.hpp>
