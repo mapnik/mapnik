@@ -31,9 +31,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 
-// agg
-#include <agg_trans_affine.h>
-
 // stl
 #include <vector>
 
@@ -53,7 +50,8 @@ struct matrix_node
     explicit matrix_node(double const* m)
         : a_(m[0]), b_(m[1]), c_(m[2]), d_(m[3]), e_(m[4]), f_(m[5]) {}
 
-    explicit matrix_node(agg::trans_affine const& m)
+    template <typename T>
+    explicit matrix_node(T const& m)
         : a_(m.sx), b_(m.shy), c_(m.shx), d_(m.sy), e_(m.tx), f_(m.ty) {}
 
     matrix_node(expr_node const& a, expr_node const& b, expr_node const& c,
@@ -115,57 +113,57 @@ struct skewY_node
 
 namespace detail {
 
-    // boost::spirit::traits::clear<T>(T& val) [with T = boost::variant<...>]
-    // attempts to assign to the variant's current value a default-constructed
-    // value ot the same type, which not only requires that each value-type is
-    // default-constructible, but also makes little sense with our variant of
-    // transform nodes...
+// boost::spirit::traits::clear<T>(T& val) [with T = boost::variant<...>]
+// attempts to assign to the variant's current value a default-constructed
+// value ot the same type, which not only requires that each value-type is
+// default-constructible, but also makes little sense with our variant of
+// transform nodes...
 
-    typedef boost::variant< identity_node
-                          , matrix_node
-                          , translate_node
-                          , scale_node
-                          , rotate_node
-                          , skewX_node
-                          , skewY_node
-                          > transform_variant;
+typedef boost::variant< identity_node
+                        , matrix_node
+                        , translate_node
+                        , scale_node
+                        , rotate_node
+                        , skewX_node
+                        , skewY_node
+                        > transform_variant;
 
-    // ... thus we wrap the variant-type in a distinct type and provide
-    // a custom clear overload, which resets the value to identity_node
+// ... thus we wrap the variant-type in a distinct type and provide
+// a custom clear overload, which resets the value to identity_node
 
-    struct transform_node
+struct transform_node
+{
+    transform_variant base_;
+
+    transform_node()
+        : base_() {}
+
+    template <typename T>
+    transform_node(T const& val)
+        : base_(val) {}
+
+    template <typename T>
+    transform_node& operator= (T const& val)
     {
-        transform_variant base_;
-
-        transform_node()
-            : base_() {}
-
-        template <typename T>
-        transform_node(T const& val)
-            : base_(val) {}
-
-        template <typename T>
-        transform_node& operator= (T const& val)
-        {
-            base_ = val;
-            return *this;
-        }
-
-        transform_variant const& operator* () const
-        {
-            return base_;
-        }
-
-        transform_variant& operator* ()
-        {
-            return base_;
-        }
-    };
-
-    inline void clear(transform_node& val)
-    {
-        val.base_ = identity_node();
+        base_ = val;
+        return *this;
     }
+
+    transform_variant const& operator* () const
+    {
+        return base_;
+    }
+
+    transform_variant& operator* ()
+    {
+        return base_;
+    }
+};
+
+inline void clear(transform_node& val)
+{
+    val.base_ = identity_node();
+}
 
 } // namespace detail
 
