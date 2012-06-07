@@ -23,8 +23,25 @@
 //mapnik
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/parse_transform.hpp>
 
 namespace mapnik {
+
+void evaluate_transform(agg::trans_affine& tr, Feature const& feature,
+                        transform_list_ptr const& trans_expr)
+{
+    #ifdef MAPNIK_LOG
+    MAPNIK_LOG_DEBUG(transform) << "transform: evaluate "
+        << (trans_expr
+            ? transform_processor_type::to_string(*trans_expr)
+            : std::string("null"));
+    #endif
+
+    if (trans_expr)
+    {
+        transform_processor_type::evaluate(tr, feature, *trans_expr);
+    }
+}
 
 // default ctor
 symbolizer_base::symbolizer_base()
@@ -36,12 +53,6 @@ symbolizer_base::symbolizer_base()
       clip_(true),
       smooth_value_(0.0)
 {
-    affine_transform_[0] = 1.0;
-    affine_transform_[1] = 0.0;
-    affine_transform_[2] = 0.0;
-    affine_transform_[3] = 1.0;
-    affine_transform_[4] = 0.0;
-    affine_transform_[5] = 0.0;
 }
 
 // copy ctor
@@ -107,6 +118,13 @@ composite_mode_e symbolizer_base::comp_op() const
 void symbolizer_base::set_transform(transform_type const& affine_transform)
 {
     affine_transform_ = affine_transform;
+
+    #ifdef MAPNIK_LOG
+    MAPNIK_LOG_DEBUG(load_map) << "map_parser: set_transform: "
+        << (affine_transform_
+            ? transform_processor_type::to_string(*affine_transform_)
+            : std::string("null"));
+    #endif
 }
 
 transform_type const& symbolizer_base::get_transform() const
@@ -116,11 +134,10 @@ transform_type const& symbolizer_base::get_transform() const
 
 std::string symbolizer_base::get_transform_string() const
 {
-    std::stringstream ss;
-    ss << "matrix(" << affine_transform_[0] << ", " << affine_transform_[1] << ", "
-       << affine_transform_[2] << ", " << affine_transform_[3] << ", "
-       << affine_transform_[4] << ", " << affine_transform_[5] << ")";
-    return ss.str();
+    if (affine_transform_)
+        return transform_processor_type::to_string(*affine_transform_);
+    else
+        return std::string();
 }
 
 void symbolizer_base::set_clip(bool clip)
@@ -149,12 +166,6 @@ symbolizer_with_image::symbolizer_with_image(path_expression_ptr file)
     : image_filename_( file ),
       image_opacity_(1.0f)
 {
-    image_transform_[0] = 1.0;
-    image_transform_[1] = 0.0;
-    image_transform_[2] = 0.0;
-    image_transform_[3] = 1.0;
-    image_transform_[4] = 0.0;
-    image_transform_[5] = 0.0;
 }
 
 symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
@@ -187,6 +198,13 @@ float symbolizer_with_image::get_opacity() const
 void symbolizer_with_image::set_image_transform(transform_type const& tr)
 {
     image_transform_ = tr;
+
+    #ifdef MAPNIK_LOG
+    MAPNIK_LOG_DEBUG(load_map) << "map_parser: set_image_transform: "
+        << (image_transform_
+            ? transform_processor_type::to_string(*image_transform_)
+            : std::string("null"));
+    #endif
 }
 
 transform_type const& symbolizer_with_image::get_image_transform() const
@@ -196,11 +214,10 @@ transform_type const& symbolizer_with_image::get_image_transform() const
 
 std::string symbolizer_with_image::get_image_transform_string() const
 {
-    std::stringstream ss;
-    ss << "matrix(" << image_transform_[0] << ", " << image_transform_[1] << ", "
-       << image_transform_[2] << ", " << image_transform_[3] << ", "
-       << image_transform_[4] << ", " << image_transform_[5] << ")";
-    return ss.str();
+    if (image_transform_)
+        return transform_processor_type::to_string(*image_transform_);
+    else
+        return std::string();
 }
 
 } // end of namespace mapnik

@@ -150,6 +150,21 @@ public:
         init_marker();
     }
 
+    box2d<double> const& get_marker_extent() const
+    {
+        return marker_ext_;
+    }
+
+    double get_marker_height() const
+    {
+        return marker_h_;
+    }
+
+    double get_marker_width() const
+    {
+        return marker_w_;
+    }
+
     bool next();
     pixel_position get_marker_position(text_path const& p);
     marker & get_marker() const;
