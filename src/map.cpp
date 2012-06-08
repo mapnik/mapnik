@@ -169,7 +169,7 @@ boost::optional<feature_type_style const&> Map::find_style(std::string const& na
         return boost::optional<feature_type_style const&>() ;
 }
 
-bool Map::insert_metawriter(std::string const& name, metawriter_ptr const& writer)
+bool Map::insert_metawriter(std::string const& name, metawriter const& writer)
 {
     return metawriters_.insert(make_pair(name, writer)).second;
 }
@@ -179,16 +179,16 @@ void Map::remove_metawriter(std::string const& name)
     metawriters_.erase(name);
 }
 
-metawriter_ptr Map::find_metawriter(std::string const& name) const
+metawriter Map::find_metawriter(std::string const& name) const
 {
-    std::map<std::string, metawriter_ptr>::const_iterator itr = metawriters_.find(name);
+    std::map<std::string, metawriter>::const_iterator itr = metawriters_.find(name);
     if (itr != metawriters_.end())
         return itr->second;
     else
-        return metawriter_ptr();
+        return metawriter();
 }
 
-std::map<std::string,metawriter_ptr> const& Map::metawriters() const
+std::map<std::string,metawriter> const& Map::metawriters() const
 {
     return metawriters_;
 }

@@ -27,13 +27,12 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/projection.hpp>
-
 // boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 #include <boost/concept_check.hpp>
-
+#include <boost/variant.hpp>
 // stl
 #include <set>
 #include <string>
@@ -79,7 +78,7 @@ private:
 };
 
 
-/** All properties to be output by a metawriter. */
+// All properties to be output by a metawriter.
 class metawriter_properties : public std::set<std::string>
 {
 public:
@@ -90,75 +89,22 @@ public:
     std::string to_string() const;
 };
 
-/** Abstract baseclass for all metawriter classes. */
-class metawriter
+// Abstract baseclass for all metawriter classes.
+class metawriter_base
 {
-public:
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
-    metawriter(metawriter_properties dflt_properties) :
+public:    
+    explicit metawriter_base(metawriter_properties dflt_properties) :
         dflt_properties_(dflt_properties),
         width_(0),
         height_(0) {}
-    virtual ~metawriter() {}
-    /** Output a rectangular area.
-     * \param box Area (in pixel coordinates)
-     * \param feature The feature being processed
-     * \param prj_trans Projection transformation
-     * \param t Coordinate transformation
-     * \param properties List of properties to output
-     */
-    virtual void add_box(box2d<double> const& box, Feature const& feature,
-                         CoordTransform const& t,
-                         metawriter_properties const& properties)=0;
-    virtual void add_text(boost::ptr_vector<text_path> &placements,
-                          box2d<double> const& extents,
-                          Feature const& feature,
-                          CoordTransform const& t,
-                          metawriter_properties const& properties)=0;
-    virtual void add_polygon(path_type & path,
-                             Feature const& feature,
-                             CoordTransform const& t,
-                             metawriter_properties const& properties)=0;
-    virtual void add_line(path_type & path,
-                          Feature const& feature,
-                          CoordTransform const& t,
-                          metawriter_properties const& properties)=0;
-
-    /** Start processing.
-     * Write file header, init database connection, ...
-     *
-     * \param properties metawriter_property_map object with userdefined values.
-     *        Useful for setting filename etc.
-     */
-    virtual void start(metawriter_property_map const& properties)
-    {
-        boost::ignore_unused_variable_warning(properties);
-    }
-
-    /** Stop processing.
-     * Write file footer, close database connection, ...
-     */
-    virtual void stop() {}
-    /** Set output size (pixels).
-     * All features that are completely outside this size are discarded.
-     */
-    void set_size(int width, int height) { width_ = width; height_ = height; }
-    /** Set Map object's srs. */
-    virtual void set_map_srs(projection const& proj) { /* Not required when working with image coordinates. */ }
-    /** Return the list of default properties. */
+    
+    void set_size(int width, int height) { width_ = width; height_ = height; }    
     metawriter_properties const& get_default_properties() const { return dflt_properties_;}
 protected:
     metawriter_properties dflt_properties_;
-    /** Output width (pixels). */
     int width_;
-    /** Output height (pixels). */
     int height_;
 };
-
-/** Shared pointer to metawriter object. */
-typedef boost::shared_ptr<metawriter> metawriter_ptr;
-/** Metawriter object + properties. */
-typedef std::pair<metawriter_ptr, metawriter_properties> metawriter_with_properties;
 
 }
 

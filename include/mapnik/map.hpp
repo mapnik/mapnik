@@ -28,7 +28,7 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/metawriter.hpp>
+#include <mapnik/metawriter_factory.hpp>
 #include <mapnik/params.hpp>
 
 // boost
@@ -72,7 +72,7 @@ private:
     boost::optional<color> background_;
     boost::optional<std::string> background_image_;
     std::map<std::string,feature_type_style> styles_;
-    std::map<std::string,metawriter_ptr> metawriters_;
+    std::map<std::string,metawriter> metawriters_;
     std::map<std::string,font_set> fontsets_;
     std::vector<layer> layers_;
     aspect_fix_mode aspectFixMode_;
@@ -87,7 +87,7 @@ public:
     typedef std::map<std::string,feature_type_style>::iterator style_iterator;
     typedef std::map<std::string,font_set>::const_iterator const_fontset_iterator;
     typedef std::map<std::string,font_set>::iterator fontset_iterator;
-    typedef std::map<std::string,metawriter_ptr>::const_iterator const_metawriter_iterator;
+    typedef std::map<std::string,metawriter>::const_iterator const_metawriter_iterator;
 
     /*! \brief Default constructor.
      *
@@ -173,7 +173,7 @@ public:
      *  @return true If success.
      *  @return false If no success.
      */
-    bool insert_metawriter(std::string const& name, metawriter_ptr const& writer);
+    bool insert_metawriter(std::string const& name, metawriter const& writer);
 
     /*! \brief Remove a metawriter from the map.
      *  @param name The name of the writer.
@@ -184,12 +184,12 @@ public:
      *  @param name The name of the writer.
      *  @return The writer if found. If not found return 0.
      */
-    metawriter_ptr find_metawriter(std::string const& name) const;
+    metawriter find_metawriter(std::string const& name) const;
 
     /*! \brief Get all metawriters.
      *  @return Const reference to metawriters.
      */
-    std::map<std::string,metawriter_ptr> const& metawriters() const;
+    std::map<std::string,metawriter> const& metawriters() const;
 
     /*! \brief Get first iterator in metawriters.
      *  @return Constant metawriter iterator.

@@ -498,7 +498,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
 void map_parser::parse_metawriter(Map & map, xml_node const& pt)
 {
     std::string name("<missing name>");
-    metawriter_ptr writer;
+    metawriter writer;
     try
     {
         name = pt.get_attr<std::string>("name");

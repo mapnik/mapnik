@@ -28,49 +28,27 @@
 // Boost
 #include <boost/foreach.hpp>
 
-using std::map;
-using std::string;
-
-namespace {
-
-using mapnik::value;
-using mapnik::Feature;
-using mapnik::metawriter_properties;
-
-// intersect a set of properties with those in the feature descriptor
-map<string,value> intersect_properties(Feature const& feature, metawriter_properties const& properties) {
-
-    map<string,value> nprops;
-    BOOST_FOREACH(string p, properties)
-    {
-        if (feature.has_key(p))
-            nprops.insert(std::make_pair(p,feature.get(p)));
-    }
-
-    return nprops;
-}} // end anonymous namespace
 
 namespace mapnik {
 
 metawriter_inmem::metawriter_inmem(metawriter_properties dflt_properties)
-    : metawriter(dflt_properties) {
+    : metawriter_base(dflt_properties) {
 }
 
 metawriter_inmem::~metawriter_inmem() {
 }
 
-void
-metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
+void metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
                           CoordTransform const& /*t*/,
-                          metawriter_properties const& properties) {
+                          metawriter_properties const& properties) 
+{
     meta_instance inst;
     inst.box = box;
     inst.properties = intersect_properties(feature, properties);
     instances_.push_back(inst);
 }
 
-void
-metawriter_inmem::add_text(
+void metawriter_inmem::add_text(
     boost::ptr_vector<text_path> & /*text*/,
     box2d<double> const& extents,
     Feature const& feature,
@@ -86,27 +64,21 @@ metawriter_inmem::add_text(
     }
 }
 
-void
-metawriter_inmem::add_polygon(path_type & path,
-                              Feature const& feature,
-                              CoordTransform const& t,
-                              metawriter_properties const& properties) {
+template <typename T>
+void metawriter_inmem::add_polygon(T & path,
+                                   Feature const& feature,
+                                   CoordTransform const& t,
+                                   metawriter_properties const& properties) 
+{
     add_vertices(path, feature, t, properties);
 }
 
-void
-metawriter_inmem::add_line(path_type & path,
-                           Feature const& feature,
-                           CoordTransform const& t,
-                           metawriter_properties const& properties) {
-    add_vertices(path, feature, t, properties);
-}
 
-void
-metawriter_inmem::add_vertices(path_type & path,
-                               Feature const& feature,
-                               CoordTransform const& /*t*/,
-                               metawriter_properties const& properties) {
+template <typename T>
+void metawriter_inmem::add_vertices(T & path,
+                                    Feature const& feature,
+                                    CoordTransform const& /*t*/,
+                                    metawriter_properties const& properties) {
     box2d<double> box;
     unsigned cmd;
     double x = 0.0, y = 0.0;

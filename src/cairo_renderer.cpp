@@ -1172,9 +1172,10 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     if (!sym.get_ignore_placement())
                         detector_.insert(label_ext);
                     metawriter_with_properties writer = sym.get_metawriter();
-                    if (writer.first)
+                    if (check_metawriter(writer.first))
                     {
-                        writer.first->add_box(label_ext, *feature, t_, writer.second);
+                        //writer.first->add_box(label_ext, *feature, t_, writer.second);
+                        add_box(writer.first, label_ext,*feature, t_, writer.second);
                     }
                 }
             }
@@ -1439,7 +1440,11 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                             //if (!sym.get_ignore_placement())
                             //    detector_.insert(label_ext);
                             metawriter_with_properties writer = sym.get_metawriter();
-                            if (writer.first) writer.first->add_box(extent, *feature, t_, writer.second);
+                            if (check_metawriter(writer.first)) 
+                            {
+                                add_box(writer.first, extent,*feature, t_, writer.second);
+                                //                               writer.first->add_box(extent, *feature, t_, writer.second);
+                            }
                         }
                     }
                     else
@@ -1458,7 +1463,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                             agg::trans_affine matrix = recenter * tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
                             render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h), **mark, matrix, sym.get_opacity(),false);
 
-                            if (writer.first)
+                            if (check_metawriter(writer.first))
                             {
                                 //writer.first->add_box(label_ext, feature, t_, writer.second);
                                 MAPNIK_LOG_WARN(cairo_renderer) << "metawriter not yet supported for LINE placement";
@@ -1548,7 +1553,11 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                         }
                         if (!sym.get_ignore_placement())
                             detector_.insert(label_ext);
-                        if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
+                        if (check_metawriter(writer.first))
+                        {
+                            add_box(writer.first, label_ext,*feature, t_, writer.second);
+                            //                           writer.first->add_box(label_ext, *feature, t_, writer.second);
+                        }
                     }
                 }
                 else
@@ -1585,7 +1594,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                         }
 
                         // TODO
-                        if (writer.first)
+                        if (check_metawriter(writer.first))
                         {
                             //writer.first->add_box(label_ext, feature, t_, writer.second);
                             MAPNIK_LOG_WARN(cairo_renderer) << "metawriter not yet supported for LINE placement";

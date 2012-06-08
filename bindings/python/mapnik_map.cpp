@@ -150,16 +150,17 @@ bool has_metawriter(mapnik::Map const& m)
 
 // returns empty shared_ptr when the metawriter isn't found, or is
 // of the wrong type. empty pointers make it back to Python as a None.
-mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map & m, std::string const& name) {
-    mapnik::metawriter_ptr metawriter = m.find_metawriter(name);
-    mapnik::metawriter_inmem_ptr inmem;
 
-    if (metawriter) {
-        inmem = boost::dynamic_pointer_cast<mapnik::metawriter_inmem>(metawriter);
-    }
+//mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map & m, std::string const& name) {
+//    mapnik::metawriter_ptr metawriter = m.find_metawriter(name);
+///   mapnik::metawriter_inmem_ptr inmem;
 
-    return inmem;
-}
+//    if (metawriter) {
+//        inmem = boost::dynamic_pointer_cast<mapnik::metawriter_inmem>(metawriter);
+//    }
+//
+//    return inmem;
+//}
 
 // TODO - we likely should allow indexing by negative number from python
 // for now, protect against negative values and kindly throw
@@ -482,13 +483,14 @@ void export_map()
              "\n"
              "Use a path like \"[z]/[x]/[y].json\" to create filenames.\n"
             )
-        .def("find_inmem_metawriter", find_inmem_metawriter,
-             (arg("name")),
-             "Gets an inmem metawriter, or None if no such metawriter "
-             "exists.\n"
-             "Use this after the map has been rendered to retrieve information "
-             "about the hit areas rendered on the map.\n"
-            )
+
+//        .def("find_inmem_metawriter", find_inmem_metawriter,
+        //            (arg("name")),
+        //    "Gets an inmem metawriter, or None if no such metawriter "
+        //    "exists.\n"
+        //    "Use this after the map has been rendered to retrieve information "
+        //    "about the hit areas rendered on the map.\n"
+        //   )
 
         .def("__deepcopy__",&map_deepcopy)
         .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")

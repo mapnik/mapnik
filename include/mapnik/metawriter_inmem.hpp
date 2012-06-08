@@ -32,6 +32,8 @@
 
 // stl
 #include <list>
+#include <map>
+#include <string>
 
 namespace mapnik {
 
@@ -50,37 +52,76 @@ namespace mapnik {
  * very common in the rendered image will increase memory usage, especially if
  * many attributes are also kept.
  */
+
+
+namespace {
+
+using mapnik::value;
+using mapnik::Feature;
+using mapnik::metawriter_properties;
+
+// intersect a set of properties with those in the feature descriptor
+std::map<std::string,value> intersect_properties(Feature const& feature, metawriter_properties const& properties) 
+{
+
+    std::map<std::string,value> nprops;
+    BOOST_FOREACH(std::string p, properties)
+    {
+        if (feature.has_key(p))
+            nprops.insert(std::make_pair(p,feature.get(p)));
+    }
+
+    return nprops;
+}} // end anonymous namespace
+
 class MAPNIK_DECL metawriter_inmem
-    : public metawriter, private boost::noncopyable {
+    : public metawriter_base, private boost::noncopyable 
+{
 public:
-    /**
-     * Construct an in-memory writer which keeps properties specified by the
-     * dflt_properties argument. For example: if dflt_properties contains "name",
-     * then the name attribute of rendered features referencing this metawriter
-     * will be kept in memory.
-     */
     metawriter_inmem(metawriter_properties dflt_properties);
     ~metawriter_inmem();
 
-    virtual void add_box(box2d<double> const& box, Feature const& feature,
-                         CoordTransform const& t,
-                         metawriter_properties const& properties);
-    virtual void add_text(boost::ptr_vector<text_path> &placements,
-                          box2d<double> const& extents,
-                          Feature const& feature,
-                          CoordTransform const& t,
-                          metawriter_properties const& properties);
-    virtual void add_polygon(path_type & path,
-                             Feature const& feature,
-                             CoordTransform const& t,
-                             metawriter_properties const& properties);
-    virtual void add_line(path_type & path,
-                          Feature const& feature,
-                          CoordTransform const& t,
-                          metawriter_properties const& properties);
-
-    virtual void start(metawriter_property_map const& properties);
-
+    void add_box(box2d<double> const& box, Feature const& feature,
+                 CoordTransform const& t,
+                 metawriter_properties const& properties);
+    void add_text(boost::ptr_vector<text_path> &placements,
+             box2d<double> const& extents,
+             Feature const& feature,
+             CoordTransform const& t,
+             metawriter_properties const& properties);
+    
+    template <typename T>
+    void add_polygon(T & path,
+                     Feature const& feature,
+                     CoordTransform const& t,
+                     metawriter_properties const& properties);
+    
+    template <typename T>
+    void add_line(T & path,
+                  Feature const& feature,
+                  CoordTransform const& t,
+                  metawriter_properties const& properties)
+    {
+        box2d<double> box;
+        unsigned cmd;
+        double x = 0.0, y = 0.0;
+      
+        path.rewind(0);
+        while ((cmd = path.vertex(&x, &y)) != SEG_END) {
+            box.expand_to_include(x, y);
+        }
+      
+        if ((box.width() >= 0.0) && (box.height() >= 0.0)) {
+            meta_instance inst;
+            inst.properties = intersect_properties(feature, properties);
+            inst.box = box;
+            instances_.push_back(inst);
+        }   
+    }
+    
+    void start(metawriter_property_map const& properties);
+    void stop() {};
+    void set_map_srs(projection const& proj) {}
     /**
      * An instance of a rendered feature. The box represents the image
      * coordinates of a bounding box around the feature. The properties
@@ -105,7 +146,8 @@ private:
 
     std::list<meta_instance> instances_;
 
-    void add_vertices(path_type & path,
+    template <typename T>
+    void add_vertices(T & path,
                       Feature const& feature,
                       CoordTransform const& t,
                       metawriter_properties const& properties);

@@ -32,7 +32,7 @@
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-
+#include <mapnik/metawriter_renderer.hpp>
 // boost
 #include <boost/foreach.hpp>
 #include <boost/concept_check.hpp>
@@ -78,7 +78,7 @@ struct process_impl<false>
         boost::ignore_unused_variable_warning(f);
         boost::ignore_unused_variable_warning(tr);
 #ifdef MAPNIK_DEBUG
-        std::clog << "NO-OP ...\n";
+        std::clog << "NO-OP " << typeid(sym).name() << std::endl;
 #endif
     }
 };
@@ -150,7 +150,7 @@ void feature_style_processor<Processor>::apply()
     {
         projection proj(m_.srs());
 
-        start_metawriters(m_,proj);
+        //start_metawriters(m_,proj);
 
         double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
         scale_denom *= scale_factor_;
@@ -164,7 +164,7 @@ void feature_style_processor<Processor>::apply()
             }
         }
 
-        stop_metawriters(m_);
+        //stop_metawriters(m_);
     }
     catch (proj_init_error& ex)
     {
@@ -201,30 +201,6 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
         MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
     }
     p.end_map_processing(m_);
-}
-
-template <typename Processor>
-void feature_style_processor<Processor>::start_metawriters(Map const& m_, projection const& proj)
-{
-    Map::const_metawriter_iterator metaItr = m_.begin_metawriters();
-    Map::const_metawriter_iterator metaItrEnd = m_.end_metawriters();
-    for (;metaItr!=metaItrEnd; ++metaItr)
-    {
-        metaItr->second->set_size(m_.width(), m_.height());
-        metaItr->second->set_map_srs(proj);
-        metaItr->second->start(m_.metawriter_output_properties);
-    }
-}
-
-template <typename Processor>
-void feature_style_processor<Processor>::stop_metawriters(Map const& m_)
-{
-    Map::const_metawriter_iterator metaItr = m_.begin_metawriters();
-    Map::const_metawriter_iterator metaItrEnd = m_.end_metawriters();
-    for (;metaItr!=metaItrEnd; ++metaItr)
-    {
-        metaItr->second->stop();
-    }
 }
 
 template <typename Processor>
@@ -556,7 +532,7 @@ void feature_style_processor<Processor>::render_style(
 
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-                if(!p.process(symbols,feature,prj_trans))
+                // if(!p.process(symbols,feature,prj_trans))
                 {
 
                     BOOST_FOREACH (symbolizer const& sym, symbols)
@@ -584,7 +560,7 @@ void feature_style_processor<Processor>::render_style(
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-                if(!p.process(symbols,feature,prj_trans))
+                //if(!p.process(symbols,feature,prj_trans))
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
@@ -606,7 +582,7 @@ void feature_style_processor<Processor>::render_style(
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-                if(!p.process(symbols,feature,prj_trans))
+                //if(!p.process(symbols,feature,prj_trans))
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
@@ -656,6 +632,7 @@ template class feature_style_processor<svg_renderer<std::ostream_iterator<char> 
 
 template class feature_style_processor<grid_renderer<grid> >;
 template class feature_style_processor<agg_renderer<image_32> >;
+template class feature_style_processor<metawriter_renderer>;
 
 }
 

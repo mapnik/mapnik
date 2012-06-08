@@ -38,42 +38,49 @@ using std::string;
 namespace mapnik
 {
 
-metawriter_ptr
-metawriter_create(xml_node const& pt)
+metawriter metawriter_create(xml_node const& pt)
 {
-    metawriter_ptr writer;
+    metawriter writer;
     string type = pt.get_attr<string>("type");
-
+    
     optional<string> properties = pt.get_opt_attr<string>("default-output");
-    if (type == "json") {
+    if (type == "json") 
+    {
         string file = pt.get_attr<string>("file");
         metawriter_json_ptr json = boost::make_shared<metawriter_json>(properties, parse_path(file));
         optional<boolean> output_empty = pt.get_opt_attr<boolean>("output-empty");
-        if (output_empty) {
+        if (output_empty) 
+        {
             json->set_output_empty(*output_empty);
         }
-
+        
         optional<boolean> pixel_coordinates = pt.get_opt_attr<boolean>("pixel-coordinates");
-        if (pixel_coordinates) {
+        if (pixel_coordinates) 
+        {
             json->set_pixel_coordinates(*pixel_coordinates);
         }
         writer = json;
 
-    } else if (type == "inmem") {
+    } 
+    else if (type == "inmem") 
+    {
         metawriter_inmem_ptr inmem = boost::make_shared<metawriter_inmem>(properties);
         writer = inmem;
-    } else {
+    } 
+    else 
+    {
         throw config_error(string("Unknown type '") + type + "'", pt);
     }
-
+    
     return writer;
 }
 
-void
-metawriter_save(const metawriter_ptr &metawriter,
-                boost::property_tree::ptree &metawriter_node, bool explicit_defaults)
+void metawriter_save(metawriter const& writer,
+                     boost::property_tree::ptree & metawriter_node, 
+                     bool explicit_defaults)
 {
-
+    // FIXME
+    /*
     metawriter_json *json = dynamic_cast<metawriter_json *>(metawriter.get());
     if (json) {
         set_attr(metawriter_node, "type", "json");
@@ -91,6 +98,7 @@ metawriter_save(const metawriter_ptr &metawriter,
     if (!metawriter->get_default_properties().empty() || explicit_defaults) {
         set_attr(metawriter_node, "default-output", metawriter->get_default_properties().to_string());
     }
+    */
 }
 
 } // namespace mapnik

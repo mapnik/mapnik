@@ -54,6 +54,8 @@ public slots:
     void pan();
     void info();
     void export_as();
+    void export_as_pdf();
+    void export_as_meta();
     void open(QString const&  path = QString());
     void reload();
     void save();
@@ -88,6 +90,8 @@ private:
     QAction *infoAct;
     QAction *openAct;
     QAction *saveAct;
+    QAction *exportPdfAction;
+    QAction *exportMetaAction;
     QAction *printAct;
     QAction *exitAct;
     QAction *aboutAct;
