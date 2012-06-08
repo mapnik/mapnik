@@ -35,44 +35,69 @@
 
 namespace mapnik {
 
-
-/** Write JSON data to a stream object. */
-class metawriter_json_stream : public metawriter, private boost::noncopyable
+class metawriter_json_stream : public metawriter_base, 
+                               private boost::noncopyable
 {
 public:
-    metawriter_json_stream(metawriter_properties dflt_properties);
+    explicit metawriter_json_stream(metawriter_properties dflt_properties);
     ~metawriter_json_stream();
-    virtual void add_box(box2d<double> const& box, Feature const& feature,
-                         CoordTransform const& t,
-                         metawriter_properties const& properties);
-    virtual void add_text(boost::ptr_vector<text_path> &placements,
-                          box2d<double> const& extents,
-                          Feature const& feature,
-                          CoordTransform const& t,
-                          metawriter_properties const& properties);
-    virtual void add_polygon(path_type & path,
-                             Feature const& feature,
-                             CoordTransform const& t,
-                             metawriter_properties const& properties);
-    virtual void add_line(path_type & path,
-                          Feature const& feature,
-                          CoordTransform const& t,
-                          metawriter_properties const& properties);
+    void add_box(box2d<double> const& box, Feature const& feature,
+                 CoordTransform const& t,
+                 metawriter_properties const& properties);
+    void add_text(boost::ptr_vector<text_path> &placements,
+                  box2d<double> const& extents,
+                  Feature const& feature,
+                  CoordTransform const& t,
+                  metawriter_properties const& properties);
+    template <typename T>
+    void add_polygon(T & path,
+                     Feature const& feature,
+                     CoordTransform const& t,
+                     metawriter_properties const& properties);   
+    
+    template <typename T>
+    void add_line(T & path,
+                  Feature const& feature,
+                  CoordTransform const& t,
+                  metawriter_properties const& properties)
+    {
+        write_feature_header("MultiLineString");
 
-    virtual void start(metawriter_property_map const& properties);
-    virtual void stop();
-    /** Set output stream. This function has to be called before the first output is made. */
-    void set_stream(std::ostream *f) { f_ = f; }
-    /** Get output stream. */
-    std::ostream *get_stream() const { return f_; }
-    /** Only write header/footer to file with one or more features. */
-    void set_output_empty(bool output_empty) { output_empty_ = output_empty; }
-    /** See set_output_empty(). */
+        *f_ << " [";
+        double x, y, last_x=0.0, last_y=0.0;
+        unsigned cmd, last_cmd = SEG_END;
+        path.rewind(0);
+
+        int polygon_count = 0;
+        while ((cmd = path.vertex(&x, &y)) != SEG_END) {
+            if (cmd == SEG_LINETO) {
+                if (last_cmd == SEG_MOVETO) {
+                    //Start new polygon/line
+                    if (polygon_count++) *f_ << "], ";
+                    *f_ << "[";
+                    write_point(t, last_x, last_y, true);
+                }
+                *f_ << ",";
+                write_point(t, x, y, true);
+            }
+            last_x = x;
+            last_y = y;
+            last_cmd = cmd;
+        }
+        *f_ << "]]";
+    
+        write_properties(feature, properties);
+    }
+    
+    void start(metawriter_property_map const& properties);
+    void stop();    
+    void set_stream(std::ostream *f) { f_ = f; }    
+    std::ostream *get_stream() const { return f_; }    
+    void set_output_empty(bool output_empty) { output_empty_ = output_empty; }    
     bool get_output_empty() { return output_empty_; }
     void set_pixel_coordinates(bool on) { pixel_coordinates_ = on; }
     bool get_pixel_coordinates() { return pixel_coordinates_; }
-    virtual void set_map_srs(projection const& proj);
-
+    void set_map_srs(projection const& proj);
 protected:
     enum {
         HEADER_NOT_WRITTEN = -1,
@@ -87,10 +112,10 @@ protected:
     proj_transform *trans_;
     projection output_srs_;
     bool pixel_coordinates_;
-
-    virtual void write_header();
-
-    inline void write_feature_header(std::string type) {
+    
+    void write_header();
+    inline void write_feature_header(std::string type) 
+    {
         if (count_ == STOPPED)
         {
             MAPNIK_LOG_WARN(metawrite_json) << "Metawriter: instance not started before using it.";
@@ -116,43 +141,38 @@ protected:
             *f_ << ",";
         }
     }
+    
+    template <typename T>
+    void write_line_polygon(T & path, CoordTransform const& t, bool polygon);
+    
 
-    void write_line_polygon(path_type & path, CoordTransform const& t, bool polygon);
-
+    
+    
 private:
     std::ostream *f_;
 };
 
-/** Shared pointer to metawriter_json_stream object. */
-typedef boost::shared_ptr<metawriter_json_stream> metawriter_json_stream_ptr;
+//typedef boost::shared_ptr<metawriter_json_stream> metawriter_json_stream_ptr;
 
-/** JSON writer. */
+// JSON writer.
 class metawriter_json : public metawriter_json_stream
 {
 public:
     metawriter_json(metawriter_properties dflt_properties, path_expression_ptr fn);
-
-    virtual void start(metawriter_property_map const& properties);
-    virtual void stop();
-    /** Set filename template.
-     *
-     * This template is processed with values from Map's metawriter properties to
-     * create the actual filename during start() call.
-     */
+    void start(metawriter_property_map const& properties);
+    void stop();
     void set_filename(path_expression_ptr fn);
-    /** Get filename template. */
     path_expression_ptr get_filename() const;
-
+    
 private:
     path_expression_ptr fn_;
     std::fstream f_;
     std::string filename_;
 
 protected:
-    virtual void write_header();
+    void write_header();
 };
 
-/** Shared pointer to metawriter_json object. */
 typedef boost::shared_ptr<metawriter_json> metawriter_json_ptr;
 
 }

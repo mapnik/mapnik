@@ -39,6 +39,12 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
+#include <mapnik/metawriter_renderer.hpp>
+#ifdef HAVE_CAIRO
+// cairo
+#include <mapnik/cairo_renderer.hpp>
+#include <cairomm/surface.h>
+#endif
 #endif
 
 // qt
@@ -48,6 +54,8 @@
 #include "layerwidget.hpp"
 #include "layerdelegate.hpp"
 #include "about_dialog.hpp"
+
+
 
 MainWindow::MainWindow()
     : filename_(),
@@ -256,6 +264,56 @@ void MainWindow::export_as()
     }
 }
 
+void MainWindow::export_as_pdf()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    QString initialPath = QDir::currentPath() + "/mapnik-cairo.pdf";
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Export As PDF"),
+                                                    initialPath,
+                                                    tr("%1 Files (*.%2);;All Files (*)")
+                                                    .arg(QString("PDF"))
+                                                    .arg(QString("pdf")));
+    if (!fileName.isEmpty())
+    {
+        std::cout << "FILE NAME:" << fileName.toStdString() << std::endl;
+#ifdef HAVE_CAIRO
+        boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
+        if (map_ptr)
+        {
+            Cairo::RefPtr<Cairo::Surface> surface;
+            surface = Cairo::PdfSurface::create(fileName.toStdString().c_str(), map_ptr->width(),map_ptr->height());
+            mapnik::cairo_renderer<Cairo::Surface> pdf_render(*map_ptr, surface);
+            pdf_render.apply();
+        }
+#endif
+    }
+}
+
+void MainWindow::export_as_meta()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    QString initialPath = QDir::currentPath() + "/mapnik-meta.json";
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Export As Meta JSON"),
+                                                    initialPath,
+                                                    tr("%1 Files (*.%2);;All Files (*)")
+                                                    .arg(QString("META"))
+                                                    .arg(QString("json")));
+    if (!fileName.isEmpty())
+    {
+        std::cout << "FILE NAME:" << fileName.toStdString() << std::endl;
+#ifdef HAVE_CAIRO
+        boost::shared_ptr<mapnik::Map> map_ptr = mapWidget_->getMap();
+        if (map_ptr)
+        {
+            mapnik::metawriter_renderer ren(*map_ptr);
+            ren.apply();
+        }
+#endif
+    }
+}
+
 void MainWindow::print()
 {
 
@@ -328,6 +386,14 @@ void MainWindow::createActions()
         exportAsActs.append(action);
     }
 
+    // export PDF
+    exportPdfAction = new QAction(QString("PDF (cairo)"), this);
+    connect(exportPdfAction, SIGNAL(triggered()), this, SLOT(export_as_pdf()));
+    
+    // export META Json
+    exportMetaAction = new QAction(QString("META (json)"), this);
+    connect(exportMetaAction, SIGNAL(triggered()), this, SLOT(export_as_meta()));
+
     printAct = new QAction(QIcon(":/images/print.png"),tr("&Print ..."),this);
     printAct->setShortcut(tr("Ctrl+E"));
     connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
@@ -349,6 +415,8 @@ void MainWindow::createMenus()
     fileMenu = new QMenu(tr("&File"),this);
     fileMenu->addAction(openAct);
     fileMenu->addAction(saveAct);
+    fileMenu->addAction(exportPdfAction);
+    fileMenu->addAction(exportMetaAction);
     fileMenu->addMenu(exportMenu);
     fileMenu->addAction(printAct);
     fileMenu->addSeparator();

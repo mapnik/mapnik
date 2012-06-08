@@ -135,8 +135,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         // TODO - impl this for markers?
                         //if (!sym.get_ignore_placement())
                         //    detector_->insert(label_ext);
-                        metawriter_with_properties writer = sym.get_metawriter();
-                        if (writer.first) writer.first->add_box(extent, *feature, t_, writer.second);
+                        //metawriter_with_properties writer = sym.get_metawriter();
+                        //if (writer.first) writer.first->add_box(extent, *feature, t_, writer.second);
                     }
                 }
                 else
@@ -168,12 +168,12 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                             //      rotated itself
                         }
 
-                        if (writer.first)
-                        {
+                        //if (writer.first)
+                        //{
                             //writer.first->add_box(label_ext, feature, t_, writer.second);
 
-                            MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
-                        }
+                        //  MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
+                        //}
                     }
                 }
             }
@@ -274,7 +274,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     }
                     if (!sym.get_ignore_placement())
                         detector_->insert(label_ext);
-                    if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
+                    //if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
                 }
             }
             else
@@ -315,12 +315,12 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
 
                     // TODO
-                    if (writer.first)
-                    {
+                    //if (writer.first)
+                    //{
                         //writer.first->add_box(label_ext, feature, t_, writer.second);
 
-                        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
-                    }
+//                        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
+                        //}
 
                     agg::conv_transform<agg::path_storage, agg::trans_affine> trans(marker, matrix);
                     ras_ptr->add_path(trans);

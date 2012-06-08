@@ -698,8 +698,8 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
 void serialize_metawriter(ptree & map_node, Map::const_metawriter_iterator metawriter_it, bool explicit_defaults)
 {
     std::string const& name = metawriter_it->first;
-    metawriter_ptr const& metawriter = metawriter_it->second;
-
+    metawriter const& metawriter = metawriter_it->second;
+    
     ptree & metawriter_node = map_node.push_back(
         ptree::value_type("MetaWriter", ptree()))->second;
 

@@ -71,9 +71,9 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
                 finder_->update_detector();
             }
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
-            if (writer_.first) writer_.first->add_text(
-                finder_->get_results(), finder_->get_extents(),
-                feature_, t_, writer_.second);
+            //if (writer_.first) writer_.first->add_text(
+            //    finder_->get_results(), finder_->get_extents(),
+            //    feature_, t_, writer_.second);
             return true;
         }
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
@@ -101,9 +101,9 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         {
             //Found a placement
             point_itr_ = points_.erase(point_itr_);
-            if (writer_.first) writer_.first->add_text(
-                finder_->get_results(), finder_->get_extents(),
-                feature_, t_, writer_.second);
+//            if (writer_.first) writer_.first->add_text(
+//                finder_->get_results(), finder_->get_extents(),
+//                feature_, t_, writer_.second);
             finder_->update_detector();
             return true;
         }
@@ -240,7 +240,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
 //    boost::make_shared<placement_finder<DetectorT> >(feature_, *placement_, *info_, detector_, dims_);
 
-    if (writer_.first) finder_->set_collect_extents(true);
+    if (check_metawriter(writer_.first)) finder_->set_collect_extents(true);
 
     placement_valid_ = true;
     return true;
@@ -316,11 +316,11 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         {
             detector_.insert(marker_ext_);
             finder_->update_detector();
-            if (writer_.first) {
-                writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
-                writer_.first->add_text(finder_->get_results(), finder_->get_extents(),
-                                        feature_, t_, writer_.second);
-            }
+            //if (writer_.first) {
+            //    writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
+            //    writer_.first->add_text(finder_->get_results(), finder_->get_extents(),
+            //                            feature_, t_, writer_.second);
+            //}
             point_itr_ = points_.erase(point_itr_);
             return true;
         }
@@ -393,7 +393,7 @@ pixel_position shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker_pos
         marker_ext_.re_center(lx, ly);
         //label is added to detector by get_line_placement(), but marker isn't
         detector_.insert(marker_ext_);
-        if (writer_.first) writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
+        //if (writer_.first) writer_.first->add_box(marker_ext_, feature_, t_, writer_.second); // FIXME
         return pixel_position(px, py);
     } else {
         //collision_detector is already updated for point placement in get_point_placement()

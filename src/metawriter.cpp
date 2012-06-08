@@ -97,7 +97,7 @@ metawriter_json_stream::~metawriter_json_stream()
 
 
 metawriter_json_stream::metawriter_json_stream(metawriter_properties dflt_properties)
-    : metawriter(dflt_properties), count_(-1), output_empty_(true),
+    : metawriter_base(dflt_properties), count_(-1), output_empty_(true),
       trans_(0), output_srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
       pixel_coordinates_(false), f_(0)
 {
@@ -262,7 +262,8 @@ void metawriter_json_stream::add_text(
     }
 }
 
-void metawriter_json_stream::add_polygon(path_type & path,
+template <typename T>
+void metawriter_json_stream::add_polygon(T & path,
                                          Feature const& feature,
                                          CoordTransform const& t,
                                          metawriter_properties const& properties)
@@ -272,17 +273,9 @@ void metawriter_json_stream::add_polygon(path_type & path,
     write_properties(feature, properties);
 }
 
-void metawriter_json_stream::add_line(path_type & path,
-                                      Feature const& feature,
-                                      CoordTransform const& t,
-                                      metawriter_properties const& properties)
-{
-    write_feature_header("MultiLineString");
-    write_line_polygon(path, t, false);
-    write_properties(feature, properties);
-}
 
-void metawriter_json_stream::write_line_polygon(path_type & path, CoordTransform const& t, bool /*polygon*/){
+template <typename T>
+void metawriter_json_stream::write_line_polygon(T & path, CoordTransform const& t, bool /*polygon*/){
     *f_ << " [";
     double x, y, last_x=0.0, last_y=0.0;
     unsigned cmd, last_cmd = SEG_END;
@@ -327,7 +320,15 @@ void metawriter_json::start(metawriter_property_map const& properties)
 
     MAPNIK_LOG_DEBUG(metawriter) << "metawriter_json: Filename=" << filename_;
 
-    metawriter_json_stream::start(properties);
+
+    assert(trans_);
+    if (output_empty_) {
+        write_header();
+    } else {
+        count_ = HEADER_NOT_WRITTEN;
+    }
+    
+    //metawriter_json_stream::start(properties);
 }
 
 void metawriter_json::write_header()
@@ -337,7 +338,7 @@ void metawriter_json::write_header()
     {
         MAPNIK_LOG_DEBUG(metawriter) << "metawriter_json: Failed to open file " << filename_;
     }
-    set_stream(&f_);
+    metawriter_json_stream::set_stream(&f_);
     metawriter_json_stream::write_header();
 }
 

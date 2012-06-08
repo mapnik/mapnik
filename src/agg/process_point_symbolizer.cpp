@@ -100,8 +100,8 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);
-                metawriter_with_properties writer = sym.get_metawriter();
-                if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
+                //metawriter_with_properties writer = sym.get_metawriter();
+                //if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
             }
         }
     }

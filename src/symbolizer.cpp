@@ -48,7 +48,7 @@ symbolizer_base::symbolizer_base()
     : properties_(),
       properties_complete_(),
       writer_name_(),
-      writer_ptr_(),
+      writer_(),
       comp_op_(src_over),
       clip_(true),
       smooth_value_(0.0)
@@ -57,7 +57,11 @@ symbolizer_base::symbolizer_base()
 
 // copy ctor
 symbolizer_base::symbolizer_base(symbolizer_base const& other)
-    : comp_op_(other.comp_op_),
+    : properties_(other.properties_),
+      properties_complete_(other.properties_complete_),
+      writer_name_(other.writer_name_),
+      writer_(other.writer_),
+      comp_op_(other.comp_op_),
       affine_transform_(other.affine_transform_),
       clip_(other.clip_),
       smooth_value_(other.smooth_value_) {}
@@ -68,16 +72,19 @@ void symbolizer_base::add_metawriter(std::string const& name, metawriter_propert
     properties_ = properties;
 }
 
-void symbolizer_base::add_metawriter(metawriter_ptr writer_ptr, metawriter_properties const& properties,
+void symbolizer_base::add_metawriter(metawriter const& writer, metawriter_properties const& properties,
                                      std::string const& name)
 {
-    writer_ptr_ = writer_ptr;
+    writer_ = writer;
     properties_ = properties;
     writer_name_ = name;
-    if (writer_ptr) {
-        properties_complete_ = writer_ptr->get_default_properties();
+    if (check_metawriter(writer)) 
+    {
+        //properties_complete_ = writer_->get_default_properties(); FIXME
         properties_complete_.insert(properties_.begin(), properties_.end());
-    } else {
+    } 
+    else 
+    {
         properties_complete_.clear();
     }
 }
@@ -86,15 +93,17 @@ void symbolizer_base::cache_metawriters(Map const &m)
 {
     if (writer_name_.empty()) {
         properties_complete_.clear();
-        writer_ptr_ = metawriter_ptr();
         return; // No metawriter
     }
-
-    writer_ptr_ = m.find_metawriter(writer_name_);
-    if (writer_ptr_) {
-        properties_complete_ = writer_ptr_->get_default_properties();
+    
+    writer_ = m.find_metawriter(writer_name_);
+    if (check_metawriter(writer_)) 
+    {
+        // properties_complete_ = writer_->get_default_properties(); FIXME
         properties_complete_.insert(properties_.begin(), properties_.end());
-    } else {
+    } 
+    else 
+    {
         properties_complete_.clear();
         MAPNIK_LOG_WARN(symbolizer) << "Metawriter '" << writer_name_ << "' used but not defined.";
     }
@@ -102,7 +111,7 @@ void symbolizer_base::cache_metawriters(Map const &m)
 
 metawriter_with_properties symbolizer_base::get_metawriter() const
 {
-    return metawriter_with_properties(writer_ptr_, properties_complete_);
+    return metawriter_with_properties(writer_, properties_complete_);
 }
 
 void symbolizer_base::set_comp_op(composite_mode_e comp_op)

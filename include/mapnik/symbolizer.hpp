@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/parse_path.hpp>
-#include <mapnik/metawriter.hpp>
+#include <mapnik/metawriter_factory.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/transform_expression.hpp>
 
@@ -52,12 +52,8 @@ public:
     
     /** Add a metawriter to this symbolizer using a name. */
     void add_metawriter(std::string const& name, metawriter_properties const& properties);
-    /** Add a metawriter to this symbolizer using a pointer.
-     * The name is only needed if you intend to call save_map() some time.
-     * You don't need to call cache_metawriters() when using this function.
-     * Call this function with an NULL writer_ptr to remove a metawriter.
-     */
-    void add_metawriter(metawriter_ptr writer_ptr,
+    
+    void add_metawriter(metawriter const& writer,
                         metawriter_properties const& properties = metawriter_properties(),
                         std::string const& name = "");
     /** Cache metawriter objects to avoid repeated lookups while processing.
@@ -96,7 +92,7 @@ private:
     metawriter_properties properties_;
     metawriter_properties properties_complete_;
     std::string writer_name_;
-    metawriter_ptr writer_ptr_;
+    metawriter writer_;
     composite_mode_e comp_op_;
     transform_type affine_transform_;
     bool clip_;

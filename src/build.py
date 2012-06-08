@@ -273,6 +273,14 @@ source += Split(
     grid/process_text_symbolizer.cpp
     """)
 
+# metawriter backend
+# grid backend
+source += Split(
+    """
+    metawriter/metawriter_renderer.cpp
+    metawriter/process_line_symbolizer.cpp
+    """)
+
 if env['SVG_RENDERER']: # svg backend
     source += Split(
               """
