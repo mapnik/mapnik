@@ -279,6 +279,7 @@ source += Split(
     """
     metawriter/metawriter_renderer.cpp
     metawriter/process_line_symbolizer.cpp
+    metawriter/process_point_symbolizer.cpp
     """)
 
 if env['SVG_RENDERER']: # svg backend
