@@ -98,35 +98,35 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
         : output_(output),
           f_(f),
           prj_trans_(prj_trans)  {}
-    
+
     template <typename T>
     void operator () (T const& sym) const
     {
         process_impl<has_process<Processor,T>::value>::process(output_,sym,f_,prj_trans_);
     }
-    
+
     Processor & output_;
     mapnik::feature_ptr const& f_;
     proj_transform const& prj_trans_;
 };
 
-typedef char (&no_tag)[1]; 
-typedef char (&yes_tag)[2]; 
+typedef char (&no_tag)[1];
+typedef char (&yes_tag)[2];
 
-template <typename T0, typename T1, void (T0::*)(T1 const&, mapnik::feature_ptr const&, proj_transform const&) > 
-struct process_memfun_helper {}; 
-    
-template <typename T0, typename T1> no_tag  has_process_helper(...); 
+template <typename T0, typename T1, void (T0::*)(T1 const&, mapnik::feature_ptr const&, proj_transform const&) >
+struct process_memfun_helper {};
+
+template <typename T0, typename T1> no_tag  has_process_helper(...);
 template <typename T0, typename T1> yes_tag has_process_helper(process_memfun_helper<T0, T1, &T0::process>* p);
-    
-template<typename T0,typename T1> 
+
+template<typename T0,typename T1>
 struct has_process
-{      
+{
     typedef typename T0::processor_impl_type processor_impl_type;
-    BOOST_STATIC_CONSTANT(bool 
-                          , value = sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag) 
-        ); 
-}; 
+    BOOST_STATIC_CONSTANT(bool
+                          , value = sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag)
+        );
+};
 
 
 template <typename Processor>
@@ -149,9 +149,6 @@ void feature_style_processor<Processor>::apply()
     try
     {
         projection proj(m_.srs());
-
-        //start_metawriters(m_,proj);
-
         double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
         scale_denom *= scale_factor_;
 
@@ -163,8 +160,6 @@ void feature_style_processor<Processor>::apply()
                 apply_to_layer(lyr, p, proj, scale_denom, names);
             }
         }
-
-        //stop_metawriters(m_);
     }
     catch (proj_init_error& ex)
     {
@@ -492,7 +487,7 @@ void feature_style_processor<Processor>::render_style(
 {
 
     p.start_style_processing(*style);
-    
+
 #if defined(RENDERING_STATS)
     std::ostringstream s1;
     s1 << "rendering style for layer: '" << lay.name()
@@ -528,18 +523,13 @@ void feature_style_processor<Processor>::render_style(
 
                 do_else=false;
                 do_also=true;
+
                 rule::symbolizers const& symbols = r->get_symbolizers();
-
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
-                // if(!p.process(symbols,feature,prj_trans))
+                BOOST_FOREACH (symbolizer const& sym, symbols)
                 {
-
-                    BOOST_FOREACH (symbolizer const& sym, symbols)
-                    {
-                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
-                    }
+                    boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
                 }
+
                 if (style->get_filter_mode() == FILTER_FIRST)
                 {
                     // Stop iterating over rules and proceed with next feature.
@@ -558,14 +548,9 @@ void feature_style_processor<Processor>::render_style(
                 p.painted(true);
 
                 rule::symbolizers const& symbols = r->get_symbolizers();
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
-                //if(!p.process(symbols,feature,prj_trans))
+                BOOST_FOREACH (symbolizer const& sym, symbols)
                 {
-                    BOOST_FOREACH (symbolizer const& sym, symbols)
-                    {
-                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
-                    }
+                    boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
                 }
             }
         }
@@ -580,14 +565,10 @@ void feature_style_processor<Processor>::render_style(
                 p.painted(true);
 
                 rule::symbolizers const& symbols = r->get_symbolizers();
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
-                //if(!p.process(symbols,feature,prj_trans))
+
+                BOOST_FOREACH (symbolizer const& sym, symbols)
                 {
-                    BOOST_FOREACH (symbolizer const& sym, symbols)
-                    {
-                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
-                    }
+                    boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
                 }
             }
         }
@@ -635,4 +616,3 @@ template class feature_style_processor<agg_renderer<image_32> >;
 template class feature_style_processor<metawriter_renderer>;
 
 }
-
