@@ -170,7 +170,8 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
         minx << ", " << miny << "], [" <<
         maxx << ", " << miny << "], [" <<
         maxx << ", " << maxy << "], [" <<
-        minx << ", " << maxy << "] ] ]";
+        minx << ", " << maxy << "], [" <<
+        minx << ", " << miny << "] ] ]";
 
     write_properties(feature, properties);
 
