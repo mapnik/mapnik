@@ -47,7 +47,6 @@ struct metawriter_wrap
     {        
         if (check_metawriter(writer.first)) 
         {
-            std::cout << "ADD PATH " << std::endl;
             add_line(writer.first, path, feature, tr, writer.second);
         }
     }
