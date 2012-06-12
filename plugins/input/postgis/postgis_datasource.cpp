@@ -563,7 +563,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
             }
                     
 
-            s << "SELECT AsBinary(\"" << geometryColumn_ << "\") AS geom";
+            s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
             
             if (!key_field_.empty())
                 mapnik::quote_attr(s,key_field_);
