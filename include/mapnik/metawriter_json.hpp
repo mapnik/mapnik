@@ -42,7 +42,6 @@ class metawriter_json_stream : public metawriter, private boost::noncopyable
 public:
     metawriter_json_stream(metawriter_properties dflt_properties);
     ~metawriter_json_stream();
-    
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties);
@@ -69,114 +68,6 @@ public:
     /** Only write header/footer to file with one or more features. */
     void set_output_empty(bool output_empty) { output_empty_ = output_empty; }
     /** See set_output_empty(). */
-||||||| parent of 5f30f85... + fix GeoJSON output in metawriter_json
-    void add_box(box2d<double> const& box, Feature const& feature,
-                 CoordTransform const& t,
-                 metawriter_properties const& properties);
-    void add_text(boost::ptr_vector<text_path> &placements,
-                  box2d<double> const& extents,
-                  Feature const& feature,
-                  CoordTransform const& t,
-                  metawriter_properties const& properties);
-    template <typename T>
-    void add_polygon(T & path,
-                     Feature const& feature,
-                     CoordTransform const& t,
-                     metawriter_properties const& properties);   
-    
-    template <typename T>
-    void add_line(T & path,
-                  Feature const& feature,
-                  CoordTransform const& t,
-                  metawriter_properties const& properties)
-    {
-        write_feature_header("MultiLineString");
-
-        *f_ << " [";
-        double x, y, last_x=0.0, last_y=0.0;
-        unsigned cmd, last_cmd = SEG_END;
-        path.rewind(0);
-
-        int polygon_count = 0;
-        while ((cmd = path.vertex(&x, &y)) != SEG_END) {
-            if (cmd == SEG_LINETO) {
-                if (last_cmd == SEG_MOVETO) {
-                    //Start new polygon/line
-                    if (polygon_count++) *f_ << "], ";
-                    *f_ << "[";
-                    write_point(t, last_x, last_y, true);
-                }
-                *f_ << ",";
-                write_point(t, x, y, true);
-            }
-            last_x = x;
-            last_y = y;
-            last_cmd = cmd;
-        }
-        *f_ << "]]";
-    
-        write_properties(feature, properties);
-    }
-    
-    void start(metawriter_property_map const& properties);
-    void stop();    
-    void set_stream(std::ostream *f) { f_ = f; }    
-    std::ostream *get_stream() const { return f_; }    
-    void set_output_empty(bool output_empty) { output_empty_ = output_empty; }    
-=======
-    void add_box(box2d<double> const& box, Feature const& feature,
-                 CoordTransform const& t,
-                 metawriter_properties const& properties);
-    void add_text(boost::ptr_vector<text_path> &placements,
-                  box2d<double> const& extents,
-                  Feature const& feature,
-                  CoordTransform const& t,
-                  metawriter_properties const& properties);
-    template <typename T>
-    void add_polygon(T & path,
-                     Feature const& feature,
-                     CoordTransform const& t,
-                     metawriter_properties const& properties);   
-    
-    template <typename T>
-    void add_line(T & path,
-                  Feature const& feature,
-                  CoordTransform const& t,
-                  metawriter_properties const& properties)
-    {
-        write_feature_header("MultiLineString");
-        *f_ << " [";
-        
-        path.rewind(0);    
-        double x, y;
-        unsigned cmd;        
-        int ring_count = 0;
-        while ((cmd = path.vertex(&x, &y)) != SEG_END) 
-        {
-            if (cmd == SEG_MOVETO) 
-            {
-                if (ring_count++ != 0) *f_ << "], ";
-                *f_ << "[";
-                write_point(t, x, y, true);
-            }
-            else if (cmd == SEG_LINETO) 
-            {            
-                *f_ << ",";
-                write_point(t, x, y, true);
-            }
-        }
-        if (ring_count != 0) *f_ << "]";
-        *f_ << "]";
-            
-        write_properties(feature, properties);
-    }
-    
-    void start(metawriter_property_map const& properties);
-    void stop();    
-    void set_stream(std::ostream *f) { f_ = f; }    
-    std::ostream *get_stream() const { return f_; }    
-    void set_output_empty(bool output_empty) { output_empty_ = output_empty; }    
->>>>>>> 5f30f85... + fix GeoJSON output in metawriter_json
     bool get_output_empty() { return output_empty_; }
     void set_pixel_coordinates(bool on) { pixel_coordinates_ = on; }
     bool get_pixel_coordinates() { return pixel_coordinates_; }
@@ -225,21 +116,9 @@ protected:
             *f_ << ",";
         }
     }
-<<<<<<< HEAD
 
     void write_line_polygon(path_type & path, CoordTransform const& t, bool polygon);
 
-||||||| parent of 5f30f85... + fix GeoJSON output in metawriter_json
-    
-    template <typename T>
-    void write_line_polygon(T & path, CoordTransform const& t, bool polygon);
-    
-
-    
-    
-=======
-    
->>>>>>> 5f30f85... + fix GeoJSON output in metawriter_json
 private:
     std::ostream *f_;
 };
