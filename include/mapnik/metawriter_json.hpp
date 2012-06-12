@@ -62,30 +62,29 @@ public:
                   metawriter_properties const& properties)
     {
         write_feature_header("MultiLineString");
-
         *f_ << " [";
-        double x, y, last_x=0.0, last_y=0.0;
-        unsigned cmd, last_cmd = SEG_END;
-        path.rewind(0);
-
-        int polygon_count = 0;
-        while ((cmd = path.vertex(&x, &y)) != SEG_END) {
-            if (cmd == SEG_LINETO) {
-                if (last_cmd == SEG_MOVETO) {
-                    //Start new polygon/line
-                    if (polygon_count++) *f_ << "], ";
-                    *f_ << "[";
-                    write_point(t, last_x, last_y, true);
-                }
+        
+        path.rewind(0);    
+        double x, y;
+        unsigned cmd;        
+        int ring_count = 0;
+        while ((cmd = path.vertex(&x, &y)) != SEG_END) 
+        {
+            if (cmd == SEG_MOVETO) 
+            {
+                if (ring_count++ != 0) *f_ << "], ";
+                *f_ << "[";
+                write_point(t, x, y, true);
+            }
+            else if (cmd == SEG_LINETO) 
+            {            
                 *f_ << ",";
                 write_point(t, x, y, true);
             }
-            last_x = x;
-            last_y = y;
-            last_cmd = cmd;
         }
-        *f_ << "]]";
-    
+        if (ring_count != 0) *f_ << "]";
+        *f_ << "]";
+            
         write_properties(feature, properties);
     }
     
@@ -141,12 +140,6 @@ protected:
             *f_ << ",";
         }
     }
-    
-    template <typename T>
-    void write_line_polygon(T & path, CoordTransform const& t, bool polygon);
-    
-
-    
     
 private:
     std::ostream *f_;
