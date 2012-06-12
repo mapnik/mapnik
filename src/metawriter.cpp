@@ -274,34 +274,6 @@ void metawriter_json_stream::add_polygon(T & path,
     write_properties(feature, properties);
 }
 
-
-template <typename T>
-void metawriter_json_stream::write_line_polygon(T & path, CoordTransform const& t, bool /*polygon*/){
-    *f_ << " [";
-    double x, y, last_x=0.0, last_y=0.0;
-    unsigned cmd, last_cmd = SEG_END;
-    path.rewind(0);
-
-    int polygon_count = 0;
-    while ((cmd = path.vertex(&x, &y)) != SEG_END) {
-        if (cmd == SEG_LINETO) {
-            if (last_cmd == SEG_MOVETO) {
-                //Start new polygon/line
-                if (polygon_count++) *f_ << "], ";
-                *f_ << "[";
-                write_point(t, last_x, last_y, true);
-            }
-            *f_ << ",";
-            write_point(t, x, y, true);
-        }
-        last_x = x;
-        last_y = y;
-        last_cmd = cmd;
-    }
-    *f_ << "]]";
-}
-
-
 void metawriter_json_stream::set_map_srs(projection const& input_srs_)
 {
     if (trans_) delete trans_;
