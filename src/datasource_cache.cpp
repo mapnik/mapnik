@@ -118,7 +118,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
     return ds;
 }
 
-bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
+bool datasource_cache::insert(std::string const& type,const lt_dlhandle module)
 {
     return plugins_.insert(make_pair(type,boost::make_shared<PluginInfo>
                                      (type,module))).second;
@@ -140,7 +140,7 @@ std::vector<std::string> datasource_cache::plugin_names ()
     return names;
 }
 
-void datasource_cache::register_datasources(const std::string& str)
+void datasource_cache::register_datasources(std::string const& str)
 {
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache,
@@ -162,51 +162,58 @@ void datasource_cache::register_datasources(const std::string& str)
                 if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
 #endif
                 {
-                    try
+#if (BOOST_FILESYSTEM_VERSION == 3)
+                    if (register_datasource(itr->path().string().c_str()))
+#else // v2
+                    if (register_datasource(itr->string().c_str()))
+#endif
                     {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                        lt_dlhandle module = lt_dlopen(itr->path().string().c_str());
-#else // v2
-                        lt_dlhandle module = lt_dlopen(itr->string().c_str());
-#endif
-                        if (module)
-                        {
-                            // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
-#ifdef __GNUC__
-                            __extension__
-#endif
-                                datasource_name* ds_name =
-                                reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
-                            if (ds_name && insert(ds_name(),module))
-                            {
-                                MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << ds_name();
-
-                                registered_=true;
-                            }
-                            else if (!ds_name)
-                            {
-                                MAPNIK_LOG_ERROR(datasource_cache)
-                                        << "Problem loading plugin library '"
-                                        << itr->path().string() << "' (plugin is lacking compatible interface)";
-                            }
-                        }
-                        else
-                        {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                            MAPNIK_LOG_ERROR(datasource_cache)
-                                    << "Problem loading plugin library: " << itr->path().string()
-                                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
-#else // v2
-                            MAPNIK_LOG_ERROR(datasource_cache)
-                                    << "Problem loading plugin library: " << itr->string()
-                                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
-#endif
-                        }
+                        registered_ = true;
                     }
-                    catch (...) {}
                 }
         }
     }
+}
+
+bool datasource_cache::register_datasource(std::string const& str)
+{
+    bool success = false;
+    try
+    {
+        lt_dlhandle module = lt_dlopen(str.c_str());
+        if (module)
+        {
+            // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
+#ifdef __GNUC__
+            __extension__
+#endif
+                datasource_name* ds_name =
+                reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
+            if (ds_name && insert(ds_name(),module))
+            {
+                MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << ds_name();
+
+                success = true;
+            }
+            else if (!ds_name)
+            {
+                MAPNIK_LOG_ERROR(datasource_cache)
+                        << "Problem loading plugin library '"
+                        << str << "' (plugin is lacking compatible interface)";
+            }
+        }
+        else
+        {
+            MAPNIK_LOG_ERROR(datasource_cache)
+                    << "Problem loading plugin library: " << str
+                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
+        }
+    }
+    catch (...) {
+            MAPNIK_LOG_ERROR(datasource_cache)
+                    << "Exception caught while loading plugin library: " << str;
+    }
+    return success;
 }
 
 }
