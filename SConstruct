@@ -1011,8 +1011,9 @@ if not preconfigured:
     env['CPPPATH'] = ['#include', '#']
     env['LIBPATH'] = ['#src']
 
-    # set any custom cxxflags to come first
+    # set any custom cxxflags and ldflags to come first
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
+    env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits
 
