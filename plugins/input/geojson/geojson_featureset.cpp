@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,29 +20,32 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_PARSE_TRANSFORM_HPP
-#define MAPNIK_PARSE_TRANSFORM_HPP
-
 // mapnik
-#include <mapnik/config.hpp>
-#include <mapnik/transform_expression.hpp>
+#include <mapnik/feature.hpp>
+// stl
+#include <string>
+#include <vector>
+#include <fstream>
 
-namespace mapnik {
+#include "geojson_featureset.hpp"
 
-template <typename Iterator> struct transform_expression_grammar;
+geojson_featureset::geojson_featureset(std::vector<mapnik::feature_ptr> const& features,
+                                       geojson_datasource::spatial_index_type const& tree)
+    : feature_id_(1),
+      features_(features),
+      tree_(tree) {}
 
-typedef transform_expression_grammar<std::string::const_iterator>
-    transform_expression_grammar__string;
+geojson_featureset::~geojson_featureset() {}
 
-MAPNIK_DECL transform_list_ptr parse_transform(std::string const& str);
-
-MAPNIK_DECL transform_list_ptr parse_transform(std::string const& str,
-                                               std::string const& encoding);
-
-MAPNIK_DECL bool parse_transform(transform_list& list,
-                                 std::string const& str,
-                                 transform_expression_grammar__string const& g);
-
-} // namespace mapnik
-
-#endif // MAPNIK_PARSE_TRANSFORM_HPP
+mapnik::feature_ptr geojson_featureset::next()
+{
+    feature_id_++;
+    if (feature_id_ <= features_.size())
+    {
+        return features_.at(feature_id_ - 1);
+    }
+    else
+    {
+        return mapnik::feature_ptr();
+    }
+}

@@ -25,14 +25,7 @@
 // mapnik
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/value_error.hpp>
-
-// boost
-#include <boost/make_shared.hpp>
-
-// agg
-#include "agg_trans_affine.h"
 
 namespace mapnik {
 using namespace boost::python;
@@ -46,8 +39,8 @@ const std::string get_svg_transform(T& symbolizer)
 template <class T>
 void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
 {
-    agg::trans_affine tr;
-    if (!mapnik::svg::parse_transform(transform_wkt.c_str(), tr))
+    transform_list_ptr trans_expr = mapnik::parse_transform(transform_wkt);
+    if (!trans_expr)
     {
         std::stringstream ss;
         ss << "Could not parse transform from '" 
@@ -55,9 +48,7 @@ void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
            << "', expected SVG transform attribute";
         throw mapnik::value_error(ss.str());
     }
-    transform_list_ptr trans = boost::make_shared<transform_list>();
-    trans->push_back(matrix_node(tr));
-    symbolizer.set_image_transform(trans);
+    symbolizer.set_image_transform(trans_expr);
 }
 
 } // end of namespace mapnik
