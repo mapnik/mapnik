@@ -25,7 +25,6 @@
 
 #include <fstream>
 #include <iostream>
-
 // boost
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
@@ -129,11 +128,9 @@ std::map<std::string, mapnik::parameters> geojson_datasource::get_statistics() c
     return statistics_;
 }
 
-// FIXME: implement
 mapnik::box2d<double> geojson_datasource::envelope() const
 {
     if (!is_bound_) bind();
-
     return extent_;
 }
 
@@ -149,9 +146,13 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
     if (!is_bound_) bind();
     
     // if the query box intersects our world extent then query for features
-    if (extent_.intersects(q.get_bbox()))
+    mapnik::box2d<double> const& b = q.get_bbox();
+    if (extent_.intersects(b))
     {
-        return boost::make_shared<geojson_featureset>(features_,tree_);
+        box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
+        index_array_ = tree_.find(box);
+        std::cout << "QUERY SIZE=" << index_array_.size() << std::endl;        
+        return boost::make_shared<geojson_featureset>(features_, index_array_.begin(), index_array_.end());
     }    
     // otherwise return an empty featureset pointer
     return mapnik::featureset_ptr();
