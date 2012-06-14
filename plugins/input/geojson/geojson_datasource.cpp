@@ -151,7 +151,6 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
     {
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
         index_array_ = tree_.find(box);
-        std::cout << "QUERY SIZE=" << index_array_.size() << std::endl;        
         return boost::make_shared<geojson_featureset>(features_, index_array_.begin(), index_array_.end());
     }    
     // otherwise return an empty featureset pointer
