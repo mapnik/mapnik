@@ -186,5 +186,50 @@ def test_render_grid3():
     eq_(resolve(utf5,38,10),{"Name": "South West"})
     eq_(resolve(utf5,38,46),{"Name": "South East"})
 
+
+def gen_grid_for_id(pixel_key):
+    ds = mapnik.MemoryDatasource()
+    context = mapnik.Context()
+    context.push('Name')
+    f = mapnik.Feature(context,pixel_key)
+    f['Name'] = str(pixel_key)
+    f.add_geometries_from_wkt('POLYGON ((0 0, 0 256, 256 256, 256 0, 0 0))')
+    ds.add_feature(f)
+    s = mapnik.Style()
+    r = mapnik.Rule()
+    symb = mapnik.PolygonSymbolizer()
+    r.symbols.append(symb)
+    s.rules.append(r)
+    lyr = mapnik.Layer('Places')
+    lyr.datasource = ds
+    lyr.styles.append('places_labels')
+    width,height = 256,256
+    m = mapnik.Map(width,height)
+    m.append_style('places_labels',s)
+    m.layers.append(lyr)
+    m.zoom_all()
+    grid = mapnik.Grid(m.width,m.height,key='__id__')
+    mapnik.render_layer(m,grid,layer=0,fields=['__id__','Name'])
+    return grid
+
+def test_negative_id():
+    grid = gen_grid_for_id(-1)
+    eq_(grid.get_pixel(128,128),-1)
+    utf1 = grid.encode('utf',resolution=4)
+    eq_(utf1['keys'],['-1'])
+
+def test_32bit_int_id():
+    int32 = 2147483647
+    grid = gen_grid_for_id(int32)
+    eq_(grid.get_pixel(128,128),int32)
+    utf1 = grid.encode('utf',resolution=4)
+    eq_(utf1['keys'],[str(int32)])
+
+    max_neg = -(int32+1)
+    grid = gen_grid_for_id(max_neg)
+    eq_(grid.get_pixel(128,128),max_neg)
+    utf1 = grid.encode('utf',resolution=4)
+    eq_(utf1['keys'],[str(max_neg)])
+
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]

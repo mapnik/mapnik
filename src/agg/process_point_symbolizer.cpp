@@ -63,26 +63,15 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
     if (marker)
     {
-        double w = (*marker)->width();
-        double h = (*marker)->height();
+        box2d<double> const& bbox = (*marker)->bounding_box();
+        coord2d const center = bbox.center();
+
         agg::trans_affine tr;
-        boost::array<double,6> const& m = sym.get_transform();
-        tr.load_from(&m[0]);
-        double px0 = - 0.5 * w;
-        double py0 = - 0.5 * h;
-        double px1 = 0.5 * w;
-        double py1 = 0.5 * h;
-        double px2 = px1;
-        double py2 = py0;
-        double px3 = px0;
-        double py3 = py1;
-        tr.transform(&px0,&py0);
-        tr.transform(&px1,&py1);
-        tr.transform(&px2,&py2);
-        tr.transform(&px3,&py3);
-        box2d<double> label_ext (px0, py0, px1, py1);
-        label_ext.expand_to_include(px2, py2);
-        label_ext.expand_to_include(px3, py3);
+        evaluate_transform(tr, *feature, sym.get_image_transform());
+
+        agg::trans_affine_translation const recenter(-center.x, -center.y);
+        agg::trans_affine const recenter_tr = recenter * tr;
+        box2d<double> label_ext = bbox * recenter_tr;
 
         for (unsigned i=0; i<feature->num_geometries(); ++i)
         {
@@ -103,7 +92,11 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 detector_->has_placement(label_ext))
             {
 
-                render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**marker,tr, sym.get_opacity());
+                render_marker(pixel_position(x, y), **marker, tr, sym.get_opacity(), sym.comp_op());
+
+                if (/* DEBUG */ 0) {
+                    debug_draw_box(label_ext, 0, 0, 0.0);
+                }
 
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);

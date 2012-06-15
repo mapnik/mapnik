@@ -80,6 +80,8 @@ public:
     void start_map_processing(Map const& map);
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
+    void start_style_processing(feature_type_style const& st);
+    void end_style_processing(feature_type_style const& st);
     void process(point_symbolizer const& sym,
                  mapnik::feature_ptr const& feature,
                  proj_transform const& prj_trans);
@@ -140,6 +142,7 @@ class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer
                                    public cairo_renderer_base
 {
 public:
+    typedef cairo_renderer_base processor_impl_type;
     cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, unsigned offset_x=0, unsigned offset_y=0);
     void end_map_processing(Map const& map);
 };

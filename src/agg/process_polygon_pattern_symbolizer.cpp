@@ -20,15 +20,18 @@
  *
  *****************************************************************************/
 
+// boost
+#include <boost/foreach.hpp>
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/expression_evaluator.hpp>
-
+#include <mapnik/vertex_converters.hpp>
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -50,28 +53,9 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef agg::wrap_mode_repeat wrap_x_type;
-    typedef agg::wrap_mode_repeat wrap_y_type;
-    typedef agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_plain,
-        agg::row_accessor<agg::int8u>, agg::pixel32_type> rendering_buffer;
-    typedef agg::image_accessor_wrap<rendering_buffer,
-        wrap_x_type,
-        wrap_y_type> img_source_type;
+    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
-    typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
-
-    typedef agg::renderer_scanline_aa<ren_base,
-        agg::span_allocator<agg::rgba8>,
-        span_gen_type> renderer_type;
-
-
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32_plain pixf(buf);
-    ren_base renb(pixf);
-
-    agg::scanline_u8 sl;
+    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
     ras_ptr->reset();
     set_gamma_method(sym,ras_ptr);
 
@@ -95,20 +79,38 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         return;
     }
 
-
     boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
 
     if (!pat) return;
 
+    typedef agg::rgba8 color;
+    typedef agg::order_rgba order;
+    typedef agg::pixel32_type pixel_type;
+    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
+    typedef agg::wrap_mode_repeat wrap_x_type;
+    typedef agg::wrap_mode_repeat wrap_y_type;
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
+    typedef agg::image_accessor_wrap<agg::pixfmt_rgba32,
+                                     wrap_x_type,
+                                     wrap_y_type> img_source_type;
+    typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
+    typedef agg::renderer_base<pixfmt_type> ren_base;
+
+    typedef agg::renderer_scanline_aa<ren_base,
+        agg::span_allocator<agg::rgba8>,
+        span_gen_type> renderer_type;
+
+    pixfmt_type pixf(buf);
+    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+    ren_base renb(pixf);
+
     unsigned w=(*pat)->width();
     unsigned h=(*pat)->height();
-    agg::row_accessor<agg::int8u> pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
-    agg::span_allocator<agg::rgba8> sa;
-    agg::pixfmt_alpha_blend_rgba<agg::blender_rgba32_plain,
-        agg::row_accessor<agg::int8u>, agg::pixel32_type> pixf_pattern(pattern_rbuf);
+    agg::rendering_buffer pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
+    agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
 
-    unsigned num_geometries = feature->num_geometries();
+
 
     pattern_alignment_e align = sym.get_alignment();
     unsigned offset_x=0;
@@ -116,33 +118,45 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     if (align == LOCAL_ALIGNMENT)
     {
-        double x0=0,y0=0;
-        if (num_geometries>0) // FIXME: hmm...?
+        double x0 = 0;
+        double y0 = 0;
+        if (feature->num_geometries() > 0)
         {
             clipped_geometry_type clipped(feature->get_geometry(0));
             clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
             path_type path(t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
-        offset_x = unsigned(width_-x0);
-        offset_y = unsigned(height_-y0);
+        offset_x = unsigned(width_ - x0);
+        offset_y = unsigned(height_ - y0);
     }
 
     span_gen_type sg(img_src, offset_x, offset_y);
+
+    agg::span_allocator<agg::rgba8> sa;
     renderer_type rp(renb,sa, sg);
-    //metawriter_with_properties writer = sym.get_metawriter();
-    for (unsigned i=0;i<num_geometries;++i)
+
+    agg::trans_affine tr;
+    evaluate_transform(tr, *feature, sym.get_transform());
+
+    box2d<double> inflated_extent = query_extent_ * 1.0;
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
+    vertex_converter<box2d<double>, rasterizer, polygon_pattern_symbolizer,
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+        converter(inflated_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+
+    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    converter.set<transform_tag>(); //always transform
+    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+
+    BOOST_FOREACH( geometry_type & geom, feature->paths())
     {
-        geometry_type & geom = feature->get_geometry(i);
         if (geom.num_points() > 2)
         {
-            clipped_geometry_type clipped(geom);
-            clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-            path_type path(t_,clipped,prj_trans);
-            ras_ptr->add_path(path);
-            //if (writer.first) writer.first->add_polygon(path, *feature, t_, writer.second);
+            converter.apply(geom);
         }
     }
+    agg::scanline_u8 sl;
     agg::render_scanlines(*ras_ptr, sl, rp);
 }
 
@@ -152,4 +166,3 @@ template void agg_renderer<image_32>::process(polygon_pattern_symbolizer const&,
                                               proj_transform const&);
 
 }
-

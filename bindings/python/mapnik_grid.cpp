@@ -39,6 +39,18 @@ bool painted(mapnik::grid const& grid)
     return grid.painted();
 }
 
+int get_pixel(mapnik::grid const& grid, int x, int y)
+{
+    if (x < grid.width() && y < grid.height())
+    {
+        mapnik::grid::value_type const * row = grid.getRow(y);
+        mapnik::grid::value_type const pixel = row[x];
+        return pixel;
+    }
+    PyErr_SetString(PyExc_IndexError, "invalid x,y for grid dimensions");
+    boost::python::throw_error_already_set();
+}
+
 void export_grid()
 {
     class_<mapnik::grid,boost::shared_ptr<mapnik::grid> >(
@@ -52,6 +64,7 @@ void export_grid()
         .def("width",&mapnik::grid::width)
         .def("height",&mapnik::grid::height)
         .def("view",&mapnik::grid::get_view)
+        .def("get_pixel",&get_pixel)
         .def("encode",encode,
              ( boost::python::arg("encoding")="utf", boost::python::arg("features")=true,boost::python::arg("resolution")=4 ),
              "Encode the grid as as optimized json\n"

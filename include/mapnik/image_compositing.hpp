@@ -23,13 +23,15 @@
 #ifndef MAPNIK_IMAGE_COMPOSITING_HPP
 #define MAPNIK_IMAGE_COMPOSITING_HPP
 
+// stl
+#include <string>
+
+#include <boost/optional.hpp>
 #include <mapnik/config.hpp>
 
 #ifdef _MSC_VER
 #include <mapnik/image_data.hpp>
 #endif
-
-// agg
 
 namespace mapnik
 {
@@ -39,7 +41,7 @@ namespace mapnik
 
 enum composite_mode_e
 {
-    clear = 1,
+    clear = 0,
     src,
     dst,
     src_over,
@@ -66,14 +68,31 @@ enum composite_mode_e
     exclusion,
     contrast,
     invert,
-    invert_rgb
+    invert_rgb,
+    grain_merge,
+    grain_extract
 };
 
+MAPNIK_DECL boost::optional<composite_mode_e> comp_op_from_string(std::string const& name);
+
 template <typename T1, typename T2>
-MAPNIK_DECL void composite(T1 & im, T2 & im2, composite_mode_e mode);
+MAPNIK_DECL void composite(T1 & im, T2 & im2,
+                           composite_mode_e mode,
+                           float opacity=1,
+                           int dx=0,
+                           int dy=0,
+                           bool premultiply_src=true,
+                           bool premultiply_dst=true);
 
 #ifdef _MSC_VER
-template MAPNIK_DECL void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & im, mapnik::image_data_32 & im2, composite_mode_e mode);
+template MAPNIK_DECL void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32 & im,
+                           mapnik::image_data_32 & im2,
+                           composite_mode_e mode,
+                           float opacity,
+                           int dx,
+                           int dy,
+                           bool premultiply_src,
+                           bool premultiply_dst);
 #endif
 
 }

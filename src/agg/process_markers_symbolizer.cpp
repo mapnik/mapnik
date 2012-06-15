@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
@@ -53,23 +54,26 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                               proj_transform const& prj_trans)
 {
     typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
-    typedef agg::pixfmt_rgba32_plain pixfmt;
-    typedef agg::renderer_base<pixfmt> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
-
+    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    typedef agg::rgba8 color_type;
+    typedef agg::order_rgba order_type;
+    typedef agg::pixel32_type pixel_type;
+    typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+    
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_power());
     agg::scanline_u8 sl;
     agg::scanline_p8 sl_line;
     agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
-    pixfmt pixf(buf);
+    pixfmt_comp_type pixf(buf);
+    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
-    renderer_solid ren(renb);
+    renderer_type ren(renb);
     agg::trans_affine tr;
-    boost::array<double,6> const& m = sym.get_transform();
-    tr.load_from(&m[0]);
+    evaluate_transform(tr, *feature, sym.get_image_transform());
     tr = agg::trans_affine_scaling(scale_factor_) * tr;
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
     marker_placement_e placement_method = sym.get_marker_placement();
@@ -83,30 +87,26 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         {
             if (!(*mark)->is_vector())
             {
-                MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: markers_symbolizer do not yet support SVG markers";
+                MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: markers_symbolizer does not yet support non-SVG markers";
 
                 return;
             }
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
-            double x1 = bbox.minx();
-            double y1 = bbox.miny();
-            double x2 = bbox.maxx();
-            double y2 = bbox.maxy();
-            double w = (*mark)->width();
-            double h = (*mark)->height();
+            coord2d const center = bbox.center();
 
-            agg::trans_affine recenter = agg::trans_affine_translation(-0.5*(x1+x2),-0.5*(y1+y2));
-            tr.transform(&x1,&y1);
-            tr.transform(&x2,&y2);
-            box2d<double> extent(x1,y1,x2,y2);
+            agg::trans_affine_translation const recenter(-center.x, -center.y);
+            agg::trans_affine const recenter_tr = recenter * tr;
+            box2d<double> extent = bbox * recenter_tr;
+
             using namespace mapnik::svg;
             vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
             svg_path_adapter svg_path(stl_storage);
+            
             svg_renderer<svg_path_adapter,
                 agg::pod_bvector<path_attributes>,
-                renderer_solid,
-                agg::pixfmt_rgba32_plain > svg_renderer(svg_path,(*marker)->attributes());
+                renderer_type,
+                agg::pixfmt_rgba32 > svg_renderer(svg_path,(*marker)->attributes());
 
             for (unsigned i=0; i<feature->num_geometries(); ++i)
             {
@@ -126,7 +126,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         detector_->has_placement(extent))
                     {
 
-                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, sym.get_opacity());
+                        render_marker(pixel_position(x, y), **mark, tr, sym.get_opacity(), sym.comp_op());
+
+                        if (/* DEBUG */ 0) {
+                            debug_draw_box(buf, extent, 0, 0, 0.0);
+                        }
 
                         // TODO - impl this for markers?
                         //if (!sym.get_ignore_placement())
@@ -148,8 +152,22 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
                     while (placement.get_point(&x, &y, &angle))
                     {
-                        agg::trans_affine matrix = recenter * tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
+                        agg::trans_affine matrix = recenter_tr;
+                        matrix.rotate(angle);
+                        matrix.translate(x, y);
                         svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(),bbox);
+
+                        if (/* DEBUG */ 0) {
+                            agg::trans_affine_rotation r(angle);
+                            debug_draw_box(buf, extent * r, x, y, 0.0);
+                            // note: debug_draw_box(buf, extent, x, y, angle)
+                            //      would draw a rotated box showing the proper
+                            //      bounds of the marker, while the above will
+                            //      draw the box used for collision detection,
+                            //      which embraces the rotated extent but isn't
+                            //      rotated itself
+                        }
+
                         if (writer.first)
                         {
                             //writer.first->add_box(label_ext, feature, t_, writer.second);
@@ -187,7 +205,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         double dx = w + (2*strk_width);
         double dy = h + (2*strk_width);
 
-        if (marker_type == ARROW)
+        if (marker_type == MARKER_ARROW)
         {
             extent = arrow_.extent();
             double x1 = extent.minx();
@@ -263,7 +281,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             else
             {
 
-                if (marker_type == ARROW)
+                if (marker_type == MARKER_ARROW)
                     marker.concat_path(arrow_);
 
                 clipped_geometry_type clipped(geom);
@@ -279,7 +297,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 {
                     agg::trans_affine matrix;
 
-                    if (marker_type == ELLIPSE)
+                    if (marker_type == MARKER_ELLIPSE)
                     {
                         // todo proper bbox - this is buggy
                         agg::ellipse c(x_t, y_t, rx, ry);

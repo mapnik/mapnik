@@ -27,6 +27,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/span_image_filter.hpp>
 
 // agg
 #include "agg_image_filters.h"
@@ -191,11 +192,9 @@ void reproject_raster(raster &target, raster const& source,
                         span_gen_type sg(ia, interpolator);
                         agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
                                                  sa, sg);
-                    } else {
-                        typedef agg::span_image_filter_rgba_2x2
-                            <img_accessor_type, interpolator_type>
-                            span_gen_type;
-
+                    } else {                        
+                        typedef mapnik::span_image_resample_rgba_affine
+                            <img_accessor_type> span_gen_type;
                         span_gen_type sg(ia, interpolator, filter);
                         agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
                                                  sa, sg);

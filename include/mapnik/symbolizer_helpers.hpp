@@ -150,10 +150,25 @@ public:
         init_marker();
     }
 
+    box2d<double> const& get_marker_extent() const
+    {
+        return marker_ext_;
+    }
+
+    double get_marker_height() const
+    {
+        return marker_h_;
+    }
+
+    double get_marker_width() const
+    {
+        return marker_w_;
+    }
+
     bool next();
     pixel_position get_marker_position(text_path const& p);
     marker & get_marker() const;
-    agg::trans_affine const& get_transform() const;
+    agg::trans_affine const& get_image_transform() const;
 protected:
     bool next_point_placement();
     bool next_line_placement();
@@ -161,13 +176,12 @@ protected:
     shield_symbolizer const& sym_;
     box2d<double> marker_ext_;
     boost::optional<marker_ptr> marker_;
-    agg::trans_affine transform_;
+    agg::trans_affine image_transform_;
     double marker_w_;
     double marker_h_;
     double marker_x_;
     double marker_y_;
-    // F***ing templates...
-    // http://womble.decadent.org.uk/c++/template-faq.html#base-lookup
+    
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement;

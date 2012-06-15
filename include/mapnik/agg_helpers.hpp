@@ -23,8 +23,16 @@
 #ifndef MAPNIK_AGG_HELPERS_HPP
 #define MAPNIK_AGG_HELPERS_HPP
 
+// agg 
+#include "agg_basics.h"
 #include "agg_gamma_functions.h"
 #include "agg_math_stroke.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_scanline_u.h"
+#include "agg_scanline_p.h"
+#include "agg_renderer_outline_aa.h"
+#include "agg_renderer_scanline.h"
+#include "agg_rasterizer_outline_aa.h"
 
 namespace mapnik {
 
@@ -85,6 +93,79 @@ void set_join_caps(Stroke const& stroke_, PathType & stroke)
         stroke.generator().line_cap(agg::round_cap);
     }
 }
+
+
+template <typename Stroke,typename Rasterizer>
+void set_join_caps_aa(Stroke const& stroke_, Rasterizer & ras)
+{
+
+    line_join_e join=stroke_.get_line_join();
+    switch (join)
+    {
+    case MITER_JOIN:
+        ras.line_join(agg::outline_miter_accurate_join);
+        break;
+    case MITER_REVERT_JOIN:
+        ras.line_join(agg::outline_no_join);
+        break;
+    case ROUND_JOIN:
+        ras.line_join(agg::outline_round_join);
+        break;
+    default:
+        ras.line_join(agg::outline_no_join);
+    }
+
+    line_cap_e cap=stroke_.get_line_cap();
+    switch (cap)
+    {
+    case BUTT_CAP:
+        ras.round_cap(false);
+        break;
+    case SQUARE_CAP:
+        ras.round_cap(false);
+        break;
+    default:
+        ras.round_cap(true);
+    }
+}
+
+template <typename PixelFormat>
+struct renderer_scanline_solid : private boost::noncopyable
+{
+    typedef PixelFormat pixfmt_type;
+    typedef typename pixfmt_type::color_type color_type;
+    typedef typename pixfmt_type::row_data row_data;
+    typedef agg::renderer_base<pixfmt_type> ren_base; 
+    typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+    typedef agg::scanline_u8 scanline_type;
+    
+    renderer_scanline_solid()
+        : renb_(),
+          ren_(renb_)
+    {}
+    
+    template <typename PF>
+    void attach(PF & pf)
+    {
+        renb_.attach(pf);
+    }
+    
+    void color(color_type const& c)
+    {
+        ren_.color(c);
+    }
+    
+    template <typename Rasterizer>
+    void render(Rasterizer & ras)
+    {
+        agg::render_scanlines(ras, sl_, ren_);
+        sl_.reset_spans();
+    }
+    
+    scanline_type sl_;
+    ren_base renb_;
+    renderer ren_;
+};
 
 }
 

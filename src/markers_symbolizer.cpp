@@ -57,7 +57,7 @@ markers_symbolizer::markers_symbolizer()
       height_(boost::make_shared<expr_node>(10.0)),
       stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT),
-      marker_type_(ARROW) {}
+      marker_type_(MARKER_ARROW) {}
 
 markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
     : symbolizer_with_image(filename),
@@ -71,7 +71,7 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
       height_(boost::make_shared<expr_node>(10.0)),
       stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT),
-      marker_type_(ARROW) {}
+      marker_type_(MARKER_ARROW) {}
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
     : symbolizer_with_image(rhs),

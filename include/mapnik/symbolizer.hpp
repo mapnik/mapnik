@@ -27,23 +27,29 @@
 #include <mapnik/config.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/metawriter.hpp>
+#include <mapnik/image_compositing.hpp>
+#include <mapnik/transform_expression.hpp>
 
 // boost
 #include <boost/array.hpp>
+#include <boost/optional.hpp>
 
 namespace mapnik
 {
 
+typedef transform_list_ptr transform_type;
+
+MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr, Feature const& feature,
+                                    transform_type const& trans_expr);
+
 class Map;
 
-class MAPNIK_DECL symbolizer_base {
+class MAPNIK_DECL symbolizer_base 
+{
 public:
-    symbolizer_base():
-        properties_(),
-        properties_complete_(),
-        writer_name_(),
-        writer_ptr_() {}
-
+    symbolizer_base();    
+    symbolizer_base(symbolizer_base const& other);
+    
     /** Add a metawriter to this symbolizer using a name. */
     void add_metawriter(std::string const& name, metawriter_properties const& properties);
     /** Add a metawriter to this symbolizer using a pointer.
@@ -77,30 +83,43 @@ public:
     metawriter_properties const& get_metawriter_properties_overrides() const { return properties_; }
     /** Get metawriter name. */
     std::string const& get_metawriter_name() const { return writer_name_; }
+    void set_comp_op(composite_mode_e comp_op);
+    composite_mode_e comp_op() const;
+    void set_transform(transform_type const& );
+    transform_type const& get_transform() const;
+    std::string get_transform_string() const;
+    void set_clip(bool clip);
+    bool clip() const;
+    void set_smooth(double smooth);
+    double smooth() const;
 private:
     metawriter_properties properties_;
     metawriter_properties properties_complete_;
     std::string writer_name_;
     metawriter_ptr writer_ptr_;
+    composite_mode_e comp_op_;
+    transform_type affine_transform_;
+    bool clip_;
+    double smooth_value_;
 };
 
-typedef boost::array<double,6> transform_type;
 
-class MAPNIK_DECL symbolizer_with_image {
+class MAPNIK_DECL symbolizer_with_image 
+{
 public:
     path_expression_ptr get_filename() const;
     void set_filename(path_expression_ptr filename);
-    void set_transform(transform_type const& );
-    transform_type const& get_transform() const;
-    std::string const get_transform_string() const;
     void set_opacity(float opacity);
     float get_opacity() const;
+    void  set_image_transform(transform_type const& tr);
+    transform_type const& get_image_transform() const;
+    std::string get_image_transform_string() const;
 protected:
     symbolizer_with_image(path_expression_ptr filename = path_expression_ptr());
     symbolizer_with_image(symbolizer_with_image const& rhs);
     path_expression_ptr image_filename_;
     float image_opacity_;
-    transform_type matrix_;
+    transform_type image_transform_;
 };
 }
 

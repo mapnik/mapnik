@@ -315,13 +315,11 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 }
 
 template <typename T>
-text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s)
+text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s, composite_mode_e comp_op)
     : pixmap_(pixmap),
       font_manager_(font_manager_),
-      stroker_(s)
-{
-
-}
+      stroker_(s),
+      comp_op_(comp_op) {}
 
 template <typename T>
 box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
@@ -402,6 +400,26 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
 }
 
 template <typename T>
+void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity, composite_mode_e comp_op)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            unsigned gray=bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                pixmap.composite_pixel(comp_op, i, j, rgba, gray, opacity);
+            }
+        }
+    }
+}
+
+template <typename T>
 void text_renderer<T>::render(pixel_position pos)
 {
     FT_Error  error;
@@ -430,9 +448,12 @@ void text_renderer<T>::render(pixel_position pos)
             {
 
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                render_bitmap(&bit->bitmap, itr->properties->halo_fill.rgba(),
-                              bit->left,
-                              height - bit->top, itr->properties->text_opacity);
+                composite_bitmap(pixmap_, &bit->bitmap, itr->properties->halo_fill.rgba(),
+                                 bit->left,
+                                 height - bit->top, 
+                                 itr->properties->text_opacity,
+                                 comp_op_
+                    );
             }
         }
         FT_Done_Glyph(g);
@@ -448,9 +469,16 @@ void text_renderer<T>::render(pixel_position pos)
         {
 
             FT_BitmapGlyph bit = (FT_BitmapGlyph)itr->image;
-            render_bitmap(&bit->bitmap, itr->properties->fill.rgba(),
-                          bit->left,
-                          height - bit->top, itr->properties->text_opacity);
+            //render_bitmap(&bit->bitmap, itr->properties->fill.rgba(),
+            //              bit->left,
+            //              height - bit->top, itr->properties->text_opacity);
+            
+            composite_bitmap(pixmap_, &bit->bitmap, itr->properties->fill.rgba(),
+                             bit->left,
+                             height - bit->top, 
+                             itr->properties->text_opacity,
+                             comp_op_
+                );
         }
     }
 }
@@ -497,10 +525,10 @@ boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 template void text_renderer<image_32>::render(pixel_position);
-template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&);
+template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path*);
 
-template void text_renderer<grid>::render_id(int, pixel_position, double);
-template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&);
+template void text_renderer<grid>::render_id(int, pixel_position, double );
+template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path*);
 }

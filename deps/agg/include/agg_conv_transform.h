@@ -29,10 +29,11 @@ namespace agg
     template<class VertexSource, class Transformer=trans_affine> class conv_transform
     {
     public:
-        conv_transform(VertexSource& source, const Transformer& tr) :
+        conv_transform(VertexSource& source, Transformer& tr) :
             m_source(&source), m_trans(&tr) {}
+    
         void attach(VertexSource& source) { m_source = &source; }
-
+    
         void rewind(unsigned path_id) 
         { 
             m_source->rewind(path_id); 
@@ -48,7 +49,7 @@ namespace agg
             return cmd;
         }
 
-        void transformer(const Transformer& tr)
+        void transformer(Transformer& tr)
         {
             m_trans = &tr;
         }

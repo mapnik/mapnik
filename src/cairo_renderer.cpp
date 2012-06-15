@@ -40,17 +40,20 @@
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/vertex_converters.hpp>
 
 // cairo
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
 #include <cairo-ft.h>
+#include <cairo-version.h>
 
 // boost
 #include <boost/utility.hpp>
 #include <boost/make_shared.hpp>
 
 // agg
+
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_smooth_poly1.h"
@@ -58,9 +61,6 @@
 // markers
 #include "agg_path_storage.h"
 #include "agg_ellipse.h"
-
-// stl
-#include <iostream>
 
 namespace mapnik
 {
@@ -285,6 +285,108 @@ public:
     void set_color(int r, int g, int b, double opacity = 1.0)
     {
         context_->set_source_rgba(r / 255.0, g / 255.0, b / 255.0, opacity);
+    }
+
+    void set_operator(composite_mode_e comp_op)
+    {
+        switch (comp_op)
+        {
+        case clear:
+            context_->set_operator(Cairo::OPERATOR_CLEAR);
+            break;
+        case src:
+            context_->set_operator(Cairo::OPERATOR_SOURCE);
+            break;
+        case dst:
+            context_->set_operator(Cairo::OPERATOR_DEST);
+            break;
+        case src_over:
+            context_->set_operator(Cairo::OPERATOR_OVER);
+            break;
+        case dst_over:
+            context_->set_operator(Cairo::OPERATOR_DEST_OVER);
+            break;
+        case src_in:
+            context_->set_operator(Cairo::OPERATOR_IN);
+            break;
+        case dst_in:
+            context_->set_operator(Cairo::OPERATOR_DEST_IN);
+            break;
+        case src_out:
+            context_->set_operator(Cairo::OPERATOR_OUT);
+            break;
+        case dst_out:
+            context_->set_operator(Cairo::OPERATOR_DEST_OUT);
+            break;
+        case src_atop:
+            context_->set_operator(Cairo::OPERATOR_ATOP);
+            break;
+        case dst_atop:
+            context_->set_operator(Cairo::OPERATOR_DEST_ATOP);
+            break;
+        case _xor:
+            context_->set_operator(Cairo::OPERATOR_XOR);
+            break;
+        case plus:
+            context_->set_operator(Cairo::OPERATOR_ADD);
+            break;
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 10, 0)
+        case multiply:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_MULTIPLY));
+            break;
+        case screen:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_SCREEN));
+            break;
+        case overlay:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_OVERLAY));
+            break;
+        case darken:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_DARKEN));
+            break;
+        case lighten:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_LIGHTEN));
+            break;
+        case color_dodge:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_COLOR_DODGE));
+            break;
+        case color_burn:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_COLOR_BURN));
+            break;
+        case hard_light:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_HARD_LIGHT));
+            break;
+        case soft_light:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_SOFT_LIGHT));
+            break;
+        case difference:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_DIFFERENCE));
+            break;
+        case exclusion:
+            context_->set_operator(static_cast<Cairo::Operator>(CAIRO_OPERATOR_EXCLUSION));
+            break;
+#else
+#warning building against cairo older that 1.10.0, some compositing options are disabled
+        case multiply:
+        case screen:
+        case overlay:
+        case darken:
+        case lighten:
+        case color_dodge:
+        case color_burn:
+        case hard_light:
+        case soft_light:
+        case difference:
+        case exclusion:
+            break;
+#endif
+        case contrast:
+        case minus:
+        case invert:
+        case invert_rgb:
+        case grain_merge:
+        case grain_extract:
+            break;
+        }
     }
 
     void set_line_join(line_join_e join)
@@ -668,6 +770,8 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         box2d<double> bounds = t_.forward(t_.extent());
         context_->rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
         context_->clip();
+#else
+#warning building against cairo older that 1.6.0, map clipping is disabled
 #endif
 
         boost::optional<color> bg = m_.background();
@@ -711,40 +815,42 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: End layer processing";
     }
 
+    void cairo_renderer_base::start_style_processing(feature_type_style const& st)
+    {
+        MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer:start style processing";
+    }
+
+    void cairo_renderer_base::end_style_processing(feature_type_style const& st)
+    {
+        MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer:end style processing";
+    }
+
     void cairo_renderer_base::process(polygon_symbolizer const& sym,
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-
         cairo_context context(context_);
+        context.set_operator(sym.comp_op());
         context.set_color(sym.get_fill(), sym.get_opacity());
-        box2d<double> inflated_extent = query_extent_ * 1.1;
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
+
+        agg::trans_affine tr;
+        evaluate_transform(tr, *feature, sym.get_transform());
+
+        typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
+        vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
+            converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
+
+        if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+        converter.set<transform_tag>(); //always transform
+        converter.set<affine_transform_tag>();
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
         {
-            geometry_type & geom = feature->get_geometry(i);
             if (geom.num_points() > 2)
             {
-                if (sym.smooth() > 0.0)
-                {
-                    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-                    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-                    typedef agg::conv_smooth_poly1_curve<path_type> smooth_type;
-                    clipped_geometry_type clipped(geom);
-                    clipped.clip_box(inflated_extent.minx(),inflated_extent.miny(),inflated_extent.maxx(),inflated_extent.maxy());
-                    path_type path(t_,clipped,prj_trans);
-                    smooth_type smooth(path);
-                    smooth.smooth_value(sym.smooth());
-                    context.add_agg_path(smooth);
-                }
-                else
-                {
-                    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-                    typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-                    clipped_geometry_type clipped(geom);
-                    clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-                    path_type path(t_,clipped,prj_trans);
-                    context.add_path(path);
-                }
+                converter.apply(geom);
             }
         }
         // fill polygon
@@ -755,17 +861,17 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
+        typedef coord_transform<CoordTransform,geometry_type> path_type;
 
         cairo_context context(context_);
-
+        context.set_operator(sym.comp_op());
         color const& fill = sym.get_fill();
         double height = 0.0;
         expression_ptr height_expr = sym.height();
         if (height_expr)
         {
             value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature), *height_expr);
-            height = 0.7071 * result.to_double();
+            height = result.to_double(); //scale_factor is always 1.0 atm
         }
 
         for (unsigned i = 0; i < feature->num_geometries(); ++i)
@@ -847,11 +953,11 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     }
                 }
 
-                path_type path(t_, *frame, prj_trans);
-                context.set_color(128, 128, 128, sym.get_opacity());
-                context.add_path(path);
-                context.stroke();
-
+                //path_type path(t_, *frame, prj_trans);
+                //context.set_color(128, 128, 128, sym.get_opacity());
+                //context.add_path(path);
+                //context.stroke();
+                
                 path_type roof_path(t_, *roof, prj_trans);
                 context.set_color(sym.get_fill(), sym.get_opacity());
                 context.add_path(roof_path);
@@ -864,11 +970,10 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
-        mapnik::stroke const& stroke_ = sym.get_stroke();
         cairo_context context(context_);
+        mapnik::stroke const& stroke_ = sym.get_stroke();
+        context.set_operator(sym.comp_op());
+
         context.set_color(stroke_.get_color(), stroke_.get_opacity());
         context.set_line_join(stroke_.get_line_join());
         context.set_line_cap(stroke_.get_line_cap());
@@ -879,20 +984,29 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             context.set_dash(stroke_.get_dash_array());
         }
 
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
-        {
-            geometry_type & geom = feature->get_geometry(i);
+        agg::trans_affine tr;
+        evaluate_transform(tr, *feature, sym.get_transform());
 
+        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
+        vertex_converter<box2d<double>, cairo_context, line_symbolizer,
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
+            converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
+
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+        converter.set<transform_tag>(); // always transform
+
+        if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        {
             if (geom.num_points() > 1)
             {
-                //cairo_context context(context_);
-                clipped_geometry_type clipped(geom);
-                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-                path_type path(t_,clipped,prj_trans);
-
-                context.add_path(path);
+                converter.apply(geom);
             }
         }
+        // stroke
         context.stroke();
     }
 
@@ -900,6 +1014,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
     {
         cairo_context context(context_);
+
         if (marker.is_vector())
         {
             box2d<double> bbox;
@@ -918,7 +1033,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
             }
 
-            typedef coord_transform2<CoordTransform,geometry_type> path_type;
+            typedef coord_transform<CoordTransform,geometry_type> path_type;
             agg::trans_affine transform;
             mapnik::path_ptr vmarker = *marker.get_vector_data();
             using namespace mapnik::svg;
@@ -967,12 +1082,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     }
                     else if(attr.fill_flag)
                     {
-                        context.set_color(attr.fill_color.r,attr.fill_color.g,attr.fill_color.b,attr.opacity*opacity);
+                        double fill_opacity = attr.opacity * opacity * attr.fill_color.opacity();
+                        context.set_color(attr.fill_color.r,attr.fill_color.g,attr.fill_color.b, fill_opacity);
                         context.fill();
                     }
                 }
 
-                if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT || attr.stroke_flag)
+                if (attr.stroke_gradient.get_gradient_type() != NO_GRADIENT || attr.stroke_flag)
                 {
                     context.add_agg_path(svg_path,attr.index);
                     if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
@@ -985,9 +1101,10 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                         context.set_gradient(g,bbox);
                         context.stroke();
                     }
-                    else if(attr.stroke_flag)
+                    else if (attr.stroke_flag)
                     {
-                        context.set_color(attr.stroke_color.r,attr.stroke_color.g,attr.stroke_color.b,attr.opacity*opacity);
+                        double stroke_opacity = attr.opacity * opacity * attr.stroke_color.opacity();
+                        context.set_color(attr.stroke_color.r,attr.stroke_color.g,attr.stroke_color.b, stroke_opacity);
                         context.set_line_width(attr.stroke_width);
                         context.set_line_cap(line_cap_enum(attr.line_cap));
                         context.set_line_join(line_join_enum(attr.line_join));
@@ -1021,6 +1138,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             marker.reset(boost::make_shared<mapnik::marker>());
         }
 
+        agg::trans_affine mtx;
+        evaluate_transform(mtx, *feature, sym.get_image_transform());
+
         if (marker)
         {
             for (unsigned i = 0; i < feature->num_geometries(); ++i)
@@ -1047,10 +1167,6 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 if (sym.get_allow_overlap() ||
                     detector_.has_placement(label_ext))
                 {
-                    agg::trans_affine mtx;
-                    boost::array<double,6> const& m = sym.get_transform();
-                    mtx.load_from(&m[0]);
-
                     render_marker(pixel_position(px,py),**marker, mtx, sym.get_opacity());
 
                     if (!sym.get_ignore_placement())
@@ -1076,14 +1192,16 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 1.0 /*scale_factor*/,
                 t_, font_manager_, detector_, query_extent_);
         cairo_context context(context_);
+        context.set_operator(sym.comp_op());
 
-        while (helper.next()) {
+        while (helper.next())
+        {
             placements_type &placements = helper.placements();
             for (unsigned int ii = 0; ii < placements.size(); ++ii)
             {
                 pixel_position marker_pos = helper.get_marker_position(placements[ii]);
                 render_marker(marker_pos,
-                              helper.get_marker(), helper.get_transform(),
+                              helper.get_marker(), helper.get_image_transform(),
                               sym.get_opacity());
                 context.add_text(placements[ii], face_manager_, font_manager_);
             }
@@ -1095,7 +1213,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       proj_transform const& prj_trans)
     {
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
         std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
@@ -1105,6 +1223,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         unsigned height((*marker)->height());
 
         cairo_context context(context_);
+        context.set_operator(sym.comp_op());
         cairo_pattern pattern(**((*marker)->get_bitmap_data()));
 
         pattern.set_extend(Cairo::EXTEND_REPEAT);
@@ -1167,10 +1286,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_ptr const& feature,
                                       proj_transform const& prj_trans)
     {
-        typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-
         cairo_context context(context_);
+        context.set_operator(sym.comp_op());
+
         std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
         if (!marker && !(*marker)->is_bitmap()) return;
@@ -1181,19 +1299,29 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
         context.set_pattern(pattern);
 
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
-        {
-            geometry_type & geom = feature->get_geometry(i);
+        agg::trans_affine tr;
+        evaluate_transform(tr, *feature, sym.get_transform());
 
+        typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
+        vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
+            converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
+
+        if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+        converter.set<transform_tag>(); //always transform
+        converter.set<affine_transform_tag>();
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+
+        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        {
             if (geom.num_points() > 2)
             {
-                clipped_geometry_type clipped(geom);
-                clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-                path_type path(t_,clipped,prj_trans);
-                context.add_path(path);
-                context.fill();
+                converter.apply(geom);
             }
         }
+
+        // fill polygon
+        context.fill();
     }
 
     void cairo_renderer_base::process(raster_symbolizer const& sym,
@@ -1234,6 +1362,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                  sym.get_scaling());
 
                 cairo_context context(context_);
+                context.set_operator(sym.comp_op());
                 //TODO -- support for advanced image merging
                 context.add_image(start_x, start_y, target.data_, sym.get_opacity());
             }
@@ -1245,15 +1374,15 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       proj_transform const& prj_trans)
     {
         cairo_context context(context_);
-
-        double scale_factor_(1);
+        context.set_operator(sym.comp_op());
+        double scale_factor_ = 1;
 
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
         agg::trans_affine tr;
-        boost::array<double,6> const& m = sym.get_transform();
-        tr.load_from(&m[0]);
+        evaluate_transform(tr, *feature, sym.get_image_transform());
+
         // TODO - use this?
         //tr = agg::trans_affine_scaling(scale_factor_) * tr;
         std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
@@ -1268,7 +1397,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             {
                 if (!(*mark)->is_vector())
                 {
-                    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: markers_symbolizer does not yet support SVG markers";
+                    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: markers_symbolizer does not yet support non-SVG markers";
 
                     return;
                 }
@@ -1357,7 +1486,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
             double dx = w + (2*strk_width);
             double dy = h + (2*strk_width);
 
-            if (marker_type == ARROW)
+            if (marker_type == MARKER_ARROW)
             {
                 extent = arrow_.extent();
                 double x1 = extent.minx();
@@ -1424,7 +1553,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 }
                 else
                 {
-                    if (marker_type == ARROW)
+                    if (marker_type == MARKER_ARROW)
                         marker.concat_path(arrow_);
 
                     clipped_geometry_type clipped(geom);
@@ -1440,7 +1569,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     {
                         agg::trans_affine matrix;
 
-                        if (marker_type == ELLIPSE)
+                        if (marker_type == MARKER_ELLIPSE)
                         {
                             agg::ellipse c(x_t, y_t, rx, ry);
                             marker.concat_path(c);
@@ -1491,6 +1620,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, *feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_, query_extent_);
 
         cairo_context context(context_);
+        context.set_operator(sym.comp_op());
 
         while (helper.next()) {
             placements_type &placements = helper.placements();

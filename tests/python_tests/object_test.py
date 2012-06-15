@@ -68,7 +68,8 @@ def test_shieldsymbolizer_init():
     # strings for PathExpressions... should we pass objects?
     eq_(s.filename, '../data/images/dummy.png')
 
-    eq_(s.transform, 'matrix(1, 0, 0, 1, 0, 0)')
+    # 11c34b1: default transform list is empty, not identity matrix
+    eq_(s.transform, '')
 
     eq_(len(s.fontset.names), 0)
 
@@ -78,6 +79,13 @@ def test_shieldsymbolizer_init():
 #@raises(RuntimeError)
 #def test_shieldsymbolizer_missing_image():
 #    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../#data/images/broken.png'))
+
+# ShieldSymbolizer modification
+def test_shieldsymbolizer_modify():
+    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
+    # transform expression
+    s.transform = "rotate(30+[a]) scale(2*[sx] [sy])"
+    eq_(s.transform, "rotate((30+[a])) scale(2*[sx], [sy])")
 
 def test_polygonsymbolizer_init():
     p = mapnik.PolygonSymbolizer()
@@ -114,12 +122,18 @@ def test_pointsymbolizer_init():
     eq_(p.placement, mapnik.point_placement.INTERIOR)
 
 
-# PointSymbolizer initialization
+# MarkersSymbolizer initialization
 def test_markersymbolizer_init():
     p = mapnik.MarkersSymbolizer() 
     eq_(p.allow_overlap, False)
     eq_(p.opacity,1)
     eq_(p.filename,'')
+    eq_(p.marker_type,mapnik.marker_type.ARROW)
+    eq_(p.placement,mapnik.marker_placement.LINE_PLACEMENT)
+    eq_(p.fill,mapnik.Color(0,0,255))
+    eq_(p.ignore_placement,False)
+    eq_(p.spacing,100)
+    eq_(p.max_error,0.2)
 
     stroke = mapnik.Stroke()
     stroke.color = mapnik.Color('black')
@@ -290,7 +304,6 @@ def test_map_init_from_string():
         m.base = 'foo'
         mapnik.load_map_from_string(m, map_string, True, ".")
         eq_(m.base, '.')
-        raise(Todo("Need to write more map property tests in 'object_test.py'..."))
     except RuntimeError, e:
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):

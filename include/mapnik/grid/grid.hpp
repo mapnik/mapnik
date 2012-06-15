@@ -329,7 +329,7 @@ public:
 
 };
 
-typedef MAPNIK_DECL hit_grid<boost::uint16_t> grid;
+typedef MAPNIK_DECL hit_grid<int> grid;
 
 }
 #endif //MAPNIK_GRID_HPP

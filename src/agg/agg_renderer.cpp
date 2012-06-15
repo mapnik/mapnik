@@ -21,8 +21,10 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
@@ -32,40 +34,13 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
+#include <mapnik/image_compositing.hpp>
+#include <mapnik/image_filter.hpp>
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
-#include "agg_rasterizer_scanline_aa.h"
-#include "agg_basics.h"
-#include "agg_scanline_p.h"
 #include "agg_scanline_u.h"
-#include "agg_renderer_scanline.h"
-#include "agg_path_storage.h"
-#include "agg_span_allocator.h"
-#include "agg_span_pattern_rgba.h"
-#include "agg_image_accessors.h"
-#include "agg_conv_stroke.h"
-#include "agg_conv_dash.h"
-#include "agg_conv_contour.h"
-#include "agg_conv_clip_polyline.h"
-#include "agg_vcgen_stroke.h"
-#include "agg_conv_adaptor_vcgen.h"
-#include "agg_conv_smooth_poly1.h"
-#include "agg_conv_marker.h"
-#include "agg_vcgen_markers_term.h"
-#include "agg_renderer_outline_aa.h"
-#include "agg_rasterizer_outline_aa.h"
-#include "agg_rasterizer_outline.h"
-#include "agg_renderer_outline_image.h"
-#include "agg_span_allocator.h"
-#include "agg_span_pattern_rgba.h"
-#include "agg_renderer_scanline.h"
-#include "agg_pattern_filters_rgba.h"
-#include "agg_renderer_outline_image.h"
-#include "agg_vpgen_clip_polyline.h"
-#include "agg_arrowhead.h"
 
 // boost
 #include <boost/utility.hpp>
@@ -108,6 +83,9 @@ template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
+      internal_buffer_(),
+      current_buffer_(&pixmap),      
+      style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
@@ -125,6 +103,9 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
+      internal_buffer_(),
+      current_buffer_(&pixmap),
+      style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
@@ -185,6 +166,10 @@ void agg_renderer<T>::start_map_processing(Map const& map)
 template <typename T>
 void agg_renderer<T>::end_map_processing(Map const& )
 {
+
+    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    agg::pixfmt_rgba32 pixf(buf);
+    pixf.demultiply();
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
 
@@ -209,21 +194,81 @@ void agg_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity)
+void agg_renderer<T>::start_style_processing(feature_type_style const& st)
+{
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing style";
+    if (st.comp_op()) style_level_compositing_ = true;
+    else style_level_compositing_ = false;
+    
+    if (style_level_compositing_ || st.image_filters().size() > 0)
+    {
+        if (!internal_buffer_)
+            internal_buffer_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height()); 
+        else
+            internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour        
+        current_buffer_ = internal_buffer_.get();
+    }
+    else
+    {
+        current_buffer_ = &pixmap_;
+    }
+}
+
+template <typename T>
+void agg_renderer<T>::end_style_processing(feature_type_style const& st)
+{
+    bool blend_from = false;
+    if (st.image_filters().size() > 0)
+    {
+        blend_from = true;
+        mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
+        BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.image_filters())
+        {
+            boost::apply_visitor(visitor, filter_tag);
+        }         
+    }
+    
+    if (st.comp_op())
+    {
+        composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(), 1.0f, 0, 0, false, false);
+    }   
+    else if (blend_from)
+    {                
+        composite(pixmap_.data(),current_buffer_->data(), src_over, 1.0f, 0, 0, false,false);
+    }
+    
+    // apply any 'direct' image filters    
+    mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
+    BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.direct_image_filters())
+    {
+        boost::apply_visitor(visitor, filter_tag);
+    }   
+    
+    MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
+}
+
+template <typename T>
+void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, 
+                                    double opacity, composite_mode_e comp_op)
 {
     if (marker.is_vector())
     {
-        typedef agg::pixfmt_rgba32_plain pixfmt;
-        typedef agg::renderer_base<pixfmt> renderer_base;
-        typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_solid;
+        typedef agg::rgba8 color_type;
+        typedef agg::order_rgba order_type;
+        typedef agg::pixel32_type pixel_type;
+        typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+        typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+        typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+        typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 
         ras_ptr->reset();
         ras_ptr->gamma(agg::gamma_power());
         agg::scanline_u8 sl;
-        agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
-        pixfmt pixf(buf);
+        agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+        pixfmt_comp_type pixf(buf);
+        pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
         renderer_base renb(pixf);
-
+        
         box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
         coord<double,2> c = bbox.center();
         // center the svg marker on '0,0'
@@ -232,27 +277,87 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         mtx *= tr;
         mtx *= agg::trans_affine_scaling(scale_factor_);
         // render the marker at the center of the marker box
-        mtx.translate(pos.x+0.5 * marker.width(), pos.y+0.5 * marker.height());
+        mtx.translate(pos.x, pos.y);
         using namespace mapnik::svg;
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer<svg_path_adapter,
             agg::pod_bvector<path_attributes>,
-            renderer_solid,
-            agg::pixfmt_rgba32_plain> svg_renderer(svg_path,
+            renderer_type,
+            agg::pixfmt_rgba32> svg_renderer(svg_path,
                                                    (*marker.get_vector_data())->attributes());
-
+        
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
     }
     else
-    {
-        //TODO: Add subpixel support
-        pixmap_.set_rectangle_alpha2(**marker.get_bitmap_data(),
-                                     boost::math::iround(pos.x),
-                                     boost::math::iround(pos.y),
-                                     opacity);
+    {        
+        double cx = 0.5 * (*marker.get_bitmap_data())->width();
+        double cy = 0.5 * (*marker.get_bitmap_data())->height();
+        composite(current_buffer_->data(), **marker.get_bitmap_data(), 
+                  comp_op, opacity,
+                  boost::math::iround(pos.x - cx),
+                  boost::math::iround(pos.y - cy),
+                  false, false);
     }
 }
 
+template <typename T>
+void agg_renderer<T>::painted(bool painted)
+{
+    pixmap_.painted(painted);
+}
+
+template <typename T>
+void agg_renderer<T>::debug_draw_box(box2d<double> const& box,
+                                     double x, double y, double angle)
+{
+    agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+    debug_draw_box(buf, box, x, y, angle);
+}
+
+template <typename T> template <typename R>
+void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
+                                     double x, double y, double angle)
+{
+    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::renderer_base<pixfmt> renderer_base;
+    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+
+    agg::scanline_p8 sl_line;
+    pixfmt pixf(buf);
+    renderer_base renb(pixf);
+    renderer_type ren(renb);
+
+    // compute tranformation matrix
+    agg::trans_affine_rotation tr(angle);
+    tr.translate(x, y);
+
+    // prepare path
+    agg::path_storage pbox;
+    pbox.start_new_path();
+    pbox.move_to(box.minx(), box.miny());
+    pbox.line_to(box.maxx(), box.miny());
+    pbox.line_to(box.maxx(), box.maxy());
+    pbox.line_to(box.minx(), box.maxy());
+    pbox.line_to(box.minx(), box.miny());
+
+    // prepare stroke with applied transformation
+    typedef agg::conv_transform<agg::path_storage> conv_transform;
+    typedef agg::conv_stroke<conv_transform> conv_stroke;
+    conv_transform tbox(pbox, tr);
+    conv_stroke sbox(tbox);
+    sbox.generator().width(1.0 * scale_factor_);
+
+    // render the outline
+    ras_ptr->reset();
+    ras_ptr->add_path(sbox);
+    ren.color(agg::rgba8(0x33, 0x33, 0xff, 0xcc)); // blue is fine
+    agg::render_scanlines(*ras_ptr, sl_line, ren);
+}
+
 template class agg_renderer<image_32>;
+template void agg_renderer<image_32>::debug_draw_box<agg::rendering_buffer>(
+                agg::rendering_buffer& buf,
+                box2d<double> const& box,
+                double x, double y, double angle);
 }

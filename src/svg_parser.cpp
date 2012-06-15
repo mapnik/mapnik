@@ -196,6 +196,7 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     }
     if ( !is_defs_ )
     {
+
         if (xmlStrEqual(name, BAD_CAST "g"))
         {
             path_.push_attr();
@@ -428,6 +429,7 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
     if (value)
     {
         path_.begin_path();
+
         if (!mapnik::svg::parse_path((const char*) value, path_))
         {
             xmlFree(value);

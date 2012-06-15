@@ -55,13 +55,13 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                                mapnik::feature_ptr const& feature,
                                proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
+    typedef coord_transform<CoordTransform,geometry_type> path_type;
+    typedef agg::renderer_base<mapnik::pixfmt_gray32> ren_base;
     typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    mapnik::pixfmt_gray16 pixf(buf);
+    mapnik::pixfmt_gray32 pixf(buf);
 
     ren_base renb(pixf);
     renderer ren(renb);
@@ -69,8 +69,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     ras_ptr->reset();
 
     agg::trans_affine tr;
-    boost::array<double,6> const& m = sym.get_transform();
-    tr.load_from(&m[0]);
+    evaluate_transform(tr, *feature, sym.get_image_transform());
     unsigned int res = pixmap_.get_resolution();
     tr = agg::trans_affine_scaling(scale_factor_*(1.0/res)) * tr;
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
@@ -104,7 +103,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             svg_renderer<svg_path_adapter,
                 agg::pod_bvector<path_attributes>,
                 renderer,
-                mapnik::pixfmt_gray16 > svg_renderer(svg_path,(*marker)->attributes());
+                mapnik::pixfmt_gray32 > svg_renderer(svg_path,(*marker)->attributes());
 
             bool placed = false;
             for (unsigned i=0; i<feature->num_geometries(); ++i)
@@ -178,7 +177,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
         double dx = w + (2*strk_width);
         double dy = h + (2*strk_width);
 
-        if (marker_type == ARROW)
+        if (marker_type == MARKER_ARROW)
         {
             extent = arrow_.extent();
             double x1 = extent.minx();
@@ -239,7 +238,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             {
 
                 agg::path_storage marker;
-                if (marker_type == ARROW)
+                if (marker_type == MARKER_ARROW)
                     marker.concat_path(arrow_);
 
                 path_type path(t_,geom,prj_trans);
@@ -253,7 +252,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 {
                     agg::trans_affine matrix;
 
-                    if (marker_type == ELLIPSE)
+                    if (marker_type == MARKER_ELLIPSE)
                     {
                         // todo proper bbox - this is buggy
                         agg::ellipse c(x_t, y_t, rx, ry);
@@ -285,7 +284,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             }
 
         }
-        ren.color(mapnik::gray16(feature->id()));
+        ren.color(mapnik::gray32(feature->id()));
         agg::render_scanlines(*ras_ptr, sl, ren);
         pixmap_.add_feature(feature);
     }

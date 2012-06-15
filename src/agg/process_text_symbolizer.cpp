@@ -35,13 +35,14 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, *feature, prj_trans,
-            width_, height_,
+            detector_->extent().width(), detector_->extent().height(),
             scale_factor_,
             t_, font_manager_, *detector_, query_extent_);
 
-    text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
+    text_renderer<T> ren(*current_buffer_, font_manager_, *(font_manager_.get_stroker()),  sym.comp_op());
 
-    while (helper.next()) {
+    while (helper.next()) 
+    {
         placements_type &placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
@@ -56,4 +57,3 @@ template void agg_renderer<image_32>::process(text_symbolizer const&,
                                               proj_transform const&);
 
 }
-

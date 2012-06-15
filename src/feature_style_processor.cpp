@@ -35,7 +35,7 @@
 
 // boost
 #include <boost/foreach.hpp>
-
+#include <boost/concept_check.hpp>
 //stl
 #include <vector>
 
@@ -56,6 +56,33 @@
 namespace mapnik
 {
 
+template <typename T0,typename T1> struct has_process;
+
+template <bool>
+struct process_impl
+{
+    template <typename T0, typename T1, typename T2, typename T3>
+    static void process(T0 & ren, T1 const& sym, T2 const& f, T3 const& tr)
+    {
+        ren.process(sym,f,tr);
+    }
+};
+
+template <> // No-op specialization
+struct process_impl<false>
+{
+    template <typename T0, typename T1, typename T2, typename T3>
+    static void process(T0 & ren, T1 const& sym, T2 const& f, T3 const& tr)
+    {
+        boost::ignore_unused_variable_warning(ren);
+        boost::ignore_unused_variable_warning(f);
+        boost::ignore_unused_variable_warning(tr);
+#ifdef MAPNIK_DEBUG
+        std::clog << "NO-OP ...\n";
+#endif
+    }
+};
+
 /** Calls the renderer's process function,
  * \param output     Renderer
  * \param f          Feature to process
@@ -71,17 +98,36 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
         : output_(output),
           f_(f),
           prj_trans_(prj_trans)  {}
-
+    
     template <typename T>
     void operator () (T const& sym) const
     {
-        output_.process(sym,f_,prj_trans_);
+        process_impl<has_process<Processor,T>::value>::process(output_,sym,f_,prj_trans_);
     }
-
+    
     Processor & output_;
-    mapnik::feature_ptr f_;
+    mapnik::feature_ptr const& f_;
     proj_transform const& prj_trans_;
 };
+
+typedef char (&no_tag)[1]; 
+typedef char (&yes_tag)[2]; 
+
+template <typename T0, typename T1, void (T0::*)(T1 const&, mapnik::feature_ptr const&, proj_transform const&) > 
+struct process_memfun_helper {}; 
+    
+template <typename T0, typename T1> no_tag  has_process_helper(...); 
+template <typename T0, typename T1> yes_tag has_process_helper(process_memfun_helper<T0, T1, &T0::process>* p);
+    
+template<typename T0,typename T1> 
+struct has_process
+{      
+    typedef typename T0::processor_impl_type processor_impl_type;
+    BOOST_STATIC_CONSTANT(bool 
+                          , value = sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag) 
+        ); 
+}; 
+
 
 template <typename Processor>
 feature_style_processor<Processor>::feature_style_processor(Map const& m, double scale_factor)
@@ -468,6 +514,9 @@ void feature_style_processor<Processor>::render_style(
     proj_transform const& prj_trans,
     double scale_denom)
 {
+
+    p.start_style_processing(*style);
+    
 #if defined(RENDERING_STATS)
     std::ostringstream s1;
     s1 << "rendering style for layer: '" << lay.name()
@@ -592,6 +641,7 @@ void feature_style_processor<Processor>::render_style(
     std::clog << s.str();
     style_timer.discard();
 #endif
+    p.end_style_processing(*style);
 }
 
 

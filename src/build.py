@@ -56,8 +56,10 @@ regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,system,regex]
+lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','proj',env['ICU_LIB_NAME'],filesystem,system,regex]
 
+if env['JPEG']:
+   lib_env['LIBS'].append('jpeg')
 
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
@@ -75,10 +77,7 @@ if env['RUNTIME_LINK'] == 'static':
         lib_env['LIBS'].append('icudata')
         lib_env['LIBS'].append('icui18n')
 else:
-    if env['INTERNAL_LIBAGG']:
-          lib_env['LIBS'].insert(0, 'agg')
-    else:
-        lib_env['LIBS'].append([lib for lib in env['LIBS'] if lib.startswith('agg')])
+    lib_env['LIBS'].insert(0, 'agg')
 
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = env.subst(env['MAPNIK_LIB_NAME'])
@@ -111,6 +110,7 @@ source = Split(
     deepcopy.cpp
     expression_string.cpp
     expression.cpp
+    transform_expression.cpp
     feature_kv_iterator.cpp
     feature_type_style.cpp
     font_engine_freetype.cpp
@@ -127,6 +127,7 @@ source = Split(
     load_map.cpp
     memory.cpp
     parse_path.cpp
+    parse_transform.cpp
     palette.cpp
     placement_finder.cpp
     plugin.cpp

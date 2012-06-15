@@ -70,34 +70,7 @@ namespace agg
             sl.reset(ras.min_x(), ras.max_x());
             while(ras.sweep_scanline(sl))
             {
-                //render_scanline_aa_solid(sl, ren, ren_color);
-
-                // This code is equivalent to the above call (copy/paste). 
-                // It's just a "manual" optimization for old compilers,
-                // like Microsoft Visual C++ v6.0
-                //-------------------------------
-                int y = sl.y();
-                unsigned num_spans = sl.num_spans();
-                typename Scanline::const_iterator span = sl.begin();
-
-                for(;;)
-                {
-                    int x = span->x;
-                    if(span->len > 0)
-                    {
-                        ren.blend_solid_hspan(x, y, (unsigned)span->len, 
-                                              ren_color, 
-                                              span->covers);
-                    }
-                    else
-                    {
-                        ren.blend_hline(x, y, (unsigned)(x - span->len - 1), 
-                                        ren_color, 
-                                        *(span->covers));
-                    }
-                    if(--num_spans == 0) break;
-                    ++span;
-                }
+                render_scanline_aa_solid(sl, ren, ren_color);
             }
         }
     }

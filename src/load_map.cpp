@@ -28,11 +28,12 @@
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/image_compositing.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
-
+#include <mapnik/image_filter_parser.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -41,6 +42,7 @@
 
 #include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
 #include <mapnik/svg/svg_path_parser.hpp>
@@ -95,7 +97,7 @@ private:
     void parse_style(Map & map, xml_node const& sty);
     void parse_layer(Map & map, xml_node const& lay);
     void parse_metawriter(Map & map, xml_node const& lay);
-    void parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node const& pt);
+    void parse_symbolizer_base(symbolizer_base &sym, xml_node const& pt);
 
     void parse_fontset(Map & map, xml_node const & fset);
     bool parse_font(font_set & fset, xml_node const& f);
@@ -416,6 +418,65 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         filter_mode_e filter_mode = sty.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
         style.set_filter_mode(filter_mode);
 
+        // compositing
+        optional<std::string> comp_op_name = sty.get_opt_attr<std::string>("comp-op");
+        if (comp_op_name)
+        {
+            optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
+            if (comp_op)
+            {
+                style.set_comp_op(*comp_op);
+            }
+            else
+            {
+                throw config_error("failed to parse comp-op: '" + *comp_op_name + "'");
+            }
+        }
+
+        // image filters
+
+        mapnik::image_filter_grammar<std::string::const_iterator,
+                                     std::vector<mapnik::filter::filter_type> > filter_grammar;
+        
+        optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
+        if (filters)
+        {
+            std::string filter_mode = *filters;
+            std::string::const_iterator itr = filter_mode.begin();
+            std::string::const_iterator end = filter_mode.end();
+            
+
+            bool result = boost::spirit::qi::phrase_parse(itr,end, 
+                                                          filter_grammar, 
+                                                          boost::spirit::qi::ascii::space, 
+                                                          style.image_filters());
+            if (!result || itr!=end)
+            {
+                throw config_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
+            }            
+        }
+        
+        // direct image filters (applied directly on main image buffer 
+        // TODO : consider creating a separate XML node e.g 
+        // <ImageFilter name="myfilter" op="blur emboss"/> 
+        // 
+        optional<std::string> direct_filters = sty.get_opt_attr<std::string>("direct-image-filters");
+        if (direct_filters)
+        {
+            std::string filter_mode = *direct_filters;
+            std::string::const_iterator itr = filter_mode.begin();
+            std::string::const_iterator end = filter_mode.end();                        
+            bool result = boost::spirit::qi::phrase_parse(itr,end, 
+                                                          filter_grammar, 
+                                                          boost::spirit::qi::ascii::space, 
+                                                          style.direct_image_filters());
+            if (!result || itr!=end)
+            {
+                throw config_error("failed to parse direct-image-filters: '" + std::string(itr,end) + "'");
+            }            
+        }
+        
+        // rules
         xml_node::const_iterator ruleIter = sty.begin();
         xml_node::const_iterator endRule = sty.end();
 
@@ -759,8 +820,45 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
     }
 }
 
-void map_parser::parse_metawriter_in_symbolizer(symbolizer_base &sym, xml_node const &pt)
+void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
 {
+    optional<std::string> comp_op_name = pt.get_opt_attr<std::string>("comp-op");
+    if (comp_op_name)
+    {
+        optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
+        if (comp_op)
+        {
+            sym.set_comp_op(*comp_op);
+        }
+        else
+        {
+            throw config_error("failed to parse comp-op: '" + *comp_op_name + "'");
+        }
+    }
+    
+    optional<std::string> transform_wkt = pt.get_opt_attr<std::string>("transform");
+    if (transform_wkt)
+    {
+        mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+        if (!mapnik::parse_transform(*tl, *transform_wkt, pt.get_tree().transform_expr_grammar))
+        {
+            std::stringstream ss;
+            ss << "Could not parse transform from '" << transform_wkt << "', expected SVG transform attribute";
+            if (strict_)
+                throw config_error(ss.str()); // value_error here?
+            else
+                std::clog << "### WARNING: " << ss.str() << endl;
+        }
+        sym.set_transform(tl);
+    }
+    
+    optional<boolean> clip = pt.get_opt_attr<boolean>("clip");
+    if (clip) sym.set_clip(*clip);
+    
+    // smooth value
+    optional<double> smooth = pt.get_opt_attr<double>("smooth");
+    if (smooth) sym.set_smooth(*smooth);
+    
     optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
     if (!writer) return;
     optional<std::string> output = pt.get_opt_attr<std::string>("meta-output");
@@ -776,8 +874,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
         optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
         optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
-
+        
         point_symbolizer symbol;
         if (allow_overlap)
         {
@@ -818,14 +915,15 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
 
                 symbol.set_filename(expr);
 
-                if (transform_wkt)
+                optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+                if (image_transform_wkt)
                 {
-                    agg::trans_affine tr;
-                    if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+                    mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+                    if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
                     {
                         std::stringstream ss;
-                        ss << "Could not parse transform from '" << transform_wkt
-                           << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                        ss << "Could not parse transform from '" << *image_transform_wkt
+                           << "', expected SVG transform attribute";
                         if (strict_)
                         {
                             throw config_error(ss.str()); // value_error here?
@@ -835,9 +933,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                             MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                         }
                     }
-                    boost::array<double,6> matrix;
-                    tr.store_to(&matrix[0]);
-                    symbol.set_transform(matrix);
+                    symbol.set_image_transform(tl);
                 }
             }
             catch (image_reader_exception const & ex)
@@ -854,7 +950,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                 }
             }
         }
-        parse_metawriter_in_symbolizer(symbol, sym);
+        parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
     catch (const config_error & ex)
@@ -872,7 +968,6 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         std::string filename("");
         optional<std::string> file = sym.get_opt_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
-        optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
 
         if (file)
         {
@@ -913,14 +1008,15 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) symbol.set_opacity(*opacity);
 
-        if (transform_wkt)
+        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+        if (image_transform_wkt)
         {
-            agg::trans_affine tr;
-            if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+            mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
             {
                 std::stringstream ss;
-                ss << "Could not parse transform from '" << transform_wkt
-                   << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                ss << "Could not parse transform from '" << *image_transform_wkt
+                   << "', expected SVG transform attribute";
                 if (strict_)
                 {
                     throw config_error(ss.str()); // value_error here?
@@ -930,11 +1026,9 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
                     MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                 }
             }
-            boost::array<double,6> matrix;
-            tr.store_to(&matrix[0]);
-            symbol.set_transform(matrix);
+            symbol.set_image_transform(tl);
         }
-
+        
         optional<color> c = sym.get_opt_attr<color>("fill");
         if (c) symbol.set_fill(*c);
         optional<double> spacing = sym.get_opt_attr<double>("spacing");
@@ -973,15 +1067,17 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         marker_placement_e placement = sym.get_attr<marker_placement_e>("placement", MARKER_LINE_PLACEMENT);
         symbol.set_marker_placement(placement);
 
-        marker_type_e dfl_marker_type = ARROW;
+        marker_type_e dfl_marker_type = MARKER_ARROW;
 
         if (placement == MARKER_POINT_PLACEMENT)
-            dfl_marker_type = ELLIPSE;
+        {
+            dfl_marker_type = MARKER_ELLIPSE;
+        }
 
         marker_type_e marker_type = sym.get_attr<marker_type_e>("marker-type", dfl_marker_type);
         symbol.set_marker_type(marker_type);
 
-        parse_metawriter_in_symbolizer(symbol, sym);
+        parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
     catch (const config_error & ex)
@@ -1017,7 +1113,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
             }
             line_pattern_symbolizer symbol(expr);
 
-            parse_metawriter_in_symbolizer(symbol, sym);
+            parse_symbolizer_base(symbol, sym);
             rule.append(symbol);
         }
         catch (image_reader_exception const & ex)
@@ -1081,7 +1177,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
             optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
             if (gamma_method) symbol.set_gamma_method(*gamma_method);
 
-            parse_metawriter_in_symbolizer(symbol, sym);
+            parse_symbolizer_base(symbol, sym);
             rule.append(symbol);
         }
         catch (image_reader_exception const & ex)
@@ -1124,7 +1220,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
         }
 
         text_symbolizer text_symbol = text_symbolizer(placement_finder);
-        parse_metawriter_in_symbolizer(text_symbol, sym);
+        parse_symbolizer_base(text_symbol, sym);
         rule.append(text_symbol);
     }
     catch (const config_error & ex)
@@ -1153,15 +1249,16 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         }
 
         shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
-        /* Symbolizer specific attributes. */
-        optional<std::string> transform_wkt = sym.get_opt_attr<std::string>("transform");
-        if (transform_wkt)
+        
+        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+        if (image_transform_wkt)
         {
-            agg::trans_affine tr;
-            if (!mapnik::svg::parse_transform((*transform_wkt).c_str(),tr))
+            mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
             {
                 std::stringstream ss;
-                ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+                ss << "Could not parse transform from '" << *image_transform_wkt 
+                   << "', expected SVG transform attribute";
                 if (strict_)
                 {
                     throw config_error(ss.str()); // value_error here?
@@ -1171,10 +1268,9 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
                     MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                 }
             }
-            boost::array<double,6> matrix;
-            tr.store_to(&matrix[0]);
-            shield_symbol.set_transform(matrix);
+            shield_symbol.set_image_transform(tl);
         }
+        
         // shield displacement
         double shield_dx = sym.get_attr("shield-dx", 0.0);
         double shield_dy = sym.get_attr("shield-dy", 0.0);
@@ -1204,7 +1300,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             shield_symbol.set_unlock_image(* unlock_image);
         }
 
-        parse_metawriter_in_symbolizer(shield_symbol, sym);
+        parse_symbolizer_base(shield_symbol, sym);
 
         std::string image_file = sym.get_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
@@ -1313,6 +1409,10 @@ void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
                                "list of floats or 'none' but got '" + (*str) + "'");
         }
     }
+    
+    // stroke-miterlimit
+    optional<double> miterlimit = sym.get_opt_attr<double>("stroke-miterlimit");
+    if (miterlimit) strk.set_miterlimit(*miterlimit);
 }
 
 void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
@@ -1322,16 +1422,16 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
         stroke strk;
         parse_stroke(strk,sym);
         line_symbolizer symbol = line_symbolizer(strk);
+        
+        // offset value
+        optional<double> offset = sym.get_opt_attr<double>("offset");
+        if (offset) symbol.set_offset(*offset);
 
-        // rasterizer method
         line_rasterizer_e rasterizer = sym.get_attr<line_rasterizer_e>("rasterizer", RASTERIZER_FULL);
-        //optional<line_rasterizer_e> rasterizer_method = sym.get_opt_attr<line_rasterizer_e>("full");
         symbol.set_rasterizer(rasterizer);
-        // smooth value
-        optional<double> smooth = sym.get_opt_attr<double>("smooth");
-        if (smooth) symbol.set_smooth(*smooth);
+
         // meta-writer
-        parse_metawriter_in_symbolizer(symbol, sym);
+        parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
     catch (const config_error & ex)
@@ -1359,11 +1459,8 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
         // gamma method
         optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
         if (gamma_method) poly_sym.set_gamma_method(*gamma_method);
-        // smooth value
-        optional<double> smooth = sym.get_opt_attr<double>("smooth");
-        if (smooth) poly_sym.set_smooth(*smooth);
-
-        parse_metawriter_in_symbolizer(poly_sym, sym);
+        
+        parse_symbolizer_base(poly_sym, sym);
         rule.append(poly_sym);
     }
     catch (const config_error & ex)
@@ -1372,7 +1469,6 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
         throw;
     }
 }
-
 
 void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
 {
@@ -1390,7 +1486,7 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
         optional<expression_ptr> height = sym.get_opt_attr<expression_ptr>("height");
         if (height) building_sym.set_height(*height);
 
-        parse_metawriter_in_symbolizer(building_sym, sym);
+        parse_symbolizer_base(building_sym, sym);
         rule.append(building_sym);
     }
     catch (const config_error & ex)
@@ -1440,6 +1536,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
             }
         }
         //Note: raster_symbolizer doesn't support metawriters
+        parse_symbolizer_base(raster_sym, sym);
         rule.append(raster_sym);
     }
     catch (const config_error & ex)

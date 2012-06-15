@@ -56,8 +56,8 @@ ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_en
 
 dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 
-if env['INTERNAL_LIBAGG']:
-    dep_libs = dep_libs.replace('-lagg','')
+# remove local agg from public linking
+dep_libs = dep_libs.replace('-lagg','')
 
 git_revision = os.popen("git rev-list --max-count=1 HEAD").read()
 

@@ -68,11 +68,28 @@ inline void to_utf8(UnicodeString const& input, std::string & target)
     }
 }
 
-struct value_null {};
+struct value_null
+{
+    template <typename T>
+    value_null operator+ (T const& other) const { return *this; }
+
+    template <typename T>
+    value_null operator- (T const& other) const { return *this; }
+
+    template <typename T>
+    value_null operator* (T const& other) const { return *this; }
+
+    template <typename T>
+    value_null operator/ (T const& other) const { return *this; }
+
+    template <typename T>
+    value_null operator% (T const& other) const { return *this; }
+};
 
 typedef boost::variant<value_null,bool,int,double,UnicodeString> value_base;
 
 namespace impl {
+
 struct equals
     : public boost::static_visitor<bool>
 {
@@ -335,7 +352,7 @@ struct add : public boost::static_visitor<V>
     {
         return lhs + rhs;
     }
-
+    
     value_type operator() (UnicodeString const& lhs, value_null rhs) const
     {
         boost::ignore_unused_variable_warning(rhs);
@@ -524,6 +541,29 @@ struct mod: public boost::static_visitor<V>
     }
 };
 
+template <typename V>
+struct negate : public boost::static_visitor<V>
+{
+    typedef V value_type;
+
+    template <typename T>
+    value_type operator() (T val) const
+    {
+        return -val;
+    }
+
+    value_type operator() (value_null const& val) const
+    {
+        return val;
+    }
+
+    value_type operator() (UnicodeString const& ustr) const
+    {
+        UnicodeString inplace(ustr);
+        return inplace.reverse();
+    }
+};
+
 struct to_bool : public boost::static_visitor<bool>
 {
     bool operator() (bool val) const
@@ -668,7 +708,6 @@ struct to_double : public boost::static_visitor<double>
             return result;
         return 0;
     }
-
     double operator() (UnicodeString const& val) const
     {
         std::string utf8;
@@ -702,7 +741,6 @@ struct to_int : public boost::static_visitor<double>
             return result;
         return 0;
     }
-
     int operator() (UnicodeString const& val) const
     {
         std::string utf8;
@@ -717,7 +755,9 @@ struct to_int : public boost::static_visitor<double>
     }
 };
 
-}
+} // namespace impl
+
+namespace value_adl_barrier {
 
 class value
 {
@@ -765,10 +805,17 @@ public:
         return boost::apply_visitor(impl::less_or_equal(),base_,other.base_);
     }
 
+    value operator- () const
+    {
+        return boost::apply_visitor(impl::negate<value>(), base_);
+    }
+
     value_base const& base() const
     {
         return base_;
     }
+
+    bool is_null() const;
 
     bool to_bool() const
     {
@@ -840,6 +887,52 @@ operator << (std::basic_ostream<charT,traits>& out,
     out << v.to_string();
     return out;
 }
+
+} // namespace value_adl_barrier
+
+using value_adl_barrier::value;
+using value_adl_barrier::operator<<;
+
+namespace impl {
+
+struct is_null : public boost::static_visitor<bool>
+{
+    bool operator() (value const& val) const
+    {
+        return val.is_null();
+    }
+
+    bool operator() (value_null const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return true;
+    }
+
+    template <typename T>
+    bool operator() (T const& val) const
+    {
+        boost::ignore_unused_variable_warning(val);
+        return false;
+    }
+
+    template <BOOST_VARIANT_ENUM_PARAMS(typename T)>
+    bool operator() (boost::variant<BOOST_VARIANT_ENUM_PARAMS(T)> const& val)
+        const
+    {
+        return boost::apply_visitor(*this, val);
+    }
+};
+
+} // namespace impl
+
+// constant visitor instance substitutes overloaded function
+impl::is_null const is_null = impl::is_null();
+
+inline bool value::is_null() const
+{
+    return boost::apply_visitor(impl::is_null(), base_);
 }
+
+} // namespace mapnik
 
 #endif // MAPNIK_VALUE_HPP

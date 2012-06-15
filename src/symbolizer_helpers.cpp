@@ -53,7 +53,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
         }
 
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
         clipped_geometry_type clipped(**geo_itr_);
         clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
         path_type path(t_, clipped, prj_trans_);
@@ -350,8 +350,7 @@ template <typename FaceManagerT, typename DetectorT>
 void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
 {
     std::string filename = path_processor_type::evaluate(*sym_.get_filename(), this->feature_);
-    boost::array<double,6> const& m = sym_.get_transform();
-    transform_.load_from(&m[0]);
+    evaluate_transform(image_transform_, feature_, sym_.get_image_transform());
     marker_.reset();
     if (!filename.empty())
     {
@@ -373,10 +372,10 @@ void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
     double py2 = py0;
     double px3 = px0;
     double py3 = py1;
-    transform_.transform(&px0,&py0);
-    transform_.transform(&px1,&py1);
-    transform_.transform(&px2,&py2);
-    transform_.transform(&px3,&py3);
+    image_transform_.transform(&px0,&py0);
+    image_transform_.transform(&px1,&py1);
+    image_transform_.transform(&px2,&py2);
+    image_transform_.transform(&px3,&py3);
     marker_ext_.init(px0, py0, px1, py1);
     marker_ext_.expand_to_include(px2, py2);
     marker_ext_.expand_to_include(px3, py3);
@@ -410,9 +409,9 @@ marker& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker() const
 }
 
 template <typename FaceManagerT, typename DetectorT>
-agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_transform() const
+agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_image_transform() const
 {
-    return transform_;
+    return image_transform_;
 }
 
 template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;

@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
+#include <mapnik/formatting/text.hpp>
 
 
 // boost
@@ -137,7 +138,9 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
 
 expression_ptr text_symbolizer::get_name() const
 {
-    return expression_ptr();
+    formatting::text_node *node = dynamic_cast<formatting::text_node *>(placement_options_->defaults.format_tree().get());
+    if (!node) return expression_ptr();
+    return node->get_text();
 }
 
 void text_symbolizer::set_name(expression_ptr name)

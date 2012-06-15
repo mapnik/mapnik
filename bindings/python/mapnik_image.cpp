@@ -39,9 +39,6 @@ extern "C"
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
 
-// stl
-#include <sstream>
-
 // jpeg
 #if defined(HAVE_JPEG)
 #include <mapnik/jpeg_io.hpp>
@@ -150,9 +147,9 @@ void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float op
 }
 
 
-void composite(image_32 & im, image_32 & im2, mapnik::composite_mode_e mode)
+void composite(image_32 & im, image_32 & im2, mapnik::composite_mode_e mode, float opacity)
 {
-    mapnik::composite(im.data(),im2.data(),mode);
+    mapnik::composite(im.data(),im2.data(),mode,opacity,0,0,false,true);
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -210,7 +207,12 @@ void export_image()
         .def("set_color_to_alpha",&image_32::set_color_to_alpha, "Set a given color to the alpha channel of the Image")
         .def("set_alpha",&image_32::set_alpha, "Set the overall alpha channel of the Image")
         .def("blend",&blend)
-        .def("composite",&composite)
+        .def("composite",&composite,
+         ( arg("self"),
+           arg("image"),
+           arg("mode"),
+           arg("opacity")=1.0f
+         ))
         .def("set_pixel",&set_pixel)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 

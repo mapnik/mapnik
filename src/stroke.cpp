@@ -55,7 +55,8 @@ stroke::stroke()
     gamma_(1.0),
     gamma_method_(GAMMA_POWER),
     dash_(),
-    dash_offset_(0) {}
+    dash_offset_(0),
+    miterlimit_(4.0) {}
 
 stroke::stroke(color const& c, double width)
     : c_(c),
@@ -66,7 +67,8 @@ stroke::stroke(color const& c, double width)
       gamma_(1.0),
       gamma_method_(GAMMA_POWER),
       dash_(),
-      dash_offset_(0.0) {}
+      dash_offset_(0.0),
+      miterlimit_(4.0) {}
 
 stroke::stroke(stroke const& other)
     : c_(other.c_),
@@ -77,7 +79,8 @@ stroke::stroke(stroke const& other)
       gamma_(other.gamma_),
       gamma_method_(other.gamma_method_),
       dash_(other.dash_),
-      dash_offset_(other.dash_offset_) {}
+      dash_offset_(other.dash_offset_),
+      miterlimit_(other.miterlimit_) {}
 
 stroke & stroke::operator=(const stroke& rhs)
 {
@@ -182,6 +185,16 @@ dash_array const& stroke::get_dash_array() const
     return dash_;
 }
 
+void stroke::set_miterlimit(double val)
+{
+    miterlimit_ = val;
+}
+
+double stroke::get_miterlimit() const
+{
+    return miterlimit_;
+}
+
 void stroke::swap(const stroke& other) throw()
 {
     c_ = other.c_;
@@ -193,5 +206,6 @@ void stroke::swap(const stroke& other) throw()
     gamma_method_ = other.gamma_method_;
     dash_ = other.dash_;
     dash_offset_ = other.dash_offset_;
+    miterlimit_ = other.miterlimit_;
 }
 }

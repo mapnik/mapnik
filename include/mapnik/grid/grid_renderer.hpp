@@ -56,12 +56,15 @@ class MAPNIK_DECL grid_renderer : public feature_style_processor<grid_renderer<T
 {
 
 public:
+    typedef grid_renderer<T> processor_impl_type;
     grid_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~grid_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
+    void start_style_processing(feature_type_style const& st) {}
+    void end_style_processing(feature_type_style const& st) {}
     void render_marker(mapnik::feature_ptr const& feature, unsigned int step, pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity);
 
     void process(point_symbolizer const& sym,

@@ -87,7 +87,7 @@ struct feature_collection_grammar :
         features = lit("\"features\"")
             > lit(":")
             > lit('[')
-            > feature(_val) % lit(',')
+            > -(feature(_val) % lit(','))
             > lit(']')
             ;
         
