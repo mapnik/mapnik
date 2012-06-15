@@ -266,6 +266,7 @@ opts.AddVariables(
     ('CXX', 'The C++ compiler to use to compile mapnik (defaults to g++).', 'g++'),
     ('CC', 'The C compiler used for configure checks of C libs (defaults to gcc).', 'gcc'),
     ('CUSTOM_CXXFLAGS', 'Custom C++ flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir>', ''),
+    ('CUSTOM_CFLAGS', 'Custom C flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir> (only used for configure checks)', ''),
     ('CUSTOM_LDFLAGS', 'Custom linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>', ''),
     EnumVariable('LINKING', "Set library format for libmapnik",'shared', ['shared','static']),
     EnumVariable('RUNTIME_LINK', "Set preference for linking dependencies",'shared', ['shared','static']),
@@ -372,7 +373,7 @@ opts.AddVariables(
 pickle_store = [# Scons internal variables
         'CC', # compiler user to check if c deps compile during configure
         'CXX', # C++ compiler to compile mapnik
-        'CCFLAGS',
+        'CFLAGS',
         'CPPDEFINES',
         'CPPFLAGS', # c preprocessor flags
         'CPPPATH',
@@ -382,6 +383,7 @@ pickle_store = [# Scons internal variables
         'LINKFLAGS',
         'CUSTOM_LDFLAGS', # user submitted
         'CUSTOM_CXXFLAGS', # user submitted
+        'CUSTOM_CFLAGS', # user submitted
         'MAPNIK_LIB_NAME',
         'LINK',
         'RUNTIME_LINK',
@@ -1012,8 +1014,10 @@ if not preconfigured:
     env['CPPPATH'] = ['#include', '#']
     env['LIBPATH'] = ['#src']
 
-    # set any custom cxxflags to come first
+    # set any custom cxxflags and ldflags to come first
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
+    env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
+    env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits
 

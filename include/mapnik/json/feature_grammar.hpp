@@ -162,7 +162,7 @@ struct feature_grammar :
         using qi::_pass;
         using qi::eps;
         using qi::raw;
-        
+
         using phoenix::new_;
         using phoenix::push_back;
         using phoenix::construct;
@@ -197,7 +197,7 @@ struct feature_grammar :
         unesc_char.add
             ("\\\"", '\"') // quotation mark
             ("\\\\", '\\') // reverse solidus
-            ("\\/", '/')   // solidus            
+            ("\\/", '/')   // solidus
             ("\\b", '\b')  // backspace
             ("\\f", '\f')  // formfeed
             ("\\n", '\n')  // newline
@@ -207,7 +207,7 @@ struct feature_grammar :
 
         string_ %= lit('"') >> *(unesc_char | "\\u" >> hex4 | (char_ - lit('"'))) >> lit('"')
             ;
-        
+
         // geojson types
 
         feature_type = lit("\"type\"")
@@ -244,17 +244,17 @@ struct feature_grammar :
         //    ;
         //////////////////////////////////////////////////////////////////
 
-        geometry = (lit('{')[_a = 0 ] 
+        geometry = (lit('{')[_a = 0 ]
                     >> lit("\"type\"") >> lit(':') >> geometry_dispatch[_a = _1] // <---- should be Nabialek trick!
-                    >> lit(',') 
+                    >> lit(',')
                     >> (lit("\"coordinates\"") > lit(':') > coordinates(_r1,_a)
-                        | 
-                        lit("\"geometries\"") > lit(':') 
+                        |
+                        lit("\"geometries\"") > lit(':')
                         >> lit('[') >> geometry_collection(_r1) >> lit(']'))
                     >> lit('}'))
             | lit("null")
             ;
-                
+
         geometry_dispatch.add
             ("\"Point\"",1)
             ("\"LineString\"",2)
@@ -265,7 +265,7 @@ struct feature_grammar :
             ("\"GeometryCollection\"",7)
             //
             ;
-        
+
         coordinates = (eps(_r2 == 1) > point_coordinates(extract_geometry_(_r1)))
             | (eps(_r2 == 2) > linestring_coordinates(extract_geometry_(_r1)))
             | (eps(_r2 == 3) > polygon_coordinates(extract_geometry_(_r1)))
@@ -273,46 +273,45 @@ struct feature_grammar :
             | (eps(_r2 == 5) > multilinestring_coordinates(extract_geometry_(_r1)))
             | (eps(_r2 == 6) > multipolygon_coordinates(extract_geometry_(_r1)))
             ;
-        
+
         point_coordinates =  eps[ _a = new_<geometry_type>(Point) ]
             > ( point(SEG_MOVETO,_a) [push_back(_r1,_a)] | eps[cleanup_(_a)][_pass = false] )
             ;
 
         linestring_coordinates = eps[ _a = new_<geometry_type>(LineString)]
-            > (points(_a) [push_back(_r1,_a)]
+            > -(points(_a) [push_back(_r1,_a)]
                | eps[cleanup_(_a)][_pass = false])
             ;
 
         polygon_coordinates = eps[ _a = new_<geometry_type>(Polygon) ]
             > ((lit('[')
-                > points(_a) % lit(',')
+                > -(points(_a) % lit(','))
                 > lit(']')) [push_back(_r1,_a)]
                | eps[cleanup_(_a)][_pass = false])
             ;
-        
-        multipoint_coordinates =  lit('[') 
-            > (point_coordinates(_r1) % lit(',')) 
+
+        multipoint_coordinates =  lit('[')
+            > -(point_coordinates(_r1) % lit(','))
             > lit(']')
             ;
-        
-        multilinestring_coordinates =  lit('[') 
-            > (linestring_coordinates(_r1) % lit(','))
+
+        multilinestring_coordinates =  lit('[')
+            > -(linestring_coordinates(_r1) % lit(','))
             > lit(']')
             ;
-        
-        multipolygon_coordinates =  lit('[') 
-            > (polygon_coordinates(_r1) % lit(','))
+
+        multipolygon_coordinates =  lit('[')
+            > -(polygon_coordinates(_r1) % lit(','))
             > lit(']')
             ;
 
         geometry_collection = *geometry(_r1) >> *(lit(',') >> geometry(_r1))
             ;
-        
-        // point
-        point = (lit('[') > double_ > lit(',') > double_ > lit(']')) [push_vertex_(_r1,_r2,_1,_2)];
-        // points
-        points = lit('[')[_a = SEG_MOVETO] > point (_a,_r1) % lit(',') [_a = SEG_LINETO] > lit(']');
 
+        // point
+        point = lit('[') > -((double_ > lit(',') > double_)[push_vertex_(_r1,_r2,_1,_2)]) > lit(']');
+        // points
+        points = lit('[')[_a = SEG_MOVETO] > -(point (_a,_r1) % lit(',')[_a = SEG_LINETO]) > lit(']');
         on_error<fail>
             (
                 feature
@@ -362,7 +361,7 @@ struct feature_grammar :
     qi::rule<Iterator,qi::locals<geometry_type*>,
              void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> linestring_coordinates;
     qi::rule<Iterator,qi::locals<geometry_type*>,
-             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> polygon_coordinates;    
+             void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> polygon_coordinates;
 
     qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multipoint_coordinates;
     qi::rule<Iterator,void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> multilinestring_coordinates;
