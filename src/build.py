@@ -55,7 +55,10 @@ filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','jpeg','proj',env['ICU_LIB_NAME'],filesystem,regex]
+lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','proj',env['ICU_LIB_NAME'],filesystem,regex]
+
+if env['JPEG']:
+   lib_env['LIBS'].append('jpeg')
 
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
@@ -77,6 +80,10 @@ if not env['RUNTIME_LINK'] == 'static':
     else:
         lib_env['LIBS'].append([lib for lib in env['LIBS'] if lib.startswith('agg')])
     
+if env['RUNTIME_LINK'] == 'static':
+    if 'icuuc' in env['ICU_LIB_NAME']:
+        lib_env['LIBS'].append('icudata')
+        lib_env['LIBS'].append('icui18n')
 
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = 'libmapnik.dylib'
