@@ -72,6 +72,16 @@ png_reader::png_reader(const std::string& fileName)
 
 png_reader::~png_reader() {}
 
+void user_error_fn(png_structp png_ptr, png_const_charp error_msg)
+{
+    throw image_reader_exception("failed to read invalid png");
+}
+
+void user_warning_fn(png_structp png_ptr, png_const_charp warning_msg)
+{
+    MAPNIK_LOG_DEBUG(png_reader) << "libpng warning: '" << warning_msg << "'";
+}
+
 static void
 png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
@@ -84,7 +94,6 @@ png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
         png_error(png_ptr, "Read Error");
     }
 }
-
 
 void png_reader::init()
 {
@@ -111,19 +120,26 @@ void png_reader::init()
         fclose(fp);
         throw image_reader_exception("failed to allocate png_ptr");
     }
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
-    {
-        png_destroy_read_struct(&png_ptr,0,0);
-        fclose(fp);
-        throw image_reader_exception("failed to create info_ptr");
-    }
 
-    if (setjmp(png_jmpbuf(png_ptr)))
+    // catch errors in a custom way to avoid the need for setjmp
+    png_set_error_fn(png_ptr, png_get_error_ptr(png_ptr), user_error_fn, user_warning_fn);
+
+    png_infop info_ptr;
+    try
+    {
+        info_ptr = png_create_info_struct(png_ptr);
+        if (!info_ptr)
+        {
+            png_destroy_read_struct(&png_ptr,0,0);
+            fclose(fp);
+            throw image_reader_exception("failed to create info_ptr");
+        }
+    }
+    catch (std::exception const& ex)
     {
         png_destroy_read_struct(&png_ptr,0,0);
         fclose(fp);
-        throw image_reader_exception("failed to read");
+        throw;
     }
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
@@ -167,19 +183,25 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
         throw image_reader_exception("failed to allocate png_ptr");
     }
 
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
-    {
-        png_destroy_read_struct(&png_ptr,0,0);
-        fclose(fp);
-        throw image_reader_exception("failed to create info_ptr");
-    }
+    // catch errors in a custom way to avoid the need for setjmp
+    png_set_error_fn(png_ptr, png_get_error_ptr(png_ptr), user_error_fn, user_warning_fn);
 
-    if (setjmp(png_jmpbuf(png_ptr)))
+    png_infop info_ptr;
+    try
+    {
+        info_ptr = png_create_info_struct(png_ptr);
+        if (!info_ptr)
+        {
+            png_destroy_read_struct(&png_ptr,0,0);
+            fclose(fp);
+            throw image_reader_exception("failed to create info_ptr");
+        }
+    }
+    catch (std::exception const& ex)
     {
         png_destroy_read_struct(&png_ptr,0,0);
         fclose(fp);
-        throw image_reader_exception("failed to read");
+        throw;
     }
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
