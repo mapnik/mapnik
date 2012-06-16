@@ -52,7 +52,7 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(markers_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
     typedef coord_transform<CoordTransform,geometry_type> path_type;
@@ -69,10 +69,10 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     ras_ptr->reset();
 
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_image_transform());
+    evaluate_transform(tr, feature, sym.get_image_transform());
     unsigned int res = pixmap_.get_resolution();
     tr = agg::trans_affine_scaling(scale_factor_*(1.0/res)) * tr;
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
     marker_placement_e placement_method = sym.get_marker_placement();
     marker_type_e marker_type = sym.get_marker_type();
 
@@ -106,9 +106,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 mapnik::pixfmt_gray32 > svg_renderer(svg_path,(*marker)->attributes());
 
             bool placed = false;
-            for (unsigned i=0; i<feature->num_geometries(); ++i)
+            for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
-                geometry_type & geom = feature->get_geometry(i);
+                geometry_type & geom = feature.get_geometry(i);
                 if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
                 {
                     double x;
@@ -143,7 +143,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 {
                     placed = true;
                     agg::trans_affine matrix = recenter * tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
-                    svg_renderer.render_id(*ras_ptr, sl, renb, feature->id(), matrix, sym.get_opacity(),bbox);
+                    svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, sym.get_opacity(),bbox);
                 }
             }
             if (placed)
@@ -203,9 +203,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
         double y;
         double z=0;
 
-        for (unsigned i=0; i<feature->num_geometries(); ++i)
+        for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            geometry_type & geom = feature->get_geometry(i);
+            geometry_type & geom = feature.get_geometry(i);
             if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
             {
                 geom.label_position(&x,&y);
@@ -284,13 +284,13 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             }
 
         }
-        ren.color(mapnik::gray32(feature->id()));
+        ren.color(mapnik::gray32(feature.id()));
         agg::render_scanlines(*ras_ptr, sl, ren);
         pixmap_.add_feature(feature);
     }
 }
 
 template void grid_renderer<grid>::process(markers_symbolizer const&,
-                                           mapnik::feature_ptr const&,
+                                           mapnik::feature_impl &,
                                            proj_transform const&);
 }

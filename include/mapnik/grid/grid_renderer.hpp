@@ -65,40 +65,40 @@ public:
     void end_layer_processing(layer const& lay);
     void start_style_processing(feature_type_style const& st) {}
     void end_style_processing(feature_type_style const& st) {}
-    void render_marker(mapnik::feature_ptr const& feature, unsigned int step, pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity);
+    void render_marker(mapnik::feature_impl & feature, unsigned int step, pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity);
 
     void process(point_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(line_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(line_pattern_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(polygon_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(polygon_pattern_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(raster_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(shield_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(text_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(building_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(markers_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     inline bool process(rule::symbolizers const& /*syms*/,
-                        mapnik::feature_ptr const& /*feature*/,
+                        mapnik::feature_impl & /*feature*/,
                         proj_transform const& /*prj_trans*/)
     {
         // grid renderer doesn't support processing of multiple symbolizers.

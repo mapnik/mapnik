@@ -32,6 +32,7 @@
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/feature_factory.hpp>
 
 // boost
 #include <boost/cstdint.hpp>
@@ -70,6 +71,7 @@ private:
     std::set<std::string> names_;
     feature_key_type f_keys_;
     feature_type features_;
+    mapnik::context_ptr ctx_;
 
 public:
 
@@ -83,7 +85,8 @@ public:
         painted_(false),
         names_(),
         f_keys_(),
-        features_()
+        features_(),
+        ctx_(boost::make_shared<mapnik::context_type>())
         {
             // this only works if each datasource's
             // feature count starts at 1
@@ -100,7 +103,8 @@ public:
         painted_(rhs.painted_),
         names_(rhs.names_),
         f_keys_(rhs.f_keys_),
-        features_(rhs.features_)
+        features_(rhs.features_),
+        ctx_(rhs.ctx_)
         {
             f_keys_[0] = "";
         }
@@ -122,23 +126,37 @@ public:
         return id_name_;
     }
 
-    inline void add_feature(mapnik::feature_ptr const& feature)
+    inline void add_feature(mapnik::feature_impl & feature)
     {
+        // avoid adding duplicate features (e.g. in the case of both a line symbolizer and a polygon symbolizer)
+        typename feature_key_type::const_iterator feature_pos = f_keys_.find(feature.id());
+        if (feature_pos != f_keys_.end())
+        {
+            return;
+        }
 
+        if (ctx_->size() == 0) {
+            mapnik::feature_impl::iterator itr = feature.begin();
+            mapnik::feature_impl::iterator end = feature.end();
+            for ( ;itr!=end; ++itr)
+            {
+                ctx_->push(boost::get<0>(*itr));
+            }
+        }
         // NOTE: currently lookup keys must be strings,
         // but this should be revisited
         boost::optional<lookup_type> lookup_value;
         if (key_ == id_name_)
         {
             std::stringstream s;
-            s << feature->id();
+            s << feature.id();
             lookup_value = s.str();
         }
         else
         {
-            if (feature->has_key(key_))
+            if (feature.has_key(key_))
             {
-                lookup_value = feature->get(key_).to_string();
+                lookup_value = feature.get(key_).to_string();
             }
             else
             {
@@ -150,16 +168,21 @@ public:
         {
             // TODO - consider shortcutting f_keys if feature_id == lookup_value
             // create a mapping between the pixel id and the feature key
-            f_keys_.insert(std::make_pair(feature->id(),*lookup_value));
+            f_keys_.insert(std::make_pair(feature.id(),*lookup_value));
             // if extra fields have been supplied, push them into grid memory
             if (!names_.empty())
             {
-                features_.insert(std::make_pair(*lookup_value,feature));
+                // it is ~ 2x faster to copy feature attributes compared
+                // to building up a in-memory cache of feature_ptrs
+                // https://github.com/mapnik/mapnik/issues/1198
+                mapnik::feature_ptr feature2(mapnik::feature_factory::create(ctx_,feature.id()));
+                feature2->set_data(feature.get_data());
+                features_.insert(std::make_pair(*lookup_value,feature2));
             }
         }
         else
         {
-            MAPNIK_LOG_DEBUG(grid) << "hit_grid: Warning - key '" << key_ << "' was blank for " << *feature;
+            MAPNIK_LOG_DEBUG(grid) << "hit_grid: Warning - key '" << key_ << "' was blank for " << feature;
         }
     }
 

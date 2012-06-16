@@ -29,12 +29,12 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(text_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
-            sym, *feature, prj_trans,
+            sym, feature, prj_trans,
             detector_->extent().width(), detector_->extent().height(),
             scale_factor_,
             t_, font_manager_, *detector_, query_extent_);
@@ -53,7 +53,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(text_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

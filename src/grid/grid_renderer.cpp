@@ -100,7 +100,7 @@ void grid_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity)
+void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity)
 {
     if (marker.is_vector())
     {
@@ -135,7 +135,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
             mapnik::pixfmt_gray32> svg_renderer(svg_path,
                                                 (*marker.get_vector_data())->attributes());
 
-        svg_renderer.render_id(*ras_ptr, sl, renb, feature->id(), mtx, opacity, bbox);
+        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), mtx, opacity, bbox);
 
     }
     else
@@ -143,7 +143,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
         image_data_32 const& data = **marker.get_bitmap_data();
         if (step == 1 && scale_factor_ == 1.0)
         {
-            pixmap_.set_rectangle(feature->id(), data,
+            pixmap_.set_rectangle(feature.id(), data,
                                   boost::math::iround(pos.x),
                                   boost::math::iround(pos.y));
         }
@@ -153,7 +153,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
             image_data_32 target(ratio * data.width(), ratio * data.height());
             mapnik::scale_image_agg<image_data_32>(target,data, SCALING_NEAR,
                                                    scale_factor_, 0.0, 0.0, 1.0, ratio);
-            pixmap_.set_rectangle(feature->id(), target,
+            pixmap_.set_rectangle(feature.id(), target,
                                   boost::math::iround(pos.x),
                                   boost::math::iround(pos.y));
         }

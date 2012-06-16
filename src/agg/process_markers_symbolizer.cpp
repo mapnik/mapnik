@@ -50,7 +50,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(markers_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
     typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
@@ -73,9 +73,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     renderer_base renb(pixf);
     renderer_type ren(renb);
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_image_transform());
+    evaluate_transform(tr, feature, sym.get_image_transform());
     tr = agg::trans_affine_scaling(scale_factor_) * tr;
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
     marker_placement_e placement_method = sym.get_marker_placement();
     marker_type_e marker_type = sym.get_marker_type();
     metawriter_with_properties writer = sym.get_metawriter();
@@ -108,9 +108,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 renderer_type,
                 agg::pixfmt_rgba32 > svg_renderer(svg_path,(*marker)->attributes());
 
-            for (unsigned i=0; i<feature->num_geometries(); ++i)
+            for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
-                geometry_type & geom = feature->get_geometry(i);
+                geometry_type & geom = feature.get_geometry(i);
                 // TODO - merge this code with point_symbolizer rendering
                 if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
                 {
@@ -136,7 +136,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         //if (!sym.get_ignore_placement())
                         //    detector_->insert(label_ext);
                         metawriter_with_properties writer = sym.get_metawriter();
-                        if (writer.first) writer.first->add_box(extent, *feature, t_, writer.second);
+                        if (writer.first) writer.first->add_box(extent, feature, t_, writer.second);
                     }
                 }
                 else
@@ -237,9 +237,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
         agg::path_storage marker;
 
-        for (unsigned i=0; i<feature->num_geometries(); ++i)
+        for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            geometry_type & geom = feature->get_geometry(i);
+            geometry_type & geom = feature.get_geometry(i);
             //if (geom.num_points() <= 1) continue;
             if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
             {
@@ -274,7 +274,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     }
                     if (!sym.get_ignore_placement())
                         detector_->insert(label_ext);
-                    if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
+                    if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                 }
             }
             else
@@ -347,6 +347,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(markers_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 }
