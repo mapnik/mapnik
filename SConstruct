@@ -1529,28 +1529,21 @@ if not preconfigured:
 
             if not conf.CheckHeader(header='Python.h',language='C'):
                 color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION'])
-                env.Replace(**backup)
                 Exit(1)
-            else:
-                env.Replace(**backup)
 
             if (int(majver), int(minver)) < (2, 2):
                 color_print(1,"Python version 2.2 or greater required")
                 Exit(1)
 
             if env['BOOST_PYTHON_LIB']:
-                env.Append(LIBS='python%s' % env['PYTHON_VERSION'])
                 if not conf.CheckLibWithHeader(libs=[env['BOOST_PYTHON_LIB']], header='boost/python/detail/config.hpp', language='C++'):
                     color_print(1, 'Could not find library %s for boost python' % env['BOOST_PYTHON_LIB'])
-                    env.Replace(**backup)
                     Exit(1)
-                else:
-                    env.Replace(**backup)
 
             color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
             color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
             color_print(4,'Python bindings will install in... %s' % os.path.normpath(env['PYTHON_INSTALL_LOCATION']))
-
+            env.Replace(**backup)
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
         if env['PRIORITIZE_LINKING']:
