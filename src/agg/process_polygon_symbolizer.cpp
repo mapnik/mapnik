@@ -41,7 +41,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(polygon_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
 
@@ -51,7 +51,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     box2d<double> inflated_extent = query_extent_ * 1.0;
 
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform());
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
@@ -63,7 +63,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     converter.set<affine_transform_tag>();
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature->paths())
+    BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
         if (geom.num_points() > 2)
         {
@@ -97,7 +97,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(polygon_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

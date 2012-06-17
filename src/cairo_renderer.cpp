@@ -830,7 +830,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(polygon_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
         cairo_context context(context_);
@@ -838,7 +838,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         context.set_color(sym.get_fill(), sym.get_opacity());
 
         agg::trans_affine tr;
-        evaluate_transform(tr, *feature, sym.get_transform());
+        evaluate_transform(tr, feature, sym.get_transform());
 
         typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
         vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
@@ -850,7 +850,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         converter.set<affine_transform_tag>();
         if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
             if (geom.num_points() > 2)
             {
@@ -862,7 +862,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(building_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
         typedef coord_transform<CoordTransform,geometry_type> path_type;
@@ -874,13 +874,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         expression_ptr height_expr = sym.height();
         if (height_expr)
         {
-            value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature), *height_expr);
+            value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
             height = result.to_double(); //scale_factor is always 1.0 atm
         }
 
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
+        for (unsigned i = 0; i < feature.num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type const& geom = feature.get_geometry(i);
 
             if (geom.num_points() > 2)
             {
@@ -971,7 +971,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(line_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
         cairo_context context(context_);
@@ -989,7 +989,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         }
 
         agg::trans_affine tr;
-        evaluate_transform(tr, *feature, sym.get_transform());
+        evaluate_transform(tr, feature, sym.get_transform());
 
         typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
         vertex_converter<box2d<double>, cairo_context, line_symbolizer,
@@ -1003,7 +1003,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         converter.set<affine_transform_tag>(); // optional affine transform
         if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
             if (geom.num_points() > 1)
             {
@@ -1127,10 +1127,10 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(point_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
-        std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
+        std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
 
         boost::optional<marker_ptr> marker;
         if ( !filename.empty() )
@@ -1143,13 +1143,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         }
 
         agg::trans_affine mtx;
-        evaluate_transform(mtx, *feature, sym.get_image_transform());
+        evaluate_transform(mtx, feature, sym.get_image_transform());
 
         if (marker)
         {
-            for (unsigned i = 0; i < feature->num_geometries(); ++i)
+            for (unsigned i = 0; i < feature.num_geometries(); ++i)
             {
-                geometry_type const& geom = feature->get_geometry(i);
+                geometry_type const& geom = feature.get_geometry(i);
                 double x;
                 double y;
                 double z = 0;
@@ -1178,7 +1178,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     metawriter_with_properties writer = sym.get_metawriter();
                     if (writer.first)
                     {
-                        writer.first->add_box(label_ext, *feature, t_, writer.second);
+                        writer.first->add_box(label_ext, feature, t_, writer.second);
                     }
                 }
             }
@@ -1186,12 +1186,12 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(shield_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
         shield_symbolizer_helper<face_manager<freetype_engine>,
             label_collision_detector4> helper(
-                sym, *feature, prj_trans,
+                sym, feature, prj_trans,
                 detector_.extent().width(), detector_.extent().height(),
                 1.0 /*scale_factor*/,
                 t_, font_manager_, detector_, query_extent_);
@@ -1213,13 +1213,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
         typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
-        std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
+        std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
         if (!marker && !(*marker)->is_bitmap()) return;
 
@@ -1234,9 +1234,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         pattern.set_filter(Cairo::FILTER_BILINEAR);
         context.set_line_width(height);
 
-        for (unsigned i = 0; i < feature->num_geometries(); ++i)
+        for (unsigned i = 0; i < feature.num_geometries(); ++i)
         {
-            geometry_type & geom = feature->get_geometry(i);
+            geometry_type & geom = feature.get_geometry(i);
 
             if (geom.num_points() > 1)
             {
@@ -1287,13 +1287,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
         cairo_context context(context_);
         context.set_operator(sym.comp_op());
 
-        std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
+        std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
         boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
         if (!marker && !(*marker)->is_bitmap()) return;
 
@@ -1304,7 +1304,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         context.set_pattern(pattern);
 
         agg::trans_affine tr;
-        evaluate_transform(tr, *feature, sym.get_transform());
+        evaluate_transform(tr, feature, sym.get_transform());
 
         typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
         vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
@@ -1316,7 +1316,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         converter.set<affine_transform_tag>();
         if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
             if (geom.num_points() > 2)
             {
@@ -1329,16 +1329,16 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(raster_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
-        raster_ptr const& source = feature->get_raster();
+        raster_ptr const& source = feature.get_raster();
         if (source)
         {
             // If there's a colorizer defined, use it to color the raster in-place
             raster_colorizer_ptr colorizer = sym.get_colorizer();
             if (colorizer)
-                colorizer->colorize(source,*feature);
+                colorizer->colorize(source,feature);
 
             box2d<double> target_ext = box2d<double>(source->ext_);
             prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
@@ -1374,7 +1374,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(markers_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
         cairo_context context(context_);
@@ -1385,11 +1385,11 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
         agg::trans_affine tr;
-        evaluate_transform(tr, *feature, sym.get_image_transform());
+        evaluate_transform(tr, feature, sym.get_image_transform());
 
         // TODO - use this?
         //tr = agg::trans_affine_scaling(scale_factor_) * tr;
-        std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
+        std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
         marker_placement_e placement_method = sym.get_marker_placement();
         marker_type_e marker_type = sym.get_marker_type();
         metawriter_with_properties writer = sym.get_metawriter();
@@ -1420,9 +1420,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 box2d<double> extent(x1,y1,x2,y2);
                 using namespace mapnik::svg;
 
-                for (unsigned i=0; i<feature->num_geometries(); ++i)
+                for (unsigned i=0; i<feature.num_geometries(); ++i)
                 {
-                    geometry_type & geom = feature->get_geometry(i);
+                    geometry_type & geom = feature.get_geometry(i);
                     // TODO - merge this code with point_symbolizer rendering
                     if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
                     {
@@ -1443,7 +1443,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                             //if (!sym.get_ignore_placement())
                             //    detector_.insert(label_ext);
                             metawriter_with_properties writer = sym.get_metawriter();
-                            if (writer.first) writer.first->add_box(extent, *feature, t_, writer.second);
+                            if (writer.first) writer.first->add_box(extent, feature, t_, writer.second);
                         }
                     }
                     else
@@ -1518,9 +1518,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 
             agg::path_storage marker;
 
-            for (unsigned i=0; i<feature->num_geometries(); ++i)
+            for (unsigned i=0; i<feature.num_geometries(); ++i)
             {
-                geometry_type & geom = feature->get_geometry(i);
+                geometry_type & geom = feature.get_geometry(i);
                 if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
                 {
                     geom.label_position(&x,&y);
@@ -1552,7 +1552,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                         }
                         if (!sym.get_ignore_placement())
                             detector_.insert(label_ext);
-                        if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
+                        if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                     }
                 }
                 else
@@ -1618,10 +1618,10 @@ void cairo_renderer_base::start_map_processing(Map const& map)
     }
 
     void cairo_renderer_base::process(text_symbolizer const& sym,
-                                      mapnik::feature_ptr const& feature,
+                                      mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
-        text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, *feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_, query_extent_);
+        text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_, query_extent_);
 
         cairo_context context(context_);
         context.set_operator(sym.comp_op());

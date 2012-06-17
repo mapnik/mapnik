@@ -220,9 +220,7 @@ static void write_features(T const& grid_type,
         boost::optional<std::string> join_value;
         if (key == grid_type.key_name())
         {
-            std::stringstream s;
-            s << feature->id();
-            join_value = s.str();
+            join_value = feat_itr->first;
         }
         else if (feature->has_key(key))
         {

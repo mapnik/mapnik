@@ -51,7 +51,7 @@ namespace mapnik {
 
 template <typename T>
 void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
     typedef agg::rgba8 color;
@@ -65,7 +65,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
     typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
     
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
     if (!mark) return;
@@ -95,7 +95,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     rasterizer_type ras(ren);
     
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform());
 
     typedef boost::mpl::vector<clip_line_tag,transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
@@ -106,7 +106,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     converter.set<transform_tag>(); //always transform 
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
     
-    BOOST_FOREACH(geometry_type & geom, feature->paths())
+    BOOST_FOREACH(geometry_type & geom, feature.paths())
     {
         if (geom.num_points() > 1)
         {
@@ -116,7 +116,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(line_pattern_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

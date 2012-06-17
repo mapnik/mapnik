@@ -62,7 +62,7 @@ template <bool>
 struct process_impl
 {
     template <typename T0, typename T1, typename T2, typename T3>
-    static void process(T0 & ren, T1 const& sym, T2 const& f, T3 const& tr)
+    static void process(T0 & ren, T1 const& sym, T2 & f, T3 const& tr)
     {
         ren.process(sym,f,tr);
     }
@@ -72,7 +72,7 @@ template <> // No-op specialization
 struct process_impl<false>
 {
     template <typename T0, typename T1, typename T2, typename T3>
-    static void process(T0 & ren, T1 const& sym, T2 const& f, T3 const& tr)
+    static void process(T0 & ren, T1 const& sym, T2 & f, T3 const& tr)
     {
         boost::ignore_unused_variable_warning(ren);
         boost::ignore_unused_variable_warning(f);
@@ -93,7 +93,7 @@ template <typename Processor>
 struct feature_style_processor<Processor>::symbol_dispatch : public boost::static_visitor<>
 {
     symbol_dispatch (Processor & output,
-                     mapnik::feature_ptr const& f,
+                     mapnik::feature_impl & f,
                      proj_transform const& prj_trans)
         : output_(output),
           f_(f),
@@ -106,14 +106,14 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
     }
     
     Processor & output_;
-    mapnik::feature_ptr const& f_;
+    mapnik::feature_impl & f_;
     proj_transform const& prj_trans_;
 };
 
 typedef char (&no_tag)[1]; 
 typedef char (&yes_tag)[2]; 
 
-template <typename T0, typename T1, void (T0::*)(T1 const&, mapnik::feature_ptr const&, proj_transform const&) > 
+template <typename T0, typename T1, void (T0::*)(T1 const&, mapnik::feature_impl &, proj_transform const&) >
 struct process_memfun_helper {}; 
     
 template <typename T0, typename T1> no_tag  has_process_helper(...); 
@@ -556,12 +556,12 @@ void feature_style_processor<Processor>::render_style(
 
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-                if(!p.process(symbols,feature,prj_trans))
+                if(!p.process(symbols,*feature,prj_trans))
                 {
 
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
+                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }
                 }
                 if (style->get_filter_mode() == FILTER_FIRST)
@@ -584,11 +584,11 @@ void feature_style_processor<Processor>::render_style(
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-                if(!p.process(symbols,feature,prj_trans))
+                if(!p.process(symbols,*feature,prj_trans))
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
+                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }
                 }
             }
@@ -606,11 +606,11 @@ void feature_style_processor<Processor>::render_style(
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
-                if(!p.process(symbols,feature,prj_trans))
+                if(!p.process(symbols,*feature,prj_trans))
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
-                        boost::apply_visitor(symbol_dispatch(p,feature,prj_trans),sym);
+                        boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }
                 }
             }

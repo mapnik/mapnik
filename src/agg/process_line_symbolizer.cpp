@@ -50,7 +50,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(line_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 
 {
@@ -77,7 +77,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     renderer_base renb(pixf);
     
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform());
 
     box2d<double> ext = query_extent_ * 1.1;
 
@@ -106,7 +106,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         if (stroke_.has_dash()) converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
 
-        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
             if (geom.num_points() > 1)
             {
@@ -129,7 +129,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         if (stroke_.has_dash()) converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
 
-        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
             if (geom.num_points() > 1)
             {
@@ -149,7 +149,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
 
 template void agg_renderer<image_32>::process(line_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

@@ -49,7 +49,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
@@ -59,7 +59,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     ras_ptr->reset();
     set_gamma_method(sym,ras_ptr);
 
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
     {
@@ -120,9 +120,9 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     {
         double x0 = 0;
         double y0 = 0;
-        if (feature->num_geometries() > 0)
+        if (feature.num_geometries() > 0)
         {
-            clipped_geometry_type clipped(feature->get_geometry(0));
+            clipped_geometry_type clipped(feature.get_geometry(0));
             clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
             path_type path(t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
@@ -137,7 +137,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     renderer_type rp(renb,sa, sg);
 
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform());
 
     box2d<double> inflated_extent = query_extent_ * 1.0;
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
@@ -149,7 +149,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     converter.set<transform_tag>(); //always transform
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature->paths())
+    BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
         if (geom.num_points() > 2)
         {
@@ -162,7 +162,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
 
 template void agg_renderer<image_32>::process(polygon_pattern_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }
