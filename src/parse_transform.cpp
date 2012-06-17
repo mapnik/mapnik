@@ -22,6 +22,8 @@
 
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/transform_expression_grammar.hpp>
+#include <mapnik/transform_processor.hpp>
+#include <mapnik/debug.hpp>
 
 #include <boost/make_shared.hpp>
 
