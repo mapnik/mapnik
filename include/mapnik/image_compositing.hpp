@@ -70,7 +70,11 @@ enum composite_mode_e
     invert,
     invert_rgb,
     grain_merge,
-    grain_extract
+    grain_extract,
+    hue,
+    saturation,
+    _color,
+    luminosity
 };
 
 MAPNIK_DECL boost::optional<composite_mode_e> comp_op_from_string(std::string const& name);

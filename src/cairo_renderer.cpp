@@ -385,10 +385,14 @@ public:
         case invert_rgb:
         case grain_merge:
         case grain_extract:
+        case hue:
+        case saturation:
+        case _color:
+        case luminosity:
             break;
         }
     }
-
+    
     void set_line_join(line_join_e join)
     {
         if (join == MITER_JOIN)
