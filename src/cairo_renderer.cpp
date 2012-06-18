@@ -389,6 +389,7 @@ public:
         case saturation:
         case _color:
         case _value:
+        case color_spin:
             break;
         }
     }
