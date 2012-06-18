@@ -58,7 +58,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
@@ -256,7 +256,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     agg::ellipse c(x, y, rx, ry);
                     marker.concat_path(c);
                     ras_ptr->add_path(marker);
-                    ren.color(agg::rgba8(r, g, b, int(a*sym.get_opacity())));
+                    ren.color(agg::rgba8_pre(r, g, b, int(a*sym.get_opacity())));
                     // TODO - fill with packed scanlines? agg::scanline_p8
                     // and agg::renderer_outline_aa
                     agg::render_scanlines(*ras_ptr, sl, ren);
@@ -269,7 +269,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         outline.generator().width(strk_width * scale_factor_);
                         ras_ptr->add_path(outline);
 
-                        ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
+                        ren.color(agg::rgba8_pre(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
                         agg::render_scanlines(*ras_ptr, sl_line, ren);
                     }
                     if (!sym.get_ignore_placement())
@@ -326,7 +326,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     ras_ptr->add_path(trans);
 
                     // fill
-                    ren.color(agg::rgba8(r, g, b, int(a*sym.get_opacity())));
+                    ren.color(agg::rgba8_pre(r, g, b, int(a*sym.get_opacity())));
                     agg::render_scanlines(*ras_ptr, sl, ren);
 
                     // outline
@@ -336,7 +336,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         agg::conv_stroke<agg::conv_transform<agg::path_storage, agg::trans_affine> >  outline(trans);
                         outline.generator().width(strk_width * scale_factor_);
                         ras_ptr->add_path(outline);
-                        ren.color(agg::rgba8(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
+                        ren.color(agg::rgba8_pre(s_r, s_g, s_b, int(s_a*stroke_.get_opacity())));
                         agg::render_scanlines(*ras_ptr, sl_line, ren);
                     }
                 }
