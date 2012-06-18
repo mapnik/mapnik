@@ -70,6 +70,11 @@ static const comp_op_lookup_type comp_lookup = boost::assign::list_of<comp_op_lo
     (invert_rgb,"invert-rgb")
     (grain_merge,"grain-merge")
     (grain_extract,"grain-extract")
+    (hue,"hue")
+    (saturation,"saturation")
+    (_color,"color")
+    (_value,"value")
+    (color_spin,"color-spin")
     ;
 
 boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
