@@ -77,7 +77,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                              scale_factor,
                              sym.get_scaling());
 
-            composite(current_buffer_->data(), target.data_, sym.comp_op(), sym.get_opacity(), start_x, start_y, false, false);
+            composite(current_buffer_->data(), target.data_, sym.comp_op(), sym.get_opacity(), start_x, start_y, true);
         }
     }
 }
