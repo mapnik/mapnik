@@ -74,7 +74,7 @@ enum composite_mode_e
     hue,
     saturation,
     _color,
-    _value
+    _value,
     color_spin
 };
 
