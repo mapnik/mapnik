@@ -1434,6 +1434,54 @@ namespace agg
         }
     };
 
+    // color spin
+    template <typename ColorT, typename Order>
+    struct comp_op_rgba_color_spin
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
+
+        static AGG_INLINE void blend_pix(value_type* p,
+                                         // source rgb
+                                         unsigned sr, unsigned sg, unsigned sb,
+                                         // source alpha and opacity
+                                         unsigned sa, unsigned cover) {
+            if (cover < 255) {
+                sa = (sa * cover + 255) >> 8;
+            }
+            p[Order::R] = (value_type)(((0 + base_mask) >> base_shift));
+            p[Order::G] = (value_type)(((0 + base_mask) >> base_shift));
+            p[Order::B] = (value_type)(((0 + base_mask) >> base_shift));
+            p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+
+            // http://en.wikipedia.org/wiki/File:HSV-RGB-comparison.svg
+            if (p[Order::A] < 64) {
+                p[Order::G] = ((p[Order::A] - 64) * 4);
+                p[Order::B] = 255;
+            }
+            if (p[Order::A] >= 64 && p[Order::A] < 128) {
+                p[Order::G] = 255;
+                p[Order::B] = 255 - ((p[Order::A] - 64) * 4);
+            }
+            if (p[Order::A] >= 128 && p[Order::A] < 192) {
+                p[Order::R] = ((p[Order::A] - 128) * 4);
+                p[Order::G] = 255;
+            }
+            if (p[Order::A] >= 192) {
+                p[Order::R] = 255;
+                p[Order::G] = 255 - ((p[Order::A] - 192) * 4);
+            }
+        }
+    };
+
     // grain extract (GIMP)
     // E = I - M + 128
 
@@ -1723,6 +1771,7 @@ namespace agg
         comp_op_rgba_saturation<ColorT,Order>::blend_pix,
         comp_op_rgba_color<ColorT,Order>::blend_pix,
         comp_op_rgba_luminosity<ColorT,Order>::blend_pix,
+        comp_op_rgba_color_spin<ColorT,Order>::blend_pix,
         0
     };
 
@@ -1764,6 +1813,7 @@ namespace agg
         comp_op_saturation,    //----comp_op_saturation
         comp_op_color,         //----comp_op_color
         comp_op_luminosity,    //----comp_op_luminosity
+        comp_op_color_spin,    //----comp_op_luminosity
         end_of_comp_op_e
     };
     
