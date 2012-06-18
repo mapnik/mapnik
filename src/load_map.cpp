@@ -1167,7 +1167,11 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
             // pattern alignment
             pattern_alignment_e p_alignment = sym.get_attr<pattern_alignment_e>("alignment",LOCAL_ALIGNMENT);
             symbol.set_alignment(p_alignment);
-
+            
+            // opacity
+            optional<double> opacity = sym.get_opt_attr<double>("opacity");
+            if (opacity) symbol.set_opacity(*opacity);
+            
             // gamma
             optional<double> gamma = sym.get_opt_attr<double>("gamma");
             if (gamma)  symbol.set_gamma(*gamma);
