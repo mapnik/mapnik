@@ -4,7 +4,7 @@ A simple log of core changes affecting Mapnik usage.
 
 Developers: Please commit along with changes.
 
-For a complete change history, see the SVN log.
+For a complete change history, see the git log.
 
 
 ## Mapnik 2.1.0
@@ -87,7 +87,7 @@ Released April 10, 2012
 
 ## Mapnik 2.0.0
 
-Released September 26, 2012
+Released September 26, 2011
 
 (Packaged from 5b4c20eab3)
 
@@ -224,6 +224,7 @@ Released Oct 18, 2011
 
 - Fixed reading of label_position_tolerance on text_symbolizer and height for building_symbolizer
 
+
 # Mapnik 0.7.1
 
 Released March 23, 2010
@@ -264,6 +265,7 @@ Released March 23, 2010
   "png8:c=128:t=1:m=h" limits palette to 128 colors, uses only binary transparency (0 - none,
   1 - binary, 2 - full), and new method of quantization using hextree (h - hextree, o - octree).
   Existing type "png256" can be also written using "png8:c=256:m=o:t=2"  (r1680, r1683, [#477](https://github.com/mapnik/mapnik/issues/477))
+
 
 # Mapnik 0.7.0
 
@@ -407,8 +409,9 @@ Released January, 19 2010
 - Fonts: Added unifont to auto-installed fonts, which is used by the OSM styles as a fallback font (r1328)
 
 
-
 # Mapnik 0.6.1
+
+Released July 14, 2009
 
 (Packaged from r1247/353ff576c7)
 
@@ -491,8 +494,9 @@ Released January, 19 2010
 - Plugins: Fixed segfault in OGR Plugin with empty geometries (r1074) (#292)
 
 
-
 # Mapnik 0.6.0
+
+Released April 1, 2009
 
 (Packaged from r1066/c88e03436f)
 
@@ -584,3 +588,27 @@ Released January, 19 2010
 - Plugins: Use memory mapped files for reading shape file (r628)
 
 - Core: Use streams to write images (i/o refactor) (r628) (#15)
+
+# Mapnik 0.5.1
+
+Released April 15, 2008
+
+(Packaged from c29cb7386d)
+
+# Mapnik 0.5.0
+
+Released April 15, 2008
+
+(Packaged from 0464a3563c)
+
+# Mapnik 0.4.0
+
+Released February 26, 2007
+
+(Packaged from 8d73e3a8dc)
+
+# Mapnik 0.3.0
+
+Released May 22, 2006
+
+(Packaged from 3ae046ebe2)
