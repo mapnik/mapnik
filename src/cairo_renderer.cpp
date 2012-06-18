@@ -388,7 +388,7 @@ public:
         case hue:
         case saturation:
         case _color:
-        case luminosity:
+        case _value:
             break;
         }
     }

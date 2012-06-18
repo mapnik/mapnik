@@ -73,7 +73,7 @@ static const comp_op_lookup_type comp_lookup = boost::assign::list_of<comp_op_lo
     (hue,"hue")
     (saturation,"saturation")
     (_color,"color")
-    (luminosity,"luminosity")
+    (_value,"value")
     ;
 
 boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)

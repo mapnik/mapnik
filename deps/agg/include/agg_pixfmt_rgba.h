@@ -32,7 +32,6 @@
 #include "agg_rendering_buffer.h"
 
 #include <boost/gil/gil_all.hpp>
-#include <boost/gil/extension/toolbox/hsl.hpp>
 #include <boost/gil/extension/toolbox/hsv.hpp>
 
 #include <iostream>
@@ -1476,7 +1475,7 @@ namespace agg
             }
         }
     };
-    
+
     template <typename ColorT, typename Order>
     struct comp_op_rgba_hue
     {
@@ -1507,20 +1506,18 @@ namespace agg
             {
                 using namespace boost;
                 using namespace gil;
-                using namespace hsl_color_space;
-
+                using namespace hsv_color_space;
                 rgb8_pixel_t rgb_src(sr,sg,sb);
                 rgb8_pixel_t rgb_dst(p[Order::R],p[Order::G],p[Order::B]);
-                hsl32f_pixel_t hsl_src,hsl_dst;
-                color_convert(rgb_src, hsl_src);
-                color_convert(rgb_dst, hsl_dst);
-                get_color(hsl_dst,hue_t()) = get_color(hsl_src,hue_t());
-                color_convert(hsl_dst, rgb_dst);
+                hsv32f_pixel_t hsv_src,hsv_dst;
+                color_convert(rgb_src, hsv_src);
+                color_convert(rgb_dst, hsv_dst);
+                get_color(hsv_dst,hue_t()) = get_color(hsv_src,hue_t());
+                color_convert(hsv_dst, rgb_dst);
                 p[Order::R] = get_color(rgb_dst,red_t());
                 p[Order::G] = get_color(rgb_dst,green_t());
                 p[Order::B] = get_color(rgb_dst,blue_t());
-                calc_type da = p[Order::A];
-                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
             }
         }
     };
@@ -1555,20 +1552,18 @@ namespace agg
             {
                 using namespace boost;
                 using namespace gil;
-                using namespace hsl_color_space;
-
+                using namespace hsv_color_space;
                 rgb8_pixel_t rgb_src(sr,sg,sb);
                 rgb8_pixel_t rgb_dst(p[Order::R],p[Order::G],p[Order::B]);
-                hsl32f_pixel_t hsl_src,hsl_dst;
-                color_convert( rgb_src, hsl_src);
-                color_convert( rgb_dst, hsl_dst);
-                get_color(hsl_dst,saturation_t()) = get_color(hsl_src,saturation_t());
-                color_convert(hsl_dst, rgb_dst);
+                hsv32f_pixel_t hsv_src,hsv_dst;
+                color_convert( rgb_src, hsv_src);
+                color_convert( rgb_dst, hsv_dst);
+                get_color(hsv_dst,saturation_t()) = get_color(hsv_src,saturation_t());
+                color_convert(hsv_dst, rgb_dst);
                 p[Order::R] = get_color(rgb_dst,red_t());
                 p[Order::G] = get_color(rgb_dst,green_t());
                 p[Order::B] = get_color(rgb_dst,blue_t());
-                calc_type da = p[Order::A];
-                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
             }
         }
     };
@@ -1603,28 +1598,26 @@ namespace agg
             {
                 using namespace boost;
                 using namespace gil;
-                using namespace hsl_color_space;
-
+                using namespace hsv_color_space;
                 rgb8_pixel_t rgb_src(sr,sg,sb);
                 rgb8_pixel_t rgb_dst(p[Order::R],p[Order::G],p[Order::B]);
-                hsl32f_pixel_t hsl_src,hsl_dst;
-                color_convert( rgb_src, hsl_src);
-                color_convert( rgb_dst, hsl_dst);
-                get_color(hsl_dst,hue_t()) = get_color(hsl_src,hue_t());
-                get_color(hsl_dst,saturation_t()) = get_color(hsl_src,saturation_t());
-                color_convert(hsl_dst, rgb_dst);
+                hsv32f_pixel_t hsv_src,hsv_dst;
+                color_convert( rgb_src, hsv_src);
+                color_convert( rgb_dst, hsv_dst);
+                get_color(hsv_dst,hue_t()) = get_color(hsv_src,hue_t());
+                get_color(hsv_dst,saturation_t()) = get_color(hsv_src,saturation_t());
+                color_convert(hsv_dst, rgb_dst);
                 p[Order::R] = get_color(rgb_dst,red_t());
                 p[Order::G] = get_color(rgb_dst,green_t());
                 p[Order::B] = get_color(rgb_dst,blue_t());
-                calc_type da = p[Order::A];
-                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
             }
         }
     };
 
 
     template <typename ColorT, typename Order>
-    struct comp_op_rgba_luminosity
+    struct comp_op_rgba_value
     {
         typedef ColorT color_type;
         typedef Order order_type;
@@ -1653,20 +1646,18 @@ namespace agg
             {
                 using namespace boost;
                 using namespace gil;
-                using namespace hsl_color_space;
-
+                using namespace hsv_color_space;
                 rgb8_pixel_t rgb_src(sr,sg,sb);
                 rgb8_pixel_t rgb_dst(p[Order::R],p[Order::G],p[Order::B]);
-                hsl32f_pixel_t hsl_src,hsl_dst;
-                color_convert( rgb_src, hsl_src);
-                color_convert( rgb_dst, hsl_dst);
-                get_color(hsl_dst,lightness_t()) = get_color(hsl_src,lightness_t());
-                color_convert(hsl_dst, rgb_dst);
+                hsv32f_pixel_t hsv_src,hsv_dst;
+                color_convert( rgb_src, hsv_src);
+                color_convert( rgb_dst, hsv_dst);
+                get_color(hsv_dst,value_t()) = get_color(hsv_src,value_t());
+                color_convert(hsv_dst, rgb_dst);
                 p[Order::R] = get_color(rgb_dst,red_t());
                 p[Order::G] = get_color(rgb_dst,green_t());
                 p[Order::B] = get_color(rgb_dst,blue_t());
-                calc_type da = p[Order::A];
-                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
             }
         }
     };
@@ -1722,7 +1713,7 @@ namespace agg
         comp_op_rgba_hue<ColorT,Order>::blend_pix,
         comp_op_rgba_saturation<ColorT,Order>::blend_pix,
         comp_op_rgba_color<ColorT,Order>::blend_pix,
-        comp_op_rgba_luminosity<ColorT,Order>::blend_pix,
+        comp_op_rgba_value<ColorT,Order>::blend_pix,
         0
     };
 
@@ -1763,10 +1754,10 @@ namespace agg
         comp_op_hue,           //----comp_op_hue
         comp_op_saturation,    //----comp_op_saturation
         comp_op_color,         //----comp_op_color
-        comp_op_luminosity,    //----comp_op_luminosity
+        comp_op_value,         //----comp_op_value
         end_of_comp_op_e
     };
-    
+
     //====================================================comp_op_adaptor_rgba
     template<class ColorT, class Order> struct comp_op_adaptor_rgba
     {
