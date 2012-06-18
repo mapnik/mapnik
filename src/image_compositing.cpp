@@ -98,7 +98,7 @@ void composite(T1 & dst, T2 & src, composite_mode_e mode,
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
     typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
+    typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
     typedef agg::renderer_base<pixfmt_type> renderer_type;
 
