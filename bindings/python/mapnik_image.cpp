@@ -147,9 +147,9 @@ void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float op
 }
 
 
-void composite(image_32 & im, image_32 & im2, mapnik::composite_mode_e mode, float opacity)
+void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity)
 {
-    mapnik::composite(im.data(),im2.data(),mode,opacity,0,0,false,true);
+    mapnik::composite(dst.data(),src.data(),mode,opacity,0,0,true);
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)

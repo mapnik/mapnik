@@ -142,7 +142,7 @@ void agg_renderer<T>::setup(Map const &m)
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        pixmap_.set_rectangle_alpha2(*bg_image, x*w, y*h, 1.0f);
+                        composite(pixmap_.data(),*bg_image, src_over, 1.0f, x*w, y*h, true);
                     }
                 }
             }
@@ -230,11 +230,11 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
     
     if (st.comp_op())
     {
-        composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(), 1.0f, 0, 0, false, false);
+        composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(), 1.0f, 0, 0, false);
     }   
     else if (blend_from)
     {                
-        composite(pixmap_.data(),current_buffer_->data(), src_over, 1.0f, 0, 0, false,false);
+        composite(pixmap_.data(),current_buffer_->data(), src_over, 1.0f, 0, 0, false);
     }
     
     // apply any 'direct' image filters    
@@ -297,7 +297,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
                   comp_op, opacity,
                   boost::math::iround(pos.x - cx),
                   boost::math::iround(pos.y - cy),
-                  false, false);
+                  true);
     }
 }
 
