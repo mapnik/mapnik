@@ -97,7 +97,6 @@ void composite(T1 & dst, T2 & src, composite_mode_e mode,
 {
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
     typedef agg::renderer_base<pixfmt_type> renderer_type;
@@ -111,8 +110,7 @@ void composite(T1 & dst, T2 & src, composite_mode_e mode,
     agg::pixfmt_rgba32 pixf_mask(src_buffer);
     if (premultiply_src)  pixf_mask.premultiply();
     renderer_type ren(pixf);
-    // TODO - is this really opacity, or agg::cover?
-    ren.blend_from(pixf_mask,0, dx,dy,unsigned(255*opacity));
+    ren.blend_from(pixf_mask,0,dx,dy,unsigned(255*opacity));
 }
 
 template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&, mapnik::image_data_32& ,composite_mode_e, float, int, int, bool);
