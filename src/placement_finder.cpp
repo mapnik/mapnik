@@ -166,7 +166,6 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
                                               string_info const& info,
                                               DetectorT & detector,
                                               box2d<double> const& extent,
-                                              UnicodeString const& repeat_key_,
                                               bool check_repeat)
     : detector_(detector),
       dimensions_(extent),
@@ -175,7 +174,6 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
       pi(placement_info),
       point_place_box_(placement_info, info),
       collect_extents_(false),
-      repeat_key_(repeat_key_),
       check_repeat_(check_repeat) {}
 
 template <typename DetectorT>
@@ -277,16 +275,13 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
          }
       }
       
-      // since there was no early exit,
+      // since there was no early exit, add envelopes for this placement
       if (check_repeat_)
       {
           // tracking repeats, so add envelopes and keys directly to detector
           while (!c_envelopes.empty())
           {
-             if (repeat_key_.isEmpty())
-                detector_.insert(c_envelopes.front());
-             else
-                detector_.insert(c_envelopes.front(), repeat_key_);
+             detector_.insert(c_envelopes.front(), info_.get_string());
              c_envelopes.pop();
           }    
           BOOST_FOREACH(relative_placement const& p, additional_placements_)
@@ -828,7 +823,7 @@ void placement_finder<DetectorT>::update_detector()
     while (!envelopes_.empty())
     {
         box2d<double> e = envelopes_.front();
-        detector_.insert(e, repeat_key_);
+        detector_.insert(e, info_.get_string());
         envelopes_.pop();
 
         if (collect_extents_)

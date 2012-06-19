@@ -1002,10 +1002,6 @@ void map_parser::parse_group_symbolizer(rule &rule, xml_node const &sym)
       {
           symbol.set_repeat_key(*repeat_key);
       }
-      else
-      {
-          symbol.set_repeat_key(boost::make_shared<mapnik::expr_node>(UnicodeString()));
-      }
 
       text_placements_ptr placements = boost::make_shared<text_placements_dummy>();
       placements->defaults.from_xml(sym, fontsets_);
@@ -1093,10 +1089,6 @@ void map_parser::parse_group_rule(group_symbolizer &sym, xml_node const &r)
       if (rptkey_child)
       {
           repeat_key = rptkey_child->get_value<expression_ptr>();
-      }
-      else
-      {
-          repeat_key = boost::make_shared<mapnik::expr_node>(UnicodeString());
       }
       
       group_rule rule(filter, repeat_key);

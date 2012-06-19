@@ -32,11 +32,13 @@ namespace mapnik
 group_symbolizer::group_symbolizer(size_t column_index_count,
                                    size_t column_index_start, 
                                    const group_layout &layout,
-                                   text_placements_ptr placements)
+                                   text_placements_ptr placements,
+                                   expression_ptr repeat_key)
    : column_index_count_(column_index_count),
      column_index_start_(column_index_start),
      layout_(layout),
-     placements_(placements)
+     placements_(placements),
+     repeat_key_(repeat_key)
 {
 }
 

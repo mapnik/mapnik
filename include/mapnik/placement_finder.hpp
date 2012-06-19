@@ -104,7 +104,6 @@ public:
                      string_info const& info,
                      DetectorT & detector,
                      box2d<double> const& extent,
-                     UnicodeString const& repeat_key = "",
                      bool check_repeat = false);
 
     /** Try place a single label at the given point. */
@@ -202,8 +201,6 @@ private:
     bool collect_extents_;
     /** Use repeat key to check minimum distance between repeating labels */
     bool check_repeat_;
-    /** Repeat key for repeat distance check */
-    UnicodeString repeat_key_;
 };
 }
 

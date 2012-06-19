@@ -206,6 +206,8 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    attribute_collector collector(columns);
    expression_attributes rk_attr(columns);
    
+   boost::apply_visitor(rk_attr, *sym.get_repeat_key());
+   
    for (group_symbolizer::rules::const_iterator itr = sym.begin();
         itr != sym.end(); ++itr)
    {
@@ -311,21 +313,37 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    // determine if we should be tracking repeat distance
    text_placement_info_ptr placement = sym.get_placement_options()->get_placement_info(scale_factor_);
    bool check_repeat = (placement->properties.minimum_distance > 0);
-   UnicodeString sym_rpt_key = (check_repeat ? boost::apply_visitor(evaluate<Feature,value_type>(*feature), *sym.get_repeat_key()).to_unicode() : "");
 
    // find placements which can accomodate the offset bboxes from the layout manager.
    string_info empty_info;
-   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, box2d<double>(0, 0, width_, height_), sym_rpt_key, check_repeat);
+   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, box2d<double>(0, 0, width_, height_), check_repeat);
    for (size_t i = 0; i < matches.size(); ++i)
    {
-      UnicodeString rule_rpt_key = "";
       if (check_repeat)
       {
          const group_rule *match_rule = matches[i].first;
          feature_ptr match_feature = matches[i].second;
-         rule_rpt_key = boost::apply_visitor(evaluate<Feature,value_type>(*match_feature), *(match_rule->get_repeat_key())).to_unicode();
+         
+         // get repeat key from matched group rule
+         expression_ptr rpt_key_expr = match_rule->get_repeat_key();
+         
+         // if no repeat key was defined, use default from group symbolizer
+         if (!rpt_key_expr)
+         {
+             rpt_key_expr = sym.get_repeat_key();
+         }
+         
+         // evalute the repeat key with the matched sub feature
+         UnicodeString rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type>(*match_feature), *rpt_key_expr).to_unicode();
+         
+         // add placement with repeat key
+         finder.add_relative_placement(layout_manager.offset_box_at(i), rpt_key_value);
       }
-      finder.add_relative_placement(layout_manager.offset_box_at(i), rule_rpt_key);
+      else
+      {
+         // add placement without repeat key
+         finder.add_relative_placement(layout_manager.offset_box_at(i));
+      }
    }
 
    // for each placement:

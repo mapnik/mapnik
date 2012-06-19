@@ -48,7 +48,8 @@ struct MAPNIK_DECL group_symbolizer : public symbolizer_base
    group_symbolizer(size_t column_index_count = 0,
                     size_t column_index_start = 1, 
                     const group_layout &layout = simple_row_layout(),
-                    text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
+                    text_placements_ptr placements = text_placements_ptr(new text_placements_dummy),
+                    expression_ptr repeat_key = boost::make_shared<mapnik::expr_node>(UnicodeString()));
    
    text_placements_ptr get_placement_options() const;
    void set_placement_options(text_placements_ptr placement_options);
