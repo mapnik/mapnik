@@ -42,16 +42,18 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
     typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
+    //typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
+    typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
     typedef agg::renderer_base<pixfmt_type> renderer_type;
 
     agg::rendering_buffer source(im.getBytes(),im.width(),im.height(),im.width() * 4);
     agg::rendering_buffer mask(im2.getBytes(),im2.width(),im2.height(),im2.width() * 4);
 
-    agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf(source);
-    pixf.premultiply();
-    agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
+    //agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf(source);
+    //pixf.premultiply();
+    //agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixf_mask(mask);
+    pixfmt_type pixf(source), pixf_mask(mask);
 
     switch(mode)
     {
@@ -140,7 +142,7 @@ void composite(T1 & im, T2 & im2, composite_mode_e mode)
         pixf.comp_op(agg::comp_op_invert_rgb);
         break;
     }
-    renderer_type ren(pixf);
+    //renderer_type ren(pixf);
     agg::renderer_base<pixfmt_type> rb(pixf);
     rb.blend_from(pixf_mask,0,0,0,255);
 }
