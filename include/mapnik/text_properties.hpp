@@ -163,6 +163,9 @@ struct text_symbolizer_properties
     /** Always try render an odd amount of labels */
     bool force_odd_labels;
     bool allow_overlap;
+   /** don't update the placement finder with the extent of the text - this allows
+    *  other symbolizers to overwrite it without needing allow_overlap */
+   bool ignore_placement;
     unsigned text_ratio;
     unsigned wrap_width;
     /** Default values for char_properties. */
