@@ -197,15 +197,25 @@ template <typename T>
 void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start processing style";
-    if (st.comp_op()) style_level_compositing_ = true;
-    else style_level_compositing_ = false;
+    if (st.comp_op() || st.image_filters().size() > 0 || st.get_opacity() < 1)
+    {
+        style_level_compositing_ = true;
+    }
+    else
+    {
+        style_level_compositing_ = false;
+    }
     
-    if (style_level_compositing_ || st.image_filters().size() > 0)
+    if (style_level_compositing_)
     {
         if (!internal_buffer_)
+        {
             internal_buffer_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height()); 
+        }
         else
+        {
             internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour        
+        }
         current_buffer_ = internal_buffer_.get();
     }
     else
@@ -217,33 +227,35 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 template <typename T>
 void agg_renderer<T>::end_style_processing(feature_type_style const& st)
 {
-    bool blend_from = false;
-    if (st.image_filters().size() > 0)
+    if (style_level_compositing_)
     {
-        blend_from = true;
-        mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
-        BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.image_filters())
+        bool blend_from = false;
+        if (st.image_filters().size() > 0)
+        {
+            blend_from = true;
+            mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
+            BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.image_filters())
+            {
+                boost::apply_visitor(visitor, filter_tag);
+            }
+        }
+
+        if (st.comp_op())
+        {
+            composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(), st.get_opacity(), 0, 0, false);
+        }
+        else if (blend_from || st.get_opacity() < 1)
+        {
+            composite(pixmap_.data(),current_buffer_->data(), src_over, st.get_opacity(), 0, 0, false);
+        }
+
+        // apply any 'direct' image filters
+        mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
+        BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.direct_image_filters())
         {
             boost::apply_visitor(visitor, filter_tag);
-        }         
+        }
     }
-    
-    if (st.comp_op())
-    {
-        composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(), 1.0f, 0, 0, false);
-    }   
-    else if (blend_from)
-    {                
-        composite(pixmap_.data(),current_buffer_->data(), src_over, 1.0f, 0, 0, false);
-    }
-    
-    // apply any 'direct' image filters    
-    mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
-    BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.direct_image_filters())
-    {
-        boost::apply_visitor(visitor, filter_tag);
-    }   
-    
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }
 
