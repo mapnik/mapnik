@@ -828,7 +828,10 @@ void placement_finder<DetectorT>::update_detector()
     while (!envelopes_.empty())
     {
         box2d<double> e = envelopes_.front();
-        detector_.insert(e, repeat_key_);
+        if (!p.ignore_placement)
+        {
+           detector_.insert(e, repeat_key_);
+        }
         envelopes_.pop();
 
         if (collect_extents_)

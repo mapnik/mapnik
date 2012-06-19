@@ -66,7 +66,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
         if (!finder_->get_results().empty())
         {
             //Found a placement
-            if (points_on_line_)
+            if (points_on_line_ && !placement_->properties.ignore_placement)
             {
                 finder_->update_detector();
             }
@@ -104,7 +104,11 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
             if (writer_.first) writer_.first->add_text(
                 finder_->get_results(), finder_->get_extents(),
                 feature_, t_, writer_.second);
-            finder_->update_detector();
+            // don't update the detector if we are ignoring placements
+            if (!placement_->properties.ignore_placement)
+            {
+               finder_->update_detector();
+            }
             return true;
         }
         //No placement for this point. Keep it in points_ for next try.
@@ -315,7 +319,10 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         if (placement_->properties.allow_overlap || detector_.has_placement(marker_ext_))
         {
             detector_.insert(marker_ext_);
-            finder_->update_detector();
+            if (!placement_->properties.ignore_placement)
+            {
+               finder_->update_detector();
+            }
             if (writer_.first) {
                 writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
                 writer_.first->add_text(finder_->get_results(), finder_->get_extents(),

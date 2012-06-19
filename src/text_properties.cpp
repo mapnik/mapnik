@@ -51,6 +51,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     max_char_angle_delta(22.5 * M_PI/180.0),
     force_odd_labels(false),
     allow_overlap(false),
+    ignore_placement(false),
     text_ratio(0),
     wrap_width(0),
     format(),
@@ -105,6 +106,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (avoid_edges_) avoid_edges = *avoid_edges_;
     optional<boolean> allow_overlap_ = sym.get_opt_attr<boolean>("allow-overlap");
     if (allow_overlap_) allow_overlap = *allow_overlap_;
+    optional<boolean> ignore_placement_ = sym.get_opt_attr<boolean>("ignore-placement");
+    if (ignore_placement_) ignore_placement = *ignore_placement_;
     optional<horizontal_alignment_e> halign_ = sym.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     if (halign_) halign = *halign_;
     optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
@@ -200,6 +203,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (allow_overlap != dfl.allow_overlap || explicit_defaults)
     {
         set_attr(node, "allow-overlap", allow_overlap);
+    }
+    if (ignore_placement != dfl.ignore_placement || explicit_defaults)
+    {
+        set_attr(node, "allow-overlap", ignore_placement);
     }
     if (avoid_edges != dfl.avoid_edges || explicit_defaults)
     {
