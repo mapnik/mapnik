@@ -297,7 +297,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
                   comp_op, opacity,
                   boost::math::iround(pos.x - cx),
                   boost::math::iround(pos.y - cy),
-                  true);
+                  false);
     }
 }
 
