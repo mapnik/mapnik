@@ -1433,9 +1433,9 @@ namespace agg
         }
     };
 
-    // color spin
+    // colorize alpha values
     template <typename ColorT, typename Order>
-    struct comp_op_rgba_color_spin
+    struct comp_op_rgba_colorize_alpha
     {
         typedef ColorT color_type;
         typedef Order order_type;
@@ -1762,7 +1762,7 @@ namespace agg
         comp_op_rgba_saturation<ColorT,Order>::blend_pix,
         comp_op_rgba_color<ColorT,Order>::blend_pix,
         comp_op_rgba_value<ColorT,Order>::blend_pix,
-        comp_op_rgba_color_spin<ColorT,Order>::blend_pix,
+        comp_op_rgba_colorize_alpha<ColorT,Order>::blend_pix,
         0
     };
 
@@ -1804,7 +1804,7 @@ namespace agg
         comp_op_saturation,    //----comp_op_saturation
         comp_op_color,         //----comp_op_color
         comp_op_value,         //----comp_op_value
-        comp_op_color_spin,    //----comp_op_color_spin
+        comp_op_colorize_alpha,//----comp_op_colorize_alpha
         end_of_comp_op_e
     };
 
