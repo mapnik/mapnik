@@ -433,8 +433,13 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             }
         }
 
-        // image filters
+        optional<float> opacity = sty.get_opt_attr<float>("opacity");
+        if (opacity)
+        {
+            style.set_opacity(*opacity);
+        }
 
+        // image filters
         mapnik::image_filter_grammar<std::string::const_iterator,
                                      std::vector<mapnik::filter::filter_type> > filter_grammar;
         

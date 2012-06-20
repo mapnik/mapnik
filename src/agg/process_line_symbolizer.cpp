@@ -74,6 +74,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
 
     pixfmt_comp_type pixf(buf);
+    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
     
     agg::trans_affine tr;
@@ -138,7 +139,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         }
 
         typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
-        pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
         renderer_base renb(pixf);
         renderer_type ren(renb);
         ren.color(agg::rgba8_pre(r, g, b, int(a * stroke_.get_opacity())));
