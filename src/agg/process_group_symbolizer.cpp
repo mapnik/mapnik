@@ -206,7 +206,10 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    attribute_collector collector(columns);
    expression_attributes rk_attr(columns);
    
-   boost::apply_visitor(rk_attr, *sym.get_repeat_key());
+   if (sym.get_repeat_key())
+   {
+       boost::apply_visitor(rk_attr, *sym.get_repeat_key());
+   }
    
    for (group_symbolizer::rules::const_iterator itr = sym.begin();
         itr != sym.end(); ++itr)
@@ -215,7 +218,10 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       // internals too, so we get all free variables.
       collector(*itr);
       // still need to collect repeat key columns
-      boost::apply_visitor(rk_attr, *itr->get_repeat_key());
+      if (itr->get_repeat_key())
+      {
+         boost::apply_visitor(rk_attr, *itr->get_repeat_key());
+      }
    }
    
    // create a new context for the sub features of this group
@@ -323,6 +329,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
       {
          const group_rule *match_rule = matches[i].first;
          feature_ptr match_feature = matches[i].second;
+         UnicodeString rpt_key_value = "";
          
          // get repeat key from matched group rule
          expression_ptr rpt_key_expr = match_rule->get_repeat_key();
@@ -333,8 +340,11 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
              rpt_key_expr = sym.get_repeat_key();
          }
          
-         // evalute the repeat key with the matched sub feature
-         UnicodeString rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type>(*match_feature), *rpt_key_expr).to_unicode();
+         // evalute the repeat key with the matched sub feature if we have one
+         if (rpt_key_expr)
+         {
+             boost::apply_visitor(evaluate<Feature,value_type>(*match_feature), *rpt_key_expr).to_unicode();
+         }
          
          // add placement with repeat key
          finder.add_relative_placement(layout_manager.offset_box_at(i), rpt_key_value);

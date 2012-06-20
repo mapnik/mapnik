@@ -241,14 +241,20 @@ inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
      expression_attributes rk_attr(group_columns);
      
      // get columns from symbolizer repeat key
-     boost::apply_visitor(rk_attr, *sym.get_repeat_key());
+     if (sym.get_repeat_key())
+     {
+         boost::apply_visitor(rk_attr, *sym.get_repeat_key());
+     }
      
      // get columns from child rules and symbolizers
      for (group_symbolizer::rules::const_iterator ruleItr = sym.begin();
           ruleItr != sym.end(); ++ruleItr)
      {
          column_collector(*ruleItr);
-         boost::apply_visitor(rk_attr, *ruleItr->get_repeat_key());
+         if (ruleItr->get_repeat_key())
+         {
+            boost::apply_visitor(rk_attr, *ruleItr->get_repeat_key());
+         }
      }
 
      BOOST_FOREACH(const std::string &col_name, group_columns)
