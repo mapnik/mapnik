@@ -343,7 +343,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
          // evalute the repeat key with the matched sub feature if we have one
          if (rpt_key_expr)
          {
-             boost::apply_visitor(evaluate<Feature,value_type>(*match_feature), *rpt_key_expr).to_unicode();
+             rpt_key_value = boost::apply_visitor(evaluate<Feature,value_type>(*match_feature), *rpt_key_expr).to_unicode();
          }
          
          // add placement with repeat key
