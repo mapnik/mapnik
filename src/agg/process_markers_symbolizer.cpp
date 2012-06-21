@@ -67,7 +67,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     ras_ptr->gamma(agg::gamma_power());
     agg::scanline_u8 sl;
     agg::scanline_p8 sl_line;
-    agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
