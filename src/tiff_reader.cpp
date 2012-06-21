@@ -98,7 +98,7 @@ void tiff_reader::init()
     // TODO: error handling
     TIFFSetWarningHandler(0);
     TIFF* tif = load_if_exists(file_name_);
-    if (!tif) throw image_reader_exception ("Can't load tiff file");
+    if (!tif) throw image_reader_exception( std::string("Can't load tiff file: '") + file_name_ + "'");
 
     char msg[1024];
 
