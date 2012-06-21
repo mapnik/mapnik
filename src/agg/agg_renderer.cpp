@@ -167,7 +167,7 @@ template <typename T>
 void agg_renderer<T>::end_map_processing(Map const& )
 {
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
     agg::pixfmt_rgba32 pixf(buf);
     pixf.demultiply();
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
