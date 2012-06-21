@@ -87,16 +87,18 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef agg::order_rgba order;
     typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
+
     typedef agg::wrap_mode_repeat wrap_x_type;
     typedef agg::wrap_mode_repeat wrap_y_type;
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
     typedef agg::image_accessor_wrap<agg::pixfmt_rgba32,
                                      wrap_x_type,
                                      wrap_y_type> img_source_type;
+
     typedef agg::span_pattern_rgba<img_source_type> span_gen_type;
     typedef agg::renderer_base<pixfmt_type> ren_base;
 
-    typedef agg::renderer_scanline_aa<ren_base,
+    typedef agg::renderer_scanline_aa_alpha<ren_base,
         agg::span_allocator<agg::rgba8>,
         span_gen_type> renderer_type;
 
@@ -109,8 +111,6 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     agg::rendering_buffer pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
     agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
-
-
 
     pattern_alignment_e align = sym.get_alignment();
     unsigned offset_x=0;
@@ -134,7 +134,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     span_gen_type sg(img_src, offset_x, offset_y);
 
     agg::span_allocator<agg::rgba8> sa;
-    renderer_type rp(renb,sa, sg);
+    renderer_type rp(renb,sa, sg, unsigned(sym.get_opacity()*255));
 
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());

@@ -2976,6 +2976,30 @@ namespace agg
         }
 
         //--------------------------------------------------------------------
+        void blend_color_hspan_alpha(int x, int y, unsigned len,
+                                     const color_type* colors,
+                                     value_type alpha,
+                                     const int8u* covers,
+                                     int8u cover)
+        {
+            value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + (x << 2);
+            do
+            {
+                blender_type::blend_pix(m_comp_op,
+                                        p,
+                                        (colors->r * alpha + 255) >> 8,
+                                        (colors->g * alpha + 255) >> 8,
+                                        (colors->b * alpha + 255) >> 8,
+                                        (colors->a * alpha + 255) >> 8,
+                                        covers ? *covers++ : cover);
+                p += 4;
+                ++colors;
+            }
+            while(--len);
+        }
+
+
+        //--------------------------------------------------------------------
         void blend_color_vspan(int x, int y, unsigned len,
                                const color_type* colors,
                                const int8u* covers,
