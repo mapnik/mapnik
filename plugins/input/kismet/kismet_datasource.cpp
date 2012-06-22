@@ -37,7 +37,6 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
@@ -50,9 +49,6 @@
 // If you change this also change the according kismet command length !
 #define MAX_KISMET_LINE 1024 // maximum length of a kismet command (assumed)
 #define KISMET_COMMAND  "*NETWORK: \001%1024[^\001]\001 %1024s %d %lf %lf"
-
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 
 using mapnik::datasource;
 using mapnik::parameters;

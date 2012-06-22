@@ -25,7 +25,6 @@
 // boost
 #include <boost/make_shared.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -38,6 +37,7 @@
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
+#include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
 
 // stl
@@ -83,7 +83,6 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
        - creates opportunity to filter attributes by map query
        speed:
        - add properties for wkt/lon/lat at parse time
-       - remove boost::lexical_cast
        - add ability to pass 'filter' keyword to drop attributes at layer init
        - create quad tree on the fly for small/med size files
        - memory map large files for reading
@@ -584,12 +583,11 @@ void csv_datasource::parse_csv(T& stream,
                             break;
                         }
 
-                        try
+                        if (mapnik::util::string2double(value,x))
                         {
-                            x = boost::lexical_cast<double>(value);
                             parsed_x = true;
                         }
-                        catch(boost::bad_lexical_cast & ex)
+                        else
                         {
                             std::ostringstream s;
                             s << "CSV Plugin: expected a float value for longitude: could not parse row "
@@ -617,12 +615,11 @@ void csv_datasource::parse_csv(T& stream,
                             break;
                         }
 
-                        try
+                        if (mapnik::util::string2double(value,y))
                         {
-                            y = boost::lexical_cast<double>(value);
                             parsed_y = true;
                         }
-                        catch(boost::bad_lexical_cast & ex)
+                        else
                         {
                             std::ostringstream s;
                             s << "CSV Plugin: expected a float value for latitude: could not parse row "

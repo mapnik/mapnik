@@ -36,7 +36,6 @@
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <iostream>
 #include <string>
