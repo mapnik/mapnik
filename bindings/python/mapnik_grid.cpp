@@ -49,6 +49,7 @@ int get_pixel(mapnik::grid const& grid, int x, int y)
     }
     PyErr_SetString(PyExc_IndexError, "invalid x,y for grid dimensions");
     boost::python::throw_error_already_set();
+    return 0;
 }
 
 void export_grid()
