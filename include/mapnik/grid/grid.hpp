@@ -33,6 +33,7 @@
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/cstdint.hpp>
@@ -59,6 +60,7 @@ public:
     typedef std::map<value_type, lookup_type> feature_key_type;
     typedef std::map<lookup_type, value_type> key_type;
     typedef std::map<lookup_type, mapnik::feature_ptr> feature_type;
+    static const value_type base_mask;
 
 private:
     unsigned width_;
@@ -88,9 +90,8 @@ public:
         features_(),
         ctx_(boost::make_shared<mapnik::context_type>())
         {
-            // this only works if each datasource's
-            // feature count starts at 1
-            f_keys_[0] = "";
+            f_keys_[base_mask] = "";
+            data_.set(base_mask);
         }
 
     hit_grid(const hit_grid<T>& rhs)
@@ -106,7 +107,8 @@ public:
         features_(rhs.features_),
         ctx_(rhs.ctx_)
         {
-            f_keys_[0] = "";
+            f_keys_[base_mask] = "";
+            data_.set(base_mask);
         }
 
     ~hit_grid() {}
@@ -128,8 +130,9 @@ public:
 
     inline void add_feature(mapnik::feature_impl & feature)
     {
+        int feature_id = feature.id();
         // avoid adding duplicate features (e.g. in the case of both a line symbolizer and a polygon symbolizer)
-        typename feature_key_type::const_iterator feature_pos = f_keys_.find(feature.id());
+        typename feature_key_type::const_iterator feature_pos = f_keys_.find(feature_id);
         if (feature_pos != f_keys_.end())
         {
             return;
@@ -145,12 +148,10 @@ public:
         }
         // NOTE: currently lookup keys must be strings,
         // but this should be revisited
-        boost::optional<lookup_type> lookup_value;
+        lookup_type lookup_value;
         if (key_ == id_name_)
         {
-            std::stringstream s;
-            s << feature.id();
-            lookup_value = s.str();
+            mapnik::util::to_string(lookup_value,feature_id);
         }
         else
         {
@@ -164,20 +165,20 @@ public:
             }
         }
 
-        if (lookup_value)
+        if (!lookup_value.empty())
         {
             // TODO - consider shortcutting f_keys if feature_id == lookup_value
             // create a mapping between the pixel id and the feature key
-            f_keys_.insert(std::make_pair(feature.id(),*lookup_value));
+            f_keys_.insert(std::make_pair(feature_id,lookup_value));
             // if extra fields have been supplied, push them into grid memory
             if (!names_.empty())
             {
                 // it is ~ 2x faster to copy feature attributes compared
                 // to building up a in-memory cache of feature_ptrs
                 // https://github.com/mapnik/mapnik/issues/1198
-                mapnik::feature_ptr feature2(mapnik::feature_factory::create(ctx_,feature.id()));
+                mapnik::feature_ptr feature2(mapnik::feature_factory::create(ctx_,feature_id));
                 feature2->set_data(feature.get_data());
-                features_.insert(std::make_pair(*lookup_value,feature2));
+                features_.insert(std::make_pair(lookup_value,feature2));
             }
         }
         else
