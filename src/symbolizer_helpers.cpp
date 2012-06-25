@@ -138,7 +138,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
         eGeomType type = geom.type();
         if (type == Polygon)
         {
-            largest_box_only = true;
+            largest_box_only = sym_.largest_bbox_only();
             if (sym_.get_minimum_path_length() > 0)
             {
                 box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);

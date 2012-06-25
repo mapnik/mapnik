@@ -127,7 +127,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     justify_alignment_e get_justify_alignment() const func_deprecated;
     text_placements_ptr get_placement_options() const;
     void set_placement_options(text_placements_ptr placement_options);
-
+    void set_largest_bbox_only(bool val);
+    bool largest_bbox_only() const;
 private:
     text_placements_ptr placement_options_;
 };

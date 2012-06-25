@@ -51,6 +51,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     max_char_angle_delta(22.5 * M_PI/180.0),
     force_odd_labels(false),
     allow_overlap(false),
+    largest_bbox_only(true),
     text_ratio(0),
     wrap_width(0),
     format(),
@@ -103,6 +104,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (avoid_edges_) avoid_edges = *avoid_edges_;
     optional<boolean> allow_overlap_ = sym.get_opt_attr<boolean>("allow-overlap");
     if (allow_overlap_) allow_overlap = *allow_overlap_;
+    optional<boolean> largest_bbox_only_ = sym.get_opt_attr<boolean>("largest-bbox-only");
+    if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
     optional<horizontal_alignment_e> halign_ = sym.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     if (halign_) halign = *halign_;
     optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
@@ -193,6 +196,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (avoid_edges != dfl.avoid_edges || explicit_defaults)
     {
         set_attr(node, "avoid-edges", avoid_edges);
+    }
+    if (largest_bbox_only != dfl.largest_bbox_only|| explicit_defaults)
+    {
+        set_attr(node, "largest-bbox_only", largest_bbox_only);
     }
     if (max_char_angle_delta != dfl.max_char_angle_delta || explicit_defaults)
     {

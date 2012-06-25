@@ -373,6 +373,16 @@ void text_symbolizer::set_avoid_edges(bool avoid)
     placement_options_->defaults.avoid_edges = avoid;
 }
 
+bool text_symbolizer::largest_bbox_only() const
+{
+    return placement_options_->defaults.largest_bbox_only;
+}
+
+void text_symbolizer::set_largest_bbox_only(bool v)
+{
+    placement_options_->defaults.largest_bbox_only = v;
+}
+
 double text_symbolizer::get_minimum_distance() const
 {
     return placement_options_->defaults.minimum_distance;

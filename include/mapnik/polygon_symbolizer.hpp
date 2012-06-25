@@ -49,7 +49,6 @@ private:
     double opacity_;
     double gamma_;
     gamma_method_e gamma_method_;
-    bool clip_;
 };
 
 }
