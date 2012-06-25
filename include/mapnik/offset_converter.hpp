@@ -47,6 +47,7 @@ struct MAPNIK_DECL offset_converter
     offset_converter(Geometry & geom)
         : geom_(geom)
         , offset_(0.0)
+        , threshold_(8.0)
         , half_turn_segments_(16)
         , status_(initial)
         , pre_first_(vertex2d::no_init)
@@ -68,13 +69,26 @@ struct MAPNIK_DECL offset_converter
         return offset_;
     }
 
-    void set_offset(double offset)
+    double get_threshold() const
     {
-        if (offset != offset_)
+        return threshold_;
+    }
+
+    void set_offset(double value)
+    {
+        if (offset_ != value)
         {
-            offset_ = offset;
+            offset_ = value;
             reset();
         }
+    }
+
+    void set_threshold(double value)
+    {
+        threshold_ = value;
+        // no need to reset(), since threshold doesn't affect
+        // offset vertices' computation, it only controls how
+        // far will we be looking for self-intersections
     }
 
     unsigned vertex(double * x, double * y)
@@ -94,6 +108,8 @@ struct MAPNIK_DECL offset_converter
         if (pos_ == vertices_.size())
             return output_vertex(x, y);
 
+        double const check_dist = offset_ * threshold_;
+        double const check_dist2 = check_dist * check_dist;
         double t = 1.0;
         double vt, ut;
 
@@ -103,6 +119,11 @@ struct MAPNIK_DECL offset_converter
 
             vertex2d const& u0 = vertices_[i];
             vertex2d const& u1 = vertices_[i+1];
+            double const dx = u0.x - cur_.x;
+            double const dy = u0.y - cur_.y;
+
+            if (dx*dx + dy*dy > check_dist2)
+                break;
 
             if (!intersection(pre_, cur_, &vt, u0, u1, &ut))
                 continue;
@@ -311,7 +332,7 @@ private:
         displace(v1, angle_b);
         push_vertex(v1);
 
-        // initalization finished
+        // initialization finished
         return status_ = process;
     }
 
@@ -339,6 +360,7 @@ private:
 
     Geometry &              geom_;
     double                  offset_;
+    double                  threshold_;
     unsigned                half_turn_segments_;
     status                  status_;
     size_t                  pos_;
