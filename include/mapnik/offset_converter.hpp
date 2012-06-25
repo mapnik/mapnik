@@ -45,10 +45,14 @@ struct MAPNIK_DECL offset_converter
     //typedef typename Geometry::value_type value_type;
 
     offset_converter(Geometry & geom)
-        : geom_(geom),
-        offset_(0.0),
-        threshold_(10),
-        status_(initial) {}
+        : geom_(geom)
+        , offset_(0.0)
+        , half_turn_segments_(16)
+        , status_(initial)
+        , pre_first_(vertex2d::no_init)
+        , pre_(vertex2d::no_init)
+        , cur_(vertex2d::no_init)
+        {}
 
     enum status
     {
@@ -66,132 +70,282 @@ struct MAPNIK_DECL offset_converter
 
     void set_offset(double offset)
     {
-        offset_ = offset;
-    }
-
-    unsigned int get_threshold() const
-    {
-        return threshold_;
-    }
-
-    void set_threshold(unsigned int t)
-    {
-        threshold_ = t;
-    }
-
-    unsigned vertex(double * x , double  * y)
-    {
-        if (offset_==0.0)
+        if (offset != offset_)
         {
-            unsigned command = geom_.vertex(x,y);
-            return command;
-        }
-        else
-        {
-            while(true)
-            {
-                switch(status_)
-                {
-                case end:
-                    return SEG_END;
-                case initial:
-                    pre_cmd_ = geom_.vertex(x,y);
-                    pre_x_ = *x;
-                    pre_y_ = *y;
-                    cur_cmd_ = geom_.vertex(&cur_x_, &cur_y_);
-                    angle_a = atan2((pre_y_-cur_y_),(pre_x_-cur_x_));
-                    dx_pre = cos(angle_a + half_pi);
-                    dy_pre = sin(angle_a + half_pi);
-                    MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: Offsetting line by=" << offset_;
-                    MAPNIK_LOG_DEBUG(ctrans) << "coord_transform_parallel: Initial dx=" << (dx_pre * offset_) << ",dy=" << (dy_pre * offset_);
-                    *x = pre_x_ + (dx_pre * offset_);
-                    *y = pre_y_ + (dy_pre * offset_);
-                    status_ = process;
-                    return SEG_MOVETO;
-                case process:
-                    switch(cur_cmd_)
-                    {
-                    case SEG_LINETO:
-                        next_cmd_ = geom_.vertex(&next_x_, &next_y_);
-                        switch(next_cmd_)
-                        {
-                        case SEG_LINETO:
-                            status_ = angle_joint;
-                            break;
-                        default:
-                            status_ = last_vertex;
-                            break;
-                        }
-                        break;
-                    case SEG_END:
-                        status_ = end;
-                        return SEG_END;
-                    }
-                    break;
-                case last_vertex:
-                    dx_curr = cos(angle_a + half_pi);
-                    dy_curr = sin(angle_a + half_pi);
-                    *x = cur_x_ + (dx_curr * offset_);
-                    *y = cur_y_ + (dy_curr * offset_);
-                    status_ = end;
-                    return cur_cmd_;
-                case angle_joint:
-                    angle_b = atan2((cur_y_-next_y_),(cur_x_-next_x_));
-                    double h = tan((angle_b - angle_a)/2.0);
-
-                    if (fabs(h) < threshold_)
-                    {
-                        dx_curr = cos(angle_a + half_pi);
-                        dy_curr = sin(angle_a + half_pi);
-                        *x = cur_x_ + (dx_curr * offset_) - h * (dy_curr * offset_);
-                        *y = cur_y_ + (dy_curr * offset_) + h * (dx_curr * offset_);
-                    }
-                    else // skip sharp spikes
-                    {
-                        status_ = process;
-                        break;
-                    }
-
-                    pre_x_ = *x;
-                    pre_x_ = *y;
-                    cur_x_ = next_x_;
-                    cur_y_ = next_y_;
-                    angle_a = angle_b;
-                    pre_cmd_ = cur_cmd_;
-                    cur_cmd_ = next_cmd_;
-                    status_ = process;
-                    return pre_cmd_;
-                }
-            }
+            offset_ = offset;
+            reset();
         }
     }
 
-    void rewind (unsigned pos)
+    unsigned vertex(double * x, double * y)
     {
-        geom_.rewind(pos);
+        if (offset_ == 0.0)
+            return geom_.vertex(x, y);
+
+        if (status_ == initial)
+            init_vertices();
+
+        if (pos_ >= vertices_.size())
+            return SEG_END;
+
+        pre_ = (pos_ ? cur_ : pre_first_);
+        cur_ = vertices_[pos_++];
+
+        if (pos_ == vertices_.size())
+            return output_vertex(x, y);
+
+        double t = 1.0;
+        double vt, ut;
+
+        for (size_t i = pos_; i+1 < vertices_.size(); ++i)
+        {
+            //break; // uncomment this to see all the curls
+
+            vertex2d const& u0 = vertices_[i];
+            vertex2d const& u1 = vertices_[i+1];
+
+            if (!intersection(pre_, cur_, &vt, u0, u1, &ut))
+                continue;
+
+            if (vt < 0.0 || vt > t || ut < 0.0 || ut > 1.0)
+                continue;
+
+            t = vt;
+            pos_ = i+1;
+        }
+
+        cur_.x = pre_.x + t * (cur_.x - pre_.x);
+        cur_.y = pre_.y + t * (cur_.y - pre_.y);
+        return output_vertex(x, y);
+    }
+
+    void reset()
+    {
+        geom_.rewind(0);
+        vertices_.clear();
         status_ = initial;
+        pos_ = 0;
+    }
+
+    void rewind(unsigned)
+    {
+        pos_ = 0;
     }
 
 private:
-    Geometry & geom_;
-    double        offset_;
-    unsigned int  threshold_;
-    status        status_;
-    double        dx_pre;
-    double        dy_pre;
-    double        dx_curr;
-    double        dy_curr;
-    double        angle_a;
-    double        angle_b;
-    unsigned      pre_cmd_;
-    double        pre_x_;
-    double        pre_y_;
-    unsigned      cur_cmd_;
-    double        cur_x_;
-    double        cur_y_;
-    unsigned      next_cmd_;
-    double        next_x_;
-    double        next_y_;
+
+    static double explement_reflex_angle(double angle)
+    {
+        if (angle > pi)
+            return angle - 2 * pi;
+        else if (angle < -pi)
+            return angle + 2 * pi;
+        else
+            return angle;
+    }
+
+    static bool intersection(vertex2d const& u1, vertex2d const& u2, double* ut,
+                             vertex2d const& v1, vertex2d const& v2, double* vt)
+    {
+        double const dx = v1.x - u1.x;
+        double const dy = v1.y - u1.y;
+        double const ux = u2.x - u1.x;
+        double const uy = u2.y - u1.y;
+        double const vx = v2.x - v1.x;
+        double const vy = v2.y - v1.y;
+
+        // the first line is not vertical
+        if (ux < -1e-6 || ux > 1e-6)
+        {
+            double const up = ux * dy - dx * uy;
+            double const dn = vx * uy - ux * vy;
+
+            if (dn > -1e-6 && dn < 1e-6)
+                return false; // they are parallel
+
+            *vt = up / dn;
+            *ut = (*vt * vx + dx) / ux;
+            return true;
+        }
+
+        // the first line is not horizontal
+        if (uy < -1e-6 || uy > 1e-6)
+        {
+            double const up = uy * dx - dy * ux;
+            double const dn = vy * ux - uy * vx;
+
+            if (dn > -1e-6 && dn < 1e-6)
+                return false; // they are parallel
+
+            *vt = up / dn;
+            *ut = (*vt * vy + dy) / uy;
+            return true;
+        }
+
+        // the first line is too short
+        return false;
+    }
+
+    /**
+     *  @brief  Translate (vx, vy) by rotated (dx, dy).
+     */
+    static void displace(vertex2d & v, double dx, double dy, double a)
+    {
+        v.x += dx * cos(a) - dy * sin(a);
+        v.y += dx * sin(a) + dy * cos(a);
+    }
+
+    /**
+     *  @brief  Translate (vx, vy) by rotated (0, -offset).
+     */
+    void displace(vertex2d & v, double a) const
+    {
+        v.x += offset_ * sin(a);
+        v.y -= offset_ * cos(a);
+    }
+
+    /**
+     *  @brief  (vx, vy) := (ux, uy) + rotated (0, -offset)
+     */
+    void displace(vertex2d & v, vertex2d const& u, double a) const
+    {
+        v.x = u.x + offset_ * sin(a);
+        v.y = u.y - offset_ * cos(a);
+        v.cmd = u.cmd;
+    }
+
+    void displace2(vertex2d & v, double a, double b) const
+    {
+        double sa = offset_ * sin(a);
+        double ca = offset_ * cos(a);
+        double h = tan(0.5 * (b - a));
+        v.x = v.x + sa + h * ca;
+        v.y = v.y - ca + h * sa;
+    }
+
+    status init_vertices()
+    {
+        if (status_ != initial) // already initialized
+            return status_;
+
+        vertex2d v1(vertex2d::no_init);
+        vertex2d v2(vertex2d::no_init);
+        vertex2d w(vertex2d::no_init);
+
+        v1.cmd = geom_.vertex(&v1.x, &v1.y);
+        v2.cmd = geom_.vertex(&v2.x, &v2.y);
+
+        if (v2.cmd == SEG_END) // not enough vertices in source
+            return status_ = process;
+
+        double angle_a = 0;
+        double angle_b = atan2((v2.y - v1.y), (v2.x - v1.x));
+        double joint_angle;
+
+        // first vertex
+        displace(v1, angle_b);
+        push_vertex(v1);
+
+        // Sometimes when the first segment is too short, it causes ugly
+        // curls at the beginning of the line. To avoid this, we make up
+        // a fake vertex two offset-lengths before the first, and expect
+        // intersection detection smoothes it out.
+        pre_first_ = v1;
+        displace(pre_first_, -2 * fabs(offset_), 0, angle_b);
+
+        while ((v1 = v2, v2.cmd = geom_.vertex(&v2.x, &v2.y)) != SEG_END)
+        {
+            angle_a = angle_b;
+            angle_b = atan2((v2.y - v1.y), (v2.x - v1.x));
+            joint_angle = explement_reflex_angle(angle_b - angle_a);
+
+            double half_turns = half_turn_segments_ * fabs(joint_angle);
+            int bulge_steps = 0;
+
+            if (offset_ < 0.0)
+            {
+                if (joint_angle > 0.0)
+                    joint_angle = joint_angle - 2 * pi;
+                else
+                    bulge_steps = 1 + int(floor(half_turns / pi));
+            }
+            else
+            {
+                if (joint_angle < 0.0)
+                    joint_angle = joint_angle + 2 * pi;
+                else
+                    bulge_steps = 1 + int(floor(half_turns / pi));
+            }
+
+            #ifdef MAPNIK_LOG
+            if (bulge_steps == 0)
+            {
+                // inside turn (sharp/obtuse angle)
+                MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
+                    << " Sharp joint [<< inside turn " << int(joint_angle*180/pi)
+                    << " degrees >>]";
+            }
+            else
+            {
+                // outside turn (reflex angle)
+                MAPNIK_LOG_DEBUG(ctrans) << "offset_converter:"
+                    << " Bulge joint >)) outside turn " << int(joint_angle*180/pi)
+                    << " degrees ((< with " << bulge_steps << " segments";
+            }
+            #endif
+
+            displace(w, v1, angle_a);
+            push_vertex(w);
+
+            for (int s = 0; ++s < bulge_steps; )
+            {
+                displace(w, v1, angle_a + (joint_angle * s) / bulge_steps);
+                push_vertex(w);
+            }
+
+            displace(v1, angle_b);
+            push_vertex(v1);
+        }
+
+        // last vertex
+        displace(v1, angle_b);
+        push_vertex(v1);
+
+        // initalization finished
+        return status_ = process;
+    }
+
+    unsigned output_vertex(double* px, double* py)
+    {
+        *px = cur_.x;
+        *py = cur_.y;
+        return cur_.cmd;
+    }
+
+    unsigned output_vertex(double* px, double* py, status st)
+    {
+        status_ = st;
+        return output_vertex(px, py);
+    }
+
+    void push_vertex(vertex2d const& v)
+    {
+        #ifdef MAPNIK_LOG
+        MAPNIK_LOG_DEBUG(ctrans) << "offset_converter: " << v;
+        #endif
+
+        vertices_.push_back(v);
+    }
+
+    Geometry &              geom_;
+    double                  offset_;
+    unsigned                half_turn_segments_;
+    status                  status_;
+    size_t                  pos_;
+    std::vector<vertex2d>   vertices_;
+    vertex2d                pre_first_;
+    vertex2d                pre_;
+    vertex2d                cur_;
 };
 
 }
