@@ -43,6 +43,28 @@ import os
 import sys
 import warnings
 
+def bootstrap_env():
+    """
+    If an optional settings file exists, inherit its
+    environment settings before loading the mapnik library.
+
+    This feature is intended for customized packages of mapnik.
+
+    The settings file should be a python file with an 'env' variable
+    that declares a dictionary of key:value pairs to push into the
+    global process environment, if not already set, like:
+    
+        env = {'ICU_DATA':'/usr/local/share/icu/'}
+    """
+    if os.path.exists(os.path.join(os.path.dirname(__file__),'mapnik_settings.py')):
+        from mapnik_settings import env
+        process_keys = os.environ.keys()
+        for key, value in env.items():
+            if key not in process_keys:
+                os.environ[key] = value
+
+bootstrap_env()
+
 from _mapnik import *
 from paths import inputpluginspath, fontscollectionpath
 
