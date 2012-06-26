@@ -393,7 +393,7 @@ public:
             break;
         }
     }
-    
+
     void set_line_join(line_join_e join)
     {
         if (join == MITER_JOIN)
@@ -958,13 +958,13 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     }
                 }
 
-                //path_type path(t_, *frame, prj_trans);
-                //context.set_color(128, 128, 128, sym.get_opacity());
-                //context.add_path(path);
-                //context.stroke();
-                
+                path_type path(t_, *frame, prj_trans);
+                context.set_color(fill.red()*0.8, fill.green()*0.8, fill.blue()*0.8, fill.alpha() * sym.get_opacity() / 255.0);
+                context.add_path(path);
+                context.stroke();
+
                 path_type roof_path(t_, *roof, prj_trans);
-                context.set_color(sym.get_fill(), sym.get_opacity());
+                context.set_color(fill, sym.get_opacity());
                 context.add_path(roof_path);
                 context.fill();
             }
