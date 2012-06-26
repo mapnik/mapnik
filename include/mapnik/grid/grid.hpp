@@ -45,6 +45,7 @@
 #include <string>
 #include <cassert>
 #include <vector>
+#include <boost/integer_traits.hpp>
 
 namespace mapnik
 {
@@ -60,7 +61,7 @@ public:
     typedef std::map<value_type, lookup_type> feature_key_type;
     typedef std::map<lookup_type, value_type> key_type;
     typedef std::map<lookup_type, mapnik::feature_ptr> feature_type;
-    static const value_type base_mask;
+    static const value_type base_mask = boost::integer_traits<value_type>::const_min;
 
 private:
     unsigned width_;

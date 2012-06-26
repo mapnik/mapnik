@@ -45,6 +45,36 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
                 except Exception:
                     print '\x1b[33mfailed\x1b[0m',csv
 
+    def test_lon_lat_detection(**kwargs):
+        ds = get_csv_ds('lon_lat.csv')
+        eq_(len(ds.fields()),2)
+        eq_(ds.fields(),['lon','lat'])
+        eq_(ds.field_types(),['int','int'])
+        query = mapnik.Query(ds.envelope())
+        for fld in ds.fields():
+            query.add_property_name(fld)
+        fs = ds.features(query)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        feat = fs.next()
+        attr = {'lon': 0, 'lat': 0}
+        eq_(feat.attributes,attr)
+
+    def test_lon_lat_detection(**kwargs):
+        ds = get_csv_ds('lng_lat.csv')
+        eq_(len(ds.fields()),2)
+        eq_(ds.fields(),['lng','lat'])
+        eq_(ds.field_types(),['int','int'])
+        query = mapnik.Query(ds.envelope())
+        for fld in ds.fields():
+            query.add_property_name(fld)
+        fs = ds.features(query)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        feat = fs.next()
+        attr = {'lng': 0, 'lat': 0}
+        eq_(feat.attributes,attr)
+
     def test_type_detection(**kwargs):
         ds = get_csv_ds('nypd.csv')
         eq_(ds.fields(),['Precinct','Phone','Address','City','geo_longitude','geo_latitude','geo_accuracy'])

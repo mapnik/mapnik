@@ -298,6 +298,7 @@ void csv_datasource::parse_csv(T& stream,
             }
             if (lower_val == "x"
                 || lower_val == "lon"
+                || lower_val == "lng"
                 || lower_val == "long"
                 || (lower_val.find("longitude") != std::string::npos))
             {
@@ -370,6 +371,7 @@ void csv_datasource::parse_csv(T& stream,
                             }
                             if (lower_val == "x"
                                 || lower_val == "lon"
+                                || lower_val == "lng"
                                 || lower_val == "long"
                                 || (lower_val.find("longitude") != std::string::npos))
                             {
@@ -402,7 +404,7 @@ void csv_datasource::parse_csv(T& stream,
     if (!has_wkt_field && (!has_lon_field || !has_lat_field) )
     {
         std::ostringstream s;
-        s << "CSV Plugin: could not detect column headers with the name of wkt ,x/y, or latitude/longitude - this is required for reading geometry data";
+        s << "CSV Plugin: could not detect column headers with the name of wkt, x/y, or latitude/longitude - this is required for reading geometry data";
         throw mapnik::datasource_exception(s.str());
     }
 
