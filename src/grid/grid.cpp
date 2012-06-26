@@ -22,7 +22,6 @@
 
 // mapnik
 #include <mapnik/grid/grid.hpp>
-#include <mapnik/util/conversions.hpp>
 
 namespace mapnik
 {
