@@ -230,16 +230,16 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
 
     formatting::node_ptr get_item(int i)
     {
-        if (i<0) i+= children_.size();
-        if (i<children_.size()) return children_[i];
+        if (i < 0) i+= children_.size();
+        if (i < static_cast<int>(children_.size())) return children_[i];
         IndexError();
         return formatting::node_ptr(); //Avoid compiler warning
     }
 
     void set_item(int i, formatting::node_ptr ptr)
     {
-        if (i<0) i+= children_.size();
-        if (i<children_.size()) children_[i] = ptr;
+        if (i < 0) i+= children_.size();
+        if (i < static_cast<int>(children_.size())) children_[i] = ptr;
         IndexError();
     }
 
