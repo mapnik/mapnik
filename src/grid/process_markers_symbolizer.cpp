@@ -133,13 +133,12 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 }
 
                 path_type path(t_,geom,prj_trans);
-                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_,
+                markers_placement<path_type, label_collision_detector4> placement(path, bbox, recenter, detector_,
                                                                                   sym.get_spacing() * scale_factor_,
                                                                                   sym.get_max_error(),
                                                                                   sym.get_allow_overlap());
                 double x, y, angle;
-
-                while (placement.get_point(&x, &y, &angle))
+                while (placement.get_point(x, y, angle))
                 {
                     placed = true;
                     agg::trans_affine matrix = recenter * tr *agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
@@ -242,13 +241,12 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     marker.concat_path(arrow_);
 
                 path_type path(t_,geom,prj_trans);
-                markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_,
+                markers_placement<path_type, label_collision_detector4> placement(path, extent, agg::trans_affine() ,detector_,
                                                                                   sym.get_spacing() * scale_factor_,
                                                                                   sym.get_max_error(),
                                                                                   sym.get_allow_overlap());
                 double x_t, y_t, angle;
-
-                while (placement.get_point(&x_t, &y_t, &angle))
+                while (placement.get_point(x_t, y_t, angle))
                 {
                     agg::trans_affine matrix;
 

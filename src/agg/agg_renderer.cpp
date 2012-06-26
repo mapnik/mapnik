@@ -341,9 +341,7 @@ void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
     renderer_type ren(renb);
 
     // compute tranformation matrix
-    agg::trans_affine_rotation tr(angle);
-    tr.translate(x, y);
-
+    agg::trans_affine tr = agg::trans_affine_rotation(angle).translate(x, y);
     // prepare path
     agg::path_storage pbox;
     pbox.start_new_path();

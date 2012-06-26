@@ -1452,13 +1452,12 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                         clipped_geometry_type clipped(geom);
                         clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                         path_type path(t_,clipped,prj_trans);
-                        markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_,
+                        markers_placement<path_type, label_collision_detector4> placement(path, extent, recenter * tr, detector_,
                                                                                           sym.get_spacing() * scale_factor_,
                                                                                           sym.get_max_error(),
                                                                                           sym.get_allow_overlap());
                         double x, y, angle;
-
-                        while (placement.get_point(&x, &y, &angle))
+                        while (placement.get_point(x, y, angle))
                         {
                             agg::trans_affine matrix = recenter * tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
                             render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h), **mark, matrix, sym.get_opacity(),false);
@@ -1564,13 +1563,12 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                     clipped_geometry_type clipped(geom);
                     clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                     path_type path(t_,clipped,prj_trans);
-                    markers_placement<path_type, label_collision_detector4> placement(path, extent, detector_,
+                    markers_placement<path_type, label_collision_detector4> placement(path, extent, agg::trans_affine(),  detector_,
                                                                                       sym.get_spacing() * scale_factor_,
                                                                                       sym.get_max_error(),
                                                                                       sym.get_allow_overlap());
                     double x_t, y_t, angle;
-
-                    while (placement.get_point(&x_t, &y_t, &angle))
+                    while (placement.get_point(x_t, y_t, angle))
                     {
                         agg::trans_affine matrix;
 
