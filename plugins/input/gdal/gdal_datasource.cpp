@@ -119,7 +119,7 @@ void gdal_datasource::bind() const
     shared_dataset_ = *params_.get<mapnik::boolean>("shared", false);
     band_ = *params_.get<int>("band", -1);
 
-    GDALDataset *dataset = open_dataset();
+    dataset_ = open_dataset();
     nbands_ = dataset_->GetRasterCount();
     width_ = dataset_->GetRasterXSize();
     height_ = dataset_->GetRasterYSize();
