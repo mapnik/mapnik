@@ -52,29 +52,35 @@ inline GDALDataset* gdal_datasource::open_dataset() const
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Opening " << dataset_name_;
 
-    GDALDataset *dataset;
+    if (dataset_)
+    {
+        return dataset_;
+    }
+    
+    //GDALDataset *dataset;
 #if GDAL_VERSION_NUM >= 1600
     if (shared_dataset_)
     {
-        dataset = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(), GA_ReadOnly));
+        dataset_ = reinterpret_cast<GDALDataset*>(GDALOpenShared((dataset_name_).c_str(), GA_ReadOnly));
     }
     else
 #endif
     {
-        dataset = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(), GA_ReadOnly));
+        dataset_ = reinterpret_cast<GDALDataset*>(GDALOpen((dataset_name_).c_str(), GA_ReadOnly));
     }
 
-    if (! dataset)
+    if (! dataset_)
     {
         throw datasource_exception(CPLGetLastErrorMsg());
     }
 
-    return dataset;
+    return dataset_;
 }
 
 
 gdal_datasource::gdal_datasource(parameters const& params, bool bind)
     : datasource(params),
+      dataset_(0),
       desc_(*params.get<std::string>("type"), "utf-8"),
       filter_factor_(*params_.get<double>("filter_factor", 0.0)),
       nodata_value_(params_.get<double>("nodata"))
@@ -114,10 +120,9 @@ void gdal_datasource::bind() const
     band_ = *params_.get<int>("band", -1);
 
     GDALDataset *dataset = open_dataset();
-
-    nbands_ = dataset->GetRasterCount();
-    width_ = dataset->GetRasterXSize();
-    height_ = dataset->GetRasterYSize();
+    nbands_ = dataset_->GetRasterCount();
+    width_ = dataset_->GetRasterXSize();
+    height_ = dataset_->GetRasterYSize();
 
     double tr[6];
     bool bbox_override = false;
@@ -144,7 +149,7 @@ void gdal_datasource::bind() const
     }
     else
     {
-        dataset->GetGeoTransform(tr);
+        dataset_->GetGeoTransform(tr);
     }
 
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource Geotransform="
@@ -183,7 +188,7 @@ void gdal_datasource::bind() const
         extent_.init(x0, y0, x1, y1);
     }
 
-    GDALClose(dataset);
+    //GDALClose(dataset);
 
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Size=" << width_ << "," << height_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Extent=" << extent_;
@@ -193,6 +198,8 @@ void gdal_datasource::bind() const
 
 gdal_datasource::~gdal_datasource()
 {
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Closing Dataset=" << dataset_;
+    GDALClose(dataset_);
 }
 
 datasource::datasource_t gdal_datasource::type() const

@@ -47,6 +47,7 @@ public:
     void bind() const;
 private:
     GDALDataset* open_dataset() const;
+    mutable GDALDataset* dataset_;
     mutable mapnik::box2d<double> extent_;
     std::string dataset_name_;
     mutable int band_;
