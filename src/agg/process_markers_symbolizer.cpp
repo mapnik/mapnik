@@ -73,13 +73,13 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
     renderer_type ren(renb);
-    agg::trans_affine tr;    
+    agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_image_transform());
     tr = agg::trans_affine_scaling(scale_factor_) * tr;
 
-    agg::trans_affine geom_tr;    
+    agg::trans_affine geom_tr;
     evaluate_transform(geom_tr, feature, sym.get_transform());
-    
+
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
     marker_placement_e placement_method = sym.get_marker_placement();
     marker_type_e marker_type = sym.get_marker_type();
@@ -102,7 +102,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
             agg::trans_affine_translation const recenter(-center.x, -center.y);
             agg::trans_affine const marker_trans = recenter * tr;
-            
+
             using namespace mapnik::svg;
             vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
             svg_path_adapter svg_path(stl_storage);
@@ -124,19 +124,20 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     geom.label_interior_position(&x, &y);
                     prj_trans.backward(x,y,z);
                     t_.forward(&x,&y);
-                    agg::trans_affine matrix = marker_trans;                    
+                    geom_tr.transform(&x,&y);
+                    agg::trans_affine matrix = marker_trans;
                     matrix.translate(x,y);
                     box2d<double> transformed_bbox = bbox * matrix;
-                    
+
                     if (sym.get_allow_overlap() ||
                         detector_->has_placement(transformed_bbox))
                     {
-                        svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(), bbox);                        
-                        if (/* DEBUG */ 0) 
+                        svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(), bbox);
+                        if (/* DEBUG */ 0)
                         {
                             debug_draw_box(buf, transformed_bbox, 0, 0, 0.0);
                         }
-                       
+
                         if (!sym.get_ignore_placement())
                             detector_->insert(transformed_bbox);
                         //metawriter_with_properties writer = sym.get_metawriter();
@@ -158,11 +159,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     {
                         agg::trans_affine matrix = marker_trans;
                         matrix.rotate(angle);
-                        matrix.translate(x, y);                       
+                        matrix.translate(x, y);
                         svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(), bbox);
-                        
-                        if (/* DEBUG */ 0) 
-                        {                            
+
+                        if (/* DEBUG */ 0)
+                        {
                             debug_draw_box(buf, bbox*matrix, 0, 0, 0.0);
                             // note: debug_draw_box(buf, extent, x, y, angle)
                             //      would draw a rotated box showing the proper
@@ -209,15 +210,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         if (marker_type == MARKER_ARROW)
         {
             extent = arrow_.extent();
-            double x1 = extent.minx();
-            double y1 = extent.miny();
-            double x2 = extent.maxx();
-            double y2 = extent.maxy();
-            tr.transform(&x1,&y1);
-            tr.transform(&x2,&y2);
-            extent.init(x1,y1,x2,y2);
-
-            //MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
         }
         else
         {
@@ -225,13 +217,12 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             double y1 = -1 *(dy);
             double x2 = dx;
             double y2 = dy;
-            tr.transform(&x1,&y1);
-            tr.transform(&x2,&y2);
             extent.init(x1,y1,x2,y2);
-
-            //MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: " << x1 << " " << y1 << " " << x2 << " " << y2 << "\n";
         }
 
+        coord2d center = extent.center();
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine marker_trans = recenter * tr;
 
         double x;
         double y;
@@ -248,6 +239,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 geom.label_position(&x,&y);
                 prj_trans.backward(x,y,z);
                 t_.forward(&x,&y);
+                geom_tr.transform(&x,&y);
                 int px = int(floor(x - 0.5 * dx));
                 int py = int(floor(y - 0.5 * dy));
                 box2d<double> label_ext (px, py, px + dx +1, py + dy +1);
@@ -289,7 +281,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                 path_type path(t_,clipped,prj_trans);
                 transformed_path_type path_transformed(path,geom_tr);
-                markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, extent, agg::trans_affine(), *detector_,
+                markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, extent, marker_trans, *detector_,
                                                                                   sym.get_spacing() * scale_factor_,
                                                                                   sym.get_max_error(),
                                                                                   sym.get_allow_overlap());
@@ -303,7 +295,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         // todo proper bbox - this is buggy
                         agg::ellipse c(x_t, y_t, rx, ry);
                         marker.concat_path(c);
-                        agg::trans_affine matrix;
+                        agg::trans_affine matrix = marker_trans;
                         matrix *= agg::trans_affine_translation(-x_t,-y_t);
                         matrix *= agg::trans_affine_rotation(angle);
                         matrix *= agg::trans_affine_translation(x_t,y_t);
@@ -312,11 +304,14 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     }
                     else
                     {
-                        matrix = tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x_t, y_t);
+                        matrix =  marker_trans * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x_t, y_t);
                     }
 
+                    if (/* DEBUG */ 0)
+                    {
+                        debug_draw_box(buf, extent*matrix, 0, 0, 0.0);
+                    }
 
-                    // TODO
                     if (writer.first)
                     {
                         //writer.first->add_box(label_ext, feature, t_, writer.second);
