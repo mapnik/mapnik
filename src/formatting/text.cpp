@@ -25,8 +25,11 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/text_properties.hpp>
-#include <mapnik/processed_text.hpp>
 #include <mapnik/xml_node.hpp>
+#include <mapnik/text/layout.hpp>
+
+//boost
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
@@ -50,7 +53,7 @@ node_ptr text_node::from_xml(xml_node const& xml)
     return boost::make_shared<text_node>(parse_expression(data, "utf8"));
 }
 
-void text_node::apply(char_properties const& p, Feature const& feature, processed_text &output) const
+void text_node::apply(char_properties const& p, Feature const& feature, text_layout &output) const
 {
     UnicodeString text_str = boost::apply_visitor(evaluate<Feature,value_type>(feature), *text_).to_unicode();
     if (p.text_transform == UPPERCASE)
@@ -66,7 +69,7 @@ void text_node::apply(char_properties const& p, Feature const& feature, processe
         text_str = text_str.toTitle(NULL);
     }
     if (text_str.length() > 0) {
-        output.push_back(p, text_str);
+        output.add_text(text_str, p);
     }
 }
 

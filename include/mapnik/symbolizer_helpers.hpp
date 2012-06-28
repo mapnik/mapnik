@@ -29,7 +29,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/processed_text.hpp>
+#include <mapnik/text/layout.hpp>
 #include <mapnik/text_path.hpp>
 
 //boost
@@ -66,7 +66,7 @@ public:
           writer_(sym.get_metawriter()),
           dims_(0, 0, width, height),
           query_extent_(query_extent),
-          text_(font_manager, scale_factor),
+          layout_(),
           angle_(0.0),
           placement_valid_(false),
           points_on_line_(false),
@@ -104,7 +104,7 @@ protected:
     box2d<double> dims_;
     box2d<double> const& query_extent_;
     //Processing
-    processed_text text_;
+    text_layout layout_;
     /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
     /** Remaining geometries to be processed. */
     std::list<geometry_type*> geometries_to_process_;

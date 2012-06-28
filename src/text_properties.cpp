@@ -21,7 +21,7 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/text_properties.hpp>
-#include <mapnik/processed_text.hpp>
+#include <mapnik/text/layout.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/formatting/text.hpp>
@@ -60,7 +60,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
 
 }
 
-void text_symbolizer_properties::process(processed_text &output, Feature const& feature) const
+void text_symbolizer_properties::process(text_layout &output, Feature const& feature) const
 {
     output.clear();
     if (tree_) {

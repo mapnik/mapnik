@@ -9,7 +9,7 @@
 
 namespace mapnik
 {
-text_layout::text_layout(double text_ratio, double wrap_width) : text_ratio_(text_ratio), wrap_width_(wrap_width)
+text_layout::text_layout()
 {
 }
 
@@ -56,6 +56,12 @@ void text_layout::shape_text()
                  " cluster: " << itr2->byte_position <<
                  " x_advance: "<< itr2->x_advance << "\n";
     }
+}
+
+void text_layout::clear()
+{
+    itemizer.clear();
+    glyphs_.clear();
 }
 
 } //ns mapnik

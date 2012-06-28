@@ -20,7 +20,7 @@ struct glyph_info
 class text_layout
 {
 public:
-    text_layout(double text_ratio, double wrap_width);
+    text_layout();
     inline void add_text(UnicodeString const& str, char_properties const& format)
     {
         itemizer.add_text(str, format);
@@ -28,12 +28,10 @@ public:
 
     void break_lines();
     void shape_text();
-
+    void clear();
 
 private:
     text_itemizer itemizer;
-    double text_ratio_;
-    double wrap_width_;
     std::vector<glyph_info> glyphs_;
 };
 }

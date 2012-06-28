@@ -24,6 +24,7 @@
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 #include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
@@ -225,8 +226,9 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         placement_valid_ = false;
         return false;
     }
-    placement_->properties.process(text_, feature_);
-    info_ = &(text_.get_string_info());
+    placement_->properties.process(layout_, feature_);
+    //TODO
+//    info_ = &(text_.get_string_info());
     if (placement_->properties.orientation)
     {
         angle_ = boost::apply_visitor(

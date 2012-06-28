@@ -29,7 +29,7 @@
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/format.hpp>
 #include <mapnik/formatting/expression.hpp>
-#include <mapnik/processed_text.hpp>
+#include <mapnik/text/layout.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>
 
@@ -83,7 +83,7 @@ struct NodeWrap: formatting::node, wrapper<formatting::node>
 
     }
 
-    void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    void apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         python_block_auto_unblock b;
         this->get_override("apply")(ptr(&p), ptr(&feature), ptr(&output));
@@ -121,7 +121,7 @@ struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
 
     }
 
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -134,7 +134,7 @@ struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
         }
     }
 
-    void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    void default_apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         formatting::text_node::apply(p, feature, output);
     }
@@ -142,7 +142,7 @@ struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
 
 struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
 {
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -155,7 +155,7 @@ struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
         }
     }
 
-    void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    void default_apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         formatting::format_node::apply(p, feature, output);
     }
@@ -163,7 +163,7 @@ struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
 
 struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expression_format>
 {
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -176,7 +176,7 @@ struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expres
         }
     }
 
-    void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    void default_apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         formatting::expression_format::apply(p, feature, output);
     }
@@ -200,7 +200,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
        http://wiki.python.org/moin/boost.python/HowTo#A.22Raw.22_function */
 
 
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -213,7 +213,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
         }
     }
 
-    void default_apply(char_properties const& p, Feature const& feature, processed_text &output) const
+    void default_apply(char_properties const& p, Feature const& feature, text_layout &output) const
     {
         formatting::list_node::apply(p, feature, output);
     }
@@ -432,7 +432,7 @@ void export_text_placement()
         ;
     register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 
-
+#if 0
     class_<processed_text,
         boost::shared_ptr<processed_text>,
         boost::noncopyable>
@@ -440,7 +440,7 @@ void export_text_placement()
         .def("push_back", &processed_text::push_back)
         .def("clear", &processed_text::clear)
         ;
-
+#endif
 
     class_<expression_set,
         boost::shared_ptr<expression_set>,

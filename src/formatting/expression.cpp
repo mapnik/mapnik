@@ -80,7 +80,7 @@ expression_ptr expression_format::get_expression(xml_node const& xml, std::strin
 }
 
 
-void expression_format::apply(char_properties const& p, const Feature &feature, processed_text &output) const
+void expression_format::apply(char_properties const& p, const Feature &feature, text_layout &output) const
 {
     char_properties new_properties = p;
     if (face_name) new_properties.face_name =
