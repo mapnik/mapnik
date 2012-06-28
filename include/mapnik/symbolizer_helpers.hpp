@@ -80,7 +80,7 @@ public:
     }
 
     /** Return next placement.
-     * If no more placements are found returns null pointer.
+     * If no more placements are found null pointer is returned.
      */
     bool next();
 

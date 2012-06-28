@@ -66,6 +66,7 @@ pretty_dep_names = {
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
     'icuuc':'ICU C++ library | configure with ICU_LIBS & ICU_INCLUDES or use ICU_LIB_NAME to specify custom lib name  | more info: http://site.icu-project.org/',
+    'harfbuzz':'HarfBuzz text shaping library | configure with HB_LIBS & HB_INCLUDES',
     'ltdl':'GNU Libtool | more info: http://www.gnu.org/software/libtool',
     'z':'Z compression library | more info: http://www.zlib.net/',
     'm':'Basic math library, part of C++ stlib',
@@ -309,6 +310,9 @@ opts.AddVariables(
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
+    PathVariable('HB_INCLUDES', 'Search path for HarfBuzz include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('HB_LIBS','Search path for HarfBuzz include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
@@ -1087,6 +1091,7 @@ if not preconfigured:
         ['z', 'zlib.h', True,'C'],
         ['proj', 'proj_api.h', True,'C'],
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
+        ['harfbuzz', 'harfbuzz/hb.h',True,'C++'],
     ]
 
     if env['JPEG']:
