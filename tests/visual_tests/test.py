@@ -44,8 +44,7 @@ files = [
     {'name': "rtl-point", 'sizes': [(200, 200)]},
     {'name': "jalign-auto", 'sizes': [(200, 200)]},
     {'name': "line-offset", 'sizes':[(900, 250)],
-        'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
-    {'name': "harfbuzz"},
+        'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)}
     ]
 
 def render(filename, width, height, bbox, quiet=False):
@@ -79,11 +78,9 @@ if __name__ == "__main__":
        quiet = False
 
     if len(sys.argv) == 2:
-        files = [{"name": sys.argv[1], "sizes": sizes_few_square}]
+        files = [(sys.argv[1], (500, 500))]
     elif len(sys.argv) > 2:
-        files = []
-        for name in argv[1:]:
-            files.append({"name": name})
+        files = [sys.argv[1:]]
 
     for f in files:
         config = dict(defaults)
