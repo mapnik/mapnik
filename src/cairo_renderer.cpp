@@ -992,10 +992,11 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         agg::trans_affine tr;
         evaluate_transform(tr, feature, sym.get_transform());
 
+        box2d<double> ext = query_extent_ * 1.1;
         typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
         vertex_converter<box2d<double>, cairo_context, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
+            converter(ext,context,sym,t_,prj_trans,tr,1.0);
 
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
