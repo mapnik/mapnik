@@ -353,7 +353,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
         pen.y = int(y * 64);
 
         face_set_ptr faces = font_manager_.get_face_set(c->format->face_name, c->format->fontset);
-        faces->set_character_sizes(c->format->text_size);
+        //faces->set_character_sizes(c->format->text_size);
 
         glyph_ptr glyph = faces->get_glyph(unsigned(c->c));
         FT_Face face = glyph->get_face()->get_face();
