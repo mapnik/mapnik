@@ -841,14 +841,14 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
         }
     }
     
-    optional<std::string> transform_wkt = pt.get_opt_attr<std::string>("transform");
+    optional<std::string> transform_wkt = pt.get_opt_attr<std::string>("view-transform");
     if (transform_wkt)
     {
         mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
         if (!mapnik::parse_transform(*tl, *transform_wkt, pt.get_tree().transform_expr_grammar))
         {
             std::stringstream ss;
-            ss << "Could not parse transform from '" << transform_wkt << "', expected SVG transform attribute";
+            ss << "Could not parse transform from '" << transform_wkt << "', expected transform attribute";
             if (strict_)
                 throw config_error(ss.str()); // value_error here?
             else
@@ -920,7 +920,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
 
                 symbol.set_filename(expr);
 
-                optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+                optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
                 if (image_transform_wkt)
                 {
                     mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
@@ -928,7 +928,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                     {
                         std::stringstream ss;
                         ss << "Could not parse transform from '" << *image_transform_wkt
-                           << "', expected SVG transform attribute";
+                           << "', expected transform attribute";
                         if (strict_)
                         {
                             throw config_error(ss.str()); // value_error here?
@@ -1013,7 +1013,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) symbol.set_opacity(*opacity);
 
-        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)
         {
             mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
@@ -1021,7 +1021,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             {
                 std::stringstream ss;
                 ss << "Could not parse transform from '" << *image_transform_wkt
-                   << "', expected SVG transform attribute";
+                   << "', expected transform attribute";
                 if (strict_)
                 {
                     throw config_error(ss.str()); // value_error here?
@@ -1259,7 +1259,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 
         shield_symbolizer shield_symbol = shield_symbolizer(placement_finder);
         
-        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("image-transform");
+        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)
         {
             mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
@@ -1267,7 +1267,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             {
                 std::stringstream ss;
                 ss << "Could not parse transform from '" << *image_transform_wkt 
-                   << "', expected SVG transform attribute";
+                   << "', expected transform attribute";
                 if (strict_)
                 {
                     throw config_error(ss.str()); // value_error here?
