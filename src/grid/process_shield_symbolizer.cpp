@@ -51,7 +51,11 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 
     bool placement_found = false;
 
-    text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
+    text_renderer<T> ren(pixmap_,
+                         font_manager_,
+                         *(font_manager_.get_stroker()),
+                         sym.comp_op(),
+                         scale_factor_);
 
     text_placement_info_ptr placement;
     while (helper.next()) {

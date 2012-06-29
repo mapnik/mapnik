@@ -39,7 +39,11 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             scale_factor_,
             t_, font_manager_, *detector_, query_extent_);
 
-    text_renderer<T> ren(*current_buffer_, font_manager_, *(font_manager_.get_stroker()),  sym.comp_op());
+    text_renderer<T> ren(*current_buffer_,
+                         font_manager_,
+                         *(font_manager_.get_stroker()),
+                         sym.comp_op(),
+                         scale_factor_);
 
     while (helper.next()) 
     {

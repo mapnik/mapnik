@@ -360,7 +360,11 @@ struct text_renderer : private boost::noncopyable
     typedef boost::ptr_vector<glyph_t> glyphs_t;
     typedef T pixmap_type;
 
-    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s, composite_mode_e comp_op = src_over);
+    text_renderer (pixmap_type & pixmap,
+                   face_manager<freetype_engine> &font_manager_,
+                   stroker & s,
+                   composite_mode_e comp_op = src_over,
+                   double scale_factor=1.0);
     box2d<double> prepare_glyphs(text_path *path);
     void render(pixel_position pos);
     void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
@@ -411,6 +415,7 @@ private:
     stroker & stroker_;
     glyphs_t glyphs_;
     composite_mode_e comp_op_;
+    double scale_factor_;
 };
 
 typedef face_manager<freetype_engine> face_manager_freetype;

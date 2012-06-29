@@ -315,11 +315,16 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 }
 
 template <typename T>
-text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s, composite_mode_e comp_op)
+text_renderer<T>::text_renderer (pixmap_type & pixmap,
+                                 face_manager<freetype_engine> &font_manager_,
+                                 stroker & s,
+                                 composite_mode_e comp_op,
+                                 double scale_factor)
     : pixmap_(pixmap),
       font_manager_(font_manager_),
       stroker_(s),
-      comp_op_(comp_op) {}
+      comp_op_(comp_op),
+      scale_factor_(scale_factor) {}
 
 template <typename T>
 box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
@@ -433,7 +438,7 @@ void text_renderer<T>::render(pixel_position pos)
     typename glyphs_t::iterator itr;
     for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-        double halo_radius = itr->properties->halo_radius;
+        double halo_radius = itr->properties->halo_radius * scale_factor_;
         //make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
         stroker_.init(halo_radius);
@@ -525,10 +530,10 @@ boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 template void text_renderer<image_32>::render(pixel_position);
-template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
+template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path*);
 
 template void text_renderer<grid>::render_id(int, pixel_position, double );
-template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
+template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path*);
 }
