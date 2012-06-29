@@ -157,11 +157,11 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
         // clamp to at least 4 px otherwise interactive pixels can be too small
         if (res == 1) {
             w = std::max(w,4.0);
-            h = std::max(w,4.0);
+            h = std::max(h,4.0);
         } else {
             double min = static_cast<double>(4.0/res);
             w = std::max(w/res,min);
-            h = std::max(w/res,min);
+            h = std::max(h/res,min);
         }
 
         double rx = w/2.0;
