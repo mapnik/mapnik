@@ -69,7 +69,7 @@ IMPLEMENT_ENUM( horizontal_alignment_e, horizontal_alignment_strings )
 
 static const char * justify_alignment_strings[] = {
     "left",
-    "center",
+    "center", // not 'middle' in order to match CSS
     "right",
     "auto",
     ""
