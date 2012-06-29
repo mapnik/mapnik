@@ -51,21 +51,21 @@ namespace mapnik {
 
 template <typename T>
 void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
     typedef agg::pixel32_type pixel_type;    
-    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;     
+    typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pattern_filter_bilinear_rgba8 pattern_filter_type;
     typedef agg::line_image_pattern<pattern_filter_type> pattern_type;
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;    
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
     typedef agg::renderer_base<pixfmt_type> renderer_base;
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
     typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
     
-    std::string filename = path_processor_type::evaluate( *sym.get_filename(), *feature);
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
     if (!mark) return;
@@ -83,7 +83,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     box2d<double> ext = query_extent_ * 1.0;
     
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
     pixfmt_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base ren_base(pixf);
@@ -95,7 +95,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     rasterizer_type ras(ren);
     
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform());
 
     typedef boost::mpl::vector<clip_line_tag,transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
@@ -106,7 +106,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     converter.set<transform_tag>(); //always transform 
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
     
-    BOOST_FOREACH(geometry_type & geom, feature->paths())
+    BOOST_FOREACH(geometry_type & geom, feature.paths())
     {
         if (geom.num_points() > 1)
         {
@@ -116,7 +116,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(line_pattern_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

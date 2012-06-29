@@ -518,7 +518,6 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
 {
     feature_type_style const& style = style_it->second;
     std::string const& name = style_it->first;
-    filter_mode_e filter_mode = style.get_filter_mode();
 
     ptree & style_node = map_node.push_back(
         ptree::value_type("Style", ptree()))->second;
@@ -526,9 +525,16 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
     set_attr(style_node, "name", name);
 
     feature_type_style dfl;
+    filter_mode_e filter_mode = style.get_filter_mode();
     if (filter_mode != dfl.get_filter_mode() || explicit_defaults)
     {
         set_attr(style_node, "filter-mode", filter_mode);
+    }
+
+    double opacity = style.get_opacity();
+    if (opacity != dfl.get_opacity() || explicit_defaults)
+    {
+        set_attr(style_node, "opacity", opacity);
     }
 
     rules::const_iterator it = style.get_rules().begin();

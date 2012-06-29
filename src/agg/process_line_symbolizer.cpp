@@ -50,7 +50,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(line_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 
 {
@@ -69,15 +69,16 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
 
     pixfmt_comp_type pixf(buf);
+    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
     
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform());
 
     box2d<double> ext = query_extent_ * 1.1;
 
@@ -89,7 +90,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         double scaled = scale_factor_ * .5;
         agg::line_profile_aa profile(stroke_.get_width() * scaled, agg::gamma_power(stroke_.get_gamma()));
         renderer_type ren(renb, profile);
-        ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
+        ren.color(agg::rgba8_pre(r, g, b, int(a*stroke_.get_opacity())));
         rasterizer_type ras(ren);
         set_join_caps_aa(stroke_,ras);
 
@@ -106,7 +107,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         if (stroke_.has_dash()) converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
 
-        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
             if (geom.num_points() > 1)
             {
@@ -129,7 +130,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         if (stroke_.has_dash()) converter.set<dash_tag>();
         converter.set<stroke_tag>(); //always stroke
 
-        BOOST_FOREACH( geometry_type & geom, feature->paths())
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
             if (geom.num_points() > 1)
             {
@@ -138,10 +139,9 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         }
 
         typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
-        pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
         renderer_base renb(pixf);
         renderer_type ren(renb);
-        ren.color(agg::rgba8(r, g, b, int(a * stroke_.get_opacity())));
+        ren.color(agg::rgba8_pre(r, g, b, int(a * stroke_.get_opacity())));
         agg::scanline_u8 sl;
         agg::render_scanlines(*ras_ptr, sl, ren);
     }
@@ -149,7 +149,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
 
 template void agg_renderer<image_32>::process(line_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

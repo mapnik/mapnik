@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 // boost
-#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
@@ -34,8 +33,6 @@
 #include "raster_info.hpp"
 #include "raster_datasource.hpp"
 
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 using mapnik::layer_descriptor;
 using mapnik::featureset_ptr;
 using mapnik::query;

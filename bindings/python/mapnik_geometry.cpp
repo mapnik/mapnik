@@ -48,7 +48,7 @@ typedef boost::ptr_vector<geometry_type> path_type;
 
 geometry_type const& getitem_impl(path_type & p, int key)
 {
-    if (key >=0 && key < p.size())
+    if (key >=0 && key < static_cast<int>(p.size()))
         return p[key];
     PyErr_SetString(PyExc_IndexError, "Index is out of range");
     throw boost::python::error_already_set();

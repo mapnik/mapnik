@@ -36,17 +36,17 @@ namespace mapnik {
 
 template <typename T>
 void  agg_renderer<T>::process(shield_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
     shield_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
-            sym, *feature, prj_trans,
+            sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
             t_, font_manager_, *detector_, query_extent_);
 
-    text_renderer<T> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
+    text_renderer<T> ren(*current_buffer_, font_manager_, *(font_manager_.get_stroker()));
 
     while (helper.next()) {
         placements_type &placements = helper.placements();
@@ -74,7 +74,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
 
 template void agg_renderer<image_32>::process(shield_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

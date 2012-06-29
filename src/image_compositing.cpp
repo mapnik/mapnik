@@ -70,6 +70,11 @@ static const comp_op_lookup_type comp_lookup = boost::assign::list_of<comp_op_lo
     (invert_rgb,"invert-rgb")
     (grain_merge,"grain-merge")
     (grain_extract,"grain-extract")
+    (hue,"hue")
+    (saturation,"saturation")
+    (_color,"color")
+    (_value,"value")
+    (colorize_alpha,"colorize-alpha")
     ;
 
 boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
@@ -84,34 +89,30 @@ boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
 }
 
 template <typename T1, typename T2>
-void composite(T1 & im, T2 & im2, composite_mode_e mode,
+void composite(T1 & dst, T2 & src, composite_mode_e mode,
                float opacity,
                int dx,
                int dy,
-               bool premultiply_src,
-               bool premultiply_dst)
+               bool premultiply_src)
 {
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
-    typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba<color, order> blender_type;
+    typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
     typedef agg::renderer_base<pixfmt_type> renderer_type;
 
-    agg::rendering_buffer source(im.getBytes(),im.width(),im.height(),im.width() * 4);
-    agg::rendering_buffer mask(im2.getBytes(),im2.width(),im2.height(),im2.width() * 4);
+    agg::rendering_buffer dst_buffer(dst.getBytes(),dst.width(),dst.height(),dst.width() * 4);
+    agg::rendering_buffer src_buffer(src.getBytes(),src.width(),src.height(),src.width() * 4);
 
-    pixfmt_type pixf(source);
+    pixfmt_type pixf(dst_buffer);
     pixf.comp_op(static_cast<agg::comp_op_e>(mode));
-
-    agg::pixfmt_rgba32 pixf_mask(mask);
+    
+    agg::pixfmt_rgba32 pixf_mask(src_buffer);
     if (premultiply_src)  pixf_mask.premultiply();
-    if (premultiply_dst)  pixf.premultiply();
     renderer_type ren(pixf);
-    // TODO - is this really opacity, or agg::cover?
-    ren.blend_from(pixf_mask,0, dx,dy,unsigned(255*opacity));
+    ren.blend_from(pixf_mask,0,dx,dy,unsigned(255*opacity));
 }
 
-template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&, mapnik::image_data_32& ,composite_mode_e, float, int, int, bool, bool);
+template void composite<mapnik::image_data_32,mapnik::image_data_32>(mapnik::image_data_32&, mapnik::image_data_32& ,composite_mode_e, float, int, int, bool);
 
 }

@@ -4,10 +4,14 @@ A simple log of core changes affecting Mapnik usage.
 
 Developers: Please commit along with changes.
 
-For a complete change history, see the SVN log.
+For a complete change history, see the git log.
 
 
 ## Mapnik 2.1.0
+
+Not yet released
+
+- Added style-level 'opacity' (#314)
 
 - PostGIS: Added 'simplify_geometries' option - will trigger ST_Simplify on geometries before returning to Mapnik (#1179)
 
@@ -48,7 +52,9 @@ For a complete change history, see the SVN log.
 
 ## Mapnik 2.0.1
 
-(Packaged from 5cd3cb2efdaf7e9990a57e8e00b652a81aaa39ae)
+Released April 10, 2012
+
+(Packaged from 57347e9106)
 
 - Support for PostGIS 2.0 (#956,#1083)
 
@@ -82,6 +88,10 @@ For a complete change history, see the SVN log.
 
 
 ## Mapnik 2.0.0
+
+Released September 26, 2011
+
+(Packaged from 5b4c20eab3)
 
 - Add minimum-path-length property to text_symbolizer to allow labels to be placed only on lines of a certain length (#865)
 
@@ -170,7 +180,11 @@ For a complete change history, see the SVN log.
 - Implement MarkersSymbolizer in Cairo render and improve the markers placement finder. (#553)
 
 
-# Mapnik 0.7.2 Release
+# Mapnik 0.7.2
+
+Released Oct 18, 2011
+
+(Packaged from bc5cabeb6a)
 
 - Added forward compatibility for Mapnik 2.0 XML syntax (https://trac.mapnik.org/wiki/Mapnik2/Changes)
 
@@ -213,9 +227,53 @@ For a complete change history, see the SVN log.
 - Fixed reading of label_position_tolerance on text_symbolizer and height for building_symbolizer
 
 
-# Mapnik 0.7.0 Release
+# Mapnik 0.7.1
 
-(Packaged from r1574)
+Released March 23, 2010
+
+(Packaged from r1745/db89f1ca75)
+
+- Rasters: Various fixes and improvements to 8bit png output ([#522](https://github.com/mapnik/mapnik/issues/522),[#475](https://github.com/mapnik/mapnik/issues/475))
+
+- XML: Save map buffer_size when serializing map.
+
+- SCons: Added new build options 'PRIORITIZE_LINKING' and 'LINK_PRIORITY'. The first is a boolean (default True)
+  of whether to use the new sorting implementation that gives explcit preference to custom or local paths
+  during compile and linking that will affect builds when duplicate libraries and include directories are on the
+  system. LINK_PRIORITY defaults to prioritizing internal sources of the mapnik source folder, then local/user
+  installed libraries over system libraries, but the option can be customized. Sorting not only ensures that
+  compiling and linking will more likely match the desired libraries but also gives more likelyhood to avoid
+  the scenario where libraries are linked that don't match the includes libmapnik compiled against.
+
+- XML: Fixed behavior of PolygonPatternSymbolizer and LinePatternSymbolizer whereby width, height,
+  and type of images is actually allowed to be optionally ommitted ([#508](https://github.com/mapnik/mapnik/issues/508)). This was added in r1543 but
+  only worked correctly for PointSymbolizer and ShieldSymbolizer.
+
+- Fixed reading of PostGIS data on Big Endian systems ([#515](https://github.com/mapnik/mapnik/issues/515))
+
+- PostGIS: Added better support for alterative schemas ([#500](https://github.com/mapnik/mapnik/issues/500))
+
+- AGG Renderer - Enforced default gamma function on all symbolizers to ensure proper antialiasing
+  even when gamma is modified on the PolygonSymbolizer. ([#512](https://github.com/mapnik/mapnik/issues/512))
+
+- PNG: fixed png256 for large images and some improvements to reduce color corruptions ([#522](https://github.com/mapnik/mapnik/issues/522))
+
+- PNG: Added new quantization method for indexed png format using hextree with full support for alpha
+  channel. Also new method has some optimizations for color gradients common when using elevation based
+  rasters. By default old method using octree is used. (r1680, r1683, [#477](https://github.com/mapnik/mapnik/issues/477))
+
+- PNG: Added initial support for passing options to png writter like number of colors, transparency
+  support, quantization method and possibly other in future using type parameter. For example
+  "png8:c=128:t=1:m=h" limits palette to 128 colors, uses only binary transparency (0 - none,
+  1 - binary, 2 - full), and new method of quantization using hextree (h - hextree, o - octree).
+  Existing type "png256" can be also written using "png8:c=256:m=o:t=2"  (r1680, r1683, [#477](https://github.com/mapnik/mapnik/issues/477))
+
+
+# Mapnik 0.7.0
+
+Released January, 19 2010
+
+(Packaged from r1574/a0da946be9)
 
 - Core: Fixed linking to external libagg (r1297,r1299)
 
@@ -353,10 +411,11 @@ For a complete change history, see the SVN log.
 - Fonts: Added unifont to auto-installed fonts, which is used by the OSM styles as a fallback font (r1328)
 
 
+# Mapnik 0.6.1
 
-# Mapnik 0.6.1 Release
+Released July 14, 2009
 
-(Packaged from r1247)
+(Packaged from r1247/353ff576c7)
 
 - Plugins: expose list of registered plugins as a 'plugin_names()' method of DatasourceCache (r1180)
 
@@ -437,10 +496,11 @@ For a complete change history, see the SVN log.
 - Plugins: Fixed segfault in OGR Plugin with empty geometries (r1074) (#292)
 
 
+# Mapnik 0.6.0
 
-# Mapnik 0.6.0 Release
+Released April 1, 2009
 
-(Packaged from r1066)
+(Packaged from r1066/c88e03436f)
 
 - Python: Added support for aspect_fix_mode (r1013)
 
@@ -530,3 +590,27 @@ For a complete change history, see the SVN log.
 - Plugins: Use memory mapped files for reading shape file (r628)
 
 - Core: Use streams to write images (i/o refactor) (r628) (#15)
+
+# Mapnik 0.5.1
+
+Released April 15, 2008
+
+(Packaged from c29cb7386d)
+
+# Mapnik 0.5.0
+
+Released April 15, 2008
+
+(Packaged from 0464a3563c)
+
+# Mapnik 0.4.0
+
+Released February 26, 2007
+
+(Packaged from 8d73e3a8dc)
+
+# Mapnik 0.3.0
+
+Released May 22, 2006
+
+(Packaged from 3ae046ebe2)

@@ -31,6 +31,11 @@
 #include "agg_color_rgba.h"
 #include "agg_rendering_buffer.h"
 
+#include <boost/gil/gil_all.hpp>
+#include <boost/gil/extension/toolbox/hsv.hpp>
+
+#include <iostream>
+
 namespace agg
 {
 
@@ -1428,6 +1433,54 @@ namespace agg
         }
     };
 
+    // colorize alpha values
+    template <typename ColorT, typename Order>
+    struct comp_op_rgba_colorize_alpha
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
+
+        static AGG_INLINE void blend_pix(value_type* p,
+                                         // source rgb
+                                         unsigned sr, unsigned sg, unsigned sb,
+                                         // source alpha and opacity
+                                         unsigned sa, unsigned cover) {
+            if (cover < 255) {
+                sa = (sa * cover + 255) >> 8;
+            }
+            p[Order::R] = (value_type)(((0 + base_mask) >> base_shift));
+            p[Order::G] = (value_type)(((0 + base_mask) >> base_shift));
+            p[Order::B] = (value_type)(((0 + base_mask) >> base_shift));
+            p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+
+            // http://en.wikipedia.org/wiki/File:HSV-RGB-comparison.svg
+            if (p[Order::A] < 64) {
+                p[Order::G] = ((p[Order::A] - 64) * 4);
+                p[Order::B] = 255;
+            }
+            if (p[Order::A] >= 64 && p[Order::A] < 128) {
+                p[Order::G] = 255;
+                p[Order::B] = 255 - ((p[Order::A] - 64) * 4);
+            }
+            if (p[Order::A] >= 128 && p[Order::A] < 192) {
+                p[Order::R] = ((p[Order::A] - 128) * 4);
+                p[Order::G] = 255;
+            }
+            if (p[Order::A] >= 192) {
+                p[Order::R] = 255;
+                p[Order::G] = 255 - ((p[Order::A] - 192) * 4);
+            }
+        }
+    };
+
     // grain extract (GIMP)
     // E = I - M + 128
 
@@ -1471,6 +1524,191 @@ namespace agg
         }
     };
 
+    template <typename ColorT, typename Order>
+    struct comp_op_rgba_hue
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
+
+        static AGG_INLINE void blend_pix(value_type* p,
+                                         unsigned sr, unsigned sg, unsigned sb,
+                                         unsigned sa, unsigned cover)
+        {
+            if (cover < 255)
+            {
+                sr = (sr * cover + 255) >> 8;
+                sg = (sg * cover + 255) >> 8;
+                sb = (sb * cover + 255) >> 8;
+                sa = (sa * cover + 255) >> 8;
+            }
+
+            if (sa > 0)
+            {
+                using namespace boost;
+                using namespace gil;
+                using namespace hsv_color_space;
+                rgb8_pixel_t rgb_src(sr,sg,sb);
+                rgb8_pixel_t rgb_dst(p[Order::R],p[Order::G],p[Order::B]);
+                hsv32f_pixel_t hsv_src,hsv_dst;
+                color_convert(rgb_src, hsv_src);
+                color_convert(rgb_dst, hsv_dst);
+                get_color(hsv_dst,hue_t()) = get_color(hsv_src,hue_t());
+                color_convert(hsv_dst, rgb_dst);
+                p[Order::R] = get_color(rgb_dst,red_t());
+                p[Order::G] = get_color(rgb_dst,green_t());
+                p[Order::B] = get_color(rgb_dst,blue_t());
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+            }
+        }
+    };
+
+    template <typename ColorT, typename Order>
+    struct comp_op_rgba_saturation
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
+
+        static AGG_INLINE void blend_pix(value_type* p,
+                                         unsigned sr, unsigned sg, unsigned sb,
+                                         unsigned sa, unsigned cover)
+        {
+            if (cover < 255)
+            {
+                sr = (sr * cover + 255) >> 8;
+                sg = (sg * cover + 255) >> 8;
+                sb = (sb * cover + 255) >> 8;
+                sa = (sa * cover + 255) >> 8;
+            }
+
+            if (sa > 0)
+            {
+                using namespace boost;
+                using namespace gil;
+                using namespace hsv_color_space;
+                rgb8_pixel_t rgb_src(sr,sg,sb);
+                rgb8_pixel_t rgb_dst(p[Order::R],p[Order::G],p[Order::B]);
+                hsv32f_pixel_t hsv_src,hsv_dst;
+                color_convert( rgb_src, hsv_src);
+                color_convert( rgb_dst, hsv_dst);
+                get_color(hsv_dst,saturation_t()) = get_color(hsv_src,saturation_t());
+                color_convert(hsv_dst, rgb_dst);
+                p[Order::R] = get_color(rgb_dst,red_t());
+                p[Order::G] = get_color(rgb_dst,green_t());
+                p[Order::B] = get_color(rgb_dst,blue_t());
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+            }
+        }
+    };
+
+    template <typename ColorT, typename Order>
+    struct comp_op_rgba_color
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
+
+        static AGG_INLINE void blend_pix(value_type* p,
+                                         unsigned sr, unsigned sg, unsigned sb,
+                                         unsigned sa, unsigned cover)
+        {
+            if (cover < 255)
+            {
+                sr = (sr * cover + 255) >> 8;
+                sg = (sg * cover + 255) >> 8;
+                sb = (sb * cover + 255) >> 8;
+                sa = (sa * cover + 255) >> 8;
+            }
+
+            if (sa > 0)
+            {
+                using namespace boost;
+                using namespace gil;
+                using namespace hsv_color_space;
+                rgb8_pixel_t rgb_src(sr,sg,sb);
+                rgb8_pixel_t rgb_dst(p[Order::R],p[Order::G],p[Order::B]);
+                hsv32f_pixel_t hsv_src,hsv_dst;
+                color_convert( rgb_src, hsv_src);
+                color_convert( rgb_dst, hsv_dst);
+                get_color(hsv_dst,hue_t()) = get_color(hsv_src,hue_t());
+                get_color(hsv_dst,saturation_t()) = get_color(hsv_src,saturation_t());
+                color_convert(hsv_dst, rgb_dst);
+                p[Order::R] = get_color(rgb_dst,red_t());
+                p[Order::G] = get_color(rgb_dst,green_t());
+                p[Order::B] = get_color(rgb_dst,blue_t());
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+            }
+        }
+    };
+
+
+    template <typename ColorT, typename Order>
+    struct comp_op_rgba_value
+    {
+        typedef ColorT color_type;
+        typedef Order order_type;
+        typedef typename color_type::value_type value_type;
+        typedef typename color_type::calc_type calc_type;
+        typedef typename color_type::long_type long_type;
+        enum base_scale_e
+        {
+            base_shift = color_type::base_shift,
+            base_mask  = color_type::base_mask
+        };
+
+        static AGG_INLINE void blend_pix(value_type* p,
+                                         unsigned sr, unsigned sg, unsigned sb,
+                                         unsigned sa, unsigned cover)
+        {
+            if (cover < 255)
+            {
+                sr = (sr * cover + 255) >> 8;
+                sg = (sg * cover + 255) >> 8;
+                sb = (sb * cover + 255) >> 8;
+                sa = (sa * cover + 255) >> 8;
+            }
+
+            if (sa > 0)
+            {
+                using namespace boost;
+                using namespace gil;
+                using namespace hsv_color_space;
+                rgb8_pixel_t rgb_src(sr,sg,sb);
+                rgb8_pixel_t rgb_dst(p[Order::R],p[Order::G],p[Order::B]);
+                hsv32f_pixel_t hsv_src,hsv_dst;
+                color_convert( rgb_src, hsv_src);
+                color_convert( rgb_dst, hsv_dst);
+                get_color(hsv_dst,value_t()) = get_color(hsv_src,value_t());
+                color_convert(hsv_dst, rgb_dst);
+                p[Order::R] = get_color(rgb_dst,red_t());
+                p[Order::G] = get_color(rgb_dst,green_t());
+                p[Order::B] = get_color(rgb_dst,blue_t());
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+            }
+        }
+    };
 
     //======================================================comp_op_table_rgba
     template<class ColorT, class Order> struct comp_op_table_rgba
@@ -1520,6 +1758,11 @@ namespace agg
         comp_op_rgba_invert_rgb <ColorT,Order>::blend_pix,
         comp_op_rgba_grain_merge<ColorT,Order>::blend_pix,
         comp_op_rgba_grain_extract<ColorT,Order>::blend_pix,
+        comp_op_rgba_hue<ColorT,Order>::blend_pix,
+        comp_op_rgba_saturation<ColorT,Order>::blend_pix,
+        comp_op_rgba_color<ColorT,Order>::blend_pix,
+        comp_op_rgba_value<ColorT,Order>::blend_pix,
+        comp_op_rgba_colorize_alpha<ColorT,Order>::blend_pix,
         0
     };
 
@@ -1557,14 +1800,13 @@ namespace agg
         comp_op_invert_rgb,    //----comp_op_invert_rgb
         comp_op_grain_merge,   //----comp_op_grain_merge_rgb
         comp_op_grain_extract, //----comp_op_grain_extract_rgb
+        comp_op_hue,           //----comp_op_hue
+        comp_op_saturation,    //----comp_op_saturation
+        comp_op_color,         //----comp_op_color
+        comp_op_value,         //----comp_op_value
+        comp_op_colorize_alpha,//----comp_op_colorize_alpha
         end_of_comp_op_e
     };
-
-
-
-
-
-
 
     //====================================================comp_op_adaptor_rgba
     template<class ColorT, class Order> struct comp_op_adaptor_rgba
@@ -2732,6 +2974,30 @@ namespace agg
             }
             while(--len);
         }
+
+        //--------------------------------------------------------------------
+        void blend_color_hspan_alpha(int x, int y, unsigned len,
+                                     const color_type* colors,
+                                     value_type alpha,
+                                     const int8u* covers,
+                                     int8u cover)
+        {
+            value_type* p = (value_type*)m_rbuf->row_ptr(x, y, len) + (x << 2);
+            do
+            {
+                blender_type::blend_pix(m_comp_op,
+                                        p,
+                                        (colors->r * alpha + 255) >> 8,
+                                        (colors->g * alpha + 255) >> 8,
+                                        (colors->b * alpha + 255) >> 8,
+                                        (colors->a * alpha + 255) >> 8,
+                                        covers ? *covers++ : cover);
+                p += 4;
+                ++colors;
+            }
+            while(--len);
+        }
+
 
         //--------------------------------------------------------------------
         void blend_color_vspan(int x, int y, unsigned len,

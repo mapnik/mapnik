@@ -36,7 +36,6 @@
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <iostream>
 #include <string>
@@ -139,10 +138,17 @@ void svg_parser::parse(std::string const& filename)
     if (reader != 0)
     {
         int ret = xmlTextReaderRead(reader);
-        while (ret == 1)
+        try {
+            while (ret == 1)
+            {
+                process_node(reader);
+                ret = xmlTextReaderRead(reader);
+            }
+        }
+        catch (std::exception const& ex)
         {
-            process_node(reader);
-            ret = xmlTextReaderRead(reader);
+            xmlFreeTextReader(reader);
+            throw;
         }
         xmlFreeTextReader(reader);
         if (ret != 0)
@@ -428,26 +434,34 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "d");
     if (value)
     {
-        path_.begin_path();
-
-        if (!mapnik::svg::parse_path((const char*) value, path_))
+        // d="" (empty paths) are valid
+        if (strlen((const char*)value) < 1)
         {
             xmlFree(value);
-            xmlChar *id_value;
-            id_value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
-            if (id_value)
-            {
-                std::string id_string((const char *) id_value);
-                xmlFree(id_value);
-                throw std::runtime_error(std::string("unable to parse invalid svg <path> with id '") + id_string + "'");
-            }
-            else
-            {
-                throw std::runtime_error("unable to parse invalid svg <path>");
-            }
         }
-        path_.end_path();
-        xmlFree(value);
+        else
+        {
+            path_.begin_path();
+
+            if (!mapnik::svg::parse_path((const char*) value, path_))
+            {
+                xmlFree(value);
+                xmlChar *id_value;
+                id_value = xmlTextReaderGetAttribute(reader, BAD_CAST "id");
+                if (id_value)
+                {
+                    std::string id_string((const char *) id_value);
+                    xmlFree(id_value);
+                    throw std::runtime_error(std::string("unable to parse invalid svg <path> with id '") + id_string + "'");
+                }
+                else
+                {
+                    throw std::runtime_error("unable to parse invalid svg <path>");
+                }
+            }
+            path_.end_path();
+            xmlFree(value);
+        }
     }
 }
 

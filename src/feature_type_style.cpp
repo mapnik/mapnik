@@ -38,7 +38,8 @@ feature_type_style::feature_type_style()
 : filter_mode_(FILTER_ALL),
     filters_(),
     direct_filters_(),
-    scale_denom_validity_(-1)
+    scale_denom_validity_(-1),
+    opacity_(1.0f)
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
@@ -46,7 +47,8 @@ feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_
       filters_(rhs.filters_),
       direct_filters_(rhs.direct_filters_),
       comp_op_(rhs.comp_op_),
-      scale_denom_validity_(-1)
+      scale_denom_validity_(-1),
+      opacity_(rhs.opacity_)
 {
     if (!deep_copy) {
         rules_ = rhs.rules_;
@@ -67,6 +69,7 @@ feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
     direct_filters_ = rhs.direct_filters_;
     comp_op_ = rhs.comp_op_;
     scale_denom_validity_ = -1;
+    opacity_= rhs.opacity_;
     return *this;
 }
 
@@ -124,6 +127,16 @@ void feature_type_style::set_comp_op(composite_mode_e comp_op)
 boost::optional<composite_mode_e> feature_type_style::comp_op() const
 {
     return comp_op_;
+}
+
+void feature_type_style::set_opacity(float opacity)
+{
+    opacity_ = opacity;
+}
+
+float feature_type_style::get_opacity() const
+{
+    return opacity_;
 }
 
 void feature_type_style::update_rule_cache(double scale_denom)

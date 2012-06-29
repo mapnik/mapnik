@@ -147,7 +147,7 @@ public:
             unsigned b = stop_color.blue();
             unsigned a = stop_color.alpha();
             //MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: r=" << r << ",g=" << g << ",b=" << b << ",a=" << a;
-            m_gradient_lut.add_color(st.first, agg::rgba8(r, g, b, int(a * opacity)));
+            m_gradient_lut.add_color(st.first, agg::rgba8_pre(r, g, b, int(a * opacity)));
         }
         m_gradient_lut.build_lut();
 
@@ -300,6 +300,7 @@ public:
                     color = attr.fill_color;
                     color.opacity(color.opacity() * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
+                    color.premultiply();
                     ren_s.color(color);
                     render_scanlines(ras, sl, ren_s);
                 }
@@ -335,6 +336,7 @@ public:
                     color = attr.stroke_color;
                     color.opacity(color.opacity() * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
+                    color.premultiply();
                     ren_s.color(color);
                     render_scanlines(ras, sl, ren_s);
                 }

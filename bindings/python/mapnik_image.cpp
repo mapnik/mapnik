@@ -147,9 +147,9 @@ void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float op
 }
 
 
-void composite(image_32 & im, image_32 & im2, mapnik::composite_mode_e mode, float opacity)
+void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity)
 {
-    mapnik::composite(im.data(),im2.data(),mode,opacity,0,0,false,true);
+    mapnik::composite(dst.data(),src.data(),mode,opacity,0,0,false);
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
@@ -213,6 +213,8 @@ void export_image()
            arg("mode"),
            arg("opacity")=1.0f
          ))
+        .def("premultiply",&image_32::premultiply)
+        .def("demultiply",&image_32::demultiply)
         .def("set_pixel",&set_pixel)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 

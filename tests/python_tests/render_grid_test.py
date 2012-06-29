@@ -225,11 +225,20 @@ def test_32bit_int_id():
     utf1 = grid.encode('utf',resolution=4)
     eq_(utf1['keys'],[str(int32)])
 
-    max_neg = -(int32+1)
+    # this will fail because it is used internally to mark alpha
+    #max_neg = -(int32+1)
+    # so we use max neg-1
+    max_neg = -(int32)
     grid = gen_grid_for_id(max_neg)
     eq_(grid.get_pixel(128,128),max_neg)
     utf1 = grid.encode('utf',resolution=4)
     eq_(utf1['keys'],[str(max_neg)])
+
+def test_id_zero():
+    grid = gen_grid_for_id(0)
+    eq_(grid.get_pixel(128,128),0)
+    utf1 = grid.encode('utf',resolution=4)
+    eq_(utf1['keys'],['0'])
 
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]

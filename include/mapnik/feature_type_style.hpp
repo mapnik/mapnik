@@ -51,7 +51,7 @@ typedef std::vector<rule*> rule_ptrs;
 class MAPNIK_DECL feature_type_style
 {
 private:
-    rules  rules_;
+    rules rules_;
     filter_mode_e filter_mode_;
     // image_filters
     std::vector<filter::filter_type> filters_;
@@ -63,6 +63,7 @@ private:
     rule_ptrs if_rules_;
     rule_ptrs else_rules_;
     rule_ptrs also_rules_;
+    float opacity_;
 public:
     feature_type_style();
 
@@ -90,7 +91,9 @@ public:
     // compositing
     void set_comp_op(composite_mode_e comp_op);
     boost::optional<composite_mode_e> comp_op() const;     
-    
+    void set_opacity(float opacity);
+    float get_opacity() const;
+
     ~feature_type_style() {}
 
 private:

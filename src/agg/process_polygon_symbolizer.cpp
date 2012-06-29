@@ -41,7 +41,7 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(polygon_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
 
@@ -51,7 +51,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     box2d<double> inflated_extent = query_extent_ * 1.0;
 
     agg::trans_affine tr;
-    evaluate_transform(tr, *feature, sym.get_transform());
+    evaluate_transform(tr, feature, sym.get_transform());
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
@@ -63,7 +63,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     converter.set<affine_transform_tag>();
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature->paths())
+    BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
         if (geom.num_points() > 2)
         {
@@ -82,7 +82,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
+    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
@@ -90,14 +90,14 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
     renderer_type ren(renb);
-    ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
+    ren.color(agg::rgba8_pre(r, g, b, int(a * sym.get_opacity())));
     agg::scanline_u8 sl;
     agg::render_scanlines(*ras_ptr, sl, ren);
 
 }
 
 template void agg_renderer<image_32>::process(polygon_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

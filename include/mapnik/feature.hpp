@@ -187,6 +187,16 @@ public:
         return data_.size();
     }
 
+    cont_type const& get_data() const
+    {
+        return data_;
+    }
+
+    void set_data(cont_type const& data)
+    {
+        data_ = data;
+    }
+
     context_ptr context()
     {
         return ctx_;

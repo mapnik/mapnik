@@ -41,16 +41,16 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(raster_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    raster_ptr const& source=feature->get_raster();
+    raster_ptr const& source=feature.get_raster();
     if (source)
     {
         // If there's a colorizer defined, use it to color the raster in-place
         raster_colorizer_ptr colorizer = sym.get_colorizer();
         if (colorizer)
-            colorizer->colorize(source,*feature);
+            colorizer->colorize(source,feature);
 
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
@@ -77,13 +77,13 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                              scale_factor,
                              sym.get_scaling());
 
-            composite(current_buffer_->data(), target.data_, sym.comp_op(), sym.get_opacity(), start_x, start_y, false, false);
+            composite(current_buffer_->data(), target.data_, sym.comp_op(), sym.get_opacity(), start_x, start_y, true);
         }
     }
 }
 
 template void agg_renderer<image_32>::process(raster_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

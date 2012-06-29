@@ -230,16 +230,16 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
 
     formatting::node_ptr get_item(int i)
     {
-        if (i<0) i+= children_.size();
-        if (i<children_.size()) return children_[i];
+        if (i < 0) i+= children_.size();
+        if (i < static_cast<int>(children_.size())) return children_[i];
         IndexError();
         return formatting::node_ptr(); //Avoid compiler warning
     }
 
     void set_item(int i, formatting::node_ptr ptr)
     {
-        if (i<0) i+= children_.size();
-        if (i<children_.size()) children_[i] = ptr;
+        if (i < 0) i+= children_.size();
+        if (i < static_cast<int>(children_.size())) children_[i] = ptr;
         IndexError();
     }
 
@@ -376,6 +376,7 @@ void export_text_placement()
         .def_readwrite("maximum_angle_char_delta", &text_symbolizer_properties::max_char_angle_delta)
         .def_readwrite("force_odd_labels", &text_symbolizer_properties::force_odd_labels)
         .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
+        .def_readwrite("largest_bbox_only", &text_symbolizer_properties::largest_bbox_only)
         .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
         .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
         .def_readwrite("format", &text_symbolizer_properties::format)

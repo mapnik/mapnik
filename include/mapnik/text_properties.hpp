@@ -162,6 +162,8 @@ struct text_symbolizer_properties
     /** Always try render an odd amount of labels */
     bool force_odd_labels;
     bool allow_overlap;
+    /** Only consider geometry with largest bbox (polygons) */
+    bool largest_bbox_only;
     unsigned text_ratio;
     unsigned wrap_width;
     /** Default values for char_properties. */

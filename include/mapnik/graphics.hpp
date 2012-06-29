@@ -76,6 +76,10 @@ public:
 
     void set_background(const color& c);
 
+    void premultiply();
+
+    void demultiply();
+
     void set_grayscale_to_alpha();
 
     void set_color_to_alpha(color const& c);

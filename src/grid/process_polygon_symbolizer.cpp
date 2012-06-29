@@ -41,7 +41,7 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(polygon_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
     typedef coord_transform<CoordTransform,geometry_type> path_type;
@@ -56,9 +56,9 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     renderer ren(renb);
 
     ras_ptr->reset();
-    for (unsigned i=0;i<feature->num_geometries();++i)
+    for (unsigned i=0;i<feature.num_geometries();++i)
     {
-        geometry_type & geom = feature->get_geometry(i);
+        geometry_type & geom = feature.get_geometry(i);
         if (geom.num_points() > 2)
         {
             path_type path(t_,geom,prj_trans);
@@ -67,7 +67,7 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     }
 
     // render id
-    ren.color(mapnik::gray32(feature->id()));
+    ren.color(mapnik::gray32(feature.id()));
     agg::render_scanlines(*ras_ptr, sl, ren);
 
     // add feature properties to grid cache
@@ -76,7 +76,7 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
 
 
 template void grid_renderer<grid>::process(polygon_symbolizer const&,
-                                           mapnik::feature_ptr const&,
+                                           mapnik::feature_impl &,
                                            proj_transform const&);
 
 }

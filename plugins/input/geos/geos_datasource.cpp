@@ -38,16 +38,12 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/limits.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 // geos
 #include <geos_c.h>
-
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 
 using mapnik::box2d;
 using mapnik::coord2d;

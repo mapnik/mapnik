@@ -63,7 +63,8 @@ static void grid2utf(T const& grid_type,
         typename T::value_type const* row = data.getRow(y);
         for (unsigned x = 0; x < data.width(); ++x)
         {
-            feature_pos = feature_keys.find(row[x]);
+            typename T::value_type feature_id = row[x];
+            feature_pos = feature_keys.find(feature_id);
             if (feature_pos != feature_keys.end())
             {
                 mapnik::grid::lookup_type val = feature_pos->second;
@@ -74,9 +75,16 @@ static void grid2utf(T const& grid_type,
                     // can't be encoded directly in JSON.
                     if (codepoint == 34) ++codepoint;      // Skip "
                     else if (codepoint == 92) ++codepoint; // Skip backslash
-
-                    keys[val] = codepoint;
-                    key_order.push_back(val);
+                    if (feature_id == mapnik::grid::base_mask)
+                    {
+                        keys[""] = codepoint;
+                        key_order.push_back("");
+                    }
+                    else
+                    {
+                        keys[val] = codepoint;
+                        key_order.push_back(val);
+                    }
                     line[idx++] = static_cast<Py_UNICODE>(codepoint);
                     ++codepoint;
                 }
@@ -117,7 +125,8 @@ static void grid2utf(T const& grid_type,
         mapnik::grid::value_type const* row = grid_type.getRow(y);
         for (unsigned x = 0; x < grid_type.width(); x=x+resolution)
         {
-            feature_pos = feature_keys.find(row[x]);
+            typename T::value_type feature_id = row[x];
+            feature_pos = feature_keys.find(feature_id);
             if (feature_pos != feature_keys.end())
             {
                 mapnik::grid::lookup_type val = feature_pos->second;
@@ -128,8 +137,16 @@ static void grid2utf(T const& grid_type,
                     // can't be encoded directly in JSON.
                     if (codepoint == 34) ++codepoint;      // Skip "
                     else if (codepoint == 92) ++codepoint; // Skip backslash
-                    keys[val] = codepoint;
-                    key_order.push_back(val);
+                    if (feature_id == mapnik::grid::base_mask)
+                    {
+                        keys[""] = codepoint;
+                        key_order.push_back("");
+                    }
+                    else
+                    {
+                        keys[val] = codepoint;
+                        key_order.push_back(val);
+                    }
                     line[idx++] = static_cast<Py_UNICODE>(codepoint);
                     ++codepoint;
                 }
@@ -220,9 +237,7 @@ static void write_features(T const& grid_type,
         boost::optional<std::string> join_value;
         if (key == grid_type.key_name())
         {
-            std::stringstream s;
-            s << feature->id();
-            join_value = s.str();
+            join_value = feat_itr->first;
         }
         else if (feature->has_key(key))
         {

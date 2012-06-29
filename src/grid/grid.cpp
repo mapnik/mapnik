@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,22 +21,11 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/debug.hpp>
-#include <mapnik/grid/grid_renderer.hpp>
+#include <mapnik/grid/grid.hpp>
 
-namespace mapnik {
-
-
-template <typename T>
-void grid_renderer<T>::process(raster_symbolizer const& sym,
-                               mapnik::feature_impl & feature,
-                               proj_transform const& prj_trans)
+namespace mapnik
 {
-    MAPNIK_LOG_WARN(grid_renderer) << "grid_renderer: raster_symbolizer is not yet supported";
-}
 
-template void grid_renderer<grid>::process(raster_symbolizer const&,
-                                           mapnik::feature_impl &,
-                                           proj_transform const&);
+template<> const grid::value_type grid::base_mask = std::numeric_limits<int>::min();
 
 }

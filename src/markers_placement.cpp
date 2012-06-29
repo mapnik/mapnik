@@ -8,6 +8,7 @@
 #include "agg_basics.h"
 #include "agg_conv_clip_polyline.h"
 #include "agg_trans_affine.h"
+#include "agg_conv_transform.h"
 // stl
 #include <cmath>
 
@@ -15,9 +16,10 @@ namespace mapnik
 {
 template <typename Locator,  typename Detector>
 markers_placement<Locator, Detector>::markers_placement(
-    Locator &locator, box2d<double> size, Detector &detector, double spacing, double max_error, bool allow_overlap)
-    : locator_(locator), size_(size), detector_(detector), max_error_(max_error), allow_overlap_(allow_overlap)
+    Locator &locator, box2d<double> size, agg::trans_affine const& tr, Detector &detector, double spacing, double max_error, bool allow_overlap)
+    : locator_(locator), size_(size), tr_(tr), detector_(detector), max_error_(max_error), allow_overlap_(allow_overlap)
 {
+    marker_width_ = (size_ * tr_).width();
     if (spacing >= 0)
     {
         spacing_ = spacing;
@@ -60,7 +62,7 @@ void markers_placement<Locator, Detector>::rewind()
 {
     locator_.rewind(0);
     //Get first point
-    done_ = agg::is_stop(locator_.vertex(&next_x, &next_y)) || spacing_ < size_.width();
+    done_ = agg::is_stop(locator_.vertex(&next_x, &next_y)) || spacing_ < marker_width_;
     last_x = next_x;
     last_y = next_y; // Force request of new segment
     error_ = 0;
@@ -69,7 +71,7 @@ void markers_placement<Locator, Detector>::rewind()
 
 template <typename Locator, typename Detector>
 bool markers_placement<Locator, Detector>::get_point(
-    double *x, double *y, double *angle, bool add_to_detector)
+    double & x, double & y, double & angle,  bool add_to_detector)
 {
     if (done_) return false;
 
@@ -102,9 +104,9 @@ bool markers_placement<Locator, Detector>::get_point(
     while (true)
     {
         //Do not place markers too close to the beginning of a segment
-        if (spacing_left_ < size_.width()/2)
+        if (spacing_left_ < marker_width_/2)
         {
-            set_spacing_left(size_.width()/2); //Only moves forward
+            set_spacing_left(marker_width_/2); //Only moves forward
         }
         //Error for this marker is too large. Skip to the next position.
         if (abs(error_) > max_error_ * spacing_)
@@ -148,12 +150,12 @@ bool markers_placement<Locator, Detector>::get_point(
         */
 
         //Check if marker really fits in this segment
-        if (segment_length < size_.width())
+        if (segment_length < marker_width_)
         {
             //Segment to short => Skip this segment
-            set_spacing_left(segment_length + size_.width()/2); //Only moves forward
+            set_spacing_left(segment_length + marker_width_/2); //Only moves forward
             continue;
-        } else if (segment_length - spacing_left_ < size_.width()/2)
+        } else if (segment_length - spacing_left_ < marker_width_/2)
         {
             //Segment is long enough, but we are to close to the end
 
@@ -162,19 +164,20 @@ bool markers_placement<Locator, Detector>::get_point(
             // only move backwards when there is no offset
             if (error_ == 0)
             {
-                set_spacing_left(segment_length - size_.width()/2, true);
+                set_spacing_left(segment_length - marker_width_/2, true);
             } else
             {
                 //Skip this segment
-                set_spacing_left(segment_length + size_.width()/2); //Only moves forward
+                set_spacing_left(segment_length + marker_width_/2); //Only moves forward
             }
             continue; //Force checking of max_error constraint
         }
-        *angle = atan2(dy, dx);
-        *x = last_x + dx * (spacing_left_ / segment_length);
-        *y = last_y + dy * (spacing_left_ / segment_length);
+        angle = atan2(dy, dx);
+        x = last_x + dx * (spacing_left_ / segment_length);
+        y = last_y + dy * (spacing_left_ / segment_length);
 
-        box2d<double> box = perform_transform(*angle, *x, *y);
+        box2d<double> box = perform_transform(angle, x, y);
+
         if (!allow_overlap_ && !detector_.has_placement(box))
         {
             //10.0 is the approxmiate number of positions tried and choosen arbitrarily
@@ -182,8 +185,8 @@ bool markers_placement<Locator, Detector>::get_point(
             continue;
         }
         if (add_to_detector) detector_.insert(box);
-        last_x = *x;
-        last_y = *y;
+        last_x = x;
+        last_y = y;
         return true;
     }
 }
@@ -197,7 +200,7 @@ box2d<double> markers_placement<Locator, Detector>::perform_transform(double ang
     double y1 = size_.miny();
     double y2 = size_.maxy();
 
-    agg::trans_affine tr = agg::trans_affine_rotation(angle).translate(dx, dy);
+    agg::trans_affine tr = tr_ * agg::trans_affine_rotation(angle).translate(dx, dy);
 
     double xA = x1, yA = y1, xB = x2, yB = y1, xC = x2, yC = y2, xD = x1, yD = y2;
     tr.transform(&xA, &yA);
@@ -205,8 +208,8 @@ box2d<double> markers_placement<Locator, Detector>::perform_transform(double ang
     tr.transform(&xC, &yC);
     tr.transform(&xD, &yD);
 
-    box2d<double> result(xA, yA, xB, yB);
-    result.expand_to_include(xC, yC);
+    box2d<double> result(xA, yA, xC, yC);
+    result.expand_to_include(xB, yB);
     result.expand_to_include(xD, yD);
     return result;
 }
@@ -234,7 +237,10 @@ void markers_placement<Locator, Detector>::set_spacing_left(double sl, bool allo
 typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
 typedef coord_transform<CoordTransform,geometry_type> path_type;
 typedef coord_transform<CoordTransform,clipped_geometry_type> clipped_path_type;
+typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
 
+template class markers_placement<transformed_path_type, label_collision_detector4>;
+template class markers_placement<agg::conv_transform<clipped_path_type,agg::trans_affine>, label_collision_detector4>;
 template class markers_placement<path_type, label_collision_detector4>;
 template class markers_placement<clipped_path_type, label_collision_detector4>;
 

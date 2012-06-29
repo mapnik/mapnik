@@ -260,6 +260,7 @@ if env['RUNTIME_LINK'] == "static":
 # grid backend
 source += Split(
     """
+    grid/grid.cpp
     grid/grid_renderer.cpp
     grid/process_building_symbolizer.cpp
     grid/process_line_pattern_symbolizer.cpp

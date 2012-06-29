@@ -28,4 +28,4 @@ if env['SUNCC']:
 else:
     cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
 
-agg_env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CPPPATH='./include', CXXFLAGS=cxxflags, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+agg_env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CXXFLAGS=cxxflags, LINKFLAGS=env['CUSTOM_LDFLAGS'])
