@@ -65,11 +65,16 @@ bool marker_cache::insert(std::string const& uri, marker_ptr path)
 
 boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool update_cache)
 {
+
+    boost::optional<marker_ptr> result;
+    if (uri.empty())
+    {
+        return result;
+    }
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
     typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
-    boost::optional<marker_ptr> result;
     iterator_type itr = cache_.find(uri);
     if (itr != cache_.end())
     {
