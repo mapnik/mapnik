@@ -957,7 +957,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         optional<std::string> file = sym.get_opt_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
 
-        if (file)
+        if (file && !file->empty())
         {
             try
             {
@@ -987,9 +987,12 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         }
 
         path_expression_ptr expr(boost::make_shared<path_expression>());
-        if (!parse_path_from_string(expr, filename, sym.get_tree().path_expr_grammar))
+        if (!filename.empty())
         {
-            throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
+            if (!parse_path_from_string(expr, filename, sym.get_tree().path_expr_grammar))
+            {
+                throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
+            }
         }
         markers_symbolizer symbol(expr);
 
@@ -1080,6 +1083,11 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
     try
     {
         std::string file = sym.get_attr<std::string>("file");
+        if (file.empty())
+        {
+            throw config_error("empty file attribute");
+        }
+
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
 
         if(base)
@@ -1115,6 +1123,10 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
     try
     {
         std::string file = sym.get_attr<std::string>("file");
+        if (file.empty())
+        {
+            throw config_error("empty file attribute");
+        }
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
 
         if(base)
@@ -1263,6 +1275,10 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         parse_symbolizer_base(shield_symbol, sym);
 
         std::string image_file = sym.get_attr<std::string>("file");
+        if (image_file.empty())
+        {
+            throw config_error("empty file attribute");
+        }
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
 
         if(base)
