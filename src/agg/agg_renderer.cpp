@@ -36,6 +36,7 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
+#include <mapnik/image_util.hpp>
 // agg
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 #include "agg_rendering_buffer.h"
@@ -84,7 +85,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
       internal_buffer_(),
-      current_buffer_(&pixmap),      
+      current_buffer_(&pixmap),
       style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
@@ -205,16 +206,16 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
     {
         style_level_compositing_ = false;
     }
-    
+
     if (style_level_compositing_)
     {
         if (!internal_buffer_)
         {
-            internal_buffer_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height()); 
+            internal_buffer_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height());
         }
         else
         {
-            internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour        
+            internal_buffer_->set_background(color(0,0,0,0)); // fill with transparent colour
         }
         current_buffer_ = internal_buffer_.get();
     }
@@ -260,7 +261,7 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
 }
 
 template <typename T>
-void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, 
+void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr,
                                     double opacity, composite_mode_e comp_op)
 {
     if (marker.is_vector())
@@ -280,7 +281,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         pixfmt_comp_type pixf(buf);
         pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
         renderer_base renb(pixf);
-        
+
         box2d<double> const& bbox = (*marker.get_vector_data())->bounding_box();
         coord<double,2> c = bbox.center();
         // center the svg marker on '0,0'
@@ -298,18 +299,36 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
             renderer_type,
             agg::pixfmt_rgba32> svg_renderer(svg_path,
                                                    (*marker.get_vector_data())->attributes());
-        
+
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
     }
     else
-    {        
-        double cx = 0.5 * (*marker.get_bitmap_data())->width();
-        double cy = 0.5 * (*marker.get_bitmap_data())->height();
-        composite(current_buffer_->data(), **marker.get_bitmap_data(), 
-                  comp_op, opacity,
-                  boost::math::iround(pos.x - cx),
-                  boost::math::iround(pos.y - cy),
-                  false);
+    {
+        double w = (*marker.get_bitmap_data())->width();
+        double h = (*marker.get_bitmap_data())->height();
+        double cx = 0.5 * w;
+        double cy = 0.5 * h;
+
+        if (std::fabs(1.0 - scale_factor_) < 0.001)
+        {
+            composite(current_buffer_->data(), **marker.get_bitmap_data(),
+                      comp_op, opacity,
+                      boost::math::iround(pos.x - cx),
+                      boost::math::iround(pos.y - cy),
+                      false);
+        }
+        else
+        {
+            double scaled_width = w * scale_factor_;
+            double scaled_height = h * scale_factor_;
+            image_data_32 buf(std::ceil(scaled_width),std::ceil(scaled_height));
+            scale_image_agg(buf,  **marker.get_bitmap_data(), SCALING_BILINEAR, scale_factor_);
+            composite(current_buffer_->data(), buf,
+                      comp_op, opacity,
+                      boost::math::iround(pos.x - 0.5*scaled_width),
+                      boost::math::iround(pos.y - 0.5*scaled_height),
+                      false);
+        }
     }
 }
 
