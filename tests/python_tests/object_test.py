@@ -134,6 +134,18 @@ def test_markersymbolizer_init():
     eq_(p.ignore_placement,False)
     eq_(p.spacing,100)
     eq_(p.max_error,0.2)
+    eq_(str(p.width),'10.0')
+    eq_(str(p.height),'10.0')
+
+    p.width = mapnik.Expression('12')
+    p.height = mapnik.Expression('12')
+    eq_(str(p.width),'12')
+    eq_(str(p.height),'12')
+
+    p.width = mapnik.Expression('[field] + 2')
+    p.height = mapnik.Expression('[field] + 2')
+    eq_(str(p.width),'([field]+2)')
+    eq_(str(p.height),'([field]+2)')
 
     stroke = mapnik.Stroke()
     stroke.color = mapnik.Color('black')

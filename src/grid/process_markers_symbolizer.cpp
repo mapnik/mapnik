@@ -152,16 +152,16 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     else
     {
 
-        double w;
-        double h;
+        double w = (boost::apply_visitor(evaluate<Feature,value_type>(feature), *(sym.get_width()))).to_double() * scale_factor_;
+        double h = (boost::apply_visitor(evaluate<Feature,value_type>(feature), *(sym.get_height()))).to_double() * scale_factor_;
         // clamp to at least 4 px otherwise interactive pixels can be too small
         if (res == 1) {
-            w = std::max(sym.get_width(),4.0);
-            h = std::max(sym.get_height(),4.0);
+            w = std::max(w,4.0);
+            h = std::max(h,4.0);
         } else {
             double min = static_cast<double>(4.0/res);
-            w = std::max(sym.get_width()/res,min);
-            h = std::max(sym.get_height()/res,min);
+            w = std::max(w/res,min);
+            h = std::max(h/res,min);
         }
 
         double rx = w/2.0;
