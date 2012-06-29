@@ -29,6 +29,7 @@
 #include <mapnik/color.hpp>
 #include <mapnik/stroke.hpp>
 #include <mapnik/enumeration.hpp>
+#include <mapnik/expression.hpp>
 
 namespace mapnik {
 
@@ -66,10 +67,10 @@ public:
     double get_max_error() const;
     void set_fill(color fill);
     color const& get_fill() const;
-    void set_width(double width);
-    double get_width() const;
-    void set_height(double height);
-    double get_height() const;
+    void set_width(expression_ptr width);
+    expression_ptr get_width() const;
+    void set_height(expression_ptr height);
+    expression_ptr get_height() const;
     stroke const& get_stroke() const;
     void set_stroke(stroke const& stroke);
     void set_marker_placement(marker_placement_e marker_p);
@@ -83,8 +84,8 @@ private:
     color fill_;
     double spacing_;
     double max_error_;
-    double width_;
-    double height_;
+    expression_ptr width_;
+    expression_ptr height_;
     stroke stroke_;
     marker_placement_e marker_p_;
     marker_type_e marker_type_;

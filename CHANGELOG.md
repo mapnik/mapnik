@@ -11,6 +11,8 @@ For a complete change history, see the git log.
 
 Not yet released
 
+- MarkersSymbolizer width and height moved to expressions (#1102)
+
 - Added style-level 'opacity' (#314)
 
 - PostGIS: Added 'simplify_geometries' option - will trigger ST_Simplify on geometries before returning to Mapnik (#1179)
