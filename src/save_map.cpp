@@ -305,7 +305,7 @@ public:
         if (sym.get_image_transform())
         {
             std::string tr_str = sym.get_image_transform_string();
-            set_attr( sym_node, "image-transform", tr_str );
+            set_attr( sym_node, "transform", tr_str );
         }
 
         const stroke & strk =  sym.get_stroke();
@@ -451,7 +451,7 @@ private:
         if (sym.get_transform())
         {
             std::string tr_str = sym.get_transform_string();
-            set_attr( node, "transform", tr_str );
+            set_attr( node, "view-transform", tr_str );
         }
     }
 
