@@ -239,8 +239,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     }
 
 
-    finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
-//    boost::make_shared<placement_finder<DetectorT> >(feature_, *placement_, *info_, detector_, dims_);
+//    finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
 
     if (writer_.first) finder_->set_collect_extents(true);
 
