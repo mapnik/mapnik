@@ -3,9 +3,8 @@
 
 //ICU
 #include <unicode/unistr.h>
-class hb_font_t;
-class hb_buffer_t;
-class hb_glyph_info_t;
+#include <unicode/uscript.h>
+#include <harfbuzz/hb.h>
 
 // freetype2
 extern "C"
@@ -24,7 +23,7 @@ public:
     text_shaping(FT_Face face);
     ~text_shaping();
 
-    uint32_t process_text(UnicodeString const& text);
+    uint32_t process_text(UnicodeString const& text, bool rtl, UScriptCode script);
     hb_buffer_t *get_buffer() { return buffer_; }
 
 protected:
