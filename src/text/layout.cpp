@@ -32,6 +32,8 @@
  * processed_text
  * string_info
  * text_path
+ * char_info
+ * font_glyph
  */
 
 namespace mapnik
@@ -73,9 +75,10 @@ void text_layout::shape_text()
         {
             glyph_info tmp;
             tmp.char_index = offset + glyphs[i].cluster;
-            tmp.glyph.index = glyphs[i].codepoint;
-            tmp.glyph.face = face;
-            tmp.x_advance = positions[i].x_advance;
+            tmp.glyph_index = glyphs[i].codepoint;
+            tmp.width = positions[i].x_advance / 64.0;
+            tmp.face = face;
+            face->glyph_dimensions(tmp);
             glyphs_.push_back(tmp);
         }
         offset += chars;
@@ -85,9 +88,11 @@ void text_layout::shape_text()
     for (;itr2 != end2; itr2++)
     {
         std::cout << "'" << (char) itemizer.get_text().charAt(itr2->char_index) <<
-                 "' glyph codepoint:" << itr2->glyph.index <<
+                 "' glyph codepoint:" << itr2->glyph_index <<
                  " cluster: " << itr2->char_index <<
-                 " x_advance: "<< itr2->x_advance/64.0 << "\n";
+                 " width: "<< itr2->width <<
+                 " height: " << itr2->height() <<
+                 "\n";
     }
 }
 

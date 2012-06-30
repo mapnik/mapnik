@@ -531,4 +531,5 @@ template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path*);
 template void text_renderer<grid>::render_id(int, pixel_position, double );
 template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path*);
+
 }

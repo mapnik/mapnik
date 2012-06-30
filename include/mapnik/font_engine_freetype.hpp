@@ -33,6 +33,7 @@
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/text/face.hpp>
 
 // freetype2
 extern "C"
@@ -69,8 +70,6 @@ class font_face;
 class text_path;
 class string_info;
 
-typedef boost::shared_ptr<font_face> face_ptr;
-
 class MAPNIK_DECL font_glyph
 {
 public:
@@ -93,62 +92,6 @@ public:
 };
 
 typedef boost::shared_ptr<font_glyph> glyph_ptr;
-
-class font_face : boost::noncopyable
-{
-public:
-    font_face(FT_Face face)
-        : face_(face) {}
-
-    std::string  family_name() const
-    {
-        return std::string(face_->family_name);
-    }
-
-    std::string  style_name() const
-    {
-        return std::string(face_->style_name);
-    }
-
-    FT_GlyphSlot glyph() const
-    {
-        return face_->glyph;
-    }
-
-    FT_Face get_face() const
-    {
-        return face_;
-    }
-
-    unsigned get_char(unsigned c) const
-    {
-        return FT_Get_Char_Index(face_, c);
-    }
-
-    bool set_pixel_sizes(unsigned size)
-    {
-        if (! FT_Set_Pixel_Sizes( face_, 0, size ))
-            return true;
-        return false;
-    }
-
-    bool set_character_sizes(float size)
-    {
-        if ( !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0))
-            return true;
-        return false;
-    }
-
-    ~font_face()
-    {
-        MAPNIK_LOG_DEBUG(font_engine_freetype) << "font_face: Clean up face \"" << family_name() << " " << style_name() << "\"";
-
-        FT_Done_Face(face_);
-    }
-
-private:
-    FT_Face face_;
-};
 
 class MAPNIK_DECL font_face_set : private boost::noncopyable
 {

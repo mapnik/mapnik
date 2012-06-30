@@ -19,38 +19,38 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef MAPNIK_TEXT_LAYOUT_HPP
-#define MAPNIK_TEXT_LAYOUT_HPP
+#ifndef MAPNIK_GLYPH_INFO_HPP
+#define MAPNIK_GLYPH_INFO_HPP
 
-//mapnik
-#include <mapnik/text/itemizer.hpp>
-#include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/text/glyph_info.hpp>
-
-//stl
-#include <vector>
+//boost
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
 
-class text_layout
+class font_face;
+struct char_properties;
+typedef boost::shared_ptr<font_face> face_ptr;
+typedef unsigned glyph_index_t;
+
+struct glyph_info
 {
-public:
-    text_layout(face_manager_freetype & font_manager);
-    inline void add_text(UnicodeString const& str, char_properties const& format)
-    {
-        itemizer.add_text(str, format);
-    }
+    glyph_info()
+        : glyph_index(0), face(), char_index(0), format(0),
+          width(0), ymin(0), ymax(0), line_height(0), valid(false) {}
+    glyph_index_t glyph_index;
+    face_ptr face;
+    unsigned char_index; //Position in the string of all characters i.e. before itemizing
+    char_properties *format;
+    double width;
 
-    void break_lines();
-    void shape_text();
-    void clear();
+    double ymin;
+    double ymax;
+    double line_height;
 
-private:
-    text_itemizer itemizer;
-    std::vector<glyph_info> glyphs_;
-    face_manager_freetype &font_manager_;
+    bool valid; //Are all values valid?
+
+    double height() const { return ymax-ymin; }
 };
-}
-
-#endif // TEXT_LAYOUT_HPP
+} //ns mapnik
+#endif // GLYPH_INFO_HPP

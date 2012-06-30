@@ -185,6 +185,7 @@ source = Split(
     text/layout.cpp
     text/itemizer.cpp
     text/scrptrun.cpp
+    text/face.cpp
     """
     )
 
