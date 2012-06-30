@@ -68,6 +68,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
         agg::trans_affine tr;
         evaluate_transform(tr, feature, sym.get_image_transform());
+        tr = agg::trans_affine_scaling(scale_factor_) * tr;
 
         agg::trans_affine_translation const recenter(-center.x, -center.y);
         agg::trans_affine const recenter_tr = recenter * tr;
