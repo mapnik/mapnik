@@ -14,7 +14,7 @@ namespace mapnik
 struct glyph_info
 {
       font_glyph glyph;
-      uint32_t byte_position;
+      uint32_t char_index; //Position in the string of all characters i.e. before itemizing
       uint32_t x_advance;
 };
 

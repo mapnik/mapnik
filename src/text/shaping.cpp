@@ -36,16 +36,16 @@ uint32_t text_shaping::process_text(UnicodeString const& text, bool rtl, UScript
     if (!font_) return 0;
     hb_buffer_reset(buffer_);
 
-    std::string s;
-    text.toUTF8String(s);
-    hb_buffer_add_utf8(buffer_, s.c_str(), s.length(), 0, -1);
+    uint32_t length = text.length();
+
+    hb_buffer_add_utf16(buffer_, text.getBuffer(), length, 0, -1);
     hb_buffer_set_direction(buffer_, rtl?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
     hb_buffer_set_script(buffer_, hb_icu_script_to_script(script));
 #if 0
     hb_buffer_set_language(buffer, hb_language_from_string (language, -1));
 #endif
     hb_shape(font_, buffer_, 0 /*features*/, 0 /*num_features*/);
-    return s.length();
+    return length;
 }
 
 void text_shaping::free_data(void *data)
