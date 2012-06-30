@@ -9,7 +9,8 @@
 
 namespace mapnik
 {
-text_layout::text_layout()
+text_layout::text_layout(face_manager_freetype &font_manager)
+    : font_manager_(font_manager)
 {
 }
 
@@ -25,7 +26,12 @@ void text_layout::shape_text()
     std::list<text_item>::const_iterator itr = list.begin(), end = list.end();
     for (;itr!=end; itr++)
     {
-        text_shaping shaper;
+        face_set_ptr face_set = font_manager_.get_face_set(itr->format.face_name, itr->format.fontset);
+        //TODO: Difference pixel_sizes, char_sizes
+        face_set->set_character_sizes(itr->format.text_size);
+        face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
+        text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
+
         uint32_t bytes = shaper.process_text(itr->str);
         hb_buffer_t *buffer = shaper.get_buffer();
 
@@ -41,7 +47,8 @@ void text_layout::shape_text()
         {
             glyph_info tmp;
             tmp.byte_position = byte_offset + glyphs[i].cluster;
-            tmp.codepoint = glyphs[i].codepoint;
+            tmp.glyph.index = glyphs[i].codepoint;
+            //TODO: tmp.glyph.set_face();
             tmp.x_advance = positions[i].x_advance;
             glyphs_.push_back(tmp);
         }
@@ -52,7 +59,7 @@ void text_layout::shape_text()
     std::vector<glyph_info>::const_iterator itr2 = glyphs_.begin(), end2 = glyphs_.end();
     for (;itr2 != end2; itr2++)
     {
-        std::cout << "glyph codepoint:" << itr2->codepoint <<
+        std::cout << "glyph codepoint:" << itr2->glyph.index <<
                  " cluster: " << itr2->byte_position <<
                  " x_advance: "<< itr2->x_advance << "\n";
     }

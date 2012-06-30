@@ -7,6 +7,13 @@ class hb_font_t;
 class hb_buffer_t;
 class hb_glyph_info_t;
 
+// freetype2
+extern "C"
+{
+#include <ft2build.h>
+#include FT_FREETYPE_H
+}
+
 namespace mapnik
 {
 
@@ -14,7 +21,7 @@ class text_shaping
 {
 public:
     //TODO: Get font file from font name
-    text_shaping();
+    text_shaping(FT_Face face);
     ~text_shaping();
 
     uint32_t process_text(UnicodeString const& text);
@@ -27,6 +34,7 @@ protected:
 
     hb_font_t *font_;
     hb_buffer_t *buffer_;
+    FT_Face face_;
 };
 } //ns mapnik
 

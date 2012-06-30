@@ -71,24 +71,25 @@ class string_info;
 
 typedef boost::shared_ptr<font_face> face_ptr;
 
-class MAPNIK_DECL font_glyph : private boost::noncopyable
+class MAPNIK_DECL font_glyph
 {
 public:
+    font_glyph() : face(), index(0) {}
+
     font_glyph(face_ptr face, unsigned index)
-        : face_(face), index_(index) {}
+        : face(face), index(index) {}
 
     face_ptr get_face() const
     {
-        return face_;
+        return face;
     }
 
     unsigned get_index() const
     {
-        return index_;
+        return index;
     }
-private:
-    face_ptr face_;
-    unsigned index_;
+    face_ptr face;
+    unsigned index;
 };
 
 typedef boost::shared_ptr<font_glyph> glyph_ptr;
@@ -152,6 +153,7 @@ private:
 class MAPNIK_DECL font_face_set : private boost::noncopyable
 {
 public:
+    typedef std::vector<face_ptr>::iterator iterator;
     font_face_set(void)
         : faces_(),
         dimension_cache_() {}
@@ -177,6 +179,16 @@ public:
 
         // Final fallback to empty square if nothing better in any font
         return boost::make_shared<font_glyph>(*faces_.begin(), 0);
+    }
+
+    iterator begin()
+    {
+        return faces_.begin();
+    }
+
+    iterator end()
+    {
+        return faces_.end();
     }
 
     char_info character_dimensions(const unsigned c);

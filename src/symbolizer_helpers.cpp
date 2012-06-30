@@ -30,6 +30,30 @@
 namespace mapnik {
 
 template <typename FaceManagerT, typename DetectorT>
+text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const text_symbolizer &sym, const Feature &feature, const proj_transform &prj_trans, unsigned width, unsigned height, double scale_factor, const CoordTransform &t, FaceManagerT &font_manager, DetectorT &detector, const box2d<double> &query_extent)
+    : sym_(sym),
+      feature_(feature),
+      prj_trans_(prj_trans),
+      t_(t),
+      font_manager_(font_manager),
+      detector_(detector),
+      writer_(sym.get_metawriter()),
+      dims_(0, 0, width, height),
+      query_extent_(query_extent),
+      layout_(font_manager),
+      angle_(0.0),
+      placement_valid_(false),
+      points_on_line_(false),
+      finder_()
+{
+    initialize_geometries();
+    if (!geometries_to_process_.size()) return;
+    placement_ = sym_.get_placement_options()->get_placement_info(scale_factor);
+    next_placement();
+    initialize_points();
+}
+
+template <typename FaceManagerT, typename DetectorT>
 bool text_symbolizer_helper<FaceManagerT, DetectorT>::next()
 {
     if (!placement_valid_) return false;
@@ -96,6 +120,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
             point_itr_ = points_.begin();
             continue; //Reexecute size check
         }
+        return false; //TODO
         finder_->clear_placements();
         finder_->find_point_placement(point_itr_->first, point_itr_->second, angle_);
         if (!finder_->get_results().empty())
@@ -227,6 +252,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         return false;
     }
     placement_->properties.process(layout_, feature_);
+    layout_.shape_text();
     //TODO
 //    info_ = &(text_.get_string_info());
     if (placement_->properties.orientation)
@@ -256,6 +282,17 @@ placements_type &text_symbolizer_helper<FaceManagerT, DetectorT>::placements() c
 
 /*****************************************************************************/
 
+
+template <typename FaceManagerT, typename DetectorT>
+shield_symbolizer_helper<FaceManagerT, DetectorT>::shield_symbolizer_helper(const shield_symbolizer &sym, const Feature &feature, const proj_transform &prj_trans, unsigned width, unsigned height, double scale_factor, const CoordTransform &t, FaceManagerT &font_manager, DetectorT &detector, const box2d<double> &query_extent)
+    : text_symbolizer_helper<FaceManagerT, DetectorT>(
+          sym, feature, prj_trans, width, height,
+          scale_factor, t, font_manager, detector, query_extent),
+    sym_(sym)
+{
+    this->points_on_line_ = true;
+    init_marker();
+}
 
 template <typename FaceManagerT, typename DetectorT>
 bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next()
@@ -417,4 +454,5 @@ agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_
 
 template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
 template class shield_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
+
 } //namespace

@@ -15,9 +15,10 @@ namespace mapnik
 {
 
 
-text_shaping::text_shaping()
+text_shaping::text_shaping(FT_Face face)
     : font_(0),
-      buffer_ (hb_buffer_create())
+      buffer_ (hb_buffer_create()),
+      face_(face)
 {
     load_font();
 }
@@ -53,38 +54,8 @@ void text_shaping::free_data(void *data)
 
 void text_shaping::load_font()
 {
-    //TODO: hb_ft_font_create
     if (font_) return;
-
-    char *font_data;
-    unsigned int size;
-
-//    std::ifstream file("./unifont-5.1.20080907.ttf" /*TODO*/, std::ios::in|std::ios::binary|std::ios::ate);
-    std::ifstream file("./DejaVuSans.ttf" /*TODO*/, std::ios::in|std::ios::binary|std::ios::ate);
-    if (file.is_open())
-    {
-        size = file.tellg();
-        font_data = new char[size];
-        file.seekg(0, std::ios::beg);
-        file.read(font_data, size);
-        file.close();
-    } else {
-        std::cerr << "Could not open font!\n";
-        return ;//TODO: Raise exception
-    }
-
-
-    hb_blob_t *blob = hb_blob_create(font_data, size, HB_MEMORY_MODE_WRITABLE, font_data, &free_data);
-    hb_face_t *face = hb_face_create(blob, 0 /*face_index*/);
-    hb_blob_destroy(blob);
-    font_ = hb_font_create(face);
-#if 1
-    //TODO: Font size
-    unsigned int upem = hb_face_get_upem(face);
-    hb_font_set_scale(font_, upem, upem);
-#endif
-    hb_face_destroy(face);
-    hb_ft_font_set_funcs(font_);
+    font_ = hb_ft_font_create(face_, NULL);
 }
 
 }

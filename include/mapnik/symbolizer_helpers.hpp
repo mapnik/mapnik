@@ -56,28 +56,7 @@ public:
                            CoordTransform const& t,
                            FaceManagerT &font_manager,
                            DetectorT &detector,
-                           box2d<double> const& query_extent)
-        : sym_(sym),
-          feature_(feature),
-          prj_trans_(prj_trans),
-          t_(t),
-          font_manager_(font_manager),
-          detector_(detector),
-          writer_(sym.get_metawriter()),
-          dims_(0, 0, width, height),
-          query_extent_(query_extent),
-          layout_(),
-          angle_(0.0),
-          placement_valid_(false),
-          points_on_line_(false),
-          finder_()
-    {
-        initialize_geometries();
-        if (!geometries_to_process_.size()) return;
-        placement_ = sym_.get_placement_options()->get_placement_info(scale_factor);
-        next_placement();
-        initialize_points();
-    }
+                           box2d<double> const& query_extent);
 
     /** Return next placement.
      * If no more placements are found false is returned.
@@ -142,13 +121,7 @@ public:
                              CoordTransform const &t,
                              FaceManagerT &font_manager,
                              DetectorT &detector,
-                             box2d<double> const& query_extent) :
-        text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector, query_extent),
-        sym_(sym)
-    {
-        this->points_on_line_ = true;
-        init_marker();
-    }
+                             box2d<double> const& query_extent);
 
     box2d<double> const& get_marker_extent() const
     {

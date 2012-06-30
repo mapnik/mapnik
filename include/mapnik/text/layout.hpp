@@ -3,6 +3,7 @@
 
 //mapnik
 #include <mapnik/text/itemizer.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 //stl
 #include <vector>
@@ -12,7 +13,7 @@ namespace mapnik
 
 struct glyph_info
 {
-      uint32_t codepoint;
+      font_glyph glyph;
       uint32_t byte_position;
       uint32_t x_advance;
 };
@@ -20,7 +21,7 @@ struct glyph_info
 class text_layout
 {
 public:
-    text_layout();
+    text_layout(face_manager_freetype & font_manager);
     inline void add_text(UnicodeString const& str, char_properties const& format)
     {
         itemizer.add_text(str, format);
@@ -33,6 +34,7 @@ public:
 private:
     text_itemizer itemizer;
     std::vector<glyph_info> glyphs_;
+    face_manager_freetype &font_manager_;
 };
 }
 
