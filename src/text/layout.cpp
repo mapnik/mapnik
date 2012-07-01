@@ -50,7 +50,6 @@ void text_layout::break_lines()
 void text_layout::shape_text()
 {
     UnicodeString const& text = itemizer.get_text();
-    uint32_t offset = 0; //in utf16 code points
 
     glyphs_.reserve(text.length()); //Preallocate memory
 
@@ -63,7 +62,7 @@ void text_layout::shape_text()
         face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
         text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
 
-        uint32_t chars = shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_DEFAULT_RTL, itr->script);
+        shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_DEFAULT_RTL, itr->script);
         hb_buffer_t *buffer = shaper.get_buffer();
 
         unsigned num_glyphs = hb_buffer_get_length(buffer);
@@ -77,14 +76,13 @@ void text_layout::shape_text()
         for (unsigned i=0; i<num_glyphs; i++)
         {
             glyph_info tmp;
-            tmp.char_index = offset + glyphs[i].cluster;
+            tmp.char_index = glyphs[i].cluster;
             tmp.glyph_index = glyphs[i].codepoint;
             tmp.width = positions[i].x_advance / 64.0;
             tmp.face = face;
             face->glyph_dimensions(tmp);
             glyphs_.push_back(tmp);
         }
-        offset += chars;
     }
     std::cout << "text_length: unicode chars: " << itemizer.get_text().length() << " glyphs: " << glyphs_.size()  << "\n";
     std::vector<glyph_info>::const_iterator itr2 = glyphs_.begin(), end2 = glyphs_.end();
