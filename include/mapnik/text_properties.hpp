@@ -34,6 +34,7 @@
 
 // boost
 #include <boost/property_tree/ptree.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
@@ -70,6 +71,7 @@ struct char_properties
     color halo_fill;
     double halo_radius;
 };
+typedef boost::shared_ptr<char_properties> char_properties_ptr;
 
 
 enum label_placement_enum

@@ -39,12 +39,13 @@ namespace mapnik
 
 struct text_item
 {
-    UnicodeString str;
+    unsigned start; //First char
+    unsigned end; //First char after this item
     UScriptCode script;
-    char_properties format;
+    char_properties_ptr format;
     UBiDiDirection rtl;
-    text_item(UnicodeString const& str) :
-        str(str), script(), format(), rtl(UBIDI_LTR)
+    text_item() :
+        start(0), end(0), script(), format(), rtl(UBIDI_LTR)
     {
 
     }
@@ -59,7 +60,7 @@ class text_itemizer
 {
 public:
     text_itemizer();
-    void add_text(UnicodeString str, char_properties const& format);
+    void add_text(UnicodeString str, char_properties_ptr format);
     std::list<text_item> const& itemize();
     void clear();
     UnicodeString const& get_text() { return text; }
@@ -70,7 +71,7 @@ private:
         unsigned limit;
         T data;
     };
-    typedef run<char_properties> format_run_t;
+    typedef run<char_properties_ptr> format_run_t;
     typedef run<UBiDiDirection> direction_run_t;
     typedef run<UScriptCode> script_run_t;
     UnicodeString text;

@@ -35,7 +35,7 @@ text_itemizer::text_itemizer() : text(), format_runs(), direction_runs(), script
 
 }
 
-void text_itemizer::add_text(UnicodeString str, char_properties const& format)
+void text_itemizer::add_text(UnicodeString str, char_properties_ptr format)
 {
     text += str;
     format_runs.push_back(format_run_t(format, text.length()));
@@ -112,7 +112,9 @@ void text_itemizer::create_item_list()
     while (position < text.length())
     {
         unsigned next_position = std::min(script_itr->limit, std::min(dir_itr->limit, format_itr->limit));
-        text_item item(text.tempSubStringBetween(position, next_position));
+        text_item item;
+        item.start = position;
+        item.end = next_position;
         item.format = format_itr->data;
         item.script = script_itr->data;
         item.rtl = dir_itr->data;

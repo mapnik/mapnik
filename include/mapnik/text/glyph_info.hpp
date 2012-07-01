@@ -41,7 +41,6 @@ struct glyph_info
     glyph_index_t glyph_index;
     face_ptr face;
     unsigned char_index; //Position in the string of all characters i.e. before itemizing
-    char_properties *format;
     double width;
 
     double ymin;
