@@ -18,7 +18,7 @@
             <!-- This is an easy test to ensure text shaping actually works. Ligatures are rendered when harfbuzz is used, but not with the old text rendering system. -->
             <Filter>[nr] = "1"</Filter>
             <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="16">"fi"</TextSymbolizer>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="-16">"ff"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="-16">"mixed نامجو mixed"</TextSymbolizer>
         </Rule>
         <Rule>
             <!-- In addition to the problem mentioned in the bug report (which seems to be gone) this the position is calculated incorrectly -->
