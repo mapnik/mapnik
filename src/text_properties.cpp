@@ -54,7 +54,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     largest_bbox_only(true),
     text_ratio(0),
     wrap_width(0),
-    format(),
+    format(boost::make_shared<char_properties>()),
     tree_()
 {
 
@@ -128,7 +128,7 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
         set_old_style_expression(parse_expression(*name_, "utf8"));
     }
 
-    format.from_xml(sym, fontsets);
+    format->from_xml(sym, fontsets);
     formatting::node_ptr n(formatting::node::from_xml(sym));
     if (n) set_format_tree(n);
 }
@@ -217,7 +217,7 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     {
         set_attr(node, "vertical-alignment", valign);
     }
-    format.to_xml(node, explicit_defaults, dfl.format);
+    format->to_xml(node, explicit_defaults, *(dfl.format));
     if (tree_) tree_->to_xml(node);
 }
 

@@ -48,7 +48,7 @@ bool text_placement_info_simple::next()
         if (state > 0)
         {
             if (state > parent_->text_sizes_.size()) return false;
-            properties.format.text_size = parent_->text_sizes_[state-1];
+            properties.format->text_size = parent_->text_sizes_[state-1];
         }
         if (!next_position_only()) {
             state++;

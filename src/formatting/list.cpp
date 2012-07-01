@@ -38,7 +38,7 @@ void list_node::to_xml(boost::property_tree::ptree &xml) const
 }
 
 
-void list_node::apply(char_properties const& p, Feature const& feature, text_layout &output) const
+void list_node::apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
 {
     std::vector<node_ptr>::const_iterator itr = children_.begin();
     std::vector<node_ptr>::const_iterator end = children_.end();

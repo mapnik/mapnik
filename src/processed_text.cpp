@@ -26,7 +26,7 @@
 namespace mapnik
 {
 
-void processed_text::push_back(char_properties const& properties, UnicodeString const& text)
+void processed_text::push_back(char_properties_ptr properties, UnicodeString const& text)
 {
     expr_list_.push_back(processed_expression(properties, text));
 }

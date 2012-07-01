@@ -53,18 +53,18 @@ node_ptr text_node::from_xml(xml_node const& xml)
     return boost::make_shared<text_node>(parse_expression(data, "utf8"));
 }
 
-void text_node::apply(char_properties const& p, Feature const& feature, text_layout &output) const
+void text_node::apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
 {
     UnicodeString text_str = boost::apply_visitor(evaluate<Feature,value_type>(feature), *text_).to_unicode();
-    if (p.text_transform == UPPERCASE)
+    if (p->text_transform == UPPERCASE)
     {
         text_str = text_str.toUpper();
     }
-    else if (p.text_transform == LOWERCASE)
+    else if (p->text_transform == LOWERCASE)
     {
         text_str = text_str.toLower();
     }
-    else if (p.text_transform == CAPITALIZE)
+    else if (p->text_transform == CAPITALIZE)
     {
         text_str = text_str.toTitle(NULL);
     }

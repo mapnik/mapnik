@@ -50,7 +50,7 @@ public:
     virtual ~node() {}
     virtual void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(xml_node const& xml);
-    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const = 0;
+    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const = 0;
     virtual void add_expressions(expression_set &output) const;
 };
 } //ns formatting

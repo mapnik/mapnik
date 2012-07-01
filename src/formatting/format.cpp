@@ -26,6 +26,9 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
 
+//boost
+#include <boost/make_shared.hpp>
+
 namespace mapnik {
 namespace formatting {
 
@@ -74,20 +77,20 @@ node_ptr format_node::from_xml(xml_node const& xml)
 }
 
 
-void format_node::apply(char_properties const& p, const Feature &feature, text_layout &output) const
+void format_node::apply(char_properties_ptr p, const Feature &feature, text_layout &output) const
 {
-    char_properties new_properties = p;
-    if (face_name) new_properties.face_name = *face_name;
-    if (text_size) new_properties.text_size = *text_size;
-    if (character_spacing) new_properties.character_spacing = *character_spacing;
-    if (line_spacing) new_properties.line_spacing = *line_spacing;
-    if (text_opacity) new_properties.text_opacity = *text_opacity;
-    if (wrap_before) new_properties.wrap_before = *wrap_before;
-    if (wrap_char) new_properties.wrap_char = *wrap_char;
-    if (text_transform) new_properties.text_transform = *text_transform;
-    if (fill) new_properties.fill = *fill;
-    if (halo_fill) new_properties.halo_fill = *halo_fill;
-    if (halo_radius) new_properties.halo_radius = *halo_radius;
+    char_properties_ptr new_properties = boost::make_shared<char_properties>(*p);
+    if (face_name) new_properties->face_name = *face_name;
+    if (text_size) new_properties->text_size = *text_size;
+    if (character_spacing) new_properties->character_spacing = *character_spacing;
+    if (line_spacing) new_properties->line_spacing = *line_spacing;
+    if (text_opacity) new_properties->text_opacity = *text_opacity;
+    if (wrap_before) new_properties->wrap_before = *wrap_before;
+    if (wrap_char) new_properties->wrap_char = *wrap_char;
+    if (text_transform) new_properties->text_transform = *text_transform;
+    if (fill) new_properties->fill = *fill;
+    if (halo_fill) new_properties->halo_fill = *halo_fill;
+    if (halo_radius) new_properties->halo_radius = *halo_radius;
 
     if (child_) {
         child_->apply(new_properties, feature, output);

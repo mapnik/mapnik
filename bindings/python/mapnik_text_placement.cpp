@@ -83,7 +83,7 @@ struct NodeWrap: formatting::node, wrapper<formatting::node>
 
     }
 
-    void apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         python_block_auto_unblock b;
         this->get_override("apply")(ptr(&p), ptr(&feature), ptr(&output));
@@ -121,7 +121,7 @@ struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
 
     }
 
-    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -134,7 +134,7 @@ struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
         }
     }
 
-    void default_apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         formatting::text_node::apply(p, feature, output);
     }
@@ -142,7 +142,7 @@ struct TextNodeWrap: formatting::text_node, wrapper<formatting::text_node>
 
 struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
 {
-    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -155,7 +155,7 @@ struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
         }
     }
 
-    void default_apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         formatting::format_node::apply(p, feature, output);
     }
@@ -163,7 +163,7 @@ struct FormatNodeWrap: formatting::format_node, wrapper<formatting::format_node>
 
 struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expression_format>
 {
-    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -176,7 +176,7 @@ struct ExprFormatWrap: formatting::expression_format, wrapper<formatting::expres
         }
     }
 
-    void default_apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         formatting::expression_format::apply(p, feature, output);
     }
@@ -200,7 +200,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
        http://wiki.python.org/moin/boost.python/HowTo#A.22Raw.22_function */
 
 
-    virtual void apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         if(override o = this->get_override("apply"))
         {
@@ -213,7 +213,7 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
         }
     }
 
-    void default_apply(char_properties const& p, Feature const& feature, text_layout &output) const
+    void default_apply(char_properties_ptr p, Feature const& feature, text_layout &output) const
     {
         formatting::list_node::apply(p, feature, output);
     }
@@ -279,12 +279,12 @@ void insert_expression(expression_set *set, expression_ptr p)
     set->insert(p);
 }
 
-char_properties & get_format(text_symbolizer const& sym)
+char_properties_ptr get_format(text_symbolizer const& sym)
 {
     return sym.get_placement_options()->defaults.format;
 }
 
-void set_format(text_symbolizer const& sym, char_properties & format)
+void set_format(text_symbolizer const& sym, char_properties_ptr format)
 {
     sym.get_placement_options()->defaults.format = format;
 }
@@ -347,7 +347,7 @@ void export_text_placement()
                       &text_symbolizer::set_placement_options)
         //TODO: Check return policy, is there a better way to do this?
         .add_property("format",
-                      make_function(&get_format, return_value_policy<reference_existing_object>()),
+                      make_function(&get_format),
                       &set_format,
                       "Shortcut for placements.defaults.default_format")
         .add_property("properties",

@@ -168,7 +168,7 @@ struct text_symbolizer_properties
     unsigned text_ratio;
     unsigned wrap_width;
     /** Default values for char_properties. */
-    char_properties format;
+    char_properties_ptr format;
 private:
     /** A tree of formatting::nodes which contain text and formatting information. */
     formatting::node_ptr tree_;

@@ -36,14 +36,14 @@ public:
     class processed_expression
     {
     public:
-        processed_expression(char_properties const& properties, UnicodeString const& text) :
+        processed_expression(char_properties_ptr properties, UnicodeString const& text) :
             p(properties), str(text) {}
         char_properties p;
         UnicodeString str;
     };
 public:
     processed_text(face_manager<freetype_engine> & font_manager, double scale_factor);
-    void push_back(char_properties const& properties, UnicodeString const& text);
+    void push_back(char_properties_ptr properties, UnicodeString const& text);
     unsigned size() const { return expr_list_.size(); }
     unsigned empty() const { return expr_list_.empty(); }
     void clear();
