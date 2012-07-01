@@ -23,10 +23,11 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/char_properties_ptr.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/text_properties.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>

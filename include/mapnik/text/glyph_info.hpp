@@ -29,14 +29,13 @@ namespace mapnik
 {
 
 class font_face;
-struct char_properties;
 typedef boost::shared_ptr<font_face> face_ptr;
 typedef unsigned glyph_index_t;
 
 struct glyph_info
 {
     glyph_info()
-        : glyph_index(0), face(), char_index(0), format(0),
+        : glyph_index(0), face(), char_index(0),
           width(0), ymin(0), ymax(0), line_height(0), valid(false) {}
     glyph_index_t glyph_index;
     face_ptr face;

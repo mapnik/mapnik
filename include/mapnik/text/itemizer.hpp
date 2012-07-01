@@ -24,7 +24,7 @@
 #define MAPNIK_TEXT_ITEMIZER_HPP
 
 //mapnik
-#include <mapnik/text_properties.hpp> //TODO: Move to text/properties.hpp
+#include <mapnik/text/char_properties_ptr.hpp>
 
 // stl
 #include <string>

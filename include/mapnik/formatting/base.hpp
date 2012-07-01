@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/text/char_properties_ptr.hpp>
 
 // stl
 #include <set>
@@ -37,7 +38,6 @@ namespace mapnik {
 typedef std::set<expression_ptr> expression_set;
 class text_layout;
 class xml_node;
-struct char_properties;
 
 namespace formatting {
 

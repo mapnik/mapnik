@@ -21,6 +21,7 @@
  *****************************************************************************/
 #include <mapnik/text/layout.hpp>
 #include <mapnik/text/shaping.hpp>
+#include <mapnik/text_properties.hpp>
 
 //stl
 #include <iostream>
@@ -48,18 +49,19 @@ void text_layout::break_lines()
 
 void text_layout::shape_text()
 {
-    glyphs_.reserve(itemizer.get_text().length()); //Preallocate memory
+    UnicodeString const& text = itemizer.get_text();
+    glyphs_.reserve(text.length()); //Preallocate memory
     uint32_t offset = 0; //in utf16 code points
     std::list<text_item> const& list = itemizer.itemize();
     std::list<text_item>::const_iterator itr = list.begin(), end = list.end();
     for (;itr!=end; itr++)
     {
-        face_set_ptr face_set = font_manager_.get_face_set(itr->format.face_name, itr->format.fontset);
-        face_set->set_character_sizes(itr->format.text_size);
+        face_set_ptr face_set = font_manager_.get_face_set(itr->format->face_name, itr->format->fontset);
+        face_set->set_character_sizes(itr->format->text_size);
         face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
         text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
 
-        uint32_t chars = shaper.process_text(itr->str, itr->rtl == UBIDI_DEFAULT_RTL, itr->script);
+        uint32_t chars = shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_DEFAULT_RTL, itr->script);
         hb_buffer_t *buffer = shaper.get_buffer();
 
         unsigned num_glyphs = hb_buffer_get_length(buffer);
@@ -68,7 +70,7 @@ void text_layout::shape_text()
         hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
 
         std::string s;
-        std::cout << "Processing item '" << itr->str.toUTF8String(s) << "' (" << uscript_getName(itr->script) << "," << itr->str.length() << "," << num_glyphs << "," << itr->rtl <<  ")\n";
+        std::cout << "Processing item '" << text.tempSubStringBetween(itr->start, itr->end).toUTF8String(s) << "' (" << uscript_getName(itr->script) << "," << itr->end - itr->start << "," << num_glyphs << "," << itr->rtl <<  ")\n";
 
         for (unsigned i=0; i<num_glyphs; i++)
         {

@@ -44,7 +44,7 @@ public:
     text_shaping(FT_Face face);
     ~text_shaping();
 
-    uint32_t process_text(UnicodeString const& text, bool rtl, UScriptCode script);
+    uint32_t process_text(UnicodeString const& text, unsigned start, unsigned end, bool rtl, UScriptCode script);
     hb_buffer_t *get_buffer() { return buffer_; }
 
 protected:

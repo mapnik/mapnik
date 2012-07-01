@@ -24,9 +24,9 @@
 #define CHAR_INFO_HPP
 
 #include <boost/shared_ptr.hpp>
+#include <mapnik/text/char_properties_ptr.hpp>
 
 namespace mapnik {
-struct char_properties;
 
 class char_info {
 public:
@@ -58,7 +58,7 @@ public:
     double ymin;
     double ymax;
     double avg_height;
-    char_properties *format;
+    char_properties_ptr format;
     double height() const { return ymax-ymin; }
 };
 }

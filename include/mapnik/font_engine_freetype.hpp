@@ -33,6 +33,7 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/text/face.hpp>
+#include <mapnik/text/char_properties_ptr.hpp>
 
 // freetype2
 extern "C"
@@ -195,8 +196,8 @@ struct text_renderer : private boost::noncopyable
     struct glyph_t : boost::noncopyable
     {
         FT_Glyph image;
-        char_properties *properties;
-        glyph_t(FT_Glyph image_, char_properties *properties_)
+        char_properties_ptr properties;
+        glyph_t(FT_Glyph image_, char_properties_ptr properties_)
             : image(image_), properties(properties_) {}
         ~glyph_t () { FT_Done_Glyph(image);}
     };

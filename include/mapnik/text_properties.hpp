@@ -23,6 +23,7 @@
 #define TEXT_PROPERTIES_HPP
 
 // mapnik
+#include <mapnik/text/char_properties_ptr.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
@@ -71,8 +72,6 @@ struct char_properties
     color halo_fill;
     double halo_radius;
 };
-typedef boost::shared_ptr<char_properties> char_properties_ptr;
-
 
 enum label_placement_enum
 {

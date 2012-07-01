@@ -52,14 +52,14 @@ text_shaping::~text_shaping()
     hb_font_destroy(font_);
 }
 
-uint32_t text_shaping::process_text(UnicodeString const& text, bool rtl, UScriptCode script)
+uint32_t text_shaping::process_text(UnicodeString const& text, unsigned start, unsigned end, bool rtl, UScriptCode script)
 {
     if (!font_) return 0;
     hb_buffer_reset(buffer_);
 
     uint32_t length = text.length();
 
-    hb_buffer_add_utf16(buffer_, text.getBuffer(), length, 0, -1);
+    hb_buffer_add_utf16(buffer_, text.getBuffer(), length, start, end-start);
     hb_buffer_set_direction(buffer_, rtl?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
     hb_buffer_set_script(buffer_, hb_icu_script_to_script(script));
 #if 0

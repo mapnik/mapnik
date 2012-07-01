@@ -26,18 +26,53 @@
 #include <mapnik/text/itemizer.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/glyph_info.hpp>
+#include <mapnik/text/char_properties_ptr.hpp>
 
 //stl
 #include <vector>
+#include <list>
+
+//boost
+#include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
+
+class format_run
+{
+    char_properties_ptr properties;
+    std::vector<glyph_info> glyphs;
+//    double
+};
+
+typedef boost::shared_ptr<format_run> format_run_ptr;
+
+
+
+/* This class stores all glyphs in a line in left to right order.
+ *
+ * It can be used for rendering but no text processing (like line breaking)
+ * should be done!
+ * Glyphs are stored in runs with the same format.
+ */
+class text_line
+{
+public:
+    double max_text_height; //Height of the largest format run in this run.
+    double max_line_height; //Includes line spacing
+    std::vector<format_run_ptr> const& get_runs() const { return runs_; }
+    void add_run(format_run_ptr);
+
+private:
+    std::vector<format_run_ptr> runs_;
+};
+
 
 class text_layout
 {
 public:
     text_layout(face_manager_freetype & font_manager);
-    inline void add_text(UnicodeString const& str, char_properties const& format)
+    inline void add_text(UnicodeString const& str, char_properties_ptr format)
     {
         itemizer.add_text(str, format);
     }
@@ -48,6 +83,7 @@ public:
 
 private:
     text_itemizer itemizer;
+    std::list<text_line> lines_;
     std::vector<glyph_info> glyphs_;
     face_manager_freetype &font_manager_;
 };
