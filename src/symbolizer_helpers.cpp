@@ -25,6 +25,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/text/layout.hpp>
 #include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
@@ -40,7 +41,7 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
       writer_(sym.get_metawriter()),
       dims_(0, 0, width, height),
       query_extent_(query_extent),
-      layout_(font_manager),
+      layout_(new text_layout(font_manager)),
       angle_(0.0),
       placement_valid_(false),
       points_on_line_(false),
@@ -251,8 +252,8 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         placement_valid_ = false;
         return false;
     }
-    placement_->properties.process(layout_, feature_);
-    layout_.shape_text();
+    placement_->properties.process(*layout_, feature_);
+    layout_->shape_text();
     //TODO
 //    info_ = &(text_.get_string_info());
     if (placement_->properties.orientation)

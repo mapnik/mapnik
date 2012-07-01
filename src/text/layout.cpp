@@ -50,8 +50,10 @@ void text_layout::break_lines()
 void text_layout::shape_text()
 {
     UnicodeString const& text = itemizer.get_text();
-    glyphs_.reserve(text.length()); //Preallocate memory
     uint32_t offset = 0; //in utf16 code points
+
+    glyphs_.reserve(text.length()); //Preallocate memory
+
     std::list<text_item> const& list = itemizer.itemize();
     std::list<text_item>::const_iterator itr = list.begin(), end = list.end();
     for (;itr!=end; itr++)

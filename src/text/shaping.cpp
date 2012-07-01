@@ -58,6 +58,7 @@ uint32_t text_shaping::process_text(UnicodeString const& text, unsigned start, u
     hb_buffer_reset(buffer_);
 
     uint32_t length = text.length();
+    std::cout << "process_text: length: " << length << " start: " << start << " end: " << end << "\n";
 
     hb_buffer_add_utf16(buffer_, text.getBuffer(), length, start, end-start);
     hb_buffer_set_direction(buffer_, rtl?HB_DIRECTION_RTL:HB_DIRECTION_LTR);

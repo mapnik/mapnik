@@ -29,7 +29,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/text/layout.hpp>
 #include <mapnik/text_path.hpp>
 
 //boost
@@ -40,6 +39,9 @@ namespace mapnik {
 
 typedef boost::ptr_vector<text_path> placements_type;
 template <typename DetectorT> class placement_finder;
+
+class text_layout;
+typedef boost::shared_ptr<text_layout> text_layout_ptr;
 
 /** Helper object that does all the TextSymbolizer placment finding
  * work except actually rendering the object. */
@@ -83,7 +85,7 @@ protected:
     box2d<double> dims_;
     box2d<double> const& query_extent_;
     //Processing
-    text_layout layout_;
+    text_layout_ptr layout_;
     /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
     /** Remaining geometries to be processed. */
     std::list<geometry_type*> geometries_to_process_;

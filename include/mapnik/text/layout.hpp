@@ -67,6 +67,8 @@ private:
     std::vector<format_run_ptr> runs_;
 };
 
+typedef boost::shared_ptr<text_line> text_line_ptr;
+
 
 class text_layout
 {
@@ -83,7 +85,7 @@ public:
 
 private:
     text_itemizer itemizer;
-    std::list<text_line> lines_;
+    std::vector<text_line_ptr> lines_;
     std::vector<glyph_info> glyphs_;
     face_manager_freetype &font_manager_;
 };
