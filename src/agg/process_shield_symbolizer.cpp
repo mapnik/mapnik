@@ -66,7 +66,6 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                           sym.get_opacity(),
                           sym.comp_op());
 
-            ren.prepare_glyphs(&(placements[ii]));
             ren.render(placements[ii].center);
         }
     }

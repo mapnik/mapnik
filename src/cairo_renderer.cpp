@@ -685,11 +685,11 @@ public:
 
         context_->glyph_path(glyphs);
     }
-
     void add_text(text_path & path,
                   cairo_face_manager & manager,
                   face_manager<freetype_engine> &font_manager)
     {
+        #if 0
         double sx = path.center.x;
         double sy = path.center.y;
 
@@ -732,6 +732,9 @@ public:
                 show_glyph(glyph->get_index(), sx + x, sy - y);
             }
         }
+#else
+#warning "Text rendering in Cairo disabled!"
+#endif
     }
 
 

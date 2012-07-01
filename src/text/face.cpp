@@ -22,6 +22,8 @@
 #include <mapnik/text/face.hpp>
 #include <mapnik/debug.hpp>
 
+#include <boost/foreach.hpp>
+
 extern "C"
 {
 #include FT_GLYPH_H
@@ -76,6 +78,21 @@ font_face::~font_face()
         " " << style_name() << "\"";
 
     FT_Done_Face(face_);
+}
+
+/******************************************************************************/
+
+void font_face_set::add(face_ptr face)
+{
+    faces_.push_back(face);
+}
+
+void font_face_set::set_character_sizes(float size)
+{
+    BOOST_FOREACH ( face_ptr const& face, faces_)
+    {
+        face->set_character_sizes(size);
+    }
 }
 
 }//ns mapnik

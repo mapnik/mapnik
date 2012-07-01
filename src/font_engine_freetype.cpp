@@ -220,54 +220,7 @@ stroker_ptr freetype_engine::create_stroker()
     return stroker_ptr();
 }
 
-char_info font_face_set::character_dimensions(const unsigned c)
-{
-    //Check if char is already in cache
-    std::map<unsigned, char_info>::const_iterator itr;
-    itr = dimension_cache_.find(c);
-    if (itr != dimension_cache_.end()) {
-        return itr->second;
-    }
-
-    FT_Matrix matrix;
-    FT_Vector pen;
-    FT_Error  error;
-
-    pen.x = 0;
-    pen.y = 0;
-
-    FT_BBox glyph_bbox;
-    FT_Glyph image;
-
-    glyph_ptr glyph = get_glyph(c);
-    FT_Face face = glyph->get_face()->get_face();
-
-    matrix.xx = (FT_Fixed)( 1 * 0x10000L );
-    matrix.xy = (FT_Fixed)( 0 * 0x10000L );
-    matrix.yx = (FT_Fixed)( 0 * 0x10000L );
-    matrix.yy = (FT_Fixed)( 1 * 0x10000L );
-
-    FT_Set_Transform(face, &matrix, &pen);
-
-    error = FT_Load_Glyph (face, glyph->get_index(), FT_LOAD_NO_HINTING);
-    if ( error )
-        return char_info();
-
-    error = FT_Get_Glyph(face->glyph, &image);
-    if ( error )
-        return char_info();
-
-    FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &glyph_bbox);
-    FT_Done_Glyph(image);
-
-    unsigned tempx = face->glyph->advance.x >> 6;
-
-    char_info dim(c, tempx, glyph_bbox.yMax, glyph_bbox.yMin, face->size->metrics.height/64.0 /* >> 6 */);
-    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
-    return dim;
-}
-
-
+#if 0
 void font_face_set::get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format)
 {
     double avg_height = character_dimensions('X').height();
@@ -313,6 +266,7 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 
     ubidi_close(bidi);
 }
+#endif
 
 template <typename T>
 text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s, composite_mode_e comp_op)
@@ -321,6 +275,7 @@ text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_eng
       stroker_(s),
       comp_op_(comp_op) {}
 
+#if 0
 template <typename T>
 box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
 {
@@ -398,6 +353,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
 
     return box2d<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
 }
+#endif
 
 template <typename T>
 void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity, composite_mode_e comp_op)
@@ -520,16 +476,70 @@ void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_
     }
 }
 
+template <typename T>
+void text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            int gray=bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                pixmap_.setPixel(i,j,feature_id);
+                //pixmap_.blendPixel2(i,j,rgba,gray,opacity_);
+            }
+        }
+    }
+}
+
+template <typename T>
+void text_renderer<T>::render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            int gray=bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                pixmap_.blendPixel2(i, j, rgba, gray, opacity);
+            }
+        }
+    }
+}
+
 #ifdef MAPNIK_THREADSAFE
 boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 template void text_renderer<image_32>::render(pixel_position);
 template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
-template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path*);
 
 template void text_renderer<grid>::render_id(int, pixel_position, double );
 template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
-template box2d<double>text_renderer<grid>::prepare_glyphs(text_path*);
+
+void stroker::init(double radius)
+{
+    FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
+                   FT_STROKER_LINECAP_ROUND,
+                   FT_STROKER_LINEJOIN_ROUND,
+                   0);
+}
+
+stroker::~stroker()
+{
+    MAPNIK_LOG_DEBUG(font_engine_freetype) << "stroker: Destroy stroker=" << s_;
+
+    FT_Stroker_Done(s_);
+}
 
 }

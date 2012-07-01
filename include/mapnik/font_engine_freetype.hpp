@@ -30,7 +30,6 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/font_set.hpp>
-#include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/text/face.hpp>
@@ -49,7 +48,6 @@ extern "C"
 #include <boost/make_shared.hpp>
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/foreach.hpp>
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
@@ -66,97 +64,6 @@ extern "C"
 
 namespace mapnik
 {
-class font_face;
-class text_path;
-class string_info;
-
-class MAPNIK_DECL font_glyph
-{
-public:
-    font_glyph() : face(), index(0) {}
-
-    font_glyph(face_ptr face, unsigned index)
-        : face(face), index(index) {}
-
-    face_ptr get_face() const
-    {
-        return face;
-    }
-
-    unsigned get_index() const
-    {
-        return index;
-    }
-    face_ptr face;
-    unsigned index;
-};
-
-typedef boost::shared_ptr<font_glyph> glyph_ptr;
-
-class MAPNIK_DECL font_face_set : private boost::noncopyable
-{
-public:
-    typedef std::vector<face_ptr>::iterator iterator;
-    font_face_set(void)
-        : faces_(),
-        dimension_cache_() {}
-
-    void add(face_ptr face)
-    {
-        faces_.push_back(face);
-        dimension_cache_.clear(); //Make sure we don't use old cached data
-    }
-
-    unsigned size() const
-    {
-        return faces_.size();
-    }
-
-    glyph_ptr get_glyph(unsigned c) const
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            FT_UInt g = face->get_char(c);
-            if (g) return boost::make_shared<font_glyph>(face, g);
-        }
-
-        // Final fallback to empty square if nothing better in any font
-        return boost::make_shared<font_glyph>(*faces_.begin(), 0);
-    }
-
-    iterator begin()
-    {
-        return faces_.begin();
-    }
-
-    iterator end()
-    {
-        return faces_.end();
-    }
-
-    char_info character_dimensions(const unsigned c);
-
-    void get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format);
-
-    void set_pixel_sizes(unsigned size)
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            face->set_pixel_sizes(size);
-        }
-    }
-
-    void set_character_sizes(float size)
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            face->set_character_sizes(size);
-        }
-    }
-private:
-    std::vector<face_ptr> faces_;
-    std::map<unsigned, char_info> dimension_cache_;
-};
 
 // FT_Stroker wrapper
 class stroker : boost::noncopyable
@@ -164,34 +71,16 @@ class stroker : boost::noncopyable
 public:
     explicit stroker(FT_Stroker s)
         : s_(s) {}
+    ~stroker();
 
-    void init(double radius)
-    {
-        FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
-                       FT_STROKER_LINECAP_ROUND,
-                       FT_STROKER_LINEJOIN_ROUND,
-                       0);
-    }
+    void init(double radius);
 
-    FT_Stroker const& get() const
-    {
-        return s_;
-    }
-
-    ~stroker()
-    {
-        MAPNIK_LOG_DEBUG(font_engine_freetype) << "stroker: Destroy stroker=" << s_;
-
-        FT_Stroker_Done(s_);
-    }
+    FT_Stroker const& get() const { return s_; }
 private:
     FT_Stroker s_;
 };
-
-
-
-typedef boost::shared_ptr<font_face_set> face_set_ptr;
 typedef boost::shared_ptr<stroker> stroker_ptr;
+
 
 class MAPNIK_DECL freetype_engine
 {
@@ -210,7 +99,7 @@ private:
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif
-    static std::map<std::string,std::pair<int,std::string> > name2file_;
+    static std::map<std::string, std::pair<int,std::string> > name2file_;
 };
 
 template <typename T>
@@ -316,50 +205,12 @@ struct text_renderer : private boost::noncopyable
     typedef T pixmap_type;
 
     text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s, composite_mode_e comp_op = src_over);
-    box2d<double> prepare_glyphs(text_path *path);
     void render(pixel_position pos);
     void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
 
 private:
-    
-    void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
-    {
-        int x_max=x+bitmap->width;
-        int y_max=y+bitmap->rows;
-        int i,p,j,q;
-
-        for (i=x,p=0;i<x_max;++i,++p)
-        {
-            for (j=y,q=0;j<y_max;++j,++q)
-            {
-                int gray=bitmap->buffer[q*bitmap->width+p];
-                if (gray)
-                {
-                    pixmap_.blendPixel2(i, j, rgba, gray, opacity);
-                }
-            }
-        }
-    }
-
-    void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y)
-    {
-        int x_max=x+bitmap->width;
-        int y_max=y+bitmap->rows;
-        int i,p,j,q;
-
-        for (i=x,p=0;i<x_max;++i,++p)
-        {
-            for (j=y,q=0;j<y_max;++j,++q)
-            {
-                int gray=bitmap->buffer[q*bitmap->width+p];
-                if (gray)
-                {
-                    pixmap_.setPixel(i,j,feature_id);
-                    //pixmap_.blendPixel2(i,j,rgba,gray,opacity_);
-                }
-            }
-        }
-    }
+    void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity);
+    void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y);
 
     pixmap_type & pixmap_;
     face_manager<freetype_engine> &font_manager_;

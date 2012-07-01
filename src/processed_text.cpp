@@ -56,6 +56,7 @@ void processed_text::clear()
 
 string_info &processed_text::get_string_info()
 {
+#if 0
     info_.clear(); //if this function is called twice invalid results are returned, so clear string_info first
     expression_list::iterator itr = expr_list_.begin();
     expression_list::iterator end = expr_list_.end();
@@ -79,6 +80,7 @@ string_info &processed_text::get_string_info()
         info_.add_text(itr->str);
     }
     return info_;
+#endif
 }
 
 } //ns mapnik

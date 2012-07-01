@@ -64,7 +64,6 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                           helper.get_marker(), helper.get_image_transform(),
                           sym.get_opacity());
 
-            ren.prepare_glyphs(&(placements[ii]));
             ren.render_id(feature.id(), placements[ii].center, 2);
         }
     }

@@ -33,7 +33,6 @@
  * string_info
  * text_path
  * char_info
- * font_glyph
  */
 
 namespace mapnik

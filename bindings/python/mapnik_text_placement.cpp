@@ -432,15 +432,6 @@ void export_text_placement()
         ;
     register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
 
-#if 0
-    class_<processed_text,
-        boost::shared_ptr<processed_text>,
-        boost::noncopyable>
-        ("ProcessedText", no_init)
-        .def("push_back", &processed_text::push_back)
-        .def("clear", &processed_text::clear)
-        ;
-#endif
 
     class_<expression_set,
         boost::shared_ptr<expression_set>,

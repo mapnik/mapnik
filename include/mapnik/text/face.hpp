@@ -24,6 +24,7 @@
 
 //mapnik
 #include <mapnik/text/glyph_info.hpp>
+#include <mapnik/config.hpp>
 
 // freetype2
 extern "C"
@@ -39,6 +40,7 @@ extern "C"
 //stl
 #include <map>
 #include <string>
+#include <vector>
 
 namespace mapnik
 {
@@ -91,6 +93,26 @@ private:
     FT_Face face_;
     std::map<glyph_index_t, glyph_info> dimension_cache_;
 };
+
+
+
+class MAPNIK_DECL font_face_set : private boost::noncopyable
+{
+public:
+    typedef std::vector<face_ptr>::iterator iterator;
+    font_face_set(void) : faces_(){}
+
+    void add(face_ptr face);
+    void set_character_sizes(float size);
+
+    unsigned size() const { return faces_.size(); }
+    iterator begin() { return faces_.begin(); }
+    iterator end() { return faces_.end(); }
+private:
+    std::vector<face_ptr> faces_;
+};
+typedef boost::shared_ptr<font_face_set> face_set_ptr;
+
 
 } //ns mapnik
 

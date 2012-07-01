@@ -48,7 +48,6 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
         placements_type &placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            ren.prepare_glyphs(&(placements[ii]));
             ren.render_id(feature.id(), placements[ii].center, 2);
         }
     }
