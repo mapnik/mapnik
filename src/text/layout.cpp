@@ -62,7 +62,7 @@ void text_layout::shape_text()
         face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
         text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
 
-        shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_DEFAULT_RTL, itr->script);
+        shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
         hb_buffer_t *buffer = shaper.get_buffer();
 
         unsigned num_glyphs = hb_buffer_get_length(buffer);
