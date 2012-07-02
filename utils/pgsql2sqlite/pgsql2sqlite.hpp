@@ -115,7 +115,7 @@ void pgsql2sqlite(Connection conn,
 
     // add AsBinary(<geometry_column>) modifier
     std::string select_sql_str = select_sql.str();
-    boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","AsBinary(" + geom_col+") as " + geom_col);
+    boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","ST_AsBinary(" + geom_col+") as " + geom_col);
 
 #ifdef MAPNIK_DEBUG
     std::cout << select_sql_str << "\n";
