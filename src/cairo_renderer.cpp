@@ -238,10 +238,8 @@ private:
     Cairo::RefPtr<Cairo::FontFace> cairo_face_;
 };
 
-cairo_face_manager::cairo_face_manager(boost::shared_ptr<freetype_engine> engine,
-                                       face_manager<freetype_engine> & manager)
-    : font_engine_(engine),
-      font_manager_(manager)
+cairo_face_manager::cairo_face_manager(boost::shared_ptr<freetype_engine> engine)
+    : font_engine_(engine)
 {
 }
 
@@ -745,7 +743,7 @@ cairo_renderer_base::cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Cont
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(boost::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
-      face_manager_(font_engine_,font_manager_),
+      face_manager_(font_engine_),
       detector_(box2d<double>(-m.buffer_size() ,-m.buffer_size() , m.width() + m.buffer_size() ,m.height() + m.buffer_size()))
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Scale=" << m.scale();

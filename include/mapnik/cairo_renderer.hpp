@@ -60,14 +60,12 @@ typedef boost::shared_ptr<cairo_face> cairo_face_ptr;
 class cairo_face_manager : private boost::noncopyable
 {
 public:
-    cairo_face_manager(boost::shared_ptr<freetype_engine> engine,
-                       face_manager<freetype_engine> & manager);
+    cairo_face_manager(boost::shared_ptr<freetype_engine> engine);
     cairo_face_ptr get_face(face_ptr face);
 
 private:
     typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
     boost::shared_ptr<freetype_engine> font_engine_;
-    face_manager<freetype_engine> & font_manager_;
     cairo_face_cache cache_;
 };
 
