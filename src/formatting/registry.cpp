@@ -39,7 +39,7 @@ registry::registry()
     register_name("ExpressionFormat", &expression_format::from_xml);
 }
 
-void registry::register_name(std::string name, from_xml_function_ptr ptr, bool overwrite)
+void registry::register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite)
 {
     if (overwrite) {
         map_[name] = ptr;
