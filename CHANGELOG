@@ -13,6 +13,8 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.2
 ------------
 
+- Support for PostGIS 2.0 in the pgsql2sqlite command (e69c44e/47e5b3c)
+
 - Fixed reference counting of Py_None when returning null attributes from Postgres during UTFGrid encoding, which could cause a Fatal Python error: deallocating None (#1221)
 
 - Fixed possible breakage registering plugins via python if a custom PREFIX or DESTDIR was used (e.g. macports/homebrew) (#1171)
