@@ -27,7 +27,6 @@
 
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/version.hpp>
-#include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
@@ -897,62 +896,46 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             sym.get_attr<point_placement_e>("placement", CENTROID_POINT_PLACEMENT);
         symbol.set_point_placement(placement);
 
-        if (file)
+        if (file && !file->empty())
         {
-            try
+            if(base)
             {
-                if(base)
+                std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+                if (itr!=file_sources_.end())
                 {
-                    std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
-                    if (itr!=file_sources_.end())
-                    {
-                        *file = itr->second + "/" + *file;
-                    }
-                }
-
-                *file = ensure_relative_to_xml(file);
-
-                path_expression_ptr expr(boost::make_shared<path_expression>());
-                if (!parse_path_from_string(expr, *file, sym.get_tree().path_expr_grammar))
-                {
-                    throw mapnik::config_error("Failed to parse path_expression '" + *file + "'");
-                }
-
-                symbol.set_filename(expr);
-
-                optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
-                if (image_transform_wkt)
-                {
-                    mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
-                    if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
-                    {
-                        std::stringstream ss;
-                        ss << "Could not parse transform from '" << *image_transform_wkt
-                           << "', expected transform attribute";
-                        if (strict_)
-                        {
-                            throw config_error(ss.str()); // value_error here?
-                        }
-                        else
-                        {
-                            MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
-                        }
-                    }
-                    symbol.set_image_transform(tl);
+                    *file = itr->second + "/" + *file;
                 }
             }
-            catch (image_reader_exception const & ex)
+
+            *file = ensure_relative_to_xml(file);
+
+            path_expression_ptr expr(boost::make_shared<path_expression>());
+            if (!parse_path_from_string(expr, *file, sym.get_tree().path_expr_grammar))
             {
-                std::string msg("Failed to load image file '" + * file +
-                                "': " + ex.what());
-                if (strict_)
+                throw mapnik::config_error("Failed to parse path_expression '" + *file + "'");
+            }
+
+            symbol.set_filename(expr);
+
+            optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
+            if (image_transform_wkt)
+            {
+                mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+                if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
                 {
-                    throw config_error(msg);
+                    std::stringstream ss;
+                    ss << "Could not parse transform from '" << *image_transform_wkt
+                       << "', expected transform attribute";
+                    if (strict_)
+                    {
+                        throw config_error(ss.str()); // value_error here?
+                    }
+                    else
+                    {
+                        MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
+                    }
                 }
-                else
-                {
-                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
-                }
+                symbol.set_image_transform(tl);
             }
         }
         parse_symbolizer_base(symbol, sym);
@@ -974,7 +957,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         optional<std::string> file = sym.get_opt_attr<std::string>("file");
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
 
-        if (file)
+        if (file && !file->empty())
         {
             try
             {
@@ -1004,9 +987,12 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         }
 
         path_expression_ptr expr(boost::make_shared<path_expression>());
-        if (!parse_path_from_string(expr, filename, sym.get_tree().path_expr_grammar))
+        if (!filename.empty())
         {
-            throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
+            if (!parse_path_from_string(expr, filename, sym.get_tree().path_expr_grammar))
+            {
+                throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
+            }
         }
         markers_symbolizer symbol(expr);
 
@@ -1097,43 +1083,32 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
     try
     {
         std::string file = sym.get_attr<std::string>("file");
+        if (file.empty())
+        {
+            throw config_error("empty file attribute");
+        }
+
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
 
-        try
+        if(base)
         {
-            if(base)
+            std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+            if (itr!=file_sources_.end())
             {
-                std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
-                if (itr!=file_sources_.end())
-                {
-                    file = itr->second + "/" + file;
-                }
-            }
-
-            file = ensure_relative_to_xml(file);
-            path_expression_ptr expr(boost::make_shared<path_expression>());
-            if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
-            {
-                throw mapnik::config_error("Failed to parse path_expression '" + file + "'");
-            }
-            line_pattern_symbolizer symbol(expr);
-
-            parse_symbolizer_base(symbol, sym);
-            rule.append(symbol);
-        }
-        catch (image_reader_exception const & ex)
-        {
-            std::string msg("Failed to load image file '" + file +
-                            "': " + ex.what());
-            if (strict_)
-            {
-                throw config_error(msg);
-            }
-            else
-            {
-                MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
+                file = itr->second + "/" + file;
             }
         }
+
+        file = ensure_relative_to_xml(file);
+        path_expression_ptr expr(boost::make_shared<path_expression>());
+        if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
+        {
+            throw mapnik::config_error("Failed to parse path_expression '" + file + "'");
+        }
+        line_pattern_symbolizer symbol(expr);
+
+        parse_symbolizer_base(symbol, sym);
+        rule.append(symbol);
     }
     catch (const config_error & ex)
     {
@@ -1148,60 +1123,50 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
     try
     {
         std::string file = sym.get_attr<std::string>("file");
+
+        if (file.empty())
+        {
+            throw config_error("empty file attribute");
+        }
+
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
 
-        try
+        if(base)
         {
-            if(base)
+            std::map<std::string,std::string>::iterator itr = file_sources_.find(*base);
+            if (itr!=file_sources_.end())
             {
-                std::map<std::string,std::string>::iterator itr = file_sources_.find(*base);
-                if (itr!=file_sources_.end())
-                {
-                    file = itr->second + "/" + file;
-                }
-            }
-
-            file = ensure_relative_to_xml(file);
-
-            path_expression_ptr expr(boost::make_shared<path_expression>());
-            if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
-            {
-                throw mapnik::config_error("Failed to parse path_expression '" + file + "'");
-            }
-            polygon_pattern_symbolizer symbol(expr);
-
-            // pattern alignment
-            pattern_alignment_e p_alignment = sym.get_attr<pattern_alignment_e>("alignment",LOCAL_ALIGNMENT);
-            symbol.set_alignment(p_alignment);
-            
-            // opacity
-            optional<double> opacity = sym.get_opt_attr<double>("opacity");
-            if (opacity) symbol.set_opacity(*opacity);
-            
-            // gamma
-            optional<double> gamma = sym.get_opt_attr<double>("gamma");
-            if (gamma)  symbol.set_gamma(*gamma);
-
-            // gamma method
-            optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
-            if (gamma_method) symbol.set_gamma_method(*gamma_method);
-
-            parse_symbolizer_base(symbol, sym);
-            rule.append(symbol);
-        }
-        catch (image_reader_exception const & ex)
-        {
-            std::string msg("Failed to load image file '" + file +
-                            "': " + ex.what());
-            if (strict_)
-            {
-                throw config_error(msg);
-            }
-            else
-            {
-                MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
+                file = itr->second + "/" + file;
             }
         }
+
+        file = ensure_relative_to_xml(file);
+
+        path_expression_ptr expr(boost::make_shared<path_expression>());
+        if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
+        {
+            throw mapnik::config_error("Failed to parse path_expression '" + file + "'");
+        }
+        polygon_pattern_symbolizer symbol(expr);
+
+        // pattern alignment
+        pattern_alignment_e p_alignment = sym.get_attr<pattern_alignment_e>("alignment",LOCAL_ALIGNMENT);
+        symbol.set_alignment(p_alignment);
+        
+        // opacity
+        optional<double> opacity = sym.get_opt_attr<double>("opacity");
+        if (opacity) symbol.set_opacity(*opacity);
+        
+        // gamma
+        optional<double> gamma = sym.get_opt_attr<double>("gamma");
+        if (gamma)  symbol.set_gamma(*gamma);
+
+        // gamma method
+        optional<gamma_method_e> gamma_method = sym.get_opt_attr<gamma_method_e>("gamma-method");
+        if (gamma_method) symbol.set_gamma_method(*gamma_method);
+
+        parse_symbolizer_base(symbol, sym);
+        rule.append(symbol);
     }
     catch (const config_error & ex)
     {
@@ -1311,41 +1276,30 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 
         parse_symbolizer_base(shield_symbol, sym);
 
-        std::string image_file = sym.get_attr<std::string>("file");
+        std::string file = sym.get_attr<std::string>("file");
+        if (file.empty())
+        {
+            throw config_error("empty file attribute");
+        }
+
         optional<std::string> base = sym.get_opt_attr<std::string>("base");
 
-        try
+        if(base)
         {
-            if(base)
+            std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+            if (itr!=file_sources_.end())
             {
-                std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
-                if (itr!=file_sources_.end())
-                {
-                    image_file = itr->second + "/" + image_file;
-                }
+                file = itr->second + "/" + file;
             }
+        }
 
-            image_file = ensure_relative_to_xml(image_file);
-            path_expression_ptr expr(boost::make_shared<path_expression>());
-            if (!parse_path_from_string(expr, image_file, sym.get_tree().path_expr_grammar))
-            {
-                throw mapnik::config_error("Failed to parse path_expression '" + image_file + "'");
-            }
-            shield_symbol.set_filename(expr);
-        }
-        catch (image_reader_exception const & ex)
+        file = ensure_relative_to_xml(file);
+        path_expression_ptr expr(boost::make_shared<path_expression>());
+        if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
         {
-            std::string msg("Failed to load image file '" + image_file +
-                            "': " + ex.what());
-            if (strict_)
-            {
-                throw config_error(msg);
-            }
-            else
-            {
-                MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
-            }
+            throw mapnik::config_error("Failed to parse path_expression '" + file + "'");
         }
+        shield_symbol.set_filename(expr);
         rule.append(shield_symbol);
     }
     catch (const config_error & ex)
