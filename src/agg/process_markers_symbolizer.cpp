@@ -78,7 +78,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     tr = agg::trans_affine_scaling(scale_factor_) * tr;
 
     agg::trans_affine geom_tr;
-    evaluate_transform(geom_tr, feature, sym.get_transform());x
+    evaluate_transform(geom_tr, feature, sym.get_transform());
 
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
     marker_placement_e placement_method = sym.get_marker_placement();

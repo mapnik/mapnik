@@ -1057,17 +1057,6 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
 
         marker_placement_e placement = sym.get_attr<marker_placement_e>("placement", MARKER_LINE_PLACEMENT);
         symbol.set_marker_placement(placement);
-
-        marker_type_e dfl_marker_type = MARKER_ARROW;
-
-        if (placement == MARKER_POINT_PLACEMENT)
-        {
-            dfl_marker_type = MARKER_ELLIPSE;
-        }
-
-        marker_type_e marker_type = sym.get_attr<marker_type_e>("marker-type", dfl_marker_type);
-        symbol.set_marker_type(marker_type);
-
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }

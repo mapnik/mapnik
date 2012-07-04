@@ -294,10 +294,6 @@ public:
         {
             set_attr( sym_node, "height", to_expression_string(*sym.get_height()) );
         }
-        if (sym.get_marker_type() != dfl.get_marker_type() || explicit_defaults_)
-        {
-            set_attr( sym_node, "marker-type", sym.get_marker_type() );
-        }
         if (sym.get_marker_placement() != dfl.get_marker_placement() || explicit_defaults_)
         {
             set_attr( sym_node, "placement", sym.get_marker_placement() );

@@ -42,14 +42,6 @@ enum marker_placement_enum {
 
 DEFINE_ENUM( marker_placement_e, marker_placement_enum );
 
-enum marker_type_enum {
-    MARKER_ARROW,
-    MARKER_ELLIPSE,
-    marker_type_enum_MAX
-};
-
-DEFINE_ENUM( marker_type_e, marker_type_enum );
-
 struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image, public symbolizer_base
 {
@@ -75,8 +67,6 @@ public:
     void set_stroke(stroke const& stroke);
     void set_marker_placement(marker_placement_e marker_p);
     marker_placement_e get_marker_placement() const;
-    void set_marker_type(marker_type_e marker_p);
-    marker_type_e get_marker_type() const;
 
 private:
     bool ignore_placement_;
@@ -88,7 +78,6 @@ private:
     expression_ptr height_;
     stroke stroke_;
     marker_placement_e marker_p_;
-    marker_type_e marker_type_;
 
 };
 
