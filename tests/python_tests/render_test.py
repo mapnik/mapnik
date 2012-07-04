@@ -127,8 +127,8 @@ def test_render_grid():
     r = mapnik.Rule()
     #symb = mapnik.PointSymbolizer()
     symb = mapnik.MarkersSymbolizer()
-    symb.width = 10
-    symb.height = 10
+    symb.width = 5
+    symb.height = 5
     symb.allow_overlap = True
     r.symbols.append(symb)
     label = mapnik.TextSymbolizer(mapnik.Expression('[Name]'),

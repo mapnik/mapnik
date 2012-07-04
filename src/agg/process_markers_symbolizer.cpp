@@ -142,8 +142,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         unsigned s_a=col.alpha();
         double w = sym.get_width();
         double h = sym.get_height();
-        double rx = w/2.0;
-        double ry = h/2.0;
+        double rx = w;
+        double ry = h;
 
         arrow arrow_;
         box2d<double> extent;

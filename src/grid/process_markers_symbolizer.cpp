@@ -146,8 +146,8 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             h = sym.get_height()/res;
         }
 
-        double rx = w/2.0;
-        double ry = h/2.0;
+        double rx = w;
+        double ry = h;
 
         arrow arrow_;
         box2d<double> extent;

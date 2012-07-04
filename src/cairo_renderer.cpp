@@ -1529,8 +1529,8 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
         double strk_width = stroke_.get_width();
         double w = sym.get_width();
         double h = sym.get_height();
-        double rx = w/2.0;
-        double ry = h/2.0;
+        double rx = w;
+        double ry = h;
 
         arrow arrow_;
         box2d<double> extent;
