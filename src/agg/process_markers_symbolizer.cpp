@@ -182,7 +182,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             }
         }
     }
-    else // FIXME: should default marker be stored in marker_cache ???
+    else // FIXME: default markers should be stored in marker_cache!
     {
         color const& fill_ = sym.get_fill();
         unsigned r = fill_.red();
@@ -196,8 +196,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         unsigned s_g=col.green();
         unsigned s_b=col.blue();
         unsigned s_a=col.alpha();
-        double w = (boost::apply_visitor(evaluate<Feature,value_type>(feature), *(sym.get_width()))).to_double() * scale_factor_;
-        double h = (boost::apply_visitor(evaluate<Feature,value_type>(feature), *(sym.get_height()))).to_double() * scale_factor_;
+        double w = (boost::apply_visitor(evaluate<Feature,value_type>(feature), *(sym.get_width()))).to_double();
+        double h = (boost::apply_visitor(evaluate<Feature,value_type>(feature), *(sym.get_height()))).to_double();
 
         double rx = w/2.0;
         double ry = h/2.0;
@@ -214,10 +214,10 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         }
         else
         {
-            double x1 = -1 *(dx);
-            double y1 = -1 *(dy);
-            double x2 = dx;
-            double y2 = dy;
+            double x1 = -0.5 * dx;
+            double y1 = -0.5 * dy;
+            double x2 = 0.5 * dx;
+            double y2 = 0.5 * dy;
             extent.init(x1,y1,x2,y2);
         }
 
@@ -234,26 +234,28 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
             geometry_type & geom = feature.get_geometry(i);
-            //if (geom.num_points() <= 1) continue;
             if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
             {
                 geom.label_position(&x,&y);
                 prj_trans.backward(x,y,z);
                 t_.forward(&x,&y);
                 geom_tr.transform(&x,&y);
-                int px = int(floor(x - 0.5 * dx));
-                int py = int(floor(y - 0.5 * dy));
-                box2d<double> label_ext (px, py, px + dx +1, py + dy +1);
+                int px = int(std::floor(x - 0.5 * dx * scale_factor_));
+                int py = int(std::floor(y - 0.5 * dy * scale_factor_));
+                box2d<double> label_ext (px, py, px + dx*scale_factor_ + 1 , py + dy*scale_factor_ + 1);
+
+                if (/* DEBUG */ 1)
+                {
+                    debug_draw_box(buf, label_ext, 0, 0, 0.0);
+                }
 
                 if (sym.get_allow_overlap() ||
                     detector_->has_placement(label_ext))
                 {
-                    agg::ellipse c(x, y, rx, ry);
+                    agg::ellipse c(x, y, int(rx * scale_factor_), int(ry * scale_factor_));
                     marker.concat_path(c);
                     ras_ptr->add_path(marker);
                     ren.color(agg::rgba8_pre(r, g, b, int(a*sym.get_opacity())));
-                    // TODO - fill with packed scanlines? agg::scanline_p8
-                    // and agg::renderer_outline_aa
                     agg::render_scanlines(*ras_ptr, sl, ren);
 
                     // outline
@@ -269,7 +271,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     }
                     if (!sym.get_ignore_placement())
                         detector_->insert(label_ext);
-                    if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
+                    //if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                 }
             }
             else
@@ -277,6 +279,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
                 if (marker_type == MARKER_ARROW)
                     marker.concat_path(arrow_);
+                else if (marker_type == MARKER_ELLIPSE)
+                {
+                    agg::ellipse c(0, 0, rx, ry);
+                    marker.concat_path(c);
+                }
 
                 clipped_geometry_type clipped(geom);
                 clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
@@ -289,26 +296,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 double x_t, y_t, angle;
                 while (placement.get_point(x_t, y_t, angle))
                 {
-                    agg::trans_affine matrix;
+                    agg::trans_affine matrix  =  marker_trans * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x_t, y_t);
 
-                    if (marker_type == MARKER_ELLIPSE)
-                    {
-                        // todo proper bbox - this is buggy
-                        agg::ellipse c(x_t, y_t, rx, ry);
-                        marker.concat_path(c);
-                        agg::trans_affine matrix = marker_trans;
-                        matrix *= agg::trans_affine_translation(-x_t,-y_t);
-                        matrix *= agg::trans_affine_rotation(angle);
-                        matrix *= agg::trans_affine_translation(x_t,y_t);
-                        marker.transform(matrix);
-
-                    }
-                    else
-                    {
-                        matrix =  marker_trans * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x_t, y_t);
-                    }
-
-                    if (/* DEBUG */ 0)
+                    if (/* DEBUG */ 1)
                     {
                         debug_draw_box(buf, extent*matrix, 0, 0, 0.0);
                     }
@@ -316,7 +306,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     if (writer.first)
                     {
                         //writer.first->add_box(label_ext, feature, t_, writer.second);
-
                         MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: metawriter do not yet supported for line placement";
                     }
 
