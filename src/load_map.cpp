@@ -389,6 +389,10 @@ void map_parser::parse_map_include( Map & map, ptree const & include )
             }
             datasource_templates_[name] = params;
         }
+        else if (v.first == "Parameters")
+        {
+            // do not throw in order to support Mapnik 2.1.x stylesheets
+        }
         else if (v.first != "<xmlcomment>" &&
                  v.first != "<xmlattr>")
         {

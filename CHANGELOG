@@ -13,6 +13,8 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.2
 ------------
 
+- XML: Fixed to avoid throwing if a `<Parameters>` element is encountered (which is supported in >= 2.1.x)
+
 - Support for PostGIS 2.0 in the pgsql2sqlite command (e69c44e/47e5b3c)
 
 - Fixed reference counting of Py_None when returning null attributes from Postgres during UTFGrid encoding, which could cause a Fatal Python error: deallocating None (#1221)
