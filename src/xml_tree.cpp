@@ -485,7 +485,6 @@ compile_get_attr(std::string);
 compile_get_attr(filter_mode_e);
 compile_get_attr(point_placement_e);
 compile_get_attr(marker_placement_e);
-compile_get_attr(marker_type_e);
 compile_get_attr(pattern_alignment_e);
 compile_get_attr(line_rasterizer_e);
 compile_get_attr(colorizer_mode);
