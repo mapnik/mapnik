@@ -42,12 +42,9 @@ void text_node::to_xml(ptree &xml) const
     new_node.put_value(to_expression_string(*text_));
 }
 
-
 node_ptr text_node::from_xml(xml_node const& xml)
 {
-    std::string data = xml.text();
-    if (data.empty()) return node_ptr(); //No text
-    return boost::make_shared<text_node>(parse_expression(data, "utf8"));
+    return boost::make_shared<text_node>(xml.get_value<expression_ptr>());
 }
 
 void text_node::apply(char_properties const& p, Feature const& feature, processed_text &output) const
