@@ -840,14 +840,14 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
         }
     }
     
-    optional<std::string> transform_wkt = pt.get_opt_attr<std::string>("view-transform");
-    if (transform_wkt)
+    optional<std::string> geometry_transform_wkt = pt.get_opt_attr<std::string>("geometry-transform");
+    if (geometry_transform_wkt)
     {
         mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
-        if (!mapnik::parse_transform(*tl, *transform_wkt, pt.get_tree().transform_expr_grammar))
+        if (!mapnik::parse_transform(*tl, *geometry_transform_wkt, pt.get_tree().transform_expr_grammar))
         {
             std::stringstream ss;
-            ss << "Could not parse transform from '" << transform_wkt << "', expected transform attribute";
+            ss << "Could not parse transform from '" << geometry_transform_wkt << "', expected transform attribute";
             if (strict_)
                 throw config_error(ss.str()); // value_error here?
             else
