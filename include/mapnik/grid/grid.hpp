@@ -77,7 +77,8 @@ public:
          key_(key),
          data_(width,height),
          resolution_(resolution),
-         id_name_("__id__") {
+         id_name_("__id__"),
+         painted_(false) {
              // this only works if each datasource's 
              // feature count starts at 1
              f_keys_[0] = "";
@@ -89,7 +90,8 @@ public:
          key_(rhs.key_),
          data_(rhs.data_),
          resolution_(rhs.resolution_),
-         id_name_("__id__")  {
+         id_name_("__id__"),
+         painted_(rhs.painted_)  {
              f_keys_[0] = "";     
          }
     
