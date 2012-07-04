@@ -980,7 +980,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         context.set_color(stroke_.get_color(), stroke_.get_opacity());
         context.set_line_join(stroke_.get_line_join());
         context.set_line_cap(stroke_.get_line_cap());
-        context.set_miter_limit(4.0);
+        context.set_miter_limit(stroke_.get_miterlimit());
         context.set_line_width(stroke_.get_width());
         if (stroke_.has_dash())
         {
