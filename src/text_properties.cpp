@@ -110,9 +110,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (halign_) halign = *halign_;
     optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
     if (jalign_) jalign = *jalign_;
-    /* Attributes needing special care */
-    optional<std::string> orientation_ = sym.get_opt_attr<std::string>("orientation");
-    if (orientation_) orientation = parse_expression(*orientation_, "utf8");
+    optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
+    if (orientation_) orientation = *orientation_;
     optional<double> dx = sym.get_opt_attr<double>("dx");
     if (dx) displacement.first = *dx;
     optional<double> dy = sym.get_opt_attr<double>("dy");
@@ -120,12 +119,12 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
 
-    optional<std::string> name_ = sym.get_opt_attr<std::string>("name");
+    optional<expression_ptr> name_ = sym.get_opt_attr<expression_ptr>("name");
     if (name_)
     {
         MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
 
-        set_old_style_expression(parse_expression(*name_, "utf8"));
+        set_old_style_expression(*name_);
     }
 
     format.from_xml(sym, fontsets);
