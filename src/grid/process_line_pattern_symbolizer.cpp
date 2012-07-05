@@ -89,4 +89,3 @@ template void grid_renderer<grid>::process(line_pattern_symbolizer const&,
                                            proj_transform const&);
 
 }
-

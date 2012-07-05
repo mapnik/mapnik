@@ -50,6 +50,7 @@ public:
     void set_filename(std::string fn);
     std::string const& filename() const;
     xml_node &root();
+    xml_node const& root() const;
 private:
     xml_node node_;
     std::string file_;

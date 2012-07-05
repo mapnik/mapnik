@@ -33,6 +33,8 @@ except:
     HAS_DISTUTILS = False
 
 
+py3 = None
+
 # local file to hold custom user configuration variables
 # Todo check timestamp, reload if changed?
 SCONS_LOCAL_CONFIG = 'config.py'
@@ -302,7 +304,7 @@ opts.AddVariables(
     ('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False),
     ('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False),
     ('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False),
-    ('BOOST_PYTHON_LIB','Specify library name to specific Boost Python lib (e.g. "boost_python-py26")',''),
+    ('BOOST_PYTHON_LIB','Specify library name to specific Boost Python lib (e.g. "boost_python-py26")','boost_python'),
 
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
@@ -1326,11 +1328,20 @@ if not preconfigured:
         color_print(4,'Not building with cairo support, pass CAIRO=True to enable')
 
     if 'python' in env['BINDINGS']:
-        # checklibwithheader does not work for boost_python since we can't feed it
-        # multiple header files, so we fall back on a simple check for boost_python headers
+
+        py3 = 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
+
+        if py3 and env['BOOST_PYTHON_LIB'] == 'boost_python':
+            env['BOOST_PYTHON_LIB'] = 'boost_python3'
+
         if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
             color_print(1,'Could not find required header files for boost python')
             env['MISSING_DEPS'].append('boost python')
+
+        if not conf.CheckLibWithHeader(libs=[env['BOOST_PYTHON_LIB']], header='boost/python/detail/config.hpp', language='C++'):
+            color_print(1, 'Could not find library "%s" for boost python bindings' % env['BOOST_PYTHON_LIB'])
+            env['MISSING_DEPS'].append('boost python')
+
 
         if env['CAIRO']:
             if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
@@ -1469,8 +1480,6 @@ if not preconfigured:
                 color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
                 Exit(1)
 
-            py3 = 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
-
             if py3:
                 sys_prefix = '''%s -c "import sys; print(sys.prefix)"''' % env['PYTHON']
             else:
@@ -1534,11 +1543,6 @@ if not preconfigured:
             if (int(majver), int(minver)) < (2, 2):
                 color_print(1,"Python version 2.2 or greater required")
                 Exit(1)
-
-            if env['BOOST_PYTHON_LIB']:
-                if not conf.CheckLibWithHeader(libs=[env['BOOST_PYTHON_LIB']], header='boost/python/detail/config.hpp', language='C++'):
-                    color_print(1, 'Could not find library %s for boost python' % env['BOOST_PYTHON_LIB'])
-                    Exit(1)
 
             color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
             color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))

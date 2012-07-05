@@ -193,6 +193,11 @@ xml_node &xml_tree::root()
     return node_;
 }
 
+const xml_node &xml_tree::root() const
+{
+    return node_;
+}
+
 /****************************************************************************/
 xml_attribute::xml_attribute(std::string const& value_)
     : value(value_), processed(false)
@@ -423,7 +428,13 @@ std::string xml_node::get_text() const
 {
     if (children_.size() == 0)
     {
-        return "";
+        if (is_text_)
+        {
+            return name_;
+        } else
+        {
+            return "";
+        }
     }
     if (children_.size() == 1)
     {
@@ -474,7 +485,6 @@ compile_get_attr(std::string);
 compile_get_attr(filter_mode_e);
 compile_get_attr(point_placement_e);
 compile_get_attr(marker_placement_e);
-compile_get_attr(marker_type_e);
 compile_get_attr(pattern_alignment_e);
 compile_get_attr(line_rasterizer_e);
 compile_get_attr(colorizer_mode);
