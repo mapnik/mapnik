@@ -49,6 +49,39 @@
 
 namespace mapnik {
 
+
+template <typename Attr>
+bool push_explicit_style(Attr const& src, Attr & dst,  markers_symbolizer const& sym)
+{
+    boost::optional<stroke> const& strk = sym.get_stroke();
+    boost::optional<color> const& fill = sym.get_fill();
+    if (strk || fill)
+    {
+        for(unsigned i = 0; i < src.size(); ++i)
+        {
+            mapnik::svg::path_attributes attr = src[i];
+
+            if (strk)
+            {
+                attr.stroke_width = (*strk).get_width();
+                color const& s_color = (*strk).get_color();
+                attr.stroke_color = agg::rgba(s_color.red()/255.0,s_color.green()/255.0,
+                                              s_color.blue()/255.0,s_color.alpha()/255.0);
+            }
+            if (fill)
+            {
+
+                color const& f_color = *fill;
+                attr.fill_color = agg::rgba(f_color.red()/255.0,f_color.green()/255.0,
+                                            f_color.blue()/255.0,f_color.alpha()/255.0);
+            }
+            dst.push_back(attr);
+        }
+        return true;
+    }
+    return false;
+}
+
 template <typename T>
 void agg_renderer<T>::process(markers_symbolizer const& sym,
                               mapnik::feature_impl & feature,
@@ -96,23 +129,25 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             }
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
-            coord2d const center = bbox.center();
+            coord2d center = bbox.center();
 
-            agg::trans_affine_translation const recenter(-center.x, -center.y);
-            agg::trans_affine const marker_trans = recenter * tr;
+            agg::trans_affine_translation recenter(-center.x, -center.y);
+            agg::trans_affine marker_trans = recenter * tr;
 
             using namespace mapnik::svg;
             vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
             svg_path_adapter svg_path(stl_storage);
 
-            svg_renderer<svg_path_adapter,
-                agg::pod_bvector<path_attributes>,
-                renderer_type,
-                agg::pixfmt_rgba32 > svg_renderer(svg_path,(*marker)->attributes());
+            agg::pod_bvector<path_attributes> attributes;
+            bool result = push_explicit_style( (*marker)->attributes(), attributes, sym);
 
-            for (unsigned i=0; i<feature.num_geometries(); ++i)
+            svg_renderer<svg_path_adapter,
+                         agg::pod_bvector<path_attributes>,
+                         renderer_type,
+                         agg::pixfmt_rgba32 > svg_renderer(svg_path, result ? attributes : (*marker)->attributes());
+
+            BOOST_FOREACH( geometry_type & geom, feature.paths())
             {
-                geometry_type & geom = feature.get_geometry(i);
                 // TODO - merge this code with point_symbolizer rendering
                 if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
                 {
@@ -147,9 +182,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     path_type path(t_,clipped,prj_trans);
                     transformed_path_type path_transformed(path,geom_tr);
                     markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
-                                                                                      sym.get_spacing() * scale_factor_,
-                                                                                      sym.get_max_error(),
-                                                                                      sym.get_allow_overlap());
+                                                                                                  sym.get_spacing() * scale_factor_,
+                                                                                                  sym.get_max_error(),
+                                                                                                  sym.get_allow_overlap());
                     double x, y, angle;
                     while (placement.get_point(x, y, angle))
                     {
