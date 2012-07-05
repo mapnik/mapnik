@@ -851,7 +851,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
             if (strict_)
                 throw config_error(ss.str()); // value_error here?
             else
-                std::clog << "### WARNING: " << ss.str() << endl;
+                MAPNIK_LOG_WARN(load_map) << "### WARNING: " << ss;
         }
         sym.set_transform(tl);
     }

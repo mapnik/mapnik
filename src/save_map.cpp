@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/ptree_helpers.hpp>
@@ -156,10 +157,11 @@ public:
             ptree::value_type("RasterSymbolizer", ptree()))->second;
         raster_symbolizer dfl;
 
-        if ( sym.get_mode() != dfl.get_mode() || explicit_defaults_ )
+        // should be serialized as comp-op now…
+        /*if ( sym.get_mode() != dfl.get_mode() || explicit_defaults_ )
         {
             set_attr( sym_node, "mode", sym.get_mode() );
-        }
+        }*/
 
         if ( sym.get_scaling() != dfl.get_scaling() || explicit_defaults_ )
         {
@@ -318,7 +320,7 @@ public:
     {
         // not-supported
 #ifdef MAPNIK_DEBUG
-        std::clog << typeid(sym).name() << " is not supported" << std::endl;
+        MAPNIK_LOG_WARN(save_map) << typeid(sym).name() << " is not supported" << std::endl;
 #endif
     }
 
