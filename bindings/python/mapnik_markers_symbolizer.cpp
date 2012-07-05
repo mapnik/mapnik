@@ -123,21 +123,21 @@ void export_markers_symbolizer()
                       &mapnik::get_svg_transform<markers_symbolizer>,
                       &mapnik::set_svg_transform<markers_symbolizer>)
         .add_property("width",
-                      &markers_symbolizer::get_width,
+                      make_function(&markers_symbolizer::get_width,
+                                    return_value_policy<copy_const_reference>()),
                       &markers_symbolizer::set_width,
                       "Set/get the marker width")
         .add_property("height",
-                      &markers_symbolizer::get_height,
+                      make_function(&markers_symbolizer::get_height,
+                                    return_value_policy<copy_const_reference>()),
                       &markers_symbolizer::set_height,
                       "Set/get the marker height")
         .add_property("fill",
-                      make_function(&markers_symbolizer::get_fill,
-                      return_value_policy<copy_const_reference>()),
+                      &markers_symbolizer::get_fill,
                       &markers_symbolizer::set_fill,
                       "Set/get the marker fill color")
         .add_property("stroke",
-                      make_function(&markers_symbolizer::get_stroke,
-                      return_value_policy<copy_const_reference>()),
+                      &markers_symbolizer::get_stroke,
                       &markers_symbolizer::set_stroke,
                       "Set/get the marker stroke (outline)")
         .add_property("placement",
