@@ -80,8 +80,8 @@ public:
     marker_type_e get_marker_type() const;
 
 private:
-    bool ignore_placement_;
     bool allow_overlap_;
+    bool ignore_placement_;
     color fill_;
     double spacing_;
     double max_error_;
