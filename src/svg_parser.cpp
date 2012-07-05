@@ -403,7 +403,7 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
         
         if (!mapnik::svg::parse_path((const char*) value, path_))
         {
-            std::runtime_error("can't parse PATH\n");
+            throw std::runtime_error("can't parse PATH\n");
         }
         path_.end_path();
     }
