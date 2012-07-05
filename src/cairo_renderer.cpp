@@ -759,14 +759,14 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
 template <>
 cairo_renderer<Cairo::Context>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m),
-      cairo_renderer_base(m,context,offset_x,offset_y)
+      cairo_renderer_base(m,context,scale_factor,offset_x,offset_y)
 {
 }
 
 template <>
 cairo_renderer<Cairo::Surface>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m),
-      cairo_renderer_base(m,Cairo::Context::create(surface),offset_x,offset_y)
+      cairo_renderer_base(m,Cairo::Context::create(surface),scale_factor,offset_x,offset_y)
 {
 }
 
