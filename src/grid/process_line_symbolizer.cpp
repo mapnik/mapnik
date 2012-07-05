@@ -99,7 +99,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
                 else
                     stroke.generator().line_cap(agg::round_cap);
 
-                stroke.generator().miter_limit(4.0);
+                stroke.generator().miter_limit(stroke_.get_miterlimit());
                 stroke.generator().width(stroke_.get_width() * scale_factor_);
 
                 ras_ptr->add_path(stroke);
@@ -126,7 +126,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
                 else
                     stroke.generator().line_cap(agg::round_cap);
 
-                stroke.generator().miter_limit(4.0);
+                stroke.generator().miter_limit(stroke_.get_miterlimit());
                 stroke.generator().width(stroke_.get_width() * scale_factor_);
                 ras_ptr->add_path(stroke);
             }

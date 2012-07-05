@@ -31,6 +31,9 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
 
+// boost
+#include <boost/optional.hpp>
+
 namespace mapnik {
 
 // TODO - consider merging with text_symbolizer label_placement_e
@@ -42,20 +45,12 @@ enum marker_placement_enum {
 
 DEFINE_ENUM( marker_placement_e, marker_placement_enum );
 
-enum marker_type_enum {
-    MARKER_ARROW,
-    MARKER_ELLIPSE,
-    marker_type_enum_MAX
-};
-
-DEFINE_ENUM( marker_type_e, marker_type_enum );
-
 struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image, public symbolizer_base
 {
 public:
     explicit markers_symbolizer();
-    markers_symbolizer(path_expression_ptr filename);
+    markers_symbolizer(path_expression_ptr const& filename);
     markers_symbolizer(markers_symbolizer const& rhs);
     void set_ignore_placement(bool ignore_placement);
     bool get_ignore_placement() const;
@@ -65,30 +60,26 @@ public:
     double get_spacing() const;
     void set_max_error(double max_error);
     double get_max_error() const;
-    void set_fill(color fill);
-    color const& get_fill() const;
-    void set_width(expression_ptr width);
-    expression_ptr get_width() const;
-    void set_height(expression_ptr height);
-    expression_ptr get_height() const;
-    stroke const& get_stroke() const;
+    void set_width(expression_ptr const&width);
+    expression_ptr const& get_width() const;
+    void set_height(expression_ptr const& height);
+    expression_ptr const& get_height() const;
+    void set_fill(color const& fill);
+    boost::optional<color> get_fill() const;
     void set_stroke(stroke const& stroke);
+    boost::optional<stroke> get_stroke() const;
     void set_marker_placement(marker_placement_e marker_p);
     marker_placement_e get_marker_placement() const;
-    void set_marker_type(marker_type_e marker_p);
-    marker_type_e get_marker_type() const;
-
 private:
     bool ignore_placement_;
     bool allow_overlap_;
-    color fill_;
     double spacing_;
     double max_error_;
     expression_ptr width_;
     expression_ptr height_;
-    stroke stroke_;
+    boost::optional<color> fill_;
+    boost::optional<stroke> stroke_;
     marker_placement_e marker_p_;
-    marker_type_e marker_type_;
 
 };
 
