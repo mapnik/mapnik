@@ -737,9 +737,16 @@ private:
     Cairo::RefPtr<Cairo::Context> context_;
 };
 
-cairo_renderer_base::cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x, unsigned offset_y)
+cairo_renderer_base::cairo_renderer_base(Map const& m,
+                                         Cairo::RefPtr<Cairo::Context> const& context,
+                                         double scale_factor,
+                                         unsigned offset_x,
+                                         unsigned offset_y)
     : m_(m),
       context_(context),
+      width_(m.width()),
+      height_(m.height()),
+      scale_factor_(scale_factor),
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(boost::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
@@ -750,14 +757,14 @@ cairo_renderer_base::cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Cont
 }
 
 template <>
-cairo_renderer<Cairo::Context>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x, unsigned offset_y)
+cairo_renderer<Cairo::Context>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m),
       cairo_renderer_base(m,context,offset_x,offset_y)
 {
 }
 
 template <>
-cairo_renderer<Cairo::Surface>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, unsigned offset_x, unsigned offset_y)
+cairo_renderer<Cairo::Surface>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m),
       cairo_renderer_base(m,Cairo::Context::create(surface),offset_x,offset_y)
 {
@@ -1192,7 +1199,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         shield_symbolizer_helper<face_manager<freetype_engine>,
             label_collision_detector4> helper(
                 sym, feature, prj_trans,
-                detector_.extent().width(), detector_.extent().height(),
+                width_, height_,
                 1.0 /*scale_factor*/,
                 t_, font_manager_, detector_, query_extent_);
         cairo_context context(context_);
@@ -1619,7 +1626,12 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                                       mapnik::feature_impl & feature,
                                       proj_transform const& prj_trans)
     {
-        text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4> helper(sym, feature, prj_trans, detector_.extent().width(), detector_.extent().height(), 1.0 /*scale_factor*/, t_, font_manager_, detector_, query_extent_);
+        text_symbolizer_helper<face_manager<freetype_engine>,
+            label_collision_detector4> helper(
+                sym, feature, prj_trans,
+                width_, height_,
+                1.0 /*scale_factor*/,
+                t_, font_manager_, detector_, query_extent_);
 
         cairo_context context(context_);
         context.set_operator(sym.comp_op());
