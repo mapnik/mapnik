@@ -38,6 +38,9 @@ libraries.append('mapnik')
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
+if env['HAS_BOOST_SYSTEM']:
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+
 input_plugin = plugin_env.SharedLibrary('../kismet', source=kismet_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
 # if the plugin links to libmapnik ensure it is built first
