@@ -135,6 +135,8 @@ protected:
 
     Map const& m_;
     Cairo::RefPtr<Cairo::Context> context_;
+    unsigned width_;
+    unsigned height_;
     CoordTransform t_;
     boost::shared_ptr<freetype_engine> font_engine_;
     face_manager<freetype_engine> font_manager_;

@@ -660,6 +660,8 @@ private:
 cairo_renderer_base::cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x, unsigned offset_y)
     : m_(m),
       context_(context),
+      width_(m.width()),
+      height_(m.height()),
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(new freetype_engine()),
       font_manager_(*font_engine_),
@@ -1145,7 +1147,8 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             cairo_context context(context_);
             string_info info(text);
 
-            placement_finder<label_collision_detector4> finder(detector_);
+            box2d<double> dims(0,0,width_,height_);
+            placement_finder<label_collision_detector4> finder(detector_,dims);
 
             faces->set_pixel_sizes(placement_options->text_size);
             faces->get_string_info(info);
@@ -1777,7 +1780,8 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
         faces->set_pixel_sizes(placement_options->text_size);
         faces->get_string_info(info);
 
-        placement_finder<label_collision_detector4> finder(detector_);
+        box2d<double> dims(0,0,width_,height_);
+        placement_finder<label_collision_detector4> finder(detector_,dims);
 
         metawriter_with_properties writer = sym.get_metawriter();
 
