@@ -352,18 +352,19 @@ void save_to_file(T const& image, std::string const& filename, rgba_palette cons
 
 #if defined(HAVE_CAIRO)
 // TODO - move to separate cairo_io.hpp
-void save_to_cairo_file(mapnik::Map const& map, std::string const& filename)
+void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, double scale_factor)
 {
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-        save_to_cairo_file(map,filename,*type);
+        save_to_cairo_file(map,filename,*type,scale_factor);
     }
 }
 
 void save_to_cairo_file(mapnik::Map const& map,
                         std::string const& filename,
-                        std::string const& type)
+                        std::string const& type,
+                        double scale_factor)
 {
     std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
     if (file)
@@ -417,7 +418,7 @@ void save_to_cairo_file(mapnik::Map const& map,
         */
 
 
-        mapnik::cairo_renderer<Cairo::Context> ren(map, context);
+        mapnik::cairo_renderer<Cairo::Context> ren(map, context, scale_factor);
         ren.apply();
 
         if (type == "ARGB32" || type == "RGB24")

@@ -60,7 +60,8 @@ public:
 #if defined(HAVE_CAIRO)
 MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
                                     std::string const& filename,
-                                    std::string const& type);
+                                    std::string const& type,
+                                    double scale_factor);
 #endif
 
 template <typename T>
