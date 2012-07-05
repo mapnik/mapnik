@@ -304,8 +304,11 @@ public:
             set_attr( sym_node, "transform", tr_str );
         }
 
-        const stroke & strk =  sym.get_stroke();
-        add_stroke_attributes(sym_node, strk);
+        boost::optional<stroke> const& strk = sym.get_stroke();
+        if (strk)
+        {
+            add_stroke_attributes(sym_node, *strk);
+        }
 
         add_metawriter_attributes(sym_node, sym);
     }
@@ -318,7 +321,7 @@ public:
         std::clog << typeid(sym).name() << " is not supported" << std::endl;
 #endif
     }
-    
+
 private:
     serialize_symbolizer();
 
