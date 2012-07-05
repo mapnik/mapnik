@@ -31,6 +31,9 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
 
+// boost
+#include <boost/optional.hpp>
+
 namespace mapnik {
 
 // TODO - consider merging with text_symbolizer label_placement_e
@@ -47,7 +50,7 @@ struct MAPNIK_DECL markers_symbolizer :
 {
 public:
     explicit markers_symbolizer();
-    markers_symbolizer(path_expression_ptr filename);
+    markers_symbolizer(path_expression_ptr const& filename);
     markers_symbolizer(markers_symbolizer const& rhs);
     void set_ignore_placement(bool ignore_placement);
     bool get_ignore_placement() const;
@@ -57,26 +60,25 @@ public:
     double get_spacing() const;
     void set_max_error(double max_error);
     double get_max_error() const;
-    void set_fill(color fill);
-    color const& get_fill() const;
-    void set_width(expression_ptr width);
-    expression_ptr get_width() const;
-    void set_height(expression_ptr height);
-    expression_ptr get_height() const;
-    stroke const& get_stroke() const;
+    void set_width(expression_ptr const&width);
+    expression_ptr const& get_width() const;
+    void set_height(expression_ptr const& height);
+    expression_ptr const& get_height() const;
+    void set_fill(color const& fill);
+    boost::optional<color> get_fill() const;
     void set_stroke(stroke const& stroke);
+    boost::optional<stroke> get_stroke() const;
     void set_marker_placement(marker_placement_e marker_p);
     marker_placement_e get_marker_placement() const;
-
 private:
     bool ignore_placement_;
     bool allow_overlap_;
-    color fill_;
     double spacing_;
     double max_error_;
     expression_ptr width_;
     expression_ptr height_;
-    stroke stroke_;
+    boost::optional<color> fill_;
+    boost::optional<stroke> stroke_;
     marker_placement_e marker_p_;
 
 };

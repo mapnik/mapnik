@@ -41,25 +41,21 @@ markers_symbolizer::markers_symbolizer()
       symbolizer_base(),
       ignore_placement_(false),
       allow_overlap_(false),
-      fill_(color(0,0,255)),
       spacing_(100.0),
       max_error_(0.2),
       width_(boost::make_shared<expr_node>(10.0)),
       height_(boost::make_shared<expr_node>(10.0)),
-      stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT) {}
 
-markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
+markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
     : symbolizer_with_image(filename),
       symbolizer_base(),
       ignore_placement_(false),
       allow_overlap_(false),
-      fill_(color(0,0,255)),
       spacing_(100.0),
       max_error_(0.2),
       width_(boost::make_shared<expr_node>(10.0)),
       height_(boost::make_shared<expr_node>(10.0)),
-      stroke_(),
       marker_p_(MARKER_LINE_PLACEMENT) {}
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
@@ -67,11 +63,11 @@ markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
       symbolizer_base(rhs),
       ignore_placement_(rhs.ignore_placement_),
       allow_overlap_(rhs.allow_overlap_),
-      fill_(rhs.fill_),
       spacing_(rhs.spacing_),
       max_error_(rhs.max_error_),
       width_(rhs.width_),
       height_(rhs.height_),
+      fill_(rhs.fill_),
       stroke_(rhs.stroke_),
       marker_p_(rhs.marker_p_) {}
 
@@ -115,37 +111,37 @@ double markers_symbolizer::get_max_error() const
     return max_error_;
 }
 
-void markers_symbolizer::set_fill(color fill)
+void markers_symbolizer::set_fill(color const& fill)
 {
     fill_ = fill;
 }
 
-color const& markers_symbolizer::get_fill() const
+boost::optional<color> markers_symbolizer::get_fill() const
 {
     return fill_;
 }
 
-void markers_symbolizer::set_width(expression_ptr width)
+void markers_symbolizer::set_width(expression_ptr const& width)
 {
     width_ = width;
 }
 
-expression_ptr markers_symbolizer::get_width() const
+expression_ptr const& markers_symbolizer::get_width() const
 {
     return width_;
 }
 
-void markers_symbolizer::set_height(expression_ptr height)
+void markers_symbolizer::set_height(expression_ptr const& height)
 {
     height_ = height;
 }
 
-expression_ptr markers_symbolizer::get_height() const
+expression_ptr const& markers_symbolizer::get_height() const
 {
     return height_;
 }
 
-stroke const& markers_symbolizer::get_stroke() const
+boost::optional<stroke> markers_symbolizer::get_stroke() const
 {
     return stroke_;
 }
