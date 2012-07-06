@@ -257,6 +257,8 @@ private:
 
     VertexContainer & m_vertices;
     unsigned          m_iterator;
+    double m_start_x;
+    double m_start_y;
 };
 
 //------------------------------------------------------------------------
@@ -279,13 +281,8 @@ inline void path_adapter<VC>::rel_to_abs(double* x, double* y) const
     {
         double x2;
         double y2;
-        if(is_vertex(m_vertices.last_vertex(&x2, &y2)))
-        {
-            *x += x2;
-            *y += y2;
-        }
-        else if (!is_stop(m_vertices.last_command()) &&
-                 is_vertex(m_vertices.prev_vertex(&x2, &y2)))
+        if(is_vertex(m_vertices.last_vertex(&x2, &y2))
+           || !is_stop(m_vertices.last_command()))
         {
             *x += x2;
             *y += y2;
@@ -297,6 +294,8 @@ inline void path_adapter<VC>::rel_to_abs(double* x, double* y) const
 template<class VC>
 inline void path_adapter<VC>::move_to(double x, double y)
 {
+    m_start_x = x;
+    m_start_y = y;
     m_vertices.add_vertex(x, y, path_cmd_move_to);
 }
 
@@ -535,7 +534,7 @@ inline void path_adapter<VC>::end_poly(unsigned flags)
 {
     if(is_vertex(m_vertices.last_command()))
     {
-        m_vertices.add_vertex(0.0, 0.0, path_cmd_end_poly | flags);
+        m_vertices.add_vertex(m_start_x, m_start_y, path_cmd_end_poly | flags);
     }
 }
 
