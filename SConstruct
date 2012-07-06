@@ -1332,7 +1332,9 @@ if not preconfigured:
         py3 = 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
 
         if py3 and env['BOOST_PYTHON_LIB'] == 'boost_python':
-            env['BOOST_PYTHON_LIB'] = 'boost_python3'
+            env['BOOST_PYTHON_LIB'] = 'boost_python3%s' % env['BOOST_APPEND']
+        elif env['BOOST_PYTHON_LIB'] == 'boost_python':
+            env['BOOST_PYTHON_LIB'] = 'boost_python%s' % env['BOOST_APPEND']
 
         if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
             color_print(1,'Could not find required header files for boost python')
