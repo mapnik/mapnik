@@ -25,9 +25,11 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/image_compositing.hpp>
 
 namespace mapnik
 {
@@ -54,11 +56,25 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
 
     std::string const& get_mode() const
     {
+        MAPNIK_LOG_ERROR(raster_symbolizer) << "getting 'mode' is deprecated and will be removed in Mapnik 3.x, use 'comp-op' with Mapnik >= 2.1.x";
         return mode_;
     }
     void set_mode(std::string const& mode)
     {
+        MAPNIK_LOG_ERROR(raster_symbolizer) << "setting 'mode' is deprecated and will be removed in Mapnik 3.x, use 'comp-op' with Mapnik >= 2.1.x";
         mode_ = mode;
+        if (mode == "normal")
+        {
+            this->set_comp_op(src_over);
+        }
+        else
+        {
+            boost::optional<composite_mode_e> comp_op = comp_op_from_string(mode);
+            if (comp_op)
+                this->set_comp_op(*comp_op);
+            else
+                MAPNIK_LOG_ERROR(raster_symbolizer) << "could not convert mode into comp-op";
+        }
     }
     std::string const& get_scaling() const
     {
