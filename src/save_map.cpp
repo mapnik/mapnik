@@ -314,7 +314,7 @@ public:
     {
         // not-supported
 #ifdef MAPNIK_DEBUG
-        MAPNIK_LOG_WARN(save_map) << typeid(sym).name() << " is not supported" << std::endl;
+        MAPNIK_LOG_WARN(save_map) << typeid(sym).name() << " is not supported";
 #endif
     }
 
