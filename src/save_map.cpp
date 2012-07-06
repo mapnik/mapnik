@@ -31,6 +31,7 @@
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/text_placements/list.hpp>
 #include <mapnik/text_placements/dummy.hpp>
+#include <mapnik/image_compositing.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -536,6 +537,16 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
     if (opacity != dfl.get_opacity() || explicit_defaults)
     {
         set_attr(style_node, "opacity", opacity);
+    }
+
+    boost::optional<composite_mode_e> comp_op = style.comp_op();
+    if (comp_op)
+    {
+        set_attr(style_node, "comp-op", *comp_op_to_string(*comp_op));
+    }
+    else if (explicit_defaults)
+    {
+        set_attr(style_node, "comp-op", "src-over");
     }
 
     rules::const_iterator it = style.get_rules().begin();

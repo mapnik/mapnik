@@ -88,6 +88,17 @@ boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
     return mode;
 }
 
+boost::optional<std::string> comp_op_to_string(composite_mode_e comp_op)
+{
+    boost::optional<std::string> mode;
+    comp_op_lookup_type::left_const_iterator left_iter = comp_lookup.left.find(comp_op);
+    if (left_iter != comp_lookup.left.end())
+    {
+        mode.reset(left_iter->second);
+    }
+    return mode;
+}
+
 template <typename T1, typename T2>
 void composite(T1 & dst, T2 & src, composite_mode_e mode,
                float opacity,
