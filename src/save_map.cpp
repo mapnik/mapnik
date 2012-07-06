@@ -32,6 +32,7 @@
 #include <mapnik/text_placements/list.hpp>
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/image_scaling.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -158,9 +159,9 @@ public:
             ptree::value_type("RasterSymbolizer", ptree()))->second;
         raster_symbolizer dfl;
 
-        if ( sym.get_scaling() != dfl.get_scaling() || explicit_defaults_ )
+        if ( sym.get_scaling_method() != dfl.get_scaling_method() || explicit_defaults_ )
         {
-            set_attr( sym_node, "scaling", sym.get_scaling() );
+            set_attr( sym_node, "scaling", *scaling_method_to_string(sym.get_scaling_method()) );
         }
 
         if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )

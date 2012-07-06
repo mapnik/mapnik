@@ -28,6 +28,7 @@
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/image_scaling.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -1468,7 +1469,27 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
 
         // scaling
         optional<std::string> scaling = sym.get_opt_attr<std::string>("scaling");
-        if (scaling) raster_sym.set_scaling(*scaling);
+        if (scaling)
+        {
+            std::string scaling_method = *scaling;
+            if (scaling_method == "fast")
+            {
+                MAPNIK_LOG_ERROR(raster_symbolizer) << "'scaling' value of 'fast' is deprecated and will be removed in Mapnik 3.x, use 'near' with Mapnik >= 2.1.x";
+                raster_sym.set_scaling_method(SCALING_NEAR);
+            }
+            else
+            {
+                boost::optional<scaling_method_e> method = scaling_method_from_string(scaling_method);
+                if (method)
+                {
+                    raster_sym.set_scaling_method(*method);
+                }
+                else
+                {
+                    throw config_error("failed to parse 'scaling': '" + *scaling + "'");
+                }
+            }
+        }
 
         // opacity
         optional<double> opacity = sym.get_opt_attr<double>("opacity");

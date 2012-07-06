@@ -37,6 +37,7 @@ void export_palette();
 void export_image();
 void export_image_view();
 void export_gamma_method();
+void export_scaling_method();
 void export_grid();
 void export_grid_view();
 void export_map();
@@ -362,6 +363,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_image();
     export_image_view();
     export_gamma_method();
+    export_scaling_method();
     export_grid();
     export_grid_view();
     export_expression();

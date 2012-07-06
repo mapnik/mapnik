@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/image_scaling.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_rasterizer.hpp>
@@ -44,7 +45,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    raster_ptr const& source=feature.get_raster();
+    raster_ptr const& source = feature.get_raster();
     if (source)
     {
         // If there's a colorizer defined, use it to color the raster in-place
@@ -54,28 +55,44 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
 
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
-
-        box2d<double> ext=t_.forward(target_ext);
-        int start_x = (int)ext.minx();
-        int start_y = (int)ext.miny();
-        int end_x = (int)ceil(ext.maxx());
-        int end_y = (int)ceil(ext.maxy());
+        box2d<double> ext = t_.forward(target_ext);
+        int start_x = static_cast<int>(ext.minx());
+        int start_y = static_cast<int>(ext.miny());
+        int end_x = static_cast<int>(ceil(ext.maxx()));
+        int end_y = static_cast<int>(ceil(ext.maxy()));
         int raster_width = end_x - start_x;
         int raster_height = end_y - start_y;
-        double err_offs_x = ext.minx() - start_x;
-        double err_offs_y = ext.miny() - start_y;
-
         if (raster_width > 0 && raster_height > 0)
         {
             image_data_32 target_data(raster_width,raster_height);
             raster target(target_ext, target_data);
-
-            reproject_raster(target, *source, prj_trans, err_offs_x, err_offs_y,
-                             sym.get_mesh_size(),
-                             sym.calculate_filter_factor(),
-                             scale_factor_,
-                             sym.get_scaling());
-
+            scaling_method_e scaling_method = sym.get_scaling_method();
+            double filter_radius = sym.calculate_filter_factor();
+            double offset_x = ext.minx() - start_x;
+            double offset_y = ext.miny() - start_y;
+            if (!prj_trans.equal())
+            {
+                reproject_and_scale_raster(target, *source, prj_trans,
+                                 offset_x, offset_y,
+                                 sym.get_mesh_size(),
+                                 filter_radius,
+                                 scaling_method);
+            }
+            else
+            {
+                if (scaling_method == SCALING_BILINEAR8){
+                    scale_image_bilinear8<image_data_32>(target.data_,source->data_, offset_x, offset_y);
+                } else {
+                    double scaling_ratio = ext.width() / source->data_.width();
+                    scale_image_agg<image_data_32>(target.data_,
+                                                   source->data_,
+                                                   scaling_method,
+                                                   scaling_ratio,
+                                                   offset_x,
+                                                   offset_y,
+                                                   filter_radius);
+                }
+            }
             composite(current_buffer_->data(), target.data_, sym.comp_op(), sym.get_opacity(), start_x, start_y, true);
         }
     }

@@ -30,6 +30,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/image_scaling.hpp>
 
 namespace mapnik
 {
@@ -39,7 +40,7 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
     raster_symbolizer()
         : symbolizer_base(),
         mode_("normal"),
-        scaling_("fast"),
+        scaling_(SCALING_NEAR),
         opacity_(1.0),
         colorizer_(),
         filter_factor_(-1),
@@ -47,9 +48,9 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
 
     raster_symbolizer(const raster_symbolizer &rhs)
         : symbolizer_base(rhs),
-        mode_(rhs.get_mode()),
-        scaling_(rhs.get_scaling()),
-        opacity_(rhs.get_opacity()),
+        mode_(rhs.mode_),
+        scaling_(rhs.scaling_),
+        opacity_(rhs.opacity_),
         colorizer_(rhs.colorizer_),
         filter_factor_(rhs.filter_factor_),
         mesh_size_(rhs.mesh_size_) {}
@@ -76,11 +77,11 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
                 MAPNIK_LOG_ERROR(raster_symbolizer) << "could not convert mode into comp-op";
         }
     }
-    std::string const& get_scaling() const
+    scaling_method_e get_scaling_method() const
     {
         return scaling_;
     }
-    void set_scaling(std::string const& scaling)
+    void set_scaling_method(scaling_method_e scaling)
     {
         scaling_ = scaling;
     }
@@ -115,13 +116,9 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
             // respect explicitly specified values
             return filter_factor_;
         } else {
-            // No filter factor specified, calculate a sensible default value
-            // based on the scaling algorithm being employed.
-            scaling_method_e scaling = get_scaling_method_by_name (scaling_);
-
             double ff = 1.0;
 
-            switch(scaling)
+            switch(scaling_)
             {
             case SCALING_NEAR:
                 ff = 1.0;
@@ -130,6 +127,7 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
                 // TODO potentially some of these algorithms would use filter_factor >2.0.
                 // Contributions welcome from someone who knows more about them.
             case SCALING_BILINEAR:
+            case SCALING_BILINEAR8:
             case SCALING_BICUBIC:
             case SCALING_SPLINE16:
             case SCALING_SPLINE36:
@@ -163,7 +161,7 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
 
 private:
     std::string mode_;
-    std::string scaling_;
+    scaling_method_e scaling_;
     float opacity_;
     raster_colorizer_ptr colorizer_;
     double filter_factor_;
