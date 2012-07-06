@@ -185,6 +185,7 @@ source = Split(
     text/itemizer.cpp
     text/scrptrun.cpp
     text/face.cpp
+    text/placement_finder_ng.cpp
     """
     )
 

@@ -38,18 +38,21 @@
 namespace mapnik
 {
 
+/** This class stores all glyphs in a format run (i.e. conscutive glyphs with the same format). */
 class format_run
 {
     char_properties_ptr properties;
-    std::vector<glyph_info> glyphs;
-//    double
+    std::vector<glyph_info> const& glyphs() const { return glyphs_; }
+    void add_glyph(glyph_info const& info);
+private:
+    std::vector<glyph_info> glyphs_;
 };
 
 typedef boost::shared_ptr<format_run> format_run_ptr;
 
 
 
-/* This class stores all glyphs in a line in left to right order.
+/** This class stores all format_runs in a line in left to right order.
  *
  * It can be used for rendering but no text processing (like line breaking)
  * should be done!
@@ -60,7 +63,7 @@ class text_line
 public:
     double max_text_height; //Height of the largest format run in this run.
     double max_line_height; //Includes line spacing
-    std::vector<format_run_ptr> const& get_runs() const { return runs_; }
+    std::vector<format_run_ptr> const& runs() const { return runs_; }
     void add_run(format_run_ptr);
 
 private:
