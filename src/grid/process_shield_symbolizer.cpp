@@ -47,8 +47,8 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
-            t_, font_manager_, detector_, query_extent);
-
+            t_, font_manager_, detector_,
+            query_extent);
     bool placement_found = false;
 
     text_renderer<T> ren(pixmap_,

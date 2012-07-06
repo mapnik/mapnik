@@ -851,7 +851,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
             if (strict_)
                 throw config_error(ss.str()); // value_error here?
             else
-                std::clog << "### WARNING: " << ss.str() << endl;
+                MAPNIK_LOG_WARN(load_map) << "### WARNING: " << ss;
         }
         sym.set_transform(tl);
     }
@@ -1263,8 +1263,6 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             shield_symbol.set_unlock_image(* unlock_image);
         }
 
-        parse_symbolizer_base(shield_symbol, sym);
-
         std::string file = sym.get_attr<std::string>("file");
         if (file.empty())
         {
@@ -1289,6 +1287,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             throw mapnik::config_error("Failed to parse path_expression '" + file + "'");
         }
         shield_symbol.set_filename(expr);
+        parse_symbolizer_base(shield_symbol, sym);
         rule.append(shield_symbol);
     }
     catch (const config_error & ex)
@@ -1392,7 +1391,6 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
         line_rasterizer_e rasterizer = sym.get_attr<line_rasterizer_e>("rasterizer", RASTERIZER_FULL);
         symbol.set_rasterizer(rasterizer);
 
-        // meta-writer
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
