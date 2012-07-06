@@ -237,8 +237,6 @@ def sort_paths(items,priority):
 
 if platform.dist()[0] in ('Ubuntu','debian'):
     LIBDIR_SCHEMA='lib'
-elif platform.uname()[4] == 'x86_64' and platform.system() == 'Linux':
-    LIBDIR_SCHEMA='lib64'
 elif platform.uname()[4] == 'ppc64':
     LIBDIR_SCHEMA='lib64'
 else:
