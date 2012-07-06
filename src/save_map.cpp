@@ -158,12 +158,6 @@ public:
             ptree::value_type("RasterSymbolizer", ptree()))->second;
         raster_symbolizer dfl;
 
-        // should be serialized as comp-op now…
-        /*if ( sym.get_mode() != dfl.get_mode() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "mode", sym.get_mode() );
-        }*/
-
         if ( sym.get_scaling() != dfl.get_scaling() || explicit_defaults_ )
         {
             set_attr( sym_node, "scaling", sym.get_scaling() );
