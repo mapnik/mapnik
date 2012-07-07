@@ -103,4 +103,28 @@ void text_layout::clear()
     glyphs_.clear();
 }
 
+format_run::format_run(char_properties_ptr properties, double text_height)
+    : properties_(properties), glyphs_(), width_(0), text_height_(text_height), line_height_(0)
+{
+}
+
+void format_run::add_glyph(const glyph_info &info)
+{
+    glyphs_.push_back(info);
+    width_ += info.width;
+    line_height_ = info.line_height; //Same value for all characters with the same format
+}
+
+text_line::text_line()
+    : max_line_height(0), max_text_height(0)
+{
+}
+
+void text_line::add_run(format_run_ptr run)
+{
+    max_line_height = std::max(max_line_height, run->line_height());
+    max_text_height = std::max(max_text_height, run->text_height());
+    runs_.push_back(run);
+}
+
 } //ns mapnik

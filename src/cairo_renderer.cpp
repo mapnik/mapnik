@@ -1203,6 +1203,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         cairo_context context(context_);
         context.set_operator(sym.comp_op());
 
+#if 0
         while (helper.next())
         {
             placements_type &placements = helper.placements();
@@ -1215,6 +1216,9 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 context.add_text(placements[ii], face_manager_, font_manager_);
             }
         }
+#else
+#warning CAIRO: Shield symbolizer rendering disabled!
+#endif
     }
 
     void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
@@ -1629,6 +1633,7 @@ void cairo_renderer_base::start_map_processing(Map const& map)
         cairo_context context(context_);
         context.set_operator(sym.comp_op());
 
+#if 0
         while (helper.next()) {
             placements_type &placements = helper.placements();
             for (unsigned int ii = 0; ii < placements.size(); ++ii)
@@ -1636,7 +1641,11 @@ void cairo_renderer_base::start_map_processing(Map const& map)
                 context.add_text(placements[ii], face_manager_, font_manager_);
             }
         }
+#else
+#warning CAIRO: Text rendering disabled
+#endif
     }
+
 
     template class cairo_renderer<Cairo::Surface>;
     template class cairo_renderer<Cairo::Context>;

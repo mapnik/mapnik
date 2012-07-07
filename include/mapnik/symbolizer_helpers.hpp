@@ -30,6 +30,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/text/placement_finder_ng.hpp>
 
 //boost
 #include <boost/shared_ptr.hpp>
@@ -40,8 +41,6 @@ namespace mapnik {
 typedef boost::ptr_vector<text_path> placements_type;
 template <typename DetectorT> class placement_finder;
 
-class text_layout;
-typedef boost::shared_ptr<text_layout> text_layout_ptr;
 
 /** Helper object that does all the TextSymbolizer placment finding
  * work except actually rendering the object. */
@@ -63,16 +62,15 @@ public:
     /** Return next placement.
      * If no more placements are found false is returned.
      */
-    bool next();
+    glyph_positions_ptr next();
 
-    /** Get current placement. next() has to be called before! */
-    placements_type & placements() const;
 protected:
-    bool next_point_placement();
-    bool next_line_placement();
+    glyph_positions_ptr next_point_placement();
+    glyph_positions_ptr next_line_placement();
     bool next_placement();
     void initialize_geometries();
     void initialize_points();
+    void update_detector(glyph_positions_ptr glyphs);
 
     //Input
     text_symbolizer const& sym_;
@@ -107,7 +105,7 @@ protected:
     bool points_on_line_;
 
     text_placement_info_ptr placement_;
-    boost::shared_ptr<placement_finder<DetectorT> > finder_;
+    placement_finder_ng finder_;
 };
 
 template <typename FaceManagerT, typename DetectorT>
@@ -175,6 +173,7 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::angle_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::finder_;
+    using text_symbolizer_helper<FaceManagerT, DetectorT>::layout_;
 };
 } //namespace
 #endif // SYMBOLIZER_HELPERS_HPP

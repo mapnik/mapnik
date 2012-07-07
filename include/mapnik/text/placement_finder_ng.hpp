@@ -25,6 +25,8 @@
 //mapnik
 #include <mapnik/box2d.hpp>
 
+//stl
+#include <list>
 
 //boost
 #include <boost/utility.hpp>
@@ -42,10 +44,10 @@ typedef feature_impl Feature;
 class text_layout;
 typedef boost::shared_ptr<text_layout> text_layout_ptr;
 
-class placement_positions
+class glyph_positions
 {
 public:
-    placement_positions(text_layout_ptr layout);
+    glyph_positions(text_layout_ptr layout);
     void point_placement(double x, double y);
 private:
     double x_;
@@ -53,7 +55,9 @@ private:
     bool point_;
     text_layout_ptr layout_;
 };
-typedef boost::shared_ptr<placement_positions> placement_positions_ptr;
+typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
+
+//typedef std::list<placement_positions_ptr> placement_positions_list;
 
 class placement_finder_ng : boost::noncopyable
 {
@@ -63,7 +67,7 @@ public:
                         box2d<double> const& extent);
 
     /** Try to place a single label at the given point. */
-    placement_positions_ptr find_point_placement(text_layout_ptr layout, double pos_x, double pos_y, double angle=0.0);
+    glyph_positions_ptr find_point_placement(text_layout_ptr layout, double pos_x, double pos_y, double angle=0.0);
 private:
     Feature const& feature_;
     DetectorType const& detector_;

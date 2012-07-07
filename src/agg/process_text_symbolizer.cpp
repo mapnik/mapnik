@@ -41,13 +41,10 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 
     text_renderer<T> ren(*current_buffer_, font_manager_, *(font_manager_.get_stroker()),  sym.comp_op());
 
-    while (helper.next()) 
+    glyph_positions_ptr glyphs;
+    while ((glyphs = helper.next()))
     {
-        placements_type &placements = helper.placements();
-        for (unsigned int ii = 0; ii < placements.size(); ++ii)
-        {
-            ren.render(placements[ii].center);
-        }
+        ren.render(glyphs);
     }
 }
 

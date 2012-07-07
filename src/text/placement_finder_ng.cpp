@@ -33,22 +33,22 @@ placement_finder_ng::placement_finder_ng( Feature const& feature, DetectorType &
 {
 }
 
-placement_positions_ptr placement_finder_ng::find_point_placement(text_layout_ptr layout, double pos_x, double pos_y, double angle)
+glyph_positions_ptr placement_finder_ng::find_point_placement(text_layout_ptr layout, double pos_x, double pos_y, double angle)
 {
-    placement_positions_ptr ptr = boost::make_shared<placement_positions>(layout);
-    ptr->point_placement(pos_x, pos_y);
+    glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>(layout);
+    glyphs->point_placement(pos_x, pos_y);
     //TODO: angle
     //TODO: Check for placement
-    return ptr;
+    return glyphs;
 }
 
-placement_positions::placement_positions(text_layout_ptr layout)
+glyph_positions::glyph_positions(text_layout_ptr layout)
     : x_(0), y_(0), point_(true), layout_(layout)
 {
 
 }
 
-void placement_positions::point_placement(double x, double y)
+void glyph_positions::point_placement(double x, double y)
 {
     x_ = x;
     y_ = y;

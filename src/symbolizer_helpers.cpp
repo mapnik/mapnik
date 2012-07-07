@@ -45,7 +45,7 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
       angle_(0.0),
       placement_valid_(false),
       points_on_line_(false),
-      finder_()
+      finder_(feature, detector, dims_)
 {
     initialize_geometries();
     if (!geometries_to_process_.size()) return;
@@ -55,9 +55,9 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
 }
 
 template <typename FaceManagerT, typename DetectorT>
-bool text_symbolizer_helper<FaceManagerT, DetectorT>::next()
+glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next()
 {
-    if (!placement_valid_) return false;
+    if (!placement_valid_) return glyph_positions_ptr();
     if (point_placement_)
         return next_point_placement();
     else
@@ -65,14 +65,14 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next()
 }
 
 template <typename FaceManagerT, typename DetectorT>
-bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
+glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
     while (!geometries_to_process_.empty())
     {
         if (geo_itr_ == geometries_to_process_.end())
         {
             //Just processed the last geometry. Try next placement.
-            if (!next_placement()) return false; //No more placements
+            if (!next_placement()) return glyph_positions_ptr(); //No more placements
             //Start again from begin of list
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
@@ -80,10 +80,11 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
         typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+
         clipped_geometry_type clipped(**geo_itr_);
         clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
         path_type path(t_, clipped, prj_trans_);
-        finder_->clear_placements();
+#if 0
         if (points_on_line_) {
             finder_->find_point_placements(path);
         } else {
@@ -102,42 +103,44 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
                 feature_, t_, writer_.second);
             return true;
         }
+#endif
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
         geo_itr_++;
     }
-    return false;
+    return glyph_positions_ptr();
 }
 
 template <typename FaceManagerT, typename DetectorT>
-bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
+glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
 {
     while (!points_.empty())
     {
         if (point_itr_ == points_.end())
         {
             //Just processed the last point. Try next placement.
-            if (!next_placement()) return false; //No more placements
+            if (!next_placement()) return glyph_positions_ptr(); //No more placements
             //Start again from begin of list
             point_itr_ = points_.begin();
             continue; //Reexecute size check
         }
-        return false; //TODO
-        finder_->clear_placements();
-        finder_->find_point_placement(point_itr_->first, point_itr_->second, angle_);
-        if (!finder_->get_results().empty())
+        glyph_positions_ptr glyphs = finder_.find_point_placement(
+                    layout_, point_itr_->first, point_itr_->second, angle_);
+        if (glyphs)
         {
             //Found a placement
             point_itr_ = points_.erase(point_itr_);
+#if 0
             if (writer_.first) writer_.first->add_text(
                 finder_->get_results(), finder_->get_extents(),
                 feature_, t_, writer_.second);
-            finder_->update_detector();
-            return true;
+#endif
+            update_detector(glyphs);
+            return glyphs;
         }
         //No placement for this point. Keep it in points_ for next try.
         point_itr_++;
     }
-    return false;
+    return glyph_positions_ptr();
 }
 
 struct largest_bbox_first
@@ -265,19 +268,12 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         angle_ = 0.0;
     }
 
-
-//    finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
-
+#if 0
     if (writer_.first) finder_->set_collect_extents(true);
+#endif
 
     placement_valid_ = true;
     return true;
-}
-
-template <typename FaceManagerT, typename DetectorT>
-placements_type &text_symbolizer_helper<FaceManagerT, DetectorT>::placements() const
-{
-    return finder_->get_results();
 }
 
 
@@ -323,26 +319,27 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         double label_x = point_itr_->first + shield_pos.first;
         double label_y = point_itr_->second + shield_pos.second;
 
-        finder_->clear_placements();
-        finder_->find_point_placement(label_x, label_y, angle_);
-        if (finder_->get_results().empty())
+        glyph_positions_ptr glyphs = finder_.find_point_placement(layout_, label_x, label_y, angle_);
+        if (!glyphs)
         {
             //No placement for this point. Keep it in points_ for next try.
             point_itr_++;
             continue;
         }
         //Found a label placement but not necessarily also a marker placement
-        // check to see if image overlaps anything too, there is only ever 1 placement found for points and verticies
+        // check to see if image overlaps anything too
         if (!sym_.get_unlock_image())
         {
             // center image at text center position
             // remove displacement from image label
-            placements_type const& p = finder_->get_results();
+            //TODO
+#if 0
             double lx = p[0].center.x - text_disp.first;
             double ly = p[0].center.y - text_disp.second;
             marker_x_ = lx - 0.5 * marker_w_;
             marker_y_ = ly - 0.5 * marker_h_;
             marker_ext_.re_center(lx, ly);
+#endif
         }
         else
         {  // center image at reference location
@@ -354,12 +351,14 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         if (placement_->properties.allow_overlap || detector_.has_placement(marker_ext_))
         {
             detector_.insert(marker_ext_);
-            finder_->update_detector();
+            this->update_detector(glyphs);
+#if 0
             if (writer_.first) {
                 writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
                 writer_.first->add_text(finder_->get_results(), finder_->get_extents(),
                                         feature_, t_, writer_.second);
             }
+#endif
             point_itr_ = points_.erase(point_itr_);
             return true;
         }
@@ -374,6 +373,7 @@ template <typename FaceManagerT, typename DetectorT>
 bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
     position const& pos = placement_->properties.displacement;
+#if 0
     finder_->additional_boxes.clear();
     //Markers are automatically centered
     finder_->additional_boxes.push_back(
@@ -381,6 +381,7 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
                       -0.5 * marker_ext_.height() - pos.second,
                       0.5 * marker_ext_.width()  - pos.first,
                       0.5 * marker_ext_.height() - pos.second));
+#endif
     return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement();
 }
 
