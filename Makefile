@@ -1,13 +1,13 @@
 all: mapnik
 
 install:
-	@python scons/scons.py --silent --config=cache --implicit-deps-unchanged --max-drift=1 install
+	@python scons/scons.py --config=cache --implicit-deps-unchanged --max-drift=1 install
 
 mapnik:
 	@python scons/scons.py --silent --config=cache --implicit-deps-unchanged --max-drift=1
 
 clean:
-	python scons/scons.py --silent -c --config=cache --implicit-deps-unchanged --max-drift=1
+	python scons/scons.py -c --config=cache --implicit-deps-unchanged --max-drift=1
 
 reset:
 	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
