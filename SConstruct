@@ -111,6 +111,8 @@ PLUGINS = { # plugins with external dependencies
 
 #### SCons build options and initial setup ####
 env = Environment(ENV=os.environ)
+env.Decider('MD5-timestamp')
+env.SourceCode(".", None)
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -932,6 +934,8 @@ if not preconfigured:
                     color_print(1,"SCons CONFIG not found: '%s'" % conf)
             # Recreate the base environment using modified `opts`
             env = Environment(ENV=os.environ,options=opts)
+            env.Decider('MD5-timestamp')
+            env.SourceCode(".", None)
             env['USE_CONFIG'] = True
     else:
         color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')
@@ -1146,6 +1150,7 @@ if not preconfigured:
     # if the user is not setting custom boost configuration
     # enforce boost version greater than or equal to BOOST_MIN_VERSION
     if not conf.CheckBoost(BOOST_MIN_VERSION):
+        color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
         color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
         if not env['BOOST_VERSION']:
             env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
@@ -1660,7 +1665,6 @@ if not HELP_REQUESTED:
         # But let's also cache implicit deps...
         EnsureSConsVersion(0,98)
         SetOption('implicit_cache', 1)
-        env.Decider('MD5-timestamp')
         SetOption('max_drift', 1)
 
     else:
