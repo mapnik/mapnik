@@ -118,6 +118,18 @@ bool painted(mapnik::image_32 const& im)
     return im.painted();
 }
 
+unsigned get_pixel(mapnik::image_32 const& im, int x, int y)
+{
+    if (x < static_cast<int>(im.width()) && y < static_cast<int>(im.height()))
+    {
+        mapnik::image_data_32 const & data = im.data();
+        return data(x,y);
+    }
+    PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
+    boost::python::throw_error_already_set();
+    return 0;
+}
+
 void set_pixel(mapnik::image_32 & im, unsigned x, unsigned y, mapnik::color const& c)
 {
     im.setPixel(x, y, c.rgba());
@@ -216,6 +228,7 @@ void export_image()
         .def("premultiply",&image_32::premultiply)
         .def("demultiply",&image_32::demultiply)
         .def("set_pixel",&set_pixel)
+        .def("get_pixel",&get_pixel)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 
         .def("tostring",&tostring1)
