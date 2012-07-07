@@ -5,6 +5,7 @@ dot text_layout.gv -Tpng > text_layout.png
 digraph textrendering {
     Text [color=red]
     text_layout[shape=box]
+    renderer [color=red]
     
     Text -> text_layout 
     text_layout -> Freetype[dir=both]
@@ -19,7 +20,8 @@ digraph textrendering {
 
 
     text_layout -> placement_finder
-    placement_finder -> placement_positions
-    placement_positions -> renderer
+    placement_finder -> glyph_positions
+    glyph_positions -> renderer
+    
 //     { rank=same; text_layout HarfBuzz Freetype text_itemizer }
 }
