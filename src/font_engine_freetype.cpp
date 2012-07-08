@@ -345,4 +345,6 @@ stroker::~stroker()
     FT_Stroker_Done(s_);
 }
 
+template class face_manager<freetype_engine>;
+
 }

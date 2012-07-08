@@ -247,6 +247,12 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
     point_itr_ = points_.begin();
 }
 
+template <typename FaceManagerT, typename DetectorT>
+void text_symbolizer_helper<FaceManagerT, DetectorT>::update_detector(glyph_positions_ptr glyphs)
+{
+    //TODO
+}
+
 
 template <typename FaceManagerT, typename DetectorT>
 bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
