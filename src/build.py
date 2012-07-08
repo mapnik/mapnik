@@ -186,6 +186,7 @@ source = Split(
     text/scrptrun.cpp
     text/face.cpp
     text/placement_finder_ng.cpp
+    text/renderer.cpp
     """
     )
 

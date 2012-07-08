@@ -22,12 +22,8 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/image_util.hpp>
-#include <mapnik/svg/svg_converter.hpp>
-#include <mapnik/svg/svg_renderer.hpp>
-#include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/renderer.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
@@ -39,6 +35,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
+#if 0
     shield_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
@@ -69,6 +66,9 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             ren.render(placements[ii].center);
         }
     }
+#else
+#warning AGG: ShieldSymbolizer disabled!
+#endif
 }
 
 

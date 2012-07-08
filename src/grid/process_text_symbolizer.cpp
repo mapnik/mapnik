@@ -31,6 +31,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
+#if 0
     box2d<double> query_extent;
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
@@ -52,6 +53,9 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
         }
     }
     if (placement_found) pixmap_.add_feature(feature);
+#else
+#warning GRID: TextSymbolizer disabled!
+#endif
 
 }
 

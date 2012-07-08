@@ -23,7 +23,6 @@
 // mapnik
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/debug.hpp>
-//#include <mapnik/text_properties.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>

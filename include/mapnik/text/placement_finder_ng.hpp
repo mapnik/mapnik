@@ -24,6 +24,7 @@
 
 //mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/pixel_position.hpp>
 
 //stl
 #include <list>
@@ -48,10 +49,9 @@ class glyph_positions
 {
 public:
     glyph_positions(text_layout_ptr layout);
-    void point_placement(double x, double y);
+    void point_placement(pixel_position base_point);
 private:
-    double x_;
-    double y_;
+    pixel_position base_point_;
     bool point_;
     text_layout_ptr layout_;
 };

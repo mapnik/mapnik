@@ -41,6 +41,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                                 mapnik::feature_impl & feature,
                                 proj_transform const& prj_trans)
 {
+#if 0
     box2d<double> query_extent;
     shield_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
@@ -69,6 +70,9 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
     }
     if (placement_found)
         pixmap_.add_feature(feature);
+#else
+#warning GRID: ShieldSymbolizer disabled!
+#endif
 }
 
 template void grid_renderer<grid>::process(shield_symbolizer const&,

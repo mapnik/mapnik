@@ -31,6 +31,7 @@
 #include <mapnik/map.hpp>
 //#include <mapnik/marker.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // boost
 #include <boost/utility.hpp>
