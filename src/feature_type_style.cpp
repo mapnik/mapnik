@@ -43,21 +43,28 @@ feature_type_style::feature_type_style()
 {}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
-    : filter_mode_(rhs.filter_mode_),
+    : 
+      filter_mode_(rhs.filter_mode_),
       filters_(rhs.filters_),
       direct_filters_(rhs.direct_filters_),
       comp_op_(rhs.comp_op_),
       scale_denom_validity_(-1),
       opacity_(rhs.opacity_)
 {
-    if (!deep_copy) {
+    if (!deep_copy) 
+    {
+        //rules_= rhs.rules_.release();
         rules_ = rhs.rules_;
-    } else {
-        rules::const_iterator it  = rhs.rules_.begin(),
-            end = rhs.rules_.end();
-        for(; it != end; ++it) {
-            rules_.push_back(rule(*it, deep_copy));
-        }
+    } 
+    else 
+    {
+        
+        //rules::const_iterator it  = rhs.rules_.begin(),
+        //    end = rhs.rules_.end();
+        //for(; it != end; ++it) 
+        //{
+        //    rules_.push_back(rule(*it, deep_copy));
+        // }
     }
 }
 
@@ -73,9 +80,9 @@ feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
     return *this;
 }
 
-void feature_type_style::add_rule(rule const& rule)
+void feature_type_style::add_rule(std::auto_ptr<rule> r)
 {
-    rules_.push_back(rule);
+    rules_.push_back(r);
     scale_denom_validity_ = -1;
 }
 

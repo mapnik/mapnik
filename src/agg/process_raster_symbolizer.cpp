@@ -67,13 +67,13 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
 
         if (raster_width > 0 && raster_height > 0)
         {
+            double scale_factor = ext.width() / source->data_.width();
             image_data_32 target_data(raster_width,raster_height);
             raster target(target_ext, target_data);
-
             reproject_raster(target, *source, prj_trans, err_offs_x, err_offs_y,
                              sym.get_mesh_size(),
                              sym.calculate_filter_factor(),
-                             scale_factor_,
+                             scale_factor,
                              sym.get_scaling());
 
             composite(current_buffer_->data(), target.data_, sym.comp_op(), sym.get_opacity(), start_x, start_y, true);

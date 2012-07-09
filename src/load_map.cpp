@@ -412,10 +412,10 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
     try
     {
         name = sty.get_attr<std::string>("name");
-        feature_type_style style;
-
+        std::auto_ptr<feature_type_style> style(new feature_type_style);
+        
         filter_mode_e filter_mode = sty.get_attr<filter_mode_e>("filter-mode", FILTER_ALL);
-        style.set_filter_mode(filter_mode);
+        style->set_filter_mode(filter_mode);
 
         // compositing
         optional<std::string> comp_op_name = sty.get_opt_attr<std::string>("comp-op");
@@ -424,7 +424,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
             if (comp_op)
             {
-                style.set_comp_op(*comp_op);
+                style->set_comp_op(*comp_op);
             }
             else
             {
@@ -435,7 +435,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         optional<float> opacity = sty.get_opt_attr<float>("opacity");
         if (opacity)
         {
-            style.set_opacity(*opacity);
+            style->set_opacity(*opacity);
         }
 
         // image filters
@@ -453,7 +453,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             bool result = boost::spirit::qi::phrase_parse(itr,end,
                                                           filter_grammar,
                                                           boost::spirit::qi::ascii::space,
-                                                          style.image_filters());
+                                                          style->image_filters());
             if (!result || itr!=end)
             {
                 throw config_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
@@ -473,7 +473,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             bool result = boost::spirit::qi::phrase_parse(itr,end,
                                                           filter_grammar,
                                                           boost::spirit::qi::ascii::space,
-                                                          style.direct_image_filters());
+                                                          style->direct_image_filters());
             if (!result || itr!=end)
             {
                 throw config_error("failed to parse direct-image-filters: '" + std::string(itr,end) + "'");
@@ -488,12 +488,14 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         {
             if (ruleIter->is("Rule"))
             {
-                parse_rule(style, *ruleIter);
+                parse_rule(*style, *ruleIter);
             }
         }
 
         map.insert_style(name, style);
-    } catch (const config_error & ex) {
+    } 
+    catch (const config_error & ex) 
+    {
         ex.append_context(std::string("in style '") + name + "'", sty);
         throw;
     }
@@ -728,97 +730,97 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
     }
 }
 
-void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
+void map_parser::parse_rule(feature_type_style & style, xml_node const& node)
 {
     std::string name;
     try
     {
-        name = r.get_attr("name", std::string());
-        rule rule(name);
-
-        xml_node const* child = r.get_opt_child("Filter");
+        name = node.get_attr("name", std::string());
+        std::auto_ptr<rule> r(new rule(name));
+        
+        xml_node const* child = node.get_opt_child("Filter");
         if (child)
         {
-            rule.set_filter(child->get_value<expression_ptr>());
+            r->set_filter(child->get_value<expression_ptr>());
         }
 
-        if (r.has_child("ElseFilter"))
+        if (node.has_child("ElseFilter"))
         {
-            rule.set_else(true);
+            r->set_else(true);
         }
 
-        if (r.has_child("AlsoFilter"))
+        if (node.has_child("AlsoFilter"))
         {
-            rule.set_also(true);
+            r->set_also(true);
         }
 
-        child = r.get_opt_child("MinScaleDenominator");
+        child = node.get_opt_child("MinScaleDenominator");
         if (child)
         {
-            rule.set_min_scale(child->get_value<double>());
+            r->set_min_scale(child->get_value<double>());
         }
 
-        child = r.get_opt_child("MaxScaleDenominator");
+        child = node.get_opt_child("MaxScaleDenominator");
         if (child)
         {
-            rule.set_max_scale(child->get_value<double>());
+            r->set_max_scale(child->get_value<double>());
         }
 
-        xml_node::const_iterator symIter = r.begin();
-        xml_node::const_iterator endSym = r.end();
+        xml_node::const_iterator symIter = node.begin();
+        xml_node::const_iterator endSym = node.end();
 
         for(;symIter != endSym; ++symIter)
         {
 
             if (symIter->is("PointSymbolizer"))
             {
-                parse_point_symbolizer(rule, *symIter);
+                parse_point_symbolizer(*r, *symIter);
             }
             else if (symIter->is("LinePatternSymbolizer"))
             {
-                parse_line_pattern_symbolizer(rule, *symIter);
+                parse_line_pattern_symbolizer(*r, *symIter);
             }
             else if (symIter->is("PolygonPatternSymbolizer"))
             {
-                parse_polygon_pattern_symbolizer(rule, *symIter);
+                parse_polygon_pattern_symbolizer(*r, *symIter);
             }
             else if (symIter->is("TextSymbolizer"))
             {
-                parse_text_symbolizer(rule, *symIter);
+                parse_text_symbolizer(*r, *symIter);
             }
             else if (symIter->is("ShieldSymbolizer"))
             {
-                parse_shield_symbolizer(rule, *symIter);
+                parse_shield_symbolizer(*r, *symIter);
             }
             else if (symIter->is("LineSymbolizer"))
             {
-                parse_line_symbolizer(rule, *symIter);
+                parse_line_symbolizer(*r, *symIter);
             }
             else if (symIter->is("PolygonSymbolizer"))
             {
-                parse_polygon_symbolizer(rule, *symIter);
+                parse_polygon_symbolizer(*r, *symIter);
             }
             else if (symIter->is("BuildingSymbolizer"))
             {
-                parse_building_symbolizer(rule, *symIter);
+                parse_building_symbolizer(*r, *symIter);
             }
             else if (symIter->is("RasterSymbolizer"))
             {
-                parse_raster_symbolizer(rule, *symIter);
+                parse_raster_symbolizer(*r, *symIter);
             }
             else if (symIter->is("MarkersSymbolizer"))
             {
-                parse_markers_symbolizer(rule, *symIter);
+                parse_markers_symbolizer(*r, *symIter);
             }
         }
-        style.add_rule(rule);
+        style.add_rule(r);
 
     }
     catch (const config_error & ex)
     {
         if (!name.empty())
         {
-            ex.append_context(std::string("in rule '") + name + "'", r);
+            ex.append_context(std::string("in rule '") + name + "'", node);
         }
         throw;
     }

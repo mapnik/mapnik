@@ -43,16 +43,22 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
         opacity_(1.0),
         colorizer_(),
         filter_factor_(-1),
-        mesh_size_(16) {}
+        mesh_size_(16) 
+        {
+            std::cout << "raster_symbolizer: default ctor called" << std::endl;
+        }
 
     raster_symbolizer(const raster_symbolizer &rhs)
         : symbolizer_base(rhs),
-        mode_(rhs.get_mode()),
-        scaling_(rhs.get_scaling()),
-        opacity_(rhs.get_opacity()),
+        mode_(rhs.mode_),
+        scaling_(rhs.scaling_),
+        opacity_(rhs.opacity_),
         colorizer_(rhs.colorizer_),
         filter_factor_(rhs.filter_factor_),
-        mesh_size_(rhs.mesh_size_) {}
+        mesh_size_(rhs.mesh_size_) 
+        {
+            std::cout << "raster_symbolizer: copy ctor called" << std::endl;
+        }
 
     std::string const& get_mode() const
     {

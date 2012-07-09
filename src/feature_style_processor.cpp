@@ -36,6 +36,7 @@
 // boost
 #include <boost/foreach.hpp>
 #include <boost/concept_check.hpp>
+
 //stl
 #include <vector>
 
@@ -363,7 +364,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             continue;
         }
 
-        const std::vector<rule>& rules=(*style).get_rules();
+        const boost::ptr_vector<rule>& rules=(*style).get_rules();
         bool active_rules=false;
 
         BOOST_FOREACH(rule const& r, rules)

@@ -31,6 +31,9 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
 
+#include <boost/ptr_container/ptr_map.hpp>
+#include <boost/assign/ptr_map_inserter.hpp>
+
 // boost
 #include <boost/make_shared.hpp>
 
@@ -90,7 +93,7 @@ Map::Map(const Map& rhs)
       buffer_size_(rhs.buffer_size_),
       background_(rhs.background_),
       background_image_(rhs.background_image_),
-      styles_(rhs.styles_),
+      //styles_(rhs.styles_),
       metawriters_(rhs.metawriters_),
       fontsets_(rhs.fontsets_),
       layers_(rhs.layers_),
@@ -109,7 +112,7 @@ Map& Map::operator=(const Map& rhs)
     buffer_size_ = rhs.buffer_size_;
     background_=rhs.background_;
     background_image_=rhs.background_image_;
-    styles_=rhs.styles_;
+    //styles_=rhs.styles_;
     metawriters_ = rhs.metawriters_;
     fontsets_ = rhs.fontsets_;
     layers_=rhs.layers_;
@@ -120,12 +123,12 @@ Map& Map::operator=(const Map& rhs)
     return *this;
 }
 
-std::map<std::string,feature_type_style> const& Map::styles() const
+boost::ptr_map<std::string,feature_type_style> const& Map::styles() const
 {
     return styles_;
 }
 
-std::map<std::string,feature_type_style> & Map::styles()
+boost::ptr_map<std::string,feature_type_style> & Map::styles()
 {
     return styles_;
 }
@@ -150,9 +153,11 @@ Map::const_style_iterator  Map::end_styles() const
     return styles_.end();
 }
 
-bool Map::insert_style(std::string const& name,feature_type_style const& style)
+bool Map::insert_style(std::string const& name, std::auto_ptr<feature_type_style> style)
 {
-    return styles_.insert(make_pair(name,style)).second;
+    //boost::assign::ptr_map_insert(styles_)(name,style);
+    styles_.insert(name,style);   
+    return true; // FIXME
 }
 
 void Map::remove_style(std::string const& name)
@@ -162,9 +167,9 @@ void Map::remove_style(std::string const& name)
 
 boost::optional<feature_type_style const&> Map::find_style(std::string const& name) const
 {
-    std::map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
+    boost::ptr_map<std::string,feature_type_style>::const_iterator itr = styles_.find(name);
     if (itr != styles_.end())
-        return boost::optional<feature_type_style const&>(itr->second);
+        return boost::optional<feature_type_style const&>(*itr->second);
     else
         return boost::optional<feature_type_style const&>() ;
 }
@@ -634,13 +639,15 @@ void Map::init_metawriters()
     Map::style_iterator styIter = begin_styles();
     Map::style_iterator styEnd = end_styles();
     for (; styIter!=styEnd; ++styIter) {
-        std::vector<rule>& rules = styIter->second.get_rules_nonconst();
-        std::vector<rule>::iterator ruleIter = rules.begin();
-        std::vector<rule>::iterator ruleEnd = rules.end();
-        for (; ruleIter!=ruleEnd; ++ruleIter) {
+        boost::ptr_vector<rule>& rules = styIter->second->get_rules_nonconst();
+        boost::ptr_vector<rule>::iterator ruleIter = rules.begin();
+        boost::ptr_vector<rule>::iterator ruleEnd = rules.end();
+        for (; ruleIter!=ruleEnd; ++ruleIter) 
+        {
             rule::symbolizers::iterator symIter = ruleIter->begin();
             rule::symbolizers::iterator symEnd = ruleIter->end();
-            for (; symIter!=symEnd; ++symIter) {
+            for (; symIter!=symEnd; ++symIter) 
+            {
                 boost::apply_visitor(d, *symIter);
             }
         }

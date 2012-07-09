@@ -166,7 +166,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         detector_->has_placement(transformed_bbox))
                     {
                         svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(), bbox);
-                        if (/* DEBUG */ 0)
+                        if (/* DEBUG */ 1)
                         {
                             debug_draw_box(buf, transformed_bbox, 0, 0, 0.0);
                         }

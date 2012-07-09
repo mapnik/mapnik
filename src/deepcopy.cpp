@@ -112,12 +112,12 @@ namespace mapnik { namespace util {
         typedef std::map<std::string, feature_type_style> style_cont;
         typedef style_cont::value_type value_type;
 
-        style_cont const& styles = map_in.styles();
-        BOOST_FOREACH ( value_type const& kv, styles )
+        //style_cont const& styles = map_in.styles();
+        //BOOST_FOREACH ( value_type const& kv, styles )
         {
-            feature_type_style const& style_in = kv.second;
-            feature_type_style style_out(style_in,true); // deep copy
-            map_out.insert_style(kv.first, style_out);
+            //  feature_type_style const& style_in = kv.second;
+            //feature_type_style style_out(style_in,true); // deep copy
+            //map_out.insert_style(kv.first, style_out);
         }
 
     }

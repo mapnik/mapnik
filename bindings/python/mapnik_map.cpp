@@ -62,8 +62,8 @@ struct map_pickle_suite : boost::python::pickle_suite
         for (; it != end; ++it)
         {
             std::string const& name = it->first;
-            const mapnik::feature_type_style & style = it->second;
-            boost::python::tuple style_pair = boost::python::make_tuple(name,style);
+            const mapnik::feature_type_style * style = it->second;
+            boost::python::tuple style_pair = boost::python::make_tuple(name,*style);
             s.append(style_pair);
         }
 

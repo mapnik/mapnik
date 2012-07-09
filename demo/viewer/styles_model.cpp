@@ -312,6 +312,7 @@ StyleModel::StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent)
     : QAbstractItemModel(parent),
       root_(new node(map_node(map)))
 {
+    /*
     typedef std::map<std::string,mapnik::feature_type_style> style_type;
     style_type const & styles = map->styles();
     style_type::const_iterator itr = styles.begin();
@@ -331,6 +332,7 @@ StyleModel::StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent)
             }
         }
     }
+    */
 }
 
 StyleModel::~StyleModel() {}

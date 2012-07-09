@@ -31,6 +31,7 @@
 
 // boost
 #include <boost/optional.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 // stl
 #include <vector>
 
@@ -45,7 +46,7 @@ enum filter_mode_enum {
 
 DEFINE_ENUM( filter_mode_e, filter_mode_enum );
 
-typedef std::vector<rule> rules;
+typedef boost::ptr_vector<rule> rules;
 typedef std::vector<rule*> rule_ptrs;
 
 class MAPNIK_DECL feature_type_style
@@ -68,10 +69,10 @@ public:
     feature_type_style();
 
     feature_type_style(feature_type_style const& rhs, bool deep_copy = false);
-
+    
     feature_type_style& operator=(feature_type_style const& rhs);
 
-    void add_rule(rule const& rule);
+    void add_rule(std::auto_ptr<rule> rule);
 
     rules const& get_rules() const;
     rule_ptrs const& get_if_rules(double scale_denom);

@@ -33,6 +33,7 @@
 
 // boost
 #include <boost/optional/optional.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
 
 namespace mapnik
 {
@@ -71,7 +72,7 @@ private:
     int buffer_size_;
     boost::optional<color> background_;
     boost::optional<std::string> background_image_;
-    std::map<std::string,feature_type_style> styles_;
+    boost::ptr_map<std::string,feature_type_style> styles_;
     std::map<std::string,metawriter_ptr> metawriters_;
     std::map<std::string,font_set> fontsets_;
     std::vector<layer> layers_;
@@ -83,8 +84,8 @@ private:
 
 public:
 
-    typedef std::map<std::string,feature_type_style>::const_iterator const_style_iterator;
-    typedef std::map<std::string,feature_type_style>::iterator style_iterator;
+    typedef boost::ptr_map<std::string,feature_type_style>::const_iterator const_style_iterator;
+    typedef boost::ptr_map<std::string,feature_type_style>::iterator style_iterator;
     typedef std::map<std::string,font_set>::const_iterator const_fontset_iterator;
     typedef std::map<std::string,font_set>::iterator fontset_iterator;
     typedef std::map<std::string,metawriter_ptr>::const_iterator const_metawriter_iterator;
@@ -121,12 +122,12 @@ public:
     /*! \brief Get all styles
      * @return Const reference to styles
      */
-    std::map<std::string,feature_type_style> const& styles() const;
+    boost::ptr_map<std::string,feature_type_style> const& styles() const;
 
     /*! \brief Get all styles
      * @return Non-constant reference to styles
      */
-    std::map<std::string,feature_type_style> & styles();
+    boost::ptr_map<std::string,feature_type_style> & styles();
 
     /*! \brief Get first iterator in styles.
      *  @return Constant style iterator.
@@ -154,7 +155,7 @@ public:
      *  @return true If success.
      *  @return false If no success.
      */
-    bool insert_style(std::string const& name,feature_type_style const& style);
+    bool insert_style(std::string const& name, std::auto_ptr<feature_type_style> style);
 
     /*! \brief Remove a style from the map.
      *  @param name The name of the style.

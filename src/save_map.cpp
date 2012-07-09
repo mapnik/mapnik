@@ -530,7 +530,7 @@ void serialize_rule( ptree & style_node, const rule & r, bool explicit_defaults)
 
 void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool explicit_defaults )
 {
-    feature_type_style const& style = style_it->second;
+    feature_type_style const* style = style_it->second;
     std::string const& name = style_it->first;
 
     ptree & style_node = map_node.push_back(
@@ -539,19 +539,19 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
     set_attr(style_node, "name", name);
 
     feature_type_style dfl;
-    filter_mode_e filter_mode = style.get_filter_mode();
+    filter_mode_e filter_mode = style->get_filter_mode();
     if (filter_mode != dfl.get_filter_mode() || explicit_defaults)
     {
         set_attr(style_node, "filter-mode", filter_mode);
     }
 
-    double opacity = style.get_opacity();
+    double opacity = style->get_opacity();
     if (opacity != dfl.get_opacity() || explicit_defaults)
     {
         set_attr(style_node, "opacity", opacity);
     }
 
-    boost::optional<composite_mode_e> comp_op = style.comp_op();
+    boost::optional<composite_mode_e> comp_op = style->comp_op();
     if (comp_op)
     {
         set_attr(style_node, "comp-op", *comp_op_to_string(*comp_op));
@@ -561,8 +561,8 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
         set_attr(style_node, "comp-op", "src-over");
     }
 
-    rules::const_iterator it = style.get_rules().begin();
-    rules::const_iterator end = style.get_rules().end();
+    rules::const_iterator it = style->get_rules().begin();
+    rules::const_iterator end = style->get_rules().end();
     for (; it != end; ++it)
     {
         serialize_rule( style_node, * it , explicit_defaults);
