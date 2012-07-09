@@ -254,10 +254,6 @@ void text_renderer<T>::render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, in
 #endif
 }
 
-template class text_renderer<image_32>; //::render(glyph_positions_ptr);
-//template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
-
-template class text_renderer<grid>; //::render_id(int, pixel_position, double );
-//template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
-
+template class text_renderer<image_32>;
+template class text_renderer<grid>;
 }
