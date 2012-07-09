@@ -49,9 +49,14 @@ struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image, public symbolizer_base
 {
 public:
-    explicit markers_symbolizer();
+    markers_symbolizer();
     markers_symbolizer(path_expression_ptr const& filename);
     markers_symbolizer(markers_symbolizer const& rhs);
+
+    void set_width(expression_ptr const& width);
+    expression_ptr const& get_width() const;
+    void set_height(expression_ptr const& height);
+    expression_ptr const& get_height() const;
     void set_ignore_placement(bool ignore_placement);
     bool get_ignore_placement() const;
     void set_allow_overlap(bool overlap);
@@ -60,10 +65,6 @@ public:
     double get_spacing() const;
     void set_max_error(double max_error);
     double get_max_error() const;
-    void set_width(expression_ptr const&width);
-    expression_ptr const& get_width() const;
-    void set_height(expression_ptr const& height);
-    expression_ptr const& get_height() const;
     void set_fill(color const& fill);
     boost::optional<color> get_fill() const;
     void set_stroke(stroke const& stroke);
@@ -71,16 +72,15 @@ public:
     void set_marker_placement(marker_placement_e marker_p);
     marker_placement_e get_marker_placement() const;
 private:
+    expression_ptr width_;
+    expression_ptr height_;
     bool ignore_placement_;
     bool allow_overlap_;
     double spacing_;
     double max_error_;
-    expression_ptr width_;
-    expression_ptr height_;
     boost::optional<color> fill_;
     boost::optional<stroke> stroke_;
     marker_placement_e marker_p_;
-
 };
 
 }

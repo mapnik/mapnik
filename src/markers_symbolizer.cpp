@@ -39,34 +39,34 @@ IMPLEMENT_ENUM( marker_placement_e, marker_placement_strings )
 markers_symbolizer::markers_symbolizer()
     : symbolizer_with_image(path_expression_ptr(new path_expression)),
       symbolizer_base(),
+      width_(),
+      height_(),
       ignore_placement_(false),
       allow_overlap_(false),
       spacing_(100.0),
       max_error_(0.2),
-      width_(boost::make_shared<expr_node>(10.0)),
-      height_(boost::make_shared<expr_node>(10.0)),
       marker_p_(MARKER_LINE_PLACEMENT) {}
 
 markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
     : symbolizer_with_image(filename),
       symbolizer_base(),
+      width_(),
+      height_(),
       ignore_placement_(false),
       allow_overlap_(false),
       spacing_(100.0),
       max_error_(0.2),
-      width_(boost::make_shared<expr_node>(10.0)),
-      height_(boost::make_shared<expr_node>(10.0)),
       marker_p_(MARKER_LINE_PLACEMENT) {}
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
     : symbolizer_with_image(rhs),
       symbolizer_base(rhs),
+      width_(rhs.width_),
+      height_(rhs.height_),
       ignore_placement_(rhs.ignore_placement_),
       allow_overlap_(rhs.allow_overlap_),
       spacing_(rhs.spacing_),
       max_error_(rhs.max_error_),
-      width_(rhs.width_),
-      height_(rhs.height_),
       fill_(rhs.fill_),
       stroke_(rhs.stroke_),
       marker_p_(rhs.marker_p_) {}
