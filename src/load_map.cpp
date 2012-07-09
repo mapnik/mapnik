@@ -950,13 +950,13 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
 }
 
 
-void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
+void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
 {
     try
     {
         std::string filename("");
-        optional<std::string> file = sym.get_opt_attr<std::string>("file");
-        optional<std::string> base = sym.get_opt_attr<std::string>("base");
+        optional<std::string> file = node.get_opt_attr<std::string>("file");
+        optional<std::string> base = node.get_opt_attr<std::string>("base");
 
         if (file && !file->empty())
         {
@@ -990,21 +990,21 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!filename.empty())
         {
-            if (!parse_path_from_string(expr, filename, sym.get_tree().path_expr_grammar))
+            if (!parse_path_from_string(expr, filename, node.get_tree().path_expr_grammar))
             {
                 throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
             }
         }
-        markers_symbolizer symbol(expr);
+        markers_symbolizer sym(expr);
 
-        optional<float> opacity = sym.get_opt_attr<float>("opacity");
-        if (opacity) symbol.set_opacity(*opacity);
+        optional<float> opacity = node.get_opt_attr<float>("opacity");
+        if (opacity) sym.set_opacity(*opacity);
 
-        optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
+        optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)
         {
             mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
-            if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
+            if (!mapnik::parse_transform(*tl, *image_transform_wkt, node.get_tree().transform_expr_grammar))
             {
                 std::stringstream ss;
                 ss << "Could not parse transform from '" << *image_transform_wkt
@@ -1018,52 +1018,38 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
                     MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                 }
             }
-            symbol.set_image_transform(tl);
+            sym.set_image_transform(tl);
         }
 
-        optional<color> c = sym.get_opt_attr<color>("fill");
-        if (c) symbol.set_fill(*c);
-        optional<double> spacing = sym.get_opt_attr<double>("spacing");
-        if (spacing) symbol.set_spacing(*spacing);
-        optional<double> max_error = sym.get_opt_attr<double>("max-error");
-        if (max_error) symbol.set_max_error(*max_error);
-        optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
-        optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
-        if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
-        if (ignore_placement) symbol.set_ignore_placement(*ignore_placement);
+        optional<color> c = node.get_opt_attr<color>("fill");
+        if (c) sym.set_fill(*c);
+        optional<double> spacing = node.get_opt_attr<double>("spacing");
+        if (spacing) sym.set_spacing(*spacing);
+        optional<double> max_error = node.get_opt_attr<double>("max-error");
+        if (max_error) sym.set_max_error(*max_error);
+        optional<boolean> allow_overlap = node.get_opt_attr<boolean>("allow-overlap");
+        optional<boolean> ignore_placement = node.get_opt_attr<boolean>("ignore-placement");
+        if (allow_overlap) sym.set_allow_overlap(*allow_overlap);
+        if (ignore_placement) sym.set_ignore_placement(*ignore_placement);
 
-        optional<expression_ptr> w = sym.get_opt_attr<expression_ptr>("width");
-        optional<expression_ptr> h = sym.get_opt_attr<expression_ptr>("height");
+        optional<expression_ptr> width = node.get_opt_attr<expression_ptr>("width");
+        if (width) sym.set_width(*width);
 
-        if (w && h)
-        {
-            symbol.set_width(*w);
-            symbol.set_height(*h);
-        }
-        else if (w)
-        {
-            symbol.set_width(*w);
-            symbol.set_height(*w);
-
-        }
-        else if (h)
-        {
-            symbol.set_width(*h);
-            symbol.set_height(*h);
-        }
+        optional<expression_ptr> height = node.get_opt_attr<expression_ptr>("height");
+        if (height) sym.set_height(*height);
 
         stroke strk;
-        if (parse_stroke(strk,sym))
-            symbol.set_stroke(strk);
+        if (parse_stroke(strk,node))
+            sym.set_stroke(strk);
 
-        marker_placement_e placement = sym.get_attr<marker_placement_e>("placement", MARKER_LINE_PLACEMENT);
-        symbol.set_marker_placement(placement);
-        parse_symbolizer_base(symbol, sym);
-        rule.append(symbol);
+        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_LINE_PLACEMENT);
+        sym.set_marker_placement(placement);
+        parse_symbolizer_base(sym, node);
+        rule.append(sym);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
-        ex.append_context("in MarkersSymbolizer", sym);
+        ex.append_context("in MarkersSymbolizer", node);
         throw;
     }
 }
