@@ -22,21 +22,37 @@ extern "C"
 namespace mapnik
 {
 template <typename T>
-struct text_renderer : private boost::noncopyable
-{    typedef T pixmap_type;
+class text_renderer : private boost::noncopyable
+{
+public:
+    typedef T pixmap_type;
 
-    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s, composite_mode_e comp_op = src_over);
+    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, composite_mode_e comp_op = src_over);
     void render(glyph_positions_ptr pos);
     void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
-
 private:
     void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity);
     void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y);
+
+    struct glyph_t : boost::noncopyable
+    {
+        FT_Glyph image;
+        char_properties_ptr properties;
+
+        glyph_t(FT_Glyph image_, char_properties_ptr properties_)
+            : image(image_), properties(properties_) {}
+
+        ~glyph_t () { FT_Done_Glyph(image);}
+
+    };
+
+    void prepare_glyphs(glyph_positions_ptr pos);
 
     pixmap_type & pixmap_;
     face_manager<freetype_engine> &font_manager_;
     stroker & stroker_;
     composite_mode_e comp_op_;
+    boost::ptr_vector<glyph_t> glyphs_;
 };
 }
 #endif // RENDERER_HPP

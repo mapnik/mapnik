@@ -1,20 +1,21 @@
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/text_properties.hpp>
 
 namespace mapnik
 {
 
 template <typename T>
-text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s, composite_mode_e comp_op)
+text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, composite_mode_e comp_op)
     : pixmap_(pixmap),
       font_manager_(font_manager_),
-      stroker_(s),
+      stroker_(*(font_manager_.get_stroker())),
       comp_op_(comp_op) {}
 
-#if 0
+
 template <typename T>
-box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
+void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
 {
     //clear glyphs
     glyphs_.clear();
@@ -23,74 +24,61 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
     FT_Vector pen;
     FT_Error  error;
 
-    FT_BBox bbox;
-    bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
-    bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
-
-    for (int i = 0; i < path->num_nodes(); i++)
+    pos->rewind();
+    bool constant_angle = pos->is_constant_angle();
+    if (constant_angle)
     {
-        char_info_ptr c;
-        double x, y, angle;
-
-        path->vertex(&c, &x, &y, &angle);
-
-        // TODO Enable when we have support for setting verbosity
-        // MAPNIK_LOG_DEBUG(font_engine_freetype) << "text_renderer: prepare_glyphs="
-        //                                        << c << "," << x << "," << y << "," << angle;
-
-        FT_BBox glyph_bbox;
-        FT_Glyph image;
-
-        pen.x = int(x * 64);
-        pen.y = int(y * 64);
-
-        face_set_ptr faces = font_manager_.get_face_set(c->format->face_name, c->format->fontset);
-        faces->set_character_sizes(c->format->text_size);
-
-        glyph_ptr glyph = faces->get_glyph(unsigned(c->c));
-        FT_Face face = glyph->get_face()->get_face();
-
-        matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
-        matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L );
-        matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
-        matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
-
-        FT_Set_Transform(face, &matrix, &pen);
-
-        error = FT_Load_Glyph(face, glyph->get_index(), FT_LOAD_NO_HINTING);
-        if ( error )
-            continue;
-
-        error = FT_Get_Glyph(face->glyph, &image);
-        if ( error )
-            continue;
-
-        FT_Glyph_Get_CBox(image,ft_glyph_bbox_pixels, &glyph_bbox);
-        if (glyph_bbox.xMin < bbox.xMin)
-            bbox.xMin = glyph_bbox.xMin;
-        if (glyph_bbox.yMin < bbox.yMin)
-            bbox.yMin = glyph_bbox.yMin;
-        if (glyph_bbox.xMax > bbox.xMax)
-            bbox.xMax = glyph_bbox.xMax;
-        if (glyph_bbox.yMax > bbox.yMax)
-            bbox.yMax = glyph_bbox.yMax;
-
-        // Check if we properly grew the bbox
-        if ( bbox.xMin > bbox.xMax )
+        double angle = pos->get_angle();
+        double cosa = cos(angle);
+        double sina = sin(angle);
+        matrix.xx = (FT_Fixed)( cosa * 0x10000L);
+        matrix.xy = (FT_Fixed)(-sina * 0x10000L);
+        matrix.yx = (FT_Fixed)( sina * 0x10000L);
+        matrix.yy = (FT_Fixed)( cosa * 0x10000L);
+    }
+    float text_size = 0;
+    while (pos->next())
+    {
+        char_properties_ptr format = pos->get_format();
+        if (format)
         {
-            bbox.xMin = 0;
-            bbox.yMin = 0;
-            bbox.xMax = 0;
-            bbox.yMax = 0;
+            //Only update parameters when format has changed.
+            text_size = format->text_size;
         }
 
-        // take ownership of the glyph
-        glyphs_.push_back(new glyph_t(image, c->format));
-    }
 
-    return box2d<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
+        pixel_position p = pos->get_position();
+        pen.x = int(p.x * 64);
+        pen.y = int(p.y * 64);
+
+        glyph_info const& glyph = pos->get_glyph();
+        glyph.face->set_character_sizes(text_size); //TODO: Optimize this?
+
+        if (!constant_angle)
+        {
+            double angle = pos->get_angle();
+            double cosa = cos(angle);
+            double sina = sin(angle);
+            matrix.xx = (FT_Fixed)( cosa * 0x10000L);
+            matrix.xy = (FT_Fixed)(-sina * 0x10000L);
+            matrix.yx = (FT_Fixed)( sina * 0x10000L);
+            matrix.yy = (FT_Fixed)( cosa * 0x10000L);
+        }
+
+        FT_Face face = glyph.face->get_face();
+        FT_Set_Transform(face, &matrix, &pen);
+
+        error = FT_Load_Glyph(face, glyph.glyph_index, FT_LOAD_NO_HINTING);
+        if (error) continue;
+
+        FT_Glyph image;
+        error = FT_Get_Glyph(face->glyph, &image);
+        if (error) continue;
+
+        // take ownership of the glyph
+        glyphs_.push_back(new glyph_t(image, format));
+    }
 }
-#endif
 
 template <typename T>
 void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity, composite_mode_e comp_op)
@@ -242,6 +230,8 @@ void text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,i
 #endif
 }
 
+
+
 template <typename T>
 void text_renderer<T>::render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
 {
@@ -264,10 +254,10 @@ void text_renderer<T>::render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, in
 #endif
 }
 
-template void text_renderer<image_32>::render(glyph_positions_ptr);
-template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
+template class text_renderer<image_32>; //::render(glyph_positions_ptr);
+//template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
 
-template void text_renderer<grid>::render_id(int, pixel_position, double );
-template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
+template class text_renderer<grid>; //::render_id(int, pixel_position, double );
+//template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e);
 
 }
