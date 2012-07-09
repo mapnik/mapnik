@@ -25,6 +25,8 @@
 //mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/text/glyph_info.hpp>
+#include <mapnik/text/char_properties_ptr.hpp>
 
 //stl
 #include <list>
@@ -45,11 +47,27 @@ typedef feature_impl Feature;
 class text_layout;
 typedef boost::shared_ptr<text_layout> text_layout_ptr;
 
+/** Stores positions of glphys.
+ *
+ * The actual glyphs and their format is stored in text_layout.
+ * For point placements only the base point is stored, glyph positions
+ * are defined by information in text_layout.
+ */
 class glyph_positions
 {
 public:
     glyph_positions(text_layout_ptr layout);
     void point_placement(pixel_position base_point);
+    bool is_point_placement() const { return point_; }
+    bool next();
+    void rewind();
+    glyph_info const& get_glyph() const;
+    pixel_position get_position() const;
+    double get_angle() const;
+    char_properties_ptr get_format() const;
+    /** Is each character rotated by the same angle?
+     * This function is used to avoid costly trigonometric function calls when not necessary. */
+    bool is_constant_angle() const;
 private:
     pixel_position base_point_;
     bool point_;
