@@ -83,6 +83,42 @@ bool push_explicit_style(Attr const& src, Attr & dst,  markers_symbolizer const&
 }
 
 template <typename T>
+void setup_label_transform(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
+{
+    int width = 0;
+    int height = 0;
+
+    expression_ptr const& width_expr = sym.get_width();
+    if (width_expr)
+        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_int();
+
+    expression_ptr const& height_expr = sym.get_height();
+    if (height_expr)
+        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_int();
+
+    if (width > 0 && height > 0)
+    {
+        double sx = width/bbox.width();
+        double sy = height/bbox.height();
+        tr *= agg::trans_affine_scaling(sx,sy);
+    }
+    else if (width > 0)
+    {
+        double sx = width/bbox.width();
+        tr *= agg::trans_affine_scaling(sx);
+    }
+    else if (height > 0)
+    {
+        double sy = height/bbox.height();
+        tr *= agg::trans_affine_scaling(sy);
+    }
+    else
+    {
+        evaluate_transform(tr, feature, sym.get_image_transform());
+    }
+}
+
+template <typename T>
 void agg_renderer<T>::process(markers_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
@@ -106,9 +142,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
     renderer_type ren(renb);
-    agg::trans_affine tr;
-    evaluate_transform(tr, feature, sym.get_image_transform());
-    tr = agg::trans_affine_scaling(scale_factor_) * tr;
 
     agg::trans_affine geom_tr;
     evaluate_transform(geom_tr, feature, sym.get_transform());
@@ -124,13 +157,21 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             if (!(*mark)->is_vector())
             {
                 MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: markers_symbolizer does not yet support non-SVG markers";
-
                 return;
             }
+
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
-            coord2d center = bbox.center();
 
+
+            agg::trans_affine tr;
+
+
+            setup_label_transform(tr, bbox, feature, sym);
+            tr = agg::trans_affine_scaling(scale_factor_) * tr;
+
+
+            coord2d center = bbox.center();
             agg::trans_affine_translation recenter(-center.x, -center.y);
             agg::trans_affine marker_trans = recenter * tr;
 
