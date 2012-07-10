@@ -67,7 +67,6 @@ void font_face::glyph_dimensions(glyph_info &glyph)
     glyph.ymin = glyph_bbox.yMin; //TODO: Which data format? 26.6, integer?
     glyph.ymax = glyph_bbox.yMax; //TODO: Which data format? 26.6, integer?
     glyph.line_height = face_->size->metrics.height/64.0;
-    glyph.valid = true;
 
 //TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
 }

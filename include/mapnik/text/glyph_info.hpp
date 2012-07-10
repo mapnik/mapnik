@@ -22,21 +22,27 @@
 #ifndef MAPNIK_GLYPH_INFO_HPP
 #define MAPNIK_GLYPH_INFO_HPP
 
+//mapnik
+#include <mapnik/text/char_properties_ptr.hpp>
+
 //boost
 #include <boost/shared_ptr.hpp>
+
 
 namespace mapnik
 {
 
 class font_face;
 typedef boost::shared_ptr<font_face> face_ptr;
+
+
 typedef unsigned glyph_index_t;
 
 struct glyph_info
 {
     glyph_info()
         : glyph_index(0), face(), char_index(0),
-          width(0), ymin(0), ymax(0), line_height(0), valid(false) {}
+          width(0), ymin(0), ymax(0), line_height(0) {}
     glyph_index_t glyph_index;
     face_ptr face;
     unsigned char_index; //Position in the string of all characters i.e. before itemizing
@@ -46,7 +52,7 @@ struct glyph_info
     double ymax;
     double line_height;
 
-    bool valid; //Are all values valid?
+    char_properties_ptr format;
 
     double height() const { return ymax-ymin; }
 };

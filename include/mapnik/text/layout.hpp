@@ -92,6 +92,7 @@ public:
     void break_lines();
     void shape_text();
     void clear();
+    unsigned size() const;
 
 private:
     text_itemizer itemizer;

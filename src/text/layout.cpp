@@ -80,6 +80,7 @@ void text_layout::shape_text()
             tmp.glyph_index = glyphs[i].codepoint;
             tmp.width = positions[i].x_advance / 64.0;
             tmp.face = face;
+            tmp.format = itr->format;
             face->glyph_dimensions(tmp);
             glyphs_.push_back(tmp);
         }

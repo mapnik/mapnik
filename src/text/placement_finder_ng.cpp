@@ -43,7 +43,7 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(text_layout_ptr la
 }
 
 glyph_positions::glyph_positions(text_layout_ptr layout)
-    : base_point_(), point_(true), layout_(layout)
+    : base_point_(), point_(true), layout_(layout), current_(0)
 {
 
 }
@@ -52,6 +52,38 @@ void glyph_positions::point_placement(pixel_position base_point)
 {
     base_point_ = base_point;
     point_ = true;
+}
+
+void glyph_positions::rewind()
+{
+    current_ = 0;
+}
+
+glyph_info const& glyph_positions::get_glyph() const
+{
+    assert(layout_);
+    assert(current_ < layout_->size());
+
+}
+
+pixel_position glyph_positions::get_position() const
+{
+    return pixel_position(0, 0);
+}
+
+double glyph_positions::get_angle() const
+{
+    return 0;
+}
+
+bool glyph_positions::is_constant_angle() const
+{
+    return point_;
+}
+
+const pixel_position &glyph_positions::get_base_point() const
+{
+    return base_point_;
 }
 
 

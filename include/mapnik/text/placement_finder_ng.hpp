@@ -64,7 +64,6 @@ public:
     glyph_info const& get_glyph() const;
     pixel_position get_position() const;
     double get_angle() const;
-    char_properties_ptr get_format() const;
     /** Is each character rotated by the same angle?
      * This function is used to avoid costly trigonometric function calls when not necessary. */
     bool is_constant_angle() const;
@@ -73,6 +72,7 @@ private:
     pixel_position base_point_;
     bool point_;
     text_layout_ptr layout_;
+    unsigned current_;
 };
 typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
 

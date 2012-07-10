@@ -36,23 +36,14 @@ void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
         matrix.yx = (FT_Fixed)( sina * 0x10000L);
         matrix.yy = (FT_Fixed)( cosa * 0x10000L);
     }
-    float text_size = 0;
     while (pos->next())
     {
-        char_properties_ptr format = pos->get_format();
-        if (format)
-        {
-            //Only update parameters when format has changed.
-            text_size = format->text_size;
-        }
-
-
         pixel_position p = pos->get_position();
         pen.x = int(p.x * 64);
         pen.y = int(p.y * 64);
 
         glyph_info const& glyph = pos->get_glyph();
-        glyph.face->set_character_sizes(text_size); //TODO: Optimize this?
+        glyph.face->set_character_sizes(glyph.format->text_size); //TODO: Optimize this?
 
         if (!constant_angle)
         {
@@ -76,7 +67,7 @@ void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
         if (error) continue;
 
         // take ownership of the glyph
-        glyphs_.push_back(new glyph_t(image, format));
+        glyphs_.push_back(new glyph_t(image, glyph.format));
     }
 }
 
