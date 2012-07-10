@@ -200,6 +200,7 @@ private:
         template <class T>
         void copy_text_ptr(T & sym) const
         {
+            boost::ignore_unused_variable_warning(sym);
             MAPNIK_LOG_WARN(rule) << "rule: deep copying TextSymbolizers is broken!";
         }
 
