@@ -118,7 +118,8 @@ protected:
     /** Text rotation. */
     double angle_;
     /** Text + formatting. */
-    string_info *info_;
+    string_info_ptr info_;
+    string_info_list info_list_;
     /** Did last call to next_placement return true? */
     bool placement_valid_;
     /** Use point placement. Otherwise line placement is used. */
