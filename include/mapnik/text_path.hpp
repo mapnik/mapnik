@@ -46,11 +46,22 @@ protected:
     typedef std::vector<char_info> characters_t;
     characters_t characters_;
     UnicodeString text_;
+    position displacement_;
     bool is_rtl;
 public:
+    string_info(UnicodeString const& text, position displacement)
+        : characters_(),
+          text_(text),
+          displacement_(displacement),
+          is_rtl(false)
+    {
+
+    }
+    
     string_info(UnicodeString const& text)
         : characters_(),
           text_(text),
+          displacement_(position(0, 0)),
           is_rtl(false)
     {
 
@@ -59,6 +70,7 @@ public:
     string_info()
         : characters_(),
           text_(),
+          displacement_(position(0, 0)),
           is_rtl(false)
     {
 
@@ -77,6 +89,16 @@ public:
     unsigned num_characters() const
     {
         return characters_.size();
+    }
+
+    void set_displacement(position displacement)
+    {
+        displacement_ = displacement;
+    }
+
+    position get_displacement() const
+    {
+        return displacement_;
     }
 
     void set_rtl(bool value)
@@ -120,6 +142,8 @@ public:
 
 typedef char_info const * char_info_ptr;
 
+typedef string_info const * string_info_ptr;
+typedef std::list<string_info_ptr> string_info_list;
 
 /** List of all characters and their positions and formats for a placement. */
 class text_path : boost::noncopyable

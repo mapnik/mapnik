@@ -91,17 +91,30 @@ template <typename DetectorT>
 class placement_finder : boost::noncopyable
 {
 public:
-    struct relative_placement
+    struct box_placement
     {
-        relative_placement(box2d<double> const& b) : box(b) {}
-        relative_placement(box2d<double> const& b, UnicodeString const& rk) : box(b), repeat_key(rk) {}
+        box_placement(box2d<double> const& b) : box(b) {}
+        box_placement(box2d<double> const& b, UnicodeString const& rk) : box(b), repeat_key(rk) {}
         box2d<double> box;
         UnicodeString repeat_key;
+    };
+    struct text_placement
+    {
+        text_placement(text_placement_info const& p, string_info const& s) : point_place_box(p, s), info(s) {}
+        string_info const& info;
+        text_place_boxes_at_point point_place_box;
     };
 
     placement_finder(Feature const& feature,
                      text_placement_info const& placement_info,
                      string_info const& info,
+                     DetectorT & detector,
+                     box2d<double> const& extent,
+                     bool check_repeat = false);
+                     
+    placement_finder(Feature const& feature,
+                     text_placement_info const& placement_info,
+                     string_info_list & info,
                      DetectorT & detector,
                      box2d<double> const& extent,
                      bool check_repeat = false);
@@ -132,17 +145,17 @@ public:
     
     inline void add_relative_placement(box2d<double> const& b)
     {
-        additional_placements_.push_back(relative_placement(b));
+        box_placements_.push_back(box_placement(b));
     }
     
     inline void add_relative_placement(box2d<double> const& b, UnicodeString const& rk)
     {
-        additional_placements_.push_back(relative_placement(b, rk));
+        box_placements_.push_back(box_placement(b, rk));
     }
     
     inline void clear_relative_placements()
     {
-        additional_placements_.clear();
+        box_placements_.clear();
     }
 
 private:
@@ -163,7 +176,8 @@ private:
     ///Tests whether the given text_path be placed without a collision
     // Returns true if it can
     // NOTE: This edits p.envelopes so it can be used afterwards (you must clear it otherwise)
-    bool test_placement(std::auto_ptr<text_path> const& current_placement, int orientation);
+    bool test_placement(std::auto_ptr<text_path> const& current_placement,
+                        int orientation);
 
     ///Does a line-circle intersect calculation
     // NOTE: Follow the strict pre conditions
@@ -179,18 +193,19 @@ private:
     DetectorT & detector_;
     box2d<double> const& dimensions_;
 
-   string_info const& info_;
-   text_symbolizer_properties const& p;
-   text_placement_info const& pi;
+    //string_info_list info_list_;
+    text_symbolizer_properties const& p;
+    text_placement_info const& pi;
 
-   text_place_boxes_at_point point_place_box_;
+    std::list<text_placement> text_placements_;
+    UnicodeString repeat_text_;
 
     /** Additional boxes and repeat keys to take into account when finding placement.
      * Used for finding line placements where multiple placements are returned.
      * Boxes are relative to starting point of current placement.
      * Only used for point placements!
      */
-    std::vector<relative_placement> additional_placements_;
+    std::list<box_placement> box_placements_;
    
     std::queue< box2d<double> > envelopes_;
     /** Used to return all placements found. */

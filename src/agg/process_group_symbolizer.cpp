@@ -90,7 +90,7 @@ struct place_bboxes : public boost::static_visitor<>
    {
       text_placement_info_ptr placement_ = sym.get_placement_options()->get_placement_info(scale_factor_);
       placement_->properties.process(text_, feature_);
-      string_info *info_ = &(text_.get_string_info());
+      string_info_ptr info_ = text_.get_string_info();
 
       text_place_boxes_at_point box_placer(*placement_, *info_);
       true_functor check;
@@ -174,7 +174,7 @@ struct render_visitor : public boost::static_visitor<>
    {
       text_placement_info_ptr placement_ = sym.get_placement_options()->get_placement_info(scale_factor_);
       placement_->properties.process(text_, feature_);
-      string_info *info_ = &(text_.get_string_info());
+      string_info_ptr info_ = text_.get_string_info();
 
       text_place_boxes_at_point box_placer(*placement_, *info_);
       true_functor check;

@@ -31,6 +31,11 @@ void processed_text::push_back(char_properties const& properties, UnicodeString 
     expr_list_.push_back(processed_expression(properties, text));
 }
 
+void processed_text::add_child(processed_text_ptr child_text)
+{
+    child_text_list_.push_back(child_text);
+}
+
 processed_text::expression_list::const_iterator processed_text::begin() const
 {
     return expr_list_.begin();
@@ -41,8 +46,18 @@ processed_text::expression_list::const_iterator processed_text::end() const
     return expr_list_.end();
 }
 
-processed_text::processed_text(face_manager<freetype_engine> & font_manager, double scale_factor)
-    : font_manager_(font_manager), scale_factor_(scale_factor)
+processed_text_list::const_iterator processed_text::child_begin() const
+{
+    return child_text_list_.begin();
+}
+
+processed_text_list::const_iterator processed_text::child_end() const
+{
+    return child_text_list_.end();
+}
+
+processed_text::processed_text(face_manager<freetype_engine> & font_manager, double scale_factor, position displacement)
+    : font_manager_(font_manager), scale_factor_(scale_factor), displacement_(displacement)
 {
 
 }
@@ -54,7 +69,7 @@ void processed_text::clear()
 }
 
 
-string_info &processed_text::get_string_info()
+string_info_ptr processed_text::get_string_info()
 {
     info_.clear(); //if this function is called twice invalid results are returned, so clear string_info first
     expression_list::iterator itr = expr_list_.begin();
@@ -77,8 +92,21 @@ string_info &processed_text::get_string_info()
         faces->set_character_sizes(p.text_size * scale_factor_);
         faces->get_string_info(info_, itr->str, &(itr->p));
         info_.add_text(itr->str);
+        info_.set_displacement(displacement_);
     }
-    return info_;
+    return &info_;
+}
+
+void processed_text::get_offset_info(string_info_list & offset_info_list)
+{
+    offset_info_list.push_back(get_string_info());
+    
+    processed_text_list::iterator itr = child_text_list_.begin();
+    processed_text_list::iterator end = child_text_list_.end();
+    for (; itr != end; ++itr)
+    {
+        (*itr)->get_offset_info(offset_info_list);
+    }
 }
 
 } //ns mapnik

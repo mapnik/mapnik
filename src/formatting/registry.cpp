@@ -24,6 +24,7 @@
 #include <mapnik/formatting/text.hpp>
 #include <mapnik/formatting/format.hpp>
 #include <mapnik/formatting/expression.hpp>
+#include <mapnik/formatting/offset.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 
@@ -35,6 +36,7 @@ namespace formatting
 registry::registry()
 {
     register_name("<xmltext>", &text_node::from_xml);
+    register_name("Offset", &offset_node::from_xml);
     register_name("Format", &format_node::from_xml);
     register_name("ExpressionFormat", &expression_format::from_xml);
 }

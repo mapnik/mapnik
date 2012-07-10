@@ -230,7 +230,10 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         return false;
     }
     placement_->properties.process(text_, feature_);
-    info_ = &(text_.get_string_info());
+    info_ = text_.get_string_info();
+    
+    text_.get_offset_info(info_list_);
+    
     if (placement_->properties.orientation)
     {
         angle_ = boost::apply_visitor(
@@ -241,7 +244,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     }
 
 
-    finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
+    finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, info_list_, detector_, dims_));
 //    boost::make_shared<placement_finder<DetectorT> >(feature_, *placement_, *info_, detector_, dims_);
 
     if (writer_.first) finder_->set_collect_extents(true);
