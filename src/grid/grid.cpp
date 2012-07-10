@@ -77,11 +77,11 @@ void hit_grid<T>::add_feature(mapnik::feature_impl & feature)
     }
 
     if (ctx_->size() == 0) {
-        mapnik::feature_impl::iterator itr = feature.begin();
-        mapnik::feature_impl::iterator end = feature.end();
+        context_type::map_type::const_iterator itr = feature.context()->begin();
+        context_type::map_type::const_iterator end = feature.context()->end();
         for ( ;itr!=end; ++itr)
         {
-            ctx_->push(boost::get<0>(*itr));
+            ctx_->add(itr->first,itr->second);
         }
     }
     // NOTE: currently lookup keys must be strings,
