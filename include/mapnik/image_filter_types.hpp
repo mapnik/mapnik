@@ -23,7 +23,12 @@
 #ifndef MAPNIK_IMAGE_FILTER_TYPES_HPP
 #define MAPNIK_IMAGE_FILTER_TYPES_HPP
 
+// boost
 #include <boost/variant.hpp>
+#include <boost/config/warning_disable.hpp>
+#include <boost/spirit/include/karma.hpp>
+// stl
+#include <iostream>
 
 namespace mapnik { namespace filter {
 
@@ -37,7 +42,7 @@ struct x_gradient {};
 struct y_gradient {};
 struct invert {};
 
-struct agg_stack_blur 
+struct agg_stack_blur
 {
     agg_stack_blur(unsigned rx_, unsigned ry_)
         : rx(rx_),ry(ry_) {}
@@ -47,7 +52,6 @@ struct agg_stack_blur
     unsigned rx;
     unsigned ry;
 };
-
 
 typedef boost::variant<filter::blur,
                        filter::gray,
@@ -59,6 +63,97 @@ typedef boost::variant<filter::blur,
                        filter::x_gradient,
                        filter::y_gradient,
                        filter::invert> filter_type;
+
+inline std::ostream& operator<< (std::ostream& os, blur)
+{
+    os << "blur";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, gray)
+{
+    os << "gray";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
+{
+    os << "agg-stack-blur:" << filter.rx << ',' << filter.ry;
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, emboss)
+{
+    os << "emboss";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, sharpen)
+{
+    os << "sharpen";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, edge_detect)
+{
+    os << "edge-detect";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, sobel)
+{
+    os << "sobel";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, x_gradient)
+{
+    os << "x-gradient";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, y_gradient)
+{
+    os << "y-gradient";
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, invert)
+{
+    os << "invert";
+    return os;
+}
+
+template <typename Out>
+struct to_string_visitor : boost::static_visitor<void>
+{
+    to_string_visitor(Out & out)
+    : out_(out) {}
+
+    template <typename T>
+    void operator () (T const& filter_tag)
+    {
+        out_ << filter_tag;
+    }
+
+    Out & out_;
+};
+
+inline std::ostream& operator<< (std::ostream& os, filter_type const& filter)
+{
+    to_string_visitor<std::ostream> visitor(os);
+    boost::apply_visitor(visitor, filter);
+    return os;
+}
+
+template <typename OutputIterator, typename Container>
+bool generate_image_filters(OutputIterator& sink, Container const& v)
+{
+    using boost::spirit::karma::stream;
+    using boost::spirit::karma::generate;
+    bool r = generate(sink, stream % ' ', v);
+    return r;
+}
 
 }}
 
