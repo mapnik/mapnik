@@ -68,6 +68,7 @@ public:
     /** Is each character rotated by the same angle?
      * This function is used to avoid costly trigonometric function calls when not necessary. */
     bool is_constant_angle() const;
+    pixel_position const& get_base_point() const;
 private:
     pixel_position base_point_;
     bool point_;

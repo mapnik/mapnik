@@ -83,7 +83,6 @@ void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
 template <typename T>
 void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity, composite_mode_e comp_op)
 {
-#if 0
     int x_max=x+bitmap->width;
     int y_max=y+bitmap->rows;
     int i,p,j,q;
@@ -99,73 +98,77 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
             }
         }
     }
-#endif
 }
 
 template <typename T>
 void text_renderer<T>::render(glyph_positions_ptr pos)
 {
-#if 0
+    if (glyphs_.empty()) prepare_glyphs(pos);
     FT_Error  error;
     FT_Vector start;
     unsigned height = pixmap_.height();
+    pixel_position const& base_point = pos->get_base_point();
 
-    start.x =  static_cast<FT_Pos>(pos.x * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - pos.y) * (1 << 6));
+    start.x =  static_cast<FT_Pos>(base_point.x * (1 << 6));
+    start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6)); //TODO: Why is this inverted coordinate system used?
 
-    // now render transformed glyphs
-    typename glyphs_t::iterator itr;
+    //render halo
+    typename boost::ptr_vector<glyph_t>::iterator itr;
+    double halo_radius = 0;
+    char_properties_ptr format;
     for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-        double halo_radius = itr->properties->halo_radius;
-        //make sure we've got reasonable values.
-        if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
-        stroker_.init(halo_radius);
+        if (itr->properties)
+        {
+            format = itr->properties;
+            /* Settings have changed. */
+            halo_radius = itr->properties->halo_radius;
+            //make sure we've got reasonable values.
+            if (halo_radius <= 0.0 || halo_radius > 1024.0) break;
+            stroker_.init(halo_radius);
+        }
         FT_Glyph g;
         error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
-            FT_Glyph_Transform(g,0,&start);
-            FT_Glyph_Stroke(&g,stroker_.get(),1);
-            error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
-            if ( ! error )
+            FT_Glyph_Transform(g, 0, &start);
+            FT_Glyph_Stroke(&g, stroker_.get(), 1);
+            error = FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
+            if (!error)
             {
-
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                composite_bitmap(pixmap_, &bit->bitmap, itr->properties->halo_fill.rgba(),
+                composite_bitmap(pixmap_, &bit->bitmap, format->halo_fill.rgba(),
                                  bit->left,
                                  height - bit->top,
-                                 itr->properties->text_opacity,
-                                 comp_op_
-                    );
+                                 format->text_opacity,
+                                 comp_op_);
             }
         }
         FT_Done_Glyph(g);
     }
+
     //render actual text
     for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-
-        FT_Glyph_Transform(itr->image,0,&start);
+        if (itr->properties)
+        {
+            format = itr->properties;
+        }
+        FT_Glyph_Transform(itr->image, 0, &start);
 
         error = FT_Glyph_To_Bitmap( &(itr->image),FT_RENDER_MODE_NORMAL,0,1);
-        if ( ! error )
+        if (!error)
         {
 
             FT_BitmapGlyph bit = (FT_BitmapGlyph)itr->image;
-            //render_bitmap(&bit->bitmap, itr->properties->fill.rgba(),
-            //              bit->left,
-            //              height - bit->top, itr->properties->text_opacity);
-
-            composite_bitmap(pixmap_, &bit->bitmap, itr->properties->fill.rgba(),
+            composite_bitmap(pixmap_, &bit->bitmap, format->fill.rgba(),
                              bit->left,
                              height - bit->top,
-                             itr->properties->text_opacity,
+                             format->text_opacity,
                              comp_op_
                 );
         }
     }
-#endif
 }
 
 
@@ -230,30 +233,6 @@ void text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,i
 #endif
 }
 
-
-
-template <typename T>
-void text_renderer<T>::render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
-{
-#if 0
-    int x_max=x+bitmap->width;
-    int y_max=y+bitmap->rows;
-    int i,p,j,q;
-
-    for (i=x,p=0;i<x_max;++i,++p)
-    {
-        for (j=y,q=0;j<y_max;++j,++q)
-        {
-            int gray=bitmap->buffer[q*bitmap->width+p];
-            if (gray)
-            {
-                pixmap_.blendPixel2(i, j, rgba, gray, opacity);
-            }
-        }
-    }
-#endif
-}
-
 template class text_renderer<image_32>;
-template class text_renderer<grid>;
+//template class text_renderer<grid>;
 }

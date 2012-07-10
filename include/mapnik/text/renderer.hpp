@@ -21,6 +21,7 @@ extern "C"
 
 namespace mapnik
 {
+
 template <typename T>
 class text_renderer : private boost::noncopyable
 {
@@ -31,7 +32,6 @@ public:
     void render(glyph_positions_ptr pos);
     void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
 private:
-    void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity);
     void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y);
 
     struct glyph_t : boost::noncopyable
