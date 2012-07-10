@@ -89,6 +89,15 @@ void export_logger();
 #include "mapnik_value_converter.hpp"
 #include "mapnik_threads.hpp"
 #include "python_optional.hpp"
+#include <mapnik/marker_cache.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
+
+
+void clear_cache()
+{
+    mapnik::marker_cache::instance()->clear();
+    mapnik::mapped_memory_cache::instance()->clear();
+}
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <pycairo.h>
@@ -392,6 +401,15 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_inmem_metawriter();
     export_label_collision_detector();
     export_logger();
+
+    def("clear_cache", &clear_cache,
+        "\n"
+        "Clear all global caches of markers and mapped memory regions.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import clear_cache\n"
+        ">>> clear_cache()\n"
+        );
 
     def("render_grid",&render_grid,
         ( arg("map"),
