@@ -38,6 +38,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
 
+// agg
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
+
 namespace mapnik
 {
 
@@ -61,11 +65,16 @@ bool marker_cache::insert(std::string const& uri, marker_ptr path)
 
 boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool update_cache)
 {
+
+    boost::optional<marker_ptr> result;
+    if (uri.empty())
+    {
+        return result;
+    }
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
     typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
-    boost::optional<marker_ptr> result;
     iterator_type itr = cache_.find(uri);
     if (itr != cache_.end())
     {
@@ -113,6 +122,11 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri, bool upda
                     BOOST_ASSERT(width > 0 && height > 0);
                     mapnik::image_ptr image(boost::make_shared<mapnik::image_data_32>(width,height));
                     reader->read(0,0,*image);
+                    // ensure images are premultiplied
+                    // TODO - don't need to multiply jpegs
+                    agg::rendering_buffer buffer(image->getBytes(),image->width(),image->height(),image->width() * 4);
+                    agg::pixfmt_rgba32 pixf(buffer);
+                    pixf.premultiply();
                     marker_ptr mark(boost::make_shared<marker>(image));
                     result.reset(mark);
                     if (update_cache)

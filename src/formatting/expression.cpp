@@ -40,7 +40,7 @@ void expression_format::to_xml(boost::property_tree::ptree &xml) const
     ptree &new_node = xml.push_back(ptree::value_type("ExpressionFormat", ptree()))->second;
     if (face_name) set_attr(new_node, "face-name", to_expression_string(*face_name));
     if (text_size) set_attr(new_node, "size", to_expression_string(*text_size));
-    if (character_spacing) set_attr(new_node, "character-spacing", to_expression_string*character_spacing);
+    if (character_spacing) set_attr(new_node, "character-spacing", to_expression_string(*character_spacing));
     if (line_spacing) set_attr(new_node, "line-spacing", to_expression_string(*line_spacing));
     if (text_opacity) set_attr(new_node, "opacity", to_expression_string(*text_opacity));
     if (wrap_before) set_attr(new_node, "wrap-before", to_expression_string(*wrap_before));
@@ -74,8 +74,8 @@ node_ptr expression_format::from_xml(xml_node const& xml)
 
 expression_ptr expression_format::get_expression(xml_node const& xml, std::string name)
 {
-    boost::optional<std::string> tmp = xml.get_opt_attr<std::string>(name);
-    if (tmp) return parse_expression(*tmp);
+    boost::optional<expression_ptr> tmp = xml.get_opt_attr<expression_ptr>(name);
+    if (tmp) return *tmp;
     return expression_ptr();
 }
 

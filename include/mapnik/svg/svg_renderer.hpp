@@ -107,8 +107,8 @@ class svg_renderer : boost::noncopyable
     typedef agg::conv_transform<curved_stroked_type> curved_stroked_trans_type;
     typedef agg::conv_transform<curved_type>         curved_trans_type;
     typedef agg::conv_contour<curved_trans_type>     curved_trans_contour_type;
-    typedef agg::renderer_base<PixelFormat> renderer_base;
-
+    typedef agg::renderer_base<PixelFormat>          renderer_base;
+    
 public:
     svg_renderer(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
@@ -147,7 +147,7 @@ public:
             unsigned b = stop_color.blue();
             unsigned a = stop_color.alpha();
             //MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: r=" << r << ",g=" << g << ",b=" << b << ",a=" << a;
-            m_gradient_lut.add_color(st.first, agg::rgba8(r, g, b, int(a * opacity)));
+            m_gradient_lut.add_color(st.first, agg::rgba8_pre(r, g, b, int(a * opacity)));
         }
         m_gradient_lut.build_lut();
 
@@ -300,6 +300,7 @@ public:
                     color = attr.fill_color;
                     color.opacity(color.opacity() * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
+                    color.premultiply();
                     ren_s.color(color);
                     render_scanlines(ras, sl, ren_s);
                 }
@@ -335,6 +336,7 @@ public:
                     color = attr.stroke_color;
                     color.opacity(color.opacity() * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
+                    color.premultiply();
                     ren_s.color(color);
                     render_scanlines(ras, sl, ren_s);
                 }
@@ -379,7 +381,7 @@ public:
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
 
-            mapnik::gray16 color(feature_id);
+            mapnik::gray32 color(feature_id);
 
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {

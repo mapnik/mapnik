@@ -101,6 +101,13 @@ public:
     {
         return "group";
     }
+ 
+    template <typename Symbolizer>
+    std::string operator() ( Symbolizer const& sym)
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return "unknown";
+    }
 };
 
 std::string get_symbol_type(const symbolizer& symbol)

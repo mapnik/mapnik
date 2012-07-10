@@ -62,8 +62,6 @@ namespace  mapnik { namespace svg {
         void parse_pattern(xmlTextReaderPtr reader);
         void parse_attr(xmlTextReaderPtr reader);
         void parse_attr(const xmlChar * name, const xmlChar * value );
-
-
     private:
         svg_converter_type & path_;
         bool is_defs_;

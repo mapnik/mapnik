@@ -33,6 +33,31 @@
 namespace mapnik
 {
 MAPNIK_DECL std::string to_expression_string(expr_node const& node);
+
+/*
+The following two templates are intentionally invalid and will prompt
+a compile error if ever instanciated. This should prevent accidentally
+passing a pointer (either raw or shared) as the argument.  Without them,
+the compiler could construct a temporary expr_node(bool) using
+implicit pointer-to-bool conversion, thus any non-null pointer
+would yield "true".
+*/
+
+template <typename T>
+std::string to_expression_string(T const* x)
+{
+    x = 0;
+    throw std::logic_error("to_expression_string() called with pointer argument");
+    return std::string();
+}
+
+template <typename T>
+std::string to_expression_string(boost::shared_ptr<T> const& x)
+{
+    x = 0;
+    throw std::logic_error("to_expression_string() called with pointer argument");
+    return std::string();
+}
 }
 
 #endif // MAPNIK_EXPRESSION_STRING_HPP

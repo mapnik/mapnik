@@ -94,7 +94,7 @@ BOOST_FUSION_ADAPT_STRUCT(
  */
 namespace boost { namespace spirit { namespace traits {
 
-        typedef mapnik::coord_transform2<mapnik::CoordTransform, mapnik::geometry_type> path_type;
+        typedef mapnik::coord_transform<mapnik::CoordTransform, mapnik::geometry_type> path_type;
 
         template <>
         struct is_container<path_type const>

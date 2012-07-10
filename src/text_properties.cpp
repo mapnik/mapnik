@@ -52,6 +52,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     force_odd_labels(false),
     allow_overlap(false),
     ignore_placement(false),
+    largest_bbox_only(true),
     text_ratio(0),
     wrap_width(0),
     format(),
@@ -108,13 +109,14 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (allow_overlap_) allow_overlap = *allow_overlap_;
     optional<boolean> ignore_placement_ = sym.get_opt_attr<boolean>("ignore-placement");
     if (ignore_placement_) ignore_placement = *ignore_placement_;
+    optional<boolean> largest_bbox_only_ = sym.get_opt_attr<boolean>("largest-bbox-only");
+    if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
     optional<horizontal_alignment_e> halign_ = sym.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     if (halign_) halign = *halign_;
     optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
     if (jalign_) jalign = *jalign_;
-    /* Attributes needing special care */
-    optional<std::string> orientation_ = sym.get_opt_attr<std::string>("orientation");
-    if (orientation_) orientation = parse_expression(*orientation_, "utf8");
+    optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
+    if (orientation_) orientation = *orientation_;
     optional<double> dx = sym.get_opt_attr<double>("dx");
     if (dx) displacement.first = *dx;
     optional<double> dy = sym.get_opt_attr<double>("dy");
@@ -122,12 +124,12 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
 
-    optional<std::string> name_ = sym.get_opt_attr<std::string>("name");
+    optional<expression_ptr> name_ = sym.get_opt_attr<expression_ptr>("name");
     if (name_)
     {
         MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
 
-        set_old_style_expression(parse_expression(*name_, "utf8"));
+        set_old_style_expression(*name_);
     }
 
     format.from_xml(sym, fontsets);
@@ -211,6 +213,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (avoid_edges != dfl.avoid_edges || explicit_defaults)
     {
         set_attr(node, "avoid-edges", avoid_edges);
+    }
+    if (largest_bbox_only != dfl.largest_bbox_only|| explicit_defaults)
+    {
+        set_attr(node, "largest-bbox_only", largest_bbox_only);
     }
     if (max_char_angle_delta != dfl.max_char_angle_delta || explicit_defaults)
     {

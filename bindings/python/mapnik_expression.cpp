@@ -46,6 +46,11 @@ expression_ptr parse_expression_(std::string const& wkt)
     return parse_expression(wkt,"utf8");
 }
 
+std::string expression_to_string_(mapnik::expr_node const& expr)
+{
+    return mapnik::to_expression_string(expr);
+}
+
 mapnik::value expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature const& f)
 {
     // will be auto-converted to proper python type by `mapnik_value_to_python`
@@ -75,7 +80,7 @@ void export_expression()
                                                   "TODO"
                                                   "",no_init)
         .def("evaluate", &expression_evaluate_)
-        .def("__str__",&to_expression_string);
+        .def("__str__",&expression_to_string_);
     ;
 
     def("Expression",&parse_expression_,(arg("expr")),"Expression string");

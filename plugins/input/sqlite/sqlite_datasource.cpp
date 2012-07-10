@@ -619,7 +619,9 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         return boost::make_shared<sqlite_featureset>(rs,
                                                      ctx,
                                                      desc_.get_encoding(),
+                                                     e,
                                                      format_,
+                                                     has_spatial_index_,
                                                      using_subquery_);
     }
 
@@ -701,7 +703,9 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt) const
         return boost::make_shared<sqlite_featureset>(rs,
                                                      ctx,
                                                      desc_.get_encoding(),
+                                                     e,
                                                      format_,
+                                                     has_spatial_index_,
                                                      using_subquery_);
     }
 

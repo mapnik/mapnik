@@ -36,6 +36,7 @@
 class LayerTab;
 class StyleTab;
 class QSlider;
+class QComboBox;
 
 class MainWindow : public QMainWindow
 {
@@ -106,6 +107,7 @@ private:
     //status bar
     QStatusBar *status;
     QSlider * slider_;
+    QComboBox * renderer_selector_;
     mapnik::box2d<double> default_extent_;
 };
 

@@ -37,7 +37,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/filesystem/operations.hpp>
 
 // sqlite
@@ -508,22 +507,12 @@ public:
             {
                 if (! rs->column_isnull(0))
                 {
-                    try
-                    {
-                        double xmin = boost::lexical_cast<double>(rs->column_double(0));
-                        double ymin = boost::lexical_cast<double>(rs->column_double(1));
-                        double xmax = boost::lexical_cast<double>(rs->column_double(2));
-                        double ymax = boost::lexical_cast<double>(rs->column_double(3));
-                        extent.init(xmin, ymin, xmax, ymax);
-                        return true;
-                    }
-                    catch (boost::bad_lexical_cast& ex)
-                    {
-                        std::ostringstream ss;
-                        ss << "SQLite Plugin: warning: could not determine extent from query: "
-                           << "'" << s.str() << "' \n problem was: " << ex.what() << std::endl;
-                        std::clog << ss.str();
-                    }
+                    double xmin = rs->column_double(0);
+                    double ymin = rs->column_double(1);
+                    double xmax = rs->column_double(2);
+                    double ymax = rs->column_double(3);
+                    extent.init (xmin, ymin, xmax, ymax);
+                    return true;
                 }
             }
         }
@@ -535,10 +524,10 @@ public:
             boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             if (rs->is_valid() && rs->step_next())
             {
-                double xmin = rs->column_double (0);
-                double ymin = rs->column_double (1);
-                double xmax = rs->column_double (2);
-                double ymax = rs->column_double (3);
+                double xmin = rs->column_double(0);
+                double ymin = rs->column_double(1);
+                double xmax = rs->column_double(2);
+                double ymax = rs->column_double(3);
                 extent.init (xmin, ymin, xmax, ymax);
                 return true;
             }

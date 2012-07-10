@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
+#include <mapnik/formatting/text.hpp>
 
 
 // boost
@@ -68,7 +69,7 @@ IMPLEMENT_ENUM( horizontal_alignment_e, horizontal_alignment_strings )
 
 static const char * justify_alignment_strings[] = {
     "left",
-    "center",
+    "center", // not 'middle' in order to match CSS
     "right",
     "auto",
     ""
@@ -137,7 +138,9 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
 
 expression_ptr text_symbolizer::get_name() const
 {
-    return expression_ptr();
+    formatting::text_node *node = dynamic_cast<formatting::text_node *>(placement_options_->defaults.format_tree().get());
+    if (!node) return expression_ptr();
+    return node->get_text();
 }
 
 void text_symbolizer::set_name(expression_ptr name)
@@ -368,6 +371,16 @@ bool text_symbolizer::get_avoid_edges() const
 void text_symbolizer::set_avoid_edges(bool avoid)
 {
     placement_options_->defaults.avoid_edges = avoid;
+}
+
+bool text_symbolizer::largest_bbox_only() const
+{
+    return placement_options_->defaults.largest_bbox_only;
+}
+
+void text_symbolizer::set_largest_bbox_only(bool v)
+{
+    placement_options_->defaults.largest_bbox_only = v;
 }
 
 double text_symbolizer::get_minimum_distance() const

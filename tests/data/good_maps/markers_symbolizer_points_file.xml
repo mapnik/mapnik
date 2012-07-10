@@ -3,7 +3,7 @@
 
     <Style name="1">
         <Rule>
-            <MarkersSymbolizer file="../svg/ellipses.svg"/>
+            <MarkersSymbolizer file="asdf"/>
         </Rule>
     </Style>
     <Layer name="point" srs="+init=epsg:4326">

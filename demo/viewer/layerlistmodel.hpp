@@ -26,7 +26,9 @@
 #include <QAbstractListModel>
 #include <QModelIndex>
 #include <QVariant>
+#ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
+#endif
 #include <boost/optional/optional.hpp>
 
 class LayerListModel : public QAbstractListModel

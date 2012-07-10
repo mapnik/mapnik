@@ -42,16 +42,16 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(line_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
+    typedef coord_transform<CoordTransform,geometry_type> path_type;
+    typedef agg::renderer_base<mapnik::pixfmt_gray32> ren_base;
     typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    mapnik::pixfmt_gray16 pixf(buf);
+    mapnik::pixfmt_gray32 pixf(buf);
 
     ren_base renb(pixf);
     renderer ren(renb);
@@ -60,9 +60,9 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
     stroke const&  stroke_ = sym.get_stroke();
 
-    for (unsigned i=0;i<feature->num_geometries();++i)
+    for (unsigned i=0;i<feature.num_geometries();++i)
     {
-        geometry_type & geom = feature->get_geometry(i);
+        geometry_type & geom = feature.get_geometry(i);
         if (geom.num_points() > 1)
         {
             path_type path(t_,geom,prj_trans);
@@ -99,7 +99,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
                 else
                     stroke.generator().line_cap(agg::round_cap);
 
-                stroke.generator().miter_limit(4.0);
+                stroke.generator().miter_limit(stroke_.get_miterlimit());
                 stroke.generator().width(stroke_.get_width() * scale_factor_);
 
                 ras_ptr->add_path(stroke);
@@ -126,7 +126,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
                 else
                     stroke.generator().line_cap(agg::round_cap);
 
-                stroke.generator().miter_limit(4.0);
+                stroke.generator().miter_limit(stroke_.get_miterlimit());
                 stroke.generator().width(stroke_.get_width() * scale_factor_);
                 ras_ptr->add_path(stroke);
             }
@@ -134,7 +134,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     }
 
     // render id
-    ren.color(mapnik::gray16(feature->id()));
+    ren.color(mapnik::gray32(feature.id()));
     agg::render_scanlines(*ras_ptr, sl, ren);
 
     // add feature properties to grid cache
@@ -144,7 +144,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
 
 template void grid_renderer<grid>::process(line_symbolizer const&,
-                                           mapnik::feature_ptr const&,
+                                           mapnik::feature_impl &,
                                            proj_transform const&);
 
 }

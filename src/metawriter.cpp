@@ -33,7 +33,6 @@
 
 // STL
 #include <iomanip>
-#include <cstdio>
 
 namespace mapnik {
 
@@ -334,7 +333,10 @@ void metawriter_json::start(metawriter_property_map const& properties)
 void metawriter_json::write_header()
 {
     f_.open(filename_.c_str(), std::fstream::out | std::fstream::trunc);
-    if (f_.fail()) perror((std::string("Metawriter JSON: Failed to open file ") + filename_).c_str());
+    if (f_.fail())
+    {
+        MAPNIK_LOG_DEBUG(metawriter) << "metawriter_json: Failed to open file " << filename_;
+    }
     set_stream(&f_);
     metawriter_json_stream::write_header();
 }

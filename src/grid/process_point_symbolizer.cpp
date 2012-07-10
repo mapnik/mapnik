@@ -38,10 +38,10 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(point_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
 
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
@@ -55,9 +55,12 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
 
     if (marker)
     {
-        for (unsigned i=0; i<feature->num_geometries(); ++i)
+        agg::trans_affine tr;
+        evaluate_transform(tr, feature, sym.get_image_transform());
+
+        for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type & geom = feature.get_geometry(i);
             double x;
             double y;
             double z=0;
@@ -78,10 +81,6 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
             if (sym.get_allow_overlap() ||
                 detector_.has_placement(label_ext))
             {
-                agg::trans_affine tr;
-                boost::array<double,6> const& m = sym.get_transform();
-                tr.load_from(&m[0]);
-
                 render_marker(feature, pixmap_.get_resolution(),
                               pixel_position(px, py),
                               **marker, tr,
@@ -96,7 +95,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
 }
 
 template void grid_renderer<grid>::process(point_symbolizer const&,
-                                           mapnik::feature_ptr const&,
+                                           mapnik::feature_impl &,
                                            proj_transform const&);
 
 }

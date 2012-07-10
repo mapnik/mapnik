@@ -116,9 +116,7 @@ def test_raster_with_alpha_blends_correctly_with_background():
     style = mapnik.Style()
     rule = mapnik.Rule()
     symbolizer = mapnik.RasterSymbolizer()
-    #XXX: This fixes it, see http://trac.mapnik.org/ticket/759#comment:3
-    #     (and remove comment when this test passes)
-    #symbolizer.scaling="bilinear_old"
+    symbolizer.scaling = mapnik.scaling_method.BILINEAR
 
     rule.symbols.append(symbolizer)
     style.rules.append(rule)

@@ -53,7 +53,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
         }
 
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+        typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
         clipped_geometry_type clipped(**geo_itr_);
         clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
         path_type path(t_, clipped, prj_trans_);
@@ -142,7 +142,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
         eGeomType type = geom.type();
         if (type == Polygon)
         {
-            largest_box_only = true;
+            largest_box_only = sym_.largest_bbox_only();
             if (sym_.get_minimum_path_length() > 0)
             {
                 box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
@@ -362,7 +362,7 @@ void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
    {
       marker_w_ = (*marker_)->width();
       marker_h_ = (*marker_)->height();
-      transform_ = helper.get_transform();
+      image_transform_ = helper.get_transform();
       marker_ext_ = helper.get_label_ext();
    }
    else 
@@ -401,9 +401,9 @@ marker& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker() const
 }
 
 template <typename FaceManagerT, typename DetectorT>
-agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_transform() const
+agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_image_transform() const
 {
-    return transform_;
+    return image_transform_;
 }
 
 /*****************************************************************************/
@@ -421,9 +421,8 @@ symbolizer_with_image_helper::symbolizer_with_image_helper(symbolizer_with_image
    {
       marker_.reset(boost::make_shared<mapnik::marker>());
    }
-   
-   boost::array<double,6> const& m = sym.get_transform();
-   tr_.load_from(&m[0]);   
+
+   evaluate_transform(tr_, feature, sym.get_image_transform());
 }
 
 box2d<double> symbolizer_with_image_helper::get_label_ext() const

@@ -29,6 +29,9 @@
 // boost
 #include <boost/utility.hpp>
 
+// agg
+#include "agg_conv_transform.h"
+
 namespace mapnik {
 
 template <typename Locator, typename Detector>
@@ -38,12 +41,13 @@ public:
     /** Constructor for markers_placement object.
      * \param locator  Path along which markers are placed (type: vertex source)
      * \param size     Size of the marker
+     * \param tr       Affine transform
      * \param detector Collision detection
      * \param spacing  Distance between markers. If the value is negative it is
      *                 converted to a positive value with similar magnitude, but
      *                 choosen to optimize marker placement. 0 = no markers
      */
-    markers_placement(Locator &locator, box2d<double> size, Detector &detector, double spacing, double max_error, bool allow_overlap);
+    markers_placement(Locator &locator, box2d<double> size, agg::trans_affine const& tr, Detector &detector, double spacing, double max_error, bool allow_overlap);
     /** Start again at first marker.
      * \note Returns the same list of markers only works when they were NOT added
      *       to the detector.
@@ -57,12 +61,14 @@ public:
      * \param add_to_detector Add selected position to detector
      * \return True if a place is found, false if none is found.
      */
-    bool get_point(double *x, double *y, double *angle, bool add_to_detector = true);
+    bool get_point(double & x, double  & y, double & angle,  bool add_to_detector = true);
 private:
     Locator &locator_;
     box2d<double> size_;
+    agg::trans_affine tr_;
     Detector &detector_;
     double spacing_;
+    double marker_width_;
     double max_error_;
     bool allow_overlap_;
 

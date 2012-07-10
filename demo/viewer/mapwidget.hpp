@@ -31,13 +31,16 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+
+#ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
+#endif
 
 class MapWidget : public QWidget
 {
     Q_OBJECT
 
-    public:
+public:
     enum eTool
     {
         ZoomToBox = 1,
@@ -45,6 +48,13 @@ class MapWidget : public QWidget
         Info,
     };
 
+    enum eRenderer
+    {
+        AGG,
+        Cairo,
+        Grid
+    };    
+    
 private:
     boost::shared_ptr<mapnik::Map> map_;
     int selected_;
@@ -60,6 +70,7 @@ private:
     QPen pen_;
     int selectedLayer_;
     double scaling_factor_;
+    eRenderer cur_renderer_;
 public:
     MapWidget(QWidget *parent=0);
     void setTool(eTool tool);
@@ -79,6 +90,7 @@ public slots:
     void zoomToLevel(int level);
     void updateMap();
     void layerSelected(int);
+    void updateRenderer(QString const& txt);
 signals:
     void mapViewChanged();
 protected:
@@ -87,6 +99,7 @@ protected:
     void mousePressEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
+    void wheelEvent(QWheelEvent* e);
     void keyPressEvent(QKeyEvent *e);
     void export_to_file(unsigned width,
                         unsigned height,

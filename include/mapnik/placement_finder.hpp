@@ -47,8 +47,8 @@ class string_info;
 class text_path;
 
 typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-typedef coord_transform2<CoordTransform,clipped_geometry_type> ClippedPathType;
-typedef coord_transform2<CoordTransform,geometry_type> PathType;
+typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
+typedef coord_transform<CoordTransform,geometry_type> PathType;
 
 typedef label_collision_detector4 DetectorType;
 

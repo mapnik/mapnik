@@ -43,15 +43,7 @@ prefix = env['PREFIX']
 target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik')
 target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
-libraries = ['mapnik']
-
-if env['BOOST_PYTHON_LIB']:
-    libraries.append(env['BOOST_PYTHON_LIB'])
-else:
-    if is_py3():
-        libraries.append('boost_python3%s' % env['BOOST_APPEND'])
-    else:
-        libraries.append('boost_python%s' % env['BOOST_APPEND'])
+libraries = ['mapnik',env['BOOST_PYTHON_LIB']]
 
 # TODO - do solaris/fedora need direct linking too?
 if env['PLATFORM'] == 'Darwin':
@@ -143,10 +135,7 @@ paths += "__all__ = [mapniklibpath,inputpluginspath,fontscollectionpath]\n"
 if not os.path.exists('mapnik'):
     os.mkdir('mapnik')
 
-if hasattr(os.path,'relpath'): # python 2.6 and above
-    file('mapnik/paths.py','w').write(paths % (os.path.relpath(env['MAPNIK_LIB_DIR'],target_path)))
-else:
-    file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
+file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
 
 # force open perms temporarily so that `sudo scons install`
 # does not later break simple non-install non-sudo rebuild

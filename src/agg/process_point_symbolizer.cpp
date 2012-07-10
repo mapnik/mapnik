@@ -47,19 +47,19 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(point_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    symbolizer_with_image_helper helper(sym, *feature);
+    symbolizer_with_image_helper helper(sym, feature);
 
     if (helper.get_marker())
     {
         box2d<double> label_ext = helper.get_label_ext();
         mapnik::marker const& marker = **helper.get_marker();
 
-        for (unsigned i=0; i<feature->num_geometries(); ++i)
+        for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type const& geom = feature.get_geometry(i);
             double x;
             double y;
             double z=0;
@@ -78,12 +78,13 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
                 render_marker(pixel_position(x - 0.5 * marker.width(), 
                                              y - 0.5 * marker.height()), 
-                              marker, helper.get_transform(), sym.get_opacity());
+                              marker, helper.get_transform(), sym.get_opacity(),
+                              sym.comp_op());
 
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);
                 metawriter_with_properties writer = sym.get_metawriter();
-                if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
+                if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
             }
         }
     }
@@ -91,7 +92,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(point_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

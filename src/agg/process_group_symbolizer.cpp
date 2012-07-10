@@ -167,7 +167,7 @@ struct render_visitor : public boost::static_visitor<>
       pixel_position pos(pixel_.x - 0.5 * m.width(),
                          pixel_.y - 0.5 * m.height());
 
-      renderer_.render_marker(pos, m, helper.get_transform(), sym.get_opacity());
+      renderer_.render_marker(pos, m, helper.get_transform(), sym.get_opacity(), sym.comp_op());
    }
 
    void operator()(text_symbolizer const &sym) const
@@ -204,7 +204,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    // find all column names referenced in the group rules and symbolizers
    std::set<std::string> columns;
    attribute_collector collector(columns);
-   expression_attributes rk_attr(columns);
+   expression_attributes<std::set<std::string> > rk_attr(columns);
    
    if (sym.get_repeat_key())
    {
@@ -362,7 +362,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
    for (unsigned int i = 0; i < num_geoms; ++i)
    {
       typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-      typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
+      typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
       geometry_type const &geom = feature->get_geometry(i);
       clipped_geometry_type clipped(const_cast<geometry_type &>(geom));

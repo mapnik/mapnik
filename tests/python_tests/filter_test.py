@@ -124,5 +124,27 @@ def test_unicode_regex_replace():
     expr = mapnik.Expression("[name].replace('(\B)|( )','$1 ')")
     eq_(expr.evaluate(f), u'Q u é b e c')
 
+def test_float_precision():
+    context = mapnik.Context()
+    context.push('num')
+    f = mapnik.Feature(context,0)
+    f["num"] = 1.0000
+    eq_(f["num"],1.0000)
+    expr = mapnik.Expression("[num] = 1.0000")
+    eq_(expr.evaluate(f),True)
+    expr = mapnik.Expression("[num].match('.*0$')")
+    eq_(expr.evaluate(f),True)
+    expr = mapnik.Expression("[num].match('.*0$')")
+    eq_(expr.evaluate(f),True)
+
+def test_string_matching_on_precision():
+    context = mapnik.Context()
+    context.push('num')
+    f = mapnik.Feature(context,0)
+    f["num"] = "1.0000"
+    eq_(f["num"],"1.0000")
+    expr = mapnik.Expression("[num].match('.*(^0|00)$')")
+    eq_(expr.evaluate(f),True)
+
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]

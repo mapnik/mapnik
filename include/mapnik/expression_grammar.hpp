@@ -198,21 +198,26 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
                 | ( (lit('>')  | lit("gt") ) >> additive_expr [ _val >  _1 ])
                 )
             ;
+
         additive_expr = multiplicative_expr [_val = _1]
             >> * (   '+' >> multiplicative_expr[_val += _1]
                      | '-' >> multiplicative_expr[_val -= _1]
                 )
             ;
 
-        multiplicative_expr = primary_expr [_val = _1]
-            >> *(     '*' >> primary_expr [_val *= _1]
-                      | '/' >> primary_expr [_val /= _1]
-                      | '%' >> primary_expr [_val %= _1]
+        multiplicative_expr = unary_expr [_val = _1]
+            >> *(     '*' >> unary_expr [_val *= _1]
+                      | '/' >> unary_expr [_val /= _1]
+                      | '%' >> unary_expr [_val %= _1]
                       |  regex_match_expr[_val = regex_match_(_val, _1)]
                       |  regex_replace_expr(_val) [_val = _1]
                 )
             ;
 
+        unary_expr = primary_expr [_val = _1]
+            | '+' >> primary_expr [_val = _1]
+            | '-' >> primary_expr [_val = -_1]
+            ;
 
         primary_expr = strict_double [_val = _1]
             | int_ [_val = _1]
@@ -256,6 +261,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     rule_type logical_expr;
     rule_type additive_expr;
     rule_type multiplicative_expr;
+    rule_type unary_expr;
     rule_type not_expr;
     rule_type primary_expr;
     qi::rule<Iterator, std::string() > regex_match_expr;

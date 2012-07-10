@@ -32,7 +32,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
 {
     // svg renderer supports processing of multiple symbolizers.
 
-    typedef coord_transform2<CoordTransform, geometry_type> path_type;
+    typedef coord_transform<CoordTransform, geometry_type> path_type;
 
     // process each symbolizer to collect its (path) information.
     // path information (attributes from line_ and polygon_ symbolizers)

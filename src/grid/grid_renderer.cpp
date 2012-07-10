@@ -100,17 +100,17 @@ void grid_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity)
+void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity)
 {
     if (marker.is_vector())
     {
-        typedef coord_transform2<CoordTransform,geometry_type> path_type;
-        typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
+        typedef coord_transform<CoordTransform,geometry_type> path_type;
+        typedef agg::renderer_base<mapnik::pixfmt_gray32> ren_base;
         typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
         agg::scanline_bin sl;
 
         grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-        mapnik::pixfmt_gray16 pixf(buf);
+        mapnik::pixfmt_gray32 pixf(buf);
 
         ren_base renb(pixf);
         renderer ren(renb);
@@ -132,10 +132,10 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
         svg_renderer<svg_path_adapter,
             agg::pod_bvector<path_attributes>,
             renderer,
-            mapnik::pixfmt_gray16> svg_renderer(svg_path,
+            mapnik::pixfmt_gray32> svg_renderer(svg_path,
                                                 (*marker.get_vector_data())->attributes());
 
-        svg_renderer.render_id(*ras_ptr, sl, renb, feature->id(), mtx, opacity, bbox);
+        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), mtx, opacity, bbox);
 
     }
     else
@@ -143,7 +143,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
         image_data_32 const& data = **marker.get_bitmap_data();
         if (step == 1 && scale_factor_ == 1.0)
         {
-            pixmap_.set_rectangle(feature->id(), data,
+            pixmap_.set_rectangle(feature.id(), data,
                                   boost::math::iround(pos.x),
                                   boost::math::iround(pos.y));
         }
@@ -153,7 +153,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
             image_data_32 target(ratio * data.width(), ratio * data.height());
             mapnik::scale_image_agg<image_data_32>(target,data, SCALING_NEAR,
                                                    scale_factor_, 0.0, 0.0, 1.0, ratio);
-            pixmap_.set_rectangle(feature->id(), target,
+            pixmap_.set_rectangle(feature.id(), target,
                                   boost::math::iround(pos.x),
                                   boost::math::iround(pos.y));
         }
@@ -161,7 +161,6 @@ void grid_renderer<T>::render_marker(mapnik::feature_ptr const& feature, unsigne
     pixmap_.add_feature(feature);
 }
 
-template class hit_grid<boost::uint16_t>;
 template class grid_renderer<grid>;
 
 }

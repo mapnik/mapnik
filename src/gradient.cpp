@@ -44,9 +44,9 @@ gradient::gradient()
     x2_(0),
     y2_(0),
     r_(0),
-    units_(OBJECT_BOUNDING_BOX)
-{
-}
+    units_(OBJECT_BOUNDING_BOX),
+    transform_()
+{}
 
 gradient::gradient(gradient const& other)
     : gradient_type_(other.gradient_type_),
@@ -77,11 +77,11 @@ gradient_e gradient::get_gradient_type() const
     return gradient_type_;
 }
 
-void gradient::set_transform(agg::trans_affine transform)
+void gradient::set_transform(agg::trans_affine const& transform)
 {
     transform_ = transform;
 }
-agg::trans_affine gradient::get_transform() const
+agg::trans_affine const& gradient::get_transform() const
 {
     return transform_;
 }

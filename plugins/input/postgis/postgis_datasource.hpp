@@ -61,7 +61,7 @@ public:
 
 private:
     std::string sql_bbox(box2d<double> const& env) const;
-    std::string populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env) const;
+    std::string populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const;
     std::string populate_tokens(const std::string& sql) const;
     static std::string unquote(const std::string& sql);
     boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, std::string const& sql) const;
@@ -85,10 +85,13 @@ private:
     mutable int srid_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
+    mutable bool simplify_geometries_;
     mutable layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
     const std::string bbox_token_;
     const std::string scale_denom_token_;
+    const std::string pixel_width_token_;
+    const std::string pixel_height_token_;
     bool persist_connection_;
     bool extent_from_subquery_;
     // params below are for testing purposes only (will likely be removed at any time)

@@ -50,7 +50,6 @@ struct MAPNIK_DECL polygon_pattern_symbolizer :
     double get_gamma() const;
     void set_gamma_method(gamma_method_e gamma_method);
     gamma_method_e get_gamma_method() const;
-
 private:
     pattern_alignment_e alignment_;
     double gamma_;

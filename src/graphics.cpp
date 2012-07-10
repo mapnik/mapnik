@@ -27,6 +27,10 @@
 #include <mapnik/global.hpp>
 #include <mapnik/color.hpp>
 
+// agg
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
+
 // cairo
 #ifdef HAVE_CAIRO
 #include <cairomm/surface.h>
@@ -188,6 +192,39 @@ void image_32::set_background(const color& c)
 boost::optional<color> const& image_32::get_background() const
 {
     return background_;
+}
+
+void image_32::premultiply()
+{
+    agg::rendering_buffer buffer(data_.getBytes(),width_,height_,width_ * 4);
+    agg::pixfmt_rgba32 pixf(buffer);
+    pixf.premultiply();
+}
+
+void image_32::demultiply()
+{
+    agg::rendering_buffer buffer(data_.getBytes(),width_,height_,width_ * 4);
+    agg::pixfmt_rgba32 pixf(buffer);
+    pixf.demultiply();
+}
+
+void image_32::composite_pixel(unsigned op, int x,int y, unsigned c, unsigned cover, double opacity)
+{
+    typedef agg::rgba8 color_type;
+    typedef color_type::value_type value_type;
+    typedef agg::order_rgba order_type;
+    typedef agg::comp_op_adaptor_rgba<color_type,order_type> blender_type;
+         
+    if (checkBounds(x,y))
+    {
+        unsigned rgba = data_(x,y);
+        unsigned ca = (unsigned)(((c >> 24) & 0xff) * opacity);
+        unsigned cb = (c >> 16 ) & 0xff;
+        unsigned cg = (c >> 8) & 0xff;
+        unsigned cr = (c & 0xff);
+        blender_type::blend_pix(op, (value_type*)&rgba, cr, cg, cb, ca, cover); 
+        data_(x,y) = rgba; 
+    }
 }
 
 }

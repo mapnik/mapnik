@@ -166,6 +166,8 @@ struct text_symbolizer_properties
    /** don't update the placement finder with the extent of the text - this allows
     *  other symbolizers to overwrite it without needing allow_overlap */
    bool ignore_placement;
+    /** Only consider geometry with largest bbox (polygons) */
+    bool largest_bbox_only;
     unsigned text_ratio;
     unsigned wrap_width;
     /** Default values for char_properties. */

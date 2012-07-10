@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/rule.hpp>
+#include <mapnik/transform_processor.hpp>
 // boost
 #include <boost/utility.hpp>
 #include <boost/variant.hpp>
@@ -37,9 +38,10 @@
 
 namespace mapnik {
 
+template <typename Container>
 struct expression_attributes : boost::static_visitor<void>
 {
-    explicit expression_attributes(std::set<std::string> & names)
+    explicit expression_attributes(Container& names)
         : names_(names) {}
 
     void operator() (value_type const& x) const
@@ -55,35 +57,35 @@ struct expression_attributes : boost::static_visitor<void>
     template <typename Tag>
     void operator() (binary_node<Tag> const& x) const
     {
-        boost::apply_visitor(expression_attributes(names_),x.left);
-        boost::apply_visitor(expression_attributes(names_),x.right);
+        boost::apply_visitor(*this, x.left);
+        boost::apply_visitor(*this, x.right);
 
     }
 
     template <typename Tag>
     void operator() (unary_node<Tag> const& x) const
     {
-        boost::apply_visitor(expression_attributes(names_),x.expr);
+        boost::apply_visitor(*this, x.expr);
     }
 
     void operator() (regex_match_node const& x) const
     {
-        boost::apply_visitor(expression_attributes(names_),x.expr);
+        boost::apply_visitor(*this, x.expr);
     }
 
     void operator() (regex_replace_node const& x) const
     {
-        boost::apply_visitor(expression_attributes(names_),x.expr);
+        boost::apply_visitor(*this, x.expr);
     }
 
 private:
-    std::set<std::string>& names_;
+    Container& names_;
 };
 
 struct symbolizer_attributes : public boost::static_visitor<>
 {
     symbolizer_attributes(std::set<std::string>& names)
-        : names_(names) {}
+        : names_(names), f_attr(names) {}
 
     template <typename T>
     void operator () (T const&) const {}
@@ -93,12 +95,12 @@ struct symbolizer_attributes : public boost::static_visitor<>
         expression_set::const_iterator it;
         expression_set expressions;
         sym.get_placement_options()->add_expressions(expressions);
-        expression_attributes f_attr(names_);
         for (it=expressions.begin(); it != expressions.end(); it++)
         {
             if (*it) boost::apply_visitor(f_attr, **it);
         }
         collect_metawriter(sym);
+        collect_transform(sym.get_transform());
     }
 
     void operator () (point_symbolizer const& sym)
@@ -109,12 +111,14 @@ struct symbolizer_attributes : public boost::static_visitor<>
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
         collect_metawriter(sym);
-
+        collect_transform(sym.get_image_transform());
+        collect_transform(sym.get_transform());
     }
 
     void operator () (line_symbolizer const& sym)
     {
         collect_metawriter(sym);
+        collect_transform(sym.get_transform());
     }
 
     void operator () (line_pattern_symbolizer const& sym)
@@ -125,11 +129,14 @@ struct symbolizer_attributes : public boost::static_visitor<>
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
         collect_metawriter(sym);
+        collect_transform(sym.get_image_transform());
+        collect_transform(sym.get_transform());
     }
 
     void operator () (polygon_symbolizer const& sym)
     {
         collect_metawriter(sym);
+        collect_transform(sym.get_transform());
     }
 
     void operator () (polygon_pattern_symbolizer const& sym)
@@ -140,6 +147,8 @@ struct symbolizer_attributes : public boost::static_visitor<>
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
         collect_metawriter(sym);
+        collect_transform(sym.get_image_transform());
+        collect_transform(sym.get_transform());
     }
 
     void operator () (shield_symbolizer const& sym)
@@ -147,7 +156,6 @@ struct symbolizer_attributes : public boost::static_visitor<>
         expression_set::const_iterator it;
         expression_set expressions;
         sym.get_placement_options()->add_expressions(expressions);
-        expression_attributes f_attr(names_);
         for (it=expressions.begin(); it != expressions.end(); it++)
         {
             if (*it) boost::apply_visitor(f_attr, **it);
@@ -159,11 +167,25 @@ struct symbolizer_attributes : public boost::static_visitor<>
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
         collect_metawriter(sym);
+        collect_transform(sym.get_image_transform());
+        collect_transform(sym.get_transform());
     }
 
     void operator () (markers_symbolizer const& sym)
     {
+        expression_ptr const& height_expr = sym.get_height();
+        if (height_expr)
+        {
+            boost::apply_visitor(f_attr,*height_expr);
+        }
+        expression_ptr const& width_expr = sym.get_width();
+        if (width_expr)
+        {
+            boost::apply_visitor(f_attr,*width_expr);
+        }
         collect_metawriter(sym);
+        collect_transform(sym.get_image_transform());
+        collect_transform(sym.get_transform());
     }
 
     void operator () (building_symbolizer const& sym)
@@ -171,10 +193,10 @@ struct symbolizer_attributes : public boost::static_visitor<>
         expression_ptr const& height_expr = sym.height();
         if (height_expr)
         {
-            expression_attributes f_attr(names_);
             boost::apply_visitor(f_attr,*height_expr);
         }
         collect_metawriter(sym);
+        collect_transform(sym.get_transform());
     }
 
     void operator () (group_symbolizer const& sym);
@@ -183,10 +205,18 @@ struct symbolizer_attributes : public boost::static_visitor<>
 
 private:
     std::set<std::string>& names_;
+    expression_attributes<std::set<std::string> > f_attr;
     void collect_metawriter(symbolizer_base const& sym)
     {
         metawriter_properties const& properties = sym.get_metawriter_properties();
         names_.insert(properties.begin(), properties.end());
+    }
+    void collect_transform(transform_list_ptr const& trans_expr)
+    {
+        if (trans_expr)
+        {
+            transform_processor_type::collect_attributes(names_, *trans_expr);
+        }
     }
 };
 
@@ -195,10 +225,11 @@ class attribute_collector : public boost::noncopyable
 {
 private:
     std::set<std::string>& names_;
+    expression_attributes<std::set<std::string> > f_attr;
 public:
 
     attribute_collector(std::set<std::string>& names)
-        : names_(names) {}
+        : names_(names), f_attr(names) {}
 
     template <typename RuleType>
     void operator() (RuleType const& r)
@@ -212,7 +243,6 @@ public:
         }
 
         expression_ptr const& expr = r.get_filter();
-        expression_attributes f_attr(names_);
         boost::apply_visitor(f_attr,*expr);
     }
 };
@@ -238,7 +268,7 @@ inline void symbolizer_attributes::operator () (group_symbolizer const& sym)
      // find all column names referenced in the group symbolizer
      std::set<std::string> group_columns;
      attribute_collector column_collector(group_columns);
-     expression_attributes rk_attr(group_columns);
+     expression_attributes<std::set<std::string> > rk_attr(group_columns);
      
      // get columns from symbolizer repeat key
      if (sym.get_repeat_key())

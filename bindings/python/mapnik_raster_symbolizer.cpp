@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/raster_symbolizer.hpp>
+#include <mapnik/image_scaling.hpp>
 
 using mapnik::raster_symbolizer;
 
@@ -39,13 +40,13 @@ struct raster_symbolizer_pickle_suite : boost::python::pickle_suite
     */
 
     static  boost::python::tuple
-    getstate(const raster_symbolizer& r)
+    getstate(raster_symbolizer const& r)
     {
-        return boost::python::make_tuple(r.get_mode(),r.get_scaling(),r.get_opacity(),r.get_filter_factor(),r.get_mesh_size());
+        return boost::python::make_tuple(r.get_mode(),r.get_scaling_method(),r.get_opacity(),r.get_filter_factor(),r.get_mesh_size());
     }
 
     static void
-    setstate (raster_symbolizer& r, boost::python::tuple state)
+    setstate (raster_symbolizer & r, boost::python::tuple state)
     {
         using namespace boost::python;
         if (len(state) != 5)
@@ -58,7 +59,7 @@ struct raster_symbolizer_pickle_suite : boost::python::pickle_suite
         }
 
         r.set_mode(extract<std::string>(state[0]));
-        r.set_scaling(extract<std::string>(state[1]));
+        r.set_scaling_method(extract<mapnik::scaling_method_e>(state[1]));
         r.set_opacity(extract<float>(state[2]));
         r.set_filter_factor(extract<float>(state[3]));
         r.set_mesh_size(extract<unsigned>(state[4]));
@@ -91,17 +92,15 @@ void export_raster_symbolizer()
             )
 
         .add_property("scaling",
-                      make_function(&raster_symbolizer::get_scaling,return_value_policy<copy_const_reference>()),
-                      &raster_symbolizer::set_scaling,
+                      &raster_symbolizer::get_scaling_method,
+                      &raster_symbolizer::set_scaling_method,
                       "Get/Set scaling algorithm.\n"
-                      "Possible values are:\n"
-                      "fast, bilinear, and bilinear8\n"
                       "\n"
                       "Usage:\n"
                       "\n"
                       ">>> from mapnik import RasterSymbolizer\n"
                       ">>> r = RasterSymbolizer()\n"
-                      ">>> r.scaling = 'bilinear8'\n"
+                      ">>> r.scaling = 'mapnik.scaling_method.GAUSSIAN'\n"
             )
 
         .add_property("opacity",
