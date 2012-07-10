@@ -33,7 +33,7 @@
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_scaling.hpp>
-
+#include <mapnik/image_filter_types.hpp>
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -554,6 +554,26 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
     else if (explicit_defaults)
     {
         set_attr(style_node, "comp-op", "src-over");
+    }
+
+    if (style.image_filters().size() > 0)
+    {
+        std::string filters_str;
+        std::back_insert_iterator<std::string> sink(filters_str);
+        if (generate_image_filters(sink, style.image_filters()))
+        {
+            set_attr(style_node, "image-filters", filters_str);
+        }
+    }
+
+    if (style.direct_image_filters().size() > 0)
+    {
+        std::string filters_str;
+        std::back_insert_iterator<std::string> sink(filters_str);
+        if (generate_image_filters(sink, style.direct_image_filters()))
+        {
+            set_attr(style_node, "direct-image-filters", filters_str);
+        }
     }
 
     rules::const_iterator it = style.get_rules().begin();
