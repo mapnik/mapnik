@@ -24,7 +24,7 @@ clean:
 	rm -f $(OBJ)
 	rm -f $(BIN)
 
-deploy:
+deploy : all
 	cp hello.input $(shell mapnik-config --input-plugins)
 
 install: clean all deploy
