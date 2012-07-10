@@ -176,6 +176,7 @@ source = Split(
     formatting/list.cpp
     formatting/text.cpp
     formatting/format.cpp
+    formatting/offset.cpp
     formatting/registry.cpp
     text_placements/registry.cpp
     text_placements/base.cpp
