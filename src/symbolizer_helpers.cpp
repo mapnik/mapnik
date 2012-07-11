@@ -247,7 +247,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
 }
 
 template <typename FaceManagerT, typename DetectorT>
-placements_type &text_symbolizer_helper<FaceManagerT, DetectorT>::placements() const
+placements_type const& text_symbolizer_helper<FaceManagerT, DetectorT>::placements() const
 {
     return finder_->get_results();
 }

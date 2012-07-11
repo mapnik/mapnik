@@ -110,7 +110,7 @@ public:
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties)=0;
-    virtual void add_text(boost::ptr_vector<text_path> &placements,
+    virtual void add_text(boost::ptr_vector<text_path> const& placements,
                           box2d<double> const& extents,
                           Feature const& feature,
                           CoordTransform const& t,

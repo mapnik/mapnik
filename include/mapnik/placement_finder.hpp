@@ -80,7 +80,7 @@ public:
     /** Remove old placements. */
     void clear_placements();
 
-    inline placements_type &get_results() { return placements_; }
+    inline placements_type const& get_results() { return placements_; }
 
     /** Additional boxes to take into account when finding placement.
      * Used for finding line placements where multiple placements are returned.

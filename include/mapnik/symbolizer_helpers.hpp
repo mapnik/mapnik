@@ -85,7 +85,7 @@ public:
     bool next();
 
     /** Get current placement. next() has to be called before! */
-    placements_type & placements() const;
+    placements_type const& placements() const;
 protected:
     bool next_point_placement();
     bool next_line_placement();
