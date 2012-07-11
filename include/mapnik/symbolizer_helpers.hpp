@@ -89,6 +89,7 @@ public:
 protected:
     bool next_point_placement();
     bool next_line_placement();
+    bool next_line_placement_clipped();
     bool next_placement();
     void initialize_geometries();
     void initialize_points();

@@ -34,6 +34,8 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next()
     if (!placement_valid_) return false;
     if (point_placement_)
         return next_point_placement();
+    else if (sym_.clip())
+        return next_line_placement_clipped();
     else
         return next_line_placement();
 }
@@ -52,11 +54,54 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
             continue; //Reexecute size check
         }
 
+        typedef coord_transform<CoordTransform,geometry_type> path_type;
+        path_type path(t_, **geo_itr_, prj_trans_);
+
+        finder_->clear_placements();
+        if (points_on_line_) {
+            finder_->find_point_placements(path);
+        } else {
+            finder_->find_line_placements(path);
+        }
+        if (!finder_->get_results().empty())
+        {
+            //Found a placement
+            if (points_on_line_)
+            {
+                finder_->update_detector();
+            }
+            geo_itr_ = geometries_to_process_.erase(geo_itr_);
+            if (writer_.first) writer_.first->add_text(
+                finder_->get_results(), finder_->get_extents(),
+                feature_, t_, writer_.second);
+            return true;
+        }
+        //No placement for this geometry. Keep it in geometries_to_process_ for next try.
+        geo_itr_++;
+    }
+    return false;
+}
+
+template <typename FaceManagerT, typename DetectorT>
+bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement_clipped()
+{
+    while (!geometries_to_process_.empty())
+    {
+        if (geo_itr_ == geometries_to_process_.end())
+        {
+            //Just processed the last geometry. Try next placement.
+            if (!next_placement()) return false; //No more placements
+            //Start again from begin of list
+            geo_itr_ = geometries_to_process_.begin();
+            continue; //Reexecute size check
+        }
+
         typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
         typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
         clipped_geometry_type clipped(**geo_itr_);
         clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
         path_type path(t_, clipped, prj_trans_);
+
         finder_->clear_placements();
         if (points_on_line_) {
             finder_->find_point_placements(path);
@@ -342,7 +387,10 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
                       -0.5 * marker_ext_.height() - pos.second,
                       0.5 * marker_ext_.width()  - pos.first,
                       0.5 * marker_ext_.height() - pos.second));
-    return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement();
+    if ( sym_.clip())
+        return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement_clipped();
+    else
+        return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement();
 }
 
 

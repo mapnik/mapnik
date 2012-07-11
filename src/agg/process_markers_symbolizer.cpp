@@ -54,9 +54,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
-    typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
@@ -144,11 +141,39 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                             detector_->insert(transformed_bbox);
                     }
                 }
-                else
+                else if (sym.clip())
                 {
+                    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+                    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+                    typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
+
                     clipped_geometry_type clipped(geom);
                     clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                     path_type path(t_,clipped,prj_trans);
+                    transformed_path_type path_transformed(path,geom_tr);
+                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
+                                                                                                  sym.get_spacing() * scale_factor_,
+                                                                                                  sym.get_max_error(),
+                                                                                                  sym.get_allow_overlap());
+                    double x, y, angle;
+                    while (placement.get_point(x, y, angle))
+                    {
+                        agg::trans_affine matrix = marker_trans;
+                        matrix.rotate(angle);
+                        matrix.translate(x, y);
+                        svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(), bbox);
+
+                        if (/* DEBUG */ 0)
+                        {
+                            debug_draw_box(buf, bbox*matrix, 0, 0, 0.0);
+                        }
+                    }
+                }
+                else
+                {
+                    typedef coord_transform<CoordTransform,geometry_type> path_type;
+                    typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
+                    path_type path(t_,geom,prj_trans);
                     transformed_path_type path_transformed(path,geom_tr);
                     markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
                                                                                                   sym.get_spacing() * scale_factor_,

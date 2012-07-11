@@ -53,7 +53,8 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                          sym.comp_op(),
                          scale_factor_);
 
-    while (helper.next()) {
+    while (helper.next())
+    {
         placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
