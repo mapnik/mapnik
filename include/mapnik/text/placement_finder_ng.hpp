@@ -72,7 +72,8 @@ private:
     pixel_position base_point_;
     bool point_;
     text_layout_ptr layout_;
-    unsigned current_;
+    signed current_;
+    pixel_position current_position_;
 };
 typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
 

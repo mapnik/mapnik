@@ -92,12 +92,15 @@ public:
     void break_lines();
     void shape_text();
     void clear();
-    unsigned size() const;
+    unsigned size() const { return glyphs_.size(); }
+
+    typedef std::vector<glyph_info> glyph_vector;
+    glyph_vector const& get_glyphs() const { return glyphs_; }
 
 private:
     text_itemizer itemizer;
     std::vector<text_line_ptr> lines_;
-    std::vector<glyph_info> glyphs_;
+    glyph_vector glyphs_;
     face_manager_freetype &font_manager_;
 };
 }

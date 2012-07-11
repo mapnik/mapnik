@@ -17,28 +17,28 @@
         <Rule>
             <!-- This is an easy test to ensure text shaping actually works. Ligatures are rendered when harfbuzz is used, but not with the old text rendering system. -->
             <Filter>[nr] = "1"</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="16">"fi"</TextSymbolizer>
+<!--             <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="16">"fi"</TextSymbolizer> -->
             <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="-16">"mixed نامجو mixed"</TextSymbolizer>
         </Rule>
         <Rule>
             <!-- In addition to the problem mentioned in the bug report (which seems to be gone) this the position is calculated incorrectly -->
-            <Filter>[nr] = "3"</Filter>
+            <Filter>[nr] = "13"</Filter>
             <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="16">"نامجو 17"</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dy="-16">"#519"</TextSymbolizer>
         </Rule>
         <Rule>
-            <Filter>[nr] = "5"</Filter>
+            <Filter>[nr] = "15"</Filter>
             <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="-16">"زنقة الملاح"</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dy="16">"#1154"</TextSymbolizer>
         </Rule>
         <Rule>
             <!--TODO: Find suitable font! -->
-            <Filter>[nr] = "7"</Filter>
+            <Filter>[nr] = "17"</Filter>
             <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="16">"អក្សរខ្មែរ"</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dy="-16">"#1208"</TextSymbolizer>
         </Rule>
         <Rule>
-            <Filter>[nr] = "9"</Filter>
+            <Filter>[nr] = "19"</Filter>
             <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="-16">"أڭادير"</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dy="16">"#1146"</TextSymbolizer>
         </Rule>

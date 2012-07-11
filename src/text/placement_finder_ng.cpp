@@ -21,6 +21,8 @@
  *****************************************************************************/
 //mapnik
 #include <mapnik/text/placement_finder_ng.hpp>
+#include <mapnik/text/layout.hpp>
+#include <mapnik/text_properties.hpp>
 
 //boost
 #include <boost/make_shared.hpp>
@@ -54,21 +56,39 @@ void glyph_positions::point_placement(pixel_position base_point)
     point_ = true;
 }
 
+bool glyph_positions::next()
+{
+    if (current_ == -1)
+    {
+        current_ = 0;
+        return layout_->size();
+    }
+    if (current_ >= layout_->size()) return false;
+    glyph_info glyph = layout_->get_glyphs()[current_];
+    current_position_.x += glyph.width + glyph.format->character_spacing;
+    std::cout << "width:" << glyph.width << "\n";
+    current_++;
+    if (current_ >= layout_->size()) return false;
+    return true;
+}
+
 void glyph_positions::rewind()
 {
-    current_ = 0;
+    current_ = -1;
+    current_position_ = pixel_position(0, 0);
 }
 
 glyph_info const& glyph_positions::get_glyph() const
 {
     assert(layout_);
     assert(current_ < layout_->size());
-
+    return layout_->get_glyphs()[current_];
 }
 
 pixel_position glyph_positions::get_position() const
 {
-    return pixel_position(0, 0);
+    std::cout << "current_position_.x:" << current_position_.x << "\n";
+    return current_position_;
 }
 
 double glyph_positions::get_angle() const
