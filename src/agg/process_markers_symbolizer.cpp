@@ -26,7 +26,6 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/image_util.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
@@ -66,20 +65,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 
-    ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_power());
-    agg::scanline_u8 sl;
-    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
-    pixfmt_comp_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
-    renderer_base renb(pixf);
-    renderer_type ren(renb);
-
-    agg::trans_affine geom_tr;
-    evaluate_transform(geom_tr, feature, sym.get_transform());
-
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
-    marker_placement_e placement_method = sym.get_marker_placement();
 
     if (!filename.empty())
     {
@@ -91,6 +77,18 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: markers_symbolizer does not yet support non-SVG markers";
                 return;
             }
+
+            ras_ptr->reset();
+            ras_ptr->gamma(agg::gamma_power());
+            agg::scanline_u8 sl;
+            agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+            pixfmt_comp_type pixf(buf);
+            pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+            renderer_base renb(pixf);
+            renderer_type ren(renb);
+
+            agg::trans_affine geom_tr;
+            evaluate_transform(geom_tr, feature, sym.get_transform());
 
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
@@ -114,6 +112,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                          agg::pod_bvector<path_attributes>,
                          renderer_type,
                          agg::pixfmt_rgba32 > svg_renderer(svg_path, result ? attributes : (*marker)->attributes());
+
+            marker_placement_e placement_method = sym.get_marker_placement();
 
             BOOST_FOREACH( geometry_type & geom, feature.paths())
             {
