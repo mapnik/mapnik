@@ -49,10 +49,10 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
 
     while (helper.next()) {
         placement_found = true;
-        placements_type &placements = helper.placements();
+        placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            ren.prepare_glyphs(&(placements[ii]));
+            ren.prepare_glyphs(placements[ii]);
             ren.render_id(feature.id(), placements[ii].center, 2);
         }
     }

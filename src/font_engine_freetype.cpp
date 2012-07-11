@@ -327,7 +327,7 @@ text_renderer<T>::text_renderer (pixmap_type & pixmap,
       scale_factor_(scale_factor) {}
 
 template <typename T>
-box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
+box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
 {
     //clear glyphs
     glyphs_.clear();
@@ -340,12 +340,12 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
     bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
     bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
 
-    for (int i = 0; i < path->num_nodes(); i++)
+    for (int i = 0; i < path.num_nodes(); i++)
     {
         char_info_ptr c;
         double x, y, angle;
 
-        path->vertex(&c, &x, &y, &angle);
+        path.vertex(&c, &x, &y, &angle);
 
         // TODO Enable when we have support for setting verbosity
         // MAPNIK_LOG_DEBUG(font_engine_freetype) << "text_renderer: prepare_glyphs="
@@ -531,9 +531,9 @@ boost::mutex freetype_engine::mutex_;
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 template void text_renderer<image_32>::render(pixel_position);
 template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
-template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path*);
+template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path const&);
 
 template void text_renderer<grid>::render_id(int, pixel_position, double );
 template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
-template box2d<double>text_renderer<grid>::prepare_glyphs(text_path*);
+template box2d<double>text_renderer<grid>::prepare_glyphs(text_path const& );
 }

@@ -54,7 +54,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                          scale_factor_);
 
     while (helper.next()) {
-        placements_type &placements = helper.placements();
+        placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
             // get_marker_position returns (minx,miny) corner position,
@@ -71,7 +71,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                           sym.get_opacity(),
                           sym.comp_op());
 
-            ren.prepare_glyphs(&(placements[ii]));
+            ren.prepare_glyphs(placements[ii]);
             ren.render(placements[ii].center);
         }
     }

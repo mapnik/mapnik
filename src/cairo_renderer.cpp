@@ -683,7 +683,7 @@ public:
         context_->glyph_path(glyphs);
     }
 
-    void add_text(text_path & path,
+    void add_text(text_path const& path,
                   cairo_face_manager & manager,
                   face_manager<freetype_engine> &font_manager)
     {
@@ -1201,7 +1201,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
 
     while (helper.next())
     {
-        placements_type &placements = helper.placements();
+        placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
             pixel_position marker_pos = helper.get_marker_position(placements[ii]);
@@ -1401,7 +1401,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_image_transform());
-    
+
     tr = agg::trans_affine_scaling(scale_factor_) * tr;
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
     marker_placement_e placement_method = sym.get_marker_placement();
@@ -1491,8 +1491,9 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
 
-    while (helper.next()) {
-        placements_type &placements = helper.placements();
+    while (helper.next())
+    {
+        placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
             context.add_text(placements[ii], face_manager_, font_manager_);

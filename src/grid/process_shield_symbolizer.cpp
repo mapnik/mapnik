@@ -58,9 +58,10 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                          scale_factor_);
 
     text_placement_info_ptr placement;
-    while (helper.next()) {
+    while (helper.next())
+    {
         placement_found = true;
-        placements_type &placements = helper.placements();
+        placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
             render_marker(feature, pixmap_.get_resolution(),
@@ -68,7 +69,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                           helper.get_marker(), helper.get_image_transform(),
                           sym.get_opacity());
 
-            ren.prepare_glyphs(&(placements[ii]));
+            ren.prepare_glyphs(placements[ii]);
             ren.render_id(feature.id(), placements[ii].center, 2);
         }
     }
