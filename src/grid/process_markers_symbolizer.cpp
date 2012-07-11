@@ -68,7 +68,6 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::renderer_scanline_bin_solid<renderer_base> renderer_type;
 
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
-    marker_placement_e placement_method = sym.get_marker_placement();
 
     if (!filename.empty())
     {
