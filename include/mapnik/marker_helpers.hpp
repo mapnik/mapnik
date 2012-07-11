@@ -47,10 +47,10 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
             if (strk)
             {
                 attr.stroke_flag = true;
-                attr.stroke_width = (*strk).get_width();
-                color const& s_color = (*strk).get_color();
+                attr.stroke_width = strk->get_width();
+                color const& s_color = strk->get_color();
                 attr.stroke_color = agg::rgba(s_color.red()/255.0,s_color.green()/255.0,
-                                              s_color.blue()/255.0,s_color.alpha()/255.0);
+                                              s_color.blue()/255.0,(s_color.alpha()*strk->get_opacity())/255.0);
             }
             if (fill)
             {
@@ -58,7 +58,7 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
                 attr.fill_flag = true;
                 color const& f_color = *fill;
                 attr.fill_color = agg::rgba(f_color.red()/255.0,f_color.green()/255.0,
-                                            f_color.blue()/255.0,f_color.alpha()/255.0);
+                                            f_color.blue()/255.0,(f_color.alpha()*sym.get_opacity())/255.0);
             }
             dst.push_back(attr);
         }
