@@ -97,7 +97,7 @@ void export_markers_symbolizer()
         ;
 
     class_<markers_symbolizer>("MarkersSymbolizer",
-                               init<>("Default Markers Symbolizer - blue arrow"))
+                               init<>("Default Markers Symbolizer - circle"))
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
         //.def_pickle(markers_symbolizer_pickle_suite())
         .add_property("filename",
