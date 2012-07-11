@@ -29,94 +29,26 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/marker_helpers.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/markers_placement.hpp>
-#include <mapnik/arrow.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 
+// agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
-#include "agg_scanline_p.h"
 #include "agg_path_storage.h"
-#include "agg_ellipse.h"
-#include "agg_conv_stroke.h"
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_transform.h"
 
+// boost
+#include <boost/optional.hpp>
+
 namespace mapnik {
-
-
-template <typename Attr>
-bool push_explicit_style(Attr const& src, Attr & dst,  markers_symbolizer const& sym)
-{
-    boost::optional<stroke> const& strk = sym.get_stroke();
-    boost::optional<color> const& fill = sym.get_fill();
-    if (strk || fill)
-    {
-        for(unsigned i = 0; i < src.size(); ++i)
-        {
-            mapnik::svg::path_attributes attr = src[i];
-
-            if (strk)
-            {
-                attr.stroke_width = (*strk).get_width();
-                color const& s_color = (*strk).get_color();
-                attr.stroke_color = agg::rgba(s_color.red()/255.0,s_color.green()/255.0,
-                                              s_color.blue()/255.0,s_color.alpha()/255.0);
-            }
-            if (fill)
-            {
-
-                color const& f_color = *fill;
-                attr.fill_color = agg::rgba(f_color.red()/255.0,f_color.green()/255.0,
-                                            f_color.blue()/255.0,f_color.alpha()/255.0);
-            }
-            dst.push_back(attr);
-        }
-        return true;
-    }
-    return false;
-}
-
-template <typename T>
-void setup_label_transform(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
-{
-    int width = 0;
-    int height = 0;
-
-    expression_ptr const& width_expr = sym.get_width();
-    if (width_expr)
-        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_int();
-
-    expression_ptr const& height_expr = sym.get_height();
-    if (height_expr)
-        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_int();
-
-    if (width > 0 && height > 0)
-    {
-        double sx = width/bbox.width();
-        double sy = height/bbox.height();
-        tr *= agg::trans_affine_scaling(sx,sy);
-    }
-    else if (width > 0)
-    {
-        double sx = width/bbox.width();
-        tr *= agg::trans_affine_scaling(sx);
-    }
-    else if (height > 0)
-    {
-        double sy = height/bbox.height();
-        tr *= agg::trans_affine_scaling(sy);
-    }
-    else
-    {
-        evaluate_transform(tr, feature, sym.get_image_transform());
-    }
-}
 
 template <typename T>
 void agg_renderer<T>::process(markers_symbolizer const& sym,
@@ -163,13 +95,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
 
-
             agg::trans_affine tr;
-
-
             setup_label_transform(tr, bbox, feature, sym);
             tr = agg::trans_affine_scaling(scale_factor_) * tr;
-
 
             coord2d center = bbox.center();
             agg::trans_affine_translation recenter(-center.x, -center.y);
