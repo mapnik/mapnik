@@ -34,7 +34,6 @@
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/markers_placement.hpp>
-#include <mapnik/arrow.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"

@@ -28,7 +28,6 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/markers_placement.hpp>
-#include <mapnik/arrow.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
