@@ -115,6 +115,7 @@ public:
         names_ = rhs.names_;
         f_keys_ = rhs.f_keys_;
         features_ = rhs.features_;
+        return *this;
     }
 
     inline unsigned x() const
@@ -211,4 +212,3 @@ typedef hit_grid_view<mapnik::ImageData<int> > grid_view;
 }
 
 #endif // MAPNIK_GRID_VIEW_HPP
-
