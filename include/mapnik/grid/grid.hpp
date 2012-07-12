@@ -79,7 +79,7 @@ public:
 
     hit_grid(int width, int height, std::string const& key, unsigned int resolution);
 
-    hit_grid(const hit_grid<T>& rhs);
+    hit_grid(hit_grid<T> const& rhs);
 
     ~hit_grid() {}
 
@@ -110,27 +110,12 @@ public:
         return names_;
     }
 
-    inline std::set<std::string> property_names()
-    {
-        return names_;
-    }
-
     inline feature_type const& get_grid_features() const
     {
         return features_;
     }
 
-    inline feature_type& get_grid_features()
-    {
-        return features_;
-    }
-
     inline feature_key_type const& get_feature_keys() const
-    {
-        return f_keys_;
-    }
-
-    inline feature_key_type& get_feature_keys()
     {
         return f_keys_;
     }

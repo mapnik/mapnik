@@ -48,7 +48,7 @@ hit_grid<T>::hit_grid(int width, int height, std::string const& key, unsigned in
       }
 
 template <typename T>
-hit_grid<T>::hit_grid(const hit_grid<T>& rhs)
+hit_grid<T>::hit_grid(hit_grid<T> const& rhs)
     : width_(rhs.width_),
       height_(rhs.height_),
       key_(rhs.key_),
