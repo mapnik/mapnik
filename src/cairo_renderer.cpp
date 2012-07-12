@@ -1085,14 +1085,14 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
                 }
                 if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    cairo_gradient g(attr.fill_gradient,attr.opacity*opacity);
+                    cairo_gradient g(attr.fill_gradient,attr.fill_opacity*opacity);
 
                     context.set_gradient(g,bbox);
                     context.fill();
                 }
                 else if(attr.fill_flag)
                 {
-                    double fill_opacity = attr.opacity * opacity * attr.fill_color.opacity();
+                    double fill_opacity = attr.fill_opacity * opacity * attr.fill_color.opacity();
                     context.set_color(attr.fill_color.r,attr.fill_color.g,attr.fill_color.b, fill_opacity);
                     context.fill();
                 }
@@ -1107,13 +1107,13 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
                     context.set_line_cap(line_cap_enum(attr.line_cap));
                     context.set_line_join(line_join_enum(attr.line_join));
                     context.set_miter_limit(attr.miter_limit);
-                    cairo_gradient g(attr.stroke_gradient,attr.opacity*opacity);
+                    cairo_gradient g(attr.stroke_gradient,attr.fill_opacity*opacity);
                     context.set_gradient(g,bbox);
                     context.stroke();
                 }
                 else if (attr.stroke_flag)
                 {
-                    double stroke_opacity = attr.opacity * opacity * attr.stroke_color.opacity();
+                    double stroke_opacity = attr.stroke_opacity * opacity * attr.stroke_color.opacity();
                     context.set_color(attr.stroke_color.r,attr.stroke_color.g,attr.stroke_color.b, stroke_opacity);
                     context.set_line_width(attr.stroke_width);
                     context.set_line_cap(line_cap_enum(attr.line_cap));
