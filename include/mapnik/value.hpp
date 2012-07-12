@@ -577,6 +577,11 @@ struct negate : public boost::static_visitor<V>
         return val;
     }
 
+    value_type operator() (bool val) const
+    {
+        return val ? -1 : 0;
+    }
+
     value_type operator() (UnicodeString const& ustr) const
     {
         UnicodeString inplace(ustr);
