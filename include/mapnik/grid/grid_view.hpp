@@ -53,7 +53,6 @@ public:
     typedef typename T::pixel_type pixel_type;
     typedef std::string lookup_type;
     typedef std::map<value_type, lookup_type> feature_key_type;
-    typedef std::map<lookup_type, value_type> key_type;
     typedef std::map<std::string, mapnik::feature_ptr> feature_type;
 
     hit_grid_view(unsigned x, unsigned y,

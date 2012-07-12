@@ -58,7 +58,6 @@ public:
     typedef std::string lookup_type;
     // mapping between pixel id and key
     typedef std::map<value_type, lookup_type> feature_key_type;
-    typedef std::map<lookup_type, value_type> key_type;
     typedef std::map<lookup_type, mapnik::feature_ptr> feature_type;
     static const value_type base_mask;
 
