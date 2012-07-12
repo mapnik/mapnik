@@ -168,11 +168,6 @@ public:
         return names_;
     }
 
-    inline std::set<std::string> property_names()
-    {
-        return names_;
-    }
-
     inline feature_type const& get_grid_features() const
     {
         return features_;
