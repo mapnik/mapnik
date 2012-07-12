@@ -142,7 +142,7 @@ public:
         return id_name_;
     }
 
-    inline const value_type* getRow(unsigned row) const
+    inline value_type const * getRow(unsigned row) const
     {
         return data_.getRow(row + y_) + x_;
     }
@@ -162,22 +162,27 @@ public:
         return data_.getBytes();
     }
 
-    std::set<std::string> const& property_names() const
+    inline std::set<std::string> const& property_names() const
     {
         return names_;
     }
 
-    inline const feature_type& get_grid_features() const
+    inline std::set<std::string> property_names()
+    {
+        return names_;
+    }
+
+    inline feature_type const& get_grid_features() const
     {
         return features_;
     }
 
-    inline const feature_key_type& get_feature_keys() const
+    inline feature_key_type const& get_feature_keys() const
     {
         return f_keys_;
     }
 
-    inline const lookup_type& get_key() const
+    inline lookup_type const& get_key() const
     {
         return key_;
     }

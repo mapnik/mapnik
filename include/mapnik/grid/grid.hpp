@@ -110,7 +110,12 @@ public:
         return names_;
     }
 
-    inline const feature_type& get_grid_features() const
+    inline std::set<std::string> property_names()
+    {
+        return names_;
+    }
+
+    inline feature_type const& get_grid_features() const
     {
         return features_;
     }
@@ -120,7 +125,7 @@ public:
         return features_;
     }
 
-    inline const feature_key_type& get_feature_keys() const
+    inline feature_key_type const& get_feature_keys() const
     {
         return f_keys_;
     }
@@ -130,7 +135,7 @@ public:
         return f_keys_;
     }
 
-    inline const std::string& get_key() const
+    inline std::string const& get_key() const
     {
         return key_;
     }
@@ -150,7 +155,7 @@ public:
         resolution_ = res;
     }
 
-    inline const data_type& data() const
+    inline data_type const& data() const
     {
         return data_;
     }
@@ -160,7 +165,7 @@ public:
         return data_;
     }
 
-    inline const T* raw_data() const
+    inline T const * raw_data() const
     {
         return data_.getData();
     }
@@ -170,7 +175,7 @@ public:
         return data_.getData();
     }
 
-    inline const value_type* getRow(unsigned row) const
+    inline value_type const * getRow(unsigned row) const
     {
         return data_.getRow(row);
     }
