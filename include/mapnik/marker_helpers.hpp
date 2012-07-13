@@ -70,16 +70,16 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
 template <typename T>
 void setup_label_transform(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
 {
-    int width = 0;
-    int height = 0;
+    double width = 0;
+    double height = 0;
 
     expression_ptr const& width_expr = sym.get_width();
     if (width_expr)
-        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_int();
+        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
 
     expression_ptr const& height_expr = sym.get_height();
     if (height_expr)
-        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_int();
+        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
 
     if (width > 0 && height > 0)
     {
