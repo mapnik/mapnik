@@ -92,14 +92,14 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 
             agg::trans_affine tr;
             setup_label_transform(tr, bbox, feature, sym);
-            tr = agg::trans_affine_scaling(scale_factor_*(1.0/pixmap_.get_resolution())) * tr;
-            // - clamp sizes to > 4 pixels of interativity
+            // - clamp sizes to > 4 pixels of interactivity
             if (tr.scale() < 0.5)
             {
                 agg::trans_affine tr2;
                 tr2 *= agg::trans_affine_scaling(0.5);
                 tr = tr2;
             }
+            tr *= agg::trans_affine_scaling(scale_factor_*(1.0/pixmap_.get_resolution()));
 
             coord2d center = bbox.center();
             agg::trans_affine_translation recenter(-center.x, -center.y);
