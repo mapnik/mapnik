@@ -991,7 +991,8 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         optional<std::string> marker_type = node.get_opt_attr<std::string>("marker-type");
         if (marker_type)
         {
-            MAPNIK_LOG_ERROR(markers_symbolizer) << "'marker-type' is deprecated and will be removed in Mapnik 3.x, use file='shape://<type>' to specify known svg shapes";
+            // TODO - before Mapnik 2.1 release change this from WARN TO ERROR
+            MAPNIK_LOG_WARN(markers_symbolizer) << "'marker-type' is deprecated and will be removed in Mapnik 3.x, use file='shape://<type>' to specify known svg shapes";
             // back compatibility with Mapnik 2.0.0
             if (!marker_type->empty() && filename.empty())
             {
