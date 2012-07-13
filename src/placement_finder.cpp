@@ -500,9 +500,9 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     }
 
     // check the placement of any additional envelopes
-    if (!p.allow_overlap && !additional_boxes.empty())
+    if (!p.allow_overlap && !additional_boxes_.empty())
     {
-        BOOST_FOREACH(box2d<double> box, additional_boxes)
+        BOOST_FOREACH(box2d<double> const& box, additional_boxes_)
         {
             box2d<double> pt(box.minx() + current_placement->center.x,
                              box.miny() + current_placement->center.y,
