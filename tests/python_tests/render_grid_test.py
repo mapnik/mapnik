@@ -243,5 +243,37 @@ def test_id_zero():
     utf1 = grid.encode('utf',resolution=4)
     eq_(utf1['keys'],['0'])
 
+line_expected = {"keys": ["", "1"], "data": {"1": {"Name": "1"}}, "grid": ["                                                               !", "                                                            !!  ", "                                                         !!     ", "                                                      !!        ", "                                                   !!           ", "                                                !!              ", "                                             !!                 ", "                                          !!                    ", "                                       !!                       ", "                                    !!                          ", "                                 !!                             ", "                              !!                                ", "                           !!                                   ", "                        !!                                      ", "                     !!                                         ", "                  !!                                            ", "               !!                                               ", "            !!                                                  ", "         !!                                                     ", "      !!                                                        ", "   !!                                                           ", "!!                                                              ", " !                                                              ", "  !                                                             ", "   !                                                            ", "    !                                                           ", "     !                                                          ", "      !                                                         ", "       !                                                        ", "        !                                                       ", "         !                                                      ", "          !                                                     ", "           !                                                    ", "            !                                                   ", "             !                                                  ", "              !                                                 ", "               !                                                ", "                !                                               ", "                 !                                              ", "                  !                                             ", "                   !                                            ", "                    !                                           ", "                     !                                          ", "                      !                                         ", "                       !                                        ", "                        !                                       ", "                         !                                      ", "                          !                                     ", "                           !                                    ", "                            !                                   ", "                             !                                  ", "                              !                                 ", "                               !                                ", "                                !                               ", "                                 !                              ", "                                  !                             ", "                                   !                            ", "                                    !                           ", "                                     !                          ", "                                      !                         ", "                                       !                        ", "                                        !                       ", "                                         !                      ", "                                          !                     "]}
+
+def test_line_rendering():
+    ds = mapnik.MemoryDatasource()
+    context = mapnik.Context()
+    context.push('Name')
+    pixel_key = 1
+    f = mapnik.Feature(context,pixel_key)
+    f['Name'] = str(pixel_key)
+    f.add_geometries_from_wkt('LINESTRING (30 10, 10 30, 40 40)')
+    ds.add_feature(f)
+    s = mapnik.Style()
+    r = mapnik.Rule()
+    symb = mapnik.LineSymbolizer()
+    r.symbols.append(symb)
+    s.rules.append(r)
+    lyr = mapnik.Layer('Places')
+    lyr.datasource = ds
+    lyr.styles.append('places_labels')
+    width,height = 256,256
+    m = mapnik.Map(width,height)
+    m.append_style('places_labels',s)
+    m.layers.append(lyr)
+    m.zoom_all()
+    #mapnik.render_to_file(m,'test.png')
+    grid = mapnik.Grid(m.width,m.height,key='__id__')
+    mapnik.render_layer(m,grid,layer=0,fields=['__id__','Name'])
+    utf1 = grid.encode()
+    eq_(utf1,line_expected,show_grids('line',utf1,line_expected))
+    #open('test.json','w').write(json.dumps(grid.encode()))
+
+
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]
