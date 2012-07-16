@@ -380,9 +380,9 @@ template <typename FaceManagerT, typename DetectorT>
 bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
     position const& pos = placement_->properties.displacement;
-    finder_->additional_boxes.clear();
+    finder_->additional_boxes().clear();
     //Markers are automatically centered
-    finder_->additional_boxes.push_back(
+    finder_->additional_boxes().push_back(
         box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
                       -0.5 * marker_ext_.height() - pos.second,
                       0.5 * marker_ext_.width()  - pos.first,

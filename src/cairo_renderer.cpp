@@ -685,7 +685,8 @@ public:
 
     void add_text(text_path const& path,
                   cairo_face_manager & manager,
-                  face_manager<freetype_engine> &font_manager)
+                  face_manager<freetype_engine> &font_manager,
+                  double scale_factor = 1.0)
     {
         double sx = path.center.x;
         double sy = path.center.y;
@@ -700,7 +701,7 @@ public:
             path.vertex(&c, &x, &y, &angle);
 
             face_set_ptr faces = font_manager.get_face_set(c->format->face_name, c->format->fontset);
-            float text_size = c->format->text_size;
+            float text_size = c->format->text_size * scale_factor;
             faces->set_character_sizes(text_size);
 
             glyph_ptr glyph = faces->get_glyph(c->c);
@@ -721,7 +722,7 @@ public:
                 set_font_face(manager, glyph->get_face());
 
                 glyph_path(glyph->get_index(), sx + x, sy - y);
-                set_line_width(c->format->halo_radius);
+                set_line_width(c->format->halo_radius * scale_factor);
                 set_line_join(ROUND_JOIN);
                 set_color(c->format->halo_fill);
                 stroke();
@@ -757,17 +758,13 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
 
 template <>
 cairo_renderer<Cairo::Context>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, double scale_factor, unsigned offset_x, unsigned offset_y)
-    : feature_style_processor<cairo_renderer>(m),
-      cairo_renderer_base(m,context,scale_factor,offset_x,offset_y)
-{
-}
+    : feature_style_processor<cairo_renderer>(m,scale_factor),
+      cairo_renderer_base(m,context,scale_factor,offset_x,offset_y) {}
 
 template <>
 cairo_renderer<Cairo::Surface>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, double scale_factor, unsigned offset_x, unsigned offset_y)
-    : feature_style_processor<cairo_renderer>(m),
-      cairo_renderer_base(m,Cairo::Context::create(surface),scale_factor,offset_x,offset_y)
-{
-}
+    : feature_style_processor<cairo_renderer>(m,scale_factor),
+      cairo_renderer_base(m,Cairo::Context::create(surface),scale_factor,offset_x,offset_y) {}
 
 cairo_renderer_base::~cairo_renderer_base() {}
 
@@ -880,7 +877,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
     if (height_expr)
     {
         value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
-        height = result.to_double(); //scale_factor is always 1.0 atm
+        height = result.to_double() * scale_factor_;
     }
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
@@ -987,7 +984,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     context.set_line_join(stroke_.get_line_join());
     context.set_line_cap(stroke_.get_line_cap());
     context.set_miter_limit(stroke_.get_miterlimit());
-    context.set_line_width(stroke_.get_width());
+    context.set_line_width(stroke_.get_width() * scale_factor_);
     if (stroke_.has_dash())
     {
         context.set_dash(stroke_.get_dash_array());
@@ -1000,7 +997,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(ext,context,sym,t_,prj_trans,tr,1.0);
+        converter(ext,context,sym,t_,prj_trans,tr,scale_factor_);
 
     if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
@@ -1194,7 +1191,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
             width_, height_,
-            1.0 /*scale_factor*/,
+            scale_factor_,
             t_, font_manager_, detector_, query_extent_);
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
@@ -1208,7 +1205,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             render_marker(marker_pos,
                           helper.get_marker(), helper.get_image_transform(),
                           sym.get_opacity());
-            context.add_text(placements[ii], face_manager_, font_manager_);
+            context.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
         }
     }
 }
@@ -1233,7 +1230,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
 
     pattern.set_extend(Cairo::EXTEND_REPEAT);
     pattern.set_filter(Cairo::FILTER_BILINEAR);
-    context.set_line_width(height);
+    context.set_line_width(height * scale_factor_);
 
     for (unsigned i = 0; i < feature.num_geometries(); ++i)
     {
@@ -1394,7 +1391,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 {
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
-    double scale_factor_ = 1;
+    //double scale_factor_ = 1;
 
     typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
     typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
@@ -1486,8 +1483,9 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
             width_, height_,
-            1.0 /*scale_factor*/,
+            scale_factor_,
             t_, font_manager_, detector_, query_extent_);
+
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
 
@@ -1496,7 +1494,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
         placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            context.add_text(placements[ii], face_manager_, font_manager_);
+            context.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
         }
     }
 }
@@ -1505,4 +1503,4 @@ template class cairo_renderer<Cairo::Surface>;
 template class cairo_renderer<Cairo::Context>;
 }
 
-#endif
+#endif // HAVE_CAIRO
