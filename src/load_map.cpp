@@ -56,6 +56,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/marker_cache.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -1000,15 +1001,36 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             }
         }
 
-        path_expression_ptr expr(boost::make_shared<path_expression>());
+        optional<std::string> marker_type = node.get_opt_attr<std::string>("marker-type");
+        if (marker_type)
+        {
+            // TODO - before Mapnik 2.1 release change this from WARN TO ERROR
+            MAPNIK_LOG_WARN(markers_symbolizer) << "'marker-type' is deprecated and will be removed in Mapnik 3.x, use file='shape://<type>' to specify known svg shapes";
+            // back compatibility with Mapnik 2.0.0
+            if (!marker_type->empty() && filename.empty())
+            {
+                if (*marker_type == "ellipse")
+                {
+                    filename = marker_cache::known_svg_prefix_ + "ellipse";
+                }
+                else if (*marker_type == "arrow")
+                {
+                    filename = marker_cache::known_svg_prefix_ + "arrow";
+                }
+            }
+        }
+
+        markers_symbolizer sym;
+
         if (!filename.empty())
         {
+            path_expression_ptr expr(boost::make_shared<path_expression>());
             if (!parse_path_from_string(expr, filename, node.get_tree().path_expr_grammar))
             {
                 throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
             }
+            sym.set_filename(expr);
         }
-        markers_symbolizer sym(expr);
 
         optional<float> opacity = node.get_opt_attr<float>("opacity");
         if (opacity) sym.set_opacity(*opacity);
@@ -1756,6 +1778,9 @@ void map_parser::ensure_font_face(std::string const& face_name)
 
 std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> opt_path)
 {
+    if (marker_cache::is_uri(*opt_path))
+        return *opt_path;
+
     if (relative_to_xml_)
     {
         boost::filesystem::path xml_path = filename_;

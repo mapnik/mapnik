@@ -26,106 +26,34 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/image_util.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/marker_helpers.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/markers_placement.hpp>
-#include <mapnik/arrow.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 
+// agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
-#include "agg_scanline_p.h"
 #include "agg_path_storage.h"
-#include "agg_ellipse.h"
-#include "agg_conv_stroke.h"
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_transform.h"
 
+// boost
+#include <boost/optional.hpp>
+
 namespace mapnik {
-
-
-template <typename Attr>
-bool push_explicit_style(Attr const& src, Attr & dst,  markers_symbolizer const& sym)
-{
-    boost::optional<stroke> const& strk = sym.get_stroke();
-    boost::optional<color> const& fill = sym.get_fill();
-    if (strk || fill)
-    {
-        for(unsigned i = 0; i < src.size(); ++i)
-        {
-            mapnik::svg::path_attributes attr = src[i];
-
-            if (strk)
-            {
-                attr.stroke_width = (*strk).get_width();
-                color const& s_color = (*strk).get_color();
-                attr.stroke_color = agg::rgba(s_color.red()/255.0,s_color.green()/255.0,
-                                              s_color.blue()/255.0,s_color.alpha()/255.0);
-            }
-            if (fill)
-            {
-
-                color const& f_color = *fill;
-                attr.fill_color = agg::rgba(f_color.red()/255.0,f_color.green()/255.0,
-                                            f_color.blue()/255.0,f_color.alpha()/255.0);
-            }
-            dst.push_back(attr);
-        }
-        return true;
-    }
-    return false;
-}
-
-template <typename T>
-void setup_label_transform(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
-{
-    int width = 0;
-    int height = 0;
-
-    expression_ptr const& width_expr = sym.get_width();
-    if (width_expr)
-        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_int();
-
-    expression_ptr const& height_expr = sym.get_height();
-    if (height_expr)
-        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_int();
-
-    if (width > 0 && height > 0)
-    {
-        double sx = width/bbox.width();
-        double sy = height/bbox.height();
-        tr *= agg::trans_affine_scaling(sx,sy);
-    }
-    else if (width > 0)
-    {
-        double sx = width/bbox.width();
-        tr *= agg::trans_affine_scaling(sx);
-    }
-    else if (height > 0)
-    {
-        double sy = height/bbox.height();
-        tr *= agg::trans_affine_scaling(sy);
-    }
-    else
-    {
-        evaluate_transform(tr, feature, sym.get_image_transform());
-    }
-}
 
 template <typename T>
 void agg_renderer<T>::process(markers_symbolizer const& sym,
                               mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
-    typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
@@ -134,20 +62,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 
-    ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_power());
-    agg::scanline_u8 sl;
-    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
-    pixfmt_comp_type pixf(buf);
-    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
-    renderer_base renb(pixf);
-    renderer_type ren(renb);
-
-    agg::trans_affine geom_tr;
-    evaluate_transform(geom_tr, feature, sym.get_transform());
-
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
-    marker_placement_e placement_method = sym.get_marker_placement();
 
     if (!filename.empty())
     {
@@ -160,16 +75,24 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 return;
             }
 
+            ras_ptr->reset();
+            ras_ptr->gamma(agg::gamma_power());
+            agg::scanline_u8 sl;
+            agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+            pixfmt_comp_type pixf(buf);
+            pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+            renderer_base renb(pixf);
+            renderer_type ren(renb);
+
+            agg::trans_affine geom_tr;
+            evaluate_transform(geom_tr, feature, sym.get_transform());
+
             boost::optional<path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
 
-
             agg::trans_affine tr;
-
-
             setup_label_transform(tr, bbox, feature, sym);
             tr = agg::trans_affine_scaling(scale_factor_) * tr;
-
 
             coord2d center = bbox.center();
             agg::trans_affine_translation recenter(-center.x, -center.y);
@@ -186,6 +109,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                          agg::pod_bvector<path_attributes>,
                          renderer_type,
                          agg::pixfmt_rgba32 > svg_renderer(svg_path, result ? attributes : (*marker)->attributes());
+
+            marker_placement_e placement_method = sym.get_marker_placement();
 
             BOOST_FOREACH( geometry_type & geom, feature.paths())
             {
@@ -216,11 +141,39 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                             detector_->insert(transformed_bbox);
                     }
                 }
-                else
+                else if (sym.clip())
                 {
+                    typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+                    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+                    typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
+
                     clipped_geometry_type clipped(geom);
                     clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                     path_type path(t_,clipped,prj_trans);
+                    transformed_path_type path_transformed(path,geom_tr);
+                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
+                                                                                                  sym.get_spacing() * scale_factor_,
+                                                                                                  sym.get_max_error(),
+                                                                                                  sym.get_allow_overlap());
+                    double x, y, angle;
+                    while (placement.get_point(x, y, angle))
+                    {
+                        agg::trans_affine matrix = marker_trans;
+                        matrix.rotate(angle);
+                        matrix.translate(x, y);
+                        svg_renderer.render(*ras_ptr, sl, renb, matrix, sym.get_opacity(), bbox);
+
+                        if (/* DEBUG */ 0)
+                        {
+                            debug_draw_box(buf, bbox*matrix, 0, 0, 0.0);
+                        }
+                    }
+                }
+                else
+                {
+                    typedef coord_transform<CoordTransform,geometry_type> path_type;
+                    typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
+                    path_type path(t_,geom,prj_trans);
                     transformed_path_type path_transformed(path,geom_tr);
                     markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
                                                                                                   sym.get_spacing() * scale_factor_,

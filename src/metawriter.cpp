@@ -177,7 +177,7 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
 }
 
 void metawriter_json_stream::add_text(
-    boost::ptr_vector<text_path> &placements, box2d<double> const& extents,
+    boost::ptr_vector<text_path> const& placements, box2d<double> const& extents,
     Feature const& feature, CoordTransform const& t,
     metawriter_properties const& properties)
 {
@@ -195,14 +195,15 @@ void metawriter_json_stream::add_text(
     */
     for (unsigned n = 0; n < placements.size(); n++)
     {
-        text_path &current_placement = placements[n];
+        text_path const& current_placement = placements[n];
 
         bool inside = false; /* Part of text is inside rendering region */
         bool straight = true;
         char_info_ptr c;
         double x, y, angle;
         current_placement.rewind();
-        for (int i = 0; i < current_placement.num_nodes(); ++i) {
+        for (int i = 0; i < current_placement.num_nodes(); ++i)
+        {
             int cx = current_placement.center.x;
             int cy = current_placement.center.y;
             current_placement.vertex(&c, &x, &y, &angle);

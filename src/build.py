@@ -151,7 +151,6 @@ source = Split(
     stroke.cpp
     symbolizer.cpp
     symbolizer_helpers.cpp
-    arrow.cpp
     unicode.cpp
     markers_symbolizer.cpp
     metawriter.cpp

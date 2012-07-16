@@ -365,7 +365,7 @@ struct text_renderer : private boost::noncopyable
                    stroker & s,
                    composite_mode_e comp_op = src_over,
                    double scale_factor=1.0);
-    box2d<double> prepare_glyphs(text_path *path);
+    box2d<double> prepare_glyphs(text_path const& path);
     void render(pixel_position pos);
     void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
 

@@ -82,6 +82,11 @@ public:
         return mapping_.find(key);
     }
 
+    void add(key_type const& name, size_type index)
+    {
+        mapping_.insert(std::make_pair(name, index));
+    }
+
     size_type size() const { return mapping_.size(); }
     const_iterator begin() const { return mapping_.begin();}
     const_iterator end() const { return mapping_.end();}

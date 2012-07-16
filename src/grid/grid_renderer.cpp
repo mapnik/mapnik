@@ -91,6 +91,7 @@ void grid_renderer<T>::start_layer_processing(layer const& lay, box2d<double> co
     {
         detector_.clear();
     }
+    query_extent_ = query_extent;
 }
 
 template <typename T>

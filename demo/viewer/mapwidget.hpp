@@ -53,8 +53,8 @@ public:
         AGG,
         Cairo,
         Grid
-    };    
-    
+    };
+
 private:
     boost::shared_ptr<mapnik::Map> map_;
     int selected_;
@@ -91,6 +91,7 @@ public slots:
     void updateMap();
     void layerSelected(int);
     void updateRenderer(QString const& txt);
+    void updateScaleFactor(double scale_factor);
 signals:
     void mapViewChanged();
 protected:

@@ -4,7 +4,7 @@ install:
 	@python scons/scons.py --config=cache --implicit-deps-unchanged --max-drift=1 install
 
 mapnik:
-	@python scons/scons.py --silent --config=cache --implicit-deps-unchanged --max-drift=1
+	@python scons/scons.py --config=cache --implicit-deps-unchanged --max-drift=1
 
 clean:
 	python scons/scons.py -c --config=cache --implicit-deps-unchanged --max-drift=1
@@ -15,7 +15,7 @@ reset:
 	if test -e "config.cache"; then rm "config.cache"; fi
 
 uninstall:
-	python scons/scons.py --silent --config=cache --implicit-deps-unchanged --max-drift=1 uninstall
+	python scons/scons.py --config=cache --implicit-deps-unchanged --max-drift=1 uninstall
 
 test:
 	@echo "*** Running visual tests..."

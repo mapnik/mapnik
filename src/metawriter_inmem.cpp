@@ -71,7 +71,7 @@ metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
 
 void
 metawriter_inmem::add_text(
-    boost::ptr_vector<text_path> & /*text*/,
+    boost::ptr_vector<text_path> const& /*text*/,
     box2d<double> const& extents,
     Feature const& feature,
     CoordTransform const& /*t*/,
@@ -146,4 +146,3 @@ metawriter_inmem::inst_end() const {
 
 
 }
-

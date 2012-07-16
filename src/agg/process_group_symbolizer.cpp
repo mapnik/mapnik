@@ -184,7 +184,7 @@ struct render_visitor : public boost::static_visitor<>
 
       text_renderer<image_32> ren(pixmap_, font_manager_, *(font_manager_.get_stroker()));
       
-      ren.prepare_glyphs(current_placement.get());
+      ren.prepare_glyphs(*(current_placement.get()));
       ren.render(current_placement->center);
    }
    

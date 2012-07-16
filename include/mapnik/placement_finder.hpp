@@ -136,7 +136,7 @@ public:
     /** Remove old placements. */
     void clear_placements();
 
-    inline placements_type &get_results() { return placements_; }
+    inline placements_type const& get_results() { return placements_; }
 
     void set_collect_extents(bool collect) { collect_extents_ = collect; }
     bool get_collect_extents() const { return collect_extents_; }

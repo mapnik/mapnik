@@ -47,11 +47,14 @@ static void grid2utf(T const& grid_type,
                      boost::python::list& l,
                      std::vector<grid::lookup_type>& key_order)
 {
+    typedef std::map< typename T::lookup_type, typename T::value_type> keys_type;
+    typedef typename keys_type::const_iterator keys_iterator;
+
     typename T::data_type const& data = grid_type.data();
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();
-    typename T::key_type keys;
-    typename T::key_type::const_iterator key_pos;
     typename T::feature_key_type::const_iterator feature_pos;
+
+    keys_type keys;
     // start counting at utf8 codepoint 32, aka space character
     boost::uint16_t codepoint = 32;
 
@@ -68,7 +71,7 @@ static void grid2utf(T const& grid_type,
             if (feature_pos != feature_keys.end())
             {
                 mapnik::grid::lookup_type val = feature_pos->second;
-                key_pos = keys.find(val);
+                keys_iterator key_pos = keys.find(val);
                 if (key_pos == keys.end())
                 {
                     // Create a new entry for this key. Skip the codepoints that
@@ -108,11 +111,13 @@ static void grid2utf(T const& grid_type,
                      std::vector<typename T::lookup_type>& key_order,
                      unsigned int resolution)
 {
-    //typename T::data_type const& data = grid_type.data();
+    typedef std::map< typename T::lookup_type, typename T::value_type> keys_type;
+    typedef typename keys_type::const_iterator keys_iterator;
+
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();
-    typename T::key_type keys;
-    typename T::key_type::const_iterator key_pos;
     typename T::feature_key_type::const_iterator feature_pos;
+
+    keys_type keys;
     // start counting at utf8 codepoint 32, aka space character
     boost::uint16_t codepoint = 32;
 
@@ -130,7 +135,7 @@ static void grid2utf(T const& grid_type,
             if (feature_pos != feature_keys.end())
             {
                 mapnik::grid::lookup_type val = feature_pos->second;
-                key_pos = keys.find(val);
+                keys_iterator key_pos = keys.find(val);
                 if (key_pos == keys.end())
                 {
                     // Create a new entry for this key. Skip the codepoints that
@@ -170,11 +175,14 @@ static void grid2utf2(T const& grid_type,
                       std::vector<typename T::lookup_type>& key_order,
                       unsigned int resolution)
 {
+    typedef std::map< typename T::lookup_type, typename T::value_type> keys_type;
+    typedef typename keys_type::const_iterator keys_iterator;
+
     typename T::data_type const& data = grid_type.data();
     typename T::feature_key_type const& feature_keys = grid_type.get_feature_keys();
-    typename T::key_type keys;
-    typename T::key_type::const_iterator key_pos;
     typename T::feature_key_type::const_iterator feature_pos;
+
+    keys_type keys;
     // start counting at utf8 codepoint 32, aka space character
     uint16_t codepoint = 32;
 
@@ -194,7 +202,7 @@ static void grid2utf2(T const& grid_type,
             if (feature_pos != feature_keys.end())
             {
                 mapnik::grid::lookup_type val = feature_pos->second;
-                key_pos = keys.find(val);
+                keys_iterator key_pos = keys.find(val);
                 if (key_pos == keys.end())
                 {
                     // Create a new entry for this key. Skip the codepoints that

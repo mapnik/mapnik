@@ -86,10 +86,11 @@ public:
     bool next();
 
     /** Get current placement. next() has to be called before! */
-    placements_type & placements() const;
+    placements_type const& placements() const;
 protected:
     bool next_point_placement();
     bool next_line_placement();
+    bool next_line_placement_clipped();
     bool next_placement();
     void initialize_geometries();
     void initialize_points();

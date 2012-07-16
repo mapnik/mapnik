@@ -1,8 +1,10 @@
-hello world plugin
-------------------
+## hello world plugin
 
 This is a very simple sample plugin. It is designed to help developers
 see the skeletal basics needed to achieve a functional datasource plugin.
+
+It is not a model plugin of best practices as much as a model of the bare
+minimum you need to have a working plugin that returns a single feature.
 
 Code comments attempt to highlight which code is mandatory, which is
 simply recommended, and which is purely fluff used to get the plugin to
