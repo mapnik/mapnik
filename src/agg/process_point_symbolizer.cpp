@@ -93,7 +93,11 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 detector_->has_placement(label_ext))
             {
 
-                render_marker(pixel_position(x, y), **marker, tr, sym.get_opacity(), sym.comp_op());
+                render_marker(pixel_position(x, y),
+                              **marker,
+                              tr,
+                              sym.get_opacity(),
+                              sym.comp_op());
 
                 if (/* DEBUG */ 0) {
                     debug_draw_box(label_ext, 0, 0, 0.0);
