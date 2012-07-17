@@ -42,7 +42,6 @@ text_shaping::text_shaping(FT_Face face)
       buffer_ (hb_buffer_create()),
       face_(face)
 {
-    hb_buffer_set_unicode_funcs(buffer_, hb_icu_get_unicode_funcs());
     load_font();
 }
 
@@ -56,6 +55,7 @@ uint32_t text_shaping::process_text(UnicodeString const& text, unsigned start, u
 {
     if (!font_) return 0;
     hb_buffer_reset(buffer_);
+    hb_buffer_set_unicode_funcs(buffer_, hb_icu_get_unicode_funcs());
 
     uint32_t length = text.length();
     std::cout << "process_text: length: " << length << " start: " << start << " end: " << end << "rtl:" << rtl << "\n";
