@@ -312,6 +312,7 @@ void scale_image_agg(Image & target,
         return;
     }
     case SCALING_BILINEAR:
+    case SCALING_BILINEAR8:
         filter.calculate(agg::image_filter_bilinear(), true); break;
     case SCALING_BICUBIC:
         filter.calculate(agg::image_filter_bicubic(), true); break;
