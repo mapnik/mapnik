@@ -198,7 +198,7 @@ struct render_visitor : public boost::static_visitor<>
 
 template <typename T>
 void  agg_renderer<T>::process(group_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
    // find all column names referenced in the group rules and symbolizers
@@ -274,20 +274,20 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
                    // indexed column
                    std::string col_idx_name = col_name;
                    boost::replace_all(col_idx_name, "%", boost::lexical_cast<std::string>(col_idx));
-                   sub_feature->put(col_name, feature->get(col_idx_name));
+                   sub_feature->put(col_name, feature.get(col_idx_name));
                 }
              }
              else
              {
                 // non-indexed column
-                sub_feature->put(col_name, feature->get(col_name));
+                sub_feature->put(col_name, feature.get(col_name));
              }
           }
       }
       else
       {
           // no indexed columns, so use the existing feature instead of copying
-          sub_feature = feature;
+          sub_feature = feature_ptr(&feature);
       }
 
       for (group_symbolizer::rules::const_iterator itr = sym.begin();
@@ -322,7 +322,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 
    // find placements which can accomodate the offset bboxes from the layout manager.
    string_info empty_info;
-   placement_finder<label_collision_detector4> finder(*feature, *placement, empty_info, *detector_, box2d<double>(0, 0, width_, height_), check_repeat);
+   placement_finder<label_collision_detector4> finder(feature, *placement, empty_info, *detector_, box2d<double>(0, 0, width_, height_), check_repeat);
    for (size_t i = 0; i < matches.size(); ++i)
    {
       if (check_repeat)
@@ -358,13 +358,13 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 
    // for each placement:
    //    render the symbolizer at that point.
-   unsigned int num_geoms = feature->num_geometries();
+   unsigned int num_geoms = feature.num_geometries();
    for (unsigned int i = 0; i < num_geoms; ++i)
    {
       typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
       typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
-      geometry_type const &geom = feature->get_geometry(i);
+      geometry_type const &geom = feature.get_geometry(i);
       clipped_geometry_type clipped(const_cast<geometry_type &>(geom));
       clipped.clip_box(query_extent_.minx(),query_extent_.miny(),
                        query_extent_.maxx(),query_extent_.maxy());
@@ -377,14 +377,15 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
          finder.update_detector();
       }
 
-      BOOST_FOREACH(text_path const &p, finder.get_results())
+      placements_type const& placements = finder.get_results();
+      for (unsigned int j = 0; j < placements.size(); ++j)
       {
-         for (size_t j = 0; j < matches.size(); ++j)
+         for (unsigned int k = 0; k < matches.size(); ++k)
          {
-            const group_rule *match_rule = matches[j].first;
-            feature_ptr match_feature = matches[j].second;
-            pixel_position pos = p.center;
-            const layout_offset &offset = layout_manager.offset_at(j);
+            const group_rule *match_rule = matches[k].first;
+            feature_ptr match_feature = matches[k].second;
+            pixel_position pos = placements[j].center;
+            const layout_offset &offset = layout_manager.offset_at(k);
             pos.x += offset.x;
             pos.y += offset.y;
             
@@ -405,7 +406,7 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
 
 
 template void agg_renderer<image_32>::process(group_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

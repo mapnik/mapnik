@@ -105,7 +105,7 @@ public:
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(group_symbolizer const& sym,
-                 mapnik::feature_ptr const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
 
     inline bool process(rule::symbolizers const& /*syms*/,
