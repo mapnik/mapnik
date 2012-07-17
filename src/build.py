@@ -139,6 +139,7 @@ source = Split(
     save_map.cpp
     shield_symbolizer.cpp
     text_symbolizer.cpp
+    group_layout_manager.cpp
     group_symbolizer.cpp
     group_rule.cpp
     tiff_reader.cpp
