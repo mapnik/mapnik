@@ -76,9 +76,9 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 detector_->has_placement(label_ext))
             {
 
-                render_marker(pixel_position(x - 0.5 * marker.width(), 
-                                             y - 0.5 * marker.height()), 
-                              marker, helper.get_transform(), sym.get_opacity(),
+                render_marker(pixel_position(x, y), marker,
+                              helper.get_transform(),
+                              sym.get_opacity(),
                               sym.comp_op());
 
                 if (!sym.get_ignore_placement())

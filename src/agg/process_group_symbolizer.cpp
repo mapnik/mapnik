@@ -164,10 +164,7 @@ struct render_visitor : public boost::static_visitor<>
    {
       symbolizer_with_image_helper helper(sym, feature_);
       const marker &m = **helper.get_marker();
-      pixel_position pos(pixel_.x - 0.5 * m.width(),
-                         pixel_.y - 0.5 * m.height());
-
-      renderer_.render_marker(pos, m, helper.get_transform(), sym.get_opacity(), sym.comp_op());
+      renderer_.render_marker(pixel_, m, helper.get_transform(), sym.get_opacity(), sym.comp_op());
    }
 
    void operator()(text_symbolizer const &sym) const
