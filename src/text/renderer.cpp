@@ -38,12 +38,12 @@ void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
     }
     while (pos->next())
     {
-        pixel_position p = pos->get_position();
-        pen.x = int(p.x * 64);
-        pen.y = int(p.y * 64);
-
         glyph_info const& glyph = pos->get_glyph();
         glyph.face->set_character_sizes(glyph.format->text_size); //TODO: Optimize this?
+
+        pixel_position p = pos->get_position();
+        pen.x = int((p.x +glyph.offset_x) * 64);
+        pen.y = int((p.y + glyph.offset_y) * 64);
 
         if (!constant_angle)
         {

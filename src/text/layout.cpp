@@ -79,10 +79,13 @@ void text_layout::shape_text()
             tmp.char_index = glyphs[i].cluster;
             tmp.glyph_index = glyphs[i].codepoint;
             tmp.width = positions[i].x_advance / 64.0;
+            tmp.offset_x = positions[i].x_offset / 64.0;
+            tmp.offset_y = positions[i].y_offset / 64.0;
             tmp.face = face;
             tmp.format = itr->format;
             face->glyph_dimensions(tmp);
             glyphs_.push_back(tmp);
+            std::cout << "glyph:" << glyphs[i].mask << " xa:" << positions[i].x_advance << " ya:" << positions[i].y_advance << " xo:" << positions[i].x_offset <<  " yo:" << positions[i].y_offset << "\n";
         }
     }
     std::cout << "text_length: unicode chars: " << itemizer.get_text().length() << " glyphs: " << glyphs_.size()  << "\n";
@@ -104,6 +107,7 @@ void text_layout::clear()
     glyphs_.clear();
 }
 
+#if 0
 format_run::format_run(char_properties_ptr properties, double text_height)
     : properties_(properties), glyphs_(), width_(0), text_height_(text_height), line_height_(0)
 {
@@ -127,5 +131,6 @@ void text_line::add_run(format_run_ptr run)
     max_text_height = std::max(max_text_height, run->text_height());
     runs_.push_back(run);
 }
+#endif
 
 } //ns mapnik

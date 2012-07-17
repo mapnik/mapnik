@@ -52,6 +52,9 @@ struct glyph_info
     double ymax;
     double line_height;
 
+    double offset_x;
+    double offset_y;
+
     char_properties_ptr format;
 
     double height() const { return ymax-ymin; }
