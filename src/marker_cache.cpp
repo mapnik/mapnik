@@ -54,12 +54,12 @@ marker_cache::marker_cache()
     insert_svg("ellipse",
                "<?xml version='1.0' standalone='no'?>"
                "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-               "<circle r='10' fill='#93a7ac' fill-opacity='.5' stroke='none'/>"
+               "<circle r='10' fill='#0000FF'/>"
                "</svg>");
     insert_svg("arrow",
                "<?xml version='1.0' standalone='no'?>"
                "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-               "<path fill='#93a7ac' fill-opacity='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
+               "<path fill='#93a7ac' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
                "</svg>");
 }
 
