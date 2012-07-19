@@ -243,7 +243,7 @@ public:
                 Renderer& ren,
                 agg::trans_affine const& mtx,
                 double opacity,
-                const box2d<double> &symbol_bbox)
+                box2d<double> const& symbol_bbox)
 
     {
         using namespace agg;
