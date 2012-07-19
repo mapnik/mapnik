@@ -64,7 +64,7 @@ public:
     bool get_point(double & x, double  & y, double & angle,  bool add_to_detector = true);
 private:
     Locator &locator_;
-    box2d<double> const& size_;
+    box2d<double> size_;
     agg::trans_affine tr_;
     Detector &detector_;
     double spacing_;
