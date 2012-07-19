@@ -88,15 +88,13 @@ struct markers_rasterizer_dispatch
     void add_path(T & path)
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
-//        std::cout << "add_path called -> " << placement_method  << std::endl;
-//        std::cout << typeid(path).name() << std::endl;
+
         if (placement_method == MARKER_POINT_PLACEMENT)
         {
 
             double x,y;
             path.rewind(0);
             label_interior_position(path, x, y);
-//            std::cout << "pos -> " << x << "," << y << std::endl;
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;
