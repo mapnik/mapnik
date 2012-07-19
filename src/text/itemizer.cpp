@@ -46,6 +46,7 @@ std::list<text_item> const& text_itemizer::itemize()
     // format itemiziation is done by add_text()
     itemize_direction();
     itemize_script();
+    std::cout << "Itemizer: direction: "<< direction_runs.size() << " script: " << script_runs.size() << "\n";
     create_item_list();
     return output;
 }
@@ -81,6 +82,7 @@ void text_itemizer::itemize_direction()
                 {
                     int32_t length;
                     direction = ubidi_getVisualRun(bidi, i, 0, &length);
+                    std::cout << "visual run" <<  direction << " length:" << length << "\n";
                     position += length;
                     direction_runs.push_back(direction_run_t(direction, position));
                 }

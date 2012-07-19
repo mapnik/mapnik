@@ -31,34 +31,14 @@
 //stl
 #include <vector>
 #include <list>
+#include <map>
 
 //boost
 #include <boost/shared_ptr.hpp>
 
 namespace mapnik
 {
-
-/** This class stores all glyphs in a format run (i.e. conscutive glyphs with the same format). */
-class format_run
-{
-public:
-    format_run(char_properties_ptr properties, double text_height);
-    std::vector<glyph_info> const& glyphs() const { return glyphs_; }
-    void add_glyph(glyph_info const& info);
-    double line_height() const { return line_height_; }
-    double text_height() const { return text_height_; }
-private:
-    char_properties_ptr properties_;
-    std::vector<glyph_info> glyphs_;
-    double width_;
-    double text_height_;
-    double line_height_;
-};
-
-typedef boost::shared_ptr<format_run> format_run_ptr;
-
-
-
+#if 0
 /** This class stores all format_runs in a line in left to right order.
  *
  * It can be used for rendering but no text processing (like line breaking)
@@ -78,7 +58,7 @@ private:
 };
 
 typedef boost::shared_ptr<text_line> text_line_ptr;
-
+#endif
 
 class text_layout
 {
@@ -89,19 +69,27 @@ public:
         itemizer.add_text(str, format);
     }
 
-    void break_lines();
+    void break_lines(double break_width);
     void shape_text();
     void clear();
     unsigned size() const { return glyphs_.size(); }
 
     typedef std::vector<glyph_info> glyph_vector;
     glyph_vector const& get_glyphs() const { return glyphs_; }
+    /** Get the text width. Returns 0 if shape_text() wasn't called before.
+     * If break_lines was already called the width of the longest line is returned.
+     **/
+    double get_width() const { return width_; }
 
 private:
     text_itemizer itemizer;
-    std::vector<text_line_ptr> lines_;
+//    std::vector<text_line_ptr> lines_;
+    /// Maps char index (UTF-16) to width. If multiple glyphs map to the same char the sum of all widths is used
+    std::map<unsigned, double> width_map;
     glyph_vector glyphs_;
     face_manager_freetype &font_manager_;
+    double total_width_;
+    double width_;
 };
 }
 

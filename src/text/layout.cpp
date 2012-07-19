@@ -29,6 +29,9 @@
 // harf-buzz
 #include <harfbuzz/hb.h>
 
+// ICU
+#include <unicode/brkiter.h>
+
 /* TODO: Remove unused classes:
  * processed_text
  * string_info
@@ -43,8 +46,46 @@ text_layout::text_layout(face_manager_freetype &font_manager)
 {
 }
 
-void text_layout::break_lines()
+void text_layout::break_lines(double break_width)
 {
+    if (total_width_ < break_width || !break_width) return;
+    UnicodeString const& text = itemizer.get_text();
+    Locale locale; //TODO: Is the default constructor correct?
+    UErrorCode status = U_ZERO_ERROR;
+    BreakIterator *breakitr = BreakIterator::createLineInstance(locale, status);
+    //Not breaking the text if an error occurs is probably the best thing we can do.
+    if (!U_SUCCESS(status)) return;
+    breakitr->setText(text);
+    unsigned current_line_length = 0;
+    unsigned last_break_position = 0;
+    for (unsigned i=0; i<text.length(); i++)
+    {
+        std::cout << "i=" << i << "\n";
+        //TODO: Char spacing
+        std::map<unsigned, double>::const_iterator width_itr = width_map.find(i);
+        if (width_itr != width_map.end())
+        {
+            current_line_length += width_itr->second;
+        }
+        if (current_line_length > break_width)
+        {
+            unsigned break_position = breakitr->preceding(i);
+            if (break_position <= last_break_position)
+            {
+                //A single word is longer than the maximum line width.
+                //Violate line width requirement and choose next break position
+                break_position = breakitr->following(i);
+                std::cout << "Line overflow!\n";
+            }
+            //TODO: Add line
+            std::cout << "Line to long ("<< current_line_length << ") at "<< i <<  " going to " << break_position << ". Last break was at " << last_break_position << "\n";
+            last_break_position = break_position;
+            i = break_position;
+
+            current_line_length = 0;
+        }
+    }
+
 }
 
 void text_layout::shape_text()
@@ -52,6 +93,8 @@ void text_layout::shape_text()
     UnicodeString const& text = itemizer.get_text();
 
     glyphs_.reserve(text.length()); //Preallocate memory
+
+    total_width_ = 0.0;
 
     std::list<text_item> const& list = itemizer.itemize();
     std::list<text_item>::const_iterator itr = list.begin(), end = list.end();
@@ -71,7 +114,7 @@ void text_layout::shape_text()
         hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
 
         std::string s;
-        std::cout << "Processing item '" << text.tempSubStringBetween(itr->start, itr->end).toUTF8String(s) << "' (" << uscript_getName(itr->script) << "," << itr->end - itr->start << "," << num_glyphs << "," << itr->rtl <<  ")\n";
+//        std::cout << "Processing item '" << text.tempSubStringBetween(itr->start, itr->end).toUTF8String(s) << "' (" << uscript_getName(itr->script) << "," << itr->end - itr->start << "," << num_glyphs << "," << itr->rtl <<  ")\n";
 
         for (unsigned i=0; i<num_glyphs; i++)
         {
@@ -84,21 +127,25 @@ void text_layout::shape_text()
             tmp.face = face;
             tmp.format = itr->format;
             face->glyph_dimensions(tmp);
+
+            width_map[glyphs[i].cluster] += tmp.width;
+            total_width_ += tmp.width;
+
             glyphs_.push_back(tmp);
-            std::cout << "glyph:" << glyphs[i].mask << " xa:" << positions[i].x_advance << " ya:" << positions[i].y_advance << " xo:" << positions[i].x_offset <<  " yo:" << positions[i].y_offset << "\n";
+//            std::cout << "glyph:" << glyphs[i].mask << " xa:" << positions[i].x_advance << " ya:" << positions[i].y_advance << " xo:" << positions[i].x_offset <<  " yo:" << positions[i].y_offset << "\n";
         }
     }
-    std::cout << "text_length: unicode chars: " << itemizer.get_text().length() << " glyphs: " << glyphs_.size()  << "\n";
-    std::vector<glyph_info>::const_iterator itr2 = glyphs_.begin(), end2 = glyphs_.end();
-    for (;itr2 != end2; itr2++)
-    {
-        std::cout << "'" << (char) itemizer.get_text().charAt(itr2->char_index) <<
-                 "' glyph codepoint:" << itr2->glyph_index <<
-                 " cluster: " << itr2->char_index <<
-                 " width: "<< itr2->width <<
-                 " height: " << itr2->height() <<
-                 "\n";
-    }
+//    std::cout << "text_length: unicode chars: " << itemizer.get_text().length() << " glyphs: " << glyphs_.size()  << "\n";
+//    std::vector<glyph_info>::const_iterator itr2 = glyphs_.begin(), end2 = glyphs_.end();
+//    for (;itr2 != end2; itr2++)
+//    {
+//        std::cout << "'" << (char) itemizer.get_text().charAt(itr2->char_index) <<
+//                 "' glyph codepoint:" << itr2->glyph_index <<
+//                 " cluster: " << itr2->char_index <<
+//                 " width: "<< itr2->width <<
+//                 " height: " << itr2->height() <<
+//                 "\n";
+//    }
 }
 
 void text_layout::clear()
