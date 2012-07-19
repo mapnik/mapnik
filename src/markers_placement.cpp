@@ -9,6 +9,7 @@
 #include "agg_conv_clip_polyline.h"
 #include "agg_trans_affine.h"
 #include "agg_conv_transform.h"
+#include "agg_conv_smooth_poly1.h"
 // stl
 #include <cmath>
 
@@ -16,7 +17,7 @@ namespace mapnik
 {
 template <typename Locator,  typename Detector>
 markers_placement<Locator, Detector>::markers_placement(
-    Locator &locator, box2d<double> size, agg::trans_affine const& tr, Detector &detector, double spacing, double max_error, bool allow_overlap)
+    Locator &locator, box2d<double> const& size, agg::trans_affine const& tr, Detector &detector, double spacing, double max_error, bool allow_overlap)
     : locator_(locator), size_(size), tr_(tr), detector_(detector), max_error_(max_error), allow_overlap_(allow_overlap)
 {
     marker_width_ = (size_ * tr_).width();
@@ -239,9 +240,14 @@ typedef coord_transform<CoordTransform,geometry_type> path_type;
 typedef coord_transform<CoordTransform,clipped_geometry_type> clipped_path_type;
 typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
 
-template class markers_placement<transformed_path_type, label_collision_detector4>;
-template class markers_placement<agg::conv_transform<clipped_path_type,agg::trans_affine>, label_collision_detector4>;
+template class markers_placement<geometry_type, label_collision_detector4>;
 template class markers_placement<path_type, label_collision_detector4>;
+template class markers_placement<clipped_geometry_type, label_collision_detector4>;
+template class markers_placement<transformed_path_type, label_collision_detector4>;
 template class markers_placement<clipped_path_type, label_collision_detector4>;
-
+template class markers_placement<agg::conv_transform<clipped_path_type,agg::trans_affine>, label_collision_detector4>;
+template class markers_placement<agg::conv_smooth_poly1_curve<clipped_path_type>, label_collision_detector4>;
+template class markers_placement<agg::conv_smooth_poly1_curve<geometry_type>, label_collision_detector4>;
+template class markers_placement<agg::conv_smooth_poly1_curve<path_type>, label_collision_detector4>;
+template class markers_placement<agg::conv_smooth_poly1_curve<clipped_geometry_type>, label_collision_detector4>;
 } //ns mapnik
