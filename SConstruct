@@ -87,7 +87,7 @@ pretty_dep_names = {
 # Core plugin build configuration
 # opts.AddVariables still hardcoded however...
 PLUGINS = { # plugins with external dependencies
-            # configured by calling project, henche 'path':None
+            # configured by calling project, hence 'path':None
             'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
             'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
             'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
