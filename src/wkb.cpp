@@ -76,7 +76,7 @@ public:
         // try to determine WKB format automatically
         if (format_ == wkbAuto)
         {
-            if (size >= 44
+            if (size_ >= 44
                 && (unsigned char)(wkb_[0]) == (unsigned char)(0x00)
                 && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C))
             {
