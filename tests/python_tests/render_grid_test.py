@@ -2,13 +2,18 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
-
+from utilities import execution_path
 import os, mapnik
 
 try:
     import json
 except ImportError:
     import simplejson as json
+
+def setup():
+    # All of the paths used are relative, if we run the tests
+    # from another directory we need to chdir()
+    os.chdir(execution_path('.'))
 
 # first pass impl where resolution is passed as render
 # time rather than encoding time, likely will be deprecated soon
@@ -39,7 +44,7 @@ def resolve(grid,row,col):
     return grid['data'].get(key)
 
 
-def create_grid_map(width,height):
+def create_grid_map(width,height,marker=True):
     ds = mapnik.MemoryDatasource()
     context = mapnik.Context()
     context.push('Name')
@@ -64,9 +69,12 @@ def create_grid_map(width,height):
     ds.add_feature(f)
     s = mapnik.Style()
     r = mapnik.Rule()
-    symb = mapnik.MarkersSymbolizer()
-    symb.width = mapnik.Expression('10')
-    symb.height = mapnik.Expression('10')
+    if marker:
+        symb = mapnik.MarkersSymbolizer()
+        symb.width = mapnik.Expression('10')
+        symb.height = mapnik.Expression('10')
+    else:
+        symb = mapnik.PointSymbolizer(mapnik.PathExpression('../data/images/dummy.png'))
     symb.allow_overlap = True
     r.symbols.append(symb)
 
@@ -274,6 +282,23 @@ def test_line_rendering():
     eq_(utf1,line_expected,show_grids('line',utf1,line_expected))
     #open('test.json','w').write(json.dumps(grid.encode()))
 
+point_expected = {"keys": ["", "3", "4", "2", "1"], "data": {"1": {"Name": "South East"}, "3": {"Name": "North West"}, "2": {"Name": "South West"}, "4": {"Name": "North East"}}, "grid": ["                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "           !!!!                                ####             ", "           !!!!                                ####             ", "           !!!!                                ####             ", "           !!!!                                ####             ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "           $$$$                                %%%%             ", "           $$$$                                %%%%             ", "           $$$$                                %%%%             ", "           $$$$                                %%%%             ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                "]}
+
+def test_point_symbolizer_grid():
+    width,height = 256,256
+    m = create_grid_map(width,height,marker=False)
+    ul_lonlat = mapnik.Coord(142.30,-38.20)
+    lr_lonlat = mapnik.Coord(143.40,-38.80)
+    m.zoom_to_box(mapnik.Box2d(ul_lonlat,lr_lonlat))
+    #mapnik.render_to_file(m,'test.png')
+    #print mapnik.save_map_to_string(m)
+    grid = mapnik.Grid(m.width,m.height)
+    mapnik.render_layer(m,grid,layer=0,fields=['Name'])
+    utf1 = grid.encode()
+    #open('test.json','w').write(json.dumps(grid.encode()))
+    eq_(utf1,point_expected,show_grids('point-sym',utf1,point_expected))
+
 
 if __name__ == "__main__":
+    setup()
     [eval(run)() for run in dir() if 'test_' in run]
