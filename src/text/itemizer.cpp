@@ -123,26 +123,17 @@ void text_itemizer::create_item_list()
         output.push_back(item);
         if (script_itr->limit == next_position)
         {
-            if (script_itr == script_end) {
-                //TODO: EXCEPTION
-                std::cerr << "Limit error\n";
-            }
+            assert(script_itr != script_end);
             script_itr++;
         }
         if (dir_itr->limit == next_position)
         {
-            if (dir_itr == dir_end) {
-                //TODO: EXCEPTION
-                std::cerr << "Limit error\n";
-            }
+            assert(dir_itr != dir_end);
             dir_itr++;
         }
         if (format_itr->limit == next_position)
         {
-            if (format_itr == format_end) {
-                //TODO: EXCEPTION
-                std::cerr << "Limit error\n";
-            }
+            assert(format_itr != format_end);
             format_itr++;
         }
         position = next_position;
