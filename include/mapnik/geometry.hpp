@@ -123,12 +123,12 @@ public:
 
     unsigned vertex(double* x, double* y) const
     {
-        return cont_.vertex(itr_++,x,y);
+        return cont_.get_vertex(itr_++,x,y);
     }
 
     unsigned vertex(std::size_t index, double* x, double* y) const
     {
-        return cont_.vertex(index, x, y);
+        return cont_.get_vertex(index, x, y);
     }
 
     void rewind(unsigned ) const

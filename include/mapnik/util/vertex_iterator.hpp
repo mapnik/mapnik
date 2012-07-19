@@ -63,7 +63,7 @@ namespace mapnik { namespace util {
 
         void increment()
         {
-            boost::get<0>(v_) = vertices_->vertex(pos_++, &boost::get<1>(v_), &boost::get<2>(v_));
+            boost::get<0>(v_) = vertices_->get_vertex(pos_++, &boost::get<1>(v_), &boost::get<2>(v_));
         }
 
         bool equal( vertex_iterator const& other) const
