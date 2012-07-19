@@ -60,7 +60,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
         geometry_type & geom = feature.get_geometry(i);
-        if (geom.num_points() > 2)
+        if (geom.size() > 2)
         {
             path_type path(t_,geom,prj_trans);
             ras_ptr->add_path(path);

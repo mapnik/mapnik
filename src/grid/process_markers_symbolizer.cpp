@@ -123,12 +123,12 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             BOOST_FOREACH( geometry_type & geom, feature.paths())
             {
                 // TODO - merge this code with point_symbolizer rendering
-                if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
+                if (placement_method == MARKER_POINT_PLACEMENT || geom.size() <= 1)
                 {
                     double x;
                     double y;
                     double z=0;
-                    geom.label_interior_position(&x, &y);
+                    label_interior_position(geom, x, y);
                     prj_trans.backward(x,y,z);
                     t_.forward(&x,&y);
                     geom_tr.transform(&x,&y);

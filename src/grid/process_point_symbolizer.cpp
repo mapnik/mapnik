@@ -26,6 +26,7 @@
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/geom_util.hpp>
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
@@ -73,9 +74,9 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
             double y;
             double z=0;
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                geom.label_position(&x, &y);
+                centroid(geom, x, y);
             else
-                geom.label_interior_position(&x, &y);
+                label_interior_position(geom, x, y);
 
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);

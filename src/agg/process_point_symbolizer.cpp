@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/geom_util.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/metawriter.hpp>
 #include <mapnik/marker.hpp>
@@ -81,9 +82,9 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             double y;
             double z=0;
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                geom.label_position(&x, &y);
+                centroid(geom, x, y);
             else
-                geom.label_interior_position(&x, &y);
+                label_interior_position(geom ,x, y);
 
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);

@@ -854,7 +854,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
 
     BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
-        if (geom.num_points() > 2)
+        if (geom.size() > 2)
         {
             converter.apply(geom);
         }
@@ -884,7 +884,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
     {
         geometry_type const& geom = feature.get_geometry(i);
 
-        if (geom.num_points() > 2)
+        if (geom.size() > 2)
         {
             boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
             boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
@@ -895,7 +895,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             geom.rewind(0);
             unsigned cm = geom.vertex(&x0, &y0);
 
-            for (unsigned j = 1; j < geom.num_points(); ++j)
+            for (unsigned j = 1; j < geom.size(); ++j)
             {
                 double x=0;
                 double y=0;
@@ -942,7 +942,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             }
 
             geom.rewind(0);
-            for (unsigned j = 0; j < geom.num_points(); ++j)
+            for (unsigned j = 0; j < geom.size(); ++j)
             {
                 double x, y;
                 unsigned cm = geom.vertex(&x, &y);
@@ -1008,7 +1008,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
 
     BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
-        if (geom.num_points() > 1)
+        if (geom.size() > 1)
         {
             converter.apply(geom);
         }
@@ -1158,9 +1158,9 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             double z = 0;
 
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                geom.label_position(&x, &y);
+                centroid(geom, x, y);
             else
-                geom.label_interior_position(&x, &y);
+                label_interior_position(geom, x, y);
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
@@ -1236,7 +1236,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     {
         geometry_type & geom = feature.get_geometry(i);
 
-        if (geom.num_points() > 1)
+        if (geom.size() > 1)
         {
             clipped_geometry_type clipped(geom);
             clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
@@ -1316,7 +1316,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
 
     BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
-        if (geom.num_points() > 2)
+        if (geom.size() > 2)
         {
             converter.apply(geom);
         }
@@ -1433,12 +1433,12 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
             {
                 geometry_type & geom = feature.get_geometry(i);
                 // TODO - merge this code with point_symbolizer rendering
-                if (placement_method == MARKER_POINT_PLACEMENT || geom.num_points() <= 1)
+                if (placement_method == MARKER_POINT_PLACEMENT || geom.size() <= 1)
                 {
                     double x;
                     double y;
                     double z=0;
-                    geom.label_interior_position(&x, &y);
+                    label_interior_position(geom, x, y);
                     prj_trans.backward(x,y,z);
                     t_.forward(&x,&y);
                     extent.re_center(x,y);
@@ -1448,9 +1448,8 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     {
                         render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, sym.get_opacity());
 
-                        // TODO - impl this for markers?
-                        //if (!sym.get_ignore_placement())
-                        //    detector_.insert(label_ext);
+                        if (!sym.get_ignore_placement())
+                            detector_.insert(extent);
                     }
                 }
                 else

@@ -200,13 +200,13 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                      {
                         mapnik::geometry_type & geom = feat->get_geometry(i);
                         path_type path(t,geom,prj_trans);
-                        if (geom.num_points() > 0)
+                        if (geom.size() > 0)
                         {
                            QPainterPath qpath;
                            double x,y;
                            path.vertex(&x,&y);
                            qpath.moveTo(x,y);
-                           for (unsigned j = 1; j < geom.num_points(); ++j)
+                           for (unsigned j = 1; j < geom.size(); ++j)
                            {
                               path.vertex(&x,&y);
                               qpath.lineTo(x,y);

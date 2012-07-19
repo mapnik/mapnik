@@ -105,7 +105,7 @@ public:
         *vertex   = y;
         ++pos_;
     }
-    unsigned get_vertex(unsigned pos,coord_type* x,coord_type* y) const
+    unsigned vertex(unsigned pos,coord_type* x,coord_type* y) const
     {
         if (pos >= pos_) return SEG_END;
         unsigned block = pos >> block_shift;

@@ -84,7 +84,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
     BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
-        if (geom.num_points() > 1)
+        if (geom.size() > 1)
         {
             converter.apply(geom);
         }
