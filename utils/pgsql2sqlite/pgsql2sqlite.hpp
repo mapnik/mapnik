@@ -281,8 +281,8 @@ void pgsql2sqlite(Connection conn,
                     if (oid == geometry_oid)
                     {
                         mapnik::Feature feat(ctx,pkid);
-                        geometry_utils::from_wkb(feat.paths(),buf,size,wkbGeneric);
-                        if (feat.num_geometries() > 0)
+                        if (geometry_utils::from_wkb(feat.paths(),buf,size,wkbGeneric)
+                            && feat.num_geometries() > 0)
                         {
                             geometry_type const& geom=feat.get_geometry(0);
                             box2d<double> bbox = geom.envelope();
