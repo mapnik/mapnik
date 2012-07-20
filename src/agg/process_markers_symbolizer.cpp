@@ -94,7 +94,7 @@ struct markers_rasterizer_dispatch
 
             double x,y;
             path.rewind(0);
-            label_interior_position(path, x, y);
+            label::interior_position(path, x, y);
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;

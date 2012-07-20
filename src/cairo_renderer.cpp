@@ -1160,7 +1160,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
                 label::centroid(geom, x, y);
             else
-                label_interior_position(geom, x, y);
+                label::interior_position(geom, x, y);
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
@@ -1438,7 +1438,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     double x;
                     double y;
                     double z=0;
-                    label_interior_position(geom, x, y);
+                    label::interior_position(geom, x, y);
                     prj_trans.backward(x,y,z);
                     t_.forward(&x,&y);
                     extent.re_center(x,y);

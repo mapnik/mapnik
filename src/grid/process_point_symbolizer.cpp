@@ -76,7 +76,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
                 label::centroid(geom, x, y);
             else
-                label_interior_position(geom, x, y);
+                label::interior_position(geom, x, y);
 
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);

@@ -42,7 +42,7 @@ public:
     {
         BOOST_FOREACH(geometry_type & geom, feature.paths())
         {
-            if (hit_test(geom, x_,y_,tol_))
+            if (label::hit_test(geom, x_,y_,tol_))
                 return true;
         }
         return false;

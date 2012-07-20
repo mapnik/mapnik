@@ -128,7 +128,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     double x;
                     double y;
                     double z=0;
-                    label_interior_position(geom, x, y);
+                    label::interior_position(geom, x, y);
                     prj_trans.backward(x,y,z);
                     t_.forward(&x,&y);
                     geom_tr.transform(&x,&y);
