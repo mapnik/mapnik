@@ -60,7 +60,6 @@ void text_layout::break_lines(double break_width)
     unsigned last_break_position = 0;
     for (unsigned i=0; i<text.length(); i++)
     {
-        std::cout << "i=" << i << "\n";
         //TODO: Char spacing
         std::map<unsigned, double>::const_iterator width_itr = width_map.find(i);
         if (width_itr != width_map.end())
@@ -80,7 +79,7 @@ void text_layout::break_lines(double break_width)
             //TODO: Add line
             std::cout << "Line to long ("<< current_line_length << ") at "<< i <<  " going to " << break_position << ". Last break was at " << last_break_position << "\n";
             last_break_position = break_position;
-            i = break_position;
+            i = break_position - 1;
 
             current_line_length = 0;
         }
