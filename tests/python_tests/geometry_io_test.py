@@ -59,7 +59,11 @@ wkbs = [
 def test_wkb_parsing():
     for wkb in wkbs:
         path = mapnik.Path()
-        path.add_wkb(unhexlify(wkb[2]))
+        success = path.add_wkb(unhexlify(wkb[2]))
+        if wkb[0] > 0:
+            eq_(success,True)
+        else:
+            eq_(success,False)
         eq_(wkb[0],len(path))
 
 def compare_wkb_from_wkt(wkt,num=None):
