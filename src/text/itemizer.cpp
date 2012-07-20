@@ -164,7 +164,7 @@ void text_itemizer::create_item_list()
                 output.push_back(item);
             } else
             {
-                output.insert(rtl_insertion_point, item);
+                rtl_insertion_point = output.insert(rtl_insertion_point, item);
             }
             if (script_itr->end == position) script_itr++;
             if (format_itr->end == position) format_itr++;
