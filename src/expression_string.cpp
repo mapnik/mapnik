@@ -50,6 +50,11 @@ struct expression_string : boost::static_visitor<void>
         str_ += "]";
     }
 
+    void operator() (geometry_type_attribute const& attr) const
+    {
+        str_ += "[mapnik::geometry_type]";
+    }
+
     template <typename Tag>
     void operator() (binary_node<Tag> const& x) const
     {

@@ -50,6 +50,10 @@ struct evaluate : boost::static_visitor<T1>
         return attr.value<value_type,feature_type>(feature_);
     }
 
+    value_type operator() (geometry_type_attribute const& attr) const
+    {
+        return attr.value<value_type,feature_type>(feature_);
+    }
 
     value_type operator() (binary_node<tags::logical_and> const & x) const
     {

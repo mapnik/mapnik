@@ -29,7 +29,6 @@
 
 // boost
 #include <boost/version.hpp>
-#include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/concept_check.hpp>
 
@@ -123,6 +122,18 @@ struct regex_replace_impl
     mapnik::transcoder const& tr_;
 };
 
+struct geometry_types : qi::symbols<char,int>
+{
+    geometry_types()
+    {
+        add
+            ("point",1)
+            ("line", 2)
+            ("polygon",3)
+            ;
+    }
+};
+
 template <typename Iterator>
 struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 {
@@ -150,7 +161,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
         using qi::hex;
         using qi::omit;
         using standard_wide::char_;
-
+        using standard_wide::no_case;
         expr = logical_expr.alias();
 
         logical_expr = not_expr [_val = _1]
@@ -221,10 +232,12 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 
         primary_expr = strict_double [_val = _1]
             | int_ [_val = _1]
-            | lit("true") [_val = true]
-            | lit("false") [_val = false]
-            | lit("null") [_val = value_null() ]
+            | no_case[lit("true")] [_val = true]
+            | no_case[lit("false")] [_val = false]
+            | no_case[lit("null")] [_val = value_null() ]
+            | no_case[geom_type][_val = _1 ]
             | ustring [_val = unicode_(_1) ]
+            | lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
             | attr [_val = construct<mapnik::attribute>( _1 ) ]
             | '(' >> expr [_val = _1 ] >> ')'
             ;
@@ -270,6 +283,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::rule<Iterator, std::string(), qi::locals<char> > ustring;
     qi::symbols<char const, char const> unesc_char;
     qi::rule<Iterator, char() > quote_char;
+    geometry_types geom_type;
 };
 
 } // namespace
