@@ -22,6 +22,7 @@
 //mapnik
 #include <mapnik/text/itemizer.hpp>
 #include <mapnik/text/scrptrun.hpp>
+#include <mapnik/debug.hpp>
 
 // stl
 #include <iostream>
@@ -37,14 +38,18 @@ text_itemizer::text_itemizer() : text(), format_runs(), direction_runs(), script
 
 void text_itemizer::add_text(UnicodeString str, char_properties_ptr format)
 {
+    unsigned start = text.length();
     text += str;
-    format_runs.push_back(format_run_t(format, text.length()));
+    format_runs.push_back(format_run_t(format, start, text.length()));
 }
 
-std::list<text_item> const& text_itemizer::itemize()
+std::list<text_item> const& text_itemizer::itemize(unsigned start, unsigned end)
 {
+    if (end == 0) {
+        end = text.length();
+    }
     // format itemiziation is done by add_text()
-    itemize_direction();
+    itemize_direction(start, end);
     itemize_script();
     std::cout << "Itemizer: direction: "<< direction_runs.size() << " script: " << script_runs.size() << "\n";
     create_item_list();
@@ -58,85 +63,112 @@ void text_itemizer::clear()
     format_runs.clear();
 }
 
-void text_itemizer::itemize_direction()
+void text_itemizer::itemize_direction(unsigned start, unsigned end)
 {
     direction_runs.clear();
     UErrorCode error = U_ZERO_ERROR;
-    int32_t length = text.length();
+    int32_t length = end - start;
     UBiDi *bidi = ubidi_openSized(length, 0, &error);
-    ubidi_setPara(bidi, text.getBuffer(), length, UBIDI_DEFAULT_LTR, 0, &error);
+    if (!bidi || U_FAILURE(error))
+    {
+        MAPNIK_LOG_ERROR(text_itemizer) << "Failed to create bidi object: " << u_errorName(error) << "\n";
+        return;
+    }
+    ubidi_setPara(bidi, text.getBuffer() + start, length, UBIDI_DEFAULT_LTR, 0, &error);
     if (U_SUCCESS(error))
     {
         UBiDiDirection direction = ubidi_getDirection(bidi);
         if(direction != UBIDI_MIXED)
         {
-            direction_runs.push_back(direction_run_t(direction, length));
+            direction_runs.push_back(direction_run_t(direction, start, end));
         } else
         {
             // mixed-directional
             int32_t count = ubidi_countRuns(bidi, &error);
             if(U_SUCCESS(error))
             {
-                int32_t position = 0;
                 for(int i=0; i<count; i++)
                 {
                     int32_t length;
-                    direction = ubidi_getVisualRun(bidi, i, 0, &length);
-                    std::cout << "visual run" <<  direction << " length:" << length << "\n";
-                    position += length;
-                    direction_runs.push_back(direction_run_t(direction, position));
+                    int32_t run_start;
+                    direction = ubidi_getVisualRun(bidi, i, &run_start, &length);
+                    run_start += start; //Add offset to compensate offset in setPara
+                    std::cout << "visual run, rtl:" << direction
+                              << " start:" << start << " length:" << length << "\n";
+                    direction_runs.push_back(direction_run_t(direction, start, start+length));
                 }
             }
         }
     } else{
-        std::cerr << "ERROR:" << u_errorName(error) << "\n"; //TODO: Exception
+        MAPNIK_LOG_ERROR(text_itemizer) << "ICU error: " << u_errorName(error) << "\n"; //TODO: Exception
     }
-    if (bidi) ubidi_close(bidi);
+    ubidi_close(bidi);
 }
 
 void text_itemizer::itemize_script()
 {
-    script_runs.clear();
-
+    if (!script_runs.empty()) return; //Already done
 
     ScriptRun runs(text.getBuffer(), text.length());
-    while (runs.next()) {
-        script_runs.push_back(script_run_t(runs.getScriptCode(), runs.getScriptEnd()));
+    while (runs.next())
+    {
+        script_runs.push_back(script_run_t(runs.getScriptCode(), runs.getScriptStart(), runs.getScriptEnd()));
     }
+}
+
+template <typename T>
+typename T::const_iterator text_itemizer::find_run(T const& list, unsigned position)
+{
+    typename T::const_iterator itr = list.begin(), end = list.end();
+    for (;itr!=end; itr++)
+    {
+        // end is the first character not included in text range!
+        if (itr->start <= position && itr->end > position) return itr;
+    }
+    return itr;
 }
 
 void text_itemizer::create_item_list()
 {
-    int32_t position = 0;
-    std::list<script_run_t>::const_iterator script_itr = script_runs.begin(), script_end = script_runs.end();
-    std::list<direction_run_t>::const_iterator dir_itr = direction_runs.begin(), dir_end = direction_runs.end();
-    std::list<format_run_t>::const_iterator format_itr = format_runs.begin(), format_end = format_runs.end();
-    while (position < text.length())
+    /* This function iterates over direction runs in visual order and splits them if neccessary.
+     * Split RTL runs are processed in reverse order to keep glyphs in correct order.
+     *
+     * logical      123 | 456789
+     * LTR visual   123 | 456789
+     * RTL visual   987654 | 321
+     * Glyphs within a single run are reversed by the shaper.
+     */
+    output.clear();
+    direction_run_list::const_iterator dir_itr = direction_runs.begin(), dir_end = direction_runs.end();
+    for (; dir_itr != dir_end; dir_itr++)
     {
-        unsigned next_position = std::min(script_itr->limit, std::min(dir_itr->limit, format_itr->limit));
-        text_item item;
-        item.start = position;
-        item.end = next_position;
-        item.format = format_itr->data;
-        item.script = script_itr->data;
-        item.rtl = dir_itr->data;
-        output.push_back(item);
-        if (script_itr->limit == next_position)
+        unsigned position = dir_itr->start;
+        unsigned end = dir_itr->end;
+        std::list<text_item>::iterator rtl_insertion_point = output.end();
+        // Find first script and format run
+        format_run_list::const_iterator format_itr = find_run(format_runs, position);
+        script_run_list::const_iterator script_itr = find_run(script_runs, position);
+        while (position < end)
         {
-            assert(script_itr != script_end);
-            script_itr++;
+            assert(script_itr != script_runs.end());
+            assert(format_itr != format_runs.end());
+            text_item item;
+            item.start = position;
+            position = std::min(script_itr->end, std::min(format_itr->end, end));
+            item.end = position;
+            item.format = format_itr->data;
+            item.script = script_itr->data;
+            item.rtl = dir_itr->data;
+            if (dir_itr->data == UBIDI_LTR)
+            {
+                output.push_back(item);
+            } else
+            {
+                output.insert(rtl_insertion_point, item);
+            }
+            if (script_itr->end == position) script_itr++;
+            if (format_itr->end == position) format_itr++;
         }
-        if (dir_itr->limit == next_position)
-        {
-            assert(dir_itr != dir_end);
-            dir_itr++;
-        }
-        if (format_itr->limit == next_position)
-        {
-            assert(format_itr != format_end);
-            format_itr++;
-        }
-        position = next_position;
     }
 }
 } //ns mapnik

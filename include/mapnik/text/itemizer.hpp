@@ -61,27 +61,36 @@ class text_itemizer
 public:
     text_itemizer();
     void add_text(UnicodeString str, char_properties_ptr format);
-    std::list<text_item> const& itemize();
+    std::list<text_item> const& itemize(unsigned start=0, unsigned end=0);
     void clear();
     UnicodeString const& get_text() { return text; }
 private:
     template<typename T> struct run
     {
-        run(T data, unsigned limit) :  limit(limit), data(data){}
-        unsigned limit;
+        run(T data, unsigned start, unsigned end) :  start(start), end(end), data(data){}
+        unsigned start;
+        unsigned end;
         T data;
     };
     typedef run<char_properties_ptr> format_run_t;
     typedef run<UBiDiDirection> direction_run_t;
     typedef run<UScriptCode> script_run_t;
+    typedef std::list<format_run_t> format_run_list;
+    typedef std::list<script_run_t> script_run_list;
+    typedef std::list<direction_run_t> direction_run_list;
     UnicodeString text;
-    std::list<format_run_t> format_runs;
-    std::list<direction_run_t> direction_runs;
-    std::list<script_run_t> script_runs;
-    void itemize_direction();
+    /// Format runs are always sorted by char index
+    format_run_list format_runs;
+    /// Directions runs are always in visual order! This is different from
+    /// format and script runs!
+    direction_run_list direction_runs;
+    /// Script runs are always sorted by char index
+    script_run_list script_runs;
+    void itemize_direction(unsigned start, unsigned end);
     void itemize_script();
     void create_item_list();
     std::list<text_item> output;
+    template <typename T> typename T::const_iterator find_run(T const& list, unsigned position);
 };
 } //ns mapnik
 
