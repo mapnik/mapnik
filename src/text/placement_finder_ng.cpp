@@ -66,7 +66,6 @@ bool glyph_positions::next()
     if (current_ >= layout_->size()) return false;
     glyph_info glyph = layout_->get_glyphs()[current_];
     current_position_.x += glyph.width + glyph.format->character_spacing;
-    std::cout << "width:" << glyph.width << "\n";
     current_++;
     if (current_ >= layout_->size()) return false;
     return true;
@@ -87,7 +86,6 @@ glyph_info const& glyph_positions::get_glyph() const
 
 pixel_position glyph_positions::get_position() const
 {
-    std::cout << "current_position_.x:" << current_position_.x << "\n";
     return current_position_;
 }
 
