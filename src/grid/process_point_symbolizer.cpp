@@ -74,7 +74,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
             double y;
             double z=0;
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                centroid(geom, x, y);
+                label::centroid(geom, x, y);
             else
                 label_interior_position(geom, x, y);
 
@@ -105,4 +105,3 @@ template void grid_renderer<grid>::process(point_symbolizer const&,
                                            proj_transform const&);
 
 }
-

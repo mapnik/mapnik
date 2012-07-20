@@ -263,6 +263,8 @@ bool middle_point(PathType & path, double & x, double & y)
     return true;
 }
 
+namespace label {
+
 template <typename PathType>
 bool centroid(PathType & path, double & x, double & y)
 {
@@ -347,10 +349,10 @@ bool hit_test(PathType & path, double x, double y, double tol)
 }
 
 template <typename PathType>
-void label_interior_position(PathType & path, double & x, double & y)
+void interior_position(PathType & path, double & x, double & y)
 {
     // start with the centroid
-    centroid(path, x,y);
+    label::centroid(path, x,y);
 
     // if we are not a polygon, or the default is within the polygon we are done
     if (hit_test(path,x,y,0.001))
@@ -417,6 +419,6 @@ void label_interior_position(PathType & path, double & x, double & y)
     }
 }
 
-}
+}}
 
 #endif // MAPNIK_GEOM_UTIL_HPP
