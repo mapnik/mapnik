@@ -313,7 +313,7 @@ void postgis_datasource::bind() const
             {
                 srid_ = -1;
 
-                MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Table " << table_ << " is using SRID=-1";
+                MAPNIK_LOG_DEBUG(postgis) << "postgis_datasource: Table " << table_ << " is using SRID=" << srid_;
             }
 
             // At this point the geometry_field may still not be known
@@ -439,7 +439,7 @@ postgis_datasource::~postgis_datasource()
     }
 }
 
-std::string postgis_datasource::name()
+const char * postgis_datasource::name()
 {
     return "postgis";
 }

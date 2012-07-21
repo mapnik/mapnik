@@ -126,7 +126,7 @@ protected:
     mutable bool is_bound_;
 };
 
-typedef std::string datasource_name();
+typedef const char * datasource_name();
 typedef datasource* create_ds(const parameters& params, bool bind);
 typedef void destroy_ds(datasource *ds);
 
@@ -142,7 +142,7 @@ public:
 typedef boost::shared_ptr<datasource> datasource_ptr;
 
 #define DATASOURCE_PLUGIN(classname)                                    \
-    extern "C" MAPNIK_EXP std::string datasource_name()                 \
+    extern "C" MAPNIK_EXP const char * datasource_name()                 \
     {                                                                   \
         return classname::name();                                       \
     }                                                                   \

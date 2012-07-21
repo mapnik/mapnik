@@ -333,7 +333,7 @@ void ogr_datasource::bind() const
     is_bound_ = true;
 }
 
-std::string ogr_datasource::name()
+const char * ogr_datasource::name()
 {
     return "ogr";
 }

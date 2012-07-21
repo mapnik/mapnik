@@ -159,7 +159,7 @@ mapnik::datasource::datasource_t raster_datasource::type() const
     return datasource::Raster;
 }
 
-std::string raster_datasource::name()
+const char * raster_datasource::name()
 {
     return "raster";
 }

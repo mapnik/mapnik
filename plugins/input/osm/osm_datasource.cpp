@@ -130,7 +130,7 @@ osm_datasource::~osm_datasource()
     //delete osm_data_;
 }
 
-std::string osm_datasource::name()
+const char * osm_datasource::name()
 {
     return "osm";
 }

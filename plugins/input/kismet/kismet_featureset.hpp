@@ -49,7 +49,6 @@ public:
 private:
     std::list<kismet_network_data> const& knd_list_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
-    mapnik::wkbFormat format_;
     int feature_id_;
     std::list<kismet_network_data>::const_iterator knd_list_it;
     mapnik::projection source_;

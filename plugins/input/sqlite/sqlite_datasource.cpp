@@ -473,7 +473,7 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
     }
 }
 
-std::string sqlite_datasource::name()
+const char * sqlite_datasource::name()
 {
     return "sqlite";
 }

@@ -122,7 +122,7 @@ kismet_datasource::~kismet_datasource()
 {
 }
 
-std::string kismet_datasource::name()
+const char * kismet_datasource::name()
 {
     return "kismet";
 }

@@ -852,7 +852,7 @@ void csv_datasource::parse_csv(T& stream,
     }
 }
 
-std::string csv_datasource::name()
+const char * csv_datasource::name()
 {
     return "csv";
 }

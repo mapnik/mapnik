@@ -106,11 +106,9 @@ void geojson_datasource::bind() const
 
 geojson_datasource::~geojson_datasource() { }
 
-std::string const geojson_datasource::name_="geojson";
-
-std::string geojson_datasource::name()
+const char * geojson_datasource::name()
 {
-    return name_;
+    return "geojson";
 }
 
 boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry_type() const 

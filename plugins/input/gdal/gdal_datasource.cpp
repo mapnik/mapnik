@@ -200,7 +200,7 @@ datasource::datasource_t gdal_datasource::type() const
     return datasource::Raster;
 }
 
-std::string gdal_datasource::name()
+const char * gdal_datasource::name()
 {
     return "gdal";
 }
