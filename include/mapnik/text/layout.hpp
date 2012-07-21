@@ -38,27 +38,27 @@
 
 namespace mapnik
 {
-#if 0
-/** This class stores all format_runs in a line in left to right order.
+/** This class stores all glyphs of a line in left to right order.
  *
  * It can be used for rendering but no text processing (like line breaking)
  * should be done!
- * Glyphs are stored in runs with the same format.
  */
 class text_line
 {
 public:
     text_line();
-    std::vector<format_run_ptr> const& runs() const { return runs_; }
-    void add_run(format_run_ptr run);
+    typedef std::vector<glyph_info> glyph_vector;
+    glyph_vector const& get_glyphs() const { return glyphs_; }
+    void add_glyph(glyph_info const& glyph);
+    void reserve(glyph_vector::size_type length);
 private:
-    std::vector<format_run_ptr> runs_;
-    double max_line_height; //Includes line spacing
-    double max_text_height; //Height of the largest format run in this run.
+    glyph_vector glyphs_;
+    double line_height_; //Includes line spacing
+    double text_height_; //Height of the largest format run in this run.
+    double width_;
 };
 
 typedef boost::shared_ptr<text_line> text_line_ptr;
-#endif
 
 class text_layout
 {
@@ -69,27 +69,26 @@ public:
         itemizer.add_text(str, format);
     }
 
-    void break_lines(double break_width);
-    void shape_text();
-    void clear();
-    unsigned size() const { return glyphs_.size(); }
+    void layout(double break_width);
 
-    typedef std::vector<glyph_info> glyph_vector;
-    glyph_vector const& get_glyphs() const { return glyphs_; }
-    /** Get the text width. Returns 0 if shape_text() wasn't called before.
-     * If break_lines was already called the width of the longest line is returned.
-     **/
-    double get_width() const { return width_; }
+    void clear();
 
 private:
+    void break_line(text_line_ptr line, double break_width);
+    void shape_text(text_line_ptr line, unsigned start, unsigned end);
+
+    //input
+    face_manager_freetype &font_manager_;
+
+    //processing
     text_itemizer itemizer;
-//    std::vector<text_line_ptr> lines_;
     /// Maps char index (UTF-16) to width. If multiple glyphs map to the same char the sum of all widths is used
     std::map<unsigned, double> width_map;
-    glyph_vector glyphs_;
-    face_manager_freetype &font_manager_;
     double total_width_;
-    double width_;
+
+
+    //output
+    std::vector<text_line_ptr> lines_;
 };
 }
 

@@ -262,8 +262,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         return false;
     }
     placement_->properties.process(*layout_, feature_);
-    layout_->shape_text();
-    layout_->break_lines(placement_->properties.wrap_width);
+    layout_->layout(placement_->properties.wrap_width);
 
     //TODO
 //    info_ = &(text_.get_string_info());

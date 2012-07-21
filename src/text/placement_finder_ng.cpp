@@ -58,10 +58,12 @@ void glyph_positions::point_placement(pixel_position base_point)
 
 bool glyph_positions::next()
 {
+    return false;
+#if 0
     if (current_ == -1)
     {
         current_ = 0;
-        return layout_->size();
+        return (bool)layout_->size();
     }
     if (current_ >= layout_->size()) return false;
     glyph_info glyph = layout_->get_glyphs()[current_];
@@ -69,6 +71,7 @@ bool glyph_positions::next()
     current_++;
     if (current_ >= layout_->size()) return false;
     return true;
+#endif
 }
 
 void glyph_positions::rewind()
@@ -79,9 +82,9 @@ void glyph_positions::rewind()
 
 glyph_info const& glyph_positions::get_glyph() const
 {
-    assert(layout_);
-    assert(current_ < layout_->size());
-    return layout_->get_glyphs()[current_];
+//    assert(layout_);
+//    assert(current_ < layout_->size());
+//    return layout_->get_glyphs()[current_];
 }
 
 pixel_position glyph_positions::get_position() const

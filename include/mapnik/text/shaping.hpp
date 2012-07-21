@@ -37,10 +37,10 @@ extern "C"
 namespace mapnik
 {
 
+/** This class is a thin wrapper around HarfBuzz. */
 class text_shaping
 {
 public:
-    //TODO: Get font file from font name
     text_shaping(FT_Face face);
     ~text_shaping();
 
