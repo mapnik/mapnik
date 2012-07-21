@@ -103,6 +103,7 @@ source = Split(
     color.cpp
     conversions.cpp
     image_compositing.cpp
+    image_scaling.cpp
     box2d.cpp
     building_symbolizer.cpp
     datasource_cache.cpp
@@ -148,7 +149,6 @@ source = Split(
     stroke.cpp
     symbolizer.cpp
     symbolizer_helpers.cpp
-    arrow.cpp
     unicode.cpp
     markers_symbolizer.cpp
     metawriter.cpp

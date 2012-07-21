@@ -174,6 +174,7 @@ typedef mapnik::value value_type;
 typedef boost::variant <
 value_type,
 attribute,
+geometry_type_attribute,
 boost::recursive_wrapper<unary_node<tags::negate> >,
 boost::recursive_wrapper<binary_node<tags::plus> >,
 boost::recursive_wrapper<binary_node<tags::minus> >,

@@ -46,7 +46,7 @@ class registry : public singleton<registry, CreateStatic>,
 public:
     registry();
     ~registry() {}
-    void register_name(std::string name, from_xml_function_ptr ptr, bool overwrite=false);
+    void register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite=false);
     node_ptr from_xml(xml_node const& xml);
 private:
     std::map<std::string, from_xml_function_ptr> map_;

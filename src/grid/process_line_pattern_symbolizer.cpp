@@ -64,7 +64,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
         geometry_type & geom = feature.get_geometry(i);
-        if (geom.num_points() > 1)
+        if (geom.size() > 1)
         {
             path_type path(t_,geom,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
@@ -89,4 +89,3 @@ template void grid_renderer<grid>::process(line_pattern_symbolizer const&,
                                            proj_transform const&);
 
 }
-

@@ -7,11 +7,13 @@ namespace mapnik
 {
 
 template <typename T>
-text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, composite_mode_e comp_op)
+text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, composite_mode_e comp_op, double scale_factor)
     : pixmap_(pixmap),
       font_manager_(font_manager_),
       stroker_(*(font_manager_.get_stroker())),
-      comp_op_(comp_op) {}
+      comp_op_(comp_op),
+      scale_factor_(scale_factor)
+{}
 
 
 template <typename T>
@@ -39,7 +41,7 @@ void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
     while (pos->next())
     {
         glyph_info const& glyph = pos->get_glyph();
-        glyph.face->set_character_sizes(glyph.format->text_size); //TODO: Optimize this?
+        glyph.face->set_character_sizes(glyph.format->text_size * scale_factor_); //TODO: Optimize this?
 
         pixel_position p = pos->get_position();
         pen.x = int((p.x +glyph.offset_x) * 64);

@@ -53,13 +53,11 @@ using mapnik::feature_factory;
 
 template <typename filterT>
 ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & ctx,
-                                                    OGRDataSource & dataset,
                                                     OGRLayer & layer,
                                                     filterT const& filter,
                                                     std::string const& index_file,
                                                     std::string const& encoding)
     : ctx_(ctx),
-      dataset_(dataset),
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       filter_(filter),

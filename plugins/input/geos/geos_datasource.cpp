@@ -226,7 +226,7 @@ void geos_datasource::bind() const
     is_bound_ = true;
 }
 
-std::string geos_datasource::name()
+const char * geos_datasource::name()
 {
     return "geos";
 }

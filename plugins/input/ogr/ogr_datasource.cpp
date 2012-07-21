@@ -333,7 +333,7 @@ void ogr_datasource::bind() const
     is_bound_ = true;
 }
 
-std::string ogr_datasource::name()
+const char * ogr_datasource::name()
 {
     return "ogr";
 }
@@ -502,7 +502,6 @@ featureset_ptr ogr_datasource::features(query const& q) const
             filter_in_box filter(q.get_bbox());
 
             return featureset_ptr(new ogr_index_featureset<filter_in_box>(ctx,
-                                                                          *dataset_,
                                                                           *layer,
                                                                           filter,
                                                                           index_name_,
@@ -510,8 +509,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
         }
         else
         {
-            return featureset_ptr(new ogr_featureset (ctx,
-                                                      *dataset_,
+            return featureset_ptr(new ogr_featureset(ctx,
                                                       *layer,
                                                       q.get_bbox(),
                                                       desc_.get_encoding()));
@@ -546,7 +544,6 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
             filter_at_point filter(pt);
 
             return featureset_ptr(new ogr_index_featureset<filter_at_point> (ctx,
-                                                                             *dataset_,
                                                                              *layer,
                                                                              filter,
                                                                              index_name_,
@@ -559,7 +556,6 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt) const
             point.setY (pt.y);
 
             return featureset_ptr(new ogr_featureset (ctx,
-                                                      *dataset_,
                                                       *layer,
                                                       point,
                                                       desc_.get_encoding()));

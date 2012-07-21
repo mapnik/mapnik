@@ -33,6 +33,8 @@ except:
     HAS_DISTUTILS = False
 
 
+py3 = None
+
 # local file to hold custom user configuration variables
 # Todo check timestamp, reload if changed?
 SCONS_LOCAL_CONFIG = 'config.py'
@@ -86,7 +88,7 @@ pretty_dep_names = {
 # Core plugin build configuration
 # opts.AddVariables still hardcoded however...
 PLUGINS = { # plugins with external dependencies
-            # configured by calling project, henche 'path':None
+            # configured by calling project, hence 'path':None
             'postgis': {'default':True,'path':None,'inc':'libpq-fe.h','lib':'pq','lang':'C'},
             'gdal':    {'default':True,'path':None,'inc':'gdal_priv.h','lib':'gdal','lang':'C++'},
             'ogr':     {'default':True,'path':None,'inc':'ogrsf_frmts.h','lib':'gdal','lang':'C++'},
@@ -110,6 +112,8 @@ PLUGINS = { # plugins with external dependencies
 
 #### SCons build options and initial setup ####
 env = Environment(ENV=os.environ)
+env.Decider('MD5-timestamp')
+env.SourceCode(".", None)
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -236,8 +240,6 @@ def sort_paths(items,priority):
 
 if platform.dist()[0] in ('Ubuntu','debian'):
     LIBDIR_SCHEMA='lib'
-elif platform.uname()[4] == 'x86_64' and platform.system() == 'Linux':
-    LIBDIR_SCHEMA='lib64'
 elif platform.uname()[4] == 'ppc64':
     LIBDIR_SCHEMA='lib64'
 else:
@@ -303,7 +305,7 @@ opts.AddVariables(
     ('BOOST_TOOLKIT','Specify boost toolkit, e.g., gcc41.','',False),
     ('BOOST_ABI', 'Specify boost ABI, e.g., d.','',False),
     ('BOOST_VERSION','Specify boost version, e.g., 1_35.','',False),
-    ('BOOST_PYTHON_LIB','Specify library name to specific Boost Python lib (e.g. "boost_python-py26")',''),
+    ('BOOST_PYTHON_LIB','Specify library name to specific Boost Python lib (e.g. "boost_python-py26")','boost_python'),
 
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
@@ -936,6 +938,8 @@ if not preconfigured:
                     color_print(1,"SCons CONFIG not found: '%s'" % conf)
             # Recreate the base environment using modified `opts`
             env = Environment(ENV=os.environ,options=opts)
+            env.Decider('MD5-timestamp')
+            env.SourceCode(".", None)
             env['USE_CONFIG'] = True
     else:
         color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')
@@ -1151,6 +1155,7 @@ if not preconfigured:
     # if the user is not setting custom boost configuration
     # enforce boost version greater than or equal to BOOST_MIN_VERSION
     if not conf.CheckBoost(BOOST_MIN_VERSION):
+        color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
         color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
         if not env['BOOST_VERSION']:
             env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
@@ -1331,11 +1336,73 @@ if not preconfigured:
         color_print(4,'Not building with cairo support, pass CAIRO=True to enable')
 
     if 'python' in env['BINDINGS']:
-        # checklibwithheader does not work for boost_python since we can't feed it
-        # multiple header files, so we fall back on a simple check for boost_python headers
+        if not os.access(env['PYTHON'], os.X_OK):
+            color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
+            Exit(1)
+
+        py3 = 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
+
+        if py3:
+            sys_prefix = '''%s -c "import sys; print(sys.prefix)"''' % env['PYTHON']
+        else:
+            sys_prefix = '''%s -c "import sys; print sys.prefix"''' % env['PYTHON']
+        env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
+
+        if HAS_DISTUTILS:
+            if py3:
+                sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print(get_python_version())"''' % env['PYTHON']
+            else:
+                sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print get_python_version()"''' % env['PYTHON']
+            env['PYTHON_VERSION'] = call(sys_version)
+
+            if py3:
+                py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())"''' % env['PYTHON']
+            else:
+                py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc()"''' % env['PYTHON']
+            env['PYTHON_INCLUDES'] = call(py_includes)
+
+            # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
+            if py3:
+                site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True))"''' % env['PYTHON']
+            else:
+                site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)"''' % env['PYTHON']
+            env['PYTHON_SITE_PACKAGES'] = call(site_packages)
+        else:
+            env['PYTHON_SYS_PREFIX'] = os.popen('''%s -c "import sys; print sys.prefix"''' % env['PYTHON']).read().strip()
+            env['PYTHON_VERSION'] = os.popen('''%s -c "import sys; print sys.version"''' % env['PYTHON']).read()[0:3]
+            env['PYTHON_INCLUDES'] = env['PYTHON_SYS_PREFIX'] + '/include/python' + env['PYTHON_VERSION']
+            env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SYS_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
+
+        # if user-requested custom prefix fall back to manual concatenation for building subdirectories
+        if env['PYTHON_PREFIX']:
+            py_relative_install = env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
+            env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_PREFIX'] + os.path.sep +  py_relative_install
+        else:
+            env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SITE_PACKAGES']
+
+        if py3:
+            is_64_bit = '''%s -c "import sys; print(sys.maxsize == 9223372036854775807)"''' % env['PYTHON']
+        else:
+            is_64_bit = '''%s -c "import sys; print sys.maxint == 9223372036854775807"''' % env['PYTHON']
+
+        if is_64_bit:
+            env['PYTHON_IS_64BIT'] = True
+        else:
+            env['PYTHON_IS_64BIT'] = False
+
+        if py3 and env['BOOST_PYTHON_LIB'] == 'boost_python':
+            env['BOOST_PYTHON_LIB'] = 'boost_python3%s' % env['BOOST_APPEND']
+        elif env['BOOST_PYTHON_LIB'] == 'boost_python':
+            env['BOOST_PYTHON_LIB'] = 'boost_python%s' % env['BOOST_APPEND']
+
         if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
             color_print(1,'Could not find required header files for boost python')
             env['MISSING_DEPS'].append('boost python')
+
+        if not conf.CheckLibWithHeader(libs=[env['BOOST_PYTHON_LIB'],'python%s' % env['PYTHON_VERSION']], header='boost/python/detail/config.hpp', language='C++'):
+            color_print(1, 'Could not find library "%s" for boost python bindings' % env['BOOST_PYTHON_LIB'])
+            # failing on launchpad, so let's make it a warning for now
+            #env['MISSING_DEPS'].append('boost python')
 
         if env['CAIRO']:
             if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
@@ -1470,62 +1537,7 @@ if not preconfigured:
                 env.Append(CXXFLAGS = '-fcatch-undefined-behavior -ftrapv -fwrapv')
 
         if 'python' in env['BINDINGS']:
-            if not os.access(env['PYTHON'], os.X_OK):
-                color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
-                Exit(1)
-
-            py3 = 'True' in os.popen('''%s -c "import sys as s;s.stdout.write(str(s.version_info[0] == 3))"''' % env['PYTHON']).read().strip()
-
-            if py3:
-                sys_prefix = '''%s -c "import sys; print(sys.prefix)"''' % env['PYTHON']
-            else:
-                sys_prefix = '''%s -c "import sys; print sys.prefix"''' % env['PYTHON']
-            env['PYTHON_SYS_PREFIX'] = call(sys_prefix)
-
-            if HAS_DISTUTILS:
-                if py3:
-                    sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print(get_python_version())"''' % env['PYTHON']
-                else:
-                    sys_version = '''%s -c "from distutils.sysconfig import get_python_version; print get_python_version()"''' % env['PYTHON']
-                env['PYTHON_VERSION'] = call(sys_version)
-
-                if py3:
-                    py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())"''' % env['PYTHON']
-                else:
-                    py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc()"''' % env['PYTHON']
-                env['PYTHON_INCLUDES'] = call(py_includes)
-
-                # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
-                if py3:
-                    site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True))"''' % env['PYTHON']
-                else:
-                    site_packages = '''%s -c "from distutils.sysconfig import get_python_lib; print get_python_lib(plat_specific=True)"''' % env['PYTHON']
-                env['PYTHON_SITE_PACKAGES'] = call(site_packages)
-            else:
-                env['PYTHON_SYS_PREFIX'] = os.popen('''%s -c "import sys; print sys.prefix"''' % env['PYTHON']).read().strip()
-                env['PYTHON_VERSION'] = os.popen('''%s -c "import sys; print sys.version"''' % env['PYTHON']).read()[0:3]
-                env['PYTHON_INCLUDES'] = env['PYTHON_SYS_PREFIX'] + '/include/python' + env['PYTHON_VERSION']
-                env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SYS_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
-
-            # if user-requested custom prefix fall back to manual concatenation for building subdirectories
-            if env['PYTHON_PREFIX']:
-                py_relative_install = env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
-                env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_PREFIX'] + os.path.sep +  py_relative_install
-            else:
-                env['PYTHON_INSTALL_LOCATION'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SITE_PACKAGES']
-
-            if py3:
-                is_64_bit = '''%s -c "import sys; print(sys.maxsize == 9223372036854775807)"''' % env['PYTHON']
-            else:
-                is_64_bit = '''%s -c "import sys; print sys.maxint == 9223372036854775807"''' % env['PYTHON']
-
-            if is_64_bit:
-                env['PYTHON_IS_64BIT'] = True
-            else:
-                env['PYTHON_IS_64BIT'] = False
-
             majver, minver = env['PYTHON_VERSION'].split('.')
-
             # we don't want the includes it in the main environment...
             # as they are later set in the python build.py
             # ugly hack needed until we have env specific conf
@@ -1539,11 +1551,6 @@ if not preconfigured:
             if (int(majver), int(minver)) < (2, 2):
                 color_print(1,"Python version 2.2 or greater required")
                 Exit(1)
-
-            if env['BOOST_PYTHON_LIB']:
-                if not conf.CheckLibWithHeader(libs=[env['BOOST_PYTHON_LIB']], header='boost/python/detail/config.hpp', language='C++'):
-                    color_print(1, 'Could not find library %s for boost python' % env['BOOST_PYTHON_LIB'])
-                    Exit(1)
 
             color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
             color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
@@ -1661,7 +1668,6 @@ if not HELP_REQUESTED:
         # But let's also cache implicit deps...
         EnsureSConsVersion(0,98)
         SetOption('implicit_cache', 1)
-        env.Decider('MD5-timestamp')
         SetOption('max_drift', 1)
 
     else:

@@ -76,7 +76,7 @@ public:
         // try to determine WKB format automatically
         if (format_ == wkbAuto)
         {
-            if (size >= 44
+            if (size_ >= 44
                 && (unsigned char)(wkb_[0]) == (unsigned char)(0x00)
                 && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C))
             {
@@ -431,13 +431,17 @@ private:
 #endif
 };
 
-void geometry_utils::from_wkb (boost::ptr_vector<geometry_type>& paths,
+bool geometry_utils::from_wkb(boost::ptr_vector<geometry_type>& paths,
                                const char* wkb,
                                unsigned size,
                                wkbFormat format)
 {
+    unsigned geom_count = paths.size();
     wkb_reader reader(wkb, size, format);
-    return reader.read(paths);
+    reader.read(paths);
+    if (paths.size() > geom_count)
+        return true;
+    return false;
 }
 
 }

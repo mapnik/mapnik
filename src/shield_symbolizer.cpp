@@ -88,4 +88,3 @@ position const& shield_symbolizer::get_shield_displacement() const
 }
 
 }
-

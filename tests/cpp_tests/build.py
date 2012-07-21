@@ -8,8 +8,9 @@ test_env = env.Clone()
 
 headers = env['CPPPATH'] 
 
-libraries =  copy(env['LIBMAPNIK_LIBS'])
+libraries = copy(env['LIBMAPNIK_LIBS'])
 libraries.append('mapnik')
+libraries.append('sqlite3')
 
 test_env.Append(CXXFLAGS='-g')
 

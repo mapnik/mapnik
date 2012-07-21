@@ -55,7 +55,7 @@ class MAPNIK_DECL geometry_utils : private boost::noncopyable
 {
 public:
 
-    static void from_wkb (boost::ptr_vector<geometry_type>& paths,
+    static bool from_wkb (boost::ptr_vector<geometry_type>& paths,
                           const char* wkb,
                           unsigned size,
                           wkbFormat format = wkbGeneric);

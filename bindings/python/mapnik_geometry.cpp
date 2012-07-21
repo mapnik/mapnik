@@ -60,9 +60,9 @@ void add_wkt_impl(path_type& p, std::string const& wkt)
     if (!result) throw std::runtime_error("Failed to parse WKT");
 }
 
-void add_wkb_impl(path_type& p, std::string const& wkb)
+bool add_wkb_impl(path_type& p, std::string const& wkb)
 {
-    mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size());
+    return mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size());
 }
 
 boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)

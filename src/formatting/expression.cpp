@@ -77,8 +77,8 @@ node_ptr expression_format::from_xml(xml_node const& xml)
 
 expression_ptr expression_format::get_expression(xml_node const& xml, std::string name)
 {
-    boost::optional<std::string> tmp = xml.get_opt_attr<std::string>(name);
-    if (tmp) return parse_expression(*tmp);
+    boost::optional<expression_ptr> tmp = xml.get_opt_attr<expression_ptr>(name);
+    if (tmp) return *tmp;
     return expression_ptr();
 }
 

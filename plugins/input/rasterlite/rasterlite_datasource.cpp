@@ -166,7 +166,7 @@ rasterlite_datasource::~rasterlite_datasource()
 {
 }
 
-std::string rasterlite_datasource::name()
+const char * rasterlite_datasource::name()
 {
     return "rasterlite";
 }

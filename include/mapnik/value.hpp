@@ -71,19 +71,39 @@ inline void to_utf8(UnicodeString const& input, std::string & target)
 struct value_null
 {
     template <typename T>
-    value_null operator+ (T const& other) const { return *this; }
+    value_null operator+ (T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return *this;
+    }
 
     template <typename T>
-    value_null operator- (T const& other) const { return *this; }
+    value_null operator- (T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return *this;
+    }
 
     template <typename T>
-    value_null operator* (T const& other) const { return *this; }
+    value_null operator* (T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return *this;
+    }
 
     template <typename T>
-    value_null operator/ (T const& other) const { return *this; }
+    value_null operator/ (T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return *this;
+    }
 
     template <typename T>
-    value_null operator% (T const& other) const { return *this; }
+    value_null operator% (T const& other) const
+    {
+        boost::ignore_unused_variable_warning(other);
+        return *this;
+    }
 };
 
 typedef boost::variant<value_null,bool,int,double,UnicodeString> value_base;
@@ -352,7 +372,7 @@ struct add : public boost::static_visitor<V>
     {
         return lhs + rhs;
     }
-    
+
     value_type operator() (UnicodeString const& lhs, value_null rhs) const
     {
         boost::ignore_unused_variable_warning(rhs);
@@ -555,6 +575,11 @@ struct negate : public boost::static_visitor<V>
     value_type operator() (value_null const& val) const
     {
         return val;
+    }
+
+    value_type operator() (bool val) const
+    {
+        return val ? -1 : 0;
     }
 
     value_type operator() (UnicodeString const& ustr) const

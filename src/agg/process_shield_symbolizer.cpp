@@ -22,8 +22,12 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/image_util.hpp>
+#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
-#include <mapnik/text/renderer.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
@@ -41,12 +45,18 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
-            t_, font_manager_, *detector_, query_extent_);
+            t_, font_manager_, *detector_,
+            query_extent_);
 
-    text_renderer<T> ren(*current_buffer_, font_manager_, *(font_manager_.get_stroker()));
+    text_renderer<T> ren(*current_buffer_,
+                         font_manager_,
+                         *(font_manager_.get_stroker()),
+                         sym.comp_op(),
+                         scale_factor_);
 
-    while (helper.next()) {
-        placements_type &placements = helper.placements();
+    while (helper.next())
+    {
+        placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
             // get_marker_position returns (minx,miny) corner position,
@@ -63,6 +73,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                           sym.get_opacity(),
                           sym.comp_op());
 
+            ren.prepare_glyphs(placements[ii]);
             ren.render(placements[ii].center);
         }
     }

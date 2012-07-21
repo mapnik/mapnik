@@ -164,7 +164,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
         geometry_type const& geom = feature_.get_geometry(i);
 
         // don't bother with empty geometries
-        if (geom.num_points() == 0) continue;
+        if (geom.size() == 0) continue;
         eGeomType type = geom.type();
         if (type == Polygon)
         {
@@ -217,7 +217,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
         if (how_placed == VERTEX_PLACEMENT)
         {
             geom.rewind(0);
-            for(unsigned i = 0; i < geom.num_points(); i++)
+            for(unsigned i = 0; i < geom.size(); i++)
             {
                 geom.vertex(&label_x, &label_y);
                 prj_trans_.backward(label_x, label_y, z);
@@ -229,11 +229,11 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
         {
             if (how_placed == POINT_PLACEMENT)
             {
-                geom.label_position(&label_x, &label_y);
+                label::centroid(geom, label_x, label_y);
             }
             else if (how_placed == INTERIOR_PLACEMENT)
             {
-                geom.label_interior_position(&label_x, &label_y);
+                label::interior_position(geom, label_x, label_y);
             }
             else
             {

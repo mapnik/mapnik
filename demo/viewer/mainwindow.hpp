@@ -28,6 +28,7 @@
 #include <QActionGroup>
 #include <QStatusBar>
 #include <QAbstractItemModel>
+#include <QDoubleSpinBox>
 
 #include "mapwidget.hpp"
 
@@ -37,6 +38,7 @@ class LayerTab;
 class StyleTab;
 class QSlider;
 class QComboBox;
+class QDoubleSpinBox;
 
 class MainWindow : public QMainWindow
 {
@@ -108,6 +110,7 @@ private:
     QStatusBar *status;
     QSlider * slider_;
     QComboBox * renderer_selector_;
+    QDoubleSpinBox * scale_factor_;
     mapnik::box2d<double> default_extent_;
 };
 

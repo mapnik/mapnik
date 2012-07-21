@@ -46,7 +46,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     for(unsigned i=0; i<feature.num_geometries(); ++i)
     {
         geometry_type const& geom = feature.get_geometry(i);
-        if(geom.num_points() > 1)
+        if(geom.size() > 1)
         {
             path_type path(t_, geom, prj_trans);
             generator_.generate_path(path, path_attributes_);

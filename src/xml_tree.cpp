@@ -193,6 +193,11 @@ xml_node &xml_tree::root()
     return node_;
 }
 
+const xml_node &xml_tree::root() const
+{
+    return node_;
+}
+
 /****************************************************************************/
 xml_attribute::xml_attribute(std::string const& value_)
     : value(value_), processed(false)
@@ -257,10 +262,10 @@ more_than_one_child::~more_than_one_child() throw()
 
 /****************************************************************************/
 
-xml_node::xml_node(xml_tree &tree, std::string const& name, unsigned line, bool text_node)
+xml_node::xml_node(xml_tree &tree, std::string const& name, unsigned line, bool is_text)
     : tree_(tree),
       name_(name),
-      text_node_(text_node),
+      is_text_(is_text),
       line_(line),
       processed_(false)
 {
@@ -271,7 +276,7 @@ std::string xml_node::xml_text = "<xmltext>";
 
 std::string const& xml_node::name() const
 {
-    if (!text_node_)
+    if (!is_text_)
         return name_;
     else
         return xml_text;
@@ -279,7 +284,7 @@ std::string const& xml_node::name() const
 
 std::string const& xml_node::text() const
 {
-    if (text_node_)
+    if (is_text_)
     {
         processed_ = true;
         return name_;
@@ -296,7 +301,7 @@ std::string const& xml_node::filename() const
 
 bool xml_node::is_text() const
 {
-    return text_node_;
+    return is_text_;
 }
 
 bool xml_node::is(std::string const& name) const
@@ -309,9 +314,9 @@ bool xml_node::is(std::string const& name) const
     return false;
 }
 
-xml_node &xml_node::add_child(std::string const& name, unsigned line, bool text_node)
+xml_node &xml_node::add_child(std::string const& name, unsigned line, bool is_text)
 {
-    children_.push_back(xml_node(tree_, name, line, text_node));
+    children_.push_back(xml_node(tree_, name, line, is_text));
     return children_.back();
 }
 
@@ -351,7 +356,7 @@ xml_node & xml_node::get_child(std::string const& name)
     std::list<xml_node>::iterator end = children_.end();
     for (; itr != end; itr++)
     {
-        if (!(itr->text_node_) && itr->name_ == name)
+        if (!(itr->is_text_) && itr->name_ == name)
         {
             itr->set_processed(true);
             return *itr;
@@ -373,7 +378,7 @@ xml_node const* xml_node::get_opt_child(std::string const& name) const
     const_iterator end = children_.end();
     for (; itr != end; itr++)
     {
-        if (!(itr->text_node_) && itr->name_ == name)
+        if (!(itr->is_text_) && itr->name_ == name)
         {
             itr->set_processed(true);
             return &(*itr);
@@ -423,7 +428,13 @@ std::string xml_node::get_text() const
 {
     if (children_.size() == 0)
     {
-        return "";
+        if (is_text_)
+        {
+            return name_;
+        } else
+        {
+            return "";
+        }
     }
     if (children_.size() == 1)
     {
@@ -474,7 +485,6 @@ compile_get_attr(std::string);
 compile_get_attr(filter_mode_e);
 compile_get_attr(point_placement_e);
 compile_get_attr(marker_placement_e);
-compile_get_attr(marker_type_e);
 compile_get_attr(pattern_alignment_e);
 compile_get_attr(line_rasterizer_e);
 compile_get_attr(colorizer_mode);

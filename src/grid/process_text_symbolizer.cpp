@@ -32,23 +32,27 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
                                proj_transform const& prj_trans)
 {
 #if 0
-    box2d<double> query_extent;
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
-            detector_.extent().width(), detector_.extent().height(),
+            width_, height_,
             scale_factor_ * (1.0/pixmap_.get_resolution()),
             t_, font_manager_, detector_,
-            query_extent);
+            query_extent_);
     bool placement_found = false;
 
-    text_renderer<T> ren(pixmap_, font_manager_);
+    text_renderer<T> ren(pixmap_,
+                         font_manager_,
+                         *(font_manager_.get_stroker()),
+                         sym.comp_op(),
+                         scale_factor_);
 
     while (helper.next()) {
         placement_found = true;
-        placements_type &placements = helper.placements();
+        placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
+            ren.prepare_glyphs(placements[ii]);
             ren.render_id(feature.id(), placements[ii].center, 2);
         }
     }

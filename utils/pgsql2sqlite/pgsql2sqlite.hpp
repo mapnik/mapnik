@@ -115,7 +115,7 @@ void pgsql2sqlite(Connection conn,
 
     // add AsBinary(<geometry_column>) modifier
     std::string select_sql_str = select_sql.str();
-    boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","AsBinary(" + geom_col+") as " + geom_col);
+    boost::algorithm::replace_all(select_sql_str, "\"" + geom_col + "\"","ST_AsBinary(" + geom_col+") as " + geom_col);
 
 #ifdef MAPNIK_DEBUG
     std::cout << select_sql_str << "\n";
@@ -281,8 +281,8 @@ void pgsql2sqlite(Connection conn,
                     if (oid == geometry_oid)
                     {
                         mapnik::Feature feat(ctx,pkid);
-                        geometry_utils::from_wkb(feat.paths(),buf,size,wkbGeneric);
-                        if (feat.num_geometries() > 0)
+                        if (geometry_utils::from_wkb(feat.paths(),buf,size,wkbGeneric)
+                            && feat.num_geometries() > 0)
                         {
                             geometry_type const& geom=feat.get_geometry(0);
                             box2d<double> bbox = geom.envelope();

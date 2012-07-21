@@ -47,6 +47,11 @@ struct expression_attributes : boost::static_visitor<void>
         boost::ignore_unused_variable_warning(x);
     }
 
+    void operator() (geometry_type_attribute const& type) const
+    {
+        // do nothing
+    }
+
     void operator() (attribute const& attr) const
     {
         names_.insert(attr.name());
@@ -171,6 +176,16 @@ struct symbolizer_attributes : public boost::static_visitor<>
 
     void operator () (markers_symbolizer const& sym)
     {
+        expression_ptr const& height_expr = sym.get_height();
+        if (height_expr)
+        {
+            boost::apply_visitor(f_attr,*height_expr);
+        }
+        expression_ptr const& width_expr = sym.get_width();
+        if (width_expr)
+        {
+            boost::apply_visitor(f_attr,*width_expr);
+        }
         collect_metawriter(sym);
         collect_transform(sym.get_image_transform());
         collect_transform(sym.get_transform());

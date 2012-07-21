@@ -18,7 +18,7 @@ public:
     mapnik::datasource::datasource_t type() const;
 
     // mandatory: name of the plugin
-    static std::string name();
+    static const char * name();
 
     // mandatory: function to query features by box2d
     // this is called when rendering, specifically in feature_style_processor.hpp

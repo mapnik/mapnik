@@ -28,7 +28,7 @@ class text_renderer : private boost::noncopyable
 public:
     typedef T pixmap_type;
 
-    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, composite_mode_e comp_op = src_over);
+    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, composite_mode_e comp_op = src_over, double scale_factor=1.0);
     void render(glyph_positions_ptr pos);
     void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
 private:
@@ -52,6 +52,7 @@ private:
     face_manager<freetype_engine> &font_manager_;
     stroker & stroker_;
     composite_mode_e comp_op_;
+    double scale_factor_;
     boost::ptr_vector<glyph_t> glyphs_;
 };
 }

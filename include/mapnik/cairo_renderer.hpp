@@ -60,21 +60,19 @@ typedef boost::shared_ptr<cairo_face> cairo_face_ptr;
 class cairo_face_manager : private boost::noncopyable
 {
 public:
-    cairo_face_manager(boost::shared_ptr<freetype_engine> engine,
-                       face_manager<freetype_engine> & manager);
+    cairo_face_manager(boost::shared_ptr<freetype_engine> engine);
     cairo_face_ptr get_face(face_ptr face);
 
 private:
     typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
     boost::shared_ptr<freetype_engine> font_engine_;
-    face_manager<freetype_engine> & font_manager_;
     cairo_face_cache cache_;
 };
 
 class MAPNIK_DECL cairo_renderer_base : private boost::noncopyable
 {
 protected:
-    cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, unsigned offset_x=0, unsigned offset_y=0);
+    cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
 public:
     ~cairo_renderer_base();
     void start_map_processing(Map const& map);
@@ -129,6 +127,9 @@ protected:
 
     Map const& m_;
     Cairo::RefPtr<Cairo::Context> context_;
+    unsigned width_;
+    unsigned height_;
+    double scale_factor_;
     CoordTransform t_;
     boost::shared_ptr<freetype_engine> font_engine_;
     face_manager<freetype_engine> font_manager_;
@@ -143,7 +144,7 @@ class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer
 {
 public:
     typedef cairo_renderer_base processor_impl_type;
-    cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, unsigned offset_x=0, unsigned offset_y=0);
+    cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     void end_map_processing(Map const& map);
 };
 }

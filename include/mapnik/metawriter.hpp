@@ -110,7 +110,7 @@ public:
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties)=0;
-    virtual void add_text(boost::ptr_vector<text_path> &placements,
+    virtual void add_text(boost::ptr_vector<text_path> const& placements,
                           box2d<double> const& extents,
                           Feature const& feature,
                           CoordTransform const& t,
@@ -144,7 +144,11 @@ public:
      */
     void set_size(int width, int height) { width_ = width; height_ = height; }
     /** Set Map object's srs. */
-    virtual void set_map_srs(projection const& proj) { /* Not required when working with image coordinates. */ }
+    virtual void set_map_srs(projection const& proj)
+    {
+        boost::ignore_unused_variable_warning(proj);
+    }
+
     /** Return the list of default properties. */
     metawriter_properties const& get_default_properties() const { return dflt_properties_;}
 protected:

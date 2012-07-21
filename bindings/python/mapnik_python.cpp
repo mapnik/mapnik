@@ -37,6 +37,7 @@ void export_palette();
 void export_image();
 void export_image_view();
 void export_gamma_method();
+void export_scaling_method();
 void export_grid();
 void export_grid_view();
 void export_map();
@@ -88,6 +89,15 @@ void export_logger();
 #include "mapnik_value_converter.hpp"
 #include "mapnik_threads.hpp"
 #include "python_optional.hpp"
+#include <mapnik/marker_cache.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
+
+
+void clear_cache()
+{
+    mapnik::marker_cache::instance()->clear();
+    mapnik::mapped_memory_cache::instance()->clear();
+}
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <pycairo.h>
@@ -150,12 +160,13 @@ void render_layer2(const mapnik::Map& map,
 
 void render3(const mapnik::Map& map,
              PycairoSurface* surface,
+             double scale_factor = 1.0,
              unsigned offset_x = 0,
              unsigned offset_y = 0)
 {
     python_unblock_auto_block b;
     Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,offset_x, offset_y);
+    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,scale_factor,offset_x,offset_y);
     ren.apply();
 }
 
@@ -169,12 +180,13 @@ void render4(const mapnik::Map& map, PycairoSurface* surface)
 
 void render5(const mapnik::Map& map,
              PycairoContext* context,
+             double scale_factor = 1.0,
              unsigned offset_x = 0,
              unsigned offset_y = 0)
 {
     python_unblock_auto_block b;
     Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-    mapnik::cairo_renderer<Cairo::Context> ren(map,c,offset_x, offset_y);
+    mapnik::cairo_renderer<Cairo::Context> ren(map,c,scale_factor,offset_x, offset_y);
     ren.apply();
 }
 
@@ -207,7 +219,7 @@ void render_to_file1(const mapnik::Map& map,
     if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
 #if defined(HAVE_CAIRO)
-        mapnik::save_to_cairo_file(map,filename,format);
+        mapnik::save_to_cairo_file(map,filename,format,1.0);
 #else
         throw mapnik::ImageWriterException("Cairo backend not available, cannot write to format: " + format);
 #endif
@@ -226,7 +238,7 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
     if (format == "pdf" || format == "svg" || format =="ps")
     {
 #if defined(HAVE_CAIRO)
-        mapnik::save_to_cairo_file(map,filename,format);
+        mapnik::save_to_cairo_file(map,filename,format,1.0);
 #else
         throw mapnik::ImageWriterException("Cairo backend not available, cannot write to format: " + format);
 #endif
@@ -248,7 +260,7 @@ void render_to_file3(const mapnik::Map& map,
     if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
 #if defined(HAVE_CAIRO)
-        mapnik::save_to_cairo_file(map,filename,format);
+        mapnik::save_to_cairo_file(map,filename,format,scale_factor);
 #else
         throw mapnik::ImageWriterException("Cairo backend not available, cannot write to format: " + format);
 #endif
@@ -360,6 +372,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_image();
     export_image_view();
     export_gamma_method();
+    export_scaling_method();
     export_grid();
     export_grid_view();
     export_expression();
@@ -388,6 +401,15 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_inmem_metawriter();
     export_label_collision_detector();
     export_logger();
+
+    def("clear_cache", &clear_cache,
+        "\n"
+        "Clear all global caches of markers and mapped memory regions.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import clear_cache\n"
+        ">>> clear_cache()\n"
+        );
 
     def("render_grid",&render_grid,
         ( arg("map"),
