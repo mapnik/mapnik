@@ -35,71 +35,52 @@ placement_finder_ng::placement_finder_ng( Feature const& feature, DetectorType &
 {
 }
 
-glyph_positions_ptr placement_finder_ng::find_point_placement(text_layout_ptr layout, double pos_x, double pos_y, double angle)
+glyph_positions_ptr placement_finder_ng::find_point_placement(text_layout_ptr layout, double pos_x, double pos_y)
 {
-    glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>(layout);
-    glyphs->point_placement(pixel_position(pos_x, pos_y));
+    glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
+//    glyphs->point_placement(pixel_position(pos_x, pos_y));
     //TODO: angle
     //TODO: Check for placement
     return glyphs;
 }
 
-glyph_positions::glyph_positions(text_layout_ptr layout)
-    : base_point_(), point_(true), layout_(layout), current_(0)
+glyph_positions::glyph_positions()
+    : base_point_(), const_angle_(true)
 {
 
 }
 
-void glyph_positions::point_placement(pixel_position base_point)
+glyph_positions::const_iterator glyph_positions::begin() const
 {
-    base_point_ = base_point;
-    point_ = true;
+    return data_.begin();
 }
 
-bool glyph_positions::next()
+glyph_positions::const_iterator glyph_positions::end() const
 {
-    return false;
-#if 0
-    if (current_ == -1)
+    return data_.end();
+}
+
+void glyph_positions::push_back(const glyph_info &glyph, pixel_position offset, double angle)
+{
+    if (data_.empty())
     {
-        current_ = 0;
-        return (bool)layout_->size();
+        angle_ = angle;
+    } else
+    {
+        if (angle != angle_) const_angle_ = false;
     }
-    if (current_ >= layout_->size()) return false;
-    glyph_info glyph = layout_->get_glyphs()[current_];
-    current_position_.x += glyph.width + glyph.format->character_spacing;
-    current_++;
-    if (current_ >= layout_->size()) return false;
-    return true;
-#endif
+    data_.push_back(glyph_position(glyph, offset, angle));
 }
 
-void glyph_positions::rewind()
-{
-    current_ = -1;
-    current_position_ = pixel_position(0, 0);
-}
 
-glyph_info const& glyph_positions::get_glyph() const
+bool glyph_positions::is_constant_angle() const
 {
-//    assert(layout_);
-//    assert(current_ < layout_->size());
-//    return layout_->get_glyphs()[current_];
-}
-
-pixel_position glyph_positions::get_position() const
-{
-    return current_position_;
+    return const_angle_;
 }
 
 double glyph_positions::get_angle() const
 {
-    return 0;
-}
-
-bool glyph_positions::is_constant_angle() const
-{
-    return point_;
+    return angle_;
 }
 
 const pixel_position &glyph_positions::get_base_point() const
