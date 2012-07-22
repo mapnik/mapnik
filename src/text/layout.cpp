@@ -35,12 +35,6 @@
 // boost
 #include <boost/make_shared.hpp>
 
-/* TODO: Remove unused classes:
- * string_info *
- * text_path *
- * char_info
- */
-
 namespace mapnik
 {
 text_layout::text_layout(face_manager_freetype &font_manager)
@@ -150,17 +144,6 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
 //            std::cout << "glyph:" << glyphs[i].mask << " xa:" << positions[i].x_advance << " ya:" << positions[i].y_advance << " xo:" << positions[i].x_offset <<  " yo:" << positions[i].y_offset << "\n";
         }
     }
-//    std::cout << "text_length: unicode chars: " << itemizer.get_text().length() << " glyphs: " << glyphs_.size()  << "\n";
-//    std::vector<glyph_info>::const_iterator itr2 = glyphs_.begin(), end2 = glyphs_.end();
-//    for (;itr2 != end2; itr2++)
-//    {
-//        std::cout << "'" << (char) itemizer.get_text().charAt(itr2->char_index) <<
-//                 "' glyph codepoint:" << itr2->glyph_index <<
-//                 " cluster: " << itr2->char_index <<
-//                 " width: "<< itr2->width <<
-//                 " height: " << itr2->height() <<
-//                 "\n";
-//    }
 }
 
 void text_layout::clear()
@@ -177,7 +160,7 @@ text_line::text_line()
 void text_line::add_glyph(const glyph_info &glyph)
 {
     glyphs_.push_back(glyph);
-    line_height_ = std::max(line_height_, glyph.line_height);
+    line_height_ = std::max(line_height_, glyph.line_height + glyph.format->line_spacing);
     text_height_ = std::max(text_height_, glyph.height());
     width_ += glyph.width + glyph.format->character_spacing;
 }
