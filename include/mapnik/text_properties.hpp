@@ -59,18 +59,19 @@ struct char_properties
     void from_xml(xml_node const &sym, fontset_map const & fontsets);
     /** Write object to XML ptree. */
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
-    std::string face_name;
-    font_set fontset;
-    float text_size;
-    double character_spacing;
-    double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
-    double text_opacity;
-    bool wrap_before;
-    unsigned wrap_char;
-    text_transform_e text_transform; //Per expression
-    color fill;
-    color halo_fill;
-    double halo_radius;
+    std::string face_name; //handled by text_layout. //TODO: Should be removed in favor of using fontsets everywhere
+    font_set fontset; // handled by text_layout
+    float text_size; // handled by text_shaping and renderer
+    double character_spacing; // handled by placement_finder //TODO
+    /** Largest total height (fontsize+line_spacing) per line is chosen */
+    double line_spacing;  // handled by text_layout and placement_finder
+    double text_opacity; // handled by renderer
+    bool wrap_before; // handled by text_layout //TODO
+    unsigned wrap_char; // handled by text_layout //TODO
+    text_transform_e text_transform; //Per expression //TODO!
+    color fill; // handled by renderer
+    color halo_fill; // handled by renderer
+    double halo_radius; // handled by renderer
 };
 
 enum label_placement_enum
