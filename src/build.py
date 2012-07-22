@@ -130,7 +130,6 @@ source = Split(
     parse_path.cpp
     parse_transform.cpp
     palette.cpp
-    placement_finder.cpp
     plugin.cpp
     png_reader.cpp
     point_symbolizer.cpp

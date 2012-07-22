@@ -25,7 +25,6 @@
 #include <mapnik/metawriter.hpp>
 #include <mapnik/metawriter_json.hpp>
 #include <mapnik/text_placements/base.hpp>
-#include <mapnik/text_path.hpp>
 
 // Boost
 #include <boost/foreach.hpp>
@@ -176,6 +175,7 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
 
 }
 
+#if 0
 void metawriter_json_stream::add_text(
     boost::ptr_vector<text_path> const& placements, box2d<double> const& extents,
     Feature const& feature, CoordTransform const& t,
@@ -262,6 +262,7 @@ void metawriter_json_stream::add_text(
         write_properties(feature, properties);
     }
 }
+#endif
 
 void metawriter_json_stream::add_polygon(path_type & path,
                                          Feature const& feature,

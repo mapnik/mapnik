@@ -32,6 +32,7 @@
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
+#include <mapnik/metawriter.hpp>
 
 // boost
 #include <boost/foreach.hpp>

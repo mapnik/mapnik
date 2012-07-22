@@ -24,6 +24,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/transform_processor.hpp>
+#include <mapnik/metawriter.hpp>
 
 namespace mapnik {
 

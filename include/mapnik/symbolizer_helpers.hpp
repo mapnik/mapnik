@@ -29,17 +29,15 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/text_path.hpp>
 #include <mapnik/text/placement_finder_ng.hpp>
+#include <mapnik/proj_transform.hpp>
+#include <mapnik/ctrans.hpp>
 
 //boost
 #include <boost/shared_ptr.hpp>
 
 
 namespace mapnik {
-
-typedef boost::ptr_vector<text_path> placements_type;
-template <typename DetectorT> class placement_finder;
 
 
 /** Helper object that does all the TextSymbolizer placment finding
@@ -95,8 +93,6 @@ protected:
     std::list<position>::iterator point_itr_;
     /** Text rotation. */
     double angle_;
-    /** Text + formatting. */
-    string_info *info_;
     /** Did last call to next_placement return true? */
     bool placement_valid_;
     /** Use point placement. Otherwise line placement is used. */
@@ -139,7 +135,7 @@ public:
     }
 
     bool next();
-    pixel_position get_marker_position(text_path const& p);
+    pixel_position get_marker_position(glyph_positions_ptr p);
     marker & get_marker() const;
     agg::trans_affine const& get_image_transform() const;
 protected:
@@ -158,7 +154,6 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::info_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geo_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::points_;

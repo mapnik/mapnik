@@ -38,7 +38,6 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
-#include <mapnik/text_path.hpp>
 #include <mapnik/vertex_converters.hpp>
 
 // cairo
@@ -683,7 +682,7 @@ public:
         context_->glyph_path(glyphs);
     }
 
-    void add_text(text_path const& path,
+    void add_text(glyph_positions_ptr path,
                   cairo_face_manager & manager,
                   face_manager<freetype_engine> &font_manager,
                   double scale_factor = 1.0)

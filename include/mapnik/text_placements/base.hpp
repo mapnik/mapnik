@@ -33,7 +33,7 @@ namespace mapnik
 typedef std::pair<double,double> dimension_type;
 
 class MAPNIK_DECL text_placements;
-/** Generate a possible placement and store results of placement_finder.
+/** Generate a possible placement.
  * This placement has first to be tested by placement_finder to verify it
  * can actually be used.
  */

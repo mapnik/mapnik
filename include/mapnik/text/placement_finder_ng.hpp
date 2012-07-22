@@ -77,8 +77,6 @@ private:
 };
 typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
 
-//typedef std::list<placement_positions_ptr> placement_positions_list;
-
 class placement_finder_ng : boost::noncopyable
 {
 public:

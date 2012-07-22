@@ -36,8 +36,8 @@
 #include <boost/make_shared.hpp>
 
 /* TODO: Remove unused classes:
- * string_info
- * text_path
+ * string_info *
+ * text_path *
  * char_info
  */
 

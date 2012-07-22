@@ -26,9 +26,9 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/parse_path.hpp>
-#include <mapnik/metawriter.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/transform_expression.hpp>
+#include <mapnik/metawriter/properties.hpp>
 
 // boost
 #include <boost/array.hpp>
@@ -58,7 +58,7 @@ public:
      * Call this function with an NULL writer_ptr to remove a metawriter.
      */
     void add_metawriter(metawriter_ptr writer_ptr,
-                        metawriter_properties const& properties = metawriter_properties(),
+                        metawriter_properties const& properties,
                         std::string const& name = "");
     /** Cache metawriter objects to avoid repeated lookups while processing.
      *
@@ -75,7 +75,7 @@ public:
     /** Get metawriter properties.
      * This functions returns the default attributes of the
      * metawriter + symbolizer specific attributes.
-     * \note This function is a helperfunction for class attribute_collector.
+     * \note This function is a helper function for class attribute_collector.
      */
     metawriter_properties const& get_metawriter_properties() const { return properties_complete_; }
     /** Get metawriter properties which only apply to this symbolizer.

@@ -69,6 +69,7 @@ metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
     instances_.push_back(inst);
 }
 
+#if 0
 void
 metawriter_inmem::add_text(
     boost::ptr_vector<text_path> const& /*text*/,
@@ -85,6 +86,7 @@ metawriter_inmem::add_text(
         instances_.push_back(inst);
     }
 }
+#endif
 
 void
 metawriter_inmem::add_polygon(path_type & path,

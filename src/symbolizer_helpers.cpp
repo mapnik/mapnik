@@ -23,7 +23,6 @@
 // mapnik
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
-#include <mapnik/placement_finder.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/layout.hpp>
 #include "agg_conv_clip_polyline.h"
@@ -264,8 +263,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     placement_->properties.process(*layout_, feature_);
     layout_->layout(placement_->properties.wrap_width);
 
-    //TODO
-//    info_ = &(text_.get_string_info());
+
     if (placement_->properties.orientation)
     {
         angle_ = boost::apply_visitor(
@@ -429,8 +427,9 @@ void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
 }
 
 template <typename FaceManagerT, typename DetectorT>
-pixel_position shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker_position(text_path const& p)
+pixel_position shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker_position(glyph_positions_ptr p)
 {
+#if 0
     position const& pos = placement_->properties.displacement;
     if (placement_->properties.label_placement == LINE_PLACEMENT) {
         double lx = p.center.x - pos.first;
@@ -446,6 +445,9 @@ pixel_position shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker_pos
         //collision_detector is already updated for point placement in get_point_placement()
         return pixel_position(marker_x_, marker_y_);
     }
+#else
+#warning get_marker_position() disabled!
+#endif
 }
 
 

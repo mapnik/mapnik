@@ -28,7 +28,7 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/metawriter.hpp>
+#include <mapnik/metawriter/properties.hpp>
 #include <mapnik/params.hpp>
 
 // boost

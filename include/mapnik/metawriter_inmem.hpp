@@ -65,11 +65,13 @@ public:
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties);
+#if 0
     virtual void add_text(boost::ptr_vector<text_path> const& placements,
                           box2d<double> const& extents,
                           Feature const& feature,
                           CoordTransform const& t,
                           metawriter_properties const& properties);
+#endif
     virtual void add_polygon(path_type & path,
                              Feature const& feature,
                              CoordTransform const& t,
