@@ -115,7 +115,7 @@ namespace detail {
 
 // boost::spirit::traits::clear<T>(T& val) [with T = boost::variant<...>]
 // attempts to assign to the variant's current value a default-constructed
-// value ot the same type, which not only requires that each value-type is
+// value of the same type, which not only requires that each value-type is
 // default-constructible, but also makes little sense with our variant of
 // transform nodes...
 
