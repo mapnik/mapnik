@@ -599,9 +599,36 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
                       (path_positions[index-1].y + (path_positions[index].y - path_positions[index-1].y)*distance/path_distances[index])
             )
         );
+        
+    double max_string_width = 0.0;
+    BOOST_FOREACH(text_placement &text, text_placements_)
+    {
+        // get max string width
+        if (text.point_place_box.string_width_ > max_string_width)
+        {
+            max_string_width = text.point_place_box.string_width_;
+        }
+    }
 
     BOOST_FOREACH(const text_placement &text, text_placements_)
     {
+        // keep text elements centered relative to each other
+        double offset_x = (max_string_width - text.point_place_box.string_width_) / 2.0;
+        while (offset_x > 0.0 && index < path_positions.size())
+        {
+            double seg_length = path_distances[index];
+            if (seg_length >= offset_x)
+            {
+                distance += offset_x;
+                offset_x = 0.0;
+            }
+            else
+            {
+                distance += seg_length;
+                offset_x -= seg_length;
+                index++;
+            }
+        }
         double old_x = path_positions[index-1].x;
         double old_y = path_positions[index-1].y;
 
