@@ -109,6 +109,8 @@ source = Split(
     datasource_cache.cpp
     debug.cpp
     deepcopy.cpp
+    expression_node.cpp
+    expression_grammar.cpp
     expression_string.cpp
     expression.cpp
     transform_expression.cpp
