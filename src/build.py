@@ -144,6 +144,7 @@ source = Split(
     text_symbolizer.cpp
     tiff_reader.cpp
     wkb.cpp
+    wkb_generator.cpp
     projection.cpp
     proj_transform.cpp
     distance.cpp
