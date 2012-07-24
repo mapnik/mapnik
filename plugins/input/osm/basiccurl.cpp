@@ -22,6 +22,8 @@
 
 #include "basiccurl.h"
 
+#include <iostream>
+
 CURL_LOAD_DATA* grab_http_response(const char* url)
 {
     CURL_LOAD_DATA* data;

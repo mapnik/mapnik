@@ -46,9 +46,6 @@ struct agg_stack_blur
 {
     agg_stack_blur(unsigned rx_, unsigned ry_)
         : rx(rx_),ry(ry_) {}
-    // an attempt to support older boost spirit (< 1.46)
-    agg_stack_blur()
-        : rx(1),ry(1) {}
     unsigned rx;
     unsigned ry;
 };
