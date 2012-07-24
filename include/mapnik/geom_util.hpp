@@ -276,10 +276,10 @@ namespace label {
 template <typename PathType>
 bool centroid(PathType & path, double & x, double & y)
 {
-    double x0(0);
-    double y0(0);
-    double x1(0);
-    double y1(0);
+    double x0 = 0;
+    double y0 = 0;
+    double x1 = 0;
+    double y1 = 0;
     double start_x;
     double start_y;
 
@@ -293,7 +293,7 @@ bool centroid(PathType & path, double & x, double & y)
     double atmp = 0;
     double xtmp = 0;
     double ytmp = 0;
-
+    unsigned count = 1;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
         double dx0 = x0 - start_x;
@@ -307,6 +307,14 @@ bool centroid(PathType & path, double & x, double & y)
         ytmp += (dy1 + dy0) * ai;
         x0 = x1;
         y0 = y1;
+        ++count;
+    }
+
+    if (count == 1)
+    {
+        x = start_x;
+        y = start_y;
+        return true;
     }
 
     if (atmp != 0)
