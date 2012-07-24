@@ -55,7 +55,7 @@ int main (int argc,char** argv)
 
     bool verbose = false;
     bool auto_open = false;
-    bool error = false;
+    int return_value = 0;
     std::vector<std::string> svg_files;
     mapnik::logger logger;
     logger.set_severity(mapnik::logger::error);
@@ -131,14 +131,14 @@ int main (int argc,char** argv)
             if (!marker_ptr)
             {
                 std::clog << "svg2png error: could not open: '" << svg_name << "'\n";
-                error = true;
+                return_value = -1;
                 continue;
             }
             mapnik::marker marker = **marker_ptr;
             if (!marker.is_vector())
             {
                 std::clog << "svg2png error: '" << svg_name << "' is not a valid vector!\n";
-                error = true;
+                return_value = -1;
                 continue;
             }
 
@@ -190,7 +190,9 @@ int main (int argc,char** argv)
 #else
                 s << "xdg-open " << svg_name;
 #endif
-                system(s.str().c_str());
+                int ret = system(s.str().c_str());
+                if (ret != 0)
+                    return_value = ret;
             }
             std::clog << "rendered to: " << svg_name << "\n";
         }
@@ -206,7 +208,5 @@ int main (int argc,char** argv)
     // to make sure valgrind output is clean
     // http://xmlsoft.org/xmlmem.html
     xmlCleanupParser();
-    if (error)
-        return -1;
-    return 0;
+    return return_value;
 }
