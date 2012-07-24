@@ -374,12 +374,12 @@ void interior_position(PathType & path, double & x, double & y)
 
     std::vector<double> intersections; // only need to store the X as we know the y
 
-    double x0(0);
-    double y0(0);
+    double x0 = 0;
+    double y0 = 0;
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
-    double x1(0);
-    double y1(0);
+    double x1 = 0;
+    double y1 = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
         if (command != SEG_MOVETO)
