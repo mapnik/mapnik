@@ -149,7 +149,6 @@ int main (int argc,char** argv)
             agg::scanline_u8 sl;
 
             double opacity = 1;
-            double scale_factor_ = .95;
             int w = marker.width();
             int h = marker.height();
             if (verbose)
@@ -165,8 +164,6 @@ int main (int argc,char** argv)
             mapnik::coord<double,2> c = bbox.center();
             // center the svg marker on '0,0'
             agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
-            // apply symbol transformation to get to map space
-            mtx *= agg::trans_affine_scaling(scale_factor_);
             // render the marker at the center of the marker box
             mtx.translate(0.5 * w, 0.5 * h);
 
