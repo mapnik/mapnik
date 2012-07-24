@@ -182,14 +182,16 @@ int main (int argc,char** argv)
 
             boost::algorithm::ireplace_last(svg_name,".svg",".png");
             mapnik::save_to_file<mapnik::image_data_32>(im.data(),svg_name,"png");
-#ifdef DARWIN
             if (auto_open)
             {
                 std::ostringstream s;
+#ifdef DARWIN
                 s << "open " << svg_name;
+#else
+                s << "xdg-open " << svg_name;
+#endif
                 system(s.str().c_str());
             }
-#endif
             std::clog << "rendered to: " << svg_name << "\n";
         }
     }
