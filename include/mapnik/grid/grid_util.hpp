@@ -45,15 +45,18 @@ static inline void scale_grid(mapnik::grid::data_type & target,
 
     if (source_width<1 || source_height<1 ||
         target_width<1 || target_height<1) return;
-    int x=0,y=0,xs=0,ys=0;
+    int x = 0;
+    int y = 0;
+    int xs = 0;
+    int ys = 0;
     int tw2 = target_width/2;
     int th2 = target_height/2;
     int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
     int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
-    unsigned yprt(0);
-    unsigned yprt1(0);
-    unsigned xprt(0);
-    unsigned xprt1(0);
+    unsigned yprt = 0;
+    unsigned yprt1 = 0;
+    unsigned xprt = 0;
+    unsigned xprt1 = 0;
 
     //no scaling or subpixel offset
     if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){

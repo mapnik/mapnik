@@ -88,8 +88,8 @@ public:
     box2d<double> envelope() const
     {
         box2d<double> result;
-        double x(0);
-        double y(0);
+        double x = 0;
+        double y = 0;
         rewind(0);
         for (unsigned i=0;i<size();++i)
         {

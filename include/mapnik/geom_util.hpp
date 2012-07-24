@@ -39,7 +39,7 @@ namespace mapnik
 template <typename T>
 bool clip_test(T p,T q,double& tmin,double& tmax)
 {
-    double r(0);
+    double r = 0;
     bool result=true;
     if (p<0.0)
     {
@@ -96,8 +96,8 @@ inline bool point_inside_path(double x,double y,Iter start,Iter end)
     double x0=boost::get<0>(*start);
     double y0=boost::get<1>(*start);
 
-    double x1(0);
-    double y1(0);
+    double x1 = 0;
+    double y1 = 0;
     while (++start!=end)
     {
         if ( boost::get<2>(*start) == SEG_MOVETO)
@@ -174,8 +174,8 @@ inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 {
     double x0=boost::get<0>(*start);
     double y0=boost::get<1>(*start);
-    double x1(0);
-    double y1(0);
+    double x1 = 0;
+    double y1 = 0;
     while (++start != end)
     {
         if ( boost::get<2>(*start) == SEG_MOVETO)
@@ -224,10 +224,10 @@ struct filter_at_point
 template <typename PathType>
 double path_length(PathType & path)
 {
-    double x0(0);
-    double y0(0);
-    double x1(0);
-    double y1(0);
+    double x0 = 0;
+    double y0 = 0;
+    double x1 = 0;
+    double y1 = 0;
     path.rewind(0);
     unsigned command = path.vertex(&x0,&y0);
     if (command == SEG_END) return 0;
@@ -244,10 +244,10 @@ double path_length(PathType & path)
 template <typename PathType>
 bool middle_point(PathType & path, double & x, double & y)
 {
-    double x0(0);
-    double y0(0);
-    double x1(0);
-    double y1(0);
+    double x0 = 0;
+    double y0 = 0;
+    double x1 = 0;
+    double y1 = 0;
     double mid_length = 0.5 * path_length(path);
     path.rewind(0);
     unsigned command = path.vertex(&x0,&y0);
@@ -334,10 +334,10 @@ template <typename PathType>
 bool hit_test(PathType & path, double x, double y, double tol)
 {
     bool inside=false;
-    double x0(0);
-    double y0(0);
-    double x1(0);
-    double y1(0);
+    double x0 = 0;
+    double y0 = 0;
+    double x1 = 0;
+    double y1 = 0;
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
     if (command == SEG_END) return false;
