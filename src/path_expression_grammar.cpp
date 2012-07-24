@@ -20,43 +20,43 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_PATH_EXPRESSIONS_GRAMMAR_HPP
-#define MAPNIK_PATH_EXPRESSIONS_GRAMMAR_HPP
-
 // mapnik
+#include <mapnik/path_expression_grammar.hpp>
 #include <mapnik/attribute.hpp>
 
 // boost
-#include <boost/variant.hpp>
-
-// spirit2
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_action.hpp>
-
-// stl
-#include <string>
-#include <vector>
+#include <boost/spirit/home/phoenix/object/construct.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
 
 namespace mapnik
 {
-using namespace boost;
-namespace qi = boost::spirit::qi;
-namespace phoenix = boost::phoenix;
-namespace standard_wide =  boost::spirit::standard_wide;
-
-using standard_wide::space_type;
-using standard_wide::space;
-typedef boost::variant<std::string, attribute> path_component;
 
 template <typename Iterator>
-struct path_expression_grammar : qi::grammar<Iterator, std::vector<path_component>(), space_type>
+path_expression_grammar<Iterator>::path_expression_grammar()
+    : path_expression_grammar::base_type(expr)
 {
-    path_expression_grammar();
-    qi::rule<Iterator, std::vector<path_component>() , space_type> expr;
-    qi::rule<Iterator, std::string() , space_type> attr;
-    qi::rule<Iterator, std::string() > str;
-};
-
+    using boost::phoenix::construct;
+    using standard_wide::char_;
+    using qi::_1;
+    using qi::_val;
+    using qi::lit;
+    using qi::lexeme;
+    using phoenix::push_back;
+    
+    expr =
+        * (
+            str [ push_back(_val, _1)]
+            |
+            ( '[' >> attr [ push_back(_val, construct<mapnik::attribute>( _1 )) ] >> ']')
+            )
+        ;
+    
+    attr %= +(char_ - ']');
+    str  %= lexeme[+(char_ -'[')];
 }
 
-#endif  // MAPNIK_PATH_EXPRESSIONS_GRAMMAR_HPP
+template struct mapnik::path_expression_grammar<std::string::const_iterator>;
+
+}
