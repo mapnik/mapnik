@@ -101,6 +101,7 @@ else: # unix, non-macos
 source = Split(
     """
     color.cpp
+    css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
     image_scaling.cpp
@@ -133,6 +134,7 @@ source = Split(
     parse_path.cpp
     parse_transform.cpp
     palette.cpp
+    path_expression_grammar.cpp
     placement_finder.cpp
     plugin.cpp
     png_reader.cpp
