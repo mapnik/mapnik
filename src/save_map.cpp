@@ -204,9 +204,11 @@ public:
         {
             set_attr(sym_node, "unlock-image", sym.get_unlock_image());
         }
-        if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_)
+
+        if (sym.get_placement_options()->defaults.format.text_opacity !=
+                dfl.get_placement_options()->defaults.format.text_opacity || explicit_defaults_)
         {
-            set_attr(sym_node, "text-opacity", sym.get_text_opacity());
+            set_attr(sym_node, "text-opacity", sym.get_placement_options()->defaults.format.text_opacity);
         }
         position displacement = sym.get_shield_displacement();
         if (displacement.first != dfl.get_shield_displacement().first || explicit_defaults_)
