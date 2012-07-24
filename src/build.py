@@ -165,6 +165,7 @@ source = Split(
     svg_points_parser.cpp
     svg_transform_parser.cpp
     warp.cpp
+    json/feature_grammar.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
     markers_placement.cpp
