@@ -238,7 +238,7 @@ void shape_datasource::init(shape_io& shape) const
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Shape type=" << shape_type_;
 }
 
-std::string shape_datasource::name()
+const char * shape_datasource::name()
 {
     return "shape";
 }

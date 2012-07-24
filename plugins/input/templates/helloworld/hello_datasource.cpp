@@ -39,11 +39,9 @@ void hello_datasource::bind() const
 hello_datasource::~hello_datasource() { }
 
 // This name must match the plugin filename, eg 'hello.input'
-std::string const hello_datasource::name_="hello";
-
-std::string hello_datasource::name()
+const char * hello_datasource::name()
 {
-    return name_;
+    return "hello";
 }
 
 mapnik::datasource::datasource_t hello_datasource::type() const

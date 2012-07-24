@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/ptree_helpers.hpp>
@@ -30,7 +31,9 @@
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/text_placements/list.hpp>
 #include <mapnik/text_placements/dummy.hpp>
-
+#include <mapnik/image_compositing.hpp>
+#include <mapnik/image_scaling.hpp>
+#include <mapnik/image_filter_types.hpp>
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -73,7 +76,7 @@ public:
         {
             set_attr( sym_node, "placement", sym.get_point_placement() );
         }
-        add_metawriter_attributes(sym_node, sym);
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( line_symbolizer const& sym )
@@ -83,13 +86,13 @@ public:
 
         const stroke & strk =  sym.get_stroke();
         add_stroke_attributes(sym_node, strk);
-        add_metawriter_attributes(sym_node, sym);
 
         line_symbolizer dfl;
         if ( sym.get_rasterizer() != dfl.get_rasterizer() || explicit_defaults_ )
         {
             set_attr( sym_node, "rasterizer", sym.get_rasterizer() );
         }
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( line_pattern_symbolizer const& sym )
@@ -99,7 +102,7 @@ public:
                               ptree()))->second;
 
         add_image_attributes( sym_node, sym );
-        add_metawriter_attributes(sym_node, sym);
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( polygon_symbolizer const& sym )
@@ -124,7 +127,7 @@ public:
         {
             set_attr( sym_node, "gamma-method", sym.get_gamma_method() );
         }
-        add_metawriter_attributes(sym_node, sym);
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( polygon_pattern_symbolizer const& sym )
@@ -147,7 +150,7 @@ public:
             set_attr( sym_node, "gamma-method", sym.get_gamma_method() );
         }
         add_image_attributes( sym_node, sym );
-        add_metawriter_attributes(sym_node, sym);
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( raster_symbolizer const& sym )
@@ -156,14 +159,9 @@ public:
             ptree::value_type("RasterSymbolizer", ptree()))->second;
         raster_symbolizer dfl;
 
-        if ( sym.get_mode() != dfl.get_mode() || explicit_defaults_ )
+        if ( sym.get_scaling_method() != dfl.get_scaling_method() || explicit_defaults_ )
         {
-            set_attr( sym_node, "mode", sym.get_mode() );
-        }
-
-        if ( sym.get_scaling() != dfl.get_scaling() || explicit_defaults_ )
-        {
-            set_attr( sym_node, "scaling", sym.get_scaling() );
+            set_attr( sym_node, "scaling", *scaling_method_to_string(sym.get_scaling_method()) );
         }
 
         if ( sym.get_opacity() != dfl.get_opacity() || explicit_defaults_ )
@@ -180,7 +178,7 @@ public:
             serialize_raster_colorizer(sym_node, sym.get_colorizer(),
                                        explicit_defaults_);
         }
-        //Note: raster_symbolizer doesn't support metawriters
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( shield_symbolizer const& sym )
@@ -191,7 +189,6 @@ public:
 
         add_font_attributes(sym_node, sym);
         add_image_attributes(sym_node, sym);
-        add_metawriter_attributes(sym_node, sym);
 
         // pseudo-default-construct a shield_symbolizer. It is used
         // to avoid printing of attributes with default values without
@@ -219,7 +216,7 @@ public:
         {
             set_attr(sym_node, "shield-dy", displacement.second);
         }
-
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( text_symbolizer const& sym )
@@ -229,7 +226,7 @@ public:
                               ptree()))->second;
 
         add_font_attributes( sym_node, sym);
-        add_metawriter_attributes(sym_node, sym);
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( building_symbolizer const& sym )
@@ -251,7 +248,7 @@ public:
             set_attr( sym_node, "height", mapnik::to_expression_string(*sym.height()) );
         }
 
-        add_metawriter_attributes(sym_node, sym);
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     void operator () ( markers_symbolizer const& sym)
@@ -306,10 +303,13 @@ public:
             set_attr( sym_node, "transform", tr_str );
         }
 
-        const stroke & strk =  sym.get_stroke();
-        add_stroke_attributes(sym_node, strk);
+        boost::optional<stroke> const& strk = sym.get_stroke();
+        if (strk)
+        {
+            add_stroke_attributes(sym_node, *strk);
+        }
 
-        add_metawriter_attributes(sym_node, sym);
+        serialize_symbolizer_base(sym_node, sym);
     }
 
     template <typename Symbolizer>
@@ -317,12 +317,40 @@ public:
     {
         // not-supported
 #ifdef MAPNIK_DEBUG
-        std::clog << typeid(sym).name() << " is not supported" << std::endl;
+        MAPNIK_LOG_WARN(save_map) << typeid(sym).name() << " is not supported";
 #endif
     }
-    
+
 private:
     serialize_symbolizer();
+
+    void serialize_symbolizer_base(ptree & node, symbolizer_base const& sym)
+    {
+        symbolizer_base dfl = symbolizer_base();
+        if (!sym.get_metawriter_name().empty() || explicit_defaults_) {
+            set_attr(node, "meta-writer", sym.get_metawriter_name());
+        }
+        if (!sym.get_metawriter_properties_overrides().empty() || explicit_defaults_) {
+            set_attr(node, "meta-output", sym.get_metawriter_properties_overrides().to_string());
+        }
+        if (sym.get_transform())
+        {
+            std::string tr_str = sym.get_transform_string();
+            set_attr( node, "geometry-transform", tr_str );
+        }
+        if (sym.clip() != dfl.clip() || explicit_defaults_)
+        {
+            set_attr( node, "clip", sym.clip() );
+        }
+        if (sym.smooth() != dfl.smooth() || explicit_defaults_)
+        {
+            set_attr( node, "smooth", sym.smooth() );
+        }
+        if (sym.comp_op() != dfl.comp_op() || explicit_defaults_)
+        {
+            set_attr( node, "comp-op", *comp_op_to_string(sym.comp_op()) );
+        }
+    }
 
     void serialize_raster_colorizer(ptree & sym_node,
                                     raster_colorizer_ptr const& colorizer,
@@ -348,7 +376,7 @@ private:
 
     }
 
-    void add_image_attributes(ptree & node, const symbolizer_with_image & sym)
+    void add_image_attributes(ptree & node, symbolizer_with_image const& sym)
     {
         if (sym.get_filename())
         {
@@ -438,21 +466,6 @@ private:
         }
     }
 
-    void add_metawriter_attributes(ptree & node, symbolizer_base const& sym)
-    {
-        if (!sym.get_metawriter_name().empty() || explicit_defaults_) {
-            set_attr(node, "meta-writer", sym.get_metawriter_name());
-        }
-        if (!sym.get_metawriter_properties_overrides().empty() || explicit_defaults_) {
-            set_attr(node, "meta-output", sym.get_metawriter_properties_overrides().to_string());
-        }
-        if (sym.get_transform())
-        {
-            std::string tr_str = sym.get_transform_string();
-            set_attr( node, "view-transform", tr_str );
-        }
-    }
-
     ptree & rule_;
     bool explicit_defaults_;
 };
@@ -533,6 +546,36 @@ void serialize_style( ptree & map_node, Map::const_style_iterator style_it, bool
     if (opacity != dfl.get_opacity() || explicit_defaults)
     {
         set_attr(style_node, "opacity", opacity);
+    }
+
+    boost::optional<composite_mode_e> comp_op = style.comp_op();
+    if (comp_op)
+    {
+        set_attr(style_node, "comp-op", *comp_op_to_string(*comp_op));
+    }
+    else if (explicit_defaults)
+    {
+        set_attr(style_node, "comp-op", "src-over");
+    }
+
+    if (style.image_filters().size() > 0)
+    {
+        std::string filters_str;
+        std::back_insert_iterator<std::string> sink(filters_str);
+        if (generate_image_filters(sink, style.image_filters()))
+        {
+            set_attr(style_node, "image-filters", filters_str);
+        }
+    }
+
+    if (style.direct_image_filters().size() > 0)
+    {
+        std::string filters_str;
+        std::back_insert_iterator<std::string> sink(filters_str);
+        if (generate_image_filters(sink, style.direct_image_filters()))
+        {
+            set_attr(style_node, "direct-image-filters", filters_str);
+        }
     }
 
     rules::const_iterator it = style.get_rules().begin();

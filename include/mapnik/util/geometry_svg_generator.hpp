@@ -66,7 +66,7 @@ namespace mapnik { namespace util {
         geometry_type::value_type const operator() (geometry_type const& geom) const
         {
             geometry_type::value_type coord;
-            boost::get<0>(coord) = geom.get_vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+            boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
             return coord;
         }
     };

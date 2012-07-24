@@ -80,14 +80,10 @@ public:
     /** Remove old placements. */
     void clear_placements();
 
-    inline placements_type &get_results() { return placements_; }
+    inline placements_type const& get_results() { return placements_; }
 
-    /** Additional boxes to take into account when finding placement.
-     * Used for finding line placements where multiple placements are returned.
-     * Boxes are relative to starting point of current placement.
-     * Only used for point placements!
-     */
-    std::vector<box2d<double> > additional_boxes;
+    std::vector<box2d<double> > & additional_boxes() { return additional_boxes_;}
+    std::vector<box2d<double> > const& additional_boxes() const { return additional_boxes_;}
 
     void set_collect_extents(bool collect) { collect_extents_ = collect; }
     bool get_collect_extents() const { return collect_extents_; }
@@ -160,6 +156,13 @@ private:
     box2d<double> extents_;
     /** Collect a bounding box of all texts placed. */
     bool collect_extents_;
+
+    /** Additional boxes to take into account when finding placement.
+     * Used for finding line placements where multiple placements are returned.
+     * Boxes are relative to starting point of current placement.
+     * Only used for point placements!
+     */
+    std::vector<box2d<double> > additional_boxes_;
 };
 }
 

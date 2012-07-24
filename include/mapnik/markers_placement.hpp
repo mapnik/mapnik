@@ -47,7 +47,7 @@ public:
      *                 converted to a positive value with similar magnitude, but
      *                 choosen to optimize marker placement. 0 = no markers
      */
-    markers_placement(Locator &locator, box2d<double> size, agg::trans_affine const& tr, Detector &detector, double spacing, double max_error, bool allow_overlap);
+    markers_placement(Locator &locator, box2d<double> const& size, agg::trans_affine const& tr, Detector &detector, double spacing, double max_error, bool allow_overlap);
     /** Start again at first marker.
      * \note Returns the same list of markers only works when they were NOT added
      *       to the detector.

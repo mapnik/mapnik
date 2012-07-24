@@ -44,7 +44,7 @@ public:
     geojson_datasource(mapnik::parameters const& params, bool bind=true);
     virtual ~geojson_datasource ();
     mapnik::datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;
@@ -52,8 +52,7 @@ public:
     std::map<std::string, mapnik::parameters> get_statistics() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     void bind() const;
-private:    
-    static const std::string name_;
+private:
     mapnik::datasource::datasource_t type_;
     mutable std::map<std::string, mapnik::parameters> statistics_;
     mutable mapnik::layer_descriptor desc_;

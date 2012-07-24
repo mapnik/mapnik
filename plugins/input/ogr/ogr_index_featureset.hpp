@@ -33,7 +33,6 @@ class ogr_index_featureset : public mapnik::Featureset
 {
 public:
     ogr_index_featureset(mapnik::context_ptr const& ctx,
-                         OGRDataSource& dataset,
                          OGRLayer& layer,
                          filterT const& filter,
                          std::string const& index_file,
@@ -41,10 +40,8 @@ public:
 
     virtual ~ogr_index_featureset();
     mapnik::feature_ptr next();
-
 private:
     mapnik::context_ptr ctx_;
-    OGRDataSource& dataset_;
     OGRLayer& layer_;
     OGRFeatureDefn* layerdef_;
     filterT filter_;

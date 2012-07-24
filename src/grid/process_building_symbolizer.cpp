@@ -70,7 +70,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     for (unsigned i=0;i<feature.num_geometries();++i)
     {
         geometry_type & geom = feature.get_geometry(i);
-        if (geom.num_points() > 2)
+        if (geom.size() > 2)
         {
             boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
             boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
@@ -78,7 +78,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
             double x0(0);
             double y0(0);
             unsigned cm = geom.vertex(&x0,&y0);
-            for (unsigned j=1;j<geom.num_points();++j)
+            for (unsigned j=1;j<geom.size();++j)
             {
                 double x(0);
                 double y(0);
@@ -117,7 +117,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
             }
 
             geom.rewind(0);
-            for (unsigned j=0;j<geom.num_points();++j)
+            for (unsigned j=0;j<geom.size();++j)
             {
                 double x,y;
                 unsigned cm = geom.vertex(&x,&y);

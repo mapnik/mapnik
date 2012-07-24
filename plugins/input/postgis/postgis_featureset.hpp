@@ -55,7 +55,7 @@ private:
     boost::shared_ptr<IResultSet> rs_;
     context_ptr ctx_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
-    int totalGeomSize_;
+    unsigned totalGeomSize_;
     int feature_id_;
     bool key_field_;
 };

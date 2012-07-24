@@ -487,14 +487,13 @@ struct filter_visitor : boost::static_visitor<void>
     : src_(src) {}
 
     template <typename T>
-    void operator () (T filter_tag)
+    void operator () (T const& filter_tag)
     {
         apply_filter(src_,filter_tag);
     }
 
     Src & src_;
 };
-
 
 }}
 

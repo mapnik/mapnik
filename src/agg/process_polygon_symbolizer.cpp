@@ -65,7 +65,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
 
     BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
-        if (geom.num_points() > 2)
+        if (geom.size() > 2)
         {
             converter.apply(geom);
         }

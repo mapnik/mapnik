@@ -28,12 +28,12 @@
 #include <mapnik/attribute.hpp>
 
 // boost
-#include <boost/variant.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #endif
+#include <boost/variant.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 
 namespace mapnik
@@ -174,6 +174,7 @@ typedef mapnik::value value_type;
 typedef boost::variant <
 value_type,
 attribute,
+geometry_type_attribute,
 boost::recursive_wrapper<unary_node<tags::negate> >,
 boost::recursive_wrapper<binary_node<tags::plus> >,
 boost::recursive_wrapper<binary_node<tags::minus> >,
@@ -239,12 +240,10 @@ struct binary_node
 };
 
 #if defined(BOOST_REGEX_HAS_ICU)
+
 struct regex_match_node
 {
-    regex_match_node (expr_node const& a, UnicodeString const& ustr)
-        : expr(a),
-          pattern(boost::make_u32regex(ustr)) {}
-
+    regex_match_node (expr_node const& a, UnicodeString const& ustr);
     expr_node expr;
     boost::u32regex pattern;
 };
@@ -252,22 +251,17 @@ struct regex_match_node
 
 struct regex_replace_node
 {
-    regex_replace_node (expr_node const& a, UnicodeString const& ustr, UnicodeString const& f)
-        : expr(a),
-          pattern(boost::make_u32regex(ustr)),
-          format(f) {}
-
+    regex_replace_node (expr_node const& a, UnicodeString const& ustr, UnicodeString const& f);
     expr_node expr;
     boost::u32regex pattern;
     UnicodeString format;
 };
+
 #else
+
 struct regex_match_node
 {
-    regex_match_node (expr_node const& a, std::string const& str)
-        : expr(a),
-          pattern(str) {}
-
+    regex_match_node (expr_node const& a, std::string const& str);
     expr_node expr;
     boost::regex pattern;
 };
@@ -275,11 +269,7 @@ struct regex_match_node
 
 struct regex_replace_node
 {
-    regex_replace_node (expr_node const& a, std::string const& str, std::string const& f)
-        : expr(a),
-          pattern(str),
-          format(f) {}
-
+    regex_replace_node (expr_node const& a, std::string const& str, std::string const& f);
     expr_node expr;
     boost::regex pattern;
     std::string format;

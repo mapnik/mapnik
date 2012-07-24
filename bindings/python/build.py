@@ -43,15 +43,7 @@ prefix = env['PREFIX']
 target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik')
 target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
-libraries = ['mapnik']
-
-if env['BOOST_PYTHON_LIB']:
-    libraries.append(env['BOOST_PYTHON_LIB'])
-else:
-    if is_py3():
-        libraries.append('boost_python3%s' % env['BOOST_APPEND'])
-    else:
-        libraries.append('boost_python%s' % env['BOOST_APPEND'])
+libraries = ['mapnik',env['BOOST_PYTHON_LIB']]
 
 # TODO - do solaris/fedora need direct linking too?
 if env['PLATFORM'] == 'Darwin':

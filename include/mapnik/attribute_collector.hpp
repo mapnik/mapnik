@@ -47,6 +47,11 @@ struct expression_attributes : boost::static_visitor<void>
         boost::ignore_unused_variable_warning(x);
     }
 
+    void operator() (geometry_type_attribute const& type) const
+    {
+        // do nothing
+    }
+
     void operator() (attribute const& attr) const
     {
         names_.insert(attr.name());

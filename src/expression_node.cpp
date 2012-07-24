@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,26 +20,33 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_ARROW_HPP
-#define MAPNIK_ARROW_HPP
+#include <mapnik/expression_node.hpp>
 
-#include <mapnik/box2d.hpp>
-
-namespace mapnik {
-
-class arrow
+namespace mapnik
 {
-public:
-    arrow();
-    void rewind(unsigned path_id);
-    unsigned vertex(double* x, double* y);
-    box2d<double> extent() const;
-private:
-    unsigned pos_;
-    double x_[7];
-    double y_[7];
-    unsigned cmd_[9];
-};
-}
 
-#endif // MAPNIK_ARROW_HPP
+#if defined(BOOST_REGEX_HAS_ICU)
+
+regex_match_node::regex_match_node (expr_node const& a, UnicodeString const& ustr)
+    : expr(a),
+      pattern(boost::make_u32regex(ustr)) {}
+
+regex_replace_node::regex_replace_node (expr_node const& a, UnicodeString const& ustr, UnicodeString const& f)
+    : expr(a),
+      pattern(boost::make_u32regex(ustr)),
+      format(f) {}
+
+#else
+regex_match_node::pattern boost::regex;
+
+regex_match_node::regex_match_node (expr_node const& a, std::string const& str)
+    : expr(a),
+      pattern(str) {}
+
+regex_replace_node::regex_replace_node (expr_node const& a, std::string const& str, std::string const& f)
+    : expr(a),
+      pattern(str),
+      format(f) {}
+#endif
+
+}

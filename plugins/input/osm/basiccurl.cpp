@@ -22,6 +22,8 @@
 
 #include "basiccurl.h"
 
+#include <iostream>
+
 CURL_LOAD_DATA* grab_http_response(const char* url)
 {
     CURL_LOAD_DATA* data;
@@ -39,7 +41,6 @@ CURL_LOAD_DATA* grab_http_response(const char* url)
 
 CURL_LOAD_DATA* do_grab(CURL* curl,const char* url)
 {
-    CURLcode res;
     CURL_LOAD_DATA* data = (CURL_LOAD_DATA*)malloc(sizeof(CURL_LOAD_DATA));
     data->data = NULL;
     data->nbytes = 0;
@@ -48,7 +49,10 @@ CURL_LOAD_DATA* do_grab(CURL* curl,const char* url)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, response_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, data);
 
-    res = curl_easy_perform(curl);
+    CURLcode res = curl_easy_perform(curl);
+    if (res !=0) {
+        std::clog << "error grabbing data\n";
+    }
 
     return data;
 }

@@ -69,7 +69,6 @@ HEADERS += \
     ../include/mapnik/agg_pattern_source.hpp \
     ../include/mapnik/agg_rasterizer.hpp \
     ../include/mapnik/agg_renderer.hpp \
-    ../include/mapnik/arrow.hpp \
     ../include/mapnik/attribute.hpp \
     ../include/mapnik/attribute_collector.hpp \
     ../include/mapnik/attribute_descriptor.hpp \

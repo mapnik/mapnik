@@ -135,29 +135,52 @@ svg_parser::~svg_parser() {}
 void svg_parser::parse(std::string const& filename)
 {
     xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename.c_str());
-    if (reader != 0)
+    if (reader == NULL)
     {
-        int ret = xmlTextReaderRead(reader);
-        try {
-            while (ret == 1)
-            {
-                process_node(reader);
-                ret = xmlTextReaderRead(reader);
-            }
-        }
-        catch (std::exception const& ex)
-        {
-            xmlFreeTextReader(reader);
-            throw;
-        }
-        xmlFreeTextReader(reader);
-        if (ret != 0)
-        {
-            MAPNIK_LOG_ERROR(svg_parser) << "Failed to parse " << filename;
-        }
-    } else {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to open " << filename;
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to open '" << filename << "'";
     }
+    else if (!parse_reader(reader))
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << filename << "'";
+    }
+}
+
+void svg_parser::parse_from_string(std::string const& svg)
+{
+    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),svg.size(),NULL,NULL,
+        (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
+    if (reader == NULL)
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
+    }
+    else if (!parse_reader(reader))
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
+    }
+}
+
+bool svg_parser::parse_reader(xmlTextReaderPtr reader)
+{
+    int ret = xmlTextReaderRead(reader);
+    try {
+        while (ret == 1)
+        {
+            process_node(reader);
+            ret = xmlTextReaderRead(reader);
+        }
+    }
+    catch (std::exception const& ex)
+    {
+        xmlFreeTextReader(reader);
+        throw;
+    }
+    xmlFreeTextReader(reader);
+    if (ret != 0)
+    {
+        // parsing failure
+        return false;
+    }
+    return true;
 }
 
 void svg_parser::process_node(xmlTextReaderPtr reader)
@@ -384,7 +407,8 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
     else if(xmlStrEqual(name, BAD_CAST "opacity"))
     {
         double opacity = parse_double((const char*)value);
-        path_.opacity(opacity);
+        path_.stroke_opacity(opacity);
+        path_.fill_opacity(opacity);
     }
     else if (xmlStrEqual(name, BAD_CAST "visibility"))
     {

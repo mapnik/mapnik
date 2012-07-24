@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+#include <mapnik/geom_util.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/metawriter.hpp>
 #include <mapnik/marker.hpp>
@@ -64,14 +65,14 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     if (marker)
     {
         box2d<double> const& bbox = (*marker)->bounding_box();
-        coord2d const center = bbox.center();
+        coord2d center = bbox.center();
 
         agg::trans_affine tr;
         evaluate_transform(tr, feature, sym.get_image_transform());
         tr = agg::trans_affine_scaling(scale_factor_) * tr;
 
-        agg::trans_affine_translation const recenter(-center.x, -center.y);
-        agg::trans_affine const recenter_tr = recenter * tr;
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr;
 
         for (unsigned i=0; i<feature.num_geometries(); ++i)
@@ -81,9 +82,9 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             double y;
             double z=0;
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                geom.label_position(&x, &y);
+                label::centroid(geom, x, y);
             else
-                geom.label_interior_position(&x, &y);
+                label::interior_position(geom ,x, y);
 
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
@@ -93,7 +94,11 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                 detector_->has_placement(label_ext))
             {
 
-                render_marker(pixel_position(x, y), **marker, tr, sym.get_opacity(), sym.comp_op());
+                render_marker(pixel_position(x, y),
+                              **marker,
+                              tr,
+                              sym.get_opacity(),
+                              sym.comp_op());
 
                 if (/* DEBUG */ 0) {
                     debug_draw_box(label_ext, 0, 0, 0.0);
@@ -114,4 +119,3 @@ template void agg_renderer<image_32>::process(point_symbolizer const&,
                                               proj_transform const&);
 
 }
-

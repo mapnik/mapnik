@@ -32,6 +32,7 @@
 #include <QItemDelegate>
 #include <QSlider>
 #include <QComboBox>
+#include <QDoubleSpinBox>
 
 // mapnik
 
@@ -97,12 +98,15 @@ MainWindow::MainWindow()
     //connect mapview to layerlist
     connect(mapWidget_, SIGNAL(mapViewChanged()),layerTab_, SLOT(update()));
     // slider
-    connect(slider_,SIGNAL(valueChanged(int)),mapWidget_,SLOT(zoomToLevel(int)));    
+    connect(slider_,SIGNAL(valueChanged(int)),mapWidget_,SLOT(zoomToLevel(int)));
     // renderer selector
-    connect(renderer_selector_,SIGNAL(currentIndexChanged(QString const&)), 
+    connect(renderer_selector_,SIGNAL(currentIndexChanged(QString const&)),
             mapWidget_, SLOT(updateRenderer(QString const&)));
-    
-    // 
+
+    // scale factor
+    connect(scale_factor_,SIGNAL(valueChanged(double)),
+            mapWidget_, SLOT(updateScaleFactor(double)));
+    //
     connect(layerTab_,SIGNAL(update_mapwidget()),mapWidget_,SLOT(updateMap()));
     connect(layerTab_,SIGNAL(layerSelected(int)),
             mapWidget_,SLOT(layerSelected(int)));
@@ -373,16 +377,23 @@ void MainWindow::createToolBars()
     fileToolBar->addAction(infoAct);
     fileToolBar->addAction(reloadAct);
     fileToolBar->addAction(printAct);
-    
+
     renderer_selector_ = new QComboBox(fileToolBar);
     renderer_selector_->setFocusPolicy(Qt::NoFocus);
     renderer_selector_->addItem("AGG");
 #ifdef HAVE_CAIRO
     renderer_selector_->addItem("Cairo");
 #endif
-    renderer_selector_->addItem("Grid");    
+    renderer_selector_->addItem("Grid");
     fileToolBar->addWidget(renderer_selector_);
 
+    scale_factor_ = new QDoubleSpinBox(fileToolBar);
+    scale_factor_->setMinimum(0.1);
+    scale_factor_->setMaximum(5.0);
+    scale_factor_->setSingleStep(0.1);
+    scale_factor_->setValue(1.0);
+
+    fileToolBar->addWidget(scale_factor_);
     slider_ = new QSlider(Qt::Horizontal,fileToolBar);
     slider_->setRange(1,18);
     slider_->setTickPosition(QSlider::TicksBelow);

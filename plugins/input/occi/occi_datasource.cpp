@@ -352,7 +352,7 @@ void occi_datasource::bind() const
     is_bound_ = true;
 }
 
-std::string occi_datasource::name()
+const char * occi_datasource::name()
 {
     return "occi";
 }

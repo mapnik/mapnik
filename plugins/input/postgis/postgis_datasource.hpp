@@ -51,7 +51,7 @@ public:
     postgis_datasource(const parameters &params, bool bind=true);
     ~postgis_datasource();
     mapnik::datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;

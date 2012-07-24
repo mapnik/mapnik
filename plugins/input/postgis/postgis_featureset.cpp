@@ -62,7 +62,7 @@ postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
 
 feature_ptr postgis_featureset::next()
 {
-    if (rs_->next())
+    while (rs_->next())
     {
         // new feature
         unsigned pos = 1;
@@ -107,10 +107,12 @@ feature_ptr postgis_featureset::next()
         // parse geometry
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
-        geometry_utils::from_wkb(feature->paths(), data, size);
+        if (!geometry_utils::from_wkb(feature->paths(), data, size))
+            continue;
+
         totalGeomSize_ += size;
 
-        int num_attrs = ctx_->size() + 1;
+        unsigned num_attrs = ctx_->size() + 1;
         for (; pos < num_attrs; ++pos)
         {
             std::string name = rs_->getFieldName(pos);
@@ -207,11 +209,7 @@ feature_ptr postgis_featureset::next()
         }
         return feature;
     }
-    else
-    {
-        rs_->close();
-        return feature_ptr();
-    }
+    return feature_ptr();
 }
 
 

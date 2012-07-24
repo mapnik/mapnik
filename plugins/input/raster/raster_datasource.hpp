@@ -34,7 +34,7 @@ public:
     raster_datasource(const mapnik::parameters& params, bool bind=true);
     virtual ~raster_datasource();
     datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     mapnik::featureset_ptr features(const mapnik::query& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;

@@ -65,19 +65,21 @@ public:
         (*bitmap_data_)->set(0xff000000);
     }
 
-    marker(const boost::optional<mapnik::image_ptr> &data) : bitmap_data_(data)
+    marker(const boost::optional<mapnik::image_ptr> &data)
+        : bitmap_data_(data)
     {
 
     }
 
-    marker(const boost::optional<mapnik::path_ptr> &data) : vector_data_(data)
+    marker(const boost::optional<mapnik::path_ptr> &data)
+        : vector_data_(data)
     {
 
     }
 
-    marker(const marker& rhs) : bitmap_data_(rhs.bitmap_data_), vector_data_(rhs.vector_data_)
-    {
-    }
+    marker(const marker& rhs)
+        : bitmap_data_(rhs.bitmap_data_), vector_data_(rhs.vector_data_)
+    {}
 
     box2d<double> bounding_box() const
     {

@@ -103,13 +103,17 @@ source = Split(
     color.cpp
     conversions.cpp
     image_compositing.cpp
+    image_scaling.cpp
     box2d.cpp
     building_symbolizer.cpp
     datasource_cache.cpp
     debug.cpp
     deepcopy.cpp
+    expression_node.cpp
+    expression_grammar.cpp
     expression_string.cpp
     expression.cpp
+    transform_expression_grammar.cpp
     transform_expression.cpp
     feature_kv_iterator.cpp
     feature_type_style.cpp
@@ -140,6 +144,7 @@ source = Split(
     text_symbolizer.cpp
     tiff_reader.cpp
     wkb.cpp
+    wkb_generator.cpp
     projection.cpp
     proj_transform.cpp
     distance.cpp
@@ -148,7 +153,6 @@ source = Split(
     stroke.cpp
     symbolizer.cpp
     symbolizer_helpers.cpp
-    arrow.cpp
     unicode.cpp
     markers_symbolizer.cpp
     metawriter.cpp
@@ -163,6 +167,7 @@ source = Split(
     svg_points_parser.cpp
     svg_transform_parser.cpp
     warp.cpp
+    json/feature_grammar.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
     markers_placement.cpp

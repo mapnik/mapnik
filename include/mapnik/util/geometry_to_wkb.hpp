@@ -119,15 +119,16 @@ namespace mapnik { namespace util {
 
     wkb_buffer_ptr to_point_wkb( geometry_type const& g, wkbByteOrder byte_order)
     {
-        assert(g.num_points() == 1);
+        assert(g.size() == 1);
         std::size_t size = 1 + 4 + 8*2 ; // byteOrder + wkbType + Point
         wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
         boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
         ss.write(reinterpret_cast<char*>(&byte_order),1);
         int type = static_cast<int>(mapnik::Point);
         write(ss,type,4,byte_order);
-        double x,y;
-        g.get_vertex(0,&x,&y);
+        double x(0);
+        double y(0);
+        g.vertex(0,&x,&y);
         write(ss,x,8,byte_order);
         write(ss,y,8,byte_order);
         assert(ss.good());
@@ -136,7 +137,7 @@ namespace mapnik { namespace util {
 
     wkb_buffer_ptr to_line_string_wkb( geometry_type const& g, wkbByteOrder byte_order)
     {
-        unsigned num_points = g.num_points();
+        unsigned num_points = g.size();
         assert(num_points > 1);
         std::size_t size = 1 + 4 + 4 + 8*2*num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
         wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
@@ -145,10 +146,11 @@ namespace mapnik { namespace util {
         int type = static_cast<int>(mapnik::LineString);
         write(ss,type,4,byte_order);
         write(ss,num_points,4,byte_order);
-        double x,y;
+        double x(0);
+        double y(0);
         for (unsigned i=0; i< num_points; ++i)
         {
-            g.get_vertex(i,&x,&y);
+            g.vertex(i,&x,&y);
             write(ss,x,8,byte_order);
             write(ss,y,8,byte_order);
         }
@@ -158,18 +160,19 @@ namespace mapnik { namespace util {
 
     wkb_buffer_ptr to_polygon_wkb( geometry_type const& g, wkbByteOrder byte_order)
     {
-        unsigned num_points = g.num_points();
+        unsigned num_points = g.size();
         assert(num_points > 1);
 
         typedef std::pair<double,double> point_type;
         typedef std::vector<point_type> linear_ring;
         boost::ptr_vector<linear_ring> rings;
 
-        double x,y;
+        double x(0);
+        double y(0);
         std::size_t size = 1 + 4 + 4 ; // byteOrder + wkbType + numRings
         for (unsigned i=0; i< num_points; ++i)
         {
-            unsigned command = g.get_vertex(i,&x,&y);
+            unsigned command = g.vertex(i,&x,&y);
             if (command == SEG_MOVETO)
             {
                 rings.push_back(new linear_ring); // start new loop

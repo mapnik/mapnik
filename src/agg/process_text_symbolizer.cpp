@@ -35,9 +35,10 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
-            detector_->extent().width(), detector_->extent().height(),
+            width_,height_,
             scale_factor_,
-            t_, font_manager_, *detector_, query_extent_);
+            t_, font_manager_, *detector_,
+            query_extent_);
 
     text_renderer<T> ren(*current_buffer_,
                          font_manager_,
@@ -47,10 +48,10 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 
     while (helper.next()) 
     {
-        placements_type &placements = helper.placements();
+        placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            ren.prepare_glyphs(&(placements[ii]));
+            ren.prepare_glyphs(placements[ii]);
             ren.render(placements[ii].center);
         }
     }

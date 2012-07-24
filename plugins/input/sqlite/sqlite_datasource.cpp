@@ -473,7 +473,7 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
     }
 }
 
-std::string sqlite_datasource::name()
+const char * sqlite_datasource::name()
 {
     return "sqlite";
 }
@@ -522,17 +522,19 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
             if (data)
             {
                 boost::ptr_vector<mapnik::geometry_type> paths;
-                mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto);
-                mapnik::util::to_ds_type(paths,result);
-                if (result)
+                if (mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto))
                 {
-                    int type = static_cast<int>(*result);
-                    if (multi_type > 0 && multi_type != type)
+                    mapnik::util::to_ds_type(paths,result);
+                    if (result)
                     {
-                        result.reset(mapnik::datasource::Collection);
-                        return result;
+                        int type = static_cast<int>(*result);
+                        if (multi_type > 0 && multi_type != type)
+                        {
+                            result.reset(mapnik::datasource::Collection);
+                            return result;
+                        }
+                        multi_type = type;
                     }
-                    multi_type = type;
                 }
             }
         }
