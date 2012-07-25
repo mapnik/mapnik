@@ -23,6 +23,8 @@
 #if defined(HAVE_CAIRO)
 
 // mapnik
+#include <mapnik/layer.hpp>
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/cairo_renderer.hpp>
 #include <mapnik/image_util.hpp>
@@ -52,7 +54,6 @@
 #include <boost/make_shared.hpp>
 
 // agg
-
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_smooth_poly1.h"

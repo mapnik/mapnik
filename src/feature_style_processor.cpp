@@ -20,8 +20,9 @@
  *
  *****************************************************************************/
 
-//mapnik
+// mapnik
 #include <mapnik/feature_style_processor.hpp>
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/memory_datasource.hpp>
@@ -36,7 +37,8 @@
 // boost
 #include <boost/foreach.hpp>
 #include <boost/concept_check.hpp>
-//stl
+
+// stl
 #include <vector>
 
 #if defined(HAVE_CAIRO)

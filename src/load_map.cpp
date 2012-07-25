@@ -22,9 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-
 #include <mapnik/load_map.hpp>
-
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -39,16 +37,12 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/xml_loader.hpp>
-
 #include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
-
 #include <mapnik/svg/svg_path_parser.hpp>
-
 #include <mapnik/metawriter_factory.hpp>
-
 #include <mapnik/text_placements/registry.hpp>
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
