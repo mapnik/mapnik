@@ -22,33 +22,36 @@
 #ifndef PLACEMENTS_DUMMY_HPP
 #define PLACEMENTS_DUMMY_HPP
 
+// mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/text_placements/base.hpp>
+// boost
+#include <boost/concept_check.hpp>
 
 namespace mapnik
 {
 
 class text_placements_info_dummy;
 
-/** Dummy placement algorithm. Always takes the default value. */
+// Dummy placement algorithm. Always takes the default value.
 class MAPNIK_DECL text_placements_dummy: public text_placements
 {
 public:
-    text_placement_info_ptr get_placement_info(double scale_factor) const;
-    friend class text_placement_info_dummy;
+text_placement_info_ptr get_placement_info(double scale_factor) const;
+friend class text_placement_info_dummy;
 };
 
-/** Placement info object for dummy placement algorithm. Always takes the default value. */
+// Placement info object for dummy placement algorithm. Always takes the default value.
 class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
 {
 public:
-    text_placement_info_dummy(text_placements_dummy const* parent, double scale_factor)
-        : text_placement_info(parent, scale_factor),
-        state(0), parent_(parent) {}
+text_placement_info_dummy(text_placements_dummy const* parent, double scale_factor)
+    : text_placement_info(parent, scale_factor),
+      state(0) {}
+
     bool next();
 private:
-    unsigned state;
-    text_placements_dummy const* parent_;
+unsigned state;
 };
 
 } //ns mapnik

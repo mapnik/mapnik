@@ -142,26 +142,18 @@ private:
 };
 
 template <typename Rasterizer, typename RendererBuffer>
-void render_raster_marker(Rasterizer & ras, RendererBuffer & renb, agg::scanline_u8 & sl,
-                          pixel_position const& pos, image_data_32 const& src,
-                          agg::trans_affine const& tr,double opacity,
-                          double scale_factor)
+void render_raster_marker(Rasterizer & ras, RendererBuffer & renb,
+                          agg::scanline_u8 & sl, image_data_32 const& src,
+                          agg::trans_affine const& marker_tr, double opacity)
 {
 
     double width  = src.width();
     double height = src.height();
     double p[8];
-    p[0] = pos.x;         p[1] = pos.y;
-    p[2] = pos.x + width; p[3] = pos.y;
-    p[4] = pos.x + width; p[5] = pos.y + height;
-    p[6] = pos.x;         p[7] = pos.y + height;
-
-    agg::trans_affine marker_tr;
-
-    marker_tr *= agg::trans_affine_translation(-pos.x,-pos.y);
-    marker_tr *= tr;
-    marker_tr *= agg::trans_affine_scaling(scale_factor);
-    marker_tr *= agg::trans_affine_translation(pos.x,pos.y);
+    p[0] = 0;     p[1] = 0;
+    p[2] = width; p[3] = 0;
+    p[4] = width; p[5] = height;
+    p[6] = 0;     p[7] = height;
 
     marker_tr.transform(&p[0], &p[1]);
     marker_tr.transform(&p[2], &p[3]);
@@ -244,8 +236,8 @@ struct raster_markers_rasterizer_dispatch
                 detector_.has_placement(transformed_bbox))
             {
 
-                render_raster_marker(ras_, renb_, sl_, pixel_position(x,y), src_,
-                                     marker_trans_, sym_.get_opacity(), scale_factor_);
+                render_raster_marker(ras_, renb_, sl_, src_,
+                                     matrix, sym_.get_opacity());
                 if (!sym_.get_ignore_placement())
                     detector_.insert(transformed_bbox);
             }
@@ -261,8 +253,9 @@ struct raster_markers_rasterizer_dispatch
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
-                render_raster_marker(ras_, renb_, sl_,  pixel_position(x,y), src_,
-                                     matrix, sym_.get_opacity(), scale_factor_);
+                matrix.translate(x,y);
+                render_raster_marker(ras_, renb_, sl_, src_,
+                                     matrix, sym_.get_opacity());
             }
         }
     }
