@@ -1058,7 +1058,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         if (parse_stroke(strk,node))
             sym.set_stroke(strk);
 
-        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_LINE_PLACEMENT);
+        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_POINT_PLACEMENT);
         sym.set_marker_placement(placement);
         parse_symbolizer_base(sym, node);
         rule.append(sym);
