@@ -40,14 +40,11 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::coord2d;
-using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::feature_factory;
-
 
 geos_featureset::geos_featureset(GEOSGeometry* geometry,
                                  GEOSGeometry* extent,

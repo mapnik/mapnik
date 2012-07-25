@@ -33,7 +33,6 @@
 #include "raster_featureset.hpp"
 
 using mapnik::query;
-using mapnik::CoordTransform;
 using mapnik::image_reader;
 using mapnik::Feature;
 using mapnik::feature_ptr;
@@ -81,7 +80,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 
                 if (image_width > 0 && image_height > 0)
                 {
-                    CoordTransform t(image_width, image_height, extent_, 0, 0);
+                    mapnik::CoordTransform t(image_width, image_height, extent_, 0, 0);
                     box2d<double> intersect = bbox_.intersect(curIter_->envelope());
                     box2d<double> ext = t.forward(intersect);
                     box2d<double> rem = policy_.transform(ext);
