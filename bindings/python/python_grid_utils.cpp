@@ -26,6 +26,8 @@
 #include <boost/foreach.hpp>
 
 // mapnik
+#include <mapnik/map.hpp>
+#include <mapnik/layer.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid.hpp>

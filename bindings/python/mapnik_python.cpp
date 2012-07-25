@@ -72,6 +72,7 @@ void export_logger();
 
 #include <mapnik/version.hpp>
 #include <mapnik/value_error.hpp>
+#include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
 #ifdef HAVE_CAIRO
