@@ -25,10 +25,14 @@ import sys
 import glob
 from copy import copy
 from subprocess import Popen, PIPE
+from colorizer import colorizer
+col = colorizer()
 
 Import('env')
 
 lib_env = env.Clone()
+
+col.colorize(lib_env)
 
 def call(cmd, silent=True):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
