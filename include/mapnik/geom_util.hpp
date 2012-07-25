@@ -334,10 +334,10 @@ template <typename PathType>
 bool hit_test(PathType & path, double x, double y, double tol)
 {
     bool inside=false;
-    double x0(0);
-    double y0(0);
-    double x1(0);
-    double y1(0);
+    double x0 = 0 ;
+    double y0 = 0;
+    double x1 = 0;
+    double y1 = 0;
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
     if (command == SEG_END) return false;
