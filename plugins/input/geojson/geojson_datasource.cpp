@@ -25,7 +25,10 @@
 
 #include <fstream>
 #include <iostream>
+#include <algorithm>
+
 // boost
+#include <boost/variant.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
@@ -64,6 +67,44 @@ geojson_datasource::geojson_datasource(parameters const& params, bool bind)
     }
 }
 
+struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeType>
+{
+    mapnik::eAttributeType operator() (int /*val*/) const
+    {
+        return mapnik::Integer;
+    }
+
+    mapnik::eAttributeType operator() (double /*val*/) const
+    {
+        return mapnik::Double;
+    }
+
+    mapnik::eAttributeType operator() (float /*val*/) const
+    {
+        return mapnik::Double;
+    }
+
+    mapnik::eAttributeType operator() (bool /*val*/) const
+    {
+        return mapnik::Boolean;
+    }
+
+    mapnik::eAttributeType operator() (std::string const& /*val*/) const
+    {
+        return mapnik::String;
+    }
+
+    mapnik::eAttributeType operator() (UnicodeString const& /*val*/) const
+    {
+        return mapnik::String;
+    }
+
+    mapnik::eAttributeType operator() (mapnik::value_null const& /*val*/) const
+    {
+        return mapnik::String;
+    }
+};
+
 void geojson_datasource::bind() const
 {
     if (is_bound_) return;
@@ -95,6 +136,13 @@ void geojson_datasource::bind() const
         {
             extent_ = box;
             first = false;
+            mapnik::feature_kv_iterator itr = f->begin();
+            mapnik::feature_kv_iterator end = f->end();
+            for ( ;itr!=end; ++itr)
+            {
+                desc_.add_descriptor(mapnik::attribute_descriptor(boost::get<0>(*itr),
+                    boost::apply_visitor(attr_value_converter(),boost::get<1>(*itr).base())));
+            }
         }
         else
         {
@@ -120,11 +168,6 @@ boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry
 mapnik::datasource::datasource_t geojson_datasource::type() const 
 {
     return type_;
-}
-
-std::map<std::string, mapnik::parameters> geojson_datasource::get_statistics() const 
-{
-    return statistics_;
 }
 
 mapnik::box2d<double> geojson_datasource::envelope() const
