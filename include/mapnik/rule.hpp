@@ -23,7 +23,7 @@
 #ifndef MAPNIK_RULE_HPP
 #define MAPNIK_RULE_HPP
 
-// mapni
+// mapnik
 #include <mapnik/building_symbolizer.hpp>
 #include <mapnik/line_symbolizer.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
