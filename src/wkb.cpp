@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/coord_array.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
 
@@ -33,6 +34,9 @@
 
 namespace mapnik
 {
+
+typedef coord_array<coord2d> CoordinateArray;
+
 struct wkb_reader : boost::noncopyable
 {
 private:

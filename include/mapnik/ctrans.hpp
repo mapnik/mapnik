@@ -27,7 +27,6 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
-#include <mapnik/coord_array.hpp>
 #include <mapnik/proj_transform.hpp>
 
 // stl
@@ -35,8 +34,6 @@
 
 namespace mapnik
 {
-
-typedef coord_array<coord2d> CoordinateArray;
 
 template <typename Transform, typename Geometry>
 struct MAPNIK_DECL coord_transform
@@ -226,24 +223,6 @@ public:
         backward(&x0, &y0);
         backward(&x1, &y1);
         return box2d<double>(x0, y0, x1, y1);
-    }
-
-    inline CoordinateArray& forward(CoordinateArray& coords) const
-    {
-        for (unsigned i = 0; i < coords.size(); ++i)
-        {
-            forward(coords[i]);
-        }
-        return coords;
-    }
-
-    inline CoordinateArray& backward(CoordinateArray& coords) const
-    {
-        for (unsigned i = 0; i < coords.size(); ++i)
-        {
-            backward(coords[i]);
-        }
-        return coords;
     }
 
     inline box2d<double> const& extent() const

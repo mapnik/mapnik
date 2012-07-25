@@ -26,7 +26,6 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
-#include <mapnik/coord_array.hpp>
 #include <mapnik/proj_transform.hpp>
 
 // boost
