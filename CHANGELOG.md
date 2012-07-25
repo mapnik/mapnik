@@ -11,6 +11,9 @@ For a complete change history, see the git log.
 
 Not yet released
 
+- Added support for filtering on a features geometry type, either `point`, `linestring`, 'polygon`,
+  or `collection` using the expression keyword of `[mapnik::geometry_type]` (#546)
+
 - MarkersSymbolizer width and height moved to expressions (#1102)
 
 - Added style-level 'opacity' (#314)
