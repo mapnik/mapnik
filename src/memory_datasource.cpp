@@ -22,6 +22,8 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/feature_factory.hpp>

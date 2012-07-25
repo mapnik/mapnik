@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/feature_style_processor.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/datasource.hpp>
