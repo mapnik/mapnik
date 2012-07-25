@@ -23,21 +23,25 @@
 #ifndef KISMET_DATASOURCE_HPP
 #define KISMET_DATASOURCE_HPP
 
-// stl
-#include <list>
-
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
-#include <mapnik/wkb.hpp>
 
 // boost
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
 
-// sqlite
+// stl
+#include <list>
+#include <vector>
+#include <string>
+
 #include "kismet_types.hpp"
 
 class kismet_datasource : public mapnik::datasource

@@ -29,6 +29,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/sql_utils.hpp>
 
