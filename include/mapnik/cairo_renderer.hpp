@@ -31,7 +31,7 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
-//#include <mapnik/marker.hpp>
+#include <mapnik/rule.hpp> // for all symbolizers
 
 // cairo
 #include <cairomm/context.h>

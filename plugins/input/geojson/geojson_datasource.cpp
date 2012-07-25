@@ -36,6 +36,7 @@
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/json/feature_collection_parser.hpp>

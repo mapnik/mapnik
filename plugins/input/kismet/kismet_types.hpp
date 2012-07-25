@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>

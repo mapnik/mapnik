@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/ctrans.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // boost

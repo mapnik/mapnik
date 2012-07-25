@@ -37,7 +37,6 @@ regex_replace_node::regex_replace_node (expr_node const& a, UnicodeString const&
       format(f) {}
 
 #else
-regex_match_node::pattern boost::regex;
 
 regex_match_node::regex_match_node (expr_node const& a, std::string const& str)
     : expr(a),

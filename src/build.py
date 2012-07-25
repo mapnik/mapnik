@@ -25,10 +25,14 @@ import sys
 import glob
 from copy import copy
 from subprocess import Popen, PIPE
+from colorizer import colorizer
+col = colorizer()
 
 Import('env')
 
 lib_env = env.Clone()
+
+col.colorize(lib_env)
 
 def call(cmd, silent=True):
     stdin, stderr = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
@@ -101,6 +105,7 @@ else: # unix, non-macos
 source = Split(
     """
     color.cpp
+    css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
     image_scaling.cpp
@@ -133,6 +138,7 @@ source = Split(
     parse_path.cpp
     parse_transform.cpp
     palette.cpp
+    path_expression_grammar.cpp
     placement_finder.cpp
     plugin.cpp
     png_reader.cpp
@@ -144,6 +150,7 @@ source = Split(
     text_symbolizer.cpp
     tiff_reader.cpp
     wkb.cpp
+    wkb_generator.cpp
     projection.cpp
     proj_transform.cpp
     distance.cpp

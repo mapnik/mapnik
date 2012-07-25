@@ -30,6 +30,8 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature_layer_desc.hpp>

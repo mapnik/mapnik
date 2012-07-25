@@ -22,9 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-
 #include <mapnik/load_map.hpp>
-
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -39,16 +37,12 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/xml_loader.hpp>
-
 #include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
-
 #include <mapnik/svg/svg_path_parser.hpp>
-
 #include <mapnik/metawriter_factory.hpp>
-
 #include <mapnik/text_placements/registry.hpp>
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -1064,7 +1058,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         if (parse_stroke(strk,node))
             sym.set_stroke(strk);
 
-        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_LINE_PLACEMENT);
+        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_POINT_PLACEMENT);
         sym.set_marker_placement(placement);
         parse_symbolizer_base(sym, node);
         rule.append(sym);

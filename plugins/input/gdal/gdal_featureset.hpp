@@ -31,6 +31,8 @@
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
 
+#include "gdal_datasource.hpp"
+
 class GDALDataset;
 class GDALRasterBand;
 

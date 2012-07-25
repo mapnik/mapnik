@@ -20,28 +20,43 @@
  *
  *****************************************************************************/
 
-#ifndef OGR_CONVERTER_HPP
-#define OGR_CONVERTER_HPP
-
 // mapnik
-#include <mapnik/datasource.hpp>
-#include <mapnik/params.hpp>
+#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/attribute.hpp>
 
-// ogr
-#include <ogrsf_frmts.h>
+// boost
+#include <boost/spirit/home/phoenix/object/construct.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
 
-class ogr_converter
+namespace mapnik
 {
-public:
 
-    static void convert_geometry (OGRGeometry* geom, mapnik::feature_ptr feature);
-    static void convert_collection (OGRGeometryCollection* geom, mapnik::feature_ptr feature);
-    static void convert_point (OGRPoint* geom, mapnik::feature_ptr feature);
-    static void convert_linestring (OGRLineString* geom, mapnik::feature_ptr feature);
-    static void convert_polygon (OGRPolygon* geom, mapnik::feature_ptr feature);
-    static void convert_multipoint (OGRMultiPoint* geom, mapnik::feature_ptr feature);
-    static void convert_multilinestring (OGRMultiLineString* geom, mapnik::feature_ptr feature);
-    static void convert_multipolygon (OGRMultiPolygon* geom, mapnik::feature_ptr feature);
-};
+template <typename Iterator>
+path_expression_grammar<Iterator>::path_expression_grammar()
+    : path_expression_grammar::base_type(expr)
+{
+    using boost::phoenix::construct;
+    using standard_wide::char_;
+    using qi::_1;
+    using qi::_val;
+    using qi::lit;
+    using qi::lexeme;
+    using phoenix::push_back;
+    
+    expr =
+        * (
+            str [ push_back(_val, _1)]
+            |
+            ( '[' >> attr [ push_back(_val, construct<mapnik::attribute>( _1 )) ] >> ']')
+            )
+        ;
+    
+    attr %= +(char_ - ']');
+    str  %= lexeme[+(char_ -'[')];
+}
 
-#endif // OGR_CONVERTER_HPP
+template struct mapnik::path_expression_grammar<std::string::const_iterator>;
+
+}

@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
 #include "shape_utils.hpp"
 
 // boost
