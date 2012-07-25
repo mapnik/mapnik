@@ -114,8 +114,9 @@ struct geometry_types : qi::symbols<char,int>
     {
         add
             ("point",1)
-            ("line", 2)
+            ("linestring", 2)
             ("polygon",3)
+            ("collection",4)
             ;
     }
 };
