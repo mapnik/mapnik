@@ -496,6 +496,11 @@ public:
             {
                 line_to(x, y);
             }
+            else if (cm == SEG_CLOSE)
+            {
+                line_to(x, y);
+                close_path();
+            }
         }
     }
 
