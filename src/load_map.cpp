@@ -1055,8 +1055,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         if (height) sym.set_height(*height);
 
         stroke strk;
-        if (parse_stroke(strk,node))
-            sym.set_stroke(strk);
+        sym.set_stroke(strk);
 
         marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_POINT_PLACEMENT);
         sym.set_marker_placement(placement);
@@ -1302,7 +1301,6 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 
 bool map_parser::parse_stroke(stroke & strk, xml_node const & sym)
 {
-    bool result = false;
     // stroke color
     optional<color> c = sym.get_opt_attr<color>("stroke");
     if (c)
@@ -1313,7 +1311,7 @@ bool map_parser::parse_stroke(stroke & strk, xml_node const & sym)
 
     // stroke-width
     optional<double> width =  sym.get_opt_attr<double>("stroke-width");
-    if (width && *width > 0)
+    if (width)
     {
         strk.set_width(*width);
         result = true;
