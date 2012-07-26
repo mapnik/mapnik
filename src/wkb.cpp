@@ -353,10 +353,11 @@ private:
                     CoordinateArray ar(num_points);
                     read_coords(ar);
                     poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points; ++j)
+                    for (int j = 1; j < num_points - 1; ++j)
                     {
                         poly->line_to(ar[j].x, ar[j].y);
                     }
+                    poly->close(ar[num_points-1].x, ar[num_points-1].y);
                 }
             }
             if (poly->size() > 2) // ignore if polygon has less than 3 vertices
@@ -388,10 +389,11 @@ private:
                     CoordinateArray ar(num_points);
                     read_coords_xyz(ar);
                     poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points; ++j)
+                    for (int j = 1; j < num_points - 1; ++j)
                     {
                         poly->line_to(ar[j].x, ar[j].y);
                     }
+                    poly->close(ar[num_points-1].x, ar[num_points-1].y);
                 }
             }
             if (poly->size() > 2) // ignore if polygon has less than 3 vertices
