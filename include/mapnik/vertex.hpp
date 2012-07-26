@@ -29,10 +29,10 @@ namespace mapnik
 {
 
 enum CommandType {
-    SEG_END   =0,
-    SEG_MOVETO=1,
-    SEG_LINETO=2,
-    SEG_CLOSE =3
+    SEG_END    = 0,
+    SEG_MOVETO = 1,
+    SEG_LINETO = 2,
+    SEG_CLOSE = (0x40 | 0x0f)
 };
 
 template <typename T,int dim>
