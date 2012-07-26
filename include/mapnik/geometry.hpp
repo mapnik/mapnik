@@ -121,6 +121,11 @@ public:
         push_vertex(x,y,SEG_MOVETO);
     }
 
+    void close(coord_type x, coord_type y)
+    {
+        push_vertex(x,y,SEG_CLOSE);
+    }
+
     unsigned vertex(double* x, double* y) const
     {
         return cont_.get_vertex(itr_++,x,y);
