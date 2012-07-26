@@ -206,12 +206,16 @@ void shape_io::read_polygon(mapnik::geometry_container & geom)
         double y = record.read_double();
         poly->move_to(x, y);
 
-        for (int j=start+1;j<end;j++)
+        for (int j=start+1;j<end-1;j++)
         {
             x = record.read_double();
             y = record.read_double();
             poly->line_to(x, y);
         }
+        x = record.read_double();
+        y = record.read_double();
+        poly->close(x, y);
+
         geom.push_back(poly);
     }
     // z-range
