@@ -30,7 +30,7 @@
 namespace mapnik
 {
 
-placement_finder_ng::placement_finder_ng( Feature const& feature, DetectorType &detector, box2d<double> const& extent)
+placement_finder_ng::placement_finder_ng(Feature const& feature, DetectorType &detector, box2d<double> const& extent)
     : feature_(feature), detector_(detector), extent_(extent)
 {
 }
@@ -42,6 +42,10 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(text_layout_ptr la
     //TODO: angle
     //TODO: Check for placement
     return glyphs;
+}
+
+void placement_finder_ng::apply_settings(text_symbolizer_properties const* properties)
+{
 }
 
 glyph_positions::glyph_positions()

@@ -50,7 +50,7 @@ struct glyph_info
 
     double ymin;
     double ymax;
-    double line_height;
+    double line_height; //Line height returned by freetype, includes normal font line spacing, but not additional user defined spacing
 
     double offset_x;
     double offset_y;

@@ -122,8 +122,7 @@ glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_
             point_itr_ = points_.begin();
             continue; //Reexecute size check
         }
-        glyph_positions_ptr glyphs = finder_.find_point_placement(
-                    layout_, point_itr_->first, point_itr_->second);
+        glyph_positions_ptr glyphs = finder_.find_point_placement(point_itr_->first, point_itr_->second);
         if (glyphs)
         {
             //Found a placement
@@ -260,8 +259,8 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         placement_valid_ = false;
         return false;
     }
-    placement_->properties.process(*layout_, feature_);
-    layout_->layout(placement_->properties.wrap_width);
+//    placement_->properties.process(*layout_, feature_);
+//    layout_->layout(placement_->properties.wrap_width, placement_->properties.text_ratio);
 
 
     if (placement_->properties.orientation)
@@ -272,7 +271,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     } else {
         angle_ = 0.0;
     }
-    finder_.set_angle(angle_);
+    finder_.apply_settings(&(placement_->properties));
 
 #if 0
     if (writer_.first) finder_->set_collect_extents(true);
@@ -325,7 +324,7 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         double label_x = point_itr_->first + shield_pos.first;
         double label_y = point_itr_->second + shield_pos.second;
 
-        glyph_positions_ptr glyphs = finder_.find_point_placement(layout_, label_x, label_y);
+        glyph_positions_ptr glyphs = finder_.find_point_placement(label_x, label_y);
         if (!glyphs)
         {
             //No placement for this point. Keep it in points_ for next try.

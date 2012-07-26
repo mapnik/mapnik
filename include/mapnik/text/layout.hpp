@@ -46,16 +46,22 @@ namespace mapnik
 class text_line
 {
 public:
-    text_line();
+    text_line(unsigned first_char, unsigned last_char);
     typedef std::vector<glyph_info> glyph_vector;
     glyph_vector const& get_glyphs() const { return glyphs_; }
     void add_glyph(glyph_info const& glyph);
     void reserve(glyph_vector::size_type length);
+    double width() const { return width_; }
+    double max_char_height() const { return max_char_height_; }
+    void set_max_char_height(double max_char_height);
+    double line_height() const { return line_height_; }
 private:
     glyph_vector glyphs_;
-    double line_height_; //Includes line spacing
-    double text_height_; //Height of the largest format run in this run.
+    double line_height_; //Includes line spacing (returned by freetype)
+    double max_char_height_; //Height of 'X' character of the largest font in this run. //TODO: Initialize this!
     double width_;
+    unsigned first_char_;
+    unsigned last_char_;
 };
 
 typedef boost::shared_ptr<text_line> text_line_ptr;
@@ -69,12 +75,12 @@ public:
         itemizer.add_text(str, format);
     }
 
-    void layout(double break_width);
+    void layout(double wrap_width, unsigned text_ratio);
 
     void clear();
 
 private:
-    void break_line(text_line_ptr line, double break_width);
+    void break_line(text_line_ptr line, double wrap_width, unsigned text_ratio);
     void shape_text(text_line_ptr line, unsigned start, unsigned end);
 
     //input

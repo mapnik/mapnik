@@ -26,7 +26,6 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/glyph_info.hpp>
-#include <mapnik/text/char_properties_ptr.hpp>
 
 //stl
 #include <vector>
@@ -86,6 +85,8 @@ private:
 };
 typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
 
+struct text_symbolizer_properties;
+
 class placement_finder_ng : boost::noncopyable
 {
 public:
@@ -96,12 +97,14 @@ public:
     /** Try to place a single label at the given point. */
     glyph_positions_ptr find_point_placement(text_layout_ptr layout, double pos_x, double pos_y);
 
-    void set_angle(double angle);
+    void apply_settings(text_symbolizer_properties const* properties);
 private:
     Feature const& feature_;
     DetectorType const& detector_;
     box2d<double> const& extent_;
     double angle_;
+    text_symbolizer_properties *properties_;
+    text_layout_ptr layout_;
 };
 
 }//ns mapnik

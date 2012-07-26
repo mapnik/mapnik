@@ -81,7 +81,6 @@ protected:
     box2d<double> dims_;
     box2d<double> const& query_extent_;
     //Processing
-    text_layout_ptr layout_;
     /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
     /** Remaining geometries to be processed. */
     std::list<geometry_type*> geometries_to_process_;

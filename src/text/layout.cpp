@@ -42,21 +42,31 @@ text_layout::text_layout(face_manager_freetype &font_manager)
 {
 }
 
-void text_layout::layout(double break_width)
+void text_layout::layout(double wrap_width, unsigned text_ratio)
 {
-    text_line_ptr line = boost::make_shared<text_line>();
+    text_line_ptr line = boost::make_shared<text_line>(0, itemizer.get_text().length());
     shape_text(line, 0, itemizer.get_text().length()); //Process full text
-    break_line(line, break_width); //Break line if neccessary
+    break_line(line, wrap_width, text_ratio); //Break line if neccessary
 }
 
 
-void text_layout::break_line(text_line_ptr line, double break_width)
+void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned text_ratio)
 {
-    if (total_width_ < break_width || !break_width)
+    //TODO: Handle \n chars.
+    if (!wrap_width || line->width() < wrap_width)
     {
         lines_.push_back(line);
         return;
+
     }
+    if (text_ratio)
+    {
+        double wrap_at;
+        double string_width = line->width();
+        double string_height = line->line_height();
+        for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio && (string_width/i) > wrap_width; i += 1.0) ;
+    }
+
     UnicodeString const& text = itemizer.get_text();
     Locale locale; //TODO: Is the default constructor correct?
     UErrorCode status = U_ZERO_ERROR;
@@ -74,7 +84,7 @@ void text_layout::break_line(text_line_ptr line, double break_width)
         {
             current_line_length += width_itr->second;
         }
-        if (current_line_length > break_width)
+        if (current_line_length > wrap_width)
         {
             unsigned break_position = breakitr->preceding(i);
             if (break_position <= last_break_position)
@@ -85,7 +95,7 @@ void text_layout::break_line(text_line_ptr line, double break_width)
                 std::cout << "Line overflow!\n";
             }
             std::cout << "Line to long ("<< current_line_length << ") at "<< i <<  " going to " << break_position << ". Last break was at " << last_break_position << "\n";
-            text_line_ptr new_line = boost::make_shared<text_line>();
+            text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
             shape_text(line, last_break_position, break_position);
             last_break_position = break_position;
             i = break_position - 1;
@@ -113,6 +123,7 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
         face_set->set_character_sizes(itr->format->text_size);
         face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
         text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
+//        line->set_text_height(/*TODO*/);
 
         shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
         hb_buffer_t *buffer = shaper.get_buffer();
@@ -121,9 +132,6 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
 
         hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer, NULL);
         hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
-
-        std::string s;
-//        std::cout << "Processing item '" << text.tempSubStringBetween(itr->start, itr->end).toUTF8String(s) << "' (" << uscript_getName(itr->script) << "," << itr->end - itr->start << "," << num_glyphs << "," << itr->rtl <<  ")\n";
 
         for (unsigned i=0; i<num_glyphs; i++)
         {
@@ -152,8 +160,9 @@ void text_layout::clear()
     lines_.clear();
 }
 
-text_line::text_line()
-    : glyphs_(), line_height_(0.), text_height_(0.), width_(0.)
+text_line::text_line(unsigned first_char, unsigned last_char)
+    : glyphs_(), line_height_(0.), max_char_height_(0.),
+      width_(0.), first_char_(first_char), last_char_(last_char)
 {
 }
 
@@ -161,7 +170,6 @@ void text_line::add_glyph(const glyph_info &glyph)
 {
     glyphs_.push_back(glyph);
     line_height_ = std::max(line_height_, glyph.line_height + glyph.format->line_spacing);
-    text_height_ = std::max(text_height_, glyph.height());
     width_ += glyph.width + glyph.format->character_spacing;
 }
 
@@ -169,6 +177,11 @@ void text_line::add_glyph(const glyph_info &glyph)
 void text_line::reserve(glyph_vector::size_type length)
 {
     glyphs_.reserve(length);
+}
+
+void text_line::set_max_char_height(double max_char_height)
+{
+    max_char_height_ = std::max(max_char_height_, max_char_height);
 }
 
 } //ns mapnik
