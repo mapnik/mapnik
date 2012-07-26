@@ -79,21 +79,21 @@ void ogr_converter::convert_geometry(OGRGeometry* geom, feature_ptr feature)
 
 void ogr_converter::convert_point(OGRPoint* geom, feature_ptr feature)
 {
-    geometry_type * point = new geometry_type(mapnik::Point);
+    std::auto_ptr<geometry_type> point(new geometry_type(mapnik::Point));
     point->move_to(geom->getX(), geom->getY());
-    feature->add_geometry(point);
+    feature->paths().push_back(point);
 }
 
 void ogr_converter::convert_linestring(OGRLineString* geom, feature_ptr feature)
 {
     int num_points = geom->getNumPoints();
-    geometry_type* line = new geometry_type(mapnik::LineString);
+    std::auto_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
     line->move_to(geom->getX(0), geom->getY(0));
     for (int i = 1; i < num_points; ++i)
     {
         line->line_to (geom->getX(i), geom->getY(i));
     }
-    feature->add_geometry(line);
+    feature->paths().push_back(line);
 }
 
 void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
@@ -102,34 +102,38 @@ void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
     int num_points = exterior->getNumPoints();
     int num_interior = geom->getNumInteriorRings();
     int capacity = 0;
-    for (int r = 0; r < num_interior; r++)
+    for (int r = 0; r < num_interior; ++r)
     {
         OGRLinearRing* interior = geom->getInteriorRing(r);
         capacity += interior->getNumPoints();
     }
-    geometry_type* poly = new geometry_type(mapnik::Polygon);
+
+    std::auto_ptr<geometry_type> poly(new geometry_type(mapnik::Polygon));
+
     poly->move_to(exterior->getX(0), exterior->getY(0));
-    for (int i = 1; i < num_points; ++i)
+    for (int i = 1; i < num_points - 1; ++i)
     {
         poly->line_to(exterior->getX(i), exterior->getY(i));
     }
-    for (int r = 0; r < num_interior; r++)
+    poly->close(exterior->getX(num_points-1), exterior->getY(num_points-1));
+    for (int r = 0; r < num_interior; ++r)
     {
         OGRLinearRing* interior = geom->getInteriorRing(r);
         num_points = interior->getNumPoints();
         poly->move_to(interior->getX(0), interior->getY(0));
-        for (int i = 1; i < num_points; ++i)
+        for (int i = 1; i < num_points - 1; ++i)
         {
             poly->line_to(interior->getX(i), interior->getY(i));
         }
+        poly->close(interior->getX(num_points-1), interior->getY(num_points-1));
     }
-    feature->add_geometry(poly);
+    feature->paths().push_back(poly);
 }
 
 void ogr_converter::convert_multipoint(OGRMultiPoint* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
-    for (int i = 0; i < num_geometries; i++)
+    for (int i = 0; i < num_geometries; ++i)
     {
         convert_point(static_cast<OGRPoint*>(geom->getGeometryRef(i)), feature);
     }
@@ -138,7 +142,7 @@ void ogr_converter::convert_multipoint(OGRMultiPoint* geom, feature_ptr feature)
 void ogr_converter::convert_multilinestring(OGRMultiLineString* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
-    for (int i = 0; i < num_geometries; i++)
+    for (int i = 0; i < num_geometries; ++i)
     {
         convert_linestring(static_cast<OGRLineString*>(geom->getGeometryRef(i)), feature);
     }
@@ -147,7 +151,7 @@ void ogr_converter::convert_multilinestring(OGRMultiLineString* geom, feature_pt
 void ogr_converter::convert_multipolygon(OGRMultiPolygon* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
-    for (int i = 0; i < num_geometries; i++)
+    for (int i = 0; i < num_geometries; ++i)
     {
         convert_polygon(static_cast<OGRPolygon*>(geom->getGeometryRef(i)), feature);
     }
@@ -156,7 +160,7 @@ void ogr_converter::convert_multipolygon(OGRMultiPolygon* geom, feature_ptr feat
 void ogr_converter::convert_collection(OGRGeometryCollection* geom, feature_ptr feature)
 {
     int num_geometries = geom->getNumGeometries();
-    for (int i = 0; i < num_geometries; i++)
+    for (int i = 0; i < num_geometries; ++i)
     {
         OGRGeometry* g = geom->getGeometryRef(i);
         if (g != NULL)
@@ -165,4 +169,3 @@ void ogr_converter::convert_collection(OGRGeometryCollection* geom, feature_ptr 
         }
     }
 }
-
