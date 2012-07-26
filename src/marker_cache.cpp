@@ -54,7 +54,7 @@ marker_cache::marker_cache()
     insert_svg("ellipse",
                "<?xml version='1.0' standalone='no'?>"
                "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-               "<circle r='10' fill='#0000FF'/>"
+               "<ellipse rx='5' ry='5' fill='#0000FF' stroke='black' stroke-width='.5'/>"
                "</svg>");
     insert_svg("arrow",
                "<?xml version='1.0' standalone='no'?>"
