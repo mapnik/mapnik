@@ -188,7 +188,7 @@ void shape_io::read_polygon(mapnik::geometry_container & geom)
         parts[i] = record.read_ndr_integer();
     }
 
-    for (int k = 0; k < num_parts; k++)
+    for (int k = 0; k < num_parts; ++k)
     {
         std::auto_ptr<geometry_type> poly(new geometry_type(mapnik::Polygon));
         int start = parts[k];
