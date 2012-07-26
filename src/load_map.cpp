@@ -111,7 +111,7 @@ private:
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
-    bool parse_stroke(stroke & strk, xml_node const & sym);
+    void parse_stroke(stroke & strk, xml_node const & sym);
 
     void ensure_font_face(std::string const& face_name);
     void find_unused_nodes(xml_node const& root);
@@ -1055,6 +1055,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         if (height) sym.set_height(*height);
 
         stroke strk;
+        parse_stroke(strk,node);
         sym.set_stroke(strk);
 
         marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_POINT_PLACEMENT);
@@ -1299,22 +1300,20 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
     }
 }
 
-bool map_parser::parse_stroke(stroke & strk, xml_node const & sym)
+void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
 {
     // stroke color
     optional<color> c = sym.get_opt_attr<color>("stroke");
     if (c)
     {
         strk.set_color(*c);
-        result = true;
     }
 
     // stroke-width
-    optional<double> width =  sym.get_opt_attr<double>("stroke-width");
+    optional<double> width = sym.get_opt_attr<double>("stroke-width");
     if (width)
     {
         strk.set_width(*width);
-        result = true;
     }
 
     // stroke-opacity
@@ -1374,7 +1373,6 @@ bool map_parser::parse_stroke(stroke & strk, xml_node const & sym)
     // stroke-miterlimit
     optional<double> miterlimit = sym.get_opt_attr<double>("stroke-miterlimit");
     if (miterlimit) strk.set_miterlimit(*miterlimit);
-    return result;
 }
 
 void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
