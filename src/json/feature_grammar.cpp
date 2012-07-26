@@ -99,10 +99,13 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         ("\\r", '\r')  // carrige return
         ("\\t", '\t')  // tab
         ;
-
-    string_ %= lit('"') >> *(unesc_char | "\\u" >> hex4 | (char_ - lit('"'))) >> lit('"')
+#if BOOST_VERSION > 104200
+    string_ %= lit('"') >> no_skip[*(unesc_char | "\\u" >> hex4 | (char_ - lit('"')))] >> lit('"')
         ;
-
+#else
+    string_ %= lit('"') >> lexeme[*(unesc_char | "\\u" >> hex4 | (char_ - lit('"')))] >> lit('"')
+        ;
+#endif
     // geojson types
 
     feature_type = lit("\"type\"")
