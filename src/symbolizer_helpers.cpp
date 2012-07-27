@@ -35,16 +35,12 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
       feature_(feature),
       prj_trans_(prj_trans),
       t_(t),
-      font_manager_(font_manager),
       detector_(detector),
       writer_(sym.get_metawriter()),
       dims_(0, 0, width, height),
       query_extent_(query_extent),
-      layout_(new text_layout(font_manager)),
-      angle_(0.0),
-      placement_valid_(false),
       points_on_line_(false),
-      finder_(feature, detector, dims_)
+      finder_(feature, detector, dims_, placement_, font_manager)
 {
     initialize_geometries();
     if (!geometries_to_process_.size()) return;
@@ -56,7 +52,6 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
 template <typename FaceManagerT, typename DetectorT>
 glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next()
 {
-    if (!placement_valid_) return glyph_positions_ptr();
     if (point_placement_)
         return next_point_placement();
     else
@@ -252,35 +247,6 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::update_detector(glyph_posi
 }
 
 
-template <typename FaceManagerT, typename DetectorT>
-bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
-{
-    if (!placement_->next()) {
-        placement_valid_ = false;
-        return false;
-    }
-//    placement_->properties.process(*layout_, feature_);
-//    layout_->layout(placement_->properties.wrap_width, placement_->properties.text_ratio);
-
-
-    if (placement_->properties.orientation)
-    {
-        angle_ = boost::apply_visitor(
-            evaluate<Feature, value_type>(feature_),
-            *(placement_->properties.orientation)).to_double();
-    } else {
-        angle_ = 0.0;
-    }
-    finder_.apply_settings(&(placement_->properties));
-
-#if 0
-    if (writer_.first) finder_->set_collect_extents(true);
-#endif
-
-    placement_valid_ = true;
-    return true;
-}
-
 
 /*****************************************************************************/
 
@@ -299,7 +265,7 @@ shield_symbolizer_helper<FaceManagerT, DetectorT>::shield_symbolizer_helper(cons
 template <typename FaceManagerT, typename DetectorT>
 bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next()
 {
-    if (!placement_valid_ || !marker_) return false;
+    if (!marker_) return false;
     if (point_placement_)
         return next_point_placement();
     else
@@ -315,7 +281,7 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         if (point_itr_ == points_.end())
         {
             //Just processed the last point. Try next placement.
-            if (!next_placement()) return false; //No more placements
+            if (!finder_.next_position()) return false; //No more placements
             //Start again from begin of list
             point_itr_ = points_.begin();
             continue; //Reexecute size check

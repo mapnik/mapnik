@@ -26,6 +26,9 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/glyph_info.hpp>
+#include <mapnik/text/layout.hpp>
+#include <mapnik/text_placements/base.hpp>
+#include <mapnik/expression_evaluator.hpp>
 
 //stl
 #include <vector>
@@ -42,9 +45,6 @@ typedef label_collision_detector4 DetectorType;
 
 class feature_impl;
 typedef feature_impl Feature;
-
-class text_layout;
-typedef boost::shared_ptr<text_layout> text_layout_ptr;
 
 struct glyph_position
 {
@@ -92,20 +92,25 @@ class placement_finder_ng : boost::noncopyable
 public:
     placement_finder_ng(Feature const& feature,
                         DetectorType & detector,
-                        box2d<double> const& extent);
+                        box2d<double> const& extent,
+                        text_placement_info_ptr placement_info,
+                        face_manager_freetype & font_manager);
 
     /** Try to place a single label at the given point. */
-    glyph_positions_ptr find_point_placement(text_layout_ptr layout, double pos_x, double pos_y);
+    glyph_positions_ptr find_point_placement(double pos_x, double pos_y);
 
-    void apply_settings(text_symbolizer_properties const* properties);
+    bool next_position();
 private:
     Feature const& feature_;
     DetectorType const& detector_;
     box2d<double> const& extent_;
     double angle_;
-    text_symbolizer_properties *properties_;
-    text_layout_ptr layout_;
+    text_layout layout_;
+    text_placement_info_ptr info_;
+    bool valid_;
 };
+
+typedef boost::shared_ptr<placement_finder_ng> placement_finder_ng_ptr;
 
 }//ns mapnik
 

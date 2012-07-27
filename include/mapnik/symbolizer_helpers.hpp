@@ -25,7 +25,6 @@
 //mapnik
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/shield_symbolizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
@@ -38,7 +37,6 @@
 
 
 namespace mapnik {
-
 
 /** Helper object that does all the TextSymbolizer placment finding
  * work except actually rendering the object. */
@@ -75,7 +73,6 @@ protected:
     Feature const& feature_;
     proj_transform const& prj_trans_;
     CoordTransform const& t_;
-    FaceManagerT & font_manager_;
     DetectorT & detector_;
     metawriter_with_properties writer_;
     box2d<double> dims_;
@@ -90,10 +87,6 @@ protected:
     std::list<position> points_;
     /** Point currently being processed. */
     std::list<position>::iterator point_itr_;
-    /** Text rotation. */
-    double angle_;
-    /** Did last call to next_placement return true? */
-    bool placement_valid_;
     /** Use point placement. Otherwise line placement is used. */
     bool point_placement_;
     /** Place text at points on a line instead of following the line (used for ShieldSymbolizer) .*/
@@ -152,22 +145,17 @@ protected:
     
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geo_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::points_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::writer_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::font_manager_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::feature_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::t_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::detector_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::dims_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::prj_trans_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_valid_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_placement_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::angle_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::finder_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::layout_;
 };
 } //namespace
 #endif // SYMBOLIZER_HELPERS_HPP
