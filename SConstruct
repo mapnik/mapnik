@@ -32,6 +32,10 @@ try:
 except:
     HAS_DISTUTILS = False
 
+if platform.uname()[4] == 'ppc64':
+    LIBDIR_SCHEMA='lib64'
+else:
+    LIBDIR_SCHEMA='lib'
 
 py3 = None
 
@@ -236,14 +240,6 @@ def sort_paths(items,priority):
     for k,v in path_types.items():
         new.extend(v)
     return new
-
-if platform.dist()[0] in ('Ubuntu','debian'):
-    LIBDIR_SCHEMA='lib'
-elif platform.uname()[4] == 'ppc64':
-    LIBDIR_SCHEMA='lib64'
-else:
-    LIBDIR_SCHEMA='lib'
-
 
 def pretty_dep(dep):
     pretty = pretty_dep_names.get(dep)
