@@ -38,7 +38,7 @@
 namespace mapnik
 {
 text_layout::text_layout(face_manager_freetype &font_manager)
-    : font_manager_(font_manager)
+    : font_manager_(font_manager), itemizer(), width_(0), height_(0), lines_()
 {
 }
 
@@ -47,6 +47,10 @@ void text_layout::layout(double wrap_width, unsigned text_ratio)
     text_line_ptr line = boost::make_shared<text_line>(0, itemizer.get_text().length());
     shape_text(line, 0, itemizer.get_text().length()); //Process full text
     break_line(line, wrap_width, text_ratio); //Break line if neccessary
+    if (lines_.size())
+    {
+        lines_[0]->set_first_line(true);
+    }
 }
 
 
@@ -55,7 +59,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
     //TODO: Handle \n chars.
     if (!wrap_width || line->width() < wrap_width)
     {
-        lines_.push_back(line);
+        add_line(line);
         return;
 
     }
@@ -97,6 +101,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
             std::cout << "Line to long ("<< current_line_length << ") at "<< i <<  " going to " << break_position << ". Last break was at " << last_break_position << "\n";
             text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
             shape_text(line, last_break_position, break_position);
+            add_line(line);
             last_break_position = break_position;
             i = break_position - 1;
 
@@ -113,8 +118,6 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
 
     line->reserve(length); //Preallocate memory
 
-    total_width_ = 0.0;
-
     std::list<text_item> const& list = itemizer.itemize(start, end);
     std::list<text_item>::const_iterator itr = list.begin(), list_end = list.end();
     for (; itr != list_end; itr++)
@@ -123,7 +126,7 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
         face_set->set_character_sizes(itr->format->text_size);
         face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
         text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
-//        line->set_text_height(/*TODO*/);
+        line->set_text_height(itr->format->text_size /*TODO*/);
 
         shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
         hb_buffer_t *buffer = shaper.get_buffer();
@@ -146,7 +149,6 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
             face->glyph_dimensions(tmp);
 
             width_map[glyphs[i].cluster] += tmp.width;
-            total_width_ += tmp.width;
 
             line->add_glyph(tmp);
 //            std::cout << "glyph:" << glyphs[i].mask << " xa:" << positions[i].x_advance << " ya:" << positions[i].y_advance << " xo:" << positions[i].x_offset <<  " yo:" << positions[i].y_offset << "\n";
@@ -160,9 +162,35 @@ void text_layout::clear()
     lines_.clear();
 }
 
+double text_layout::height() const
+{
+    return height_; //TODO
+}
+
+double text_layout::width() const
+{
+    return width_; //TODO
+}
+
+text_layout::const_iterator text_layout::begin() const
+{
+    return lines_.begin();
+}
+
+text_layout::const_iterator text_layout::end() const
+{
+    return lines_.end();
+}
+
+unsigned text_layout::size() const
+{
+    return lines_.size();
+}
+
 text_line::text_line(unsigned first_char, unsigned last_char)
     : glyphs_(), line_height_(0.), max_char_height_(0.),
-      width_(0.), first_char_(first_char), last_char_(last_char)
+      width_(0.), first_char_(first_char), last_char_(last_char),
+      first_line_(false)
 {
 }
 
@@ -179,9 +207,30 @@ void text_line::reserve(glyph_vector::size_type length)
     glyphs_.reserve(length);
 }
 
+text_line::const_iterator text_line::begin() const
+{
+    return glyphs_.begin();
+}
+
+text_line::const_iterator text_line::end() const
+{
+    return glyphs_.end();
+}
+
+double text_line::height() const
+{
+    if (first_line_) return max_char_height_;
+    return line_height_;
+}
+
 void text_line::set_max_char_height(double max_char_height)
 {
     max_char_height_ = std::max(max_char_height_, max_char_height);
+}
+
+void text_line::set_first_line(bool first_line)
+{
+    first_line_ = first_line;
 }
 
 } //ns mapnik

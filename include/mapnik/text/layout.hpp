@@ -47,14 +47,24 @@ class text_line
 {
 public:
     text_line(unsigned first_char, unsigned last_char);
+
     typedef std::vector<glyph_info> glyph_vector;
+    typedef glyph_vector::const_iterator const_iterator;
     glyph_vector const& get_glyphs() const { return glyphs_; }
     void add_glyph(glyph_info const& glyph);
+
     void reserve(glyph_vector::size_type length);
+    const_iterator begin() const;
+    const_iterator end() const;
+
     double width() const { return width_; }
+    double height() const;
+
     double max_char_height() const { return max_char_height_; }
     void set_max_char_height(double max_char_height);
     double line_height() const { return line_height_; }
+
+    void set_first_line(bool first_line);
 private:
     glyph_vector glyphs_;
     double line_height_; //Includes line spacing (returned by freetype)
@@ -62,6 +72,7 @@ private:
     double width_;
     unsigned first_char_;
     unsigned last_char_;
+    bool first_line_;
 };
 
 typedef boost::shared_ptr<text_line> text_line_ptr;
@@ -69,6 +80,8 @@ typedef boost::shared_ptr<text_line> text_line_ptr;
 class text_layout
 {
 public:
+    typedef std::vector<text_line_ptr> line_vector;
+    typedef line_vector::const_iterator const_iterator;
     text_layout(face_manager_freetype & font_manager);
     inline void add_text(UnicodeString const& str, char_properties_ptr format)
     {
@@ -78,10 +91,17 @@ public:
     void layout(double wrap_width, unsigned text_ratio);
 
     void clear();
+    double height() const;
+    double width() const;
+
+    const_iterator begin() const;
+    const_iterator end() const;
+    unsigned size() const;
 
 private:
     void break_line(text_line_ptr line, double wrap_width, unsigned text_ratio);
     void shape_text(text_line_ptr line, unsigned start, unsigned end);
+    void add_line(text_line_ptr line);
 
     //input
     face_manager_freetype &font_manager_;
@@ -90,11 +110,12 @@ private:
     text_itemizer itemizer;
     /// Maps char index (UTF-16) to width. If multiple glyphs map to the same char the sum of all widths is used
     std::map<unsigned, double> width_map;
-    double total_width_;
+    double width_;
+    double height_;
 
 
     //output
-    std::vector<text_line_ptr> lines_;
+    line_vector lines_;
 };
 }
 

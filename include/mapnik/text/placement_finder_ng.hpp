@@ -94,7 +94,8 @@ public:
                         DetectorType & detector,
                         box2d<double> const& extent,
                         text_placement_info_ptr placement_info,
-                        face_manager_freetype & font_manager);
+                        face_manager_freetype & font_manager,
+                        double scale_factor);
 
     /** Try to place a single label at the given point. */
     glyph_positions_ptr find_point_placement(pixel_position pos);
@@ -102,10 +103,14 @@ public:
     bool next_position();
 private:
     void init_alignment();
+    pixel_position alignment_offset() const;
     Feature const& feature_;
     DetectorType const& detector_;
     box2d<double> const& extent_;
-    double angle_;
+    double angle_; //in rad
+    // Precalculated values for maximum performance
+    double sina_;
+    double cosa_;
     text_layout layout_;
     text_placement_info_ptr info_;
     bool valid_;
@@ -113,6 +118,7 @@ private:
     vertical_alignment_e valign_;
     horizontal_alignment_e halign_;
     justify_alignment_e jalign_;
+    double scale_factor_;
 };
 
 typedef boost::shared_ptr<placement_finder_ng> placement_finder_ng_ptr;

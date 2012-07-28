@@ -40,12 +40,12 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       points_on_line_(false),
-      finder_(feature, detector, dims_, placement_, font_manager)
+      finder_(feature, detector, dims_, placement_, font_manager, scale_factor)
 {
     initialize_geometries();
     if (!geometries_to_process_.size()) return;
     placement_ = sym_.get_placement_options()->get_placement_info(scale_factor);
-    next_placement();
+    finder_.next_position();
     initialize_points();
 }
 
@@ -66,7 +66,7 @@ glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_p
         if (geo_itr_ == geometries_to_process_.end())
         {
             //Just processed the last geometry. Try next placement.
-            if (!next_placement()) return glyph_positions_ptr(); //No more placements
+            if (!finder_.next_position()) return glyph_positions_ptr(); //No more placements
             //Start again from begin of list
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
@@ -112,7 +112,7 @@ glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_
         if (point_itr_ == points_.end())
         {
             //Just processed the last point. Try next placement.
-            if (!next_placement()) return glyph_positions_ptr(); //No more placements
+            if (!finder_.next_position()) return glyph_positions_ptr(); //No more placements
             //Start again from begin of list
             point_itr_ = points_.begin();
             continue; //Reexecute size check

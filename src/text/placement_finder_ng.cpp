@@ -31,8 +31,8 @@
 namespace mapnik
 {
 
-placement_finder_ng::placement_finder_ng(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager)
-    : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true)
+placement_finder_ng::placement_finder_ng(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager, double scale_factor)
+    : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true), scale_factor_(scale_factor)
 {
 }
 
@@ -55,10 +55,13 @@ bool placement_finder_ng::next_position()
     {
         angle_ = boost::apply_visitor(
             evaluate<Feature, value_type>(feature_),
-            *(info_->properties.orientation)).to_double();
+            *(info_->properties.orientation)).to_double() * M_PI / 180.0;
     } else {
         angle_ = 0.0;
     }
+    cosa_ = std::cos(angle_);
+    sina_ = std::sin(angle_);
+
     init_alignment();
     return true;
 }
@@ -112,13 +115,72 @@ void placement_finder_ng::init_alignment()
     }
 }
 
+
+pixel_position placement_finder_ng::alignment_offset() const
+{
+    pixel_position result(0,0);
+    // if needed, adjust for desired vertical alignment
+    if (valign_ == V_TOP)
+    {
+        result.y = -0.5 * layout_.height();  // move center up by 1/2 the total height
+    } else if (valign_ == V_BOTTOM)
+    {
+        result.y = 0.5 * layout_.height();  // move center down by the 1/2 the total height
+    }
+
+    // set horizontal position to middle of text
+    if (halign_ == H_LEFT)
+    {
+        result.x = -0.5 * layout_.width();  // move center left by 1/2 the string width
+    } else if (halign_ == H_RIGHT)
+    {
+        result.x = 0.5 * layout_.width();  // move center right by 1/2 the string width
+    }
+    return result;
+}
+
+
 glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos)
 {
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
-    glyphs->set_base_point(pos + info_->properties.displacement);
-//    glyphs->point_placement(pixel_position(pos_x, pos_y));
-    //TODO: angle
-    //TODO: Check for placement
+    if (!layout_.size()) return glyphs; //No data
+
+    //TODO: Verify enough space is available. For point placement the bounding box is enough!
+
+    glyphs->set_base_point(pos + scale_factor_ * info_->properties.displacement + alignment_offset());
+
+    /* IMPORTANT NOTE:
+       x and y are relative to the center of the text
+       coordinate system:
+       x: grows from left to right
+       y: grows from bottom to top (opposite of normal computer graphics)
+    */
+    double x, y;
+
+    // set for upper left corner of text envelope for the first line, top left of first character
+    y = layout_.height() / 2.0;
+
+    text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
+    for (; line_itr != line_end; line_itr++)
+    {
+//        text_line *line_itr;
+        y -= (*line_itr)->height(); //Automatically handles first line differently
+        // reset to begining of line position
+        if (jalign_ == J_LEFT)
+            x = -(layout_.width() / 2.0);
+        else if (jalign_ == J_RIGHT)
+            x = (layout_.width() / 2.0) - (*line_itr)->width();
+        else
+            x = -((*line_itr)->width() / 2.0);
+
+        text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
+        for (; glyph_itr != glyph_end; glyph_itr++)
+        {
+//            glyph_info *glyph_itr;
+            glyphs->push_back(*glyph_itr, pixel_position(x, y), angle_); //TODO: Store cosa, sina instead
+            x += glyph_itr->width + glyph_itr->format->character_spacing;
+        }
+    }
     return glyphs;
 }
 
@@ -165,9 +227,14 @@ double glyph_positions::get_angle() const
     return angle_;
 }
 
-const pixel_position &glyph_positions::get_base_point() const
+pixel_position const& glyph_positions::get_base_point() const
 {
     return base_point_;
+}
+
+void glyph_positions::set_base_point(pixel_position base_point)
+{
+    base_point_ = base_point;
 }
 
 

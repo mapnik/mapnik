@@ -63,7 +63,6 @@ public:
 protected:
     glyph_positions_ptr next_point_placement();
     glyph_positions_ptr next_line_placement();
-    bool next_placement();
     void initialize_geometries();
     void initialize_points();
     void update_detector(glyph_positions_ptr glyphs);
