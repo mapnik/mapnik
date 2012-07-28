@@ -101,6 +101,7 @@ public:
 
     bool next_position();
 private:
+    void init_alignment();
     Feature const& feature_;
     DetectorType const& detector_;
     box2d<double> const& extent_;
@@ -108,6 +109,10 @@ private:
     text_layout layout_;
     text_placement_info_ptr info_;
     bool valid_;
+
+    vertical_alignment_e valign_;
+    horizontal_alignment_e halign_;
+    justify_alignment_e jalign_;
 };
 
 typedef boost::shared_ptr<placement_finder_ng> placement_finder_ng_ptr;

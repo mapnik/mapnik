@@ -68,7 +68,57 @@ bool placement_finder_ng::next_position()
     } else {
         angle_ = 0.0;
     }
+    init_alignment();
     return true;
+}
+
+
+void placement_finder_ng::init_alignment()
+{
+    text_symbolizer_properties const& p = info_->properties;
+    valign_ = p.valign;
+    if (valign_ == V_AUTO)
+    {
+        if (p.displacement.second > 0.0)
+        {
+            valign_ = V_BOTTOM;
+        } else if (p.displacement.second < 0.0)
+        {
+            valign_ = V_TOP;
+        } else
+        {
+            valign_ = V_MIDDLE;
+        }
+    }
+
+    halign_ = p.halign;
+    if (halign_ == H_AUTO)
+    {
+        if (p.displacement.first > 0.0)
+        {
+            halign_ = H_RIGHT;
+        } else if (p.displacement.first < 0.0)
+        {
+            halign_ = H_LEFT;
+        } else
+        {
+            halign_ = H_MIDDLE;
+        }
+    }
+
+    jalign_ = p.jalign;
+    if (jalign_ == J_AUTO)
+    {
+        if (p.displacement.first > 0.0)
+        {
+            jalign_ = J_LEFT;
+        } else if (p.displacement.first < 0.0)
+        {
+            jalign_ = J_RIGHT;
+        } else {
+            jalign_ = J_MIDDLE;
+        }
+    }
 }
 
 
