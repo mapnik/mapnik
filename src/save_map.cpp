@@ -205,14 +205,14 @@ public:
         {
             set_attr(sym_node, "text-opacity", sym.get_text_opacity());
         }
-        position displacement = sym.get_shield_displacement();
-        if (displacement.first != dfl.get_shield_displacement().first || explicit_defaults_)
+        pixel_position displacement = sym.get_shield_displacement();
+        if (displacement.x != dfl.get_shield_displacement().x || explicit_defaults_)
         {
-            set_attr(sym_node, "shield-dx", displacement.first);
+            set_attr(sym_node, "shield-dx", displacement.x);
         }
-        if (displacement.second != dfl.get_shield_displacement().second || explicit_defaults_)
+        if (displacement.y != dfl.get_shield_displacement().y || explicit_defaults_)
         {
-            set_attr(sym_node, "shield-dy", displacement.second);
+            set_attr(sym_node, "shield-dy", displacement.y);
         }
         serialize_symbolizer_base(sym_node, sym);
     }

@@ -84,9 +84,9 @@ protected:
     /** Geometry currently being processed. */
     std::list<geometry_type*>::iterator geo_itr_;
     /** Remaining points to be processed. */
-    std::list<position> points_;
+    std::list<pixel_position> points_;
     /** Point currently being processed. */
-    std::list<position>::iterator point_itr_;
+    std::list<pixel_position>::iterator point_itr_;
     /** Use point placement. Otherwise line placement is used. */
     bool point_placement_;
     /** Place text at points on a line instead of following the line (used for ShieldSymbolizer) .*/
@@ -116,14 +116,9 @@ public:
         return marker_ext_;
     }
 
-    double get_marker_height() const
+    pixel_position get_marker_size() const
     {
-        return marker_h_;
-    }
-
-    double get_marker_width() const
-    {
-        return marker_w_;
+        return marker_size_;
     }
 
     bool next();
@@ -138,10 +133,8 @@ protected:
     box2d<double> marker_ext_;
     boost::optional<marker_ptr> marker_;
     agg::trans_affine image_transform_;
-    double marker_w_;
-    double marker_h_;
-    double marker_x_;
-    double marker_y_;
+    pixel_position marker_size_;
+    pixel_position marker_pos_;
     
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;

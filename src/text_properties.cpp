@@ -113,9 +113,9 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
     if (orientation_) orientation = *orientation_;
     optional<double> dx = sym.get_opt_attr<double>("dx");
-    if (dx) displacement.first = *dx;
+    if (dx) displacement.x = *dx;
     optional<double> dy = sym.get_opt_attr<double>("dy");
-    if (dy) displacement.second = *dy;
+    if (dy) displacement.y = *dy;
     optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
 
@@ -144,13 +144,13 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
         }
     }
 
-    if (displacement.first != dfl.displacement.first || explicit_defaults)
+    if (displacement.x != dfl.displacement.x || explicit_defaults)
     {
-        set_attr(node, "dx", displacement.first);
+        set_attr(node, "dx", displacement.x);
     }
-    if (displacement.second != dfl.displacement.second || explicit_defaults)
+    if (displacement.y != dfl.displacement.y || explicit_defaults)
     {
-        set_attr(node, "dy", displacement.second);
+        set_attr(node, "dy", displacement.y);
     }
     if (label_placement != dfl.label_placement || explicit_defaults)
     {

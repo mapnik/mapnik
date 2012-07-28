@@ -36,15 +36,6 @@ placement_finder_ng::placement_finder_ng(Feature const& feature, DetectorType &d
 {
 }
 
-glyph_positions_ptr placement_finder_ng::find_point_placement(double pos_x, double pos_y)
-{
-    glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
-//    glyphs->point_placement(pixel_position(pos_x, pos_y));
-    //TODO: angle
-    //TODO: Check for placement
-    return glyphs;
-}
-
 bool placement_finder_ng::next_position()
 {
     if (!valid_)
@@ -79,10 +70,10 @@ void placement_finder_ng::init_alignment()
     valign_ = p.valign;
     if (valign_ == V_AUTO)
     {
-        if (p.displacement.second > 0.0)
+        if (p.displacement.y > 0.0)
         {
             valign_ = V_BOTTOM;
-        } else if (p.displacement.second < 0.0)
+        } else if (p.displacement.y < 0.0)
         {
             valign_ = V_TOP;
         } else
@@ -94,10 +85,10 @@ void placement_finder_ng::init_alignment()
     halign_ = p.halign;
     if (halign_ == H_AUTO)
     {
-        if (p.displacement.first > 0.0)
+        if (p.displacement.x > 0.0)
         {
             halign_ = H_RIGHT;
-        } else if (p.displacement.first < 0.0)
+        } else if (p.displacement.x < 0.0)
         {
             halign_ = H_LEFT;
         } else
@@ -109,10 +100,10 @@ void placement_finder_ng::init_alignment()
     jalign_ = p.jalign;
     if (jalign_ == J_AUTO)
     {
-        if (p.displacement.first > 0.0)
+        if (p.displacement.x > 0.0)
         {
             jalign_ = J_LEFT;
-        } else if (p.displacement.first < 0.0)
+        } else if (p.displacement.x < 0.0)
         {
             jalign_ = J_RIGHT;
         } else {
@@ -120,6 +111,19 @@ void placement_finder_ng::init_alignment()
         }
     }
 }
+
+glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos)
+{
+    glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
+    glyphs->set_base_point(pos + info_->properties.displacement);
+//    glyphs->point_placement(pixel_position(pos_x, pos_y));
+    //TODO: angle
+    //TODO: Check for placement
+    return glyphs;
+}
+
+
+/*********************************************************************************************/
 
 
 glyph_positions::glyph_positions()

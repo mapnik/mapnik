@@ -29,6 +29,7 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/formatting/base.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // stl
 #include <map>
@@ -118,7 +119,6 @@ enum justify_alignment
 
 DEFINE_ENUM(justify_alignment_e, justify_alignment);
 
-typedef std::pair<double, double> position;
 class text_layout;
 
 
@@ -147,7 +147,7 @@ struct text_symbolizer_properties
 
     //Per symbolizer options
     expression_ptr orientation;
-    position displacement;
+    pixel_position displacement;
     label_placement_e label_placement;
     horizontal_alignment_e halign;
     justify_alignment_e jalign;

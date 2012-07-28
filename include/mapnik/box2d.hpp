@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/coord.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // boost
 #include <boost/operators.hpp>

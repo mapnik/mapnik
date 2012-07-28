@@ -117,7 +117,7 @@ glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_
             point_itr_ = points_.begin();
             continue; //Reexecute size check
         }
-        glyph_positions_ptr glyphs = finder_.find_point_placement(point_itr_->first, point_itr_->second);
+        glyph_positions_ptr glyphs = finder_.find_point_placement(*point_itr_);
         if (glyphs)
         {
             //Found a placement
@@ -215,7 +215,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
                 geom.vertex(&label_x, &label_y);
                 prj_trans_.backward(label_x, label_y, z);
                 t_.forward(&label_x, &label_y);
-                points_.push_back(std::make_pair(label_x, label_y));
+                points_.push_back(pixel_position(label_x, label_y));
             }
         }
         else
@@ -234,7 +234,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
             }
             prj_trans_.backward(label_x, label_y, z);
             t_.forward(&label_x, &label_y);
-            points_.push_back(std::make_pair(label_x, label_y));
+            points_.push_back(pixel_position(label_x, label_y));
         }
     }
     point_itr_ = points_.begin();
@@ -275,7 +275,7 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next()
 template <typename FaceManagerT, typename DetectorT>
 bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
 {
-    position const& shield_pos = sym_.get_shield_displacement();
+    pixel_position const& shield_pos = sym_.get_shield_displacement();
     while (!points_.empty())
     {
         if (point_itr_ == points_.end())
@@ -286,11 +286,10 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
             point_itr_ = points_.begin();
             continue; //Reexecute size check
         }
-        position const& text_disp = placement_->properties.displacement;
-        double label_x = point_itr_->first + shield_pos.first;
-        double label_y = point_itr_->second + shield_pos.second;
+        pixel_position const& text_disp = placement_->properties.displacement;
+        pixel_position label_pos = *point_itr_ + shield_pos;
 
-        glyph_positions_ptr glyphs = finder_.find_point_placement(label_x, label_y);
+        glyph_positions_ptr glyphs = finder_.find_point_placement(label_pos);
         if (!glyphs)
         {
             //No placement for this point. Keep it in points_ for next try.
@@ -314,9 +313,8 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         }
         else
         {  // center image at reference location
-            marker_x_ = label_x - 0.5 * marker_w_;
-            marker_y_ = label_y - 0.5 * marker_h_;
-            marker_ext_.re_center(label_x, label_y);
+            marker_pos_ = label_pos - 0.5 * marker_size_;
+            marker_ext_.re_center(label_pos.x, label_pos.y);
         }
 
         if (placement_->properties.allow_overlap || detector_.has_placement(marker_ext_))
@@ -343,7 +341,7 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
 template <typename FaceManagerT, typename DetectorT>
 bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
-    position const& pos = placement_->properties.displacement;
+    pixel_position const& pos = placement_->properties.displacement;
 #if 0
     finder_->additional_boxes.clear();
     //Markers are automatically centered
@@ -368,17 +366,15 @@ void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
         marker_ = marker_cache::instance()->find(filename, true);
     }
     if (!marker_) {
-        marker_w_ = 0;
-        marker_h_ = 0;
+        marker_size_.clear();
         marker_ext_.init(0, 0, 0, 0);
         return;
     }
-    marker_w_ = (*marker_)->width();
-    marker_h_ = (*marker_)->height();
-    double px0 = - 0.5 * marker_w_;
-    double py0 = - 0.5 * marker_h_;
-    double px1 = 0.5 * marker_w_;
-    double py1 = 0.5 * marker_h_;
+    marker_size_.set((*marker_)->width(), (*marker_)->height());
+    double px0 = - 0.5 * marker_size_.x;
+    double py0 = - 0.5 * marker_size_.y;
+    double px1 = 0.5 * marker_size_.x;
+    double py1 = 0.5 * marker_size_.y;
     double px2 = px1;
     double py2 = py0;
     double px3 = px0;

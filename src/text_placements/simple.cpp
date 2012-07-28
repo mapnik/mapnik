@@ -62,8 +62,8 @@ bool text_placement_info_simple::next()
 
 bool text_placement_info_simple::next_position_only()
 {
-    const position &pdisp = parent_->defaults.displacement;
-    position &displacement = properties.displacement;
+    pixel_position const& pdisp = parent_->defaults.displacement;
+    pixel_position &displacement = properties.displacement;
     if (position_state >= parent_->direction_.size()) return false;
     directions_t dir = parent_->direction_[position_state];
     switch (dir) {
@@ -71,28 +71,28 @@ bool text_placement_info_simple::next_position_only()
         displacement = pdisp;
         break;
     case NORTH:
-        displacement = std::make_pair(0, -abs(pdisp.second));
+        displacement.set(0, -abs(pdisp.y));
         break;
     case EAST:
-        displacement = std::make_pair(abs(pdisp.first), 0);
+        displacement.set(abs(pdisp.x), 0);
         break;
     case SOUTH:
-        displacement = std::make_pair(0, abs(pdisp.second));
+        displacement.set(0, abs(pdisp.y));
         break;
     case WEST:
-        displacement = std::make_pair(-abs(pdisp.first), 0);
+        displacement.set(-abs(pdisp.x), 0);
         break;
     case NORTHEAST:
-        displacement = std::make_pair(abs(pdisp.first), -abs(pdisp.second));
+        displacement.set(abs(pdisp.x), -abs(pdisp.y));
         break;
     case SOUTHEAST:
-        displacement = std::make_pair(abs(pdisp.first), abs(pdisp.second));
+        displacement.set(abs(pdisp.x), abs(pdisp.y));
         break;
     case NORTHWEST:
-        displacement = std::make_pair(-abs(pdisp.first), -abs(pdisp.second));
+        displacement.set(-abs(pdisp.x), -abs(pdisp.y));
         break;
     case SOUTHWEST:
-        displacement = std::make_pair(-abs(pdisp.first), abs(pdisp.second));
+        displacement.set(-abs(pdisp.x), abs(pdisp.y));
         break;
     default:
         MAPNIK_LOG_WARN(text_placements) << "Unknown placement";

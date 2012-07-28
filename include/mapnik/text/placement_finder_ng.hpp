@@ -97,7 +97,7 @@ public:
                         face_manager_freetype & font_manager);
 
     /** Try to place a single label at the given point. */
-    glyph_positions_ptr find_point_placement(double pos_x, double pos_y);
+    glyph_positions_ptr find_point_placement(pixel_position pos);
 
     bool next_position();
 private:

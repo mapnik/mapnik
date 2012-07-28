@@ -350,15 +350,15 @@ label_placement_e  text_symbolizer::get_label_placement() const
 
 void  text_symbolizer::set_displacement(double x, double y)
 {
-    placement_options_->defaults.displacement = std::make_pair(x,y);
+    placement_options_->defaults.displacement.set(x, y);
 }
 
-void text_symbolizer::set_displacement(position const& p)
+void text_symbolizer::set_displacement(const pixel_position &p)
 {
     placement_options_->defaults.displacement = p;
 }
 
-position const& text_symbolizer::get_displacement() const
+pixel_position const& text_symbolizer::get_displacement() const
 {
     return placement_options_->defaults.displacement;
 }

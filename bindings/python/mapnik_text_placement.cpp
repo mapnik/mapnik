@@ -56,7 +56,7 @@ using namespace boost::python;
 
 boost::python::tuple get_displacement(text_symbolizer_properties const& t)
 {
-    return boost::python::make_tuple(t.displacement.first, t.displacement.second);
+    return boost::python::make_tuple(t.displacement.x, t.displacement.y);
 }
 
 void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
@@ -72,7 +72,7 @@ void set_displacement(text_symbolizer_properties &t, boost::python::tuple arg)
 
     double x = extract<double>(arg[0]);
     double y = extract<double>(arg[1]);
-    t.displacement = std::make_pair(x, y);
+    t.displacement.set(x, y);
 }
 
 
