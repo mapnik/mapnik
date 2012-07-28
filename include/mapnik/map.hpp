@@ -30,6 +30,7 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/metawriter/properties.hpp>
 #include <mapnik/params.hpp>
+#include <mapnik/ctrans.hpp>
 
 // boost
 #include <boost/optional/optional.hpp>

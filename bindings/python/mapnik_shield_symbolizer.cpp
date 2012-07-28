@@ -60,8 +60,8 @@ tuple get_shield_displacement(const shield_symbolizer& s)
 
 void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
 {
-    s.get_placement_options()->defaults.displacement.first = extract<double>(arg[0]);
-    s.get_placement_options()->defaults.displacement.second = extract<double>(arg[1]);
+    s.get_placement_options()->defaults.displacement.x = extract<double>(arg[0]);
+    s.get_placement_options()->defaults.displacement.y = extract<double>(arg[1]);
 }
 
 tuple get_text_displacement(const shield_symbolizer& t)
