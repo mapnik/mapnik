@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/ctrans.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/boolean.hpp>
 

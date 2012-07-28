@@ -26,8 +26,7 @@
 // mapnik
 #include <mapnik/value.hpp>
 #include <mapnik/geometry.hpp>
-// boost
-#include <boost/foreach.hpp>
+
 // stl
 #include <string>
 
@@ -53,15 +52,18 @@ struct geometry_type_attribute
     template <typename V, typename F>
     V value(F const& f) const
     {
-        int result = 0;
-
+        int type = 0;
         geometry_container::const_iterator itr = f.paths().begin();
         geometry_container::const_iterator end = f.paths().end();
         for ( ; itr != end; ++itr)
         {
-            result = itr->type();
+            if (type != 0 && itr->type() != type)
+            {
+                return 4; // Collection
+            }
+            type = itr->type();
         }
-        return result;
+        return type;
     }
 };
 

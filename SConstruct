@@ -32,6 +32,10 @@ try:
 except:
     HAS_DISTUTILS = False
 
+if platform.uname()[4] == 'ppc64':
+    LIBDIR_SCHEMA='lib64'
+else:
+    LIBDIR_SCHEMA='lib'
 
 py3 = None
 
@@ -237,14 +241,6 @@ def sort_paths(items,priority):
     for k,v in path_types.items():
         new.extend(v)
     return new
-
-if platform.dist()[0] in ('Ubuntu','debian'):
-    LIBDIR_SCHEMA='lib'
-elif platform.uname()[4] == 'ppc64':
-    LIBDIR_SCHEMA='lib64'
-else:
-    LIBDIR_SCHEMA='lib'
-
 
 def pretty_dep(dep):
     pretty = pretty_dep_names.get(dep)
@@ -1531,7 +1527,7 @@ if not preconfigured:
             if env['DEBUG']:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
             else:
-                env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts %s' % (env['OPTIMIZATION'],ndebug_flags))
+                env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts %s' % (env['OPTIMIZATION'],ndebug_flags))
 
             if env['DEBUG_UNDEFINED']:
                 env.Append(CXXFLAGS = '-fcatch-undefined-behavior -ftrapv -fwrapv')

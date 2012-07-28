@@ -27,6 +27,8 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/projection.hpp>
+#include <mapnik/feature.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>

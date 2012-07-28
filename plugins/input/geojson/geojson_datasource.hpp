@@ -25,13 +25,28 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
+#include <mapnik/feature_layer_desc.hpp>
+
 // boost
+#include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/algorithms/area.hpp>
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
+
+// stl
+#include <vector>
+#include <string>
+#include <map>
+#include <deque>
 
 class geojson_datasource : public mapnik::datasource
 {
@@ -49,7 +64,6 @@ public:
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
-    std::map<std::string, mapnik::parameters> get_statistics() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     void bind() const;
 private:

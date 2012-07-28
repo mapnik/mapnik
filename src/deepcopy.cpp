@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/layer.hpp>

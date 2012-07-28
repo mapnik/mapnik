@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/layer.hpp>
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/map.hpp>
@@ -201,9 +203,11 @@ public:
         {
             set_attr(sym_node, "unlock-image", sym.get_unlock_image());
         }
-        if (sym.get_text_opacity() != dfl.get_text_opacity() || explicit_defaults_)
+
+        if (sym.get_placement_options()->defaults.format.text_opacity !=
+                dfl.get_placement_options()->defaults.format.text_opacity || explicit_defaults_)
         {
-            set_attr(sym_node, "text-opacity", sym.get_text_opacity());
+            set_attr(sym_node, "text-opacity", sym.get_placement_options()->defaults.format.text_opacity);
         }
         pixel_position displacement = sym.get_shield_displacement();
         if (displacement.x != dfl.get_shield_displacement().x || explicit_defaults_)

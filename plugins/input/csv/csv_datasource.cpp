@@ -277,9 +277,9 @@ void csv_datasource::parse_csv(T& stream,
     bool has_wkt_field = false;
     bool has_lat_field = false;
     bool has_lon_field = false;
-    unsigned wkt_idx;
-    unsigned lat_idx;
-    unsigned lon_idx;
+    unsigned wkt_idx(0);
+    unsigned lat_idx(0);
+    unsigned lon_idx(0);
 
     if (!manual_headers_.empty())
     {

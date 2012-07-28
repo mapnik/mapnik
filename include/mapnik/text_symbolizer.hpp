@@ -37,7 +37,7 @@
 // stl
 #include <string>
 
-#if (1 && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+#if (!defined(NO_DEPRECATION_WARNINGS) && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
 #define func_deprecated __attribute__ ((deprecated))
 #else
 #define func_deprecated

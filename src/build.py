@@ -101,6 +101,7 @@ else: # unix, non-macos
 source = Split(
     """
     color.cpp
+    css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
     image_scaling.cpp
@@ -109,8 +110,11 @@ source = Split(
     datasource_cache.cpp
     debug.cpp
     deepcopy.cpp
+    expression_node.cpp
+    expression_grammar.cpp
     expression_string.cpp
     expression.cpp
+    transform_expression_grammar.cpp
     transform_expression.cpp
     feature_kv_iterator.cpp
     feature_type_style.cpp
@@ -130,6 +134,7 @@ source = Split(
     parse_path.cpp
     parse_transform.cpp
     palette.cpp
+    path_expression_grammar.cpp
     plugin.cpp
     png_reader.cpp
     point_symbolizer.cpp
@@ -140,6 +145,7 @@ source = Split(
     text_symbolizer.cpp
     tiff_reader.cpp
     wkb.cpp
+    wkb_generator.cpp
     projection.cpp
     proj_transform.cpp
     distance.cpp
@@ -162,6 +168,7 @@ source = Split(
     svg_points_parser.cpp
     svg_transform_parser.cpp
     warp.cpp
+    json/feature_grammar.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
     markers_placement.cpp
@@ -282,21 +289,21 @@ source += Split(
 if env['SVG_RENDERER']: # svg backend
     source += Split(
               """
-      	svg/svg_renderer.cpp
-      	svg/svg_generator.cpp
-      	svg/svg_output_attributes.cpp
-      	svg/process_symbolizers.cpp
-      	svg/process_building_symbolizer.cpp
-      	svg/process_line_pattern_symbolizer.cpp
-      	svg/process_line_symbolizer.cpp
-      	svg/process_markers_symbolizer.cpp
-      	svg/process_point_symbolizer.cpp
-      	svg/process_polygon_pattern_symbolizer.cpp
-      	svg/process_polygon_symbolizer.cpp
-      	svg/process_raster_symbolizer.cpp
-      	svg/process_shield_symbolizer.cpp
-      	svg/process_text_symbolizer.cpp
-      	""")
+        svg/svg_renderer.cpp
+        svg/svg_generator.cpp
+        svg/svg_output_attributes.cpp
+        svg/process_symbolizers.cpp
+        svg/process_building_symbolizer.cpp
+        svg/process_line_pattern_symbolizer.cpp
+        svg/process_line_symbolizer.cpp
+        svg/process_markers_symbolizer.cpp
+        svg/process_point_symbolizer.cpp
+        svg/process_polygon_pattern_symbolizer.cpp
+        svg/process_polygon_symbolizer.cpp
+        svg/process_raster_symbolizer.cpp
+        svg/process_shield_symbolizer.cpp
+        svg/process_text_symbolizer.cpp
+        """)
     lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
     libmapnik_cxxflags.append('-DSVG_RENDERER')
 

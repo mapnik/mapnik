@@ -107,7 +107,7 @@ void shape_io::read_polyline(mapnik::geometry_container & geom)
     int num_points = record.read_ndr_integer();
     if (num_parts == 1)
     {
-        geometry_type* line = new geometry_type(mapnik::LineString);
+        std::auto_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
         record.skip(4);
         double x = record.read_double();
         double y = record.read_double();
@@ -131,7 +131,7 @@ void shape_io::read_polyline(mapnik::geometry_container & geom)
         int start, end;
         for (int k = 0; k < num_parts; ++k)
         {
-            geometry_type* line = new geometry_type(mapnik::LineString);
+            std::auto_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
             start = parts[k];
             if (k == num_parts - 1)
             {
@@ -188,9 +188,9 @@ void shape_io::read_polygon(mapnik::geometry_container & geom)
         parts[i] = record.read_ndr_integer();
     }
 
-    for (int k = 0; k < num_parts; k++)
+    for (int k = 0; k < num_parts; ++k)
     {
-        geometry_type* poly = new geometry_type(mapnik::Polygon);
+        std::auto_ptr<geometry_type> poly(new geometry_type(mapnik::Polygon));
         int start = parts[k];
         int end;
         if (k == num_parts - 1)
@@ -206,12 +206,16 @@ void shape_io::read_polygon(mapnik::geometry_container & geom)
         double y = record.read_double();
         poly->move_to(x, y);
 
-        for (int j=start+1;j<end;j++)
+        for (int j=start+1;j<end-1;j++)
         {
             x = record.read_double();
             y = record.read_double();
             poly->line_to(x, y);
         }
+        x = record.read_double();
+        y = record.read_double();
+        poly->close(x, y);
+
         geom.push_back(poly);
     }
     // z-range

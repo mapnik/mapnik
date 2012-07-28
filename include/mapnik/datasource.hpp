@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/ctrans.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/query.hpp>

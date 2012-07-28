@@ -30,6 +30,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/rule.hpp> // for all symbolizers
 
 // boost
 #include <boost/utility.hpp>
@@ -48,6 +49,7 @@ struct trans_affine;
 namespace mapnik {
 
 class marker;
+
 struct rasterizer;
 
 template <typename T>

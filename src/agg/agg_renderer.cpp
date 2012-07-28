@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/layer.hpp>
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
@@ -239,7 +241,7 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
         {
             blend_from = true;
             mapnik::filter::filter_visitor<image_32> visitor(*current_buffer_);
-            BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.image_filters())
+            BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.image_filters())
             {
                 boost::apply_visitor(visitor, filter_tag);
             }
@@ -256,7 +258,7 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
 
         // apply any 'direct' image filters
         mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
-        BOOST_FOREACH(mapnik::filter::filter_type filter_tag, st.direct_image_filters())
+        BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.direct_image_filters())
         {
             boost::apply_visitor(visitor, filter_tag);
         }

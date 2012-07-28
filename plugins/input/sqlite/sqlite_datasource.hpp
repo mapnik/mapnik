@@ -25,17 +25,25 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 
 // boost
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
+// stl
+#include <vector>
+#include <string>
+
 // sqlite
 #include "sqlite_connection.hpp"
-
 
 class sqlite_datasource : public mapnik::datasource
 {

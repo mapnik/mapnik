@@ -32,6 +32,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/rule.hpp> // for all symbolizers
 
 // cairo
 #include <cairomm/context.h>

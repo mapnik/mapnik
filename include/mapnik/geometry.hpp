@@ -88,8 +88,8 @@ public:
     box2d<double> envelope() const
     {
         box2d<double> result;
-        double x(0);
-        double y(0);
+        double x = 0;
+        double y = 0;
         rewind(0);
         for (unsigned i=0;i<size();++i)
         {
@@ -119,6 +119,11 @@ public:
     void move_to(coord_type x,coord_type y)
     {
         push_vertex(x,y,SEG_MOVETO);
+    }
+
+    void close(coord_type x, coord_type y)
+    {
+        push_vertex(x,y,SEG_CLOSE);
     }
 
     unsigned vertex(double* x, double* y) const

@@ -38,4 +38,9 @@ grind:
 		valgrind --leak-check=full --log-fd=1 $${FILE} | grep definitely; \
 	done
 
+render:
+	@for FILE in tests/data/good_maps/*xml; do \
+		nik2img.py $${FILE} /tmp/$$(basename $${FILE}).png; \
+	done
+
 .PHONY: clean reset uninstall test install

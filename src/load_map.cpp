@@ -22,9 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-
 #include <mapnik/load_map.hpp>
-
 #include <mapnik/xml_tree.hpp>
 #include <mapnik/version.hpp>
 #include <mapnik/image_compositing.hpp>
@@ -39,16 +37,12 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/xml_loader.hpp>
-
 #include <mapnik/expression.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
-
 #include <mapnik/svg/svg_path_parser.hpp>
-
 #include <mapnik/metawriter_factory.hpp>
-
 #include <mapnik/text_placements/registry.hpp>
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -1062,9 +1056,11 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
 
         stroke strk;
         if (parse_stroke(strk,node))
+        {
             sym.set_stroke(strk);
+        }
 
-        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_LINE_PLACEMENT);
+        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_POINT_PLACEMENT);
         sym.set_marker_placement(placement);
         parse_symbolizer_base(sym, node);
         rule.append(sym);
@@ -1309,25 +1305,30 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
 bool map_parser::parse_stroke(stroke & strk, xml_node const & sym)
 {
     bool result = false;
+
     // stroke color
     optional<color> c = sym.get_opt_attr<color>("stroke");
     if (c)
     {
-        strk.set_color(*c);
         result = true;
+        strk.set_color(*c);
     }
 
     // stroke-width
-    optional<double> width =  sym.get_opt_attr<double>("stroke-width");
-    if (width && *width > 0)
+    optional<double> width = sym.get_opt_attr<double>("stroke-width");
+    if (width)
     {
-        strk.set_width(*width);
         result = true;
+        strk.set_width(*width);
     }
 
     // stroke-opacity
     optional<double> opacity = sym.get_opt_attr<double>("stroke-opacity");
-    if (opacity) strk.set_opacity(*opacity);
+    if (opacity)
+    {
+        result = true;
+        strk.set_opacity(*opacity);
+    }
 
     // stroke-linejoin
     optional<line_join_e> line_join = sym.get_opt_attr<line_join_e>("stroke-linejoin");
