@@ -61,7 +61,7 @@ public:
     double height() const;
 
     double max_char_height() const { return max_char_height_; }
-    void set_max_char_height(double max_char_height);
+    void update_max_char_height(double max_char_height);
     double line_height() const { return line_height_; }
 
     void set_first_line(bool first_line);

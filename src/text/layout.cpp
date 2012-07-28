@@ -47,10 +47,6 @@ void text_layout::layout(double wrap_width, unsigned text_ratio)
     text_line_ptr line = boost::make_shared<text_line>(0, itemizer_.get_text().length());
     shape_text(line, 0, itemizer_.get_text().length()); //Process full text
     break_line(line, wrap_width, text_ratio); //Break line if neccessary
-    if (lines_.size())
-    {
-        lines_[0]->set_first_line(true);
-    }
 }
 
 
@@ -126,7 +122,7 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
         face_set->set_character_sizes(itr->format->text_size);
         face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
         text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
-        line->set_text_height(itr->format->text_size /*TODO*/);
+        line->update_max_char_height(itr->format->text_size /*TODO*/);
 
         shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
         hb_buffer_t *buffer = shaper.get_buffer();
@@ -154,6 +150,17 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
 //            std::cout << "glyph:" << glyphs[i].mask << " xa:" << positions[i].x_advance << " ya:" << positions[i].y_advance << " xo:" << positions[i].x_offset <<  " yo:" << positions[i].y_offset << "\n";
         }
     }
+}
+
+void text_layout::add_line(text_line_ptr line)
+{
+    if (lines_.empty())
+    {
+        line->set_first_line(true);
+    }
+    lines_.push_back(line);
+    width_ = std::max(width_, line->width());
+    height_ += line->height();
 }
 
 void text_layout::clear()
@@ -187,6 +194,8 @@ unsigned text_layout::size() const
     return lines_.size();
 }
 
+/*********************************************************************************************/
+
 text_line::text_line(unsigned first_char, unsigned last_char)
     : glyphs_(), line_height_(0.), max_char_height_(0.),
       width_(0.), first_char_(first_char), last_char_(last_char),
@@ -196,9 +205,14 @@ text_line::text_line(unsigned first_char, unsigned last_char)
 
 void text_line::add_glyph(const glyph_info &glyph)
 {
-    glyphs_.push_back(glyph);
     line_height_ = std::max(line_height_, glyph.line_height + glyph.format->line_spacing);
-    width_ += glyph.width + glyph.format->character_spacing;
+    if (glyphs_.empty())
+    {
+        width_ = glyph.width;
+    } else {
+        width_ += glyph.width + glyphs_.back().format->character_spacing;
+    }
+    glyphs_.push_back(glyph);
 }
 
 
@@ -223,7 +237,7 @@ double text_line::height() const
     return line_height_;
 }
 
-void text_line::set_max_char_height(double max_char_height)
+void text_line::update_max_char_height(double max_char_height)
 {
     max_char_height_ = std::max(max_char_height_, max_char_height);
 }
