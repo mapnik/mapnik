@@ -38,14 +38,14 @@
 namespace mapnik
 {
 text_layout::text_layout(face_manager_freetype &font_manager)
-    : font_manager_(font_manager), itemizer(), width_(0), height_(0), lines_()
+    : font_manager_(font_manager), itemizer_(), width_(0), height_(0), lines_()
 {
 }
 
 void text_layout::layout(double wrap_width, unsigned text_ratio)
 {
-    text_line_ptr line = boost::make_shared<text_line>(0, itemizer.get_text().length());
-    shape_text(line, 0, itemizer.get_text().length()); //Process full text
+    text_line_ptr line = boost::make_shared<text_line>(0, itemizer_.get_text().length());
+    shape_text(line, 0, itemizer_.get_text().length()); //Process full text
     break_line(line, wrap_width, text_ratio); //Break line if neccessary
     if (lines_.size())
     {
@@ -71,7 +71,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
         for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio && (string_width/i) > wrap_width; i += 1.0) ;
     }
 
-    UnicodeString const& text = itemizer.get_text();
+    UnicodeString const& text = itemizer_.get_text();
     Locale locale; //TODO: Is the default constructor correct?
     UErrorCode status = U_ZERO_ERROR;
     BreakIterator *breakitr = BreakIterator::createLineInstance(locale, status);
@@ -83,8 +83,8 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
     for (unsigned i=0; i<text.length(); i++)
     {
         //TODO: Char spacing
-        std::map<unsigned, double>::const_iterator width_itr = width_map.find(i);
-        if (width_itr != width_map.end())
+        std::map<unsigned, double>::const_iterator width_itr = width_map_.find(i);
+        if (width_itr != width_map_.end())
         {
             current_line_length += width_itr->second;
         }
@@ -112,13 +112,13 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
 
 void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
 {
-    UnicodeString const& text = itemizer.get_text();
+    UnicodeString const& text = itemizer_.get_text();
 
     size_t length = end - start;
 
     line->reserve(length); //Preallocate memory
 
-    std::list<text_item> const& list = itemizer.itemize(start, end);
+    std::list<text_item> const& list = itemizer_.itemize(start, end);
     std::list<text_item>::const_iterator itr = list.begin(), list_end = list.end();
     for (; itr != list_end; itr++)
     {
@@ -148,7 +148,7 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
             tmp.format = itr->format;
             face->glyph_dimensions(tmp);
 
-            width_map[glyphs[i].cluster] += tmp.width;
+            width_map_[glyphs[i].cluster] += tmp.width;
 
             line->add_glyph(tmp);
 //            std::cout << "glyph:" << glyphs[i].mask << " xa:" << positions[i].x_advance << " ya:" << positions[i].y_advance << " xo:" << positions[i].x_offset <<  " yo:" << positions[i].y_offset << "\n";
@@ -158,7 +158,7 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
 
 void text_layout::clear()
 {
-    itemizer.clear();
+    itemizer_.clear();
     lines_.clear();
 }
 

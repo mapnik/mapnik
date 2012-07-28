@@ -85,7 +85,7 @@ public:
     text_layout(face_manager_freetype & font_manager);
     inline void add_text(UnicodeString const& str, char_properties_ptr format)
     {
-        itemizer.add_text(str, format);
+        itemizer_.add_text(str, format);
     }
 
     void layout(double wrap_width, unsigned text_ratio);
@@ -107,9 +107,9 @@ private:
     face_manager_freetype &font_manager_;
 
     //processing
-    text_itemizer itemizer;
+    text_itemizer itemizer_;
     /// Maps char index (UTF-16) to width. If multiple glyphs map to the same char the sum of all widths is used
-    std::map<unsigned, double> width_map;
+    std::map<unsigned, double> width_map_;
     double width_;
     double height_;
 
