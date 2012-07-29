@@ -83,10 +83,7 @@ public:
     typedef std::vector<text_line_ptr> line_vector;
     typedef line_vector::const_iterator const_iterator;
     text_layout(face_manager_freetype & font_manager);
-    inline void add_text(UnicodeString const& str, char_properties_ptr format)
-    {
-        itemizer_.add_text(str, format);
-    }
+    void add_text(UnicodeString const& str, char_properties_ptr format);
 
     void layout(double wrap_width, unsigned text_ratio);
 
