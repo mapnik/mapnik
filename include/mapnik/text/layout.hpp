@@ -65,6 +65,9 @@ public:
     double line_height() const { return line_height_; }
 
     void set_first_line(bool first_line);
+
+    unsigned get_first_char() const;
+    unsigned get_last_char() const;
 private:
     glyph_vector glyphs_;
     double line_height_; //Includes line spacing (returned by freetype)
@@ -97,7 +100,7 @@ public:
 
 private:
     void break_line(text_line_ptr line, double wrap_width, unsigned text_ratio);
-    void shape_text(text_line_ptr line, unsigned start, unsigned end);
+    void shape_text(text_line_ptr line);
     void add_line(text_line_ptr line);
 
     //input

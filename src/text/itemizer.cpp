@@ -33,7 +33,7 @@ namespace mapnik
 
 text_itemizer::text_itemizer() : text_(), format_runs_(), direction_runs_(), script_runs_()
 {
-
+    forced_line_breaks_.push_back(0);
 }
 
 void text_itemizer::add_text(UnicodeString str, char_properties_ptr format)
@@ -41,6 +41,11 @@ void text_itemizer::add_text(UnicodeString str, char_properties_ptr format)
     unsigned start = text_.length();
     text_ += str;
     format_runs_.push_back(format_run_t(format, start, text_.length()));
+
+    while ((start = text_.indexOf('\n', start)+1) > 0)
+    {
+        forced_line_breaks_.push_back(start);
+    }
 }
 
 std::list<text_item> const& text_itemizer::itemize(unsigned start, unsigned end)
@@ -60,6 +65,26 @@ void text_itemizer::clear()
     output_.clear();
     text_.remove();
     format_runs_.clear();
+    forced_line_breaks_.clear();
+    forced_line_breaks_.push_back(0);
+}
+
+std::pair<unsigned, unsigned> text_itemizer::get_line(unsigned i) const
+{
+#ifdef MAPNIK_DEBUG
+    if (i >= forced_line_breaks_.size()) return std::make_pair(0, 0);
+#endif
+    if (i == forced_line_breaks_.size()-1)
+    {
+        return std::make_pair(forced_line_breaks_[i], text_.length());
+    }
+    //Note -1 offset to exclude the \n char
+    return std::make_pair(forced_line_breaks_[i], forced_line_breaks_[i+1]-1);
+}
+
+unsigned text_itemizer::num_lines() const
+{
+    return forced_line_breaks_.size();
 }
 
 void text_itemizer::itemize_direction(unsigned start, unsigned end)

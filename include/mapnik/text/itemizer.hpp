@@ -29,6 +29,7 @@
 // stl
 #include <string>
 #include <list>
+#include <vector>
 
 // ICU
 #include <unicode/unistr.h>
@@ -63,7 +64,13 @@ public:
     void add_text(UnicodeString str, char_properties_ptr format);
     std::list<text_item> const& itemize(unsigned start=0, unsigned end=0);
     void clear();
-    UnicodeString const& get_text() { return text_; }
+    UnicodeString const& get_text() const { return text_; }
+    /** Returns the start and end position of a certain line.
+     *
+     * Only forced line breaks with \n characters are handled here.
+     */
+    std::pair<unsigned, unsigned> get_line(unsigned i) const;
+    unsigned num_lines() const;
 private:
     template<typename T> struct run
     {
@@ -91,6 +98,7 @@ private:
     void create_item_list();
     std::list<text_item> output_;
     template <typename T> typename T::const_iterator find_run(T const& list, unsigned position);
+    std::vector<unsigned> forced_line_breaks_; //Positions of \n characters
 };
 } //ns mapnik
 

@@ -56,15 +56,19 @@ void text_layout::add_text(const UnicodeString &str, char_properties_ptr format)
 
 void text_layout::layout(double wrap_width, unsigned text_ratio)
 {
-    text_line_ptr line = boost::make_shared<text_line>(0, itemizer_.get_text().length());
-    shape_text(line, 0, itemizer_.get_text().length()); //Process full text
-    break_line(line, wrap_width, text_ratio); //Break line if neccessary
+    unsigned num_lines = itemizer_.num_lines();
+    for (unsigned i = 0; i < num_lines; i++)
+    {
+        std::pair<unsigned, unsigned> line_limits = itemizer_.get_line(i);
+        text_line_ptr line = boost::make_shared<text_line>(line_limits.first, line_limits.second);
+        shape_text(line);
+        break_line(line, wrap_width, text_ratio); //Break line if neccessary
+    }
 }
 
 
 void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned text_ratio)
 {
-    //TODO: Handle \n chars.
     if (!wrap_width || line->width() < wrap_width)
     {
         add_line(line);
@@ -77,6 +81,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
         double string_width = line->width();
         double string_height = line->line_height();
         for (double i = 1.0; ((wrap_at = string_width/i)/(string_height*i)) > text_ratio && (string_width/i) > wrap_width; i += 1.0) ;
+        wrap_width = wrap_at;
     }
 
     UnicodeString const& text = itemizer_.get_text();
@@ -88,7 +93,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
     breakitr->setText(text);
     unsigned current_line_length = 0;
     unsigned last_break_position = 0;
-    for (unsigned i=0; i<text.length(); i++)
+    for (unsigned i=line->get_first_char(); i<line->get_last_char(); i++)
     {
         //TODO: Char spacing
         std::map<unsigned, double>::const_iterator width_itr = width_map_.find(i);
@@ -99,16 +104,21 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
         if (current_line_length > wrap_width)
         {
             unsigned break_position = breakitr->preceding(i);
-            if (break_position <= last_break_position)
+            if (break_position <= last_break_position || break_position == BreakIterator::DONE)
             {
                 //A single word is longer than the maximum line width.
                 //Violate line width requirement and choose next break position
                 break_position = breakitr->following(i);
-                std::cout << "Line overflow!\n";
+                if (break_position == BreakIterator::DONE)
+                {
+                    break_position = line->get_last_char();
+                    MAPNIK_LOG_WARN(text_layout) << "Unexpected result in break_line. Trying to recover...\n";
+                }
+//                std::cout << "Line overflow!\n";
             }
-            std::cout << "Line to long ("<< current_line_length << ") at "<< i <<  " going to " << break_position << ". Last break was at " << last_break_position << "\n";
+//            std::cout << "Line to long ("<< current_line_length << ") at "<< i <<  " going to " << break_position << ". Last break was at " << last_break_position << "\n";
             text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
-            shape_text(new_line, last_break_position, break_position);
+            shape_text(new_line);
             add_line(new_line);
             last_break_position = break_position;
             i = break_position - 1;
@@ -116,10 +126,18 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
             current_line_length = 0;
         }
     }
+    if (last_break_position != line->get_last_char())
+    {
+        text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, line->get_last_char());
+        shape_text(new_line);
+        add_line(new_line);
+    }
 }
 
-void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
+void text_layout::shape_text(text_line_ptr line)
 {
+    unsigned start = line->get_first_char();
+    unsigned end = line->get_last_char();
     UnicodeString const& text = itemizer_.get_text();
 
     size_t length = end - start;
@@ -258,6 +276,16 @@ void text_line::update_max_char_height(double max_char_height)
 void text_line::set_first_line(bool first_line)
 {
     first_line_ = first_line;
+}
+
+unsigned text_line::get_first_char() const
+{
+    return first_char_;
+}
+
+unsigned text_line::get_last_char() const
+{
+    return last_char_;
 }
 
 } //ns mapnik
