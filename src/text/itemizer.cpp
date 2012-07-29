@@ -51,7 +51,6 @@ std::list<text_item> const& text_itemizer::itemize(unsigned start, unsigned end)
     // format itemiziation is done by add_text()
     itemize_direction(start, end);
     itemize_script();
-    std::cout << "Itemizer: direction: "<< direction_runs.size() << " script: " << script_runs.size() << "\n";
     create_item_list();
     return output;
 }

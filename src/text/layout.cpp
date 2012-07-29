@@ -122,7 +122,8 @@ void text_layout::shape_text(text_line_ptr line, unsigned start, unsigned end)
         face_set->set_character_sizes(itr->format->text_size);
         face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
         text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
-        line->update_max_char_height(itr->format->text_size /*TODO*/);
+
+        line->update_max_char_height(face->get_char_height());
 
         shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
         hb_buffer_t *buffer = shaper.get_buffer();

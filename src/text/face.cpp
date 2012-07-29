@@ -32,7 +32,28 @@ extern "C"
 namespace mapnik
 {
 
-void font_face::glyph_dimensions(glyph_info &glyph)
+font_face::font_face(FT_Face face)
+    : face_(face), dimension_cache_(), char_height_(0.)
+{
+}
+
+double font_face::get_char_height() const
+{
+    if (char_height_ != 0.0) return char_height_;
+    glyph_info tmp;
+    tmp.glyph_index = FT_Get_Char_Index(face_, 'X');
+    glyph_dimensions(tmp);
+    char_height_ = tmp.height();
+    return char_height_;
+}
+
+bool font_face::set_character_sizes(float size)
+{
+    char_height_ = 0.;
+    return !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0);
+}
+
+void font_face::glyph_dimensions(glyph_info &glyph) const
 {
     //TODO
     //Check if char is already in cache
@@ -64,8 +85,8 @@ void font_face::glyph_dimensions(glyph_info &glyph)
     FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &glyph_bbox);
     FT_Done_Glyph(image);
 
-    glyph.ymin = glyph_bbox.yMin; //TODO: Which data format? 26.6, integer?
-    glyph.ymax = glyph_bbox.yMax; //TODO: Which data format? 26.6, integer?
+    glyph.ymin = glyph_bbox.yMin; //pixels!
+    glyph.ymax = glyph_bbox.yMax;
     glyph.line_height = face_->size->metrics.height/64.0;
 
 //TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));

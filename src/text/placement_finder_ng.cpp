@@ -48,6 +48,7 @@ bool placement_finder_ng::next_position()
         valid_ = false;
         return false;
     }
+
     info_->properties.process(layout_, feature_);
     layout_.layout(info_->properties.wrap_width, info_->properties.text_ratio);
 
@@ -143,7 +144,8 @@ pixel_position placement_finder_ng::alignment_offset() const
 glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos)
 {
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
-    if (!layout_.size()) return glyphs; //No data
+    if (!layout_.size()) return glyphs; /* No data. Don't return NULL pointer, which would mean
+     that not enough space was available. */
 
     //TODO: Verify enough space is available. For point placement the bounding box is enough!
 
@@ -163,7 +165,6 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
     text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
     for (; line_itr != line_end; line_itr++)
     {
-//        text_line *line_itr;
         y -= (*line_itr)->height(); //Automatically handles first line differently
         // reset to begining of line position
         if (jalign_ == J_LEFT)
@@ -176,7 +177,6 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
-//            glyph_info *glyph_itr;
             glyphs->push_back(*glyph_itr, pixel_position(x, y), angle_); //TODO: Store cosa, sina instead
             x += glyph_itr->width + glyph_itr->format->character_spacing;
         }

@@ -48,8 +48,7 @@ namespace mapnik
 class font_face : boost::noncopyable
 {
 public:
-    font_face(FT_Face face)
-        : face_(face) {}
+    font_face(FT_Face face);
 
     std::string family_name() const
     {
@@ -66,32 +65,18 @@ public:
         return face_;
     }
 
-    unsigned get_char(unsigned c) const
-    {
-        return FT_Get_Char_Index(face_, c);
-    }
+    double get_char_height() const;
 
-    bool set_pixel_sizes(unsigned size)
-    {
-        if (! FT_Set_Pixel_Sizes( face_, 0, size ))
-            return true;
-        return false;
-    }
+    bool set_character_sizes(float size);
 
-    bool set_character_sizes(float size)
-    {
-        if ( !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0))
-            return true;
-        return false;
-    }
-
-    void glyph_dimensions(glyph_info &glyph);
+    void glyph_dimensions(glyph_info &glyph) const;
 
     ~font_face();
 
 private:
     FT_Face face_;
-    std::map<glyph_index_t, glyph_info> dimension_cache_;
+    mutable std::map<glyph_index_t, glyph_info> dimension_cache_;
+    mutable double char_height_;
 };
 
 
