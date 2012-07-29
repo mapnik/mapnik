@@ -63,7 +63,7 @@ public:
     void add_text(UnicodeString str, char_properties_ptr format);
     std::list<text_item> const& itemize(unsigned start=0, unsigned end=0);
     void clear();
-    UnicodeString const& get_text() { return text; }
+    UnicodeString const& get_text() { return text_; }
 private:
     template<typename T> struct run
     {
@@ -78,18 +78,18 @@ private:
     typedef std::list<format_run_t> format_run_list;
     typedef std::list<script_run_t> script_run_list;
     typedef std::list<direction_run_t> direction_run_list;
-    UnicodeString text;
+    UnicodeString text_;
     /// Format runs are always sorted by char index
-    format_run_list format_runs;
+    format_run_list format_runs_;
     /// Directions runs are always in visual order! This is different from
     /// format and script runs!
-    direction_run_list direction_runs;
+    direction_run_list direction_runs_;
     /// Script runs are always sorted by char index
-    script_run_list script_runs;
+    script_run_list script_runs_;
     void itemize_direction(unsigned start, unsigned end);
     void itemize_script();
     void create_item_list();
-    std::list<text_item> output;
+    std::list<text_item> output_;
     template <typename T> typename T::const_iterator find_run(T const& list, unsigned position);
 };
 } //ns mapnik
