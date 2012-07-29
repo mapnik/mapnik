@@ -44,14 +44,7 @@ text_layout::text_layout(face_manager_freetype &font_manager)
 
 void text_layout::add_text(const UnicodeString &str, char_properties_ptr format)
 {
-    if (format->wrap_char)
-    {
-        UnicodeString copy = str;
-        copy.findAndReplace(UChar32(format->wrap_char), "\n");
-        itemizer_.add_text(copy, format);
-    } else {
-        itemizer_.add_text(str, format);
-    }
+    itemizer_.add_text(str, format);
 }
 
 void text_layout::layout(double wrap_width, unsigned text_ratio)
