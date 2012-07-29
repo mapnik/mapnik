@@ -96,8 +96,8 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
             }
             std::cout << "Line to long ("<< current_line_length << ") at "<< i <<  " going to " << break_position << ". Last break was at " << last_break_position << "\n";
             text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
-            shape_text(line, last_break_position, break_position);
-            add_line(line);
+            shape_text(new_line, last_break_position, break_position);
+            add_line(new_line);
             last_break_position = break_position;
             i = break_position - 1;
 
