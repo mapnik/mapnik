@@ -111,7 +111,7 @@ private:
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
-    void parse_stroke(stroke & strk, xml_node const & sym);
+    bool parse_stroke(stroke & strk, xml_node const & sym);
 
     void ensure_font_face(std::string const& face_name);
     void find_unused_nodes(xml_node const& root);
@@ -1055,8 +1055,10 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         if (height) sym.set_height(*height);
 
         stroke strk;
-        parse_stroke(strk,node);
-        sym.set_stroke(strk);
+        if (parse_stroke(strk,node))
+        {
+            sym.set_stroke(strk);
+        }
 
         marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_POINT_PLACEMENT);
         sym.set_marker_placement(placement);
@@ -1300,12 +1302,15 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
     }
 }
 
-void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
+bool map_parser::parse_stroke(stroke & strk, xml_node const & sym)
 {
+    bool result = false;
+
     // stroke color
     optional<color> c = sym.get_opt_attr<color>("stroke");
     if (c)
     {
+        result = true;
         strk.set_color(*c);
     }
 
@@ -1313,12 +1318,17 @@ void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
     optional<double> width = sym.get_opt_attr<double>("stroke-width");
     if (width)
     {
+        result = true;
         strk.set_width(*width);
     }
 
     // stroke-opacity
     optional<double> opacity = sym.get_opt_attr<double>("stroke-opacity");
-    if (opacity) strk.set_opacity(*opacity);
+    if (opacity)
+    {
+        result = true;
+        strk.set_opacity(*opacity);
+    }
 
     // stroke-linejoin
     optional<line_join_e> line_join = sym.get_opt_attr<line_join_e>("stroke-linejoin");
@@ -1373,6 +1383,7 @@ void map_parser::parse_stroke(stroke & strk, xml_node const & sym)
     // stroke-miterlimit
     optional<double> miterlimit = sym.get_opt_attr<double>("stroke-miterlimit");
     if (miterlimit) strk.set_miterlimit(*miterlimit);
+    return result;
 }
 
 void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)

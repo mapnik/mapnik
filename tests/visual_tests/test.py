@@ -81,7 +81,7 @@ if __name__ == "__main__":
         files = [{"name": sys.argv[1], "sizes": sizes_few_square}]
     elif len(sys.argv) > 2:
         files = []
-        for name in argv[1:]:
+        for name in sys.argv[1:]:
             files.append({"name": name})
 
     for f in files:

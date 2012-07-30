@@ -12,7 +12,6 @@ passed = 0
 def compare_pixels(pixel1, pixel2):
     if pixel1 == pixel2:
         return False
-    # will only work on little endian
     r_diff = abs((pixel1 & 0xff) - (pixel2 & 0xff))
     g_diff = abs(((pixel1 >> 8) & 0xff) - ((pixel2 >> 8) & 0xff))
     b_diff = abs(((pixel1 >> 16) & 0xff)- ((pixel2 >> 16) & 0xff))
@@ -32,7 +31,7 @@ def compare(actual, expected):
     im1 = mapnik.Image.open(actual)
     try:
         im2 = mapnik.Image.open(expected)
-    except IOError:
+    except RuntimeError:
         errors.append((None, actual, expected))
         return -1
     diff = 0
