@@ -241,6 +241,8 @@ double path_length(PathType & path)
     return length;
 }
 
+namespace label {
+
 template <typename PathType>
 bool middle_point(PathType & path, double & x, double & y)
 {
@@ -270,8 +272,6 @@ bool middle_point(PathType & path, double & x, double & y)
     }
     return true;
 }
-
-namespace label {
 
 template <typename PathType>
 bool centroid(PathType & path, double & x, double & y)
