@@ -658,13 +658,13 @@ public:
         context_->restore();
     }
 
-    void show_glyph(unsigned long index, double x, double y)
+    void show_glyph(unsigned long index, pixel_position const& pos)
     {
         Cairo::Glyph glyph;
 
         glyph.index = index;
-        glyph.x = x;
-        glyph.y = y;
+        glyph.x = pos.x;
+        glyph.y = pos.y;
 
         std::vector<Cairo::Glyph> glyphs;
 
@@ -673,13 +673,13 @@ public:
         context_->show_glyphs(glyphs);
     }
 
-    void glyph_path(unsigned long index, double x, double y)
+    void glyph_path(unsigned long index, pixel_position pos)
     {
         Cairo::Glyph glyph;
 
         glyph.index = index;
-        glyph.x = x;
-        glyph.y = y;
+        glyph.x = pos.x;
+        glyph.y = pos.y;
 
         std::vector<Cairo::Glyph> glyphs;
 
@@ -688,55 +688,41 @@ public:
         context_->glyph_path(glyphs);
     }
 
-    void add_text(glyph_positions_ptr path,
+    void add_text(glyph_positions_ptr pos,
                   cairo_face_manager & manager,
                   face_manager<freetype_engine> &font_manager,
-                  double scale_factor = 1.0)
+                  double scale_factor)
     {
-#if 0
-        double sx = path.center.x;
-        double sy = path.center.y;
+        pixel_position const& base = pos->get_base_point();
 
-        path.rewind();
-
-        for (int iii = 0; iii < path.num_nodes(); iii++)
+        glyph_positions::const_iterator itr = pos->begin(), end = pos->end();
+        for (; itr != end; itr++)
         {
-            char_info_ptr c;
-            double x, y, angle;
+            glyph_info const& glyph = *(itr->glyph);
+            double text_size = glyph.format->text_size * scale_factor;
+            glyph.face->set_character_sizes(text_size);
 
-            path.vertex(&c, &x, &y, &angle);
+            Cairo::Matrix matrix;
+            double sina = sin(itr->angle);
+            double cosa = cos(itr->angle);
+            matrix.xx = text_size * cosa;
+            matrix.xy = text_size * sina;
+            matrix.yx = text_size * -sina;
+            matrix.yy = text_size * cosa;
+            matrix.x0 = 0;
+            matrix.y0 = 0;
 
-            face_set_ptr faces = font_manager.get_face_set(c->format->face_name, c->format->fontset);
-            float text_size = c->format->text_size * scale_factor;
-            faces->set_character_sizes(text_size);
+            set_font_matrix(matrix);
+            set_font_face(manager, glyph.face);
 
-            glyph_ptr glyph = faces->get_glyph(c->c);
-
-            if (glyph)
-            {
-                Cairo::Matrix matrix;
-
-                matrix.xx = text_size * cos(angle);
-                matrix.xy = text_size * sin(angle);
-                matrix.yx = text_size * -sin(angle);
-                matrix.yy = text_size * cos(angle);
-                matrix.x0 = 0;
-                matrix.y0 = 0;
-
-                set_font_matrix(matrix);
-
-                set_font_face(manager, glyph->get_face());
-
-                glyph_path(glyph->get_index(), sx + x, sy - y);
-                set_line_width(c->format->halo_radius * scale_factor);
-                set_line_join(ROUND_JOIN);
-                set_color(c->format->halo_fill);
-                stroke();
-                set_color(c->format->fill);
-                show_glyph(glyph->get_index(), sx + x, sy - y);
-            }
+            glyph_path(glyph.glyph_index, base + itr->pos);
+            set_line_width(glyph.format->halo_radius * scale_factor);
+            set_line_join(ROUND_JOIN);
+            set_color(glyph.format->halo_fill);
+            stroke();
+            set_color(glyph.format->fill);
+            show_glyph(glyph.glyph_index, base + itr->pos);
         }
-#endif
     }
 
 
@@ -1489,7 +1475,6 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-#if 0
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
@@ -1500,17 +1485,11 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
 
-    while (helper.next())
+    glyph_positions_ptr glyphs;
+    while ((glyphs = helper.next()))
     {
-        placements_type const& placements = helper.placements();
-        for (unsigned int ii = 0; ii < placements.size(); ++ii)
-        {
-            context.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
-        }
+        context.add_text(glyphs, face_manager_, font_manager_, scale_factor_);
     }
-#else
-#warning CAIRO: TextSymbolizer disabled!
-#endif
 }
 
 template class cairo_renderer<Cairo::Surface>;

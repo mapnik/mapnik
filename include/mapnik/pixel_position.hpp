@@ -32,17 +32,17 @@ struct pixel_position
     double y;
     pixel_position(double x, double y) : x(x), y(y) { }
     pixel_position() : x(0), y(0) { }
-    pixel_position operator+ (pixel_position const& other)
+    pixel_position operator+ (pixel_position const& other) const
     {
         return pixel_position(x + other.x, y + other.y);
     }
 
-    pixel_position operator- (pixel_position const& other)
+    pixel_position operator- (pixel_position const& other) const
     {
         return pixel_position(x - other.x, y - other.y);
     }
 
-    pixel_position operator* (double other)
+    pixel_position operator* (double other) const
     {
         return pixel_position(x * other, y * other);
     }
