@@ -1,6 +1,5 @@
 <Map srs="+init=epsg:4326" background-color="steelblue">
-
-<! -- test case for https://github.com/mapnik/mapnik/issues/1354 -->
+<!-- test case for https://github.com/mapnik/mapnik/issues/1354 -->
 
     <Style name="labels">
         <Rule>
