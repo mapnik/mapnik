@@ -244,7 +244,14 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
         {
             if (how_placed == POINT_PLACEMENT)
             {
-                label::centroid(geom, label_x, label_y);
+                if (geom.type() == Polygon)
+                {
+                    label::centroid(geom, label_x, label_y);
+                }
+                else if (geom.type() == LineString)
+                {
+                    label::middle_point(geom, label_x,label_y);
+                }
             }
             else if (how_placed == INTERIOR_PLACEMENT)
             {
