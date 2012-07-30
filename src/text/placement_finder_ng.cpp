@@ -201,7 +201,10 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
-            glyphs->push_back(*glyph_itr, pixel_position(x, y), angle_); //TODO: Store cosa, sina instead
+            // place the character relative to the center of the string envelope
+            double dx = x * cosa_ - y * sina_;
+            double dy = x * sina_ + y * cosa_;
+            glyphs->push_back(*glyph_itr, pixel_position(dx, dy), angle_); //TODO: Store cosa, sina instead
             x += glyph_itr->width + glyph_itr->format->character_spacing;
         }
     }
