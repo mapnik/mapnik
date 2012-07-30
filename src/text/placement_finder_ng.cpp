@@ -24,6 +24,7 @@
 #include <mapnik/text/layout.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/label_collision_detector.hpp>
 
 //boost
 #include <boost/make_shared.hpp>
@@ -140,6 +141,15 @@ pixel_position placement_finder_ng::alignment_offset() const
     return result;
 }
 
+// Output is centered around (0,0)
+static void rotated_box2d(box2d<double> &box, double sina, double cosa, double width, double height)
+{
+    //TODO: Verify calculation
+    double new_width = width * cosa + height * sina;
+    double new_height = width * sina + height * cosa;
+    box.init(-new_width/2., -new_height/2., new_width/2., new_height/2.);
+}
+
 
 glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos)
 {
@@ -150,6 +160,18 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
     //TODO: Verify enough space is available. For point placement the bounding box is enough!
 
     glyphs->set_base_point(pos + scale_factor_ * info_->properties.displacement + alignment_offset());
+    box2d<double> bbox;
+    rotated_box2d(bbox, sina_, cosa_, layout_.width(), layout_.height());
+    bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
+    std::cout << "bbox:" << bbox << "\n";
+
+    if (!detector_.extent().intersects(bbox) ||
+        (!info_->properties.allow_overlap &&
+         !detector_.has_point_placement(bbox, info_->properties.minimum_distance * scale_factor_)))
+    {
+        return glyph_positions_ptr(); //Not enough space for this text
+    }
+    detector_.insert(bbox, layout_.get_text());
 
     /* IMPORTANT NOTE:
        x and y are relative to the center of the text
@@ -173,6 +195,8 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
             x = (layout_.width() / 2.0) - (*line_itr)->width();
         else
             x = -((*line_itr)->width() / 2.0);
+
+        //TODO: Rotate
 
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)

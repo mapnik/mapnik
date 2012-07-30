@@ -47,6 +47,11 @@ void text_layout::add_text(const UnicodeString &str, char_properties_ptr format)
     itemizer_.add_text(str, format);
 }
 
+const UnicodeString &text_layout::get_text() const
+{
+    return itemizer_.get_text();
+}
+
 void text_layout::layout(double wrap_width, unsigned text_ratio)
 {
     unsigned num_lines = itemizer_.num_lines();
@@ -115,7 +120,6 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
             add_line(new_line);
             last_break_position = break_position;
             i = break_position - 1;
-
             current_line_length = 0;
         }
     }

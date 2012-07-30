@@ -87,6 +87,7 @@ public:
     typedef line_vector::const_iterator const_iterator;
     text_layout(face_manager_freetype & font_manager);
     void add_text(UnicodeString const& str, char_properties_ptr format);
+    UnicodeString const& get_text() const;
 
     void layout(double wrap_width, unsigned text_ratio);
 

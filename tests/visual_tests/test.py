@@ -35,6 +35,7 @@ files = [
     {'name': "simple-SW"},
     {'name': "simple-S"},
     {'name': "simple-W"},
+    {'name': "formatting"},
     {'name': "formatting-1"},
     {'name': "formatting-2"},
     {'name': "formatting-3"},

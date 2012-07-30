@@ -105,7 +105,7 @@ private:
     void init_alignment();
     pixel_position alignment_offset() const;
     Feature const& feature_;
-    DetectorType const& detector_;
+    DetectorType &detector_;
     box2d<double> const& extent_;
     double angle_; //in rad
     // Precalculated values for maximum performance
