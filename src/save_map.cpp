@@ -78,6 +78,11 @@ public:
         {
             set_attr( sym_node, "placement", sym.get_point_placement() );
         }
+        if (sym.get_image_transform())
+        {
+            std::string tr_str = sym.get_image_transform_string();
+            set_attr( sym_node, "transform", tr_str );
+        }
         serialize_symbolizer_base(sym_node, sym);
     }
 
@@ -218,6 +223,11 @@ public:
         {
             set_attr(sym_node, "shield-dy", displacement.second);
         }
+        if (sym.get_image_transform())
+        {
+            std::string tr_str = sym.get_image_transform_string();
+            set_attr( sym_node, "transform", tr_str );
+        }
         serialize_symbolizer_base(sym_node, sym);
     }
 
@@ -249,7 +259,6 @@ public:
         {
             set_attr( sym_node, "height", mapnik::to_expression_string(*sym.height()) );
         }
-
         serialize_symbolizer_base(sym_node, sym);
     }
 
