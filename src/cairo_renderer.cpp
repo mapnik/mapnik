@@ -498,7 +498,6 @@ public:
             }
             else if (cm == SEG_CLOSE)
             {
-                line_to(x, y);
                 close_path();
             }
         }
@@ -916,6 +915,10 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                 {
                     frame->line_to(x,y);
                 }
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close(x,y);
+                }
 
                 if (j != 0)
                 {
@@ -1000,14 +1003,21 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     evaluate_transform(tr, feature, sym.get_transform());
 
     box2d<double> ext = query_extent_ * 1.1;
-    typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_line_tag, clip_poly_tag, transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(ext,context,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+    {
+        eGeomType type = feature.paths()[0].type();
+        if (type == Polygon)
+            converter.set<clip_poly_tag>();
+        else if (type == LineString)
+            converter.set<clip_line_tag>();
+        // don't clip if type==Point
+    }
     converter.set<transform_tag>(); // always transform
-
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
