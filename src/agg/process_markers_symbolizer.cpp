@@ -32,12 +32,16 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_storage.hpp>
+#include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 
 // agg
 #include "agg_basics.h"
+#include "agg_ellipse.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
@@ -318,29 +322,92 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                      renderer_type,
                                      agg::pixfmt_rgba32 > svg_renderer_type;
                 typedef vector_markers_rasterizer_dispatch<buffer_type, svg_renderer_type, rasterizer, detector_type> dispatch_type;
-                box2d<double> const& bbox = (*mark)->bounding_box();
-                setup_label_transform(tr, bbox, feature, sym);
-                coord2d center = bbox.center();
-                agg::trans_affine_translation recenter(-center.x, -center.y);
-                agg::trans_affine marker_trans = recenter * tr;
-                boost::optional<svg_path_ptr> vector_marker = (*mark)->get_vector_data();
-                vertex_stl_adapter<svg_path_storage> stl_storage((*vector_marker)->source());
-                svg_path_adapter svg_path(stl_storage);
-                agg::pod_bvector<path_attributes> attributes;
-                bool result = push_explicit_style( (*vector_marker)->attributes(), attributes, sym);
-                svg_renderer_type svg_renderer(svg_path, result ? attributes : (*vector_marker)->attributes());
-                dispatch_type rasterizer_dispatch(*current_buffer_,svg_renderer,*ras_ptr,
-                                                  bbox, marker_trans, sym, *detector_, scale_factor_);
-                vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
-                                 CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(query_extent_* 1.1,rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
-                if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
-                converter.template set<transform_tag>(); //always transform
-                if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
 
-                BOOST_FOREACH(geometry_type & geom, feature.paths())
+                boost::optional<svg_path_ptr> const& stock_vector_marker = (*mark)->get_vector_data();
+                expression_ptr const& width_expr = sym.get_width();
+                expression_ptr const& height_expr = sym.get_height();
+
+                // special case for simple ellipse markers
+                // to allow for full control over rx/ry dimensions
+                if (filename == "shape://ellipse"
+                   && (width_expr || height_expr))
                 {
-                    converter.apply(geom);
+                    double width = 0;
+                    double height = 0;
+                    if (width_expr && height_expr)
+                    {
+                        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
+                        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
+                    }
+                    else if (width_expr)
+                    {
+                        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
+                        height = width;
+                    }
+                    else if (height_expr)
+                    {
+                        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
+                        width = height;
+                    }
+                    // create a new marker
+                    svg_storage_type marker_ellipse;
+                    vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());
+                    svg_path_adapter svg_path(stl_storage);
+                    svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
+                    styled_svg.push_attr();
+                    styled_svg.begin_path();
+                    agg::ellipse c(0, 0, width/2.0, height/2.0);
+                    styled_svg.storage().concat_path(c);
+                    styled_svg.end_path();
+                    styled_svg.pop_attr();
+                    double lox,loy,hix,hiy;
+                    styled_svg.bounding_rect(&lox, &loy, &hix, &hiy);
+                    marker_ellipse.set_bounding_box(lox,loy,hix,hiy);
+                    agg::pod_bvector<path_attributes> attributes;
+                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
+                    svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
+                    evaluate_transform(tr, feature, sym.get_image_transform());
+                    box2d<double> bbox = marker_ellipse.bounding_box();
+                    coord2d center = bbox.center();
+                    agg::trans_affine_translation recenter(-center.x, -center.y);
+                    agg::trans_affine marker_trans = recenter * tr;
+                    dispatch_type rasterizer_dispatch(*current_buffer_,svg_renderer,*ras_ptr,
+                                                      bbox, marker_trans, sym, *detector_, scale_factor_);
+                    vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
+                                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+                        converter(query_extent_* 1.1,rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                    if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
+                    converter.template set<transform_tag>(); //always transform
+                    if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
+                    BOOST_FOREACH(geometry_type & geom, feature.paths())
+                    {
+                        converter.apply(geom);
+                    }
+                }
+                else
+                {
+                    box2d<double> const& bbox = (*mark)->bounding_box();
+                    setup_label_transform(tr, bbox, feature, sym);
+                    coord2d center = bbox.center();
+                    agg::trans_affine_translation recenter(-center.x, -center.y);
+                    agg::trans_affine marker_trans = recenter * tr;
+                    vertex_stl_adapter<svg_path_storage> stl_storage((*stock_vector_marker)->source());
+                    svg_path_adapter svg_path(stl_storage);
+                    agg::pod_bvector<path_attributes> attributes;
+                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
+                    svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
+                    dispatch_type rasterizer_dispatch(*current_buffer_,svg_renderer,*ras_ptr,
+                                                      bbox, marker_trans, sym, *detector_, scale_factor_);
+                    vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
+                                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+                        converter(query_extent_* 1.1,rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                    if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
+                    converter.template set<transform_tag>(); //always transform
+                    if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
+                    BOOST_FOREACH(geometry_type & geom, feature.paths())
+                    {
+                        converter.apply(geom);
+                    }
                 }
             }
             else // raster markers
@@ -357,6 +424,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
                     converter(query_extent_* 1.1, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+
                 if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
                 converter.template set<transform_tag>(); //always transform
                 if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
