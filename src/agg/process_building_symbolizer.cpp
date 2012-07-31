@@ -82,32 +82,31 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
             boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
             std::deque<segment_t> face_segments;
-            double x0(0);
-            double y0(0);
-
+            double x0 = 0;
+            double y0 = 0;
+            double x,y;
             geom.rewind(0);
-            unsigned cm = geom.vertex(&x0,&y0);
-            for (unsigned j=1;j<geom.size();++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x(0);
-                double y(0);
-                cm = geom.vertex(&x,&y);
                 if (cm == SEG_MOVETO)
                 {
                     frame->move_to(x,y);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-
                 x0 = x;
                 y0 = y;
             }
+
             std::sort(face_segments.begin(),face_segments.end(), y_order);
             std::deque<segment_t>::const_iterator itr=face_segments.begin();
-            for (;itr!=face_segments.end();++itr)
+            std::deque<segment_t>::const_iterator end=face_segments.end();
+
+            for (; itr!=end; ++itr)
             {
                 boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
                 faces->move_to(itr->get<0>(),itr->get<1>());
@@ -120,22 +119,22 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                 ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
                 agg::render_scanlines(*ras_ptr, sl, ren);
                 ras_ptr->reset();
-
+                //
                 frame->move_to(itr->get<0>(),itr->get<1>());
                 frame->line_to(itr->get<0>(),itr->get<1>()+height);
+
             }
 
             geom.rewind(0);
-            for (unsigned j=0;j<geom.size();++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x,y;
-                unsigned cm = geom.vertex(&x,&y);
                 if (cm == SEG_MOVETO)
                 {
                     frame->move_to(x,y+height);
                     roof->move_to(x,y+height);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
                     frame->line_to(x,y+height);
                     roof->line_to(x,y+height);
@@ -153,6 +152,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             ras_ptr->add_path(roof_path);
             ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
+
         }
     }
 }

@@ -498,7 +498,6 @@ public:
             }
             else if (cm == SEG_CLOSE)
             {
-                line_to(x, y);
                 close_path();
             }
         }
@@ -895,43 +894,32 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
             boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
             std::deque<segment_t> face_segments;
-            double x0(0);
-            double y0(0);
-
+            double x0 = 0;
+            double y0 = 0;
+            double x, y;
             geom.rewind(0);
-            unsigned cm = geom.vertex(&x0, &y0);
-
-            for (unsigned j = 1; j < geom.size(); ++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x=0;
-                double y=0;
-
-                cm = geom.vertex(&x,&y);
-
                 if (cm == SEG_MOVETO)
                 {
                     frame->move_to(x,y);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
                     frame->line_to(x,y);
+                    face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-
-                if (j != 0)
-                {
-                    face_segments.push_back(segment_t(x0, y0, x, y));
-                }
-
                 x0 = x;
                 y0 = y;
             }
 
             std::sort(face_segments.begin(), face_segments.end(), y_order);
             std::deque<segment_t>::const_iterator itr = face_segments.begin();
-            for (; itr != face_segments.end(); ++itr)
+            std::deque<segment_t>::const_iterator end=face_segments.end();
+            for (; itr != end; ++itr)
             {
                 boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
-
                 faces->move_to(itr->get<0>(), itr->get<1>());
                 faces->line_to(itr->get<2>(), itr->get<3>());
                 faces->line_to(itr->get<2>(), itr->get<3>() + height);
@@ -948,20 +936,18 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             }
 
             geom.rewind(0);
-            for (unsigned j = 0; j < geom.size(); ++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x, y;
-                unsigned cm = geom.vertex(&x, &y);
-
                 if (cm == SEG_MOVETO)
                 {
-                    frame->move_to(x, y + height);
-                    roof->move_to(x, y + height);
+                    frame->move_to(x,y+height);
+                    roof->move_to(x,y+height);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
-                    frame->line_to(x, y + height);
-                    roof->line_to(x, y + height);
+                    frame->line_to(x,y+height);
+                    roof->line_to(x,y+height);
                 }
             }
 
@@ -1000,14 +986,21 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     evaluate_transform(tr, feature, sym.get_transform());
 
     box2d<double> ext = query_extent_ * 1.1;
-    typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_line_tag, clip_poly_tag, transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(ext,context,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+    {
+        eGeomType type = feature.paths()[0].type();
+        if (type == Polygon)
+            converter.set<clip_poly_tag>();
+        else if (type == LineString)
+            converter.set<clip_line_tag>();
+        // don't clip if type==Point
+    }
     converter.set<transform_tag>(); // always transform
-
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
