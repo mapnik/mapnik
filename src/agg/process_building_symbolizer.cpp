@@ -82,8 +82,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
             boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
             std::deque<segment_t> face_segments;
-            double x0(0);
-            double y0(0);
+            double x0 = 0;
+            double y0 = 0;
 
             geom.rewind(0);
             unsigned cm = geom.vertex(&x0,&y0);
@@ -96,12 +96,11 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                 {
                     frame->move_to(x,y);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-
                 x0 = x;
                 y0 = y;
             }
