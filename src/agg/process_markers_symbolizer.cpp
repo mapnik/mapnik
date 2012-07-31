@@ -304,49 +304,36 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         {
             ras_ptr->reset();
             ras_ptr->gamma(agg::gamma_power());
-
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
-
-            box2d<double> const& bbox = (*mark)->bounding_box();
             agg::trans_affine tr;
-            setup_label_transform(tr, bbox, feature, sym);
-            tr = agg::trans_affine_scaling(scale_factor_) * tr;
-            coord2d center = bbox.center();
-            agg::trans_affine_translation recenter(-center.x, -center.y);
-            agg::trans_affine marker_trans = recenter * tr;
+            tr *= agg::trans_affine_scaling(scale_factor_);
 
             if ((*mark)->is_vector())
             {
-                typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
-
                 using namespace mapnik::svg;
-                boost::optional<path_ptr> marker = (*mark)->get_vector_data();
-
-
-                vertex_stl_adapter<svg_path_storage> stl_storage((*marker)->source());
-                svg_path_adapter svg_path(stl_storage);
-
-                agg::pod_bvector<path_attributes> attributes;
-                bool result = push_explicit_style( (*marker)->attributes(), attributes, sym);
-
+                typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
                 typedef svg_renderer<svg_path_adapter,
                                      agg::pod_bvector<path_attributes>,
                                      renderer_type,
                                      agg::pixfmt_rgba32 > svg_renderer_type;
                 typedef vector_markers_rasterizer_dispatch<buffer_type, svg_renderer_type, rasterizer, detector_type> dispatch_type;
-
-
-                svg_renderer_type svg_renderer(svg_path, result ? attributes : (*marker)->attributes());
-
+                box2d<double> const& bbox = (*mark)->bounding_box();
+                setup_label_transform(tr, bbox, feature, sym);
+                coord2d center = bbox.center();
+                agg::trans_affine_translation recenter(-center.x, -center.y);
+                agg::trans_affine marker_trans = recenter * tr;
+                boost::optional<svg_path_ptr> vector_marker = (*mark)->get_vector_data();
+                vertex_stl_adapter<svg_path_storage> stl_storage((*vector_marker)->source());
+                svg_path_adapter svg_path(stl_storage);
+                agg::pod_bvector<path_attributes> attributes;
+                bool result = push_explicit_style( (*vector_marker)->attributes(), attributes, sym);
+                svg_renderer_type svg_renderer(svg_path, result ? attributes : (*vector_marker)->attributes());
                 dispatch_type rasterizer_dispatch(*current_buffer_,svg_renderer,*ras_ptr,
                                                   bbox, marker_trans, sym, *detector_, scale_factor_);
-
-
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
                     converter(query_extent_* 1.1,rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
-
                 if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
                 converter.template set<transform_tag>(); //always transform
                 if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
@@ -358,6 +345,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             }
             else // raster markers
             {
+                box2d<double> const& bbox = (*mark)->bounding_box();
+                setup_label_transform(tr, bbox, feature, sym);
+                coord2d center = bbox.center();
+                agg::trans_affine_translation recenter(-center.x, -center.y);
+                agg::trans_affine marker_trans = recenter * tr;
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
                 typedef raster_markers_rasterizer_dispatch<buffer_type,rasterizer, detector_type> dispatch_type;
                 dispatch_type rasterizer_dispatch(*current_buffer_,*ras_ptr, **marker,
@@ -365,7 +357,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
                     converter(query_extent_* 1.1, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
-
                 if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
                 converter.template set<transform_tag>(); //always transform
                 if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter

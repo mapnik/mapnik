@@ -1048,7 +1048,7 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
 
         typedef coord_transform<CoordTransform,geometry_type> path_type;
         agg::trans_affine transform;
-        mapnik::path_ptr vmarker = *marker.get_vector_data();
+        mapnik::svg_path_ptr vmarker = *marker.get_vector_data();
         using namespace mapnik::svg;
         agg::pod_bvector<path_attributes> const & attributes_ = vmarker->attributes();
         for(unsigned i = 0; i < attributes_.size(); ++i)
@@ -1420,7 +1420,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
                 return;
             }
-            boost::optional<path_ptr> marker = (*mark)->get_vector_data();
+            boost::optional<svg_path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
             double x1 = bbox.minx();
             double y1 = bbox.miny();

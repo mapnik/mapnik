@@ -144,7 +144,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             }
             std::string known_svg_string = mark_itr->second;
             using namespace mapnik::svg;
-            path_ptr marker_path(boost::make_shared<svg_storage_type>());
+            svg_path_ptr marker_path(boost::make_shared<svg_storage_type>());
             vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
             svg_path_adapter svg_path(stl_storage);
             svg_converter_type svg(svg_path, marker_path->attributes());
@@ -173,7 +173,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             if (is_svg(uri))
             {
                 using namespace mapnik::svg;
-                path_ptr marker_path(boost::make_shared<svg_storage_type>());
+                svg_path_ptr marker_path(boost::make_shared<svg_storage_type>());
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());

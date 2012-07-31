@@ -49,13 +49,13 @@ namespace mapnik
 
 typedef agg::pod_bvector<mapnik::svg::path_attributes> attr_storage;
 typedef mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage> svg_storage_type;
-typedef boost::shared_ptr<svg_storage_type> path_ptr;
+typedef boost::shared_ptr<svg_storage_type> svg_path_ptr;
 typedef boost::shared_ptr<image_data_32> image_ptr;
 /**
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally
  * in the image caches and most of the render paths.
  */
-class marker
+class marker: private boost::noncopyable
 {
 public:
     marker()
@@ -71,14 +71,15 @@ public:
 
     }
 
-    marker(const boost::optional<mapnik::path_ptr> &data)
+    marker(const boost::optional<mapnik::svg_path_ptr> &data)
         : vector_data_(data)
     {
 
     }
 
     marker(const marker& rhs)
-        : bitmap_data_(rhs.bitmap_data_), vector_data_(rhs.vector_data_)
+        : bitmap_data_(rhs.bitmap_data_),
+          vector_data_(rhs.vector_data_)
     {}
 
     box2d<double> bounding_box() const
@@ -128,17 +129,14 @@ public:
         return bitmap_data_;
     }
 
-    boost::optional<mapnik::path_ptr> get_vector_data() const
+    boost::optional<mapnik::svg_path_ptr> get_vector_data() const
     {
         return vector_data_;
     }
 
-
 private:
-    marker& operator=(const marker&);
-
     boost::optional<mapnik::image_ptr> bitmap_data_;
-    boost::optional<mapnik::path_ptr> vector_data_;
+    boost::optional<mapnik::svg_path_ptr> vector_data_;
 
 };
 

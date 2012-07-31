@@ -87,7 +87,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
 
-            boost::optional<path_ptr> marker = (*mark)->get_vector_data();
+            boost::optional<svg_path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
 
             agg::trans_affine tr;
