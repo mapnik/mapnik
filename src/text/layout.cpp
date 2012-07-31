@@ -195,6 +195,9 @@ void text_layout::clear()
 {
     itemizer_.clear();
     lines_.clear();
+    width_map_.clear();
+    width_ = 0.;
+    height_ = 0.;
 }
 
 double text_layout::height() const
