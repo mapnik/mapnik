@@ -894,47 +894,32 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
             boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
             std::deque<segment_t> face_segments;
-            double x0(0);
-            double y0(0);
-
+            double x0 = 0;
+            double y0 = 0;
+            double x, y;
             geom.rewind(0);
-            unsigned cm = geom.vertex(&x0, &y0);
-
-            for (unsigned j = 1; j < geom.size(); ++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x=0;
-                double y=0;
-
-                cm = geom.vertex(&x,&y);
-
                 if (cm == SEG_MOVETO)
                 {
                     frame->move_to(x,y);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
                     frame->line_to(x,y);
+                    face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-                else if (cm == SEG_CLOSE)
-                {
-                    frame->close(x,y);
-                }
-
-                if (j != 0)
-                {
-                    face_segments.push_back(segment_t(x0, y0, x, y));
-                }
-
                 x0 = x;
                 y0 = y;
             }
 
             std::sort(face_segments.begin(), face_segments.end(), y_order);
             std::deque<segment_t>::const_iterator itr = face_segments.begin();
-            for (; itr != face_segments.end(); ++itr)
+            std::deque<segment_t>::const_iterator end=face_segments.end();
+            for (; itr != end; ++itr)
             {
                 boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
-
                 faces->move_to(itr->get<0>(), itr->get<1>());
                 faces->line_to(itr->get<2>(), itr->get<3>());
                 faces->line_to(itr->get<2>(), itr->get<3>() + height);
@@ -951,20 +936,18 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             }
 
             geom.rewind(0);
-            for (unsigned j = 0; j < geom.size(); ++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x, y;
-                unsigned cm = geom.vertex(&x, &y);
-
                 if (cm == SEG_MOVETO)
                 {
-                    frame->move_to(x, y + height);
-                    roof->move_to(x, y + height);
+                    frame->move_to(x,y+height);
+                    roof->move_to(x,y+height);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
-                    frame->line_to(x, y + height);
-                    roof->line_to(x, y + height);
+                    frame->line_to(x,y+height);
+                    roof->line_to(x,y+height);
                 }
             }
 
