@@ -109,6 +109,7 @@ private:
     void parse_building_symbolizer(rule & rule, xml_node const& sym);
     void parse_raster_symbolizer(rule & rule, xml_node const& sym);
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
+    void parse_debug_symbolizer(rule & rule, xml_node const& sym);
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     bool parse_stroke(stroke & strk, xml_node const & sym);
@@ -805,6 +806,10 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
             else if (symIter->is("MarkersSymbolizer"))
             {
                 parse_markers_symbolizer(rule, *symIter);
+            }
+            else if (symIter->is("DebugSymbolizer"))
+            {
+                parse_debug_symbolizer(rule, *symIter);
             }
         }
         style.add_rule(rule);
@@ -1534,6 +1539,14 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         ex.append_context("in RasterSymbolizer", sym);
         throw;
     }
+}
+
+void map_parser::parse_debug_symbolizer(rule & rule, xml_node const & sym)
+{
+    debug_symbolizer symbol;
+
+    parse_symbolizer_base(symbol, sym);
+    rule.append(symbol);
 }
 
 void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
