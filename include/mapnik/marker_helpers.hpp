@@ -38,24 +38,54 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
 {
     boost::optional<stroke> const& strk = sym.get_stroke();
     boost::optional<color> const& fill = sym.get_fill();
-    if (strk || fill)
+    boost::optional<float> const& opacity = sym.get_opacity();
+    boost::optional<float> const& fill_opacity = sym.get_fill_opacity();
+    if (strk || fill || opacity || fill_opacity)
     {
         for(unsigned i = 0; i < src.size(); ++i)
         {
             mapnik::svg::path_attributes attr = src[i];
 
-            if (strk && attr.stroke_flag)
+            if (attr.stroke_flag)
             {
-                attr.stroke_width = strk->get_width();
-                color const& s_color = strk->get_color();
-                attr.stroke_color = agg::rgba(s_color.red()/255.0,s_color.green()/255.0,
-                                              s_color.blue()/255.0,(s_color.alpha()*strk->get_opacity())/255.0);
+                // TODO - stroke attributes need to be boost::optional
+                // for this to work properly
+                if (strk)
+                {
+                    attr.stroke_width = strk->get_width();
+                    color const& s_color = strk->get_color();
+                    attr.stroke_color = agg::rgba(s_color.red()/255.0,
+                                                  s_color.green()/255.0,
+                                                  s_color.blue()/255.0,
+                                                  s_color.alpha()/255.0);
+                }
+                if (opacity)
+                {
+                    attr.stroke_opacity = *opacity;
+                }
+                else if (strk)
+                {
+                    attr.stroke_opacity = strk->get_opacity();
+                }
             }
-            if (fill && attr.fill_flag)
+            if (attr.fill_flag)
             {
-                color const& f_color = *fill;
-                attr.fill_color = agg::rgba(f_color.red()/255.0,f_color.green()/255.0,
-                                            f_color.blue()/255.0,(f_color.alpha()*sym.get_opacity())/255.0);
+                if (fill)
+                {
+                    color const& f_color = *fill;
+                    attr.fill_color = agg::rgba(f_color.red()/255.0,
+                                                f_color.green()/255.0,
+                                                f_color.blue()/255.0,
+                                                f_color.alpha()/255.0);
+                }
+                if (opacity)
+                {
+                    attr.fill_opacity = *opacity;
+                }
+                else if (fill_opacity)
+                {
+                    attr.fill_opacity = *fill_opacity;
+                }
             }
             dst.push_back(attr);
         }

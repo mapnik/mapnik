@@ -65,8 +65,12 @@ public:
     double get_spacing() const;
     void set_max_error(double max_error);
     double get_max_error() const;
+    void set_opacity(float opacity);
+    boost::optional<float> get_opacity() const;
     void set_fill(color const& fill);
     boost::optional<color> get_fill() const;
+    void set_fill_opacity(float opacity);
+    boost::optional<float> get_fill_opacity() const;
     void set_stroke(stroke const& stroke);
     boost::optional<stroke> get_stroke() const;
     void set_marker_placement(marker_placement_e marker_p);
@@ -79,6 +83,8 @@ private:
     double spacing_;
     double max_error_;
     boost::optional<color> fill_;
+    boost::optional<float> fill_opacity_;
+    boost::optional<float> opacity_;
     boost::optional<stroke> stroke_;
     marker_placement_e marker_p_;
 };

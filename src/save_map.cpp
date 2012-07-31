@@ -283,6 +283,10 @@ public:
         {
             set_attr( sym_node, "fill", sym.get_fill() );
         }
+        if (sym.get_fill_opacity() != dfl.get_fill_opacity() || explicit_defaults_)
+        {
+            set_attr( sym_node, "fill-opacity", sym.get_fill_opacity() );
+        }
         if (sym.get_opacity() != dfl.get_opacity() || explicit_defaults_)
         {
             set_attr( sym_node, "opacity", sym.get_opacity() );

@@ -614,6 +614,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     python_optional<std::string>();
     python_optional<unsigned>();
     python_optional<double>();
+    python_optional<float>();
     python_optional<bool>();
     python_optional<mapnik::text_transform_e>();
     register_ptr_to_python<mapnik::expression_ptr>();

@@ -64,7 +64,6 @@ struct vector_markers_rasterizer_dispatch
     typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 
     vector_markers_rasterizer_dispatch(BufferType & image_buffer,
                                 SvgRenderer & svg_renderer,
@@ -105,7 +104,7 @@ struct vector_markers_rasterizer_dispatch
             if (sym_.get_allow_overlap() ||
                 detector_.has_placement(transformed_bbox))
             {
-                svg_renderer_.render(ras_, sl_, renb_, matrix, sym_.get_opacity(), bbox_);
+                svg_renderer_.render(ras_, sl_, renb_, matrix, 1, bbox_);
 
                 if (!sym_.get_ignore_placement())
                     detector_.insert(transformed_bbox);
@@ -123,7 +122,7 @@ struct vector_markers_rasterizer_dispatch
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
                 matrix.translate(x, y);
-                svg_renderer_.render(ras_, sl_, renb_, matrix, sym_.get_opacity(), bbox_);
+                svg_renderer_.render(ras_, sl_, renb_, matrix, 1, bbox_);
             }
         }
     }
@@ -146,7 +145,6 @@ void render_raster_marker(Rasterizer & ras, RendererBuffer & renb,
                           agg::scanline_u8 & sl, image_data_32 const& src,
                           agg::trans_affine const& marker_tr, double opacity)
 {
-
     double width  = src.width();
     double height = src.height();
     double p[8];
@@ -180,10 +178,19 @@ void render_raster_marker(Rasterizer & ras, RendererBuffer & renb,
     typedef agg::span_interpolator_linear<agg::trans_affine> interpolator_type;
     typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
                                             interpolator_type> span_gen_type;
+    typedef agg::order_rgba order_type;
+    typedef agg::pixel32_type pixel_type;
+    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+    typedef agg::renderer_scanline_aa_alpha<renderer_base,
+            agg::span_allocator<agg::rgba8>,
+            span_gen_type> renderer_type;
     img_accessor_type ia(pixf);
     interpolator_type interpolator(agg::trans_affine(p, 0, 0, width, height) );
     span_gen_type sg(ia, interpolator, filter);
-    agg::render_scanlines_aa(ras, sl, renb, sa, sg);
+    renderer_type rp(renb,sa, sg, unsigned(opacity*255));
+    agg::render_scanlines(ras, sl, rp);
 }
 
 template <typename BufferType, typename Rasterizer, typename Detector>
@@ -195,7 +202,6 @@ struct raster_markers_rasterizer_dispatch
     typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 
     raster_markers_rasterizer_dispatch(BufferType & image_buffer,
                                        Rasterizer & ras,
@@ -236,8 +242,9 @@ struct raster_markers_rasterizer_dispatch
                 detector_.has_placement(transformed_bbox))
             {
 
+                float opacity = sym_.get_opacity() ? *sym_.get_opacity() : 1;
                 render_raster_marker(ras_, renb_, sl_, src_,
-                                     matrix, sym_.get_opacity());
+                                     matrix, opacity);
                 if (!sym_.get_ignore_placement())
                     detector_.insert(transformed_bbox);
             }
@@ -254,8 +261,9 @@ struct raster_markers_rasterizer_dispatch
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
                 matrix.translate(x,y);
+                float opacity = sym_.get_opacity() ? *sym_.get_opacity() : 1;
                 render_raster_marker(ras_, renb_, sl_, src_,
-                                     matrix, sym_.get_opacity());
+                                     matrix, opacity);
             }
         }
     }
@@ -284,7 +292,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
-    typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
     typedef label_collision_detector4 detector_type;
     typedef boost::mpl::vector<clip_line_tag,transform_tag,smooth_tag> conv_types;
 
@@ -311,6 +318,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
             if ((*mark)->is_vector())
             {
+                typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+
                 using namespace mapnik::svg;
                 boost::optional<path_ptr> marker = (*mark)->get_vector_data();
 

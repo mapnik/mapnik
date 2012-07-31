@@ -1013,8 +1013,12 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             sym.set_filename(expr);
         }
 
+        // overall opacity - impacts both fill and stroke, like svg
         optional<float> opacity = node.get_opt_attr<float>("opacity");
         if (opacity) sym.set_opacity(*opacity);
+
+        optional<float> fill_opacity = node.get_opt_attr<float>("fill-opacity");
+        if (fill_opacity) sym.set_fill_opacity(*fill_opacity);
 
         optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)

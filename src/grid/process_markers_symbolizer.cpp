@@ -140,7 +140,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                         detector_.has_placement(transformed_bbox))
                     {
                         placed = true;
-                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, sym.get_opacity(), bbox);
+                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, 1, bbox);
                         if (!sym.get_ignore_placement())
                             detector_.insert(transformed_bbox);
                     }
@@ -166,7 +166,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                         agg::trans_affine matrix = marker_trans;
                         matrix.rotate(angle);
                         matrix.translate(x, y);
-                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, sym.get_opacity(), bbox);
+                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, 1, bbox);
                     }
                 }
                 else
@@ -186,7 +186,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                         agg::trans_affine matrix = marker_trans;
                         matrix.rotate(angle);
                         matrix.translate(x, y);
-                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, sym.get_opacity(), bbox);
+                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, 1, bbox);
                     }
                 }
             }

@@ -1452,7 +1452,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     if (sym.get_allow_overlap() ||
                         detector_.has_placement(extent))
                     {
-                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, sym.get_opacity());
+                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, 1);
 
                         if (!sym.get_ignore_placement())
                             detector_.insert(extent);
@@ -1471,7 +1471,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     while (placement.get_point(x, y, angle))
                     {
                         agg::trans_affine matrix = recenter * tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
-                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h), **mark, matrix, sym.get_opacity(),false);
+                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h), **mark, matrix, 1,false);
                     }
                 }
                 context.fill();
