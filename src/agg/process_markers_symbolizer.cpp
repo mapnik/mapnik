@@ -33,7 +33,6 @@
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_storage.hpp>
-#include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/markers_placement.hpp>
@@ -41,7 +40,6 @@
 
 // agg
 #include "agg_basics.h"
-#include "agg_ellipse.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
@@ -317,12 +315,15 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             {
                 using namespace mapnik::svg;
                 typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+                typedef agg::pod_bvector<path_attributes> svg_attribute_type;
                 typedef svg_renderer<svg_path_adapter,
-                                     agg::pod_bvector<path_attributes>,
+                                     svg_attribute_type,
                                      renderer_type,
                                      agg::pixfmt_rgba32 > svg_renderer_type;
-                typedef vector_markers_rasterizer_dispatch<buffer_type, svg_renderer_type, rasterizer, detector_type> dispatch_type;
-
+                typedef vector_markers_rasterizer_dispatch<buffer_type,
+                                     svg_renderer_type,
+                                     rasterizer,
+                                     detector_type > dispatch_type;
                 boost::optional<svg_path_ptr> const& stock_vector_marker = (*mark)->get_vector_data();
                 expression_ptr const& width_expr = sym.get_width();
                 expression_ptr const& height_expr = sym.get_height();
@@ -332,38 +333,11 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 if (filename == "shape://ellipse"
                    && (width_expr || height_expr))
                 {
-                    double width = 0;
-                    double height = 0;
-                    if (width_expr && height_expr)
-                    {
-                        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
-                        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
-                    }
-                    else if (width_expr)
-                    {
-                        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
-                        height = width;
-                    }
-                    else if (height_expr)
-                    {
-                        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
-                        width = height;
-                    }
-                    // create a new marker
                     svg_storage_type marker_ellipse;
                     vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());
                     svg_path_adapter svg_path(stl_storage);
-                    svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
-                    styled_svg.push_attr();
-                    styled_svg.begin_path();
-                    agg::ellipse c(0, 0, width/2.0, height/2.0);
-                    styled_svg.storage().concat_path(c);
-                    styled_svg.end_path();
-                    styled_svg.pop_attr();
-                    double lox,loy,hix,hiy;
-                    styled_svg.bounding_rect(&lox, &loy, &hix, &hiy);
-                    marker_ellipse.set_bounding_box(lox,loy,hix,hiy);
-                    agg::pod_bvector<path_attributes> attributes;
+                    build_ellipse(sym, feature, marker_ellipse, svg_path);
+                    svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
                     svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
                     evaluate_transform(tr, feature, sym.get_image_transform());
@@ -393,7 +367,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     agg::trans_affine marker_trans = recenter * tr;
                     vertex_stl_adapter<svg_path_storage> stl_storage((*stock_vector_marker)->source());
                     svg_path_adapter svg_path(stl_storage);
-                    agg::pod_bvector<path_attributes> attributes;
+                    svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
                     svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
                     dispatch_type rasterizer_dispatch(*current_buffer_,svg_renderer,*ras_ptr,
