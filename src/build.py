@@ -263,6 +263,7 @@ source += Split(
     agg/process_raster_symbolizer.cpp
     agg/process_shield_symbolizer.cpp
     agg/process_markers_symbolizer.cpp
+    agg/process_debug_symbolizer.cpp
     """
     )
 
