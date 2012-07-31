@@ -65,19 +65,19 @@ public:
         (*bitmap_data_)->set(0xff000000);
     }
 
-    marker(const boost::optional<mapnik::image_ptr> &data)
+    marker(boost::optional<mapnik::image_ptr> const& data)
         : bitmap_data_(data)
     {
 
     }
 
-    marker(const boost::optional<mapnik::svg_path_ptr> &data)
+    marker(boost::optional<mapnik::svg_path_ptr> const& data)
         : vector_data_(data)
     {
 
     }
 
-    marker(const marker& rhs)
+    marker(marker const& rhs)
         : bitmap_data_(rhs.bitmap_data_),
           vector_data_(rhs.vector_data_)
     {}
