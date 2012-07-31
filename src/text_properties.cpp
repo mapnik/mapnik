@@ -54,6 +54,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     largest_bbox_only(true),
     text_ratio(0),
     wrap_width(0),
+    rotate_displacement(false),
     format(boost::make_shared<char_properties>()),
     tree_()
 {
@@ -112,6 +113,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (jalign_) jalign = *jalign_;
     optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
     if (orientation_) orientation = *orientation_;
+    optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
+    if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
     optional<double> dx = sym.get_opt_attr<double>("dx");
     if (dx) displacement.x = *dx;
     optional<double> dy = sym.get_opt_attr<double>("dy");
@@ -215,6 +218,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (valign != dfl.valign || explicit_defaults)
     {
         set_attr(node, "vertical-alignment", valign);
+    }
+    if (rotate_displacement != dfl.rotate_displacement || explicit_defaults)
+    {
+        set_attr(node, "rotate-displacement", rotate_displacement);
     }
     format->to_xml(node, explicit_defaults, *(dfl.format));
     if (tree_) tree_->to_xml(node);

@@ -150,6 +150,14 @@ static void rotated_box2d(box2d<double> &box, double sina, double cosa, double w
     box.init(-new_width/2., -new_height/2., new_width/2., new_height/2.);
 }
 
+static pixel_position rotate(pixel_position pos, double sina, double cosa)
+{
+    double tmp_x = pos.x * cosa + pos.y * sina;
+    pos.y = - pos.x * sina + pos.y * cosa;
+    pos.x = tmp_x;
+    return pos;
+}
+
 
 glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos)
 {
@@ -157,9 +165,10 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
     if (!layout_.size()) return glyphs; /* No data. Don't return NULL pointer, which would mean
      that not enough space was available. */
 
-    //TODO: Verify enough space is available. For point placement the bounding box is enough!
+    pixel_position displacement = scale_factor_ * info_->properties.displacement + alignment_offset();
+    if (info_->properties.rotate_displacement) displacement = rotate(displacement, sina_, cosa_);
 
-    glyphs->set_base_point(pos + scale_factor_ * info_->properties.displacement + alignment_offset());
+    glyphs->set_base_point(pos + displacement);
     box2d<double> bbox;
     rotated_box2d(bbox, sina_, cosa_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
@@ -195,8 +204,6 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
             x = (layout_.width() / 2.0) - (*line_itr)->width();
         else
             x = -((*line_itr)->width() / 2.0);
-
-        //TODO: Rotate
 
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)

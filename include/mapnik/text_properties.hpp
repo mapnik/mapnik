@@ -168,6 +168,7 @@ struct text_symbolizer_properties
     bool largest_bbox_only;
     unsigned text_ratio;
     unsigned wrap_width;
+    bool rotate_displacement;
     /** Default values for char_properties. */
     char_properties_ptr format;
 private:
