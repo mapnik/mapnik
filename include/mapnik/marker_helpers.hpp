@@ -27,11 +27,50 @@
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/svg/svg_converter.hpp>
+#include <mapnik/svg/svg_storage.hpp>
+
+// agg
+#include "agg_ellipse.h"
 
 // boost
 #include <boost/optional.hpp>
 
 namespace mapnik {
+
+template <typename T>
+void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storage_type & marker_ellipse, svg::svg_path_adapter & svg_path)
+{
+    expression_ptr const& width_expr = sym.get_width();
+    expression_ptr const& height_expr = sym.get_height();
+    double width = 0;
+    double height = 0;
+    if (width_expr && height_expr)
+    {
+        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
+        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
+    }
+    else if (width_expr)
+    {
+        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
+        height = width;
+    }
+    else if (height_expr)
+    {
+        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
+        width = height;
+    }
+    svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
+    styled_svg.push_attr();
+    styled_svg.begin_path();
+    agg::ellipse c(0, 0, width/2.0, height/2.0);
+    styled_svg.storage().concat_path(c);
+    styled_svg.end_path();
+    styled_svg.pop_attr();
+    double lox,loy,hix,hiy;
+    styled_svg.bounding_rect(&lox, &loy, &hix, &hiy);
+    marker_ellipse.set_bounding_box(lox,loy,hix,hiy);
+}
 
 template <typename Attr>
 bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& sym)
@@ -42,10 +81,12 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
     boost::optional<float> const& fill_opacity = sym.get_fill_opacity();
     if (strk || fill || opacity || fill_opacity)
     {
+        bool success = false;
         for(unsigned i = 0; i < src.size(); ++i)
         {
-            mapnik::svg::path_attributes attr = src[i];
-
+            success = true;
+            dst.push_back(src[i]);
+            mapnik::svg::path_attributes & attr = dst.last();
             if (attr.stroke_flag)
             {
                 // TODO - stroke attributes need to be boost::optional
@@ -87,9 +128,8 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
                     attr.fill_opacity = *fill_opacity;
                 }
             }
-            dst.push_back(attr);
         }
-        return true;
+        return success;
     }
     return false;
 }
