@@ -80,7 +80,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    box2d<double> ext = query_extent_ * 1.1;
+    box2d<double> ext = query_extent_ * 1.0;
 
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {

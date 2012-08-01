@@ -331,15 +331,13 @@ public:
     /*! \brief Set the map maximum extent.
      *  @param box The bounding box for the maximum extent.
      */
-    void set_maximum_extent(box2d<double>const& box);
+    void set_maximum_extent(box2d<double> const& box);
 
     /*! \brief Get the map maximum extent as box2d<double>
      */
     boost::optional<box2d<double> > const& maximum_extent() const;
 
-    /*! \brief Get the non-const map maximum extent as box2d<double>
-     */
-    boost::optional<box2d<double> > & maximum_extent();
+    void reset_maximum_extent();
 
     /*! \brief Get the map base path where paths should be relative to.
      */

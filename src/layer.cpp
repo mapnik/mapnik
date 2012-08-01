@@ -42,7 +42,8 @@ layer::layer(std::string const& name, std::string const& srs)
       clear_label_cache_(false),
       cache_features_(false),
       group_by_(""),
-      ds_() {}
+      ds_(),
+      buffer_size_(0) {}
 
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
@@ -55,7 +56,9 @@ layer::layer(const layer& rhs)
       cache_features_(rhs.cache_features_),
       group_by_(rhs.group_by_),
       styles_(rhs.styles_),
-      ds_(rhs.ds_) {}
+      ds_(rhs.ds_),
+      buffer_size_(rhs.buffer_size_),
+      maximum_extent_(rhs.maximum_extent_) {}
 
 layer& layer::operator=(const layer& rhs)
 {
@@ -82,6 +85,8 @@ void layer::swap(const layer& rhs)
     group_by_ = rhs.group_by_;
     styles_=rhs.styles_;
     ds_=rhs.ds_;
+    buffer_size_ = rhs.buffer_size_;
+    maximum_extent_ = rhs.maximum_extent_;
 }
 
 layer::~layer() {}
@@ -174,6 +179,31 @@ datasource_ptr layer::datasource() const
 void layer::set_datasource(datasource_ptr const& ds)
 {
     ds_ = ds;
+}
+
+void layer::set_maximum_extent(box2d<double> const& box)
+{
+    maximum_extent_.reset(box);
+}
+
+boost::optional<box2d<double> > const& layer::maximum_extent() const
+{
+    return maximum_extent_;
+}
+
+void layer::reset_maximum_extent()
+{
+    maximum_extent_.reset();
+}
+
+void layer::set_buffer_size(int size)
+{
+    buffer_size_ = size;
+}
+
+int layer::buffer_size() const
+{
+    return buffer_size_;
 }
 
 box2d<double> layer::envelope() const

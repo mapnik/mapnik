@@ -320,9 +320,11 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     // if we've got this far, now prepare the unbuffered extent
     // which is used as a bbox for clipping geometries
     box2d<double> query_ext = m_.get_current_extent(); // unbuffered
-    if (maximum_extent) {
+    if (maximum_extent)
+    {
         query_ext.clip(*maximum_extent);
     }
+
     box2d<double> layer_ext2 = lay.envelope();
     if (fw_success)
     {

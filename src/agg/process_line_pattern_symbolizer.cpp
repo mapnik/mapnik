@@ -56,7 +56,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 {
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
-    typedef agg::pixel32_type pixel_type;    
+    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pattern_filter_bilinear_rgba8 pattern_filter_type;
     typedef agg::line_image_pattern<pattern_filter_type> pattern_type;
@@ -64,7 +64,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     typedef agg::renderer_base<pixfmt_type> renderer_base;
     typedef agg::renderer_outline_image<renderer_base, pattern_type> renderer_type;
     typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
-    
+
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
 
     boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
@@ -81,8 +81,6 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (!pat) return;
 
-    box2d<double> ext = query_extent_ * 1.0;
-    
     agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
     pixfmt_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
@@ -91,26 +89,26 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     pattern_source source(*(*pat));
     pattern_type pattern (filter,source);
-    renderer_type ren(ren_base, pattern);    
+    renderer_type ren(ren_base, pattern);
     rasterizer_type ras(ren);
-    
+
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
     typedef boost::mpl::vector<clip_line_tag,transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(ext,ras,sym,t_,prj_trans,tr,scale_factor_);
-    
+        converter(query_extent_,ras,sym,t_,prj_trans,tr,scale_factor_);
+
     if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true)
-    converter.set<transform_tag>(); //always transform 
+    converter.set<transform_tag>(); //always transform
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-    
+
     BOOST_FOREACH(geometry_type & geom, feature.paths())
     {
         if (geom.size() > 1)
         {
-            converter.apply(geom);        
+            converter.apply(geom);
         }
     }
 }

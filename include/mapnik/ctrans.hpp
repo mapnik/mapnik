@@ -52,34 +52,25 @@ struct MAPNIK_DECL coord_transform
         : t_(0),
         geom_(geom),
         prj_trans_(0)  {}
-    
+
     void set_proj_trans(proj_transform const& prj_trans)
     {
         prj_trans_ = &prj_trans;
     }
-    
+
     void set_trans(Transform  const& t)
     {
         t_ = &t;
     }
-    
+
     unsigned vertex(double *x, double *y) const
     {
-        unsigned command = SEG_MOVETO;
-        bool ok = false;
-        bool skipped_points = false;
-        double z = 0;
-        while (!ok && command != SEG_END)
+        unsigned command = geom_.vertex(x, y);
+        if ( command != SEG_END)
         {
-            command = geom_.vertex(x, y);
-            ok = prj_trans_->backward(*x, *y, z);
-            if (!ok) {
-                skipped_points = true;
-            }
-        }
-        if (skipped_points && (command == SEG_LINETO))
-        {
-            command = SEG_MOVETO;
+            double z = 0;
+            if (!prj_trans_->backward(*x, *y, z))
+                return SEG_END;
         }
         t_->forward(x, y);
         return command;

@@ -741,6 +741,22 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         set_attr( layer_node, "group-by", layer.group_by() );
     }
 
+    int buffer_size = layer.buffer_size();
+    if ( buffer_size || explicit_defaults)
+    {
+        set_attr( layer_node, "buffer-size", buffer_size );
+    }
+
+    optional<box2d<double> > const& maximum_extent = layer.maximum_extent();
+    if ( maximum_extent)
+    {
+        std::ostringstream s;
+        s << std::setprecision(16)
+          << maximum_extent->minx() << "," << maximum_extent->miny() << ","
+          << maximum_extent->maxx() << "," << maximum_extent->maxy();
+        set_attr( layer_node, "maximum-extent", s.str() );
+    }
+
     std::vector<std::string> const& style_names = layer.styles();
     for (unsigned i = 0; i < style_names.size(); ++i)
     {
@@ -788,7 +804,7 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         set_attr( map_node, "background-image", *image_filename );
     }
 
-    unsigned buffer_size = map.buffer_size();
+    int buffer_size = map.buffer_size();
     if ( buffer_size || explicit_defaults)
     {
         set_attr( map_node, "buffer-size", buffer_size );

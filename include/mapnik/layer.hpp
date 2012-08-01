@@ -43,7 +43,9 @@ namespace mapnik
 class MAPNIK_DECL layer
 {
 public:
-    explicit layer(std::string const& name, std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+    layer(std::string const& name,
+          std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+
     layer(layer const& l);
     layer& operator=(layer const& l);
     bool operator==(layer const& other) const;
@@ -57,7 +59,7 @@ public:
      * @return the name of the layer.
      */
 
-    const std::string& name() const;
+    std::string const& name() const;
 
     /*!
      * @brief Set the SRS of the layer.
@@ -188,6 +190,11 @@ public:
      */
     box2d<double> envelope() const;
 
+    void set_maximum_extent(box2d<double> const& box);
+    boost::optional<box2d<double> > const&  maximum_extent() const;
+    void reset_maximum_extent();
+    void set_buffer_size(int size);
+    int buffer_size() const;
     ~layer();
 private:
     void swap(const layer& other);
@@ -204,6 +211,8 @@ private:
     std::string group_by_;
     std::vector<std::string> styles_;
     datasource_ptr ds_;
+    int buffer_size_;
+    boost::optional<box2d<double> > maximum_extent_;
 };
 }
 
