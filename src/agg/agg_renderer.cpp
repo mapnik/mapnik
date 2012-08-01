@@ -444,6 +444,27 @@ void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
     agg::render_scanlines(*ras_ptr, sl_line, ren);
 }
 
+template <typename T>
+void agg_renderer<T>::draw_geo_extent(box2d<double> const& extent, mapnik::color const& color)
+{
+    box2d<double> box = t_.forward(extent);
+    double x0 = box.minx();
+    double x1 = box.maxx();
+    double y0 = box.miny();
+    double y1 = box.maxy();
+    unsigned rgba = color.rgba();
+    for (double x=x0; x<x1; x++)
+    {
+        pixmap_.setPixel(x, y0, rgba);
+        pixmap_.setPixel(x, y1, rgba);
+    }
+    for (double y=y0; y<y1; y++)
+    {
+        pixmap_.setPixel(x0, y, rgba);
+        pixmap_.setPixel(x1, y, rgba);
+    }
+}
+
 template class agg_renderer<image_32>;
 template void agg_renderer<image_32>::debug_draw_box<agg::rendering_buffer>(
                 agg::rendering_buffer& buf,
