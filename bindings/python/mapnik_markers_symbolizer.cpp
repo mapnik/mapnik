@@ -92,6 +92,7 @@ void export_markers_symbolizer()
 
     mapnik::enumeration_<mapnik::marker_placement_e>("marker_placement")
         .value("POINT_PLACEMENT",mapnik::MARKER_POINT_PLACEMENT)
+        .value("INTERIOR_PLACEMENT",mapnik::MARKER_INTERIOR_PLACEMENT)
         .value("LINE_PLACEMENT",mapnik::MARKER_LINE_PLACEMENT)
         ;
 

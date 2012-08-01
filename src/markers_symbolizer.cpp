@@ -30,6 +30,7 @@ namespace mapnik {
 
 static const char * marker_placement_strings[] = {
     "point",
+    "interior",
     "line",
     ""
 };

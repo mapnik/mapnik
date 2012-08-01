@@ -889,7 +889,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             symbol.set_ignore_placement(* ignore_placement);
         }
         point_placement_e placement =
-            sym.get_attr<point_placement_e>("placement", sym.get_point_placement());
+            sym.get_attr<point_placement_e>("placement", symbol.get_point_placement());
         symbol.set_point_placement(placement);
 
         if (file && !file->empty())

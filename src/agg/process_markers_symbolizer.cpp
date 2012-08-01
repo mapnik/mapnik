@@ -94,11 +94,18 @@ struct vector_markers_rasterizer_dispatch
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
 
-        if (placement_method == MARKER_POINT_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT)
         {
             double x,y;
             path.rewind(0);
-            label::interior_position(path, x, y);
+            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            {
+                label::interior_position(path, x, y);
+            }
+            else
+            {
+                label::centroid(path, x, y);
+            }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;
@@ -231,11 +238,18 @@ struct raster_markers_rasterizer_dispatch
         marker_placement_e placement_method = sym_.get_marker_placement();
         box2d<double> bbox_(0,0, src_.width(),src_.height());
 
-        if (placement_method == MARKER_POINT_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT)
         {
             double x,y;
             path.rewind(0);
-            label::interior_position(path, x, y);
+            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            {
+                label::interior_position(path, x, y);
+            }
+            else
+            {
+                label::centroid(path, x, y);
+            }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
             box2d<double> transformed_bbox = bbox_ * matrix;
