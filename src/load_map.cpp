@@ -889,7 +889,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             symbol.set_ignore_placement(* ignore_placement);
         }
         point_placement_e placement =
-            sym.get_attr<point_placement_e>("placement", CENTROID_POINT_PLACEMENT);
+            sym.get_attr<point_placement_e>("placement", symbol.get_point_placement());
         symbol.set_point_placement(placement);
 
         if (file && !file->empty())
@@ -1064,7 +1064,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             sym.set_stroke(strk);
         }
 
-        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_POINT_PLACEMENT);
+        marker_placement_e placement = node.get_attr<marker_placement_e>("placement",sym.get_marker_placement());
         sym.set_marker_placement(placement);
         parse_symbolizer_base(sym, node);
         rule.append(sym);

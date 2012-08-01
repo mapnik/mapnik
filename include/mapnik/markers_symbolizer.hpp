@@ -39,6 +39,7 @@ namespace mapnik {
 // TODO - consider merging with text_symbolizer label_placement_e
 enum marker_placement_enum {
     MARKER_POINT_PLACEMENT,
+    MARKER_INTERIOR_PLACEMENT,
     MARKER_LINE_PLACEMENT,
     marker_placement_enum_MAX
 };

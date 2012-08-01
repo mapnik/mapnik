@@ -2,8 +2,15 @@
 <Map background-color="white" srs="+init=epsg:4326" minimum-version="0.7.2">
     <Style name="1">
         <Rule>
-            <LineSymbolizer stroke-width=".2" stroke="grey"/>
-            <MarkersSymbolizer file="../svg/crosshair16x16.svg"/>
+            <LineSymbolizer offset="-2" stroke-width="2" stroke="red"/>
+            <LineSymbolizer stroke-width="2" stroke="orange"/>
+            <LineSymbolizer offset="2" stroke-width="2" stroke="yellow"/>
+            <LineSymbolizer offset="4" stroke-width="2" stroke="green"/>
+            <MarkersSymbolizer
+                file="../svg/octocat.svg"
+                transform="scale(.13)"
+                placement="line"
+            />
         </Rule>
     </Style>
 

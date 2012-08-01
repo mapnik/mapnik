@@ -66,10 +66,10 @@ public:
         {
             throw std::runtime_error("end_path : The path was not begun");
         }
-        path_attributes attr = cur_attr();
-        unsigned idx = attributes_[attributes_.size() - 1].index;
+        path_attributes& attr = attributes_[attributes_.size() - 1];
+        unsigned idx = attr.index;
+        attr = cur_attr();
         attr.index = idx;
-        attributes_[attributes_.size() - 1] = attr;
     }
 
     void move_to(double x, double y, bool rel=false)  // M, m

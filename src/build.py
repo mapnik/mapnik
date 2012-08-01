@@ -172,7 +172,6 @@ source = Split(
     json/feature_grammar.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
-    markers_placement.cpp
     processed_text.cpp
     formatting/base.cpp
     formatting/expression.cpp

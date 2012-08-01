@@ -3,7 +3,14 @@
     <Style name="1">
         <Rule>
             <LineSymbolizer stroke-width=".2" stroke="grey"/>
-            <MarkersSymbolizer stroke="green" stroke-width="1.3" fill="yellow"/>
+            <MarkersSymbolizer
+                file="shape://arrow"
+                transform="scale(.8,.5)"
+                stroke="green"
+                stroke-width="1.3"
+                fill="yellow"
+                placement="line"
+            />
         </Rule>
     </Style>
 
