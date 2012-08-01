@@ -119,7 +119,7 @@ void text_itemizer::itemize_direction(unsigned start, unsigned end)
                     run_start += start; //Add offset to compensate offset in setPara
                     std::cout << "visual run, rtl:" << direction
                               << " start:" << start << " length:" << length << "\n";
-                    direction_runs_.push_back(direction_run_t(direction, start, start+length));
+                    direction_runs_.push_back(direction_run_t(direction, run_start, run_start+length));
                 }
             }
         }
