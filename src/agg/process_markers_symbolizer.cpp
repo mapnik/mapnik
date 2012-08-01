@@ -21,11 +21,12 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/graphics.hpp>
-#include <mapnik/geom_util.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+
+#include <mapnik/debug.hpp>
+#include <mapnik/geom_util.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker.hpp>
@@ -52,6 +53,7 @@
 #include "agg_span_allocator.h"
 #include "agg_image_accessors.h"
 #include "agg_span_image_filter_rgba.h"
+
 // boost
 #include <boost/optional.hpp>
 

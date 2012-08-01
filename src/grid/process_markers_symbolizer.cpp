@@ -20,22 +20,55 @@
  *
  *****************************************************************************/
 
+/*
+
+porting notes -->
+
+ - grid includes
+ - detector
+ - no gamma
+ - mapnik::pixfmt_gray32
+ - agg::scanline_bin sl
+ - grid_rendering_buffer
+ - agg::renderer_scanline_bin_solid
+ - clamping:
+    // - clamp sizes to > 4 pixels of interactivity
+    if (tr.scale() < 0.5)
+    {
+        agg::trans_affine tr2;
+        tr2 *= agg::trans_affine_scaling(0.5);
+        tr = tr2;
+    }
+    tr *= agg::trans_affine_scaling(scale_factor_*(1.0/pixmap_.get_resolution()));
+ - svg_renderer.render_id
+ - only encode feature if placements are found:
+    if (placed)
+    {
+        pixmap_.add_feature(feature);
+    }
+
+*/
+
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+
+#include <mapnik/debug.hpp>
+#include <mapnik/geom_util.hpp>
+#include <mapnik/expression_evaluator.hpp>
+#include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
-#include <mapnik/markers_symbolizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
-#include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/markers_placement.hpp>
+#include <mapnik/markers_symbolizer.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -46,6 +79,11 @@
 #include "agg_path_storage.h"
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_transform.h"
+#include "agg_image_filters.h"
+#include "agg_trans_bilinear.h"
+#include "agg_span_allocator.h"
+#include "agg_image_accessors.h"
+#include "agg_span_image_filter_rgba.h"
 
 // boost
 #include <boost/optional.hpp>
