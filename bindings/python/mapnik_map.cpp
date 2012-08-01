@@ -117,7 +117,7 @@ struct map_pickle_suite : boost::python::pickle_suite
 std::vector<layer>& (Map::*layers_nonconst)() =  &Map::layers;
 std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
 mapnik::parameters& (Map::*params_nonconst)() =  &Map::get_extra_parameters;
-boost::optional<mapnik::box2d<double> > const& (Map::*maximum_extent_const)() const =  &Map::maximum_extent;
+//boost::optional<mapnik::box2d<double> > const& (Map::*maximum_extent_const)() const =  &Map::maximum_extent;
 
 mapnik::feature_type_style find_style(mapnik::Map const& m, std::string const& name)
 {
@@ -192,7 +192,6 @@ mapnik::Map map_deepcopy(mapnik::Map & m, boost::python::dict memo)
     return result;
 }
 
-// TODO - find a simplier way to set optional to uninitialized
 void set_maximum_extent(mapnik::Map & m, boost::optional<mapnik::box2d<double> > const& box)
 {
     if (box)
@@ -201,7 +200,7 @@ void set_maximum_extent(mapnik::Map & m, boost::optional<mapnik::box2d<double> >
     }
     else
     {
-        m.maximum_extent().reset();
+        m.reset_maximum_extent();
     }
 }
 
@@ -562,7 +561,7 @@ void export_map()
             )
 
         .add_property("maximum_extent",make_function
-                      (maximum_extent_const,return_value_policy<copy_const_reference>()),
+                      (&Map::maximum_extent,return_value_policy<copy_const_reference>()),
                       &set_maximum_extent,
                       "The maximum extent of the map.\n"
                       "\n"

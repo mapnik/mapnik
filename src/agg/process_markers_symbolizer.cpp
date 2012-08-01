@@ -365,7 +365,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                       bbox, marker_trans, sym, *detector_, scale_factor_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(query_extent_* 1.1,rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         eGeomType type = feature.paths()[0].type();
@@ -398,7 +398,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                       bbox, marker_trans, sym, *detector_, scale_factor_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(query_extent_* 1.1,rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         eGeomType type = feature.paths()[0].type();
@@ -429,7 +429,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                   marker_trans, sym, *detector_, scale_factor_);
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(query_extent_* 1.1, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                    converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
 
                 if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                 {
