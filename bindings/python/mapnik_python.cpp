@@ -608,6 +608,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
 
+    python_optional<mapnik::stroke>();
     python_optional<mapnik::color>();
     python_optional<mapnik::box2d<double> >();
     python_optional<mapnik::datasource::geometry_t>();
