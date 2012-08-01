@@ -46,7 +46,8 @@ files = [
     {'name': "jalign-auto", 'sizes': [(200, 200)]},
     {'name': "line-offset", 'sizes':[(900, 250)],
         'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
-    {'name': "orientation", 'sizes': [(800, 200)]}
+    {'name': "orientation", 'sizes': [(800, 200)]},
+    {'name': "hb-fontsets", 'sizes': [(800, 200)]}
     ]
 
 def render(filename, width, height, bbox, quiet=False):

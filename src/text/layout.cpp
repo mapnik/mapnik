@@ -145,10 +145,11 @@ void text_layout::shape_text(text_line_ptr line)
     {
         face_set_ptr face_set = font_manager_.get_face_set(itr->format->face_name, itr->format->fontset);
         face_set->set_character_sizes(itr->format->text_size);
-        face_ptr face = *(face_set->begin()); //TODO: Implement font sets correctly
+        font_face_set::iterator face_itr = face_set->begin(), face_end = face_set->end();
+        for (; face_itr != face_end; face_itr++)
+        {
+        face_ptr face = *face_itr;
         text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
-
-        line->update_max_char_height(face->get_char_height());
 
         shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
         hb_buffer_t *buffer = shaper.get_buffer();
@@ -157,6 +158,24 @@ void text_layout::shape_text(text_line_ptr line)
 
         hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer, NULL);
         hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
+
+        bool font_has_all_glyphs = true;
+        /* Check if all glyphs are valid. */
+        for (unsigned i=0; i<num_glyphs; i++)
+        {
+            if (!glyphs[i].codepoint)
+            {
+                font_has_all_glyphs = false;
+                break;
+            }
+        }
+        if (!font_has_all_glyphs)
+        {
+            //Try next font in fontset
+            continue;
+        }
+
+
 
         for (unsigned i=0; i<num_glyphs; i++)
         {
@@ -173,6 +192,9 @@ void text_layout::shape_text(text_line_ptr line)
             width_map_[glyphs[i].cluster] += tmp.width;
 
             line->add_glyph(tmp);
+        }
+        line->update_max_char_height(face->get_char_height());
+        break; //When we reach this point the current font had all glyphs.
         }
     }
 }
