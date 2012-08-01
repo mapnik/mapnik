@@ -148,53 +148,51 @@ void text_layout::shape_text(text_line_ptr line)
         font_face_set::iterator face_itr = face_set->begin(), face_end = face_set->end();
         for (; face_itr != face_end; face_itr++)
         {
-        face_ptr face = *face_itr;
-        text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
+            face_ptr face = *face_itr;
+            text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
 
-        shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
-        hb_buffer_t *buffer = shaper.get_buffer();
+            shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
+            hb_buffer_t *buffer = shaper.get_buffer();
 
-        unsigned num_glyphs = hb_buffer_get_length(buffer);
+            unsigned num_glyphs = hb_buffer_get_length(buffer);
 
-        hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer, NULL);
-        hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
+            hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer, NULL);
+            hb_glyph_position_t *positions = hb_buffer_get_glyph_positions(buffer, NULL);
 
-        bool font_has_all_glyphs = true;
-        /* Check if all glyphs are valid. */
-        for (unsigned i=0; i<num_glyphs; i++)
-        {
-            if (!glyphs[i].codepoint)
+            bool font_has_all_glyphs = true;
+            /* Check if all glyphs are valid. */
+            for (unsigned i=0; i<num_glyphs; i++)
             {
-                font_has_all_glyphs = false;
-                break;
+                if (!glyphs[i].codepoint)
+                {
+                    font_has_all_glyphs = false;
+                    break;
+                }
             }
-        }
-        if (!font_has_all_glyphs)
-        {
-            //Try next font in fontset
-            continue;
-        }
+            if (!font_has_all_glyphs)
+            {
+                //Try next font in fontset
+                continue;
+            }
 
+            for (unsigned i=0; i<num_glyphs; i++)
+            {
+                glyph_info tmp;
+                tmp.char_index = glyphs[i].cluster;
+                tmp.glyph_index = glyphs[i].codepoint;
+                tmp.width = positions[i].x_advance / 64.0;
+                tmp.offset_x = positions[i].x_offset / 64.0;
+                tmp.offset_y = positions[i].y_offset / 64.0;
+                tmp.face = face;
+                tmp.format = itr->format;
+                face->glyph_dimensions(tmp);
 
+                width_map_[glyphs[i].cluster] += tmp.width;
 
-        for (unsigned i=0; i<num_glyphs; i++)
-        {
-            glyph_info tmp;
-            tmp.char_index = glyphs[i].cluster;
-            tmp.glyph_index = glyphs[i].codepoint;
-            tmp.width = positions[i].x_advance / 64.0;
-            tmp.offset_x = positions[i].x_offset / 64.0;
-            tmp.offset_y = positions[i].y_offset / 64.0;
-            tmp.face = face;
-            tmp.format = itr->format;
-            face->glyph_dimensions(tmp);
-
-            width_map_[glyphs[i].cluster] += tmp.width;
-
-            line->add_glyph(tmp);
-        }
-        line->update_max_char_height(face->get_char_height());
-        break; //When we reach this point the current font had all glyphs.
+                line->add_glyph(tmp);
+            }
+            line->update_max_char_height(face->get_char_height());
+            break; //When we reach this point the current font had all glyphs.
         }
     }
 }
