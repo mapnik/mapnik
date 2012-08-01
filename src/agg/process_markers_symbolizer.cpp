@@ -295,7 +295,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef label_collision_detector4 detector_type;
-    typedef boost::mpl::vector<clip_line_tag,transform_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_line_tag,clip_poly_tag,transform_tag,smooth_tag> conv_types;
 
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
 
@@ -350,7 +350,15 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(query_extent_* 1.1,rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
-                    if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
+                    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                    {
+                        eGeomType type = feature.paths()[0].type();
+                        if (type == Polygon)
+                            converter.template set<clip_poly_tag>();
+                        else if (type == LineString)
+                            converter.template set<clip_line_tag>();
+                        // don't clip if type==Point
+                    }
                     converter.template set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
                     BOOST_FOREACH(geometry_type & geom, feature.paths())
@@ -375,7 +383,15 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(query_extent_* 1.1,rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
-                    if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
+                    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                    {
+                        eGeomType type = feature.paths()[0].type();
+                        if (type == Polygon)
+                            converter.template set<clip_poly_tag>();
+                        else if (type == LineString)
+                            converter.template set<clip_line_tag>();
+                        // don't clip if type==Point
+                    }
                     converter.template set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
                     BOOST_FOREACH(geometry_type & geom, feature.paths())
@@ -399,7 +415,15 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
                     converter(query_extent_* 1.1, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
 
-                if (sym.clip()) converter.template set<clip_line_tag>(); //optional clip (default: true)
+                if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                {
+                    eGeomType type = feature.paths()[0].type();
+                    if (type == Polygon)
+                        converter.template set<clip_poly_tag>();
+                    else if (type == LineString)
+                        converter.template set<clip_line_tag>();
+                    // don't clip if type==Point
+                }
                 converter.template set<transform_tag>(); //always transform
                 if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
 

@@ -45,10 +45,7 @@ markers_symbolizer::markers_symbolizer()
       allow_overlap_(false),
       spacing_(100.0),
       max_error_(0.2),
-      marker_p_(MARKER_POINT_PLACEMENT) {
-          // override the default for clipping in symbolizer base
-          this->set_clip(false);
-      }
+      marker_p_(MARKER_POINT_PLACEMENT) { }
 
 markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
     : symbolizer_with_image(filename),
@@ -59,10 +56,7 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
       allow_overlap_(false),
       spacing_(100.0),
       max_error_(0.2),
-      marker_p_(MARKER_POINT_PLACEMENT) {
-          // override the default for clipping in symbolizer base
-          this->set_clip(false);
-      }
+      marker_p_(MARKER_POINT_PLACEMENT) { }
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
     : symbolizer_with_image(rhs),
