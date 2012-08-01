@@ -43,4 +43,11 @@ demo/c++/demo.tif
 demo/c++/demo.jpg
 demo/c++/demo.png
 demo/c++/demo256.png
+demo/viewer/Makefile
+demo/viewer/Makefile.Debug
+demo/viewer/Makefile.Release
+demo/viewer/release/
+demo/viewer/ui_about.h
+demo/viewer/ui_info.h
+demo/viewer/ui_layer_info.h
 tests/cpp_tests/*-bin
