@@ -80,8 +80,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    box2d<double> ext = query_extent_ * 1.0;
-
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
         typedef agg::renderer_outline_aa<renderer_base> renderer_type;
@@ -94,23 +92,13 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         rasterizer_type ras(ren);
         set_join_caps_aa(stroke_,ras);
 
-        typedef boost::mpl::vector<clip_line_tag, clip_poly_tag,transform_tag,
+        typedef boost::mpl::vector<clip_line_tag, transform_tag,
                                    offset_transform_tag, affine_transform_tag,
                                    smooth_tag, dash_tag, stroke_tag> conv_types;
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(ext,ras,sym,t_,prj_trans,tr,scaled);
-
-        if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
-        {
-            eGeomType type = feature.paths()[0].type();
-            if (type == Polygon)
-                converter.set<clip_poly_tag>();
-            else if (type == LineString)
-                converter.set<clip_line_tag>();
-            // don't clip if type==Point
-        }
-
+            converter(query_extent_,ras,sym,t_,prj_trans,tr,scaled);
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
         converter.set<affine_transform_tag>(); // optional affine transform
@@ -128,23 +116,14 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     }
     else
     {
-        typedef boost::mpl::vector<clip_line_tag, clip_poly_tag, transform_tag, offset_transform_tag,
+        typedef boost::mpl::vector<clip_line_tag, transform_tag, offset_transform_tag,
                                    affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
 
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(ext,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+            converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
-        if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
-        {
-            eGeomType type = feature.paths()[0].type();
-            if (type == Polygon)
-                converter.set<clip_poly_tag>();
-            else if (type == LineString)
-                converter.set<clip_line_tag>();
-            // don't clip if type==Point
-        }
-
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
         converter.set<affine_transform_tag>(); // optional affine transform
