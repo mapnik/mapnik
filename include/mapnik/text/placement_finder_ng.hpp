@@ -99,7 +99,13 @@ public:
 
     /** Try to place a single label at the given point. */
     glyph_positions_ptr find_point_placement(pixel_position pos);
-
+    /** Iterate over the given path, placing line-following labels with respect to label_spacing. */
+    template <typename T>
+    glyph_positions_ptr find_line_placements(T & path);
+    /** Iterate over the given path, placing point labels with respect to label_spacing. */
+    template <typename T>
+    glyph_positions_ptr find_point_on_line_placements(T & path);
+    /** Try next position alternative from placement_info. */
     bool next_position();
 private:
     void init_alignment();

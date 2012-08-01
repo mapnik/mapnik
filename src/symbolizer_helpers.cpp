@@ -76,28 +76,33 @@ glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_p
         typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
         clipped_geometry_type clipped(**geo_itr_);
-        clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+        clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
+                         query_extent_.maxx(), query_extent_.maxy());
         path_type path(t_, clipped, prj_trans_);
-#if 0
+        glyph_positions_ptr glyphs;
         if (points_on_line_) {
-            finder_->find_point_placements(path);
+#if 0
+            finder_.find_point_on_line_placements(path);
+#endif
         } else {
-            finder_->find_line_placements(path);
+            glyphs = finder_.find_line_placements(path);
         }
-        if (!finder_->get_results().empty())
+        if (glyphs)
         {
             //Found a placement
+#if 0
             if (points_on_line_)
             {
                 finder_->update_detector();
             }
+
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
             if (writer_.first) writer_.first->add_text(
                 finder_->get_results(), finder_->get_extents(),
                 feature_, t_, writer_.second);
-            return true;
+            #endif
+            return glyphs;
         }
-#endif
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
         geo_itr_++;
     }

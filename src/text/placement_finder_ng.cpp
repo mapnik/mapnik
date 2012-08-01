@@ -25,9 +25,13 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>
+#include <mapnik/ctrans.hpp>
 
 //boost
 #include <boost/make_shared.hpp>
+
+// agg
+#include "agg_conv_clip_polyline.h"
 
 namespace mapnik
 {
@@ -217,6 +221,19 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
 }
 
 
+template <typename T>
+glyph_positions_ptr placement_finder_ng::find_point_on_line_placements(T & path)
+{
+    return glyph_positions_ptr();
+}
+
+template <typename T>
+glyph_positions_ptr placement_finder_ng::find_line_placements(T & path)
+{
+    return glyph_positions_ptr();
+}
+
+
 /*********************************************************************************************/
 
 
@@ -268,6 +285,16 @@ void glyph_positions::set_base_point(pixel_position base_point)
 {
     base_point_ = base_point;
 }
+
+
+/*************************************************************************************/
+typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
+typedef coord_transform<CoordTransform,geometry_type> PathType;
+template glyph_positions_ptr placement_finder_ng::find_point_on_line_placements<ClippedPathType>(ClippedPathType &);
+template glyph_positions_ptr placement_finder_ng::find_line_placements<ClippedPathType>(ClippedPathType &);
+template glyph_positions_ptr placement_finder_ng::find_point_on_line_placements<PathType>(PathType &);
+template glyph_positions_ptr placement_finder_ng::find_line_placements<PathType>(PathType &);
 
 
 }// ns mapnik
