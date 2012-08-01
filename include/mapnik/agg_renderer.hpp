@@ -123,6 +123,7 @@ protected:
                         double x, double y, double angle = 0.0);
     void debug_draw_box(box2d<double> const& extent,
                         double x, double y, double angle = 0.0);
+    void draw_geo_extent(box2d<double> const& extent,mapnik::color const& color);
 
 private:
     buffer_type & pixmap_;

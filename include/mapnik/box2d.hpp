@@ -109,7 +109,7 @@ operator << (std::basic_ostream<charT,traits>& out,
     std::basic_ostringstream<charT,traits> s;
     s.copyfmt(out);
     s.width(0);
-    s << "box2d(" << std::setprecision(16)
+    s << "box2d(" << std::fixed << std::setprecision(16)
       << e.minx() << ',' << e.miny() << ','
       << e.maxx() << ',' << e.maxy() << ')';
     out << s.str();
