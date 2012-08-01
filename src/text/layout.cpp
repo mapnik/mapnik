@@ -112,9 +112,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
                     break_position = line->get_last_char();
                     MAPNIK_LOG_WARN(text_layout) << "Unexpected result in break_line. Trying to recover...\n";
                 }
-//                std::cout << "Line overflow!\n";
             }
-//            std::cout << "Line to long ("<< current_line_length << ") at "<< i <<  " going to " << break_position << ". Last break was at " << last_break_position << "\n";
             text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
             shape_text(new_line);
             add_line(new_line);
@@ -175,7 +173,6 @@ void text_layout::shape_text(text_line_ptr line)
             width_map_[glyphs[i].cluster] += tmp.width;
 
             line->add_glyph(tmp);
-//            std::cout << "glyph:" << glyphs[i].mask << " xa:" << positions[i].x_advance << " ya:" << positions[i].y_advance << " xo:" << positions[i].x_offset <<  " yo:" << positions[i].y_offset << "\n";
         }
     }
 }

@@ -58,9 +58,6 @@ uint32_t text_shaping::process_text(UnicodeString const& text, unsigned start, u
     hb_buffer_set_unicode_funcs(buffer_, hb_icu_get_unicode_funcs());
 
     uint32_t length = text.length();
-    std::string s;
-    text.toUTF8String(s);
-    std::cout << "process_text: length: " << length << " start: " << start << " end: " << end << "rtl:" << rtl << "text: '"<<s<< "'\n";
 
     hb_buffer_add_utf16(buffer_, text.getBuffer(), length, start, end-start);
     hb_buffer_set_direction(buffer_, rtl?HB_DIRECTION_RTL:HB_DIRECTION_LTR);

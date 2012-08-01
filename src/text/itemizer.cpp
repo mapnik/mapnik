@@ -117,8 +117,6 @@ void text_itemizer::itemize_direction(unsigned start, unsigned end)
                     int32_t run_start;
                     direction = ubidi_getVisualRun(bidi, i, &run_start, &length);
                     run_start += start; //Add offset to compensate offset in setPara
-                    std::cout << "visual run, rtl:" << direction
-                              << " start:" << start << " length:" << length << "\n";
                     direction_runs_.push_back(direction_run_t(direction, run_start, run_start+length));
                 }
             }

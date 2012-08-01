@@ -144,7 +144,6 @@ pixel_position placement_finder_ng::alignment_offset() const
 // Output is centered around (0,0)
 static void rotated_box2d(box2d<double> &box, double sina, double cosa, double width, double height)
 {
-    //TODO: Verify calculation
     double new_width = width * cosa + height * sina;
     double new_height = width * sina + height * cosa;
     box.init(-new_width/2., -new_height/2., new_width/2., new_height/2.);
@@ -172,7 +171,6 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
     box2d<double> bbox;
     rotated_box2d(bbox, sina_, cosa_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
-    std::cout << "bbox:" << bbox << "\n";
 
     if (!detector_.extent().intersects(bbox) ||
         (!info_->properties.allow_overlap &&
