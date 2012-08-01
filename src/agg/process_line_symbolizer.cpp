@@ -47,7 +47,6 @@
 
 namespace mapnik {
 
-
 template <typename T>
 void agg_renderer<T>::process(line_symbolizer const& sym,
                               mapnik::feature_impl & feature,
@@ -80,6 +79,23 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
+    box2d<double> clipping_extent = query_extent_;
+    if (sym.clip())
+    {
+        double padding = (double)(query_extent_.width()/pixmap_.width());
+        float half_stroke = stroke_.get_width()/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+        // debugging
+        //box2d<double> inverse(x0 + padding, y0 + padding, x1 - padding , y1 - padding);
+        //draw_geo_extent(inverse,mapnik::color("red"));
+    }
+
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
         typedef agg::renderer_outline_aa<renderer_base> renderer_type;
@@ -97,7 +113,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
                                    smooth_tag, dash_tag, stroke_tag> conv_types;
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(query_extent_,ras,sym,t_,prj_trans,tr,scaled);
+            converter(clipping_extent,ras,sym,t_,prj_trans,tr,scaled);
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -121,7 +137,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+            converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
