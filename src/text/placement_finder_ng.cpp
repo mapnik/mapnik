@@ -26,6 +26,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/path_processor.hpp>
 
 //boost
 #include <boost/make_shared.hpp>
@@ -222,15 +223,39 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
 
 
 template <typename T>
-glyph_positions_ptr placement_finder_ng::find_point_on_line_placements(T & path)
+placements_list_ptr placement_finder_ng::find_point_on_line_placements(T & path)
 {
-    return glyph_positions_ptr();
+    path_processor<T> pp(path);
+    placements_list_ptr list = boost::make_shared<placements_list>();
+    if (!pp.valid() || !layout_.size()) return list;
+    if (pp.length() == 0.0)
+    {
+        list->push_back(find_point_placement(pp.current_point()));
+        return list;
+    }
+
+    int num_labels = 1;
+    if (info_->properties.label_spacing > 0)
+        num_labels = static_cast<int> (floor(pp.length() / info_->properties.label_spacing * scale_factor_));
+
+    if (info_->properties.force_odd_labels && num_labels % 2 == 0)
+        num_labels--;
+    if (num_labels <= 0)
+        num_labels = 1;
+
+    double spacing = pp.length() / num_labels;
+    pp.skip(spacing/2.); // first label should be placed at half the spacing
+    do
+    {
+        list->push_back(find_point_placement(pp.current_point()));
+    } while (pp.skip(spacing));
+    return list;
 }
 
 template <typename T>
-glyph_positions_ptr placement_finder_ng::find_line_placements(T & path)
+placements_list_ptr placement_finder_ng::find_line_placements(T & path)
 {
-    return glyph_positions_ptr();
+    return placements_list_ptr();
 }
 
 
@@ -291,10 +316,10 @@ void glyph_positions::set_base_point(pixel_position base_point)
 typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
 typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
 typedef coord_transform<CoordTransform,geometry_type> PathType;
-template glyph_positions_ptr placement_finder_ng::find_point_on_line_placements<ClippedPathType>(ClippedPathType &);
-template glyph_positions_ptr placement_finder_ng::find_line_placements<ClippedPathType>(ClippedPathType &);
-template glyph_positions_ptr placement_finder_ng::find_point_on_line_placements<PathType>(PathType &);
-template glyph_positions_ptr placement_finder_ng::find_line_placements<PathType>(PathType &);
+template placements_list_ptr placement_finder_ng::find_point_on_line_placements<ClippedPathType>(ClippedPathType &);
+template placements_list_ptr placement_finder_ng::find_line_placements<ClippedPathType>(ClippedPathType &);
+template placements_list_ptr placement_finder_ng::find_point_on_line_placements<PathType>(PathType &);
+template placements_list_ptr placement_finder_ng::find_line_placements<PathType>(PathType &);
 
 
 }// ns mapnik

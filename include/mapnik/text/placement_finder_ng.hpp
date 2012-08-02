@@ -32,6 +32,7 @@
 
 //stl
 #include <vector>
+#include <list>
 
 //boost
 #include <boost/utility.hpp>
@@ -85,7 +86,8 @@ private:
 };
 typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
 
-struct text_symbolizer_properties;
+typedef std::list<glyph_positions_ptr> placements_list;
+typedef boost::shared_ptr<placements_list> placements_list_ptr;
 
 class placement_finder_ng : boost::noncopyable
 {
@@ -101,10 +103,10 @@ public:
     glyph_positions_ptr find_point_placement(pixel_position pos);
     /** Iterate over the given path, placing line-following labels with respect to label_spacing. */
     template <typename T>
-    glyph_positions_ptr find_line_placements(T & path);
+    placements_list_ptr find_line_placements(T & path);
     /** Iterate over the given path, placing point labels with respect to label_spacing. */
     template <typename T>
-    glyph_positions_ptr find_point_on_line_placements(T & path);
+    placements_list_ptr find_point_on_line_placements(T & path);
     /** Try next position alternative from placement_info. */
     bool next_position();
 private:
