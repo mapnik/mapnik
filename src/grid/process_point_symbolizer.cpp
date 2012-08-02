@@ -26,14 +26,21 @@
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+
 #include <mapnik/geom_util.hpp>
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 
+// agg
+#include "agg_trans_affine.h"
+
 // stl
 #include <string>
+
+// boost
+#include <boost/make_shared.hpp>
 
 namespace mapnik {
 
@@ -57,14 +64,14 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
     if (marker)
     {
         box2d<double> const& bbox = (*marker)->bounding_box();
-        coord2d const center = bbox.center();
+        coord2d center = bbox.center();
 
         agg::trans_affine tr;
         evaluate_transform(tr, feature, sym.get_image_transform());
         tr = agg::trans_affine_scaling(scale_factor_) * tr;
 
-        agg::trans_affine_translation const recenter(-center.x, -center.y);
-        agg::trans_affine const recenter_tr = recenter * tr;
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr;
 
         for (unsigned i=0; i<feature.num_geometries(); ++i)
