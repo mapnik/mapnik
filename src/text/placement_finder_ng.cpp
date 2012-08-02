@@ -23,10 +23,12 @@
 #include <mapnik/text/placement_finder_ng.hpp>
 #include <mapnik/text/layout.hpp>
 #include <mapnik/text_properties.hpp>
+#include <mapnik/text/placements_list.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/path_processor.hpp>
+#include <mapnik/expression_evaluator.hpp>
 
 //boost
 #include <boost/make_shared.hpp>
@@ -38,7 +40,7 @@ namespace mapnik
 {
 
 placement_finder_ng::placement_finder_ng(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager, double scale_factor)
-    : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true), scale_factor_(scale_factor)
+    : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true), scale_factor_(scale_factor), placements_()
 {
 }
 
@@ -71,6 +73,11 @@ bool placement_finder_ng::next_position()
 
     init_alignment();
     return true;
+}
+
+const placements_list &placement_finder_ng::placements() const
+{
+    return placements_;
 }
 
 
@@ -163,11 +170,10 @@ static pixel_position rotate(pixel_position pos, double sina, double cosa)
 }
 
 
-glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos)
+bool placement_finder_ng::find_point_placement(pixel_position pos)
 {
+    if (!layout_.size()) return true; //No text => placement always succeeds.
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
-    if (!layout_.size()) return glyphs; /* No data. Don't return NULL pointer, which would mean
-     that not enough space was available. */
 
     pixel_position displacement = scale_factor_ * info_->properties.displacement + alignment_offset();
     if (info_->properties.rotate_displacement) displacement = rotate(displacement, sina_, cosa_);
@@ -181,7 +187,7 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
         (!info_->properties.allow_overlap &&
          !detector_.has_point_placement(bbox, info_->properties.minimum_distance * scale_factor_)))
     {
-        return glyph_positions_ptr(); //Not enough space for this text
+        return false; //Not enough space for this text
     }
     detector_.insert(bbox, layout_.get_text());
 
@@ -218,20 +224,19 @@ glyph_positions_ptr placement_finder_ng::find_point_placement(pixel_position pos
             x += glyph_itr->width + glyph_itr->format->character_spacing;
         }
     }
-    return glyphs;
+    placements_.push_back(glyphs);
+    return true;
 }
 
 
 template <typename T>
-placements_list_ptr placement_finder_ng::find_point_on_line_placements(T & path)
+bool placement_finder_ng::find_point_on_line_placements(T & path)
 {
     path_processor<T> pp(path);
-    placements_list_ptr list = boost::make_shared<placements_list>();
-    if (!pp.valid() || !layout_.size()) return list;
+    if (!pp.valid() || !layout_.size()) return true;
     if (pp.length() == 0.0)
     {
-        list->push_back(find_point_placement(pp.current_point()));
-        return list;
+        return find_point_placement(pp.current_point());
     }
 
     int num_labels = 1;
@@ -245,17 +250,18 @@ placements_list_ptr placement_finder_ng::find_point_on_line_placements(T & path)
 
     double spacing = pp.length() / num_labels;
     pp.skip(spacing/2.); // first label should be placed at half the spacing
+    bool success = false;
     do
     {
-        list->push_back(find_point_placement(pp.current_point()));
+        success = find_point_placement(pp.current_point()) || success;
     } while (pp.skip(spacing));
-    return list;
+    return success;
 }
 
 template <typename T>
-placements_list_ptr placement_finder_ng::find_line_placements(T & path)
+bool placement_finder_ng::find_line_placements(T & path)
 {
-    return placements_list_ptr();
+    return false;
 }
 
 
@@ -316,10 +322,10 @@ void glyph_positions::set_base_point(pixel_position base_point)
 typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
 typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
 typedef coord_transform<CoordTransform,geometry_type> PathType;
-template placements_list_ptr placement_finder_ng::find_point_on_line_placements<ClippedPathType>(ClippedPathType &);
-template placements_list_ptr placement_finder_ng::find_line_placements<ClippedPathType>(ClippedPathType &);
-template placements_list_ptr placement_finder_ng::find_point_on_line_placements<PathType>(PathType &);
-template placements_list_ptr placement_finder_ng::find_line_placements<PathType>(PathType &);
+template bool placement_finder_ng::find_point_on_line_placements<ClippedPathType>(ClippedPathType &);
+template bool placement_finder_ng::find_line_placements<ClippedPathType>(ClippedPathType &);
+template bool placement_finder_ng::find_point_on_line_placements<PathType>(PathType &);
+template bool placement_finder_ng::find_line_placements<PathType>(PathType &);
 
 
 }// ns mapnik

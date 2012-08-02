@@ -50,23 +50,28 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
 }
 
 template <typename FaceManagerT, typename DetectorT>
-glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next()
+placements_list const& text_symbolizer_helper<FaceManagerT, DetectorT>::get()
 {
     if (point_placement_)
-        return next_point_placement();
+    {
+        while (next_point_placement());
+    }
     else
-        return next_line_placement();
+    {
+        while (next_line_placement());
+    }
+    return finder_.placements();
 }
 
 template <typename FaceManagerT, typename DetectorT>
-glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
+bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
     while (!geometries_to_process_.empty())
     {
         if (geo_itr_ == geometries_to_process_.end())
         {
             //Just processed the last geometry. Try next placement.
-            if (!finder_.next_position()) return glyph_positions_ptr(); //No more placements
+            if (!finder_.next_position()) return false; //No more placements
             //Start again from begin of list
             geo_itr_ = geometries_to_process_.begin();
             continue; //Reexecute size check
@@ -79,51 +84,43 @@ glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_p
         clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
                          query_extent_.maxx(), query_extent_.maxy());
         path_type path(t_, clipped, prj_trans_);
-        glyph_positions_ptr glyphs;
+        bool success;
         if (points_on_line_) {
-#if 0
-            finder_.find_point_on_line_placements(path);
-#endif
+            success = finder_.find_point_on_line_placements(path);
         } else {
-            glyphs = finder_.find_line_placements(path);
+            success = finder_.find_line_placements(path);
         }
-        if (glyphs)
+        if (success)
         {
             //Found a placement
-#if 0
-            if (points_on_line_)
-            {
-                finder_->update_detector();
-            }
-
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
+#if 0
             if (writer_.first) writer_.first->add_text(
                 finder_->get_results(), finder_->get_extents(),
                 feature_, t_, writer_.second);
-            #endif
-            return glyphs;
+#endif
+            return true;
         }
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
         geo_itr_++;
     }
-    return glyph_positions_ptr();
+    return false;
 }
 
 template <typename FaceManagerT, typename DetectorT>
-glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
+bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
 {
     while (!points_.empty())
     {
         if (point_itr_ == points_.end())
         {
             //Just processed the last point. Try next placement.
-            if (!finder_.next_position()) return glyph_positions_ptr(); //No more placements
+            if (!finder_.next_position()) return false; //No more placements
             //Start again from begin of list
             point_itr_ = points_.begin();
             continue; //Reexecute size check
         }
-        glyph_positions_ptr glyphs = finder_.find_point_placement(*point_itr_);
-        if (glyphs)
+        if (finder_.find_point_placement(*point_itr_))
         {
             //Found a placement
             point_itr_ = points_.erase(point_itr_);
@@ -132,13 +129,12 @@ glyph_positions_ptr text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_
                 finder_->get_results(), finder_->get_extents(),
                 feature_, t_, writer_.second);
 #endif
-            update_detector(glyphs);
-            return glyphs;
+            return true;
         }
         //No placement for this point. Keep it in points_ for next try.
         point_itr_++;
     }
-    return glyph_positions_ptr();
+    return false;
 }
 
 struct largest_bbox_first
@@ -245,14 +241,6 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
     point_itr_ = points_.begin();
 }
 
-template <typename FaceManagerT, typename DetectorT>
-void text_symbolizer_helper<FaceManagerT, DetectorT>::update_detector(glyph_positions_ptr glyphs)
-{
-    //TODO
-}
-
-
-
 /*****************************************************************************/
 
 
@@ -294,8 +282,7 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         pixel_position const& text_disp = placement_->properties.displacement;
         pixel_position label_pos = *point_itr_ + shield_pos;
 
-        glyph_positions_ptr glyphs = finder_.find_point_placement(label_pos);
-        if (!glyphs)
+        if (!finder_.find_point_placement(label_pos))
         {
             //No placement for this point. Keep it in points_ for next try.
             point_itr_++;
@@ -325,7 +312,6 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         if (placement_->properties.allow_overlap || detector_.has_placement(marker_ext_))
         {
             detector_.insert(marker_ext_);
-            this->update_detector(glyphs);
 #if 0
             if (writer_.first) {
                 writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);

@@ -25,6 +25,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
+#include <boost/foreach.hpp>
 
 namespace mapnik {
 
@@ -43,8 +44,8 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 
     text_renderer<T> ren(*current_buffer_, font_manager_, sym.comp_op(), scale_factor_);
 
-    glyph_positions_ptr glyphs;
-    while ((glyphs = helper.next()))
+    placements_list const& placements = helper.get();
+    BOOST_FOREACH(glyph_positions_ptr glyphs, placements)
     {
         ren.render(glyphs);
     }

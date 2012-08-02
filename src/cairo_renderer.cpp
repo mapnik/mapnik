@@ -1485,8 +1485,8 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
 
-    glyph_positions_ptr glyphs;
-    while ((glyphs = helper.next()))
+    placements_list const& placements = helper.get();
+    BOOST_FOREACH(glyph_positions_ptr glyphs, placements)
     {
         context.add_text(glyphs, face_manager_, font_manager_, scale_factor_);
     }

@@ -58,14 +58,13 @@ public:
     /** Return next placement.
      * If no more placements are found false is returned.
      */
-    glyph_positions_ptr next();
+    placements_list const& get();
 
 protected:
-    glyph_positions_ptr next_point_placement();
-    glyph_positions_ptr next_line_placement();
+    bool next_point_placement();
+    bool next_line_placement();
     void initialize_geometries();
     void initialize_points();
-    void update_detector(glyph_positions_ptr glyphs);
 
     //Input
     text_symbolizer const& sym_;

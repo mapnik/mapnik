@@ -25,14 +25,11 @@
 //mapnik
 #include <mapnik/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/text/glyph_info.hpp>
 #include <mapnik/text/layout.hpp>
 #include <mapnik/text_placements/base.hpp>
-#include <mapnik/expression_evaluator.hpp>
+#include <mapnik/text/placements_list.hpp>
 
 //stl
-#include <vector>
-#include <list>
 
 //boost
 #include <boost/utility.hpp>
@@ -47,48 +44,6 @@ typedef label_collision_detector4 DetectorType;
 class feature_impl;
 typedef feature_impl Feature;
 
-struct glyph_position
-{
-    glyph_position(glyph_info const& glyph, pixel_position const& pos, double angle)
-        : glyph(&glyph), pos(pos), angle(angle) { }
-    glyph_info const* glyph;
-    pixel_position pos;
-    double angle;
-};
-
-/** Stores positions of glphys.
- *
- * The actual glyphs and their format is stored in text_layout.
- */
-class glyph_positions
-{
-public:
-    typedef std::vector<glyph_position>::const_iterator const_iterator;
-    glyph_positions();
-
-    const_iterator begin() const;
-    const_iterator end() const;
-
-    void push_back(glyph_info const& glyph, pixel_position offset, double angle);
-
-    /** Is each character rotated by the same angle?
-     * This function is used to avoid costly trigonometric function calls when not necessary. */
-    bool is_constant_angle() const;
-    double get_angle() const;
-
-    pixel_position const& get_base_point() const;
-    void set_base_point(pixel_position base_point);
-private:
-    std::vector<glyph_position> data_;
-    pixel_position base_point_;
-    double angle_;
-    bool const_angle_;
-};
-typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
-
-typedef std::list<glyph_positions_ptr> placements_list;
-typedef boost::shared_ptr<placements_list> placements_list_ptr;
-
 class placement_finder_ng : boost::noncopyable
 {
 public:
@@ -100,15 +55,17 @@ public:
                         double scale_factor);
 
     /** Try to place a single label at the given point. */
-    glyph_positions_ptr find_point_placement(pixel_position pos);
+    bool find_point_placement(pixel_position pos);
     /** Iterate over the given path, placing line-following labels with respect to label_spacing. */
     template <typename T>
-    placements_list_ptr find_line_placements(T & path);
+    bool find_line_placements(T & path);
     /** Iterate over the given path, placing point labels with respect to label_spacing. */
     template <typename T>
-    placements_list_ptr find_point_on_line_placements(T & path);
+    bool find_point_on_line_placements(T & path);
     /** Try next position alternative from placement_info. */
     bool next_position();
+
+    placements_list const& placements() const;
 private:
     void init_alignment();
     pixel_position alignment_offset() const;
@@ -127,6 +84,8 @@ private:
     horizontal_alignment_e halign_;
     justify_alignment_e jalign_;
     double scale_factor_;
+
+    placements_list placements_;
 };
 
 typedef boost::shared_ptr<placement_finder_ng> placement_finder_ng_ptr;
