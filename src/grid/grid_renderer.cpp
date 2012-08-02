@@ -21,14 +21,15 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/layer.hpp>
-#include <mapnik/feature_type_style.hpp>
-#include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+
+#include <mapnik/debug.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
@@ -56,13 +57,22 @@ grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, u
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
+      // NOTE: can change this to m dims instead of pixmap_ if render-time
+      // resolution support is dropped from grid_renderer python interface
       t_(pixmap_.width(),pixmap_.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(box2d<double>(-m.buffer_size(), -m.buffer_size(), pixmap_.width() + m.buffer_size(), pixmap_.height() + m.buffer_size())),
+      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
       ras_ptr(new grid_rasterizer)
 {
+    setup(m);
+}
+
+template <typename T>
+void grid_renderer<T>::setup(Map const& m)
+{
     MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: Scale=" << m.scale();
+    // nothing to do for grids yet on setup
 }
 
 template <typename T>
@@ -91,9 +101,25 @@ void grid_renderer<T>::start_layer_processing(layer const& lay, box2d<double> co
 
     if (lay.clear_label_cache())
     {
-        detector_.clear();
+        detector_->clear();
     }
     query_extent_ = query_extent;
+    int buffer_size = lay.buffer_size();
+    if (buffer_size != 0 )
+    {
+        double padding = buffer_size * (double)(query_extent.width()/pixmap_.width());
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        query_extent_.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+    }
+
+    boost::optional<box2d<double> > const& maximum_extent = lay.maximum_extent();
+    if (maximum_extent)
+    {
+        query_extent_.clip(*maximum_extent);
+    }
 }
 
 template <typename T>
@@ -144,21 +170,27 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
     else
     {
         image_data_32 const& data = **marker.get_bitmap_data();
-        if (step == 1 && scale_factor_ == 1.0)
+        double width = data.width();
+        double height = data.height();
+        double cx = 0.5 * width;
+        double cy = 0.5 * height;
+        if (step == 1 && (std::fabs(1.0 - scale_factor_) < 0.001 && tr.is_identity()))
         {
+            // TODO - support opacity
             pixmap_.set_rectangle(feature.id(), data,
-                                  boost::math::iround(pos.x),
-                                  boost::math::iround(pos.y));
+                                  boost::math::iround(pos.x - cx),
+                                  boost::math::iround(pos.y - cy));
         }
         else
         {
+            // TODO - remove support for step != or add support for agg scaling with opacity
             double ratio = (1.0/step);
             image_data_32 target(ratio * data.width(), ratio * data.height());
             mapnik::scale_image_agg<image_data_32>(target,data, SCALING_NEAR,
                                                    scale_factor_, 0.0, 0.0, 1.0, ratio);
             pixmap_.set_rectangle(feature.id(), target,
-                                  boost::math::iround(pos.x),
-                                  boost::math::iround(pos.y));
+                                  boost::math::iround(pos.x - cx),
+                                  boost::math::iround(pos.y - cy));
         }
     }
     pixmap_.add_feature(feature);

@@ -175,12 +175,12 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     box2d<double> transformed_bbox = bbox * matrix;
 
                     if (sym.get_allow_overlap() ||
-                        detector_.has_placement(transformed_bbox))
+                        detector_->has_placement(transformed_bbox))
                     {
                         placed = true;
                         svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, 1, bbox);
                         if (!sym.get_ignore_placement())
-                            detector_.insert(transformed_bbox);
+                            detector_->insert(transformed_bbox);
                     }
                 }
                 else if (sym.clip())
@@ -193,7 +193,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                     path_type path(t_,clipped,prj_trans);
                     transformed_path_type path_transformed(path,geom_tr);
-                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, detector_,
+                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
                                                                                                   sym.get_spacing() * scale_factor_,
                                                                                                   sym.get_max_error(),
                                                                                                   sym.get_allow_overlap());
@@ -213,7 +213,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
                     path_type path(t_,geom,prj_trans);
                     transformed_path_type path_transformed(path,geom_tr);
-                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, detector_,
+                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
                                                                                                   sym.get_spacing() * scale_factor_,
                                                                                                   sym.get_max_error(),
                                                                                                   sym.get_allow_overlap());

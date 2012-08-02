@@ -89,7 +89,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
             t_.forward(&x,&y);
             label_ext.re_center(x,y);
             if (sym.get_allow_overlap() ||
-                detector_.has_placement(label_ext))
+                detector_->has_placement(label_ext))
             {
 
                 render_marker(feature,
@@ -101,7 +101,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
                               sym.comp_op());
 
                 if (!sym.get_ignore_placement())
-                    detector_.insert(label_ext);
+                    detector_->insert(label_ext);
             }
         }
     }
