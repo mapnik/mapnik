@@ -159,6 +159,10 @@ void agg_renderer<T>::setup(Map const &m)
         }
     }
 
+    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+    agg::pixfmt_rgba32 pixf(buf);
+    pixf.premultiply();
+
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
 
@@ -169,7 +173,6 @@ template <typename T>
 void agg_renderer<T>::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start map processing bbox=" << map.get_current_extent();
-
     ras_ptr->clip_box(0,0,width_,height_);
 }
 
