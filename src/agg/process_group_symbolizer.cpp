@@ -344,12 +344,12 @@ void  agg_renderer<T>::process(group_symbolizer const& sym,
          }
          
          // add placement with repeat key
-         finder.add_relative_placement(layout_manager.offset_box_at(i), rpt_key_value);
+         finder.add_box_element(layout_manager.offset_box_at(i), rpt_key_value);
       }
       else
       {
          // add placement without repeat key
-         finder.add_relative_placement(layout_manager.offset_box_at(i));
+         finder.add_box_element(layout_manager.offset_box_at(i));
       }
    }
 

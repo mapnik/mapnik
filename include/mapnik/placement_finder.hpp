@@ -91,16 +91,16 @@ template <typename DetectorT>
 class placement_finder : boost::noncopyable
 {
 public:
-    struct box_placement
+    struct box_element
     {
-        box_placement(box2d<double> const& b) : box(b) {}
-        box_placement(box2d<double> const& b, UnicodeString const& rk) : box(b), repeat_key(rk) {}
+        box_element(box2d<double> const& b) : box(b) {}
+        box_element(box2d<double> const& b, UnicodeString const& rk) : box(b), repeat_key(rk) {}
         box2d<double> box;
         UnicodeString repeat_key;
     };
-    struct text_placement
+    struct text_element
     {
-        text_placement(text_placement_info const& p, string_info const& s) : point_place_box(p, s), info(s) {}
+        text_element(text_placement_info const& p, string_info const& s) : point_place_box(p, s), info(s) {}
         string_info const& info;
         text_place_boxes_at_point point_place_box;
     };
@@ -143,19 +143,31 @@ public:
 
     box2d<double> const& get_extents() const { return extents_; }
     
-    inline void add_relative_placement(box2d<double> const& b)
+    inline void add_box_element(box2d<double> const& b)
     {
-        box_placements_.push_back(box_placement(b));
+        box_elements_.push_back(box_element(b));
     }
     
-    inline void add_relative_placement(box2d<double> const& b, UnicodeString const& rk)
+    inline void add_box_element(box2d<double> const& b, UnicodeString const& rk)
     {
-        box_placements_.push_back(box_placement(b, rk));
+        box_elements_.push_back(box_element(b, rk));
     }
     
-    inline void clear_relative_placements()
+    inline void clear_box_elements()
     {
-        box_placements_.clear();
+        box_elements_.clear();
+    }
+    
+    void add_text_element(text_placement_info const& p, string_info const& s)
+    {
+        text_elements_.push_back(text_element(p, s));
+        double w = text_elements_.back().point_place_box.string_width_;
+        if (w > text_width_) text_width_ = w;
+    }
+    
+    inline void clear_text_elements()
+    {
+        text_elements_.clear();
     }
 
 private:
@@ -193,19 +205,19 @@ private:
     DetectorT & detector_;
     box2d<double> const& dimensions_;
 
-    //string_info_list info_list_;
     text_symbolizer_properties const& p;
     text_placement_info const& pi;
 
-    std::list<text_placement> text_placements_;
+    std::list<text_element> text_elements_;
     UnicodeString repeat_text_;
+    double text_width_;
 
     /** Additional boxes and repeat keys to take into account when finding placement.
      * Used for finding line placements where multiple placements are returned.
      * Boxes are relative to starting point of current placement.
      * Only used for point placements!
      */
-    std::list<box_placement> box_placements_;
+    std::list<box_element> box_elements_;
    
     std::queue< box2d<double> > envelopes_;
     /** Used to return all placements found. */

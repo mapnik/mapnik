@@ -173,9 +173,10 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
       pi(placement_info),
       repeat_text_(info.get_string()),
       collect_extents_(false),
-      check_repeat_(check_repeat)
+      check_repeat_(check_repeat),
+      text_width_(0)
 {
-    text_placements_.push_back(text_placement(placement_info, info));
+    add_text_element(placement_info, info);
 }
 
 template <typename DetectorT>
@@ -191,11 +192,12 @@ placement_finder<DetectorT>::placement_finder(Feature const& feature,
       pi(placement_info),
       repeat_text_(""),
       collect_extents_(false),
-      check_repeat_(check_repeat)
+      check_repeat_(check_repeat),
+      text_width_(0)
 {
     for (string_info_list::iterator itr = info_list.begin(); itr != info_list.end(); ++itr)
     {
-        text_placements_.push_back(text_placement(placement_info, **itr));
+        add_text_element(placement_info, **itr);
         
         // put strings together for label repeat check
         repeat_text_ += (*itr)->get_string();
@@ -274,8 +276,8 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
                                                        double angle)
 {
    // For now, use first text placement for point
-   text_place_boxes_at_point & point_place_box = text_placements_.front().point_place_box;
-   string_info const& info = text_placements_.front().info;
+   text_place_boxes_at_point & point_place_box = text_elements_.front().point_place_box;
+   string_info const& info = text_elements_.front().info;
     
    point_placement_check<DetectorT> check(detector_, dimensions_, point_place_box);
    std::auto_ptr<text_path> current_placement(new text_path(label_x, label_y));
@@ -289,9 +291,9 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
       std::queue< box2d<double> > rel_boxes;
       
       // check the placement of any additional envelopes
-      if (!box_placements_.empty() && (p.minimum_distance > 0 || !p.allow_overlap || p.avoid_edges || p.minimum_padding > 0))
+      if (!box_elements_.empty() && (p.minimum_distance > 0 || !p.allow_overlap || p.avoid_edges || p.minimum_padding > 0))
       {
-         BOOST_FOREACH(box_placement const& bp, box_placements_)
+         BOOST_FOREACH(box_element const& bp, box_elements_)
          {
             box2d<double> rel_box(bp.box.minx() + current_placement->center.x,
                                   bp.box.miny() + current_placement->center.y,
@@ -314,7 +316,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
              detector_.insert(c_envelopes.front(), info.get_string());
              c_envelopes.pop();
           }    
-          BOOST_FOREACH(box_placement const& bp, box_placements_)
+          BOOST_FOREACH(box_element const& bp, box_elements_)
           {
              if (bp.repeat_key.isEmpty())
                 detector_.insert(rel_boxes.front());
@@ -331,7 +333,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
              envelopes_.push(c_envelopes.front());
              c_envelopes.pop();
           }
-          BOOST_FOREACH(box_placement const& p, box_placements_)
+          BOOST_FOREACH(box_element const& p, box_elements_)
           {
              envelopes_.push(rel_boxes.front());
              rel_boxes.pop();
@@ -348,14 +350,13 @@ template <typename PathT>
 void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 {
     // For now, use first text placement for point
-    //text_placement const& text = text_placements_.front();
+    //text_element const& text = text_elements_.front();
 
     double displacement = p.displacement.second; // displace by dy
     
-    double max_string_width = 0.0;
     bool has_displacement = (displacement != 0.0);
 
-    BOOST_FOREACH(text_placement &text, text_placements_)
+    BOOST_FOREACH(text_element &text, text_elements_)
     {
 #ifdef MAPNIK_LOG
         if (! text.point_place_box.line_sizes_.empty())
@@ -363,13 +364,6 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
             MAPNIK_LOG_ERROR(placement_finder) << "Internal error. Text contains line breaks, but line placement is used. Please file a bug report!";
         }
 #endif
-        
-        // get max string width
-        if (text.point_place_box.string_width_ > max_string_width)
-        {
-            max_string_width = text.point_place_box.string_width_;
-        }
-        
         // check if any text element has y displacement
         if (text.info.get_displacement().second != 0.0)
         {
@@ -421,13 +415,13 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
     double distance = 0.0;
 
     //Calculate a target_distance that will place the labels centered evenly rather than offset from the start of the linestring
-    if (total_distance < max_string_width) //Can't place any strings
+    if (total_distance < text_width_) //Can't place any strings
         return;
 
     //If there is no spacing then just do one label, otherwise calculate how many there should be
     int num_labels = 1;
     if (p.label_spacing > 0)
-        num_labels = static_cast<int>(floor(total_distance / (pi.get_actual_label_spacing() + max_string_width)));
+        num_labels = static_cast<int>(floor(total_distance / (pi.get_actual_label_spacing() + text_width_)));
 
     if (p.force_odd_labels && (num_labels % 2 == 0))
         num_labels--;
@@ -436,7 +430,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 
     //Now we know how many labels we are going to place, calculate the spacing so that they will get placed evenly
     double spacing = total_distance / num_labels;
-    double target_distance = (spacing - max_string_width) / 2; // first label should be placed at half the spacing
+    double target_distance = (spacing - text_width_) / 2; // first label should be placed at half the spacing
 
     //Calculate or read out the tolerance
     double tolerance_delta, tolerance;
@@ -505,7 +499,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 
                             unsigned v_start = 0;
                             unsigned v_end = 0;
-                            BOOST_FOREACH(text_placement &text, text_placements_)
+                            BOOST_FOREACH(text_element &text, text_elements_)
                             {
                                 double text_displacement = displacement + text.info.get_displacement().second;
                                 v_end += text.info.num_characters();
@@ -599,24 +593,14 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
                       (path_positions[index-1].y + (path_positions[index].y - path_positions[index-1].y)*distance/path_distances[index])
             )
         );
-        
-    double max_string_width = 0.0;
-    BOOST_FOREACH(text_placement &text, text_placements_)
-    {
-        // get max string width
-        if (text.point_place_box.string_width_ > max_string_width)
-        {
-            max_string_width = text.point_place_box.string_width_;
-        }
-    }
 
-    BOOST_FOREACH(const text_placement &text, text_placements_)
+    BOOST_FOREACH(const text_element &text, text_elements_)
     {
         // keep text elements centered relative to each other
-        double offset_x = (max_string_width - text.point_place_box.string_width_) / 2.0;
+        double offset_x = (text_width_ - text.point_place_box.string_width_) / 2.0;
         while (offset_x > 0.0 && index < path_positions.size())
         {
-            double seg_length = path_distances[index];
+            double seg_length = path_distances[index] - distance;
             if (seg_length >= offset_x)
             {
                 distance += offset_x;
@@ -624,8 +608,8 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
             }
             else
             {
-                distance += seg_length;
                 offset_x -= seg_length;
+                distance = 0.0;
                 index++;
             }
         }
@@ -795,7 +779,7 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
                                                  int orientation)
 {
     bool status = true;
-    BOOST_FOREACH(const text_placement &text, text_placements_)
+    BOOST_FOREACH(const text_element &text, text_elements_)
     {
         //Create and test envelopes
         for (unsigned i = 0; i < text.info.num_characters(); ++i)
