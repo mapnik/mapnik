@@ -92,7 +92,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 typedef svg_renderer<svg_path_adapter,
                                      svg_attribute_type,
                                      renderer_type,
-                                     agg::pixfmt_rgba32 > svg_renderer_type;
+                                     pixfmt_comp_type > svg_renderer_type;
                 typedef vector_markers_rasterizer_dispatch<buffer_type,
                                      svg_renderer_type,
                                      rasterizer,
