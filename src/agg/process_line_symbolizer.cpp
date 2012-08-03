@@ -86,6 +86,8 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         float half_stroke = stroke_.get_width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
         double x0 = query_extent_.minx();
         double y0 = query_extent_.miny();
         double x1 = query_extent_.maxx();
