@@ -91,6 +91,18 @@ struct layer_pickle_suite : boost::python::pickle_suite
 
 std::vector<std::string> & (mapnik::layer::*_styles_)() = &mapnik::layer::styles;
 
+void set_maximum_extent(mapnik::layer & l, boost::optional<mapnik::box2d<double> > const& box)
+{
+    if (box)
+    {
+        l.set_maximum_extent(*box);
+    }
+    else
+    {
+        l.reset_maximum_extent();
+    }
+}
+
 void export_layer()
 {
     using namespace boost::python;
@@ -194,6 +206,27 @@ void export_layer()
                       ">>> lyr.datasource = Datasource(type='shape',file='world_borders')\n"
                       ">>> lyr.datasource\n"
                       "<mapnik.Datasource object at 0x65470>\n"
+            )
+
+        .add_property("buffer_size",
+                      &layer::buffer_size,
+                      &layer::set_buffer_size,
+                      "Get/Set the size of buffer around layer in pixels.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> l.buffer_size\n"
+                      "0 # zero by default\n"
+                      ">>> l.buffer_size = 2\n"
+                      ">>> l.buffer_size\n"
+                      "2\n"
+            )
+        .add_property("maximum_extent",make_function
+                      (&layer::maximum_extent,return_value_policy<copy_const_reference>()),
+                      &set_maximum_extent,
+                      "The maximum extent of the map.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.maximum_extent = Box2d(-180,-90,180,90)\n"
             )
 
         .add_property("maxzoom",

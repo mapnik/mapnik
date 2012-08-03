@@ -20,22 +20,55 @@
  *
  *****************************************************************************/
 
+/*
+
+porting notes -->
+
+ - grid includes
+ - detector
+ - no gamma
+ - mapnik::pixfmt_gray32
+ - agg::scanline_bin sl
+ - grid_rendering_buffer
+ - agg::renderer_scanline_bin_solid
+ - clamping:
+    // - clamp sizes to > 4 pixels of interactivity
+    if (tr.scale() < 0.5)
+    {
+        agg::trans_affine tr2;
+        tr2 *= agg::trans_affine_scaling(0.5);
+        tr = tr2;
+    }
+    tr *= agg::trans_affine_scaling(scale_factor_*(1.0/pixmap_.get_resolution()));
+ - svg_renderer.render_id
+ - only encode feature if placements are found:
+    if (placed)
+    {
+        pixmap_.add_feature(feature);
+    }
+
+*/
+
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+
+#include <mapnik/debug.hpp>
+#include <mapnik/geom_util.hpp>
+#include <mapnik/expression_evaluator.hpp>
+#include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
-#include <mapnik/markers_symbolizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
-#include <mapnik/marker_cache.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/markers_placement.hpp>
+#include <mapnik/markers_symbolizer.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -46,6 +79,11 @@
 #include "agg_path_storage.h"
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_transform.h"
+#include "agg_image_filters.h"
+#include "agg_trans_bilinear.h"
+#include "agg_span_allocator.h"
+#include "agg_image_accessors.h"
+#include "agg_span_image_filter_rgba.h"
 
 // boost
 #include <boost/optional.hpp>
@@ -87,7 +125,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
 
-            boost::optional<path_ptr> marker = (*mark)->get_vector_data();
+            boost::optional<svg_path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
 
             agg::trans_affine tr;
@@ -137,12 +175,12 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     box2d<double> transformed_bbox = bbox * matrix;
 
                     if (sym.get_allow_overlap() ||
-                        detector_.has_placement(transformed_bbox))
+                        detector_->has_placement(transformed_bbox))
                     {
                         placed = true;
-                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, sym.get_opacity(), bbox);
+                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, 1, bbox);
                         if (!sym.get_ignore_placement())
-                            detector_.insert(transformed_bbox);
+                            detector_->insert(transformed_bbox);
                     }
                 }
                 else if (sym.clip())
@@ -155,7 +193,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
                     path_type path(t_,clipped,prj_trans);
                     transformed_path_type path_transformed(path,geom_tr);
-                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, detector_,
+                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
                                                                                                   sym.get_spacing() * scale_factor_,
                                                                                                   sym.get_max_error(),
                                                                                                   sym.get_allow_overlap());
@@ -166,7 +204,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                         agg::trans_affine matrix = marker_trans;
                         matrix.rotate(angle);
                         matrix.translate(x, y);
-                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, sym.get_opacity(), bbox);
+                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, 1, bbox);
                     }
                 }
                 else
@@ -175,7 +213,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                     typedef agg::conv_transform<path_type, agg::trans_affine> transformed_path_type;
                     path_type path(t_,geom,prj_trans);
                     transformed_path_type path_transformed(path,geom_tr);
-                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, detector_,
+                    markers_placement<transformed_path_type, label_collision_detector4> placement(path_transformed, bbox, marker_trans, *detector_,
                                                                                                   sym.get_spacing() * scale_factor_,
                                                                                                   sym.get_max_error(),
                                                                                                   sym.get_allow_overlap());
@@ -186,7 +224,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                         agg::trans_affine matrix = marker_trans;
                         matrix.rotate(angle);
                         matrix.translate(x, y);
-                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, sym.get_opacity(), bbox);
+                        svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), matrix, 1, bbox);
                     }
                 }
             }

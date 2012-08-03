@@ -30,6 +30,7 @@ namespace mapnik {
 
 static const char * marker_placement_strings[] = {
     "point",
+    "interior",
     "line",
     ""
 };
@@ -45,10 +46,7 @@ markers_symbolizer::markers_symbolizer()
       allow_overlap_(false),
       spacing_(100.0),
       max_error_(0.2),
-      marker_p_(MARKER_POINT_PLACEMENT) {
-          // override the default for clipping in symbolizer base
-          this->set_clip(false);
-      }
+      marker_p_(MARKER_POINT_PLACEMENT) { }
 
 markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
     : symbolizer_with_image(filename),
@@ -59,10 +57,7 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
       allow_overlap_(false),
       spacing_(100.0),
       max_error_(0.2),
-      marker_p_(MARKER_POINT_PLACEMENT) {
-          // override the default for clipping in symbolizer base
-          this->set_clip(false);
-      }
+      marker_p_(MARKER_POINT_PLACEMENT) { }
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
     : symbolizer_with_image(rhs),
@@ -74,6 +69,8 @@ markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
       spacing_(rhs.spacing_),
       max_error_(rhs.max_error_),
       fill_(rhs.fill_),
+      fill_opacity_(rhs.fill_opacity_),
+      opacity_(rhs.opacity_),
       stroke_(rhs.stroke_),
       marker_p_(rhs.marker_p_) {}
 
@@ -117,6 +114,16 @@ double markers_symbolizer::get_max_error() const
     return max_error_;
 }
 
+void markers_symbolizer::set_opacity(float opacity)
+{
+    opacity_ = opacity;
+}
+
+boost::optional<float> markers_symbolizer::get_opacity() const
+{
+    return opacity_;
+}
+
 void markers_symbolizer::set_fill(color const& fill)
 {
     fill_ = fill;
@@ -125,6 +132,16 @@ void markers_symbolizer::set_fill(color const& fill)
 boost::optional<color> markers_symbolizer::get_fill() const
 {
     return fill_;
+}
+
+void markers_symbolizer::set_fill_opacity(float opacity)
+{
+    fill_opacity_ = opacity;
+}
+
+boost::optional<float> markers_symbolizer::get_fill_opacity() const
+{
+    return fill_opacity_;
 }
 
 void markers_symbolizer::set_width(expression_ptr const& width)

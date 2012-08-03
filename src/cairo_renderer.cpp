@@ -497,7 +497,6 @@ public:
             }
             else if (cm == SEG_CLOSE)
             {
-                line_to(x, y);
                 close_path();
             }
         }
@@ -882,43 +881,32 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
             boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
             std::deque<segment_t> face_segments;
-            double x0(0);
-            double y0(0);
-
+            double x0 = 0;
+            double y0 = 0;
+            double x, y;
             geom.rewind(0);
-            unsigned cm = geom.vertex(&x0, &y0);
-
-            for (unsigned j = 1; j < geom.size(); ++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x=0;
-                double y=0;
-
-                cm = geom.vertex(&x,&y);
-
                 if (cm == SEG_MOVETO)
                 {
                     frame->move_to(x,y);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
                     frame->line_to(x,y);
+                    face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-
-                if (j != 0)
-                {
-                    face_segments.push_back(segment_t(x0, y0, x, y));
-                }
-
                 x0 = x;
                 y0 = y;
             }
 
             std::sort(face_segments.begin(), face_segments.end(), y_order);
             std::deque<segment_t>::const_iterator itr = face_segments.begin();
-            for (; itr != face_segments.end(); ++itr)
+            std::deque<segment_t>::const_iterator end=face_segments.end();
+            for (; itr != end; ++itr)
             {
                 boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
-
                 faces->move_to(itr->get<0>(), itr->get<1>());
                 faces->line_to(itr->get<2>(), itr->get<3>());
                 faces->line_to(itr->get<2>(), itr->get<3>() + height);
@@ -935,20 +923,18 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             }
 
             geom.rewind(0);
-            for (unsigned j = 0; j < geom.size(); ++j)
+            for (unsigned cm = geom.vertex(&x, &y); cm != SEG_END;
+                 cm = geom.vertex(&x, &y))
             {
-                double x, y;
-                unsigned cm = geom.vertex(&x, &y);
-
                 if (cm == SEG_MOVETO)
                 {
-                    frame->move_to(x, y + height);
-                    roof->move_to(x, y + height);
+                    frame->move_to(x,y+height);
+                    roof->move_to(x,y+height);
                 }
-                else if (cm == SEG_LINETO)
+                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
                 {
-                    frame->line_to(x, y + height);
-                    roof->line_to(x, y + height);
+                    frame->line_to(x,y+height);
+                    roof->line_to(x,y+height);
                 }
             }
 
@@ -987,14 +973,21 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     evaluate_transform(tr, feature, sym.get_transform());
 
     box2d<double> ext = query_extent_ * 1.1;
-    typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_line_tag, clip_poly_tag, transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(ext,context,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+    {
+        eGeomType type = feature.paths()[0].type();
+        if (type == Polygon)
+            converter.set<clip_poly_tag>();
+        else if (type == LineString)
+            converter.set<clip_line_tag>();
+        // don't clip if type==Point
+    }
     converter.set<transform_tag>(); // always transform
-
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
@@ -1035,7 +1028,7 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
 
         typedef coord_transform<CoordTransform,geometry_type> path_type;
         agg::trans_affine transform;
-        mapnik::path_ptr vmarker = *marker.get_vector_data();
+        mapnik::svg_path_ptr vmarker = *marker.get_vector_data();
         using namespace mapnik::svg;
         agg::pod_bvector<path_attributes> const & attributes_ = vmarker->attributes();
         for(unsigned i = 0; i < attributes_.size(); ++i)
@@ -1411,7 +1404,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
                 return;
             }
-            boost::optional<path_ptr> marker = (*mark)->get_vector_data();
+            boost::optional<svg_path_ptr> marker = (*mark)->get_vector_data();
             box2d<double> const& bbox = (*marker)->bounding_box();
             double x1 = bbox.minx();
             double y1 = bbox.miny();
@@ -1443,7 +1436,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     if (sym.get_allow_overlap() ||
                         detector_.has_placement(extent))
                     {
-                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, sym.get_opacity());
+                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h) ,**mark, tr, 1);
 
                         if (!sym.get_ignore_placement())
                             detector_.insert(extent);
@@ -1462,7 +1455,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     while (placement.get_point(x, y, angle))
                     {
                         agg::trans_affine matrix = recenter * tr * agg::trans_affine_rotation(angle) * agg::trans_affine_translation(x, y);
-                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h), **mark, matrix, sym.get_opacity(),false);
+                        render_marker(pixel_position(x - 0.5 * w, y - 0.5 * h), **mark, matrix, 1,false);
                     }
                 }
                 context.fill();

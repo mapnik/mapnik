@@ -21,12 +21,14 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/layer.hpp>
-#include <mapnik/feature_type_style.hpp>
-#include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_helpers.hpp>
+#include <mapnik/graphics.hpp>
+
+#include <mapnik/debug.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/unicode.hpp>
@@ -36,6 +38,7 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
@@ -156,6 +159,10 @@ void agg_renderer<T>::setup(Map const &m)
         }
     }
 
+    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
+    agg::pixfmt_rgba32 pixf(buf);
+    pixf.premultiply();
+
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
 
@@ -166,7 +173,6 @@ template <typename T>
 void agg_renderer<T>::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Start map processing bbox=" << map.get_current_extent();
-
     ras_ptr->clip_box(0,0,width_,height_);
 }
 
@@ -191,7 +197,24 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
     {
         detector_->clear();
     }
+
     query_extent_ = query_extent;
+    int buffer_size = lay.buffer_size();
+    if (buffer_size != 0 )
+    {
+        double padding = buffer_size * (double)(query_extent.width()/pixmap_.width());
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        query_extent_.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+    }
+
+    boost::optional<box2d<double> > const& maximum_extent = lay.maximum_extent();
+    if (maximum_extent)
+    {
+        query_extent_.clip(*maximum_extent);
+    }
 }
 
 template <typename T>
@@ -362,15 +385,18 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
                                              src.height(),
                                              src.width()*4);
             agg::pixfmt_rgba32_pre pixf(marker_buf);
-
             typedef agg::image_accessor_clone<agg::pixfmt_rgba32_pre> img_accessor_type;
             typedef agg::span_interpolator_linear<agg::trans_affine> interpolator_type;
             typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
                                                     interpolator_type> span_gen_type;
+            typedef agg::renderer_scanline_aa_alpha<renderer_base,
+                        agg::span_allocator<agg::rgba8>,
+                        span_gen_type> renderer_type;
             img_accessor_type ia(pixf);
             interpolator_type interpolator(agg::trans_affine(p, 0, 0, width, height) );
             span_gen_type sg(ia, interpolator, filter);
-            agg::render_scanlines_aa(*ras_ptr, sl, renb, sa, sg);
+            renderer_type rp(renb,sa, sg, unsigned(opacity*255));
+            agg::render_scanlines(*ras_ptr, sl, rp);
         }
     }
 }
@@ -425,6 +451,27 @@ void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
     ras_ptr->add_path(sbox);
     ren.color(agg::rgba8(0x33, 0x33, 0xff, 0xcc)); // blue is fine
     agg::render_scanlines(*ras_ptr, sl_line, ren);
+}
+
+template <typename T>
+void agg_renderer<T>::draw_geo_extent(box2d<double> const& extent, mapnik::color const& color)
+{
+    box2d<double> box = t_.forward(extent);
+    double x0 = box.minx();
+    double x1 = box.maxx();
+    double y0 = box.miny();
+    double y1 = box.maxy();
+    unsigned rgba = color.rgba();
+    for (double x=x0; x<x1; x++)
+    {
+        pixmap_.setPixel(x, y0, rgba);
+        pixmap_.setPixel(x, y1, rgba);
+    }
+    for (double y=y0; y<y1; y++)
+    {
+        pixmap_.setPixel(x0, y, rgba);
+        pixmap_.setPixel(x1, y, rgba);
+    }
 }
 
 template class agg_renderer<image_32>;

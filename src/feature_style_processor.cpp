@@ -102,35 +102,35 @@ struct feature_style_processor<Processor>::symbol_dispatch : public boost::stati
         : output_(output),
           f_(f),
           prj_trans_(prj_trans)  {}
-    
+
     template <typename T>
     void operator () (T const& sym) const
     {
         process_impl<has_process<Processor,T>::value>::process(output_,sym,f_,prj_trans_);
     }
-    
+
     Processor & output_;
     mapnik::feature_impl & f_;
     proj_transform const& prj_trans_;
 };
 
-typedef char (&no_tag)[1]; 
-typedef char (&yes_tag)[2]; 
+typedef char (&no_tag)[1];
+typedef char (&yes_tag)[2];
 
 template <typename T0, typename T1, void (T0::*)(T1 const&, mapnik::feature_impl &, proj_transform const&) >
-struct process_memfun_helper {}; 
-    
-template <typename T0, typename T1> no_tag  has_process_helper(...); 
+struct process_memfun_helper {};
+
+template <typename T0, typename T1> no_tag  has_process_helper(...);
 template <typename T0, typename T1> yes_tag has_process_helper(process_memfun_helper<T0, T1, &T0::process>* p);
-    
-template<typename T0,typename T1> 
+
+template<typename T0,typename T1>
 struct has_process
-{      
+{
     typedef typename T0::processor_impl_type processor_impl_type;
-    BOOST_STATIC_CONSTANT(bool 
-                          , value = sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag) 
-        ); 
-}; 
+    BOOST_STATIC_CONSTANT(bool
+                          , value = sizeof(has_process_helper<processor_impl_type,T1>(0)) == sizeof(yes_tag)
+        );
+};
 
 
 template <typename Processor>
@@ -321,9 +321,11 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     // if we've got this far, now prepare the unbuffered extent
     // which is used as a bbox for clipping geometries
     box2d<double> query_ext = m_.get_current_extent(); // unbuffered
-    if (maximum_extent) {
+    if (maximum_extent)
+    {
         query_ext.clip(*maximum_extent);
     }
+
     box2d<double> layer_ext2 = lay.envelope();
     if (fw_success)
     {
@@ -351,8 +353,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     query q(layer_ext,res,scale_denom,m_.get_current_extent());
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
-    double filt_factor = 1;
-    directive_collector d_collector(&filt_factor);
+    double filt_factor = 1.0;
+    directive_collector d_collector(filt_factor);
 
     // iterate through all named styles collecting active styles and attribute names
     BOOST_FOREACH(std::string const& style_name, style_names)
@@ -520,7 +522,7 @@ void feature_style_processor<Processor>::render_style(
 {
 
     p.start_style_processing(*style);
-    
+
 #if defined(RENDERING_STATS)
     std::ostringstream s1;
     s1 << "rendering style for layer: '" << lay.name()
@@ -662,4 +664,3 @@ template class feature_style_processor<grid_renderer<grid> >;
 template class feature_style_processor<agg_renderer<image_32> >;
 
 }
-

@@ -86,13 +86,13 @@ struct markers_symbolizer_pickle_suite : boost::python::pickle_suite
 
 };
 
-
 void export_markers_symbolizer()
 {
     using namespace boost::python;
 
     mapnik::enumeration_<mapnik::marker_placement_e>("marker_placement")
         .value("POINT_PLACEMENT",mapnik::MARKER_POINT_PLACEMENT)
+        .value("INTERIOR_PLACEMENT",mapnik::MARKER_INTERIOR_PLACEMENT)
         .value("LINE_PLACEMENT",mapnik::MARKER_LINE_PLACEMENT)
         ;
 
@@ -115,7 +115,11 @@ void export_markers_symbolizer()
         .add_property("opacity",
                       &markers_symbolizer::get_opacity,
                       &markers_symbolizer::set_opacity,
-                      "Set/get the text opacity")
+                      "Set/get the overall opacity")
+        .add_property("fill_opacity",
+                      &markers_symbolizer::get_fill_opacity,
+                      &markers_symbolizer::set_fill_opacity,
+                      "Set/get the fill opacity")
         .add_property("ignore_placement",
                       &markers_symbolizer::get_ignore_placement,
                       &markers_symbolizer::set_ignore_placement)

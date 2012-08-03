@@ -575,66 +575,95 @@ bool map_parser::parse_font(font_set &fset, xml_node const& f)
     return false;
 }
 
-void map_parser::parse_layer(Map & map, xml_node const& lay)
+void map_parser::parse_layer(Map & map, xml_node const& node)
 {
     std::string name;
     try
     {
-        name = lay.get_attr("name", std::string("Unnamed"));
+        name = node.get_attr("name", std::string("Unnamed"));
 
         // XXX if no projection is given inherit from map? [DS]
-        std::string srs = lay.get_attr("srs", map.srs());
+        std::string srs = node.get_attr("srs", map.srs());
 
         layer lyr(name, srs);
 
-        optional<boolean> status = lay.get_opt_attr<boolean>("status");
+        optional<boolean> status = node.get_opt_attr<boolean>("status");
         if (status)
         {
             lyr.set_active(* status);
         }
 
-        optional<double> min_zoom = lay.get_opt_attr<double>("minzoom");
+        optional<double> min_zoom = node.get_opt_attr<double>("minzoom");
         if (min_zoom)
         {
             lyr.set_min_zoom(* min_zoom);
         }
 
 
-        optional<double> max_zoom = lay.get_opt_attr<double>("maxzoom");
+        optional<double> max_zoom = node.get_opt_attr<double>("maxzoom");
         if (max_zoom)
         {
             lyr.set_max_zoom(* max_zoom);
         }
 
-        optional<boolean> queryable = lay.get_opt_attr<boolean>("queryable");
+        optional<boolean> queryable = node.get_opt_attr<boolean>("queryable");
         if (queryable)
         {
             lyr.set_queryable(* queryable);
         }
 
         optional<boolean> clear_cache =
-            lay.get_opt_attr<boolean>("clear-label-cache");
+            node.get_opt_attr<boolean>("clear-label-cache");
         if (clear_cache)
         {
             lyr.set_clear_label_cache(* clear_cache);
         }
 
         optional<boolean> cache_features =
-            lay.get_opt_attr<boolean>("cache-features");
+            node.get_opt_attr<boolean>("cache-features");
         if (cache_features)
         {
             lyr.set_cache_features(* cache_features);
         }
 
         optional<std::string> group_by =
-            lay.get_opt_attr<std::string>("group-by");
+            node.get_opt_attr<std::string>("group-by");
         if (group_by)
         {
             lyr.set_group_by(* group_by);
         }
 
-        xml_node::const_iterator child = lay.begin();
-        xml_node::const_iterator end = lay.end();
+        optional<unsigned> buffer_size = node.get_opt_attr<unsigned>("buffer-size");
+        if (buffer_size)
+        {
+            lyr.set_buffer_size(*buffer_size);
+        }
+
+        optional<std::string> maximum_extent = node.get_opt_attr<std::string>("maximum-extent");
+        if (maximum_extent)
+        {
+            box2d<double> box;
+            if (box.from_string(*maximum_extent))
+            {
+                lyr.set_maximum_extent(box);
+            }
+            else
+            {
+                std::ostringstream s_err;
+                s_err << "failed to parse 'maximum-extent' in layer " << name;
+                if (strict_)
+                {
+                    throw config_error(s_err.str());
+                }
+                else
+                {
+                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << s_err.str();
+                }
+            }
+        }
+
+        xml_node::const_iterator child = node.begin();
+        xml_node::const_iterator end = node.end();
 
         for(; child != end; ++child)
         {
@@ -719,7 +748,7 @@ void map_parser::parse_layer(Map & map, xml_node const& lay)
     {
         if (!name.empty())
         {
-            ex.append_context(std::string(" encountered during parsing of layer '") + name + "'", lay);
+            ex.append_context(std::string(" encountered during parsing of layer '") + name + "'", node);
         }
         throw;
     }
@@ -894,7 +923,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             symbol.set_ignore_placement(* ignore_placement);
         }
         point_placement_e placement =
-            sym.get_attr<point_placement_e>("placement", CENTROID_POINT_PLACEMENT);
+            sym.get_attr<point_placement_e>("placement", symbol.get_point_placement());
         symbol.set_point_placement(placement);
 
         if (file && !file->empty())
@@ -1018,8 +1047,12 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             sym.set_filename(expr);
         }
 
+        // overall opacity - impacts both fill and stroke, like svg
         optional<float> opacity = node.get_opt_attr<float>("opacity");
         if (opacity) sym.set_opacity(*opacity);
+
+        optional<float> fill_opacity = node.get_opt_attr<float>("fill-opacity");
+        if (fill_opacity) sym.set_fill_opacity(*fill_opacity);
 
         optional<std::string> image_transform_wkt = node.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)
@@ -1065,7 +1098,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             sym.set_stroke(strk);
         }
 
-        marker_placement_e placement = node.get_attr<marker_placement_e>("placement", MARKER_POINT_PLACEMENT);
+        marker_placement_e placement = node.get_attr<marker_placement_e>("placement",sym.get_marker_placement());
         sym.set_marker_placement(placement);
         parse_symbolizer_base(sym, node);
         rule.append(sym);

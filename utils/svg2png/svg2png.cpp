@@ -155,8 +155,9 @@ int main (int argc,char** argv)
             {
                 std::clog << "found width of '" << w << "' and height of '" << h << "'\n";
             }
-            mapnik::image_32 im(w,h);
-            agg::rendering_buffer buf(im.raw_data(), w, h, w * 4);
+            // 10 pixel buffer to avoid edge clipping of 100% svg's
+            mapnik::image_32 im(w+10,h+10);
+            agg::rendering_buffer buf(im.raw_data(), im.width(), im.height(), im.width() * 4);
             pixfmt pixf(buf);
             renderer_base renb(pixf);
 
@@ -165,7 +166,7 @@ int main (int argc,char** argv)
             // center the svg marker on '0,0'
             agg::trans_affine mtx = agg::trans_affine_translation(-c.x,-c.y);
             // render the marker at the center of the marker box
-            mtx.translate(0.5 * w, 0.5 * h);
+            mtx.translate(0.5 * im.width(), 0.5 * im.height());
 
             mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
             mapnik::svg::svg_path_adapter svg_path(stl_storage);

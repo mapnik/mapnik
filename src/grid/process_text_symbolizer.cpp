@@ -37,7 +37,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_ * (1.0/pixmap_.get_resolution()),
-            t_, font_manager_, detector_,
+            t_, font_manager_, *detector_,
             query_extent_);
     bool placement_found = false;
 

@@ -1,0 +1,66 @@
+<Map srs="+init=epsg:4326" background-color="rgba(255,255,255,.5)">
+
+    <Style name="ellipse">
+        <Rule>
+            <MarkersSymbolizer
+              width="240"
+              height="240"
+              fill="steelblue"
+              fill-opacity=".7"
+              stroke="yellow"
+              stroke-width="16"
+              stroke-opacity=".3"
+            />
+            <MarkersSymbolizer
+              width="100"
+              opacity=".5"
+              fill="darkorange"
+              comp-op="multiply"
+              transform="skewX(50)"
+              allow-overlap="true"
+            />
+            <MarkersSymbolizer
+              width="100"
+              opacity=".5"
+              fill="darkred"
+              comp-op="color-burn"
+              transform="skewX(-50)"
+              allow-overlap="true"
+            />
+        </Rule>
+    </Style>
+
+    <Layer name="layer" srs="+init=epsg:4326">
+        <StyleName>ellipse</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+2.5,2.5
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- points to frame data view -->
+
+    <Style name="frame">
+        <Rule>
+            <PointSymbolizer />
+        </Rule>
+    </Style>
+
+    <Layer name="frame" srs="+init=epsg:4326">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+0,0
+5,0
+0,5
+5,5
+            </Parameter>
+        </Datasource>
+    </Layer>
+    
+</Map>

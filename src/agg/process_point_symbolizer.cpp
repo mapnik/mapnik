@@ -23,19 +23,16 @@
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/geom_util.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/metawriter.hpp>
+
+#include <mapnik/geom_util.hpp>
+#include <mapnik/point_symbolizer.hpp>
+#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/expression_evaluator.hpp>
 
 // agg
-#include "agg_basics.h"
-#include "agg_rendering_buffer.h"
-#include "agg_pixfmt_rgba.h"
-#include "agg_rasterizer_scanline_aa.h"
-#include "agg_scanline_u.h"
+#include "agg_trans_affine.h"
 
 // stl
 #include <string>
@@ -89,7 +86,6 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
             label_ext.re_center(x,y);
-
             if (sym.get_allow_overlap() ||
                 detector_->has_placement(label_ext))
             {
@@ -106,8 +102,8 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);
-                metawriter_with_properties writer = sym.get_metawriter();
-                if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
+                //metawriter_with_properties writer = sym.get_metawriter();
+                //if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
             }
         }
     }

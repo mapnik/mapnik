@@ -47,7 +47,6 @@
 
 namespace mapnik {
 
-
 template <typename T>
 void agg_renderer<T>::process(line_symbolizer const& sym,
                               mapnik::feature_impl & feature,
@@ -60,7 +59,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     unsigned g=col.green();
     unsigned b=col.blue();
     unsigned a=col.alpha();
-    
+
     ras_ptr->reset();
     set_gamma_method(stroke_, ras_ptr);
 
@@ -76,11 +75,28 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base renb(pixf);
-    
+
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    box2d<double> ext = query_extent_ * 1.1;
+    box2d<double> clipping_extent = query_extent_;
+    if (sym.clip())
+    {
+        double padding = (double)(query_extent_.width()/pixmap_.width());
+        float half_stroke = stroke_.get_width()/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+        // debugging
+        //box2d<double> inverse(x0 + padding, y0 + padding, x1 - padding , y1 - padding);
+        //draw_geo_extent(inverse,mapnik::color("red"));
+    }
 
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
@@ -94,11 +110,12 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         rasterizer_type ras(ren);
         set_join_caps_aa(stroke_,ras);
 
-        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+        typedef boost::mpl::vector<clip_line_tag, transform_tag,
+                                   offset_transform_tag, affine_transform_tag,
+                                   smooth_tag, dash_tag, stroke_tag> conv_types;
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(ext,ras,sym,t_,prj_trans,tr,scaled);
-
+            converter(clipping_extent,ras,sym,t_,prj_trans,tr,scaled);
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -117,10 +134,12 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     }
     else
     {
-        typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+        typedef boost::mpl::vector<clip_line_tag, transform_tag, offset_transform_tag,
+                                   affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
+
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(ext,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+            converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
