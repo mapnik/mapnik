@@ -57,7 +57,11 @@ symbolizer_base::symbolizer_base()
 
 // copy ctor
 symbolizer_base::symbolizer_base(symbolizer_base const& other)
-    : comp_op_(other.comp_op_),
+    : properties_(other.properties_),
+      properties_complete_(other.properties_complete_),
+      writer_name_(other.writer_name_),
+      writer_ptr_(other.writer_ptr_),
+      comp_op_(other.comp_op_),
       affine_transform_(other.affine_transform_),
       clip_(other.clip_),
       smooth_value_(other.smooth_value_) {}
