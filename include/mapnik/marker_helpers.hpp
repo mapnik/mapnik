@@ -55,12 +55,8 @@ namespace mapnik {
 template <typename BufferType, typename SvgRenderer, typename Rasterizer, typename Detector>
 struct vector_markers_rasterizer_dispatch
 {
-    typedef agg::rgba8 color_type;
-    typedef agg::order_rgba order_type;
-    typedef agg::pixel32_type pixel_type;
-    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
-    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+    typedef typename SvgRenderer::renderer_base renderer_base;
+    typedef typename renderer_base::pixfmt_type pixfmt_type;
 
     vector_markers_rasterizer_dispatch(BufferType & image_buffer,
                                 SvgRenderer & svg_renderer,
@@ -133,7 +129,7 @@ struct vector_markers_rasterizer_dispatch
 private:
     agg::scanline_u8 sl_;
     agg::rendering_buffer buf_;
-    pixfmt_comp_type pixf_;
+    pixfmt_type pixf_;
     renderer_base renb_;
     SvgRenderer & svg_renderer_;
     Rasterizer & ras_;
