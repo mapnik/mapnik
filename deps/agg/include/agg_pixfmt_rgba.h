@@ -1015,18 +1015,34 @@ namespace agg
         //   Dca' = Sa.(Sca.Da + Dca.Sa - Sa.Da)/Sca + Sca.(1 - Da) + Dca.(1 - Sa)
         //
         // Da'  = Sa + Da - Sa.Da
+
+
+        // http://www.w3.org/TR/SVGCompositing/
+        // if Sca == 0 and Dca == Da
+        //   Dca' = Sa × Da + Sca × (1 - Da) + Dca × (1 - Sa)
+        //        = Sa × Da + Dca × (1 - Sa)
+        //        = Da = Dca
+        // otherwise if Sca == 0
+        //   Dca' = Sca × (1 - Da) + Dca × (1 - Sa)
+        //        = Dca × (1 - Sa)
+        // otherwise if Sca > 0
+        //   Dca' = Sa × Da - Sa × Da × min(1, (1 - Dca/Da) × Sa/Sca) + Sca × (1 - Da) + Dca × (1 - Sa)
+        //        = Sa × Da × (1 - min(1, (1 - Dca/Da) × Sa/Sca)) + Sca × (1 - Da) + Dca × (1 - Sa)
+
+        //   sa * da * (255 - std::min(255, (255 - p[0]/da)*(sa/(sc*sa)) +
         static AGG_INLINE void blend_pix(value_type* p,
                                          unsigned sr, unsigned sg, unsigned sb,
                                          unsigned sa, unsigned cover)
         {
-            if(cover < 255)
+            if (cover < 255)
             {
                 sr = (sr * cover + 255) >> 8;
                 sg = (sg * cover + 255) >> 8;
                 sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            if(sa)
+
+            if (sa)
             {
                 calc_type d1a  = base_mask - p[Order::A];
                 calc_type s1a  = base_mask - sa;
@@ -1042,15 +1058,15 @@ namespace agg
                 long_type sbda = sb * da;
                 long_type sada = sa * da;
 
-                p[Order::R] = (value_type)(((srda + drsa <= sada) ?
+                if ( sr > 0)  p[Order::R] = (value_type)(((srda + drsa <= sada) ?
                     sr * d1a + dr * s1a :
                     sa * (srda + drsa - sada) / sr + sr * d1a + dr * s1a + base_mask) >> base_shift);
 
-                p[Order::G] = (value_type)(((sgda + dgsa <= sada) ?
+                if ( sg > 0 ) p[Order::G] = (value_type)(((sgda + dgsa <= sada) ?
                     sg * d1a + dg * s1a :
                     sa * (sgda + dgsa - sada) / sg + sg * d1a + dg * s1a + base_mask) >> base_shift);
 
-                p[Order::B] = (value_type)(((sbda + dbsa <= sada) ?
+                if ( sb > 0) p[Order::B] = (value_type)(((sbda + dbsa <= sada) ?
                     sb * d1a + db * s1a :
                     sa * (sbda + dbsa - sada) / sb + sb * d1a + db * s1a + base_mask) >> base_shift);
 
@@ -1502,24 +1518,29 @@ namespace agg
                                          unsigned sr, unsigned sg, unsigned sb,
                                          unsigned sa, unsigned cover)
         {
-            if (cover < 255)
-            {
-                sr = (sr * cover + 255) >> 8;
-                sg = (sg * cover + 255) >> 8;
-                sb = (sb * cover + 255) >> 8;
-                sa = (sa * cover + 255) >> 8;
-            }
-            if (sa > 0)
-            {
-                calc_type da = p[Order::A];
-                int dr = p[Order::R] - sr + 128;
-                int dg = p[Order::G] - sg + 128;
-                int db = p[Order::B] - sb + 128;
+            calc_type da = (p[Order::A] * sa + 255) >> 8;
 
-                p[Order::R] = dr < 0 ? 0 : (dr > 255 ? 255 : dr);
-                p[Order::G] = dg < 0 ? 0 : (dg > 255 ? 255 : dg);
-                p[Order::B] = db < 0 ? 0 : (db > 255 ? 255 : db);
-                p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
+            int dr = p[Order::R] - sr + 128;
+            int dg = p[Order::G] - sg + 128;
+            int db = p[Order::B] - sb + 128;
+
+            dr = dr < 0 ? 0 : (dr > 255 ? 255 : dr);
+            dg = dg < 0 ? 0 : (dg > 255 ? 255 : dg);
+            db = db < 0 ? 0 : (db > 255 ? 255 : db);
+
+            p[Order::A] = da;
+
+            if (da < 255)
+            {
+                p[Order::R] = (dr * da + 255) >> 8;
+                p[Order::G] = (dg * da + 255) >> 8;
+                p[Order::B] = (db * da + 255) >> 8;
+            }
+            else
+            {
+                p[Order::R] = dr;
+                p[Order::G] = dg;
+                p[Order::B] = db;
             }
         }
     };
