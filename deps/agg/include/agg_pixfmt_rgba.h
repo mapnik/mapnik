@@ -1468,31 +1468,38 @@ namespace agg
                                          // source rgb
                                          unsigned sr, unsigned sg, unsigned sb,
                                          // source alpha and opacity
-                                         unsigned sa, unsigned cover) {
-            if (cover < 255) {
+                                         unsigned sa, unsigned cover)
+        {
+            if(cover < 255)
+            {
+                sr = (sr * cover + 255) >> 8;
+                sg = (sg * cover + 255) >> 8;
+                sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            p[Order::R] = (value_type)(((0 + base_mask) >> base_shift));
-            p[Order::G] = (value_type)(((0 + base_mask) >> base_shift));
-            p[Order::B] = (value_type)(((0 + base_mask) >> base_shift));
-            p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
-
-            // http://en.wikipedia.org/wiki/File:HSV-RGB-comparison.svg
-            if (p[Order::A] < 64) {
-                p[Order::G] = ((p[Order::A] - 64) * 4);
-                p[Order::B] = 255;
-            }
-            if (p[Order::A] >= 64 && p[Order::A] < 128) {
-                p[Order::G] = 255;
-                p[Order::B] = 255 - ((p[Order::A] - 64) * 4);
-            }
-            if (p[Order::A] >= 128 && p[Order::A] < 192) {
-                p[Order::R] = ((p[Order::A] - 128) * 4);
-                p[Order::G] = 255;
-            }
-            if (p[Order::A] >= 192) {
-                p[Order::R] = 255;
-                p[Order::G] = 255 - ((p[Order::A] - 192) * 4);
+            if (sa > 0)
+            {
+                p[Order::R] = (value_type)(((0 + base_mask) >> base_shift));
+                p[Order::G] = (value_type)(((0 + base_mask) >> base_shift));
+                p[Order::B] = (value_type)(((0 + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+                // http://en.wikipedia.org/wiki/File:HSV-RGB-comparison.svg
+                if (p[Order::A] < 64) {
+                    p[Order::G] = ((p[Order::A] - 64) * 4);
+                    p[Order::B] = 255;
+                }
+                if (p[Order::A] >= 64 && p[Order::A] < 128) {
+                    p[Order::G] = 255;
+                    p[Order::B] = 255 - ((p[Order::A] - 64) * 4);
+                }
+                if (p[Order::A] >= 128 && p[Order::A] < 192) {
+                    p[Order::R] = ((p[Order::A] - 128) * 4);
+                    p[Order::G] = 255;
+                }
+                if (p[Order::A] >= 192) {
+                    p[Order::R] = 255;
+                    p[Order::G] = 255 - ((p[Order::A] - 192) * 4);
+                }
             }
         }
     };
