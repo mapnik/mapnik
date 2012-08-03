@@ -1058,17 +1058,17 @@ namespace agg
                 long_type sbda = sb * da;
                 long_type sada = sa * da;
 
-                if ( sr > 0)  p[Order::R] = (value_type)(((srda + drsa <= sada) ?
-                    sr * d1a + dr * s1a :
-                    sa * (srda + drsa - sada) / sr + sr * d1a + dr * s1a + base_mask) >> base_shift);
+                p[Order::R] = (value_type)(((srda + drsa <= sada) ?
+                   sr * d1a + dr * s1a :
+                   (sr > 0 ? sa * (srda + drsa - sada) / sr + sr * d1a + dr * s1a + base_mask : 0)) >> base_shift);
 
-                if ( sg > 0 ) p[Order::G] = (value_type)(((sgda + dgsa <= sada) ?
+                p[Order::G] = (value_type)(((sgda + dgsa <= sada) ?
                     sg * d1a + dg * s1a :
-                    sa * (sgda + dgsa - sada) / sg + sg * d1a + dg * s1a + base_mask) >> base_shift);
+                   (sg > 0 ? sa * (sgda + dgsa - sada) / sg + sg * d1a + dg * s1a + base_mask : 0)) >> base_shift);
 
-                if ( sb > 0) p[Order::B] = (value_type)(((sbda + dbsa <= sada) ?
+                p[Order::B] = (value_type)(((sbda + dbsa <= sada) ?
                     sb * d1a + db * s1a :
-                    sa * (sbda + dbsa - sada) / sb + sb * d1a + db * s1a + base_mask) >> base_shift);
+                   (sb > 0 ? sa * (sbda + dbsa - sada) / sb + sb * d1a + db * s1a + base_mask : 0)) >> base_shift);
 
                 p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
             }
