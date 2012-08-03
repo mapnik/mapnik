@@ -70,7 +70,6 @@ markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
       max_error_(rhs.max_error_),
       fill_(rhs.fill_),
       fill_opacity_(rhs.fill_opacity_),
-      opacity_(rhs.opacity_),
       stroke_(rhs.stroke_),
       marker_p_(rhs.marker_p_) {}
 
@@ -112,16 +111,6 @@ void markers_symbolizer::set_max_error(double max_error)
 double markers_symbolizer::get_max_error() const
 {
     return max_error_;
-}
-
-void markers_symbolizer::set_opacity(float opacity)
-{
-    opacity_ = opacity;
-}
-
-boost::optional<float> markers_symbolizer::get_opacity() const
-{
-    return opacity_;
 }
 
 void markers_symbolizer::set_fill(color const& fill)

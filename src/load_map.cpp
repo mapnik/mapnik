@@ -1042,7 +1042,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             sym.set_filename(expr);
         }
 
-        // overall opacity - impacts both fill and stroke, like svg
+        // overall opacity to be applied to all paths
         optional<float> opacity = node.get_opt_attr<float>("opacity");
         if (opacity) sym.set_opacity(*opacity);
 
