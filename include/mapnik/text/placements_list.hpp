@@ -74,21 +74,6 @@ private:
 };
 typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
 
-#if 0
-class placements_list
-{
-public:
-    placements_list();
-    void push_back(glyph_positions_ptr glyphs);
-    typedef std::list<glyph_positions_ptr> list_type;
-    typedef list_type::const_iterator const_iterator;
-    const_iterator begin() const;
-    const_iterator end() const;
-private:
-    list_type placements_;
-};
-#endif
-
 typedef std::list<glyph_positions_ptr> placements_list;
 }
 #endif // PLACEMENTS_LIST_HPP
