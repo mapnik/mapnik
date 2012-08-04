@@ -288,7 +288,7 @@ bool placement_finder_ng::find_line_placements(T & path)
 
         int num_labels = 1;
         if (info_->properties.label_spacing > 0)
-            num_labels = static_cast<int> (floor(pp.length() / info_->properties.label_spacing * scale_factor_));
+            num_labels = static_cast<int>(floor(pp.length() / (info_->properties.label_spacing * scale_factor_ + layout_.width())));
 
         if (info_->properties.force_odd_labels && num_labels % 2 == 0)
             num_labels--;
@@ -296,7 +296,8 @@ bool placement_finder_ng::find_line_placements(T & path)
             num_labels = 1;
 
         double spacing = pp.length() / num_labels;
-        pp.forward(spacing/2.-layout_.width()/2.); // first label should be placed at half the spacing
+        // first label should be placed at half the spacing
+        pp.forward(spacing/2.-layout_.width()/2.);
         do
         {
             vertex_cache::state s = pp.save_state();
@@ -313,7 +314,6 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, signed orienta
     std::cout << "single_line" << pp.current_position().x << ", " << pp.current_position().y << "\n";
     double base_offset = alignment_offset().y + info_->properties.displacement.y;
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
-//    glyphs->set_base_point(pixel_position(0, 0));
 
     /* IMPORTANT NOTE:
        x and y are relative to the center of the text
@@ -335,7 +335,6 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, signed orienta
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
             double angle = pp.angle(glyph_itr->width);
-            std::cout << "angle:" << angle / (2 * M_PI) * 360 << "\n";
             double sina = sin(angle);
             double cosa = cos(angle);
             pixel_position pos = pp.current_position();
