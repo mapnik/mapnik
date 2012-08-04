@@ -22,6 +22,9 @@
 #ifndef MAPNIK_PIXEL_POSITION_HPP
 #define MAPNIK_PIXEL_POSITION_HPP
 
+// stl
+#include <iomanip>
+
 namespace mapnik
 {
 
@@ -63,6 +66,20 @@ struct pixel_position
 inline pixel_position operator* (double factor, pixel_position const& pos)
 {
     return pixel_position(factor * pos.x, factor * pos.y);
+}
+
+template <class charT, class traits>
+inline std::basic_ostream<charT,traits>&
+operator << (std::basic_ostream<charT,traits>& out,
+             const pixel_position& e)
+{
+    std::basic_ostringstream<charT,traits> s;
+    s.copyfmt(out);
+    s.width(0);
+    s << '(' << std::fixed << std::setprecision(16)
+      << e.x << ", " << e.y << ')';
+    out << s.str();
+    return out;
 }
 
 }
