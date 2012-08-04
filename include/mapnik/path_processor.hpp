@@ -38,7 +38,30 @@ namespace mapnik
 /** Caches all path points and their lengths. Allows easy moving in both directions. */
 class path_processor
 {
+    struct segment
+    {
+        segment(double x, double y, double length) : pos(x, y), length(length) {}
+        pixel_position pos; //Last point of this segment, first point is implicitly defined by the previous segement in this vector
+        double length;
+    };
+
+    /* The first segment always has the length 0 and just defines the starting point. */
+    struct segment_vector
+    {
+        typedef std::vector<segment>::iterator iterator;
+        std::vector<segment> vector;
+        double length;
+    };
 public:
+    /** This class has no public members to avoid acciedential modification.
+     * It should only be used with save_state/restore_state. */
+    class state
+    {
+        segment_vector::iterator current_segment;
+        double position_in_segment;
+        friend class path_processor;
+    };
+
     template <typename T> path_processor(T &path);
 
     double length() const { return current_subpath_->length; }
@@ -56,22 +79,11 @@ public:
      */
     bool forward(double length);
 
+    state save_state() const;
+    void restore_state(state s);
+
 
 private:
-    struct segment
-    {
-        segment(double x, double y, double length) : pos(x, y), length(length) {}
-        pixel_position pos; //Last point of this segment, first point is implicitly defined by the previous segement in this vector
-        double length;
-    };
-
-    /* The first segment always has the length 0 and just defines the starting point. */
-    struct segment_vector
-    {
-        typedef std::vector<segment>::iterator iterator;
-        std::vector<segment> vector;
-        double length;
-    };
     pixel_position current_position_;
     pixel_position segment_starting_point_;
     std::vector<segment_vector> subpaths_;
@@ -172,6 +184,20 @@ bool path_processor::forward(double length)
     position_in_segment_ = length;
     current_position_ = segment_starting_point_ + (current_segment_->pos - segment_starting_point_) * factor;
     return true;
+}
+
+path_processor::state path_processor::save_state() const
+{
+    state s;
+    s.current_segment = current_segment_;
+    s.position_in_segment = position_in_segment_;
+    return s;
+}
+
+void path_processor::restore_state(path_processor::state s)
+{
+    current_segment_ = s.current_segment;
+    position_in_segment_ = s.position_in_segment;
 }
 
 
