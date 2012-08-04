@@ -34,62 +34,6 @@
 namespace mapnik
 {
 
-static const char * label_placement_strings[] = {
-    "point",
-    "line",
-    "vertex",
-    "interior",
-    ""
-};
-
-
-IMPLEMENT_ENUM( label_placement_e, label_placement_strings )
-
-static const char * vertical_alignment_strings[] = {
-    "top",
-    "middle",
-    "bottom",
-    "auto",
-    ""
-};
-
-
-IMPLEMENT_ENUM( vertical_alignment_e, vertical_alignment_strings )
-
-static const char * horizontal_alignment_strings[] = {
-    "left",
-    "middle",
-    "right",
-    "auto",
-    ""
-};
-
-
-IMPLEMENT_ENUM( horizontal_alignment_e, horizontal_alignment_strings )
-
-static const char * justify_alignment_strings[] = {
-    "left",
-    "center", // not 'middle' in order to match CSS
-    "right",
-    "auto",
-    ""
-};
-
-
-IMPLEMENT_ENUM( justify_alignment_e, justify_alignment_strings )
-
-static const char * text_transform_strings[] = {
-    "none",
-    "uppercase",
-    "lowercase",
-    "capitalize",
-    ""
-};
-
-
-IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
-
-
 text_symbolizer::text_symbolizer(text_placements_ptr placements)
 : symbolizer_base(),
     placement_options_(placements)
