@@ -68,8 +68,13 @@ public:
 
     pixel_position const& current_position() const { return current_position_; }
 
+    double angle() const;
+
     bool next_subpath();
     bool next_segment();
+
+    /** Moves all positions to a parallel line in the specified distance. */
+    void set_offset(double offset);
 
 
     /** Skip a certain amount of space.
@@ -91,6 +96,8 @@ private:
     segment_vector::iterator current_segment_;
     bool first_subpath_;
     double position_in_segment_;
+    mutable double angle_;
+    mutable bool angle_valid_;
 };
 
 template <typename T>
@@ -101,7 +108,9 @@ path_processor::path_processor(T &path)
           current_subpath_(),
           current_segment_(),
           first_subpath_(true),
-          position_in_segment_(0.)
+          position_in_segment_(0.),
+          angle_(0.),
+          angle_valid_(false)
 {
     path.rewind(0);
     unsigned cmd;
@@ -145,6 +154,17 @@ path_processor::path_processor(T &path)
     }
 }
 
+double path_processor::angle() const
+{
+    //Only calculate angle on request as it is expensive
+    if (!angle_valid_)
+    {
+        angle_ = atan2(current_position()->pos.y - segment_starting_point_.y,
+                       current_position()->pos.x - segment_starting_point_.x);
+    }
+    return angle_;
+}
+
 bool path_processor::next_subpath()
 {
     if (first_subpath_)
@@ -161,6 +181,7 @@ bool path_processor::next_subpath()
     current_position_ = current_segment_->pos;
     position_in_segment_ = 0;
     segment_starting_point_ = current_position_;
+    angle_valid_ = false;
     return true;
 }
 
@@ -169,7 +190,13 @@ bool path_processor::next_segment()
     segment_starting_point_ = current_segment_->pos; //Next segments starts at the end of the current one
     if (current_segment_ == current_subpath_->vector.end()) return false;
     current_segment_++;
+    angle_valid_ = false;
     return true;
+}
+
+void path_processor::set_offset(double offset)
+{
+    MAPNIK_LOG_DEBUG(path_processor) << "set_offset: unimplemented\n";
 }
 
 bool path_processor::forward(double length)
