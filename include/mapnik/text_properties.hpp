@@ -119,6 +119,16 @@ enum justify_alignment
 
 DEFINE_ENUM(justify_alignment_e, justify_alignment);
 
+enum text_upright
+{
+    UPRIGHT_AUTO,
+    UPRIGHT_LEFT,
+    UPRIGHT_RIGHT,
+    text_upright_MAX
+};
+
+DEFINE_ENUM(text_upright_e, text_upright);
+
 class text_layout;
 
 
@@ -169,6 +179,7 @@ struct text_symbolizer_properties
     unsigned text_ratio;
     unsigned wrap_width;
     bool rotate_displacement;
+    text_upright_e upright;
     /** Default values for char_properties. */
     char_properties_ptr format;
 private:

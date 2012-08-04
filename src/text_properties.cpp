@@ -43,9 +43,7 @@ static const char * label_placement_strings[] = {
     "interior",
     ""
 };
-
-
-IMPLEMENT_ENUM( label_placement_e, label_placement_strings )
+IMPLEMENT_ENUM(label_placement_e, label_placement_strings)
 
 static const char * vertical_alignment_strings[] = {
     "top",
@@ -54,9 +52,7 @@ static const char * vertical_alignment_strings[] = {
     "auto",
     ""
 };
-
-
-IMPLEMENT_ENUM( vertical_alignment_e, vertical_alignment_strings )
+IMPLEMENT_ENUM(vertical_alignment_e, vertical_alignment_strings)
 
 static const char * horizontal_alignment_strings[] = {
     "left",
@@ -65,9 +61,7 @@ static const char * horizontal_alignment_strings[] = {
     "auto",
     ""
 };
-
-
-IMPLEMENT_ENUM( horizontal_alignment_e, horizontal_alignment_strings )
+IMPLEMENT_ENUM(horizontal_alignment_e, horizontal_alignment_strings)
 
 static const char * justify_alignment_strings[] = {
     "left",
@@ -76,9 +70,7 @@ static const char * justify_alignment_strings[] = {
     "auto",
     ""
 };
-
-
-IMPLEMENT_ENUM( justify_alignment_e, justify_alignment_strings )
+IMPLEMENT_ENUM(justify_alignment_e, justify_alignment_strings)
 
 static const char * text_transform_strings[] = {
     "none",
@@ -87,9 +79,18 @@ static const char * text_transform_strings[] = {
     "capitalize",
     ""
 };
+IMPLEMENT_ENUM(text_transform_e, text_transform_strings)
 
 
-IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
+static const char * text_upright_strings[] = {
+    "auto",
+    "left",
+    "right",
+    "capitalize",
+    ""
+};
+IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
+
 
 text_symbolizer_properties::text_symbolizer_properties() :
     orientation(),
@@ -111,6 +112,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     text_ratio(0),
     wrap_width(0),
     rotate_displacement(false),
+    upright(UPRIGHT_AUTO),
     format(boost::make_shared<char_properties>()),
     tree_()
 {
@@ -171,6 +173,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (orientation_) orientation = *orientation_;
     optional<boolean> rotate_displacement_ = sym.get_opt_attr<boolean>("rotate-displacement");
     if (rotate_displacement_) rotate_displacement = *rotate_displacement_;
+    optional<text_upright_e> upright_ = sym.get_opt_attr<text_upright_e>("upright");
+    if (upright_) upright = *upright_;
     optional<double> dx = sym.get_opt_attr<double>("dx");
     if (dx) displacement.x = *dx;
     optional<double> dy = sym.get_opt_attr<double>("dy");
@@ -278,6 +282,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (rotate_displacement != dfl.rotate_displacement || explicit_defaults)
     {
         set_attr(node, "rotate-displacement", rotate_displacement);
+    }
+    if (upright != dfl.upright || explicit_defaults)
+    {
+        set_attr(node, "upright", upright);
     }
     format->to_xml(node, explicit_defaults, *(dfl.format));
     if (tree_) tree_->to_xml(node);
