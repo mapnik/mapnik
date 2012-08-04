@@ -26,6 +26,9 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/debug.hpp>
 
+// agg
+#include "agg_basics.h"
+
 // stl
 #include <vector>
 #include <utility>
@@ -59,7 +62,7 @@ public:
         friend class vertex_cache;
     };
 
-    template <typename T> vertex_processor(T &path);
+    template <typename T> vertex_cache(T &path);
 
     double length() const { return current_subpath_->length; }
 
@@ -187,6 +190,7 @@ bool vertex_cache::next_segment()
     segment_starting_point_ = current_segment_->pos; //Next segments starts at the end of the current one
     if (current_segment_ == current_subpath_->vector.end()) return false;
     current_segment_++;
+    if (current_segment_ == current_subpath_->vector.end()) return false;
     angle_valid_ = false;
     return true;
 }
