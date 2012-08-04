@@ -19,15 +19,12 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef MAPNIK_PATH_PROCESSOR_HPP
-#define MAPNIK_PATH_PROCESSOR_HPP
+#ifndef MAPNIK_VERTEX_CACHE_HPP
+#define MAPNIK_VERTEX_CACHE_HPP
 
 // mapnik
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/debug.hpp>
-
-// agg
-#include "agg_path_length.h"
 
 // stl
 #include <vector>
@@ -36,7 +33,7 @@
 namespace mapnik
 {
 /** Caches all path points and their lengths. Allows easy moving in both directions. */
-class path_processor
+class vertex_cache
 {
     struct segment
     {
@@ -59,10 +56,10 @@ public:
     {
         segment_vector::iterator current_segment;
         double position_in_segment;
-        friend class path_processor;
+        friend class vertex_cache;
     };
 
-    template <typename T> path_processor(T &path);
+    template <typename T> vertex_processor(T &path);
 
     double length() const { return current_subpath_->length; }
 
@@ -101,7 +98,7 @@ private:
 };
 
 template <typename T>
-path_processor::path_processor(T &path)
+vertex_cache::vertex_cache(T &path)
         : current_position_(),
           segment_starting_point_(),
           subpaths_(),
@@ -135,7 +132,7 @@ path_processor::path_processor(T &path)
         {
             if (first)
             {
-                MAPNIK_LOG_ERROR(path_processor) << "No starting point in path!\n";
+                MAPNIK_LOG_ERROR(vertex_cache) << "No starting point in path!\n";
                 continue;
             }
             double dx = old_x - new_x;
@@ -150,22 +147,22 @@ path_processor::path_processor(T &path)
     if (!first) {
         current_subpath_->length = path_length;
     } else {
-        MAPNIK_LOG_DEBUG(path_processor) << "Empty path\n";
+        MAPNIK_LOG_DEBUG(vertex_cache) << "Empty path\n";
     }
 }
 
-double path_processor::angle() const
+double vertex_cache::angle() const
 {
     //Only calculate angle on request as it is expensive
     if (!angle_valid_)
     {
-        angle_ = atan2(current_position()->pos.y - segment_starting_point_.y,
-                       current_position()->pos.x - segment_starting_point_.x);
+        angle_ = atan2(current_segment_->pos.y - segment_starting_point_.y,
+                       current_segment_->pos.x - segment_starting_point_.x);
     }
     return angle_;
 }
 
-bool path_processor::next_subpath()
+bool vertex_cache::next_subpath()
 {
     if (first_subpath_)
     {
@@ -185,7 +182,7 @@ bool path_processor::next_subpath()
     return true;
 }
 
-bool path_processor::next_segment()
+bool vertex_cache::next_segment()
 {
     segment_starting_point_ = current_segment_->pos; //Next segments starts at the end of the current one
     if (current_segment_ == current_subpath_->vector.end()) return false;
@@ -194,12 +191,12 @@ bool path_processor::next_segment()
     return true;
 }
 
-void path_processor::set_offset(double offset)
+void vertex_cache::set_offset(double offset)
 {
-    MAPNIK_LOG_DEBUG(path_processor) << "set_offset: unimplemented\n";
+    MAPNIK_LOG_DEBUG(vertex_cache) << "set_offset: unimplemented\n";
 }
 
-bool path_processor::forward(double length)
+bool vertex_cache::forward(double length)
 {
     length += position_in_segment_;
     while (length >= current_segment_->length)
@@ -213,7 +210,7 @@ bool path_processor::forward(double length)
     return true;
 }
 
-path_processor::state path_processor::save_state() const
+vertex_cache::state vertex_cache::save_state() const
 {
     state s;
     s.current_segment = current_segment_;
@@ -221,7 +218,7 @@ path_processor::state path_processor::save_state() const
     return s;
 }
 
-void path_processor::restore_state(path_processor::state s)
+void vertex_cache::restore_state(vertex_cache::state s)
 {
     current_segment_ = s.current_segment;
     position_in_segment_ = s.position_in_segment;
@@ -229,4 +226,4 @@ void path_processor::restore_state(path_processor::state s)
 
 
 }
-#endif // PATH_PROCESSOR_HPP
+#endif
