@@ -68,7 +68,7 @@ public:
 
     pixel_position const& current_position() const { return current_position_; }
 
-    double angle() const;
+    double angle(double width);
 
     bool next_subpath();
     bool next_segment();
@@ -154,15 +154,28 @@ vertex_cache::vertex_cache(T &path)
     }
 }
 
-double vertex_cache::angle() const
+double vertex_cache::angle(double width)
 {
-    //Only calculate angle on request as it is expensive
-    if (!angle_valid_)
+    if (width + position_in_segment_ < current_segment_->length)
     {
-        angle_ = atan2(current_segment_->pos.y - segment_starting_point_.y,
-                       current_segment_->pos.x - segment_starting_point_.x);
+        //Only calculate angle on request as it is expensive
+        if (!angle_valid_)
+        {
+            angle_ = atan2(current_segment_->pos.y - segment_starting_point_.y,
+                           current_segment_->pos.x - segment_starting_point_.x);
+        }
+        return angle_;
+    } else
+    {
+        pixel_position old_pos = current_position_;
+        state s = save_state();
+        forward(width);
+        double angle = atan2(current_position_.y - old_pos.y,
+                             current_position_.x - old_pos.x);
+        restore_state(s);
+        current_position_ = old_pos;
+        return angle;
     }
-    return angle_;
 }
 
 bool vertex_cache::next_subpath()

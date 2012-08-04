@@ -334,7 +334,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, signed orienta
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
-            double angle = pp.angle();
+            double angle = pp.angle(glyph_itr->width);
             std::cout << "angle:" << angle / (2 * M_PI) * 360 << "\n";
             double sina = sin(angle);
             double cosa = cos(angle);
