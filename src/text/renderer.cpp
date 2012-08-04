@@ -95,7 +95,8 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
 template <typename T>
 void text_renderer<T>::render(glyph_positions_ptr pos)
 {
-    if (glyphs_.empty()) prepare_glyphs(pos);
+    glyphs_.clear();
+    prepare_glyphs(pos);
     FT_Error  error;
     FT_Vector start;
     unsigned height = pixmap_.height();
