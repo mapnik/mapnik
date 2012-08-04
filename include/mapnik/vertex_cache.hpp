@@ -59,7 +59,10 @@ public:
     {
         segment_vector::iterator current_segment;
         double position_in_segment;
+        pixel_position current_position;
         friend class vertex_cache;
+    public:
+        pixel_position const& position() { return current_position; }
     };
 
     template <typename T> vertex_cache(T &path);
@@ -167,13 +170,12 @@ double vertex_cache::angle(double width)
         return angle_;
     } else
     {
-        pixel_position old_pos = current_position_;
         state s = save_state();
+        pixel_position const& old_pos = s.position();
         forward(width);
         double angle = atan2(current_position_.y - old_pos.y,
                              current_position_.x - old_pos.x);
         restore_state(s);
-        current_position_ = old_pos;
         return angle;
     }
 }
@@ -215,6 +217,10 @@ void vertex_cache::set_offset(double offset)
 
 bool vertex_cache::forward(double length)
 {
+    if (length < 0)
+    {
+        MAPNIK_LOG_ERROR(vertex_cache) << "vertex_cache::forward() called with negative argument!\n";
+    }
     length += position_in_segment_;
     while (length >= current_segment_->length)
     {
@@ -232,6 +238,7 @@ vertex_cache::state vertex_cache::save_state() const
     state s;
     s.current_segment = current_segment_;
     s.position_in_segment = position_in_segment_;
+    s.current_position = current_position_;
     return s;
 }
 
@@ -239,6 +246,8 @@ void vertex_cache::restore_state(vertex_cache::state s)
 {
     current_segment_ = s.current_segment;
     position_in_segment_ = s.position_in_segment;
+    current_position_ = s.current_position;
+    angle_valid_ = false;
 }
 
 
