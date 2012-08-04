@@ -197,7 +197,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                                 {
                                     render_marker(feature,pixmap_.get_resolution(),px,py,**marker,tr,sym.get_opacity());
 
-                                    box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
+                                    ren.prepare_glyphs(&text_placement.placements[0]);
                                     ren.render_id(feature.id(),x,y,2);
                                     detector_.insert(label_ext);
                                     finder.update_detector(text_placement);
@@ -227,7 +227,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 
                             render_marker(feature,pixmap_.get_resolution(),px,py,**marker,tr,sym.get_opacity());
 
-                            box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
+                            ren.prepare_glyphs(&text_placement.placements[ii]);
                             ren.render_id(feature.id(),x,y,2);
                         }
                         finder.update_detector(text_placement);

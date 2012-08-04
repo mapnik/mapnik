@@ -215,7 +215,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
                                 {
                                     render_marker(px,py,**marker,tr,sym.get_opacity());
 
-                                    box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[0]);
+                                    ren.prepare_glyphs(&text_placement.placements[0]);
                                     ren.render(x,y);
                                     detector_.insert(label_ext);
                                     finder.update_detector(text_placement);
@@ -254,7 +254,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
 
                             render_marker(px,py,**marker,tr,sym.get_opacity());
 
-                            box2d<double> dim = ren.prepare_glyphs(&text_placement.placements[ii]);
+                            ren.prepare_glyphs(&text_placement.placements[ii]);
                             ren.render(x,y);
                             if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
                         }
