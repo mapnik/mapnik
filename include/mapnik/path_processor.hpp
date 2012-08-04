@@ -35,13 +35,11 @@
 
 namespace mapnik
 {
-
 /** Caches all path points and their lengths. Allows easy moving in both directions. */
-template <typename T>
 class path_processor
 {
 public:
-    path_processor(T &path);
+    template <typename T> path_processor(T &path);
 
     double length() const { return current_subpath_->length; }
 
@@ -70,24 +68,22 @@ private:
     /* The first segment always has the length 0 and just defines the starting point. */
     struct segment_vector
     {
-        typedef typename std::vector<segment>::iterator iterator;
+        typedef std::vector<segment>::iterator iterator;
         std::vector<segment> vector;
         double length;
     };
-    T &path_;
     pixel_position current_position_;
     pixel_position segment_starting_point_;
     std::vector<segment_vector> subpaths_;
-    typename std::vector<segment_vector>::iterator current_subpath_;
-    typename segment_vector::iterator current_segment_;
+    std::vector<segment_vector>::iterator current_subpath_;
+    segment_vector::iterator current_segment_;
     bool first_subpath_;
     double position_in_segment_;
 };
 
 template <typename T>
-path_processor<T>::path_processor(T &path)
-        : path_(path),
-          current_position_(),
+path_processor::path_processor(T &path)
+        : current_position_(),
           segment_starting_point_(),
           subpaths_(),
           current_subpath_(),
@@ -95,12 +91,12 @@ path_processor<T>::path_processor(T &path)
           first_subpath_(true),
           position_in_segment_(0.)
 {
-    path_.rewind(0);
+    path.rewind(0);
     unsigned cmd;
     double new_x = 0., new_y = 0., old_x = 0., old_y = 0.;
     double path_length = 0.;
     bool first = true; //current_subpath_ uninitalized
-    while (!agg::is_stop(cmd = path_.vertex(&new_x, &new_y)))
+    while (!agg::is_stop(cmd = path.vertex(&new_x, &new_y)))
     {
         if (agg::is_move_to(cmd))
         {
@@ -137,8 +133,7 @@ path_processor<T>::path_processor(T &path)
     }
 }
 
-template <typename T>
-bool path_processor<T>::next_subpath()
+bool path_processor::next_subpath()
 {
     if (first_subpath_)
     {
@@ -157,16 +152,15 @@ bool path_processor<T>::next_subpath()
     return true;
 }
 
-template <typename T>
-bool path_processor<T>::next_segment()
+bool path_processor::next_segment()
 {
     segment_starting_point_ = current_segment_->pos; //Next segments starts at the end of the current one
     if (current_segment_ == current_subpath_->vector.end()) return false;
     current_segment_++;
+    return true;
 }
 
-template <typename T>
-bool path_processor<T>::forward(double length)
+bool path_processor::forward(double length)
 {
     length += position_in_segment_;
     while (length >= current_segment_->length)
