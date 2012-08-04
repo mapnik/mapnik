@@ -424,9 +424,6 @@ void export_text_placement()
         ("TextPlacementInfo",
          init<text_placements const*, double>())
         .def("next", pure_virtual(&text_placement_info::next))
-        .def("get_actual_label_spacing", &text_placement_info::get_actual_label_spacing)
-        .def("get_actual_minimum_distance", &text_placement_info::get_actual_minimum_distance)
-        .def("get_actual_minimum_padding", &text_placement_info::get_actual_minimum_padding)
         .def_readwrite("properties", &text_placement_info::properties)
         .def_readwrite("scale_factor", &text_placement_info::scale_factor)
         ;
