@@ -229,7 +229,11 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
             double dx = x * cosa_ - y * sina_;
             double dy = x * sina_ + y * cosa_;
             glyphs->push_back(*glyph_itr, pixel_position(dx, dy), angle_); //TODO: Store cosa, sina instead
-            x += glyph_itr->width + glyph_itr->format->character_spacing;
+            if (glyph_itr->width)
+            {
+                //Only advance if glyph is not part of a multiple glyph sequence
+                x += glyph_itr->width + glyph_itr->format->character_spacing;
+            }
         }
     }
     placements_.push_back(glyphs);
