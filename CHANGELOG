@@ -13,6 +13,10 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.2
 ------------
 
+Released Aug 3, 2012
+
+(Packaged from adb2ec741)
+
 - Fixed handling of empty WKB geometries (#1334)
 
 - Fixed naming of `stroke-dashoffset` in save_map (cc3cd5f63f28)
