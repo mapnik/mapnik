@@ -102,7 +102,7 @@ void text_renderer<T>::render(glyph_positions_ptr pos)
     pixel_position const& base_point = pos->get_base_point();
 
     start.x =  static_cast<FT_Pos>(base_point.x * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6)); //TODO: Why is this inverted coordinate system used?
+    start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
 
     //render halo
     typename boost::ptr_vector<glyph_t>::iterator itr;

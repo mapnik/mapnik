@@ -27,7 +27,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/ctrans.hpp>
-#include <mapnik/path_processor.hpp>
+#include <mapnik/vertex_cache.hpp>
 #include <mapnik/expression_evaluator.hpp>
 
 //boost
@@ -244,8 +244,8 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
 template <typename T>
 bool placement_finder_ng::find_point_on_line_placements(T & path)
 {
-    path_processor<T> pp(path);
     if (!layout_.size()) return true;
+    vertex_cache pp(path);
     bool success = false;
     while (pp.next_subpath())
     {
@@ -277,8 +277,90 @@ bool placement_finder_ng::find_point_on_line_placements(T & path)
 template <typename T>
 bool placement_finder_ng::find_line_placements(T & path)
 {
-    path_processor<T> pp(path);
-    return false;
+    if (!layout_.size()) return true;
+    vertex_cache pp(path);
+    bool success = false;
+    while (pp.next_subpath())
+    {
+        if ((pp.length() < info_->properties.minimum_path_length)
+                ||
+            (pp.length() < layout_.width())) continue;
+
+        int num_labels = 1;
+        if (info_->properties.label_spacing > 0)
+            num_labels = static_cast<int> (floor(pp.length() / info_->properties.label_spacing * scale_factor_));
+
+        if (info_->properties.force_odd_labels && num_labels % 2 == 0)
+            num_labels--;
+        if (num_labels <= 0)
+            num_labels = 1;
+
+        double spacing = pp.length() / num_labels;
+        pp.forward(spacing/2.-layout_.width()/2.); // first label should be placed at half the spacing
+        do
+        {
+            vertex_cache::state s = pp.save_state();
+            success = single_line_placement(pp, 0) || success;
+            pp.restore_state(s);
+        } while (pp.forward(spacing));
+    }
+    return success;
+}
+
+
+bool placement_finder_ng::single_line_placement(vertex_cache &pp, signed orientation)
+{
+    std::cout << "single_line" << pp.current_position().x << ", " << pp.current_position().y << "\n";
+    double base_offset = alignment_offset().y + info_->properties.displacement.y;
+    glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
+//    glyphs->set_base_point(pixel_position(0, 0));
+
+    /* IMPORTANT NOTE:
+       x and y are relative to the center of the text
+       coordinate system:
+       x: grows from left to right
+       y: grows from bottom to top (all values are negative!)
+    */
+
+    double offset = base_offset + layout_.height();
+
+    text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
+    for (; line_itr != line_end; line_itr++)
+    {
+        double char_height = (*line_itr)->max_char_height();
+        offset -= (*line_itr)->height();
+        // reset to begining of line position
+
+        text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
+        for (; glyph_itr != glyph_end; glyph_itr++)
+        {
+            double angle = pp.angle();
+            std::cout << "angle:" << angle / (2 * M_PI) * 360 << "\n";
+            double sina = sin(angle);
+            double cosa = cos(angle);
+            pixel_position pos = pp.current_position();
+            //Center the text on the line
+            pos.y = -pos.y - char_height/2.0*cosa;
+            pos.x =  pos.x - char_height/2.0*sina;
+
+//            if (orientation < 0)
+//            {
+//                // rotate in place
+//                render_x += cwidth*cosa - char_height*sina;
+//                render_y -= cwidth*sina + char_height*cosa;
+//                render_angle += M_PI;
+//            }
+
+            glyphs->push_back(*glyph_itr, pos, -angle); //TODO: Store cosa, sina instead
+            if (glyph_itr->width)
+            {
+                //Only advance if glyph is not part of a multiple glyph sequence
+                pp.forward(glyph_itr->width + glyph_itr->format->character_spacing);
+            }
+        }
+    }
+    placements_.push_back(glyphs);
+    return true;
 }
 
 

@@ -43,6 +43,7 @@ typedef label_collision_detector4 DetectorType;
 
 class feature_impl;
 typedef feature_impl Feature;
+class vertex_cache;
 
 class placement_finder_ng : boost::noncopyable
 {
@@ -69,6 +70,8 @@ public:
 private:
     void init_alignment();
     pixel_position alignment_offset() const;
+
+    bool single_line_placement(vertex_cache &pp, signed orientation);
     Feature const& feature_;
     DetectorType &detector_;
     box2d<double> const& extent_;
