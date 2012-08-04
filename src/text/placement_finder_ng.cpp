@@ -183,12 +183,20 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
     rotated_box2d(bbox, sina_, cosa_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
 
-    if (!detector_.extent().intersects(bbox) ||
+    if (!detector_.extent().intersects(bbox)
+            ||
+        (info_->properties.avoid_edges && !extent_.contains(bbox))
+            ||
+        (info_->properties.minimum_padding > 0 &&
+         !extent_.contains(bbox + (scale_factor_ * info_->properties.minimum_padding)))
+            ||
         (!info_->properties.allow_overlap &&
-         !detector_.has_point_placement(bbox, info_->properties.minimum_distance * scale_factor_)))
+         !detector_.has_point_placement(bbox, info_->properties.minimum_distance * scale_factor_))
+        )
     {
-        return false; //Not enough space for this text
+        return false;
     }
+
     detector_.insert(bbox, layout_.get_text());
 
     /* IMPORTANT NOTE:
