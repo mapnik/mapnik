@@ -13,6 +13,12 @@ For a complete change history, see the SVN log.
 Mapnik 2.0.2
 ------------
 
+- Fixed handling of empty WKB geometries (#1334)
+
+- Fixed naming of `stroke-dashoffset` in save_map (cc3cd5f63f28)
+
+- Fixed support for boost 1.50 (8dea5a5fe239233)
+
 - Fixed TextSymbolizer placement in Cairo backend so it respects avoid-edges and minimum-padding across all renderers (#1242)
 
 - Fixed ShieldSymbolizer placement so it respects avoid-edges and minimum-padding across all renderers (#1242)
