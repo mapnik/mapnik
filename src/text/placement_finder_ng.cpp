@@ -233,34 +233,39 @@ template <typename T>
 bool placement_finder_ng::find_point_on_line_placements(T & path)
 {
     path_processor<T> pp(path);
-    if (!pp.valid() || !layout_.size()) return true;
-    if (pp.length() == 0.0)
-    {
-        return find_point_placement(pp.current_point());
-    }
-
-    int num_labels = 1;
-    if (info_->properties.label_spacing > 0)
-        num_labels = static_cast<int> (floor(pp.length() / info_->properties.label_spacing * scale_factor_));
-
-    if (info_->properties.force_odd_labels && num_labels % 2 == 0)
-        num_labels--;
-    if (num_labels <= 0)
-        num_labels = 1;
-
-    double spacing = pp.length() / num_labels;
-    pp.skip(spacing/2.); // first label should be placed at half the spacing
+    if (!layout_.size()) return true;
     bool success = false;
-    do
+    while (pp.next_subpath())
     {
-        success = find_point_placement(pp.current_point()) || success;
-    } while (pp.skip(spacing));
+        if (pp.length() == 0.0)
+        {
+            return find_point_placement(pp.current_position());
+        }
+
+        int num_labels = 1;
+        if (info_->properties.label_spacing > 0)
+            num_labels = static_cast<int> (floor(pp.length() / info_->properties.label_spacing * scale_factor_));
+
+        if (info_->properties.force_odd_labels && num_labels % 2 == 0)
+            num_labels--;
+        if (num_labels <= 0)
+            num_labels = 1;
+
+        double spacing = pp.length() / num_labels;
+        pp.forward(spacing/2.); // first label should be placed at half the spacing
+
+        do
+        {
+            success = find_point_placement(pp.current_position()) || success;
+        } while (pp.forward(spacing));
+    }
     return success;
 }
 
 template <typename T>
 bool placement_finder_ng::find_line_placements(T & path)
 {
+    path_processor<T> pp(path);
     return false;
 }
 

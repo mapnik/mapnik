@@ -22,61 +22,164 @@
 #ifndef MAPNIK_PATH_PROCESSOR_HPP
 #define MAPNIK_PATH_PROCESSOR_HPP
 
-//mapnik
-#include "pixel_position.hpp"
+// mapnik
+#include <mapnik/pixel_position.hpp>
+#include <mapnik/debug.hpp>
 
 // agg
 #include "agg_path_length.h"
+
+// stl
+#include <vector>
+#include <utility>
+
 namespace mapnik
 {
+
+/** Caches all path points and their lengths. Allows easy moving in both directions. */
 template <typename T>
 class path_processor
 {
 public:
-    path_processor(T &path)
-        : path_(path), length_(agg::path_length(path_)), valid_(true)
-    {
-        rewind();
-    }
+    path_processor(T &path);
 
-    double length() const { return length_ ;}
+    double length() const { return current_subpath_->length; }
 
-    bool next()
-    {
-        if (!valid_) return false;
-        valid_ = path_.vertex(&current_point_.x, &current_point_.y);
-        return valid_;
-    }
+    pixel_position const& current_position() const { return current_position_; }
 
-    pixel_position const& current_point() const
-    {
-        return current_point_;
-    }
+    bool next_subpath();
+    bool next_segment();
 
-    void rewind()
-    {
-        path_.rewind(0);
-        valid_ = true;
-    }
-
-    bool valid() const { return valid_; }
 
     /** Skip a certain amount of space.
      *
      * This function automatically calculates new points if the position is not exactly
      * on a point on the path.
      */
-    bool skip(double length)
-    {
-        //TODO
-        return valid_;
-    }
+    bool forward(double length);
+
 
 private:
+    struct segment
+    {
+        segment(double x, double y, double length) : pos(x, y), length(length) {}
+        pixel_position pos; //Last point of this segment, first point is implicitly defined by the previous segement in this vector
+        double length;
+    };
+
+    /* The first segment always has the length 0 and just defines the starting point. */
+    struct segment_vector
+    {
+        typedef typename std::vector<segment>::iterator iterator;
+        std::vector<segment> vector;
+        double length;
+    };
     T &path_;
-    double length_;
-    bool valid_;
-    pixel_position current_point_;
+    pixel_position current_position_;
+    pixel_position segment_starting_point_;
+    std::vector<segment_vector> subpaths_;
+    typename std::vector<segment_vector>::iterator current_subpath_;
+    typename segment_vector::iterator current_segment_;
+    bool first_subpath_;
+    double position_in_segment_;
 };
+
+template <typename T>
+path_processor<T>::path_processor(T &path)
+        : path_(path),
+          current_position_(),
+          segment_starting_point_(),
+          subpaths_(),
+          current_subpath_(),
+          current_segment_(),
+          first_subpath_(true),
+          position_in_segment_(0.)
+{
+    path_.rewind(0);
+    unsigned cmd;
+    double new_x = 0., new_y = 0., old_x = 0., old_y = 0.;
+    double path_length = 0.;
+    bool first = true; //current_subpath_ uninitalized
+    while (!agg::is_stop(cmd = path_.vertex(&new_x, &new_y)))
+    {
+        if (agg::is_move_to(cmd))
+        {
+            if (!first)
+            {
+                current_subpath_->length = path_length;
+            }
+            //Create new sub path
+            subpaths_.push_back(segment_vector());
+            current_subpath_ = subpaths_.end()-1;
+            current_subpath_->vector.push_back(segment(new_x, new_y, 0));
+            first = false;
+        }
+        if (agg::is_line_to(cmd))
+        {
+            if (first)
+            {
+                MAPNIK_LOG_ERROR(path_processor) << "No starting point in path!\n";
+                continue;
+            }
+            double dx = old_x - new_x;
+            double dy = old_y - new_y;
+            double segment_length = std::sqrt(dx*dx + dy*dy);
+            path_length += segment_length;
+            current_subpath_->vector.push_back(segment(new_x, new_y, segment_length));
+        }
+        old_x = new_x;
+        old_y = new_y;
+    }
+    if (!first) {
+        current_subpath_->length = path_length;
+    } else {
+        MAPNIK_LOG_DEBUG(path_processor) << "Empty path\n";
+    }
+}
+
+template <typename T>
+bool path_processor<T>::next_subpath()
+{
+    if (first_subpath_)
+    {
+        current_subpath_ = subpaths_.begin();
+        first_subpath_ = false;
+    } else
+    {
+        current_subpath_++;
+    }
+    if (current_subpath_ == subpaths_.end()) return false;
+    current_segment_ = current_subpath_->vector.begin();
+    //All subpaths contain at least one segment
+    current_position_ = current_segment_->pos;
+    position_in_segment_ = 0;
+    segment_starting_point_ = current_position_;
+    return true;
+}
+
+template <typename T>
+bool path_processor<T>::next_segment()
+{
+    segment_starting_point_ = current_segment_->pos; //Next segments starts at the end of the current one
+    if (current_segment_ == current_subpath_->vector.end()) return false;
+    current_segment_++;
+}
+
+template <typename T>
+bool path_processor<T>::forward(double length)
+{
+    length += position_in_segment_;
+    while (length >= current_segment_->length)
+    {
+        length -= current_segment_->length;
+        if (!next_segment()) return false; //Skip all complete segments
+    }
+    double factor = length / current_segment_->length;
+    position_in_segment_ = length;
+    current_position_ = segment_starting_point_ + (current_segment_->pos - segment_starting_point_) * factor;
+    return true;
+}
+
+
 }
 #endif // PATH_PROCESSOR_HPP
