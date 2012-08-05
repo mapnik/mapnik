@@ -242,6 +242,13 @@ unsigned text_layout::size() const
     return lines_.size();
 }
 
+double text_layout::cluster_width(unsigned cluster) const
+{
+    std::map<unsigned, double>::const_iterator width_itr = width_map_.find(cluster);
+    if (width_itr != width_map_.end()) return width_itr->second;
+    return 0;
+}
+
 /*********************************************************************************************/
 
 text_line::text_line(unsigned first_char, unsigned last_char)

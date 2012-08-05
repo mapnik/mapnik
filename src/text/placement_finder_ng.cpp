@@ -338,31 +338,37 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
         offset -= (*line_itr)->height();
         pp.set_offset(offset);
 
-        double last_glyph_angle = 999;
+        double last_cluster_angle = 999;
+//        signed current_cluster = -1;
+        double angle, sina, cosa;
 
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
-            double angle = normalize_angle(pp.angle(sign * glyph_itr->width));
-            double sina = sin(angle);
-            double cosa = cos(angle);
+            if (glyph_itr->width > 0)
+            {
+                //Only calculate new angle at the start of each cluster!
+                angle = normalize_angle(pp.angle(sign * glyph_itr->width));
+                sina = sin(angle);
+                cosa = cos(angle);
+                if ((info_->properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
+                        fabs(normalize_angle(angle-last_cluster_angle)) > info_->properties.max_char_angle_delta)
+                {
+                    pp.restore_state(s);
+                    return false;
+                }
+                last_cluster_angle = angle;
+//                current_cluster = glyph_itr->char_index;
+            }
+            if (abs(angle) > M_PI/2) upside_down_glyph_count++;
+
             pixel_position pos = pp.current_position();
             //Center the text on the line
             pos.y = -pos.y - char_height/2.0*cosa;
             pos.x =  pos.x + char_height/2.0*sina;
 
-            if (abs(angle) > M_PI/2) upside_down_glyph_count++;
-
-            if ((info_->properties.max_char_angle_delta > 0) && (last_glyph_angle != 999) &&
-                    fabs(normalize_angle(angle-last_glyph_angle)) > info_->properties.max_char_angle_delta)
-            {
-                pp.restore_state(s);
-                return false;
-            }
-            last_glyph_angle = angle;
-
             glyphs->push_back(*glyph_itr, pos, angle); //TODO: Store cosa, sina instead
-            if (glyph_itr->width)
+            if (glyph_itr->width > 0)
             {
                 //Only advance if glyph is not part of a multiple glyph sequence
                 pp.move(sign * (glyph_itr->width + glyph_itr->format->character_spacing));

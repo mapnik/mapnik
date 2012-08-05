@@ -99,6 +99,8 @@ public:
     const_iterator end() const;
     unsigned size() const;
 
+    double cluster_width(unsigned cluster) const;
+
 private:
     void break_line(text_line_ptr line, double wrap_width, unsigned text_ratio);
     void shape_text(text_line_ptr line);
