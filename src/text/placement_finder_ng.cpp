@@ -62,8 +62,10 @@ bool placement_finder_ng::next_position()
 
     if (info_->properties.orientation)
     {
+        // https://github.com/mapnik/mapnik/issues/1352
+        mapnik::evaluate<Feature, value_type> evaluator(feature_);
         angle_ = boost::apply_visitor(
-            evaluate<Feature, value_type>(feature_),
+            evaluator,
             *(info_->properties.orientation)).to_double() * M_PI / 180.0;
     } else {
         angle_ = 0.0;

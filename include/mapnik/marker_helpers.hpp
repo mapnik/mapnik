@@ -104,7 +104,7 @@ struct vector_markers_rasterizer_dispatch
             if (sym_.get_allow_overlap() ||
                 detector_.has_placement(transformed_bbox))
             {
-                svg_renderer_.render(ras_, sl_, renb_, matrix, 1, bbox_);
+                svg_renderer_.render(ras_, sl_, renb_, matrix, sym_.get_opacity(), bbox_);
 
                 if (!sym_.get_ignore_placement())
                     detector_.insert(transformed_bbox);
@@ -122,7 +122,7 @@ struct vector_markers_rasterizer_dispatch
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
                 matrix.translate(x, y);
-                svg_renderer_.render(ras_, sl_, renb_, matrix, 1, bbox_);
+                svg_renderer_.render(ras_, sl_, renb_, matrix, sym_.get_opacity(), bbox_);
             }
         }
     }
@@ -248,10 +248,8 @@ struct raster_markers_rasterizer_dispatch
             if (sym_.get_allow_overlap() ||
                 detector_.has_placement(transformed_bbox))
             {
-
-                float opacity = sym_.get_opacity() ? *sym_.get_opacity() : 1;
                 render_raster_marker(ras_, renb_, sl_, src_,
-                                     matrix, opacity);
+                                     matrix, sym_.get_opacity());
                 if (!sym_.get_ignore_placement())
                     detector_.insert(transformed_bbox);
             }
@@ -268,9 +266,8 @@ struct raster_markers_rasterizer_dispatch
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
                 matrix.translate(x,y);
-                float opacity = sym_.get_opacity() ? *sym_.get_opacity() : 1;
                 render_raster_marker(ras_, renb_, sl_, src_,
-                                     matrix, opacity);
+                                     matrix, sym_.get_opacity());
             }
         }
     }
@@ -327,9 +324,8 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
 {
     boost::optional<stroke> const& strk = sym.get_stroke();
     boost::optional<color> const& fill = sym.get_fill();
-    boost::optional<float> const& opacity = sym.get_opacity();
     boost::optional<float> const& fill_opacity = sym.get_fill_opacity();
-    if (strk || fill || opacity || fill_opacity)
+    if (strk || fill || fill_opacity)
     {
         bool success = false;
         for(unsigned i = 0; i < src.size(); ++i)
@@ -349,13 +345,6 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
                                                   s_color.green()/255.0,
                                                   s_color.blue()/255.0,
                                                   s_color.alpha()/255.0);
-                }
-                if (opacity)
-                {
-                    attr.stroke_opacity = *opacity;
-                }
-                else if (strk)
-                {
                     attr.stroke_opacity = strk->get_opacity();
                 }
             }
@@ -369,11 +358,7 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
                                                 f_color.blue()/255.0,
                                                 f_color.alpha()/255.0);
                 }
-                if (opacity)
-                {
-                    attr.fill_opacity = *opacity;
-                }
-                else if (fill_opacity)
+                if (fill_opacity)
                 {
                     attr.fill_opacity = *fill_opacity;
                 }

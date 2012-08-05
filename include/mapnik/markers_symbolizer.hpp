@@ -66,8 +66,6 @@ public:
     double get_spacing() const;
     void set_max_error(double max_error);
     double get_max_error() const;
-    void set_opacity(float opacity);
-    boost::optional<float> get_opacity() const;
     void set_fill(color const& fill);
     boost::optional<color> get_fill() const;
     void set_fill_opacity(float opacity);

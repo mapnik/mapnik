@@ -247,7 +247,6 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
 
 /*****************************************************************************/
 
-
 template <typename FaceManagerT, typename DetectorT>
 shield_symbolizer_helper<FaceManagerT, DetectorT>::shield_symbolizer_helper(const shield_symbolizer &sym, const Feature &feature, const proj_transform &prj_trans, unsigned width, unsigned height, double scale_factor, const CoordTransform &t, FaceManagerT &font_manager, DetectorT &detector, const box2d<double> &query_extent)
     : text_symbolizer_helper<FaceManagerT, DetectorT>(

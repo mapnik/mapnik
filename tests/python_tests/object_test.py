@@ -135,7 +135,7 @@ def test_pointsymbolizer_init():
 def test_markersymbolizer_init():
     p = mapnik.MarkersSymbolizer() 
     eq_(p.allow_overlap, False)
-    eq_(p.opacity,None)
+    eq_(p.opacity,1.0)
     eq_(p.fill_opacity,None)
     eq_(p.filename,'shape://ellipse')
     eq_(p.placement,mapnik.marker_placement.POINT_PLACEMENT)

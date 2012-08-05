@@ -1058,17 +1058,17 @@ namespace agg
                 long_type sbda = sb * da;
                 long_type sada = sa * da;
 
-                if ( sr > 0)  p[Order::R] = (value_type)(((srda + drsa <= sada) ?
-                    sr * d1a + dr * s1a :
-                    sa * (srda + drsa - sada) / sr + sr * d1a + dr * s1a + base_mask) >> base_shift);
+                p[Order::R] = (value_type)(((srda + drsa <= sada) ?
+                   sr * d1a + dr * s1a :
+                   (sr > 0 ? sa * (srda + drsa - sada) / sr + sr * d1a + dr * s1a + base_mask : 0)) >> base_shift);
 
-                if ( sg > 0 ) p[Order::G] = (value_type)(((sgda + dgsa <= sada) ?
+                p[Order::G] = (value_type)(((sgda + dgsa <= sada) ?
                     sg * d1a + dg * s1a :
-                    sa * (sgda + dgsa - sada) / sg + sg * d1a + dg * s1a + base_mask) >> base_shift);
+                   (sg > 0 ? sa * (sgda + dgsa - sada) / sg + sg * d1a + dg * s1a + base_mask : 0)) >> base_shift);
 
-                if ( sb > 0) p[Order::B] = (value_type)(((sbda + dbsa <= sada) ?
+                p[Order::B] = (value_type)(((sbda + dbsa <= sada) ?
                     sb * d1a + db * s1a :
-                    sa * (sbda + dbsa - sada) / sb + sb * d1a + db * s1a + base_mask) >> base_shift);
+                   (sb > 0 ? sa * (sbda + dbsa - sada) / sb + sb * d1a + db * s1a + base_mask : 0)) >> base_shift);
 
                 p[Order::A] = (value_type)(sa + da - ((sa * da + base_mask) >> base_shift));
             }
@@ -1468,31 +1468,38 @@ namespace agg
                                          // source rgb
                                          unsigned sr, unsigned sg, unsigned sb,
                                          // source alpha and opacity
-                                         unsigned sa, unsigned cover) {
-            if (cover < 255) {
+                                         unsigned sa, unsigned cover)
+        {
+            if(cover < 255)
+            {
+                sr = (sr * cover + 255) >> 8;
+                sg = (sg * cover + 255) >> 8;
+                sb = (sb * cover + 255) >> 8;
                 sa = (sa * cover + 255) >> 8;
             }
-            p[Order::R] = (value_type)(((0 + base_mask) >> base_shift));
-            p[Order::G] = (value_type)(((0 + base_mask) >> base_shift));
-            p[Order::B] = (value_type)(((0 + base_mask) >> base_shift));
-            p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
-
-            // http://en.wikipedia.org/wiki/File:HSV-RGB-comparison.svg
-            if (p[Order::A] < 64) {
-                p[Order::G] = ((p[Order::A] - 64) * 4);
-                p[Order::B] = 255;
-            }
-            if (p[Order::A] >= 64 && p[Order::A] < 128) {
-                p[Order::G] = 255;
-                p[Order::B] = 255 - ((p[Order::A] - 64) * 4);
-            }
-            if (p[Order::A] >= 128 && p[Order::A] < 192) {
-                p[Order::R] = ((p[Order::A] - 128) * 4);
-                p[Order::G] = 255;
-            }
-            if (p[Order::A] >= 192) {
-                p[Order::R] = 255;
-                p[Order::G] = 255 - ((p[Order::A] - 192) * 4);
+            if (sa > 0)
+            {
+                p[Order::R] = (value_type)(((0 + base_mask) >> base_shift));
+                p[Order::G] = (value_type)(((0 + base_mask) >> base_shift));
+                p[Order::B] = (value_type)(((0 + base_mask) >> base_shift));
+                p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+                // http://en.wikipedia.org/wiki/File:HSV-RGB-comparison.svg
+                if (p[Order::A] < 64) {
+                    p[Order::G] = ((p[Order::A] - 64) * 4);
+                    p[Order::B] = 255;
+                }
+                if (p[Order::A] >= 64 && p[Order::A] < 128) {
+                    p[Order::G] = 255;
+                    p[Order::B] = 255 - ((p[Order::A] - 64) * 4);
+                }
+                if (p[Order::A] >= 128 && p[Order::A] < 192) {
+                    p[Order::R] = ((p[Order::A] - 128) * 4);
+                    p[Order::G] = 255;
+                }
+                if (p[Order::A] >= 192) {
+                    p[Order::R] = 255;
+                    p[Order::G] = 255 - ((p[Order::A] - 192) * 4);
+                }
             }
         }
     };
