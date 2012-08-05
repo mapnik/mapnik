@@ -300,9 +300,7 @@ bool placement_finder_ng::find_line_placements(T & path)
         pp.forward(spacing/2.-layout_.width()/2.);
         do
         {
-            vertex_cache::state s = pp.save_state();
             success = single_line_placement(pp, info_->properties.upright) || success;
-            pp.restore_state(s);
         } while (pp.forward(spacing));
     }
     return success;
@@ -311,6 +309,7 @@ bool placement_finder_ng::find_line_placements(T & path)
 
 bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e orientation)
 {
+    vertex_cache::state s = pp.save_state();
     /* IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! */
     text_upright_e real_orientation = orientation;
     if (orientation == UPRIGHT_AUTO)
@@ -359,6 +358,12 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
                 pp.move(sign * (glyph_itr->width + glyph_itr->format->character_spacing));
             }
         }
+    }
+    pp.restore_state(s);
+    if (orientation == UPRIGHT_AUTO && (upside_down_glyph_count > layout_.size()/2))
+    {
+        //Try again with oposite orienation
+        return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
     }
     placements_.push_back(glyphs);
     return true;
