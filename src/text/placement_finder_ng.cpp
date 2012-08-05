@@ -316,8 +316,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     text_upright_e real_orientation = orientation;
     if (orientation == UPRIGHT_AUTO)
     {
-        double angle = normalize_angle(pp.angle());
-        real_orientation = (angle > 0.5*M_PI && angle < 1.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+        real_orientation = (fabs(normalize_angle(pp.angle())) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
     double sign = 1;
     if (real_orientation == UPRIGHT_LEFT)
@@ -339,6 +338,8 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
         offset -= (*line_itr)->height();
         pp.set_offset(offset);
 
+        double last_glyph_angle = 999;
+
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
@@ -350,8 +351,15 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
             pos.y = -pos.y - char_height/2.0*cosa;
             pos.x =  pos.x + char_height/2.0*sina;
 
-            if (angle > M_PI/2. && angle < 1.5*M_PI)
-                upside_down_glyph_count++;
+            if (abs(angle) > M_PI/2) upside_down_glyph_count++;
+
+            if ((info_->properties.max_char_angle_delta > 0) && (last_glyph_angle != 999) &&
+                    fabs(normalize_angle(angle-last_glyph_angle)) > info_->properties.max_char_angle_delta)
+            {
+                pp.restore_state(s);
+                return false;
+            }
+            last_glyph_angle = angle;
 
             glyphs->push_back(*glyph_itr, pos, angle); //TODO: Store cosa, sina instead
             if (glyph_itr->width)
@@ -373,9 +381,9 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
 
 double placement_finder_ng::normalize_angle(double angle)
 {
-    while (angle >= 2*M_PI)
+    while (angle >= M_PI)
         angle -= 2*M_PI;
-    while (angle < 0)
+    while (angle < -M_PI)
         angle += 2*M_PI;
     return angle;
 }
