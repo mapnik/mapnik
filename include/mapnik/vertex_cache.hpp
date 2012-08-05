@@ -60,6 +60,7 @@ public:
         segment_vector::iterator current_segment;
         double position_in_segment;
         pixel_position current_position;
+        pixel_position segment_starting_point;
         friend class vertex_cache;
     public:
         pixel_position const& position() { return current_position; }
@@ -282,6 +283,7 @@ vertex_cache::state vertex_cache::save_state() const
     s.current_segment = current_segment_;
     s.position_in_segment = position_in_segment_;
     s.current_position = current_position_;
+    s.segment_starting_point = segment_starting_point_;
     return s;
 }
 
@@ -290,6 +292,7 @@ void vertex_cache::restore_state(vertex_cache::state s)
     current_segment_ = s.current_segment;
     position_in_segment_ = s.position_in_segment;
     current_position_ = s.current_position;
+    segment_starting_point_ = s.segment_starting_point;
     angle_valid_ = false;
 }
 
