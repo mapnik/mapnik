@@ -480,6 +480,7 @@ compile_get_opt_attr(label_placement_e);
 compile_get_opt_attr(vertical_alignment_e);
 compile_get_opt_attr(horizontal_alignment_e);
 compile_get_opt_attr(justify_alignment_e);
+compile_get_opt_attr(text_upright_e);
 compile_get_opt_attr(expression_ptr);
 compile_get_attr(std::string);
 compile_get_attr(filter_mode_e);

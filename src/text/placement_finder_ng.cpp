@@ -301,7 +301,7 @@ bool placement_finder_ng::find_line_placements(T & path)
         do
         {
             vertex_cache::state s = pp.save_state();
-            success = single_line_placement(pp, 0) || success;
+            success = single_line_placement(pp, info_->properties.upright) || success;
             pp.restore_state(s);
         } while (pp.forward(spacing));
     }
@@ -309,57 +309,68 @@ bool placement_finder_ng::find_line_placements(T & path)
 }
 
 
-bool placement_finder_ng::single_line_placement(vertex_cache &pp, signed orientation)
+bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e orientation)
 {
-    std::cout << "single_line" << pp.current_position().x << ", " << pp.current_position().y << "\n";
+    /* IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! */
+    text_upright_e real_orientation = orientation;
+    if (orientation == UPRIGHT_AUTO)
+    {
+        double angle = normalize_angle(pp.angle());
+        real_orientation = (angle > 0.5*M_PI && angle < 1.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+    }
+    double sign = 1;
+    if (real_orientation == UPRIGHT_LEFT)
+    {
+        sign = -1;
+        pp.forward(layout_.width());
+    }
+
     double base_offset = alignment_offset().y + info_->properties.displacement.y;
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
 
-    /* IMPORTANT NOTE:
-       x and y are relative to the center of the text
-       coordinate system:
-       x: grows from left to right
-       y: grows from bottom to top (all values are negative!)
-    */
-
     double offset = base_offset + layout_.height();
+    unsigned upside_down_glyph_count = 0;
 
     text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
     for (; line_itr != line_end; line_itr++)
     {
         double char_height = (*line_itr)->max_char_height();
         offset -= (*line_itr)->height();
-        // reset to begining of line position
+        pp.set_offset(offset);
 
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
-            double angle = pp.angle(glyph_itr->width);
+            double angle = normalize_angle(pp.angle(sign * glyph_itr->width));
             double sina = sin(angle);
             double cosa = cos(angle);
             pixel_position pos = pp.current_position();
             //Center the text on the line
             pos.y = -pos.y - char_height/2.0*cosa;
-            pos.x =  pos.x - char_height/2.0*sina;
+            pos.x =  pos.x + char_height/2.0*sina;
 
-//            if (orientation < 0)
-//            {
-//                // rotate in place
-//                render_x += cwidth*cosa - char_height*sina;
-//                render_y -= cwidth*sina + char_height*cosa;
-//                render_angle += M_PI;
-//            }
+            if (angle > M_PI/2. && angle < 1.5*M_PI)
+                upside_down_glyph_count++;
 
-            glyphs->push_back(*glyph_itr, pos, -angle); //TODO: Store cosa, sina instead
+            glyphs->push_back(*glyph_itr, pos, angle); //TODO: Store cosa, sina instead
             if (glyph_itr->width)
             {
                 //Only advance if glyph is not part of a multiple glyph sequence
-                pp.forward(glyph_itr->width + glyph_itr->format->character_spacing);
+                pp.move(sign * (glyph_itr->width + glyph_itr->format->character_spacing));
             }
         }
     }
     placements_.push_back(glyphs);
     return true;
+}
+
+double placement_finder_ng::normalize_angle(double angle)
+{
+    while (angle >= 2*M_PI)
+        angle -= 2*M_PI;
+    while (angle < 0)
+        angle += 2*M_PI;
+    return angle;
 }
 
 

@@ -71,10 +71,9 @@ public:
 
     pixel_position const& current_position() const { return current_position_; }
 
-    double angle(double width);
+    double angle(double width=0.);
 
     bool next_subpath();
-    bool next_segment();
 
     /** Moves all positions to a parallel line in the specified distance. */
     void set_offset(double offset);
@@ -86,12 +85,16 @@ public:
      * on a point on the path.
      */
     bool forward(double length);
+    bool backward(double length);
+    bool move(double length); //Move works in both directions
 
     state save_state() const;
     void restore_state(state s);
 
 
 private:
+    bool next_segment();
+    bool previous_segment();
     pixel_position current_position_;
     pixel_position segment_starting_point_;
     std::vector<segment_vector> subpaths_;
@@ -159,21 +162,24 @@ vertex_cache::vertex_cache(T &path)
 
 double vertex_cache::angle(double width)
 {
-    if (width + position_in_segment_ < current_segment_->length)
+ /* IMPORTANT NOTE: See note about coordinate systems in placement_finder::find_point_placement()
+  * for imformation about why the y axis is inverted! */
+    double tmp = width + position_in_segment_;
+    if ((tmp <= current_segment_->length) && (tmp >= 0))
     {
         //Only calculate angle on request as it is expensive
         if (!angle_valid_)
         {
-            angle_ = atan2(current_segment_->pos.y - segment_starting_point_.y,
+            angle_ = atan2(-(current_segment_->pos.y - segment_starting_point_.y),
                            current_segment_->pos.x - segment_starting_point_.x);
         }
-        return angle_;
+        return width >= 0 ? angle_ : angle_ + M_PI;
     } else
     {
         state s = save_state();
         pixel_position const& old_pos = s.position();
-        forward(width);
-        double angle = atan2(current_position_.y - old_pos.y,
+        move(width);
+        double angle = atan2(-(current_position_.y - old_pos.y),
                              current_position_.x - old_pos.x);
         restore_state(s);
         return angle;
@@ -205,8 +211,23 @@ bool vertex_cache::next_segment()
     segment_starting_point_ = current_segment_->pos; //Next segments starts at the end of the current one
     if (current_segment_ == current_subpath_->vector.end()) return false;
     current_segment_++;
-    if (current_segment_ == current_subpath_->vector.end()) return false;
     angle_valid_ = false;
+    if (current_segment_ == current_subpath_->vector.end()) return false;
+    return true;
+}
+
+bool vertex_cache::previous_segment()
+{
+    if (current_segment_ == current_subpath_->vector.begin()) return false;
+    current_segment_--;
+    angle_valid_ = false;
+    if (current_segment_ == current_subpath_->vector.begin())
+    {
+        //First segment is special
+        segment_starting_point_ = current_segment_->pos;
+        return true;
+    }
+    segment_starting_point_ = (current_segment_-1)->pos;
     return true;
 }
 
@@ -220,18 +241,40 @@ bool vertex_cache::forward(double length)
     if (length < 0)
     {
         MAPNIK_LOG_ERROR(vertex_cache) << "vertex_cache::forward() called with negative argument!\n";
+        return false;
     }
+    return move(length);
+}
+
+bool vertex_cache::backward(double length)
+{
+    if (length < 0)
+    {
+        MAPNIK_LOG_ERROR(vertex_cache) << "vertex_cache::backward() called with negative argument!\n";
+        return false;
+    }
+    return move(-length);
+}
+
+bool vertex_cache::move(double length)
+{
     length += position_in_segment_;
     while (length >= current_segment_->length)
     {
         length -= current_segment_->length;
         if (!next_segment()) return false; //Skip all complete segments
     }
+    while (length < 0)
+    {
+        if (!previous_segment()) return false;
+        length += current_segment_->length;
+    }
     double factor = length / current_segment_->length;
     position_in_segment_ = length;
     current_position_ = segment_starting_point_ + (current_segment_->pos - segment_starting_point_) * factor;
     return true;
 }
+
 
 vertex_cache::state vertex_cache::save_state() const
 {

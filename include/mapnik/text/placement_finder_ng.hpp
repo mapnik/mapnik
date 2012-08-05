@@ -71,7 +71,8 @@ private:
     void init_alignment();
     pixel_position alignment_offset() const;
 
-    bool single_line_placement(vertex_cache &pp, signed orientation);
+    bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
+    static double normalize_angle(double angle);
     Feature const& feature_;
     DetectorType &detector_;
     box2d<double> const& extent_;
