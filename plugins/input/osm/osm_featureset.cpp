@@ -83,29 +83,29 @@ feature_ptr osm_featureset<filterT>::next()
         }
 
         if (!cur_item) return feature_ptr();
-            feature = feature_factory::create(ctx_, feature_id_);
-            ++feature_id_;
-            geometry_type* geom;
-            if (static_cast<osm_way*>(cur_item)->is_polygon())
-            {
-                geom = new geometry_type(mapnik::Polygon);
-            }
-            else
-            {
-                geom = new geometry_type(mapnik::LineString);
-            }
+        feature = feature_factory::create(ctx_, feature_id_);
+        ++feature_id_;
+        geometry_type* geom;
+        if (static_cast<osm_way*>(cur_item)->is_polygon())
+        {
+            geom = new geometry_type(mapnik::Polygon);
+        }
+        else
+        {
+            geom = new geometry_type(mapnik::LineString);
+        }
 
-            geom->move_to(static_cast<osm_way*>(cur_item)->nodes[0]->lon,
-                          static_cast<osm_way*>(cur_item)->nodes[0]->lat);
+        geom->move_to(static_cast<osm_way*>(cur_item)->nodes[0]->lon,
+                      static_cast<osm_way*>(cur_item)->nodes[0]->lat);
 
-            for (unsigned int count = 1;
-                 count < static_cast<osm_way*>(cur_item)->nodes.size();
-                 count++)
-            {
-                geom->line_to(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
-                              static_cast<osm_way*>(cur_item)->nodes[count]->lat);
-            }
-            feature->add_geometry(geom);
+        for (unsigned int count = 1;
+             count < static_cast<osm_way*>(cur_item)->nodes.size();
+             count++)
+        {
+            geom->line_to(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
+                          static_cast<osm_way*>(cur_item)->nodes[count]->lat);
+        }
+        feature->add_geometry(geom);
     } else
     {
         MAPNIK_LOG_FATAL(osm_featureset) << "Current item is neither node nor way.\n";
