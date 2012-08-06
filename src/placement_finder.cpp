@@ -585,7 +585,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
     
     // Whether the orientation was set by the caller
     bool orientation_forced = (orientation != 0);
-        
+
     unsigned upside_down_char_count = 0; //Count of characters that are placed upside down.
 
     std::auto_ptr<text_path> current_placement(
@@ -594,25 +594,32 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
             )
         );
 
+    bool first = true;
     BOOST_FOREACH(const text_element &text, text_elements_)
     {
+        if (text.info.num_characters() == 0) continue;
+        
+        double segment_length = path_distances[index];
+        
         // keep text elements centered relative to each other
-        double offset_x = (text_width_ - text.point_place_box.string_width_) / 2.0;
-        while (offset_x > 0.0 && index < path_positions.size())
+        distance += (text_width_ - text.point_place_box.string_width_) / 2.0;
+        while (distance >= segment_length)
         {
-            double seg_length = path_distances[index] - distance;
-            if (seg_length >= offset_x)
+            distance -= segment_length;
+            if (++index == path_positions.size())
             {
-                distance += offset_x;
-                offset_x = 0.0;
+                // can't place if required distance exceeds available line segments
+                MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Out of space (centering)";
+                return std::auto_ptr<text_path>(NULL);
             }
-            else
-            {
-                offset_x -= seg_length;
-                distance = 0.0;
-                index++;
-            }
+            segment_length = path_distances[index];
         }
+        
+        if (segment_length == 0) {
+            // Not allowed to place across on 0 length segments or discontinuities
+            return std::auto_ptr<text_path>(NULL);
+        }
+        
         double old_x = path_positions[index-1].x;
         double old_y = path_positions[index-1].y;
 
@@ -622,15 +629,13 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         double dx = new_x - old_x;
         double dy = new_y - old_y;
 
-        double segment_length = path_distances[index];
-        if (segment_length == 0) {
-            // Not allowed to place across on 0 length segments or discontinuities
-            return std::auto_ptr<text_path>(NULL);
-        }
-
         double angle = atan2(-dy, dx);
-        if (!orientation_forced)
-            orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
+        if (first)
+        {
+            first = false;
+            if (!orientation_forced)
+                orientation = (angle > 0.55*M_PI || angle < -0.45*M_PI) ? -1 : 1;
+        }
 
         for (unsigned i = 0; i < text.info.num_characters(); ++i)
         {
@@ -847,9 +852,9 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
             }
             envelopes_.push(e);
         }
-
-        current_placement->rewind();
     }
+    
+    current_placement->rewind();
 
     return status;
 }
