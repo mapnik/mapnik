@@ -27,35 +27,33 @@
 
 // mapnik
 #include <mapnik/metawriter_inmem.hpp>
+#include <mapnik/params.hpp>
 
 using mapnik::metawriter_inmem;
 using mapnik::metawriter_inmem_ptr;
 
 namespace {
-std::map<std::string, mapnik::value>::const_iterator
-mapnik_value_map_begin(const std::map<std::string, mapnik::value> &m) {
-    return m.begin();
-}
+mapnik::parameters get_inmem_metawriter_properties(metawriter_inmem::meta_instance inst) {
+   typedef std::pair<std::string, mapnik::value> value_type;
+   mapnik::parameters params;
 
-std::map<std::string, mapnik::value>::const_iterator
-mapnik_value_map_end(const std::map<std::string, mapnik::value> &m) {
-    return m.end();
+   BOOST_FOREACH(const value_type &val, inst.properties) {
+      params.insert(std::make_pair(val.first, mapnik::value_holder(val.second.to_string())));
+   }
+
+   return params;
 }
 }
 
 void export_inmem_metawriter() {
     using namespace boost::python;
 
-    class_<std::map<std::string, mapnik::value> >
-        ("MapnikProperties", "Retarded.", init<>())
-        .def("__iter__", range(&mapnik_value_map_begin, &mapnik_value_map_end))
-        ;
-
     class_<metawriter_inmem::meta_instance>
-        ("MetaInstance", "Single rendered instance of meta-information.", no_init)
-        .def_readonly("box", &metawriter_inmem::meta_instance::box)
-        .def_readonly("properties", &metawriter_inmem::meta_instance::properties)
-        ;
+       ("MetaInstance", "Single rendered instance of meta-information.", no_init)
+       .def_readonly("box", &metawriter_inmem::meta_instance::box)
+       .add_property("properties", make_function(get_inmem_metawriter_properties, 
+                                                 return_value_policy<return_by_value>()))
+       ;
 
     class_<metawriter_inmem, metawriter_inmem_ptr, boost::noncopyable>
         ("MetaWriterInMem",
