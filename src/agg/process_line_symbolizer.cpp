@@ -20,15 +20,15 @@
  *
  *****************************************************************************/
 
-// boost
-#include <boost/foreach.hpp>
 // mapnik
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+
 #include <mapnik/line_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
+
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -41,9 +41,12 @@
 #include "agg_conv_dash.h"
 #include "agg_renderer_outline_aa.h"
 #include "agg_rasterizer_outline_aa.h"
+
+// boost
+#include <boost/foreach.hpp>
+
 // stl
 #include <string>
-#include <cmath>
 
 namespace mapnik {
 
@@ -71,6 +74,9 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+    typedef boost::mpl::vector<clip_line_tag, transform_tag,
+                               offset_transform_tag, affine_transform_tag,
+                               smooth_tag, dash_tag, stroke_tag> conv_types;
 
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
@@ -110,9 +116,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         rasterizer_type ras(ren);
         set_join_caps_aa(stroke_,ras);
 
-        typedef boost::mpl::vector<clip_line_tag, transform_tag,
-                                   offset_transform_tag, affine_transform_tag,
-                                   smooth_tag, dash_tag, stroke_tag> conv_types;
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
             converter(clipping_extent,ras,sym,t_,prj_trans,tr,scaled);
@@ -134,9 +137,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     }
     else
     {
-        typedef boost::mpl::vector<clip_line_tag, transform_tag, offset_transform_tag,
-                                   affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
-
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
             converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
