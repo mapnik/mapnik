@@ -727,7 +727,7 @@ public:
                 set_font_face(manager, glyph->get_face());
 
                 glyph_path(glyph->get_index(), sx + x, sy - y);
-                set_line_width(c->format->halo_radius * scale_factor);
+                set_line_width(2.0 * c->format->halo_radius * scale_factor);
                 set_line_join(ROUND_JOIN);
                 set_color(c->format->halo_fill);
                 stroke();
