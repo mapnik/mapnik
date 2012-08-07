@@ -26,6 +26,7 @@
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+
 #include <mapnik/line_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 
@@ -49,31 +50,45 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef coord_transform<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<mapnik::pixfmt_gray32> ren_base;
-    typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+    typedef agg::renderer_base<mapnik::pixfmt_gray32> renderer_base;
+    typedef agg::renderer_scanline_bin_solid<renderer_base> renderer_type;
+    typedef boost::mpl::vector<clip_line_tag, transform_tag,
+                               offset_transform_tag, affine_transform_tag,
+                               smooth_tag, dash_tag, stroke_tag> conv_types;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
     mapnik::pixfmt_gray32 pixf(buf);
 
-    ren_base renb(pixf);
-    renderer ren(renb);
+    renderer_base renb(pixf);
+    renderer_type ren(renb);
 
     ras_ptr->reset();
 
-    stroke const&  stroke_ = sym.get_stroke();
+    stroke const& stroke_ = sym.get_stroke();
 
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    box2d<double> ext = query_extent_ * 1.1;
+    box2d<double> clipping_extent = query_extent_;
+    if (sym.clip())
+    {
+        double padding = (double)(query_extent_.width()/pixmap_.width());
+        float half_stroke = stroke_.get_width()/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+    }
 
-    typedef boost::mpl::vector<clip_line_tag,transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
     vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(ext,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
-
+        converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
     if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
