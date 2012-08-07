@@ -91,7 +91,7 @@ PyObject* get_fill_opacity_impl(markers_symbolizer & sym)
     boost::optional<float> fill_opacity = sym.get_fill_opacity();
     if (fill_opacity)
         return ::PyFloat_FromDouble(*fill_opacity);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 void export_markers_symbolizer()

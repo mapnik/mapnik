@@ -105,7 +105,7 @@ PyObject* to_wkb( geometry_type const& geom, mapnik::util::wkbByteOrder byte_ord
     }
     else
     {
-        return Py_None;
+        Py_RETURN_NONE;
     }
 }
 #else
@@ -133,7 +133,7 @@ PyObject* to_wkb2( path_type const& p, mapnik::util::wkbByteOrder byte_order)
     }
     else
     {
-        return Py_None;
+        Py_RETURN_NONE;
     }
 }
 #else
