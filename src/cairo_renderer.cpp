@@ -666,11 +666,11 @@ public:
         glyph.x = x;
         glyph.y = y;
 
-        std::vector<Cairo::Glyph> glyphs;
-
-        glyphs.push_back(glyph);
-
-        context_->show_glyphs(glyphs);
+        cairo_show_glyphs(context_->cobj(), &glyph, 1);
+        if (context_->get_status() != CAIRO_STATUS_SUCCESS)
+        {
+            throw std::runtime_error("cairo: show_glyph");
+        }
     }
 
     void glyph_path(unsigned long index, double x, double y)
@@ -681,11 +681,11 @@ public:
         glyph.x = x;
         glyph.y = y;
 
-        std::vector<Cairo::Glyph> glyphs;
-
-        glyphs.push_back(glyph);
-
-        context_->glyph_path(glyphs);
+        cairo_glyph_path(context_->cobj(), &glyph, 1);
+        if (context_->get_status() != CAIRO_STATUS_SUCCESS)
+        {
+            throw std::runtime_error("cairo: glyph_path");
+        }
     }
 
     void add_text(text_path const& path,
