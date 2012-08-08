@@ -1391,7 +1391,6 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 {
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
-    //double scale_factor_ = 1;
 
     typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
     typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
