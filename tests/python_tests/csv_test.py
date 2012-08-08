@@ -21,7 +21,7 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         broken = glob.glob("../data/csv/fails/*.*")
         broken.extend(glob.glob("../data/csv/warns/*.*"))
 
-        # Add a filename that doesn't exist 
+        # Add a filename that doesn't exist
         broken.append("../data/csv/fails/does_not_exist.csv")
 
         for csv in broken:
@@ -107,13 +107,15 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(ds.fields(),['x', 'y', 'text', 'date', 'integer', 'boolean', 'float', 'time', 'datetime', 'empty_column'])
         eq_(ds.field_types(),['int', 'int', 'str', 'str', 'int', 'str', 'float', 'str', 'str', 'str'])
         fs = ds.featureset()
-        feat = fs.next()
         attr = {'x': 0, 'empty_column': u'', 'text': u'a b', 'float': 1.0, 'datetime': u'1971-01-01T04:14:00', 'y': 0, 'boolean': u'True', 'time': u'04:14:00', 'date': u'1971-01-01', 'integer': 40}
-        eq_(feat.attributes,attr)
-        while feat:
+        first = True
+        for feat in fs:
+            if first:
+                first=False
+                eq_(feat.attributes,attr)
             eq_(len(feat),10)
             eq_(feat['empty_column'],u'')
-            feat = fs.next()
+
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
         eq_(desc['name'],'csv')

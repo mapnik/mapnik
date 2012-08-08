@@ -27,12 +27,9 @@ if 'shape' in plugins and 'ogr' in plugins:
         fs1 = ds1.featureset()
         fs2 = ds2.featureset()
         count = 0;
-        while(True):
+        import itertools
+        for feat1,feat2 in itertools.izip(fs1, fs2):
             count += 1
-            feat1 = fs1.next()
-            feat2 = fs2.next()
-            if not feat1:
-                break
             eq_(str(feat1),str(feat2))
             # TODO - revisit this: https://github.com/mapnik/mapnik/issues/1093
             #eq_(feat1.geometries().to_wkt(),feat2.geometries().to_wkt())
