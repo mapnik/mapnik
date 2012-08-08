@@ -424,7 +424,7 @@ public:
         context_->set_line_width(width);
     }
 
-    void set_dash(dash_array const &dashes)
+    void set_dash(dash_array const &dashes, double scale_factor)
     {
         std::valarray<double> d(dashes.size() * 2);
         dash_array::const_iterator itr = dashes.begin();
@@ -433,8 +433,8 @@ public:
 
         for (; itr != end; ++itr)
         {
-            d[index++] = itr->first;
-            d[index++] = itr->second;
+            d[index++] = itr->first * scale_factor;
+            d[index++] = itr->second * scale_factor;
         }
 
         context_->set_dash(d, 0.0);
@@ -980,7 +980,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     context.set_line_width(stroke_.get_width() * scale_factor_);
     if (stroke_.has_dash())
     {
-        context.set_dash(stroke_.get_dash_array());
+        context.set_dash(stroke_.get_dash_array(), scale_factor_);
     }
 
     agg::trans_affine tr;
