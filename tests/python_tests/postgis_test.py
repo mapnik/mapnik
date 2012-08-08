@@ -111,7 +111,7 @@ INSERT INTO test5(non_id, manual_id, geom) values (0, -1, GeomFromEWKT('SRID=432
 INSERT INTO test5(non_id, manual_id, geom) values (0, 1, GeomFromEWKT('SRID=4326;POINT(0 0)'));
 """
 
-insert_table_6 = '''
+insert_table_5b = '''
 CREATE TABLE "tableWithMixedCase"(gid serial PRIMARY KEY, geom geometry);
 INSERT INTO "tableWithMixedCase"(geom) values (ST_MakePoint(0,0));
 INSERT INTO "tableWithMixedCase"(geom) values (ST_MakePoint(0,1));
@@ -119,10 +119,16 @@ INSERT INTO "tableWithMixedCase"(geom) values (ST_MakePoint(1,0));
 INSERT INTO "tableWithMixedCase"(geom) values (ST_MakePoint(1,1));
 '''
 
-insert_table_7 = '''
+insert_table_6 = '''
 CREATE TABLE test6(first_id int4, second_id int4,PRIMARY KEY (first_id,second_id), geom geometry);
 INSERT INTO test6(first_id, second_id, geom) values (0, 0, GeomFromEWKT('SRID=4326;POINT(0 0)'));
 '''
+
+insert_table_7 = '''
+CREATE TABLE test7(gid serial PRIMARY KEY, geom geometry);
+INSERT INTO test7(gid, geom) values (1, GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(MULTILINESTRING((10 10,20 20,10 40),(40 40,30 30,40 20,30 10)),LINESTRING EMPTY)'));
+'''
+
 
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
@@ -134,7 +140,8 @@ def postgis_setup():
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_3),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_4),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_5),silent=False)
-    call("""psql -q %s -c '%s'""" % (MAPNIK_TEST_DBNAME,insert_table_6),silent=False)
+    call("""psql -q %s -c '%s'""" % (MAPNIK_TEST_DBNAME,insert_table_5b),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_6),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_7),silent=False)
 
 def postgis_takedown():
@@ -437,6 +444,12 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
         eq_(fs.next().id(),3)
         eq_(fs.next().id(),4)
         eq_(fs.next(),None)
+
+    def test_empty_geom():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test7',
+                            geometry_field='geom')
+        fs = ds.featureset()
+        eq_(fs.next()['gid'],1)
 
     atexit.register(postgis_takedown)
 
