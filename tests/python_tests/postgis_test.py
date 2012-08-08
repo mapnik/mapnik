@@ -197,7 +197,11 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
     def test_empty_db():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='empty')
         fs = ds.featureset()
-        feature = fs.next()
+        feature = None
+        try:
+            feature = fs.next()
+        except StopIteration:
+            pass
         eq_(feature,None)
         eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Collection)
 
@@ -397,22 +401,16 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
                             geometry_field='geom',
                             autodetect_key_field=True)
         fs = ds.featureset()
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),2)
-        eq_(fs.next().id(),3)
-        eq_(fs.next().id(),4)
-        eq_(fs.next(),None)
+        for id in range(1,5):
+            eq_(fs.next().id(),id)
 
     def test_querying_subquery_with_mixed_case():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(SeLeCt * FrOm "tableWithMixedCase") as MixedCaseQuery',
                             geometry_field='geom',
                             autodetect_key_field=True)
         fs = ds.featureset()
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),2)
-        eq_(fs.next().id(),3)
-        eq_(fs.next().id(),4)
-        eq_(fs.next(),None)
+        for id in range(1,5):
+            eq_(fs.next().id(),id)
 
     def test_bbox_token_in_subquery1():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
@@ -420,11 +418,8 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
                             geometry_field='geom',
                             autodetect_key_field=True)
         fs = ds.featureset()
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),2)
-        eq_(fs.next().id(),3)
-        eq_(fs.next().id(),4)
-        eq_(fs.next(),None)
+        for id in range(1,5):
+            eq_(fs.next().id(),id)
 
     def test_bbox_token_in_subquery2():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='''
@@ -432,11 +427,8 @@ if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
                             geometry_field='geom',
                             autodetect_key_field=True)
         fs = ds.featureset()
-        eq_(fs.next().id(),1)
-        eq_(fs.next().id(),2)
-        eq_(fs.next().id(),3)
-        eq_(fs.next().id(),4)
-        eq_(fs.next(),None)
+        for id in range(1,5):
+            eq_(fs.next().id(),id)
 
     atexit.register(postgis_takedown)
 

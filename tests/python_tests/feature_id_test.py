@@ -5,6 +5,7 @@ from nose.tools import *
 from utilities import execution_path, Todo
 
 import os, sys, glob, mapnik
+import itertools
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -23,17 +24,12 @@ def compare_shape_between_mapnik_and_ogr(shapefile,query=None):
             fs1 = ds1.featureset()
             fs2 = ds2.featureset()
         count = 0;
-        while(True):
+        for feat1,feat2 in itertools.izip(fs1,fs2):
             count += 1
-            feat1 = fs1.next()
-            feat2 = fs2.next()
-            if not feat1:
-                break
-            #import pdb;pdb.set_trace()
             eq_(feat1.id(),feat2.id(),
-                '%s : ogr feature id %s "%s" does not equal shapefile feature id %s "%s"' 
+                '%s : ogr feature id %s "%s" does not equal shapefile feature id %s "%s"'
                   % (count,feat1.id(),str(feat1.attributes), feat2.id(),str(feat2.attributes)))
-        return True
+    return True
 
 
 def test_shapefile_line_featureset_id():
