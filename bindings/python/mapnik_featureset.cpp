@@ -49,13 +49,14 @@ inline object pass_through(object const& o) { return o; }
 
 inline mapnik::feature_ptr next(mapnik::featureset_ptr const& itr)
 {
-    if (!itr)
+    mapnik::feature_ptr f = itr->next();
+    if (!f)
     {
         PyErr_SetString(PyExc_StopIteration, "No more features.");
         boost::python::throw_error_already_set();
     }
 
-    return itr->next();
+    return f;
 }
 
 }
