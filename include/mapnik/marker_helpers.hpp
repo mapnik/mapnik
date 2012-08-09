@@ -113,10 +113,10 @@ struct vector_markers_rasterizer_dispatch
         }
         else
         {
-            markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
-                                                                      sym_.get_spacing() * scale_factor_,
-                                                                      sym_.get_max_error(),
-                                                                      sym_.get_allow_overlap());
+            markers_placement<T, Detector> placement(path, bbox_, marker_trans_, detector_,
+                                                     sym_.get_spacing() * scale_factor_,
+                                                     sym_.get_max_error(),
+                                                     sym_.get_allow_overlap());
             double x, y, angle;
             while (placement.get_point(x, y, angle))
             {
