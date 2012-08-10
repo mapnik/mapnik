@@ -267,7 +267,6 @@ bool placement_finder_ng::find_point_on_line_placements(T & path)
 
 
         double spacing = pp.length() / num_labels;
-        double dx = info_->properties.displacement.x;
         pp.forward(spacing/2.); // first label should be placed at half the spacing
         path_move_dx(pp);
 
@@ -315,7 +314,7 @@ bool placement_finder_ng::find_line_placements(T & path)
 
 bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e orientation)
 {
-    vertex_cache::state s = pp.save_state();
+    vertex_cache::scoped_state s(pp);
     /* IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! */
     text_upright_e real_orientation = orientation;
     if (orientation == UPRIGHT_AUTO)
@@ -358,7 +357,6 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
                 if ((info_->properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
                         fabs(normalize_angle(angle-last_cluster_angle)) > info_->properties.max_char_angle_delta)
                 {
-                    pp.restore_state(s);
                     return false;
                 }
                 last_cluster_angle = angle;
@@ -379,7 +377,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
             }
         }
     }
-    pp.restore_state(s);
+    s.restore();
     if (orientation == UPRIGHT_AUTO && (upside_down_glyph_count > layout_.size()/2))
     {
         //Try again with oposite orienation

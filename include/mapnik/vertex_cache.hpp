@@ -35,6 +35,7 @@
 
 namespace mapnik
 {
+
 /** Caches all path points and their lengths. Allows easy moving in both directions. */
 class vertex_cache
 {
@@ -63,7 +64,20 @@ public:
         pixel_position segment_starting_point;
         friend class vertex_cache;
     public:
-        pixel_position const& position() { return current_position; }
+        pixel_position const& position() const { return current_position; }
+    };
+
+    class scoped_state
+    {
+    public:
+        scoped_state(vertex_cache &pp) : pp_(pp), state_(pp.save_state()), restored_(false) {}
+        void restore() { pp_.restore_state(state_); restored_ = true; }
+        ~scoped_state() { if (!restored_) pp_.restore_state(state_); }
+        state const& state() const { return state_; }
+    private:
+        vertex_cache &pp_;
+        class state state_;
+        bool restored_;
     };
 
     template <typename T> vertex_cache(T &path);
@@ -91,7 +105,7 @@ public:
     void rewind();
 
     state save_state() const;
-    void restore_state(state s);
+    void restore_state(state const& s);
 
 
 private:
@@ -178,12 +192,11 @@ double vertex_cache::angle(double width)
         return width >= 0 ? angle_ : angle_ + M_PI;
     } else
     {
-        state s = save_state();
-        pixel_position const& old_pos = s.position();
+        scoped_state s(*this);
+        pixel_position const& old_pos = s.state().position();
         move(width);
         double angle = atan2(-(current_position_.y - old_pos.y),
                              current_position_.x - old_pos.x);
-        restore_state(s);
         return angle;
     }
 }
@@ -293,7 +306,7 @@ vertex_cache::state vertex_cache::save_state() const
     return s;
 }
 
-void vertex_cache::restore_state(vertex_cache::state s)
+void vertex_cache::restore_state(state const& s)
 {
     current_segment_ = s.current_segment;
     position_in_segment_ = s.position_in_segment;
