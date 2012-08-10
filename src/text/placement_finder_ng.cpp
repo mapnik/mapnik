@@ -325,7 +325,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     if (real_orientation == UPRIGHT_LEFT)
     {
         sign = -1;
-        pp.forward(layout_.width());
+        if (!pp.forward(layout_.width())) return false;
     }
 
     double base_offset = alignment_offset().y + info_->properties.displacement.y;
@@ -342,16 +342,20 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
         pp.set_offset(offset);
 
         double last_cluster_angle = 999;
-//        signed current_cluster = -1;
+        signed current_cluster = -1;
+        pixel_position cluster_offset;
         double angle, sina, cosa;
 
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
-            if (glyph_itr->width > 0)
+            glyph_info const& glyph = *glyph_itr;
+            if (current_cluster != glyph.char_index)
             {
+                if (!pp.move(sign * layout_.cluster_width(current_cluster))) return false;
+                current_cluster = glyph.char_index;
                 //Only calculate new angle at the start of each cluster!
-                angle = normalize_angle(pp.angle(sign * glyph_itr->width));
+                angle = normalize_angle(pp.angle(sign * layout_.cluster_width(current_cluster)));
                 sina = sin(angle);
                 cosa = cos(angle);
                 if ((info_->properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
@@ -359,26 +363,24 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
                 {
                     return false;
                 }
+                cluster_offset.clear();
                 last_cluster_angle = angle;
-//                current_cluster = glyph_itr->char_index;
             }
             if (abs(angle) > M_PI/2) upside_down_glyph_count++;
 
-            pixel_position pos = pp.current_position();
+            pixel_position pos = pp.current_position() + cluster_offset;
             //Center the text on the line
             pos.y = -pos.y - char_height/2.0*cosa;
             pos.x =  pos.x + char_height/2.0*sina;
 
-            glyphs->push_back(*glyph_itr, pos, angle); //TODO: Store cosa, sina instead
-            if (glyph_itr->width > 0)
-            {
-                //Only advance if glyph is not part of a multiple glyph sequence
-                pp.move(sign * (glyph_itr->width + glyph_itr->format->character_spacing));
-            }
+            cluster_offset.x += cosa * glyph_itr->width;
+            cluster_offset.y -= sina * glyph_itr->width;
+
+            glyphs->push_back(glyph, pos, angle); //TODO: Store cosa, sina instead
         }
     }
     s.restore();
-    if (orientation == UPRIGHT_AUTO && (upside_down_glyph_count > layout_.size()/2))
+    if (orientation == UPRIGHT_AUTO && (upside_down_glyph_count > layout_.get_text().length()/2))
     {
         //Try again with oposite orienation
         return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
