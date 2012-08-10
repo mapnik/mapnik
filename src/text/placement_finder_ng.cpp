@@ -265,8 +265,11 @@ bool placement_finder_ng::find_point_on_line_placements(T & path)
         if (num_labels <= 0)
             num_labels = 1;
 
+
         double spacing = pp.length() / num_labels;
+        double dx = info_->properties.displacement.x;
         pp.forward(spacing/2.); // first label should be placed at half the spacing
+        path_move_dx(pp);
 
         do
         {
@@ -300,6 +303,7 @@ bool placement_finder_ng::find_line_placements(T & path)
         double spacing = pp.length() / num_labels;
         // first label should be placed at half the spacing
         pp.forward(spacing/2.-layout_.width()/2.);
+        path_move_dx(pp);
         do
         {
             success = single_line_placement(pp, info_->properties.upright) || success;
@@ -383,6 +387,16 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     }
     placements_.push_back(glyphs);
     return true;
+}
+
+void placement_finder_ng::path_move_dx(vertex_cache &pp)
+{
+    double dx = info_->properties.displacement.x;
+    if (dx != 0.0)
+    {
+        vertex_cache::state state = pp.save_state();
+        if (!pp.move(dx)) pp.restore_state(state);
+    }
 }
 
 double placement_finder_ng::normalize_angle(double angle)
