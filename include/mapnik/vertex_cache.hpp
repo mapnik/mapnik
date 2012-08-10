@@ -88,6 +88,7 @@ public:
     bool forward(double length);
     bool backward(double length);
     bool move(double length); //Move works in both directions
+    void rewind();
 
     state save_state() const;
     void restore_state(state s);
@@ -198,12 +199,7 @@ bool vertex_cache::next_subpath()
         current_subpath_++;
     }
     if (current_subpath_ == subpaths_.end()) return false;
-    current_segment_ = current_subpath_->vector.begin();
-    //All subpaths contain at least one segment
-    current_position_ = current_segment_->pos;
-    position_in_segment_ = 0;
-    segment_starting_point_ = current_position_;
-    angle_valid_ = false;
+    rewind();
     return true;
 }
 
@@ -274,6 +270,16 @@ bool vertex_cache::move(double length)
     position_in_segment_ = length;
     current_position_ = segment_starting_point_ + (current_segment_->pos - segment_starting_point_) * factor;
     return true;
+}
+
+void vertex_cache::rewind()
+{
+    current_segment_ = current_subpath_->vector.begin();
+    //All subpaths contain at least one segment
+    current_position_ = current_segment_->pos;
+    position_in_segment_ = 0;
+    segment_starting_point_ = current_position_;
+    angle_valid_ = false;
 }
 
 
