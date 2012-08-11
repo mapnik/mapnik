@@ -102,7 +102,10 @@ public:
     bool forward(double length);
     bool backward(double length);
     bool move(double length); //Move works in both directions
-    void rewind();
+    void rewind_subpath();
+    // Compatibility with standard path interface
+    void rewind(unsigned);
+    unsigned vertex(double *x, double *y);
 
     state save_state() const;
     void restore_state(state const& s);
@@ -116,6 +119,8 @@ private:
     std::vector<segment_vector> subpaths_;
     std::vector<segment_vector>::iterator current_subpath_;
     segment_vector::iterator current_segment_;
+    segment_vector::iterator vertex_segment_; //Only for vertex()
+    std::vector<segment_vector>::iterator vertex_subpath_;
     bool first_subpath_;
     double position_in_segment_;
     mutable double angle_;
@@ -129,6 +134,8 @@ vertex_cache::vertex_cache(T &path)
           subpaths_(),
           current_subpath_(),
           current_segment_(),
+          vertex_segment_(),
+          vertex_subpath_(),
           first_subpath_(true),
           position_in_segment_(0.),
           angle_(0.),
@@ -212,7 +219,7 @@ bool vertex_cache::next_subpath()
         current_subpath_++;
     }
     if (current_subpath_ == subpaths_.end()) return false;
-    rewind();
+    rewind_subpath();
     return true;
 }
 
@@ -285,7 +292,7 @@ bool vertex_cache::move(double length)
     return true;
 }
 
-void vertex_cache::rewind()
+void vertex_cache::rewind_subpath()
 {
     current_segment_ = current_subpath_->vector.begin();
     //All subpaths contain at least one segment
@@ -293,6 +300,27 @@ void vertex_cache::rewind()
     position_in_segment_ = 0;
     segment_starting_point_ = current_position_;
     angle_valid_ = false;
+}
+
+void vertex_cache::rewind(unsigned)
+{
+    vertex_subpath_ = subpaths_.begin();
+    vertex_segment_ = vertex_subpath_->vector.begin();
+}
+
+unsigned vertex_cache::vertex(double *x, double *y)
+{
+    if (vertex_segment_ == vertex_subpath_->vector.end())
+    {
+        vertex_subpath_++;
+        if (vertex_subpath_ == subpaths_.end()) return agg::path_cmd_stop;
+        vertex_segment_ = vertex_subpath_->vector.begin();
+    }
+    *x = vertex_segment_->pos.x;
+    *y = vertex_segment_->pos.y;
+    unsigned cmd = (vertex_segment_ == vertex_subpath_->vector.begin()) ? agg::path_cmd_move_to : agg::path_cmd_line_to;
+    vertex_segment_++;
+    return cmd;
 }
 
 
