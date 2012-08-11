@@ -90,6 +90,7 @@ public:
     void clip(const box2d_type &other);
     bool from_string(const std::string& s);
     bool valid() const;
+    void move(T x, T y);
 
     // define some operators
     box2d_type& operator+=(box2d_type const& other);

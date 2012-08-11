@@ -64,15 +64,13 @@ bool placement_finder_ng::next_position()
     {
         // https://github.com/mapnik/mapnik/issues/1352
         mapnik::evaluate<Feature, value_type> evaluator(feature_);
-        angle_ = boost::apply_visitor(
+        orientation_.init(
+            boost::apply_visitor(
             evaluator,
-            *(info_->properties.orientation)).to_double() * M_PI / 180.0;
+            *(info_->properties.orientation)).to_double() * M_PI / 180.0);
     } else {
-        angle_ = 0.0;
+        orientation_.reset();
     }
-    cosa_ = std::cos(angle_);
-    sina_ = std::sin(angle_);
-
     init_alignment();
     return true;
 }
@@ -156,16 +154,16 @@ pixel_position placement_finder_ng::alignment_offset() const
 }
 
 // Output is centered around (0,0)
-static void rotated_box2d(box2d<double> &box, double sina, double cosa, double width, double height)
+static void rotated_box2d(box2d<double> &box, rotation const& rot, double width, double height)
 {
-    double new_width = width * cosa + height * sina;
-    double new_height = width * sina + height * cosa;
+    double new_width = width * rot.cos + height * rot.sin;
+    double new_height = width * rot.sin + height * rot.cos;
     box.init(-new_width/2., -new_height/2., new_width/2., new_height/2.);
 }
 
-pixel_position pixel_position::rotate(double sina, double cosa) const
+pixel_position pixel_position::rotate(rotation const& rot) const
 {
-    return pixel_position(x * cosa - y * sina, x * sina + y * cosa);
+    return pixel_position(x * rot.cos - y * rot.sin, x * rot.sin + y * rot.cos);
 }
 
 
@@ -175,11 +173,11 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
 
     pixel_position displacement = scale_factor_ * info_->properties.displacement + alignment_offset();
-    if (info_->properties.rotate_displacement) displacement = displacement.rotate(-sina_, cosa_);
+    if (info_->properties.rotate_displacement) displacement = displacement.rotate(!orientation_);
 
     glyphs->set_base_point(pos + displacement);
     box2d<double> bbox;
-    rotated_box2d(bbox, sina_, cosa_, layout_.width(), layout_.height());
+    rotated_box2d(bbox, orientation_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
     if (collision(bbox)) return false;
 
@@ -212,7 +210,7 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
             // place the character relative to the center of the string envelope
-            glyphs->push_back(*glyph_itr, pixel_position(x, y).rotate(sina_, cosa_), angle_); //TODO: Store cosa, sina instead
+            glyphs->push_back(*glyph_itr, pixel_position(x, y).rotate(orientation_), orientation_);
             if (glyph_itr->width)
             {
                 //Only advance if glyph is not part of a multiple glyph sequence
@@ -308,7 +306,8 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
         double last_cluster_angle = 999;
         signed current_cluster = -1;
         pixel_position cluster_offset;
-        double angle, sina, cosa;
+        double angle;
+        rotation rot;
 
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
@@ -320,8 +319,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
                 current_cluster = glyph.char_index;
                 //Only calculate new angle at the start of each cluster!
                 angle = normalize_angle(pp.angle(sign * layout_.cluster_width(current_cluster)));
-                sina = sin(angle);
-                cosa = cos(angle);
+                rot.init(angle);
                 if ((info_->properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
                         fabs(normalize_angle(angle-last_cluster_angle)) > info_->properties.max_char_angle_delta)
                 {
@@ -334,13 +332,13 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
 
             pixel_position pos = pp.current_position() + cluster_offset;
             //Center the text on the line
-            pos.y = -pos.y - char_height/2.0*cosa;
-            pos.x =  pos.x + char_height/2.0*sina;
+            pos.y = -pos.y - char_height/2.0*rot.cos;
+            pos.x =  pos.x + char_height/2.0*rot.sin;
 
-            cluster_offset.x += cosa * glyph_itr->width;
-            cluster_offset.y -= sina * glyph_itr->width;
+            cluster_offset.x += rot.cos * glyph_itr->width;
+            cluster_offset.y -= rot.sin * glyph_itr->width;
 
-            glyphs->push_back(glyph, pos, angle); //TODO: Store cosa, sina instead
+            glyphs->push_back(glyph, pos, rot);
         }
     }
     s.restore();
@@ -410,7 +408,7 @@ bool placement_finder_ng::collision(const box2d<double> &box) const
 
 
 glyph_positions::glyph_positions()
-    : base_point_(), const_angle_(true)
+    : base_point_()
 {
 
 }
@@ -425,27 +423,10 @@ glyph_positions::const_iterator glyph_positions::end() const
     return data_.end();
 }
 
-void glyph_positions::push_back(const glyph_info &glyph, pixel_position offset, double angle)
+void glyph_positions::push_back(const glyph_info &glyph, pixel_position offset, rotation const& rot)
 {
-    if (data_.empty())
-    {
-        angle_ = angle;
-    } else
-    {
-        if (angle != angle_) const_angle_ = false;
-    }
-    data_.push_back(glyph_position(glyph, offset, angle));
-}
 
-
-bool glyph_positions::is_constant_angle() const
-{
-    return const_angle_;
-}
-
-double glyph_positions::get_angle() const
-{
-    return angle_;
+    data_.push_back(glyph_position(glyph, offset, rot));
 }
 
 pixel_position const& glyph_positions::get_base_point() const

@@ -28,6 +28,7 @@
 #include <mapnik/text/layout.hpp>
 #include <mapnik/text_placements/base.hpp>
 #include <mapnik/text/placements_list.hpp>
+#include <mapnik/text/rotation.hpp>
 
 //stl
 
@@ -76,13 +77,12 @@ private:
     static double normalize_angle(double angle);
     double get_spacing(double path_length, double layout_width) const;
     bool collision(box2d<double> const& box) const;
+    box2d<double> get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation rot);
     Feature const& feature_;
     DetectorType &detector_;
     box2d<double> const& extent_;
-    double angle_; //in rad
     // Precalculated values for maximum performance
-    double sina_;
-    double cosa_;
+    rotation orientation_;
     text_layout layout_;
     text_placement_info_ptr info_;
     bool valid_;

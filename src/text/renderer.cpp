@@ -26,36 +26,18 @@ void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
     FT_Vector pen;
     FT_Error  error;
 
-    bool constant_angle = pos->is_constant_angle();
-    double sina, cosa;
-    if (constant_angle)
-    {
-        double angle = pos->get_angle();
-        cosa = cos(angle);
-        sina = sin(angle);
-        matrix.xx = (FT_Fixed)( cosa * 0x10000L);
-        matrix.xy = (FT_Fixed)(-sina * 0x10000L);
-        matrix.yx = (FT_Fixed)( sina * 0x10000L);
-        matrix.yy = (FT_Fixed)( cosa * 0x10000L);
-    }
     glyph_positions::const_iterator itr = pos->begin(), end = pos->end();
     for (; itr != end; itr++)
     {
         glyph_info const& glyph = *(itr->glyph);
         glyph.face->set_character_sizes(glyph.format->text_size * scale_factor_); //TODO: Optimize this?
 
-        if (!constant_angle)
-        {
-            double angle = itr->angle;
-            cosa = cos(angle);
-            sina = sin(angle);
-            matrix.xx = (FT_Fixed)( cosa * 0x10000L);
-            matrix.xy = (FT_Fixed)(-sina * 0x10000L);
-            matrix.yx = (FT_Fixed)( sina * 0x10000L);
-            matrix.yy = (FT_Fixed)( cosa * 0x10000L);
-        }
+        matrix.xx = (FT_Fixed)( itr->rot.cos * 0x10000L);
+        matrix.xy = (FT_Fixed)(-itr->rot.sin * 0x10000L);
+        matrix.yx = (FT_Fixed)( itr->rot.sin * 0x10000L);
+        matrix.yy = (FT_Fixed)( itr->rot.cos * 0x10000L);
 
-        pixel_position pos = itr->pos + glyph.offset.rotate(sina, cosa);
+        pixel_position pos = itr->pos + glyph.offset.rotate(itr->rot);
         pen.x = int(pos.x * 64);
         pen.y = int(pos.y * 64);
 

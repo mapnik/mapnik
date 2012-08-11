@@ -28,6 +28,7 @@
 namespace mapnik
 {
 
+struct rotation;
 /** Store a pixel position. */
 struct pixel_position
 {
@@ -62,7 +63,7 @@ struct pixel_position
         y = 0;
     }
 
-    pixel_position rotate(double sina_, double cosa_) const;
+    pixel_position rotate(rotation const& rot) const;
     pixel_position operator~()
     {
         return pixel_position(x, -y);

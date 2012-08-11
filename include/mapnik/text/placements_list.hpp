@@ -25,6 +25,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/glyph_info.hpp>
+#include <mapnik/text/rotation.hpp>
 
 //stl
 #include <vector>
@@ -37,11 +38,11 @@ struct glyph_info;
 
 struct glyph_position
 {
-    glyph_position(glyph_info const& glyph, pixel_position const& pos, double angle)
-        : glyph(&glyph), pos(pos), angle(angle) { }
+    glyph_position(glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
+        : glyph(&glyph), pos(pos), rot(rot) { }
     glyph_info const* glyph;
     pixel_position pos;
-    double angle;
+    rotation rot;
 };
 
 /** Stores positions of glphys.
@@ -57,20 +58,13 @@ public:
     const_iterator begin() const;
     const_iterator end() const;
 
-    void push_back(glyph_info const& glyph, pixel_position offset, double angle);
-
-    /** Is each character rotated by the same angle?
-     * This function is used to avoid costly trigonometric function calls when not necessary. */
-    bool is_constant_angle() const;
-    double get_angle() const;
+    void push_back(glyph_info const& glyph, pixel_position offset, rotation const& rot);
 
     pixel_position const& get_base_point() const;
     void set_base_point(pixel_position base_point);
 private:
     std::vector<glyph_position> data_;
     pixel_position base_point_;
-    double angle_;
-    bool const_angle_;
 };
 typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
 

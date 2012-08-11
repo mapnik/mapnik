@@ -702,12 +702,10 @@ public:
             glyph.face->set_character_sizes(text_size);
 
             Cairo::Matrix matrix;
-            double sina = sin(itr->angle);
-            double cosa = cos(itr->angle);
-            matrix.xx = text_size * cosa;
-            matrix.xy = text_size * sina;
-            matrix.yx = text_size * -sina;
-            matrix.yy = text_size * cosa;
+            matrix.xx = text_size * itr->rot.cos;
+            matrix.xy = text_size * itr->rot.sin;
+            matrix.yx = text_size * -itr->rot.sin;
+            matrix.yy = text_size * itr->rot.cos;
             matrix.x0 = 0;
             matrix.y0 = 0;
 
