@@ -36,6 +36,9 @@
 // agg
 #include "agg_conv_clip_polyline.h"
 
+// stl
+#include <vector>
+
 namespace mapnik
 {
 
@@ -296,6 +299,9 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     double offset = base_offset + layout_.height();
     unsigned upside_down_glyph_count = 0;
 
+    std::vector<box2d<double> > bboxes;
+    bboxes.reserve(layout_.get_text().length());
+
     text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
     for (; line_itr != line_end; line_itr++)
     {
@@ -338,8 +344,9 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
             cluster_offset.x += rot.cos * glyph_itr->width;
             cluster_offset.y -= rot.sin * glyph_itr->width;
 
-//            detector_.insert(get_bbox(glyph, pos, rot), layout_.get_text());
-
+            box2d<double> bbox = get_bbox(glyph, pos, rot);
+            if (collision(bbox)) return false;
+            bboxes.push_back(bbox);
             glyphs->push_back(glyph, pos, rot);
         }
     }
@@ -348,6 +355,10 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     {
         //Try again with oposite orienation
         return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
+    }
+    BOOST_FOREACH(box2d<double> bbox, bboxes)
+    {
+        detector_.insert(bbox, layout_.get_text());
     }
     placements_.push_back(glyphs);
     return true;
