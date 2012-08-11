@@ -55,8 +55,9 @@ void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
             matrix.yy = (FT_Fixed)( cosa * 0x10000L);
         }
 
-        pen.x = int((itr->pos.x + glyph.offset_x * cosa - glyph.offset_y * sina) * 64);
-        pen.y = int((itr->pos.y + glyph.offset_y * cosa + glyph.offset_x * sina) * 64);
+        pixel_position pos = itr->pos + glyph.offset.rotate(sina, cosa);
+        pen.x = int(pos.x * 64);
+        pen.y = int(pos.y * 64);
 
         FT_Face face = glyph.face->get_face();
         FT_Set_Transform(face, &matrix, &pen);

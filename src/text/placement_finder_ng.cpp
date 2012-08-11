@@ -163,12 +163,9 @@ static void rotated_box2d(box2d<double> &box, double sina, double cosa, double w
     box.init(-new_width/2., -new_height/2., new_width/2., new_height/2.);
 }
 
-static pixel_position rotate(pixel_position pos, double sina, double cosa)
+pixel_position pixel_position::rotate(double sina, double cosa) const
 {
-    double tmp_x = pos.x * cosa + pos.y * sina;
-    pos.y = - pos.x * sina + pos.y * cosa;
-    pos.x = tmp_x;
-    return pos;
+    return pixel_position(x * cosa - y * sina, x * sina + y * cosa);
 }
 
 
@@ -178,26 +175,13 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
 
     pixel_position displacement = scale_factor_ * info_->properties.displacement + alignment_offset();
-    if (info_->properties.rotate_displacement) displacement = rotate(displacement, sina_, cosa_);
+    if (info_->properties.rotate_displacement) displacement = displacement.rotate(-sina_, cosa_);
 
     glyphs->set_base_point(pos + displacement);
     box2d<double> bbox;
     rotated_box2d(bbox, sina_, cosa_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
-
-    if (!detector_.extent().intersects(bbox)
-            ||
-        (info_->properties.avoid_edges && !extent_.contains(bbox))
-            ||
-        (info_->properties.minimum_padding > 0 &&
-         !extent_.contains(bbox + (scale_factor_ * info_->properties.minimum_padding)))
-            ||
-        (!info_->properties.allow_overlap &&
-         !detector_.has_point_placement(bbox, info_->properties.minimum_distance * scale_factor_))
-        )
-    {
-        return false;
-    }
+    if (collision(bbox)) return false;
 
     detector_.insert(bbox, layout_.get_text());
 
@@ -228,9 +212,7 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
         for (; glyph_itr != glyph_end; glyph_itr++)
         {
             // place the character relative to the center of the string envelope
-            double dx = x * cosa_ - y * sina_;
-            double dy = x * sina_ + y * cosa_;
-            glyphs->push_back(*glyph_itr, pixel_position(dx, dy), angle_); //TODO: Store cosa, sina instead
+            glyphs->push_back(*glyph_itr, pixel_position(x, y).rotate(sina_, cosa_), angle_); //TODO: Store cosa, sina instead
             if (glyph_itr->width)
             {
                 //Only advance if glyph is not part of a multiple glyph sequence
@@ -403,6 +385,24 @@ double placement_finder_ng::get_spacing(double path_length, double layout_width)
         num_labels = 1;
 
     return path_length / num_labels;
+}
+
+bool placement_finder_ng::collision(const box2d<double> &box) const
+{
+    if (!detector_.extent().intersects(box)
+            ||
+        (info_->properties.avoid_edges && !extent_.contains(box))
+            ||
+        (info_->properties.minimum_padding > 0 &&
+         !extent_.contains(box + (scale_factor_ * info_->properties.minimum_padding)))
+            ||
+        (!info_->properties.allow_overlap &&
+         !detector_.has_point_placement(box, info_->properties.minimum_distance * scale_factor_))
+        )
+    {
+        return true;
+    }
+    return false;
 }
 
 

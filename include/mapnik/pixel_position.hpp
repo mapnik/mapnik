@@ -61,6 +61,12 @@ struct pixel_position
         x = 0;
         y = 0;
     }
+
+    pixel_position rotate(double sina_, double cosa_) const;
+    pixel_position operator~()
+    {
+        return pixel_position(x, -y);
+    }
 };
 
 inline pixel_position operator* (double factor, pixel_position const& pos)

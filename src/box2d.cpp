@@ -404,7 +404,7 @@ box2d<T>&  box2d<T>::operator+=(box2d<T> const& other)
 }
 
 template <typename T>
-box2d<T> box2d<T>::operator+ (T other)
+box2d<T> box2d<T>::operator+ (T other) const
 {
     return box2d<T>(minx_ - other, miny_ - other, maxx_ + other, maxy_ + other);
 }

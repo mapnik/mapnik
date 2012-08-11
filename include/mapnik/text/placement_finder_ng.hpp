@@ -75,6 +75,7 @@ private:
     void path_move_dx(vertex_cache &pp);
     static double normalize_angle(double angle);
     double get_spacing(double path_length, double layout_width) const;
+    bool collision(box2d<double> const& box) const;
     Feature const& feature_;
     DetectorType &detector_;
     box2d<double> const& extent_;

@@ -24,6 +24,7 @@
 
 //mapnik
 #include <mapnik/text/char_properties_ptr.hpp>
+#include <mapnik/pixel_position.hpp>
 
 //boost
 #include <boost/shared_ptr.hpp>
@@ -52,8 +53,7 @@ struct glyph_info
     double ymax;
     double line_height; //Line height returned by freetype, includes normal font line spacing, but not additional user defined spacing
 
-    double offset_x;
-    double offset_y;
+    pixel_position offset;
 
     char_properties_ptr format;
 

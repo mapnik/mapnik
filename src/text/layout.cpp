@@ -181,8 +181,7 @@ void text_layout::shape_text(text_line_ptr line)
                 tmp.char_index = glyphs[i].cluster;
                 tmp.glyph_index = glyphs[i].codepoint;
                 tmp.width = positions[i].x_advance / 64.0;
-                tmp.offset_x = positions[i].x_offset / 64.0;
-                tmp.offset_y = positions[i].y_offset / 64.0;
+                tmp.offset.set(positions[i].x_offset / 64.0, positions[i].y_offset / 64.0);
                 tmp.face = face;
                 tmp.format = itr->format;
                 face->glyph_dimensions(tmp);
