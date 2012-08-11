@@ -4,7 +4,6 @@
 //mapnik
 #include <mapnik/text/placement_finder_ng.hpp>
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/font_engine_freetype.hpp>
 
 //boost
 #include <boost/utility.hpp>
@@ -25,11 +24,8 @@ namespace mapnik
 class text_renderer : private boost::noncopyable
 {
 public:
-    text_renderer (composite_mode_e comp_op = src_over, double scale_factor=1.0);
-//    void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
+    text_renderer (stroker &stroker, composite_mode_e comp_op = src_over, double scale_factor=1.0);
 protected:
-//    void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y);
-
     struct glyph_t : boost::noncopyable
     {
         FT_Glyph image;
@@ -47,6 +43,7 @@ protected:
     composite_mode_e comp_op_;
     double scale_factor_;
     boost::ptr_vector<glyph_t> glyphs_;
+    stroker & stroker_;
 };
 
 template <typename T>
@@ -59,7 +56,19 @@ public:
     void render(glyph_positions_ptr pos);
 private:
     pixmap_type & pixmap_;
-    stroker & stroker_;
+};
+
+template <typename T>
+class grid_text_renderer : public text_renderer
+{
+public:
+    typedef T pixmap_type;
+    grid_text_renderer (pixmap_type & pixmap, stroker &stroker,
+                       composite_mode_e comp_op = src_over, double scale_factor=1.0);
+    void render(glyph_positions_ptr pos, int feature_id, double min_radius=1.0);
+private:
+    pixmap_type & pixmap_;
+    void render_bitmap_id(FT_Bitmap *bitmap, int feature_id, int x, int y);
 };
 
 }

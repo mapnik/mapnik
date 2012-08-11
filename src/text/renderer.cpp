@@ -2,13 +2,15 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/text_properties.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 namespace mapnik
 {
 
-text_renderer::text_renderer (composite_mode_e comp_op, double scale_factor)
+text_renderer::text_renderer (stroker &stroker, composite_mode_e comp_op, double scale_factor)
     : comp_op_(comp_op),
-      scale_factor_(scale_factor)
+      scale_factor_(scale_factor),
+      stroker_(stroker)
 {}
 
 
@@ -74,7 +76,7 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
 template <typename T>
 agg_text_renderer<T>::agg_text_renderer (pixmap_type & pixmap, stroker &stroker,
                         composite_mode_e comp_op, double scale_factor)
-    : text_renderer(comp_op, scale_factor), pixmap_(pixmap), stroker_(stroker)
+    : text_renderer(stroker, comp_op, scale_factor), pixmap_(pixmap)
 {
 
 }
@@ -151,20 +153,19 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
     }
 }
 
-#if 0
+
 template <typename T>
-void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_radius)
+void grid_text_renderer<T>::render(glyph_positions_ptr pos, int feature_id, double min_radius)
 {
-#if 0
     FT_Error  error;
     FT_Vector start;
     unsigned height = pixmap_.height();
-
-    start.x =  static_cast<FT_Pos>(pos.x * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - pos.y) * (1 << 6));
+    pixel_position const& base_point = pos->get_base_point();
+    start.x =  static_cast<FT_Pos>(base_point.x * (1 << 6));
+    start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
 
     // now render transformed glyphs
-    typename glyphs_t::iterator itr;
+    typename boost::ptr_vector<glyph_t>::iterator itr;
     for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
         stroker_.init(std::max(itr->properties->halo_radius, min_radius));
@@ -187,13 +188,11 @@ void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_
         }
         FT_Done_Glyph(g);
     }
-#endif
 }
 
 template <typename T>
-void text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y)
+void grid_text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap, int feature_id, int x, int y)
 {
-#if 0
     int x_max=x+bitmap->width;
     int y_max=y+bitmap->rows;
     int i,p,j,q;
@@ -210,10 +209,17 @@ void text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,i
             }
         }
     }
-#endif
 }
-#endif
+
+template <typename T>
+grid_text_renderer<T>::grid_text_renderer(grid_text_renderer::pixmap_type &pixmap,
+                                          stroker &stroker, composite_mode_e comp_op,
+                                          double scale_factor) :
+    text_renderer(stroker, comp_op, scale_factor), pixmap_(pixmap)
+{
+}
+
 
 template class agg_text_renderer<image_32>;
-//template class text_renderer<grid>;
+template class grid_text_renderer<grid>;
 }

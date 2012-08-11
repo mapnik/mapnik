@@ -23,6 +23,8 @@
 // mapnik
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/renderer.hpp>
+#include <boost/foreach.hpp>
 
 namespace mapnik {
 
@@ -31,23 +33,6 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-#if 0
-    text_symbolizer_helper<face_manager<freetype_engine>,
-        label_collision_detector4> helper(
-            sym, feature, prj_trans,
-            width_,height_,
-            scale_factor_,
-            t_, font_manager_, *detector_,
-            query_extent_);
-
-    text_renderer<T> ren(*current_buffer_, font_manager_, sym.comp_op(), scale_factor_);
-
-    placements_list const& placements = helper.get();
-    BOOST_FOREACH(glyph_positions_ptr glyphs, placements)
-    {
-        ren.render(glyphs);
-    }
-
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
@@ -56,22 +41,15 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
             t_, font_manager_, *detector_,
             query_extent_);
 
-    text_renderer<T> ren(pixmap_,
-                         font_manager_,
-                         *(font_manager_.get_stroker()),
-                         sym.comp_op(),
-                         scale_factor_);
-
-
+    grid_text_renderer<T> ren(pixmap_, *(font_manager_.get_stroker()), sym.comp_op(), scale_factor_);
 
     placements_list const& placements = helper.get();
     if (!placements.size()) return;
     BOOST_FOREACH(glyph_positions_ptr glyphs, placements)
     {
-        ren.render(glyphs);
+        ren.render(glyphs, feature.id(), 2);
     }
     pixmap_.add_feature(feature);
-    #endif
 }
 
 template void grid_renderer<grid>::process(text_symbolizer const&,
