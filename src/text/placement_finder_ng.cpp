@@ -338,6 +338,8 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
             cluster_offset.x += rot.cos * glyph_itr->width;
             cluster_offset.y -= rot.sin * glyph_itr->width;
 
+//            detector_.insert(get_bbox(glyph, pos, rot), layout_.get_text());
+
             glyphs->push_back(glyph, pos, rot);
         }
     }
@@ -401,6 +403,40 @@ bool placement_finder_ng::collision(const box2d<double> &box) const
         return true;
     }
     return false;
+}
+
+box2d<double> placement_finder_ng::get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
+{
+    /*
+
+          (0/ymax)           (width/ymax)
+               ***************
+               *             *
+          (0/0)*             *
+               *             *
+               ***************
+          (0/ymin)          (width/ymin)
+          Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
+    */
+    std::cout << glyph.offset << glyph.width << "," << glyph.ymin << glyph.ymax << "\n";
+    double width = layout_.cluster_width(glyph.char_index);
+    if (glyph.width <= 0) width = -width;
+    pixel_position tmp, tmp2;
+    tmp.set(0, glyph.ymax);
+    tmp = tmp.rotate(rot);
+    tmp2.set(width, glyph.ymax);
+    tmp2 = tmp2.rotate(rot);
+    box2d<double> bbox(tmp.x,  -tmp.y,
+                       tmp2.x, -tmp2.y);
+    tmp.set(width, glyph.ymin);
+    tmp = tmp.rotate(rot);
+    bbox.expand_to_include(tmp.x, -tmp.y);
+    tmp.set(0, glyph.ymin);
+    tmp = tmp.rotate(rot);
+    bbox.expand_to_include(tmp.x, -tmp.y);
+    pixel_position pos2 = pos + pixel_position(0, glyph.offset.y).rotate(rot);
+    bbox.move(pos2.x , -pos2.y);
+    return bbox;
 }
 
 

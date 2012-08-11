@@ -77,7 +77,7 @@ private:
     static double normalize_angle(double angle);
     double get_spacing(double path_length, double layout_width) const;
     bool collision(box2d<double> const& box) const;
-    box2d<double> get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation rot);
+    box2d<double> get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
     Feature const& feature_;
     DetectorType &detector_;
     box2d<double> const& extent_;
