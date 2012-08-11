@@ -253,23 +253,13 @@ bool placement_finder_ng::find_point_on_line_placements(T & path)
     {
         if (pp.length() == 0.0)
         {
-            return find_point_placement(pp.current_position());
+            success = find_point_placement(pp.current_position()) || success;
+            continue;
         }
 
-        int num_labels = 1;
-        if (info_->properties.label_spacing > 0)
-            num_labels = static_cast<int> (floor(pp.length() / info_->properties.label_spacing * scale_factor_));
-
-        if (info_->properties.force_odd_labels && num_labels % 2 == 0)
-            num_labels--;
-        if (num_labels <= 0)
-            num_labels = 1;
-
-
-        double spacing = pp.length() / num_labels;
+        double spacing = get_spacing(pp.length(), 0);
         pp.forward(spacing/2.); // first label should be placed at half the spacing
         path_move_dx(pp);
-
         do
         {
             success = find_point_placement(pp.current_position()) || success;
@@ -290,19 +280,11 @@ bool placement_finder_ng::find_line_placements(T & path)
                 ||
             (pp.length() < layout_.width())) continue;
 
-        int num_labels = 1;
-        if (info_->properties.label_spacing > 0)
-            num_labels = static_cast<int>(floor(pp.length() / (info_->properties.label_spacing * scale_factor_ + layout_.width())));
-
-        if (info_->properties.force_odd_labels && num_labels % 2 == 0)
-            num_labels--;
-        if (num_labels <= 0)
-            num_labels = 1;
-
-        double spacing = pp.length() / num_labels;
+        double spacing = get_spacing(pp.length(), layout_.width());
         // first label should be placed at half the spacing
         pp.forward(spacing/2.-layout_.width()/2.);
         path_move_dx(pp);
+        //TODO: label_position_tolerance
         do
         {
             success = single_line_placement(pp, info_->properties.upright) || success;
@@ -406,6 +388,21 @@ double placement_finder_ng::normalize_angle(double angle)
     while (angle < -M_PI)
         angle += 2*M_PI;
     return angle;
+}
+
+double placement_finder_ng::get_spacing(double path_length, double layout_width) const
+{
+    int num_labels = 1;
+    if (info_->properties.label_spacing > 0)
+        num_labels = static_cast<int>(floor(
+            path_length / (info_->properties.label_spacing * scale_factor_ + layout_width)));
+
+    if (info_->properties.force_odd_labels && num_labels % 2 == 0)
+        num_labels--;
+    if (num_labels <= 0)
+        num_labels = 1;
+
+    return path_length / num_labels;
 }
 
 

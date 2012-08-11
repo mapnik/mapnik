@@ -74,6 +74,7 @@ private:
     bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
     void path_move_dx(vertex_cache &pp);
     static double normalize_angle(double angle);
+    double get_spacing(double path_length, double layout_width) const;
     Feature const& feature_;
     DetectorType &detector_;
     box2d<double> const& extent_;
