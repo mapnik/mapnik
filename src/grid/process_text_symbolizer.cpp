@@ -35,11 +35,26 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
+            width_,height_,
+            scale_factor_,
+            t_, font_manager_, *detector_,
+            query_extent_);
+
+    text_renderer<T> ren(*current_buffer_, font_manager_, sym.comp_op(), scale_factor_);
+
+    placements_list const& placements = helper.get();
+    BOOST_FOREACH(glyph_positions_ptr glyphs, placements)
+    {
+        ren.render(glyphs);
+    }
+
+    text_symbolizer_helper<face_manager<freetype_engine>,
+        label_collision_detector4> helper(
+            sym, feature, prj_trans,
             width_, height_,
             scale_factor_ * (1.0/pixmap_.get_resolution()),
             t_, font_manager_, *detector_,
             query_extent_);
-    bool placement_found = false;
 
     text_renderer<T> ren(pixmap_,
                          font_manager_,
@@ -47,20 +62,16 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
                          sym.comp_op(),
                          scale_factor_);
 
-    while (helper.next()) {
-        placement_found = true;
-        placements_type const& placements = helper.placements();
-        for (unsigned int ii = 0; ii < placements.size(); ++ii)
-        {
-            ren.prepare_glyphs(placements[ii]);
-            ren.render_id(feature.id(), placements[ii].center, 2);
-        }
-    }
-    if (placement_found) pixmap_.add_feature(feature);
-#else
-#warning GRID: TextSymbolizer disabled!
-#endif
 
+
+    placements_list const& placements = helper.get();
+    if (!placements.size()) return;
+    BOOST_FOREACH(glyph_positions_ptr glyphs, placements)
+    {
+        ren.render(glyphs);
+    }
+    pixmap_.add_feature(feature);
+    #endif
 }
 
 template void grid_renderer<grid>::process(text_symbolizer const&,

@@ -22,17 +22,13 @@ extern "C"
 namespace mapnik
 {
 
-template <typename T>
 class text_renderer : private boost::noncopyable
 {
 public:
-    typedef T pixmap_type;
-
-    text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, composite_mode_e comp_op = src_over, double scale_factor=1.0);
-    void render(glyph_positions_ptr pos);
-    void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
-private:
-    void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y);
+    text_renderer (composite_mode_e comp_op = src_over, double scale_factor=1.0);
+//    void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
+protected:
+//    void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y);
 
     struct glyph_t : boost::noncopyable
     {
@@ -48,12 +44,23 @@ private:
 
     void prepare_glyphs(glyph_positions_ptr pos);
 
-    pixmap_type & pixmap_;
-    face_manager<freetype_engine> &font_manager_;
-    stroker & stroker_;
     composite_mode_e comp_op_;
     double scale_factor_;
     boost::ptr_vector<glyph_t> glyphs_;
 };
+
+template <typename T>
+class agg_text_renderer : public text_renderer
+{
+public:
+    typedef T pixmap_type;
+    agg_text_renderer (pixmap_type & pixmap, stroker &stroker,
+                       composite_mode_e comp_op = src_over, double scale_factor=1.0);
+    void render(glyph_positions_ptr pos);
+private:
+    pixmap_type & pixmap_;
+    stroker & stroker_;
+};
+
 }
 #endif // RENDERER_HPP

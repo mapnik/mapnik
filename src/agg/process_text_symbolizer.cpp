@@ -37,12 +37,12 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
     text_symbolizer_helper<face_manager<freetype_engine>,
         label_collision_detector4> helper(
             sym, feature, prj_trans,
-            width_,height_,
+            width_, height_,
             scale_factor_,
             t_, font_manager_, *detector_,
             query_extent_);
 
-    text_renderer<T> ren(*current_buffer_, font_manager_, sym.comp_op(), scale_factor_);
+    agg_text_renderer<T> ren(*current_buffer_, *(font_manager_.get_stroker()), sym.comp_op(), scale_factor_);
 
     placements_list const& placements = helper.get();
     BOOST_FOREACH(glyph_positions_ptr glyphs, placements)

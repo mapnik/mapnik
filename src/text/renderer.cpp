@@ -6,18 +6,13 @@
 namespace mapnik
 {
 
-template <typename T>
-text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, composite_mode_e comp_op, double scale_factor)
-    : pixmap_(pixmap),
-      font_manager_(font_manager_),
-      stroker_(*(font_manager_.get_stroker())),
-      comp_op_(comp_op),
+text_renderer::text_renderer (composite_mode_e comp_op, double scale_factor)
+    : comp_op_(comp_op),
       scale_factor_(scale_factor)
 {}
 
 
-template <typename T>
-void text_renderer<T>::prepare_glyphs(glyph_positions_ptr pos)
+void text_renderer::prepare_glyphs(glyph_positions_ptr pos)
 {
     //clear glyphs
     glyphs_.clear();
@@ -77,7 +72,15 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
 }
 
 template <typename T>
-void text_renderer<T>::render(glyph_positions_ptr pos)
+agg_text_renderer<T>::agg_text_renderer (pixmap_type & pixmap, stroker &stroker,
+                        composite_mode_e comp_op, double scale_factor)
+    : text_renderer(comp_op, scale_factor), pixmap_(pixmap), stroker_(stroker)
+{
+
+}
+
+template <typename T>
+void agg_text_renderer<T>::render(glyph_positions_ptr pos)
 {
     glyphs_.clear();
     prepare_glyphs(pos);
@@ -148,7 +151,7 @@ void text_renderer<T>::render(glyph_positions_ptr pos)
     }
 }
 
-
+#if 0
 template <typename T>
 void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_radius)
 {
@@ -209,7 +212,8 @@ void text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,i
     }
 #endif
 }
+#endif
 
-template class text_renderer<image_32>;
+template class agg_text_renderer<image_32>;
 //template class text_renderer<grid>;
 }
