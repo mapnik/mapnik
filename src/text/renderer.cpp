@@ -95,10 +95,10 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
     start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
 
     //render halo
-    typename boost::ptr_vector<glyph_t>::iterator itr;
+    typename boost::ptr_vector<glyph_t>::iterator itr, end = glyphs_.end();
     double halo_radius = 0;
     char_properties_ptr format;
-    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
+    for (itr = glyphs_.begin(); itr != end; ++itr)
     {
         if (itr->properties)
         {
@@ -130,7 +130,7 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
     }
 
     //render actual text
-    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
+    for (itr = glyphs_.begin(); itr != end; ++itr)
     {
         if (itr->properties)
         {
@@ -165,8 +165,8 @@ void grid_text_renderer<T>::render(glyph_positions_ptr pos, int feature_id, doub
     start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
 
     // now render transformed glyphs
-    typename boost::ptr_vector<glyph_t>::iterator itr;
-    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
+    typename boost::ptr_vector<glyph_t>::iterator itr, end = glyphs_.end();
+    for (itr = glyphs_.begin(); itr != end; ++itr)
     {
         stroker_.init(std::max(itr->properties->halo_radius, min_radius));
         FT_Glyph g;
