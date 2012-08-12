@@ -296,7 +296,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     double base_offset = alignment_offset().y + info_->properties.displacement.y;
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
 
-    double offset = base_offset + layout_.height()/2.;
+    double offset = base_offset + sign * layout_.height()/2.;
     unsigned upside_down_glyph_count = 0;
 
     std::vector<box2d<double> > bboxes;
@@ -308,7 +308,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
         double char_height = (*line_itr)->max_char_height();
         //Only subtract half the line height here and half at the end because text is automatically
         //centered on the line
-        offset -= (*line_itr)->height()/2;
+        offset -= sign * (*line_itr)->height()/2;
         vertex_cache &off_pp = pp.get_offseted(offset, sign*layout_.width());
         vertex_cache::scoped_state off_state(off_pp); //TODO: Remove this when a clean implementation in vertex_cache::get_offseted was done
 
@@ -353,7 +353,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
             glyphs->push_back(glyph, pos, rot);
         }
         //See comment above
-        offset -= (*line_itr)->height()/2;
+        offset -= sign * (*line_itr)->height()/2;
     }
     s.restore();
     if (orientation == UPRIGHT_AUTO && (upside_down_glyph_count > layout_.get_text().length()/2))
