@@ -282,6 +282,13 @@ bool placement_finder_ng::find_line_placements(T & path)
 bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e orientation)
 {
     vertex_cache::scoped_state s(pp);
+
+    glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
+    std::vector<box2d<double> > bboxes;
+    bboxes.reserve(layout_.get_text().length());
+    unsigned upside_down_glyph_count = 0;
+
+
     /* IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! */
     text_upright_e real_orientation = orientation;
     if (orientation == UPRIGHT_AUTO)
@@ -289,25 +296,17 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
         real_orientation = (fabs(normalize_angle(pp.angle())) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
     double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
-
-    double base_offset = alignment_offset().y + info_->properties.displacement.y;
-    glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
-
-    double offset = base_offset + sign * layout_.height()/2.;
-    unsigned upside_down_glyph_count = 0;
-
-    std::vector<box2d<double> > bboxes;
-    bboxes.reserve(layout_.get_text().length());
+    double offset = alignment_offset().y + info_->properties.displacement.y + sign * layout_.height()/2.;
 
     text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
     for (; line_itr != line_end; line_itr++)
     {
-        double char_height = (*line_itr)->max_char_height();
         //Only subtract half the line height here and half at the end because text is automatically
         //centered on the line
         offset -= sign * (*line_itr)->height()/2;
         vertex_cache &off_pp = pp.get_offseted(offset, sign*layout_.width());
         vertex_cache::scoped_state off_state(off_pp); //TODO: Remove this when a clean implementation in vertex_cache::get_offseted was done
+
         if (!off_pp.move(sign * jalign_offset((*line_itr)->width()))) return false;
 
         double last_cluster_angle = 999;
@@ -339,6 +338,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
 
             pixel_position pos = off_pp.current_position() + cluster_offset;
             //Center the text on the line
+            double char_height = (*line_itr)->max_char_height();
             pos.y = -pos.y - char_height/2.0*rot.cos;
             pos.x =  pos.x + char_height/2.0*rot.sin;
 
@@ -353,10 +353,10 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
         //See comment above
         offset -= sign * (*line_itr)->height()/2;
     }
-    s.restore();
     if (orientation == UPRIGHT_AUTO && (upside_down_glyph_count > layout_.get_text().length()/2))
     {
-        //Try again with oposite orienation
+        //Try again with oposite orientation
+        s.restore();
         return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
     }
     BOOST_FOREACH(box2d<double> bbox, bboxes)
