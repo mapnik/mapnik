@@ -1,5 +1,5 @@
 /*****************************************************************************
- * 
+ *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
  * Copyright (C) 2012 Artem Pavlenko
@@ -72,13 +72,13 @@ struct end_container<mapnik::Feature const>
 };
 
 template <>
-struct transform_attribute<const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>, 
+struct transform_attribute<const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>,
                            mapnik::geometry_container const& ,karma::domain>
 {
     typedef mapnik::geometry_container const& type;
-    static type pre(const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>& f) 
-    {        
-        return boost::fusion::at<mpl::int_<0> >(f).paths(); 
+    static type pre(const boost::fusion::cons<mapnik::feature_impl const&, boost::fusion::nil>& f)
+    {
+        return boost::fusion::at<mpl::int_<0> >(f).paths();
     }
 };
 
@@ -103,7 +103,7 @@ struct get_id
 struct make_properties_range
 {
     typedef boost::iterator_range<mapnik::feature_kv_iterator> properties_range_type;
-    
+
     template <typename T>
     struct result { typedef properties_range_type type; };
 
@@ -131,7 +131,7 @@ struct value_base
 {
     template <typename T>
     struct result { typedef mapnik::value_base const& type; };
-    
+
     mapnik::value_base const& operator() (mapnik::value const& val) const
     {
         return val.base();
@@ -147,15 +147,15 @@ struct escaped_string
     {
         using boost::spirit::karma::maxwidth;
         using boost::spirit::karma::right_align;
-        
+
         esc_char.add('\a', "\\a")('\b', "\\b")('\f', "\\f")('\n', "\\n")
             ('\r', "\\r")('\t', "\\t")('\v', "\\v")('\\', "\\\\")
             ('\'', "\\\'")('\"', "\\\"")
             ;
 
-        esc_str =   karma::lit(karma::_r1) 
-            << *(esc_char 
-                 | karma::print 
+        esc_str =   karma::lit(karma::_r1)
+            << *(esc_char
+                 | karma::print
                  | "\\u" << right_align(4,karma::lit('0'))[karma::hex])
             <<  karma::lit(karma::_r1)
             ;
@@ -172,11 +172,11 @@ struct feature_generator_grammar:
 {
     typedef boost::tuple<std::string, mapnik::value> pair_type;
     typedef make_properties_range::properties_range_type range_type;
-    
+
     feature_generator_grammar()
         : feature_generator_grammar::base_type(feature)
         , quote_("\"")
-          
+
     {
         using boost::spirit::karma::lit;
         using boost::spirit::karma::uint_;
@@ -188,35 +188,35 @@ struct feature_generator_grammar:
         using boost::spirit::karma::_r1;
         using boost::spirit::karma::string;
         using boost::spirit::karma::eps;
-        
-        feature = lit("{\"type\":\"Feature\",\"id\":") 
-            << uint_[_1 = id_(_val)] 
+
+        feature = lit("{\"type\":\"Feature\",\"id\":")
+            << uint_[_1 = id_(_val)]
             << lit(",\"geometry\":") << geometry
-            << lit(",\"properties\":") << properties 
+            << lit(",\"properties\":") << properties
             << lit('}')
             ;
-        
-        properties = lit('{') 
-            << pair % lit(',')
-            << lit('}')            
+
+        properties = lit('{')
+            << -(pair % lit(','))
+            << lit('}')
             ;
-        
-        pair = lit('"') 
-            << string[_1 = phoenix::at_c<0>(_val)] << lit('"') 
+
+        pair = lit('"')
+            << string[_1 = phoenix::at_c<0>(_val)] << lit('"')
             << lit(':')
             << value(phoenix::at_c<1>(_val))
             ;
-        
-        value = (value_null_| bool_ | int_| double_ | ustring)[_1 = value_base_(_r1)]            
+
+        value = (value_null_| bool_ | int_| double_ | ustring)[_1 = value_base_(_r1)]
             ;
-        
+
         value_null_ = string[_1 = "null"]
             ;
-        
+
         ustring = escaped_string_(quote_.c_str())[_1 = utf8_(_val)]
             ;
     }
-    
+
     // rules
     karma::rule<OutputIterator, mapnik::Feature const&()> feature;
     multi_geometry_generator_grammar<OutputIterator> geometry;
@@ -231,8 +231,8 @@ struct feature_generator_grammar:
     phoenix::function<value_base> value_base_;
     phoenix::function<utf8> utf8_;
     std::string quote_;
-}; 
-                      
+};
+
 }}
 
 #endif // MAPNIK_JSON_FEATURE_GENERATOR_GRAMMAR_HPP

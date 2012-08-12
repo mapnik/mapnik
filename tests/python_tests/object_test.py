@@ -112,7 +112,7 @@ def test_polygonsymbolizer_init():
 
 # PointSymbolizer initialization
 def test_pointsymbolizer_init():
-    p = mapnik.PointSymbolizer() 
+    p = mapnik.PointSymbolizer()
     eq_(p.allow_overlap, False)
     eq_(p.opacity,1)
     eq_(p.filename,'')
@@ -133,7 +133,7 @@ def test_pointsymbolizer_init():
 
 # MarkersSymbolizer initialization
 def test_markersymbolizer_init():
-    p = mapnik.MarkersSymbolizer() 
+    p = mapnik.MarkersSymbolizer()
     eq_(p.allow_overlap, False)
     eq_(p.opacity,1.0)
     eq_(p.fill_opacity,None)
@@ -159,12 +159,12 @@ def test_markersymbolizer_init():
     stroke = mapnik.Stroke()
     stroke.color = mapnik.Color('black')
     stroke.width = 1.0
-    
+
     p.stroke = stroke
     p.fill = mapnik.Color('white')
     p.allow_overlap = True
     p.opacity = 0.5
-    p.fill_opacity = .01
+    p.fill_opacity = 0.5
 
     eq_(p.allow_overlap, True)
     eq_(p.opacity, 0.5)
@@ -339,7 +339,7 @@ def test_color_init_errors():
 
 @raises(RuntimeError)
 def test_color_init_errors():
-    c = mapnik.Color('foo') # mapnik config 
+    c = mapnik.Color('foo') # mapnik config
 
 def test_color_init():
     c = mapnik.Color('blue')

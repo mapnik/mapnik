@@ -344,8 +344,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 {
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Processing rgb bands...";
 
-                    int hasNoData(0);
-                    double nodata(0);
+                    int hasNoData = 0;
+                    double nodata = 0.0;
                     if (nodata_value_)
                     {
                         hasNoData = 1;

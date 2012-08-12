@@ -57,5 +57,6 @@ Mapnik is written by Artem Pavlenko with contributions from:
 * Andreas Volz
 * Lennard voor den Dag
 * Shaun Walbridge
+* Rich Wareham
 * Nick Whitelegg
 * Leslie Wu

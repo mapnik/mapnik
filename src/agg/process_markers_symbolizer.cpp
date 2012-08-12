@@ -65,7 +65,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::order_rgba order_type;
     typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
-    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+    typedef agg::rendering_buffer buf_type;
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, buf_type> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef label_collision_detector4 detector_type;
     typedef boost::mpl::vector<clip_line_tag,clip_poly_tag,transform_tag,smooth_tag> conv_types;
@@ -93,7 +94,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                      svg_attribute_type,
                                      renderer_type,
                                      pixfmt_comp_type > svg_renderer_type;
-                typedef vector_markers_rasterizer_dispatch<buffer_type,
+                typedef vector_markers_rasterizer_dispatch<buf_type,
                                      svg_renderer_type,
                                      rasterizer,
                                      detector_type > dispatch_type;
@@ -118,7 +119,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
                     agg::trans_affine marker_trans = recenter * tr;
-                    dispatch_type rasterizer_dispatch(*current_buffer_,svg_renderer,*ras_ptr,
+                    buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
+                    dispatch_type rasterizer_dispatch(render_buffer,svg_renderer,*ras_ptr,
                                                       bbox, marker_trans, sym, *detector_, scale_factor_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
@@ -151,7 +153,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
                     svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
-                    dispatch_type rasterizer_dispatch(*current_buffer_,svg_renderer,*ras_ptr,
+                    buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
+                    dispatch_type rasterizer_dispatch(render_buffer,svg_renderer,*ras_ptr,
                                                       bbox, marker_trans, sym, *detector_, scale_factor_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
@@ -181,8 +184,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 agg::trans_affine_translation recenter(-center.x, -center.y);
                 agg::trans_affine marker_trans = recenter * tr;
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
-                typedef raster_markers_rasterizer_dispatch<buffer_type,rasterizer, detector_type> dispatch_type;
-                dispatch_type rasterizer_dispatch(*current_buffer_,*ras_ptr, **marker,
+                typedef raster_markers_rasterizer_dispatch<buf_type,rasterizer, detector_type> dispatch_type;
+                buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
+                dispatch_type rasterizer_dispatch(render_buffer,*ras_ptr, **marker,
                                                   marker_trans, sym, *detector_, scale_factor_);
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>

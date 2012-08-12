@@ -321,7 +321,7 @@ char_properties::char_properties() :
 
 void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
 {
-    optional<double> text_size_ = sym.get_opt_attr<double>("size");
+    optional<float> text_size_ = sym.get_opt_attr<float>("size");
     if (text_size_) text_size = *text_size_;
     optional<double> character_spacing_ = sym.get_opt_attr<double>("character-spacing");
     if (character_spacing_) character_spacing = *character_spacing_;

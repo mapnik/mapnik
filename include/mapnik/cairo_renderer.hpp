@@ -123,8 +123,10 @@ public:
         // nothing to do
     }
 
-protected:
     void render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & mtx, double opacity=1.0, bool recenter=true);
+    void render_box(box2d<double> const& b);
+protected:
+
 
     Map const& m_;
     Cairo::RefPtr<Cairo::Context> context_;
