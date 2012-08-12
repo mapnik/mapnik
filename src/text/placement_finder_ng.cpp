@@ -161,6 +161,7 @@ double placement_finder_ng::jalign_offset(double line_width) const
     if (jalign_ == J_MIDDLE) return -(line_width / 2.0);
     if (jalign_ == J_LEFT)   return -(layout_.width() / 2.0);
     if (jalign_ == J_RIGHT)  return (layout_.width() / 2.0) - line_width;
+    return 0;
 }
 
 // Output is centered around (0,0)
@@ -287,12 +288,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     {
         real_orientation = (fabs(normalize_angle(pp.angle())) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
-    double sign = 1;
-    if (real_orientation == UPRIGHT_LEFT)
-    {
-        sign = -1;
-        if (!pp.forward(layout_.width())) return false;
-    }
+    double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
 
     double base_offset = alignment_offset().y + info_->properties.displacement.y;
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
