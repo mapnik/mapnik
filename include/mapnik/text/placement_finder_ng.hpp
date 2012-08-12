@@ -71,6 +71,7 @@ public:
 private:
     void init_alignment();
     pixel_position alignment_offset() const;
+    double jalign_offset(double line_width) const;
 
     bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
     void path_move_dx(vertex_cache &pp);

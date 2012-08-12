@@ -156,6 +156,13 @@ pixel_position placement_finder_ng::alignment_offset() const
     return result;
 }
 
+double placement_finder_ng::jalign_offset(double line_width) const
+{
+    if (jalign_ == J_MIDDLE) return -(line_width / 2.0);
+    if (jalign_ == J_LEFT)   return -(layout_.width() / 2.0);
+    if (jalign_ == J_RIGHT)  return (layout_.width() / 2.0) - line_width;
+}
+
 // Output is centered around (0,0)
 static void rotated_box2d(box2d<double> &box, rotation const& rot, double width, double height)
 {
@@ -201,13 +208,7 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
     for (; line_itr != line_end; line_itr++)
     {
         y -= (*line_itr)->height(); //Automatically handles first line differently
-        // reset to begining of line position
-        if (jalign_ == J_LEFT)
-            x = -(layout_.width() / 2.0);
-        else if (jalign_ == J_RIGHT)
-            x = (layout_.width() / 2.0) - (*line_itr)->width();
-        else
-            x = -((*line_itr)->width() / 2.0);
+        x = jalign_offset((*line_itr)->width());
 
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
@@ -265,7 +266,7 @@ bool placement_finder_ng::find_line_placements(T & path)
 
         double spacing = get_spacing(pp.length(), layout_.width());
         // first label should be placed at half the spacing
-        pp.forward(spacing/2.-layout_.width()/2.);
+        pp.forward(spacing/2);
         path_move_dx(pp);
         //TODO: label_position_tolerance
         do
@@ -311,6 +312,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
         offset -= sign * (*line_itr)->height()/2;
         vertex_cache &off_pp = pp.get_offseted(offset, sign*layout_.width());
         vertex_cache::scoped_state off_state(off_pp); //TODO: Remove this when a clean implementation in vertex_cache::get_offseted was done
+        if (!off_pp.move(sign * jalign_offset((*line_itr)->width()))) return false;
 
         double last_cluster_angle = 999;
         signed current_cluster = -1;
