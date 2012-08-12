@@ -296,7 +296,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     double base_offset = alignment_offset().y + info_->properties.displacement.y;
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
 
-    double offset = base_offset + layout_.height();
+    double offset = base_offset + layout_.height()/2.;
     unsigned upside_down_glyph_count = 0;
 
     std::vector<box2d<double> > bboxes;
@@ -306,8 +306,11 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     for (; line_itr != line_end; line_itr++)
     {
         double char_height = (*line_itr)->max_char_height();
-        offset -= (*line_itr)->height();
-        pp.set_offset(offset);
+        //Only subtract half the line height here and half at the end because text is automatically
+        //centered on the line
+        offset -= (*line_itr)->height()/2;
+        vertex_cache &off_pp = pp.get_offseted(offset, sign*layout_.width());
+        vertex_cache::scoped_state off_state(off_pp); //TODO: Remove this when a clean implementation in vertex_cache::get_offseted was done
 
         double last_cluster_angle = 999;
         signed current_cluster = -1;
@@ -321,10 +324,10 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
             glyph_info const& glyph = *glyph_itr;
             if (current_cluster != glyph.char_index)
             {
-                if (!pp.move(sign * layout_.cluster_width(current_cluster))) return false;
+                if (!off_pp.move(sign * layout_.cluster_width(current_cluster))) return false;
                 current_cluster = glyph.char_index;
                 //Only calculate new angle at the start of each cluster!
-                angle = normalize_angle(pp.angle(sign * layout_.cluster_width(current_cluster)));
+                angle = normalize_angle(off_pp.angle(sign * layout_.cluster_width(current_cluster)));
                 rot.init(angle);
                 if ((info_->properties.max_char_angle_delta > 0) && (last_cluster_angle != 999) &&
                         fabs(normalize_angle(angle-last_cluster_angle)) > info_->properties.max_char_angle_delta)
@@ -336,7 +339,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
             }
             if (abs(angle) > M_PI/2) upside_down_glyph_count++;
 
-            pixel_position pos = pp.current_position() + cluster_offset;
+            pixel_position pos = off_pp.current_position() + cluster_offset;
             //Center the text on the line
             pos.y = -pos.y - char_height/2.0*rot.cos;
             pos.x =  pos.x + char_height/2.0*rot.sin;
@@ -349,6 +352,8 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
             bboxes.push_back(bbox);
             glyphs->push_back(glyph, pos, rot);
         }
+        //See comment above
+        offset -= (*line_itr)->height()/2;
     }
     s.restore();
     if (orientation == UPRIGHT_AUTO && (upside_down_glyph_count > layout_.get_text().length()/2))
@@ -429,7 +434,6 @@ box2d<double> placement_finder_ng::get_bbox(glyph_info const& glyph, pixel_posit
           (0/ymin)          (width/ymin)
           Add glyph offset in y direction, but not in x direction (as we use the full cluster width anyways)!
     */
-    std::cout << glyph.offset << glyph.width << "," << glyph.ymin << glyph.ymax << "\n";
     double width = layout_.cluster_width(glyph.char_index);
     if (glyph.width <= 0) width = -width;
     pixel_position tmp, tmp2;

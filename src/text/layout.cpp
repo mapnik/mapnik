@@ -218,12 +218,12 @@ void text_layout::clear()
 
 double text_layout::height() const
 {
-    return height_; //TODO
+    return height_;
 }
 
 double text_layout::width() const
 {
-    return width_; //TODO
+    return width_;
 }
 
 text_layout::const_iterator text_layout::begin() const

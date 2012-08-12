@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/offset_converter.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -32,9 +33,17 @@
 // stl
 #include <vector>
 #include <utility>
+#include <cmath>
+
+//boost
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
+
+class vertex_cache;
+typedef boost::shared_ptr<vertex_cache> vertex_cache_ptr;
 
 /** Caches all path points and their lengths. Allows easy moving in both directions. */
 class vertex_cache
@@ -62,6 +71,7 @@ public:
         double position_in_segment;
         pixel_position current_position;
         pixel_position segment_starting_point;
+        double position_;
         friend class vertex_cache;
     public:
         pixel_position const& position() const { return current_position; }
@@ -91,7 +101,7 @@ public:
     bool next_subpath();
 
     /** Moves all positions to a parallel line in the specified distance. */
-    void set_offset(double offset);
+    vertex_cache &get_offseted(double offset, double region_width);
 
 
     /** Skip a certain amount of space.
@@ -125,7 +135,10 @@ private:
     double position_in_segment_;
     mutable double angle_;
     mutable bool angle_valid_;
+    vertex_cache_ptr offseted_line_;
+    double position_;
 };
+
 
 template <typename T>
 vertex_cache::vertex_cache(T &path)
@@ -139,7 +152,9 @@ vertex_cache::vertex_cache(T &path)
           first_subpath_(true),
           position_in_segment_(0.),
           angle_(0.),
-          angle_valid_(false)
+          angle_valid_(false),
+          offseted_line_(),
+          position_(0.)
 {
     path.rewind(0);
     unsigned cmd;
@@ -248,9 +263,22 @@ bool vertex_cache::previous_segment()
     return true;
 }
 
-void vertex_cache::set_offset(double offset)
+vertex_cache & vertex_cache::get_offseted(double offset, double region_width)
 {
-    MAPNIK_LOG_DEBUG(vertex_cache) << "set_offset: unimplemented\n";
+    if (fabs(offset) < 0.01)
+    {
+        return *this;
+    }
+    //TODO: Cache offseted lines
+    offset_converter<vertex_cache> converter(*this);
+    converter.set_offset(offset);
+    offseted_line_ = vertex_cache_ptr(new vertex_cache(converter));
+    offseted_line_->rewind_subpath(); //TODO: Multiple subpath support
+    double seek = (position_ + region_width/2.) * offseted_line_->length() / length() - region_width/2.;
+    if (seek < 0) seek = 0;
+    if (seek > offseted_line_->length()) seek = offseted_line_->length();
+    offseted_line_->move(seek);
+    return *offseted_line_;
 }
 
 bool vertex_cache::forward(double length)
@@ -275,6 +303,7 @@ bool vertex_cache::backward(double length)
 
 bool vertex_cache::move(double length)
 {
+    position_ += length;
     length += position_in_segment_;
     while (length >= current_segment_->length)
     {
@@ -300,6 +329,7 @@ void vertex_cache::rewind_subpath()
     position_in_segment_ = 0;
     segment_starting_point_ = current_position_;
     angle_valid_ = false;
+    position_ = 0;
 }
 
 void vertex_cache::rewind(unsigned)
@@ -331,6 +361,7 @@ vertex_cache::state vertex_cache::save_state() const
     s.position_in_segment = position_in_segment_;
     s.current_position = current_position_;
     s.segment_starting_point = segment_starting_point_;
+    s.position_ = position_;
     return s;
 }
 
@@ -340,6 +371,7 @@ void vertex_cache::restore_state(state const& s)
     position_in_segment_ = s.position_in_segment;
     current_position_ = s.current_position;
     segment_starting_point_ = s.segment_starting_point;
+    position_ = s.position_;
     angle_valid_ = false;
 }
 

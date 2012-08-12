@@ -78,7 +78,7 @@ void font_face::glyph_dimensions(glyph_info &glyph) const
     matrix.yx = (FT_Fixed)( 0 * 0x10000L );
     matrix.yy = (FT_Fixed)( 1 * 0x10000L );
 
-    FT_Set_Transform(face_, &matrix, &pen); //TODO: Matrix is always only set to the identity matrix. This seems to be useless.
+    FT_Set_Transform(face_, &matrix, &pen);
 
     if (FT_Load_Glyph (face_, glyph.glyph_index, FT_LOAD_NO_HINTING)) return;
     if (FT_Get_Glyph(face_->glyph, &image)) return;
