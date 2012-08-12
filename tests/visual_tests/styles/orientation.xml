@@ -48,17 +48,17 @@
         </Rule>
         <Rule>
             <Filter>[nr] = '8'</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="0" dx="0.01" dy="-0.01" rotate-displacement="true">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="0" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = '9'</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90" dy="0.01" dx="-0.01" rotate-displacement="false">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="90" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
         <Rule>
             <Filter>[nr] = '10'</Filter>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180" dy="10" rotate-displacement="true">"XYZ"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" orientation="180" horizontal-alignment="right" vertical-alignment="top" rotate-displacement="true">"XYZ"</TextSymbolizer>
             <PointSymbolizer allow-overlap="true"/>
         </Rule>
     </Style>
