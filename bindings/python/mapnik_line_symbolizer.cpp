@@ -63,5 +63,9 @@ void export_line_symbolizer()
                       &line_symbolizer::smooth,
                       &line_symbolizer::set_smooth,
                       "smooth value (0..1.0)")
+        .add_property("offset",
+                      &line_symbolizer::offset,
+                      &line_symbolizer::set_offset,
+                      "offset value")
         ;
 }
