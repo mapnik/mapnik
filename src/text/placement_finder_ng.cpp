@@ -258,6 +258,7 @@ bool placement_finder_ng::find_line_placements(T & path)
 {
     if (!layout_.size()) return true;
     vertex_cache pp(path);
+
     bool success = false;
     while (pp.next_subpath())
     {
@@ -266,13 +267,31 @@ bool placement_finder_ng::find_line_placements(T & path)
             (pp.length() < layout_.width())) continue;
 
         double spacing = get_spacing(pp.length(), layout_.width());
+
+        double tolerance = info_->properties.label_position_tolerance > 0 ?
+                    info_->properties.label_position_tolerance : spacing/2.0;
+        double tolerance_delta = std::max(1.0, tolerance/100.0);
+
         // first label should be placed at half the spacing
         pp.forward(spacing/2);
         path_move_dx(pp);
-        //TODO: label_position_tolerance
         do
         {
-            success = single_line_placement(pp, info_->properties.upright) || success;
+            vertex_cache::state state = pp.save_state();
+            for (double diff = 0; diff < tolerance; diff += tolerance_delta)
+            {
+                for(int dir = -1; dir < 2; dir+=2) //-1, +1
+                {
+                    if (pp.move(dir * diff) && single_line_placement(pp, info_->properties.upright))
+                    {
+                        success = true;
+                        diff = tolerance; // Break out of outer loop
+                        break;
+                    }
+                    pp.restore_state(state);
+                    if (diff == 0) continue;
+                }
+            }
         } while (pp.forward(spacing));
     }
     return success;
