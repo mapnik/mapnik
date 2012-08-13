@@ -251,7 +251,7 @@ struct raster_markers_rasterizer_dispatch
         typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
                                                 interpolator_type> span_gen_type;
         typedef agg::renderer_scanline_aa_alpha<renderer_base,
-                agg::span_allocator<agg::rgba8>,
+                agg::span_allocator<color_type>,
                 span_gen_type> renderer_type;
         img_accessor_type ia(pixf);
         interpolator_type interpolator(agg::trans_affine(p, 0, 0, width, height) );
