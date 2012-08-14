@@ -86,6 +86,7 @@ struct markers_symbolizer_pickle_suite : boost::python::pickle_suite
 
 };
 
+// https://github.com/mapnik/mapnik/issues/1367
 PyObject* get_fill_opacity_impl(markers_symbolizer & sym)
 {
     boost::optional<float> fill_opacity = sym.get_fill_opacity();
