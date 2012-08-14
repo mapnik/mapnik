@@ -987,6 +987,9 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
+    typedef boost::mpl::vector<clip_line_tag, transform_tag,
+                               offset_transform_tag, affine_transform_tag,
+                               smooth_tag, dash_tag, stroke_tag> conv_types;
     cairo_context context(context_);
     mapnik::stroke const& stroke_ = sym.get_stroke();
     context.set_operator(sym.comp_op());
@@ -1004,21 +1007,26 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    box2d<double> ext = query_extent_ * 1.1;
-    typedef boost::mpl::vector<clip_line_tag, clip_poly_tag, transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
+    box2d<double> clipping_extent = query_extent_;
+    if (sym.clip())
+    {
+        double padding = (double)(query_extent_.width()/width_);
+        float half_stroke = stroke_.get_width()/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+    }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(ext,context,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clipping_extent,context,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
-    {
-        eGeomType type = feature.paths()[0].type();
-        if (type == Polygon)
-            converter.set<clip_poly_tag>();
-        else if (type == LineString)
-            converter.set<clip_line_tag>();
-        // don't clip if type==Point
-    }
+    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
