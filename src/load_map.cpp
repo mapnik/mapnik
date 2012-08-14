@@ -224,14 +224,14 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 else
                 {
                     std::ostringstream s_err;
-                    s_err << "failed to parse 'maximum-extent'";
+                    s_err << "failed to parse Map maximum-extent '" << *maximum_extent << "'";
                     if (strict_)
                     {
                         throw config_error(s_err.str());
                     }
                     else
                     {
-                        MAPNIK_LOG_WARN(load_map) << "map_parser: " << s_err.str();
+                        MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err.str();
                     }
                 }
             }
@@ -648,16 +648,16 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             }
             else
             {
-                std::ostringstream s_err;
-                s_err << "failed to parse 'maximum-extent' in layer " << name;
-                if (strict_)
-                {
-                    throw config_error(s_err.str());
-                }
-                else
-                {
-                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << s_err.str();
-                }
+                    std::ostringstream s_err;
+                    s_err << "failed to parse Layer maximum-extent '" << *maximum_extent << "' for '" << name << "'";
+                    if (strict_)
+                    {
+                        throw config_error(s_err.str());
+                    }
+                    else
+                    {
+                        MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err.str();
+                    }
             }
         }
 
@@ -872,11 +872,9 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
         if (!mapnik::parse_transform(*tl, *geometry_transform_wkt, pt.get_tree().transform_expr_grammar))
         {
             std::stringstream ss;
-            ss << "Could not parse transform from '" << geometry_transform_wkt << "', expected transform attribute";
-            if (strict_)
-                throw config_error(ss.str()); // value_error here?
-            else
-                MAPNIK_LOG_WARN(load_map) << "### WARNING: " << ss;
+            ss << "Could not parse transform from '" << *geometry_transform_wkt
+               << "', expected transform attribute";
+            throw config_error(ss.str());
         }
         sym.set_transform(tl);
     }
@@ -948,17 +946,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
                 mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
                 if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
                 {
-                    std::stringstream ss;
-                    ss << "Could not parse transform from '" << *image_transform_wkt
-                       << "', expected transform attribute";
-                    if (strict_)
-                    {
-                        throw config_error(ss.str()); // value_error here?
-                    }
-                    else
-                    {
-                        MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
-                    }
+                    throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
                 }
                 symbol.set_image_transform(tl);
             }
@@ -984,31 +972,16 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
 
         if (file && !file->empty())
         {
-            try
+            if (base)
             {
-                if (base)
+                std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
+                if (itr!=file_sources_.end())
                 {
-                    std::map<std::string,std::string>::const_iterator itr = file_sources_.find(*base);
-                    if (itr!=file_sources_.end())
-                    {
-                        *file = itr->second + "/" + *file;
-                    }
+                    *file = itr->second + "/" + *file;
                 }
+            }
 
-                filename = ensure_relative_to_xml(file);
-            }
-            catch (...)
-            {
-                std::string msg("Failed to load marker file '" + *file + "'!");
-                if (strict_)
-                {
-                    throw config_error(msg);
-                }
-                else
-                {
-                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << msg;
-                }
-            }
+            filename = ensure_relative_to_xml(file);
         }
 
         optional<std::string> marker_type = node.get_opt_attr<std::string>("marker-type");
@@ -1055,17 +1028,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
             mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
             if (!mapnik::parse_transform(*tl, *image_transform_wkt, node.get_tree().transform_expr_grammar))
             {
-                std::stringstream ss;
-                ss << "Could not parse transform from '" << *image_transform_wkt
-                   << "', expected transform attribute";
-                if (strict_)
-                {
-                    throw config_error(ss.str()); // value_error here?
-                }
-                else
-                {
-                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
-                }
+                throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
             }
             sym.set_image_transform(tl);
         }
@@ -1257,17 +1220,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
             if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
             {
-                std::stringstream ss;
-                ss << "Could not parse transform from '" << *image_transform_wkt
-                   << "', expected transform attribute";
-                if (strict_)
-                {
-                    throw config_error(ss.str()); // value_error here?
-                }
-                else
-                {
-                    MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
-                }
+                throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
             }
             shield_symbol.set_image_transform(tl);
         }
