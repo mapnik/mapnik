@@ -77,9 +77,10 @@ struct image_filter_grammar :
             lit("y-gradient")[push_back(_val,construct<mapnik::filter::y_gradient>())]
             |
             (lit("agg-stack-blur")[_a = 1, _b = 1]
-             >> -( lit(':') >> radius_[_a = _1]
+             >> -( lit('(') >> radius_[_a = _1]
                    >> lit(',')
-                   >> radius_[_b = _1])
+                   >> radius_[_b = _1]
+                   >> lit(')'))
              [push_back(_val,construct<mapnik::filter::agg_stack_blur>(_a,_b))])
             |
             lit("invert")[push_back(_val,construct<mapnik::filter::invert>())]
