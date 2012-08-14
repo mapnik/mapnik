@@ -1162,7 +1162,9 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
     }
     else if (marker.is_bitmap())
     {
-        context.add_image(pos.x, pos.y, **marker.get_bitmap_data(), opacity);
+        agg::trans_affine matrix = tr;
+        matrix *= agg::trans_affine_translation(pos.x, pos.y);
+        context.add_image(matrix, **marker.get_bitmap_data(), opacity);
     }
 }
 
@@ -1239,9 +1241,17 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
             pixel_position marker_pos = helper.get_marker_position(placements[ii]);
+            double dx = 0.5 * helper.get_marker_width();
+            double dy = 0.5 * helper.get_marker_height();
+            agg::trans_affine marker_tr = agg::trans_affine_translation(-dx,-dy);
+            marker_tr *= agg::trans_affine_scaling(scale_factor_);
+            marker_tr *= agg::trans_affine_translation(dx,dy);
+            marker_tr *= helper.get_image_transform();
             render_marker(marker_pos,
-                          helper.get_marker(), helper.get_image_transform(),
+                          helper.get_marker(),
+                          marker_tr,
                           sym.get_opacity());
+
             context.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
         }
     }
