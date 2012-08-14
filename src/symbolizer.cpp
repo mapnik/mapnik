@@ -51,6 +51,7 @@ symbolizer_base::symbolizer_base()
       writer_ptr_(),
       comp_op_(src_over),
       clip_(true),
+      simplify_tolerance_value_(0.0),
       smooth_value_(0.0)
 {
 }
@@ -60,6 +61,7 @@ symbolizer_base::symbolizer_base(symbolizer_base const& other)
     : comp_op_(other.comp_op_),
       affine_transform_(other.affine_transform_),
       clip_(other.clip_),
+      simplify_tolerance_value_(other.simplify_tolerance_value_),
       smooth_value_(other.smooth_value_) {}
 
 void symbolizer_base::add_metawriter(std::string const& name, metawriter_properties const& properties)
@@ -148,6 +150,16 @@ void symbolizer_base::set_clip(bool clip)
 bool symbolizer_base::clip() const
 {
     return clip_;
+}
+
+void symbolizer_base::set_simplify_tolerance(double simplify_tolerance)
+{
+    simplify_tolerance_value_ = simplify_tolerance;
+}
+
+double symbolizer_base::simplify_tolerance() const
+{
+    return simplify_tolerance_value_;
 }
 
 void symbolizer_base::set_smooth(double smooth)

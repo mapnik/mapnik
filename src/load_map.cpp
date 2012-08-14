@@ -882,6 +882,10 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     optional<boolean> clip = pt.get_opt_attr<boolean>("clip");
     if (clip) sym.set_clip(*clip);
 
+    // simplify value
+    optional<double> simplify_tolerance = pt.get_opt_attr<double>("simplify-tolerance");
+    if (simplify_tolerance) sym.set_simplify_tolerance(*simplify_tolerance);
+
     // smooth value
     optional<double> smooth = pt.get_opt_attr<double>("smooth");
     if (smooth) sym.set_smooth(*smooth);

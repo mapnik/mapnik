@@ -90,6 +90,8 @@ public:
     std::string get_transform_string() const;
     void set_clip(bool clip);
     bool clip() const;
+    void set_simplify_tolerance(double simplify_tolerance);
+    double simplify_tolerance() const;
     void set_smooth(double smooth);
     double smooth() const;
 private:
@@ -100,6 +102,7 @@ private:
     composite_mode_e comp_op_;
     transform_type affine_transform_;
     bool clip_;
+    double simplify_tolerance_value_;
     double smooth_value_;
 };
 
