@@ -183,7 +183,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
 
     polygon_coordinates = eps[ _a = new_<geometry_type>(Polygon) ]
         > ((lit('[')
-            > -(points(_a) % lit(','))
+            > -(points(_a)[close_path_(_a)] % lit(','))
             > lit(']')) [push_back(_r1,_a)]
            | eps[cleanup_(_a)][_pass = false])
         ;

@@ -116,6 +116,22 @@ struct push_vertex
     }
 };
 
+struct close_path
+{
+    template <typename T>
+    struct result
+    {
+        typedef void type;
+    };
+
+    template <typename T>
+    void operator() (T path) const
+    {
+        BOOST_ASSERT( path!=0 );
+        path->close();
+    }
+};
+
 struct cleanup
 {
     template <typename T0>
@@ -187,6 +203,7 @@ struct feature_grammar :
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
     boost::phoenix::function<push_vertex> push_vertex_;
+    boost::phoenix::function<close_path> close_path_;
     boost::phoenix::function<cleanup> cleanup_;
 
 };
