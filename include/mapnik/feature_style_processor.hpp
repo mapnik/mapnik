@@ -59,15 +59,6 @@ public:
     void apply(mapnik::layer const& lyr, std::set<std::string>& names);
 private:
     /*!
-     * @return initialize metawriters for a given map and projection.
-     */
-    void start_metawriters(Map const& m_, projection const& proj);
-    /*!
-     * @return stop metawriters that were previously initialized.
-     */
-    void stop_metawriters(Map const& m_);
-
-    /*!
      * @return render a layer given a projection and scale.
      */
     void apply_to_layer(layer const& lay,

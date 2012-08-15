@@ -28,7 +28,6 @@ def test_map_deepcopy1():
     eq_(m2.scale(),m1.scale())
     eq_(m2.scale_denominator(),m1.scale_denominator())
     eq_(m2.maximum_extent,m1.maximum_extent)
-    eq_(id(m2.has_metawriter()),id(m1.has_metawriter()))
     eq_(id(m2.view_transform()),id(m1.view_transform()))
     eq_(id(m2.parameters),id(m1.parameters))
     eq_(id(m2.layers),id(m1.layers))

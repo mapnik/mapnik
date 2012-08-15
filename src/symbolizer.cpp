@@ -45,11 +45,7 @@ void evaluate_transform(agg::trans_affine& tr, Feature const& feature,
 
 // default ctor
 symbolizer_base::symbolizer_base()
-    : properties_(),
-      properties_complete_(),
-      writer_name_(),
-      writer_ptr_(),
-      comp_op_(src_over),
+    : comp_op_(src_over),
       clip_(true),
       smooth_value_(0.0)
 {
@@ -61,49 +57,6 @@ symbolizer_base::symbolizer_base(symbolizer_base const& other)
       affine_transform_(other.affine_transform_),
       clip_(other.clip_),
       smooth_value_(other.smooth_value_) {}
-
-void symbolizer_base::add_metawriter(std::string const& name, metawriter_properties const& properties)
-{
-    writer_name_ = name;
-    properties_ = properties;
-}
-
-void symbolizer_base::add_metawriter(metawriter_ptr writer_ptr, metawriter_properties const& properties,
-                                     std::string const& name)
-{
-    writer_ptr_ = writer_ptr;
-    properties_ = properties;
-    writer_name_ = name;
-    if (writer_ptr) {
-        properties_complete_ = writer_ptr->get_default_properties();
-        properties_complete_.insert(properties_.begin(), properties_.end());
-    } else {
-        properties_complete_.clear();
-    }
-}
-
-void symbolizer_base::cache_metawriters(Map const &m)
-{
-    if (writer_name_.empty()) {
-        properties_complete_.clear();
-        writer_ptr_ = metawriter_ptr();
-        return; // No metawriter
-    }
-
-    writer_ptr_ = m.find_metawriter(writer_name_);
-    if (writer_ptr_) {
-        properties_complete_ = writer_ptr_->get_default_properties();
-        properties_complete_.insert(properties_.begin(), properties_.end());
-    } else {
-        properties_complete_.clear();
-        MAPNIK_LOG_WARN(symbolizer) << "Metawriter '" << writer_name_ << "' used but not defined.";
-    }
-}
-
-metawriter_with_properties symbolizer_base::get_metawriter() const
-{
-    return metawriter_with_properties(writer_ptr_, properties_complete_);
-}
 
 void symbolizer_base::set_comp_op(composite_mode_e comp_op)
 {

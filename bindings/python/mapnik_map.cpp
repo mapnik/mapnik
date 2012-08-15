@@ -29,7 +29,6 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/metawriter_inmem.hpp>
 #include <mapnik/util/deepcopy.hpp>
 #include "mapnik_enumeration.hpp"
 
@@ -139,26 +138,6 @@ mapnik::font_set find_fontset(mapnik::Map const& m, std::string const& name)
         boost::python::throw_error_already_set();
     }
     return *fontset;
-}
-
-bool has_metawriter(mapnik::Map const& m)
-{
-    if (m.metawriters().size() >=1)
-        return true;
-    return false;
-}
-
-// returns empty shared_ptr when the metawriter isn't found, or is
-// of the wrong type. empty pointers make it back to Python as a None.
-mapnik::metawriter_inmem_ptr find_inmem_metawriter(const mapnik::Map & m, std::string const& name) {
-    mapnik::metawriter_ptr metawriter = m.find_metawriter(name);
-    mapnik::metawriter_inmem_ptr inmem;
-
-    if (metawriter) {
-        inmem = boost::dynamic_pointer_cast<mapnik::metawriter_inmem>(metawriter);
-    }
-
-    return inmem;
 }
 
 // TODO - we likely should allow indexing by negative number from python
@@ -310,15 +289,6 @@ void export_map()
              "<mapnik._mapnik.Style object at 0x654f0>\n"
             )
 
-        .def("has_metawriter",
-             has_metawriter,
-             "Check if the Map has any active metawriters\n"
-             "\n"
-             "Usage:\n"
-             ">>> m.has_metawriter()\n"
-             "False\n"
-            )
-
         .def("pan",&Map::pan,
              (arg("x"),arg("y")),
              "Set the Map center at a given x,y location\n"
@@ -456,37 +426,6 @@ void export_map()
              "Usage:\n"
              ">>> extext = Box2d(-180.0, -90.0, 180.0, 90.0)\n"
              ">>> m.zoom_to_box(extent)\n"
-            )
-        .def("get_metawriter_property", &Map::get_metawriter_property,
-             (arg("name")),
-             "Reads a metawriter property.\n"
-             "These properties are completely user-defined and can be used to"
-             "create filenames, etc.\n"
-             "\n"
-             "Usage:\n"
-             ">>> map.set_metawriter_property(\"x\", \"10\")\n"
-             ">>> map.get_metawriter_property(\"x\")\n"
-             "10\n"
-            )
-        .def("set_metawriter_property", &Map::set_metawriter_property,
-             (arg("name"),arg("value")),
-             "Sets a metawriter property.\n"
-             "These properties are completely user-defined and can be used to"
-             "create filenames, etc.\n"
-             "\n"
-             "Usage:\n"
-             ">>> map.set_metawriter_property(\"x\", str(x))\n"
-             ">>> map.set_metawriter_property(\"y\", str(y))\n"
-             ">>> map.set_metawriter_property(\"z\", str(z))\n"
-             "\n"
-             "Use a path like \"[z]/[x]/[y].json\" to create filenames.\n"
-            )
-        .def("find_inmem_metawriter", find_inmem_metawriter,
-             (arg("name")),
-             "Gets an inmem metawriter, or None if no such metawriter "
-             "exists.\n"
-             "Use this after the map has been rendered to retrieve information "
-             "about the hit areas rendered on the map.\n"
             )
 
         .def("__deepcopy__",&map_deepcopy)

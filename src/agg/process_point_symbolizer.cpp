@@ -96,14 +96,8 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                               sym.get_opacity(),
                               sym.comp_op());
 
-                if (/* DEBUG */ 0) {
-                    debug_draw_box(label_ext, 0, 0, 0.0);
-                }
-
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);
-                //metawriter_with_properties writer = sym.get_metawriter();
-                //if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
             }
         }
     }

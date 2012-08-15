@@ -42,7 +42,6 @@
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/metawriter_factory.hpp>
 #include <mapnik/text_placements/registry.hpp>
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -91,7 +90,6 @@ private:
     void parse_map_include(Map & map, xml_node const& include);
     void parse_style(Map & map, xml_node const& sty);
     void parse_layer(Map & map, xml_node const& lay);
-    void parse_metawriter(Map & map, xml_node const& lay);
     void parse_symbolizer_base(symbolizer_base &sym, xml_node const& pt);
 
     void parse_fontset(Map & map, xml_node const & fset);
@@ -329,10 +327,6 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             {
                 parse_fontset(map, *itr);
             }
-            else if (itr->is("MetaWriter"))
-            {
-                parse_metawriter(map, *itr);
-            }
             else if (itr->is("FileSource"))
             {
                 std::string name = itr->get_attr<std::string>("name");
@@ -398,8 +392,6 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
         ex.append_context(include);
         throw;
     }
-
-    map.init_metawriters();
 }
 
 void map_parser::parse_style(Map & map, xml_node const& sty)
@@ -492,20 +484,6 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
     } catch (const config_error & ex) {
         ex.append_context(std::string("in style '") + name + "'", sty);
         throw;
-    }
-}
-
-void map_parser::parse_metawriter(Map & map, xml_node const& pt)
-{
-    std::string name("<missing name>");
-    metawriter_ptr writer;
-    try
-    {
-        name = pt.get_attr<std::string>("name");
-        writer = metawriter_create(pt);
-        map.insert_metawriter(name, writer);
-    } catch (const config_error & ex) {
-        ex.append_context(std::string("in meta writer '") + name + "'", pt);
     }
 }
 
@@ -885,11 +863,6 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     // smooth value
     optional<double> smooth = pt.get_opt_attr<double>("smooth");
     if (smooth) sym.set_smooth(*smooth);
-
-    optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
-    if (!writer) return;
-    optional<std::string> output = pt.get_opt_attr<std::string>("meta-output");
-    sym.add_metawriter(*writer, output);
 }
 
 void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
@@ -1511,7 +1484,6 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
                 parse_raster_colorizer(colorizer, *cssIter);
             }
         }
-        //Note: raster_symbolizer doesn't support metawriters
         parse_symbolizer_base(raster_sym, sym);
         rule.append(raster_sym);
     }
