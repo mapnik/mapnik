@@ -387,7 +387,7 @@ public:
         case saturation:
         case _color:
         case _value:
-        case colorize_alpha:
+        //case colorize_alpha:
             break;
         }
     }

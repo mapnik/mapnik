@@ -7,8 +7,11 @@
       <PolygonSymbolizer fill-opacity=".9" gamma=".65"/>
     </Rule>
   </Style>
-  
+
+<!--
   <Style name="style" comp-op="colorize-alpha">
+-->
+  <Style name="style">
     <Rule>
       <PointSymbolizer  file="../images/marker.png" allow-overlap="true"   />
     </Rule>
