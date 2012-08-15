@@ -31,7 +31,7 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/util/deepcopy.hpp>
+//#include <mapnik/util/deepcopy.hpp>
 #include "mapnik_enumeration.hpp"
 
 using mapnik::color;
@@ -165,6 +165,7 @@ mapnik::featureset_ptr query_map_point(mapnik::Map const& m, int index, double x
 }
 
 // deepcopy
+/*
 mapnik::Map map_deepcopy(mapnik::Map & m, boost::python::dict memo)
 {
     // FIXME: ignore memo for now
@@ -172,6 +173,7 @@ mapnik::Map map_deepcopy(mapnik::Map & m, boost::python::dict memo)
     mapnik::util::deepcopy(m, result);
     return result;
 }
+*/
 
 void set_maximum_extent(mapnik::Map & m, boost::optional<mapnik::box2d<double> > const& box)
 {
@@ -430,7 +432,7 @@ void export_map()
              ">>> m.zoom_to_box(extent)\n"
             )
 
-        .def("__deepcopy__",&map_deepcopy)
+        //.def("__deepcopy__",&map_deepcopy)
         .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
 
         .add_property("aspect_fix_mode",
