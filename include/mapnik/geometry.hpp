@@ -126,6 +126,14 @@ public:
         push_vertex(x,y,SEG_CLOSE);
     }
 
+    void close()
+    {
+        if (cont_.size() > 3)
+        {
+            cont_.set_command(cont_.size() - 1, SEG_CLOSE);
+        }
+    }
+
     unsigned vertex(double* x, double* y) const
     {
         return cont_.get_vertex(itr_++,x,y);
