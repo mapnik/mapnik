@@ -1628,7 +1628,8 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
             box2d<double> const& bbox = (*mark)->bounding_box();
-            setup_label_transform(tr, bbox, feature, sym);
+            setup_transform_scaling(tr, bbox, feature, sym);
+            evaluate_transform(tr, feature, sym.get_image_transform());
 
             if ((*mark)->is_vector())
             {

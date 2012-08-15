@@ -129,7 +129,8 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             box2d<double> const& bbox = (*marker)->bounding_box();
 
             agg::trans_affine tr;
-            setup_label_transform(tr, bbox, feature, sym);
+            setup_transform_scaling(tr, bbox, feature, sym);
+            evaluate_transform(tr, feature, sym.get_image_transform());
             // - clamp sizes to > 4 pixels of interactivity
             if (tr.scale() < 0.5)
             {

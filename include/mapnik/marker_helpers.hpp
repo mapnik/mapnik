@@ -359,7 +359,7 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
 }
 
 template <typename T>
-void setup_label_transform(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
+void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
 {
     double width = 0;
     double height = 0;
@@ -387,10 +387,6 @@ void setup_label_transform(agg::trans_affine & tr, box2d<double> const& bbox, ma
     {
         double sy = height/bbox.height();
         tr *= agg::trans_affine_scaling(sy);
-    }
-    else
-    {
-        evaluate_transform(tr, feature, sym.get_image_transform());
     }
 }
 
