@@ -25,6 +25,7 @@
 #include <mapnik/json/feature_grammar.hpp>
 
 // boost
+#include <boost/version.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 
 namespace mapnik { namespace json {
@@ -81,8 +82,12 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
         >> value >> *(lit(',') >> value)
         >> lit(']')
         ;
-
+// https://github.com/mapnik/mapnik/issues/1342
+#if BOOST_VERSION >= 104700
     number %= strict_double
+#else
+    number = strict_double
+#endif
         | int_
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
