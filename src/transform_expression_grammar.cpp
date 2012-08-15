@@ -22,6 +22,9 @@
  
 #include <mapnik/transform_expression_grammar.hpp>
 
+// boost
+#include <boost/version.hpp>
+
 namespace mapnik {
 
 namespace qi = boost::spirit::qi;
@@ -38,9 +41,13 @@ transform_expression_grammar<Iterator>::transform_expression_grammar(expression_
     using qi::char_;
     using qi::lit;
     using qi::no_case;
+#if BOOST_VERSION > 104200
     using qi::no_skip;
-
     start = transform_ % no_skip[char_(", ")] ;
+#else
+    using qi::lexeme;
+    start = transform_ % lexeme[char_(", ")] ;
+#endif
 
     transform_ = matrix | translate | scale | rotate | skewX | skewY ;
 
