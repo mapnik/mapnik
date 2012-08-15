@@ -49,63 +49,6 @@ list get_dashes_list(const stroke& stroke)
 }
 }
 
-struct stroke_pickle_suite : boost::python::pickle_suite
-{
-    static boost::python::tuple
-    getinitargs(const stroke& s)
-    {
-
-        return boost::python::make_tuple(s.get_color(),s.get_width());
-
-    }
-
-    static  boost::python::tuple
-    getstate(const stroke& s)
-    {
-        boost::python::list dashes = get_dashes_list(s);
-        return boost::python::make_tuple(s.get_opacity(),
-                                         dashes,
-                                         s.get_line_cap(),
-                                         s.get_line_join(),
-                                         s.get_gamma(),
-                                         s.get_gamma_method());
-    }
-
-    static void
-    setstate (stroke& s, boost::python::tuple state)
-    {
-        using namespace boost::python;
-        if (len(state) != 6)
-        {
-            PyErr_SetObject(PyExc_ValueError,
-                            ("expected 6-item tuple in call to __setstate__; got %s"
-                             % state).ptr()
-                );
-            throw_error_already_set();
-        }
-
-        s.set_opacity(extract<float>(state[0]));
-
-        if (state[1])
-        {
-            list dashes = extract<list>(state[1]);
-            for(boost::python::ssize_t i=0; i<len(dashes); i++) {
-                double ds1 = extract<double>(dashes[i][0]);
-                double ds2 = extract<double>(dashes[i][1]);
-                s.add_dash(ds1,ds2);
-            }
-        }
-
-        s.set_line_cap(extract<line_cap_e>(state[2]));
-        s.set_line_join(extract<line_join_e>(state[3]));
-        s.set_gamma(extract<double>(state[4]));
-        s.set_gamma_method(extract<gamma_method_e>(state[5]));
-
-    }
-
-};
-
-
 void export_stroke ()
 {
     using namespace boost::python;
@@ -132,7 +75,6 @@ void export_stroke ()
                  (arg("color"),arg("width")),
                  "Creates a new stroke object with a specified color and width.\n")
             )
-        .def_pickle(stroke_pickle_suite())
         .add_property("color",make_function
                       (&stroke::get_color,return_value_policy<copy_const_reference>()),
                       &stroke::set_color,

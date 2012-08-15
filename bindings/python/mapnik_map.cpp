@@ -40,85 +40,9 @@ using mapnik::box2d;
 using mapnik::layer;
 using mapnik::Map;
 
-struct map_pickle_suite : boost::python::pickle_suite
-{
-    static boost::python::tuple
-    getinitargs(const Map& m)
-    {
-        return boost::python::make_tuple(m.width(),m.height(),m.srs());
-    }
-
-    static  boost::python::tuple
-    getstate(const Map& m)
-    {
-        boost::python::list l;
-        for (unsigned i=0;i<m.layer_count();++i)
-        {
-            l.append(m.getLayer(i));
-        }
-
-        boost::python::list s;
-        Map::const_style_iterator it = m.styles().begin();
-        Map::const_style_iterator end = m.styles().end();
-        for (; it != end; ++it)
-        {
-            std::string const& name = it->first;
-            const mapnik::feature_type_style & style = it->second;
-            boost::python::tuple style_pair = boost::python::make_tuple(name,style);
-            s.append(style_pair);
-        }
-
-        return boost::python::make_tuple(m.get_current_extent(),m.background(),l,s,m.base_path());
-    }
-
-    static void
-    setstate (Map& m, boost::python::tuple state)
-    {
-        using namespace boost::python;
-        if (len(state) != 5)
-        {
-            PyErr_SetObject(PyExc_ValueError,
-                            ("expected 5-item tuple in call to __setstate__; got %s"
-                             % state).ptr()
-                );
-            throw_error_already_set();
-        }
-
-        box2d<double> ext = extract<box2d<double> >(state[0]);
-        m.zoom_to_box(ext);
-        if (state[1])
-        {
-            color bg = extract<color>(state[1]);
-            m.set_background(bg);
-        }
-
-        boost::python::list l=extract<boost::python::list>(state[2]);
-        for (int i=0;i<len(l);++i)
-        {
-            m.addLayer(extract<layer>(l[i]));
-        }
-
-        boost::python::list s=extract<boost::python::list>(state[3]);
-        for (int i=0;i<len(s);++i)
-        {
-            boost::python::tuple style_pair=extract<boost::python::tuple>(s[i]);
-            std::string name = extract<std::string>(style_pair[0]);
-            mapnik::feature_type_style style = extract<mapnik::feature_type_style>(style_pair[1]);
-            m.insert_style(name, style);
-        }
-
-        if (state[4])
-        {
-            std::string base_path = extract<std::string>(state[4]);
-            m.set_base_path(base_path);
-        }
-    }
-};
-
 std::vector<layer>& (Map::*layers_nonconst)() =  &Map::layers;
 std::vector<layer> const& (Map::*layers_const)() const =  &Map::layers;
 mapnik::parameters& (Map::*params_nonconst)() =  &Map::get_extra_parameters;
-//boost::optional<mapnik::box2d<double> > const& (Map::*maximum_extent_const)() const =  &Map::maximum_extent;
 
 mapnik::feature_type_style find_style(mapnik::Map const& m, std::string const& name)
 {
@@ -222,9 +146,6 @@ void export_map()
                     ">>> m.srs\n"
                     "'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'\n"
                     ))
-
-        .def_pickle(map_pickle_suite()
-            )
 
         .def("append_style",&Map::insert_style,
              (arg("style_name"),arg("style_object")),

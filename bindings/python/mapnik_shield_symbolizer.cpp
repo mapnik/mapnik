@@ -96,7 +96,6 @@ void export_shield_symbolizer()
                                                         unsigned, mapnik::color const&,
                                                         path_expression_ptr>()
         )
-        //.def_pickle(shield_symbolizer_pickle_suite())
         .add_property("allow_overlap",
                       &shield_symbolizer::get_allow_overlap,
                       &shield_symbolizer::set_allow_overlap,
