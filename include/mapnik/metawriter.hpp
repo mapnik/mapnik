@@ -28,11 +28,11 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/metawriter/properties.hpp>
+#include <mapnik/text/placements_list.hpp>
 
 // boost
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/concept_check.hpp>
 
 // stl
 #include <set>
@@ -63,15 +63,11 @@ public:
     virtual void add_box(box2d<double> const& box, Feature const& feature,
                          CoordTransform const& t,
                          metawriter_properties const& properties)=0;
-#if 0
-    virtual void add_text(boost::ptr_vector<text_path> const& placements,
-                          box2d<double> const& extents,
+
+    virtual void add_text(placements_list const& positions,
                           Feature const& feature,
                           CoordTransform const& t,
                           metawriter_properties const& properties)=0;
-#else
-#warning MetaWriter: add_text disabled!
-#endif
     virtual void add_polygon(path_type & path,
                              Feature const& feature,
                              CoordTransform const& t,
@@ -87,10 +83,7 @@ public:
      * \param properties metawriter_property_map object with userdefined values.
      *        Useful for setting filename etc.
      */
-    virtual void start(metawriter_property_map const& properties)
-    {
-        boost::ignore_unused_variable_warning(properties);
-    }
+    virtual void start(metawriter_property_map const& /*properties*/) { }
 
     /** Stop processing.
      * Write file footer, close database connection, ...
@@ -101,10 +94,7 @@ public:
      */
     void set_size(int width, int height) { width_ = width; height_ = height; }
     /** Set Map object's srs. */
-    virtual void set_map_srs(projection const& proj)
-    {
-        boost::ignore_unused_variable_warning(proj);
-    }
+    virtual void set_map_srs(projection const& /*proj*/) {}
 
     /** Return the list of default properties. */
     metawriter_properties const& get_default_properties() const { return dflt_properties_;}

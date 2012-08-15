@@ -25,6 +25,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/layout.hpp>
+#include <mapnik/metawriter.hpp>
 #include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
@@ -36,7 +37,6 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
       prj_trans_(prj_trans),
       t_(t),
       detector_(detector),
-      writer_(sym.get_metawriter()),
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       points_on_line_(false),
@@ -59,6 +59,12 @@ placements_list const& text_symbolizer_helper<FaceManagerT, DetectorT>::get()
     else
     {
         while (next_line_placement());
+    }
+    metawriter_with_properties writer = sym_.get_metawriter();
+    if (writer.first)
+    {
+        //TODO: Boxes for ShieldSymbolizer
+        writer.first->add_text(finder_.placements(), feature_, t_, writer.second);
     }
     return finder_.placements();
 }
@@ -94,11 +100,6 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
         {
             //Found a placement
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
-#if 0
-            if (writer_.first) writer_.first->add_text(
-                finder_->get_results(), finder_->get_extents(),
-                feature_, t_, writer_.second);
-#endif
             return true;
         }
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
@@ -124,11 +125,6 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         {
             //Found a placement
             point_itr_ = points_.erase(point_itr_);
-#if 0
-            if (writer_.first) writer_.first->add_text(
-                finder_->get_results(), finder_->get_extents(),
-                feature_, t_, writer_.second);
-#endif
             return true;
         }
         //No placement for this point. Keep it in points_ for next try.
@@ -315,13 +311,6 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         if (placement_->properties.allow_overlap || detector_.has_placement(marker_ext_))
         {
             detector_.insert(marker_ext_);
-#if 0
-            if (writer_.first) {
-                writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
-                writer_.first->add_text(finder_->get_results(), finder_->get_extents(),
-                                        feature_, t_, writer_.second);
-            }
-#endif
             point_itr_ = points_.erase(point_itr_);
             return true;
         }

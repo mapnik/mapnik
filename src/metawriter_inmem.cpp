@@ -69,15 +69,13 @@ metawriter_inmem::add_box(box2d<double> const& box, Feature const& feature,
     instances_.push_back(inst);
 }
 
-#if 0
 void
-metawriter_inmem::add_text(
-    boost::ptr_vector<text_path> const& /*text*/,
-    box2d<double> const& extents,
+metawriter_inmem::add_text(placements_list const& /*positions*/,
     Feature const& feature,
     CoordTransform const& /*t*/,
     metawriter_properties const& properties)
 {
+#if 0
     if (extents.valid())
     {
         meta_instance inst;
@@ -85,8 +83,10 @@ metawriter_inmem::add_text(
         inst.box = extents;
         instances_.push_back(inst);
     }
-}
+#else
+#warning Add text in metawriter_inmem disabled.
 #endif
+}
 
 void
 metawriter_inmem::add_polygon(path_type & path,

@@ -55,9 +55,7 @@ public:
                            DetectorT &detector,
                            box2d<double> const& query_extent);
 
-    /** Return next placement.
-     * If no more placements are found false is returned.
-     */
+    /** Return all placements.*/
     placements_list const& get();
 
 protected:
@@ -72,7 +70,6 @@ protected:
     proj_transform const& prj_trans_;
     CoordTransform const& t_;
     DetectorT & detector_;
-    metawriter_with_properties writer_;
     box2d<double> dims_;
     box2d<double> const& query_extent_;
     //Processing
@@ -139,7 +136,6 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geo_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::points_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::writer_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::feature_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::t_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::detector_;

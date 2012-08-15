@@ -175,12 +175,12 @@ void metawriter_json_stream::add_box(box2d<double> const &box, Feature const& fe
 
 }
 
-#if 0
-void metawriter_json_stream::add_text(
-    boost::ptr_vector<text_path> const& placements, box2d<double> const& extents,
+
+void metawriter_json_stream::add_text(placements_list const& placements,
     Feature const& feature, CoordTransform const& t,
     metawriter_properties const& properties)
 {
+#if 0
     /* Note:
        Map coordinate system (and starting_{x,y}) starts in upper left corner
        and grows towards lower right corner.
@@ -261,8 +261,10 @@ void metawriter_json_stream::add_text(
         *f_ << "]";
         write_properties(feature, properties);
     }
-}
+#else
+#warning Metawriter: add_text() disabled.
 #endif
+}
 
 void metawriter_json_stream::add_polygon(path_type & path,
                                          Feature const& feature,
