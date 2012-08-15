@@ -84,7 +84,6 @@ HEADERS += \
     ../include/mapnik/coord.hpp \
     ../include/mapnik/coord_array.hpp \
     ../include/mapnik/css_color_grammar.hpp \
-    ../include/mapnik/css_color_grammar_deprecated.hpp \
     ../include/mapnik/ctrans.hpp \
     ../include/mapnik/debug.hpp \
     ../include/mapnik/datasource.hpp \

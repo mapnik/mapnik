@@ -32,13 +32,7 @@
 // stl
 #include <sstream>
 
-// boost 1.41 -> 1.44 compatibility, to be removed in mapnik 2.1 (dane)
-#if BOOST_VERSION >= 104500
 #include <mapnik/css_color_grammar.hpp>
-#else
-#include <mapnik/css_color_grammar_deprecated.hpp>
-#endif
-
 
 namespace mapnik {
 

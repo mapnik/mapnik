@@ -20,6 +20,11 @@
  *
  *****************************************************************************/
 
+// boost
+#include <boost/version.hpp>
+
+#if BOOST_VERSION >= 104500
+
 #include <mapnik/css_color_grammar.hpp>
 
 namespace mapnik
@@ -260,3 +265,5 @@ template struct mapnik::css_color_grammar<std::string::const_iterator>;
 
 
 }
+
+#endif
