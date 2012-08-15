@@ -136,10 +136,6 @@ HEADERS += \
     ../include/mapnik/memory.hpp \
     ../include/mapnik/memory_datasource.hpp \
     ../include/mapnik/memory_featureset.hpp \
-    ../include/mapnik/metawriter.hpp \
-    ../include/mapnik/metawriter_factory.hpp \
-    ../include/mapnik/metawriter_inmem.hpp \
-    ../include/mapnik/metawriter_json.hpp \
     ../include/mapnik/octree.hpp \
     ../include/mapnik/palette.hpp \
     ../include/mapnik/params.hpp \
@@ -279,9 +275,6 @@ SOURCES += \
     ../src/markers_symbolizer.cpp \
     ../src/memory.cpp \
     ../src/memory_datasource.cpp \
-    ../src/metawriter.cpp \
-    ../src/metawriter_factory.cpp \
-    ../src/metawriter_inmem.cpp \
     ../src/palette.cpp \
     ../src/parse_path.cpp \
     ../src/placement_finder.cpp \
