@@ -25,9 +25,7 @@
 
 // mapnik
 #include <mapnik/map.hpp>
-#include <mapnik/projection.hpp>
 #include <mapnik/memory_datasource.hpp>
-
 
 // stl
 #include <set>
@@ -40,6 +38,7 @@ namespace mapnik
 class Map;
 class layer;
 class projection;
+class proj_transform;
 
 template <typename Processor>
 class feature_style_processor
