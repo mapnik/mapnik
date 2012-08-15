@@ -2,7 +2,6 @@
 
 from nose.tools import *
 from utilities import execution_path
-from copy import deepcopy
 
 import os, mapnik
 
