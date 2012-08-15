@@ -86,9 +86,9 @@ public:
             unsigned int b = (in >> 16) & 0xff;
             unsigned int a = (in >> 24) & 0xff;
 
-            r = r * a / 255;
-            g = g * a / 255;
-            b = b * a / 255;
+            //r = r * a / 255;
+            //g = g * a / 255;
+            //b = b * a / 255;
 
             *out_ptr++ = (a << 24) | (r << 16) | (g << 8) | b;
         }
@@ -97,7 +97,7 @@ public:
         pattern_ = Cairo::SurfacePattern::create(surface_);
     }
 
-    ~cairo_pattern(void)
+    ~cairo_pattern()
     {
     }
 
@@ -128,7 +128,7 @@ public:
         pattern_->set_filter(filter);
     }
 
-    Cairo::RefPtr<Cairo::SurfacePattern> const& pattern(void) const
+    Cairo::RefPtr<Cairo::SurfacePattern> const& pattern() const
     {
         return pattern_;
     }
@@ -173,12 +173,12 @@ public:
         pattern_->set_matrix(Cairo::Matrix(m[0],m[1],m[2],m[3],m[4],m[5]));
     }
 
-    ~cairo_gradient(void)
+    ~cairo_gradient()
     {
     }
 
 
-    Cairo::RefPtr<Cairo::Gradient> const& gradient(void) const
+    Cairo::RefPtr<Cairo::Gradient> const& gradient() const
     {
         return pattern_;
     }
@@ -209,7 +209,7 @@ public:
         cairo_face_ = Cairo::RefPtr<Cairo::FontFace>(new Cairo::FontFace(c_face));
     }
 
-    Cairo::RefPtr<Cairo::FontFace> const& face(void) const
+    Cairo::RefPtr<Cairo::FontFace> const& face() const
     {
         return cairo_face_;
     }
@@ -270,7 +270,7 @@ public:
         context_->save();
     }
 
-    ~cairo_context(void)
+    ~cairo_context()
     {
         context_->restore();
     }
@@ -568,17 +568,17 @@ public:
         context_->rectangle(x, y, w, h);
     }
 
-    void stroke(void)
+    void stroke()
     {
         context_->stroke();
     }
 
-    void fill(void)
+    void fill()
     {
         context_->fill();
     }
 
-    void paint(void)
+    void paint()
     {
         context_->paint();
     }
@@ -1343,6 +1343,9 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
+    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
 
@@ -1356,13 +1359,32 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
 
     context.set_pattern(pattern);
 
+    //pattern_alignment_e align = sym.get_alignment();
+    //unsigned offset_x=0;
+    //unsigned offset_y=0;
+
+    //if (align == LOCAL_ALIGNMENT)
+    //{
+    //    double x0 = 0;
+    //    double y0 = 0;
+    //    if (feature.num_geometries() > 0)
+    //    {
+    //        clipped_geometry_type clipped(feature.get_geometry(0));
+    //        clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+    //        path_type path(t_,clipped,prj_trans);
+    //        path.vertex(&x0,&y0);
+    //    }
+    //    offset_x = unsigned(width_ - x0);
+    //    offset_y = unsigned(height_ - y0);
+    //}
+
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
+        converter(query_extent_,context,sym,t_,prj_trans,tr, scale_factor_);
 
     if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
@@ -1376,7 +1398,6 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
             converter.apply(geom);
         }
     }
-
     // fill polygon
     context.fill();
 }
