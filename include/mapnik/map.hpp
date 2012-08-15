@@ -28,7 +28,6 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/ctrans.hpp>
 #include <mapnik/params.hpp>
 
 // boost
@@ -36,6 +35,9 @@
 
 namespace mapnik
 {
+
+class CoordTransform;
+
 class MAPNIK_DECL Map
 {
 public:
