@@ -342,7 +342,7 @@ void grid_encode_utf(T const& grid_type,
 }
 
 template <typename T>
-boost::python::dict grid_encode( T const& grid, std::string format, bool add_features, unsigned int resolution)
+boost::python::dict grid_encode( T const& grid, std::string const& format, bool add_features, unsigned int resolution)
 {
     if (format == "utf") {
         boost::python::dict json;
@@ -357,8 +357,8 @@ boost::python::dict grid_encode( T const& grid, std::string format, bool add_fea
     }
 }
 
-template boost::python::dict grid_encode( mapnik::grid const& grid, std::string format, bool add_features, unsigned int resolution);
-template boost::python::dict grid_encode( mapnik::grid_view const& grid, std::string format, bool add_features, unsigned int resolution);
+template boost::python::dict grid_encode( mapnik::grid const& grid, std::string const& format, bool add_features, unsigned int resolution);
+template boost::python::dict grid_encode( mapnik::grid_view const& grid, std::string const& format, bool add_features, unsigned int resolution);
 
 /* new approach: key comes from grid object
  * grid size should be same as the map

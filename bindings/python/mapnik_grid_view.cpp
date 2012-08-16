@@ -34,7 +34,7 @@
 using namespace boost::python;
 
 // help compiler see template definitions
-static dict (*encode)( mapnik::grid_view const&, std::string, bool, unsigned int) = mapnik::grid_encode;
+static dict (*encode)( mapnik::grid_view const&, std::string const& , bool, unsigned int) = mapnik::grid_encode;
 
 void export_grid_view()
 {
