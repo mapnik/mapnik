@@ -57,7 +57,7 @@ namespace mapnik {
         {
             debug = 0,
             warn = 1,
-            error = 2
+            error = 2,
             none = 3
         };
 
