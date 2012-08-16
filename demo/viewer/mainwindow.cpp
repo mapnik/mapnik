@@ -40,6 +40,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
+#include <mapnik/projection.hpp>
 #endif
 
 // qt
