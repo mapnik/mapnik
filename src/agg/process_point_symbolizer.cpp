@@ -66,8 +66,6 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
         agg::trans_affine tr;
         evaluate_transform(tr, feature, sym.get_image_transform());
-        tr = agg::trans_affine_scaling(scale_factor_) * tr;
-
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr;
@@ -96,14 +94,8 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
                               sym.get_opacity(),
                               sym.comp_op());
 
-                if (/* DEBUG */ 0) {
-                    debug_draw_box(label_ext, 0, 0, 0.0);
-                }
-
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);
-                //metawriter_with_properties writer = sym.get_metawriter();
-                //if (writer.first) writer.first->add_box(label_ext, feature, t_, writer.second);
             }
         }
     }

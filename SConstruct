@@ -32,10 +32,7 @@ try:
 except:
     HAS_DISTUTILS = False
 
-if platform.uname()[4] == 'ppc64':
-    LIBDIR_SCHEMA='lib64'
-else:
-    LIBDIR_SCHEMA='lib'
+LIBDIR_SCHEMA_DEFAULT='lib'
 
 py3 = None
 
@@ -287,6 +284,7 @@ opts.AddVariables(
 
     # Install Variables
     ('PREFIX', 'The install path "prefix"', '/usr/local'),
+    ('LIBDIR_SCHEMA', 'The library sub-directory appended to the "prefix", sometimes lib64 on 64bit linux systems', LIBDIR_SCHEMA_DEFAULT),
     ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
     ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
@@ -307,17 +305,17 @@ opts.AddVariables(
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('JPEG', 'Build Mapnik with JPEG read and write support', 'True'),
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
-    PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include', PathVariable.PathAccept),
-    PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('PKG_CONFIG_PATH', 'Use this path to point pkg-config to .pc files instead of the PKG_CONFIG_PATH environment setting',''),
 
     # Variables affecting rendering back-ends
@@ -336,11 +334,11 @@ opts.AddVariables(
     ('GDAL_CONFIG', 'The path to the gdal-config executable for finding gdal and ogr details.', 'gdal-config'),
     ('PG_CONFIG', 'The path to the pg_config executable.', 'pg_config'),
     PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept),
-    PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept),
-    PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
-    PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
 
     # Variables for logging and statistics
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
@@ -657,7 +655,7 @@ def FindBoost(context, prefixes, thread_flag):
     prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_INCLUDES'])))
     prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_LIBS'])))
     for searchDir in prefixes:
-        libItems = glob(os.path.join(searchDir, LIBDIR_SCHEMA, '%s*.*' % search_lib))
+        libItems = glob(os.path.join(searchDir, env['LIBDIR_SCHEMA'], '%s*.*' % search_lib))
         if not libItems:
             libItems = glob(os.path.join(searchDir, 'lib/%s*.*' % search_lib))
         incItems = glob(os.path.join(searchDir, 'include/boost*/'))
@@ -676,7 +674,7 @@ def FindBoost(context, prefixes, thread_flag):
         msg += '\n  *libs found: %s' % BOOST_LIB_DIR
         env['BOOST_LIBS'] = BOOST_LIB_DIR
     else:
-        env['BOOST_LIBS'] = '/usr/' + LIBDIR_SCHEMA
+        env['BOOST_LIBS'] = '/usr/' + env['LIBDIR_SCHEMA']
         msg += '\n  *using default boost lib dir: %s' % env['BOOST_LIBS']
 
     if BOOST_INCLUDE_DIR:
@@ -958,7 +956,6 @@ if not preconfigured:
     env['LIBMAPNIK_LIBS'] = []
     env['LIBMAPNIK_CPPATHS'] = []
     env['LIBMAPNIK_CXXFLAGS'] = []
-    env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
     env['SQLITE_LINKFLAGS'] = []

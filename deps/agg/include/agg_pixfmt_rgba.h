@@ -1450,6 +1450,9 @@ namespace agg
     };
 
     // colorize alpha values
+    // TODO - consider moving to image-filters:
+    // https://github.com/mapnik/mapnik/issues/1371
+    /*
     template <typename ColorT, typename Order>
     struct comp_op_rgba_colorize_alpha
     {
@@ -1503,6 +1506,7 @@ namespace agg
             }
         }
     };
+    */
 
     // grain extract (GIMP)
     // E = I - M + 128
@@ -1790,7 +1794,7 @@ namespace agg
         comp_op_rgba_saturation<ColorT,Order>::blend_pix,
         comp_op_rgba_color<ColorT,Order>::blend_pix,
         comp_op_rgba_value<ColorT,Order>::blend_pix,
-        comp_op_rgba_colorize_alpha<ColorT,Order>::blend_pix,
+        //comp_op_rgba_colorize_alpha<ColorT,Order>::blend_pix,
         0
     };
 
@@ -1832,7 +1836,7 @@ namespace agg
         comp_op_saturation,    //----comp_op_saturation
         comp_op_color,         //----comp_op_color
         comp_op_value,         //----comp_op_value
-        comp_op_colorize_alpha,//----comp_op_colorize_alpha
+        //comp_op_colorize_alpha,//----comp_op_colorize_alpha
         end_of_comp_op_e
     };
 

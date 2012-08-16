@@ -25,9 +25,7 @@
 
 // mapnik
 #include <mapnik/map.hpp>
-#include <mapnik/projection.hpp>
 #include <mapnik/memory_datasource.hpp>
-
 
 // stl
 #include <set>
@@ -40,6 +38,7 @@ namespace mapnik
 class Map;
 class layer;
 class projection;
+class proj_transform;
 
 template <typename Processor>
 class feature_style_processor
@@ -58,15 +57,6 @@ public:
      */
     void apply(mapnik::layer const& lyr, std::set<std::string>& names);
 private:
-    /*!
-     * @return initialize metawriters for a given map and projection.
-     */
-    void start_metawriters(Map const& m_, projection const& proj);
-    /*!
-     * @return stop metawriters that were previously initialized.
-     */
-    void stop_metawriters(Map const& m_);
-
     /*!
      * @return render a layer given a projection and scale.
      */

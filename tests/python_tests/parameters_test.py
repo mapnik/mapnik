@@ -6,7 +6,6 @@ from nose.tools import *
 from utilities import execution_path
 
 import mapnik
-import pickle
 
 def setup():
     os.chdir(execution_path('.'))
@@ -42,15 +41,6 @@ def test_parameters():
     eq_(params[0][1],1.0777)
 
     eq_(params.get('float'),1.0777)
-
-def test_parameters_pickling():
-    params = mapnik.Parameters()
-    params.append(mapnik.Parameter('oh',str('yeah')))
-
-    params2 = pickle.loads(pickle.dumps(params,pickle.HIGHEST_PROTOCOL))
-
-    eq_(params[0][0],params2[0][0])
-    eq_(params[0][1],params2[0][1])
 
 
 if __name__ == "__main__":

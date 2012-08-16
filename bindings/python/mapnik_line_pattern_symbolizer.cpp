@@ -49,17 +49,6 @@ void set_filename(line_pattern_symbolizer & t, std::string const& file_expr)
 
 }
 
-struct line_pattern_symbolizer_pickle_suite : boost::python::pickle_suite
-{
-    static boost::python::tuple
-    getinitargs(const line_pattern_symbolizer& l)
-    {
-        std::string filename = path_processor_type::to_string(*l.get_filename());
-        // FIXME : Do we need "type" parameter at all ?
-        return boost::python::make_tuple(filename, guess_type(filename));
-    }
-};
-
 void export_line_pattern_symbolizer()
 {
     using namespace boost::python;
@@ -67,7 +56,6 @@ void export_line_pattern_symbolizer()
     class_<line_pattern_symbolizer>("LinePatternSymbolizer",
                                     init<path_expression_ptr>
                                     ("<image file expression>"))
-        //.def_pickle(line_pattern_symbolizer_pickle_suite())
         .add_property("transform",
                       mapnik::get_svg_transform<line_pattern_symbolizer>,
                       mapnik::set_svg_transform<line_pattern_symbolizer>)

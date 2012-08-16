@@ -146,7 +146,6 @@ source = Split(
     text_symbolizer.cpp
     tiff_reader.cpp
     wkb.cpp
-    wkb_generator.cpp
     projection.cpp
     proj_transform.cpp
     distance.cpp
@@ -157,11 +156,9 @@ source = Split(
     symbolizer_helpers.cpp
     unicode.cpp
     markers_symbolizer.cpp
-    metawriter.cpp
     raster_colorizer.cpp
     wkt/wkt_factory.cpp
-    metawriter_inmem.cpp
-    metawriter_factory.cpp
+    wkt/wkt_generator.cpp
     mapped_memory_cache.cpp
     marker_cache.cpp
     svg_parser.cpp

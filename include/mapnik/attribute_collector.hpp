@@ -102,7 +102,6 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             if (*it) boost::apply_visitor(f_attr, **it);
         }
-        collect_metawriter(sym);
         collect_transform(sym.get_transform());
     }
 
@@ -113,14 +112,12 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_metawriter(sym);
         collect_transform(sym.get_image_transform());
         collect_transform(sym.get_transform());
     }
 
     void operator () (line_symbolizer const& sym)
     {
-        collect_metawriter(sym);
         collect_transform(sym.get_transform());
     }
 
@@ -131,14 +128,12 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_metawriter(sym);
         collect_transform(sym.get_image_transform());
         collect_transform(sym.get_transform());
     }
 
     void operator () (polygon_symbolizer const& sym)
     {
-        collect_metawriter(sym);
         collect_transform(sym.get_transform());
     }
 
@@ -149,7 +144,6 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_metawriter(sym);
         collect_transform(sym.get_image_transform());
         collect_transform(sym.get_transform());
     }
@@ -169,7 +163,6 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             path_processor_type::collect_attributes(*filename_expr,names_);
         }
-        collect_metawriter(sym);
         collect_transform(sym.get_image_transform());
         collect_transform(sym.get_transform());
     }
@@ -186,7 +179,6 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             boost::apply_visitor(f_attr,*width_expr);
         }
-        collect_metawriter(sym);
         collect_transform(sym.get_image_transform());
         collect_transform(sym.get_transform());
     }
@@ -198,7 +190,6 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             boost::apply_visitor(f_attr,*height_expr);
         }
-        collect_metawriter(sym);
         collect_transform(sym.get_transform());
     }
     // TODO - support remaining syms
@@ -206,11 +197,6 @@ struct symbolizer_attributes : public boost::static_visitor<>
 private:
     std::set<std::string>& names_;
     expression_attributes<std::set<std::string> > f_attr;
-    void collect_metawriter(symbolizer_base const& sym)
-    {
-        metawriter_properties const& properties = sym.get_metawriter_properties();
-        names_.insert(properties.begin(), properties.end());
-    }
     void collect_transform(transform_list_ptr const& trans_expr)
     {
         if (trans_expr)

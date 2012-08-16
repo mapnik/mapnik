@@ -49,43 +49,7 @@ void set_filename(mapnik::markers_symbolizer & symbolizer, std::string const& fi
 
 }
 
-struct markers_symbolizer_pickle_suite : boost::python::pickle_suite
-{
-    static boost::python::tuple
-    getinitargs(markers_symbolizer const& p)
-    {
-        std::string filename = path_processor_type::to_string(*p.get_filename());
-        return boost::python::make_tuple(filename,mapnik::guess_type(filename));
-    }
-
-    static  boost::python::tuple
-    getstate(markers_symbolizer const& p)
-    {
-        return boost::python::make_tuple(p.get_allow_overlap(),
-                                         p.get_ignore_placement());//,p.get_opacity());
-    }
-
-    static void
-    setstate (markers_symbolizer& p, boost::python::tuple state)
-    {
-        using namespace boost::python;
-        if (len(state) != 2)
-        {
-            PyErr_SetObject(PyExc_ValueError,
-                            ("expected 2-item tuple in call to __setstate__; got %s"
-                             % state).ptr()
-                );
-            throw_error_already_set();
-        }
-
-        p.set_allow_overlap(extract<bool>(state[0]));
-        p.set_ignore_placement(extract<bool>(state[1]));
-        //p.set_opacity(extract<float>(state[2]));
-
-    }
-
-};
-
+// https://github.com/mapnik/mapnik/issues/1367
 PyObject* get_fill_opacity_impl(markers_symbolizer & sym)
 {
     boost::optional<float> fill_opacity = sym.get_fill_opacity();
@@ -107,7 +71,6 @@ void export_markers_symbolizer()
     class_<markers_symbolizer>("MarkersSymbolizer",
                                init<>("Default Markers Symbolizer - circle"))
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
-        //.def_pickle(markers_symbolizer_pickle_suite())
         .add_property("filename",
                       &get_filename,
                       &set_filename)

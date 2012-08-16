@@ -50,47 +50,6 @@ void set_filename(point_symbolizer & t, std::string const& file_expr)
 
 }
 
-struct point_symbolizer_pickle_suite : boost::python::pickle_suite
-{
-    static boost::python::tuple
-    getinitargs(const point_symbolizer& p)
-    {
-        std::string filename = path_processor_type::to_string(*p.get_filename());
-        return boost::python::make_tuple(filename,mapnik::guess_type(filename));
-    }
-
-    static  boost::python::tuple
-    getstate(const point_symbolizer& p)
-    {
-        return boost::python::make_tuple(p.get_allow_overlap(),
-                                         p.get_opacity(),
-                                         p.get_ignore_placement(),
-                                         p.get_point_placement());
-    }
-
-    static void
-    setstate (point_symbolizer& p, boost::python::tuple state)
-    {
-        using namespace boost::python;
-        if (len(state) != 4)
-        {
-            PyErr_SetObject(PyExc_ValueError,
-                            ("expected 4-item tuple in call to __setstate__; got %s"
-                             % state).ptr()
-                );
-            throw_error_already_set();
-        }
-
-        p.set_allow_overlap(extract<bool>(state[0]));
-        p.set_opacity(extract<float>(state[1]));
-        p.set_ignore_placement(extract<bool>(state[2]));
-        p.set_point_placement(extract<point_placement_e>(state[3]));
-
-    }
-
-};
-
-
 void export_point_symbolizer()
 {
     using namespace boost::python;
@@ -103,7 +62,6 @@ void export_point_symbolizer()
     class_<point_symbolizer>("PointSymbolizer",
                              init<>("Default Point Symbolizer - 4x4 black square"))
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
-        .def_pickle(point_symbolizer_pickle_suite())
         .add_property("filename",
                       &get_filename,
                       &set_filename)
