@@ -65,7 +65,7 @@ if env['PLATFORM'] == 'Darwin':
     # 3) the below will directly link _mapnik.so to a python version
     # 4) _mapnik.so must link to the same python lib as boost_python.dylib otherwise
     # python will Abort with a Version Mismatch error.
-    # See http://trac.mapnik.org/ticket/453 for the seeds of a better approach
+    # See https://github.com/mapnik/mapnik/issues/453 for the seeds of a better approach
     # for now we offer control over method of direct linking...
     # The default below is to link against the python dylib in the form of
     #/path/to/Python.framework/Python instead of -lpython
@@ -86,7 +86,7 @@ if env['PLATFORM'] == 'Darwin':
             # /System/Library/Frameworks/Python.framework/Python/Versions/
             # or
             # /Library/Frameworks/Python.framework/Python/Versions/
-            # See: http://trac.mapnik.org/ticket/380
+            # See: https://github.com/mapnik/mapnik/issues/380
             link_prefix = env['PYTHON_SYS_PREFIX']
             if '.framework' in link_prefix:
                 python_link_flag = '-F%s -framework Python -Z' % os.path.dirname(link_prefix.split('.')[0])
