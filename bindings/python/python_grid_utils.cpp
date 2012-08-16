@@ -379,12 +379,15 @@ void render_layer_for_grid(const mapnik::Map& map,
         throw std::runtime_error(s.str());
     }
 
-    // convert python list to std::vector
+    // convert python list to std::set
+    std::set<std::string> attributes;
     boost::python::ssize_t num_fields = boost::python::len(fields);
     for(boost::python::ssize_t i=0; i<num_fields; i++) {
         boost::python::extract<std::string> name(fields[i]);
-        if (name.check()) {
+        if (name.check())
+        {
             grid.add_property_name(name());
+            attributes.insert(name());
         }
         else
         {
@@ -394,8 +397,6 @@ void render_layer_for_grid(const mapnik::Map& map,
         }
     }
 
-    // copy property names
-    std::set<std::string> attributes = grid.property_names();
     std::string const& key = grid.get_key();
 
     // if key is special __id__ keyword
@@ -405,13 +406,10 @@ void render_layer_for_grid(const mapnik::Map& map,
 
         // if __id__ is requested to be dumped out
         // remove it so that datasource queries will not break
-        if (attributes.find(key) != attributes.end())
-        {
-            attributes.erase(key);
-        }
+        attributes.erase(key);
     }
     // if key is not the special __id__ keyword
-    else if (attributes.find(key) == attributes.end())
+    else
     {
         // them make sure the datasource query includes this field
         attributes.insert(key);
