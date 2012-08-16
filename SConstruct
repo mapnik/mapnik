@@ -1696,7 +1696,6 @@ if not HELP_REQUESTED:
 
     create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'], False)
     create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
-    create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
 
     # before installing plugins, wipe out any previously
     # installed plugins that we are no longer building
