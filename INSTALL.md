@@ -15,9 +15,9 @@ If you need to uninstall do:
 
 For more details see the 'Building' Section below.
 
-Platform specific install guides at http://trac.mapnik.org/wiki/MapnikInstallation
+Platform specific install guides at https://github.com/mapnik/mapnik/wiki/Mapnik-Installation
 
-For troubleshooting help see http://trac.mapnik.org/wiki/InstallationTroubleshooting
+For troubleshooting help see https://github.com/mapnik/mapnik/wiki/InstallationTroubleshooting
 
 
 ## Depends
@@ -26,7 +26,7 @@ Mapnik is cross platform and runs on Linux, Mac OSX, Solaris, *BSD, and Windows.
 
 The build system should work for all posix/unix systems but for windows see:
 
-    http://trac.mapnik.org/wiki/BuildingOnWindows
+    https://github.com/mapnik/mapnik/wiki/BuildingOnWindows
 
 Build dependencies are:
 
@@ -74,7 +74,7 @@ Optional dependencies:
 
 Instructions for installing many of these dependencies on
 various platforms can be found at the Mapnik Community Wiki
-(http://trac.mapnik.org/wiki/MapnikInstallation).
+(https://github.com/mapnik/mapnik/wiki/Mapnik-Installation).
 
 
 
@@ -124,7 +124,7 @@ If you want to see configure options do:
 
 For more details on all the options see:
 
-    http://trac.mapnik.org/wiki/UsingScons
+    https://github.com/mapnik/mapnik/wiki/UsingScons
 
 
 ## Testing Installation
@@ -155,11 +155,11 @@ For further tests see the `tests` folder within the Mapnik source code.
 
 ### Users
 
-Visit http://trac.mapnik.org/wiki/LearningMapnik for basic tutorials on making maps with Mapnik using the Python bindings.
+Visit https://github.com/mapnik/mapnik/wiki/LearningMapnik for basic tutorials on making maps with Mapnik using the Python bindings.
 
 ### Developers
 
-Visit http://trac.mapnik.org/#DevelopersCorner for resources for getting involved with Mapnik development.
+Read docs/contributing.markdown for resources for getting involved with Mapnik development.
 
 
 ## Mapnik Community
@@ -168,22 +168,7 @@ Visit http://trac.mapnik.org/#DevelopersCorner for resources for getting involve
 Mapnik has an active community of talented users and developers making
 amazing maps.
 
-If you are looking for further help on installation or usage and you can't
-find what you are looking for from searching the users list archives
-(http://lists.berlios.de/pipermail/mapnik-users/) or the trac wiki
-(http://trac.mapnik.org/), feel free to join the Mapnik community and
-introduce yourself.
+Please feel free to subscribe to the community list and post on both
+usage and development topics: http://mapnik.org/contact/
 
-You can get involved by:
-
- * Subscribing to the mapnik-users list:
-
-    http://lists.berlios.de/mailman/listinfo/mapnik-users
-
- * Subscribing to the mapnik-developers list:
-
-    http://lists.berlios.de/mailman/listinfo/mapnik-devel
-
- * Joining the #mapnik channel on irc://irc.freenode.net/mapnik
-
- * Signing up as a user or contributor at http://www.ohloh.net/p/mapnik/  
+You can also get involved by joining the #mapnik channel on irc://irc.freenode.net/mapnik

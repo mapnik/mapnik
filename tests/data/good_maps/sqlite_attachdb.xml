@@ -15,7 +15,7 @@
        <Parameter name="use_spatial_index">true</Parameter>
 
        <!-- key_field is required if a subquery AND spatial index
-         is used. see: http://trac.mapnik.org/ticket/821 
+         is used. see: https://github.com/mapnik/mapnik/issues/821
        -->
        <Parameter name="key_field">OGC_FID</Parameter>
        <!--

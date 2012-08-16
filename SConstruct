@@ -54,17 +54,17 @@ DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
 
 
 pretty_dep_names = {
-    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: http://trac.mapnik.org/wiki/OCCI',
-    'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/GDAL',
-    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/OGR',
-    'geos_c':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: http://trac.mapnik.org/wiki/GEOS',
+    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki//OCCI',
+    'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/GDAL',
+    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki//OGR',
+    'geos_c':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: https://github.com/mapnik/mapnik/wiki//GEOS',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'cairomm-version':'Cairomm version is too old (so cairo renderer will not be built), you need at least %s' % CAIROMM_MIN_VERSION,
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
-    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: http://trac.mapnik.org/wiki/PostGIS',
-    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: http://trac.mapnik.org/wiki/SQLite',
+    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki//PostGIS',
+    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki//SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
@@ -78,8 +78,8 @@ pretty_dep_names = {
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
     'geos-config':'geos-config program | try setting GEOS_CONFIG SCons option',
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
-    'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
-    'curl':'libcurl is required for the "osm" plugin - more info: http://trac.mapnik.org/wiki/OsmPlugin',
+    'osm':'more info: https://github.com/mapnik/mapnik/wiki//OsmPlugin',
+    'curl':'libcurl is required for the "osm" plugin - more info: https://github.com/mapnik/mapnik/wiki//OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
     'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
@@ -138,7 +138,7 @@ def call(cmd, silent=False):
     if not stderr:
         return stdin.strip()
     elif not silent:
-        color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
+        color_print(1,'Problem encounted with SCons scripts, please post bug report to: https://github.com/mapnik/mapnik/issues \nError was: %s' % stderr)
 
 def strip_first(string,find,replace=''):
     if string.startswith(find):
@@ -244,7 +244,7 @@ def pretty_dep(dep):
     if pretty:
         return '%s (%s)' % (dep,pretty)
     elif 'boost' in dep:
-        return '%s (%s)' % (dep,'more info see: http://trac.mapnik.org/wiki/MapnikInstallation & http://www.boost.org')
+        return '%s (%s)' % (dep,'more info see: https://github.com/mapnik/mapnik/wiki//MapnikInstallation & http://www.boost.org')
     return dep
 
 
@@ -1416,7 +1416,7 @@ if not preconfigured:
         color_print(4,"    $ sudo python scons/scons.py install")
         color_print(4,"\nTo view available path variables:\n    $ python scons/scons.py --help or -h")
         color_print(4,'\nTo view overall SCons help options:\n    $ python scons/scons.py --help-options or -H\n')
-        color_print(4,'More info: http://trac.mapnik.org/wiki/MapnikInstallation')
+        color_print(4,'More info: https://github.com/mapnik/mapnik/wiki//MapnikInstallation')
         if not HELP_REQUESTED:
             Exit(1)
     else:
