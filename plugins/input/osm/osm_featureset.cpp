@@ -106,9 +106,10 @@ feature_ptr osm_featureset<filterT>::next()
                           static_cast<osm_way*>(cur_item)->nodes[count]->lat);
         }
         feature->add_geometry(geom);
-    } else
+    }
+    else
     {
-        MAPNIK_LOG_FATAL(osm_featureset) << "Current item is neither node nor way.\n";
+        MAPNIK_LOG_ERROR(osm_featureset) << "Current item is neither node nor way.\n";
     }
 
     std::set<std::string>::const_iterator itr = attribute_names_.begin();

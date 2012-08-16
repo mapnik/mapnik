@@ -33,6 +33,7 @@ except:
     HAS_DISTUTILS = False
 
 LIBDIR_SCHEMA_DEFAULT='lib'
+severities = ['debug', 'warn', 'error', 'none']
 
 py3 = None
 
@@ -343,7 +344,7 @@ opts.AddVariables(
     # Variables for logging and statistics
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
-    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. "info", "debug", "warn", "error", "fatal", "none")', 'error'),
+    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. ' + ', '.join(severities), 'error'),
 
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -1470,7 +1471,6 @@ if not preconfigured:
         ndebug_flags = '-DNDEBUG'
 
         # Enable logging in debug mode (always) and release mode (when specified)
-        severities = ['info', 'debug', 'warn', 'error', 'fatal', 'none']
         if env['DEFAULT_LOG_SEVERITY']:
             if env['DEFAULT_LOG_SEVERITY'] not in severities:
                 severities_list = ', '.join(["'%s'" % s for s in severities])

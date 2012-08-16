@@ -146,7 +146,6 @@ public:
             unsigned g = stop_color.green();
             unsigned b = stop_color.blue();
             unsigned a = stop_color.alpha();
-            //MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: r=" << r << ",g=" << g << ",b=" << b << ",a=" << a;
             m_gradient_lut.add_color(st.first, agg::rgba8_pre(r, g, b, int(a * opacity)));
         }
         m_gradient_lut.build_lut();

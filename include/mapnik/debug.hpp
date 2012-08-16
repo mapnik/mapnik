@@ -55,12 +55,10 @@ namespace mapnik {
     public:
         enum severity_type
         {
-            info,
-            debug,
-            warn,
-            error,
-            fatal,
-            none
+            debug = 0,
+            warn = 1,
+            error = 2
+            none = 3
         };
 
         typedef boost::unordered_map<std::string, severity_type> severity_map;
@@ -180,7 +178,7 @@ namespace mapnik {
         /*
           Base log class, should not log anything when no MAPNIK_LOG is defined
 
-          This is used for info/debug/warn reporting that should not output
+          This is used for debug/warn reporting that should not output
           anything when not compiling for speed.
         */
         template<template <class Ch, class Tr, class A> class OutputPolicy,
@@ -240,7 +238,7 @@ namespace mapnik {
         /*
           Base log class that always log, regardless of MAPNIK_LOG.
 
-          This is used for error/fatal reporting that should always log something
+          This is used for error reporting that should always log something
         */
         template<template <class Ch, class Tr, class A> class OutputPolicy,
                  logger::severity_type Severity,
@@ -288,20 +286,18 @@ namespace mapnik {
         };
 
 
-        typedef base_log<clog_sink, logger::info> base_log_info;
         typedef base_log<clog_sink, logger::debug> base_log_debug;
         typedef base_log<clog_sink, logger::warn> base_log_warn;
         typedef base_log_always<clog_sink, logger::error> base_log_error;
-        typedef base_log_always<clog_sink, logger::fatal> base_log_fatal;
 
     } // namespace detail
 
 
     // real interfaces
-    class MAPNIK_DECL info : public detail::base_log_info {
+    class MAPNIK_DECL warn : public detail::base_log_warn {
     public:
-        info() : detail::base_log_info() {}
-        info(const char* object_name) : detail::base_log_info(object_name) {}
+        warn() : detail::base_log_warn() {}
+        warn(const char* object_name) : detail::base_log_warn(object_name) {}
     };
 
     class MAPNIK_DECL debug : public detail::base_log_debug {
@@ -310,31 +306,16 @@ namespace mapnik {
         debug(const char* object_name) : detail::base_log_debug(object_name) {}
     };
 
-    class MAPNIK_DECL warn : public detail::base_log_warn {
-    public:
-        warn() : detail::base_log_warn() {}
-        warn(const char* object_name) : detail::base_log_warn(object_name) {}
-    };
-
     class MAPNIK_DECL error : public detail::base_log_error {
     public:
         error() : detail::base_log_error() {}
         error(const char* object_name) : detail::base_log_error(object_name) {}
     };
 
-    class MAPNIK_DECL fatal : public detail::base_log_fatal {
-    public:
-        fatal() : detail::base_log_fatal() {}
-        fatal(const char* object_name) : detail::base_log_fatal(object_name) {}
-    };
-
-
     // logging helpers
-    #define MAPNIK_LOG_INFO(s) mapnik::info(#s)
     #define MAPNIK_LOG_DEBUG(s) mapnik::debug(#s)
     #define MAPNIK_LOG_WARN(s) mapnik::warn(#s)
     #define MAPNIK_LOG_ERROR(s) mapnik::error(#s)
-    #define MAPNIK_LOG_FATAL(s) mapnik::fatal(#s)
 }
 
 #endif // MAPNIK_DEBUG_HPP
