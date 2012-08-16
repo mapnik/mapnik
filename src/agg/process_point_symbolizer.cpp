@@ -66,8 +66,6 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
         agg::trans_affine tr;
         evaluate_transform(tr, feature, sym.get_image_transform());
-        tr = agg::trans_affine_scaling(scale_factor_) * tr;
-
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr;
