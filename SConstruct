@@ -1388,11 +1388,6 @@ if not preconfigured:
             color_print(1,'Could not find required header files for boost python')
             env['MISSING_DEPS'].append('boost python')
 
-        if not conf.CheckLibWithHeader(libs=[env['BOOST_PYTHON_LIB'],'python%s' % env['PYTHON_VERSION']], header='boost/python/detail/config.hpp', language='C++'):
-            color_print(1, 'Could not find library "%s" for boost python bindings' % env['BOOST_PYTHON_LIB'])
-            # failing on launchpad, so let's make it a warning for now
-            #env['MISSING_DEPS'].append('boost python')
-
         if env['CAIRO']:
             if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
                 env['HAS_PYCAIRO'] = True
