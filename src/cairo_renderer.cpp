@@ -1192,8 +1192,6 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
         marker.reset(boost::make_shared<mapnik::marker>());
     }
 
-    agg::trans_affine mtx;
-    evaluate_transform(mtx, feature, sym.get_image_transform());
 
     if (marker)
     {
@@ -1212,16 +1210,18 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
 
-            int w = (*marker)->width();
-            int h = (*marker)->height();
-
-            int px = int(floor(x - 0.5 * w));
-            int py = int(floor(y - 0.5 * h));
-            box2d<double> label_ext (px, py, px + w, py + h);
+            double dx = 0.5 * (*marker)->width();
+            double dy = 0.5 * (*marker)->height();
+            box2d<double> const& bbox = (*marker)->bounding_box();
+            agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
+            evaluate_transform(tr, feature, sym.get_image_transform());
+            box2d<double> label_ext (-dx, -dy, dx, dy);
+            label_ext *= tr;
+            label_ext *= agg::trans_affine_translation(x,y);
             if (sym.get_allow_overlap() ||
                 detector_.has_placement(label_ext))
             {
-                render_marker(pixel_position(px,py),**marker, mtx, sym.get_opacity());
+                render_marker(pixel_position(x,y),**marker, tr, sym.get_opacity());
 
                 if (!sym.get_ignore_placement())
                     detector_.insert(label_ext);
