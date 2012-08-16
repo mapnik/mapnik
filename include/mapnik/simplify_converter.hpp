@@ -120,6 +120,10 @@ private:
             v.push_back(new weighted_vertex(vtx));
         }
 
+        if (!v.size()) {
+            return status_ = process;
+        }
+
         // Connect the vertices in a linked list.
         for (WeightedVertices::iterator end = v.end(), begin = v.begin(), i = v.begin(); i != end; i++)
         {
@@ -153,7 +157,9 @@ private:
 
             // TODO: find a way so that we can efficiently resort the vector.
             // We only changed remove->prev and removed->next, so we should only
-            // have to deal with them.
+            // have to deal with them. E.g. use binary search to find prev/next
+            // using the old value, determine new position using binary search
+            // and if different, move it.
             std::sort(v.begin(), v.end(), descending);
         }
 
