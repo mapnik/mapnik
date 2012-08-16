@@ -1243,6 +1243,10 @@ if not preconfigured:
         env.PrependUnique(LIBPATH = '#src', delete_existing=True)
 
     if env['PGSQL2SQLITE']:
+        if 'sqlite3' not in env['LIBS']:
+            env.AppendUnique(LIBS='sqlite3')
+            env.AppendUnique(CPPPATH = os.path.realpath(env['SQLITE_INCLUDES']))
+            env.AppendUnique(LIBPATH = os.path.realpath(env['SQLITE_LIBS']))
         if not conf.sqlite_has_rtree():
             env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
             env['PGSQL2SQLITE'] = False
