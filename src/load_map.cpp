@@ -1623,7 +1623,15 @@ void map_parser::find_unused_nodes(xml_node const& root)
     find_unused_nodes_recursive(root, error_message);
     if (!error_message.str().empty())
     {
-        throw config_error("The following nodes or attributes were not processed while parsing the xml file:" + error_message.str());
+        std::string msg("The following nodes or attributes were not processed while parsing the xml file:" + error_message.str());
+        if (strict_)
+        {
+            throw config_error(msg);
+        }
+        else
+        {
+            MAPNIK_LOG_ERROR(load_map) << "map_parser: " << msg;
+        }
     }
 }
 
