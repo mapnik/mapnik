@@ -1659,11 +1659,6 @@ if not HELP_REQUESTED:
         SetOption('implicit_cache', 1)
         SetOption('max_drift', 1)
 
-    else:
-        # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
-        # This allows for a SCONS_LOCAL_CONFIG, if present, to be used as the primary means of storing paths to successful build dependencies
-        SetCacheMode('force')
-
     if env['JOBS'] > 1:
         SetOption("num_jobs", env['JOBS'])
 
