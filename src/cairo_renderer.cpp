@@ -1212,7 +1212,6 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
             double dx = 0.5 * (*marker)->width();
             double dy = 0.5 * (*marker)->height();
-            box2d<double> const& bbox = (*marker)->bounding_box();
             agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
             evaluate_transform(tr, feature, sym.get_image_transform());
             box2d<double> label_ext (-dx, -dy, dx, dy);
