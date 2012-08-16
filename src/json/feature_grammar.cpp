@@ -20,12 +20,14 @@
  *
  *****************************************************************************/
 
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 104700
+
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/json/feature_grammar.hpp>
 
 // boost
-#include <boost/version.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 
 namespace mapnik { namespace json {
@@ -233,3 +235,5 @@ template struct mapnik::json::feature_grammar<std::string::const_iterator,mapnik
 template struct mapnik::json::feature_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> >,mapnik::Feature>;
 
 }}
+
+#endif

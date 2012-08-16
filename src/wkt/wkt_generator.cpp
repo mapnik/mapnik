@@ -20,6 +20,10 @@
  *
  *****************************************************************************/
 
+#include <boost/version.hpp>
+
+#if BOOST_VERSION >= 104700
+
 #include <mapnik/util/geometry_wkt_generator.hpp>
 #include <mapnik/util/vertex_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
@@ -139,3 +143,5 @@ template struct mapnik::util::wkt_multi_generator<std::back_insert_iterator<std:
 
 
 }}
+
+#endif
