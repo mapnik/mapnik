@@ -88,10 +88,6 @@ void export_polygon_symbolizer()
                       &polygon_symbolizer::smooth,
                       &polygon_symbolizer::set_smooth,
                       "smooth value (0..1.0)")
-        .add_property("simplify_algorithm",
-                      &polygon_symbolizer::simplify_algorithm,
-                      &polygon_symbolizer::set_simplify_algorithm,
-                      "simplfication algorithm")
         .add_property("simplify_tolerance",
                       &polygon_symbolizer::simplify_tolerance,
                       &polygon_symbolizer::set_simplify_tolerance,

@@ -107,6 +107,7 @@ struct converter_traits<T,mapnik::simplify_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
+        geom.set_simplify_algorithm(boost::fusion::at_c<2>(args).simplify_algorithm());
         geom.set_simplify_tolerance(boost::fusion::at_c<2>(args).simplify_tolerance());
     }
 };

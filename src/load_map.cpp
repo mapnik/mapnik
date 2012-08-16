@@ -883,7 +883,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     if (clip) sym.set_clip(*clip);
 
     // simplify algorithm
-    optional<std::string> simplify_algorithm_name = pt.get_opt_attr<std::string>("simlify-op");
+    optional<std::string> simplify_algorithm_name = pt.get_opt_attr<std::string>("simplify-algorithm");
     if (simplify_algorithm_name)
     {
         optional<simplify_algorithm_e> simplify_algorithm = simplify_algorithm_from_string(*simplify_algorithm_name);
