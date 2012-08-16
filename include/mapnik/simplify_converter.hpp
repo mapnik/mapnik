@@ -4,13 +4,16 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
+#include <mapnik/simplify.hpp>
 
 // STL
 #include <limits>
 
+// Boost
+#include <boost/optional.hpp>
+
 namespace mapnik
 {
-
 
 struct weighted_vertex : private boost::noncopyable {
     vertex2d coord;
@@ -49,6 +52,7 @@ public:
         : geom_(geom)
         , tolerance_(0.0)
         , status_(initial)
+        , algorithm_(radial_distance)
     {
     }
 
@@ -58,6 +62,18 @@ public:
         process,
         end
     };
+
+    simplify_algorithm_e get_simplify_algorithm()
+    {
+        return algorithm_;
+    }
+
+    void set_simplify_algorithm(simplify_algorithm_e value) {
+        if (algorithm_ != value) {
+            algorithm_ = value;
+            reset();
+        }
+    }
 
     double get_simplify_tolerance()
     {
@@ -93,6 +109,25 @@ public:
         if (status_ == initial)
             init_vertices();
 
+        return output_vertex(x, y);
+    }
+
+
+
+private:
+    unsigned output_vertex(double* x, double* y)
+    {
+        switch (algorithm_) {
+            case visvalingam_whyatt:
+                return output_vertex_cached(x, y);
+            default:
+                throw std::runtime_error("simplification algorithm not yet implemented");
+        }
+
+        return SEG_END;
+    }
+
+    unsigned output_vertex_cached(double* x, double* y) {
         if (pos_ >= vertices_.size())
             return SEG_END;
 
@@ -103,7 +138,6 @@ public:
         return vtx.cmd;
     }
 
-private:
     status init_vertices()
     {
         if (status_ != initial) // already initialized
@@ -111,6 +145,15 @@ private:
 
         reset();
 
+        switch (algorithm_) {
+            case visvalingam_whyatt:
+                return init_vertices_visvalingam_whyatt();
+            default:
+                throw std::runtime_error("simplification algorithm not yet implemented");
+        }
+    }
+
+    status init_vertices_visvalingam_whyatt() {
         typedef std::vector<weighted_vertex *> WeightedVertices;
 
         WeightedVertices v;
@@ -171,13 +214,14 @@ private:
             delete removed;
         }
 
-        // initialization finished
+        // Initialization finished.
         return status_ = process;
     }
 
     Geometry&                       geom_;
     double                          tolerance_;
     status                          status_;
+    simplify_algorithm_e            algorithm_;
     size_t                          pos_;
     std::vector<vertex2d>           vertices_;
 

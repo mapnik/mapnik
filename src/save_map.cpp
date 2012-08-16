@@ -357,6 +357,10 @@ private:
         {
             set_attr( node, "clip", sym.clip() );
         }
+        if (sym.simplify_algorithm() != dfl.simplify_algorithm() || explicit_defaults_)
+        {
+            set_attr( node, "simplify-algorithm", *simplify_algorithm_to_string(sym.simplify_algorithm()) );
+        }
         if (sym.simplify_tolerance() != dfl.simplify_tolerance() || explicit_defaults_)
         {
             set_attr( node, "simplify-tolerance", sym.simplify_tolerance() );

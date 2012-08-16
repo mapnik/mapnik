@@ -51,6 +51,7 @@ symbolizer_base::symbolizer_base()
       writer_ptr_(),
       comp_op_(src_over),
       clip_(true),
+      simplify_algorithm_value_(radial_distance),
       simplify_tolerance_value_(0.0),
       smooth_value_(0.0)
 {
@@ -150,6 +151,16 @@ void symbolizer_base::set_clip(bool clip)
 bool symbolizer_base::clip() const
 {
     return clip_;
+}
+
+void symbolizer_base::set_simplify_algorithm(simplify_algorithm_e algo)
+{
+    simplify_algorithm_value_ = algo;
+}
+
+simplify_algorithm_e symbolizer_base::simplify_algorithm() const
+{
+    return simplify_algorithm_value_;
 }
 
 void symbolizer_base::set_simplify_tolerance(double simplify_tolerance)

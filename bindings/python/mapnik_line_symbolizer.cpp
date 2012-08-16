@@ -63,6 +63,10 @@ void export_line_symbolizer()
                       &line_symbolizer::smooth,
                       &line_symbolizer::set_smooth,
                       "smooth value (0..1.0)")
+        .add_property("simplify_algorithm",
+                      &line_symbolizer::simplify_algorithm,
+                      &line_symbolizer::set_simplify_algorithm,
+                      "simplfication algorithm")
         .add_property("simplify_tolerance",
                       &line_symbolizer::simplify_tolerance,
                       &line_symbolizer::set_simplify_tolerance,
