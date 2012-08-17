@@ -329,6 +329,49 @@ def test_point_symbolizer_grid():
     eq_(utf1,point_expected,show_grids('point-sym',utf1,point_expected))
 
 
+# should throw because this is a mis-usage
+# https://github.com/mapnik/mapnik/issues/1325
+@raises(RuntimeError)
+def test_render_to_grid_multiple_times():
+    # create map with two layers
+    m = mapnik.Map(256,256)
+    s = mapnik.Style()
+    r = mapnik.Rule()
+    sym = mapnik.MarkersSymbolizer()
+    sym.allow_overlap = True
+    r.symbols.append(sym)
+    s.rules.append(r)
+    m.append_style('points',s)
+
+    # NOTE: we use a csv datasource here
+    # because the memorydatasource fails silently for
+    # queries requesting fields that do not exist in the datasource
+    ds1 = mapnik.Datasource(**{"type":"csv","inline":'''
+      wkt,Name
+      "POINT (143.10 -38.60)",South East'''})
+    lyr1 = mapnik.Layer('One')
+    lyr1.datasource = ds1
+    lyr1.styles.append('points')
+    m.layers.append(lyr1)
+
+    ds2 = mapnik.Datasource(**{"type":"csv","inline":'''
+      wkt,Value
+      "POINT (142.48 -38.60)",South West'''})
+    lyr2 = mapnik.Layer('Two')
+    lyr2.datasource = ds2
+    lyr2.styles.append('points')
+    m.layers.append(lyr2)
+
+    ul_lonlat = mapnik.Coord(142.30,-38.20)
+    lr_lonlat = mapnik.Coord(143.40,-38.80)
+    m.zoom_to_box(mapnik.Box2d(ul_lonlat,lr_lonlat))
+    grid = mapnik.Grid(m.width,m.height)
+    mapnik.render_layer(m,grid,layer=0,fields=['Name'])
+    # should throw right here since Name will be a property now on the `grid` object
+    # and it is not found on the second layer
+    mapnik.render_layer(m,grid,layer=1,fields=['Value'])
+    utf1 = grid.encode()
+
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
