@@ -43,7 +43,7 @@ namespace mapnik
 {
 
 placement_finder_ng::placement_finder_ng(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager, double scale_factor)
-    : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true), scale_factor_(scale_factor), placements_()
+    : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true), scale_factor_(scale_factor), placements_(), has_marker_(false), marker_(), marker_box_()
 {
 }
 
@@ -82,7 +82,6 @@ const placements_list &placement_finder_ng::placements() const
 {
     return placements_;
 }
-
 
 void placement_finder_ng::init_alignment()
 {
@@ -191,7 +190,7 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
     rotated_box2d(bbox, orientation_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
     if (collision(bbox)) return false;
-
+    if (has_marker_ && !add_marker(glyphs, pos)) return false;
     detector_.insert(bbox, layout_.get_text());
 
     /* IMPORTANT NOTE:
@@ -438,6 +437,27 @@ bool placement_finder_ng::collision(const box2d<double> &box) const
     return false;
 }
 
+void placement_finder_ng::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, const pixel_position &marker_displacement)
+{
+    marker_ = m;
+    marker_box_ = box;
+    marker_unlocked_ = marker_unlocked;
+    marker_displacement_ = marker_displacement;
+    has_marker_ = true;
+}
+
+
+bool placement_finder_ng::add_marker(glyph_positions_ptr glyphs, const pixel_position &pos) const
+{
+    pixel_position real_pos = (marker_unlocked_ ? pos : glyphs->get_base_point()) + marker_displacement_;
+    box2d<double> bbox = marker_box_;
+    bbox.move(real_pos.x, real_pos.y);
+    glyphs->set_marker(marker_, real_pos);
+    if (collision(bbox)) return false;
+    detector_.insert(bbox);
+    return true;
+}
+
 box2d<double> placement_finder_ng::get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
 {
     /*
@@ -505,6 +525,22 @@ pixel_position const& glyph_positions::get_base_point() const
 void glyph_positions::set_base_point(pixel_position base_point)
 {
     base_point_ = base_point;
+}
+
+void glyph_positions::set_marker(marker_info_ptr marker, const pixel_position &marker_pos)
+{
+    marker_ = marker;
+    marker_pos_ = marker_pos;
+}
+
+marker_info_ptr glyph_positions::marker() const
+{
+    return marker_;
+}
+
+const pixel_position &glyph_positions::marker_pos() const
+{
+    return marker_pos_;
 }
 
 

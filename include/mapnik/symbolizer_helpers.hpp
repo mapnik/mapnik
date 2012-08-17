@@ -70,8 +70,6 @@ public:
 
     /** Return all placements.*/
     placements_list const& get();
-    marker_ptr get_marker() const;
-    agg::trans_affine const& get_image_transform() const;
 protected:
     bool next_point_placement();
     bool next_line_placement();
@@ -104,8 +102,6 @@ protected:
     placement_finder_ng finder_;
 
     //ShieldSymbolizer only
-    marker_ptr marker_;
-    agg::trans_affine marker_transform_;
     void init_marker();
 };
 

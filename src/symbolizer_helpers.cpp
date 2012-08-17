@@ -267,45 +267,34 @@ void text_symbolizer_helper::init_marker()
 {
     shield_symbolizer const& sym = static_cast<shield_symbolizer const&>(sym_);
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature_);
-    evaluate_transform(marker_transform_, feature_, sym.get_image_transform());
-#if 0
-    marker_.reset();
+    agg::trans_affine trans;
+    evaluate_transform(trans, feature_, sym.get_image_transform());
+    boost::optional<marker_ptr> opt_marker; //TODO: Why boost::optional?
     if (!filename.empty())
     {
-        marker_ = marker_cache::instance()->find(filename, true);
+        opt_marker = marker_cache::instance()->find(filename, true);
     }
-    if (!marker_) {
-        marker_size_.clear();
-        marker_ext_.init(0, 0, 0, 0);
-        return;
-    }
-    marker_size_.set((*marker_)->width(), (*marker_)->height());
-    double px0 = - 0.5 * marker_size_.x;
-    double py0 = - 0.5 * marker_size_.y;
-    double px1 = 0.5 * marker_size_.x;
-    double py1 = 0.5 * marker_size_.y;
+    marker_ptr m;
+    if (opt_marker) m = *opt_marker;
+    if (!m) return;
+    double width = m->width();
+    double height = m->height();
+    double px0 = - 0.5 * width;
+    double py0 = - 0.5 * height;
+    double px1 = 0.5 * width;
+    double py1 = 0.5 * height;
     double px2 = px1;
     double py2 = py0;
     double px3 = px0;
     double py3 = py1;
-    marker_transform_.transform(&px0,&py0);
-    marker_transform_.transform(&px1,&py1);
-    marker_transform_.transform(&px2,&py2);
-    marker_transform_.transform(&px3,&py3);
-    marker_ext_.init(px0, py0, px1, py1);
-    marker_ext_.expand_to_include(px2, py2);
-    marker_ext_.expand_to_include(px3, py3);
-#endif
-}
-
-marker_ptr text_symbolizer_helper::get_marker() const
-{
-    return marker_;
-}
-
-agg::trans_affine const& text_symbolizer_helper::get_image_transform() const
-{
-    return marker_transform_;
+    trans.transform(&px0, &py0);
+    trans.transform(&px1, &py1);
+    trans.transform(&px2, &py2);
+    trans.transform(&px3, &py3);
+    box2d<double> bbox(px0, py0, px1, py1);
+    bbox.expand_to_include(px2, py2);
+    bbox.expand_to_include(px3, py3);
+    finder_.set_marker(boost::make_shared<marker_info>(m, trans), bbox, sym.get_unlock_image(), sym.get_shield_displacement());
 }
 
 template text_symbolizer_helper::text_symbolizer_helper(const text_symbolizer &sym, const Feature &feature,

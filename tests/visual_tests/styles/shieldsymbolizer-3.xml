@@ -50,7 +50,7 @@
         </Rule>
         <Rule>
             <Filter>[nr] = '10'</Filter>
-            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/images/crosshair16x16.png" unlock-image="false" shield-dx="15">'X'</ShieldSymbolizer>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/images/crosshair16x16.png" unlock-image="false" shield-dx="15" dy="20">'X'</ShieldSymbolizer>
         </Rule>
         <Rule>
             <PointSymbolizer allow-overlap="true" file="../../data/raster/white-alpha.png"/>

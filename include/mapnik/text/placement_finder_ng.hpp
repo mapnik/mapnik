@@ -68,16 +68,24 @@ public:
     bool next_position();
 
     placements_list const& placements() const;
+
+    void set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement);
 private:
     void init_alignment();
     pixel_position alignment_offset() const;
     double jalign_offset(double line_width) const;
 
     bool single_line_placement(vertex_cache &pp, text_upright_e orientation);
+    /** Moves dx pixels but makes sure not to fall of the end. */
     void path_move_dx(vertex_cache &pp);
+    /** Normalize angle in range [-pi, +pi]. */
     static double normalize_angle(double angle);
+    /** Adjusts user defined spacing to place an integer number of labels. */
     double get_spacing(double path_length, double layout_width) const;
+    /** Checks for collision. */
     bool collision(box2d<double> const& box) const;
+    /** Adds marker to glyph_positions and to collision detector. Returns false if there is a collision. */
+    bool add_marker(glyph_positions_ptr glyphs, pixel_position const& pos) const;
     box2d<double> get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
     Feature const& feature_;
     DetectorType &detector_;
@@ -94,6 +102,13 @@ private:
     double scale_factor_;
 
     placements_list placements_;
+
+    //ShieldSymbolizer
+    bool has_marker_;
+    marker_info_ptr marker_;
+    box2d<double> marker_box_;
+    bool marker_unlocked_;
+    pixel_position marker_displacement_;
 };
 
 typedef boost::shared_ptr<placement_finder_ng> placement_finder_ng_ptr;
