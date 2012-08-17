@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include "csv_datasource.hpp"
+#include "csv_utils.hpp"
 
 // boost
 #include <boost/make_shared.hpp>
@@ -36,6 +37,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/memory_featureset.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
@@ -82,7 +84,7 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
        - build up csv line-by-line iterator
        - creates opportunity to filter attributes by map query
        speed:
-       - add properties for wkt/lon/lat at parse time
+       - add properties for wkt/json/lon/lat at parse time
        - add ability to pass 'filter' keyword to drop attributes at layer init
        - create quad tree on the fly for small/med size files
        - memory map large files for reading
@@ -264,7 +266,7 @@ void csv_datasource::parse_csv(T& stream,
         //  grammer = boost::escaped_list_separator<char>('\\', ',', '\"');
         grammer = boost::escaped_list_separator<char>(esc, sep, quo);
     }
-    catch(const std::exception & ex)
+    catch(std::exception const& ex)
     {
         std::ostringstream s;
         s << "CSV Plugin: " << ex.what();
@@ -275,9 +277,11 @@ void csv_datasource::parse_csv(T& stream,
 
     int line_number(1);
     bool has_wkt_field = false;
+    bool has_json_field = false;
     bool has_lat_field = false;
     bool has_lon_field = false;
     unsigned wkt_idx(0);
+    unsigned json_idx(0);
     unsigned lat_idx(0);
     unsigned lon_idx(0);
 
@@ -295,6 +299,11 @@ void csv_datasource::parse_csv(T& stream,
             {
                 wkt_idx = idx;
                 has_wkt_field = true;
+            }
+            if (lower_val == "geojson")
+            {
+                json_idx = idx;
+                has_json_field = true;
             }
             if (lower_val == "x"
                 || lower_val == "lon"
@@ -369,6 +378,11 @@ void csv_datasource::parse_csv(T& stream,
                                 wkt_idx = idx;
                                 has_wkt_field = true;
                             }
+                            if (lower_val == "geojson")
+                            {
+                                json_idx = idx;
+                                has_json_field = true;
+                            }
                             if (lower_val == "x"
                                 || lower_val == "lon"
                                 || lower_val == "lng"
@@ -401,10 +415,10 @@ void csv_datasource::parse_csv(T& stream,
         }
     }
 
-    if (!has_wkt_field && (!has_lon_field || !has_lat_field) )
+    if (!has_wkt_field && !has_json_field && (!has_lon_field || !has_lat_field) )
     {
         std::ostringstream s;
-        s << "CSV Plugin: could not detect column headers with the name of wkt, x/y, or latitude/longitude - this is required for reading geometry data";
+        s << "CSV Plugin: could not detect column headers with the name of wkt, geojson, x/y, or latitude/longitude - this is required for reading geometry data";
         throw mapnik::datasource_exception(s.str());
     }
 
@@ -444,6 +458,13 @@ void csv_datasource::parse_csv(T& stream,
 
         try
         {
+            // special handling for varieties of quoting that we will enounter with json
+            // TODO - test with custom "quo" option
+            if (has_json_field && (quo == "\"") && (std::count(csv_line.begin(), csv_line.end(), '"') >= 6))
+            {
+                csv_utils::fix_json_quoting(csv_line);
+            }
+            
             Tokenizer tok(csv_line, grammer);
             Tokenizer::iterator beg = tok.begin();
 
@@ -465,6 +486,7 @@ void csv_datasource::parse_csv(T& stream,
             bool parsed_x = false;
             bool parsed_y = false;
             bool parsed_wkt = false;
+            bool parsed_json = false;
             bool null_geom = false;
             std::vector<std::string> collected;
 
@@ -569,6 +591,42 @@ void csv_datasource::parse_csv(T& stream,
                             }
                         }
                     }
+                }
+                // TODO - support both wkt/geojson columns
+                // at once to create multi-geoms?
+                // parse as geojson
+                else if (has_json_field)
+                {
+                    if (i == json_idx)
+                    {
+                        // skip empty geoms
+                        if (value.empty())
+                        {
+                            null_geom = true;
+                            break;
+                        }
+                        if (mapnik::json::from_geojson(value, feature->paths()))
+                        {
+                            parsed_json = true;
+                        }
+                        else
+                        {
+                            std::ostringstream s;
+                            s << "CSV Plugin: expected geojson geometry: could not parse row "
+                              << line_number
+                              << ",column "
+                              << i << " - found: '"
+                              << value << "'";
+                            if (strict_)
+                            {
+                                throw mapnik::datasource_exception(s.str());
+                            }
+                            else
+                            {
+                                MAPNIK_LOG_ERROR(csv) << s.str();
+                            }
+                        }
+                    }                
                 }
                 else
                 {
@@ -730,9 +788,9 @@ void csv_datasource::parse_csv(T& stream,
                 }
             }
 
-            if (has_wkt_field)
+            if (has_wkt_field || has_json_field)
             {
-                if (parsed_wkt)
+                if (parsed_wkt || parsed_json)
                 {
                     if (!extent_initialized)
                     {
@@ -749,7 +807,7 @@ void csv_datasource::parse_csv(T& stream,
                 else
                 {
                     std::ostringstream s;
-                    s << "CSV Plugin: could not read WKT geometry "
+                    s << "CSV Plugin: could not read WKT or GeoJSON geometry "
                       << "for line " << line_number << " - found " <<  headers_.size()
                       << " with values like: " << csv_line << "\n";
                     if (strict_)

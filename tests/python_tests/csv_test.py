@@ -141,7 +141,6 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(ds.fields(),['type','WKT'])
         eq_(ds.field_types(),['str','str'])
         fs = ds.all_features()
-        #import pdb;pdb.set_trace()
         eq_(len(fs[0].geometries()),1)
         eq_(fs[0].geometries()[0].type(),mapnik.DataGeometryType.Point)
         eq_(len(fs[1].geometries()),1)
@@ -150,9 +149,6 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(fs[2].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
         eq_(len(fs[3].geometries()),1) # one geometry, two parts
         eq_(fs[3].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
-        # tests assuming we want to flatten geometries
-        # ideally we should not have to:
-        # https://github.com/mapnik/mapnik/issues?labels=multigeom+robustness&sort=created&direction=desc&state=open&page=1
         eq_(len(fs[4].geometries()),4)
         eq_(fs[4].geometries()[0].type(),mapnik.DataGeometryType.Point)
         eq_(len(fs[5].geometries()),2)
@@ -362,6 +358,45 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         fs = ds.featureset()
         feat = fs.next()
         eq_(feat['Name'],u"Winthrop, WA")
+
+    def validate_geojson_datasource(ds):
+        eq_(len(ds.fields()),2)
+        eq_(ds.fields(),['type','GeoJSON'])
+        eq_(ds.field_types(),['str','str'])
+        fs = ds.all_features()
+        eq_(len(fs[0].geometries()),1)
+        eq_(fs[0].geometries()[0].type(),mapnik.DataGeometryType.Point)
+        eq_(len(fs[1].geometries()),1)
+        eq_(fs[1].geometries()[0].type(),mapnik.DataGeometryType.LineString)
+        eq_(len(fs[2].geometries()),1)
+        eq_(fs[2].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
+        eq_(len(fs[3].geometries()),1) # one geometry, two parts
+        eq_(fs[3].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
+        eq_(len(fs[4].geometries()),4)
+        eq_(fs[4].geometries()[0].type(),mapnik.DataGeometryType.Point)
+        eq_(len(fs[5].geometries()),2)
+        eq_(fs[5].geometries()[0].type(),mapnik.DataGeometryType.LineString)
+        eq_(len(fs[6].geometries()),2)
+        eq_(fs[6].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
+        eq_(len(fs[7].geometries()),2)
+        eq_(fs[7].geometries()[0].type(),mapnik.DataGeometryType.Polygon)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Collection)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
+
+    def test_json_field1(**kwargs):
+        ds = get_csv_ds('geojson_double_quote_escape.csv')
+        validate_geojson_datasource(ds)
+
+    def test_json_field2(**kwargs):
+        ds = get_csv_ds('geojson_single_quote.csv')
+        validate_geojson_datasource(ds)
+
+    def test_json_field3(**kwargs):
+        ds = get_csv_ds('geojson_2x_double_quote_filebakery_style.csv')
+        validate_geojson_datasource(ds)
 
 
 if __name__ == "__main__":
