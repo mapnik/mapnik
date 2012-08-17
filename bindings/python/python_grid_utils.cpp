@@ -365,8 +365,8 @@ template boost::python::dict grid_encode( mapnik::grid_view const& grid, std::st
  * encoding, resizing handled as method on grid object
  * whether features are dumped is determined by argument not 'fields'
  */
-void render_layer_for_grid(const mapnik::Map& map,
-                                  mapnik::grid& grid,
+void render_layer_for_grid(mapnik::Map const& map,
+                                  mapnik::grid & grid,
                                   unsigned layer_idx, // TODO - layer by name or index
                                   boost::python::list const& fields)
 {
@@ -419,7 +419,7 @@ void render_layer_for_grid(const mapnik::Map& map,
 /* old, original impl - to be removed after further testing
  * grid object is created on the fly at potentially reduced size
  */
-boost::python::dict render_grid(const mapnik::Map& map,
+boost::python::dict render_grid(mapnik::Map const& map,
                                        unsigned layer_idx, // layer
                                        std::string const& key, // key_name
                                        unsigned int step, // resolution
