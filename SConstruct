@@ -1705,20 +1705,21 @@ if not HELP_REQUESTED:
     if env['DEMO']:
         SConscript('demo/c++/build.py')
 
-    # Build the pgsql2psqlite app if requested
-    if env['PGSQL2SQLITE']:
-        SConscript('utils/pgsql2sqlite/build.py')
-
     # Build shapeindex and remove its dependency from the LIBS
     if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
         SConscript('utils/shapeindex/build.py')
 
+        # Build the pgsql2psqlite app if requested
+        if env['PGSQL2SQLITE']:
+            SConscript('utils/pgsql2sqlite/build.py')
+
+        SConscript('utils/svg2png/build.py')
+
         # devtools not ready for public
         #SConscript('utils/ogrindex/build.py')
-        SConscript('utils/svg2png/build.py')
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
-        color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
+        color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' and other command line programs will not be available")
 
     # Build the Python bindings
     if 'python' in env['BINDINGS']:
