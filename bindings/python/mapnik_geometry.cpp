@@ -31,6 +31,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/json/geojson_generator.hpp>
 
 #include <boost/version.hpp>
@@ -56,27 +57,43 @@ geometry_type const& getitem_impl(path_type & p, int key)
 
 void add_wkt_impl(path_type& p, std::string const& wkt)
 {
-    bool result = mapnik::from_wkt(wkt , p);
-    if (!result) throw std::runtime_error("Failed to parse WKT");
+    if (!mapnik::from_wkt(wkt , p))
+        throw std::runtime_error("Failed to parse WKT");
 }
 
-bool add_wkb_impl(path_type& p, std::string const& wkb)
+void add_wkb_impl(path_type& p, std::string const& wkb)
 {
-    return mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size());
+    if (!mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size()))
+        throw std::runtime_error("Failed to parse WKB");
+}
+
+void add_geojson_impl(path_type& p, std::string const& json)
+{
+    if (!mapnik::json::from_geojson(json, p))
+        throw std::runtime_error("Failed to parse geojson geometry");
 }
 
 boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
 {
     boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
-    bool result = mapnik::from_wkt(wkt, *paths);
-    if (!result) throw std::runtime_error("Failed to parse WKT");
+    if (!mapnik::from_wkt(wkt, *paths))
+        throw std::runtime_error("Failed to parse WKT");
     return paths;
 }
 
 boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
 {
     boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
-    mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size());
+    if (!mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size()))
+        throw std::runtime_error("Failed to parse WKB");
+    return paths;
+}
+
+boost::shared_ptr<path_type> from_geojson_impl(std::string const& json)
+{
+    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    if (! mapnik::json::from_geojson(json, *paths))
+        throw std::runtime_error("Failed to parse geojson geometry");
     return paths;
 }
 
@@ -220,13 +237,16 @@ void export_geometry()
         .def("__len__", &path_type::size)
         .def("add_wkt",add_wkt_impl)
         .def("add_wkb",add_wkb_impl)
+        .def("add_geojson",add_geojson_impl)
         .def("to_wkt",&to_wkt2)
         .def("to_wkb",&to_wkb2)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)
+        .def("from_geojson",from_geojson_impl)
         .def("to_geojson",to_geojson)
         .staticmethod("from_wkt")
         .staticmethod("from_wkb")
+        .staticmethod("from_geojson")
         ;
 
 }
