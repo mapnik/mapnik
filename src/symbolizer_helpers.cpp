@@ -31,12 +31,11 @@
 namespace mapnik {
 
 template <typename FaceManagerT, typename DetectorT>
-text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const text_symbolizer &sym, const Feature &feature, const proj_transform &prj_trans, unsigned width, unsigned height, double scale_factor, const CoordTransform &t, FaceManagerT &font_manager, DetectorT &detector, const box2d<double> &query_extent)
+text_symbolizer_helper::text_symbolizer_helper(const text_symbolizer &sym, const Feature &feature, const proj_transform &prj_trans, unsigned width, unsigned height, double scale_factor, const CoordTransform &t, FaceManagerT &font_manager, DetectorT &detector, const box2d<double> &query_extent)
     : sym_(sym),
       feature_(feature),
       prj_trans_(prj_trans),
       t_(t),
-      detector_(detector),
       dims_(0, 0, width, height),
       query_extent_(query_extent),
       points_on_line_(false),
@@ -49,8 +48,7 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(const te
     initialize_points();
 }
 
-template <typename FaceManagerT, typename DetectorT>
-placements_list const& text_symbolizer_helper<FaceManagerT, DetectorT>::get()
+placements_list const& text_symbolizer_helper::get()
 {
     if (point_placement_)
     {
@@ -69,8 +67,7 @@ placements_list const& text_symbolizer_helper<FaceManagerT, DetectorT>::get()
     return finder_.placements();
 }
 
-template <typename FaceManagerT, typename DetectorT>
-bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
+bool text_symbolizer_helper::next_line_placement()
 {
     while (!geometries_to_process_.empty())
     {
@@ -108,8 +105,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
     return false;
 }
 
-template <typename FaceManagerT, typename DetectorT>
-bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
+bool text_symbolizer_helper::next_point_placement()
 {
     while (!points_.empty())
     {
@@ -144,8 +140,7 @@ struct largest_bbox_first
 
 };
 
-template <typename FaceManagerT, typename DetectorT>
-void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
+void text_symbolizer_helper::initialize_geometries()
 {
     bool largest_box_only = false;
     unsigned num_geom = feature_.num_geometries();
@@ -181,8 +176,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
     geo_itr_ = geometries_to_process_.begin();
 }
 
-template <typename FaceManagerT, typename DetectorT>
-void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
+void text_symbolizer_helper::initialize_points()
 {
     label_placement_enum how_placed = placement_->properties.label_placement;
     if (how_placed == LINE_PLACEMENT)
@@ -244,105 +238,37 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
 /*****************************************************************************/
 
 template <typename FaceManagerT, typename DetectorT>
-shield_symbolizer_helper<FaceManagerT, DetectorT>::shield_symbolizer_helper(const shield_symbolizer &sym, const Feature &feature, const proj_transform &prj_trans, unsigned width, unsigned height, double scale_factor, const CoordTransform &t, FaceManagerT &font_manager, DetectorT &detector, const box2d<double> &query_extent)
-    : text_symbolizer_helper<FaceManagerT, DetectorT>(
-          sym, feature, prj_trans, width, height,
-          scale_factor, t, font_manager, detector, query_extent),
-    sym_(sym)
+text_symbolizer_helper::text_symbolizer_helper(
+        const shield_symbolizer &sym, const Feature &feature,
+        const proj_transform &prj_trans,
+        unsigned width, unsigned height, double scale_factor,
+        const CoordTransform &t, FaceManagerT &font_manager,
+        DetectorT &detector, const box2d<double> &query_extent)
+    : sym_(sym),
+      feature_(feature),
+      prj_trans_(prj_trans),
+      t_(t),
+      dims_(0, 0, width, height),
+      query_extent_(query_extent),
+      points_on_line_(false),
+      placement_(sym_.get_placement_options()->get_placement_info(scale_factor)),
+      finder_(feature, detector, dims_, placement_, font_manager, scale_factor)
 {
-    this->points_on_line_ = true;
+    initialize_geometries();
+    if (!geometries_to_process_.size()) return;
+    finder_.next_position();
+    initialize_points();
+    points_on_line_ = true;
     init_marker();
 }
 
-template <typename FaceManagerT, typename DetectorT>
-bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next()
-{
-    if (!marker_) return false;
-    if (point_placement_)
-        return next_point_placement();
-    else
-        return next_line_placement();
-}
 
-template <typename FaceManagerT, typename DetectorT>
-bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
+void text_symbolizer_helper::init_marker()
 {
-    pixel_position const& shield_pos = sym_.get_shield_displacement();
-    while (!points_.empty())
-    {
-        if (point_itr_ == points_.end())
-        {
-            //Just processed the last point. Try next placement.
-            if (!finder_.next_position()) return false; //No more placements
-            //Start again from begin of list
-            point_itr_ = points_.begin();
-            continue; //Reexecute size check
-        }
-        pixel_position const& text_disp = placement_->properties.displacement;
-        pixel_position label_pos = *point_itr_ + shield_pos;
-
-        if (!finder_.find_point_placement(label_pos))
-        {
-            //No placement for this point. Keep it in points_ for next try.
-            point_itr_++;
-            continue;
-        }
-        //Found a label placement but not necessarily also a marker placement
-        // check to see if image overlaps anything too
-        if (!sym_.get_unlock_image())
-        {
-            // center image at text center position
-            // remove displacement from image label
-            //TODO
+    shield_symbolizer const& sym = static_cast<shield_symbolizer const&>(sym_);
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature_);
+    evaluate_transform(marker_transform_, feature_, sym.get_image_transform());
 #if 0
-            double lx = p[0].center.x - text_disp.first;
-            double ly = p[0].center.y - text_disp.second;
-            marker_x_ = lx - 0.5 * marker_w_;
-            marker_y_ = ly - 0.5 * marker_h_;
-            marker_ext_.re_center(lx, ly);
-#endif
-        }
-        else
-        {  // center image at reference location
-            marker_pos_ = label_pos - 0.5 * marker_size_;
-            marker_ext_.re_center(label_pos.x, label_pos.y);
-        }
-
-        if (placement_->properties.allow_overlap || detector_.has_placement(marker_ext_))
-        {
-            detector_.insert(marker_ext_);
-            point_itr_ = points_.erase(point_itr_);
-            return true;
-        }
-        //No placement found. Try again
-        point_itr_++;
-    }
-    return false;
-}
-
-
-template <typename FaceManagerT, typename DetectorT>
-bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
-{
-    pixel_position const& pos = placement_->properties.displacement;
-#if 0
-    finder_->additional_boxes.clear();
-    //Markers are automatically centered
-    finder_->additional_boxes.push_back(
-        box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
-                      -0.5 * marker_ext_.height() - pos.second,
-                      0.5 * marker_ext_.width()  - pos.first,
-                      0.5 * marker_ext_.height() - pos.second));
-#endif
-    return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement();
-}
-
-
-template <typename FaceManagerT, typename DetectorT>
-void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
-{
-    std::string filename = path_processor_type::evaluate(*sym_.get_filename(), this->feature_);
-    evaluate_transform(image_transform_, feature_, sym_.get_image_transform());
     marker_.reset();
     if (!filename.empty())
     {
@@ -362,53 +288,35 @@ void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
     double py2 = py0;
     double px3 = px0;
     double py3 = py1;
-    image_transform_.transform(&px0,&py0);
-    image_transform_.transform(&px1,&py1);
-    image_transform_.transform(&px2,&py2);
-    image_transform_.transform(&px3,&py3);
+    marker_transform_.transform(&px0,&py0);
+    marker_transform_.transform(&px1,&py1);
+    marker_transform_.transform(&px2,&py2);
+    marker_transform_.transform(&px3,&py3);
     marker_ext_.init(px0, py0, px1, py1);
     marker_ext_.expand_to_include(px2, py2);
     marker_ext_.expand_to_include(px3, py3);
-}
-
-template <typename FaceManagerT, typename DetectorT>
-pixel_position shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker_position(glyph_positions_ptr p)
-{
-#if 0
-    position const& pos = placement_->properties.displacement;
-    if (placement_->properties.label_placement == LINE_PLACEMENT) {
-        double lx = p.center.x - pos.first;
-        double ly = p.center.y - pos.second;
-        double px = lx - 0.5*marker_w_;
-        double py = ly - 0.5*marker_h_;
-        marker_ext_.re_center(lx, ly);
-        //label is added to detector by get_line_placement(), but marker isn't
-        detector_.insert(marker_ext_);
-        if (writer_.first) writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
-        return pixel_position(px, py);
-    } else {
-        //collision_detector is already updated for point placement in get_point_placement()
-        return pixel_position(marker_x_, marker_y_);
-    }
-#else
-#warning get_marker_position() disabled!
 #endif
 }
 
-
-template <typename FaceManagerT, typename DetectorT>
-marker& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker() const
+marker_ptr text_symbolizer_helper::get_marker() const
 {
-    return **marker_;
+    return marker_;
 }
 
-template <typename FaceManagerT, typename DetectorT>
-agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_image_transform() const
+agg::trans_affine const& text_symbolizer_helper::get_image_transform() const
 {
-    return image_transform_;
+    return marker_transform_;
 }
 
-template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
-template class shield_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
+template text_symbolizer_helper::text_symbolizer_helper(const text_symbolizer &sym, const Feature &feature,
+const proj_transform &prj_trans,
+unsigned width, unsigned height, double scale_factor,
+const CoordTransform &t, face_manager<freetype_engine> &font_manager,
+label_collision_detector4 &detector, const box2d<double> &query_extent);
 
+template text_symbolizer_helper::text_symbolizer_helper(const shield_symbolizer &sym, const Feature &feature,
+const proj_transform &prj_trans,
+unsigned width, unsigned height, double scale_factor,
+const CoordTransform &t, face_manager<freetype_engine> &font_manager,
+label_collision_detector4 &detector, const box2d<double> &query_extent);
 } //namespace
