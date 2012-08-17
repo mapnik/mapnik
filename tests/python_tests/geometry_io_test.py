@@ -44,7 +44,7 @@ wkbs = [
 
     [ 0, "MultiSurface EMPTY", '010C00000000000000'],
     [ 0, "PolyhedralSurface EMPTY", '010F00000000000000'],
-    [ 0, "TIM EMPTY", '011000000000000000'],
+    [ 0, "TIN EMPTY", '011000000000000000'],
     [ 0, "GEOMETRYCOLLECTION EMPTY", '010700000000000000'],
     [ 2, "GEOMETRYCOLLECTION(MULTILINESTRING((10 10,20 20,10 40),(40 40,30 30,40 20,30 10)),LINESTRING EMPTY)", '010700000002000000010500000002000000010200000003000000000000000000244000000000000024400000000000003440000000000000344000000000000024400000000000004440010200000004000000000000000000444000000000000044400000000000003e400000000000003e40000000000000444000000000000034400000000000003e400000000000002440010200000000000000'
     ],
@@ -61,14 +61,15 @@ wkbs = [
 ]
 
 def test_wkb_parsing():
+    path = mapnik.Path()
+    count = 0
     for wkb in wkbs:
-        path = mapnik.Path()
-        success = path.add_wkb(unhexlify(wkb[2]))
-        if wkb[0] > 0:
-            eq_(success,True)
-        else:
-            eq_(success,False)
-        eq_(wkb[0],len(path))
+        count += wkb[0]
+        try :
+            path.add_wkb(unhexlify(wkb[2]))
+        except RuntimeError:
+            pass
+    eq_(count,len(path))
 
 def compare_wkb_from_wkt(wkt,num=None):
 
