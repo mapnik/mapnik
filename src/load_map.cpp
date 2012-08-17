@@ -1242,6 +1242,17 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             }
         }
 
+        // no_text - removed property in 2.1.x that used to have a purpose
+        // before you could provide an expression with an empty string
+        optional<boolean> no_text =
+            sym.get_opt_attr<boolean>("no-text");
+        if (no_text)
+        {
+            MAPNIK_LOG_ERROR(raster_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
+            if (*no_text)
+                shield_symbol.set_name(parse_expression("' '"));
+        }
+
         file = ensure_relative_to_xml(file);
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
@@ -1431,7 +1442,16 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
 
         // mode
         optional<std::string> mode = sym.get_opt_attr<std::string>("mode");
-        if (mode) raster_sym.set_mode(*mode);
+        if (mode)
+        {
+            std::string mode_string = *mode;
+            if (boost::algorithm::find_first(mode_string,"_"))
+            {
+                MAPNIK_LOG_ERROR(raster_symbolizer) << "'mode' values using \"_\" are deprecated and will be removed in Mapnik 3.x, use \"-\"instead";
+                boost::algorithm::replace_all(mode_string,"_","-");
+            }
+            raster_sym.set_mode(mode_string);
+        }
 
         // scaling
         optional<std::string> scaling = sym.get_opt_attr<std::string>("scaling");
