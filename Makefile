@@ -30,6 +30,10 @@ test:
 	@echo "*** Running python tests..."
 	@python tests/run_tests.py -q
 
+demo:
+	@echo "*** Running rundemo.cpp…"
+	cd demo/c++; ./rundemo `mapnik-config --prefix`/lib/mapnik
+
 pep8:
 	# https://gist.github.com/1903033
 	# gsed on osx
@@ -46,4 +50,4 @@ render:
 		nik2img.py $${FILE} /tmp/$$(basename $${FILE}).png; \
 	done
 
-.PHONY: clean reset uninstall test install
+.PHONY: clean reset uninstall test install demo
