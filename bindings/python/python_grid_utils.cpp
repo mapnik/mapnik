@@ -233,9 +233,50 @@ void write_features(T const& grid_type,
                            boost::python::dict& feature_data,
                            std::vector<typename T::lookup_type> const& key_order)
 {
-    std::string const& key = grid_type.get_key();
-    std::set<std::string> const& attributes = grid_type.property_names();
     typename T::feature_type const& g_features = grid_type.get_grid_features();
+    if (g_features.size() <= 0)
+    {
+        return;
+    }
+
+    std::set<std::string> const& attributes = grid_type.property_names();
+    typename T::feature_type::const_iterator feat_end = g_features.end();
+    BOOST_FOREACH ( std::string const& key_item, key_order )
+    {
+        if (key_item.empty())
+        {
+            continue;
+        }
+
+        typename T::feature_type::const_iterator feat_itr = g_features.find(key_item);
+        if (feat_itr == feat_end)
+        {
+            continue;
+        }
+
+        bool found = false;
+        boost::python::dict feat;
+        mapnik::feature_ptr feature = feat_itr->second;
+        BOOST_FOREACH ( std::string const& attr, attributes )
+        {
+            if (attr == "__id__")
+            {
+                feat[attr.c_str()] = feature->id();
+            }
+            else if (feature->has_key(attr))
+            {
+                found = true;
+                feat[attr.c_str()] = feature->get(attr);
+            }
+        }
+
+        if (found)
+        {
+            feature_data[feat_itr->first] = feat;
+        }
+    }
+/*    std::string const& key = grid_type.get_key();
+    std::set<std::string> const& attributes = grid_type.property_names();
     typename T::feature_type::const_iterator feat_itr = g_features.begin();
     typename T::feature_type::const_iterator feat_end = g_features.end();
     bool include_key = (attributes.find(key) != attributes.end());
@@ -298,6 +339,7 @@ void write_features(T const& grid_type,
             MAPNIK_LOG_DEBUG(bindings) << "write_features: Should not get here: key " << key << " not found in grid feature properties";
         }
     }
+*/
 }
 
 template <typename T>

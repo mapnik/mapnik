@@ -11,6 +11,8 @@ For a complete change history, see the git log.
 
 Not yet released
 
+- Increased grid encoding performance (#1315)
+
 - Added support for overriding fill, stroke, and opacity for svg markers using marker properties
 
 - Added support for setting opacity dynamically on images in polygon pattern and markers symbolizers
