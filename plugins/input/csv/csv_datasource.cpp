@@ -428,19 +428,16 @@ void csv_datasource::parse_csv(T& stream,
             break;
         }
 
-        unsigned line_length = csv_line.length();
-
         // skip blank lines
-        if (line_length < 5)
+        unsigned line_length = csv_line.length();
+        if (line_length <= 10)
         {
             std::string trimmed = csv_line;
-            boost::trim_if(trimmed,boost::algorithm::is_any_of("\",'\r\n"));
+            boost::trim_if(trimmed,boost::algorithm::is_any_of("\",'\r\n "));
             if (trimmed.empty())
             {
                 ++line_number;
-
                 MAPNIK_LOG_DEBUG(csv) << "csv_datasource: empty row encountered at line: " << line_number;
-
                 continue;
             }
         }
