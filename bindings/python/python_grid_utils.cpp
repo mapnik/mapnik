@@ -380,14 +380,12 @@ void render_layer_for_grid(const mapnik::Map& map,
     }
 
     // convert python list to std::set
-    std::set<std::string> attributes;
     boost::python::ssize_t num_fields = boost::python::len(fields);
     for(boost::python::ssize_t i=0; i<num_fields; i++) {
         boost::python::extract<std::string> name(fields[i]);
         if (name.check())
         {
             grid.add_property_name(name());
-            attributes.insert(name());
         }
         else
         {
@@ -397,22 +395,20 @@ void render_layer_for_grid(const mapnik::Map& map,
         }
     }
 
-    std::string const& key = grid.get_key();
-
-    // if key is special __id__ keyword
-    if (key == grid.key_name())
+    // copy property names
+    std::set<std::string> attributes = grid.property_names();
+    // todo - make this a static constant
+    std::string known_id_key = "__id__";
+    if (attributes.find(known_id_key) != attributes.end())
     {
-        // TODO - should feature.id() be a first class attribute?
-
-        // if __id__ is requested to be dumped out
-        // remove it so that datasource queries will not break
-        attributes.erase(key);
+        attributes.erase(known_id_key);
     }
-    // if key is not the special __id__ keyword
-    else
+
+    std::string join_field = grid.get_key();
+    if (known_id_key != join_field &&
+        attributes.find(join_field) == attributes.end())
     {
-        // them make sure the datasource query includes this field
-        attributes.insert(key);
+        attributes.insert(join_field);
     }
 
     mapnik::grid_renderer<mapnik::grid> ren(map,grid,1.0,0,0);
@@ -445,7 +441,7 @@ boost::python::dict render_grid(const mapnik::Map& map,
     // TODO - no need to pass step here
     mapnik::grid grid(grid_width,grid_height,key,step);
 
-    // convert python list to std::vector
+    // convert python list to std::set
     boost::python::ssize_t num_fields = boost::python::len(fields);
     for(boost::python::ssize_t i=0; i<num_fields; i++) {
         boost::python::extract<std::string> name(fields[i]);
@@ -462,24 +458,18 @@ boost::python::dict render_grid(const mapnik::Map& map,
 
     // copy property names
     std::set<std::string> attributes = grid.property_names();
-
-    // if key is special __id__ keyword
-    if (key == grid.key_name())
+    // todo - make this a static constant
+    std::string known_id_key = "__id__";
+    if (attributes.find(known_id_key) != attributes.end())
     {
-        // TODO - should feature.id() be a first class attribute?
-
-        // if __id__ is requested to be dumped out
-        // remove it so that datasource queries will not break
-        if (attributes.find(key) != attributes.end())
-        {
-            attributes.erase(key);
-        }
+        attributes.erase(known_id_key);
     }
-    // if key is not the special __id__ keyword
-    else if (attributes.find(key) == attributes.end())
+
+    std::string join_field = grid.get_key();
+    if (known_id_key != join_field &&
+        attributes.find(join_field) == attributes.end())
     {
-        // them make sure the datasource query includes this field
-        attributes.insert(key);
+        attributes.insert(join_field);
     }
 
     try
