@@ -97,6 +97,25 @@ boost::shared_ptr<path_type> from_geojson_impl(std::string const& json)
     return paths;
 }
 
+mapnik::box2d<double> envelope_impl(path_type & p)
+{
+    mapnik::box2d<double> b;
+    bool first = true;
+    BOOST_FOREACH(mapnik::geometry_type const& geom, p)
+    {
+        if (first)
+        {
+            b = geom.envelope();
+            first=false;
+        }
+        else
+        {
+            b.expand_to_include(geom.envelope());
+        }
+    }
+    return b;
+}
+
 }
 
 inline std::string boost_version()
@@ -235,6 +254,7 @@ void export_geometry()
     class_<path_type, boost::shared_ptr<path_type>, boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
         .def("__len__", &path_type::size)
+        .def("envelope",envelope_impl)
         .def("add_wkt",add_wkt_impl)
         .def("add_wkb",add_wkb_impl)
         .def("add_geojson",add_geojson_impl)
