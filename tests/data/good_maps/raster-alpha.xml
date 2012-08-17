@@ -4,7 +4,7 @@
 
 <Style name="white">
   <Rule>
-    <RasterSymbolizer opacity="1" scaling="bilinear" mode="grain_merge"/>
+    <RasterSymbolizer opacity="1" scaling="bilinear" comp-op="src-over"/>
   </Rule>
 </Style>
 <Layer name="white"
