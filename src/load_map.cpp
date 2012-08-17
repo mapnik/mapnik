@@ -707,12 +707,10 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                         datasource_cache::instance()->create(params);
                     lyr.set_datasource(ds);
                 }
-
-                catch (const std::exception & ex)
+                catch (std::exception const& ex)
                 {
                     throw config_error(ex.what());
                 }
-
                 catch (...)
                 {
                     throw config_error("Unknown exception occured attempting to create datasoure for layer '" + lyr.name() + "'");
