@@ -1190,31 +1190,30 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-#if 0
-    shield_symbolizer_helper<face_manager<freetype_engine>,
-        label_collision_detector4> helper(
+    text_symbolizer_helper helper(
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
             t_, font_manager_, detector_, query_extent_);
+
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
 
-    while (helper.next())
+    placements_list const& placements = helper.get();
+    BOOST_FOREACH(glyph_positions_ptr glyphs, placements)
     {
-        placements_type const& placements = helper.placements();
-        for (unsigned int ii = 0; ii < placements.size(); ++ii)
+        if (glyphs->marker())
         {
-            pixel_position marker_pos = helper.get_marker_position(placements[ii]);
-            render_marker(marker_pos,
-                          helper.get_marker(), helper.get_image_transform(),
-                          sym.get_opacity());
-            context.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
+            // Position is handled differently by cairo renderer
+            pixel_position pos = glyphs->marker_pos() - 0.5 *
+                    pixel_position(glyphs->marker()->marker->width(),
+                                   glyphs->marker()->marker->height());
+            render_marker(pos,
+                      *(glyphs->marker()->marker), glyphs->marker()->transform,
+                      sym.get_opacity());
         }
+        context.add_text(glyphs, face_manager_, font_manager_, scale_factor_);
     }
-#else
-#warning CAIRO: ShieldSymbolizer disabled!
-#endif
 }
 
 void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
