@@ -68,6 +68,8 @@ public:
 
     unsigned get_first_char() const;
     unsigned get_last_char() const;
+
+    unsigned size() const;
 private:
     glyph_vector glyphs_;
     double line_height_; //Includes line spacing (returned by freetype)
@@ -100,6 +102,7 @@ public:
     unsigned size() const;
 
     double cluster_width(unsigned cluster) const;
+    unsigned glyphs_count() const;
 
 private:
     void break_line(text_line_ptr line, double wrap_width, unsigned text_ratio);
@@ -115,6 +118,7 @@ private:
     std::map<unsigned, double> width_map_;
     double width_;
     double height_;
+    unsigned glyphs_count_;
 
 
     //output

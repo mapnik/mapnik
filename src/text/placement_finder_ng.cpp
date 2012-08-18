@@ -204,6 +204,7 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
     // set for upper left corner of text envelope for the first line, top left of first character
     y = layout_.height() / 2.0;
 
+    glyphs->reserve(layout_.glyphs_count());
     text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
     for (; line_itr != line_end; line_itr++)
     {
@@ -316,6 +317,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
     double offset = alignment_offset().y + info_->properties.displacement.y + sign * layout_.height()/2.;
 
+    glyphs->reserve(layout_.glyphs_count());
     text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
     for (; line_itr != line_end; line_itr++)
     {
@@ -496,7 +498,7 @@ box2d<double> placement_finder_ng::get_bbox(glyph_info const& glyph, pixel_posit
 
 
 glyph_positions::glyph_positions()
-    : base_point_()
+    : data_(), base_point_(), marker_(), marker_pos_(), bbox_()
 {
 
 }
@@ -513,8 +515,12 @@ glyph_positions::const_iterator glyph_positions::end() const
 
 void glyph_positions::push_back(const glyph_info &glyph, pixel_position offset, rotation const& rot)
 {
-
     data_.push_back(glyph_position(glyph, offset, rot));
+}
+
+void glyph_positions::reserve(unsigned count)
+{
+    data_.reserve(count);
 }
 
 pixel_position const& glyph_positions::get_base_point() const

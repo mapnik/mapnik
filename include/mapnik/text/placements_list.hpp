@@ -73,17 +73,20 @@ public:
     const_iterator end() const;
 
     void push_back(glyph_info const& glyph, pixel_position offset, rotation const& rot);
+    void reserve(unsigned count);
 
     pixel_position const& get_base_point() const;
     void set_base_point(pixel_position base_point);
     void set_marker(marker_info_ptr marker, pixel_position const& marker_pos);
     marker_info_ptr marker() const;
     pixel_position const& marker_pos() const;
+    box2d<double> const & bbox() const;
 private:
     std::vector<glyph_position> data_;
     pixel_position base_point_;
     marker_info_ptr marker_;
     pixel_position marker_pos_;
+    box2d<double> bbox_;
 };
 typedef boost::shared_ptr<glyph_positions> glyph_positions_ptr;
 

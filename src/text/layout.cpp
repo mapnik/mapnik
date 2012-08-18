@@ -38,7 +38,8 @@
 namespace mapnik
 {
 text_layout::text_layout(face_manager_freetype &font_manager)
-    : font_manager_(font_manager), itemizer_(), width_(0), height_(0), lines_()
+    : font_manager_(font_manager), itemizer_(), width_(0), height_(0), glyphs_count_(0),
+      lines_()
 {
 }
 
@@ -205,6 +206,7 @@ void text_layout::add_line(text_line_ptr line)
     lines_.push_back(line);
     width_ = std::max(width_, line->width());
     height_ += line->height();
+    glyphs_count_ += line->size();
 }
 
 void text_layout::clear()
@@ -246,6 +248,11 @@ double text_layout::cluster_width(unsigned cluster) const
     std::map<unsigned, double>::const_iterator width_itr = width_map_.find(cluster);
     if (width_itr != width_map_.end()) return width_itr->second;
     return 0;
+}
+
+unsigned text_layout::glyphs_count() const
+{
+    return glyphs_count_;
 }
 
 /*********************************************************************************************/
@@ -309,6 +316,11 @@ unsigned text_line::get_first_char() const
 unsigned text_line::get_last_char() const
 {
     return last_char_;
+}
+
+unsigned text_line::size() const
+{
+    glyphs_.size();
 }
 
 } //ns mapnik
