@@ -11,9 +11,41 @@ For a complete change history, see the git log.
 
 Not yet released
 
-- Increased grid encoding performance (#1315)
+- Feature-level compositing (comp-op) for all symbolizers (except building) in AGG and Cairo renderers (#1409)
 
-- Added support for overriding fill, stroke, and opacity for svg markers using marker properties
+- Style-level compositing (comp-op) (#1409) and style-level opacity for AGG renderer (#314)
+
+- New experimental framework for image manipulation called `image-filters` to allow things to be done across entire layer canvas like burring (#1412)
+
+- Support for recoloring stroke, fill, and opacity of SVG files (#1410 / #659)
+
+- Support for data-driven transform expressions (#664)
+
+- New support for offsetting geometries / parallel lines in line_symbolizer (#927/#1269)
+
+- New support for clipping geometries - now default enabled on all symbolizers (#1116)
+
+- Framework for chainable geometry transformations (called `vertex_converters`) so that you can do things like clip, smooth, and offset at the same time (#927)
+
+- WKT parsing now is more robust and supports multi-geometries (#745)
+
+- New support for outputting WKT/WKB/GeoJSON from mapnik.Geometry objects (#1411)
+
+- New experimental python datasource plugin (#1337)
+
+- New experimental geojson datasource plugin using in-memory rtree indexing (#1413)
+
+TODO - fill these out more:
+
+- svg Transform per-sym
+- data-driven transforms as well
+- cairo more synced up
+- geometry closed
+- feature api better - context's provide schema support
+
+- Support in the CSV plugin for reading JSON encoded geometries (#1392)
+
+- Increased grid encoding performance (#1315)
 
 - Added support for setting opacity dynamically on images in polygon pattern and markers symbolizers
 
@@ -22,15 +54,13 @@ Not yet released
 
 - MarkersSymbolizer width and height moved to expressions (#1102)
 
-- Added style-level 'opacity' (#314)
-
 - PostGIS: Added 'simplify_geometries' option - will trigger ST_Simplify on geometries before returning to Mapnik (#1179)
 
 - Improved error feedback for invalid values passed to map.query_point
 
 - Fixed rendering of thin svg lines (#1129)
 
-- Improved logging/debugging system with release logs and file redirection (#937 and partially #986, #467)
+- Improved logging/debugging system with release logs and file redirection (https://github.com/mapnik/mapnik/wiki/Runtime-Logging) (#937 and partially #986, #467)
 
 - GDAL: allow setting nodata value on the fly (will override value if nodata is set in data) (#1161)
  
