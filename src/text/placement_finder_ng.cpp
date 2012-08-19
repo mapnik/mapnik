@@ -42,6 +42,55 @@
 namespace mapnik
 {
 
+class tolerance_iterator
+{
+public:
+    tolerance_iterator(double label_position_tolerance, double spacing)
+        : tolerance_(label_position_tolerance > 0 ?
+                        label_position_tolerance : spacing/2.0),
+          tolerance_delta_(std::max(1.0, tolerance_/100.0)),
+          value_(0),
+          initialized_(false),
+          values_tried_(0)
+    {
+    }
+
+    ~tolerance_iterator()
+    {
+        //std::cout << "values tried:" << values_tried_ << "\n";
+    }
+
+    double get() const
+    {
+        return value_;
+    }
+
+    bool next()
+    {
+        values_tried_ ++;
+        if (!initialized_)
+        {
+            initialized_ = true;
+            return true; //Always return value 0 as the first value.
+        }
+        if (value_ == 0)
+        {
+            value_ = tolerance_delta_;
+            return true;
+        }
+        value_ = -value_;
+        if (value_ > 0) value_ += tolerance_delta_;
+        if (value_ > tolerance_) return false;
+        return true;
+    }
+private:
+    double tolerance_;
+    double tolerance_delta_;
+    double value_;
+    bool initialized_;
+    unsigned values_tried_;
+};
+
 placement_finder_ng::placement_finder_ng(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager, double scale_factor)
     : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true), scale_factor_(scale_factor), placements_(), has_marker_(false), marker_(), marker_box_()
 {
@@ -268,29 +317,21 @@ bool placement_finder_ng::find_line_placements(T & path)
 
         double spacing = get_spacing(pp.length(), layout_.width());
 
-        double tolerance = info_->properties.label_position_tolerance > 0 ?
-                    info_->properties.label_position_tolerance : spacing/2.0;
-        double tolerance_delta = std::max(1.0, tolerance/100.0);
-
         // first label should be placed at half the spacing
         pp.forward(spacing/2);
         path_move_dx(pp);
         do
         {
+            tolerance_iterator tolerance_offset(info_->properties.label_position_tolerance, spacing);
             vertex_cache::state state = pp.save_state();
-            for (double diff = 0; diff < tolerance; diff += tolerance_delta)
+            while (tolerance_offset.next())
             {
-                for(int dir = -1; dir < 2; dir+=2) //-1, +1
+                if (pp.move(tolerance_offset.get()) && single_line_placement(pp, info_->properties.upright))
                 {
-                    if (pp.move(dir * diff) && single_line_placement(pp, info_->properties.upright))
-                    {
-                        success = true;
-                        diff = tolerance; // Break out of outer loop
-                        break;
-                    }
-                    pp.restore_state(state);
-                    if (diff == 0) continue;
+                    success = true;
+                    break;
                 }
+                pp.restore_state(state);
             }
         } while (pp.forward(spacing));
     }
