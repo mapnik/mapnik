@@ -228,19 +228,19 @@ pixel_position pixel_position::rotate(rotation const& rot) const
 
 bool placement_finder_ng::find_point_placement(pixel_position pos)
 {
-    if (!layout_.size()) return true; //No text => placement always succeeds.
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
 
     pixel_position displacement = scale_factor_ * info_->properties.displacement + alignment_offset();
     if (info_->properties.rotate_displacement) displacement = displacement.rotate(!orientation_);
-
     glyphs->set_base_point(pos + displacement);
+
     box2d<double> bbox;
     rotated_box2d(bbox, orientation_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
+    /* add_marker first checks for collision and then updates the detector.*/
     if (collision(bbox)) return false;
     if (has_marker_ && !add_marker(glyphs, pos)) return false;
-    detector_.insert(bbox, layout_.get_text());
+    if (layout_.size()) detector_.insert(bbox, layout_.get_text());
 
     /* IMPORTANT NOTE:
        x and y are relative to the center of the text
