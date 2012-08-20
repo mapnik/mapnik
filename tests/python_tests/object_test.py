@@ -270,19 +270,6 @@ def test_textsymbolizer_init():
     eq_(ts.properties.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
 
 # Map initialization
-def test_layer_init():
-    l = mapnik.Layer('test')
-    eq_(l.name,'test')
-    eq_(l.envelope(),mapnik.Box2d())
-    eq_(l.clear_label_cache,False)
-    eq_(l.cache_features,False)
-    eq_(l.visible(1),True)
-    eq_(l.active,True)
-    eq_(l.datasource,None)
-    eq_(l.queryable,False)
-    eq_(l.srs,'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-
-# Map initialization
 def test_map_init():
     m = mapnik.Map(256, 256)
 
