@@ -171,7 +171,7 @@ public:
     /*!
      * @return The field rendering of this layer is grouped by.
      */
-    std::string group_by() const;
+    std::string const& group_by() const;
 
     /*!
      * @brief Attach a datasource for this layer.
