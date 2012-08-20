@@ -468,15 +468,28 @@ void csv_datasource::parse_csv(T& stream,
             Tokenizer tok(csv_line, grammer);
             Tokenizer::iterator beg = tok.begin();
 
-            // early return for strict mode
-            if (strict_)
+            unsigned num_fields = std::distance(beg,tok.end());
+            if (num_fields > num_headers)
             {
-                unsigned num_fields = std::distance(beg,tok.end());
-                if (num_fields != num_headers)
+                std::ostringstream s;
+                s << "CSV Plugin: # of columns("
+                << num_fields << ") > # of headers("
+                << num_headers << ") parsed for row " << line_number << "\n";
+                throw mapnik::datasource_exception(s.str());
+            }
+            else if (num_fields < num_headers)
+            {
+                std::ostringstream s;
+                s << "CSV Plugin: # of headers("
+                << num_headers << ") > # of columns("
+                << num_fields << ") parsed for row " << line_number << "\n";
+                if (strict_)
                 {
-                    std::ostringstream s;
-                    s << "CSV Plugin: # of headers != # of values parsed for row " << line_number << "\n";
                     throw mapnik::datasource_exception(s.str());
+                }
+                else
+                {
+                    MAPNIK_LOG_WARN(csv) << s.str();
                 }
             }
 
@@ -487,22 +500,23 @@ void csv_datasource::parse_csv(T& stream,
             bool parsed_y = false;
             bool parsed_wkt = false;
             bool parsed_json = false;
-            bool null_geom = false;
             std::vector<std::string> collected;
-
             for (unsigned i = 0; i < num_headers; ++i)
             {
                 std::string fld_name(headers_.at(i));
                 collected.push_back(fld_name);
                 std::string value;
-                if (beg == tok.end())
+                if (beg == tok.end()) // there are more headers than column values for this row
                 {
+                    // add an empty string here to represent a missing value
+                    // not using null type here since nulls are not a csv thing
                     feature->put(fld_name,tr.transcode(value.c_str()));
-                    null_geom = true;
                     if (feature_count == 1)
                     {
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
+                    // continue here instead of break so that all missing values are
+                    // encoded consistenly as empty strings
                     continue;
                 }
                 else
@@ -521,7 +535,6 @@ void csv_datasource::parse_csv(T& stream,
                         // skip empty geoms
                         if (value.empty())
                         {
-                            null_geom = true;
                             break;
                         }
 
@@ -602,7 +615,6 @@ void csv_datasource::parse_csv(T& stream,
                         // skip empty geoms
                         if (value.empty())
                         {
-                            null_geom = true;
                             break;
                         }
                         if (mapnik::json::from_geojson(value, feature->paths()))
@@ -636,7 +648,6 @@ void csv_datasource::parse_csv(T& stream,
                         // skip empty geoms
                         if (value.empty())
                         {
-                            null_geom = true;
                             break;
                         }
 
@@ -668,7 +679,6 @@ void csv_datasource::parse_csv(T& stream,
                         // skip empty geoms
                         if (value.empty())
                         {
-                            null_geom = true;
                             break;
                         }
 
@@ -771,23 +781,7 @@ void csv_datasource::parse_csv(T& stream,
                 }
             }
 
-            if (null_geom)
-            {
-                ++line_number;
-                std::ostringstream s;
-                s << "CSV Plugin: null geometry encountered for line "
-                  << line_number;
-                if (strict_)
-                {
-                    throw mapnik::datasource_exception(s.str());
-                }
-                else
-                {
-                    MAPNIK_LOG_ERROR(csv) << s.str();
-                    continue;
-                }
-            }
-
+            bool null_geom = true;
             if (has_wkt_field || has_json_field)
             {
                 if (parsed_wkt || parsed_json)
@@ -803,6 +797,7 @@ void csv_datasource::parse_csv(T& stream,
                     }
                     features_.push_back(feature);
                     ++feature_count;
+                    null_geom = false;
                 }
                 else
                 {
@@ -821,7 +816,7 @@ void csv_datasource::parse_csv(T& stream,
                     }
                 }
             }
-            else
+            else if (has_lat_field || has_lon_field)
             {
                 if (parsed_x && parsed_y)
                 {
@@ -830,33 +825,31 @@ void csv_datasource::parse_csv(T& stream,
                     feature->add_geometry(pt);
                     features_.push_back(feature);
                     ++feature_count;
-
+                    null_geom = false;
                     if (!extent_initialized)
                     {
                         extent_initialized = true;
                         extent_ = feature->envelope();
-
                     }
                     else
                     {
                         extent_.expand_to_include(feature->envelope());
                     }
                 }
-                else
+                else if (parsed_x || parsed_y)
                 {
                     std::ostringstream s;
+                    s << "CSV Plugin: does your csv have valid headers?\n";
                     if (!parsed_x)
                     {
-                        s << "CSV Plugin: does your csv have valid headers?\n"
-                          << "Could not detect or parse any rows named 'x' or 'longitude' "
+                          s << "Could not detect or parse any rows named 'x' or 'longitude' "
                           << "for line " << line_number << " but found " <<  headers_.size()
                           << " with values like: " << csv_line << "\n"
                           << "for: " << boost::algorithm::join(collected, ",") << "\n";
                     }
                     if (!parsed_y)
                     {
-                        s << "CSV Plugin: does your csv have valid headers?\n"
-                          << "Could not detect or parse any rows named 'y' or 'latitude' "
+                          s << "Could not detect or parse any rows named 'y' or 'latitude' "
                           << "for line " << line_number << " but found " <<  headers_.size()
                           << " with values like: " << csv_line << "\n"
                           << "for: " << boost::algorithm::join(collected, ",") << "\n";
@@ -872,9 +865,26 @@ void csv_datasource::parse_csv(T& stream,
                     }
                 }
             }
+
+            if (null_geom)
+            {
+                std::ostringstream s;
+                s << "CSV Plugin: could not detect and parse valid lat/lon fields or wkt/json geometry for line "
+                  << line_number;
+                if (strict_)
+                {
+                    throw mapnik::datasource_exception(s.str());
+                }
+                else
+                {
+                    MAPNIK_LOG_ERROR(csv) << s.str();
+                    continue;
+                }
+            }
+
             ++line_number;
         }
-        catch(const mapnik::datasource_exception & ex )
+        catch(mapnik::datasource_exception const& ex )
         {
             if (strict_)
             {
@@ -885,7 +895,7 @@ void csv_datasource::parse_csv(T& stream,
                 MAPNIK_LOG_ERROR(csv) << ex.what();
             }
         }
-        catch(const std::exception & ex)
+        catch(std::exception const& ex)
         {
             std::ostringstream s;
             s << "CSV Plugin: unexpected error parsing line: " << line_number

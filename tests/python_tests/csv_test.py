@@ -398,6 +398,25 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         ds = get_csv_ds('geojson_2x_double_quote_filebakery_style.csv')
         validate_geojson_datasource(ds)
 
+    def test_that_blank_undelimited_rows_are_still_parsed(**kwargs):
+        ds = get_csv_ds('more_headers_than_column_values.csv')
+        eq_(len(ds.fields()),5)
+        eq_(ds.fields(),['x','y','one', 'two','three'])
+        eq_(ds.field_types(),['int','int','str','str','str'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['one'],'')
+        eq_(feat['two'],'')
+        eq_(feat['three'],'')
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+
+    @raises(RuntimeError)
+    def test_that_fewer_headers_than_rows_throws(**kwargs):
+        # this has invalid header # so throw
+        ds = get_csv_ds('more_column_values_than_headers.csv')
 
 if __name__ == "__main__":
     setup()
