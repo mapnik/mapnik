@@ -93,8 +93,19 @@ def test_shieldsymbolizer_init():
 def test_shieldsymbolizer_modify():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
     # transform expression
-    s.transform = "rotate(30+[a]) scale(2*[sx] [sy])"
-    eq_(s.transform, "rotate((30+[a])) scale(2*[sx], [sy])")
+    def check_transform(expr, expect_str=None):
+        s.transform = expr
+        eq_(s.transform, expr if expect_str is None else expect_str)
+    check_transform("matrix(1 2 3 4 5 6)", "matrix(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)")
+    check_transform("matrix(1, 2, 3, 4, 5, 6 +7)", "matrix(1, 2, 3, 4, 5, (6+7))")
+    check_transform("rotate([a])")
+    check_transform("rotate([a] -2)", "rotate(([a]-2))")
+    check_transform("rotate([a] -2 -3)", "rotate([a], -2.0, -3.0)")
+    check_transform("rotate([a] -2 -3 -4)", "rotate(((([a]-2)-3)-4))")
+    check_transform("rotate([a] -2, 3, 4)", "rotate(([a]-2), 3, 4)")
+    check_transform("translate([tx]) rotate([a])")
+    check_transform("scale([sx], [sy]/2)")
+    # TODO check expected failures
 
 def test_polygonsymbolizer_init():
     p = mapnik.PolygonSymbolizer()
