@@ -129,7 +129,7 @@ if 'python' in mapnik.DatasourceCache.instance().plugin_names() and have_shapely
 
     def test_python_point_rendering():
         m = mapnik.Map(512,512)
-        mapnik.load_map(m,'../data/good_maps/python_point_datasource.xml')
+        mapnik.load_map(m,'../data/python_plugin/python_point_datasource.xml')
         m.zoom_all()
         im = mapnik.Image(512,512)
         mapnik.render(m,im)
@@ -142,7 +142,7 @@ if 'python' in mapnik.DatasourceCache.instance().plugin_names() and have_shapely
 
     def test_python_circle_rendering():
         m = mapnik.Map(512,512)
-        mapnik.load_map(m,'../data/good_maps/python_circle_datasource.xml')
+        mapnik.load_map(m,'../data/python_plugin/python_circle_datasource.xml')
         m.zoom_all()
         im = mapnik.Image(512,512)
         mapnik.render(m,im)
