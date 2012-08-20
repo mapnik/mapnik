@@ -436,8 +436,6 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             std::string filter_mode = *filters;
             std::string::const_iterator itr = filter_mode.begin();
             std::string::const_iterator end = filter_mode.end();
-
-
             bool result = boost::spirit::qi::phrase_parse(itr,end,
                                                           filter_grammar,
                                                           boost::spirit::qi::ascii::space,
