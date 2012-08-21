@@ -86,14 +86,23 @@ if __name__ == "__main__":
     else:
        quiet = False
 
-    if len(sys.argv) == 2:
-        files = [{"name": sys.argv[1], "sizes": sizes_few_square}]
+    print len(sys.argv)
+    if len(sys.argv) <= 1:
+        active = files
+    elif len(sys.argv) == 2:
+        active = [{"name": sys.argv[1], "sizes": sizes_few_square}]
     elif len(sys.argv) > 2:
-        files = []
-        for name in sys.argv[1:]:
-            files.append({"name": name})
+        active = []
+        if sys.argv[1] == "-s":
+            name = sys.argv[2]
+            for f in files:
+                if f['name'] == name:
+                    active.append(f)
+        else:
+            for name in sys.argv[1:]:
+                active.append({"name": name})
 
-    for f in files:
+    for f in active:
         config = dict(defaults)
         config.update(f)
         for size in config['sizes']:
