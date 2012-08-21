@@ -23,11 +23,13 @@
 #include <boost/python.hpp>
 
 #include <mapnik/graphics.hpp>
+#include <mapnik/value_error.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 #include "mapnik_svg.hpp"
 #include "mapnik_enumeration.hpp"
+#include <mapnik/marker_cache.hpp> // for known_svg_prefix_
 
 using mapnik::markers_symbolizer;
 using mapnik::symbolizer_with_image;
@@ -47,7 +49,26 @@ void set_filename(mapnik::markers_symbolizer & symbolizer, std::string const& fi
     symbolizer.set_filename(parse_path(file_expr));
 }
 
+void set_marker_type(mapnik::markers_symbolizer & symbolizer, std::string const& marker_type)
+{
+    std::string filename;
+    if (marker_type == "ellipse")
+    {
+        filename = mapnik::marker_cache::known_svg_prefix_ + "ellipse";
+    }
+    else if (marker_type == "arrow")
+    {
+        filename = mapnik::marker_cache::known_svg_prefix_ + "arrow";
+    }
+    else
+    {
+        throw mapnik::value_error("Unknown marker-type: '" + marker_type + "'");
+    }
+    symbolizer.set_filename(parse_path(filename));
 }
+
+}
+
 
 // https://github.com/mapnik/mapnik/issues/1367
 PyObject* get_fill_opacity_impl(markers_symbolizer & sym)
@@ -74,6 +95,9 @@ void export_markers_symbolizer()
         .add_property("filename",
                       &get_filename,
                       &set_filename)
+        .add_property("marker_type",
+                      &get_filename,
+                      &set_marker_type)
         .add_property("allow_overlap",
                       &markers_symbolizer::get_allow_overlap,
                       &markers_symbolizer::set_allow_overlap)

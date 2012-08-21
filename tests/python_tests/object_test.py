@@ -197,6 +197,12 @@ def test_markersymbolizer_init():
     eq_(p.opacity, 0.5)
     eq_(p.fill_opacity, 0.5)
 
+    #https://github.com/mapnik/mapnik/issues/1285
+    #https://github.com/mapnik/mapnik/issues/1427
+    p.marker_type = 'arrow'
+    eq_(p.marker_type,'shape://arrow')
+    eq_(p.filename,'shape://arrow')
+
 
 # PointSymbolizer missing image file
 # images paths are now PathExpressions are evaluated at runtime

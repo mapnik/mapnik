@@ -68,8 +68,8 @@ private:
 class MAPNIK_DECL symbolizer_with_image
 {
 public:
-    path_expression_ptr get_filename() const;
-    void set_filename(path_expression_ptr filename);
+    path_expression_ptr const& get_filename() const;
+    void set_filename(path_expression_ptr const& filename);
     void set_opacity(float opacity);
     float get_opacity() const;
     void  set_image_transform(transform_type const& tr);
