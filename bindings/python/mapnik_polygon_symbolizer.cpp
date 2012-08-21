@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 #include <boost/python.hpp>
-#include "mapnik_enumeration.hpp"
 #include <mapnik/polygon_symbolizer.hpp>
 
 using namespace mapnik;
