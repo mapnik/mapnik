@@ -161,7 +161,7 @@ void export_layer()
         .add_property("active",
                       &layer::active,
                       &layer::set_active,
-                      "Get/Set whether this layer is active and will be rendered.\n"
+                      "Get/Set whether this layer is active and will be rendered (same as status property).\n"
                       "\n"
                       "Usage:\n"
                       ">>> from mapnik import Layer\n"
@@ -170,6 +170,21 @@ void export_layer()
                       "True # Active by default\n"
                       ">>> lyr.active = False # set False to disable layer rendering\n"
                       ">>> lyr.active\n"
+                      "False\n"
+            )
+
+        .add_property("status",
+                      &layer::active,
+                      &layer::set_active,
+                      "Get/Set whether this layer is active and will be rendered.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> from mapnik import Layer\n"
+                      ">>> lyr = Layer('My Layer','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')\n"
+                      ">>> lyr.status\n"
+                      "True # Active by default\n"
+                      ">>> lyr.status = False # set False to disable layer rendering\n"
+                      ">>> lyr.status\n"
                       "False\n"
             )
 
