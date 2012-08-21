@@ -390,8 +390,10 @@ void export_text_placement()
        set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
     ;
 
-    class_<char_properties>
+
+    class_with_converter<char_properties>
         ("CharProperties")
+        .def_readwrite_convert("text_transform", &char_properties::text_transform)
         .def(init<char_properties const&>()) //Copy constructor
         .def_readwrite("face_name", &char_properties::face_name)
         .def_readwrite("fontset", &char_properties::fontset)
@@ -401,7 +403,6 @@ void export_text_placement()
         .def_readwrite("text_opacity", &char_properties::text_opacity)
         .def_readwrite("wrap_char", &char_properties::wrap_char)
         .def_readwrite("wrap_before", &char_properties::wrap_before)
-        .def_readwrite("text_transform", &char_properties::text_transform)
         .def_readwrite("fill", &char_properties::fill)
         .def_readwrite("halo_fill", &char_properties::halo_fill)
         .def_readwrite("halo_radius", &char_properties::halo_radius)
