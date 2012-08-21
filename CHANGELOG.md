@@ -43,6 +43,8 @@ TODO - fill these out more:
 - geometry closed
 - feature api better - context's provide schema support
 
+- Python: exposed Map `background_image` (and aliased `background` to `background_color`)
+
 - Python: exposed BuildingSymbolizer
 
 - Support in the CSV plugin for reading JSON encoded geometries (#1392)
