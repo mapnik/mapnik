@@ -329,6 +329,7 @@ bool placement_finder_ng::find_line_placements(T & path)
                 if (pp.move(tolerance_offset.get()) && single_line_placement(pp, info_->properties.upright))
                 {
                     success = true;
+                    pp.restore_state(state);
                     break;
                 }
                 pp.restore_state(state);
