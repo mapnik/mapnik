@@ -107,18 +107,12 @@ def test_shieldsymbolizer_modify():
     check_transform("scale([sx], [sy]/2)")
     # TODO check expected failures
 
-def test_polygonsymbolizer_init():
-    p = mapnik.PolygonSymbolizer()
-
-    eq_(p.fill, mapnik.Color('gray'))
-    eq_(p.fill_opacity, 1)
+def test_point_symbolizer_init():
+    p = mapnik.PointSymbolizer()
     eq_(p.placement, mapnik.point_placement.CENTROID)
 
-    p = mapnik.PolygonSymbolizer(mapnik.Color('blue'))
+    p = mapnik.PointSymbolizer()
     p.placement = mapnik.point_placement.INTERIOR
-
-    eq_(p.fill, mapnik.Color('blue'))
-    eq_(p.fill_opacity, 1)
     eq_(p.placement, mapnik.point_placement.INTERIOR)
 
 # PointSymbolizer initialization
@@ -189,8 +183,7 @@ def test_markersymbolizer_init():
 #def test_pointsymbolizer_missing_image():
  #   p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/broken.png"))
 
-# PolygonSymbolizer initialization
-def test_polygonsymbolizer_init():
+def test_polygon_symbolizer_init():
     p = mapnik.PolygonSymbolizer()
 
     eq_(p.fill, mapnik.Color('gray'))
@@ -201,7 +194,13 @@ def test_polygonsymbolizer_init():
     eq_(p.fill, mapnik.Color('blue'))
     eq_(p.fill_opacity, 1)
 
-# Stroke initialization
+def test_building_symbolizer_init():
+    p = mapnik.BuildingSymbolizer()
+
+    eq_(p.fill, mapnik.Color('gray'))
+    eq_(p.fill_opacity, 1)
+    eq_(p.height,None)
+
 def test_stroke_init():
     s = mapnik.Stroke()
 
