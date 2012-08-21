@@ -30,6 +30,11 @@ def test_line_symbolizer_stroke_reference():
     eq_(l.stroke.opacity,1.0)
     assert_almost_equal(l.stroke.width,0.1)
 
+# https://github.com/mapnik/mapnik/issues/1420
+def test_text_symbolizer_init():
+    s = mapnik.TextSymbolizer()
+    eq_(s.text_transform, mapnik.text_transform.NONE)
+
 # ShieldSymbolizer initialization
 def test_shieldsymbolizer_init():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
