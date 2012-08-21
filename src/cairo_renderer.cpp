@@ -1203,9 +1203,15 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             double z = 0;
 
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                label::centroid(geom, x, y);
+            {
+                if (!label::centroid(geom, x, y))
+                    return;
+            }
             else
-                label::interior_position(geom, x, y);
+            {
+                if (!label::interior_position(geom ,x, y))
+                    return;
+            }
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
@@ -1490,15 +1496,17 @@ struct markers_dispatch
 
         if (placement_method != MARKER_LINE_PLACEMENT)
         {
-            double x,y;
-            path.rewind(0);
+            double x = 0;
+            double y = 0;
             if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                label::interior_position(path, x, y);
+                if (!label::interior_position(path, x, y))
+                    return;
             }
             else
             {
-                label::centroid(path, x, y);
+                if (!label::centroid(path, x, y))
+                    return;
             }
             coord2d center = bbox_.center();
             agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
@@ -1571,15 +1579,17 @@ struct markers_dispatch_2
 
         if (placement_method != MARKER_LINE_PLACEMENT)
         {
-            double x,y;
-            path.rewind(0);
+            double x = 0;
+            double y = 0;
             if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                label::interior_position(path, x, y);
+                if (!label::interior_position(path, x, y))
+                    return;
             }
             else
             {
-                label::centroid(path, x, y);
+                if (!label::centroid(path, x, y))
+                    return;
             }
             coord2d center = bbox_.center();
             agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);

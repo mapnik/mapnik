@@ -77,9 +77,15 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
             double y;
             double z=0;
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                label::centroid(geom, x, y);
+            {
+                if (!label::centroid(geom, x, y))
+                    return;
+            }
             else
-                label::interior_position(geom ,x, y);
+            {
+                if (!label::interior_position(geom ,x, y))
+                    return;
+            }
 
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
