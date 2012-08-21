@@ -129,8 +129,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         eGeomType type = feature.paths()[0].type();
                         if (type == Polygon)
                             converter.template set<clip_poly_tag>();
-                        else if (type == LineString)
-                            converter.template set<clip_line_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
                         // don't clip if type==Point
                     }
                     converter.template set<transform_tag>(); //always transform
@@ -164,8 +165,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         eGeomType type = feature.paths()[0].type();
                         if (type == Polygon)
                             converter.template set<clip_poly_tag>();
-                        else if (type == LineString)
-                            converter.template set<clip_line_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
                         // don't clip if type==Point
                     }
                     converter.template set<transform_tag>(); //always transform
@@ -198,8 +200,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     eGeomType type = feature.paths()[0].type();
                     if (type == Polygon)
                         converter.template set<clip_poly_tag>();
-                    else if (type == LineString)
-                        converter.template set<clip_line_tag>();
+                    // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                    //else if (type == LineString)
+                    //    converter.template set<clip_line_tag>();
                     // don't clip if type==Point
                 }
                 converter.template set<transform_tag>(); //always transform
