@@ -94,6 +94,11 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
     optional<unsigned> spacing_ = sym.get_opt_attr<unsigned>("spacing");
     if (spacing_) label_spacing = *spacing_;
+    else {
+        // https://github.com/mapnik/mapnik/issues/1427
+        spacing_ = sym.get_opt_attr<unsigned>("label-spacing");
+        if (spacing_) label_spacing = *spacing_;
+    }
     optional<unsigned> minimum_distance_ = sym.get_opt_attr<unsigned>("minimum-distance");
     if (minimum_distance_) minimum_distance = *minimum_distance_;
     optional<unsigned> min_padding_ = sym.get_opt_attr<unsigned>("minimum-padding");
