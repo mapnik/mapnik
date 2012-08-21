@@ -617,6 +617,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     python_optional<mapnik::stroke>();
     python_optional<mapnik::color>();
     python_optional<mapnik::box2d<double> >();
+    python_optional<mapnik::composite_mode_e>();
     python_optional<mapnik::datasource::geometry_t>();
     python_optional<std::string>();
     python_optional<unsigned>();
