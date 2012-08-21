@@ -5,12 +5,8 @@
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
         <StyleName>My Style</StyleName>
         <Datasource>
-            <!--
-                <Parameter name="type">osm</Parameter>
-                <Parameter name="file">points.osm</Parameter>
-            -->
-            <Parameter name="type">shape</Parameter>
-            <Parameter name="file">../data/points.shp</Parameter>
+            <Parameter name="type">osm</Parameter>
+            <Parameter name="file">../data/points.osm</Parameter>
         </Datasource>
     </Layer>
 
