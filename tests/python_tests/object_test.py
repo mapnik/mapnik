@@ -34,6 +34,21 @@ def test_line_symbolizer_stroke_reference():
 def test_text_symbolizer_init():
     s = mapnik.TextSymbolizer()
     eq_(s.text_transform, mapnik.text_transform.NONE)
+    # https://github.com/mapnik/mapnik/issues/1427
+    eq_(s.wrap_char,ord(' '))
+    eq_(s.wrap_character,ord(' '))
+    s.wrap_char = ord('\n')
+    eq_(s.wrap_char,ord('\n'))
+    eq_(s.wrap_character,ord('\n'))
+    eq_(s.format.wrap_character,ord('\n'))
+    s.wrap_character = ord('\r')
+    eq_(s.wrap_char,ord('\r'))
+    eq_(s.wrap_character,ord('\r'))
+    eq_(s.format.wrap_character,ord('\r'))
+    s.format.wrap_character = ord(' ')
+    eq_(s.wrap_char,ord(' '))
+    eq_(s.wrap_character,ord(' '))
+    eq_(s.format.wrap_character,ord(' '))
 
 # ShieldSymbolizer initialization
 def test_shieldsymbolizer_init():

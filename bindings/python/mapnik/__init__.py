@@ -793,6 +793,18 @@ class _TextSymbolizer(TextSymbolizer,_injector):
         self.format.wrap_char = wrap_char
 
 
+    @property
+    def wrap_character(self):
+        warnings.warn("'wrap_character' is deprecated, use format.wrap_character",
+        DeprecationWarning, 2)
+        return self.format.wrap_character
+
+    @wrap_char.setter
+    def wrap_character(self, wrap_character):
+        warnings.warn("'wrap_char' is deprecated, use format.wrap_character",
+        DeprecationWarning, 2)
+        self.format.wrap_character = wrap_character
+
 
     @property
     def wrap_before(self):
