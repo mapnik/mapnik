@@ -70,6 +70,9 @@ void export_polygon_pattern_symbolizer()
         .add_property("filename",
                       &get_filename,
                       &set_filename)
+        .add_property("opacity",
+                      &polygon_pattern_symbolizer::get_opacity,
+                      &polygon_pattern_symbolizer::set_opacity)
         .add_property("gamma",
                       &polygon_pattern_symbolizer::get_gamma,
                       &polygon_pattern_symbolizer::set_gamma)
