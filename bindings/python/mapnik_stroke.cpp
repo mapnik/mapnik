@@ -106,6 +106,10 @@ void export_stroke ()
                       &stroke::get_line_join,
                       &stroke::set_line_join,
                       "Returns the line join mode of this stroke.\n")
+        .add_property("miterlimit",
+                      &stroke::get_miterlimit,
+                      &stroke::set_miterlimit,
+                      "Returns the miterlimit mode of this stroke.\n")
         // todo consider providing a single get/set property
         .def("add_dash",&stroke::add_dash,
              (arg("length"),arg("gap")),

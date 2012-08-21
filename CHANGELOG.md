@@ -43,6 +43,8 @@ TODO - fill these out more:
 - geometry closed
 - feature api better - context's provide schema support
 
+- Added Stroke `miterlimit` (#786)
+
 - Python: exposed Map `background_image` (and aliased `background` to `background_color`)
 
 - Python: exposed BuildingSymbolizer
