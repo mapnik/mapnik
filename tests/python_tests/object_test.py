@@ -30,6 +30,16 @@ def test_line_symbolizer_stroke_reference():
     eq_(l.stroke.opacity,1.0)
     assert_almost_equal(l.stroke.width,0.1)
 
+# https://github.com/mapnik/mapnik/issues/1427
+def test_stroke_dash_api():
+    stroke = mapnik.Stroke()
+    dashes = [(1.0,1.0)]
+    stroke.dasharray = dashes
+    eq_(stroke.dasharray, dashes)
+    stroke.add_dash(.1,.1)
+    dashes.append((.1,.1))
+    eq_(stroke.dasharray, dashes)
+
 # https://github.com/mapnik/mapnik/issues/1420
 def test_text_symbolizer_init():
     s = mapnik.TextSymbolizer()
