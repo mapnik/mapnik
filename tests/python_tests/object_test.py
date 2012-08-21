@@ -14,9 +14,6 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-# Tests that exercise the functionality of Mapnik classes.
-
-# LineSymbolizer initialization
 def test_line_symbolizer_init():
     s = mapnik.LineSymbolizer()
     eq_(s.rasterizer, mapnik.line_rasterizer.FULL)
@@ -60,7 +57,6 @@ def test_text_symbolizer_init():
     eq_(s.wrap_character,ord(' '))
     eq_(s.format.wrap_character,ord(' '))
 
-# ShieldSymbolizer initialization
 def test_shieldsymbolizer_init():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
     eq_(s.displacement, (0.0,0.0))
@@ -119,7 +115,6 @@ def test_shieldsymbolizer_init():
 #def test_shieldsymbolizer_missing_image():
 #    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../#data/images/broken.png'))
 
-# ShieldSymbolizer modification
 def test_shieldsymbolizer_modify():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
     # transform expression
@@ -145,7 +140,6 @@ def test_point_symbolizer_init():
     p.placement = mapnik.point_placement.INTERIOR
     eq_(p.placement, mapnik.point_placement.INTERIOR)
 
-# PointSymbolizer initialization
 def test_pointsymbolizer_init():
     p = mapnik.PointSymbolizer()
     eq_(p.allow_overlap, False)
@@ -165,8 +159,6 @@ def test_pointsymbolizer_init():
     eq_(p.ignore_placement,True)
     eq_(p.placement, mapnik.point_placement.INTERIOR)
 
-
-# MarkersSymbolizer initialization
 def test_markersymbolizer_init():
     p = mapnik.MarkersSymbolizer()
     eq_(p.allow_overlap, False)
@@ -251,7 +243,6 @@ def test_stroke_init():
     eq_(s.line_cap, mapnik.line_cap.BUTT_CAP)
     eq_(s.line_join, mapnik.line_join.MITER_JOIN)
 
-# Stroke dashes
 def test_stroke_dash_arrays():
     s = mapnik.Stroke()
     s.add_dash(1,2)
@@ -260,7 +251,6 @@ def test_stroke_dash_arrays():
 
     eq_(s.get_dashes(), [(1,2),(3,4),(5,6)])
 
-# LineSymbolizer initialization
 def test_linesymbolizer_init():
     l = mapnik.LineSymbolizer()
 
@@ -287,7 +277,6 @@ def test_linesymbolizer_init():
     eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
     eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
 
-# TextSymbolizer initialization
 def test_textsymbolizer_init():
     ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
 
@@ -298,7 +287,6 @@ def test_textsymbolizer_init():
     eq_(ts.properties.label_placement, mapnik.label_placement.POINT_PLACEMENT)
     eq_(ts.properties.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
 
-# Map initialization
 def test_map_init():
     m = mapnik.Map(256, 256)
 
@@ -414,7 +402,6 @@ def test_color_init():
 
     eq_(c.to_hex_string(), '#004080c0')
 
-# Color equality
 def test_color_equality():
 
     c1 = mapnik.Color('blue')
@@ -469,7 +456,6 @@ def test_color_equality():
     eq_(c2, mapnik.Color('lime'))
     eq_(c3, mapnik.Color(0,0,255,128))
 
-# Rule initialization
 def test_rule_init():
     min_scale = 5
     max_scale = 10
@@ -526,14 +512,12 @@ def test_rule_init():
     eq_(r.has_else(), False)
     eq_(r.has_also(), False)
 
-# Coordinate initialization
 def test_coord_init():
     c = mapnik.Coord(100, 100)
 
     eq_(c.x, 100)
     eq_(c.y, 100)
 
-# Coordinate multiplication
 def test_coord_multiplication():
     c = mapnik.Coord(100, 100)
     c *= 2
@@ -541,7 +525,6 @@ def test_coord_multiplication():
     eq_(c.x, 200)
     eq_(c.y, 200)
 
-# Box2d initialization
 def test_envelope_init():
     e = mapnik.Box2d(100, 100, 200, 200)
 
@@ -580,7 +563,6 @@ def test_envelope_init():
     eq_(c.x, 150)
     eq_(c.y, 150)
 
-# Box2d static initialization
 def test_envelope_static_init():
     e = mapnik.Box2d.from_string('100 100 200 200')
     e2 = mapnik.Box2d.from_string('100,100,200,200')
@@ -623,7 +605,6 @@ def test_envelope_static_init():
     eq_(c.x, 150)
     eq_(c.y, 150)
 
-# Box2d multiplication
 def test_envelope_multiplication():
     e = mapnik.Box2d(100, 100, 200, 200)
     e *= 2
@@ -654,7 +635,6 @@ def test_envelope_multiplication():
     eq_(c.x, 150)
     eq_(c.y, 150)
 
-# Box2d clipping
 def test_envelope_clipping():
     e1 = mapnik.Box2d(-180,-90,180,90)
     e2 = mapnik.Box2d(-120,40,-110,48)
