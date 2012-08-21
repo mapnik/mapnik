@@ -62,7 +62,7 @@ public:
 
     double get() const
     {
-        return value_;
+        return -value_;
     }
 
     bool next()
