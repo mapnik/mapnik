@@ -205,5 +205,13 @@ void export_shield_symbolizer()
         .add_property("transform",
                       mapnik::get_svg_transform<shield_symbolizer>,
                       mapnik::set_svg_transform<shield_symbolizer>)
+        .add_property("comp_op",
+                      &shield_symbolizer::comp_op,
+                      &shield_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &shield_symbolizer::clip,
+                      &shield_symbolizer::set_clip,
+                      "Set/get the shield geometry's clipping status")
         ;
 }

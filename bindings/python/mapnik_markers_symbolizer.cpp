@@ -143,5 +143,17 @@ void export_markers_symbolizer()
                       &markers_symbolizer::get_marker_placement,
                       &markers_symbolizer::set_marker_placement,
                       "Set/get the marker placement")
+        .add_property("comp_op",
+                      &markers_symbolizer::comp_op,
+                      &markers_symbolizer::set_comp_op,
+                      "Set/get the marker comp-op")
+        .add_property("clip",
+                      &markers_symbolizer::clip,
+                      &markers_symbolizer::set_clip,
+                      "Set/get the marker geometry's clipping status")
+        .add_property("smooth",
+                      &markers_symbolizer::smooth,
+                      &markers_symbolizer::set_smooth,
+                      "Set/get the marker geometry's smooth value")
         ;
 }

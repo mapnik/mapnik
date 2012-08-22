@@ -80,5 +80,17 @@ void export_polygon_pattern_symbolizer()
                       &polygon_pattern_symbolizer::get_gamma_method,
                       &polygon_pattern_symbolizer::set_gamma_method,
                       "Set/get the gamma correction method of the polygon")
+        .add_property("comp_op",
+                      &polygon_pattern_symbolizer::comp_op,
+                      &polygon_pattern_symbolizer::set_comp_op,
+                      "Set/get the pattern comp-op")
+        .add_property("clip",
+                      &polygon_pattern_symbolizer::clip,
+                      &polygon_pattern_symbolizer::set_clip,
+                      "Set/get the pattern geometry's clipping status")
+        .add_property("smooth",
+                      &polygon_pattern_symbolizer::smooth,
+                      &polygon_pattern_symbolizer::set_smooth,
+                      "Set/get the pattern geometry's smooth value")
         ;
 }

@@ -354,6 +354,14 @@ void export_text_placement()
                       make_function(&get_properties, return_value_policy<reference_existing_object>()),
                       &set_properties,
                       "Shortcut for placements.defaults")
+        .add_property("comp_op",
+                      &text_symbolizer::comp_op,
+                      &text_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &text_symbolizer::clip,
+                      &text_symbolizer::set_clip,
+                      "Set/get the text geometry's clipping status")
         ;
 
 

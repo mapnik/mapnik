@@ -81,5 +81,9 @@ void export_point_symbolizer()
         .add_property("transform",
                       mapnik::get_svg_transform<point_symbolizer>,
                       mapnik::set_svg_transform<point_symbolizer>)
+        .add_property("comp_op",
+                      &point_symbolizer::comp_op,
+                      &point_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
         ;
 }

@@ -39,18 +39,13 @@ void export_raster_symbolizer()
         .add_property("mode",
                       make_function(&raster_symbolizer::get_mode,return_value_policy<copy_const_reference>()),
                       &raster_symbolizer::set_mode,
-                      "Get/Set merging mode.\n"
-                      "Possible values are:\n"
-                      "normal, grain_merge, grain_merge2, multiply,\n"
-                      "multiply2, divide, divide2, screen, and hard_light\n"
-                      "\n"
-                      "Usage:\n"
-                      "\n"
-                      ">>> from mapnik import RasterSymbolizer\n"
-                      ">>> r = RasterSymbolizer()\n"
-                      ">>> r.mode = 'grain_merge2'\n"
+                      "Get/Set merging mode. (deprecated, use comp_op instead)\n"
             )
-
+        .add_property("comp_op",
+                      &raster_symbolizer::comp_op,
+                      &raster_symbolizer::set_comp_op,
+                      "Set/get the raster comp-op"
+            )
         .add_property("scaling",
                       &raster_symbolizer::get_scaling_method,
                       &raster_symbolizer::set_scaling_method,
