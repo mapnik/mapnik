@@ -32,8 +32,8 @@ namespace csv_utils
     static void fix_json_quoting(std::string & csv_line)
     {
         std::string wrapping_char;
-        std::string::size_type j_idx;
-        std::string::size_type post_idx;
+        std::string::size_type j_idx = std::string::npos;
+        std::string::size_type post_idx = std::string::npos;
         std::string::size_type j_idx_double = csv_line.find("\"{");
         std::string::size_type j_idx_single = csv_line.find("'{");
         if (j_idx_double != std::string::npos)
