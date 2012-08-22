@@ -24,6 +24,9 @@
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
+#include <mapnik/geom_util.hpp>
+
+// agg
 #include "agg_conv_clip_polyline.h"
 
 namespace mapnik {

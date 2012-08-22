@@ -24,6 +24,8 @@
 #define MAPNIK_MARKER_HELPERS_HPP
 
 #include <mapnik/color.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/geom_util.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>

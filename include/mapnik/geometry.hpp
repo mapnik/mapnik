@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
-#include <mapnik/geom_util.hpp>
+#include <mapnik/box2d.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>

@@ -26,6 +26,8 @@
 // mapnik
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/markers_placement.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/geom_util.hpp>
 
 // agg
 #include "agg_renderer_scanline.h"
