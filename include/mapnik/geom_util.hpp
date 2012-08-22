@@ -276,10 +276,10 @@ bool middle_point(PathType & path, double & x, double & y)
 template <typename PathType>
 bool centroid(PathType & path, double & x, double & y)
 {
-    double x0 = 0;
-    double y0 = 0;
-    double x1 = 0;
-    double y1 = 0;
+    double x0 = 0.0;
+    double y0 = 0.0;
+    double x1 = 0.0;
+    double y1 = 0.0;
     double start_x;
     double start_y;
 
@@ -290,9 +290,9 @@ bool centroid(PathType & path, double & x, double & y)
     start_x = x0;
     start_y = y0;
 
-    double atmp = 0;
-    double xtmp = 0;
-    double ytmp = 0;
+    double atmp = 0.0;
+    double xtmp = 0.0;
+    double ytmp = 0.0;
     unsigned count = 1;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
@@ -310,10 +310,9 @@ bool centroid(PathType & path, double & x, double & y)
         ++count;
     }
 
-    if (count == 1)
-    {
-        x = start_x;
-        y = start_y;
+    if (count <= 2) {
+        x = (start_x + x0) * 0.5;
+        y = (start_y + y0) * 0.5;
         return true;
     }
 
