@@ -14,9 +14,42 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-def test_line_symbolizer_init():
+def test_line_pattern():
+    s = mapnik.LinePatternSymbolizer(mapnik.PathExpression('../data/images/dummy.png'))
+    eq_(s.filename, '../data/images/dummy.png')
+    eq_(s.smooth,0.0)
+    eq_(s.transform,'')
+    eq_(s.comp_op,mapnik.CompositeOp.src_over)
+    eq_(s.clip,True)
+
+def test_line_symbolizer():
     s = mapnik.LineSymbolizer()
     eq_(s.rasterizer, mapnik.line_rasterizer.FULL)
+    eq_(s.smooth,0.0)
+    eq_(s.comp_op,mapnik.CompositeOp.src_over)
+    eq_(s.clip,True)
+    eq_(s.stroke.width, 1)
+    eq_(s.stroke.opacity, 1)
+    eq_(s.stroke.color, mapnik.Color('black'))
+    eq_(s.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
+    eq_(s.stroke.line_join, mapnik.line_join.MITER_JOIN)
+
+    l = mapnik.LineSymbolizer(mapnik.Color('blue'), 5.0)
+
+    eq_(l.stroke.width, 5)
+    eq_(l.stroke.opacity, 1)
+    eq_(l.stroke.color, mapnik.Color('blue'))
+    eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
+    eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
+
+    s = mapnik.Stroke(mapnik.Color('blue'), 5.0)
+    l = mapnik.LineSymbolizer(s)
+
+    eq_(l.stroke.width, 5)
+    eq_(l.stroke.opacity, 1)
+    eq_(l.stroke.color, mapnik.Color('blue'))
+    eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
+    eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
 
 def test_line_symbolizer_stroke_reference():
     l = mapnik.LineSymbolizer(mapnik.Color('green'),0.1)
@@ -37,10 +70,15 @@ def test_stroke_dash_api():
     dashes.append((.1,.1))
     eq_(stroke.dasharray, dashes)
 
-# https://github.com/mapnik/mapnik/issues/1420
-def test_text_symbolizer_init():
+
+def test_text_symbolizer():
     s = mapnik.TextSymbolizer()
+    eq_(s.comp_op,mapnik.CompositeOp.src_over)
+    eq_(s.clip,True)
+
+    # https://github.com/mapnik/mapnik/issues/1420
     eq_(s.text_transform, mapnik.text_transform.NONE)
+
     # https://github.com/mapnik/mapnik/issues/1427
     eq_(s.wrap_char,ord(' '))
     eq_(s.wrap_character,ord(' '))
@@ -57,8 +95,19 @@ def test_text_symbolizer_init():
     eq_(s.wrap_character,ord(' '))
     eq_(s.format.wrap_character,ord(' '))
 
-def test_shieldsymbolizer_init():
+    # old args required method
+    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
+#    eq_(str(ts.name), str(mapnik2.Expression('[Field_Name]'))) name field is no longer supported
+    eq_(ts.format.face_name, 'Font Name')
+    eq_(ts.format.text_size, 8)
+    eq_(ts.format.fill, mapnik.Color('black'))
+    eq_(ts.properties.label_placement, mapnik.label_placement.POINT_PLACEMENT)
+    eq_(ts.properties.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
+
+def test_shield_symbolizer_init():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
+    eq_(s.comp_op,mapnik.CompositeOp.src_over)
+    eq_(s.clip,True)
     eq_(s.displacement, (0.0,0.0))
     eq_(s.allow_overlap, False)
     eq_(s.avoid_edges, False)
@@ -115,7 +164,7 @@ def test_shieldsymbolizer_init():
 #def test_shieldsymbolizer_missing_image():
 #    s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../#data/images/broken.png'))
 
-def test_shieldsymbolizer_modify():
+def test_shield_symbolizer_modify():
     s = mapnik.ShieldSymbolizer(mapnik.Expression('[Field Name]'), 'DejaVu Sans Bold', 6, mapnik.Color('#000000'), mapnik.PathExpression('../data/images/dummy.png'))
     # transform expression
     def check_transform(expr, expect_str=None):
@@ -132,20 +181,14 @@ def test_shieldsymbolizer_modify():
     check_transform("scale([sx], [sy]/2)")
     # TODO check expected failures
 
-def test_point_symbolizer_init():
+def test_point_symbolizer():
     p = mapnik.PointSymbolizer()
-    eq_(p.placement, mapnik.point_placement.CENTROID)
-
-    p = mapnik.PointSymbolizer()
-    p.placement = mapnik.point_placement.INTERIOR
-    eq_(p.placement, mapnik.point_placement.INTERIOR)
-
-def test_pointsymbolizer_init():
-    p = mapnik.PointSymbolizer()
-    eq_(p.allow_overlap, False)
-    eq_(p.opacity,1)
     eq_(p.filename,'')
+    eq_(p.transform,'')
+    eq_(p.opacity,1.0)
+    eq_(p.allow_overlap,False)
     eq_(p.ignore_placement,False)
+    eq_(p.comp_op,mapnik.CompositeOp.src_over)
     eq_(p.placement, mapnik.point_placement.CENTROID)
 
     p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/dummy.png"))
@@ -159,7 +202,7 @@ def test_pointsymbolizer_init():
     eq_(p.ignore_placement,True)
     eq_(p.placement, mapnik.point_placement.INTERIOR)
 
-def test_markersymbolizer_init():
+def test_markers_symbolizer():
     p = mapnik.MarkersSymbolizer()
     eq_(p.allow_overlap, False)
     eq_(p.opacity,1.0)
@@ -172,6 +215,10 @@ def test_markersymbolizer_init():
     eq_(p.max_error,0.2)
     eq_(p.width,None)
     eq_(p.height,None)
+    eq_(p.transform,'')
+    eq_(p.clip,True)
+    eq_(p.comp_op,mapnik.CompositeOp.src_over)
+    
 
     p.width = mapnik.Expression('12')
     p.height = mapnik.Expression('12')
@@ -211,9 +258,11 @@ def test_markersymbolizer_init():
 #def test_pointsymbolizer_missing_image():
  #   p = mapnik.PointSymbolizer(mapnik.PathExpression("../data/images/broken.png"))
 
-def test_polygon_symbolizer_init():
+def test_polygon_symbolizer():
     p = mapnik.PolygonSymbolizer()
-
+    eq_(p.smooth,0.0)
+    eq_(p.comp_op,mapnik.CompositeOp.src_over)
+    eq_(p.clip,True)
     eq_(p.fill, mapnik.Color('gray'))
     eq_(p.fill_opacity, 1)
 
@@ -256,42 +305,6 @@ def test_stroke_dash_arrays():
     s.add_dash(5,6)
 
     eq_(s.get_dashes(), [(1,2),(3,4),(5,6)])
-
-def test_linesymbolizer_init():
-    l = mapnik.LineSymbolizer()
-
-    eq_(l.stroke.width, 1)
-    eq_(l.stroke.opacity, 1)
-    eq_(l.stroke.color, mapnik.Color('black'))
-    eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
-    eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
-
-    l = mapnik.LineSymbolizer(mapnik.Color('blue'), 5.0)
-
-    eq_(l.stroke.width, 5)
-    eq_(l.stroke.opacity, 1)
-    eq_(l.stroke.color, mapnik.Color('blue'))
-    eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
-    eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
-
-    s = mapnik.Stroke(mapnik.Color('blue'), 5.0)
-    l = mapnik.LineSymbolizer(s)
-
-    eq_(l.stroke.width, 5)
-    eq_(l.stroke.opacity, 1)
-    eq_(l.stroke.color, mapnik.Color('blue'))
-    eq_(l.stroke.line_cap, mapnik.line_cap.BUTT_CAP)
-    eq_(l.stroke.line_join, mapnik.line_join.MITER_JOIN)
-
-def test_textsymbolizer_init():
-    ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
-
-#    eq_(str(ts.name), str(mapnik2.Expression('[Field_Name]'))) name field is no longer supported
-    eq_(ts.format.face_name, 'Font Name')
-    eq_(ts.format.text_size, 8)
-    eq_(ts.format.fill, mapnik.Color('black'))
-    eq_(ts.properties.label_placement, mapnik.label_placement.POINT_PLACEMENT)
-    eq_(ts.properties.horizontal_alignment, mapnik.horizontal_alignment.AUTO)
 
 def test_map_init():
     m = mapnik.Map(256, 256)
