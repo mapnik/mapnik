@@ -132,7 +132,7 @@ void placement_finder<DetectorT>::find_point_placements(T & shape_path)
     double total_distance = get_total_distance<T>(shape_path);
     shape_path.rewind(0);
 
-    if (distance == 0) //Point data, not a line
+    if (total_distance == 0) //Point data, not a line
     {
         double x, y;
         shape_path.vertex(&x,&y);
