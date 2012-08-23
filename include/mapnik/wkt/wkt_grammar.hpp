@@ -97,6 +97,8 @@ namespace mapnik { namespace wkt {
             : wkt_grammar::base_type(geometry_tagged_text)
         {
             using qi::no_case;
+            using qi::_1;
+            using qi::_2;
             using boost::phoenix::push_back;
 
             geometry_tagged_text = point_tagged_text

@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/wkt/wkt_grammar.hpp>
 // boost
 #include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -36,10 +37,6 @@
 #include <string>
 
 namespace mapnik {
-
-namespace wkt {
-template <typename Iterator> struct wkt_collection_grammar;
-}
 
 MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
 

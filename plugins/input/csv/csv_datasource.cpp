@@ -432,6 +432,7 @@ void csv_datasource::parse_csv(T& stream,
     }
 
     mapnik::transcoder tr(desc_.get_encoding());
+    mapnik::wkt_parser parse_wkt;
 
     while (std::getline(stream,csv_line,newline))
     {
@@ -538,69 +539,25 @@ void csv_datasource::parse_csv(T& stream,
                             break;
                         }
 
-                        // optimize simple "POINT (x y)"
-                        // using this shaved 2 seconds off csv that took 8 seconds total to parse
-                        if (value.find("POINT") == 0)
+                        if (parse_wkt.parse(value, feature->paths()))
                         {
-                            using boost::phoenix::ref;
-                            using boost::spirit::qi::_1;
-                            std::string::const_iterator str_beg = value.begin();
-                            std::string::const_iterator str_end = value.end();
-                            bool r = qi::phrase_parse(str_beg,str_end,
-                                                      (
-                                                          qi::lit("POINT") >> '('
-                                                          >> double_[ref(x) = _1]
-                                                          >> double_[ref(y) = _1] >> ')'
-                                                          ),
-                                                      ascii::space);
-
-                            if (r && (str_beg == str_end))
-                            {
-                                mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::Point);
-                                pt->move_to(x,y);
-                                feature->add_geometry(pt);
-                                parsed_wkt = true;
-                            }
-                            else
-                            {
-                                std::ostringstream s;
-                                s << "CSV Plugin: expected well known text geometry: could not parse row "
-                                  << line_number
-                                  << ",column "
-                                  << i << " - found: '"
-                                  << value << "'";
-                                if (strict_)
-                                {
-                                    throw mapnik::datasource_exception(s.str());
-                                }
-                                else
-                                {
-                                    MAPNIK_LOG_ERROR(csv) << s.str();
-                                }
-                            }
+                            parsed_wkt = true;
                         }
                         else
                         {
-                            if (mapnik::from_wkt(value, feature->paths()))
+                            std::ostringstream s;
+                            s << "CSV Plugin: expected well known text geometry: could not parse row "
+                              << line_number
+                              << ",column "
+                              << i << " - found: '"
+                              << value << "'";
+                            if (strict_)
                             {
-                                parsed_wkt = true;
+                                throw mapnik::datasource_exception(s.str());
                             }
                             else
                             {
-                                std::ostringstream s;
-                                s << "CSV Plugin: expected well known text geometry: could not parse row "
-                                  << line_number
-                                  << ",column "
-                                  << i << " - found: '"
-                                  << value << "'";
-                                if (strict_)
-                                {
-                                    throw mapnik::datasource_exception(s.str());
-                                }
-                                else
-                                {
-                                    MAPNIK_LOG_ERROR(csv) << s.str();
-                                }
+                                MAPNIK_LOG_ERROR(csv) << s.str();
                             }
                         }
                     }
