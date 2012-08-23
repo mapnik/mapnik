@@ -50,17 +50,15 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
 {
     ras_ptr->reset();
 
-    box2d<double> inflated_extent = query_extent_ * 1.0;
-
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, grid_rasterizer, polygon_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(inflated_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter

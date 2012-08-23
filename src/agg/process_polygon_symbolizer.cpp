@@ -56,7 +56,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
