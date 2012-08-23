@@ -433,6 +433,7 @@ void csv_datasource::parse_csv(T& stream,
 
     mapnik::transcoder tr(desc_.get_encoding());
     mapnik::wkt_parser parse_wkt;
+    mapnik::json::geometry_parser<std::string::const_iterator> parse_json;
 
     while (std::getline(stream,csv_line,newline))
     {
@@ -574,7 +575,7 @@ void csv_datasource::parse_csv(T& stream,
                         {
                             break;
                         }
-                        if (mapnik::json::from_geojson(value, feature->paths()))
+                        if (parse_json.parse(value.begin(),value.end(), feature->paths()))
                         {
                             parsed_json = true;
                         }
