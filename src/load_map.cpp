@@ -116,6 +116,7 @@ private:
 
 
     std::string ensure_relative_to_xml(boost::optional<std::string> opt_path);
+    void ensure_exists(std::string const& file_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
                                               std::string const& name);
 
@@ -896,11 +897,12 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             }
 
             *file = ensure_relative_to_xml(file);
-
+            std::string filename = *file;
+            ensure_exists(filename);
             path_expression_ptr expr(boost::make_shared<path_expression>());
-            if (!parse_path_from_string(expr, *file, sym.get_tree().path_expr_grammar))
+            if (!parse_path_from_string(expr, filename, sym.get_tree().path_expr_grammar))
             {
-                throw mapnik::config_error("Failed to parse path_expression '" + *file + "'");
+                throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
             }
 
             symbol.set_filename(expr);
@@ -973,6 +975,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
 
         if (!filename.empty())
         {
+            ensure_exists(filename);
             path_expression_ptr expr(boost::make_shared<path_expression>());
             if (!parse_path_from_string(expr, filename, node.get_tree().path_expr_grammar))
             {
@@ -1056,6 +1059,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
         }
 
         file = ensure_relative_to_xml(file);
+        ensure_exists(file);
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
         {
@@ -1097,7 +1101,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         }
 
         file = ensure_relative_to_xml(file);
-
+        ensure_exists(file);
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
         {
@@ -1249,6 +1253,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         }
 
         file = ensure_relative_to_xml(file);
+        ensure_exists(file);
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
         {
@@ -1628,6 +1633,20 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> opt_
         }
     }
     return *opt_path;
+}
+
+void map_parser::ensure_exists(std::string const& file_path)
+{
+    if (marker_cache::is_uri(file_path))
+        return;
+    // validate that the filename exists if it is not a dynamic PathExpression
+    if (!boost::algorithm::find_first(file_path,"[") && !boost::algorithm::find_first(file_path,"]"))
+    {
+       if (!boost::filesystem::exists(file_path))
+       {
+           throw mapnik::config_error("point-file could not be found: '" + file_path + "'");
+       }
+    }
 }
 
 void map_parser::find_unused_nodes(xml_node const& root)
