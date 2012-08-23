@@ -26,6 +26,7 @@
 #if BOOST_VERSION >= 104500
 
 #include <mapnik/css_color_grammar.hpp>
+#include <mapnik/position_iterator.hpp>
 
 namespace mapnik
 {
@@ -262,6 +263,7 @@ css_color_grammar<Iterator>::css_color_grammar()
 }
 
 template struct mapnik::css_color_grammar<std::string::const_iterator>;
+template struct mapnik::css_color_grammar<position_iterator<std::string::const_iterator> >;
 
 
 }
