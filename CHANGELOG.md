@@ -9,7 +9,9 @@ For a complete change history, see the git log.
 
 ## Mapnik 2.1.0
 
-Not yet released
+Released Aug 23, 2012
+
+(Packaged from a25aac8)
 
 - Feature-level compositing (comp-op) for all symbolizers (except building) in AGG and Cairo renderers (#1409)
 
