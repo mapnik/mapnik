@@ -31,7 +31,6 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/image_filter_parser.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -427,9 +426,6 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         }
 
         // image filters
-        mapnik::image_filter_grammar<std::string::const_iterator,
-                                     std::vector<mapnik::filter::filter_type> > filter_grammar;
-
         optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
@@ -437,7 +433,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             std::string::const_iterator itr = filter_mode.begin();
             std::string::const_iterator end = filter_mode.end();
             bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                          filter_grammar,
+                                                          sty.get_tree().image_filters_grammar,
                                                           boost::spirit::qi::ascii::space,
                                                           style.image_filters());
             if (!result || itr!=end)
@@ -457,7 +453,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             std::string::const_iterator itr = filter_mode.begin();
             std::string::const_iterator end = filter_mode.end();
             bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                          filter_grammar,
+                                                          sty.get_tree().image_filters_grammar,
                                                           boost::spirit::qi::ascii::space,
                                                           style.direct_image_filters());
             if (!result || itr!=end)

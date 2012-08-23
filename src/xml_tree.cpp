@@ -173,7 +173,8 @@ xml_tree::xml_tree(std::string const& encoding)
       color_grammar(),
       expr_grammar(tr_),
       path_expr_grammar(),
-      transform_expr_grammar(expr_grammar)
+      transform_expr_grammar(expr_grammar),
+      image_filters_grammar()
 {
     node_.set_processed(true); //root node is always processed
 }

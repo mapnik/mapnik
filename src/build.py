@@ -104,6 +104,7 @@ source = Split(
     css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
+    image_filter_grammar.cpp
     image_scaling.cpp
     box2d.cpp
     building_symbolizer.cpp
