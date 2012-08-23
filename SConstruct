@@ -325,7 +325,7 @@ opts.AddVariables(
 
     BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
 
-    BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
+    #BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
 
     # Variables for optional dependencies
     ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),
@@ -426,7 +426,7 @@ pickle_store = [# Scons internal variables
         'CAIROMM_LIBPATHS',
         'CAIROMM_LINKFLAGS',
         'CAIROMM_CPPPATHS',
-        'SVG_RENDERER',
+        #'SVG_RENDERER',
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER'
         ]
@@ -1740,7 +1740,8 @@ if not HELP_REQUESTED:
     # not ready for release
     SConscript('tests/cpp_tests/build.py')
 
-    # not ready for release
+    # not currently maintained
+    # https://github.com/mapnik/mapnik/issues/1438
     #if env['SVG_RENDERER']:
     #    SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 
