@@ -29,19 +29,15 @@ Not yet released
 
 - WKT parsing now is more robust and supports multi-geometries (#745)
 
-- New support for outputting WKT/WKB/GeoJSON from mapnik.Geometry objects (#1411)
+- New support for outputting WKT/WKB/GeoJSON/SVG from mapnik.Geometry objects (#1411)
 
 - New experimental python datasource plugin (#1337)
 
 - New experimental geojson datasource plugin using in-memory rtree indexing (#1413)
 
-TODO - fill these out more:
+- Cairo rendering is now much more similiar to AGG rendering as cairo backend now supports `scale_factor` (#1280) and other fixed have landed (#1343, #1233, #1344, #1242, #687, #737, #1006, #1071)
 
-- svg Transform per-sym
-- data-driven transforms as well
-- cairo more synced up
-- geometry closed
-- feature api better - context's provide schema support
+- mapnik::Feature objects and datasource plugins now use a `Context` to store attribute schemas to reduce the memory footprint of features (#834)
 
 - Added Stroke `miterlimit` (#786)
 
