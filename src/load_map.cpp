@@ -921,7 +921,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PointSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1029,7 +1029,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
     }
     catch (config_error const& ex)
     {
-        ex.append_context("in MarkersSymbolizer", node);
+        ex.append_context(node);
         throw;
     }
 }
@@ -1068,7 +1068,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in LinePatternSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1126,7 +1126,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PolygonPatternSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1155,7 +1155,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in TextSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1260,7 +1260,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in ShieldSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1369,7 +1369,7 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in LineSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1398,7 +1398,7 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PolygonSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1424,7 +1424,7 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in BuildingSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1502,7 +1502,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in RasterSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1588,7 +1588,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in RasterColorizer", node);
+        ex.append_context(node);
         throw;
     }
 }
