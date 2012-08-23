@@ -46,7 +46,7 @@ namespace mapnik { namespace util {
     namespace karma = boost::spirit::karma;
     namespace phoenix = boost::phoenix;
 
-    namespace detail {
+    namespace svg_detail {
     struct get_type
     {
         template <typename T>
@@ -133,10 +133,10 @@ namespace mapnik { namespace util {
         karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> svg_path;
 
         // phoenix functions
-        phoenix::function<detail::get_type > _type;
-        phoenix::function<detail::get_first> _first;
+        phoenix::function<svg_detail::get_type > _type;
+        phoenix::function<svg_detail::get_first> _first;
         //
-        karma::real_generator<double, detail::coordinate_policy<double> > coord_type;
+        karma::real_generator<double, svg_detail::coordinate_policy<double> > coord_type;
 
     };
 
