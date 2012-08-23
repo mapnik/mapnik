@@ -197,7 +197,69 @@ double hue_to_rgb( double m1, double m2, double h)
     return m1;
 }
 
+template <typename Iterator>
+css_color_grammar<Iterator>::css_color_grammar()
+    : css_color_grammar::base_type(css_color)
 
+{
+    using qi::lit;
+    using qi::_val;
+    using qi::double_;
+    using qi::_1;
+    using qi::_a;
+    using qi::_b;
+    using qi::_c;
+    using ascii::no_case;
+    using phoenix::at_c;
+
+    css_color %= rgba_color
+        | rgba_percent_color
+        | hsl_percent_color
+        | hex_color
+        | hex_color_small
+        | no_case[named];
+
+    hex_color = lit('#')
+        >> hex2 [ at_c<0>(_val) = _1 ]
+        >> hex2 [ at_c<1>(_val) = _1 ]
+        >> hex2 [ at_c<2>(_val) = _1 ]
+        >>-hex2 [ at_c<3>(_val) = _1 ]
+        ;
+
+    hex_color_small = lit('#')
+        >> hex1 [ at_c<0>(_val) = _1 | _1 << 4 ]
+        >> hex1 [ at_c<1>(_val) = _1 | _1 << 4 ]
+        >> hex1 [ at_c<2>(_val) = _1 | _1 << 4 ]
+        >>-hex1 [ at_c<3>(_val) = _1 | _1 << 4 ]
+        ;
+
+    rgba_color = lit("rgb") >> -lit('a')
+                            >> lit('(')
+                            >> dec3 [at_c<0>(_val) = _1] >> ','
+                            >> dec3 [at_c<1>(_val) = _1] >> ','
+                            >> dec3 [at_c<2>(_val) = _1]
+                            >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)])
+                            >> lit(')')
+        ;
+
+    rgba_percent_color = lit("rgb") >> -lit('a')
+                                    >> lit('(')
+                                    >> double_ [at_c<0>(_val) = percent_converter(_1)] >> '%' >> ','
+                                    >> double_ [at_c<1>(_val) = percent_converter(_1)] >> '%' >> ','
+                                    >> double_ [at_c<2>(_val) = percent_converter(_1)] >> '%'
+                                    >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)])
+                                    >> lit(')')
+        ;
+
+    hsl_percent_color = lit("hsl") >> -lit('a')
+                                   >> lit('(')
+                                   >> double_ [ _a = _1] >> ','        // hue 0..360
+                                   >> double_ [ _b = _1] >> '%' >> ',' // saturation 0..100%
+                                   >> double_ [ _c = _1] >> '%'        // lightness  0..100%
+                                   >> -(','>> -double_ [at_c<3>(_val) = alpha_converter(_1)]) // opacity 0...1
+                                   >> lit (')') [ hsl_converter(_val,_a,_b,_c)]
+        ;
+}
 
 template struct mapnik::css_color_grammar<std::string::const_iterator>;
 
