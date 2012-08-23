@@ -28,7 +28,7 @@
 #include <mapnik/value_error.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/image_filter_parser.hpp> // image_filter_grammar
+#include <mapnik/image_filter_grammar.hpp> // image_filter_grammar
 #include <mapnik/image_filter_types.hpp> // generate_image_filters
 
 using mapnik::feature_type_style;
