@@ -1636,14 +1636,14 @@ void map_parser::find_unused_nodes(xml_node const& root)
     find_unused_nodes_recursive(root, error_message);
     if (!error_message.str().empty())
     {
-        std::string msg("The following nodes or attributes were not processed while parsing the xml file:" + error_message.str());
+        std::string msg("Unable to process some data while parsing '" + filename_ + "':" + error_message.str());
         if (strict_)
         {
             throw config_error(msg);
         }
         else
         {
-            MAPNIK_LOG_ERROR(load_map) << "map_parser: " << msg;
+            MAPNIK_LOG_ERROR(load_map) << msg;
         }
     }
 }
@@ -1655,7 +1655,7 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::stringst
         if (node.is_text()) {
             error_message << "\n* text '" << node.text() << "'";
         } else {
-            error_message << "\n* node '" << node.name() << "' in line " << node.line();
+            error_message << "\n* node '" << node.name() << "' at line " << node.line();
         }
         return; //All attributes and children are automatically unprocessed, too.
     }
@@ -1668,7 +1668,7 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::stringst
         {
             error_message << "\n* attribute '" << aitr->first <<
                 "' with value '" << aitr->second.value <<
-                "' in line " << node.line();
+                "' at line " << node.line();
         }
     }
     xml_node::const_iterator itr = node.begin();
