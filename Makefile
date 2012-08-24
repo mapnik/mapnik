@@ -1,21 +1,24 @@
 all: mapnik
 
 install:
-	@python scons/scons.py --config=cache --implicit-deps-unchanged --max-drift=1 install
+	@python scons/scons.py --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	@python scons/scons.py --config=cache --implicit-deps-unchanged --max-drift=1
+	@python scons/scons.py --config=cache --implicit-cache --max-drift=1
 
 clean:
-	python scons/scons.py -c --config=cache --implicit-deps-unchanged --max-drift=1
+	@python scons/scons.py -c --config=cache --implicit-cache --max-drift=1
+	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 
-reset:
+distclean:
 	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	if test -e "config.cache"; then rm "config.cache"; fi
 
+reset: distclean
+
 uninstall:
-	python scons/scons.py --config=cache --implicit-deps-unchanged --max-drift=1 uninstall
+	python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
 	@echo "*** Running visual tests..."
@@ -26,6 +29,10 @@ test:
 	done
 	@echo "*** Running python tests..."
 	@python tests/run_tests.py -q
+
+demo:
+	@echo "*** Running rundemo.cpp…"
+	cd demo/c++; ./rundemo `mapnik-config --prefix`/lib/mapnik
 
 pep8:
 	# https://gist.github.com/1903033
@@ -43,4 +50,4 @@ render:
 		nik2img.py $${FILE} /tmp/$$(basename $${FILE}).png; \
 	done
 
-.PHONY: clean reset uninstall test install
+.PHONY: clean reset uninstall test install demo

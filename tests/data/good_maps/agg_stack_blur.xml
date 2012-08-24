@@ -1,0 +1,24 @@
+<Map srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over" background-color="steelblue">
+    <!-- Asia -->
+    <Style name="style" filter-mode="first">
+        <Rule>
+            <Filter>([REGION]=142)</Filter>
+            <PolygonSymbolizer fill="yellow"/>
+        </Rule>
+    </Style>
+    <!-- Not Asia -->
+    <Style name="style2" filter-mode="first" image-filters="agg-stack-blur(2,2)">
+        <Rule>
+            <Filter>([REGION]!=142)</Filter>
+            <PolygonSymbolizer fill="green" fill-opacity=".3"/>
+        </Rule>
+    </Style>
+    <Layer name="world" srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over">
+        <StyleName>style</StyleName>
+        <StyleName>style2</StyleName>
+        <Datasource>
+            <Parameter name="file">../../data/shp/world_merc</Parameter>
+            <Parameter name="type">shape</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

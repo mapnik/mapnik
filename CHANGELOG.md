@@ -11,6 +11,8 @@ For a complete change history, see the git log.
 
 Not yet released
 
+- Increased grid encoding performance (#1315)
+
 - Added support for overriding fill, stroke, and opacity for svg markers using marker properties
 
 - Added support for setting opacity dynamically on images in polygon pattern and markers symbolizers
@@ -135,7 +137,7 @@ Released September 26, 2011
 
 - Add support for png quantization using fixed palettes (#843)
 
-- Add AlsoFilter functionality - http://trac.mapnik.org/wiki/AlsoFilter
+- Add AlsoFilter functionality - https://github.com/mapnik/mapnik/wiki/AlsoFilter
 
 - SQLite Plugin: optimize i/o using shared cache and no mutexes (#797)
 
@@ -224,7 +226,7 @@ Released Oct 18, 2011
 
 (Packaged from bc5cabeb6a)
 
-- Added forward compatibility for Mapnik 2.0 XML syntax (https://trac.mapnik.org/wiki/Mapnik2/Changes)
+- Added forward compatibility for Mapnik 2.0 XML syntax (https://github.com/mapnik/mapnik/wiki/Mapnik2/Changes)
 
 - Build fixes to ensure boost_threads are not used unless THREADING=multi build option is used
 

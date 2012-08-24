@@ -70,7 +70,6 @@ private:
     occi_connection_ptr conn_;
     oracle::occi::ResultSet* rs_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
-    const char* fidcolumn_;
     mutable int feature_id_;
     mapnik::context_ptr ctx_;
     bool use_wkb_;

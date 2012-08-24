@@ -29,7 +29,6 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/raster_colorizer.hpp>
-#include <mapnik/metawriter_factory.hpp>
 #include <mapnik/text_placements/simple.hpp>
 #include <mapnik/text_placements/list.hpp>
 #include <mapnik/text_placements/dummy.hpp>
@@ -342,12 +341,6 @@ private:
     void serialize_symbolizer_base(ptree & node, symbolizer_base const& sym)
     {
         symbolizer_base dfl = symbolizer_base();
-        if (!sym.get_metawriter_name().empty() || explicit_defaults_) {
-            set_attr(node, "meta-writer", sym.get_metawriter_name());
-        }
-        if (!sym.get_metawriter_properties_overrides().empty() || explicit_defaults_) {
-            set_attr(node, "meta-output", sym.get_metawriter_properties_overrides().to_string());
-        }
         if (sym.get_transform())
         {
             std::string tr_str = sym.get_transform_string();
@@ -781,18 +774,6 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
     }
 }
 
-void serialize_metawriter(ptree & map_node, Map::const_metawriter_iterator metawriter_it, bool explicit_defaults)
-{
-    std::string const& name = metawriter_it->first;
-    metawriter_ptr const& metawriter = metawriter_it->second;
-
-    ptree & metawriter_node = map_node.push_back(
-        ptree::value_type("MetaWriter", ptree()))->second;
-
-    set_attr(metawriter_node, "name", name);
-    metawriter_save(metawriter, metawriter_node, explicit_defaults);
-}
-
 void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
 {
 
@@ -856,12 +837,6 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
     for (unsigned i = 0; i < layers.size(); ++i )
     {
         serialize_layer( map_node, layers[i], explicit_defaults );
-    }
-
-    Map::const_metawriter_iterator m_it = map.begin_metawriters();
-    Map::const_metawriter_iterator m_end = map.end_metawriters();
-    for (; m_it != m_end; ++m_it) {
-        serialize_metawriter(map_node, m_it, explicit_defaults);
     }
 }
 

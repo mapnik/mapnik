@@ -89,7 +89,7 @@ boost::optional<std::string> scaling_method_to_string(scaling_method_e scaling_m
     return mode;
 }
 
-// this has been replaced by agg impl - see https://trac.mapnik.org/ticket/656
+// this has been replaced by agg impl - see https://github.com/mapnik/mapnik/issues/656
 template <typename Image>
 void scale_image_bilinear_old (Image & target,Image const& source, double x_off_f, double y_off_f)
 {

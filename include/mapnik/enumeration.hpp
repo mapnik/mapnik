@@ -261,7 +261,7 @@ public:
         {
             if (our_strings_[i] == 0 )
             {
-                MAPNIK_LOG_FATAL(enumeration)
+                MAPNIK_LOG_ERROR(enumeration)
                         << "### FATAL: Not enough strings for enum "
                         << our_name_ << " defined in file '" << filename
                         << "' at line " << line_no;
@@ -270,7 +270,7 @@ public:
         }
         if ( std::string("") != our_strings_[THE_MAX])
         {
-            MAPNIK_LOG_FATAL(enumeration)
+            MAPNIK_LOG_ERROR(enumeration)
                     << "### FATAL: The string array for enum " << our_name_
                     << " defined in file '" << filename << "' at line " << line_no
                     << " has too many items or is not terminated with an "

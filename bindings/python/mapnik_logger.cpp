@@ -39,22 +39,14 @@ void export_logger()
         ;
 
     enum_<mapnik::logger::severity_type>("severity_type")
-        .value("Info", logger::info)
         .value("Debug", logger::debug)
         .value("Warn", logger::warn)
         .value("Error", logger::error)
-        .value("Fatal", logger::fatal)
         .value("None", logger::none)
         ;
 
     class_<logger,bases<singleton<logger,CreateStatic> >,
         boost::noncopyable>("logger",no_init)
-        .def_readonly("Info", logger::info)
-        .def_readonly("Debug", logger::debug)
-        .def_readonly("Warn", logger::warn)
-        .def_readonly("Error", logger::error)
-        .def_readonly("Fatal", logger::fatal)
-        .def_readonly("None", logger::none)
         .def("get_severity", &logger::get_severity)
         .def("set_severity", &logger::set_severity)
         .def("get_object_severity", &logger::get_object_severity)

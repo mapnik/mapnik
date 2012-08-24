@@ -59,7 +59,7 @@ box2d<T>::box2d(const box2d &rhs)
       maxx_(rhs.maxx_),
       maxy_(rhs.maxy_) {}
 // copy rather than init so dfl ctor (0,0,-1,-1) is not modified
-// http://trac.mapnik.org/ticket/749
+// https://github.com/mapnik/mapnik/issues/749
 /*{
   init(rhs.minx_,rhs.miny_,rhs.maxx_,rhs.maxy_);
   }*/

@@ -31,11 +31,7 @@
 // boost
 #include <boost/format.hpp>
 
-#if BOOST_VERSION >= 104500
 #include <mapnik/css_color_grammar.hpp>
-#else
-#include <mapnik/css_color_grammar_deprecated.hpp>
-#endif
 
 //stl
 #include <string>

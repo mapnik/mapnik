@@ -27,6 +27,8 @@
 #include <mapnik/map.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
+#include <mapnik/ctrans.hpp>
 #include <mapnik/filter_featureset.hpp>
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/scale_denominator.hpp>
@@ -36,24 +38,8 @@
 // boost
 #include <boost/make_shared.hpp>
 
-// icu
-#include <unicode/uversion.h>
-
 namespace mapnik
 {
-
-/** Call cache_metawriters for each symbolizer.*/
-struct metawriter_cache_dispatch : public boost::static_visitor<>
-{
-    metawriter_cache_dispatch (Map const &m) : m_(m) {}
-
-    template <typename T> void operator () (T &sym) const
-    {
-        sym.cache_metawriters(m_);
-    }
-
-    Map const &m_;
-};
 
 static const char * aspect_fix_mode_strings[] = {
     "GROW_BBOX",
@@ -93,7 +79,6 @@ Map::Map(const Map& rhs)
       background_(rhs.background_),
       background_image_(rhs.background_image_),
       styles_(rhs.styles_),
-      metawriters_(rhs.metawriters_),
       fontsets_(rhs.fontsets_),
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
@@ -101,6 +86,8 @@ Map::Map(const Map& rhs)
       maximum_extent_(rhs.maximum_extent_),
       base_path_(rhs.base_path_),
       extra_params_(rhs.extra_params_) {}
+
+Map::~Map() {}
 
 Map& Map::operator=(const Map& rhs)
 {
@@ -112,7 +99,6 @@ Map& Map::operator=(const Map& rhs)
     background_=rhs.background_;
     background_image_=rhs.background_image_;
     styles_=rhs.styles_;
-    metawriters_ = rhs.metawriters_;
     fontsets_ = rhs.fontsets_;
     layers_=rhs.layers_;
     aspectFixMode_=rhs.aspectFixMode_;
@@ -171,40 +157,6 @@ boost::optional<feature_type_style const&> Map::find_style(std::string const& na
         return boost::optional<feature_type_style const&>() ;
 }
 
-bool Map::insert_metawriter(std::string const& name, metawriter_ptr const& writer)
-{
-    return metawriters_.insert(make_pair(name, writer)).second;
-}
-
-void Map::remove_metawriter(std::string const& name)
-{
-    metawriters_.erase(name);
-}
-
-metawriter_ptr Map::find_metawriter(std::string const& name) const
-{
-    std::map<std::string, metawriter_ptr>::const_iterator itr = metawriters_.find(name);
-    if (itr != metawriters_.end())
-        return itr->second;
-    else
-        return metawriter_ptr();
-}
-
-std::map<std::string,metawriter_ptr> const& Map::metawriters() const
-{
-    return metawriters_;
-}
-
-Map::const_metawriter_iterator Map::begin_metawriters() const
-{
-    return metawriters_.begin();
-}
-
-Map::const_metawriter_iterator Map::end_metawriters() const
-{
-    return metawriters_.end();
-}
-
 bool Map::insert_fontset(std::string const& name, font_set const& fontset)
 {
     return fontsets_.insert(make_pair(name, fontset)).second;
@@ -248,7 +200,6 @@ void Map::remove_all()
 {
     layers_.clear();
     styles_.clear();
-    metawriters_.clear();
 }
 
 const layer& Map::getLayer(size_t index) const
@@ -628,42 +579,6 @@ featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
     return query_point(index,x,y);
 }
 
-Map::~Map() {}
-
-void Map::init_metawriters()
-{
-    metawriter_cache_dispatch d(*this);
-    Map::style_iterator styIter = begin_styles();
-    Map::style_iterator styEnd = end_styles();
-    for (; styIter!=styEnd; ++styIter) {
-        std::vector<rule>& rules = styIter->second.get_rules_nonconst();
-        std::vector<rule>::iterator ruleIter = rules.begin();
-        std::vector<rule>::iterator ruleEnd = rules.end();
-        for (; ruleIter!=ruleEnd; ++ruleIter) {
-            rule::symbolizers::iterator symIter = ruleIter->begin();
-            rule::symbolizers::iterator symEnd = ruleIter->end();
-            for (; symIter!=symEnd; ++symIter) {
-                boost::apply_visitor(d, *symIter);
-            }
-        }
-    }
-}
-
-void Map::set_metawriter_property(std::string name, std::string value)
-{
-#if (U_ICU_VERSION_MAJOR_NUM > 4) || (U_ICU_VERSION_MAJOR_NUM == 4 && U_ICU_VERSION_MINOR_NUM >=2)
-    metawriter_output_properties[name] = UnicodeString::fromUTF8(value);
-#else
-    metawriter_output_properties[name] = UnicodeString(value.c_str());
-#endif
-}
-
-std::string Map::get_metawriter_property(std::string name) const
-{
-    std::string result;
-    to_utf8(metawriter_output_properties[name], result);
-    return result;
-}
 
 parameters const& Map::get_extra_parameters() const
 {

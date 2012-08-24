@@ -82,8 +82,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             ras_ptr->gamma(agg::gamma_power());
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
-            agg::trans_affine tr;
-            tr *= agg::trans_affine_scaling(scale_factor_);
+            agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
 
             if ((*mark)->is_vector())
             {
@@ -144,7 +143,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 else
                 {
                     box2d<double> const& bbox = (*mark)->bounding_box();
-                    setup_label_transform(tr, bbox, feature, sym);
+                    setup_transform_scaling(tr, bbox, feature, sym);
+                    evaluate_transform(tr, feature, sym.get_image_transform());
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
                     agg::trans_affine marker_trans = recenter * tr;
@@ -179,7 +179,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             else // raster markers
             {
                 box2d<double> const& bbox = (*mark)->bounding_box();
-                setup_label_transform(tr, bbox, feature, sym);
+                setup_transform_scaling(tr, bbox, feature, sym);
+                evaluate_transform(tr, feature, sym.get_image_transform());
                 coord2d center = bbox.center();
                 agg::trans_affine_translation recenter(-center.x, -center.y);
                 agg::trans_affine marker_trans = recenter * tr;

@@ -19,33 +19,40 @@
 #
 
 
-Import ('plugin_base')
 Import ('env')
 
-prefix = env['PREFIX']
+can_build = False
 
-plugin_env = plugin_base.Clone()
+if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+    if boost_version_from_header >= 47:
+        can_build = True
 
-geojson_src = Split(
-  """
-  geojson_datasource.cpp
-  geojson_featureset.cpp      
-  """
-        )
+if not can_build:
+    print 'WARNING: skipping building the optional geojson datasource plugin which requires boost >= 1.47'
+else:
+    Import ('plugin_base')
+    prefix = env['PREFIX']
+    plugin_env = plugin_base.Clone()
+    geojson_src = Split(
+      """
+      geojson_datasource.cpp
+      geojson_featureset.cpp
+      """
+            )
+    libraries = []
+    # Link Library to Dependencies
+    libraries.append('mapnik')
+    libraries.append(env['ICU_LIB_NAME'])
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    if env['THREADING'] == 'multi':
+        libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
-libraries = []
-# Link Library to Dependencies
-libraries.append('mapnik')
-libraries.append(env['ICU_LIB_NAME'])
-libraries.append('boost_system%s' % env['BOOST_APPEND'])
-if env['THREADING'] == 'multi':
-    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+    input_plugin = plugin_env.SharedLibrary('../geojson', source=geojson_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 
-input_plugin = plugin_env.SharedLibrary('../geojson', source=geojson_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+    # if the plugin links to libmapnik ensure it is built first
+    Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
 
-# if the plugin links to libmapnik ensure it is built first
-Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
-
-if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], input_plugin)
-    env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+    if 'uninstall' not in COMMAND_LINE_TARGETS:
+        env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], input_plugin)
+        env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])

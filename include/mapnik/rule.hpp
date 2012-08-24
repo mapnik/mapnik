@@ -249,8 +249,6 @@ public:
             symbolizers::const_iterator it  = syms_.begin();
             symbolizers::const_iterator end = syms_.end();
 
-            // FIXME - metawriter_ptr?
-
             for(; it != end; ++it)
             {
                 boost::apply_visitor(deepcopy_symbolizer(),*it);

@@ -134,13 +134,14 @@ bool freetype_engine::register_font(std::string const& file_name)
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
     boost::filesystem::path path(dir);
-
     if (!boost::filesystem::exists(path))
+    {
         return false;
-
+    }
     if (!boost::filesystem::is_directory(path))
+    {
         return mapnik::freetype_engine::register_font(dir);
-
+    }
     boost::filesystem::directory_iterator end_itr;
     bool success = false;
     for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
@@ -152,7 +153,10 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 #endif
         if (boost::filesystem::is_directory(*itr) && recurse)
         {
-            success = register_fonts(file_name, true);
+            if (register_fonts(file_name, true))
+            {
+                success = true;
+            }
         }
         else
         {
@@ -165,7 +169,10 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
                      boost::filesystem::is_regular_file(file_name) &&
                      is_font_file(file_name))
             {
-                success = mapnik::freetype_engine::register_font(file_name);
+                if (mapnik::freetype_engine::register_font(file_name))
+                {
+                    success = true;
+                }
             }
         }
     }

@@ -58,9 +58,9 @@ bool logger::format_env_check_ = true;
 
 logger::severity_type logger::severity_level_ =
     #if MAPNIK_DEFAULT_LOG_SEVERITY == 0
-        logger::info
-    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
         logger::debug
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
+        logger::info
     #elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
         logger::warn
     #elif MAPNIK_DEFAULT_LOG_SEVERITY == 3

@@ -42,7 +42,6 @@
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/metawriter_factory.hpp>
 #include <mapnik/text_placements/registry.hpp>
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
@@ -91,7 +90,6 @@ private:
     void parse_map_include(Map & map, xml_node const& include);
     void parse_style(Map & map, xml_node const& sty);
     void parse_layer(Map & map, xml_node const& lay);
-    void parse_metawriter(Map & map, xml_node const& lay);
     void parse_symbolizer_base(symbolizer_base &sym, xml_node const& pt);
 
     void parse_fontset(Map & map, xml_node const & fset);
@@ -329,10 +327,6 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             {
                 parse_fontset(map, *itr);
             }
-            else if (itr->is("MetaWriter"))
-            {
-                parse_metawriter(map, *itr);
-            }
             else if (itr->is("FileSource"))
             {
                 std::string name = itr->get_attr<std::string>("name");
@@ -398,8 +392,6 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
         ex.append_context(include);
         throw;
     }
-
-    map.init_metawriters();
 }
 
 void map_parser::parse_style(Map & map, xml_node const& sty)
@@ -492,20 +484,6 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
     } catch (const config_error & ex) {
         ex.append_context(std::string("in style '") + name + "'", sty);
         throw;
-    }
-}
-
-void map_parser::parse_metawriter(Map & map, xml_node const& pt)
-{
-    std::string name("<missing name>");
-    metawriter_ptr writer;
-    try
-    {
-        name = pt.get_attr<std::string>("name");
-        writer = metawriter_create(pt);
-        map.insert_metawriter(name, writer);
-    } catch (const config_error & ex) {
-        ex.append_context(std::string("in meta writer '") + name + "'", pt);
     }
 }
 
@@ -729,12 +707,10 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                         datasource_cache::instance()->create(params);
                     lyr.set_datasource(ds);
                 }
-
-                catch (const std::exception & ex)
+                catch (std::exception const& ex)
                 {
                     throw config_error(ex.what());
                 }
-
                 catch (...)
                 {
                     throw config_error("Unknown exception occured attempting to create datasoure for layer '" + lyr.name() + "'");
@@ -904,11 +880,6 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     // smooth value
     optional<double> smooth = pt.get_opt_attr<double>("smooth");
     if (smooth) sym.set_smooth(*smooth);
-
-    optional<std::string> writer = pt.get_opt_attr<std::string>("meta-writer");
-    if (!writer) return;
-    optional<std::string> output = pt.get_opt_attr<std::string>("meta-output");
-    sym.add_metawriter(*writer, output);
 }
 
 void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
@@ -1290,6 +1261,17 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             }
         }
 
+        // no_text - removed property in 2.1.x that used to have a purpose
+        // before you could provide an expression with an empty string
+        optional<boolean> no_text =
+            sym.get_opt_attr<boolean>("no-text");
+        if (no_text)
+        {
+            MAPNIK_LOG_ERROR(raster_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
+            if (*no_text)
+                shield_symbol.set_name(parse_expression("' '"));
+        }
+
         file = ensure_relative_to_xml(file);
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
@@ -1479,7 +1461,16 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
 
         // mode
         optional<std::string> mode = sym.get_opt_attr<std::string>("mode");
-        if (mode) raster_sym.set_mode(*mode);
+        if (mode)
+        {
+            std::string mode_string = *mode;
+            if (boost::algorithm::find_first(mode_string,"_"))
+            {
+                MAPNIK_LOG_ERROR(raster_symbolizer) << "'mode' values using \"_\" are deprecated and will be removed in Mapnik 3.x, use \"-\"instead";
+                boost::algorithm::replace_all(mode_string,"_","-");
+            }
+            raster_sym.set_mode(mode_string);
+        }
 
         // scaling
         optional<std::string> scaling = sym.get_opt_attr<std::string>("scaling");
@@ -1530,7 +1521,6 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
                 parse_raster_colorizer(colorizer, *cssIter);
             }
         }
-        //Note: raster_symbolizer doesn't support metawriters
         parse_symbolizer_base(raster_sym, sym);
         rule.append(raster_sym);
     }
@@ -1670,7 +1660,15 @@ void map_parser::find_unused_nodes(xml_node const& root)
     find_unused_nodes_recursive(root, error_message);
     if (!error_message.str().empty())
     {
-        throw config_error("The following nodes or attributes were not processed while parsing the xml file:" + error_message.str());
+        std::string msg("The following nodes or attributes were not processed while parsing the xml file:" + error_message.str());
+        if (strict_)
+        {
+            throw config_error(msg);
+        }
+        else
+        {
+            MAPNIK_LOG_ERROR(load_map) << "map_parser: " << msg;
+        }
     }
 }
 

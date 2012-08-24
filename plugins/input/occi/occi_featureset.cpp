@@ -287,8 +287,6 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
         {
             const bool is_single_geom = false;
             const bool is_point_type = true;
-
-            // FIXME :http://trac.mapnik.org/ticket/458
             convert_ordinates(feature,
                               mapnik::Point,
                               elem_info,

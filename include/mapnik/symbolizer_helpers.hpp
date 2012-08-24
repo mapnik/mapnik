@@ -63,7 +63,6 @@ public:
           t_(t),
           font_manager_(font_manager),
           detector_(detector),
-          writer_(sym.get_metawriter()),
           dims_(0, 0, width, height),
           query_extent_(query_extent),
           text_(font_manager, scale_factor),
@@ -101,7 +100,6 @@ protected:
     CoordTransform const& t_;
     FaceManagerT & font_manager_;
     DetectorT & detector_;
-    metawriter_with_properties writer_;
     box2d<double> dims_;
     box2d<double> const& query_extent_;
     //Processing
@@ -182,7 +180,7 @@ protected:
     double marker_h_;
     double marker_x_;
     double marker_y_;
-    
+
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement;
@@ -190,7 +188,6 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geo_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::points_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::writer_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::font_manager_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::feature_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::t_;

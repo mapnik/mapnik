@@ -352,6 +352,18 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         ds = get_csv_ds('line_wkt.csv')
         eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.LineString)
 
+    def test_creation_of_csv_from_in_memory_string(**kwargs):
+        csv_string = '''
+           wkt,Name
+          "POINT (120.15 48.47)","Winthrop, WA"
+          ''' # csv plugin will test lines <= 10 chars for being fully blank
+        ds = mapnik.Datasource(**{"type":"csv","inline":csv_string})
+        eq_(ds.describe()['geometry_type'],mapnik.DataGeometryType.Point)
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['Name'],u"Winthrop, WA")
+
+
 if __name__ == "__main__":
     setup()
     [eval(run)(visual=True) for run in dir() if 'test_' in run]
