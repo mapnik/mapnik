@@ -53,12 +53,12 @@ Released Aug 23, 2012
 
 - Added support for setting opacity dynamically on images in polygon pattern and markers symbolizers
 
-- Added support for filtering on a features geometry type, either `point`, `linestring`, 'polygon`,
+- Added support for filtering on a features geometry type, either `point`, `linestring`, `polygon`,
   or `collection` using the expression keyword of `[mapnik::geometry_type]` (#546)
 
 - MarkersSymbolizer width and height moved to expressions (#1102)
 
-- PostGIS: Added 'simplify_geometries' option - will trigger ST_Simplify on geometries before returning to Mapnik (#1179)
+- PostGIS: Added `simplify_geometries` option - will trigger ST_Simplify on geometries before returning to Mapnik (#1179)
 
 - Improved error feedback for invalid values passed to map.query_point
 
@@ -70,15 +70,15 @@ Released Aug 23, 2012
  
 - GDAL: respect nodata for paletted/colormapped images (#1160)
 
-- PostGIS: Added a new option called 'autodetect_key_field' (by default false) that if true will
-  trigger autodetection of a given tables' primary key allowing for feature.id() to represent
-  globally unique ids. This option has no effect if the user has not manually supplied the 'key_field' option. (#804)
+- PostGIS: Added a new option called `autodetect_key_field` (by default false) that if true will
+  trigger autodetection of the table primary key allowing for feature.id() to represent
+  globally unique ids. This option has no effect if the user has not manually supplied the `key_field` option. (#804)
 
 - Cairo: Add full rendering support for markers to match AGG renderer functionality (#1071)
 
 - Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentionally radii) (#1134)
 
-- Added 'ignore-placement` attribute to markers-symbolizer (#1135)
+- Added `ignore-placement` attribute to markers-symbolizer (#1135)
 
 - Removed PointDatasource - use more robust MemoryDatasource instead (#1032)
 
@@ -142,7 +142,7 @@ Released April 10, 2012
 
 - Fix Markers rendering so that ellipse height/width units are pixels (previously were unintentially radii) (#1134)
 
-- Added 'ignore-placement` attribute to markers-symbolizer (#1135)
+- Added `ignore-placement` attribute to markers-symbolizer (#1135)
 
 - Removed svn_revision info from mapnik-config and python bindings as git is now used
 
@@ -192,13 +192,13 @@ Released September 26, 2011
   from a file that files directory is used. And a custom value can still be passed as an argument to
   load_map_from_string().
 
-- Added python function 'render_grid' to allow conversion of grid buffer to python object containing list of grid
+- Added python function `render_grid` to allow conversion of grid buffer to python object containing list of grid
   pixels, list of keys, and a and dictionary of feature attributes.
 
 - Added new rendering backend, grid_renderer, that collects the attributes of rendered features and
   burns their ids into a grid buffer.
 
-- Added optional 'maximum-extent' parameter to map object. If set will be used, instead of combined
+- Added optional `maximum-extent` parameter to map object. If set will be used, instead of combined
   layer extents, for return value of map.zoom_all(). Useful in cases where the combined layer extents
   cannot possibly be projected into the map srs or the user wishes to control map bounds without
   modifying the extents of each layer.
@@ -211,9 +211,9 @@ Released September 26, 2011
 
 - Added support for drawing only first matching rule using filter-mode="first" in Style (#706)
 
-- Added support to PointSymbolizer ('ignore_placement') for skipping adding placed points to collision detector (#564)
+- Added support to PointSymbolizer (`ignore_placement`) for skipping adding placed points to collision detector (#564)
 
-- Added ability to register fonts within XML using Map level 'font_directory' parameter (#168)
+- Added ability to register fonts within XML using Map level `font-directory` parameter (#168)
 
 - TextSymbolizer: Change text_convert to text_transform to better match css naming (r2211)
 
@@ -221,8 +221,8 @@ Released September 26, 2011
 
 - Upgraded to the latest proj4 string literal for EPSG:4326 (WGS84) as global default projection (#333)
 
-- Added 'mapnik_version_from_string()' function in python bindings to easily convert string representation
-  of version number to the integer format used in 'mapnik/version.hpp'. e.g. '0.7.1' --> 701.
+- Added `mapnik_version_from_string()` function in python bindings to easily convert string representation
+  of version number to the integer format used in `mapnik/version.hpp`. e.g. `0.7.1` --> `701`.
 
 - Added xinclude (http://www.w3.org/TR/xinclude/) support to libxml2-based xml parser (oldtopos) (#567)
 
@@ -230,7 +230,7 @@ Released September 26, 2011
 
 - Added support for setting global alignment of polygon pattern fills (#203)
 
-- Added support for choosing OGR layer by index number using 'layer_by_index' parameter (r1904)
+- Added support for choosing OGR layer by index number using `layer_by_index` parameter (r1904)
 
 - Added support for fractional halo widths (using FT Stroker) (#93)
 
@@ -292,7 +292,7 @@ Released Oct 18, 2011
 
 - Various fixes to sqlite, ogr, and occi driver backported from trunk.
 
-- Ensured that '\n' triggers linebreaks in text rendering (#584)
+- Ensured that `\n` triggers linebreaks in text rendering (#584)
 
 - Support for boost filesystem v3
 
@@ -311,13 +311,13 @@ Released March 23, 2010
 
 - XML: Save map buffer_size when serializing map.
 
-- SCons: Added new build options 'PRIORITIZE_LINKING' and 'LINK_PRIORITY'. The first is a boolean (default True)
+- SCons: Added new build options `PRIORITIZE_LINKING` and `LINK_PRIORITY`. The first is a boolean (default True)
   of whether to use the new sorting implementation that gives explcit preference to custom or local paths
   during compile and linking that will affect builds when duplicate libraries and include directories are on the
   system. LINK_PRIORITY defaults to prioritizing internal sources of the mapnik source folder, then local/user
   installed libraries over system libraries, but the option can be customized. Sorting not only ensures that
   compiling and linking will more likely match the desired libraries but also gives more likelyhood to avoid
-  the scenario where libraries are linked that don't match the includes libmapnik compiled against.
+  the scenario where libraries are linked that don`t match the includes libmapnik compiled against.
 
 - XML: Fixed behavior of PolygonPatternSymbolizer and LinePatternSymbolizer whereby width, height,
   and type of images is actually allowed to be optionally ommitted ([#508](https://github.com/mapnik/mapnik/issues/508)). This was added in r1543 but
@@ -357,26 +357,26 @@ Released January, 19 2010
 
     * Use the gdaladdo utility to add overviews to existing GDAL datasets
 
-- PostGIS: Added an optional 'geometry_table' parameter. The 'geometry_table' used by Mapnik to look up
-  metadata in the geometry_columns and calculate extents (when the 'geometry_field' and 'srid' parameters
-  are not supplied). If 'geometry_table' is not specified Mapnik will attempt to determine the name of the
-  table to query based on parsing the 'table' parameter, which may fail for complex queries with more than
-  one 'from' keyword. Using this parameter should allow for existing metadata and table indexes to be used
-  while opening the door to much more complicated subqueries being passed to the 'table' parameter without
+- PostGIS: Added an optional `geometry_table` parameter. The `geometry_table` used by Mapnik to look up
+  metadata in the geometry_columns and calculate extents (when the `geometry_field` and `srid` parameters
+  are not supplied). If `geometry_table` is not specified Mapnik will attempt to determine the name of the
+  table to query based on parsing the `table` parameter, which may fail for complex queries with more than
+  one `from` keyword. Using this parameter should allow for existing metadata and table indexes to be used
+  while opening the door to much more complicated subqueries being passed to the `table` parameter without
   failing (#260, #426).
 
-- PostGIS Plugin: Added optional 'geometry_field' and 'srid' parameters. If specified these will allow
+- PostGIS Plugin: Added optional `geometry_field` and `srid` parameters. If specified these will allow
   Mapnik to skip several queries to try to determine these values dynamically, and can be helpful to avoid
   possible query failures during metadata lookup with complex subqueries as discussed in #260 and #436, but
-  also solvable by specifying the 'geometry_table' parameter. (r1300,#376)
+  also solvable by specifying the `geometry_table` parameter. (r1300,#376)
 
-- PostGIS: Added an optional 'extent_from_subquery' parameter that when true (while the 'extent' parameter is
-  not provided and 'estimate_extent' is false) will direct Mapnik to calculate the extent upon the exact table
-  or sql provided in the 'table' parameter. If a sub-select is used for the table parameter then this will,
+- PostGIS: Added an optional `extent_from_subquery` parameter that when true (while the `extent` parameter is
+  not provided and `estimate_extent` is false) will direct Mapnik to calculate the extent upon the exact table
+  or sql provided in the `table` parameter. If a sub-select is used for the table parameter then this will,
   in cases where the subquery limits results, provide a faster and more accurate layer extent. It will have
-  no effect if the 'table' parameter is simply an existing table. This parameter is false by default. (#456)
+  no effect if the `table` parameter is simply an existing table. This parameter is false by default. (#456)
 
-- PostGIS Plugin: Added '!bbox!' token substitution ability in sql query string. This opens the door for various
+- PostGIS Plugin: Added `!bbox!` token substitution ability in sql query string. This opens the door for various
   complex queries that may aggregate geometries to be kept fast by allowing proper placement of the bbox
   query to be used by indexes. (#415)
 
@@ -392,7 +392,7 @@ Released January, 19 2010
           (Select * from table where geom &amp;&amp; !bbox!) as map
         </Parameter>
 
-- PostGIS Plugin: Added 'scale_denominator' substitution ability in sql query string (#415/#465)
+- PostGIS Plugin: Added `scale_denominator` substitution ability in sql query string (#415/#465)
 
     * Pass the scale_denominator token inside a subquery like: !scale_denominator!
 
@@ -400,7 +400,7 @@ Released January, 19 2010
 
 - PostGIS Plugin: Added support for quoted table names (r1454) (#393)
 
-- PostGIS: Add a 'persist_connection' option (default true), that when false will release
+- PostGIS: Add a `persist_connection` option (default true), that when false will release
   the idle psql connection after datasource goes out of scope (r1337) (#433,#434)
 
 - PostGIS: Added support for BigInt (int8) postgres type (384)
@@ -421,19 +421,19 @@ Released January, 19 2010
 
 - PNG: Added support for semi-transparency in png256 output (#477,#202)
 
-- PolygonSymbolizer: Added 'gamma' attribute to allow for dilation of polygon edges - a solution
+- PolygonSymbolizer: Added `gamma` attribute to allow for dilation of polygon edges - a solution
   to gap artifacts or "ghost lines" between adjacent polygons and allows for slight sharpening of
   the edges of non overlapping polygons. Accepts any values but 0-1 is the recommended range.
 
-- TextSymbolizer: Large set of new attributes: 'text_transform', 'line_spacing', 'character_spacing',
-  'wrap_character', 'wrap_before', 'horizontal_alignment', 'justify_alignment', and 'opacity'.
+- TextSymbolizer: Large set of new attributes: `text_transform`, `line_spacing`, `character_spacing`,
+  `wrap_character`, `wrap_before`, `horizontal_alignment`, `justify_alignment`, and `opacity`.
 
     * More details at changesets: r1254 and r1341
 
-- SheildSymbolizer: Added special new attributes: 'unlock_image', 'VERTEX' placement, 'no_text' and many
-  attributes previously only supported in the TextSymbolizer: 'allow_overlap', 'vertical_alignment',
-  'horizontal_alignment', 'justify_alignment', 'wrap_width', 'wrap_character', 'wrap_before', 'text_transform',
-  'line_spacing', 'character_spacing', and 'opacity'.
+- SheildSymbolizer: Added special new attributes: `unlock_image`, `VERTEX` placement, `no_text` and many
+  attributes previously only supported in the TextSymbolizer: `allow_overlap`, `vertical_alignment`,
+  `horizontal_alignment`, `justify_alignment`, `wrap_width`, `wrap_character`, `wrap_before`, `text_transform`,
+  `line_spacing`, `character_spacing`, and `opacity`.
 
     * More details at changeset r1341
 
@@ -441,42 +441,42 @@ Released January, 19 2010
 
 - XML: Fixed memory leak in libxml2 implementation (#473)
 
-- XML: Added function to serialize map to string, called 'mapnik.save_map_to_string()' (#396)
+- XML: Added function to serialize map to string, called `mapnik.save_map_to_string()` (#396)
 
-- XML: Added parameter to <Map> called 'minimum_version' to allow for enforcing the minimum Mapnik version
+- XML: Added parameter to <Map> called `minimum_version` to allow for enforcing the minimum Mapnik version
   needed for XML features used in the mapfiles. Uses Major.Minor.Point syntax, for example
   <Map minimum_version="0.6.1"> would throw an error if the user is running Mapnik less than 0.6.1.
 
-- XML: Added support for relative paths when using entities and 'mapnik.load_map_from_string()' (#440)
+- XML: Added support for relative paths when using entities and `mapnik.load_map_from_string()` (#440)
 
 - XML: Made width and height optional for symbolizers using images (r1543)
 
 - XML: Ensured that default values for layers are not serialized in save_map() (r1366)
 
-- XML: Added missing serialization of PointSymbolizer 'opacity' and 'allow_overlap' attributes (r1358)
+- XML: Added missing serialization of PointSymbolizer `opacity` and `allow_overlap` attributes (r1358)
 
 - XML: Default text vertical_alignment now dependent on dy (#485, r1527)
 
-- Python: Exposed ability to write to Cairo formats using 'mapnik.render_to_file()' and without pycairo (#381)
+- Python: Exposed ability to write to Cairo formats using `mapnik.render_to_file()` and without pycairo (#381)
 
 - Python: Fixed potential crash if pycairo support is enabled but python-cairo module is missing (#392)
 
-- Python: Added 'mapnik.has_pycairo()' function to test for pycairo support (r1278) (#284)
+- Python: Added `mapnik.has_pycairo()` function to test for pycairo support (r1278) (#284)
 
-- Python: Added 'mapnik.register_plugins()' and 'mapnik.register_fonts()' functions (r1256)
+- Python: Added `mapnik.register_plugins()` and `mapnik.register_fonts()` functions (r1256)
 
 - Python: Pickling support for point_symbolizer (r1295) (#345)
 
 - Python: Ensured mapnik::config_errors now throw RuntimeError exception instead of UserWarning exception (#442)
 
-- Filters: Added support for '!=' as an alias to '<>' for not-equals filters (avoids &lt;&gt;) (r1326) (#427)
+- Filters: Added support for `!=` as an alias to `<>` for not-equals filters (avoids &lt;&gt;) (r1326) (#427)
 
 - SCons: Improved boost auto-detection (r1255,r1279)
 
 - SCons: Fixed support for JOBS=N and FAST=True to enable faster compiling (r1440)
 
 - SCons: Ensured that -h or --help will properly print help on custom Mapnik options before a user
-  has been able to properly run 'configure'. (r1514)
+  has been able to properly run `configure`. (r1514)
 
 - SCons: Added ability to link to custom icu library name using ICU_LIB_NAME (r1414)
 
@@ -491,7 +491,7 @@ Released July 14, 2009
 
 (Packaged from r1247/353ff576c7)
 
-- Plugins: expose list of registered plugins as a 'plugin_names()' method of DatasourceCache (r1180)
+- Plugins: expose list of registered plugins as a `plugin_names()` method of DatasourceCache (r1180)
 
 - XML: Fixed serialization and parsing bugs related to handling of integers and Enums (#328,#353)
 
@@ -531,13 +531,13 @@ Released July 14, 2009
 
 - Python: Pickling support for raster_symbolizer (r1154) (#345)
 
-- Python: Added 'mapnik.has_cairo()' function to test for cairo support (r1152) (#284)
+- Python: Added `mapnik.has_cairo()` function to test for cairo support (r1152) (#284)
 
 - Python: Exposed dash_array get method (r1151) (#317)
 
 - Python: Pickling support for Coord objects (#345)
 
-- GDAL Plugin: Added an experimental option to open files in 'shared mode' (r1143)
+- GDAL Plugin: Added an experimental option to open files in `shared mode` (r1143)
 
 - Python: Exposed RasterSymbolizer options in Python (r1139)
 
@@ -549,13 +549,13 @@ Released July 14, 2009
 
 - XML: Ensured relative paths in XML are interpreted relative to XML file location (r1124) (#326)
 
-- XML: Added ability to serialize all default symbolizer values by passing third argument to save_map(m,'file.xml',True)(r1117) (#327)
+- XML: Added ability to serialize all default symbolizer values by passing third argument to save_map(m,`file.xml`,True)(r1117) (#327)
 
 - Core: Added support for alpha transparency when writing to png256 (patch from Marcin Rudowski) (#202)
 
 - SCons: Ensured ABI compatibility information is embedded in libmapnik.dylib on Mac OS X (#322)
 
-- SCons: Ensured that the full 'install_name' path would be added to libmapnik.dylib on Mac OS X (#374)
+- SCons: Ensured that the full `install_name` path would be added to libmapnik.dylib on Mac OS X (#374)
 
 - Tests: Added testing framework in Python using nose (r1101-r1105)
 
@@ -580,7 +580,7 @@ Released April 1, 2009
 
 - OGCServer Fixed axis-ordering for WMS 1.3.0 request (r1051) (#241)
 
-- Plugins: Added option to all plugins to support using a 'base' path argument (r1042)
+- Plugins: Added option to all plugins to support using a `base` path argument (r1042)
 
 - Symbolizers: RasterSymbolizer now support composing modes for hillshading (r1027)
 
@@ -601,7 +601,7 @@ Released April 1, 2009
 - Plugins: PostGIS plugin now accepts multi-line queries (r862)
 
 - Filter parsing: Allow numbers in the filter field name.
-  This allows for shapefiles with columns like '1970'.
+  This allows for shapefiles with columns like `1970`.
 
 - Plugins: Added OGR driver for reading all OGR supported formats (kunitoki) (r836) (#170)
 
@@ -623,7 +623,7 @@ Released April 1, 2009
 
 - Core: Transformation is now skipped if srs values match exactly (r777)
 
-- Symbolizers: 'min_distance' now honored for POINT placement using Text Symbolizer (r771)
+- Symbolizers: `min_distance` now honored for POINT placement using Text Symbolizer (r771)
 
 - Plugins: PostGIS plugin now accepts a geometry_field,record_limit, cursor_size options (r769,r872)
 
