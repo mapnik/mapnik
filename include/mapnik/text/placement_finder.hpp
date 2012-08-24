@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef MAPNIK_PLACEMENT_FINDER_NG_HPP
-#define MAPNIK_PLACEMENT_FINDER_NG_HPP
+#ifndef MAPNIK_PLACEMENT_FINDER_HPP
+#define MAPNIK_PLACEMENT_FINDER_HPP
 
 //mapnik
 #include <mapnik/box2d.hpp>
@@ -46,10 +46,10 @@ class feature_impl;
 typedef feature_impl Feature;
 class vertex_cache;
 
-class placement_finder_ng : boost::noncopyable
+class placement_finder : boost::noncopyable
 {
 public:
-    placement_finder_ng(Feature const& feature,
+    placement_finder(Feature const& feature,
                         DetectorType & detector,
                         box2d<double> const& extent,
                         text_placement_info_ptr placement_info,
@@ -108,8 +108,6 @@ private:
     pixel_position marker_displacement_;
 };
 
-typedef boost::shared_ptr<placement_finder_ng> placement_finder_ng_ptr;
-
 }//ns mapnik
 
-#endif // PLACEMENT_FINDER_NG_HPP
+#endif // PLACEMENT_FINDER_HPP

@@ -2,7 +2,7 @@
 #define MAPNIK_TEXT_RENDERER_HPP
 
 //mapnik
-#include <mapnik/text/placement_finder_ng.hpp>
+#include <mapnik/text/placement_finder.hpp>
 #include <mapnik/image_compositing.hpp>
 
 //boost

@@ -28,7 +28,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/text/placement_finder_ng.hpp>
+#include <mapnik/text/placement_finder.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/ctrans.hpp>
 
@@ -99,7 +99,7 @@ protected:
     bool points_on_line_;
 
     text_placement_info_ptr placement_;
-    placement_finder_ng finder_;
+    placement_finder finder_;
 
     //ShieldSymbolizer only
     void init_marker();

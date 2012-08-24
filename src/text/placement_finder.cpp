@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 //mapnik
-#include <mapnik/text/placement_finder_ng.hpp>
+#include <mapnik/text/placement_finder.hpp>
 #include <mapnik/text/layout.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
@@ -91,16 +91,16 @@ private:
     unsigned values_tried_;
 };
 
-placement_finder_ng::placement_finder_ng(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager, double scale_factor)
+placement_finder::placement_finder(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager, double scale_factor)
     : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true), scale_factor_(scale_factor), placements_(), has_marker_(false), marker_(), marker_box_()
 {
 }
 
-bool placement_finder_ng::next_position()
+bool placement_finder::next_position()
 {
     if (!valid_)
     {
-        MAPNIK_LOG_WARN(placement_finder_ng) << "next_position() called while last call already returned false!\n";
+        MAPNIK_LOG_WARN(placement_finder) << "next_position() called while last call already returned false!\n";
         return false;
     }
     if (!info_->next())
@@ -127,12 +127,12 @@ bool placement_finder_ng::next_position()
     return true;
 }
 
-const placements_list &placement_finder_ng::placements() const
+const placements_list &placement_finder::placements() const
 {
     return placements_;
 }
 
-void placement_finder_ng::init_alignment()
+void placement_finder::init_alignment()
 {
     text_symbolizer_properties const& p = info_->properties;
     valign_ = p.valign;
@@ -181,7 +181,7 @@ void placement_finder_ng::init_alignment()
 }
 
 
-pixel_position placement_finder_ng::alignment_offset() const
+pixel_position placement_finder::alignment_offset() const
 {
     pixel_position result(0,0);
     // if needed, adjust for desired vertical alignment
@@ -204,7 +204,7 @@ pixel_position placement_finder_ng::alignment_offset() const
     return result;
 }
 
-double placement_finder_ng::jalign_offset(double line_width) const
+double placement_finder::jalign_offset(double line_width) const
 {
     if (jalign_ == J_MIDDLE) return -(line_width / 2.0);
     if (jalign_ == J_LEFT)   return -(layout_.width() / 2.0);
@@ -226,7 +226,7 @@ pixel_position pixel_position::rotate(rotation const& rot) const
 }
 
 
-bool placement_finder_ng::find_point_placement(pixel_position pos)
+bool placement_finder::find_point_placement(pixel_position pos)
 {
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
 
@@ -276,7 +276,7 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
 }
 
 template <typename T>
-bool placement_finder_ng::find_line_placements(T & path, bool points)
+bool placement_finder::find_line_placements(T & path, bool points)
 {
     if (!layout_.size()) return true;
     vertex_cache pp(path);
@@ -323,7 +323,7 @@ bool placement_finder_ng::find_line_placements(T & path, bool points)
 }
 
 
-bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e orientation)
+bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e orientation)
 {
     vertex_cache::scoped_state s(pp);
 
@@ -412,7 +412,7 @@ bool placement_finder_ng::single_line_placement(vertex_cache &pp, text_upright_e
     return true;
 }
 
-void placement_finder_ng::path_move_dx(vertex_cache &pp)
+void placement_finder::path_move_dx(vertex_cache &pp)
 {
     double dx = info_->properties.displacement.x;
     if (dx != 0.0)
@@ -422,7 +422,7 @@ void placement_finder_ng::path_move_dx(vertex_cache &pp)
     }
 }
 
-double placement_finder_ng::normalize_angle(double angle)
+double placement_finder::normalize_angle(double angle)
 {
     while (angle >= M_PI)
         angle -= 2*M_PI;
@@ -431,7 +431,7 @@ double placement_finder_ng::normalize_angle(double angle)
     return angle;
 }
 
-double placement_finder_ng::get_spacing(double path_length, double layout_width) const
+double placement_finder::get_spacing(double path_length, double layout_width) const
 {
     int num_labels = 1;
     if (info_->properties.label_spacing > 0)
@@ -446,7 +446,7 @@ double placement_finder_ng::get_spacing(double path_length, double layout_width)
     return path_length / num_labels;
 }
 
-bool placement_finder_ng::collision(const box2d<double> &box) const
+bool placement_finder::collision(const box2d<double> &box) const
 {
     if (!detector_.extent().intersects(box)
             ||
@@ -464,7 +464,7 @@ bool placement_finder_ng::collision(const box2d<double> &box) const
     return false;
 }
 
-void placement_finder_ng::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, const pixel_position &marker_displacement)
+void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, const pixel_position &marker_displacement)
 {
     marker_ = m;
     marker_box_ = box;
@@ -474,7 +474,7 @@ void placement_finder_ng::set_marker(marker_info_ptr m, box2d<double> box, bool 
 }
 
 
-bool placement_finder_ng::add_marker(glyph_positions_ptr glyphs, const pixel_position &pos) const
+bool placement_finder::add_marker(glyph_positions_ptr glyphs, const pixel_position &pos) const
 {
     pixel_position real_pos = (marker_unlocked_ ? pos : glyphs->get_base_point()) + marker_displacement_;
     box2d<double> bbox = marker_box_;
@@ -485,7 +485,7 @@ bool placement_finder_ng::add_marker(glyph_positions_ptr glyphs, const pixel_pos
     return true;
 }
 
-box2d<double> placement_finder_ng::get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
+box2d<double> placement_finder::get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot)
 {
     /*
 
@@ -579,8 +579,8 @@ const pixel_position &glyph_positions::marker_pos() const
 typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
 typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
 typedef coord_transform<CoordTransform,geometry_type> PathType;
-template bool placement_finder_ng::find_line_placements<ClippedPathType>(ClippedPathType &, bool);
-template bool placement_finder_ng::find_line_placements<PathType>(PathType &, bool);
+template bool placement_finder::find_line_placements<ClippedPathType>(ClippedPathType &, bool);
+template bool placement_finder::find_line_placements<PathType>(PathType &, bool);
 
 
 }// ns mapnik
