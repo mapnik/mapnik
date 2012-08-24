@@ -151,12 +151,12 @@ symbolizer_with_image::symbolizer_with_image( symbolizer_with_image const& rhs)
 {
 }
 
-path_expression_ptr symbolizer_with_image::get_filename() const
+path_expression_ptr const& symbolizer_with_image::get_filename() const
 {
     return image_filename_;
 }
 
-void symbolizer_with_image::set_filename(path_expression_ptr image_filename)
+void symbolizer_with_image::set_filename(path_expression_ptr const& image_filename)
 {
     image_filename_ = image_filename;
 }

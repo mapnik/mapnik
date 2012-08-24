@@ -309,7 +309,9 @@ opts.AddVariables(
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('LTDL_INCLUDES', 'Search path for libltdl (part of libtool) include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('LTDL_LIBS','Search path for libltdl (ltdl.h) library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('JPEG', 'Build Mapnik with JPEG read and write support', 'True'),
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
@@ -323,7 +325,7 @@ opts.AddVariables(
 
     BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
 
-    BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
+    #BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
 
     # Variables for optional dependencies
     ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),
@@ -424,7 +426,7 @@ pickle_store = [# Scons internal variables
         'CAIROMM_LIBPATHS',
         'CAIROMM_LINKFLAGS',
         'CAIROMM_CPPPATHS',
-        'SVG_RENDERER',
+        #'SVG_RENDERER',
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER'
         ]
@@ -1055,7 +1057,7 @@ if not preconfigured:
 
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU', 'SQLITE'):
+    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU', 'SQLITE', 'LTDL'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1442,7 +1444,7 @@ if not preconfigured:
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
         abi = conf.GetMapnikLibVersion()
-        abi_fallback = "2.0.1-pre"
+        abi_fallback = "2.2.0-pre"
         if not abi:
             color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
             abi = abi_fallback
@@ -1738,7 +1740,8 @@ if not HELP_REQUESTED:
     # not ready for release
     SConscript('tests/cpp_tests/build.py')
 
-    # not ready for release
+    # not currently maintained
+    # https://github.com/mapnik/mapnik/issues/1438
     #if env['SVG_RENDERER']:
     #    SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 

@@ -21,7 +21,11 @@ plugin_sources = Split(
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
 libraries = ['mapnik',env['BOOST_PYTHON_LIB'],boost_system,env['ICU_LIB_NAME']]
 
-python_link_flag = ''
+# NOTE: explicit linking to libpython is uneeded on most linux version if the
+# python plugin is used by a app in python using mapnik's python bindings
+# we explicitly link to libpython here so that this plugin
+# can be used from a pure C++ calling application or a different binding language
+python_link_flag = '-lpython%s' % env['PYTHON_VERSION']
 
 if env['PLATFORM'] == 'Darwin':
     if env['PYTHON_DYNAMIC_LOOKUP']:
@@ -37,8 +41,6 @@ if env['PLATFORM'] == 'Darwin':
                 python_link_flag = '-F/System/Library/Frameworks/ -framework Python -Z'
             else:
                 python_link_flag = '-F/ -framework Python'
-    else:
-        python_link_flag = '-lpython%s' % env['PYTHON_VERSION']
 
 if env['CUSTOM_LDFLAGS']:
     linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], python_link_flag)

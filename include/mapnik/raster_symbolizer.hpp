@@ -32,6 +32,9 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_scaling.hpp>
 
+// boost
+#include <boost/algorithm/string.hpp>
+
 namespace mapnik
 {
 struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
@@ -66,15 +69,22 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
         mode_ = mode;
         if (mode == "normal")
         {
+            MAPNIK_LOG_ERROR(raster_symbolizer) << "converting 'mode=normal' to 'comp-op:src_over'";
             this->set_comp_op(src_over);
         }
         else
         {
-            boost::optional<composite_mode_e> comp_op = comp_op_from_string(mode);
+            std::string mode2 = boost::algorithm::replace_last_copy(mode,"2","");
+            boost::optional<composite_mode_e> comp_op = comp_op_from_string(mode2);
             if (comp_op)
+            {
+                MAPNIK_LOG_ERROR(raster_symbolizer) << "converting 'mode:" << mode << "' to 'comp-op:" + *comp_op_to_string(*comp_op) + "'";
                 this->set_comp_op(*comp_op);
+            }
             else
-                MAPNIK_LOG_ERROR(raster_symbolizer) << "could not convert mode into comp-op";
+            {
+                MAPNIK_LOG_ERROR(raster_symbolizer) << "could not convert mode '" << mode << "' into comp-op, defaulting to 'comp-op:src-over'";
+            }
         }
     }
     scaling_method_e get_scaling_method() const

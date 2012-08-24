@@ -370,10 +370,28 @@ void export_map()
         .add_property("background",make_function
                       (&Map::background,return_value_policy<copy_const_reference>()),
                       &Map::set_background,
-                      "The background color of the map.\n"
+                      "The background color of the map (same as background_color property).\n"
                       "\n"
                       "Usage:\n"
                       ">>> m.background = Color('steelblue')\n"
+            )
+
+        .add_property("background_color",make_function
+                      (&Map::background,return_value_policy<copy_const_reference>()),
+                      &Map::set_background,
+                      "The background color of the map.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.background_color = Color('steelblue')\n"
+            )
+
+        .add_property("background_image",make_function
+                      (&Map::background_image,return_value_policy<copy_const_reference>()),
+                      &Map::set_background_image,
+                      "The optional background image of the map.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.background_image = '/path/to/image.png'\n"
             )
 
         .add_property("base",

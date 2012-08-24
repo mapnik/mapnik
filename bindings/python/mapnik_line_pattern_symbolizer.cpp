@@ -62,5 +62,17 @@ void export_line_pattern_symbolizer()
         .add_property("filename",
                       &get_filename,
                       &set_filename)
+        .add_property("comp_op",
+                      &line_pattern_symbolizer::comp_op,
+                      &line_pattern_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &line_pattern_symbolizer::clip,
+                      &line_pattern_symbolizer::set_clip,
+                      "Set/get the line pattern geometry's clipping status")
+        .add_property("smooth",
+                      &line_pattern_symbolizer::smooth,
+                      &line_pattern_symbolizer::set_smooth,
+                      "smooth value (0..1.0)")
         ;
 }

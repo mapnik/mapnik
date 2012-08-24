@@ -24,6 +24,9 @@
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
+#include <mapnik/geom_util.hpp>
+
+// agg
 #include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
@@ -233,25 +236,31 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
         }
         else
         {
+            // https://github.com/mapnik/mapnik/issues/1423
+            bool success = false;
+            // https://github.com/mapnik/mapnik/issues/1350
             if (geom.type() == LineString)
             {
-                label::middle_point(geom, label_x,label_y);
+                success = label::middle_point(geom, label_x,label_y);
             }
             else if (how_placed == POINT_PLACEMENT)
             {
-                label::centroid(geom, label_x, label_y);
+                success = label::centroid(geom, label_x, label_y);
             }
             else if (how_placed == INTERIOR_PLACEMENT)
             {
-                label::interior_position(geom, label_x, label_y);
+                success = label::interior_position(geom, label_x, label_y);
             }
             else
             {
                 MAPNIK_LOG_ERROR(symbolizer_helpers) << "ERROR: Unknown placement type in initialize_points()";
             }
-            prj_trans_.backward(label_x, label_y, z);
-            t_.forward(&label_x, &label_y);
-            points_.push_back(std::make_pair(label_x, label_y));
+            if (success)
+            {
+                prj_trans_.backward(label_x, label_y, z);
+                t_.forward(&label_x, &label_y);
+                points_.push_back(std::make_pair(label_x, label_y));
+            }
         }
     }
     point_itr_ = points_.begin();

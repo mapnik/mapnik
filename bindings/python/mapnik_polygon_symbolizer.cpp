@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 #include <boost/python.hpp>
-#include "mapnik_enumeration.hpp"
 #include <mapnik/polygon_symbolizer.hpp>
 
 using namespace mapnik;
@@ -49,10 +48,18 @@ void export_polygon_symbolizer()
                       &polygon_symbolizer::get_gamma_method,
                       &polygon_symbolizer::set_gamma_method,
                       "gamma correction method")
+        .add_property("comp_op",
+                      &polygon_symbolizer::comp_op,
+                      &polygon_symbolizer::set_comp_op,
+                      "Set/get the polygon comp-op")
+        .add_property("clip",
+                      &polygon_symbolizer::clip,
+                      &polygon_symbolizer::set_clip,
+                      "Set/get the polygon geometry's clipping status")
         .add_property("smooth",
                       &polygon_symbolizer::smooth,
                       &polygon_symbolizer::set_smooth,
-                      "smooth value (0..1.0)")
+                      "Set/get the polygon geometry's smooth value")
         .add_property("simplify_tolerance",
                       &polygon_symbolizer::simplify_tolerance,
                       &polygon_symbolizer::set_simplify_tolerance,

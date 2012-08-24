@@ -354,6 +354,14 @@ void export_text_placement()
                       make_function(&get_properties, return_value_policy<reference_existing_object>()),
                       &set_properties,
                       "Shortcut for placements.defaults")
+        .add_property("comp_op",
+                      &text_symbolizer::comp_op,
+                      &text_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &text_symbolizer::clip,
+                      &text_symbolizer::set_clip,
+                      "Set/get the text geometry's clipping status")
         ;
 
 
@@ -390,8 +398,10 @@ void export_text_placement()
        set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
     ;
 
-    class_<char_properties>
+
+    class_with_converter<char_properties>
         ("CharProperties")
+        .def_readwrite_convert("text_transform", &char_properties::text_transform)
         .def(init<char_properties const&>()) //Copy constructor
         .def_readwrite("face_name", &char_properties::face_name)
         .def_readwrite("fontset", &char_properties::fontset)
@@ -400,8 +410,8 @@ void export_text_placement()
         .def_readwrite("line_spacing", &char_properties::line_spacing)
         .def_readwrite("text_opacity", &char_properties::text_opacity)
         .def_readwrite("wrap_char", &char_properties::wrap_char)
+        .def_readwrite("wrap_character", &char_properties::wrap_char)
         .def_readwrite("wrap_before", &char_properties::wrap_before)
-        .def_readwrite("text_transform", &char_properties::text_transform)
         .def_readwrite("fill", &char_properties::fill)
         .def_readwrite("halo_fill", &char_properties::halo_fill)
         .def_readwrite("halo_radius", &char_properties::halo_radius)
@@ -488,6 +498,7 @@ void export_text_placement()
         .def_readwrite_convert("line_spacing", &formatting::format_node::line_spacing)
         .def_readwrite_convert("text_opacity", &formatting::format_node::text_opacity)
         .def_readwrite_convert("wrap_char", &formatting::format_node::wrap_char)
+        .def_readwrite_convert("wrap_character", &formatting::format_node::wrap_char)
         .def_readwrite_convert("wrap_before", &formatting::format_node::wrap_before)
         .def_readwrite_convert("text_transform", &formatting::format_node::text_transform)
         .def_readwrite_convert("fill", &formatting::format_node::fill)
@@ -527,6 +538,7 @@ void export_text_placement()
         .def_readwrite("line_spacing", &formatting::expression_format::line_spacing)
         .def_readwrite("text_opacity", &formatting::expression_format::text_opacity)
         .def_readwrite("wrap_char", &formatting::expression_format::wrap_char)
+        .def_readwrite("wrap_character", &formatting::expression_format::wrap_char)
         .def_readwrite("wrap_before", &formatting::expression_format::wrap_before)
         .def_readwrite("fill", &formatting::expression_format::fill)
         .def_readwrite("halo_fill", &formatting::expression_format::halo_fill)

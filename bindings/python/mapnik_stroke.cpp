@@ -32,10 +32,9 @@ using namespace mapnik;
 namespace {
 using namespace boost::python;
 
-list get_dashes_list(const stroke& stroke)
+list get_dashes_list(stroke const& stroke)
 {
     list l;
-
     if (stroke.has_dash()) {
         mapnik::dash_array const& dash = stroke.get_dash_array();
         mapnik::dash_array::const_iterator iter = dash.begin();
@@ -44,9 +43,23 @@ list get_dashes_list(const stroke& stroke)
             l.append(make_tuple(iter->first, iter->second));
         }
     }
-
     return l;
 }
+
+void set_dasharray(stroke & stroke, list const& l)
+{
+    for (int i=0; i<len(l); ++i)
+    {
+        boost::python::tuple dash = extract<boost::python::tuple>(l[i]);
+        if (len(dash) == 2)
+        {
+            double d1 = extract<double>(dash[0]);
+            double d2 = extract<double>(dash[1]);
+            stroke.add_dash(d1,d2);
+        }
+    }
+}
+
 }
 
 void export_stroke ()
@@ -101,18 +114,37 @@ void export_stroke ()
         .add_property("line_cap",
                       &stroke::get_line_cap,
                       &stroke::set_line_cap,
-                      "Gets or sets the line cap of this stroke.\n")
+                      "Gets or sets the line cap of this stroke. (alias of linecap)\n")
+        .add_property("linecap",
+                      &stroke::get_line_cap,
+                      &stroke::set_line_cap,
+                      "Gets or sets the linecap of this stroke.\n")
         .add_property("line_join",
                       &stroke::get_line_join,
                       &stroke::set_line_join,
-                      "Returns the line join mode of this stroke.\n")
-        // todo consider providing a single get/set property
+                      "Returns the line join mode of this stroke. (alias of linejoin)\n")
+        .add_property("linejoin",
+                      &stroke::get_line_join,
+                      &stroke::set_line_join,
+                      "Returns the linejoin mode of this stroke.\n")
+        .add_property("miterlimit",
+                      &stroke::get_miterlimit,
+                      &stroke::set_miterlimit,
+                      "Returns the miterlimit mode of this stroke.\n")
         .def("add_dash",&stroke::add_dash,
              (arg("length"),arg("gap")),
              "Adds a dash segment to the dash patterns of this stroke.\n")
         .def("get_dashes", get_dashes_list,
              "Returns the list of dash segments for this stroke.\n")
+        .add_property("dasharray",
+                      get_dashes_list,
+                      set_dasharray,
+                      "Gets or sets dasharray string of this stroke. (alternate property to add_dash/get_dashes)\n")
         .add_property("dash_offset",
+                      &stroke::dash_offset,
+                      &stroke::set_dash_offset,
+                      "Gets or sets dash offset of this stroke. (alias of dashoffet)\n")
+        .add_property("dashoffset",
                       &stroke::dash_offset,
                       &stroke::set_dash_offset,
                       "Gets or sets dash offset of this stroke.\n")

@@ -38,6 +38,7 @@
 #if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
+#include <mapnik/util/geometry_to_svg.hpp>
 #endif
 
 namespace {
@@ -224,6 +225,41 @@ std::string to_geojson( path_type const& geom)
     return json;
 }
 
+std::string to_svg( geometry_type const& geom)
+{
+#if BOOST_VERSION >= 104700
+    std::string svg; // Use Python String directly ?
+    bool result = mapnik::util::to_svg(svg,geom);
+    if (!result)
+    {
+        throw std::runtime_error("Generate WKT failed");
+    }
+    return svg;
+#else
+    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost "
+                             + boost_version());
+#endif
+}
+
+/*
+// https://github.com/mapnik/mapnik/issues/1437
+std::string to_svg2( path_type const& geom)
+{
+#if BOOST_VERSION >= 104700
+    std::string svg; // Use Python String directly ?
+    bool result = mapnik::util::to_svg(svg,geom);
+    if (!result)
+    {
+        throw std::runtime_error("Generate WKT failed");
+    }
+    return svg;
+#else
+    throw std::runtime_error("mapnik::to_svg() requires at least boost 1.47 while your build was compiled against boost "
+                             + boost_version());
+#endif
+}*/
+
+
 void export_geometry()
 {
     using namespace boost::python;
@@ -248,6 +284,7 @@ void export_geometry()
         .def("type",&geometry_type::type)
         .def("to_wkb",&to_wkb)
         .def("to_wkt",&to_wkt)
+        .def("to_svg",&to_svg)
         // TODO add other geometry_type methods
         ;
 
@@ -259,6 +296,7 @@ void export_geometry()
         .def("add_wkb",add_wkb_impl)
         .def("add_geojson",add_geojson_impl)
         .def("to_wkt",&to_wkt2)
+        //.def("to_svg",&to_svg2)
         .def("to_wkb",&to_wkb2)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)

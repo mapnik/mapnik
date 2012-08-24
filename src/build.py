@@ -104,6 +104,7 @@ source = Split(
     css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
+    image_filter_grammar.cpp
     image_scaling.cpp
     box2d.cpp
     building_symbolizer.cpp
@@ -280,26 +281,27 @@ source += Split(
     grid/process_text_symbolizer.cpp
     """)
 
-if env['SVG_RENDERER']: # svg backend
-    source += Split(
-              """
-        svg/svg_renderer.cpp
-        svg/svg_generator.cpp
-        svg/svg_output_attributes.cpp
-        svg/process_symbolizers.cpp
-        svg/process_building_symbolizer.cpp
-        svg/process_line_pattern_symbolizer.cpp
-        svg/process_line_symbolizer.cpp
-        svg/process_markers_symbolizer.cpp
-        svg/process_point_symbolizer.cpp
-        svg/process_polygon_pattern_symbolizer.cpp
-        svg/process_polygon_symbolizer.cpp
-        svg/process_raster_symbolizer.cpp
-        svg/process_shield_symbolizer.cpp
-        svg/process_text_symbolizer.cpp
-        """)
-    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
-    libmapnik_cxxflags.append('-DSVG_RENDERER')
+# https://github.com/mapnik/mapnik/issues/1438
+#if env['SVG_RENDERER']: # svg backend
+#    source += Split(
+#              """
+#        svg/svg_renderer.cpp
+#        svg/svg_generator.cpp
+#        svg/svg_output_attributes.cpp
+#        svg/process_symbolizers.cpp
+#        svg/process_building_symbolizer.cpp
+#        svg/process_line_pattern_symbolizer.cpp
+#        svg/process_line_symbolizer.cpp
+#        svg/process_markers_symbolizer.cpp
+#        svg/process_point_symbolizer.cpp
+#        svg/process_polygon_pattern_symbolizer.cpp
+#        svg/process_polygon_symbolizer.cpp
+#       svg/process_raster_symbolizer.cpp
+#        svg/process_shield_symbolizer.cpp
+#        svg/process_text_symbolizer.cpp
+#        """)
+#    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
+#    libmapnik_cxxflags.append('-DSVG_RENDERER')
 
 if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     source += Split(

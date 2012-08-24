@@ -31,6 +31,10 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 
+// fusion
+#include <boost/fusion/include/at.hpp>
+#include <boost/fusion/include/vector.hpp>
+
 // stl
 #include <vector>
 
@@ -83,9 +87,18 @@ struct scale_node
 
 struct rotate_node
 {
+    typedef boost::fusion::vector2<expr_node, expr_node> coords_type;
+
     expr_node angle_;
     expr_node cx_;
     expr_node cy_;
+
+    explicit rotate_node(expr_node const& angle)
+        : angle_(angle) {}
+
+    rotate_node(expr_node const& angle,
+                expr_node const& cx, expr_node const& cy)
+        : angle_(angle), cx_(cx), cy_(cy) {}
 
     rotate_node(expr_node const& angle,
                 boost::optional<expr_node> const& cx,
@@ -93,6 +106,17 @@ struct rotate_node
         : angle_(angle)
         , cx_(cx ? *cx : value_null())
         , cy_(cy ? *cy : value_null()) {}
+
+    rotate_node(expr_node const& angle,
+                boost::optional<coords_type> const& center)
+      : angle_(angle)
+    {
+        if (center)
+        {
+            cx_ = boost::fusion::at_c<0>(*center);
+            cy_ = boost::fusion::at_c<1>(*center);
+        }
+    }
 };
 
 struct skewX_node

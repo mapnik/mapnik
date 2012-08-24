@@ -1,0 +1,20 @@
+<Map>
+    <Style name="test">
+        <Rule>
+            <Filter>[filename]='dummy.png'</Filter>
+            <PointSymbolizer file="../../[path1]/[path2]/[filename]"/>
+        </Rule>
+    </Style>
+
+    <Layer name="layer">
+        <StyleName>test</StyleName>
+        <Datasource>
+            <Parameter name="inline">
+            x,y,path1,path2,filename
+            0,0,data,images,dummy.png
+            1,1,data,images,dummy.png
+            </Parameter>
+            <Parameter name="type">csv</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

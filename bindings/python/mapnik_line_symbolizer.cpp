@@ -48,17 +48,25 @@ void export_line_symbolizer()
                       (&line_symbolizer::get_stroke,
                        return_value_policy<reference_existing_object>()),
                       &line_symbolizer::set_stroke)
-        .add_property("smooth",
-                      &line_symbolizer::smooth,
-                      &line_symbolizer::set_smooth,
-                      "smooth value (0..1.0)")
         .add_property("simplify_tolerance",
                       &line_symbolizer::simplify_tolerance,
                       &line_symbolizer::set_simplify_tolerance,
-                      "simplfication tolerance measure")
+                      "simplification tolerance measure")
         .add_property("offset",
                       &line_symbolizer::offset,
                       &line_symbolizer::set_offset,
                       "offset value")
+        .add_property("comp_op",
+                      &line_symbolizer::comp_op,
+                      &line_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &line_symbolizer::clip,
+                      &line_symbolizer::set_clip,
+                      "Set/get the line geometry's clipping status")
+        .add_property("smooth",
+                      &line_symbolizer::smooth,
+                      &line_symbolizer::set_smooth,
+                      "smooth value (0..1.0)")
         ;
 }

@@ -30,7 +30,7 @@
 
 namespace mapnik { namespace util {
 
-boost::tuple<unsigned,bool> multi_geometry_type::operator() (geometry_container const& geom) const
+boost::tuple<unsigned,bool> detail::multi_geometry_type::operator() (geometry_container const& geom) const
 {
     unsigned type = 0u;
     bool collection = false;

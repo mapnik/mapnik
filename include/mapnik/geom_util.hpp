@@ -276,10 +276,10 @@ bool middle_point(PathType & path, double & x, double & y)
 template <typename PathType>
 bool centroid(PathType & path, double & x, double & y)
 {
-    double x0 = 0;
-    double y0 = 0;
-    double x1 = 0;
-    double y1 = 0;
+    double x0 = 0.0;
+    double y0 = 0.0;
+    double x1 = 0.0;
+    double y1 = 0.0;
     double start_x;
     double start_y;
 
@@ -290,9 +290,9 @@ bool centroid(PathType & path, double & x, double & y)
     start_x = x0;
     start_y = y0;
 
-    double atmp = 0;
-    double xtmp = 0;
-    double ytmp = 0;
+    double atmp = 0.0;
+    double xtmp = 0.0;
+    double ytmp = 0.0;
     unsigned count = 1;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
@@ -310,10 +310,9 @@ bool centroid(PathType & path, double & x, double & y)
         ++count;
     }
 
-    if (count == 1)
-    {
-        x = start_x;
-        y = start_y;
+    if (count <= 2) {
+        x = (start_x + x0) * 0.5;
+        y = (start_y + y0) * 0.5;
         return true;
     }
 
@@ -368,14 +367,15 @@ bool hit_test(PathType & path, double x, double y, double tol)
 }
 
 template <typename PathType>
-void interior_position(PathType & path, double & x, double & y)
+bool interior_position(PathType & path, double & x, double & y)
 {
     // start with the centroid
-    label::centroid(path, x,y);
+    if (!label::centroid(path, x,y))
+        return false;
 
     // if we are not a polygon, or the default is within the polygon we are done
     if (hit_test(path,x,y,0.001))
-        return;
+        return true;
 
     // otherwise we find a horizontal line across the polygon and then return the
     // center of the widest intersection between the polygon and the line.
@@ -422,7 +422,7 @@ void interior_position(PathType & path, double & x, double & y)
     }
     // no intersections we just return the default
     if (intersections.empty())
-        return;
+        return true;
     x0=intersections[0];
     double max_width = 0;
     for (unsigned ii = 1; ii < intersections.size(); ++ii)
@@ -437,6 +437,7 @@ void interior_position(PathType & path, double & x, double & y)
             break;
         }
     }
+    return true;
 }
 
 }}

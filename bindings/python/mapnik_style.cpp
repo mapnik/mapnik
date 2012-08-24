@@ -25,12 +25,39 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 // mapnik
+#include <mapnik/value_error.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/feature_type_style.hpp>
+#include <mapnik/image_filter_grammar.hpp> // image_filter_grammar
+#include <mapnik/image_filter_types.hpp> // generate_image_filters
 
 using mapnik::feature_type_style;
 using mapnik::rules;
 using mapnik::rule;
+
+std::string get_image_filters(feature_type_style & style)
+{
+    std::string filters_str;
+    std::back_insert_iterator<std::string> sink(filters_str);
+    generate_image_filters(sink, style.image_filters());
+    return filters_str;
+}
+
+void set_image_filters(feature_type_style & style, std::string const& filters)
+{
+    std::string::const_iterator itr = filters.begin();
+    std::string::const_iterator end = filters.end();
+    mapnik::image_filter_grammar<std::string::const_iterator,
+                                 std::vector<mapnik::filter::filter_type> > filter_grammar;
+    bool result = boost::spirit::qi::phrase_parse(itr,end,
+                                                  filter_grammar,
+                                                  boost::spirit::qi::ascii::space,
+                                                  style.image_filters());
+    if (!result || itr!=end)
+    {
+        throw mapnik::value_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
+    }
+}
 
 void export_style()
 {
@@ -61,6 +88,18 @@ void export_style()
                       &feature_type_style::get_filter_mode,
                       &feature_type_style::set_filter_mode,
                       "Set/get the filter mode of the style")
+        .add_property("opacity",
+                      &feature_type_style::get_opacity,
+                      &feature_type_style::set_opacity,
+                      "Set/get the opacity of the style")
+        .add_property("comp_op",
+                      &feature_type_style::comp_op,
+                      &feature_type_style::set_comp_op,
+                      "Set/get the comp-op (composite operation) of the style")
+        .add_property("image_filters",
+                      get_image_filters,
+                      set_image_filters,
+                      "Set/get the comp-op (composite operation) of the style")
         ;
 
 }

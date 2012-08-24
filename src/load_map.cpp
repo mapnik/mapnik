@@ -31,7 +31,6 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/image_filter_parser.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -117,6 +116,7 @@ private:
 
 
     std::string ensure_relative_to_xml(boost::optional<std::string> opt_path);
+    void ensure_exists(std::string const& file_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
                                               std::string const& name);
 
@@ -427,19 +427,14 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         }
 
         // image filters
-        mapnik::image_filter_grammar<std::string::const_iterator,
-                                     std::vector<mapnik::filter::filter_type> > filter_grammar;
-
         optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
             std::string filter_mode = *filters;
             std::string::const_iterator itr = filter_mode.begin();
             std::string::const_iterator end = filter_mode.end();
-
-
             bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                          filter_grammar,
+                                                          sty.get_tree().image_filters_grammar,
                                                           boost::spirit::qi::ascii::space,
                                                           style.image_filters());
             if (!result || itr!=end)
@@ -459,7 +454,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
             std::string::const_iterator itr = filter_mode.begin();
             std::string::const_iterator end = filter_mode.end();
             bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                          filter_grammar,
+                                                          sty.get_tree().image_filters_grammar,
                                                           boost::spirit::qi::ascii::space,
                                                           style.direct_image_filters());
             if (!result || itr!=end)
@@ -921,11 +916,12 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             }
 
             *file = ensure_relative_to_xml(file);
-
+            std::string filename = *file;
+            ensure_exists(filename);
             path_expression_ptr expr(boost::make_shared<path_expression>());
-            if (!parse_path_from_string(expr, *file, sym.get_tree().path_expr_grammar))
+            if (!parse_path_from_string(expr, filename, sym.get_tree().path_expr_grammar))
             {
-                throw mapnik::config_error("Failed to parse path_expression '" + *file + "'");
+                throw mapnik::config_error("Failed to parse path_expression '" + filename + "'");
             }
 
             symbol.set_filename(expr);
@@ -946,7 +942,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PointSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -977,8 +973,9 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
         optional<std::string> marker_type = node.get_opt_attr<std::string>("marker-type");
         if (marker_type)
         {
-            // TODO - before Mapnik 2.1 release change this from WARN TO ERROR
-            MAPNIK_LOG_WARN(markers_symbolizer) << "'marker-type' is deprecated and will be removed in Mapnik 3.x, use file='shape://<type>' to specify known svg shapes";
+            // TODO - revisit whether to officially deprecate marker-type
+            // https://github.com/mapnik/mapnik/issues/1427
+            //MAPNIK_LOG_WARN(markers_symbolizer) << "'marker-type' is deprecated and will be removed in Mapnik 3.x, use file='shape://<type>' to specify known svg shapes";
             // back compatibility with Mapnik 2.0.0
             if (!marker_type->empty() && filename.empty())
             {
@@ -997,6 +994,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
 
         if (!filename.empty())
         {
+            ensure_exists(filename);
             path_expression_ptr expr(boost::make_shared<path_expression>());
             if (!parse_path_from_string(expr, filename, node.get_tree().path_expr_grammar))
             {
@@ -1053,7 +1051,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
     }
     catch (config_error const& ex)
     {
-        ex.append_context("in MarkersSymbolizer", node);
+        ex.append_context(node);
         throw;
     }
 }
@@ -1080,6 +1078,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
         }
 
         file = ensure_relative_to_xml(file);
+        ensure_exists(file);
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
         {
@@ -1092,7 +1091,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in LinePatternSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1121,7 +1120,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         }
 
         file = ensure_relative_to_xml(file);
-
+        ensure_exists(file);
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
         {
@@ -1150,7 +1149,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PolygonPatternSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1179,7 +1178,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in TextSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1273,6 +1272,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         }
 
         file = ensure_relative_to_xml(file);
+        ensure_exists(file);
         path_expression_ptr expr(boost::make_shared<path_expression>());
         if (!parse_path_from_string(expr, file, sym.get_tree().path_expr_grammar))
         {
@@ -1284,7 +1284,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in ShieldSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1393,7 +1393,7 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in LineSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1422,7 +1422,7 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in PolygonSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1448,7 +1448,7 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in BuildingSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1526,7 +1526,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in RasterSymbolizer", sym);
+        ex.append_context(sym);
         throw;
     }
 }
@@ -1612,7 +1612,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
     }
     catch (const config_error & ex)
     {
-        ex.append_context("in RasterColorizer", node);
+        ex.append_context(node);
         throw;
     }
 }
@@ -1654,20 +1654,34 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> opt_
     return *opt_path;
 }
 
+void map_parser::ensure_exists(std::string const& file_path)
+{
+    if (marker_cache::is_uri(file_path))
+        return;
+    // validate that the filename exists if it is not a dynamic PathExpression
+    if (!boost::algorithm::find_first(file_path,"[") && !boost::algorithm::find_first(file_path,"]"))
+    {
+       if (!boost::filesystem::exists(file_path))
+       {
+           throw mapnik::config_error("point-file could not be found: '" + file_path + "'");
+       }
+    }
+}
+
 void map_parser::find_unused_nodes(xml_node const& root)
 {
     std::stringstream error_message;
     find_unused_nodes_recursive(root, error_message);
     if (!error_message.str().empty())
     {
-        std::string msg("The following nodes or attributes were not processed while parsing the xml file:" + error_message.str());
+        std::string msg("Unable to process some data while parsing '" + filename_ + "':" + error_message.str());
         if (strict_)
         {
             throw config_error(msg);
         }
         else
         {
-            MAPNIK_LOG_ERROR(load_map) << "map_parser: " << msg;
+            MAPNIK_LOG_ERROR(load_map) << msg;
         }
     }
 }
@@ -1679,7 +1693,7 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::stringst
         if (node.is_text()) {
             error_message << "\n* text '" << node.text() << "'";
         } else {
-            error_message << "\n* node '" << node.name() << "' in line " << node.line();
+            error_message << "\n* node '" << node.name() << "' at line " << node.line();
         }
         return; //All attributes and children are automatically unprocessed, too.
     }
@@ -1692,7 +1706,7 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::stringst
         {
             error_message << "\n* attribute '" << aitr->first <<
                 "' with value '" << aitr->second.value <<
-                "' in line " << node.line();
+                "' at line " << node.line();
         }
     }
     xml_node::const_iterator itr = node.begin();

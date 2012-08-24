@@ -25,11 +25,10 @@ config_error::config_error(std::string const& what, unsigned line_number, std::s
 char const* config_error::what() const throw()
 {
     std::stringstream s;
-    s << file_;
-    if (line_number_ > 0) s << " line " << line_number_;
-    if (!node_name_.empty()) s << " in node "<< node_name_;
-    if (line_number_ > 0 || !file_.empty()) s << ": ";
     s << what_;
+    if (!node_name_.empty()) s << " in " << node_name_;
+    if (line_number_ > 0) s << " at line " << line_number_;
+    if (!file_.empty()) s << " of '" << file_ << "'";
     msg_ = s.str(); //Avoid returning pointer to dead object
     return msg_.c_str();
 }

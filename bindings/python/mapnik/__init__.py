@@ -664,6 +664,39 @@ class PythonDatasource(object):
 
         return itertools.imap(make_it, features, itertools.count(1))
 
+    @classmethod
+    def wkt_features(cls, keys, features):
+        """A convenience function to wrap an iterator yielding pairs of WKT format geometry and dictionaries of
+        key-value pairs into mapnik features. Return this from PythonDatasource.features() passing it a sequence of keys
+        to appear in the output and an iterator yielding features.
+
+        For example. One might have a features() method in a derived class like the following:
+
+        def features(self, query):
+            # ... create WKT features feat1 and feat2
+
+            return mapnik.PythonDatasource.wkt_features(
+                keys = ( 'name', 'author' ),
+                features = [
+                    (feat1, { 'name': 'feat1', 'author': 'alice' }),
+                    (feat2, { 'name': 'feat2', 'author': 'bob' }),
+                ]
+            )
+
+        """
+        ctx = Context()
+        [ctx.push(x) for x in keys]
+
+        def make_it(feat, idx):
+            f = Feature(ctx, idx)
+            geom, attrs = feat
+            f.add_geometries_from_wkt(geom)
+            for k, v in attrs.iteritems():
+                f[k] = v
+            return f
+
+        return itertools.imap(make_it, features, itertools.count(1))
+
 class _TextSymbolizer(TextSymbolizer,_injector):
     @property
     def text_size(self):
@@ -759,6 +792,18 @@ class _TextSymbolizer(TextSymbolizer,_injector):
         DeprecationWarning, 2)
         self.format.wrap_char = wrap_char
 
+
+    @property
+    def wrap_character(self):
+        warnings.warn("'wrap_character' is deprecated, use format.wrap_character",
+        DeprecationWarning, 2)
+        return self.format.wrap_character
+
+    @wrap_char.setter
+    def wrap_character(self, wrap_character):
+        warnings.warn("'wrap_char' is deprecated, use format.wrap_character",
+        DeprecationWarning, 2)
+        self.format.wrap_character = wrap_character
 
 
     @property

@@ -870,7 +870,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
 
-    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
@@ -1205,9 +1205,15 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             double z = 0;
 
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                label::centroid(geom, x, y);
+            {
+                if (!label::centroid(geom, x, y))
+                    return;
+            }
             else
-                label::interior_position(geom, x, y);
+            {
+                if (!label::interior_position(geom ,x, y))
+                    return;
+            }
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
@@ -1387,7 +1393,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(query_extent_,context,sym,t_,prj_trans,tr, scale_factor_);
 
-    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
@@ -1493,15 +1499,17 @@ struct markers_dispatch
 
         if (placement_method != MARKER_LINE_PLACEMENT)
         {
-            double x,y;
-            path.rewind(0);
+            double x = 0;
+            double y = 0;
             if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                label::interior_position(path, x, y);
+                if (!label::interior_position(path, x, y))
+                    return;
             }
             else
             {
-                label::centroid(path, x, y);
+                if (!label::centroid(path, x, y))
+                    return;
             }
             coord2d center = bbox_.center();
             agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
@@ -1574,15 +1582,17 @@ struct markers_dispatch_2
 
         if (placement_method != MARKER_LINE_PLACEMENT)
         {
-            double x,y;
-            path.rewind(0);
+            double x = 0;
+            double y = 0;
             if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                label::interior_position(path, x, y);
+                if (!label::interior_position(path, x, y))
+                    return;
             }
             else
             {
-                label::centroid(path, x, y);
+                if (!label::centroid(path, x, y))
+                    return;
             }
             coord2d center = bbox_.center();
             agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
@@ -1692,8 +1702,9 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                         eGeomType type = feature.paths()[0].type();
                         if (type == Polygon)
                             converter.set<clip_poly_tag>();
-                        else if (type == LineString)
-                            converter.set<clip_line_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
                         // don't clip if type==Point
                     }
                     converter.set<transform_tag>(); //always transform
@@ -1719,8 +1730,9 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                         eGeomType type = feature.paths()[0].type();
                         if (type == Polygon)
                             converter.set<clip_poly_tag>();
-                        else if (type == LineString)
-                            converter.set<clip_line_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
                         // don't clip if type==Point
                     }
                     converter.set<transform_tag>(); //always transform
@@ -1751,8 +1763,9 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                         eGeomType type = feature.paths()[0].type();
                         if (type == Polygon)
                             converter.set<clip_poly_tag>();
-                        else if (type == LineString)
-                            converter.set<clip_line_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
                         // don't clip if type==Point
                     }
                     converter.set<transform_tag>(); //always transform
