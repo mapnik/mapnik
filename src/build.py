@@ -187,7 +187,6 @@ source = Split(
     text_properties.cpp
     xml_tree.cpp
     config_error.cpp
-    position_iterator.cpp
     """
     )
 
