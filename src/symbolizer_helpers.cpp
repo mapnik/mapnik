@@ -87,12 +87,7 @@ bool text_symbolizer_helper::next_line_placement()
         clipped.clip_box(query_extent_.minx(), query_extent_.miny(),
                          query_extent_.maxx(), query_extent_.maxy());
         path_type path(t_, clipped, prj_trans_);
-        bool success;
-        if (points_on_line_) {
-            success = finder_.find_point_on_line_placements(path);
-        } else {
-            success = finder_.find_line_placements(path);
-        }
+        bool success = finder_.find_line_placements(path, points_on_line_);
         if (success)
         {
             //Found a placement

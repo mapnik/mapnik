@@ -233,7 +233,6 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
     pixel_position displacement = scale_factor_ * info_->properties.displacement + alignment_offset();
     if (info_->properties.rotate_displacement) displacement = displacement.rotate(!orientation_);
     glyphs->set_base_point(pos + displacement);
-
     box2d<double> bbox;
     rotated_box2d(bbox, orientation_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
@@ -276,46 +275,29 @@ bool placement_finder_ng::find_point_placement(pixel_position pos)
     return true;
 }
 
-
 template <typename T>
-bool placement_finder_ng::find_point_on_line_placements(T & path)
+bool placement_finder_ng::find_line_placements(T & path, bool points)
 {
     if (!layout_.size()) return true;
     vertex_cache pp(path);
+
     bool success = false;
     while (pp.next_subpath())
     {
-        if (pp.length() == 0.0)
+        if (points)
         {
-            success = find_point_placement(pp.current_position()) || success;
-            continue;
+            if (pp.length() == 0.0)
+            {
+                success = find_point_placement(pp.current_position()) || success;
+                continue;
+            }
+        } else {
+            if ((pp.length() < info_->properties.minimum_path_length)
+                ||
+                (pp.length() < layout_.width())) continue;
         }
 
-        double spacing = get_spacing(pp.length(), 0);
-        pp.forward(spacing/2.); // first label should be placed at half the spacing
-        path_move_dx(pp);
-        do
-        {
-            success = find_point_placement(pp.current_position()) || success;
-        } while (pp.forward(spacing));
-    }
-    return success;
-}
-
-template <typename T>
-bool placement_finder_ng::find_line_placements(T & path)
-{
-    if (!layout_.size()) return true;
-    vertex_cache pp(path);
-
-    bool success = false;
-    while (pp.next_subpath())
-    {
-        if ((pp.length() < info_->properties.minimum_path_length)
-                ||
-            (pp.length() < layout_.width())) continue;
-
-        double spacing = get_spacing(pp.length(), layout_.width());
+        double spacing = get_spacing(pp.length(), points ? 0. : layout_.width());
 
         // first label should be placed at half the spacing
         pp.forward(spacing/2);
@@ -323,16 +305,17 @@ bool placement_finder_ng::find_line_placements(T & path)
         do
         {
             tolerance_iterator tolerance_offset(info_->properties.label_position_tolerance, spacing);
-            vertex_cache::state state = pp.save_state();
             while (tolerance_offset.next())
             {
-                if (pp.move(tolerance_offset.get()) && single_line_placement(pp, info_->properties.upright))
+                vertex_cache::scoped_state state(pp);
+                if (pp.move(tolerance_offset.get())
+                    && (
+                    (points && find_point_placement(pp.current_position()))
+                    || (!points && single_line_placement(pp, info_->properties.upright))))
                 {
                     success = true;
-                    pp.restore_state(state);
                     break;
                 }
-                pp.restore_state(state);
             }
         } while (pp.forward(spacing));
     }
@@ -596,10 +579,8 @@ const pixel_position &glyph_positions::marker_pos() const
 typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
 typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
 typedef coord_transform<CoordTransform,geometry_type> PathType;
-template bool placement_finder_ng::find_point_on_line_placements<ClippedPathType>(ClippedPathType &);
-template bool placement_finder_ng::find_line_placements<ClippedPathType>(ClippedPathType &);
-template bool placement_finder_ng::find_point_on_line_placements<PathType>(PathType &);
-template bool placement_finder_ng::find_line_placements<PathType>(PathType &);
+template bool placement_finder_ng::find_line_placements<ClippedPathType>(ClippedPathType &, bool);
+template bool placement_finder_ng::find_line_placements<PathType>(PathType &, bool);
 
 
 }// ns mapnik
