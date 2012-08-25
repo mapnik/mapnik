@@ -58,6 +58,7 @@ symbolizer_base::symbolizer_base(symbolizer_base const& other)
     : comp_op_(other.comp_op_),
       affine_transform_(other.affine_transform_),
       clip_(other.clip_),
+      simplify_algorithm_value_(other.simplify_algorithm_value_),
       simplify_tolerance_value_(other.simplify_tolerance_value_),
       smooth_value_(other.smooth_value_) {}
 
