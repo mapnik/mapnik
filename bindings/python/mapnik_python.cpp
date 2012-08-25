@@ -199,6 +199,56 @@ void render6(const mapnik::Map& map, PycairoContext* context)
     ren.apply();
 }
 
+void render_with_detector2(
+    const mapnik::Map& map,
+    PycairoContext* context,
+    boost::shared_ptr<mapnik::label_collision_detector4> detector)
+{
+    python_unblock_auto_block b;
+    Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+    mapnik::cairo_renderer<Cairo::Context> ren(map,c,detector);
+    ren.apply();
+}
+
+void render_with_detector3(
+    const mapnik::Map& map,
+    PycairoContext* context,
+    boost::shared_ptr<mapnik::label_collision_detector4> detector,
+    double scale_factor = 1.0,
+    unsigned offset_x = 0u,
+    unsigned offset_y = 0u)
+{
+    python_unblock_auto_block b;
+    Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
+    mapnik::cairo_renderer<Cairo::Context> ren(map,c,detector,scale_factor,offset_x,offset_y);
+    ren.apply();
+}
+
+void render_with_detector4(
+    const mapnik::Map& map,
+    PycairoSurface* surface,
+    boost::shared_ptr<mapnik::label_collision_detector4> detector)
+{
+    python_unblock_auto_block b;
+    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,detector);
+    ren.apply();
+}
+
+void render_with_detector5(
+    const mapnik::Map& map,
+    PycairoSurface* surface,
+    boost::shared_ptr<mapnik::label_collision_detector4> detector,
+    double scale_factor = 1.0,
+    unsigned offset_x = 0u,
+    unsigned offset_y = 0u)
+{
+    python_unblock_auto_block b;
+    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
+    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,detector,scale_factor,offset_x,offset_y);
+    ren.apply();
+}
+
 #endif
 
 
@@ -572,6 +622,65 @@ BOOST_PYTHON_MODULE(_mapnik)
         ">>> render(m,context)\n"
         "\n"
         );
+
+    def("render_with_detector", &render_with_detector2,
+        "\n"
+        "Render Map to Cairo Context using a pre-constructed detector.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import Map, LabelCollisionDetector, render_with_detector, load_map\n"
+        ">>> from cairo import SVGSurface, Context\n"
+        ">>> surface = SVGSurface('image.svg', m.width, m.height)\n"
+        ">>> ctx = Context(surface)\n"
+        ">>> m = Map(256,256)\n"
+        ">>> load_map(m,'mapfile.xml')\n"
+        ">>> detector = LabelCollisionDetector(m)\n"
+        ">>> render_with_detector(m, ctx, detector)\n"
+        );
+
+    def("render_with_detector", &render_with_detector3,
+        "\n"
+        "Render Map to Cairo Context using a pre-constructed detector, scale and offsets.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import Map, LabelCollisionDetector, render_with_detector, load_map\n"
+        ">>> from cairo import SVGSurface, Context\n"
+        ">>> surface = SVGSurface('image.svg', m.width, m.height)\n"
+        ">>> ctx = Context(surface)\n"
+        ">>> m = Map(256,256)\n"
+        ">>> load_map(m,'mapfile.xml')\n"
+        ">>> detector = LabelCollisionDetector(m)\n"
+        ">>> render_with_detector(m, ctx, detector, 1, 1, 1)\n"
+        );
+
+    def("render_with_detector", &render_with_detector4,
+        "\n"
+        "Render Map to Cairo Surface using a pre-constructed detector.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import Map, LabelCollisionDetector, render_with_detector, load_map\n"
+        ">>> from cairo import SVGSurface, Context\n"
+        ">>> surface = SVGSurface('image.svg', m.width, m.height)\n"
+        ">>> m = Map(256,256)\n"
+        ">>> load_map(m,'mapfile.xml')\n"
+        ">>> detector = LabelCollisionDetector(m)\n"
+        ">>> render_with_detector(m, surface, detector)\n"
+        );
+
+    def("render_with_detector", &render_with_detector5,
+        "\n"
+        "Render Map to Cairo Surface using a pre-constructed detector, scale and offsets.\n"
+        "\n"
+        "Usage:\n"
+        ">>> from mapnik import Map, LabelCollisionDetector, render_with_detector, load_map\n"
+        ">>> from cairo import SVGSurface, Context\n"
+        ">>> surface = SVGSurface('image.svg', m.width, m.height)\n"
+        ">>> m = Map(256,256)\n"
+        ">>> load_map(m,'mapfile.xml')\n"
+        ">>> detector = LabelCollisionDetector(m)\n"
+        ">>> render_with_detector(m, surface, detector, 1, 1, 1)\n"
+        );
+
 #endif
 
     def("scale_denominator", &scale_denominator,

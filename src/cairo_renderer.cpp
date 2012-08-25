@@ -774,7 +774,29 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
       font_engine_(boost::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_),
-      detector_(box2d<double>(-m.buffer_size() ,-m.buffer_size() , m.width() + m.buffer_size() ,m.height() + m.buffer_size()))
+      detector_(boost::make_shared<label_collision_detector4>(
+          box2d<double>(-m.buffer_size(), -m.buffer_size(),
+          m.width() + m.buffer_size(), m.height() + m.buffer_size())))
+{
+    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Scale=" << m.scale();
+}
+
+cairo_renderer_base::cairo_renderer_base(Map const& m,
+                                         Cairo::RefPtr<Cairo::Context> const& context,
+                                         boost::shared_ptr<label_collision_detector4> detector,
+                                         double scale_factor,
+                                         unsigned offset_x,
+                                         unsigned offset_y)
+    : m_(m),
+      context_(context),
+      width_(m.width()),
+      height_(m.height()),
+      scale_factor_(scale_factor),
+      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
+      font_engine_(boost::make_shared<freetype_engine>()),
+      font_manager_(*font_engine_),
+      face_manager_(font_engine_),
+      detector_(detector)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Scale=" << m.scale();
 }
@@ -788,6 +810,16 @@ template <>
 cairo_renderer<Cairo::Surface>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m,scale_factor),
       cairo_renderer_base(m,Cairo::Context::create(surface),scale_factor,offset_x,offset_y) {}
+
+template <>
+cairo_renderer<Cairo::Context>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, boost::shared_ptr<label_collision_detector4> detector, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<cairo_renderer>(m,scale_factor),
+      cairo_renderer_base(m,context,detector,scale_factor,offset_x,offset_y) {}
+
+template <>
+cairo_renderer<Cairo::Surface>::cairo_renderer(Map const& m, Cairo::RefPtr<Cairo::Surface> const& surface, boost::shared_ptr<label_collision_detector4> detector, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<cairo_renderer>(m,scale_factor),
+      cairo_renderer_base(m,Cairo::Context::create(surface),detector,scale_factor,offset_x,offset_y) {}
 
 cairo_renderer_base::~cairo_renderer_base() {}
 
@@ -834,7 +866,7 @@ void cairo_renderer_base::start_layer_processing(layer const& lay, box2d<double>
 
     if (lay.clear_label_cache())
     {
-        detector_.clear();
+        detector_->clear();
     }
     query_extent_ = query_extent;
 }
@@ -1224,12 +1256,12 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             label_ext *= tr;
             label_ext *= agg::trans_affine_translation(x,y);
             if (sym.get_allow_overlap() ||
-                detector_.has_placement(label_ext))
+                detector_->has_placement(label_ext))
             {
                 render_marker(pixel_position(x,y),**marker, tr, sym.get_opacity());
 
                 if (!sym.get_ignore_placement())
-                    detector_.insert(label_ext);
+                    detector_->insert(label_ext);
             }
         }
     }
@@ -1244,7 +1276,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
-            t_, font_manager_, detector_, query_extent_);
+            t_, font_manager_, *detector_, query_extent_);
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
 
@@ -1689,7 +1721,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     box2d<double> bbox = marker_ellipse.bounding_box();
 
                     dispatch_type dispatch(context, marker_ellipse, result?attributes:(*stock_vector_marker)->attributes(),
-                                           detector_, sym, bbox, marker_tr, scale_factor_);
+                                           *detector_, sym, bbox, marker_tr, scale_factor_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(query_extent_, dispatch, sym, t_, prj_trans, marker_tr, scale_factor_);
@@ -1717,7 +1749,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
 
                     dispatch_type dispatch(context, **stock_vector_marker, result?attributes:(*stock_vector_marker)->attributes(),
-                                           detector_, sym, bbox, tr, scale_factor_);
+                                           *detector_, sym, bbox, tr, scale_factor_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(query_extent_, dispatch, sym, t_, prj_trans, tr, scale_factor_);
@@ -1749,7 +1781,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                 if ( marker )
                 {
                     dispatch_type dispatch(context, *marker,
-                                           detector_, sym, bbox, tr, scale_factor_);
+                                           *detector_, sym, bbox, tr, scale_factor_);
 
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
@@ -1786,7 +1818,7 @@ void cairo_renderer_base::process(text_symbolizer const& sym,
             sym, feature, prj_trans,
             width_, height_,
             scale_factor_,
-            t_, font_manager_, detector_, query_extent_);
+            t_, font_manager_, *detector_, query_extent_);
 
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
