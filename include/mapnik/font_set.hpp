@@ -39,6 +39,7 @@ public:
     font_set(font_set const& rhs);
     font_set& operator=(font_set const& rhs);
     unsigned size() const;
+    void set_name(std::string const& name);
     std::string const& get_name() const;
     void add_face_name(std::string);
     std::vector<std::string> const& get_face_names() const;
