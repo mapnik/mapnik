@@ -401,8 +401,12 @@ void postgis_datasource::bind() const
                         shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
                         if (rs_oid->next())
                         {
-                            MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type=" << rs_oid->getValue("typname")
-                                                     << " (oid:" << rs_oid->getValue("oid") << ")";
+                            std::string typname(rs_oid->getValue("typname"));
+                            if (typname != "geometry")
+                            {
+                                MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type=" << typname
+                                                         << " (oid:" << rs_oid->getValue("oid") << ")";
+                            }
                         }
                         else
                         {
