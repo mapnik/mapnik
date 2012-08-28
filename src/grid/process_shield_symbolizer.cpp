@@ -28,7 +28,7 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/svg/svg_converter.hpp>
-#include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 
 // agg

@@ -57,7 +57,7 @@ porting notes -->
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/marker_helpers.hpp>
-#include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
@@ -106,7 +106,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             {
                 using namespace mapnik::svg;
                 typedef agg::pod_bvector<path_attributes> svg_attribute_type;
-                typedef svg_renderer<svg_path_adapter,
+                typedef svg_renderer_agg<svg_path_adapter,
                                      svg_attribute_type,
                                      renderer_type,
                                      pixfmt_type > svg_renderer_type;

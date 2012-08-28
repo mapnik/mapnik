@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_properties.hpp>
-#include <mapnik/text_placements/base.hpp>
+//#include <mapnik/text_placements/base.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/ctrans.hpp>

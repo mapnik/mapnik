@@ -32,7 +32,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-#include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -170,7 +170,7 @@ int main (int argc,char** argv)
 
             mapnik::svg::vertex_stl_adapter<mapnik::svg::svg_path_storage> stl_storage((*marker.get_vector_data())->source());
             mapnik::svg::svg_path_adapter svg_path(stl_storage);
-            mapnik::svg::svg_renderer<mapnik::svg::svg_path_adapter,
+            mapnik::svg::svg_renderer_agg<mapnik::svg::svg_path_adapter,
                 agg::pod_bvector<mapnik::svg::path_attributes>,
                 renderer_solid,
                 agg::pixfmt_rgba32_plain > svg_renderer_this(svg_path,

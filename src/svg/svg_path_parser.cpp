@@ -21,19 +21,31 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/svg_path_attributes.hpp>
+#include <mapnik/svg/svg_path_parser.hpp>
+#include <mapnik/svg/svg_path_grammar.hpp>
+#include <mapnik/svg/svg_converter.hpp>
 
-namespace mapnik
-{
-template <typename T>
-void svg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
-                              Feature const& feature,
-                              proj_transform const& prj_trans)
-{
-    // nothing yet.
-}
+// agg
+#include "agg_path_storage.h"
 
-template void svg_renderer<std::ostream_iterator<char> >::process(polygon_pattern_symbolizer const& sym,
-                                                                  Feature const& feature,
-                                                                  proj_transform const& prj_trans);
-}
+// stl
+#include <string>
+
+namespace mapnik { namespace svg {
+
+    template <typename PathType>
+    bool parse_path(const char* wkt, PathType & p)
+    {
+        using namespace boost::spirit;
+        typedef const char* iterator_type;
+        typedef ascii::space_type skip_type;
+        svg_path_grammar<iterator_type,skip_type,PathType> g(p);
+        iterator_type first = wkt;
+        iterator_type last =  wkt + std::strlen(wkt);
+        return qi::phrase_parse(first, last, g, skip_type());
+    }
+
+    template bool parse_path<svg_converter_type>(const char*, svg_converter_type&);
+
+    }}

@@ -1670,6 +1670,9 @@ if not HELP_REQUESTED:
     # Build the core library
     SConscript('src/build.py')
 
+    # Install headers
+    SConscript('include/build.py')
+
     # Build the requested and able-to-be-compiled input plug-ins
     GDAL_BUILT = False
     OGR_BUILT = False

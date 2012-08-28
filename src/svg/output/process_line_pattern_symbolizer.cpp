@@ -21,19 +21,19 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/output/svg_renderer.hpp>
 
 namespace mapnik
 {
 template <typename T>
-void svg_renderer<T>::process(markers_symbolizer const& sym,
+void svg_renderer<T>::process(line_pattern_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
     // nothing yet.
 }
 
-template void svg_renderer<std::ostream_iterator<char> >::process(markers_symbolizer const& sym,
+template void svg_renderer<std::ostream_iterator<char> >::process(line_pattern_symbolizer const& sym,
                                                                   Feature const& feature,
                                                                   proj_transform const& prj_trans);
 }

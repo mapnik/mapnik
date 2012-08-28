@@ -52,7 +52,7 @@
 #endif
 
 #if defined(SVG_RENDERER)
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/output/svg_renderer.hpp>
 #endif
 
 #if defined(RENDERING_STATS)

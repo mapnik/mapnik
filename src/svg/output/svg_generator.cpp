@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg/svg_generator.hpp>
+#include <mapnik/svg/output/svg_generator.hpp>
 #include <mapnik/geometry.hpp>
 
 // boost
