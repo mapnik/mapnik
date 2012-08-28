@@ -4,26 +4,16 @@ from glob import glob
 Import('env')
 
 base = './mapnik/'
-subdirs = ['svg','wkt','grid','json','util']
+subdirs = ['','svg','wkt','grid','json','util','text_placements','formatting']
 
 #if env['SVG_RENDERER']:
 #    subdirs.append('svg/output')
 
-inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik')
-
 if 'install' in COMMAND_LINE_TARGETS:
-    
-    includes = glob('./mapnik/*.hpp')
-
     for subdir in subdirs:
         pathdir = os.path.join(base,subdir,'*.hpp')
-        includes.extend(glob(pathdir))
-
-    env.Alias(target='install', source=env.Install(inc_target, includes))
-    
-    # special case these as duplicate named headers break scons
-    for subdir in ['text_placements','formatting']:
-        includes = glob('../include/mapnik/%s*.hpp' % subdir)
+        includes = glob(pathdir)
+        inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/'+subdir)
         env.Alias(target='install', source=env.Install(inc_target, includes))
 
-env['create_uninstall_target'](env, inc_target)
+env['create_uninstall_target'](env, os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/'))
