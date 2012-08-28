@@ -28,7 +28,7 @@
 #include <mapnik/formatting/text.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/format.hpp>
-#include <mapnik/formatting/expression.hpp>
+#include <mapnik/formatting/expression_format.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>

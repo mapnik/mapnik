@@ -28,6 +28,7 @@ CONFIG_OTHER_INCLUDES='%(other_includes)s'
 CONFIG_FONTS='%(fonts)s'
 CONFIG_INPUT_PLUGINS='%(input_plugins)s'
 CONFIG_GIT_REVISION='%(git_revision)s'
+CONFIG_MAPNIK_AGG_INCLUDE=${CONFIG_PREFIX}/include/mapnik/agg
 
 '''
 

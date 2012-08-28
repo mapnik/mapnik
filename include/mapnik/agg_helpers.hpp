@@ -23,6 +23,10 @@
 #ifndef MAPNIK_AGG_HELPERS_HPP
 #define MAPNIK_AGG_HELPERS_HPP
 
+// mapnik
+#include <mapnik/gamma_method.hpp>
+#include <mapnik/stroke.hpp>
+
 // agg 
 #include "agg_basics.h"
 #include "agg_gamma_functions.h"

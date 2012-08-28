@@ -21,23 +21,19 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/output/svg_renderer.hpp>
 
 namespace mapnik
 {
-/*!
- * @brief Collect presentation attributes found in polygon symbolizer.
- */
 template <typename T>
-void svg_renderer<T>::process(polygon_symbolizer const& sym,
+void svg_renderer<T>::process(text_symbolizer const& sym,
                               Feature const& feature,
                               proj_transform const& prj_trans)
 {
-    path_attributes_.set_fill_color(sym.get_fill());
-    path_attributes_.set_fill_opacity(sym.get_opacity());
+    // nothing yet.
 }
 
-template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,
+template void svg_renderer<std::ostream_iterator<char> >::process(text_symbolizer const& sym,
                                                                   Feature const& feature,
                                                                   proj_transform const& prj_trans);
 }

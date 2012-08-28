@@ -23,7 +23,7 @@
 #include <mapnik/formatting/registry.hpp>
 #include <mapnik/formatting/text.hpp>
 #include <mapnik/formatting/format.hpp>
-#include <mapnik/formatting/expression.hpp>
+#include <mapnik/formatting/expression_format.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 

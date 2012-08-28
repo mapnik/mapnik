@@ -27,8 +27,8 @@
 #include <mapnik/vertex.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/svg/svg_path_iterator.hpp>
-#include <mapnik/svg/svg_output_attributes.hpp>
+#include <mapnik/svg/output/svg_path_iterator.hpp>
+#include <mapnik/svg/output/svg_output_attributes.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>

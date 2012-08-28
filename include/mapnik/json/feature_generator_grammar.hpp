@@ -148,9 +148,14 @@ struct escaped_string
         using boost::spirit::karma::maxwidth;
         using boost::spirit::karma::right_align;
 
-        esc_char.add('\a', "\\a")('\b', "\\b")('\f', "\\f")('\n', "\\n")
-            ('\r', "\\r")('\t', "\\t")('\v', "\\v")('\\', "\\\\")
-            ('\'', "\\\'")('\"', "\\\"")
+        esc_char.add
+            ('"', "\\\"")
+            ('\\', "\\\\")
+            ('\b', "\\b")
+            ('\f', "\\f")
+            ('\n', "\\n")
+            ('\r', "\\r")
+            ('\t', "\\t")
             ;
 
         esc_str =   karma::lit(karma::_r1)

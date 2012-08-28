@@ -37,7 +37,7 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/svg/svg_converter.hpp>
-#include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 
 // boost
@@ -158,7 +158,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
         using namespace mapnik::svg;
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
-        svg_renderer<svg_path_adapter,
+        svg_renderer_agg<svg_path_adapter,
             agg::pod_bvector<path_attributes>,
             renderer,
             mapnik::pixfmt_gray32> svg_renderer(svg_path,

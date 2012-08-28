@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_SVG_RENDERER_HPP
-#define MAPNIK_SVG_RENDERER_HPP
+#ifndef MAPNIK_SVG_RENDERER_AGG_HPP
+#define MAPNIK_SVG_RENDERER_AGG_HPP
 
 // mapnik
 #include <mapnik/debug.hpp>
@@ -100,7 +100,7 @@ private:
 };
 
 template <typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat>
-class svg_renderer : boost::noncopyable
+class svg_renderer_agg : boost::noncopyable
 {
 public:
     typedef agg::conv_curve<VertexSource>            curved_type;
@@ -110,7 +110,7 @@ public:
     typedef agg::conv_contour<curved_trans_type>     curved_trans_contour_type;
     typedef agg::renderer_base<PixelFormat>          renderer_base;
 
-    svg_renderer(VertexSource & source, AttributeSource const& attributes)
+    svg_renderer_agg(VertexSource & source, AttributeSource const& attributes)
         : source_(source),
           curved_(source_),
           curved_stroked_(curved_),
@@ -440,4 +440,4 @@ private:
 
 }}
 
-#endif //MAPNIK_SVG_RENDERER_HPP
+#endif //MAPNIK_SVG_RENDERER_AGG_HPP

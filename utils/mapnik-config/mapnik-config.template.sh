@@ -90,7 +90,7 @@ while test $# -gt 0; do
       ;;
 
     --cflags)
-      echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_OTHER_INCLUDES}
+      echo -I${CONFIG_MAPNIK_INCLUDE} -I${CONFIG_MAPNIK_AGG_INCLUDE} ${CONFIG_OTHER_INCLUDES}
       ;;
 
     --libs)

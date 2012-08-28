@@ -15,9 +15,10 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
-# $Id$
+# 
 
-import glob
+import os
+from glob import glob
 
 Import('env')
 
@@ -28,4 +29,13 @@ if env['SUNCC']:
 else:
     cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
 
-agg_env.StaticLibrary('agg', glob.glob('./src/' + '*.cpp'), LIBS=[], CXXFLAGS=cxxflags, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+agg_env.StaticLibrary('agg', glob('./src/' + '*.cpp'), LIBS=[], CXXFLAGS=cxxflags, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+
+if 'install' in COMMAND_LINE_TARGETS:
+    inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/agg')
+    # TODO - restrict to just agg headers used in mapnik includes?
+    includes = glob('./include/*.h')
+    # just for kicks wait till libmapnik is built to install headers
+    target = env.Install(inc_target, includes)
+    Depends(target, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
+    env.Alias(target='install', source=target)

@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/formatting/expression.hpp>
+#include <mapnik/formatting/expression_format.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>

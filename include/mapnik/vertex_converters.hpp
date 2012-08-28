@@ -25,6 +25,7 @@
 
 // boost
 #include <boost/type_traits/is_same.hpp>
+
 // mpl
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/push_back.hpp>
@@ -36,11 +37,11 @@
 #include <boost/mpl/size.hpp>
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/int.hpp>
+
 // fusion
 #include <boost/fusion/container/vector.hpp>
 #include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/make_vector.hpp>
-//#include <boost/fusion/adapted/mpl.hpp>
 
 #include <boost/foreach.hpp>
 #include <boost/utility.hpp>
@@ -50,6 +51,7 @@
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/offset_converter.hpp>
 #include <mapnik/simplify_converter.hpp>
+
 // agg
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_clip_polyline.h"

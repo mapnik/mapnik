@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# $Id$
+# 
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 # Copyright (C) 2005 Jean-Francois Doyon

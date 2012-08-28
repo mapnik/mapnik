@@ -5,7 +5,7 @@
 
 // mapnik
 #include <mapnik/map.hpp>
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/color_factory.hpp>
 
 // std
