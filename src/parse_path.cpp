@@ -29,12 +29,18 @@ namespace mapnik {
 
 path_expression_ptr parse_path(std::string const & str)
 {
-    path_expression_ptr path =  boost::make_shared<path_expression>();
     path_expression_grammar<std::string::const_iterator> g;
+    return parse_path(str,g);
+}
 
+path_expression_ptr parse_path(std::string const & str,
+                               path_expression_grammar<std::string::const_iterator> const& g)
+{
+    path_expression_ptr path =  boost::make_shared<path_expression>();
+    
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, space, *path);
+    bool r = qi::phrase_parse(itr, end, g, boost::spirit::standard_wide::space, *path);
     if (r  && itr == end)
     {
         return path;
@@ -43,16 +49,6 @@ path_expression_ptr parse_path(std::string const & str)
     {
         throw std::runtime_error("Failed to parse path expression");
     }
-}
-
-bool parse_path_from_string(path_expression_ptr const& path,
-                                           std::string const & str,
-                                           path_expression_grammar<std::string::const_iterator> const& g)
-{
-    std::string::const_iterator itr = str.begin();
-    std::string::const_iterator end = str.end();
-    bool r = qi::phrase_parse(itr, end, g, space, *path);
-    return (r && itr==end);
 }
 
 }
