@@ -41,7 +41,7 @@
 
 namespace mapnik {
 
-typedef boost::shared_ptr<path_expression> path_expression_ptr;
+typedef boost::shared_ptr<const path_expression> path_expression_ptr;
 
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str,
