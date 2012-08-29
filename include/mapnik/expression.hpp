@@ -34,7 +34,7 @@
 namespace mapnik
 {
 
-typedef boost::shared_ptr<const expr_node> expression_ptr;
+typedef boost::shared_ptr<expr_node> expression_ptr;
 
 
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding = "UTF8");
