@@ -100,15 +100,7 @@ inline boost::optional<color> fast_cast(xml_tree const& tree, std::string const&
 template <>
 inline boost::optional<expression_ptr> fast_cast(xml_tree const& tree, std::string const& value)
 {
-    expression_ptr expr(boost::make_shared<expr_node>(true));
-    if (expression_factory::parse_from_string(expr, value, tree.expr_grammar))
-    {
-        return expr;
-    }
-    else
-    {
-        throw mapnik::config_error("Failed to parse expression '" + value + "'");
-    }
+    return parse_expression(value, tree.expr_grammar);
 }
 
 /****************************************************************************/
