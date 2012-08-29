@@ -183,20 +183,6 @@ named_colors_::named_colors_()
         ;
 }
 
-double hue_to_rgb( double m1, double m2, double h)
-{
-    if (h < 0.0) h = h + 1.0;
-    else if (h > 1) h = h - 1.0;
-
-    if (h * 6 < 1.0)
-        return m1 + (m2 - m1) * h * 6.0;
-    if (h * 2 < 1.0)
-        return m2;
-    if (h * 3 < 2.0)
-        return m1 + (m2 - m1)* (2.0/3.0 - h) * 6.0;
-    return m1;
-}
-
 template struct mapnik::css_color_grammar<std::string::const_iterator>;
 
 }
