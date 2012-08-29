@@ -220,7 +220,7 @@ void render_to_file(Map const& m, const std::string output_filename)
 BOOST_AUTO_TEST_CASE(path_element_test_case_1)
 {
     Map m(800,600);
-    m.set_background(color_factory::from_string("steelblue"));
+    m.set_background(parse_color("steelblue"));
 
     prepare_map(m);
 
