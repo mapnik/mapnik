@@ -24,27 +24,16 @@
 #define MAPNIK_COLOR_FACTORY_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/css_color_grammar.hpp>
 
-// boost
-#include <boost/utility.hpp>
+#include <string>
 
 namespace mapnik {
 
-class color;
+MAPNIK_DECL mapnik::color parse_color(std::string const& str);
+MAPNIK_DECL mapnik::color parse_color(std::string const& str, mapnik::css_color_grammar<std::string::const_iterator> const& g);
 
-template <typename Iterator> struct css_color_grammar;
-class MAPNIK_DECL color_factory : boost::noncopyable
-{
-public:
-
-    static void init_from_string(color & c, std::string const& css_color);
-
-    static bool parse_from_string(color & c, std::string const& css_color,
-                                  mapnik::css_color_grammar<std::string::const_iterator> const& g);
-
-    static color from_string(std::string const& css_color);
-};
 }
 
 #endif // MAPNIK_COLOR_FACTORY_HPP

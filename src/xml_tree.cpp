@@ -86,15 +86,7 @@ inline boost::optional<std::string> fast_cast(xml_tree const& tree, std::string 
 template <>
 inline boost::optional<color> fast_cast(xml_tree const& tree, std::string const& value)
 {
-    mapnik::color c;
-    if (mapnik::color_factory::parse_from_string(c, value, tree.color_grammar))
-    {
-        return c;
-    }
-    else
-    {
-        throw config_error("Failed to parse color '"+value+"'");
-    }
+    return parse_color(value, tree.color_grammar);
 }
 
 template <>

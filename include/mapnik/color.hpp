@@ -47,37 +47,51 @@ private:
 
 public:
     color()
-        : red_(0xff),
+      : red_(0xff),
         green_(0xff),
         blue_(0xff),
         alpha_(0xff)
         {}
 
     color(unsigned red, unsigned green, unsigned blue, unsigned alpha = 0xff)
-        :  red_(red),
+      : red_(red),
         green_(green),
         blue_(blue),
         alpha_(alpha)
         {}
 
-    color( std::string const& css_string);
-
     color(const color& rhs)
-        : red_(rhs.red_),
+      : red_(rhs.red_),
         green_(rhs.green_),
         blue_(rhs.blue_),
         alpha_(rhs.alpha_)
         {}
 
-    color& operator=(const color& rhs)
-        {
-            if (this==&rhs) return *this;
-            red_=rhs.red_;
-            green_=rhs.green_;
-            blue_=rhs.blue_;
-            alpha_=rhs.alpha_;
+    color( std::string const& str);
+
+    std::string to_string() const;
+    std::string to_hex_string() const;
+
+    color& operator=(color const& rhs)
+    {
+        if (this==&rhs) 
             return *this;
-        }
+        
+        red_   = rhs.red_;
+        green_ = rhs.green_;
+        blue_  = rhs.blue_;
+        alpha_ = rhs.alpha_;
+        
+        return *this;
+    }
+
+    inline bool operator==(color const& rhs) const
+    {
+        return (red_== rhs.red()) &&
+               (green_ == rhs.green()) &&
+               (blue_  == rhs.blue()) &&
+               (alpha_ == rhs.alpha());
+    }
 
     inline unsigned red() const
     {
@@ -123,18 +137,6 @@ public:
         return (alpha_ << 24) | (blue_ << 16) | (green_ << 8) | (red_) ;
 #endif
     }
-
-    inline bool operator==(color const& rhs) const
-    {
-        return (red_== rhs.red()) &&
-            (green_ == rhs.green()) &&
-            (blue_  == rhs.blue()) &&
-            (alpha_ == rhs.alpha());
-
-    }
-
-    std::string to_string() const;
-    std::string to_hex_string() const;
 };
 
 template <typename charT, typename traits>
