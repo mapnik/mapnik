@@ -35,7 +35,5 @@ if 'install' in COMMAND_LINE_TARGETS:
     inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/agg')
     # TODO - restrict to just agg headers used in mapnik includes?
     includes = glob('./include/*.h')
-    # just for kicks wait till libmapnik is built to install headers
     target = env.Install(inc_target, includes)
-    Depends(target, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
     env.Alias(target='install', source=target)
