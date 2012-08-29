@@ -61,7 +61,7 @@ int main ( int argc , char** argv)
         freetype_engine::register_font(mapnik_dir + "/fonts/DejaVuSans.ttf");
 
         Map m(800,600);
-        m.set_background(color_factory::from_string("white"));
+        m.set_background(parse_color("white"));
 
         // create styles
 

@@ -74,7 +74,7 @@ agg::rgba8 parse_color(const char* str)
     mapnik::color c(100,100,100);
     try
     {
-        mapnik::color_factory::init_from_string(c,str);
+        c = mapnik::parse_color(str);
     }
     catch (mapnik::config_error & ex)
     {
@@ -784,7 +784,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
             {
                 try
                 {
-                    mapnik::color_factory::init_from_string(stop_color,kv.second.c_str());
+                    stop_color = mapnik::parse_color(kv.second.c_str());
                 }
                 catch (mapnik::config_error & ex)
                 {
@@ -804,7 +804,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
     {
         try
         {
-            mapnik::color_factory::init_from_string(stop_color,(const char *) value);
+            stop_color = mapnik::parse_color((const char *) value);
         }
         catch (mapnik::config_error & ex)
         {
