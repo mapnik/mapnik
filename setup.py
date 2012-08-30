@@ -135,5 +135,7 @@ setup(
     classifiers=[
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Scientific/Engineering :: GIS",
+        "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
     ],
 )
