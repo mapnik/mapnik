@@ -363,9 +363,6 @@ void apply_filter(Src const& src, Dst & dst, FilterTag filter_tag)
     rgba8_view_t dst_view = interleaved_view(dst.width(),dst.height(),
                                              (rgba8_pixel_t*) dst.raw_data(),
                                              dst.width()*4);
-
-    typedef boost::mpl::vector<red_t,green_t,blue_t> channels;
-
     apply_convolution_3x3(src_view,dst_view,filter_tag);
 }
 
