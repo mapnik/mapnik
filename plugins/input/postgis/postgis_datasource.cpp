@@ -91,7 +91,7 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
     }
 
     boost::optional<std::string> ext = params_.get<std::string>("extent");
-    if (ext)
+    if (ext && !ext->empty())
     {
         extent_initialized_ = extent_.from_string(*ext);
     }
