@@ -1,10 +1,12 @@
-Changelog for mapnik2
+Changelog for mapnik
 ========================
 
 2.1.0
 -----
 
+- Updated for mapnik 2.1.0
 - No more separate bindings repository.
+- New Pypi package name: mapnik instead of mapnik2
 
 
 2.0.1.3 (2012-08-05)
