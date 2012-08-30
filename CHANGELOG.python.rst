@@ -1,5 +1,7 @@
-Changelog for mapnik
-========================
+Changelog
+=========
+This the PyPI Python bindings only changelog.
+For a full changelog see `the official Mapnik changelog <https://github.com/mapnik/mapnik/blob/master/CHANGELOG.md>`_.
 
 2.1.0
 -----
@@ -30,6 +32,7 @@ Changelog for mapnik
 
 2.0.1 (2012-05-06)
 ------------------
-First public release of mapnik2 eggified python bindings
+
+- First public release of mapnik2 eggified python bindings
 
 

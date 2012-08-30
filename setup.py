@@ -8,6 +8,16 @@ from subprocess import Popen, PIPE, check_output
 from ctypes import CDLL
 
 
+def rst(filename):
+    '''
+    Load rst file and sanitize it for PyPI.
+    Remove unsupported github tags:
+     - code-block directive
+    '''
+    content = open(filename).read()
+    return re.sub(r'\.\.\s? code-block::\s*\w+', '::', content)
+
+
 def mapnik_config(key):
     cmd = 'mapnik-config --%s' % key
     try:
@@ -77,8 +87,8 @@ else:
 
 
 long_description = '\n'.join((
-    open('README.python.rst').read(),
-    open('CHANGELOG.python.rst').read(),
+    rst('README.python.rst'),
+    rst('CHANGELOG.python.rst'),
     ''
 ))
 
