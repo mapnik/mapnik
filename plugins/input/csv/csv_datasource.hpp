@@ -54,7 +54,7 @@ public:
     void bind() const;
 
     template <typename T>
-    void parse_csv(T& stream,
+    void parse_csv(T & stream,
                    std::string const& escape,
                    std::string const& separator,
                    std::string const& quote) const;

@@ -143,7 +143,7 @@ void csv_datasource::bind() const
 }
 
 template <typename T>
-void csv_datasource::parse_csv(T& stream,
+void csv_datasource::parse_csv(T & stream,
                                std::string const& escape,
                                std::string const& separator,
                                std::string const& quote) const
@@ -171,6 +171,7 @@ void csv_datasource::parse_csv(T& stream,
 
     // autodetect newlines
     char newline = '\n';
+    bool has_newline = false;
     int newline_count = 0;
     int carriage_count = 0;
     for (unsigned idx = 0; idx < file_length_; idx++)
@@ -179,10 +180,12 @@ void csv_datasource::parse_csv(T& stream,
         if (c == '\n')
         {
             ++newline_count;
+            has_newline = true;
         }
         else if (c == '\r')
         {
             ++carriage_count;
+            has_newline = true;
         }
         // read at least 2000 bytes before testing
         if (idx == file_length_-1 || idx > 4000)
@@ -422,7 +425,7 @@ void csv_datasource::parse_csv(T& stream,
         throw mapnik::datasource_exception(s.str());
     }
 
-    int feature_count(1);
+    int feature_count(0);
     bool extent_initialized = false;
     std::size_t num_headers = headers_.size();
 
@@ -435,12 +438,23 @@ void csv_datasource::parse_csv(T& stream,
     mapnik::wkt_parser parse_wkt;
     mapnik::json::geometry_parser<std::string::const_iterator> parse_json;
 
-    while (std::getline(stream,csv_line,newline))
+    // handle rare case of a single line of data and user-provided headers
+    // where a lack of a newline will mean that std::getline returns false
+    bool is_first_row = false;
+    if (!has_newline)
     {
+        stream >> csv_line;
+        if (!csv_line.empty())
+        {
+            is_first_row = true;
+        }
+    }
+    while (std::getline(stream,csv_line,newline) || is_first_row)
+    {
+        is_first_row = false;
         if ((row_limit_ > 0) && (line_number > row_limit_))
         {
             MAPNIK_LOG_DEBUG(csv) << "csv_datasource: row limit hit, exiting at feature: " << feature_count;
-
             break;
         }
 
@@ -495,7 +509,8 @@ void csv_datasource::parse_csv(T& stream,
                 }
             }
 
-            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_count));
+            // NOTE: we use ++feature_count here because feature id's should start at 1;
+            mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,++feature_count));
             double x(0);
             double y(0);
             bool parsed_x = false;
@@ -754,7 +769,6 @@ void csv_datasource::parse_csv(T& stream,
                         extent_.expand_to_include(feature->envelope());
                     }
                     features_.push_back(feature);
-                    ++feature_count;
                     null_geom = false;
                 }
                 else
@@ -782,7 +796,6 @@ void csv_datasource::parse_csv(T& stream,
                     pt->move_to(x,y);
                     feature->add_geometry(pt);
                     features_.push_back(feature);
-                    ++feature_count;
                     null_geom = false;
                     if (!extent_initialized)
                     {
@@ -836,6 +849,9 @@ void csv_datasource::parse_csv(T& stream,
                 else
                 {
                     MAPNIK_LOG_ERROR(csv) << s.str();
+                    // with no geometry we will never
+                    // add this feature so drop the count
+                    feature_count--;
                     continue;
                 }
             }
