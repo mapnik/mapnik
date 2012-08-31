@@ -1565,7 +1565,7 @@ namespace agg
             base_mask  = color_type::base_mask
         };
 
-        static AGG_INLINE void blend_pix(value_type* p,
+        static void blend_pix(value_type* p,
                                          unsigned sr, unsigned sg, unsigned sb,
                                          unsigned sa, unsigned cover);
     };
@@ -1584,7 +1584,7 @@ namespace agg
             base_mask  = color_type::base_mask
         };
 
-        static AGG_INLINE void blend_pix(value_type* p,
+        static void blend_pix(value_type* p,
                                          unsigned sr, unsigned sg, unsigned sb,
                                          unsigned sa, unsigned cover);
     };
@@ -1603,7 +1603,7 @@ namespace agg
             base_mask  = color_type::base_mask
         };
 
-        static AGG_INLINE void blend_pix(value_type* p,
+        static void blend_pix(value_type* p,
                                          unsigned sr, unsigned sg, unsigned sb,
                                          unsigned sa, unsigned cover);
     };
@@ -1623,7 +1623,7 @@ namespace agg
             base_mask  = color_type::base_mask
         };
 
-        static AGG_INLINE void blend_pix(value_type* p,
+        static void blend_pix(value_type* p,
                                          unsigned sr, unsigned sg, unsigned sb,
                                          unsigned sa, unsigned cover);
     };
