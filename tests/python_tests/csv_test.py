@@ -418,6 +418,79 @@ if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
         # this has invalid header # so throw
         ds = get_csv_ds('more_column_values_than_headers.csv')
 
+    def test_that_feature_id_only_incremented_for_valid_rows(**kwargs):
+        ds = mapnik.Datasource(type='csv',
+                               file=os.path.join('../data/csv/warns','feature_id_counting.csv'),
+                               quiet=True)
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','id'])
+        eq_(ds.field_types(),['int','int','int'])
+        fs = ds.featureset()
+        # first
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['id'],1)
+        # second, should have skipped bogus one
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['id'],2)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(len(ds.all_features()),2)
+
+    def test_dynamically_defining_headers1(**kwargs):
+        ds = mapnik.Datasource(type='csv',
+                               file=os.path.join('../data/csv/fails','needs_headers_two_lines.csv'),
+                               quiet=True,
+                               headers='x,y,name')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','name'])
+        eq_(ds.field_types(),['int','int','str'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['name'],'data_name')
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(len(ds.all_features()),2)
+
+    def test_dynamically_defining_headers2(**kwargs):
+        ds = mapnik.Datasource(type='csv',
+                               file=os.path.join('../data/csv/fails','needs_headers_one_line.csv'),
+                               quiet=True,
+                               headers='x,y,name')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','name'])
+        eq_(ds.field_types(),['int','int','str'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['name'],'data_name')
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(len(ds.all_features()),1)
+
+    def test_dynamically_defining_headers3(**kwargs):
+        ds = mapnik.Datasource(type='csv',
+                               file=os.path.join('../data/csv/fails','needs_headers_one_line_no_newline.csv'),
+                               quiet=True,
+                               headers='x,y,name')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','name'])
+        eq_(ds.field_types(),['int','int','str'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['name'],'data_name')
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(len(ds.all_features()),1)
+
 if __name__ == "__main__":
     setup()
     [eval(run)(visual=True) for run in dir() if 'test_' in run]
