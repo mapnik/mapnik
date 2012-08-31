@@ -94,6 +94,8 @@ Released Aug 23, 2012
 
 - Added support for justify-alignment=auto. This is the new default. (#1125)
 
+- Added support for grouped rendering using the `group-by` layer option: https://github.com/mapnik/mapnik/wiki/Grouped-rendering
+
 
 ## Mapnik 2.0.2
 
