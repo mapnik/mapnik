@@ -145,6 +145,17 @@ def test_pre_multiply_status_of_map2():
     mapnik.render(m,im)
     eq_(validate_pixels_are_not_premultiplied(im),True)
 
+def test_style_level_opacity():
+    m = mapnik.Map(512,512)
+    mapnik.load_map(m,'../data/good_maps/style_level_opacity_and_blur.xml')
+    m.zoom_all()
+    im = mapnik.Image(512,512)
+    mapnik.render(m,im)
+    actual = '/tmp/mapnik-style-level-opacity.png'
+    expected = 'images/support/mapnik-style-level-opacity.png'
+    im.save(actual)
+    expected_im = mapnik.Image.open(expected)
+    eq_(im.tostring(),expected_im.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual,'tests/python_tests/'+ expected))
 
 if __name__ == "__main__":
     setup()
