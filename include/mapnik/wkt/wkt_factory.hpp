@@ -40,7 +40,7 @@ namespace mapnik {
 
 MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
 
-#if BOOST_VERSION >= 104700
+#if BOOST_VERSION >= 104200
 
 class wkt_parser : boost::noncopyable
 {

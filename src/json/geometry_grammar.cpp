@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <boost/version.hpp>
-#if BOOST_VERSION >= 104700
+#if BOOST_VERSION >= 104200
 
 // mapnik
 #include <mapnik/json/geometry_grammar.hpp>
@@ -154,7 +154,9 @@ geometry_grammar<Iterator>::geometry_grammar()
 }
 
 template struct mapnik::json::geometry_grammar<std::string::const_iterator>;
+#if BOOST_VERSION > 104200
 template struct mapnik::json::geometry_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
+#endif
 
 }}
 

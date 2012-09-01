@@ -32,7 +32,7 @@
 
 namespace mapnik { namespace json {
 
-#if BOOST_VERSION >= 104700
+#if BOOST_VERSION >= 104200
 
 template <typename Iterator>
 geometry_parser<Iterator>::geometry_parser()
@@ -73,6 +73,8 @@ bool from_geojson(std::string const& json, boost::ptr_vector<geometry_type> & pa
 }
 
 template class geometry_parser<std::string::const_iterator> ;
+#if BOOST_VERSION > 104200
 template class geometry_parser<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
+#endif
 
 }}
