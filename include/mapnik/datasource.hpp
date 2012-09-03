@@ -53,7 +53,7 @@ typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
 class MAPNIK_DECL datasource_exception : public std::exception
 {
 public:
-    datasource_exception(const std::string& message = std::string("no reason"))
+    datasource_exception(std::string const& message = std::string("no reason"))
       : message_(message)
     {
     }
@@ -114,7 +114,7 @@ public:
      */
     virtual void bind() const {}
 
-    virtual featureset_ptr features(const query& q) const = 0;
+    virtual featureset_ptr features(query const& q) const = 0;
     virtual featureset_ptr features_at_point(coord2d const& pt) const = 0;
     virtual box2d<double> envelope() const = 0;
     virtual boost::optional<geometry_t> get_geometry_type() const = 0;
@@ -126,7 +126,7 @@ protected:
 };
 
 typedef const char * datasource_name();
-typedef datasource* create_ds(const parameters& params, bool bind);
+typedef datasource* create_ds(parameters const& params, bool bind);
 typedef void destroy_ds(datasource *ds);
 
 class datasource_deleter
@@ -145,7 +145,7 @@ typedef boost::shared_ptr<datasource> datasource_ptr;
     {                                                                   \
         return classname::name();                                       \
     }                                                                   \
-    extern "C"  MAPNIK_EXP datasource* create(const parameters &params, bool bind) \
+    extern "C"  MAPNIK_EXP datasource* create(parameters const& params, bool bind) \
     {                                                                   \
         return new classname(params, bind);                             \
     }                                                                   \
