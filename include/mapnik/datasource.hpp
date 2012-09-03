@@ -53,7 +53,7 @@ typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
 class MAPNIK_DECL datasource_exception : public std::exception
 {
 public:
-    datasource_exception(std::string const& message = std::string("no reason"))
+    datasource_exception(std::string const& message)
       : message_(message)
     {
     }
@@ -141,7 +141,7 @@ public:
 typedef boost::shared_ptr<datasource> datasource_ptr;
 
 #define DATASOURCE_PLUGIN(classname)                                    \
-    extern "C" MAPNIK_EXP const char * datasource_name()                 \
+    extern "C" MAPNIK_EXP const char * datasource_name()                \
     {                                                                   \
         return classname::name();                                       \
     }                                                                   \
