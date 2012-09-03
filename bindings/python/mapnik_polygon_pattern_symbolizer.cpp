@@ -37,7 +37,7 @@ using mapnik::guess_type;
 namespace {
 using namespace boost::python;
 
-const std::string get_filename(polygon_pattern_symbolizer const& t)
+std::string get_filename(polygon_pattern_symbolizer const& t)
 {
     return path_processor_type::to_string(*t.get_filename());
 }

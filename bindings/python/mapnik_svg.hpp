@@ -31,7 +31,7 @@ namespace mapnik {
 using namespace boost::python;
 
 template <class T>
-const std::string get_svg_transform(T& symbolizer)
+std::string get_svg_transform(T& symbolizer)
 {
     return symbolizer.get_image_transform_string();
 }
