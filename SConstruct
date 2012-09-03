@@ -1703,7 +1703,7 @@ if not HELP_REQUESTED:
             if plugin not in env['REQUESTED_PLUGINS']:
                 plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'%s.input' % plugin)
                 if os.path.exists(plugin_path):
-                    color_print(1,"Notice: removing out of date plugin: '%s'" % plugin_path)
+                    color_print(3,"Notice: removing out of date plugin: '%s'" % plugin_path)
                     os.unlink(plugin_path)
 
     # Build the c++ rundemo app if requested
@@ -1757,3 +1757,8 @@ if not HELP_REQUESTED:
     # if requested, build the sample input plugins
     if env['SAMPLE_INPUT_PLUGINS']:
         SConscript('plugins/input/templates/helloworld/build.py')
+    elif 'install' in COMMAND_LINE_TARGETS:
+        plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'hello.input')
+        if os.path.exists(plugin_path):
+            color_print(3,"Notice: removing out of date plugin: '%s'" % plugin_path)
+            os.unlink(plugin_path)
