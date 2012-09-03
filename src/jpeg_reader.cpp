@@ -46,7 +46,7 @@ private:
     unsigned width_;
     unsigned height_;
 public:
-    explicit JpegReader(const std::string& fileName);
+    explicit JpegReader(std::string const& fileName);
     ~JpegReader();
     unsigned width() const;
     unsigned height() const;
@@ -57,14 +57,14 @@ private:
 
 namespace
 {
-image_reader* createJpegReader(const std::string& file)
+image_reader* createJpegReader(std::string const& file)
 {
     return new JpegReader(file);
 }
 const bool registered = register_image_reader("jpeg",createJpegReader);
 }
 
-JpegReader::JpegReader(const std::string& fileName)
+JpegReader::JpegReader(std::string const& fileName)
     : fileName_(fileName),
       width_(0),
       height_(0)

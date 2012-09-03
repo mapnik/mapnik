@@ -55,7 +55,7 @@ public:
         stripped,
         tiled
     };
-    explicit tiff_reader(const std::string& file_name);
+    explicit tiff_reader(std::string const& file_name);
     virtual ~tiff_reader();
     unsigned width() const;
     unsigned height() const;
@@ -67,12 +67,12 @@ private:
     void read_generic(unsigned x,unsigned y,image_data_32& image);
     void read_stripped(unsigned x,unsigned y,image_data_32& image);
     void read_tiled(unsigned x,unsigned y,image_data_32& image);
-    TIFF* load_if_exists(const std::string& filename);
+    TIFF* load_if_exists(std::string const& filename);
 };
 
 namespace
 {
-image_reader* create_tiff_reader(const std::string& file)
+image_reader* create_tiff_reader(std::string const& file)
 {
     return new tiff_reader(file);
 }
@@ -80,7 +80,7 @@ image_reader* create_tiff_reader(const std::string& file)
 const bool registered = register_image_reader("tiff",create_tiff_reader);
 }
 
-tiff_reader::tiff_reader(const std::string& file_name)
+tiff_reader::tiff_reader(std::string const& file_name)
     : file_name_(file_name),
       read_method_(generic),
       width_(0),

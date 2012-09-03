@@ -349,7 +349,7 @@ template <typename T>
 #if !defined(__SUNPRO_CC)
 inline
 #endif
-bool box2d<T>::from_string(const std::string& s)
+bool box2d<T>::from_string(std::string const& s)
 {
     unsigned i = 0;
     double d[4];

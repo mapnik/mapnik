@@ -193,7 +193,7 @@ public:
           else_filter_(false),
           also_filter_(false) {}
 
-    rule(const std::string& name,
+    rule(std::string const& name,
          double min_scale_denominator=0,
          double max_scale_denominator=std::numeric_limits<double>::infinity())
         : name_(name),

@@ -49,7 +49,7 @@ private:
     datasource_cache& operator=(const datasource_cache&);
     static std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
     static bool registered_;
-    static bool insert(const std::string&  name,const lt_dlhandle module);
+    static bool insert(std::string const&  name,const lt_dlhandle module);
     static std::vector<std::string> plugin_directories_;
 public:
     static std::vector<std::string> plugin_names();

@@ -375,7 +375,7 @@ void sqlite_datasource::bind() const
     is_bound_ = true;
 }
 
-std::string sqlite_datasource::populate_tokens(const std::string& sql) const
+std::string sqlite_datasource::populate_tokens(std::string const& sql) const
 {
     std::string populated_sql = sql;
     if (boost::algorithm::ifind_first(populated_sql, intersects_token_))

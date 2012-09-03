@@ -205,8 +205,8 @@ void render6(const mapnik::Map& map, PycairoContext* context)
 void render_tile_to_file(const mapnik::Map& map,
                          unsigned offset_x, unsigned offset_y,
                          unsigned width, unsigned height,
-                         const std::string& file,
-                         const std::string& format)
+                         std::string const& file,
+                         std::string const& format)
 {
     mapnik::image_32 image(width,height);
     render(map,image,1.0,offset_x, offset_y);
@@ -214,8 +214,8 @@ void render_tile_to_file(const mapnik::Map& map,
 }
 
 void render_to_file1(const mapnik::Map& map,
-                     const std::string& filename,
-                     const std::string& format)
+                     std::string const& filename,
+                     std::string const& format)
 {
     if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
@@ -233,7 +233,7 @@ void render_to_file1(const mapnik::Map& map,
     }
 }
 
-void render_to_file2(const mapnik::Map& map,const std::string& filename)
+void render_to_file2(const mapnik::Map& map,std::string const& filename)
 {
     std::string format = mapnik::guess_type(filename);
     if (format == "pdf" || format == "svg" || format =="ps")
@@ -253,8 +253,8 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
 }
 
 void render_to_file3(const mapnik::Map& map,
-                     const std::string& filename,
-                     const std::string& format,
+                     std::string const& filename,
+                     std::string const& format,
                      double scale_factor = 1.0
     )
 {

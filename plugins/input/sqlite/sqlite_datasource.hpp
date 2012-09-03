@@ -63,7 +63,7 @@ private:
     // Fill init_statements with any statements
     // needed to attach auxillary databases
     void parse_attachdb(std::string const& attachdb) const;
-    std::string populate_tokens(const std::string& sql) const;
+    std::string populate_tokens(std::string const& sql) const;
 
     // FIXME: remove mutable qualifier from data members
     //        by factoring out bind() logic out from

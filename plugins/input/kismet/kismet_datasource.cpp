@@ -175,7 +175,7 @@ featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
     return featureset_ptr();
 }
 
-void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
+void kismet_datasource::run(std::string const& ip_host, const unsigned int port)
 {
     MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource: Enter run";
 

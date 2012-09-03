@@ -114,7 +114,7 @@ std::ofstream logger::file_output_;
 std::string logger::file_name_;
 std::streambuf* logger::saved_buf_ = 0;
 
-void logger::use_file(const std::string& filepath)
+void logger::use_file(std::string const& filepath)
 {
     // save clog rdbuf
     if (saved_buf_ == 0)

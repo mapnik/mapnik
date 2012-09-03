@@ -34,7 +34,7 @@
 
 polygon_types osm_way::ptypes;
 
-bool osm_dataset::load(const char* filename,const std::string& parser)
+bool osm_dataset::load(const char* filename,std::string const& parser)
 {
     if (parser == "libxml2")
     {
@@ -43,9 +43,9 @@ bool osm_dataset::load(const char* filename,const std::string& parser)
     return false;
 }
 
-bool osm_dataset::load_from_url(const std::string& url,
-                                const std::string& bbox,
-                                const std::string& parser)
+bool osm_dataset::load_from_url(std::string const& url,
+                                std::string const& bbox,
+                                std::string const& parser)
 {
     if (parser == "libxml2")
     {

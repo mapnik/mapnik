@@ -159,7 +159,7 @@ public:
     /*! \brief Remove a style from the map.
      *  @param name The name of the style.
      */
-    void remove_style(const std::string& name);
+    void remove_style(std::string const& name);
 
     /*! \brief Find a style.
      *  @param name The name of the style.

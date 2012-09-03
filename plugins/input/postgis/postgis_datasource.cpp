@@ -485,7 +485,7 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
     return b.str();
 }
 
-std::string postgis_datasource::populate_tokens(const std::string& sql) const
+std::string postgis_datasource::populate_tokens(std::string const& sql) const
 {
     std::string populated_sql = sql;
 
@@ -520,7 +520,7 @@ std::string postgis_datasource::populate_tokens(const std::string& sql) const
     return populated_sql;
 }
 
-std::string postgis_datasource::populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
+std::string postgis_datasource::populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
 {
     std::string populated_sql = sql;
     std::string box = sql_bbox(env);

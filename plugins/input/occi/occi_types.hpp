@@ -156,7 +156,7 @@ public:
         owns_connection_ = owns_connection;
     }
 
-    oracle::occi::ResultSet* execute_query(const std::string& s, const unsigned prefetch = 0)
+    oracle::occi::ResultSet* execute_query(std::string const& s, const unsigned prefetch = 0)
     {
         close_query(false);
 

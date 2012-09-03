@@ -38,7 +38,7 @@ class image_reader_exception : public std::exception
 private:
     std::string message_;
 public:
-    image_reader_exception(const std::string& message)
+    image_reader_exception(std::string const& message)
         : message_(message) {}
 
     ~image_reader_exception() throw() {}
@@ -57,9 +57,9 @@ struct MAPNIK_DECL image_reader
     virtual ~image_reader() {}
 };
 
-bool register_image_reader(const std::string& type,image_reader* (*)(const std::string&));
-MAPNIK_DECL image_reader* get_image_reader(const std::string& file,const std::string& type);
-MAPNIK_DECL image_reader* get_image_reader(const std::string& file);
+bool register_image_reader(std::string const& type,image_reader* (*)(std::string const&));
+MAPNIK_DECL image_reader* get_image_reader(std::string const& file,std::string const& type);
+MAPNIK_DECL image_reader* get_image_reader(std::string const& file);
 
 }
 

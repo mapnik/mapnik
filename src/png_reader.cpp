@@ -42,7 +42,7 @@ private:
     int bit_depth_;
     int color_type_;
 public:
-    explicit png_reader(const std::string& fileName);
+    explicit png_reader(std::string const& fileName);
     ~png_reader();
     unsigned width() const;
     unsigned height() const;
@@ -53,14 +53,14 @@ private:
 
 namespace
 {
-image_reader* create_png_reader(const std::string& file)
+image_reader* create_png_reader(std::string const& file)
 {
     return new png_reader(file);
 }
 const bool registered = register_image_reader("png",create_png_reader);
 }
 
-png_reader::png_reader(const std::string& fileName)
+png_reader::png_reader(std::string const& fileName)
     : fileName_(fileName),
       width_(0),
       height_(0),

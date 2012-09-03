@@ -37,7 +37,7 @@ const std::string shape_io::SHP = ".shp";
 const std::string shape_io::DBF = ".dbf";
 const std::string shape_io::INDEX = ".index";
 
-shape_io::shape_io(const std::string& shape_name, bool open_index)
+shape_io::shape_io(std::string const& shape_name, bool open_index)
     : type_(shape_null),
       shp_(shape_name + SHP),
       dbf_(shape_name + DBF),

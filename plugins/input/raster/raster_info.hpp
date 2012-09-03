@@ -33,8 +33,8 @@ using mapnik::box2d;
 class raster_info
 {
 public:
-    raster_info(const std::string& file,
-                const std::string& format,
+    raster_info(std::string const& file,
+                std::string const& format,
                 const box2d<double>& extent,
                 unsigned width,
                 unsigned height);
