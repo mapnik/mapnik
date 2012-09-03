@@ -14,16 +14,19 @@ def setup():
 if 'geojson' in mapnik.DatasourceCache.instance().plugin_names():
 
     def test_geojson_init():
-        s = mapnik.Datasource(type='geojson',file='../data/json/escaped.json')
-        e = s.envelope()
+        ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.json')
+        e = ds.envelope()
         assert_almost_equal(e.minx, -81.705583, places=7)
         assert_almost_equal(e.miny, 41.480573, places=6)
         assert_almost_equal(e.maxx, -81.705583, places=5)
         assert_almost_equal(e.maxy, 41.480573, places=3)
 
     def test_geojson_properties():
-        s = mapnik.Datasource(type='geojson',file='../data/json/escaped.json')
-        f = s.features_at_point(s.envelope().center()).features[0]
+        ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.json')
+        f = ds.features_at_point(s.envelope().center()).features[0]
+
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 
         eq_(f['name'], u'test')
         eq_(f['description'], u'Test: \u005C')
@@ -34,8 +37,11 @@ if 'geojson' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(f['NOM_FR'], u'Québec')
 
     def test_geojson_properties():
-        s = mapnik.Datasource(type='geojson',file='../data/json/escaped.json')
-        f = s.all_features()[0]
+        ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.json')
+        f = ds.all_features()[0]
+
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
 
         eq_(f['name'], u'Test')
         eq_(f['int'], 1)
