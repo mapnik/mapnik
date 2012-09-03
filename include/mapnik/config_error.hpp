@@ -39,8 +39,8 @@ public:
 
     virtual const char * what() const throw();
 
-    void append_context(const std::string & ctx) const;
-    void append_context(const std::string & ctx, xml_node const& node) const;
+    void append_context(std::string const& ctx) const;
+    void append_context(std::string const& ctx, xml_node const& node) const;
     void append_context(xml_node const& node) const;
 protected:
     mutable std::string what_;
