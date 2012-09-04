@@ -152,7 +152,7 @@ feature_ptr postgis_featureset::next()
                     float8net(val,buf);
                     boost::put(*feature,name,val);
                 }
-                else if (oid==25 || oid==1043) // text or varchar
+                else if (oid==25 || oid==1043 || oid==705 ) // text or varchar or literal
                 {
                     UnicodeString ustr = tr_->transcode(buf);
                     boost::put(*feature,name,ustr);
