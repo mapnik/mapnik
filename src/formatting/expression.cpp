@@ -63,7 +63,7 @@ node_ptr expression_format::from_xml(xml_node const& xml)
     n->text_size = get_expression(xml, "size");
     n->character_spacing = get_expression(xml, "character-spacing");
     n->line_spacing = get_expression(xml, "line-spacing");
-    n->text_opacity = get_expression(xml, "opactity");
+    n->text_opacity = get_expression(xml, "opacity");
     n->wrap_before = get_expression(xml, "wrap-before");
     n->wrap_char = get_expression(xml, "wrap-character");
     n->fill = get_expression(xml, "fill");
