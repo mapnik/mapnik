@@ -12,4 +12,4 @@ before_install:
  - sudo apt-get install -qq libicu-dev libpng-dev libjpeg-dev libtiff-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libpq-dev libgdal-dev libcairomm-1.0-dev python-cairo-dev libsqlite3-dev
  - sudo apt-get install -qq ccache python-nose
 
-script: scons configure JOBS=4 FAST=True CXX="ccache $CXX $CXX_SCONS" WARNING_CXXFLAGS=$WARNING_CXXFLAGS && sudo make install && make test
+script: scons configure JOBS=4 FAST=True CXX="$CXX $CXX_SCONS" WARNING_CXXFLAGS=$WARNING_CXXFLAGS && sudo make install && make test
