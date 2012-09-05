@@ -86,24 +86,24 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (placement_) label_placement = *placement_;
     optional<vertical_alignment_e> valign_ = sym.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     if (valign_) valign = *valign_;
-    optional<unsigned> text_ratio_ = sym.get_opt_attr<unsigned>("text-ratio");
+    optional<double> text_ratio_ = sym.get_opt_attr<double>("text-ratio");
     if (text_ratio_) text_ratio = *text_ratio_;
-    optional<unsigned> wrap_width_ = sym.get_opt_attr<unsigned>("wrap-width");
+    optional<double> wrap_width_ = sym.get_opt_attr<double>("wrap-width");
     if (wrap_width_) wrap_width = *wrap_width_;
     optional<unsigned> label_position_tolerance_ = sym.get_opt_attr<unsigned>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
-    optional<unsigned> spacing_ = sym.get_opt_attr<unsigned>("spacing");
+    optional<double> spacing_ = sym.get_opt_attr<double>("spacing");
     if (spacing_) label_spacing = *spacing_;
     else {
         // https://github.com/mapnik/mapnik/issues/1427
-        spacing_ = sym.get_opt_attr<unsigned>("label-spacing");
+        spacing_ = sym.get_opt_attr<double>("label-spacing");
         if (spacing_) label_spacing = *spacing_;
     }
-    optional<unsigned> minimum_distance_ = sym.get_opt_attr<unsigned>("minimum-distance");
+    optional<double> minimum_distance_ = sym.get_opt_attr<double>("minimum-distance");
     if (minimum_distance_) minimum_distance = *minimum_distance_;
-    optional<unsigned> min_padding_ = sym.get_opt_attr<unsigned>("minimum-padding");
+    optional<double> min_padding_ = sym.get_opt_attr<double>("minimum-padding");
     if (min_padding_) minimum_padding = *min_padding_;
-    optional<unsigned> min_path_length_ = sym.get_opt_attr<unsigned>("minimum-path-length");
+    optional<double> min_path_length_ = sym.get_opt_attr<double>("minimum-path-length");
     if (min_path_length_) minimum_path_length = *min_path_length_;
     optional<boolean> avoid_edges_ = sym.get_opt_attr<boolean>("avoid-edges");
     if (avoid_edges_) avoid_edges = *avoid_edges_;
@@ -256,7 +256,7 @@ char_properties::char_properties() :
 
 void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
 {
-    optional<float> text_size_ = sym.get_opt_attr<float>("size");
+    optional<double> text_size_ = sym.get_opt_attr<double>("size");
     if (text_size_) text_size = *text_size_;
     optional<double> character_spacing_ = sym.get_opt_attr<double>("character-spacing");
     if (character_spacing_) character_spacing = *character_spacing_;

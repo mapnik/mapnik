@@ -59,7 +59,7 @@ struct char_properties
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
     std::string face_name;
     font_set fontset;
-    float text_size;
+    double text_size;
     double character_spacing;
     double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
     double text_opacity;
@@ -151,7 +151,7 @@ struct text_symbolizer_properties
     justify_alignment_e jalign;
     vertical_alignment_e valign;
     /** distance between repeated labels on a single geometry */
-    unsigned label_spacing;
+    double label_spacing;
     /** distance the label can be moved on the line to fit, if 0 the default is used */
     unsigned label_position_tolerance;
     bool avoid_edges;
@@ -164,8 +164,8 @@ struct text_symbolizer_properties
     bool allow_overlap;
     /** Only consider geometry with largest bbox (polygons) */
     bool largest_bbox_only;
-    unsigned text_ratio;
-    unsigned wrap_width;
+    double text_ratio;
+    double wrap_width;
     /** Default values for char_properties. */
     char_properties format;
 private:

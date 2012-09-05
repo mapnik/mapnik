@@ -131,7 +131,7 @@ public:
         return false;
     }
 
-    bool set_character_sizes(float size)
+    bool set_character_sizes(double size)
     {
         if ( !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0))
             return true;
@@ -191,7 +191,7 @@ public:
         }
     }
 
-    void set_character_sizes(float size)
+    void set_character_sizes(double size)
     {
         BOOST_FOREACH ( face_ptr const& face, faces_)
         {

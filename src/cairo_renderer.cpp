@@ -724,7 +724,7 @@ public:
             path.vertex(&c, &x, &y, &angle);
 
             face_set_ptr faces = font_manager.get_face_set(c->format->face_name, c->format->fontset);
-            float text_size = c->format->text_size * scale_factor;
+            double text_size = c->format->text_size * scale_factor;
             faces->set_character_sizes(text_size);
 
             glyph_ptr glyph = faces->get_glyph(c->c);

@@ -59,9 +59,9 @@ node_ptr format_node::from_xml(xml_node const& xml)
 
     n->face_name = xml.get_opt_attr<std::string>("face-name");
     /*TODO: Fontset is problematic. We don't have the fontsets pointer here... */
-    n->text_size = xml.get_opt_attr<unsigned>("size");
-    n->character_spacing = xml.get_opt_attr<unsigned>("character-spacing");
-    n->line_spacing = xml.get_opt_attr<unsigned>("line-spacing");
+    n->text_size = xml.get_opt_attr<double>("size");
+    n->character_spacing = xml.get_opt_attr<double>("character-spacing");
+    n->line_spacing = xml.get_opt_attr<double>("line-spacing");
     n->text_opacity = xml.get_opt_attr<double>("opacity");
     boost::optional<boolean> wrap = xml.get_opt_attr<boolean>("wrap-before");
     if (wrap) n->wrap_before = *wrap;
