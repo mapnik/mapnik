@@ -22,7 +22,7 @@ def create_ds():
     ds = mapnik.SQLite(file=DB,table=TABLE)
     fs = ds.all_features()
 
-if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
+if 'sqlite' in mapnik.DatasourceCache.plugin_names():
 
     def test_rtree_creation():
 
@@ -47,7 +47,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
             conn.commit()
             eq_(cur.fetchone()[0],TOTAL)
         except sqlite3.OperationalError:
-            # don't worry about testing # of index records if 
+            # don't worry about testing # of index records if
             # python's sqlite module does not support rtree
             pass
         cur.close()

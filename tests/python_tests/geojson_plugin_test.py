@@ -11,7 +11,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'geojson' in mapnik.DatasourceCache.instance().plugin_names():
+if 'geojson' in mapnik.DatasourceCache.plugin_names():
 
     def test_geojson_init():
         ds = mapnik.Datasource(type='geojson',file='../data/json/escaped.json')

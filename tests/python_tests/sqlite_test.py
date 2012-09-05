@@ -10,7 +10,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
+if 'sqlite' in mapnik.DatasourceCache.plugin_names():
 
     def test_attachdb_with_relative_file():
         # The point table and index is in the qgis_spatiallite.sqlite

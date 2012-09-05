@@ -149,7 +149,7 @@ def postgis_takedown():
     # fails as the db is in use: https://github.com/mapnik/mapnik/issues/960
     #call('dropdb %s' % MAPNIK_TEST_DBNAME)
 
-if 'postgis' in mapnik.DatasourceCache.instance().plugin_names() \
+if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         and createdb_and_dropdb_on_path() \
         and psql_can_connect() \
         and shp2pgsql_on_path():

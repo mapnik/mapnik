@@ -21,10 +21,10 @@ class PointDatasource(mapnik.PythonDatasource):
 
     def features(self, query):
         return mapnik.PythonDatasource.wkt_features(
-            keys = ('label',), 
+            keys = ('label',),
             features = (
-                ( 'POINT (5 6)', { 'label': 'foo-bar'} ), 
-                ( 'POINT (60 50)', { 'label': 'buzz-quux'} ), 
+                ( 'POINT (5 6)', { 'label': 'foo-bar'} ),
+                ( 'POINT (60 50)', { 'label': 'buzz-quux'} ),
             )
         )
 
@@ -94,7 +94,7 @@ class CirclesDatasource(mapnik.PythonDatasource):
             features = ConcentricCircles(centre, query.bbox, self.step)
         )
 
-if 'python' in mapnik.DatasourceCache.instance().plugin_names():
+if 'python' in mapnik.DatasourceCache.plugin_names():
     # make sure we can load from ourself as a module
     sys.path.append(execution_path('.'))
 

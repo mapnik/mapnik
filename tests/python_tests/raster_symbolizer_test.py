@@ -14,7 +14,7 @@ def setup():
 def test_dataraster_coloring():
     srs = '+init=epsg:32630'
     lyr = mapnik.Layer('dataraster')
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Gdal(
             file = '../data/raster/dataraster.tif',
             band = 1,
@@ -60,7 +60,7 @@ def test_dataraster_coloring():
 def test_dataraster_query_point():
     srs = '+init=epsg:32630'
     lyr = mapnik.Layer('dataraster')
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Gdal(
             file = '../data/raster/dataraster.tif',
             band = 1,
@@ -125,7 +125,7 @@ def test_raster_with_alpha_blends_correctly_with_background():
 
     map_layer = mapnik.Layer('test_layer')
     filepath = '../data/raster/white-alpha.png'
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         map_layer.datasource = mapnik.Gdal(file=filepath)
         map_layer.styles.append('raster_style')
         map.layers.append(map_layer)
@@ -145,7 +145,7 @@ def test_raster_warping():
     lyrSrs = "+init=epsg:32630"
     mapSrs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
     lyr = mapnik.Layer('dataraster', lyrSrs)
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Gdal(
             file = '../data/raster/dataraster.tif',
             band = 1,
@@ -161,7 +161,7 @@ def test_raster_warping():
         lyr.styles.append('foo')
         _map.layers.append(lyr)
         prj_trans = mapnik.ProjTransform(mapnik.Projection(mapSrs),
-                                          mapnik.Projection(lyrSrs)) 
+                                          mapnik.Projection(lyrSrs))
         _map.zoom_to_box(prj_trans.backward(lyr.envelope()))
 
         im = mapnik.Image(_map.width,_map.height)
@@ -175,7 +175,7 @@ def test_raster_warping_does_not_overclip_source():
     lyrSrs = "+init=epsg:32630"
     mapSrs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
     lyr = mapnik.Layer('dataraster', lyrSrs)
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Gdal(
             file = '../data/raster/dataraster.tif',
             band = 1,

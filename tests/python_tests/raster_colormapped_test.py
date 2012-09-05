@@ -9,7 +9,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+if 'gdal' in mapnik.DatasourceCache.plugin_names():
 
     def test_vrt_rendering():
         m = mapnik.Map(512,512)
@@ -22,7 +22,7 @@ if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
         im.save(actual)
         expected_im = mapnik.Image.open(expected)
         eq_(im.tostring(),expected_im.tostring(), 'failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
-    
+
     def test_tif_rendering_nodata():
         m = mapnik.Map(512,512)
         mapnik.load_map(m,'../data/good_maps/tiff_colortable.xml')

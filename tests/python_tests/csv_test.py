@@ -12,7 +12,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'csv' in mapnik.DatasourceCache.instance().plugin_names():
+if 'csv' in mapnik.DatasourceCache.plugin_names():
 
     def get_csv_ds(filename):
         return mapnik.Datasource(type='csv',file=os.path.join('../data/csv/',filename),quiet=True)
