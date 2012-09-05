@@ -174,6 +174,7 @@ feature_ptr postgis_featureset::next()
 
                     case 25:   //text
                     case 1043: //varchar
+                    case 705:  //literal
                     {
                         feature->put(name, tr_->transcode(buf));
                         break;
