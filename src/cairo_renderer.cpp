@@ -865,7 +865,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, polygon_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
@@ -873,6 +873,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
     if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
+    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     BOOST_FOREACH( geometry_type & geom, feature.paths())
@@ -989,7 +990,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
 {
     typedef boost::mpl::vector<clip_line_tag, transform_tag,
                                offset_transform_tag, affine_transform_tag,
-                               smooth_tag, dash_tag, stroke_tag> conv_types;
+                               simplify_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
     cairo_context context(context_);
     mapnik::stroke const& stroke_ = sym.get_stroke();
     context.set_operator(sym.comp_op());
@@ -1030,6 +1031,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     converter.set<transform_tag>(); // always transform
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
+    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     BOOST_FOREACH( geometry_type & geom, feature.paths())
@@ -1386,7 +1388,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(query_extent_,context,sym,t_,prj_trans,tr, scale_factor_);
@@ -1394,6 +1396,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
+    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     BOOST_FOREACH( geometry_type & geom, feature.paths())

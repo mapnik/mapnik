@@ -60,6 +60,10 @@ void export_polygon_symbolizer()
                       &polygon_symbolizer::smooth,
                       &polygon_symbolizer::set_smooth,
                       "Set/get the polygon geometry's smooth value")
+        .add_property("simplify_tolerance",
+                      &polygon_symbolizer::simplify_tolerance,
+                      &polygon_symbolizer::set_simplify_tolerance,
+                      "simplfication tolerance measure")
         ;
 
 }
