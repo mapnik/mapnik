@@ -33,8 +33,6 @@
 namespace mapnik
 {
 
-boost::unordered_map<std::string, mapped_region_ptr> mapped_memory_cache::cache_;
-
 void mapped_memory_cache::clear()
 {
 #ifdef MAPNIK_THREADSAFE
