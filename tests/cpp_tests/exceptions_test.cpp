@@ -44,11 +44,11 @@ int main( int, char*[] )
     std::string csv_plugin("./plugins/input/csv.input");
     if (boost::filesystem::exists(csv_plugin)) {
         try {
-            mapnik::datasource_cache::instance()->register_datasource(csv_plugin);
+            mapnik::datasource_cache::instance().register_datasource(csv_plugin);
             mapnik::parameters p;
             p["type"]="csv";
             p["inline"]="x,y\n0,0";
-            mapnik::datasource_ptr ds = mapnik::datasource_cache::instance()->create(p);
+            mapnik::datasource_ptr ds = mapnik::datasource_cache::instance().create(p);
             //mapnik::datasource_ptr ds = boost::make_shared<mapnik::memory_datasource>();
             //mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
             //mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, 1));
@@ -75,29 +75,29 @@ int main( int, char*[] )
     std::string shape_plugin("./plugins/input/shape.input");
     if (boost::filesystem::exists(shape_plugin)) {
         try {
-            mapnik::datasource_cache::instance()->register_datasource(shape_plugin);
+            mapnik::datasource_cache::instance().register_datasource(shape_plugin);
             mapnik::parameters p2;
             p2["type"]="shape";
             p2["file"]="foo";
-            mapnik::datasource_cache::instance()->create(p2);
+            mapnik::datasource_cache::instance().create(p2);
             BOOST_TEST(false);
         } catch (...) {
             BOOST_TEST(true);
         }
     }
-    
+
     /*
     // not working, oddly segfaults valgrind
     try {
         sqlite3_initialize();
         // http://stackoverflow.com/questions/11107703/sqlite3-sigsegvs-with-valgrind
         sqlite3_config(SQLITE_CONFIG_HEAP, malloc (1024*1024), 1024*1024, 64);
-        mapnik::datasource_cache::instance()->register_datasource("./plugins/input/sqlite.input");
+        mapnik::datasource_cache::instance().register_datasource("./plugins/input/sqlite.input");
         mapnik::parameters p;
         p["type"]="sqlite";
         p["file"]="tests/data/sqlite/world.sqlite";
         p["table"]="world_merc";
-        mapnik::datasource_cache::instance()->create(p);
+        mapnik::datasource_cache::instance().create(p);
         sqlite3_shutdown();
         BOOST_TEST(true);
     } catch (...) {

@@ -94,7 +94,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 
     if (!filename.empty())
     {
-        boost::optional<marker_ptr> mark = mapnik::marker_cache::instance()->find(filename, true);
+        boost::optional<marker_ptr> mark = mapnik::marker_cache::instance().find(filename, true);
         if (mark && *mark)
         {
             ras_ptr->reset();

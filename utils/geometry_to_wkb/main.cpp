@@ -43,7 +43,7 @@ int main (int argc, char ** argv )
 
     std::cerr << "Geometry to WKB converter\n";
 
-    mapnik::datasource_cache::instance()->register_datasources("/opt/mapnik/lib/mapnik/input/");
+    mapnik::datasource_cache::instance().register_datasources("/opt/mapnik/lib/mapnik/input/");
 
     std::string filename(argv[1]);
     std::cerr << filename << std::endl;
@@ -56,7 +56,7 @@ int main (int argc, char ** argv )
 
     try
     {
-        ds = mapnik::datasource_cache::instance()->create(p);
+        ds = mapnik::datasource_cache::instance().create(p);
     }
     catch ( ... )
     {
@@ -104,5 +104,3 @@ int main (int argc, char ** argv )
 
     return EXIT_SUCCESS;
 }
-
-

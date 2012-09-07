@@ -81,7 +81,7 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
         }
     }
 
-    return mapnik::datasource_cache::instance()->create(params, bind);
+    return mapnik::datasource_cache::instance().create(params, bind);
 }
 
 boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)

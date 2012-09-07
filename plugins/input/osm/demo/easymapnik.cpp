@@ -32,7 +32,7 @@ int main(int argc,char *argv[])
         exit(1);
     }
 
-    datasource_cache::instance()->register_datasources
+    datasource_cache::instance().register_datasources
         ("/usr/local/lib/mapnik/input");
     freetype_engine::register_font
         ("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
