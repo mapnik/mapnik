@@ -25,7 +25,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/layout.hpp>
-#include <mapnik/metawriter.hpp>
+#include <mapnik/geom_util.hpp>
 #include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
@@ -57,12 +57,6 @@ placements_list const& text_symbolizer_helper::get()
     else
     {
         while (next_line_placement());
-    }
-    metawriter_with_properties writer = sym_.get_metawriter();
-    if (writer.first)
-    {
-        //TODO: Boxes for ShieldSymbolizer
-        writer.first->add_text(finder_.placements(), feature_, t_, writer.second);
     }
     return finder_.placements();
 }
@@ -206,25 +200,31 @@ void text_symbolizer_helper::initialize_points()
         }
         else
         {
+            // https://github.com/mapnik/mapnik/issues/1423
+            bool success = false;
+            // https://github.com/mapnik/mapnik/issues/1350
             if (geom.type() == LineString)
             {
-                label::middle_point(geom, label_x,label_y);
+                success = label::middle_point(geom, label_x,label_y);
             }
             else if (how_placed == POINT_PLACEMENT)
             {
-                label::centroid(geom, label_x, label_y);
+                success = label::centroid(geom, label_x, label_y);
             }
             else if (how_placed == INTERIOR_PLACEMENT)
             {
-                label::interior_position(geom, label_x, label_y);
+                success = label::interior_position(geom, label_x, label_y);
             }
             else
             {
                 MAPNIK_LOG_ERROR(symbolizer_helpers) << "ERROR: Unknown placement type in initialize_points()";
             }
-            prj_trans_.backward(label_x, label_y, z);
-            t_.forward(&label_x, &label_y);
-            points_.push_back(pixel_position(label_x, label_y));
+            if (success)
+            {
+                prj_trans_.backward(label_x, label_y, z);
+                t_.forward(&label_x, &label_y);
+                points_.push_back(pixel_position(label_x, label_y));
+            }
         }
     }
     point_itr_ = points_.begin();

@@ -3,6 +3,7 @@ import re
 import os
 import sys
 from copy import copy
+from subprocess import Popen, PIPE
 
 Import('env')
 
@@ -27,6 +28,7 @@ CONFIG_OTHER_INCLUDES='%(other_includes)s'
 CONFIG_FONTS='%(fonts)s'
 CONFIG_INPUT_PLUGINS='%(input_plugins)s'
 CONFIG_GIT_REVISION='%(git_revision)s'
+CONFIG_MAPNIK_AGG_INCLUDE=${CONFIG_PREFIX}/include/mapnik/agg
 
 '''
 
@@ -59,7 +61,17 @@ dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 # remove local agg from public linking
 dep_libs = dep_libs.replace('-lagg','')
 
-git_revision = os.popen("git rev-list --max-count=1 HEAD").read()
+git_revision = 'unknown'
+# present only for official releases where git metadata is stripped
+# more info: https://github.com/mapnik/mapnik/wiki/MapnikReleaseSteps
+revision_release_file = '../../GIT_REVISION'
+if os.path.exists(revision_release_file):
+    git_revision = open(revision_release_file,'r').read()
+else:
+    git_cmd = "git rev-list --max-count=1 HEAD"
+    stdin, stderr = Popen(git_cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    if not stderr:
+        git_revision = stdin.strip()
 
 configuration = {
     "prefix": config_env['PREFIX'],

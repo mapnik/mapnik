@@ -5,7 +5,7 @@
 
 // mapnik
 #include <mapnik/map.hpp>
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/color_factory.hpp>
 
 // std
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(combined_test_case)
     typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
 
     Map map(800, 600);
-    map.set_background(color_factory::from_string("white"));
+    map.set_background(parse_color("white"));
 
     std::ostringstream output_stream;
     std::ostream_iterator<char> output_stream_iterator(output_stream);

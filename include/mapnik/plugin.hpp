@@ -40,9 +40,9 @@ private:
     std::string name_;
     lt_dlhandle module_;
 public:
-    PluginInfo (const std::string& name,const lt_dlhandle module);
+    PluginInfo (std::string const& name,const lt_dlhandle module);
     ~PluginInfo();
-    const std::string& name() const;
+    std::string const& name() const;
     lt_dlhandle handle() const;
 };
 }

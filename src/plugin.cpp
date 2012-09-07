@@ -26,7 +26,7 @@
 namespace mapnik
 {
 
-PluginInfo::PluginInfo (const std::string& name,const lt_dlhandle module)
+PluginInfo::PluginInfo (std::string const& name,const lt_dlhandle module)
     :name_(name),module_(module) {}
 
 PluginInfo::~PluginInfo()
@@ -37,7 +37,7 @@ PluginInfo::~PluginInfo()
     }
 }
 
-const std::string& PluginInfo::name() const
+std::string const& PluginInfo::name() const
 {
     return name_;
 }

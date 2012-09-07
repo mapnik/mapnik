@@ -42,6 +42,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/json/feature_collection_parser.hpp>
 
 using mapnik::datasource;
@@ -123,8 +124,7 @@ void geojson_datasource::bind() const
     bool result = p.parse(begin,end, features_);
     if (!result) 
     {
-        MAPNIK_LOG_WARN(geojson) << "geojson_datasource: Failed parse GeoJSON file " << file_;
-        return;
+        throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + file_ + "'");
     }
     
     bool first = true;
@@ -162,7 +162,24 @@ const char * geojson_datasource::name()
 
 boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry_type() const 
 {
-    return boost::optional<mapnik::datasource::geometry_t>();
+    boost::optional<mapnik::datasource::geometry_t> result;
+    int multi_type = 0;
+    unsigned num_features = features_.size();
+    for (unsigned i = 0; i < num_features && i < 5; ++i)
+    {
+        mapnik::util::to_ds_type(features_[i]->paths(),result);
+        if (result)
+        {
+            int type = static_cast<int>(*result);
+            if (multi_type > 0 && multi_type != type)
+            {
+                result.reset(mapnik::datasource::Collection);
+                return result;
+            }
+            multi_type = type;
+        }
+    }
+    return result;
 }
 
 mapnik::datasource::datasource_t geojson_datasource::type() const 
@@ -203,5 +220,6 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
 mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d const& pt) const
 {
     if (!is_bound_) bind();
+    throw mapnik::datasource_exception("GeoJSON Plugin: features_at_point is not supported yet");
     return mapnik::featureset_ptr();
 }

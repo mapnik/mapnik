@@ -59,6 +59,22 @@ namespace mapnik { namespace wkt {
         }
     };
 
+    struct close_path
+    {
+        template <typename T>
+        struct result
+        {
+            typedef void type;
+        };
+
+        template <typename T>
+        void operator() (T path) const
+        {
+            BOOST_ASSERT( path!=0 );
+            path->close();
+        }
+    };
+
     struct cleanup
     {
         template <typename T0>
@@ -81,6 +97,8 @@ namespace mapnik { namespace wkt {
             : wkt_grammar::base_type(geometry_tagged_text)
         {
             using qi::no_case;
+            using qi::_1;
+            using qi::_2;
             using boost::phoenix::push_back;
 
             geometry_tagged_text = point_tagged_text
@@ -119,7 +137,7 @@ namespace mapnik { namespace wkt {
                 ;
 
             // <polygon text> ::= <empty set> | <left paren> <linestring text> {<comma> <linestring text>}* <right paren>
-            polygon_text = (lit('(') >> linestring_text(_r1) % lit(',') >> lit(')')) | empty_set;
+            polygon_text = (lit('(') >> linestring_text(_r1)[close_path_(_r1)] % lit(',') >> lit(')')) | empty_set;
 
 
             //<multipoint tagged text> ::= multipoint <multipoint text>
@@ -191,6 +209,7 @@ namespace mapnik { namespace wkt {
         qi::rule<Iterator,qi::locals<CommandType>,void(geometry_type*),ascii::space_type> points;
         qi::rule<Iterator,ascii::space_type> empty_set;
         boost::phoenix::function<push_vertex> push_vertex_;
+        boost::phoenix::function<close_path> close_path_;
         boost::phoenix::function<cleanup> cleanup_;
     };
 

@@ -46,7 +46,7 @@ class ImageWriterException : public std::exception
 private:
     std::string message_;
 public:
-    ImageWriterException(const std::string& message)
+    ImageWriterException(std::string const& message)
         : message_(message) {}
 
     ~ImageWriterException() throw() {}
@@ -219,6 +219,11 @@ template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
                                                       std::string const&,
                                                       std::string const&,
                                                       rgba_palette const&);
+
+template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
+                                                      std::string const&,
+                                                      std::string const&);
+
 template MAPNIK_DECL void save_to_file<image_data_32>(image_data_32 const&,
                                                       std::string const&,
                                                       rgba_palette const&);

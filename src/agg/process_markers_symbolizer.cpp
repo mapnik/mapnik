@@ -32,7 +32,7 @@
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/svg/svg_renderer.hpp>
+#include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
@@ -82,15 +82,14 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             ras_ptr->gamma(agg::gamma_power());
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
-            agg::trans_affine tr;
-            tr *= agg::trans_affine_scaling(scale_factor_);
+            agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
 
             if ((*mark)->is_vector())
             {
                 using namespace mapnik::svg;
                 typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
                 typedef agg::pod_bvector<path_attributes> svg_attribute_type;
-                typedef svg_renderer<svg_path_adapter,
+                typedef svg_renderer_agg<svg_path_adapter,
                                      svg_attribute_type,
                                      renderer_type,
                                      pixfmt_comp_type > svg_renderer_type;
@@ -130,8 +129,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         eGeomType type = feature.paths()[0].type();
                         if (type == Polygon)
                             converter.template set<clip_poly_tag>();
-                        else if (type == LineString)
-                            converter.template set<clip_line_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
                         // don't clip if type==Point
                     }
                     converter.template set<transform_tag>(); //always transform
@@ -144,7 +144,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 else
                 {
                     box2d<double> const& bbox = (*mark)->bounding_box();
-                    setup_label_transform(tr, bbox, feature, sym);
+                    setup_transform_scaling(tr, bbox, feature, sym);
+                    evaluate_transform(tr, feature, sym.get_image_transform());
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
                     agg::trans_affine marker_trans = recenter * tr;
@@ -164,8 +165,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         eGeomType type = feature.paths()[0].type();
                         if (type == Polygon)
                             converter.template set<clip_poly_tag>();
-                        else if (type == LineString)
-                            converter.template set<clip_line_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
                         // don't clip if type==Point
                     }
                     converter.template set<transform_tag>(); //always transform
@@ -179,7 +181,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             else // raster markers
             {
                 box2d<double> const& bbox = (*mark)->bounding_box();
-                setup_label_transform(tr, bbox, feature, sym);
+                setup_transform_scaling(tr, bbox, feature, sym);
+                evaluate_transform(tr, feature, sym.get_image_transform());
                 coord2d center = bbox.center();
                 agg::trans_affine_translation recenter(-center.x, -center.y);
                 agg::trans_affine marker_trans = recenter * tr;
@@ -197,8 +200,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     eGeomType type = feature.paths()[0].type();
                     if (type == Polygon)
                         converter.template set<clip_poly_tag>();
-                    else if (type == LineString)
-                        converter.template set<clip_line_tag>();
+                    // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                    //else if (type == LineString)
+                    //    converter.template set<clip_line_tag>();
                     // don't clip if type==Point
                 }
                 converter.template set<transform_tag>(); //always transform

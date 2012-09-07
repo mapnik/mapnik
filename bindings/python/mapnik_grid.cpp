@@ -32,7 +32,7 @@
 using namespace boost::python;
 
 // help compiler see template definitions
-static dict (*encode)( mapnik::grid const&, std::string, bool, unsigned int) = mapnik::grid_encode;
+static dict (*encode)( mapnik::grid const&, std::string const& , bool, unsigned int) = mapnik::grid_encode;
 
 bool painted(mapnik::grid const& grid)
 {

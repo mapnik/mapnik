@@ -32,10 +32,8 @@ try:
 except:
     HAS_DISTUTILS = False
 
-if platform.uname()[4] == 'ppc64':
-    LIBDIR_SCHEMA='lib64'
-else:
-    LIBDIR_SCHEMA='lib'
+LIBDIR_SCHEMA_DEFAULT='lib'
+severities = ['debug', 'warn', 'error', 'none']
 
 py3 = None
 
@@ -57,17 +55,17 @@ DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
 
 
 pretty_dep_names = {
-    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: http://trac.mapnik.org/wiki/OCCI',
-    'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/GDAL',
-    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: http://trac.mapnik.org/wiki/OGR',
-    'geos_c':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: http://trac.mapnik.org/wiki/GEOS',
+    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki//OCCI',
+    'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/GDAL',
+    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki//OGR',
+    'geos_c':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: https://github.com/mapnik/mapnik/wiki//GEOS',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'cairomm-version':'Cairomm version is too old (so cairo renderer will not be built), you need at least %s' % CAIROMM_MIN_VERSION,
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
-    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: http://trac.mapnik.org/wiki/PostGIS',
-    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: http://trac.mapnik.org/wiki/SQLite',
+    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki//PostGIS',
+    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki//SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
@@ -82,8 +80,8 @@ pretty_dep_names = {
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
     'geos-config':'geos-config program | try setting GEOS_CONFIG SCons option',
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
-    'osm':'more info: http://trac.mapnik.org/wiki/OsmPlugin',
-    'curl':'libcurl is required for the "osm" plugin - more info: http://trac.mapnik.org/wiki/OsmPlugin',
+    'osm':'more info: https://github.com/mapnik/mapnik/wiki//OsmPlugin',
+    'curl':'libcurl is required for the "osm" plugin - more info: https://github.com/mapnik/mapnik/wiki//OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
     'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
@@ -142,7 +140,7 @@ def call(cmd, silent=False):
     if not stderr:
         return stdin.strip()
     elif not silent:
-        color_print(1,'Problem encounted with SCons scripts, please post bug report to: http://trac.mapnik.org\nError was: %s' % stderr)
+        color_print(1,'Problem encounted with SCons scripts, please post bug report to: https://github.com/mapnik/mapnik/issues \nError was: %s' % stderr)
 
 def strip_first(string,find,replace=''):
     if string.startswith(find):
@@ -248,7 +246,7 @@ def pretty_dep(dep):
     if pretty:
         return '%s (%s)' % (dep,pretty)
     elif 'boost' in dep:
-        return '%s (%s)' % (dep,'more info see: http://trac.mapnik.org/wiki/MapnikInstallation & http://www.boost.org')
+        return '%s (%s)' % (dep,'more info see: https://github.com/mapnik/mapnik/wiki//MapnikInstallation & http://www.boost.org')
     return dep
 
 
@@ -288,6 +286,7 @@ opts.AddVariables(
 
     # Install Variables
     ('PREFIX', 'The install path "prefix"', '/usr/local'),
+    ('LIBDIR_SCHEMA', 'The library sub-directory appended to the "prefix", sometimes lib64 on 64bit linux systems', LIBDIR_SCHEMA_DEFAULT),
     ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
     ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
@@ -308,27 +307,29 @@ opts.AddVariables(
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
     PathVariable('HB_INCLUDES', 'Search path for HarfBuzz include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('HB_LIBS','Search path for HarfBuzz include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('HB_LIBS','Search path for HarfBuzz include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('PNG_LIBS','Search path for libpng include files','/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('LTDL_INCLUDES', 'Search path for libltdl (part of libtool) include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('LTDL_LIBS','Search path for libltdl (ltdl.h) library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('JPEG', 'Build Mapnik with JPEG read and write support', 'True'),
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
-    PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/local/include', PathVariable.PathAccept),
-    PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/local/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('PKG_CONFIG_PATH', 'Use this path to point pkg-config to .pc files instead of the PKG_CONFIG_PATH environment setting',''),
 
     # Variables affecting rendering back-ends
 
     BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
 
-    BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
+    #BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
 
     # Variables for optional dependencies
     ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),
@@ -340,16 +341,16 @@ opts.AddVariables(
     ('GDAL_CONFIG', 'The path to the gdal-config executable for finding gdal and ogr details.', 'gdal-config'),
     ('PG_CONFIG', 'The path to the pg_config executable.', 'pg_config'),
     PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept),
-    PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('OCCI_LIBS', 'Search path for OCCI library files', '/usr/lib/oracle/10.2.0.3/client/'+ LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('SQLITE_INCLUDES', 'Search path for SQLITE include files', '/usr/include/', PathVariable.PathAccept),
-    PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('SQLITE_LIBS', 'Search path for SQLITE library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('RASTERLITE_INCLUDES', 'Search path for RASTERLITE include files', '/usr/include/', PathVariable.PathAccept),
-    PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA, PathVariable.PathAccept),
+    PathVariable('RASTERLITE_LIBS', 'Search path for RASTERLITE library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
 
     # Variables for logging and statistics
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
-    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. "info", "debug", "warn", "error", "fatal", "none")', 'error'),
+    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. ' + ', '.join(severities), 'error'),
 
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -429,7 +430,7 @@ pickle_store = [# Scons internal variables
         'CAIROMM_LIBPATHS',
         'CAIROMM_LINKFLAGS',
         'CAIROMM_CPPPATHS',
-        'SVG_RENDERER',
+        #'SVG_RENDERER',
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER'
         ]
@@ -661,7 +662,7 @@ def FindBoost(context, prefixes, thread_flag):
     prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_INCLUDES'])))
     prefixes.insert(0,os.path.dirname(os.path.normpath(env['BOOST_LIBS'])))
     for searchDir in prefixes:
-        libItems = glob(os.path.join(searchDir, LIBDIR_SCHEMA, '%s*.*' % search_lib))
+        libItems = glob(os.path.join(searchDir, env['LIBDIR_SCHEMA'], '%s*.*' % search_lib))
         if not libItems:
             libItems = glob(os.path.join(searchDir, 'lib/%s*.*' % search_lib))
         incItems = glob(os.path.join(searchDir, 'include/boost*/'))
@@ -680,7 +681,7 @@ def FindBoost(context, prefixes, thread_flag):
         msg += '\n  *libs found: %s' % BOOST_LIB_DIR
         env['BOOST_LIBS'] = BOOST_LIB_DIR
     else:
-        env['BOOST_LIBS'] = '/usr/' + LIBDIR_SCHEMA
+        env['BOOST_LIBS'] = '/usr/' + env['LIBDIR_SCHEMA']
         msg += '\n  *using default boost lib dir: %s' % env['BOOST_LIBS']
 
     if BOOST_INCLUDE_DIR:
@@ -962,7 +963,6 @@ if not preconfigured:
     env['LIBMAPNIK_LIBS'] = []
     env['LIBMAPNIK_CPPATHS'] = []
     env['LIBMAPNIK_CXXFLAGS'] = []
-    env['LIBDIR_SCHEMA'] = LIBDIR_SCHEMA
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
     env['SQLITE_LINKFLAGS'] = []
@@ -1061,7 +1061,7 @@ if not preconfigured:
 
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU', 'SQLITE'):
+    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU', 'SQLITE', 'LTDL'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1250,6 +1250,10 @@ if not preconfigured:
         env.PrependUnique(LIBPATH = '#src', delete_existing=True)
 
     if env['PGSQL2SQLITE']:
+        if 'sqlite3' not in env['LIBS']:
+            env.AppendUnique(LIBS='sqlite3')
+            env.AppendUnique(CPPPATH = os.path.realpath(env['SQLITE_INCLUDES']))
+            env.AppendUnique(LIBPATH = os.path.realpath(env['SQLITE_LIBS']))
         if not conf.sqlite_has_rtree():
             env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
             env['PGSQL2SQLITE'] = False
@@ -1396,11 +1400,6 @@ if not preconfigured:
             color_print(1,'Could not find required header files for boost python')
             env['MISSING_DEPS'].append('boost python')
 
-        if not conf.CheckLibWithHeader(libs=[env['BOOST_PYTHON_LIB'],'python%s' % env['PYTHON_VERSION']], header='boost/python/detail/config.hpp', language='C++'):
-            color_print(1, 'Could not find library "%s" for boost python bindings' % env['BOOST_PYTHON_LIB'])
-            # failing on launchpad, so let's make it a warning for now
-            #env['MISSING_DEPS'].append('boost python')
-
         if env['CAIRO']:
             if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
                 env['HAS_PYCAIRO'] = True
@@ -1424,7 +1423,7 @@ if not preconfigured:
         color_print(4,"    $ sudo python scons/scons.py install")
         color_print(4,"\nTo view available path variables:\n    $ python scons/scons.py --help or -h")
         color_print(4,'\nTo view overall SCons help options:\n    $ python scons/scons.py --help-options or -H\n')
-        color_print(4,'More info: http://trac.mapnik.org/wiki/MapnikInstallation')
+        color_print(4,'More info: https://github.com/mapnik/mapnik/wiki//MapnikInstallation')
         if not HELP_REQUESTED:
             Exit(1)
     else:
@@ -1450,7 +1449,7 @@ if not preconfigured:
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
         abi = conf.GetMapnikLibVersion()
-        abi_fallback = "2.0.1-pre"
+        abi_fallback = "2.2.0-pre"
         if not abi:
             color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
             abi = abi_fallback
@@ -1483,7 +1482,6 @@ if not preconfigured:
         ndebug_flags = '-DNDEBUG'
 
         # Enable logging in debug mode (always) and release mode (when specified)
-        severities = ['info', 'debug', 'warn', 'error', 'fatal', 'none']
         if env['DEFAULT_LOG_SEVERITY']:
             if env['DEFAULT_LOG_SEVERITY'] not in severities:
                 severities_list = ', '.join(["'%s'" % s for s in severities])
@@ -1667,11 +1665,6 @@ if not HELP_REQUESTED:
         SetOption('implicit_cache', 1)
         SetOption('max_drift', 1)
 
-    else:
-        # Set the cache mode to 'force' unless requested, avoiding hidden caching of Scons 'opts' in '.sconsign.dblite'
-        # This allows for a SCONS_LOCAL_CONFIG, if present, to be used as the primary means of storing paths to successful build dependencies
-        SetCacheMode('force')
-
     if env['JOBS'] > 1:
         SetOption("num_jobs", env['JOBS'])
 
@@ -1681,6 +1674,9 @@ if not HELP_REQUESTED:
 
     # Build the core library
     SConscript('src/build.py')
+
+    # Install headers
+    SConscript('include/build.py')
 
     # Build the requested and able-to-be-compiled input plug-ins
     GDAL_BUILT = False
@@ -1704,7 +1700,6 @@ if not HELP_REQUESTED:
 
     create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'], False)
     create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
-    create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
 
     # before installing plugins, wipe out any previously
     # installed plugins that we are no longer building
@@ -1713,27 +1708,28 @@ if not HELP_REQUESTED:
             if plugin not in env['REQUESTED_PLUGINS']:
                 plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'%s.input' % plugin)
                 if os.path.exists(plugin_path):
-                    color_print(1,"Notice: removing out of date plugin: '%s'" % plugin_path)
+                    color_print(3,"Notice: removing out of date plugin: '%s'" % plugin_path)
                     os.unlink(plugin_path)
 
     # Build the c++ rundemo app if requested
     if env['DEMO']:
         SConscript('demo/c++/build.py')
 
-    # Build the pgsql2psqlite app if requested
-    if env['PGSQL2SQLITE']:
-        SConscript('utils/pgsql2sqlite/build.py')
-
     # Build shapeindex and remove its dependency from the LIBS
     if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
         SConscript('utils/shapeindex/build.py')
 
+        # Build the pgsql2psqlite app if requested
+        if env['PGSQL2SQLITE']:
+            SConscript('utils/pgsql2sqlite/build.py')
+
+        SConscript('utils/svg2png/build.py')
+
         # devtools not ready for public
         #SConscript('utils/ogrindex/build.py')
-        SConscript('utils/svg2png/build.py')
         env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
     else :
-        color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' won't be available")
+        color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' and other command line programs will not be available")
 
     # Build the Python bindings
     if 'python' in env['BINDINGS']:
@@ -1752,7 +1748,8 @@ if not HELP_REQUESTED:
     # not ready for release
     SConscript('tests/cpp_tests/build.py')
 
-    # not ready for release
+    # not currently maintained
+    # https://github.com/mapnik/mapnik/issues/1438
     #if env['SVG_RENDERER']:
     #    SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 
@@ -1765,3 +1762,8 @@ if not HELP_REQUESTED:
     # if requested, build the sample input plugins
     if env['SAMPLE_INPUT_PLUGINS']:
         SConscript('plugins/input/templates/helloworld/build.py')
+    elif 'install' in COMMAND_LINE_TARGETS:
+        plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'hello.input')
+        if os.path.exists(plugin_path):
+            color_print(3,"Notice: removing out of date plugin: '%s'" % plugin_path)
+            os.unlink(plugin_path)

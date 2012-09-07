@@ -143,27 +143,6 @@ private:
 
     struct deepcopy_symbolizer : public boost::static_visitor<>
     {
-
-        void operator () (markers_symbolizer & sym) const
-        {
-            copy_path_ptr(sym);
-        }
-
-        void operator () (point_symbolizer & sym) const
-        {
-            copy_path_ptr(sym);
-        }
-
-        void operator () (polygon_pattern_symbolizer & sym) const
-        {
-            copy_path_ptr(sym);
-        }
-
-        void operator () (line_pattern_symbolizer & sym) const
-        {
-            copy_path_ptr(sym);
-        }
-
         void operator () (raster_symbolizer & sym) const
         {
             raster_colorizer_ptr old_colorizer = sym.get_colorizer();
@@ -182,7 +161,6 @@ private:
 
         void operator () (shield_symbolizer & sym) const
         {
-            copy_path_ptr(sym);
             copy_text_ptr(sym);
         }
 
@@ -191,19 +169,12 @@ private:
             copy_height_ptr(sym);
         }
 
-
         template <typename T> void operator () (T &sym) const
         {
             boost::ignore_unused_variable_warning(sym);
         }
 
     private:
-        template <class T>
-        void copy_path_ptr(T & sym) const
-        {
-            std::string path = path_processor_type::to_string(*sym.get_filename());
-            sym.set_filename( parse_path(path) );
-        }
 
         template <class T>
         void copy_text_ptr(T & sym) const
@@ -230,7 +201,7 @@ public:
           else_filter_(false),
           also_filter_(false) {}
 
-    rule(const std::string& name,
+    rule(std::string const& name,
          double min_scale_denominator=0,
          double max_scale_denominator=std::numeric_limits<double>::infinity())
         : name_(name),
@@ -256,8 +227,6 @@ public:
             filter_ = parse_expression(expr,"utf8");
             symbolizers::const_iterator it  = syms_.begin();
             symbolizers::const_iterator end = syms_.end();
-
-            // FIXME - metawriter_ptr?
 
             for(; it != end; ++it)
             {

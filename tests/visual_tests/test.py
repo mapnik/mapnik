@@ -102,11 +102,12 @@ if __name__ == "__main__":
             for name in sys.argv[1:]:
                 active.append({"name": name})
 
-    for f in active:
-        config = dict(defaults)
-        config.update(f)
-        for size in config['sizes']:
-            m = render(config['name'], size[0], size[1], config['bbox'], quiet=quiet)
-        mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
+    if 'osm' in mapnik.DatasourceCache.instance().plugin_names():
+        for f in files:
+            config = dict(defaults)
+            config.update(f)
+            for size in config['sizes']:
+                m = render(config['name'], size[0], size[1], config['bbox'], quiet=quiet)
+            mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
 
-    summary()
+        summary()

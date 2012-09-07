@@ -117,7 +117,7 @@ void image_32::set_grayscale_to_alpha()
             unsigned b = (rgba >> 16) & 0xff;
 
             // magic numbers for grayscale
-            unsigned a = (int)((r * .3) + (g * .59) + (b * .11));
+            unsigned a = static_cast<unsigned>(std::ceil((r * .3) + (g * .59) + (b * .11)));
 
             row_from[x] = (a << 24)| (255 << 16) |  (255 << 8) | (255) ;
         }

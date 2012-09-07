@@ -60,19 +60,18 @@ struct char_properties
     void from_xml(xml_node const &sym, fontset_map const & fontsets);
     /** Write object to XML ptree. */
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
-    std::string face_name; //handled by text_layout. //TODO: Should be removed in favor of using fontsets everywhere
-    font_set fontset; // handled by text_layout
-    float text_size; // handled by text_shaping and renderer
-    double character_spacing; // handled by placement_finder //TODO
-    /** Largest total height (fontsize+line_spacing) per line is chosen */
-    double line_spacing;  // handled by text_layout and placement_finder
-    double text_opacity; // handled by renderer
-    bool wrap_before; // handled by text_layout //TODO
-    unsigned wrap_char; // handled by text_layout //TODO
-    text_transform_e text_transform; //Per expression //TODO!
-    color fill; // handled by renderer
-    color halo_fill; // handled by renderer
-    double halo_radius; // handled by renderer
+    std::string face_name;
+    font_set fontset;
+    double text_size;
+    double character_spacing;
+    double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
+    double text_opacity;
+    bool wrap_before;
+    unsigned wrap_char;
+    text_transform_e text_transform; //Per expression
+    color fill;
+    color halo_fill;
+    double halo_radius;
 };
 
 enum label_placement_enum
@@ -163,7 +162,7 @@ struct text_symbolizer_properties
     justify_alignment_e jalign;
     vertical_alignment_e valign;
     /** distance between repeated labels on a single geometry */
-    unsigned label_spacing;
+    double label_spacing;
     /** distance the label can be moved on the line to fit, if 0 the default is used */
     unsigned label_position_tolerance;
     bool avoid_edges;
@@ -176,8 +175,8 @@ struct text_symbolizer_properties
     bool allow_overlap;
     /** Only consider geometry with largest bbox (polygons) */
     bool largest_bbox_only;
-    unsigned text_ratio;
-    unsigned wrap_width;
+    double text_ratio;
+    double wrap_width;
     bool rotate_displacement;
     text_upright_e upright;
     /** Default values for char_properties. */

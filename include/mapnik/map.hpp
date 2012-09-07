@@ -28,7 +28,6 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/layer.hpp>
-#include <mapnik/metawriter/properties.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/ctrans.hpp>
 
@@ -37,6 +36,9 @@
 
 namespace mapnik
 {
+
+class CoordTransform;
+
 class MAPNIK_DECL Map
 {
 public:
@@ -73,7 +75,6 @@ private:
     boost::optional<color> background_;
     boost::optional<std::string> background_image_;
     std::map<std::string,feature_type_style> styles_;
-    std::map<std::string,metawriter_ptr> metawriters_;
     std::map<std::string,font_set> fontsets_;
     std::vector<layer> layers_;
     aspect_fix_mode aspectFixMode_;
@@ -88,7 +89,6 @@ public:
     typedef std::map<std::string,feature_type_style>::iterator style_iterator;
     typedef std::map<std::string,font_set>::const_iterator const_fontset_iterator;
     typedef std::map<std::string,font_set>::iterator fontset_iterator;
-    typedef std::map<std::string,metawriter_ptr>::const_iterator const_metawriter_iterator;
 
     /*! \brief Default constructor.
      *
@@ -160,47 +160,13 @@ public:
     /*! \brief Remove a style from the map.
      *  @param name The name of the style.
      */
-    void remove_style(const std::string& name);
+    void remove_style(std::string const& name);
 
     /*! \brief Find a style.
      *  @param name The name of the style.
      *  @return The style if found. If not found return the default map style.
      */
     boost::optional<feature_type_style const&> find_style(std::string const& name) const;
-
-    /*! \brief Insert a metawriter in the map.
-     *  @param name The name of the writer.
-     *  @param style A pointer to the writer to insert.
-     *  @return true If success.
-     *  @return false If no success.
-     */
-    bool insert_metawriter(std::string const& name, metawriter_ptr const& writer);
-
-    /*! \brief Remove a metawriter from the map.
-     *  @param name The name of the writer.
-     */
-    void remove_metawriter(const std::string& name);
-
-    /*! \brief Find a metawriter.
-     *  @param name The name of the writer.
-     *  @return The writer if found. If not found return 0.
-     */
-    metawriter_ptr find_metawriter(std::string const& name) const;
-
-    /*! \brief Get all metawriters.
-     *  @return Const reference to metawriters.
-     */
-    std::map<std::string,metawriter_ptr> const& metawriters() const;
-
-    /*! \brief Get first iterator in metawriters.
-     *  @return Constant metawriter iterator.
-     */
-    const_metawriter_iterator begin_metawriters() const;
-
-    /*! \brief Get last iterator in metawriters.
-     *  @return Constant metawriter iterator.
-     */
-    const_metawriter_iterator end_metawriters() const;
 
     /*! \brief Insert a fontset into the map.
      *  @param name The name of the fontset.
@@ -414,33 +380,10 @@ public:
      */
     featureset_ptr query_map_point(unsigned index, double x, double y) const;
 
-    /*!
-     * @brief Resolve names to object references for metawriters.
-     */
-    void init_metawriters();
-
     ~Map();
 
     inline void set_aspect_fix_mode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
     inline aspect_fix_mode get_aspect_fix_mode() const { return aspectFixMode_; }
-
-    /*!
-     * @brief Metawriter properties.
-     *
-     * These properties are defined by the user and are substituted in filenames,
-     * sepcial columns in tables, etc.
-     */
-    metawriter_property_map metawriter_output_properties;
-
-    /*!
-     * @brief Set a metawriter property.
-     */
-    void set_metawriter_property(std::string name, std::string value);
-
-    /*!
-     * @brief Get a metawriter property.
-     */
-    std::string get_metawriter_property(std::string name) const;
 
     /*!
      * @brief Get extra, arbitrary Parameters attached to the Map

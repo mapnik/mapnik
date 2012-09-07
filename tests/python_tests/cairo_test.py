@@ -10,7 +10,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if mapnik.has_pycairo():
+if mapnik.has_pycairo() and 'sqlite' in mapnik.DatasourceCache.plugin_names():
 
     def _pycairo_surface(type,sym):
             import cairo

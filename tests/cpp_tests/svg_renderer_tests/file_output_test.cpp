@@ -14,7 +14,7 @@
 
 // mapnik
 #include <mapnik/map.hpp>
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/color_factory.hpp>
 
 // stl
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(file_output_test_case)
     typedef svg_renderer<std::ostream_iterator<char> > svg_ren;
 
     Map map(800, 600);
-    map.set_background(color_factory::from_string("blue"));
+    map.set_background(parse_color("blue"));
 
     std::string output_filename = "file_output_test_case.svg";
     std::ofstream output_stream(output_filename.c_str());

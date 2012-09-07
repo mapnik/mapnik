@@ -29,44 +29,6 @@
 
 using mapnik::raster_symbolizer;
 
-struct raster_symbolizer_pickle_suite : boost::python::pickle_suite
-{
-    /*
-      static boost::python::tuple
-      getinitargs(const raster_symbolizer& r)
-      {
-      return boost::python::make_tuple();
-      }
-    */
-
-    static  boost::python::tuple
-    getstate(raster_symbolizer const& r)
-    {
-        return boost::python::make_tuple(r.get_mode(),r.get_scaling_method(),r.get_opacity(),r.get_filter_factor(),r.get_mesh_size());
-    }
-
-    static void
-    setstate (raster_symbolizer & r, boost::python::tuple state)
-    {
-        using namespace boost::python;
-        if (len(state) != 5)
-        {
-            PyErr_SetObject(PyExc_ValueError,
-                            ("expected 5-item tuple in call to __setstate__; got %s"
-                             % state).ptr()
-                );
-            throw_error_already_set();
-        }
-
-        r.set_mode(extract<std::string>(state[0]));
-        r.set_scaling_method(extract<mapnik::scaling_method_e>(state[1]));
-        r.set_opacity(extract<float>(state[2]));
-        r.set_filter_factor(extract<float>(state[3]));
-        r.set_mesh_size(extract<unsigned>(state[4]));
-    }
-
-};
-
 void export_raster_symbolizer()
 {
     using namespace boost::python;
@@ -74,23 +36,16 @@ void export_raster_symbolizer()
     class_<raster_symbolizer>("RasterSymbolizer",
                               init<>("Default ctor"))
 
-        .def_pickle(raster_symbolizer_pickle_suite())
-
         .add_property("mode",
                       make_function(&raster_symbolizer::get_mode,return_value_policy<copy_const_reference>()),
                       &raster_symbolizer::set_mode,
-                      "Get/Set merging mode.\n"
-                      "Possible values are:\n"
-                      "normal, grain_merge, grain_merge2, multiply,\n"
-                      "multiply2, divide, divide2, screen, and hard_light\n"
-                      "\n"
-                      "Usage:\n"
-                      "\n"
-                      ">>> from mapnik import RasterSymbolizer\n"
-                      ">>> r = RasterSymbolizer()\n"
-                      ">>> r.mode = 'grain_merge2'\n"
+                      "Get/Set merging mode. (deprecated, use comp_op instead)\n"
             )
-
+        .add_property("comp_op",
+                      &raster_symbolizer::comp_op,
+                      &raster_symbolizer::set_comp_op,
+                      "Set/get the raster comp-op"
+            )
         .add_property("scaling",
                       &raster_symbolizer::get_scaling_method,
                       &raster_symbolizer::set_scaling_method,

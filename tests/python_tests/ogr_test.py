@@ -11,7 +11,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
+if 'ogr' in mapnik.DatasourceCache.plugin_names():
 
     # Shapefile initialization
     def test_shapefile_init():
@@ -28,6 +28,7 @@ if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
     def test_shapefile_properties():
         # NOTE: encoding is latin1 but gdal >= 1.9 should now expose utf8 encoded features
         # See SHAPE_ENCODING for overriding: http://gdal.org/ogr/drv_shapefile.html
+        # So: failure for the NOM_FR field is expected for older gdal
         ds = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0)
         f = ds.features_at_point(ds.envelope().center()).features[0]
         eq_(ds.geometry_type(),mapnik.DataGeometryType.Polygon)

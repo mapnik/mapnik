@@ -108,9 +108,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     {
         typedef agg::renderer_outline_aa<renderer_base> renderer_type;
         typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
-        // need to reduce width by half to match standard rasterizer look
-        double scaled = scale_factor_ * .5;
-        agg::line_profile_aa profile(stroke_.get_width() * scaled, agg::gamma_power(stroke_.get_gamma()));
+        agg::line_profile_aa profile(stroke_.get_width() * scale_factor_, agg::gamma_power(stroke_.get_gamma()));
         renderer_type ren(renb, profile);
         ren.color(agg::rgba8_pre(r, g, b, int(a*stroke_.get_opacity())));
         rasterizer_type ras(ren);
@@ -118,14 +116,12 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(clipping_extent,ras,sym,t_,prj_trans,tr,scaled);
+            converter(clipping_extent,ras,sym,t_,prj_trans,tr,scale_factor_);
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
         converter.set<affine_transform_tag>(); // optional affine transform
         if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-        if (stroke_.has_dash()) converter.set<dash_tag>();
-        converter.set<stroke_tag>(); //always stroke
 
         BOOST_FOREACH( geometry_type & geom, feature.paths())
         {

@@ -8,13 +8,6 @@ import sys
 from utilities import execution_path
 from nose.tools import *
 
-try:
-    from shapely.geometry import Point
-    have_shapely = True
-except ImportError:
-    print('Shapely is required for python data source test.')
-    have_shapely = False
-
 def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
@@ -27,17 +20,13 @@ class PointDatasource(mapnik.PythonDatasource):
         )
 
     def features(self, query):
-        return mapnik.PythonDatasource.wkb_features(
-            keys = ('label',), 
+        return mapnik.PythonDatasource.wkt_features(
+            keys = ('label',),
             features = (
-                ( Point(5,6).wkb, { 'label': 'foo-bar'} ), 
-                ( Point(60,50).wkb, { 'label': 'buzz-quux'} ), 
+                ( 'POINT (5 6)', { 'label': 'foo-bar'} ),
+                ( 'POINT (60 50)', { 'label': 'buzz-quux'} ),
             )
         )
-
-def box2d_to_shapely(box):
-    import shapely.geometry
-    return shapely.geometry.box(box.minx, box.miny, box.maxx, box.maxy)
 
 class ConcentricCircles(object):
     def __init__(self, centre, bounds, step=1):
@@ -53,20 +42,31 @@ class ConcentricCircles(object):
             bounds = self.container.bounds
             step = self.container.step
 
-            if centre.within(bounds):
-                self.radius = step
-            else:
-                self.radius = math.ceil(centre.distance(bounds) / float(step)) * step
+            self.radius = step
 
         def next(self):
-            circle = self.container.centre.buffer(self.radius)
-            self.radius += self.container.step
+            points = []
+            for alpha in xrange(0, 361, 5):
+                x = math.sin(math.radians(alpha)) * self.radius + self.container.centre[0]
+                y = math.cos(math.radians(alpha)) * self.radius + self.container.centre[1]
+                points.append('%s %s' % (x,y))
+            circle = 'POLYGON ((' + ','.join(points) + '))'
 
             # has the circle grown so large that the boundary is entirely within it?
-            if circle.contains(self.container.bounds):
+            tl = (self.container.bounds.maxx, self.container.bounds.maxy)
+            tr = (self.container.bounds.maxx, self.container.bounds.maxy)
+            bl = (self.container.bounds.minx, self.container.bounds.miny)
+            br = (self.container.bounds.minx, self.container.bounds.miny)
+            def within_circle(p):
+                delta_x = p[0] - self.container.centre[0]
+                delta_y = p[0] - self.container.centre[0]
+                return delta_x*delta_x + delta_y*delta_y < self.radius*self.radius
+
+            if all(within_circle(p) for p in (tl,tr,bl,br)):
                 raise StopIteration()
 
-            return ( circle.wkb, { } )
+            self.radius += self.container.step
+            return ( circle, { } )
 
     def __iter__(self):
         return ConcentricCircles.Iterator(self)
@@ -87,16 +87,14 @@ class CirclesDatasource(mapnik.PythonDatasource):
         self.step = step
 
     def features(self, query):
-        # Get the query bounding-box as a shapely bounding box
-        bounding_box = box2d_to_shapely(query.bbox)
-        centre = Point(self.centre_x, self.centre_y)
+        centre = (self.centre_x, self.centre_y)
 
-        return mapnik.PythonDatasource.wkb_features(
+        return mapnik.PythonDatasource.wkt_features(
             keys = (),
-            features = ConcentricCircles(centre, bounding_box, self.step)
+            features = ConcentricCircles(centre, query.bbox, self.step)
         )
 
-if 'python' in mapnik.DatasourceCache.instance().plugin_names() and have_shapely:
+if 'python' in mapnik.DatasourceCache.plugin_names():
     # make sure we can load from ourself as a module
     sys.path.append(execution_path('.'))
 
@@ -129,7 +127,7 @@ if 'python' in mapnik.DatasourceCache.instance().plugin_names() and have_shapely
 
     def test_python_point_rendering():
         m = mapnik.Map(512,512)
-        mapnik.load_map(m,'../data/good_maps/python_point_datasource.xml')
+        mapnik.load_map(m,'../data/python_plugin/python_point_datasource.xml')
         m.zoom_all()
         im = mapnik.Image(512,512)
         mapnik.render(m,im)
@@ -142,7 +140,7 @@ if 'python' in mapnik.DatasourceCache.instance().plugin_names() and have_shapely
 
     def test_python_circle_rendering():
         m = mapnik.Map(512,512)
-        mapnik.load_map(m,'../data/good_maps/python_circle_datasource.xml')
+        mapnik.load_map(m,'../data/python_plugin/python_circle_datasource.xml')
         m.zoom_all()
         im = mapnik.Image(512,512)
         mapnik.render(m,im)

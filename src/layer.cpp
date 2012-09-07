@@ -237,7 +237,7 @@ void layer::set_group_by(std::string column)
     group_by_ = column;
 }
 
-std::string layer::group_by() const
+std::string const& layer::group_by() const
 {
     return group_by_;
 }

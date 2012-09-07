@@ -50,8 +50,8 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int band,
                                  gdal_query q,
                                  mapnik::box2d<double> extent,
-                                 double width,
-                                 double height,
+                                 unsigned width,
+                                 unsigned height,
                                  int nbands,
                                  double dx,
                                  double dy,
@@ -515,7 +515,8 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
         double Y = pt.y - gt[3] - gt[5]/2;
         double det1 = gt[1]*Y + gt[4]*X;
         double det2 = gt[2]*Y + gt[5]*X;
-        unsigned x = det2/det, y = det1/det;
+        unsigned x = static_cast<unsigned>(det2/det);
+        unsigned y = static_cast<unsigned>(det1/det);
 
         if (x < raster_xsize && y < raster_ysize)
         {

@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id$
 
 // stl
 #include <iostream>
@@ -40,6 +39,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/save_map.hpp>
+#include <mapnik/projection.hpp>
 #endif
 
 // qt

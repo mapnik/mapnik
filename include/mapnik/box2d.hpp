@@ -88,7 +88,7 @@ public:
     void re_center(const coord<T,2>& c);
     void init(T x0,T y0,T x1,T y1);
     void clip(const box2d_type &other);
-    bool from_string(const std::string& s);
+    bool from_string(std::string const& s);
     bool valid() const;
     void move(T x, T y);
 

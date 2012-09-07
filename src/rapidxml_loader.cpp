@@ -57,7 +57,7 @@ public:
     {
     }
 
-    void load(const std::string & filename, xml_node &node)
+    void load(std::string const& filename, xml_node &node)
     {
         filename_ = filename;
         std::basic_ifstream<char> stream(filename.c_str());
@@ -101,7 +101,7 @@ public:
         }
     }
 
-    void load_string(const std::string & buffer, xml_node &node, std::string const & base_path )
+    void load_string(std::string const& buffer, xml_node &node, std::string const & base_path )
     {
 
 //        if (!base_path.empty())

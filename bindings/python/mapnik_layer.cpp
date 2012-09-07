@@ -161,7 +161,7 @@ void export_layer()
         .add_property("active",
                       &layer::active,
                       &layer::set_active,
-                      "Get/Set whether this layer is active and will be rendered.\n"
+                      "Get/Set whether this layer is active and will be rendered (same as status property).\n"
                       "\n"
                       "Usage:\n"
                       ">>> from mapnik import Layer\n"
@@ -170,6 +170,21 @@ void export_layer()
                       "True # Active by default\n"
                       ">>> lyr.active = False # set False to disable layer rendering\n"
                       ">>> lyr.active\n"
+                      "False\n"
+            )
+
+        .add_property("status",
+                      &layer::active,
+                      &layer::set_active,
+                      "Get/Set whether this layer is active and will be rendered.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> from mapnik import Layer\n"
+                      ">>> lyr = Layer('My Layer','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')\n"
+                      ">>> lyr.status\n"
+                      "True # Active by default\n"
+                      ">>> lyr.status = False # set False to disable layer rendering\n"
+                      ">>> lyr.status\n"
                       "False\n"
             )
 
@@ -302,6 +317,14 @@ void export_layer()
                       ">>> # set to google mercator with Proj.4 literal\n"
                       "... \n"
                       ">>> lyr.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'\n"
+            )
+
+        .add_property("group_by",
+                      make_function(&layer::group_by,return_value_policy<copy_const_reference>()),
+                      &layer::set_group_by,
+                      "Get/Set the optional layer group name.\n"
+                      "\n"
+                      "More details at https://github.com/mapnik/mapnik/wiki/Grouped-rendering:\n"
             )
 
         .add_property("styles",

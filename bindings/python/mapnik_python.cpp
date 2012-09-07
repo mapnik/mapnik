@@ -57,6 +57,7 @@ void export_point_symbolizer();
 void export_line_symbolizer();
 void export_line_pattern_symbolizer();
 void export_polygon_symbolizer();
+void export_building_symbolizer();
 void export_polygon_pattern_symbolizer();
 void export_raster_symbolizer();
 void export_text_placement();
@@ -66,7 +67,6 @@ void export_projection();
 void export_proj_transform();
 void export_view_transform();
 void export_raster_colorizer();
-void export_inmem_metawriter();
 void export_label_collision_detector();
 void export_logger();
 
@@ -205,8 +205,8 @@ void render6(const mapnik::Map& map, PycairoContext* context)
 void render_tile_to_file(const mapnik::Map& map,
                          unsigned offset_x, unsigned offset_y,
                          unsigned width, unsigned height,
-                         const std::string& file,
-                         const std::string& format)
+                         std::string const& file,
+                         std::string const& format)
 {
     mapnik::image_32 image(width,height);
     render(map,image,1.0,offset_x, offset_y);
@@ -214,8 +214,8 @@ void render_tile_to_file(const mapnik::Map& map,
 }
 
 void render_to_file1(const mapnik::Map& map,
-                     const std::string& filename,
-                     const std::string& format)
+                     std::string const& filename,
+                     std::string const& format)
 {
     if (format == "pdf" || format == "svg" || format =="ps" || format == "ARGB32" || format == "RGB24")
     {
@@ -233,7 +233,7 @@ void render_to_file1(const mapnik::Map& map,
     }
 }
 
-void render_to_file2(const mapnik::Map& map,const std::string& filename)
+void render_to_file2(const mapnik::Map& map,std::string const& filename)
 {
     std::string format = mapnik::guess_type(filename);
     if (format == "pdf" || format == "svg" || format =="ps")
@@ -253,8 +253,8 @@ void render_to_file2(const mapnik::Map& map,const std::string& filename)
 }
 
 void render_to_file3(const mapnik::Map& map,
-                     const std::string& filename,
-                     const std::string& format,
+                     std::string const& filename,
+                     std::string const& format,
                      double scale_factor = 1.0
     )
 {
@@ -396,6 +396,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_line_symbolizer();
     export_line_pattern_symbolizer();
     export_polygon_symbolizer();
+    export_building_symbolizer();
     export_polygon_pattern_symbolizer();
     export_raster_symbolizer();
     export_text_placement();
@@ -407,7 +408,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_coord();
     export_map();
     export_raster_colorizer();
-    export_inmem_metawriter();
     export_label_collision_detector();
     export_logger();
 
@@ -619,6 +619,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     python_optional<mapnik::stroke>();
     python_optional<mapnik::color>();
     python_optional<mapnik::box2d<double> >();
+    python_optional<mapnik::composite_mode_e>();
     python_optional<mapnik::datasource::geometry_t>();
     python_optional<std::string>();
     python_optional<unsigned>();

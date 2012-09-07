@@ -54,7 +54,7 @@ def bootstrap_env():
     The settings file should be a python file with an 'env' variable
     that declares a dictionary of key:value pairs to push into the
     global process environment, if not already set, like:
-    
+
         env = {'ICU_DATA':'/usr/local/share/icu/'}
     """
     if os.path.exists(os.path.join(os.path.dirname(__file__),'mapnik_settings.py')):
@@ -136,18 +136,18 @@ class _Coord(Coord,_injector):
 
     def forward(self, projection):
         """
-        Projects the point from the geographic coordinate 
-        space  into the cartesian space. The x component is 
-        considered to be longitude, the y component the 
+        Projects the point from the geographic coordinate
+        space  into the cartesian space. The x component is
+        considered to be longitude, the y component the
         latitude.
 
-        Returns the easting (x) and northing (y) as a 
+        Returns the easting (x) and northing (y) as a
         coordinate pair.
 
-        Example: Project the geographic coordinates of the 
+        Example: Project the geographic coordinates of the
                  city center of Stuttgart into the local
-                 map projection (GK Zone 3/DHDN, EPSG 31467)  
-        >>> p = Projection('+init=epsg:31467') 
+                 map projection (GK Zone 3/DHDN, EPSG 31467)
+        >>> p = Projection('+init=epsg:31467')
         >>> Coord(9.1, 48.7).forward(p)
         Coord(3507360.12813,5395719.2749)
         """
@@ -155,19 +155,19 @@ class _Coord(Coord,_injector):
 
     def inverse(self, projection):
         """
-        Projects the point from the cartesian space 
-        into the geographic space. The x component is 
-        considered to be the easting, the y component 
+        Projects the point from the cartesian space
+        into the geographic space. The x component is
+        considered to be the easting, the y component
         to be the northing.
 
-        Returns the longitude (x) and latitude (y) as a 
+        Returns the longitude (x) and latitude (y) as a
         coordinate pair.
 
-        Example: Project the cartesian coordinates of the 
+        Example: Project the cartesian coordinates of the
                  city center of Stuttgart in the local
                  map projection (GK Zone 3/DHDN, EPSG 31467)
                  into geographic coordinates:
-        >>> p = Projection('+init=epsg:31467') 
+        >>> p = Projection('+init=epsg:31467')
         >>> Coord(3507360.12813,5395719.2749).inverse(p)
         Coord(9.1, 48.7)
         """
@@ -175,13 +175,13 @@ class _Coord(Coord,_injector):
 
 class _Box2d(Box2d,_injector):
     """
-    Represents a spatial envelope (i.e. bounding box). 
+    Represents a spatial envelope (i.e. bounding box).
 
 
     Following operators are defined for Box2d:
 
     Addition:
-    e1 + e2 is equvalent to e1.expand_to_include(e2) but yields 
+    e1 + e2 is equvalent to e1.expand_to_include(e2) but yields
     a new envelope instead of modifying e1
 
     Subtraction:
@@ -191,7 +191,7 @@ class _Box2d(Box2d,_injector):
     Multiplication and division change the width and height of the envelope
     by the given factor without modifying its center..
 
-    That is, e1 * x is equivalent to: 
+    That is, e1 * x is equivalent to:
            e1.width(x * e1.width())
            e1.height(x * e1.height()),
     except that a new envelope is created instead of modifying e1.
@@ -207,8 +207,8 @@ class _Box2d(Box2d,_injector):
 
     def forward(self, projection):
         """
-        Projects the envelope from the geographic space 
-        into the cartesian space by projecting its corner 
+        Projects the envelope from the geographic space
+        into the cartesian space by projecting its corner
         points.
 
         See also:
@@ -218,8 +218,8 @@ class _Box2d(Box2d,_injector):
 
     def inverse(self, projection):
         """
-        Projects the envelope from the cartesian space 
-        into the geographic space by projecting its corner 
+        Projects the envelope from the cartesian space
+        into the geographic space by projecting its corner
         points.
 
         See also:
@@ -234,7 +234,7 @@ class _Projection(Projection,_injector):
 
     def forward(self,obj):
         """
-        Projects the given object (Box2d or Coord) 
+        Projects the given object (Box2d or Coord)
         from the geographic space into the cartesian space.
 
         See also:
@@ -245,7 +245,7 @@ class _Projection(Projection,_injector):
 
     def inverse(self,obj):
         """
-        Projects the given object (Box2d or Coord) 
+        Projects the given object (Box2d or Coord)
         from the cartesian space into the geographic space.
 
         See also:
@@ -326,7 +326,7 @@ def Shapefile(**keywords):
       encoding -- file encoding (default 'utf-8')
 
     >>> from mapnik import Shapefile, Layer
-    >>> shp = Shapefile(base='/home/mapnik/data',file='world_borders') 
+    >>> shp = Shapefile(base='/home/mapnik/data',file='world_borders')
     >>> lyr = Layer('Shapefile Layer')
     >>> lyr.datasource = shp
 
@@ -341,7 +341,7 @@ def PostGIS(**keywords):
       dbname -- database name to connect to
       table -- table name or subselect query
 
-      *Note: if using subselects for the 'table' value consider also 
+      *Note: if using subselects for the 'table' value consider also
        passing the 'geometry_field' and 'srid' and 'extent_from_subquery'
        options and/or specifying the 'geometry_table' option.
 
@@ -400,7 +400,7 @@ def Raster(**keywords):
       tile_stride -- if an image is in tiles, what's the increment between rows/cols (default 1)
 
     >>> from mapnik import Raster, Layer
-    >>> raster = Raster(base='/home/mapnik/data',file='elevation.tif',lox=-122.8,loy=48.5,hix=-122.7,hiy=48.6) 
+    >>> raster = Raster(base='/home/mapnik/data',file='elevation.tif',lox=-122.8,loy=48.5,hix=-122.7,hiy=48.6)
     >>> lyr = Layer('Tiff Layer')
     >>> lyr.datasource = raster
 
@@ -474,7 +474,7 @@ def Ogr(**keywords):
       encoding -- file encoding (default 'utf-8')
 
     >>> from mapnik import Ogr, Layer
-    >>> datasource = Ogr(base='/home/mapnik/data',file='rivers.geojson',layer='OGRGeoJSON') 
+    >>> datasource = Ogr(base='/home/mapnik/data',file='rivers.geojson',layer='OGRGeoJSON')
     >>> lyr = Layer('OGR Layer from GeoJSON file')
     >>> lyr.datasource = datasource
 
@@ -502,7 +502,7 @@ def SQLite(**keywords):
       use_spatial_index -- boolean, instruct sqlite plugin to use Rtree spatial index (default True)
 
     >>> from mapnik import SQLite, Layer
-    >>> sqlite = SQLite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239') 
+    >>> sqlite = SQLite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239')
     >>> lyr = Layer('SQLite Layer')
     >>> lyr.datasource = sqlite
 
@@ -522,7 +522,7 @@ def Rasterlite(**keywords):
       extent -- manually specified data extent (comma delimited string, default None)
 
     >>> from mapnik import Rasterlite, Layer
-    >>> rasterlite = Rasterlite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239') 
+    >>> rasterlite = Rasterlite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239')
     >>> lyr = Layer('Rasterlite Layer')
     >>> lyr.datasource = rasterlite
 
@@ -542,7 +542,7 @@ def Osm(**keywords):
       bbox -- data bounding box for fetching data (default None)
 
     >>> from mapnik import Osm, Layer
-    >>> datasource = Osm(file='test.osm') 
+    >>> datasource = Osm(file='test.osm')
     >>> lyr = Layer('Osm Layer')
     >>> lyr.datasource = datasource
 
@@ -564,7 +564,7 @@ def Kismet(**keywords):
       extent -- manually specified data extent (comma delimited string, default None)
 
     >>> from mapnik import Kismet, Layer
-    >>> datasource = Kismet(host='localhost',port=2501,extent='-179,-85,179,85') 
+    >>> datasource = Kismet(host='localhost',port=2501,extent='-179,-85,179,85')
     >>> lyr = Layer('Kismet Server Layer')
     >>> lyr.datasource = datasource
 
@@ -582,7 +582,7 @@ def Geos(**keywords):
       extent -- manually specified data extent (comma delimited string, default None)
 
     >>> from mapnik import Geos, Layer
-    >>> datasource = Geos(wkt='MULTIPOINT(100 100, 50 50, 0 0)') 
+    >>> datasource = Geos(wkt='MULTIPOINT(100 100, 50 50, 0 0)')
     >>> lyr = Layer('GEOS Layer from WKT string')
     >>> lyr.datasource = datasource
 
@@ -616,7 +616,7 @@ class PythonDatasource(object):
 
     def features(self, query):
         """Return an iterable which yields instances of Feature for features within the passed query.
-        
+
         Required arguments:
           query -- a Query instance specifying the region for which features should be returned
         """
@@ -653,6 +653,39 @@ class PythonDatasource(object):
             f = Feature(ctx, idx)
             geom, attrs = feat
             f.add_geometries_from_wkb(geom)
+            for k, v in attrs.iteritems():
+                f[k] = v
+            return f
+
+        return itertools.imap(make_it, features, itertools.count(1))
+
+    @classmethod
+    def wkt_features(cls, keys, features):
+        """A convenience function to wrap an iterator yielding pairs of WKT format geometry and dictionaries of
+        key-value pairs into mapnik features. Return this from PythonDatasource.features() passing it a sequence of keys
+        to appear in the output and an iterator yielding features.
+
+        For example. One might have a features() method in a derived class like the following:
+
+        def features(self, query):
+            # ... create WKT features feat1 and feat2
+
+            return mapnik.PythonDatasource.wkt_features(
+                keys = ( 'name', 'author' ),
+                features = [
+                    (feat1, { 'name': 'feat1', 'author': 'alice' }),
+                    (feat2, { 'name': 'feat2', 'author': 'bob' }),
+                ]
+            )
+
+        """
+        ctx = Context()
+        [ctx.push(x) for x in keys]
+
+        def make_it(feat, idx):
+            f = Feature(ctx, idx)
+            geom, attrs = feat
+            f.add_geometries_from_wkt(geom)
             for k, v in attrs.iteritems():
                 f[k] = v
             return f
@@ -754,6 +787,18 @@ class _TextSymbolizer(TextSymbolizer,_injector):
         DeprecationWarning, 2)
         self.format.wrap_char = wrap_char
 
+
+    @property
+    def wrap_character(self):
+        warnings.warn("'wrap_character' is deprecated, use format.wrap_character",
+        DeprecationWarning, 2)
+        return self.format.wrap_character
+
+    @wrap_char.setter
+    def wrap_character(self, wrap_character):
+        warnings.warn("'wrap_char' is deprecated, use format.wrap_character",
+        DeprecationWarning, 2)
+        self.format.wrap_character = wrap_character
 
 
     @property
@@ -1072,7 +1117,7 @@ def mapnik_version_from_string(version_string):
 
 def register_plugins(path=inputpluginspath):
     """Register plugins located by specified path"""
-    DatasourceCache.instance().register_datasources(path)
+    DatasourceCache.register_datasources(path)
 
 def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont']):
     """Recursively register fonts using path argument as base directory"""

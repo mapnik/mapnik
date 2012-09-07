@@ -11,7 +11,7 @@
 
 // mapnik
 #include <mapnik/map.hpp>
-#include <mapnik/svg_renderer.hpp>
+#include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/expression.hpp>
@@ -220,7 +220,7 @@ void render_to_file(Map const& m, const std::string output_filename)
 BOOST_AUTO_TEST_CASE(path_element_test_case_1)
 {
     Map m(800,600);
-    m.set_background(color_factory::from_string("steelblue"));
+    m.set_background(parse_color("steelblue"));
 
     prepare_map(m);
 

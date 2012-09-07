@@ -115,6 +115,14 @@ public:
         return commands_[block] [pos & block_mask];
     }
 
+    void set_command(unsigned pos, unsigned command)
+    {
+        if (pos < pos_)
+        {
+            unsigned block = pos >> block_shift;
+            commands_[block] [pos & block_mask] = command;
+        }
+    }
 private:
     void allocate_block(unsigned block)
     {

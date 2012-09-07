@@ -52,10 +52,10 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     // not able to compile make_shared used within a constructor
     text_symbolizer(text_placements_ptr placements = text_placements_ptr(new text_placements_dummy));
     text_symbolizer(expression_ptr name, std::string const& face_name,
-                    float size, color const& fill,
+                    double size, color const& fill,
                     text_placements_ptr placements = text_placements_ptr(new text_placements_dummy)
         );
-    text_symbolizer(expression_ptr name, float size, color const& fill,
+    text_symbolizer(expression_ptr name, double size, color const& fill,
                     text_placements_ptr placements = text_placements_ptr(new text_placements_dummy)
         );
     text_symbolizer(text_symbolizer const& rhs);
@@ -66,30 +66,30 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     expression_ptr get_orientation() const func_deprecated; // orienation (rotation angle atm)
     void set_orientation(expression_ptr expr);
 
-    unsigned get_text_ratio() const func_deprecated; // target ratio for text bounding box in pixels
-    void set_text_ratio(unsigned ratio);
-    unsigned get_wrap_width() const func_deprecated; // width to wrap text at, or trigger ratio
-    void set_wrap_width(unsigned ratio);
+    double get_text_ratio() const func_deprecated; // target ratio for text bounding box in pixels
+    void set_text_ratio(double ratio);
+    double get_wrap_width() const func_deprecated; // width to wrap text at, or trigger ratio
+    void set_wrap_width(double width);
     unsigned char get_wrap_char() const func_deprecated; // character used to wrap lines
     std::string get_wrap_char_string() const func_deprecated; // character used to wrap lines as std::string
     void set_wrap_char(unsigned char character);
     void set_wrap_char_from_string(std::string const& character);
     text_transform_e get_text_transform() const func_deprecated; // text conversion on strings before display
     void set_text_transform(text_transform_e convert);
-    unsigned get_line_spacing() const func_deprecated; // spacing between lines of text
-    void set_line_spacing(unsigned spacing);
-    unsigned get_character_spacing() const func_deprecated; // spacing between characters in text
-    void set_character_spacing(unsigned spacing);
-    unsigned get_label_spacing() const func_deprecated; // spacing between repeated labels on lines
-    void set_label_spacing(unsigned spacing);
+    double get_line_spacing() const func_deprecated; // spacing between lines of text
+    void set_line_spacing(double spacing);
+    double get_character_spacing() const func_deprecated; // spacing between characters in text
+    void set_character_spacing(double spacing);
+    double get_label_spacing() const func_deprecated; // spacing between repeated labels on lines
+    void set_label_spacing(double spacing);
     unsigned get_label_position_tolerance() const func_deprecated; //distance the label can be moved on the line to fit, if 0 the default is used
     void set_label_position_tolerance(unsigned tolerance);
     bool get_force_odd_labels() const func_deprecated; // try render an odd amount of labels
     void set_force_odd_labels(bool force);
     double get_max_char_angle_delta() const func_deprecated; // maximum change in angle between adjacent characters
     void set_max_char_angle_delta(double angle);
-    float get_text_size() const func_deprecated;
-    void set_text_size(float size);
+    double get_text_size() const func_deprecated;
+    void set_text_size(double size);
     std::string const& get_face_name() const func_deprecated;
     void set_face_name(std::string face_name);
     font_set const& get_fontset() const func_deprecated;

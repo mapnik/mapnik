@@ -75,7 +75,7 @@ void set_text_displacement(shield_symbolizer & t, boost::python::tuple arg)
     t.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
-const std::string get_filename(shield_symbolizer const& t)
+std::string get_filename(shield_symbolizer const& t)
 {
     return path_processor_type::to_string(*t.get_filename());
 }
@@ -96,7 +96,6 @@ void export_shield_symbolizer()
                                                         unsigned, mapnik::color const&,
                                                         path_expression_ptr>()
         )
-        //.def_pickle(shield_symbolizer_pickle_suite())
         .add_property("allow_overlap",
                       &shield_symbolizer::get_allow_overlap,
                       &shield_symbolizer::set_allow_overlap,
@@ -206,5 +205,13 @@ void export_shield_symbolizer()
         .add_property("transform",
                       mapnik::get_svg_transform<shield_symbolizer>,
                       mapnik::set_svg_transform<shield_symbolizer>)
+        .add_property("comp_op",
+                      &shield_symbolizer::comp_op,
+                      &shield_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &shield_symbolizer::clip,
+                      &shield_symbolizer::set_clip,
+                      "Set/get the shield geometry's clipping status")
         ;
 }

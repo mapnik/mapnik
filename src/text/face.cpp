@@ -47,7 +47,7 @@ double font_face::get_char_height() const
     return char_height_;
 }
 
-bool font_face::set_character_sizes(float size)
+bool font_face::set_character_sizes(double size)
 {
     char_height_ = 0.;
     return !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0);
@@ -108,7 +108,7 @@ void font_face_set::add(face_ptr face)
     faces_.push_back(face);
 }
 
-void font_face_set::set_character_sizes(float size)
+void font_face_set::set_character_sizes(double size)
 {
     BOOST_FOREACH ( face_ptr const& face, faces_)
     {

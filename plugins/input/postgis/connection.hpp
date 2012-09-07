@@ -87,7 +87,7 @@ public:
         }
     }
 
-    bool execute(const std::string& sql) const
+    bool execute(std::string const& sql) const
     {
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute ") + sql);
@@ -99,7 +99,7 @@ public:
         return ok;
     }
 
-    boost::shared_ptr<ResultSet> executeQuery(const std::string& sql, int type = 0) const
+    boost::shared_ptr<ResultSet> executeQuery(std::string const& sql, int type = 0) const
     {
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute_query ") + sql);

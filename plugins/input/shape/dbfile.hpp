@@ -63,7 +63,7 @@ private:
     char* record_;
 public:
     dbf_file();
-    dbf_file(const std::string& file_name);
+    dbf_file(std::string const& file_name);
     ~dbf_file();
     bool is_open();
     int num_records() const;

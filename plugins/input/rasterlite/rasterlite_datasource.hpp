@@ -58,13 +58,10 @@ public:
 
 private:
     void* open_dataset() const;
-
     mutable mapnik::box2d<double> extent_;
     std::string dataset_name_;
     std::string table_name_;
     mapnik::layer_descriptor desc_;
-    unsigned width_;
-    unsigned height_;
 };
 
 #endif // RASTERLITE_DATASOURCE_HPP

@@ -59,7 +59,7 @@ public:
     void bind() const;
 
 private:
-    void run (const std::string& host, const unsigned int port);
+    void run (std::string const& host, const unsigned int port);
 
     mapnik::box2d<double> extent_;
     bool extent_initialized_;

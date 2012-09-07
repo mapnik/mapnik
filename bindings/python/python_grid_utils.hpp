@@ -64,7 +64,7 @@ void grid_encode_utf(T const& grid_type,
                             unsigned int resolution);
 
 template <typename T>
-boost::python::dict grid_encode( T const& grid, std::string format, bool add_features, unsigned int resolution);
+boost::python::dict grid_encode( T const& grid, std::string const& format, bool add_features, unsigned int resolution);
 
 /* new approach: key comes from grid object
  * grid size should be same as the map

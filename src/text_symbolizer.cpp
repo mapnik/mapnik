@@ -42,7 +42,7 @@ text_symbolizer::text_symbolizer(text_placements_ptr placements)
 }
 
 text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name,
-                                 float size, color const& fill,
+                                 double size, color const& fill,
                                  text_placements_ptr placements)
     : symbolizer_base(),
       placement_options_(placements)
@@ -53,7 +53,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
     set_fill(fill);
 }
 
-text_symbolizer::text_symbolizer(expression_ptr name, float size, color const& fill,
+text_symbolizer::text_symbolizer(expression_ptr name, double size, color const& fill,
                                  text_placements_ptr placements)
     : symbolizer_base(),
       placement_options_(placements)
@@ -122,22 +122,22 @@ font_set const& text_symbolizer::get_fontset() const
     return placement_options_->defaults.format->fontset;
 }
 
-unsigned  text_symbolizer::get_text_ratio() const
+double text_symbolizer::get_text_ratio() const
 {
     return placement_options_->defaults.text_ratio;
 }
 
-void  text_symbolizer::set_text_ratio(unsigned ratio)
+void  text_symbolizer::set_text_ratio(double ratio)
 {
     placement_options_->defaults.text_ratio = ratio;
 }
 
-unsigned  text_symbolizer::get_wrap_width() const
+double text_symbolizer::get_wrap_width() const
 {
     return placement_options_->defaults.wrap_width;
 }
 
-void  text_symbolizer::set_wrap_width(unsigned width)
+void text_symbolizer::set_wrap_width(double width)
 {
     placement_options_->defaults.wrap_width = width;
 }
@@ -182,32 +182,32 @@ void  text_symbolizer::set_text_transform(text_transform_e convert)
     placement_options_->defaults.format->text_transform = convert;
 }
 
-unsigned  text_symbolizer::get_line_spacing() const
+double text_symbolizer::get_line_spacing() const
 {
     return placement_options_->defaults.format->line_spacing;
 }
 
-void  text_symbolizer::set_line_spacing(unsigned spacing)
+void  text_symbolizer::set_line_spacing(double spacing)
 {
     placement_options_->defaults.format->line_spacing = spacing;
 }
 
-unsigned  text_symbolizer::get_character_spacing() const
+double text_symbolizer::get_character_spacing() const
 {
     return placement_options_->defaults.format->character_spacing;
 }
 
-void  text_symbolizer::set_character_spacing(unsigned spacing)
+void  text_symbolizer::set_character_spacing(double spacing)
 {
     placement_options_->defaults.format->character_spacing = spacing;
 }
 
-unsigned  text_symbolizer::get_label_spacing() const
+double text_symbolizer::get_label_spacing() const
 {
     return placement_options_->defaults.label_spacing;
 }
 
-void  text_symbolizer::set_label_spacing(unsigned spacing)
+void  text_symbolizer::set_label_spacing(double spacing)
 {
     placement_options_->defaults.label_spacing = spacing;
 }
@@ -242,12 +242,12 @@ void text_symbolizer::set_max_char_angle_delta(double angle)
     placement_options_->defaults.max_char_angle_delta = angle;
 }
 
-void text_symbolizer::set_text_size(float size)
+void text_symbolizer::set_text_size(double size)
 {
     placement_options_->defaults.format->text_size = size;
 }
 
-float text_symbolizer::get_text_size() const
+double text_symbolizer::get_text_size() const
 {
     return placement_options_->defaults.format->text_size;
 }

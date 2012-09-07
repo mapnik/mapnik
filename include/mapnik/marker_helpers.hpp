@@ -24,6 +24,8 @@
 #define MAPNIK_MARKER_HELPERS_HPP
 
 #include <mapnik/color.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/geom_util.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
@@ -87,15 +89,17 @@ struct vector_markers_rasterizer_dispatch
 
         if (placement_method != MARKER_LINE_PLACEMENT)
         {
-            double x,y;
-            path.rewind(0);
+            double x = 0;
+            double y = 0;
             if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                label::interior_position(path, x, y);
+                if (!label::interior_position(path, x, y))
+                    return;
             }
             else
             {
-                label::centroid(path, x, y);
+                if (!label::centroid(path, x, y))
+                    return;
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
@@ -117,7 +121,9 @@ struct vector_markers_rasterizer_dispatch
                                                      sym_.get_spacing() * scale_factor_,
                                                      sym_.get_max_error(),
                                                      sym_.get_allow_overlap());
-            double x, y, angle;
+            double x = 0;
+            double y = 0;
+            double angle = 0;
             while (placement.get_point(x, y, angle))
             {
                 agg::trans_affine matrix = marker_trans_;
@@ -179,15 +185,17 @@ struct raster_markers_rasterizer_dispatch
 
         if (placement_method != MARKER_LINE_PLACEMENT)
         {
-            double x,y;
-            path.rewind(0);
+            double x = 0;
+            double y = 0;
             if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                label::interior_position(path, x, y);
+                if (!label::interior_position(path, x, y))
+                    return;
             }
             else
             {
-                label::centroid(path, x, y);
+                if (!label::centroid(path, x, y))
+                    return;
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
@@ -251,7 +259,7 @@ struct raster_markers_rasterizer_dispatch
         typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
                                                 interpolator_type> span_gen_type;
         typedef agg::renderer_scanline_aa_alpha<renderer_base,
-                agg::span_allocator<agg::rgba8>,
+                agg::span_allocator<color_type>,
                 span_gen_type> renderer_type;
         img_accessor_type ia(pixf);
         interpolator_type interpolator(agg::trans_affine(p, 0, 0, width, height) );
@@ -359,7 +367,7 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
 }
 
 template <typename T>
-void setup_label_transform(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
+void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
 {
     double width = 0;
     double height = 0;
@@ -387,10 +395,6 @@ void setup_label_transform(agg::trans_affine & tr, box2d<double> const& bbox, ma
     {
         double sy = height/bbox.height();
         tr *= agg::trans_affine_scaling(sy);
-    }
-    else
-    {
-        evaluate_transform(tr, feature, sym.get_image_transform());
     }
 }
 

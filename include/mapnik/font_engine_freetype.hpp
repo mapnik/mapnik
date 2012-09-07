@@ -71,7 +71,16 @@ class MAPNIK_DECL freetype_engine
 {
 public:
     static bool is_font_file(std::string const& file_name);
+    /*! \brief register a font file
+     *  @param file_name path to a font file.
+     *  @return bool - true if at least one face was successfully registered in the file.
+     */
     static bool register_font(std::string const& file_name);
+    /*! \brief register a font file
+     *  @param file_name - path to a directory containing fonts or subdirectories.
+     *  @param recurse - default false, whether to search for fonts in sub directories.
+     *  @return bool - true if at least one face was successfully registered.
+     */
     static bool register_fonts(std::string const& dir, bool recurse = false);
     static std::vector<std::string> face_names();
     static std::map<std::string,std::pair<int,std::string> > const& get_mapping();

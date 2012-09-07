@@ -49,7 +49,6 @@ namespace mapnik { namespace util {
 //  *   background_(rhs.background_),
 //  *   background_image_(rhs.background_image_),
 //  *   styles_(rhs.styles_),
-//      metawriters_(rhs.metawriters_),
 //      fontsets_(rhs.fontsets_),
 //  *   layers_(rhs.layers_),
 //      aspectFixMode_(rhs.aspectFixMode_),
@@ -102,7 +101,7 @@ namespace mapnik { namespace util {
                 parameters p(ds_in->params());
 
                 // TODO : re-use datasource extent if already set.
-                datasource_ptr ds_out = datasource_cache::create(p);
+                datasource_ptr ds_out = datasource_cache::instance()->create(p);
                 if (ds_out)
                 {
                     lyr_out.set_datasource(ds_out);

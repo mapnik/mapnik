@@ -13,7 +13,7 @@ def setup():
 def test_multi_tile_policy():
     srs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
     lyr = mapnik.Layer('raster')
-    if 'raster' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'raster' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Raster(
             file = '../data/raster_tiles/${x}/${y}.tif',
             lox = -180,

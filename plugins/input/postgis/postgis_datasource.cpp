@@ -91,7 +91,7 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
     }
 
     boost::optional<std::string> ext = params_.get<std::string>("extent");
-    if (ext)
+    if (ext && !ext->empty())
     {
         extent_initialized_ = extent_.from_string(*ext);
     }
@@ -401,8 +401,12 @@ void postgis_datasource::bind() const
                         shared_ptr<ResultSet> rs_oid = conn->executeQuery(s.str());
                         if (rs_oid->next())
                         {
-                            MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type=" << rs_oid->getValue("typname")
-                                                     << " (oid:" << rs_oid->getValue("oid") << ")";
+                            std::string typname(rs_oid->getValue("typname"));
+                            if (typname != "geometry")
+                            {
+                                MAPNIK_LOG_WARN(postgis) << "postgis_datasource: Unknown type=" << typname
+                                                         << " (oid:" << rs_oid->getValue("oid") << ")";
+                            }
                         }
                         else
                         {
@@ -481,7 +485,7 @@ std::string postgis_datasource::sql_bbox(box2d<double> const& env) const
     return b.str();
 }
 
-std::string postgis_datasource::populate_tokens(const std::string& sql) const
+std::string postgis_datasource::populate_tokens(std::string const& sql) const
 {
     std::string populated_sql = sql;
 
@@ -516,7 +520,7 @@ std::string postgis_datasource::populate_tokens(const std::string& sql) const
     return populated_sql;
 }
 
-std::string postgis_datasource::populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
+std::string postgis_datasource::populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
 {
     std::string populated_sql = sql;
     std::string box = sql_bbox(env);

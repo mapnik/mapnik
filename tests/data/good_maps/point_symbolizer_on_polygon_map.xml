@@ -7,12 +7,12 @@
         </Rule>
         <Rule name="europe">
             <Filter>([REGION]=150)</Filter>
-            <!-- requires at least Mapnik 0.7.1 to work due to http://trac.mapnik.org/ticket/508 -->
+            <!-- requires at least Mapnik 0.7.1 to work due to https://github.com/mapnik/mapnik/issues/508 -->
             <PolygonPatternSymbolizer file="../images/dummy.png"/>
         </Rule>
         <Rule name="americas">
             <Filter>([REGION]=19)</Filter>
-            <!-- requires at least Mapnik 0.7.1 to work due to http://trac.mapnik.org/ticket/508 -->
+            <!-- requires at least Mapnik 0.7.1 to work due to https://github.com/mapnik/mapnik/issues/508 -->
             <LinePatternSymbolizer file="../images/dummy.png"/>
         </Rule>
         <Rule name="Africa">

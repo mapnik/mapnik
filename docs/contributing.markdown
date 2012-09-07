@@ -92,7 +92,7 @@ If you see bits of code around that do not follow these please don't hesitate to
 #### Use C++ style casts
 
     static_cast<int>(value); // yes
-    
+
     (int)value; // no
 
 #### Use const keyword after the type
@@ -109,22 +109,29 @@ If you see bits of code around that do not follow these please don't hesitate to
 
 #### Shared pointers should be created with [boost::make_shared](http://www.boost.org/doc/libs/1_47_0/libs/smart_ptr/make_shared.html) where possible
 
+#### Use assignment operator for zero initialized numbers
+
+    double num = 0; // please
+
+    double num(0); // no
+
+
 #### Function definitions should not be separated from their arguments:
 
     void foo(int a) // please
-    
+
     void foo (int a) // no
 
 #### Separate arguments by a single space:
 
     void foo(int a, float b) // please
-  
+
     void foo(int a,float b) // no
 
 #### Space between operators:
 
     if (a == b) // please
-    
+
     if(a==b) // no
 
 #### Braces should always be used:
@@ -136,7 +143,7 @@ If you see bits of code around that do not follow these please don't hesitate to
 
     if (!file)
         throw mapnik::datasource_exception("not found"); // no
-        
+
 
 #### Braces should be on a separate line:
 

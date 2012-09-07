@@ -85,9 +85,9 @@ public:
             unsigned int b = (in >> 16) & 0xff;
             unsigned int a = (in >> 24) & 0xff;
 
-            r = r * a / 255;
-            g = g * a / 255;
-            b = b * a / 255;
+            //r = r * a / 255;
+            //g = g * a / 255;
+            //b = b * a / 255;
 
             *out_ptr++ = (a << 24) | (r << 16) | (g << 8) | b;
         }
@@ -96,7 +96,7 @@ public:
         pattern_ = Cairo::SurfacePattern::create(surface_);
     }
 
-    ~cairo_pattern(void)
+    ~cairo_pattern()
     {
     }
 
@@ -127,7 +127,7 @@ public:
         pattern_->set_filter(filter);
     }
 
-    Cairo::RefPtr<Cairo::SurfacePattern> const& pattern(void) const
+    Cairo::RefPtr<Cairo::SurfacePattern> const& pattern() const
     {
         return pattern_;
     }
@@ -172,12 +172,12 @@ public:
         pattern_->set_matrix(Cairo::Matrix(m[0],m[1],m[2],m[3],m[4],m[5]));
     }
 
-    ~cairo_gradient(void)
+    ~cairo_gradient()
     {
     }
 
 
-    Cairo::RefPtr<Cairo::Gradient> const& gradient(void) const
+    Cairo::RefPtr<Cairo::Gradient> const& gradient() const
     {
         return pattern_;
     }
@@ -208,7 +208,7 @@ public:
         cairo_face_ = Cairo::RefPtr<Cairo::FontFace>(new Cairo::FontFace(c_face));
     }
 
-    Cairo::RefPtr<Cairo::FontFace> const& face(void) const
+    Cairo::RefPtr<Cairo::FontFace> const& face() const
     {
         return cairo_face_;
     }
@@ -269,7 +269,7 @@ public:
         context_->save();
     }
 
-    ~cairo_context(void)
+    ~cairo_context()
     {
         context_->restore();
     }
@@ -386,7 +386,7 @@ public:
         case saturation:
         case _color:
         case _value:
-        case colorize_alpha:
+        //case colorize_alpha:
             break;
         }
     }
@@ -567,17 +567,17 @@ public:
         context_->rectangle(x, y, w, h);
     }
 
-    void stroke(void)
+    void stroke()
     {
         context_->stroke();
     }
 
-    void fill(void)
+    void fill()
     {
         context_->fill();
     }
 
-    void paint(void)
+    void paint()
     {
         context_->paint();
     }
@@ -621,6 +621,24 @@ public:
         context_->paint_with_alpha(opacity);
         context_->restore();
     }
+
+    void add_image(agg::trans_affine const& tr, image_data_32 & data, double opacity = 1.0)
+    {
+        cairo_pattern pattern(data);
+        if (!tr.is_identity())
+        {
+            double m[6];
+            tr.store_to(m);
+            Cairo::Matrix cairo_matrix(m[0],m[1],m[2],m[3],m[4],m[5]);
+            cairo_matrix.invert();
+            pattern.set_matrix(cairo_matrix);
+        }
+        context_->save();
+        context_->set_source(pattern.pattern());
+        context_->paint_with_alpha(opacity);
+        context_->restore();
+    }
+
 
     void set_font_face(cairo_face_manager & manager, face_ptr face)
     {
@@ -837,7 +855,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
 
-    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
@@ -954,6 +972,9 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
+    typedef boost::mpl::vector<clip_line_tag, transform_tag,
+                               offset_transform_tag, affine_transform_tag,
+                               smooth_tag, dash_tag, stroke_tag> conv_types;
     cairo_context context(context_);
     mapnik::stroke const& stroke_ = sym.get_stroke();
     context.set_operator(sym.comp_op());
@@ -971,21 +992,26 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    box2d<double> ext = query_extent_ * 1.1;
-    typedef boost::mpl::vector<clip_line_tag, clip_poly_tag, transform_tag, offset_transform_tag, affine_transform_tag, smooth_tag> conv_types;
+    box2d<double> clipping_extent = query_extent_;
+    if (sym.clip())
+    {
+        double padding = (double)(query_extent_.width()/width_);
+        float half_stroke = stroke_.get_width()/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+    }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(ext,context,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clipping_extent,context,sym,t_,prj_trans,tr,scale_factor_);
 
-    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
-    {
-        eGeomType type = feature.paths()[0].type();
-        if (type == Polygon)
-            converter.set<clip_poly_tag>();
-        else if (type == LineString)
-            converter.set<clip_line_tag>();
-        // don't clip if type==Point
-    }
+    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
@@ -1112,6 +1138,7 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
     }
 }
 
+
 void cairo_renderer_base::render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity, bool recenter)
 
 {
@@ -1128,7 +1155,9 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
     }
     else if (marker.is_bitmap())
     {
-        context.add_image(pos.x, pos.y, **marker.get_bitmap_data(), opacity);
+        agg::trans_affine matrix = tr;
+        matrix *= agg::trans_affine_translation(pos.x, pos.y);
+        context.add_image(matrix, **marker.get_bitmap_data(), opacity);
     }
 }
 
@@ -1148,8 +1177,6 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
         marker.reset(boost::make_shared<mapnik::marker>());
     }
 
-    agg::trans_affine mtx;
-    evaluate_transform(mtx, feature, sym.get_image_transform());
 
     if (marker)
     {
@@ -1161,23 +1188,30 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             double z = 0;
 
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                label::centroid(geom, x, y);
+            {
+                if (!label::centroid(geom, x, y))
+                    return;
+            }
             else
-                label::interior_position(geom, x, y);
+            {
+                if (!label::interior_position(geom ,x, y))
+                    return;
+            }
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
 
-            int w = (*marker)->width();
-            int h = (*marker)->height();
-
-            int px = int(floor(x - 0.5 * w));
-            int py = int(floor(y - 0.5 * h));
-            box2d<double> label_ext (px, py, px + w, py + h);
+            double dx = 0.5 * (*marker)->width();
+            double dy = 0.5 * (*marker)->height();
+            agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
+            evaluate_transform(tr, feature, sym.get_image_transform());
+            box2d<double> label_ext (-dx, -dy, dx, dy);
+            label_ext *= tr;
+            label_ext *= agg::trans_affine_translation(x,y);
             if (sym.get_allow_overlap() ||
                 detector_.has_placement(label_ext))
             {
-                render_marker(pixel_position(px,py),**marker, mtx, sym.get_opacity());
+                render_marker(pixel_position(x,y),**marker, tr, sym.get_opacity());
 
                 if (!sym.get_ignore_placement())
                     detector_.insert(label_ext);
@@ -1208,6 +1242,14 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             pixel_position pos = glyphs->marker_pos() - 0.5 *
                     pixel_position(glyphs->marker()->marker->width(),
                                    glyphs->marker()->marker->height());
+
+            double dx = 0.5 * glyphs->marker()->marker->width();
+            double dy = 0.5 * glyphs->marker()->marker->height();
+            agg::trans_affine marker_tr = agg::trans_affine_translation(-dx,-dy);
+            marker_tr *= agg::trans_affine_scaling(scale_factor_);
+            marker_tr *= agg::trans_affine_translation(dx, dy);
+            marker_tr *= glyphs->marker()->transform;
+
             render_marker(pos,
                       *(glyphs->marker()->marker), glyphs->marker()->transform,
                       sym.get_opacity());
@@ -1294,6 +1336,9 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
+    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+
     cairo_context context(context_);
     context.set_operator(sym.comp_op());
 
@@ -1307,15 +1352,34 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
 
     context.set_pattern(pattern);
 
+    //pattern_alignment_e align = sym.get_alignment();
+    //unsigned offset_x=0;
+    //unsigned offset_y=0;
+
+    //if (align == LOCAL_ALIGNMENT)
+    //{
+    //    double x0 = 0;
+    //    double y0 = 0;
+    //    if (feature.num_geometries() > 0)
+    //    {
+    //        clipped_geometry_type clipped(feature.get_geometry(0));
+    //        clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+    //        path_type path(t_,clipped,prj_trans);
+    //        path.vertex(&x0,&y0);
+    //    }
+    //    offset_x = unsigned(width_ - x0);
+    //    offset_y = unsigned(height_ - y0);
+    //}
+
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, cairo_context, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(query_extent_,context,sym,t_,prj_trans,tr,1.0);
+        converter(query_extent_,context,sym,t_,prj_trans,tr, scale_factor_);
 
-    if (sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     converter.set<affine_transform_tag>();
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
@@ -1327,7 +1391,6 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
             converter.apply(geom);
         }
     }
-
     // fill polygon
     context.fill();
 }
@@ -1421,15 +1484,17 @@ struct markers_dispatch
 
         if (placement_method != MARKER_LINE_PLACEMENT)
         {
-            double x,y;
-            path.rewind(0);
+            double x = 0;
+            double y = 0;
             if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
-                label::interior_position(path, x, y);
+                if (!label::interior_position(path, x, y))
+                    return;
             }
             else
             {
-                label::centroid(path, x, y);
+                if (!label::centroid(path, x, y))
+                    return;
             }
             coord2d center = bbox_.center();
             agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
@@ -1476,6 +1541,89 @@ struct markers_dispatch
     double scale_factor_;
 };
 
+template <typename Context, typename ImageMarker, typename Detector>
+struct markers_dispatch_2
+{
+    markers_dispatch_2(Context & ctx,
+                     ImageMarker & marker,
+                     Detector & detector,
+                     markers_symbolizer const& sym,
+                     box2d<double> const& bbox,
+                     agg::trans_affine const& marker_trans,
+                     double scale_factor)
+        :ctx_(ctx),
+         marker_(marker),
+         detector_(detector),
+         sym_(sym),
+         bbox_(bbox),
+         marker_trans_(marker_trans),
+         scale_factor_(scale_factor) {}
+
+
+    template <typename T>
+    void add_path(T & path)
+    {
+        marker_placement_e placement_method = sym_.get_marker_placement();
+
+        if (placement_method != MARKER_LINE_PLACEMENT)
+        {
+            double x = 0;
+            double y = 0;
+            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            {
+                if (!label::interior_position(path, x, y))
+                    return;
+            }
+            else
+            {
+                if (!label::centroid(path, x, y))
+                    return;
+            }
+            coord2d center = bbox_.center();
+            agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
+            matrix *= marker_trans_;
+            matrix *=agg::trans_affine_translation(x, y);
+
+            box2d<double> transformed_bbox = bbox_ * matrix;
+
+            if (sym_.get_allow_overlap() ||
+                detector_.has_placement(transformed_bbox))
+            {
+                ctx_.add_image(matrix, *marker_, sym_.get_opacity());
+                if (!sym_.get_ignore_placement())
+                {
+                    detector_.insert(transformed_bbox);
+                }
+            }
+        }
+        else
+        {
+            markers_placement<T, label_collision_detector4> placement(path, bbox_, marker_trans_, detector_,
+                                                                      sym_.get_spacing() * scale_factor_,
+                                                                      sym_.get_max_error(),
+                                                                      sym_.get_allow_overlap());
+            double x, y, angle;
+            while (placement.get_point(x, y, angle))
+            {
+                coord2d center = bbox_.center();
+                agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
+                matrix *= marker_trans_;
+                matrix *= agg::trans_affine_rotation(angle);
+                matrix *= agg::trans_affine_translation(x, y);
+                ctx_.add_image(matrix, *marker_, sym_.get_opacity());
+            }
+        }
+    }
+
+    Context & ctx_;
+    ImageMarker & marker_;
+    Detector & detector_;
+    markers_symbolizer const& sym_;
+    box2d<double> const& bbox_;
+    agg::trans_affine const& marker_trans_;
+    double scale_factor_;
+};
+
 }
 void cairo_renderer_base::process(markers_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
@@ -1498,85 +1646,119 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
             box2d<double> const& bbox = (*mark)->bounding_box();
-            setup_label_transform(tr, bbox, feature, sym);
+            setup_transform_scaling(tr, bbox, feature, sym);
+            evaluate_transform(tr, feature, sym.get_image_transform());
 
-
-            using namespace mapnik::svg;
-            typedef agg::pod_bvector<path_attributes> svg_attributes_type;
-            typedef detail::markers_dispatch<cairo_context, mapnik::svg_storage_type,
+            if ((*mark)->is_vector())
+            {
+                using namespace mapnik::svg;
+                typedef agg::pod_bvector<path_attributes> svg_attributes_type;
+                typedef detail::markers_dispatch<cairo_context, mapnik::svg_storage_type,
                                              svg_attributes_type,label_collision_detector4> dispatch_type;
 
-            boost::optional<svg_path_ptr> const& stock_vector_marker = (*mark)->get_vector_data();
+                boost::optional<svg_path_ptr> const& stock_vector_marker = (*mark)->get_vector_data();
 
-            expression_ptr const& width_expr = sym.get_width();
-            expression_ptr const& height_expr = sym.get_height();
+                expression_ptr const& width_expr = sym.get_width();
+                expression_ptr const& height_expr = sym.get_height();
 
-            // special case for simple ellipse markers
-            // to allow for full control over rx/ry dimensions
-            if (filename == "shape://ellipse"
-                && (width_expr || height_expr))
-            {
-                svg_storage_type marker_ellipse;
-                vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());
-                svg_path_adapter svg_path(stl_storage);
-                build_ellipse(sym, feature, marker_ellipse, svg_path);
-                svg_attributes_type attributes;
-                bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
-                //svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
-                agg::trans_affine marker_tr = agg::trans_affine_scaling(scale_factor_);
-                evaluate_transform(marker_tr, feature, sym.get_image_transform());
-                box2d<double> bbox = marker_ellipse.bounding_box();
-                coord2d center = bbox.center();
-                agg::trans_affine_translation recenter(-center.x, -center.y);
-                agg::trans_affine marker_trans = recenter * tr;
-
-                dispatch_type dispatch(context, marker_ellipse, result?attributes:(*stock_vector_marker)->attributes(),
-                                       detector_, sym, bbox, marker_tr, scale_factor_);
-                vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
-                                 CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(query_extent_, dispatch, sym, t_, prj_trans, marker_tr, scale_factor_);
-
-                if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                // special case for simple ellipse markers
+                // to allow for full control over rx/ry dimensions
+                if (filename == "shape://ellipse"
+                    && (width_expr || height_expr))
                 {
-                    eGeomType type = feature.paths()[0].type();
-                    if (type == Polygon)
-                        converter.set<clip_poly_tag>();
-                    else if (type == LineString)
-                        converter.set<clip_line_tag>();
-                    // don't clip if type==Point
+                    svg_storage_type marker_ellipse;
+                    vertex_stl_adapter<svg_path_storage> stl_storage(marker_ellipse.source());
+                    svg_path_adapter svg_path(stl_storage);
+                    build_ellipse(sym, feature, marker_ellipse, svg_path);
+                    svg_attributes_type attributes;
+                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
+                    agg::trans_affine marker_tr = agg::trans_affine_scaling(scale_factor_);
+                    evaluate_transform(marker_tr, feature, sym.get_image_transform());
+                    box2d<double> bbox = marker_ellipse.bounding_box();
+
+                    dispatch_type dispatch(context, marker_ellipse, result?attributes:(*stock_vector_marker)->attributes(),
+                                           detector_, sym, bbox, marker_tr, scale_factor_);
+                    vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
+                                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+                        converter(query_extent_, dispatch, sym, t_, prj_trans, marker_tr, scale_factor_);
+
+                    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                    {
+                        eGeomType type = feature.paths()[0].type();
+                        if (type == Polygon)
+                            converter.set<clip_poly_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
+                        // don't clip if type==Point
+                    }
+                    converter.set<transform_tag>(); //always transform
+                    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+                    BOOST_FOREACH(geometry_type & geom, feature.paths())
+                    {
+                        converter.apply(geom);
+                    }
                 }
-                converter.set<transform_tag>(); //always transform
-                if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-                BOOST_FOREACH(geometry_type & geom, feature.paths())
+                else
                 {
-                    converter.apply(geom);
+                    svg_attributes_type attributes;
+                    bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
+
+                    dispatch_type dispatch(context, **stock_vector_marker, result?attributes:(*stock_vector_marker)->attributes(),
+                                           detector_, sym, bbox, tr, scale_factor_);
+                    vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
+                                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+                        converter(query_extent_, dispatch, sym, t_, prj_trans, tr, scale_factor_);
+
+                    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                    {
+                        eGeomType type = feature.paths()[0].type();
+                        if (type == Polygon)
+                            converter.set<clip_poly_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
+                        // don't clip if type==Point
+                    }
+                    converter.set<transform_tag>(); //always transform
+                    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+                    BOOST_FOREACH(geometry_type & geom, feature.paths())
+                    {
+                        converter.apply(geom);
+                    }
                 }
             }
-            else
+            else // raster markers
             {
-                svg_attributes_type attributes;
-                bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
-
-                dispatch_type dispatch(context, **stock_vector_marker, result?attributes:(*stock_vector_marker)->attributes(),
-                                       detector_, sym, bbox, tr, scale_factor_);
-                vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
-                                 CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(query_extent_, dispatch, sym, t_, prj_trans, tr, scale_factor_);
-
-                if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                typedef detail::markers_dispatch_2<cairo_context,
+                                                   mapnik::image_ptr,
+                                                   label_collision_detector4> dispatch_type;
+                boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
+                if ( marker )
                 {
-                    eGeomType type = feature.paths()[0].type();
-                    if (type == Polygon)
-                        converter.set<clip_poly_tag>();
-                    else if (type == LineString)
-                        converter.set<clip_line_tag>();
-                    // don't clip if type==Point
-                }
-                converter.set<transform_tag>(); //always transform
-                if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-                BOOST_FOREACH(geometry_type & geom, feature.paths())
-                {
-                    converter.apply(geom);
+                    dispatch_type dispatch(context, *marker,
+                                           detector_, sym, bbox, tr, scale_factor_);
+
+                    vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
+                                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+                        converter(query_extent_, dispatch, sym, t_, prj_trans, tr, scale_factor_);
+
+                    if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
+                    {
+                        eGeomType type = feature.paths()[0].type();
+                        if (type == Polygon)
+                            converter.set<clip_poly_tag>();
+                        // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
+                        //else if (type == LineString)
+                        //    converter.template set<clip_line_tag>();
+                        // don't clip if type==Point
+                    }
+                    converter.set<transform_tag>(); //always transform
+                    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+                    BOOST_FOREACH(geometry_type & geom, feature.paths())
+                    {
+                        converter.apply(geom);
+                    }
                 }
             }
         }

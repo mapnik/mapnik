@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id$
+# 
 
 import os
 from copy import copy
@@ -40,8 +40,7 @@ if env['HAS_CAIRO']:
     demo_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
 
 libraries =  copy(env['LIBMAPNIK_LIBS'])
-boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
-libraries.extend([boost_program_options,'mapnik'])
+libraries.append('mapnik')
 
 rundemo = demo_env.Program('rundemo', source, LIBS=libraries, LINKFLAGS=env["CUSTOM_LDFLAGS"])
 

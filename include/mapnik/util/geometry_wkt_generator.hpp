@@ -56,7 +56,7 @@ namespace mapnik { namespace util {
 namespace karma = boost::spirit::karma;
 namespace phoenix = boost::phoenix;
 
-namespace {
+namespace detail {
 
 struct get_type
 {
@@ -130,10 +130,10 @@ struct wkt_generator :
     karma::rule<OutputIterator, geometry_type::value_type (unsigned& )> polygon_coord;
 
     // phoenix functions
-    phoenix::function<get_type > _type;
-    phoenix::function<get_first> _first;
+    phoenix::function<detail::get_type > _type;
+    phoenix::function<detail::get_first> _first;
     //
-    karma::real_generator<double, wkt_coordinate_policy<double> > coord_type;
+    karma::real_generator<double, detail::wkt_coordinate_policy<double> > coord_type;
 };
 
 
@@ -150,9 +150,9 @@ struct wkt_multi_generator :
     karma::rule<OutputIterator, geometry_container const& ()> multi_geometry;
     wkt_generator<OutputIterator>  path;
     // phoenix
-    phoenix::function<multi_geometry_> is_multi;
-    phoenix::function<multi_geometry_type> _multi_type;
-    phoenix::function<get_type > _type;
+    phoenix::function<detail::multi_geometry_> is_multi;
+    phoenix::function<detail::multi_geometry_type> _multi_type;
+    phoenix::function<detail::get_type > _type;
     //
     karma::symbols<unsigned, char const*> geometry_types;
 };

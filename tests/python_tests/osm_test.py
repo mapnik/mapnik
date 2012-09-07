@@ -11,7 +11,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'osm' in mapnik.DatasourceCache.instance().plugin_names():
+if 'osm' in mapnik.DatasourceCache.plugin_names():
 
     # Shapefile initialization
     def test_osm_init():

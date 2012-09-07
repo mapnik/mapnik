@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/vertex_vector.hpp>
-#include <mapnik/geom_util.hpp>
+#include <mapnik/box2d.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -124,6 +124,14 @@ public:
     void close(coord_type x, coord_type y)
     {
         push_vertex(x,y,SEG_CLOSE);
+    }
+
+    void close()
+    {
+        if (cont_.size() > 3)
+        {
+            cont_.set_command(cont_.size() - 1, SEG_CLOSE);
+        }
     }
 
     unsigned vertex(double* x, double* y) const

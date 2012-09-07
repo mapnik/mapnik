@@ -34,11 +34,11 @@ namespace mapnik
 struct MAPNIK_DECL building_symbolizer : public symbolizer_base
 {
     building_symbolizer();
-    building_symbolizer(color const& fill, expression_ptr height);
+    building_symbolizer(color const& fill, expression_ptr const& height);
     color const& get_fill() const;
     void set_fill(color const& fill);
-    expression_ptr height() const;
-    void set_height(expression_ptr height);
+    expression_ptr const& height() const;
+    void set_height(expression_ptr const& height);
     void set_opacity(double opacity);
     double get_opacity() const;
 

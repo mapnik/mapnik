@@ -28,7 +28,6 @@
 #include <mapnik/transform_expression.hpp>
 
 // spirit
-#include <boost/spirit/home/phoenix/object/construct.hpp>
 #include <boost/spirit/home/qi.hpp>
 
 namespace mapnik {
@@ -40,20 +39,22 @@ namespace mapnik {
         : qi::grammar<Iterator, transform_list(), space_type>
     {
         explicit transform_expression_grammar(expression_grammar<Iterator> const& g);
-        typedef qi::locals<expr_node, boost::optional<expr_node>,
-                                      boost::optional<expr_node>
-                          > rotate_locals;
+
         typedef qi::rule<Iterator, transform_node(), space_type> node_rule;
         typedef qi::rule<Iterator, transform_list(), space_type> list_rule;
 
         // rules
-        typename expression_grammar<Iterator>::rule_type expr;
+        qi::rule<Iterator, std::string(), space_type>    attr;
+        qi::rule<Iterator, expr_node(), space_type>      atom;
+        qi::rule<Iterator, expr_node(), space_type>      expr;
+        qi::rule<Iterator, expr_node(), space_type>      sep_atom;
+        qi::rule<Iterator, expr_node(), space_type>      sep_expr;
         qi::rule<Iterator, transform_list(), space_type> start;
         qi::rule<Iterator, transform_node(), space_type> transform_;
         qi::rule<Iterator, transform_node(), space_type> matrix;
         qi::rule<Iterator, transform_node(), space_type> translate;
         qi::rule<Iterator, transform_node(), space_type> scale;
-        qi::rule<Iterator, transform_node(), space_type, rotate_locals> rotate;
+        qi::rule<Iterator, transform_node(), space_type> rotate;
         qi::rule<Iterator, transform_node(), space_type> skewX;
         qi::rule<Iterator, transform_node(), space_type> skewY;
     };

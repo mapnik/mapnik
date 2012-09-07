@@ -152,7 +152,7 @@ featureset_ptr kismet_datasource::features(query const& q) const
 {
     if (! is_bound_) bind();
 
-    MAPNIK_LOG_INFO(kismet) << "kismet_datasource::features()";
+    MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource::features()";
 
     // TODO: use box2d to filter bbox before adding to featureset_ptr
     // mapnik::box2d<double> const& e = q.get_bbox();
@@ -170,12 +170,12 @@ featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
 {
     if (! is_bound_) bind();
 
-    MAPNIK_LOG_INFO(kismet) << "kismet_datasource::features_at_point()";
+    MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource::features_at_point()";
 
     return featureset_ptr();
 }
 
-void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
+void kismet_datasource::run(std::string const& ip_host, const unsigned int port)
 {
     MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource: Enter run";
 

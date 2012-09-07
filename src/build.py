@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id$
+# 
 
 
 import os
@@ -104,6 +104,7 @@ source = Split(
     css_color_grammar.cpp
     conversions.cpp
     image_compositing.cpp
+    image_filter_grammar.cpp
     image_scaling.cpp
     box2d.cpp
     building_symbolizer.cpp
@@ -145,7 +146,6 @@ source = Split(
     text_symbolizer.cpp
     tiff_reader.cpp
     wkb.cpp
-    wkb_generator.cpp
     projection.cpp
     proj_transform.cpp
     distance.cpp
@@ -156,18 +156,18 @@ source = Split(
     symbolizer_helpers.cpp
     unicode.cpp
     markers_symbolizer.cpp
-    metawriter.cpp
     raster_colorizer.cpp
     wkt/wkt_factory.cpp
-    metawriter_inmem.cpp
-    metawriter_factory.cpp
+    wkt/wkt_generator.cpp
     mapped_memory_cache.cpp
     marker_cache.cpp
-    svg_parser.cpp
-    svg_path_parser.cpp
-    svg_points_parser.cpp
-    svg_transform_parser.cpp
+    svg/svg_parser.cpp
+    svg/svg_path_parser.cpp
+    svg/svg_points_parser.cpp
+    svg/svg_transform_parser.cpp
     warp.cpp
+    json/geometry_grammar.cpp
+    json/geometry_parser.cpp
     json/feature_grammar.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
@@ -192,6 +192,7 @@ source = Split(
     text/face.cpp
     text/placement_finder.cpp
     text/renderer.cpp
+    color_factory.cpp
     """
     )
 
@@ -286,26 +287,27 @@ source += Split(
     grid/process_text_symbolizer.cpp
     """)
 
-if env['SVG_RENDERER']: # svg backend
-    source += Split(
-              """
-        svg/svg_renderer.cpp
-        svg/svg_generator.cpp
-        svg/svg_output_attributes.cpp
-        svg/process_symbolizers.cpp
-        svg/process_building_symbolizer.cpp
-        svg/process_line_pattern_symbolizer.cpp
-        svg/process_line_symbolizer.cpp
-        svg/process_markers_symbolizer.cpp
-        svg/process_point_symbolizer.cpp
-        svg/process_polygon_pattern_symbolizer.cpp
-        svg/process_polygon_symbolizer.cpp
-        svg/process_raster_symbolizer.cpp
-        svg/process_shield_symbolizer.cpp
-        svg/process_text_symbolizer.cpp
-        """)
-    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
-    libmapnik_cxxflags.append('-DSVG_RENDERER')
+# https://github.com/mapnik/mapnik/issues/1438
+#if env['SVG_RENDERER']: # svg backend
+#    source += Split(
+#              """
+#        svg/output/svg_renderer.cpp
+#        svg/output/svg_generator.cpp
+#        svg/output/svg_output_attributes.cpp
+#        svg/output/process_symbolizers.cpp
+#        svg/output/process_building_symbolizer.cpp
+#        svg/output/process_line_pattern_symbolizer.cpp
+#        svg/output/process_line_symbolizer.cpp
+#        svg/output/process_markers_symbolizer.cpp
+#        svg/output/process_point_symbolizer.cpp
+#        svg/output/process_polygon_pattern_symbolizer.cpp
+#        svg/output/process_polygon_symbolizer.cpp
+#        svg/output/process_raster_symbolizer.cpp
+#        svg/output/process_shield_symbolizer.cpp
+#        svg/output/process_text_symbolizer.cpp
+#        """)
+#    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
+#    libmapnik_cxxflags.append('-DSVG_RENDERER')
 
 if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     source += Split(
@@ -389,40 +391,3 @@ else:
     env['create_uninstall_target'](env, target2)
     env['create_uninstall_target'](env, target1)
     env['create_uninstall_target'](env, target)
-
-includes = glob.glob('../include/mapnik/*.hpp')
-svg_includes = glob.glob('../include/mapnik/svg/*.hpp')
-wkt_includes = glob.glob('../include/mapnik/wkt/*.hpp')
-grid_includes = glob.glob('../include/mapnik/grid/*.hpp')
-json_includes = glob.glob('../include/mapnik/json/*.hpp')
-util_includes = glob.glob('../include/mapnik/util/*.hpp')
-text_placements_includes = glob.glob('../include/mapnik/text_placements/*.hpp')
-formatting_includes = glob.glob('../include/mapnik/formatting/*.hpp')
-
-inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik')
-svg_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/svg')
-wkt_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/wkt')
-grid_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/grid')
-json_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/json')
-util_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/util')
-text_placements_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/text_placements')
-formatting_inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/formatting')
-
-if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Alias(target='install', source=env.Install(inc_target, includes))
-    env.Alias(target='install', source=env.Install(svg_inc_target, svg_includes))
-    env.Alias(target='install', source=env.Install(wkt_inc_target, wkt_includes))
-    env.Alias(target='install', source=env.Install(grid_inc_target, grid_includes))
-    env.Alias(target='install', source=env.Install(json_inc_target, json_includes))
-    env.Alias(target='install', source=env.Install(util_inc_target, util_includes))
-    env.Alias(target='install', source=env.Install(text_placements_inc_target, text_placements_includes))
-    env.Alias(target='install', source=env.Install(formatting_inc_target, formatting_includes))
-
-env['create_uninstall_target'](env, inc_target)
-env['create_uninstall_target'](env, svg_inc_target)
-env['create_uninstall_target'](env, wkt_inc_target)
-env['create_uninstall_target'](env, grid_inc_target)
-env['create_uninstall_target'](env, json_inc_target)
-env['create_uninstall_target'](env, util_inc_target)
-env['create_uninstall_target'](env, text_placements_inc_target)
-env['create_uninstall_target'](env, formatting_inc_target)

@@ -233,69 +233,46 @@ void write_features(T const& grid_type,
                            boost::python::dict& feature_data,
                            std::vector<typename T::lookup_type> const& key_order)
 {
-    std::string const& key = grid_type.get_key();
-    std::set<std::string> const& attributes = grid_type.property_names();
     typename T::feature_type const& g_features = grid_type.get_grid_features();
-    typename T::feature_type::const_iterator feat_itr = g_features.begin();
-    typename T::feature_type::const_iterator feat_end = g_features.end();
-    bool include_key = (attributes.find(key) != attributes.end());
-    for (; feat_itr != feat_end; ++feat_itr)
+    if (g_features.size() <= 0)
     {
+        return;
+    }
+
+    std::set<std::string> const& attributes = grid_type.property_names();
+    typename T::feature_type::const_iterator feat_end = g_features.end();
+    BOOST_FOREACH ( std::string const& key_item, key_order )
+    {
+        if (key_item.empty())
+        {
+            continue;
+        }
+
+        typename T::feature_type::const_iterator feat_itr = g_features.find(key_item);
+        if (feat_itr == feat_end)
+        {
+            continue;
+        }
+
+        bool found = false;
+        boost::python::dict feat;
         mapnik::feature_ptr feature = feat_itr->second;
-        boost::optional<std::string> join_value;
-        if (key == grid_type.key_name())
+        BOOST_FOREACH ( std::string const& attr, attributes )
         {
-            join_value = feat_itr->first;
-        }
-        else if (feature->has_key(key))
-        {
-            join_value = feature->get(key).to_string();
-        }
-
-        if (join_value)
-        {
-            // only serialize features visible in the grid
-            if(std::find(key_order.begin(), key_order.end(), *join_value) != key_order.end()) {
-                boost::python::dict feat;
-                bool found = false;
-                if (key == grid_type.key_name())
-                {
-                    // drop key unless requested
-                    if (include_key) {
-                        found = true;
-                        //TODO - add __id__ as data key?
-                        //feat[key] = *join_value;
-                    }
-                }
-
-                feature_kv_iterator itr = feature->begin();
-                feature_kv_iterator end = feature->end();
-                for ( ;itr!=end; ++itr)
-                {
-                    std::string const& key_name = boost::get<0>(*itr);
-                    if (key_name == key) {
-                        // drop key unless requested
-                        if (include_key) {
-                            found = true;
-                            feat[key_name] = boost::get<1>(*itr);
-                        }
-                    }
-                    else if ( (attributes.find(key_name) != attributes.end()) )
-                    {
-                        found = true;
-                        feat[key_name] = boost::get<1>(*itr);
-                    }
-                }
-
-                if (found)
-                {
-                    feature_data[feat_itr->first] = feat;
-                }
+            if (attr == "__id__")
+            {
+                feat[attr.c_str()] = feature->id();
+            }
+            else if (feature->has_key(attr))
+            {
+                found = true;
+                feat[attr.c_str()] = feature->get(attr);
             }
         }
-        else
+
+        if (found)
         {
-            MAPNIK_LOG_DEBUG(bindings) << "write_features: Should not get here: key " << key << " not found in grid feature properties";
+            feature_data[feat_itr->first] = feat;
         }
     }
 }
@@ -342,7 +319,7 @@ void grid_encode_utf(T const& grid_type,
 }
 
 template <typename T>
-boost::python::dict grid_encode( T const& grid, std::string format, bool add_features, unsigned int resolution)
+boost::python::dict grid_encode( T const& grid, std::string const& format, bool add_features, unsigned int resolution)
 {
     if (format == "utf") {
         boost::python::dict json;
@@ -357,16 +334,16 @@ boost::python::dict grid_encode( T const& grid, std::string format, bool add_fea
     }
 }
 
-template boost::python::dict grid_encode( mapnik::grid const& grid, std::string format, bool add_features, unsigned int resolution);
-template boost::python::dict grid_encode( mapnik::grid_view const& grid, std::string format, bool add_features, unsigned int resolution);
+template boost::python::dict grid_encode( mapnik::grid const& grid, std::string const& format, bool add_features, unsigned int resolution);
+template boost::python::dict grid_encode( mapnik::grid_view const& grid, std::string const& format, bool add_features, unsigned int resolution);
 
 /* new approach: key comes from grid object
  * grid size should be same as the map
  * encoding, resizing handled as method on grid object
  * whether features are dumped is determined by argument not 'fields'
  */
-void render_layer_for_grid(const mapnik::Map& map,
-                                  mapnik::grid& grid,
+void render_layer_for_grid(mapnik::Map const& map,
+                                  mapnik::grid & grid,
                                   unsigned layer_idx, // TODO - layer by name or index
                                   boost::python::list const& fields)
 {
@@ -379,11 +356,12 @@ void render_layer_for_grid(const mapnik::Map& map,
         throw std::runtime_error(s.str());
     }
 
-    // convert python list to std::vector
+    // convert python list to std::set
     boost::python::ssize_t num_fields = boost::python::len(fields);
     for(boost::python::ssize_t i=0; i<num_fields; i++) {
         boost::python::extract<std::string> name(fields[i]);
-        if (name.check()) {
+        if (name.check())
+        {
             grid.add_property_name(name());
         }
         else
@@ -396,25 +374,18 @@ void render_layer_for_grid(const mapnik::Map& map,
 
     // copy property names
     std::set<std::string> attributes = grid.property_names();
-    std::string const& key = grid.get_key();
-
-    // if key is special __id__ keyword
-    if (key == grid.key_name())
+    // todo - make this a static constant
+    std::string known_id_key = "__id__";
+    if (attributes.find(known_id_key) != attributes.end())
     {
-        // TODO - should feature.id() be a first class attribute?
-
-        // if __id__ is requested to be dumped out
-        // remove it so that datasource queries will not break
-        if (attributes.find(key) != attributes.end())
-        {
-            attributes.erase(key);
-        }
+        attributes.erase(known_id_key);
     }
-    // if key is not the special __id__ keyword
-    else if (attributes.find(key) == attributes.end())
+
+    std::string join_field = grid.get_key();
+    if (known_id_key != join_field &&
+        attributes.find(join_field) == attributes.end())
     {
-        // them make sure the datasource query includes this field
-        attributes.insert(key);
+        attributes.insert(join_field);
     }
 
     mapnik::grid_renderer<mapnik::grid> ren(map,grid,1.0,0,0);
@@ -425,7 +396,7 @@ void render_layer_for_grid(const mapnik::Map& map,
 /* old, original impl - to be removed after further testing
  * grid object is created on the fly at potentially reduced size
  */
-boost::python::dict render_grid(const mapnik::Map& map,
+boost::python::dict render_grid(mapnik::Map const& map,
                                        unsigned layer_idx, // layer
                                        std::string const& key, // key_name
                                        unsigned int step, // resolution
@@ -447,7 +418,7 @@ boost::python::dict render_grid(const mapnik::Map& map,
     // TODO - no need to pass step here
     mapnik::grid grid(grid_width,grid_height,key,step);
 
-    // convert python list to std::vector
+    // convert python list to std::set
     boost::python::ssize_t num_fields = boost::python::len(fields);
     for(boost::python::ssize_t i=0; i<num_fields; i++) {
         boost::python::extract<std::string> name(fields[i]);
@@ -464,24 +435,18 @@ boost::python::dict render_grid(const mapnik::Map& map,
 
     // copy property names
     std::set<std::string> attributes = grid.property_names();
-
-    // if key is special __id__ keyword
-    if (key == grid.key_name())
+    // todo - make this a static constant
+    std::string known_id_key = "__id__";
+    if (attributes.find(known_id_key) != attributes.end())
     {
-        // TODO - should feature.id() be a first class attribute?
-
-        // if __id__ is requested to be dumped out
-        // remove it so that datasource queries will not break
-        if (attributes.find(key) != attributes.end())
-        {
-            attributes.erase(key);
-        }
+        attributes.erase(known_id_key);
     }
-    // if key is not the special __id__ keyword
-    else if (attributes.find(key) == attributes.end())
+
+    std::string join_field = grid.get_key();
+    if (known_id_key != join_field &&
+        attributes.find(join_field) == attributes.end())
     {
-        // them make sure the datasource query includes this field
-        attributes.insert(key);
+        attributes.insert(join_field);
     }
 
     try
