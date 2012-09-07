@@ -101,7 +101,7 @@ namespace mapnik { namespace util {
                 parameters p(ds_in->params());
 
                 // TODO : re-use datasource extent if already set.
-                datasource_ptr ds_out = datasource_cache::instance()->create(p);
+                datasource_ptr ds_out = datasource_cache::instance().create(p);
                 if (ds_out)
                 {
                     lyr_out.set_datasource(ds_out);

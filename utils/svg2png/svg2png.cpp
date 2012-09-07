@@ -127,7 +127,7 @@ int main (int argc,char** argv)
             }
 
             boost::optional<mapnik::marker_ptr> marker_ptr =
-                mapnik::marker_cache::instance()->find(svg_name, false);
+                mapnik::marker_cache::instance().find(svg_name, false);
             if (!marker_ptr)
             {
                 std::clog << "svg2png error: could not open: '" << svg_name << "'\n";

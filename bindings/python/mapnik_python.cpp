@@ -96,8 +96,8 @@ void export_logger();
 
 void clear_cache()
 {
-    mapnik::marker_cache::instance()->clear();
-    mapnik::mapped_memory_cache::instance()->clear();
+    mapnik::marker_cache::instance().clear();
+    mapnik::mapped_memory_cache::instance().clear();
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)

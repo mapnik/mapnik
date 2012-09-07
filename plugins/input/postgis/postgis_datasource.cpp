@@ -120,10 +120,8 @@ void postgis_datasource::bind() const
     boost::optional<mapnik::boolean> simplify_opt = params_.get<mapnik::boolean>("simplify_geometries", false);
     simplify_geometries_ = simplify_opt && *simplify_opt;
 
-    ConnectionManager* mgr = ConnectionManager::instance();
-    mgr->registerPool(creator_, *initial_size, *max_size);
-
-    shared_ptr< Pool<Connection,ConnectionCreator> > pool = mgr->getPool(creator_.id());
+    ConnectionManager::instance().registerPool(creator_, *initial_size, *max_size);
+    shared_ptr< Pool<Connection,ConnectionCreator> > pool = ConnectionManager::instance().getPool(creator_.id());
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
@@ -430,8 +428,7 @@ postgis_datasource::~postgis_datasource()
 {
     if (is_bound_ && ! persist_connection_)
     {
-        ConnectionManager* mgr = ConnectionManager::instance();
-        shared_ptr< Pool<Connection,ConnectionCreator> > pool = mgr->getPool(creator_.id());
+        shared_ptr< Pool<Connection,ConnectionCreator> > pool = ConnectionManager::instance().getPool(creator_.id());
         if (pool)
         {
             shared_ptr<Connection> conn = pool->borrowObject();
@@ -613,8 +610,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
     box2d<double> const& box = q.get_bbox();
     double scale_denom = q.scale_denominator();
 
-    ConnectionManager* mgr = ConnectionManager::instance();
-    shared_ptr< Pool<Connection,ConnectionCreator> > pool = mgr->getPool(creator_.id());
+    shared_ptr< Pool<Connection,ConnectionCreator> > pool = ConnectionManager::instance().getPool(creator_.id());
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
@@ -723,9 +719,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::features_at_point");
 #endif
-
-    ConnectionManager* mgr = ConnectionManager::instance();
-    shared_ptr< Pool<Connection,ConnectionCreator> > pool = mgr->getPool(creator_.id());
+    shared_ptr< Pool<Connection,ConnectionCreator> > pool = ConnectionManager::instance().getPool(creator_.id());
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
@@ -814,8 +808,7 @@ box2d<double> postgis_datasource::envelope() const
         bind();
     }
 
-    ConnectionManager* mgr = ConnectionManager::instance();
-    shared_ptr< Pool<Connection,ConnectionCreator> > pool = mgr->getPool(creator_.id());
+    shared_ptr< Pool<Connection,ConnectionCreator> > pool = ConnectionManager::instance().getPool(creator_.id());
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
@@ -915,8 +908,7 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
 
     boost::optional<mapnik::datasource::geometry_t> result;
 
-    ConnectionManager* mgr = ConnectionManager::instance();
-    shared_ptr< Pool<Connection,ConnectionCreator> > pool = mgr->getPool(creator_.id());
+    shared_ptr< Pool<Connection,ConnectionCreator> > pool = ConnectionManager::instance().getPool(creator_.id());
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();

@@ -43,7 +43,7 @@ int main(int argc,char *argv[])
         exit(0);
     }
 
-    mapnik::datasource_cache::instance()->register_datasources("/usr/local/lib/mapnik/input");
+    mapnik::datasource_cache::instance().register_datasources("/usr/local/lib/mapnik/input");
     mapnik::freetype_engine::register_font("/usr/local/lib/mapnik/fonts/DejaVuSans.ttf");
 
     mapnik::Map m(800, 800);
@@ -57,7 +57,7 @@ int main(int argc,char *argv[])
         for (int count = 0; count < m.layer_count(); count++)
         {
             mapnik::parameters q = m.getLayer(count).datasource()->params();
-            m.getLayer(count).set_datasource(mapnik::datasource_cache::instance()->create(p));
+            m.getLayer(count).set_datasource(mapnik::datasource_cache::instance().create(p));
         }
     }
 

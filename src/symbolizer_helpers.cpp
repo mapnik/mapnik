@@ -401,7 +401,7 @@ void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
     marker_.reset();
     if (!filename.empty())
     {
-        marker_ = marker_cache::instance()->find(filename, true);
+        marker_ = marker_cache::instance().find(filename, true);
     }
     if (!marker_) {
         marker_w_ = 0;

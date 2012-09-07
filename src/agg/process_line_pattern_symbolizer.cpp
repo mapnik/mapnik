@@ -67,7 +67,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
 
-    boost::optional<marker_ptr> mark = marker_cache::instance()->find(filename,true);
+    boost::optional<marker_ptr> mark = marker_cache::instance().find(filename,true);
     if (!mark) return;
 
     if (!(*mark)->is_bitmap())

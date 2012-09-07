@@ -77,7 +77,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
         l.set_queryable(extract<bool>(state[3]));
 
         mapnik::parameters params = extract<parameters>(state[4]);
-        l.set_datasource(datasource_cache::instance()->create(params));
+        l.set_datasource(datasource_cache::instance().create(params));
 
         boost::python::list s = extract<boost::python::list>(state[5]);
         for (int i=0;i<len(s);++i)

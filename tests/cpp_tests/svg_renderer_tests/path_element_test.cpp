@@ -28,7 +28,7 @@ void prepare_map(Map& m)
 {
     const std::string mapnik_dir("/usr/local/lib/mapnik/");
     std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "input/" << "\n";
-    datasource_cache::instance()->register_datasources(mapnik_dir + "input/");
+    datasource_cache::instance().register_datasources(mapnik_dir + "input/");
 
     // create styles
 
@@ -135,7 +135,7 @@ void prepare_map(Map& m)
         p["file"]="../../../demo/data/boundaries";
 
         layer lyr("Provinces");
-        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("provinces");
         m.addLayer(lyr);
     }
@@ -146,7 +146,7 @@ void prepare_map(Map& m)
         p["type"]="shape";
         p["file"]="../../../demo/data/qcdrainage";
         layer lyr("Quebec Hydrography");
-        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("drainage");
         m.addLayer(lyr);
     }
@@ -157,7 +157,7 @@ void prepare_map(Map& m)
         p["file"]="../../../demo/data/ontdrainage";
 
         layer lyr("Ontario Hydrography");
-        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("drainage");
         m.addLayer(lyr);
     }
@@ -168,7 +168,7 @@ void prepare_map(Map& m)
         p["type"]="shape";
         p["file"]="../../../demo/data/boundaries_l";
         layer lyr("Provincial borders");
-        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("provlines");
         m.addLayer(lyr);
     }
@@ -179,7 +179,7 @@ void prepare_map(Map& m)
         p["type"]="shape";
         p["file"]="../../../demo/data/roads";
         layer lyr("Roads");
-        lyr.set_datasource(datasource_cache::instance()->create(p));
+        lyr.set_datasource(datasource_cache::instance().create(p));
         lyr.add_style("smallroads");
         lyr.add_style("road-border");
         lyr.add_style("road-fill");

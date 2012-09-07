@@ -1187,7 +1187,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
     boost::optional<marker_ptr> marker;
     if ( !filename.empty() )
     {
-        marker = marker_cache::instance()->find(filename, true);
+        marker = marker_cache::instance().find(filename, true);
     }
     else
     {
@@ -1280,7 +1280,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
+    boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance().find(filename,true);
     if (!marker && !(*marker)->is_bitmap()) return;
 
     unsigned width((*marker)->width());
@@ -1357,7 +1357,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     context.set_operator(sym.comp_op());
 
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
-    boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance()->find(filename,true);
+    boost::optional<mapnik::marker_ptr> marker = mapnik::marker_cache::instance().find(filename,true);
     if (!marker && !(*marker)->is_bitmap()) return;
 
     cairo_pattern pattern(**((*marker)->get_bitmap_data()));
@@ -1655,7 +1655,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
     if (!filename.empty())
     {
-        boost::optional<marker_ptr> mark = mapnik::marker_cache::instance()->find(filename, true);
+        boost::optional<marker_ptr> mark = mapnik::marker_cache::instance().find(filename, true);
         if (mark && *mark)
         {
             agg::trans_affine geom_tr;

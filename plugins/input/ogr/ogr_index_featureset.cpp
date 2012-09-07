@@ -64,7 +64,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & 
       fidcolumn_(layer_.GetFIDColumn())
 {
 
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance()->find(index_file.c_str(),true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file.c_str(),true);
     if (memory)
     {
         boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());

@@ -54,7 +54,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
     {
-        marker = marker_cache::instance()->find(filename, true);
+        marker = marker_cache::instance().find(filename, true);
     }
     else
     {

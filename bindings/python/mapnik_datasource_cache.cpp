@@ -61,22 +61,22 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
         }
     }
 
-    return mapnik::datasource_cache::instance()->create(params, bind);
+    return mapnik::datasource_cache::instance().create(params, bind);
 }
 
 void register_datasources(std::string const& path)
 {
-    mapnik::datasource_cache::instance()->register_datasources(path);
+    mapnik::datasource_cache::instance().register_datasources(path);
 }
 
 std::vector<std::string> plugin_names()
 {
-    return mapnik::datasource_cache::instance()->plugin_names();
+    return mapnik::datasource_cache::instance().plugin_names();
 }
 
 std::string plugin_directories()
 {
-    return mapnik::datasource_cache::instance()->plugin_directories();
+    return mapnik::datasource_cache::instance().plugin_directories();
 }
 
 }
