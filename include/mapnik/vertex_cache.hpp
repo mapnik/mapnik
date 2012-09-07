@@ -83,7 +83,7 @@ public:
         scoped_state(vertex_cache &pp) : pp_(pp), state_(pp.save_state()), restored_(false) {}
         void restore() { pp_.restore_state(state_); restored_ = true; }
         ~scoped_state() { if (!restored_) pp_.restore_state(state_); }
-        state const& state() const { return state_; }
+        state const& get_state() const { return state_; }
     private:
         vertex_cache &pp_;
         class state state_;
@@ -215,7 +215,7 @@ double vertex_cache::angle(double width)
     } else
     {
         scoped_state s(*this);
-        pixel_position const& old_pos = s.state().position();
+        pixel_position const& old_pos = s.get_state().position();
         move(width);
         double angle = atan2(-(current_position_.y - old_pos.y),
                              current_position_.x - old_pos.x);
