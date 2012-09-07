@@ -340,54 +340,59 @@ void Map::zoom(double factor)
 
 void Map::zoom_all()
 {
-    if (maximum_extent_) {
-        zoom_to_box(*maximum_extent_);
-    }
-    else
+    try
     {
-        try
+        if (!layers_.size() > 0)
+            return;
+        projection proj0(srs_);
+        box2d<double> ext;
+        bool success = false;
+        bool first = true;
+        std::vector<layer>::const_iterator itr = layers_.begin();
+        std::vector<layer>::const_iterator end = layers_.end();
+        while (itr != end)
         {
-            if (!layers_.size() > 0)
-                return;
-            projection proj0(srs_);
-            box2d<double> ext;
-            bool success = false;
-            bool first = true;
-            std::vector<layer>::const_iterator itr = layers_.begin();
-            std::vector<layer>::const_iterator end = layers_.end();
-            while (itr != end)
+            if (itr->active())
             {
-                if (itr->active())
+                std::string const& layer_srs = itr->srs();
+                projection proj1(layer_srs);
+                proj_transform prj_trans(proj0,proj1);
+                box2d<double> layer_ext = itr->envelope();
+                if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
                 {
-                    std::string const& layer_srs = itr->srs();
-                    projection proj1(layer_srs);
-
-                    proj_transform prj_trans(proj0,proj1);
-
-                    box2d<double> layer_ext = itr->envelope();
-                    if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
+                    success = true;
+                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
+                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
+                    if (first)
                     {
-                        success = true;
-
-                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
-                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
-
-                        if (first)
-                        {
-                            ext = layer_ext;
-                            first = false;
-                        }
-                        else
-                        {
-                            ext.expand_to_include(layer_ext);
-                        }
+                        ext = layer_ext;
+                        first = false;
+                    }
+                    else
+                    {
+                        ext.expand_to_include(layer_ext);
                     }
                 }
-                ++itr;
             }
-            if (success) {
-                zoom_to_box(ext);
-            } else {
+            ++itr;
+        }
+        if (success)
+        {
+            if (maximum_extent_) {
+                ext.clip(*maximum_extent_);
+            }
+            zoom_to_box(ext);
+        }
+        else
+        {
+            if (maximum_extent_)
+            {
+                MAPNIK_LOG_ERROR(map) << "could not zoom to combined layer extents"
+                    << " so falling back to maximum-extent for zoom_all result";
+                zoom_to_box(*maximum_extent_);
+            }
+            else
+            {
                 std::ostringstream s;
                 s << "could not zoom to combined layer extents "
                   << "using zoom_all because proj4 could not "
@@ -396,10 +401,10 @@ void Map::zoom_all()
                 throw std::runtime_error(s.str());
             }
         }
-        catch (proj_init_error & ex)
-        {
-            throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
-        }
+    }
+    catch (proj_init_error & ex)
+    {
+        throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
     }
 }
 
@@ -544,7 +549,8 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             if (fs)
             {
                 mapnik::box2d<double> map_ex = current_extent_;
-                if (maximum_extent_) {
+                if (maximum_extent_)
+                {
                     map_ex.clip(*maximum_extent_);
                 }
                 if (!prj_trans.backward(map_ex,PROJ_ENVELOPE_POINTS))
