@@ -54,11 +54,11 @@ void set_marker_type(mapnik::markers_symbolizer & symbolizer, std::string const&
     std::string filename;
     if (marker_type == "ellipse")
     {
-        filename = mapnik::marker_cache::known_svg_prefix_ + "ellipse";
+        filename = mapnik::marker_cache::instance()->known_svg_prefix_ + "ellipse";
     }
     else if (marker_type == "arrow")
     {
-        filename = mapnik::marker_cache::known_svg_prefix_ + "arrow";
+        filename = mapnik::marker_cache::instance()->known_svg_prefix_ + "arrow";
     }
     else
     {

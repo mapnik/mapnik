@@ -140,6 +140,7 @@ public:
             {
                 if (destroyed_)
                 {
+                    destroyed_ = false;
                     onDeadReference();
                 }
                 else

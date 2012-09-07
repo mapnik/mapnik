@@ -974,11 +974,11 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
             {
                 if (*marker_type == "ellipse")
                 {
-                    filename = marker_cache::known_svg_prefix_ + "ellipse";
+                    filename = marker_cache::instance()->known_svg_prefix_ + "ellipse";
                 }
                 else if (*marker_type == "arrow")
                 {
-                    filename = marker_cache::known_svg_prefix_ + "arrow";
+                    filename = marker_cache::instance()->known_svg_prefix_ + "arrow";
                 }
             }
         }
@@ -1011,16 +1011,16 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
 
         optional<color> c = sym.get_opt_attr<color>("fill");
         if (c) symbol.set_fill(*c);
-        
+
         optional<double> spacing = sym.get_opt_attr<double>("spacing");
         if (spacing) symbol.set_spacing(*spacing);
-        
+
         optional<double> max_error = sym.get_opt_attr<double>("max-error");
         if (max_error) symbol.set_max_error(*max_error);
-        
+
         optional<boolean> allow_overlap = sym.get_opt_attr<boolean>("allow-overlap");
         if (allow_overlap) symbol.set_allow_overlap(*allow_overlap);
-        
+
         optional<boolean> ignore_placement = sym.get_opt_attr<boolean>("ignore-placement");
         if (ignore_placement) symbol.set_ignore_placement(*ignore_placement);
 
@@ -1605,7 +1605,7 @@ void map_parser::ensure_font_face(std::string const& face_name)
 
 std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> opt_path)
 {
-    if (marker_cache::is_uri(*opt_path))
+    if (marker_cache::instance()->is_uri(*opt_path))
         return *opt_path;
 
     if (relative_to_xml_)
@@ -1633,7 +1633,7 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> opt_
 
 void map_parser::ensure_exists(std::string const& file_path)
 {
-    if (marker_cache::is_uri(file_path))
+    if (marker_cache::instance()->is_uri(file_path))
         return;
     // validate that the filename exists if it is not a dynamic PathExpression
     if (!boost::algorithm::find_first(file_path,"[") && !boost::algorithm::find_first(file_path,"]"))

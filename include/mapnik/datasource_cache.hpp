@@ -36,28 +36,27 @@
 // stl
 #include <map>
 
-namespace mapnik { namespace detail {
-class MAPNIK_DECL datasource_cache_impl
+namespace mapnik {
+
+class MAPNIK_DECL datasource_cache
+    : public singleton<datasource_cache, CreateStatic>,
+      private boost::noncopyable
 {
+    friend class CreateStatic<datasource_cache>;
 public:
-    datasource_cache_impl();
-    ~datasource_cache_impl();
     std::vector<std::string> plugin_names();
     std::string plugin_directories();
     void register_datasources(std::string const& path);
     bool register_datasource(std::string const& path);
     boost::shared_ptr<datasource> create(parameters const& params, bool bind=true);
 private:
+    datasource_cache();
+    ~datasource_cache();
     std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
     bool registered_;
     bool insert(std::string const&  name,const lt_dlhandle module);
     std::vector<std::string> plugin_directories_;
-
 };
-}
-
-typedef singleton<detail::datasource_cache_impl, CreateStatic> datasource_cache;
-
 }
 
 #endif // MAPNIK_DATASOURCE_CACHE_HPP
