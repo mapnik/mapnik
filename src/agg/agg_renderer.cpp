@@ -137,7 +137,7 @@ void agg_renderer<T>::setup(Map const &m)
     boost::optional<std::string> const& image_filename = m.background_image();
     if (image_filename)
     {
-        boost::optional<mapnik::marker_ptr> bg_marker = mapnik::marker_cache::instance()->find(*image_filename,true);
+        boost::optional<mapnik::marker_ptr> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
         if (bg_marker && (*bg_marker)->is_bitmap())
         {
             mapnik::image_ptr bg_image = *(*bg_marker)->get_bitmap_data();

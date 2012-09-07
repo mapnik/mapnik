@@ -129,7 +129,7 @@ protected:
 #endif
     singleton() {}
 public:
-    static  T* instance()
+    static T& instance()
     {
         if (! pInstance_)
         {
@@ -151,7 +151,7 @@ public:
                 }
             }
         }
-        return pInstance_;
+        return *pInstance_;
     }
 };
 #ifdef MAPNIK_THREADSAFE

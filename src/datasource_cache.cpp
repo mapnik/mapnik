@@ -38,7 +38,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace mapnik { namespace detail {
+namespace mapnik {
 
 bool is_input_plugin (std::string const& filename)
 {
@@ -46,21 +46,17 @@ bool is_input_plugin (std::string const& filename)
 }
 
 
-datasource_cache_impl::datasource_cache_impl()
+datasource_cache::datasource_cache()
 {
     if (lt_dlinit()) throw std::runtime_error("lt_dlinit() failed");
 }
 
-datasource_cache_impl::~datasource_cache_impl()
+datasource_cache::~datasource_cache()
 {
     lt_dlexit();
 }
 
-//std::map<std::string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
-//bool datasource_cache::registered_=false;
-//std::vector<std::string> datasource_cache::plugin_directories_;
-
-datasource_ptr datasource_cache_impl::create(const parameters& params, bool bind)
+datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 {
     boost::optional<std::string> type = params.get<std::string>("type");
     if ( ! type)
@@ -70,7 +66,7 @@ datasource_ptr datasource_cache_impl::create(const parameters& params, bool bind
     }
 
 #ifdef MAPNIK_THREADSAFE
-    //mutex::scoped_lock lock(mutex_);
+    mutex::scoped_lock lock(mutex_);
 #endif
 
     datasource_ptr ds;
@@ -101,34 +97,34 @@ datasource_ptr datasource_cache_impl::create(const parameters& params, bool bind
     }
 
 #ifdef MAPNIK_LOG
-    MAPNIK_LOG_DEBUG(datasource_cache_impl) << "datasource_cache: Size=" << params.size();
+    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Size=" << params.size();
 
     parameters::const_iterator i = params.begin();
     for (; i != params.end(); ++i)
     {
-        MAPNIK_LOG_DEBUG(datasource_cache_impl) << "datasource_cache: -- " << i->first << "=" << i->second;
+        MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: -- " << i->first << "=" << i->second;
     }
 #endif
 
     ds = datasource_ptr(create_datasource(params, bind), datasource_deleter());
 
-    MAPNIK_LOG_DEBUG(datasource_cache_impl) << "datasource_cache: Datasource=" << ds << " type=" << type;
+    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Datasource=" << ds << " type=" << type;
 
     return ds;
 }
 
-bool datasource_cache_impl::insert(std::string const& type,const lt_dlhandle module)
+bool datasource_cache::insert(std::string const& type,const lt_dlhandle module)
 {
     return plugins_.insert(make_pair(type,boost::make_shared<PluginInfo>
                                      (type,module))).second;
 }
 
-std::string datasource_cache_impl::plugin_directories()
+std::string datasource_cache::plugin_directories()
 {
     return boost::algorithm::join(plugin_directories_,", ");
 }
 
-std::vector<std::string> datasource_cache_impl::plugin_names()
+std::vector<std::string> datasource_cache::plugin_names()
 {
     std::vector<std::string> names;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::const_iterator itr;
@@ -139,11 +135,10 @@ std::vector<std::string> datasource_cache_impl::plugin_names()
     return names;
 }
 
-void datasource_cache_impl::register_datasources(std::string const& str)
+void datasource_cache::register_datasources(std::string const& str)
 {
 #ifdef MAPNIK_THREADSAFE
-    //mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache,
-    //                        mapnik::CreateStatic>::mutex_);
+    mutex::scoped_lock lock(mutex_);
 #endif
     boost::filesystem::path path(str);
     // TODO - only push unique paths
@@ -174,7 +169,7 @@ void datasource_cache_impl::register_datasources(std::string const& str)
     }
 }
 
-bool datasource_cache_impl::register_datasource(std::string const& str)
+bool datasource_cache::register_datasource(std::string const& str)
 {
     bool success = false;
     try
@@ -215,4 +210,4 @@ bool datasource_cache_impl::register_datasource(std::string const& str)
     return success;
 }
 
-}}
+}

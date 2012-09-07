@@ -320,7 +320,7 @@ void MapSource::setOSMLayers(Map& m, const parameters &p)
         if(boost::get<std::string>(q["type"])=="osm")
         {
             m.getLayer(count).set_datasource
-                (datasource_cache::instance()->create(p));
+                (datasource_cache::instance().create(p));
         }
     }
 }
@@ -353,7 +353,7 @@ void MapSource::addSRTMLayers(Map& m,double w,double s,double e,double n)
        <<(lon>=0 ? lon:-lon)<<"c10";
     p["file"] = str.str();
     cerr<<"ADDING SRTM LAYER: " << p["file"] << endl;
-    m.getLayer(i).set_datasource(datasource_cache::instance()->create(p));
+    m.getLayer(i).set_datasource(datasource_cache::instance().create(p));
 
     // do we have more than one srtm layer?
     if(floor(w) != floor(e) || floor(s) != floor(n))
@@ -385,7 +385,7 @@ void MapSource::addSRTMLayers(Map& m,double w,double s,double e,double n)
                     lyr.add_style("contours");
                     lyr.add_style("contours-text");
                     lyr.set_datasource
-                        (datasource_cache::instance()->create(p));
+                        (datasource_cache::instance().create(p));
                     m.addLayer(lyr);
                 }
             }

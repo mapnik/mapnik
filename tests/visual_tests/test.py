@@ -102,7 +102,7 @@ if __name__ == "__main__":
             for name in sys.argv[1:]:
                 active.append({"name": name})
 
-    if 'osm' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'osm' in mapnik.DatasourceCache.plugin_names():
         for f in files:
             config = dict(defaults)
             config.update(f)

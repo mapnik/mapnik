@@ -45,11 +45,8 @@
 namespace mapnik
 {
 
-boost::unordered_map<std::string, marker_ptr> marker_cache::marker_cache_;
-boost::unordered_map<std::string, std::string> marker_cache::svg_cache_;
-std::string marker_cache::known_svg_prefix_ = "shape://";
-
 marker_cache::marker_cache()
+    : known_svg_prefix_("shape://")
 {
     insert_svg("ellipse",
                "<?xml version='1.0' standalone='no'?>"

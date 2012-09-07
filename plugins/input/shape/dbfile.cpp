@@ -34,6 +34,8 @@
 #include <string>
 
 
+using mapnik::mapped_memory_cache;
+
 dbf_file::dbf_file()
     : num_records_(0),
       num_fields_(0),
@@ -53,7 +55,7 @@ dbf_file::dbf_file(std::string const& file_name)
 {
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(file_name.c_str(),true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name.c_str(),true);
     if (memory)
     {
         file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());

@@ -267,7 +267,7 @@ void text_symbolizer_helper::init_marker()
     boost::optional<marker_ptr> opt_marker; //TODO: Why boost::optional?
     if (!filename.empty())
     {
-        opt_marker = marker_cache::instance()->find(filename, true);
+        opt_marker = marker_cache::instance().find(filename, true);
     }
     marker_ptr m;
     if (opt_marker) m = *opt_marker;
