@@ -6,6 +6,11 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Future
+
+- Fixed zoom_all behavior when Map maximum-extent is provided. Previously maximum-extent was used outright but
+  now the combined layer extents will be again respected: they will be clipped to the maximum-extent if possible
+  and only when back-projecting fails for all layers will the maximum-extent be used as a fallback (#1473)
 
 ## Mapnik 2.1.0
 
