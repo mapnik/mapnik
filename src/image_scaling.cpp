@@ -294,8 +294,8 @@ void scale_image_agg(Image & target,
     interpolator_type interpolator(img_mtx);
 
     // draw an anticlockwise polygon to render our image into
-    double scaled_width = source.width() * image_ratio;
-    double scaled_height = source.height() * image_ratio;
+    double scaled_width = target.width();//source.width() * image_ratio;
+    double scaled_height = target.height();//source.height() * image_ratio;
     ras.reset();
     ras.move_to_d(x_off_f,                y_off_f);
     ras.line_to_d(x_off_f + scaled_width, y_off_f);
