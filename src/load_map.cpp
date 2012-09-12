@@ -1092,6 +1092,10 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
         ensure_exists(file);
         line_pattern_symbolizer symbol( parse_path(file, sym.get_tree().path_expr_grammar) );
 
+        // offset value
+        optional<double> offset = sym.get_opt_attr<double>("offset");
+        if (offset) symbol.set_offset(*offset);
+
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
