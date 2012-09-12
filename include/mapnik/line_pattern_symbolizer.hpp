@@ -34,6 +34,9 @@ struct MAPNIK_DECL line_pattern_symbolizer :
 {
     line_pattern_symbolizer(path_expression_ptr file);
     line_pattern_symbolizer(line_pattern_symbolizer const& rhs);
+    double offset_;
+    double offset() const;
+    void set_offset(double offset);
 };
 }
 

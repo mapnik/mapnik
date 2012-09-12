@@ -107,6 +107,11 @@ public:
             ptree::value_type("LinePatternSymbolizer",
                               ptree()))->second;
 
+        if (sym.offset() != 0.0 || explicit_defaults_ )
+        {
+            set_attr( sym_node, "offset", sym.offset() );
+        }
+
         add_image_attributes( sym_node, sym );
         serialize_symbolizer_base(sym_node, sym);
     }

@@ -102,6 +102,8 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
         float half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
         double x0 = query_extent_.minx();
         double y0 = query_extent_.miny();
         double x1 = query_extent_.maxx();
@@ -109,13 +111,14 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
         clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
     }
 
-    typedef boost::mpl::vector<clip_line_tag,transform_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(clipping_extent,ras,sym,t_,prj_trans,tr,scale_factor_);
 
     if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
+    if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     BOOST_FOREACH(geometry_type & geom, feature.paths())
