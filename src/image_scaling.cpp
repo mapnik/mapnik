@@ -264,8 +264,7 @@ void scale_image_agg(Image & target,
                      double ratio)
 {
     typedef agg::pixfmt_rgba32 pixfmt;
-    typedef agg::pixfmt_rgba32_pre pixfmt_pre;
-    typedef agg::renderer_base<pixfmt_pre> renderer_base;
+    typedef agg::renderer_base<pixfmt> renderer_base;
 
     // define some stuff we'll use soon
     agg::rasterizer_scanline_aa<> ras;
@@ -279,9 +278,9 @@ void scale_image_agg(Image & target,
     typedef agg::image_accessor_clone<pixfmt> img_src_type;
     img_src_type img_src(pixf_src);
 
-    // initialise destination AGG buffer (with transparency)
+    // initialize destination AGG buffer (with transparency)
     agg::rendering_buffer rbuf_dst((unsigned char*)target.getBytes(), target.width(), target.height(), target.width() * 4);
-    pixfmt_pre pixf_dst(rbuf_dst);
+    pixfmt pixf_dst(rbuf_dst);
     renderer_base rb_dst(pixf_dst);
     rb_dst.clear(agg::rgba(0, 0, 0, 0));
 
@@ -294,8 +293,8 @@ void scale_image_agg(Image & target,
     interpolator_type interpolator(img_mtx);
 
     // draw an anticlockwise polygon to render our image into
-    double scaled_width = target.width();//source.width() * image_ratio;
-    double scaled_height = target.height();//source.height() * image_ratio;
+    double scaled_width = target.width();
+    double scaled_height = target.height();
     ras.reset();
     ras.move_to_d(x_off_f,                y_off_f);
     ras.line_to_d(x_off_f + scaled_width, y_off_f);
