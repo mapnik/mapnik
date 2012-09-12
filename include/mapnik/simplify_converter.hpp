@@ -9,7 +9,8 @@
 // STL
 #include <limits>
 #include <set>
-
+#include <vector>
+#include <deque>
 // Boost
 #include <boost/optional.hpp>
 
@@ -45,6 +46,52 @@ struct weighted_vertex : private boost::noncopyable {
     };
 };
 
+struct sleeve
+{
+    vertex2d v[5];
+
+    sleeve(vertex2d const& v0, vertex2d const& v1, double offset)
+    {
+        double a = atan2((v1.y - v0.y), (v1.x - v0.x));
+        double dx = offset * cos(a);
+        double dy = offset * sin(a);
+        v[0].x = v0.x + dy;
+        v[0].y = v0.y - dx;
+        v[1].x = v0.x - dy;
+        v[1].y = v0.y + dx;
+        v[2].x = v1.x - dy;
+        v[2].y = v1.y + dx;
+        v[3].x = v1.x + dy;
+        v[3].y = v1.y - dx;
+        v[4].x = v0.x + dy;
+        v[4].y = v0.y - dx;
+    }
+
+    bool inside(vertex2d const& q)
+    {
+        bool inside=false;
+
+        for (unsigned i=0;i<4;++i)
+        {
+            if ((((v[i+1].y <= q.y) && (q.y < v[i].y)) ||
+                 ((v[i].y <= q.y) && (q.y < v[i+1].y))) &&
+                (q.x < (v[i].x - v[i+1].x) * (q.y - v[i+1].y)/ (v[i].y - v[i+1].y) + v[i+1].x))
+                inside=!inside;
+        }
+        return inside;
+    }
+    void print()
+    {
+        std::cerr << "LINESTRING("
+                  << v[0].x << " " << -v[0].y << ","
+                  << v[1].x << " " << -v[1].y << ","
+                  << v[2].x << " " << -v[2].y << ","
+                  << v[3].x << " " << -v[3].y << ","
+                  << v[0].x << " " << -v[0].y << ")" << std::endl;
+
+    }
+};
+
 template <typename Geometry>
 struct MAPNIK_DECL simplify_converter
 {
@@ -54,8 +101,7 @@ public:
         , tolerance_(0.0)
         , status_(initial)
         , algorithm_(radial_distance)
-    {
-    }
+    {}
 
     enum status
     {
@@ -114,18 +160,19 @@ public:
         return output_vertex(x, y);
     }
 
-
-
 private:
     unsigned output_vertex(double* x, double* y)
     {
-        switch (algorithm_) {
-            case visvalingam_whyatt:
-                return output_vertex_cached(x, y);
-            case radial_distance:
-                return output_vertex_distance(x, y);
-            default:
-                throw std::runtime_error("simplification algorithm not yet implemented");
+        switch (algorithm_)
+        {
+        case visvalingam_whyatt:
+            return output_vertex_cached(x, y);
+        case radial_distance:
+            return output_vertex_distance(x, y);
+        case zhao_saalfeld:
+            return output_vertex_sleeve(x, y);
+        default:
+            throw std::runtime_error("simplification algorithm not yet implemented");
         }
 
         return SEG_END;
@@ -186,6 +233,88 @@ private:
         return vtx.cmd;
     }
 
+    template <typename Iterator>
+    bool fit_sleeve(Iterator itr,Iterator end, vertex2d const& v)
+    {
+        sleeve s(*itr,v,tolerance_);
+        ++itr; // skip first vertex
+        for (; itr!=end; ++itr)
+        {
+            if (!s.inside(*itr))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    unsigned output_vertex_sleeve(double* x, double* y)
+    {
+        vertex2d vtx(vertex2d::no_init);
+
+        while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
+        {
+            if (vtx.cmd == SEG_MOVETO)
+            {
+                if (!sleeve_cont_.empty())
+                {
+                    vertices_.push_back(sleeve_cont_.back());
+                    sleeve_cont_.clear();
+                }
+                vertices_.push_back(vtx);
+                sleeve_cont_.push_back(vtx);
+                break;
+            }
+            else if (vtx.cmd == SEG_LINETO)
+            {
+                if (!fit_sleeve(sleeve_cont_.begin(), sleeve_cont_.end(), vtx))
+                {
+                    vertex2d last = vtx;
+                    vtx = sleeve_cont_.back();
+                    sleeve_cont_.clear();
+                    sleeve_cont_.push_back(vtx);
+                    sleeve_cont_.push_back(last);
+                    vertices_.push_back(vtx);
+                    break;
+                }
+                else
+                {
+                    sleeve_cont_.push_back(vtx);
+                }
+            }
+            else if (vtx.cmd == SEG_CLOSE)
+            {
+                if (!sleeve_cont_.empty())
+                {
+                    vertices_.push_back(sleeve_cont_.back());
+                    sleeve_cont_.clear();
+                }
+                vertices_.push_back(vtx);
+                break;
+            }
+        }
+
+        if (vtx.cmd == SEG_END)
+        {
+            if (!sleeve_cont_.empty())
+            {
+                vertices_.push_back(sleeve_cont_.back());
+            }
+            sleeve_cont_.clear();
+            vertices_.push_back(vtx);
+        }
+
+        if (vertices_.size() > 0)
+        {
+            vertex2d v = vertices_.front();
+            vertices_.pop_front();
+            *x = v.x;
+            *y = v.y;
+            return v.cmd;
+        }
+        return SEG_END;
+    }
+
     double distance_to_previous(vertex2d const& vtx) {
         double dx = previous_vertex_.x - vtx.x;
         double dy = previous_vertex_.y - vtx.y;
@@ -206,6 +335,9 @@ private:
                 // Use
                 vertices_.push_back(vertex2d(vertex2d::no_init));
                 return status_ = process;
+            case zhao_saalfeld:
+                status_ = process;
+                return status_;
             default:
                 throw std::runtime_error("simplification algorithm not yet implemented");
         }
@@ -283,9 +415,11 @@ private:
     status                          status_;
     simplify_algorithm_e            algorithm_;
     size_t                          pos_;
-    std::vector<vertex2d>           vertices_;
+    std::deque<vertex2d>            vertices_;
+    std::deque<vertex2d>            sleeve_cont_;
     vertex2d                        previous_vertex_;
 };
+
 
 }
 
