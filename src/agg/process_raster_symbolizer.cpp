@@ -68,10 +68,10 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
             raster target(target_ext, target_data);
             scaling_method_e scaling_method = sym.get_scaling_method();
             double filter_radius = sym.calculate_filter_factor();
-            double offset_x = ext.minx() - start_x;
-            double offset_y = ext.miny() - start_y;
             if (!prj_trans.equal())
             {
+                double offset_x = ext.minx() - start_x;
+                double offset_y = ext.miny() - start_y;
                 reproject_and_scale_raster(target, *source, prj_trans,
                                  offset_x, offset_y,
                                  sym.get_mesh_size(),
@@ -82,7 +82,7 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
             {
                 if (scaling_method == SCALING_BILINEAR8)
                 {
-                    scale_image_bilinear8<image_data_32>(target.data_,source->data_, offset_x, offset_y);
+                    scale_image_bilinear8<image_data_32>(target.data_,source->data_, 0.0, 0.0);
                 } else
                 {
                     double scaling_ratio = ext.width() / source->data_.width();
