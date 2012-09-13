@@ -399,7 +399,8 @@ void export_text_placement()
     ;
 
 
-    class_with_converter<char_properties>
+    class_with_converter<char_properties,
+            boost::shared_ptr<char_properties> >
         ("CharProperties")
         .def_readwrite_convert("text_transform", &char_properties::text_transform)
         .def(init<char_properties const&>()) //Copy constructor
