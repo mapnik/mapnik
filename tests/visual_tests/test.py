@@ -53,7 +53,8 @@ files = [
     {'name': "line-offset", 'sizes':[(900, 250)],
         'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     {'name': "orientation", 'sizes': [(800, 200)]},
-    {'name': "hb-fontsets", 'sizes': [(800, 200)]}
+    {'name': "hb-fontsets", 'sizes': [(800, 200)]},
+    {'name': "charspacing", 'sizes': [(200, 400)]},
     ]
 
 def render(filename, width, height, bbox, quiet=False):
@@ -86,7 +87,6 @@ if __name__ == "__main__":
     else:
        quiet = False
 
-    print len(sys.argv)
     if len(sys.argv) <= 1:
         active = files
     elif len(sys.argv) == 2:
@@ -103,7 +103,7 @@ if __name__ == "__main__":
                 active.append({"name": name})
 
     if 'osm' in mapnik.DatasourceCache.plugin_names():
-        for f in files:
+        for f in active:
             config = dict(defaults)
             config.update(f)
             for size in config['sizes']:
