@@ -699,6 +699,18 @@ class PythonDatasource(object):
 
 class _TextSymbolizer(TextSymbolizer,_injector):
     @property
+    def name(self):
+        if isinstance(self.properties.format_tree, FormattingText):
+            return self.properties.format_tree.text
+        else:
+            return None # This text symbolizer is using complex formatting features.
+                        # There is no single expression which could be returned as name
+
+    @name.setter
+    def name(self, name):
+        self.properties.format_tree = FormattingText(name)
+
+    @property
     def text_size(self):
         warnings.warn("'text_size' is deprecated, use format.text_size",
         DeprecationWarning, 2)
