@@ -73,8 +73,8 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         # caution - will go square due to evil aspect_fix_mode backhandedness
         m.zoom_all()
         #mapnik.render_to_file(m,'works2.png')
-        # valid that aspec_fix_mode modified the bbox
-        eq_(m.envelope(),mapnik.Box2d(-179.999999975,-179.999999975,179.999999975,179.999999975))
+        # validate that aspect_fix_mode modified the bbox reasonably
+        eq_(str(m.envelope()),str(mapnik.Box2d(-179.999999975,-167.951396161,179.999999975,192.048603789)))
         fs = m.query_point(0,-98.9264, 38.1432) # somewhere in kansas
         feat = fs.next()
         eq_(feat.attributes['NAME'],u'United States')
@@ -96,11 +96,11 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         m.maximum_extent = wgs84_bounds
         # caution - will go square due to evil aspect_fix_mode backhandedness
         m.zoom_all()
-        # valid that aspec_fix_mode modified the bbox
-        eq_(m.envelope(),mapnik.Box2d(-179.999999975,-179.999999975,179.999999975,179.999999975))
-        fs = m.query_map_point(0,55,100) # somewhere in middle of us
+        # validate that aspect_fix_mode modified the bbox reasonably
+        eq_(str(m.envelope()),str(mapnik.Box2d(-179.999999975,-167.951396161,179.999999975,192.048603789)))
+        fs = m.query_map_point(0,55,100) # somewhere in Canada
         feat = fs.next()
-        eq_(feat.attributes['NAME'],u'United States')
+        eq_(feat.attributes['NAME'],u'Canada')
 
 if __name__ == "__main__":
     setup()
