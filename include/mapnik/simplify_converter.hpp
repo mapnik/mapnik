@@ -108,7 +108,8 @@ public:
         initial,
         process,
         closing,
-        end
+        end,
+        cache
     };
 
     simplify_algorithm_e get_simplify_algorithm()
@@ -251,9 +252,19 @@ private:
     unsigned output_vertex_sleeve(double* x, double* y)
     {
         vertex2d vtx(vertex2d::no_init);
-
+        std::size_t min_size = 3;
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
+            if ((std::fabs(vtx.x - previous_vertex_.x) < 0.5) &&
+                (std::fabs(vtx.y - previous_vertex_.y) < 0.5))
+                continue;
+
+            if (status_ == cache &&
+                vertices_.size() >= min_size)
+                status_ = process;
+
+            previous_vertex_ = vtx;
+
             if (vtx.cmd == SEG_MOVETO)
             {
                 if (!sleeve_cont_.empty())
@@ -263,7 +274,7 @@ private:
                 }
                 vertices_.push_back(vtx);
                 sleeve_cont_.push_back(vtx);
-                break;
+                if (status_ == process) break;
             }
             else if (vtx.cmd == SEG_LINETO)
             {
@@ -275,7 +286,7 @@ private:
                     sleeve_cont_.push_back(vtx);
                     sleeve_cont_.push_back(last);
                     vertices_.push_back(vtx);
-                    break;
+                    if (status_ == process) break;
                 }
                 else
                 {
@@ -290,8 +301,15 @@ private:
                     sleeve_cont_.clear();
                 }
                 vertices_.push_back(vtx);
-                break;
+                if (status_ == process) break;
             }
+        }
+
+        if (status_ == cache)
+        {
+            if (vertices_.size() < min_size)
+                return SEG_END;
+            status_ = process;
         }
 
         if (vtx.cmd == SEG_END)
@@ -336,8 +354,7 @@ private:
                 vertices_.push_back(vertex2d(vertex2d::no_init));
                 return status_ = process;
             case zhao_saalfeld:
-                status_ = process;
-                return status_;
+                return status_ = cache;
             default:
                 throw std::runtime_error("simplification algorithm not yet implemented");
         }
