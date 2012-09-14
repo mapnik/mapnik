@@ -33,6 +33,7 @@
 #include <map>
 
 // boost
+#include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 namespace mapnik
@@ -58,7 +59,7 @@ struct char_properties
     /** Write object to XML ptree. */
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
     std::string face_name;
-    font_set fontset;
+    boost::optional<font_set> fontset;
     double text_size;
     double character_spacing;
     double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
