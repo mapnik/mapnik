@@ -1061,7 +1061,7 @@ if not preconfigured:
 
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU', 'SQLITE', 'LTDL'):
+    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU', 'SQLITE', 'LTDL', 'HB'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
