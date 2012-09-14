@@ -17,6 +17,21 @@ def test_loading_fontset_from_map():
     eq_(len(fs.names),2)
     eq_(list(fs.names),['DejaVu Sans Book','DejaVu Sans Oblique'])
 
+def test_loading_fontset_from_python():
+    m = mapnik.Map(256,256)
+    fset = mapnik.FontSet('my-set')
+    fset.add_face_name('Comic Sans')
+    fset.add_face_name('Papyrus')
+    m.append_fontset('my-set', fset)
+    sty = mapnik.Style()
+    rule = mapnik.Rule()
+    tsym = mapnik.TextSymbolizer()
+    tsym.fontset = fset
+    rule.symbols.append(tsym)
+    sty.rules.append(rule)
+    m.append_style('Style',sty)
+    serialized_map = mapnik.save_map_to_string(m)
+    eq_('fontset-name="my-set"' in serialized_map,True)
 
 if __name__ == "__main__":
     setup()
