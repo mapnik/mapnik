@@ -404,9 +404,9 @@ void export_text_placement()
             boost::shared_ptr<char_properties> >
         ("CharProperties")
         .def_readwrite_convert("text_transform", &char_properties::text_transform)
+        .def_readwrite_convert("fontset", &char_properties::fontset)
         .def(init<char_properties const&>()) //Copy constructor
         .def_readwrite("face_name", &char_properties::face_name)
-        .def_readwrite("fontset", &char_properties::fontset)
         .def_readwrite("text_size", &char_properties::text_size)
         .def_readwrite("character_spacing", &char_properties::character_spacing)
         .def_readwrite("line_spacing", &char_properties::line_spacing)

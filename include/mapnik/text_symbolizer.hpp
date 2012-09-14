@@ -92,7 +92,7 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     void set_text_size(double size);
     std::string const& get_face_name() const func_deprecated;
     void set_face_name(std::string face_name);
-    font_set const& get_fontset() const func_deprecated;
+    boost::optional<font_set> const& get_fontset() const func_deprecated;
     void set_fontset(font_set const& fset);
     color const& get_fill() const func_deprecated;
     void set_fill(color const& fill);

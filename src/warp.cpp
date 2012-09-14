@@ -78,8 +78,6 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     typedef agg::pixfmt_rgba32 pixfmt;
     typedef pixfmt::color_type color_type;
     typedef agg::renderer_base<pixfmt> renderer_base;
-    typedef agg::pixfmt_rgba32_pre pixfmt_pre;
-    typedef agg::renderer_base<pixfmt_pre> renderer_base_pre;
 
     agg::rasterizer_scanline_aa<> rasterizer;
     agg::scanline_u8  scanline;
@@ -87,8 +85,8 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                               target.data_.width(),
                               target.data_.height(),
                               target.data_.width()*4);
-    pixfmt_pre pixf_pre(buf);
-    renderer_base_pre rb_pre(pixf_pre);
+    pixfmt pixf(buf);
+    renderer_base rb(pixf);
     rasterizer.clip_box(0, 0, target.data_.width(), target.data_.height());
     agg::rendering_buffer buf_tile(
         (unsigned char*)source.data_.getData(),
@@ -178,13 +176,13 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                         <img_accessor_type, interpolator_type>
                         span_gen_type;
                     span_gen_type sg(ia, interpolator);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
+                    agg::render_scanlines_aa(rasterizer, scanline, rb,
                                              sa, sg);
                 } else {
                     typedef mapnik::span_image_resample_rgba_affine
                         <img_accessor_type> span_gen_type;
                     span_gen_type sg(ia, interpolator, filter);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
+                    agg::render_scanlines_aa(rasterizer, scanline, rb,
                                              sa, sg);
                 }
             }

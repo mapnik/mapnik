@@ -367,11 +367,11 @@ void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
             throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'", sym);
         }
     }
-    if (!face_name.empty() && !fontset.get_name().empty())
+    if (!face_name.empty() && fontset)
     {
         throw config_error("Can't have both face-name and fontset-name", sym);
     }
-    if (face_name.empty() && fontset.get_name().empty())
+    if (face_name.empty() && !fontset)
     {
         throw config_error("Must have face-name or fontset-name", sym);
     }
@@ -379,11 +379,9 @@ void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
 
 void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl) const
 {
-    std::string const& fontset_name = fontset.get_name();
-    std::string const& dfl_fontset_name = dfl.fontset.get_name();
-    if (fontset_name != dfl_fontset_name || explicit_defaults)
+    if (fontset)
     {
-        set_attr(node, "fontset-name", fontset_name);
+        set_attr(node, "fontset-name", fontset->get_name());
     }
 
     if (face_name != dfl.face_name || explicit_defaults)

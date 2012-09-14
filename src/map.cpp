@@ -159,6 +159,10 @@ boost::optional<feature_type_style const&> Map::find_style(std::string const& na
 
 bool Map::insert_fontset(std::string const& name, font_set const& fontset)
 {
+    if (fontset.get_name() != name)
+    {
+        throw mapnik::config_error("Fontset name must match the name used to reference it on the map");
+    }
     return fontsets_.insert(make_pair(name, fontset)).second;
 }
 

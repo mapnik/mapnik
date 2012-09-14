@@ -354,7 +354,7 @@ opts.AddVariables(
 
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
-    ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if given aborts installation of bundled DejaVu fonts)',''),
+    ('SYSTEM_FONTS','Provide location for python bindings to register fonts (if provided then the bundled DejaVu fonts are not installed)',''),
     ('LIB_DIR_NAME','Name to use for the subfolder beside libmapnik where fonts and plugins are installed','mapnik'),
     PathVariable('PYTHON','Full path to Python executable used to build bindings', sys.executable),
     BoolVariable('FRAMEWORK_PYTHON', 'Link against Framework Python on Mac OS X', 'True'),

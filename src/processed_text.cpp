@@ -65,22 +65,22 @@ string_info &processed_text::get_string_info()
         face_set_ptr faces = font_manager_.get_face_set(p.face_name, p.fontset);
         if (faces->size() == 0)
         {
-            if (!p.fontset.get_name().empty())
+            if (p.fontset && !p.fontset->get_name().empty())
             {
-                if (p.fontset.size())
+                if (p.fontset->size())
                 {
                     if (!p.face_name.empty())
                     {
-                        throw config_error("Unable to find specified font face '" + p.face_name + "' in font set: '" + p.fontset.get_name() + "'");
+                        throw config_error("Unable to find specified font face '" + p.face_name + "' in font set: '" + p.fontset->get_name() + "'");
                     }
                     else
                     {
-                        throw config_error("No valid font face could be loaded for font set: '" + p.fontset.get_name() + "'");
+                        throw config_error("No valid font face could be loaded for font set: '" + p.fontset->get_name() + "'");
                     }
                 }
                 else
                 {
-                    throw config_error("Font set '" + p.fontset.get_name() + "' does not contain any Font face-name entries");           
+                    throw config_error("Font set '" + p.fontset->get_name() + "' does not contain any Font face-name entries");
                 }
             }
             else if (!p.face_name.empty())
