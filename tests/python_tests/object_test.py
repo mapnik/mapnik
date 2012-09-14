@@ -155,7 +155,7 @@ def test_shield_symbolizer_init():
     # 11c34b1: default transform list is empty, not identity matrix
     eq_(s.transform, '')
 
-    eq_(len(s.fontset.names), 0)
+    eq_(s.fontset, None)
 
 # ShieldSymbolizer missing image file
 # images paths are now PathExpressions are evaluated at runtime

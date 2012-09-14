@@ -173,7 +173,7 @@ void text_symbolizer::set_fontset(font_set const& fontset)
     placement_options_->defaults.format.fontset = fontset;
 }
 
-font_set const& text_symbolizer::get_fontset() const
+boost::optional<font_set> const& text_symbolizer::get_fontset() const
 {
     return placement_options_->defaults.format.fontset;
 }

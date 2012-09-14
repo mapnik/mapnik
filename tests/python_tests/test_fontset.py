@@ -19,13 +19,17 @@ def test_loading_fontset_from_map():
 
 def test_loading_fontset_from_python():
     m = mapnik.Map(256,256)
-    fset = mapnik.FontSet('my-set')
+    fset = mapnik.FontSet('foo')
     fset.add_face_name('Comic Sans')
     fset.add_face_name('Papyrus')
+    eq_(fset.name,'foo')
+    fset.name = 'my-set'
+    eq_(fset.name,'my-set')
     m.append_fontset('my-set', fset)
     sty = mapnik.Style()
     rule = mapnik.Rule()
     tsym = mapnik.TextSymbolizer()
+    eq_(tsym.fontset,None)
     tsym.fontset = fset
     rule.symbols.append(tsym)
     sty.rules.append(rule)

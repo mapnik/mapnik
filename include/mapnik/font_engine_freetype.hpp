@@ -333,11 +333,11 @@ public:
         return face_set;
     }
 
-    face_set_ptr get_face_set(std::string const& name, font_set const& fset)
+    face_set_ptr get_face_set(std::string const& name, boost::optional<font_set> fset)
     {
-        if (fset.size() > 0)
+        if (fset && fset->size() > 0)
         {
-            return get_face_set(fset);
+            return get_face_set(*fset);
         }
         else
         {
