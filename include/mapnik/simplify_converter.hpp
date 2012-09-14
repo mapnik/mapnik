@@ -267,7 +267,7 @@ private:
 
             if (vtx.cmd == SEG_MOVETO)
             {
-                if (!sleeve_cont_.empty())
+                if (sleeve_cont_.size() > 1)
                 {
                     vertices_.push_back(sleeve_cont_.back());
                     sleeve_cont_.clear();
@@ -278,7 +278,7 @@ private:
             }
             else if (vtx.cmd == SEG_LINETO)
             {
-                if (!fit_sleeve(sleeve_cont_.begin(), sleeve_cont_.end(), vtx))
+                if (sleeve_cont_.size() > 1 && !fit_sleeve(sleeve_cont_.begin(), sleeve_cont_.end(), vtx))
                 {
                     vertex2d last = vtx;
                     vtx = sleeve_cont_.back();
@@ -295,7 +295,7 @@ private:
             }
             else if (vtx.cmd == SEG_CLOSE)
             {
-                if (!sleeve_cont_.empty())
+                if (sleeve_cont_.size() > 1)
                 {
                     vertices_.push_back(sleeve_cont_.back());
                     sleeve_cont_.clear();
@@ -314,7 +314,7 @@ private:
 
         if (vtx.cmd == SEG_END)
         {
-            if (!sleeve_cont_.empty())
+            if (sleeve_cont_.size() > 1)
             {
                 vertices_.push_back(sleeve_cont_.back());
             }
