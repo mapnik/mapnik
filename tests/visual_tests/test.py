@@ -55,6 +55,7 @@ files = [
     {'name': "orientation", 'sizes': [(800, 200)]},
     {'name': "hb-fontsets", 'sizes': [(800, 200)]},
     {'name': "charspacing", 'sizes': [(200, 400)]},
+    {'name': "line_break", 'sizes': [(800, 800)]},
     ]
 
 def render(filename, width, height, bbox, quiet=False):

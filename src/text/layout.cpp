@@ -102,7 +102,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
         }
         if (current_line_length > wrap_width)
         {
-            unsigned break_position = breakitr->preceding(i);
+            unsigned break_position = wrap_before ? breakitr->preceding(i) : breakitr->following(i);
             if (break_position <= last_break_position || break_position == BreakIterator::DONE)
             {
                 //A single word is longer than the maximum line width.
