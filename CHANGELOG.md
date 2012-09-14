@@ -7,6 +7,11 @@ Developers: Please commit along with changes.
 For a complete change history, see the git log.
 
 
+## Unreleased
+
+- Add DebugSymbolizer (#1366)
+
+
 ## Mapnik 2.1.0
 
 Released Aug 23, 2012
