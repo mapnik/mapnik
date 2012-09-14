@@ -39,22 +39,29 @@ enum line_rasterizer_enum {
 
 DEFINE_ENUM( line_rasterizer_e, line_rasterizer_enum );
 
+
 struct MAPNIK_DECL line_symbolizer : public symbolizer_base
 {
     explicit line_symbolizer()
         : symbolizer_base(),
         stroke_(),
-        rasterizer_p_(RASTERIZER_FULL) {}
-
+        offset_(0.0),
+        rasterizer_p_(RASTERIZER_FULL)
+        {}
+    
     line_symbolizer(stroke const& stroke)
         : symbolizer_base(),
         stroke_(stroke),
-        rasterizer_p_(RASTERIZER_FULL) {}
+        offset_(0.0),
+        rasterizer_p_(RASTERIZER_FULL)
+        {}
 
     line_symbolizer(color const& pen,float width=1.0)
         : symbolizer_base(),
         stroke_(pen,width),
-        rasterizer_p_(RASTERIZER_FULL) {}
+        offset_(0.0),
+        rasterizer_p_(RASTERIZER_FULL)
+        {}
 
     stroke const& get_stroke() const
     {
@@ -64,6 +71,16 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
     void set_stroke(stroke const& stk)
     {
         stroke_ = stk;
+    }
+    
+    void set_offset(double val)
+    {
+        offset_ = val;
+    }
+    
+    double offset() const
+    {
+        return offset_;
     }
 
     void set_rasterizer(line_rasterizer_e rasterizer_p)
@@ -78,6 +95,7 @@ struct MAPNIK_DECL line_symbolizer : public symbolizer_base
 
 private:
     stroke stroke_;
+    double offset_;
     line_rasterizer_e rasterizer_p_;
 };
 }

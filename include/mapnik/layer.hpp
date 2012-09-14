@@ -43,7 +43,9 @@ namespace mapnik
 class MAPNIK_DECL layer
 {
 public:
-    explicit layer(std::string const& name, std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+    layer(std::string const& name,
+          std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+
     layer(layer const& l);
     layer& operator=(layer const& l);
     bool operator==(layer const& other) const;
@@ -57,7 +59,7 @@ public:
      * @return the name of the layer.
      */
 
-    const std::string& name() const;
+    std::string const& name() const;
 
     /*!
      * @brief Set the SRS of the layer.
@@ -83,49 +85,49 @@ public:
 
     /*!
      * @return the styles list attached to this layer
-     *         (const version).
+     *         (non-const version).
      */
     std::vector<std::string>& styles();
 
     /*!
-     * @param maxZoom The minimum zoom level to set
+     * @param max_zoom The minimum zoom level to set
      */
-    void setMinZoom(double minZoom);
+    void set_min_zoom(double min_zoom);
 
     /*!
-     * @param maxZoom The maximum zoom level to set
+     * @param max_zoom The maximum zoom level to set
      */
-    void setMaxZoom(double maxZoom);
+    void set_max_zoom(double max_zoom);
 
     /*!
      * @return the minimum zoom level of the layer.
      */
-    double getMinZoom() const;
+    double min_zoom() const;
 
     /*!
      * @return the maximum zoom level of the layer.
      */
-    double getMaxZoom() const;
+    double max_zoom() const;
 
     /*!
      * @brief Set whether this layer is active and will be rendered.
      */
-    void setActive(bool active);
+    void set_active(bool active);
 
     /*!
      * @return whether this layer is active and will be rendered.
      */
-    bool isActive() const;
+    bool active() const;
 
     /*!
      * @brief Set whether this layer is queryable.
      */
-    void setQueryable(bool queryable);
+    void set_queryable(bool queryable);
 
     /*!
      * @return whether this layer is queryable or not.
      */
-    bool isQueryable() const;
+    bool queryable() const;
 
     /*!
      * @brief Get the visability for a specific scale.
@@ -139,7 +141,7 @@ public:
      *         or
      *         scale < maxzoom + 1e-6
      */
-    bool isVisible(double scale) const;
+    bool visible(double scale) const;
 
     /*!
      * @param clear_cache Set whether this layer's labels are cached.
@@ -169,7 +171,7 @@ public:
     /*!
      * @return The field rendering of this layer is grouped by.
      */
-    std::string group_by() const;
+    std::string const& group_by() const;
 
     /*!
      * @brief Attach a datasource for this layer.
@@ -188,6 +190,11 @@ public:
      */
     box2d<double> envelope() const;
 
+    void set_maximum_extent(box2d<double> const& box);
+    boost::optional<box2d<double> > const&  maximum_extent() const;
+    void reset_maximum_extent();
+    void set_buffer_size(int size);
+    int buffer_size() const;
     ~layer();
 private:
     void swap(const layer& other);
@@ -195,15 +202,17 @@ private:
     std::string name_;
     std::string srs_;
 
-    double minZoom_;
-    double maxZoom_;
+    double min_zoom_;
+    double max_zoom_;
     bool active_;
     bool queryable_;
     bool clear_label_cache_;
     bool cache_features_;
     std::string group_by_;
-    std::vector<std::string>  styles_;
+    std::vector<std::string> styles_;
     datasource_ptr ds_;
+    int buffer_size_;
+    boost::optional<box2d<double> > maximum_extent_;
 };
 }
 

@@ -39,7 +39,7 @@ struct label_collision_detector
 {
     typedef std::vector<box2d<double> > label_placements;
 
-    bool has_plasement(box2d<double> const& box)
+    bool has_placement(box2d<double> const& box)
     {
         label_placements::const_iterator itr=labels_.begin();
         for( ; itr !=labels_.end();++itr)
@@ -134,13 +134,13 @@ public:
 };
 
 
-//quad tree based label collission detector so labels dont appear within a given distance
+//quad tree based label collision detector so labels dont appear within a given distance
 class label_collision_detector4 : boost::noncopyable
 {
 public:
     struct label
     {
-        label(box2d<double> const& b) : box(b) {}
+        label(box2d<double> const& b) : box(b), text() {}
         label(box2d<double> const& b, UnicodeString const& t) : box(b), text(t) {}
 
         box2d<double> box;

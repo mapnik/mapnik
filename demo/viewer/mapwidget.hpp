@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id$
 
 #ifndef MAP_WIDGET_HPP
 #define MAP_WIDGET_HPP
@@ -31,18 +30,28 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+
+#ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
+#endif
 
 class MapWidget : public QWidget
 {
     Q_OBJECT
 
-    public:
+public:
     enum eTool
     {
         ZoomToBox = 1,
         Pan,
         Info,
+    };
+
+    enum eRenderer
+    {
+        AGG,
+        Cairo,
+        Grid
     };
 
 private:
@@ -60,6 +69,7 @@ private:
     QPen pen_;
     int selectedLayer_;
     double scaling_factor_;
+    eRenderer cur_renderer_;
 public:
     MapWidget(QWidget *parent=0);
     void setTool(eTool tool);
@@ -79,6 +89,8 @@ public slots:
     void zoomToLevel(int level);
     void updateMap();
     void layerSelected(int);
+    void updateRenderer(QString const& txt);
+    void updateScaleFactor(double scale_factor);
 signals:
     void mapViewChanged();
 protected:
@@ -87,6 +99,7 @@ protected:
     void mousePressEvent(QMouseEvent* e);
     void mouseMoveEvent(QMouseEvent* e);
     void mouseReleaseEvent(QMouseEvent* e);
+    void wheelEvent(QWheelEvent* e);
     void keyPressEvent(QKeyEvent *e);
     void export_to_file(unsigned width,
                         unsigned height,

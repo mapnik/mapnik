@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
+#include <mapnik/ctrans.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/feature_factory.hpp>
@@ -31,7 +33,6 @@
 #include "raster_featureset.hpp"
 
 using mapnik::query;
-using mapnik::CoordTransform;
 using mapnik::image_reader;
 using mapnik::Feature;
 using mapnik::feature_ptr;
@@ -45,12 +46,12 @@ raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
                                                    query const& q)
     : policy_(policy),
       feature_id_(1),
+      ctx_(boost::make_shared<mapnik::context_type>()),
       extent_(extent),
       bbox_(q.get_bbox()),
       curIter_(policy_.begin()),
       endIter_(policy_.end())
 {
-    ctx_ = boost::make_shared<mapnik::context_type>();
 }
 
 template <typename LookupPolicy>
@@ -69,10 +70,8 @@ feature_ptr raster_featureset<LookupPolicy>::next()
         {
             std::auto_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
 
-#ifdef MAPNIK_DEBUG
-            std::clog << "Raster Plugin: READER = " << curIter_->format() << " " << curIter_->file()
-                      << " size(" << curIter_->width() << "," << curIter_->height() << ")" << std::endl;
-#endif
+            MAPNIK_LOG_DEBUG(raster) << "raster_featureset: Reader=" << curIter_->format() << "," << curIter_->file()
+                                     << ",size(" << curIter_->width() << "," << curIter_->height() << ")";
 
             if (reader.get())
             {
@@ -81,7 +80,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 
                 if (image_width > 0 && image_height > 0)
                 {
-                    CoordTransform t(image_width, image_height, extent_, 0, 0);
+                    mapnik::CoordTransform t(image_width, image_height, extent_, 0, 0);
                     box2d<double> intersect = bbox_.intersect(curIter_->envelope());
                     box2d<double> ext = t.forward(intersect);
                     box2d<double> rem = policy_.transform(ext);
@@ -121,15 +120,15 @@ feature_ptr raster_featureset<LookupPolicy>::next()
         }
         catch (mapnik::image_reader_exception const& ex)
         {
-            std::cerr << "Raster Plugin: image reader exception caught: " << ex.what() << std::endl;
+            MAPNIK_LOG_ERROR(raster) << "Raster Plugin: image reader exception caught: " << ex.what();
         }
         catch (std::exception const& ex)
         {
-            std::cerr << "Raster Plugin: " << ex.what() << std::endl;
+            MAPNIK_LOG_ERROR(raster) << "Raster Plugin: " << ex.what();
         }
         catch (...)
         {
-            std::cerr << "Raster Plugin: exception caught" << std::endl;
+            MAPNIK_LOG_ERROR(raster) << "Raster Plugin: exception caught";
         }
 
         ++curIter_;

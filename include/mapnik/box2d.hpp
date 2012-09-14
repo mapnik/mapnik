@@ -33,6 +33,12 @@
 // stl
 #include <iomanip>
 
+// agg
+// forward declare so that apps using mapnik do not need agg headers
+namespace agg {
+struct trans_affine;
+}
+
 namespace mapnik {
 
 /*!
@@ -56,6 +62,7 @@ public:
     box2d(T minx,T miny,T maxx,T maxy);
     box2d(const coord<T,2>& c0,const coord<T,2>& c1);
     box2d(const box2d_type& rhs);
+    box2d(const box2d_type& rhs, const agg::trans_affine& tr);
     T minx() const;
     T miny() const;
     T maxx() const;
@@ -80,7 +87,7 @@ public:
     void re_center(const coord<T,2>& c);
     void init(T x0,T y0,T x1,T y1);
     void clip(const box2d_type &other);
-    bool from_string(const std::string& s);
+    bool from_string(std::string const& s);
     bool valid() const;
 
     // define some operators
@@ -88,6 +95,10 @@ public:
     box2d_type& operator*=(T);
     box2d_type& operator/=(T);
     T operator[](int index) const;
+
+    // compute the bounding box of this one transformed
+    box2d_type  operator* (agg::trans_affine const& tr) const;
+    box2d_type& operator*=(agg::trans_affine const& tr);
 };
 
 template <class charT,class traits,class T>
@@ -98,9 +109,9 @@ operator << (std::basic_ostream<charT,traits>& out,
     std::basic_ostringstream<charT,traits> s;
     s.copyfmt(out);
     s.width(0);
-    s <<"box2d(" << std::setprecision(16)
-      << e.minx() << "," << e.miny() <<","
-      << e.maxx() << "," << e.maxy() <<")";
+    s << "box2d(" << std::fixed << std::setprecision(16)
+      << e.minx() << ',' << e.miny() << ','
+      << e.maxx() << ',' << e.maxy() << ')';
     out << s.str();
     return out;
 }

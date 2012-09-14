@@ -20,10 +20,11 @@
  *
  *****************************************************************************/
 
-//$Id$
+// mapnik
 #include <mapnik/distance.hpp>
-
 #include <mapnik/ellipsoid.hpp>
+
+// stl
 #include <cmath>
 
 namespace mapnik {

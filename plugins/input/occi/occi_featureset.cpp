@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
@@ -36,7 +37,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_type;
@@ -61,10 +61,12 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
                                  std::string const& sqlstring,
                                  std::string const& encoding,
                                  bool use_connection_pool,
+                                 bool use_wkb,
                                  unsigned prefetch_rows)
     : tr_(new transcoder(encoding)),
       feature_id_(1),
-      ctx_(ctx)
+      ctx_(ctx),
+      use_wkb_(use_wkb)
 {
     if (use_connection_pool)
     {
@@ -81,7 +83,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
     }
     catch (SQLException &ex)
     {
-        std::clog << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage() << std::endl;
+        MAPNIK_LOG_ERROR(occi) << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage();
     }
 }
 
@@ -96,10 +98,31 @@ feature_ptr occi_featureset::next()
         feature_ptr feature(feature_factory::create(ctx_,feature_id_));
         ++feature_id_;
 
-        boost::scoped_ptr<SDOGeometry> geom(dynamic_cast<SDOGeometry*>(rs_->getObject(1)));
-        if (geom.get())
+        if (use_wkb_)
         {
-            convert_geometry(geom.get(), feature);
+            Blob blob = rs_->getBlob (1);
+            blob.open(oracle::occi::OCCI_LOB_READONLY);
+
+            int size = blob.length();
+            if (buffer_.size() < size)
+            {
+                buffer_.resize(size);
+            }
+
+            oracle::occi::Stream* instream = blob.getStream(1,0);
+            instream->readBuffer(buffer_.data(), size);
+            blob.closeStream(instream);
+            blob.close();
+
+            geometry_utils::from_wkb(feature->paths(), buffer_.data(), size);
+        }
+        else
+        {
+            boost::scoped_ptr<SDOGeometry> geom(dynamic_cast<SDOGeometry*>(rs_->getObject(1)));
+            if (geom.get())
+            {
+                convert_geometry(geom.get(), feature);
+            }
         }
 
         std::vector<MetaData> listOfColumns = rs_->getColumnListMetaData();
@@ -180,18 +203,18 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCI_SQLT_CLOB:
             case oracle::occi::OCCI_SQLT_BLOB:
             case oracle::occi::OCCI_SQLT_RSET:
-#ifdef MAPNIK_DEBUG
-                std::clog << "OCCI Plugin: unsupported datatype "
-                          << occi_enums::resolve_datatype(type_oid)
-                          << " (type_oid=" << type_oid << ")" << std::endl;
-#endif
-                break;
+                {
+                    MAPNIK_LOG_WARN(occi) << "occi_featureset: Unsupported datatype "
+                                          << occi_enums::resolve_datatype(type_oid)
+                                          << " (type_oid=" << type_oid << ")";
+                    break;
+                }
             default: // shouldn't get here
-#ifdef MAPNIK_DEBUG
-                std::clog << "OCCI Plugin: unknown datatype "
-                          << "(type_oid=" << type_oid << ")" << std::endl;
-#endif
-                break;
+                {
+                    MAPNIK_LOG_WARN(occi) << "occi_featureset: Unknown datatype "
+                                          << "(type_oid=" << type_oid << ")";
+                    break;
+                }
             }
         }
 
@@ -208,20 +231,6 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
     int dimensions = gtype / 1000;
     int lrsvalue = (gtype - dimensions * 1000) / 100;
     int geomtype = (gtype - dimensions * 1000 - lrsvalue * 100);
-
-#if 0
-    std::clog << "-----------Geometry Object ------------" << std::endl;
-    std::clog << "SDO GTYPE = " << gtype << std::endl;
-    std::clog << "SDO DIMENSIONS = " << dimensions << std::endl;
-    std::clog << "SDO LRS = " << lrsvalue << std::endl;
-    std::clog << "SDO GEOMETRY TYPE = " << geomtype << std::endl;
-
-    Number sdo_srid = geom->getSdo_srid();
-    if (sdo_srid.isNull())
-        std::clog << "SDO SRID = " << "Null" << std::endl;
-    else
-        std::clog << "SDO SRID = " << (int)sdo_srid << std::endl;
-#endif
 
     const std::vector<Number>& elem_info = geom->getSdo_elem_info();
     const std::vector<Number>& ordinates = geom->getSdo_ordinates();
@@ -278,8 +287,6 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
         {
             const bool is_single_geom = false;
             const bool is_point_type = true;
-
-            // FIXME :http://trac.mapnik.org/ticket/458
             convert_ordinates(feature,
                               mapnik::Point,
                               elem_info,
@@ -344,12 +351,12 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
     break;
     case SDO_GTYPE_UNKNOWN:
     default:
-#ifdef MAPNIK_DEBUG
-        std::clog << "OCCI Plugin: unknown <occi> "
-                  << occi_enums::resolve_gtype(geomtype)
-                  << "(gtype=" << gtype << ")" << std::endl;
-#endif
-        break;
+    {
+        MAPNIK_LOG_WARN(occi) << "occi_featureset: Unknown oracle enum "
+                              << occi_enums::resolve_gtype(geomtype)
+                              << "(gtype=" << gtype << ")";
+    }
+    break;
     }
 }
 
@@ -373,7 +380,6 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
         if (! is_single_geom && elem_size > SDO_ELEM_INFO_SIZE)
         {
             geometry_type* geom = new geometry_type(geom_type);
-            if (geom) geom->set_capacity(ord_size);
 
             for (int i = SDO_ELEM_INFO_SIZE; i < elem_size; i+=3)
             {
@@ -434,8 +440,6 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                     }
 
                     geom = new geometry_type(gtype);
-                    geom->set_capacity((next_offset - 1) - (offset - 1 - dimensions));
-
                     fill_geometry_type(geom,
                                        offset - 1,
                                        next_offset - 1,
@@ -458,8 +462,6 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
         else
         {
             geometry_type * geom = new geometry_type(geom_type);
-            geom->set_capacity(ord_size);
-
             fill_geometry_type(geom,
                                offset - 1,
                                ord_size,

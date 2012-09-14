@@ -2,7 +2,6 @@
 
 from nose.tools import *
 from utilities import execution_path
-from copy import deepcopy
 
 import os, mapnik
 
@@ -22,4 +21,3 @@ def test_loading_fontset_from_map():
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
-    

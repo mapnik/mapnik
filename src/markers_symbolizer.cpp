@@ -20,67 +20,68 @@
  *
  *****************************************************************************/
 
-//$Id$
-
+// mapnik
 #include <mapnik/markers_symbolizer.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
 
 namespace mapnik {
 
 static const char * marker_placement_strings[] = {
     "point",
+    "interior",
     "line",
     ""
 };
 
 IMPLEMENT_ENUM( marker_placement_e, marker_placement_strings )
 
-
-static const char * marker_type_strings[] = {
-    "arrow",
-    "ellipse",
-    ""
-};
-
-IMPLEMENT_ENUM( marker_type_e, marker_type_strings )
-
 markers_symbolizer::markers_symbolizer()
-: symbolizer_with_image(path_expression_ptr(new path_expression)),
-    symbolizer_base(),
-    allow_overlap_(false),
-    fill_(color(0,0,255)),
-    spacing_(100.0),
-    max_error_(0.2),
-    width_(5.0),
-    height_(5.0),
-    stroke_(),
-    marker_p_(MARKER_LINE_PLACEMENT),
-    marker_type_(ARROW) {}
-
-markers_symbolizer::markers_symbolizer(path_expression_ptr filename)
-    : symbolizer_with_image(filename),
+    : symbolizer_with_image(parse_path("shape://ellipse")),
       symbolizer_base(),
+      width_(),
+      height_(),
+      ignore_placement_(false),
       allow_overlap_(false),
-      fill_(color(0,0,255)),
       spacing_(100.0),
       max_error_(0.2),
-      width_(5.0),
-      height_(5.0),
-      stroke_(),
-      marker_p_(MARKER_LINE_PLACEMENT),
-      marker_type_(ARROW) {}
+      marker_p_(MARKER_POINT_PLACEMENT) { }
+
+markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
+    : symbolizer_with_image(filename),
+      symbolizer_base(),
+      width_(),
+      height_(),
+      ignore_placement_(false),
+      allow_overlap_(false),
+      spacing_(100.0),
+      max_error_(0.2),
+      marker_p_(MARKER_POINT_PLACEMENT) { }
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
     : symbolizer_with_image(rhs),
       symbolizer_base(rhs),
-      allow_overlap_(rhs.allow_overlap_),
-      fill_(rhs.fill_),
-      spacing_(rhs.spacing_),
-      max_error_(rhs.max_error_),
       width_(rhs.width_),
       height_(rhs.height_),
+      ignore_placement_(rhs.ignore_placement_),
+      allow_overlap_(rhs.allow_overlap_),
+      spacing_(rhs.spacing_),
+      max_error_(rhs.max_error_),
+      fill_(rhs.fill_),
+      fill_opacity_(rhs.fill_opacity_),
       stroke_(rhs.stroke_),
-      marker_p_(rhs.marker_p_),
-      marker_type_(rhs.marker_type_) {}
+      marker_p_(rhs.marker_p_) {}
+
+void markers_symbolizer::set_ignore_placement(bool ignore_placement)
+{
+    ignore_placement_ = ignore_placement;
+}
+
+bool markers_symbolizer::get_ignore_placement() const
+{
+    return ignore_placement_;
+}
 
 void markers_symbolizer::set_allow_overlap(bool overlap)
 {
@@ -112,37 +113,47 @@ double markers_symbolizer::get_max_error() const
     return max_error_;
 }
 
-void markers_symbolizer::set_fill(color fill)
+void markers_symbolizer::set_fill(color const& fill)
 {
     fill_ = fill;
 }
 
-color const& markers_symbolizer::get_fill() const
+boost::optional<color> markers_symbolizer::get_fill() const
 {
     return fill_;
 }
 
-void markers_symbolizer::set_width(double width)
+void markers_symbolizer::set_fill_opacity(float opacity)
+{
+    fill_opacity_ = opacity;
+}
+
+boost::optional<float> markers_symbolizer::get_fill_opacity() const
+{
+    return fill_opacity_;
+}
+
+void markers_symbolizer::set_width(expression_ptr const& width)
 {
     width_ = width;
 }
 
-double markers_symbolizer::get_width() const
+expression_ptr const& markers_symbolizer::get_width() const
 {
     return width_;
 }
 
-void markers_symbolizer::set_height(double height)
+void markers_symbolizer::set_height(expression_ptr const& height)
 {
     height_ = height;
 }
 
-double markers_symbolizer::get_height() const
+expression_ptr const& markers_symbolizer::get_height() const
 {
     return height_;
 }
 
-stroke const& markers_symbolizer::get_stroke() const
+boost::optional<stroke> markers_symbolizer::get_stroke() const
 {
     return stroke_;
 }
@@ -161,16 +172,5 @@ marker_placement_e markers_symbolizer::get_marker_placement() const
 {
     return marker_p_;
 }
-
-void markers_symbolizer::set_marker_type(marker_type_e marker_type)
-{
-    marker_type_ = marker_type;
-}
-
-marker_type_e markers_symbolizer::get_marker_type() const
-{
-    return marker_type_;
-}
-
 
 }

@@ -22,19 +22,24 @@
 #ifndef SYMBOLIZER_HELPERS_HPP
 #define SYMBOLIZER_HELPERS_HPP
 
+//mapnik
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/shield_symbolizer.hpp>
-#include <mapnik/text_processing.hpp>
-#include <mapnik/placement_finder.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/processed_text.hpp>
+#include <mapnik/text_path.hpp>
 
+//boost
 #include <boost/shared_ptr.hpp>
 
 
 namespace mapnik {
+
+typedef boost::ptr_vector<text_path> placements_type;
+template <typename DetectorT> class placement_finder;
 
 /** Helper object that does all the TextSymbolizer placment finding
  * work except actually rendering the object. */
@@ -48,27 +53,27 @@ public:
                            unsigned width,
                            unsigned height,
                            double scale_factor,
-                           CoordTransform const &t,
+                           CoordTransform const& t,
                            FaceManagerT &font_manager,
-                           DetectorT &detector)
+                           DetectorT &detector,
+                           box2d<double> const& query_extent)
         : sym_(sym),
           feature_(feature),
           prj_trans_(prj_trans),
           t_(t),
           font_manager_(font_manager),
           detector_(detector),
-          writer_(sym.get_metawriter()),
           dims_(0, 0, width, height),
+          query_extent_(query_extent),
           text_(font_manager, scale_factor),
           angle_(0.0),
-          placement_valid_(true)
+          placement_valid_(false),
+          points_on_line_(false),
+          finder_()
     {
         initialize_geometries();
-        if (!geometries_to_process_.size()) return; //TODO: Test this
-        placement_ = sym_.get_placement_options()->get_placement_info(
-            scale_factor, std::make_pair(width, height), false);
-        //TODO: has_dimensions? Why? When?
-        if (writer_.first) placement_->collect_extents = true;
+        if (!geometries_to_process_.size()) return;
+        placement_ = sym_.get_placement_options()->get_placement_info(scale_factor);
         next_placement();
         initialize_points();
     }
@@ -76,10 +81,14 @@ public:
     /** Return next placement.
      * If no more placements are found returns null pointer.
      */
-    text_placement_info_ptr get_placement();
-    text_placement_info_ptr get_point_placement();
-    text_placement_info_ptr get_line_placement();
+    bool next();
+
+    /** Get current placement. next() has to be called before! */
+    placements_type const& placements() const;
 protected:
+    bool next_point_placement();
+    bool next_line_placement();
+    bool next_line_placement_clipped();
     bool next_placement();
     void initialize_geometries();
     void initialize_points();
@@ -88,26 +97,35 @@ protected:
     text_symbolizer const& sym_;
     Feature const& feature_;
     proj_transform const& prj_trans_;
-    CoordTransform const &t_;
-    FaceManagerT &font_manager_;
-    DetectorT &detector_;
-    metawriter_with_properties writer_;
+    CoordTransform const& t_;
+    FaceManagerT & font_manager_;
+    DetectorT & detector_;
     box2d<double> dims_;
-
+    box2d<double> const& query_extent_;
     //Processing
     processed_text text_;
     /* Using list instead of vector, because we delete random elements and need iterators to stay valid. */
+    /** Remaining geometries to be processed. */
     std::list<geometry_type*> geometries_to_process_;
+    /** Geometry currently being processed. */
     std::list<geometry_type*>::iterator geo_itr_;
+    /** Remaining points to be processed. */
     std::list<position> points_;
+    /** Point currently being processed. */
     std::list<position>::iterator point_itr_;
+    /** Text rotation. */
     double angle_;
+    /** Text + formatting. */
     string_info *info_;
+    /** Did last call to next_placement return true? */
     bool placement_valid_;
+    /** Use point placement. Otherwise line placement is used. */
     bool point_placement_;
+    /** Place text at points on a line instead of following the line (used for ShieldSymbolizer) .*/
+    bool points_on_line_;
 
-    //Output
     text_placement_info_ptr placement_;
+    boost::shared_ptr<placement_finder<DetectorT> > finder_;
 };
 
 template <typename FaceManagerT, typename DetectorT>
@@ -122,31 +140,47 @@ public:
                              double scale_factor,
                              CoordTransform const &t,
                              FaceManagerT &font_manager,
-                             DetectorT &detector) :
-        text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector),
+                             DetectorT &detector,
+                             box2d<double> const& query_extent) :
+        text_symbolizer_helper<FaceManagerT, DetectorT>(sym, feature, prj_trans, width, height, scale_factor, t, font_manager, detector, query_extent),
         sym_(sym)
     {
+        this->points_on_line_ = true;
         init_marker();
     }
 
-    text_placement_info_ptr get_placement();
-    std::pair<int, int> get_marker_position(text_path &p);
-    marker &get_marker() const;
-    agg::trans_affine const& get_transform() const;
+    box2d<double> const& get_marker_extent() const
+    {
+        return marker_ext_;
+    }
+
+    double get_marker_height() const
+    {
+        return marker_h_;
+    }
+
+    double get_marker_width() const
+    {
+        return marker_w_;
+    }
+
+    bool next();
+    pixel_position get_marker_position(text_path const& p);
+    marker & get_marker() const;
+    agg::trans_affine const& get_image_transform() const;
 protected:
-    text_placement_info_ptr get_point_placement();
-    text_placement_info_ptr get_line_placement();
+    bool next_point_placement();
+    bool next_line_placement();
     void init_marker();
     shield_symbolizer const& sym_;
     box2d<double> marker_ext_;
     boost::optional<marker_ptr> marker_;
-    agg::trans_affine transform_;
-    int marker_w_;
-    int marker_h_;
-    int marker_x_;
-    int marker_y_;
-    // F***ing templates...
-    // http://womble.decadent.org.uk/c++/template-faq.html#base-lookup
+    agg::trans_affine image_transform_;
+    double marker_w_;
+    double marker_h_;
+    double marker_x_;
+    double marker_y_;
+
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement;
@@ -154,7 +188,6 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geo_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::points_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::writer_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::font_manager_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::feature_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::t_;
@@ -164,6 +197,7 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_valid_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::angle_;
+    using text_symbolizer_helper<FaceManagerT, DetectorT>::finder_;
 };
 } //namespace
 #endif // SYMBOLIZER_HELPERS_HPP

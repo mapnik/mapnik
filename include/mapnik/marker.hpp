@@ -49,13 +49,13 @@ namespace mapnik
 
 typedef agg::pod_bvector<mapnik::svg::path_attributes> attr_storage;
 typedef mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage> svg_storage_type;
-typedef boost::shared_ptr<svg_storage_type> path_ptr;
+typedef boost::shared_ptr<svg_storage_type> svg_path_ptr;
 typedef boost::shared_ptr<image_data_32> image_ptr;
 /**
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally
  * in the image caches and most of the render paths.
  */
-class marker
+class marker: private boost::noncopyable
 {
 public:
     marker()
@@ -65,34 +65,52 @@ public:
         (*bitmap_data_)->set(0xff000000);
     }
 
-    marker(const boost::optional<mapnik::image_ptr> &data) : bitmap_data_(data)
+    marker(boost::optional<mapnik::image_ptr> const& data)
+        : bitmap_data_(data)
     {
 
     }
 
-    marker(const boost::optional<mapnik::path_ptr> &data) : vector_data_(data)
+    marker(boost::optional<mapnik::svg_path_ptr> const& data)
+        : vector_data_(data)
     {
 
     }
 
-    marker(const marker& rhs) : bitmap_data_(rhs.bitmap_data_), vector_data_(rhs.vector_data_)
+    marker(marker const& rhs)
+        : bitmap_data_(rhs.bitmap_data_),
+          vector_data_(rhs.vector_data_)
+    {}
+
+    box2d<double> bounding_box() const
     {
+        if (is_vector())
+        {
+            return (*vector_data_)->bounding_box();
+        }
+        if (is_bitmap())
+        {
+            double width = (*bitmap_data_)->width();
+            double height = (*bitmap_data_)->height();
+            return box2d<double>(0, 0, width, height);
+        }
+        return box2d<double>();
     }
 
-    inline unsigned width() const
+    inline double width() const
     {
         if (is_bitmap())
             return (*bitmap_data_)->width();
         else if (is_vector())
-            return static_cast<unsigned>((*vector_data_)->bounding_box().width());
+            return (*vector_data_)->bounding_box().width();
         return 0;
     }
-    inline unsigned height() const
+    inline double height() const
     {
         if (is_bitmap())
             return (*bitmap_data_)->height();
         else if (is_vector())
-            return static_cast<unsigned>((*vector_data_)->bounding_box().height());
+            return (*vector_data_)->bounding_box().height();
         return 0;
     }
 
@@ -106,22 +124,19 @@ public:
         return vector_data_;
     }
 
-    boost::optional<mapnik::image_ptr> get_bitmap_data()
+    boost::optional<mapnik::image_ptr> get_bitmap_data() const
     {
         return bitmap_data_;
     }
 
-    boost::optional<mapnik::path_ptr> get_vector_data()
+    boost::optional<mapnik::svg_path_ptr> get_vector_data() const
     {
         return vector_data_;
     }
 
-
 private:
-    marker& operator=(const marker&);
-
     boost::optional<mapnik::image_ptr> bitmap_data_;
-    boost::optional<mapnik::path_ptr> vector_data_;
+    boost::optional<mapnik::svg_path_ptr> vector_data_;
 
 };
 

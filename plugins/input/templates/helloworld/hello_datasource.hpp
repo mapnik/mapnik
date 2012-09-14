@@ -3,6 +3,19 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
+#include <mapnik/feature_layer_desc.hpp>
+
+// boost
+#include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
+
+// stl
+#include <string>
 
 class hello_datasource : public mapnik::datasource
 {
@@ -18,7 +31,7 @@ public:
     mapnik::datasource::datasource_t type() const;
 
     // mandatory: name of the plugin
-    static std::string name();
+    static const char * name();
 
     // mandatory: function to query features by box2d
     // this is called when rendering, specifically in feature_style_processor.hpp

@@ -44,7 +44,9 @@ namespace  mapnik { namespace svg {
         explicit svg_parser(svg_converter_type & path);
         ~svg_parser();
         void parse(std::string const& filename);
+        void parse_from_string(std::string const& svg);
     private:
+        bool parse_reader(xmlTextReaderPtr reader);
         void process_node(xmlTextReaderPtr reader);
         void start_element(xmlTextReaderPtr reader);
         void end_element(xmlTextReaderPtr reader);
@@ -62,8 +64,6 @@ namespace  mapnik { namespace svg {
         void parse_pattern(xmlTextReaderPtr reader);
         void parse_attr(xmlTextReaderPtr reader);
         void parse_attr(const xmlChar * name, const xmlChar * value );
-
-
     private:
         svg_converter_type & path_;
         bool is_defs_;

@@ -19,12 +19,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
+#include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/agg_helpers.hpp>
 #include <mapnik/agg_rasterizer.hpp>
+
 #include <mapnik/line_symbolizer.hpp>
+#include <mapnik/vertex_converters.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -39,6 +42,8 @@
 #include "agg_renderer_outline_aa.h"
 #include "agg_rasterizer_outline_aa.h"
 
+// boost
+#include <boost/foreach.hpp>
 
 // stl
 #include <string>
@@ -47,12 +52,10 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(line_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
-{
-    typedef agg::renderer_base<agg::pixfmt_rgba32_plain> ren_base;
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
 
+{
     stroke const& stroke_ = sym.get_stroke();
     color const& col = stroke_.get_color();
     unsigned r=col.red();
@@ -60,147 +63,108 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     unsigned b=col.blue();
     unsigned a=col.alpha();
 
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32_plain pixf(buf);
+    ras_ptr->reset();
+    set_gamma_method(stroke_, ras_ptr);
+
+    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+
+    typedef agg::rgba8 color_type;
+    typedef agg::order_rgba order_type;
+    typedef agg::pixel32_type pixel_type;
+    typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
+    typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+    typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
+    typedef boost::mpl::vector<clip_line_tag, transform_tag,
+                               offset_transform_tag, affine_transform_tag,
+                               smooth_tag, dash_tag, stroke_tag> conv_types;
+
+    pixfmt_comp_type pixf(buf);
+    pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
+    renderer_base renb(pixf);
+
+    agg::trans_affine tr;
+    evaluate_transform(tr, feature, sym.get_transform());
+
+    box2d<double> clipping_extent = query_extent_;
+    if (sym.clip())
+    {
+        double padding = (double)(query_extent_.width()/pixmap_.width());
+        float half_stroke = stroke_.get_width()/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+        // debugging
+        //box2d<double> inverse(x0 + padding, y0 + padding, x1 - padding , y1 - padding);
+        //draw_geo_extent(inverse,mapnik::color("red"));
+    }
 
     if (sym.get_rasterizer() == RASTERIZER_FAST)
     {
-        typedef agg::renderer_outline_aa<ren_base> renderer_type;
+        typedef agg::renderer_outline_aa<renderer_base> renderer_type;
         typedef agg::rasterizer_outline_aa<renderer_type> rasterizer_type;
-
-        agg::line_profile_aa profile;
-        //agg::line_profile_aa profile(stroke_.get_width() * scale_factor_, agg::gamma_none());
-        profile.width(stroke_.get_width() * scale_factor_);
-        ren_base base_ren(pixf);
-        renderer_type ren(base_ren, profile);
-        ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
-        //ren.clip_box(0,0,width_,height_);
+        agg::line_profile_aa profile(stroke_.get_width() * scale_factor_, agg::gamma_power(stroke_.get_gamma()));
+        renderer_type ren(renb, profile);
+        ren.color(agg::rgba8_pre(r, g, b, int(a*stroke_.get_opacity())));
         rasterizer_type ras(ren);
-        ras.line_join(agg::outline_miter_accurate_join);
-        ras.round_cap(true);
+        set_join_caps_aa(stroke_,ras);
 
-        for (unsigned i=0;i<feature->num_geometries();++i)
+        vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
+            converter(clipping_extent,ras,sym,t_,prj_trans,tr,scale_factor_);
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+        converter.set<transform_tag>(); // always transform
+        if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
-            geometry_type const& geom = feature->get_geometry(i);
-            if (geom.num_points() > 1)
+            if (geom.size() > 1)
             {
-                path_type path(t_,geom,prj_trans);
-                ras.add_path(path);
+                converter.apply(geom);
             }
         }
     }
     else
     {
-        typedef agg::renderer_scanline_aa_solid<ren_base> renderer;
+        vertex_converter<box2d<double>, rasterizer, line_symbolizer,
+                         CoordTransform, proj_transform, agg::trans_affine, conv_types>
+            converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
-        agg::scanline_p8 sl;
+        if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+        converter.set<transform_tag>(); // always transform
+        if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+        converter.set<affine_transform_tag>(); // optional affine transform
+        if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+        if (stroke_.has_dash()) converter.set<dash_tag>();
+        converter.set<stroke_tag>(); //always stroke
 
-        ren_base renb(pixf);
-        renderer ren(renb);
-        ras_ptr->reset();
-        switch (stroke_.get_gamma_method())
+        BOOST_FOREACH( geometry_type & geom, feature.paths())
         {
-        case GAMMA_POWER:
-            ras_ptr->gamma(agg::gamma_power(stroke_.get_gamma()));
-            break;
-        case GAMMA_LINEAR:
-            ras_ptr->gamma(agg::gamma_linear(0.0, stroke_.get_gamma()));
-            break;
-        case GAMMA_NONE:
-            ras_ptr->gamma(agg::gamma_none());
-            break;
-        case GAMMA_THRESHOLD:
-            ras_ptr->gamma(agg::gamma_threshold(stroke_.get_gamma()));
-            break;
-        case GAMMA_MULTIPLY:
-            ras_ptr->gamma(agg::gamma_multiply(stroke_.get_gamma()));
-            break;
-        default:
-            ras_ptr->gamma(agg::gamma_power(stroke_.get_gamma()));
-        }
-
-        metawriter_with_properties writer = sym.get_metawriter();
-        for (unsigned i=0;i<feature->num_geometries();++i)
-        {
-            geometry_type const& geom = feature->get_geometry(i);
-            if (geom.num_points() > 1)
+            if (geom.size() > 1)
             {
-                path_type path(t_,geom,prj_trans);
-
-                if (stroke_.has_dash())
-                {
-                    agg::conv_dash<path_type> dash(path);
-                    dash_array const& d = stroke_.get_dash_array();
-                    dash_array::const_iterator itr = d.begin();
-                    dash_array::const_iterator end = d.end();
-                    for (;itr != end;++itr)
-                    {
-                        dash.add_dash(itr->first * scale_factor_,
-                                      itr->second * scale_factor_);
-                    }
-
-                    agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
-
-                    line_join_e join=stroke_.get_line_join();
-                    if ( join == MITER_JOIN)
-                        stroke.generator().line_join(agg::miter_join);
-                    else if( join == MITER_REVERT_JOIN)
-                        stroke.generator().line_join(agg::miter_join);
-                    else if( join == ROUND_JOIN)
-                        stroke.generator().line_join(agg::round_join);
-                    else
-                        stroke.generator().line_join(agg::bevel_join);
-
-                    line_cap_e cap=stroke_.get_line_cap();
-                    if (cap == BUTT_CAP)
-                        stroke.generator().line_cap(agg::butt_cap);
-                    else if (cap == SQUARE_CAP)
-                        stroke.generator().line_cap(agg::square_cap);
-                    else
-                        stroke.generator().line_cap(agg::round_cap);
-
-                    stroke.generator().miter_limit(4.0);
-                    stroke.generator().width(stroke_.get_width() * scale_factor_);
-                    ras_ptr->add_path(stroke);
-
-                }
-                else
-                {
-                    agg::conv_stroke<path_type>  stroke(path);
-                    line_join_e join=stroke_.get_line_join();
-                    if ( join == MITER_JOIN)
-                        stroke.generator().line_join(agg::miter_join);
-                    else if( join == MITER_REVERT_JOIN)
-                        stroke.generator().line_join(agg::miter_join);
-                    else if( join == ROUND_JOIN)
-                        stroke.generator().line_join(agg::round_join);
-                    else
-                        stroke.generator().line_join(agg::bevel_join);
-
-                    line_cap_e cap=stroke_.get_line_cap();
-                    if (cap == BUTT_CAP)
-                        stroke.generator().line_cap(agg::butt_cap);
-                    else if (cap == SQUARE_CAP)
-                        stroke.generator().line_cap(agg::square_cap);
-                    else
-                        stroke.generator().line_cap(agg::round_cap);
-
-                    stroke.generator().miter_limit(4.0);
-                    stroke.generator().width(stroke_.get_width() * scale_factor_);
-                    ras_ptr->add_path(stroke);
-                    if (writer.first) writer.first->add_line(path, *feature, t_, writer.second);
-                }
+                converter.apply(geom);
             }
         }
-        ren.color(agg::rgba8(r, g, b, int(a*stroke_.get_opacity())));
+
+        typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+        renderer_base renb(pixf);
+        renderer_type ren(renb);
+        ren.color(agg::rgba8_pre(r, g, b, int(a * stroke_.get_opacity())));
+        agg::scanline_u8 sl;
         agg::render_scanlines(*ras_ptr, sl, ren);
     }
 }
 
 
 template void agg_renderer<image_32>::process(line_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }
-

@@ -19,11 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: datasource_cache.cpp 23 2005-03-22 22:16:34Z pavlenko $
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource_cache.hpp>
-
 #include <mapnik/config_error.hpp>
 
 // boost
@@ -39,8 +38,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace mapnik
-{
+namespace mapnik {
 
 bool is_input_plugin (std::string const& filename)
 {
@@ -58,10 +56,6 @@ datasource_cache::~datasource_cache()
     lt_dlexit();
 }
 
-std::map<std::string,boost::shared_ptr<PluginInfo> > datasource_cache::plugins_;
-bool datasource_cache::registered_=false;
-std::vector<std::string> datasource_cache::plugin_directories_;
-
 datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 {
     boost::optional<std::string> type = params.get<std::string>("type");
@@ -74,6 +68,7 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
+
     datasource_ptr ds;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
     if ( itr == plugins_.end() )
@@ -81,11 +76,13 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
         throw config_error(std::string("Could not create datasource. No plugin ") +
                            "found for type '" + * type + "' (searched in: " + plugin_directories() + ")");
     }
+
     if ( ! itr->second->handle())
     {
         throw std::runtime_error(std::string("Cannot load library: ") +
                                  lt_dlerror());
     }
+
     // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
 #ifdef __GNUC__
     __extension__
@@ -93,28 +90,30 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
         create_ds* create_datasource =
         reinterpret_cast<create_ds*>(lt_dlsym(itr->second->handle(), "create"));
 
-    if ( ! create_datasource)
+    if (! create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") +
                                  lt_dlerror());
     }
-#ifdef MAPNIK_DEBUG
-    std::clog << "size = " << params.size() << "\n";
+
+#ifdef MAPNIK_LOG
+    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Size=" << params.size();
+
     parameters::const_iterator i = params.begin();
-    for (;i!=params.end();++i)
+    for (; i != params.end(); ++i)
     {
-        std::clog << i->first << "=" << i->second << "\n";
+        MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: -- " << i->first << "=" << i->second;
     }
 #endif
-    ds=datasource_ptr(create_datasource(params, bind), datasource_deleter());
 
-#ifdef MAPNIK_DEBUG
-    std::clog<<"datasource="<<ds<<" type="<<type<<std::endl;
-#endif
+    ds = datasource_ptr(create_datasource(params, bind), datasource_deleter());
+
+    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Datasource=" << ds << " type=" << type;
+
     return ds;
 }
 
-bool datasource_cache::insert(const std::string& type,const lt_dlhandle module)
+bool datasource_cache::insert(std::string const& type,const lt_dlhandle module)
 {
     return plugins_.insert(make_pair(type,boost::make_shared<PluginInfo>
                                      (type,module))).second;
@@ -125,7 +124,7 @@ std::string datasource_cache::plugin_directories()
     return boost::algorithm::join(plugin_directories_,", ");
 }
 
-std::vector<std::string> datasource_cache::plugin_names ()
+std::vector<std::string> datasource_cache::plugin_names()
 {
     std::vector<std::string> names;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::const_iterator itr;
@@ -136,11 +135,10 @@ std::vector<std::string> datasource_cache::plugin_names ()
     return names;
 }
 
-void datasource_cache::register_datasources(const std::string& str)
+void datasource_cache::register_datasources(std::string const& str)
 {
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mapnik::singleton<mapnik::datasource_cache,
-                            mapnik::CreateStatic>::mutex_);
+    mutex::scoped_lock lock(mutex_);
 #endif
     boost::filesystem::path path(str);
     // TODO - only push unique paths
@@ -158,48 +156,58 @@ void datasource_cache::register_datasources(const std::string& str)
                 if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
 #endif
                 {
-                    try
+#if (BOOST_FILESYSTEM_VERSION == 3)
+                    if (register_datasource(itr->path().string().c_str()))
+#else // v2
+                    if (register_datasource(itr->string().c_str()))
+#endif
                     {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                        lt_dlhandle module = lt_dlopen(itr->path().string().c_str());
-#else // v2
-                        lt_dlhandle module = lt_dlopen(itr->string().c_str());
-#endif
-                        if (module)
-                        {
-                            // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
-#ifdef __GNUC__
-                            __extension__
-#endif
-                                datasource_name* ds_name =
-                                reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
-                            if (ds_name && insert(ds_name(),module))
-                            {
-#ifdef MAPNIK_DEBUG
-                                std::clog << "Datasource loader: registered: " << ds_name() << std::endl;
-#endif
-                                registered_=true;
-                            }
-                            else if (!ds_name)
-                            {
-                                std::clog << "Problem loading plugin library '" << itr->path().string() << "' (plugin is lacking compatible interface)" << std::endl;
-                            }
-                        }
-                        else
-                        {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                            std::clog << "Problem loading plugin library: " << itr->path().string()
-                                      << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;
-#else // v2
-                            std::clog << "Problem loading plugin library: " << itr->string()
-                                      << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)" << std::endl;
-#endif
-                        }
+                        registered_ = true;
                     }
-                    catch (...) {}
                 }
         }
     }
+}
+
+bool datasource_cache::register_datasource(std::string const& str)
+{
+    bool success = false;
+    try
+    {
+        lt_dlhandle module = lt_dlopen(str.c_str());
+        if (module)
+        {
+            // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
+#ifdef __GNUC__
+            __extension__
+#endif
+                datasource_name* ds_name =
+                reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
+            if (ds_name && insert(ds_name(),module))
+            {
+                MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << ds_name();
+
+                success = true;
+            }
+            else if (!ds_name)
+            {
+                MAPNIK_LOG_ERROR(datasource_cache)
+                        << "Problem loading plugin library '"
+                        << str << "' (plugin is lacking compatible interface)";
+            }
+        }
+        else
+        {
+            MAPNIK_LOG_ERROR(datasource_cache)
+                    << "Problem loading plugin library: " << str
+                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
+        }
+    }
+    catch (...) {
+            MAPNIK_LOG_ERROR(datasource_cache)
+                    << "Exception caught while loading plugin library: " << str;
+    }
+    return success;
 }
 
 }

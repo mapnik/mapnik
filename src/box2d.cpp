@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: envelope.cpp 17 2005-03-08 23:58:43Z pavlenko $
 
+// mapnik
 #include <mapnik/box2d.hpp>
 
 // stl
@@ -28,8 +28,11 @@
 
 // boost
 #include <boost/tokenizer.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/spirit/include/qi.hpp>
+
+// agg
+#include "agg_trans_affine.h"
 
 namespace mapnik
 {
@@ -56,10 +59,26 @@ box2d<T>::box2d(const box2d &rhs)
       maxx_(rhs.maxx_),
       maxy_(rhs.maxy_) {}
 // copy rather than init so dfl ctor (0,0,-1,-1) is not modified
-// http://trac.mapnik.org/ticket/749
+// https://github.com/mapnik/mapnik/issues/749
 /*{
   init(rhs.minx_,rhs.miny_,rhs.maxx_,rhs.maxy_);
   }*/
+
+template <typename T>
+box2d<T>::box2d(const box2d_type &rhs, const agg::trans_affine& tr)
+{
+    double x0 = rhs.minx_, y0 = rhs.miny_;
+    double x1 = rhs.maxx_, y1 = rhs.miny_;
+    double x2 = rhs.maxx_, y2 = rhs.maxy_;
+    double x3 = rhs.minx_, y3 = rhs.maxy_;
+    tr.transform(&x0, &y0);
+    tr.transform(&x1, &y1);
+    tr.transform(&x2, &y2);
+    tr.transform(&x3, &y3);
+    init(x0, y0, x2, y2);
+    expand_to_include(x1, y1);
+    expand_to_include(x3, y3);
+}
 
 template <typename T>
 #if !defined(__SUNPRO_CC)
@@ -330,39 +349,39 @@ template <typename T>
 #if !defined(__SUNPRO_CC)
 inline
 #endif
-bool box2d<T>::from_string(const std::string& s)
+bool box2d<T>::from_string(std::string const& s)
 {
-    bool success = false;
-
-    boost::char_separator<char> sep(", ");
-    boost::tokenizer<boost::char_separator<char> > tok(s, sep);
-
     unsigned i = 0;
     double d[4];
+    bool success = false;
+    boost::char_separator<char> sep(", ");
+    boost::tokenizer<boost::char_separator<char> > tok(s, sep);
     for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
          beg != tok.end(); ++beg)
     {
-        try
-        {
-            d[i] = boost::lexical_cast<double>(boost::trim_copy(*beg));
-        }
-        catch (boost::bad_lexical_cast & ex)
+        std::string item(*beg);
+        boost::trim(item);
+        // note: we intentionally do not use mapnik::util::conversions::string2double
+        // here to ensure that shapeindex can statically compile mapnik::box2d without
+        // needing to link to libmapnik
+        std::string::const_iterator str_beg = item.begin();
+        std::string::const_iterator str_end = item.end();
+        bool r = boost::spirit::qi::phrase_parse(str_beg,str_end,boost::spirit::qi::double_,boost::spirit::ascii::space,d[i]);
+        if (!(r && (str_beg == str_end)))
         {
             break;
         }
-
         if (i == 3)
         {
             success = true;
             break;
         }
-
         ++i;
     }
 
     if (success)
     {
-        init(d[0], d[1], d[2], d[3]);
+        init(static_cast<T>(d[0]),static_cast<T>(d[1]),static_cast<T>(d[2]),static_cast<T>(d[3]));
     }
 
     return success;
@@ -435,6 +454,29 @@ T box2d<T>::operator[] (int index) const
     default:
         throw std::out_of_range("index out of range, max value is 3, min value is -4 ");
     }
+}
+
+template <typename T>
+box2d<T> box2d<T>::operator*(agg::trans_affine const& tr) const
+{
+    return box2d<T>(*this, tr);
+}
+
+template <typename T>
+box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
+{
+    double x0 = minx_, y0 = miny_;
+    double x1 = maxx_, y1 = miny_;
+    double x2 = maxx_, y2 = maxy_;
+    double x3 = minx_, y3 = maxy_;
+    tr.transform(&x0, &y0);
+    tr.transform(&x1, &y1);
+    tr.transform(&x2, &y2);
+    tr.transform(&x3, &y3);
+    init(x0, y0, x2, y2);
+    expand_to_include(x1, y1);
+    expand_to_include(x3, y3);
+    return *this;
 }
 
 template class box2d<int>;

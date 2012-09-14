@@ -20,11 +20,11 @@
  *
  *****************************************************************************/
 
-//$Id$
+// mapnik
 #include <mapnik/scale_denominator.hpp>
-
 #include <mapnik/map.hpp>
 
+// stl
 #include <cmath>
 
 namespace mapnik {

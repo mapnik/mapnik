@@ -1,18 +1,11 @@
 ######################################################################
 # Mapnik viewer - Copyright (C) 2007 Artem Pavlenko
 ######################################################################
-CC = g++
 TEMPLATE = app
-
-INCLUDEPATH += /usr/local/include/
-INCLUDEPATH += /usr/boost/include/
-INCLUDEPATH += /usr/X11/include/
-INCLUDEPATH += /usr/X11/include/freetype2
-INCLUDEPATH += .
-
-QMAKE_CXXFLAGS +=' -DDARWIN -Wno-missing-field-initializers -ansi'
-unix:LIBS =  -L/usr/local/lib -L/usr/X11/lib -lmapnik -lfreetype
-unix:LIBS += -lboost_system -licuuc -lboost_filesystem -lboost_regex
+QMAKE_CXX = clang++
+QMAKE_CXXFLAGS += $$system(mapnik-config --cflags)
+QMAKE_LFLAGS += $$system(mapnik-config --libs)
+QMAKE_LFLAGS += $$system(mapnik-config --ldflags --dep-libs)
 
 # Input
 

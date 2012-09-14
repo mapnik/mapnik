@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // boost
 #include <boost/python.hpp>
@@ -28,7 +27,7 @@
 //mapnik
 #include <mapnik/palette.hpp>
 
-static boost::shared_ptr<mapnik::rgba_palette> make_palette( const std::string& palette, const std::string& format )
+static boost::shared_ptr<mapnik::rgba_palette> make_palette( std::string const& palette, std::string const& format )
 {
     mapnik::rgba_palette::palette_type type = mapnik::rgba_palette::PALETTE_RGBA;
     if (format == "rgb")

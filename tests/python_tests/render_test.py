@@ -25,9 +25,9 @@ def test_simplest_render():
 
 def test_render_image_to_string():
     i = mapnik.Image(256, 256)
-    
+
     i.background = mapnik.Color('black')
-    
+
     s = i.tostring()
 
     eq_(s, 256 * 256 * '\x00\x00\x00\xff')
@@ -39,18 +39,18 @@ def test_setting_alpha():
     im1 = mapnik.Image(w,h)
     # white, half transparent
     im1.background = mapnik.Color('rgba(255,255,255,.5)')
-    
+
     # pure white
     im2 = mapnik.Image(w,h)
     im2.background = mapnik.Color('rgba(255,255,255,1)')
     im2.set_alpha(.5)
-        
+
     eq_(len(im1.tostring()), len(im2.tostring()))
 
 
 def test_render_image_to_file():
     i = mapnik.Image(256, 256)
-    
+
     i.background = mapnik.Color('black')
 
     if mapnik.has_jpeg():
@@ -61,7 +61,7 @@ def test_render_image_to_file():
         os.remove('test.jpg')
     else:
         return False
-    
+
     if os.path.exists('test.png'):
         os.remove('test.png')
     else:
@@ -87,7 +87,7 @@ def test_render_from_serialization():
     try:
         i,i2 = get_paired_images(100,100,'../data/good_maps/building_symbolizer.xml')
         eq_(i.tostring(),i2.tostring())
-    
+
         i,i2 = get_paired_images(100,100,'../data/good_maps/polygon_symbolizer.xml')
         eq_(i.tostring(),i2.tostring())
     except RuntimeError, e:
@@ -95,98 +95,6 @@ def test_render_from_serialization():
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(e)
 
-grid_correct = {"keys": ["", "North West", "North East", "South West", "South East"], "data": {"South East": {"Name": "South East"}, "North East": {"Name": "North East"}, "North West": {"Name": "North West"}, "South West": {"Name": "South West"}}, "grid": ["                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "         !!!                                 ###                ", "        !!!!!                               #####               ", "        !!!!!                               #####               ", "         !!!                                 ###                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "        $$$$                                %%%%                ", "        $$$$$                               %%%%%               ", "        $$$$$                               %%%%%               ", "         $$$                                 %%%                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                ", "                                                                "]}
-
-
-def resolve(grid,x,y):
-    """ Resolve the attributes for a given pixel in a grid.
-    
-    js version: 
-      https://github.com/mapbox/mbtiles-spec/blob/master/1.1/utfgrid.md
-    spec:
-      https://github.com/mapbox/wax/blob/master/control/lib/gridutil.js
-    
-    """
-    utf_val = grid['grid'][x][y]
-    #http://docs.python.org/library/functions.html#ord
-    codepoint = ord(utf_val)
-    if (codepoint >= 93):
-        codepoint-=1
-    if (codepoint >= 35):
-        codepoint-=1
-    codepoint -= 32
-    key = grid['keys'][codepoint]
-    return grid['data'].get(key)
-
-
-def test_render_grid():
-    ds = mapnik.MemoryDatasource()
-    context = mapnik.Context()
-    context.push('Name')
-    f = mapnik.Feature(context,1)
-    f['Name'] = 'South East'
-    f.add_geometries_from_wkt('POINT (143.10 -38.60)')
-    ds.add_feature(f)
-
-    f = mapnik.Feature(context,2)
-    f['Name'] = 'South West'
-    f.add_geometries_from_wkt('POINT (142.48 -38.60)')
-    ds.add_feature(f)
-
-    f = mapnik.Feature(context,3)
-    f['Name'] = 'North West'
-    f.add_geometries_from_wkt('POINT (142.48 -38.38)')
-    ds.add_feature(f)
-
-    f = mapnik.Feature(context,4)
-    f['Name'] = 'North East'
-    f.add_geometries_from_wkt('POINT (143.10 -38.38)')
-    ds.add_feature(f)
-
-    s = mapnik.Style()
-    r = mapnik.Rule()
-    symb = mapnik.MarkersSymbolizer()
-    symb.allow_overlap = True
-    r.symbols.append(symb)
-    s.rules.append(r)
-    lyr = mapnik.Layer('Places')
-    lyr.datasource = ds
-    lyr.styles.append('places_labels')
-    m = mapnik.Map(256,256)
-    m.append_style('places_labels',s)
-    m.layers.append(lyr)
-    ul_lonlat = mapnik.Coord(142.30,-38.20)
-    lr_lonlat = mapnik.Coord(143.40,-38.80)
-    m.zoom_to_box(mapnik.Box2d(ul_lonlat,lr_lonlat))
-    grid = mapnik.render_grid(m,0,key='Name',resolution=4,fields=['Name'])
-    eq_(grid,grid_correct)
-    eq_(resolve(grid,0,0),None)
-    
-    # check every pixel of the nw symbol
-    expected = {"Name": "North West"}
-    
-    # top row
-    eq_(resolve(grid,23,9),expected)
-    eq_(resolve(grid,23,10),expected)
-    eq_(resolve(grid,23,11),expected)
-
-    # core
-    eq_(resolve(grid,24,8),expected)
-    eq_(resolve(grid,24,9),expected)
-    eq_(resolve(grid,24,10),expected)
-    eq_(resolve(grid,24,11),expected)
-    eq_(resolve(grid,24,12),expected)
-    eq_(resolve(grid,25,8),expected)
-    eq_(resolve(grid,25,9),expected)
-    eq_(resolve(grid,25,10),expected)
-    eq_(resolve(grid,25,11),expected)
-    eq_(resolve(grid,25,12),expected)
-    
-    # bottom row
-    eq_(resolve(grid,26,9),expected)
-    eq_(resolve(grid,26,10),expected)
-    eq_(resolve(grid,26,11),expected)
-    
 def test_render_points():
 
     if not mapnik.has_cairo(): return

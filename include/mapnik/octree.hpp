@@ -209,9 +209,9 @@ public:
         if (r->children_count==0)
             return;
 
-        double mean_r = r->reds   / r->count_cum;
-        double mean_g = r->greens / r->count_cum;
-        double mean_b = r->blues  / r->count_cum;
+        double mean_r = static_cast<double>(r->reds / r->count_cum);
+        double mean_g = static_cast<double>(r->greens / r->count_cum);
+        double mean_b = static_cast<double>(r->blues / r->count_cum);
         for (unsigned idx=0; idx < 8; ++idx) if (r->children_[idx] != 0)
                                              {
                                                  double dr,dg,db;
@@ -256,7 +256,7 @@ public:
                             gch += nd->children_[idx]->children_count;
                     }
                     if (gch==0 && nd->reduce_cost < bestv){
-                        bestv = nd->reduce_cost;
+                        bestv = static_cast<unsigned>(nd->reduce_cost);
                         red_idx = i;
                     }
                 }

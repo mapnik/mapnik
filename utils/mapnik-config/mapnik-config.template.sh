@@ -22,10 +22,10 @@ Usage: mapnik-config [OPTION]
 
 Known values for OPTION are:
 
-  --prefix          display mapnik prefix [default $CONFIG_PREFIX]
-  --prefix=DIR      change mapnik prefix [default $CONFIG_PREFIX]
+  --prefix          display Mapnik prefix [default $CONFIG_PREFIX]
+  --prefix=DIR      change Mapnik prefix [default $CONFIG_PREFIX]
   --libs            print library linking information
-  --dep-libs        print library linking information for mapnik depedencies
+  --dep-libs        print library linking information for Mapnik dependencies
   --ldflags         print library paths (-L) information
   --cflags          print pre-processor and compiler flags
   --fonts           print default fonts directory
@@ -90,7 +90,7 @@ while test $# -gt 0; do
       ;;
 
     --cflags)
-      echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_OTHER_INCLUDES}
+      echo -I${CONFIG_MAPNIK_INCLUDE} -I${CONFIG_MAPNIK_AGG_INCLUDE} ${CONFIG_OTHER_INCLUDES}
       ;;
 
     --libs)

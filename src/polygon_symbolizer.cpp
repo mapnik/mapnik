@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
 // mapnik
 #include <mapnik/polygon_symbolizer.hpp>
 
@@ -32,14 +31,16 @@ polygon_symbolizer::polygon_symbolizer()
       fill_(color(128,128,128)),
       opacity_(1.0),
       gamma_(1.0),
-      gamma_method_(GAMMA_POWER) {}
+      gamma_method_(GAMMA_POWER)
+      {}
 
 polygon_symbolizer::polygon_symbolizer(color const& fill)
     : symbolizer_base(),
       fill_(fill),
       opacity_(1.0),
       gamma_(1.0),
-      gamma_method_(GAMMA_POWER) {}
+      gamma_method_(GAMMA_POWER)
+      {}
 
 color const& polygon_symbolizer::get_fill() const
 {

@@ -26,22 +26,23 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/wkt/wkt_grammar.hpp>
+// boost
+#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/version.hpp>
+
 // stl
 #include <string>
 
 namespace mapnik {
 
-namespace wkt {
-template <typename Iterator> struct wkt_collection_grammar;
-}
-
 MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
 
 #if BOOST_VERSION >= 104700
 
-class wkt_parser
+class wkt_parser : boost::noncopyable
 {
     typedef std::string::const_iterator iterator_type;
 public:

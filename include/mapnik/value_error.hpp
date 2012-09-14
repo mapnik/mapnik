@@ -31,12 +31,14 @@ namespace mapnik {
 class value_error : public std::exception
 {
 public:
-    value_error() {}
+    value_error() :
+        what_() {}
 
-    value_error( const std::string & what ) :
+    value_error( std::string const& what ) :
         what_( what )
     {
     }
+
     virtual ~value_error() throw() {};
 
     virtual const char * what() const throw()
@@ -44,7 +46,7 @@ public:
         return what_.c_str();
     }
 
-    void append_context(const std::string & ctx) const
+    void append_context(std::string const& ctx) const
     {
         what_ += " " + ctx;
     }

@@ -19,13 +19,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// $Id$
 
 #include <mapnik/map.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/rule.hpp>
+#include <mapnik/feature_type_style.hpp>
+#include <mapnik/graphics.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/config_error.hpp>
@@ -53,12 +56,12 @@ int main ( int argc , char** argv)
         std::cout << " running demo ... \n";
         std::string mapnik_dir(argv[1]);
         std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "/input/" << "\n";
-        datasource_cache::instance()->register_datasources(mapnik_dir + "/input/");
+        datasource_cache::instance().register_datasources(mapnik_dir + "/input/");
         std::cout << " looking for DejaVuSans font in... " << mapnik_dir << "/fonts/DejaVuSans.ttf" << "\n";
         freetype_engine::register_font(mapnik_dir + "/fonts/DejaVuSans.ttf");
 
         Map m(800,600);
-        m.set_background(color_factory::from_string("white"));
+        m.set_background(parse_color("white"));
 
         // create styles
 
@@ -71,7 +74,7 @@ int main ( int argc , char** argv)
         provpoly_style.add_rule(provpoly_rule_on);
 
         rule provpoly_rule_qc;
-        provpoly_rule_qc.set_filter(parse_expression("[NOM_FR] = 'Québec'"));
+        provpoly_rule_qc.set_filter(parse_expression("[NOM_FR] = 'QuÃ©bec'"));
         provpoly_rule_qc.append(polygon_symbolizer(color(217, 235, 203)));
         provpoly_style.add_rule(provpoly_rule_qc);
 
@@ -176,9 +179,10 @@ int main ( int argc , char** argv)
             parameters p;
             p["type"]="shape";
             p["file"]="../data/boundaries";
+            p["encoding"]="latin1";
 
             layer lyr("Provinces");
-            lyr.set_datasource(datasource_cache::instance()->create(p));
+            lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("provinces");
             m.addLayer(lyr);
         }
@@ -189,7 +193,7 @@ int main ( int argc , char** argv)
             p["type"]="shape";
             p["file"]="../data/qcdrainage";
             layer lyr("Quebec Hydrography");
-            lyr.set_datasource(datasource_cache::instance()->create(p));
+            lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("drainage");
             m.addLayer(lyr);
         }
@@ -200,7 +204,7 @@ int main ( int argc , char** argv)
             p["file"]="../data/ontdrainage";
 
             layer lyr("Ontario Hydrography");
-            lyr.set_datasource(datasource_cache::instance()->create(p));
+            lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("drainage");
             m.addLayer(lyr);
         }
@@ -211,7 +215,7 @@ int main ( int argc , char** argv)
             p["type"]="shape";
             p["file"]="../data/boundaries_l";
             layer lyr("Provincial borders");
-            lyr.set_datasource(datasource_cache::instance()->create(p));
+            lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("provlines");
             m.addLayer(lyr);
         }
@@ -222,7 +226,7 @@ int main ( int argc , char** argv)
             p["type"]="shape";
             p["file"]="../data/roads";
             layer lyr("Roads");
-            lyr.set_datasource(datasource_cache::instance()->create(p));
+            lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("smallroads");
             lyr.add_style("road-border");
             lyr.add_style("road-fill");
@@ -238,7 +242,7 @@ int main ( int argc , char** argv)
             p["file"]="../data/popplaces";
             p["encoding"] = "latin1";
             layer lyr("Populated Places");
-            lyr.set_datasource(datasource_cache::instance()->create(p));
+            lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("popplaces");
             m.addLayer(lyr);
         }
@@ -250,10 +254,10 @@ int main ( int argc , char** argv)
         agg_renderer<image_32> ren(m,buf);
         ren.apply();
 
-        save_to_file<image_data_32>(buf.data(),"demo.jpg","jpeg");
-        save_to_file<image_data_32>(buf.data(),"demo.png","png");
-        save_to_file<image_data_32>(buf.data(),"demo256.png","png256");
-        save_to_file<image_data_32>(buf.data(),"demo.tif","tiff");
+        save_to_file(buf,"demo.jpg","jpeg");
+        save_to_file(buf,"demo.png","png");
+        save_to_file(buf,"demo256.png","png256");
+        save_to_file(buf,"demo.tif","tiff");
 
         std::cout << "Three maps have been rendered using AGG in the current directory:\n"
             "- demo.jpg\n"

@@ -21,14 +21,17 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/text_placements.hpp>
+#include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/text_path.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
 #include <sstream>
 
 // icu
@@ -69,11 +72,10 @@ bool freetype_engine::is_font_file(std::string const& file_name)
 
 bool freetype_engine::register_font(std::string const& file_name)
 {
-    if (!boost::filesystem::is_regular_file(file_name) || !is_font_file(file_name)) return false;
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
-    FT_Library library;
+    FT_Library library = 0;
     FT_Error error = FT_Init_FreeType(&library);
     if (error)
     {
@@ -81,69 +83,100 @@ bool freetype_engine::register_font(std::string const& file_name)
     }
 
     FT_Face face = 0;
+    int num_faces = 0;
+    bool success = false;
     // some font files have multiple fonts in a file
     // the count is in the 'root' face library[0]
     // see the FT_FaceRec in freetype.h
-    for ( int i = 0; face == 0 || i < face->num_faces; i++ ) {
+    for ( int i = 0; face == 0 || i < num_faces; i++ ) {
         // if face is null then this is the first face
         error = FT_New_Face (library,file_name.c_str(),i,&face);
         if (error)
         {
-            FT_Done_FreeType(library);
-            return false;
+            break;
         }
+        // store num_faces locally, after FT_Done_Face it can not be accessed any more
+        if (!num_faces)
+            num_faces = face->num_faces;
         // some fonts can lack names, skip them
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
-        if (face->family_name && face->style_name) {
+        if (face->family_name && face->style_name)
+        {
             std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-            name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
-            FT_Done_Face(face);
-            //FT_Done_FreeType(library);
-            //return true;
-        } else {
-            FT_Done_Face(face);
-            FT_Done_FreeType(library);
+            // skip fonts with leading . in name
+            if (!boost::algorithm::starts_with(name,"."))
+            {
+                success = true;
+                name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
+            }
+        }
+        else
+        {
             std::ostringstream s;
-            s << "Error: unable to load invalid font file which lacks identifiable family and style name: '"
-              << file_name << "'";
-            throw std::runtime_error(s.str());
+            s << "Warning: unable to load font file '" << file_name << "' ";
+            if (!face->family_name && !face->style_name)
+                s << "which lacks both a family name and style name";
+            else if (face->family_name)
+                s << "which reports a family name of '" << std::string(face->family_name) << "' and lacks a style name";
+            else if (face->style_name)
+                s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
+
+            MAPNIK_LOG_DEBUG(font_engine_freetype) << "freetype_engine: " << s.str();
         }
     }
-    FT_Done_FreeType(library);
-    return true;
+    if (face)
+        FT_Done_Face(face);
+    if (library)
+        FT_Done_FreeType(library);
+    return success;
 }
 
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
     boost::filesystem::path path(dir);
-
     if (!boost::filesystem::exists(path))
+    {
         return false;
-
+    }
     if (!boost::filesystem::is_directory(path))
+    {
         return mapnik::freetype_engine::register_font(dir);
-
+    }
     boost::filesystem::directory_iterator end_itr;
+    bool success = false;
     for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
     {
+#if (BOOST_FILESYSTEM_VERSION == 3)
+        std::string file_name = itr->path().string();
+#else // v2
+        std::string file_name = itr->string();
+#endif
         if (boost::filesystem::is_directory(*itr) && recurse)
         {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            if (!register_fonts(itr->path().string(), true)) return false;
-#else // v2
-            if (!register_fonts(itr->string(), true)) return false;
-#endif
+            if (register_fonts(file_name, true))
+            {
+                success = true;
+            }
         }
         else
         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
-            mapnik::freetype_engine::register_font(itr->path().string());
+            std::string base_name = itr->path().filename().string();
 #else // v2
-            mapnik::freetype_engine::register_font(itr->string());
+            std::string base_name = itr->filename();
 #endif
+            if (!boost::algorithm::starts_with(base_name,".") &&
+                     boost::filesystem::is_regular_file(file_name) &&
+                     is_font_file(file_name))
+            {
+                if (mapnik::freetype_engine::register_font(file_name))
+                {
+                    success = true;
+                }
+            }
         }
     }
-    return true;
+    return success;
 }
 
 
@@ -177,7 +210,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                                       &face);
         if (!error)
         {
-            return face_ptr (new font_face(face));
+            return boost::make_shared<font_face>(face);
         }
     }
     return face_ptr();
@@ -189,7 +222,7 @@ stroker_ptr freetype_engine::create_stroker()
     FT_Error error = FT_Stroker_New(library_, &s);
     if (!error)
     {
-        return stroker_ptr(new stroker(s));
+        return boost::make_shared<stroker>(s);
     }
     return stroker_ptr();
 }
@@ -289,16 +322,19 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 }
 
 template <typename T>
-text_renderer<T>::text_renderer (pixmap_type & pixmap, face_manager<freetype_engine> &font_manager_, stroker & s)
+text_renderer<T>::text_renderer (pixmap_type & pixmap,
+                                 face_manager<freetype_engine> &font_manager_,
+                                 stroker & s,
+                                 composite_mode_e comp_op,
+                                 double scale_factor)
     : pixmap_(pixmap),
       font_manager_(font_manager_),
-      stroker_(s)
-{
-
-}
+      stroker_(s),
+      comp_op_(comp_op),
+      scale_factor_(scale_factor) {}
 
 template <typename T>
-box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
+box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
 {
     //clear glyphs
     glyphs_.clear();
@@ -311,19 +347,16 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
     bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
     bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
 
-    for (int i = 0; i < path->num_nodes(); i++)
+    for (int i = 0; i < path.num_nodes(); i++)
     {
-        int c;
+        char_info_ptr c;
         double x, y, angle;
-        char_properties *properties;
 
-        path->vertex(&c, &x, &y, &angle, &properties);
+        path.vertex(&c, &x, &y, &angle);
 
-#ifdef MAPNIK_DEBUG
         // TODO Enable when we have support for setting verbosity
-        //std::clog << "prepare_glyphs: " << c << "," << x <<
-        //    "," << y << "," << angle << std::endl;
-#endif
+        // MAPNIK_LOG_DEBUG(font_engine_freetype) << "text_renderer: prepare_glyphs="
+        //                                        << c << "," << x << "," << y << "," << angle;
 
         FT_BBox glyph_bbox;
         FT_Glyph image;
@@ -331,10 +364,10 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
         pen.x = int(x * 64);
         pen.y = int(y * 64);
 
-        face_set_ptr faces = font_manager_.get_face_set(properties->face_name, properties->fontset);
-        faces->set_character_sizes(properties->text_size);
+        face_set_ptr faces = font_manager_.get_face_set(c->format->face_name, c->format->fontset);
+        faces->set_character_sizes(c->format->text_size*scale_factor_);
 
-        glyph_ptr glyph = faces->get_glyph(unsigned(c));
+        glyph_ptr glyph = faces->get_glyph(unsigned(c->c));
         FT_Face face = glyph->get_face()->get_face();
 
         matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
@@ -372,32 +405,52 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path *path)
         }
 
         // take ownership of the glyph
-        glyphs_.push_back(new glyph_t(image, properties));
+        glyphs_.push_back(new glyph_t(image, c->format));
     }
 
     return box2d<double>(bbox.xMin, bbox.yMin, bbox.xMax, bbox.yMax);
 }
 
 template <typename T>
-void text_renderer<T>::render(double x0, double y0)
+void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity, composite_mode_e comp_op)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            unsigned gray=bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                pixmap.composite_pixel(comp_op, i, j, rgba, gray, opacity);
+            }
+        }
+    }
+}
+
+template <typename T>
+void text_renderer<T>::render(pixel_position pos)
 {
     FT_Error  error;
     FT_Vector start;
     unsigned height = pixmap_.height();
 
-    start.x =  static_cast<FT_Pos>(x0 * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - y0) * (1 << 6));
+    start.x =  static_cast<FT_Pos>(pos.x * (1 << 6));
+    start.y =  static_cast<FT_Pos>((height - pos.y) * (1 << 6));
 
     // now render transformed glyphs
-    typename glyphs_t::iterator pos;
-    for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+    typename glyphs_t::iterator itr;
+    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-        double halo_radius = pos->properties->halo_radius;
+        double halo_radius = itr->properties->halo_radius * scale_factor_;
         //make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
         stroker_.init(halo_radius);
         FT_Glyph g;
-        error = FT_Glyph_Copy(pos->image, &g);
+        error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
             FT_Glyph_Transform(g,0,&start);
@@ -407,49 +460,59 @@ void text_renderer<T>::render(double x0, double y0)
             {
 
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                render_bitmap(&bit->bitmap, pos->properties->halo_fill.rgba(),
-                              bit->left,
-                              height - bit->top, pos->properties->text_opacity);
+                composite_bitmap(pixmap_, &bit->bitmap, itr->properties->halo_fill.rgba(),
+                                 bit->left,
+                                 height - bit->top, 
+                                 itr->properties->text_opacity,
+                                 comp_op_
+                    );
             }
         }
         FT_Done_Glyph(g);
     }
     //render actual text
-    for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
 
-        FT_Glyph_Transform(pos->image,0,&start);
+        FT_Glyph_Transform(itr->image,0,&start);
 
-        error = FT_Glyph_To_Bitmap( &(pos->image),FT_RENDER_MODE_NORMAL,0,1);
+        error = FT_Glyph_To_Bitmap( &(itr->image),FT_RENDER_MODE_NORMAL,0,1);
         if ( ! error )
         {
 
-            FT_BitmapGlyph bit = (FT_BitmapGlyph)pos->image;
-            render_bitmap(&bit->bitmap, pos->properties->fill.rgba(),
-                          bit->left,
-                          height - bit->top, pos->properties->text_opacity);
+            FT_BitmapGlyph bit = (FT_BitmapGlyph)itr->image;
+            //render_bitmap(&bit->bitmap, itr->properties->fill.rgba(),
+            //              bit->left,
+            //              height - bit->top, itr->properties->text_opacity);
+            
+            composite_bitmap(pixmap_, &bit->bitmap, itr->properties->fill.rgba(),
+                             bit->left,
+                             height - bit->top, 
+                             itr->properties->text_opacity,
+                             comp_op_
+                );
         }
     }
 }
 
 
 template <typename T>
-void text_renderer<T>::render_id(int feature_id,double x0, double y0, double min_radius)
+void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_radius)
 {
     FT_Error  error;
     FT_Vector start;
     unsigned height = pixmap_.height();
 
-    start.x =  static_cast<FT_Pos>(x0 * (1 << 6));
-    start.y =  static_cast<FT_Pos>((height - y0) * (1 << 6));
+    start.x =  static_cast<FT_Pos>(pos.x * (1 << 6));
+    start.y =  static_cast<FT_Pos>((height - pos.y) * (1 << 6));
 
     // now render transformed glyphs
-    typename glyphs_t::iterator pos;
-    for ( pos = glyphs_.begin(); pos != glyphs_.end();++pos)
+    typename glyphs_t::iterator itr;
+    for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-        stroker_.init(std::max(pos->properties->halo_radius, min_radius));
+        stroker_.init(std::max(itr->properties->halo_radius, min_radius));
         FT_Glyph g;
-        error = FT_Glyph_Copy(pos->image, &g);
+        error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
             FT_Glyph_Transform(g,0,&start);
@@ -473,11 +536,11 @@ void text_renderer<T>::render_id(int feature_id,double x0, double y0, double min
 boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-template void text_renderer<image_32>::render(double, double);
-template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&);
-template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path*);
+template void text_renderer<image_32>::render(pixel_position);
+template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
+template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path const&);
 
-template void text_renderer<grid>::render_id(int, double, double, double);
-template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&);
-template box2d<double>text_renderer<grid>::prepare_glyphs(text_path*);
+template void text_renderer<grid>::render_id(int, pixel_position, double );
+template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
+template box2d<double>text_renderer<grid>::prepare_glyphs(text_path const& );
 }

@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/grid/grid_rasterizer.hpp>
@@ -27,7 +26,9 @@
 #include <mapnik/grid/grid_pixfmt.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
 #include <mapnik/grid/grid.hpp>
+
 #include <mapnik/line_symbolizer.hpp>
+#include <mapnik/vertex_converters.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"
@@ -36,6 +37,9 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
 
+// boost
+#include <boost/foreach.hpp>
+
 // stl
 #include <string>
 
@@ -43,99 +47,66 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(line_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
-    typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+    typedef agg::renderer_base<mapnik::pixfmt_gray32> renderer_base;
+    typedef agg::renderer_scanline_bin_solid<renderer_base> renderer_type;
+    typedef boost::mpl::vector<clip_line_tag, transform_tag,
+                               offset_transform_tag, affine_transform_tag,
+                               smooth_tag, dash_tag, stroke_tag> conv_types;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    mapnik::pixfmt_gray16 pixf(buf);
+    mapnik::pixfmt_gray32 pixf(buf);
 
-    ren_base renb(pixf);
-    renderer ren(renb);
+    renderer_base renb(pixf);
+    renderer_type ren(renb);
 
     ras_ptr->reset();
 
-    stroke const&  stroke_ = sym.get_stroke();
+    stroke const& stroke_ = sym.get_stroke();
 
-    for (unsigned i=0;i<feature->num_geometries();++i)
+    agg::trans_affine tr;
+    evaluate_transform(tr, feature, sym.get_transform());
+
+    box2d<double> clipping_extent = query_extent_;
+    if (sym.clip())
     {
-        geometry_type const& geom = feature->get_geometry(i);
-        if (geom.num_points() > 1)
+        double padding = (double)(query_extent_.width()/pixmap_.width());
+        float half_stroke = stroke_.get_width()/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
+        double x0 = query_extent_.minx();
+        double y0 = query_extent_.miny();
+        double x1 = query_extent_.maxx();
+        double y1 = query_extent_.maxy();
+        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+    }
+
+    vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+        converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+    converter.set<transform_tag>(); // always transform
+    if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    converter.set<affine_transform_tag>(); // optional affine transform
+    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+    if (stroke_.has_dash()) converter.set<dash_tag>();
+    converter.set<stroke_tag>(); //always stroke
+
+    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    {
+        if (geom.size() > 1)
         {
-            path_type path(t_,geom,prj_trans);
-
-            if (stroke_.has_dash())
-            {
-                agg::conv_dash<path_type> dash(path);
-                dash_array const& d = stroke_.get_dash_array();
-                dash_array::const_iterator itr = d.begin();
-                dash_array::const_iterator end = d.end();
-                for (;itr != end;++itr)
-                {
-                    dash.add_dash(itr->first * scale_factor_,
-                                  itr->second * scale_factor_);
-                }
-
-                agg::conv_stroke<agg::conv_dash<path_type > > stroke(dash);
-
-                line_join_e join=stroke_.get_line_join();
-                if ( join == MITER_JOIN)
-                    stroke.generator().line_join(agg::miter_join);
-                else if( join == MITER_REVERT_JOIN)
-                    stroke.generator().line_join(agg::miter_join);
-                else if( join == ROUND_JOIN)
-                    stroke.generator().line_join(agg::round_join);
-                else
-                    stroke.generator().line_join(agg::bevel_join);
-
-                line_cap_e cap=stroke_.get_line_cap();
-                if (cap == BUTT_CAP)
-                    stroke.generator().line_cap(agg::butt_cap);
-                else if (cap == SQUARE_CAP)
-                    stroke.generator().line_cap(agg::square_cap);
-                else
-                    stroke.generator().line_cap(agg::round_cap);
-
-                stroke.generator().miter_limit(4.0);
-                stroke.generator().width(stroke_.get_width() * scale_factor_);
-
-                ras_ptr->add_path(stroke);
-
-            }
-            else
-            {
-                agg::conv_stroke<path_type>  stroke(path);
-                line_join_e join=stroke_.get_line_join();
-                if ( join == MITER_JOIN)
-                    stroke.generator().line_join(agg::miter_join);
-                else if( join == MITER_REVERT_JOIN)
-                    stroke.generator().line_join(agg::miter_join);
-                else if( join == ROUND_JOIN)
-                    stroke.generator().line_join(agg::round_join);
-                else
-                    stroke.generator().line_join(agg::bevel_join);
-
-                line_cap_e cap=stroke_.get_line_cap();
-                if (cap == BUTT_CAP)
-                    stroke.generator().line_cap(agg::butt_cap);
-                else if (cap == SQUARE_CAP)
-                    stroke.generator().line_cap(agg::square_cap);
-                else
-                    stroke.generator().line_cap(agg::round_cap);
-
-                stroke.generator().miter_limit(4.0);
-                stroke.generator().width(stroke_.get_width() * scale_factor_);
-                ras_ptr->add_path(stroke);
-            }
+            converter.apply(geom);
         }
     }
 
     // render id
-    ren.color(mapnik::gray16(feature->id()));
+    ren.color(mapnik::gray32(feature.id()));
     agg::render_scanlines(*ras_ptr, sl, ren);
 
     // add feature properties to grid cache
@@ -145,7 +116,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
 
 template void grid_renderer<grid>::process(line_symbolizer const&,
-                                           mapnik::feature_ptr const&,
+                                           mapnik::feature_impl &,
                                            proj_transform const&);
 
 }

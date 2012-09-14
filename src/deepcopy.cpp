@@ -20,15 +20,14 @@
  *
  *****************************************************************************/
 
-//$Id$
-
+// mapnik
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/params.hpp>
-#include <mapnik/filter_factory.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/util/deepcopy.hpp>
 
@@ -50,7 +49,6 @@ namespace mapnik { namespace util {
 //  *   background_(rhs.background_),
 //  *   background_image_(rhs.background_image_),
 //  *   styles_(rhs.styles_),
-//      metawriters_(rhs.metawriters_),
 //      fontsets_(rhs.fontsets_),
 //  *   layers_(rhs.layers_),
 //      aspectFixMode_(rhs.aspectFixMode_),
@@ -103,7 +101,7 @@ namespace mapnik { namespace util {
                 parameters p(ds_in->params());
 
                 // TODO : re-use datasource extent if already set.
-                datasource_ptr ds_out = datasource_cache::create(p);
+                datasource_ptr ds_out = datasource_cache::instance().create(p);
                 if (ds_out)
                 {
                     lyr_out.set_datasource(ds_out);

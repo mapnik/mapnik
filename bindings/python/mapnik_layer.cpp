@@ -19,8 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: mapnik_layer.cc 17 2005-03-08 23:58:43Z pavlenko $
-
 
 // boost
 #include <boost/python.hpp>
@@ -54,7 +52,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
         {
             s.append(style_names[i]);
         }
-        return boost::python::make_tuple(l.clear_label_cache(),l.getMinZoom(),l.getMaxZoom(),l.isQueryable(),l.datasource()->params(),l.cache_features(),s);
+        return boost::python::make_tuple(l.clear_label_cache(),l.min_zoom(),l.max_zoom(),l.queryable(),l.datasource()->params(),l.cache_features(),s);
     }
 
     static void
@@ -72,14 +70,14 @@ struct layer_pickle_suite : boost::python::pickle_suite
 
         l.set_clear_label_cache(extract<bool>(state[0]));
 
-        l.setMinZoom(extract<double>(state[1]));
+        l.set_min_zoom(extract<double>(state[1]));
 
-        l.setMaxZoom(extract<double>(state[2]));
+        l.set_max_zoom(extract<double>(state[2]));
 
-        l.setQueryable(extract<bool>(state[3]));
+        l.set_queryable(extract<bool>(state[3]));
 
         mapnik::parameters params = extract<parameters>(state[4]);
-        l.set_datasource(datasource_cache::instance()->create(params));
+        l.set_datasource(datasource_cache::instance().create(params));
 
         boost::python::list s = extract<boost::python::list>(state[5]);
         for (int i=0;i<len(s);++i)
@@ -92,6 +90,18 @@ struct layer_pickle_suite : boost::python::pickle_suite
 };
 
 std::vector<std::string> & (mapnik::layer::*_styles_)() = &mapnik::layer::styles;
+
+void set_maximum_extent(mapnik::layer & l, boost::optional<mapnik::box2d<double> > const& box)
+{
+    if (box)
+    {
+        l.set_maximum_extent(*box);
+    }
+    else
+    {
+        l.reset_maximum_extent();
+    }
+}
 
 void export_layer()
 {
@@ -128,7 +138,7 @@ void export_layer()
              "box2d(-1.0,-1.0,0.0,0.0) # default until a datasource is loaded\n"
             )
 
-        .def("visible", &layer::isVisible,
+        .def("visible", &layer::visible,
              "Return True if this layer's data is active and visible at a given scale.\n"
              "\n"
              "Otherwise returns False.\n"
@@ -149,9 +159,9 @@ void export_layer()
             )
 
         .add_property("active",
-                      &layer::isActive,
-                      &layer::setActive,
-                      "Get/Set whether this layer is active and will be rendered.\n"
+                      &layer::active,
+                      &layer::set_active,
+                      "Get/Set whether this layer is active and will be rendered (same as status property).\n"
                       "\n"
                       "Usage:\n"
                       ">>> from mapnik import Layer\n"
@@ -160,6 +170,21 @@ void export_layer()
                       "True # Active by default\n"
                       ">>> lyr.active = False # set False to disable layer rendering\n"
                       ">>> lyr.active\n"
+                      "False\n"
+            )
+
+        .add_property("status",
+                      &layer::active,
+                      &layer::set_active,
+                      "Get/Set whether this layer is active and will be rendered.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> from mapnik import Layer\n"
+                      ">>> lyr = Layer('My Layer','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')\n"
+                      ">>> lyr.status\n"
+                      "True # Active by default\n"
+                      ">>> lyr.status = False # set False to disable layer rendering\n"
+                      ">>> lyr.status\n"
                       "False\n"
             )
 
@@ -198,9 +223,30 @@ void export_layer()
                       "<mapnik.Datasource object at 0x65470>\n"
             )
 
+        .add_property("buffer_size",
+                      &layer::buffer_size,
+                      &layer::set_buffer_size,
+                      "Get/Set the size of buffer around layer in pixels.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> l.buffer_size\n"
+                      "0 # zero by default\n"
+                      ">>> l.buffer_size = 2\n"
+                      ">>> l.buffer_size\n"
+                      "2\n"
+            )
+        .add_property("maximum_extent",make_function
+                      (&layer::maximum_extent,return_value_policy<copy_const_reference>()),
+                      &set_maximum_extent,
+                      "The maximum extent of the map.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.maximum_extent = Box2d(-180,-90,180,90)\n"
+            )
+
         .add_property("maxzoom",
-                      &layer::getMaxZoom,
-                      &layer::setMaxZoom,
+                      &layer::max_zoom,
+                      &layer::set_max_zoom,
                       "Get/Set the maximum zoom lever of the layer.\n"
                       "\n"
                       "Usage:\n"
@@ -214,8 +260,8 @@ void export_layer()
             )
 
         .add_property("minzoom",
-                      &layer::getMinZoom,
-                      &layer::setMinZoom,
+                      &layer::min_zoom,
+                      &layer::set_min_zoom,
                       "Get/Set the minimum zoom lever of the layer.\n"
                       "\n"
                       "Usage:\n"
@@ -244,8 +290,8 @@ void export_layer()
             )
 
         .add_property("queryable",
-                      &layer::isQueryable,
-                      &layer::setQueryable,
+                      &layer::queryable,
+                      &layer::set_queryable,
                       "Get/Set whether this layer is queryable.\n"
                       "\n"
                       "Usage:\n"
@@ -271,6 +317,14 @@ void export_layer()
                       ">>> # set to google mercator with Proj.4 literal\n"
                       "... \n"
                       ">>> lyr.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'\n"
+            )
+
+        .add_property("group_by",
+                      make_function(&layer::group_by,return_value_policy<copy_const_reference>()),
+                      &layer::set_group_by,
+                      "Get/Set the optional layer group name.\n"
+                      "\n"
+                      "More details at https://github.com/mapnik/mapnik/wiki/Grouped-rendering:\n"
             )
 
         .add_property("styles",

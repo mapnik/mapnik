@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
@@ -37,7 +38,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
@@ -47,33 +47,42 @@ using mapnik::feature_factory;
 sqlite_featureset::sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
                                      mapnik::context_ptr const& ctx,
                                      std::string const& encoding,
+                                     mapnik::box2d<double> const& bbox,
                                      mapnik::wkbFormat format,
+                                     bool spatial_index,
                                      bool using_subquery)
     : rs_(rs),
+      ctx_(ctx),
       tr_(new transcoder(encoding)),
+      bbox_(bbox),
       format_(format),
-      using_subquery_(using_subquery),
-      ctx_(ctx)
-{
-}
+      spatial_index_(spatial_index),
+      using_subquery_(using_subquery)
+{}
 
-sqlite_featureset::~sqlite_featureset()
-{
-}
+sqlite_featureset::~sqlite_featureset() {}
 
 feature_ptr sqlite_featureset::next()
 {
-    if (rs_->is_valid () && rs_->step_next ())
+    while (rs_->is_valid () && rs_->step_next ())
     {
         int size;
         const char* data = (const char*) rs_->column_blob(0, size);
-        if (! data)
+        if (data == 0)
         {
             return feature_ptr();
         }
 
-        feature_ptr feature(feature_factory::create(ctx_,rs_->column_integer(1)));
-        geometry_utils::from_wkb(feature->paths(), data, size, format_);
+        feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer(1));
+        if (!geometry_utils::from_wkb(feature->paths(), data, size, format_))
+            continue;
+
+        if (!spatial_index_)
+        {
+            // we are not using r-tree index, check if feature intersects bounding box
+            if (!bbox_.intersects(feature->envelope()))
+                continue;
+        }
 
         for (int i = 2; i < rs_->column_count(); ++i)
         {
@@ -107,9 +116,9 @@ feature_ptr sqlite_featureset::next()
 
             case SQLITE_TEXT:
             {
-                int text_size;
-                const char * data = rs_->column_text(i, text_size);
-                UnicodeString ustr = tr_->transcode(data, text_size);
+                int text_col_size;
+                const char * data = rs_->column_text(i, text_col_size);
+                UnicodeString ustr = tr_->transcode(data, text_col_size);
                 feature->put(fld_name_str, ustr);
                 break;
             }
@@ -124,10 +133,7 @@ feature_ptr sqlite_featureset::next()
                 break;
 
             default:
-#ifdef MAPNIK_DEBUG
-                std::clog << "Sqlite Plugin: field " << fld_name_str
-                          << " unhandled type_oid=" << type_oid << std::endl;
-#endif
+                MAPNIK_LOG_WARN(sqlite) << "sqlite_featureset: Field=" << fld_name_str << " unhandled type_oid=" << type_oid;
                 break;
             }
         }

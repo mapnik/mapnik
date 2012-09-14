@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id$
+# 
 
 import os, re, sys, glob
 from subprocess import Popen, PIPE
@@ -43,15 +43,7 @@ prefix = env['PREFIX']
 target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik')
 target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
-libraries = ['mapnik']
-
-if env['BOOST_PYTHON_LIB']:
-    libraries.append(env['BOOST_PYTHON_LIB'])
-else:
-    if is_py3():
-        libraries.append('boost_python3%s' % env['BOOST_APPEND'])
-    else:
-        libraries.append('boost_python%s' % env['BOOST_APPEND'])
+libraries = ['mapnik',env['BOOST_PYTHON_LIB']]
 
 # TODO - do solaris/fedora need direct linking too?
 if env['PLATFORM'] == 'Darwin':
@@ -73,7 +65,7 @@ if env['PLATFORM'] == 'Darwin':
     # 3) the below will directly link _mapnik.so to a python version
     # 4) _mapnik.so must link to the same python lib as boost_python.dylib otherwise
     # python will Abort with a Version Mismatch error.
-    # See http://trac.mapnik.org/ticket/453 for the seeds of a better approach
+    # See https://github.com/mapnik/mapnik/issues/453 for the seeds of a better approach
     # for now we offer control over method of direct linking...
     # The default below is to link against the python dylib in the form of
     #/path/to/Python.framework/Python instead of -lpython
@@ -94,7 +86,7 @@ if env['PLATFORM'] == 'Darwin':
             # /System/Library/Frameworks/Python.framework/Python/Versions/
             # or
             # /Library/Frameworks/Python.framework/Python/Versions/
-            # See: http://trac.mapnik.org/ticket/380
+            # See: https://github.com/mapnik/mapnik/issues/380
             link_prefix = env['PYTHON_SYS_PREFIX']
             if '.framework' in link_prefix:
                 python_link_flag = '-F%s -framework Python -Z' % os.path.dirname(link_prefix.split('.')[0])
@@ -143,10 +135,7 @@ paths += "__all__ = [mapniklibpath,inputpluginspath,fontscollectionpath]\n"
 if not os.path.exists('mapnik'):
     os.mkdir('mapnik')
 
-if hasattr(os.path,'relpath'): # python 2.6 and above
-    file('mapnik/paths.py','w').write(paths % (os.path.relpath(env['MAPNIK_LIB_DIR'],target_path)))
-else:
-    file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
+file('mapnik/paths.py','w').write(paths % (env['MAPNIK_LIB_DIR']))
 
 # force open perms temporarily so that `sudo scons install`
 # does not later break simple non-install non-sudo rebuild
@@ -154,8 +143,14 @@ try:
     os.chmod('mapnik/paths.py',0666)
 except: pass
 
-# install the core mapnik python files, including '__init__.py'
+# install the shared object beside the module directory
+sources = glob.glob('*.cpp')
+
+py_env = env.Clone()
+py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
+
 if 'install' in COMMAND_LINE_TARGETS:
+    # install the core mapnik python files, including '__init__.py'
     init_files = glob.glob('mapnik/*.py')
     if 'mapnik/paths.py' in init_files:
         init_files.remove('mapnik/paths.py') 
@@ -165,8 +160,7 @@ if 'install' in COMMAND_LINE_TARGETS:
     init_mapnik2 = env.Install(target_path_deprecated, 'mapnik2/__init__.py')
     env.Alias(target='install', source=init_mapnik2)
       
-# fix perms and install the custom generated 'paths.py' 
-if 'install' in COMMAND_LINE_TARGETS:
+    # fix perms and install the custom generated 'paths.py'
     targetp = os.path.join(target_path,'paths.py')
     env.Alias("install", targetp)
     # use env.Command rather than env.Install
@@ -177,23 +171,18 @@ if 'install' in COMMAND_LINE_TARGETS:
         Chmod("$TARGET", 0644),
         ])
 
+if 'uninstall' not in COMMAND_LINE_TARGETS:
+    if env['HAS_CAIRO']:
+        py_env.Append(CPPPATH = env['CAIROMM_CPPPATHS'])
+        py_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+        if env['PLATFORM'] == 'Darwin':
+            py_env.Append(LIBS=env['CAIROMM_LINKFLAGS'])
     
-# install the shared object beside the module directory
-sources = glob.glob('*.cpp')
+    if env['HAS_PYCAIRO']:
+        py_env.ParseConfig('pkg-config --cflags pycairo')
+        py_env.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
 
-py_env = env.Clone()
-py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
-
-if env['HAS_CAIRO']:
-    py_env.Append(CPPPATH = env['CAIROMM_CPPPATHS'])
-    py_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
-    if env['PLATFORM'] == 'Darwin':
-        py_env.Append(LIBS=env['CAIROMM_LINKFLAGS'])
-
-if env['HAS_PYCAIRO']:
-    py_env.ParseConfig('pkg-config --cflags pycairo')
-    py_env.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
-
+libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
@@ -203,7 +192,7 @@ if env['PLATFORM'] == 'SunOS' and env['PYTHON_IS_64BIT']:
     cxx_module_path = os.path.join(target_path,'64')
 else:
     cxx_module_path = target_path
-    
+
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     pymapniklib = env.Install(cxx_module_path,_mapnik)
     py_env.Alias(target='install',source=pymapniklib)

@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id$
+# 
 
 
 Import ('plugin_base')
@@ -48,6 +48,13 @@ libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 if env['SHAPE_MEMORY_MAPPED_FILE']:
     plugin_env.Append(CXXFLAGS = '-DSHAPE_MEMORY_MAPPED_FILE')
+
+if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+    if boost_version_from_header < 46:
+        # avoid ubuntu issue with boost interprocess:
+        # https://github.com/mapnik/mapnik/issues/1082
+        plugin_env.Append(CXXFLAGS = '-fpermissive')
 
 input_plugin = plugin_env.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 

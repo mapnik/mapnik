@@ -50,6 +50,10 @@ struct evaluate : boost::static_visitor<T1>
         return attr.value<value_type,feature_type>(feature_);
     }
 
+    value_type operator() (geometry_type_attribute const& attr) const
+    {
+        return attr.value<value_type,feature_type>(feature_);
+    }
 
     value_type operator() (binary_node<tags::logical_and> const & x) const
     {
@@ -73,6 +77,12 @@ struct evaluate : boost::static_visitor<T1>
 
     template <typename Tag>
     value_type operator() (unary_node<Tag> const& x) const
+    {
+        typename make_op<Tag>::type func;
+        return func(boost::apply_visitor(*this, x.expr));
+    }
+
+    value_type operator() (unary_node<tags::logical_not> const& x) const
     {
         return ! (boost::apply_visitor(evaluate<feature_type,value_type>(feature_),x.expr).to_bool());
     }

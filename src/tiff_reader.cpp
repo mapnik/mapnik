@@ -20,17 +20,18 @@
  *
  *****************************************************************************/
 
-//$Id: tiff_reader.cpp 17 2005-03-08 23:58:43Z pavlenko $
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
 #include <boost/filesystem/operations.hpp>
+
+// stl
+#include <iostream>
 
 extern "C"
 {
 #include <tiffio.h>
 }
-// stl
-#include <iostream>
 
 namespace mapnik
 {
@@ -54,7 +55,7 @@ public:
         stripped,
         tiled
     };
-    explicit tiff_reader(const std::string& file_name);
+    explicit tiff_reader(std::string const& file_name);
     virtual ~tiff_reader();
     unsigned width() const;
     unsigned height() const;
@@ -66,12 +67,12 @@ private:
     void read_generic(unsigned x,unsigned y,image_data_32& image);
     void read_stripped(unsigned x,unsigned y,image_data_32& image);
     void read_tiled(unsigned x,unsigned y,image_data_32& image);
-    TIFF* load_if_exists(const std::string& filename);
+    TIFF* load_if_exists(std::string const& filename);
 };
 
 namespace
 {
-image_reader* create_tiff_reader(const std::string& file)
+image_reader* create_tiff_reader(std::string const& file)
 {
     return new tiff_reader(file);
 }
@@ -79,7 +80,7 @@ image_reader* create_tiff_reader(const std::string& file)
 const bool registered = register_image_reader("tiff",create_tiff_reader);
 }
 
-tiff_reader::tiff_reader(const std::string& file_name)
+tiff_reader::tiff_reader(std::string const& file_name)
     : file_name_(file_name),
       read_method_(generic),
       width_(0),
@@ -97,7 +98,7 @@ void tiff_reader::init()
     // TODO: error handling
     TIFFSetWarningHandler(0);
     TIFF* tif = load_if_exists(file_name_);
-    if (!tif) throw image_reader_exception ("Can't load tiff file");
+    if (!tif) throw image_reader_exception( std::string("Can't load tiff file: '") + file_name_ + "'");
 
     char msg[1024];
 
@@ -165,7 +166,8 @@ void tiff_reader::read_generic(unsigned /*x*/,unsigned /*y*/,image_data_32& /*im
     TIFF* tif = load_if_exists(file_name_);
     if (tif)
     {
-        std::clog << "TODO:tiff is not stripped or tiled\n";
+        MAPNIK_LOG_DEBUG(tiff_reader) << "tiff_reader: TODO - tiff is not stripped or tiled";
+
         TIFFClose(tif);
     }
 }

@@ -27,6 +27,7 @@
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/debug.hpp>
 
 #include "osm_featureset.hpp"
 
@@ -56,92 +57,76 @@ template <typename filterT>
 feature_ptr osm_featureset<filterT>::next()
 {
     feature_ptr feature;
-    bool success = false;
 
     osm_item* cur_item = dataset_->next_item();
-    if (cur_item != NULL)
+    if (!cur_item) return feature_ptr();
+    if (dataset_->current_item_is_node())
     {
-        if (dataset_->current_item_is_node())
-        {
-            feature = feature_factory::create(ctx_,feature_id_);
-            ++feature_id_;
-            double lat = static_cast<osm_node*>(cur_item)->lat;
-            double lon = static_cast<osm_node*>(cur_item)->lon;
-            geometry_type* point = new geometry_type(mapnik::Point);
-            point->move_to(lon, lat);
-            feature->add_geometry(point);
-            success = true;
-        }
-        else if (dataset_->current_item_is_way())
+        feature = feature_factory::create(ctx_, feature_id_);
+        ++feature_id_;
+        double lat = static_cast<osm_node*>(cur_item)->lat;
+        double lon = static_cast<osm_node*>(cur_item)->lon;
+        geometry_type* point = new geometry_type(mapnik::Point);
+        point->move_to(lon, lat);
+        feature->add_geometry(point);
+    }
+    else if (dataset_->current_item_is_way())
+    {
+        // Loop until we find a feature which passes the filter
+        while (cur_item)
         {
             bounds b = static_cast<osm_way*>(cur_item)->get_bounds();
-
-            // Loop until we find a feature which passes the filter
-            while (cur_item != NULL &&
-                   ! filter_.pass(box2d<double>(b.w, b.s, b.e, b.n)))
-            {
-                cur_item = dataset_->next_item();
-                if (cur_item != NULL)
-                {
-                    b = static_cast<osm_way*>(cur_item)->get_bounds();
-                }
-            }
-
-            if (cur_item != NULL)
-            {
-                if (static_cast<osm_way*>(cur_item)->nodes.size())
-                {
-                    feature = feature_factory::create(ctx_,feature_id_);
-                    ++feature_id_;
-                    geometry_type* geom;
-                    if (static_cast<osm_way*>(cur_item)->is_polygon())
-                    {
-                        geom = new geometry_type(mapnik::Polygon);
-                    }
-                    else
-                    {
-                        geom = new geometry_type(mapnik::LineString);
-                    }
-
-                    geom->set_capacity(static_cast<osm_way*>(cur_item)->nodes.size());
-                    geom->move_to(static_cast<osm_way*>(cur_item)->nodes[0]->lon,
-                                  static_cast<osm_way*>(cur_item)->nodes[0]->lat);
-
-                    for (unsigned int count = 1;
-                         count < static_cast<osm_way*>(cur_item)->nodes.size();
-                         count++)
-                    {
-                        geom->line_to(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
-                                      static_cast<osm_way*>(cur_item)->nodes[count]->lat);
-                    }
-                    feature->add_geometry(geom);
-                    success = true;
-                }
-            }
+            if (filter_.pass(box2d<double>(b.w, b.s, b.e, b.n))
+                    &&
+                static_cast<osm_way*>(cur_item)->nodes.size()) break;
+            cur_item = dataset_->next_item();
         }
 
-        // can feature_ptr be compared to NULL? - no
-        if (success)
+        if (!cur_item) return feature_ptr();
+        feature = feature_factory::create(ctx_, feature_id_);
+        ++feature_id_;
+        geometry_type* geom;
+        if (static_cast<osm_way*>(cur_item)->is_polygon())
         {
-            std::map<std::string,std::string>::iterator i = cur_item->keyvals.begin();
+            geom = new geometry_type(mapnik::Polygon);
+        }
+        else
+        {
+            geom = new geometry_type(mapnik::LineString);
+        }
 
-            // add the keyvals to the feature. the feature seems to be a map
-            // of some sort so this should work - see dbf_file::add_attribute()
-            while (i != cur_item->keyvals.end())
-            {
-                // only add if in the specified set of attribute names
-                if (attribute_names_.find(i->first) != attribute_names_.end())
-                {
-                    feature->put(i->first,tr_->transcode(i->second.c_str()));
-                }
+        geom->move_to(static_cast<osm_way*>(cur_item)->nodes[0]->lon,
+                      static_cast<osm_way*>(cur_item)->nodes[0]->lat);
 
-                i++;
-            }
+        for (unsigned int count = 1;
+             count < static_cast<osm_way*>(cur_item)->nodes.size();
+             count++)
+        {
+            geom->line_to(static_cast<osm_way*>(cur_item)->nodes[count]->lon,
+                          static_cast<osm_way*>(cur_item)->nodes[count]->lat);
+        }
+        feature->add_geometry(geom);
+    }
+    else
+    {
+        MAPNIK_LOG_ERROR(osm_featureset) << "Current item is neither node nor way.\n";
+    }
 
-            return feature;
+    std::set<std::string>::const_iterator itr = attribute_names_.begin();
+    std::set<std::string>::const_iterator end = attribute_names_.end();
+    std::map<std::string,std::string>::iterator end_keyvals = cur_item->keyvals.end();
+    for (; itr != end; itr++)
+    {
+        std::map<std::string,std::string>::iterator i = cur_item->keyvals.find(*itr);
+        if (i != end_keyvals)
+        {
+            feature->put_new(i->first, tr_->transcode(i->second.c_str()));
+        } else
+        {
+            feature->put_new(*itr, "");
         }
     }
-    return feature_ptr();
+    return feature;
 }
 
 template <typename filterT>

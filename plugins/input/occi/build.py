@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id$
+# 
 
 Import ('plugin_base')
 Import ('env')
@@ -38,6 +38,7 @@ occi_src = Split(
 
 libraries = [ 'occi', 'ociei' ]
 libraries.append('mapnik')
+libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append(env['ICU_LIB_NAME'])
 
 input_plugin = plugin_env.SharedLibrary('../occi', source=occi_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])

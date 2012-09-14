@@ -20,11 +20,8 @@
  *
  *****************************************************************************/
 
-//$Id: layer.cpp 17 2005-03-08 23:58:43Z pavlenko $
-
 // mapnik
 #include <mapnik/layer.hpp>
-
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 
@@ -38,27 +35,30 @@ namespace mapnik
 layer::layer(std::string const& name, std::string const& srs)
     : name_(name),
       srs_(srs),
-      minZoom_(0),
-      maxZoom_(std::numeric_limits<double>::max()),
+      min_zoom_(0),
+      max_zoom_(std::numeric_limits<double>::max()),
       active_(true),
       queryable_(false),
       clear_label_cache_(false),
       cache_features_(false),
       group_by_(""),
-      ds_() {}
+      ds_(),
+      buffer_size_(0) {}
 
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
       srs_(rhs.srs_),
-      minZoom_(rhs.minZoom_),
-      maxZoom_(rhs.maxZoom_),
+      min_zoom_(rhs.min_zoom_),
+      max_zoom_(rhs.max_zoom_),
       active_(rhs.active_),
       queryable_(rhs.queryable_),
       clear_label_cache_(rhs.clear_label_cache_),
       cache_features_(rhs.cache_features_),
       group_by_(rhs.group_by_),
       styles_(rhs.styles_),
-      ds_(rhs.ds_) {}
+      ds_(rhs.ds_),
+      buffer_size_(rhs.buffer_size_),
+      maximum_extent_(rhs.maximum_extent_) {}
 
 layer& layer::operator=(const layer& rhs)
 {
@@ -76,8 +76,8 @@ void layer::swap(const layer& rhs)
 {
     name_=rhs.name_;
     srs_ = rhs.srs_;
-    minZoom_=rhs.minZoom_;
-    maxZoom_=rhs.maxZoom_;
+    min_zoom_=rhs.min_zoom_;
+    max_zoom_=rhs.max_zoom_;
     active_=rhs.active_;
     queryable_=rhs.queryable_;
     clear_label_cache_ = rhs.clear_label_cache_;
@@ -85,6 +85,8 @@ void layer::swap(const layer& rhs)
     group_by_ = rhs.group_by_;
     styles_=rhs.styles_;
     ds_=rhs.ds_;
+    buffer_size_ = rhs.buffer_size_;
+    maximum_extent_ = rhs.maximum_extent_;
 }
 
 layer::~layer() {}
@@ -124,47 +126,47 @@ std::vector<std::string> & layer::styles()
     return styles_;
 }
 
-void layer::setMinZoom(double minZoom)
+void layer::set_min_zoom(double min_zoom)
 {
-    minZoom_=minZoom;
+    min_zoom_=min_zoom;
 }
 
-void layer::setMaxZoom(double maxZoom)
+void layer::set_max_zoom(double max_zoom)
 {
-    maxZoom_=maxZoom;
+    max_zoom_=max_zoom;
 }
 
-double layer::getMinZoom() const
+double layer::min_zoom() const
 {
-    return minZoom_;
+    return min_zoom_;
 }
 
-double layer::getMaxZoom() const
+double layer::max_zoom() const
 {
-    return maxZoom_;
+    return max_zoom_;
 }
 
-void layer::setActive(bool active)
+void layer::set_active(bool active)
 {
     active_=active;
 }
 
-bool layer::isActive() const
+bool layer::active() const
 {
     return active_;
 }
 
-bool layer::isVisible(double scale) const
+bool layer::visible(double scale) const
 {
-    return isActive() && scale >= minZoom_ - 1e-6 && scale < maxZoom_ + 1e-6;
+    return active() && scale >= min_zoom_ - 1e-6 && scale < max_zoom_ + 1e-6;
 }
 
-void layer::setQueryable(bool queryable)
+void layer::set_queryable(bool queryable)
 {
     queryable_=queryable;
 }
 
-bool layer::isQueryable() const
+bool layer::queryable() const
 {
     return queryable_;
 }
@@ -177,6 +179,31 @@ datasource_ptr layer::datasource() const
 void layer::set_datasource(datasource_ptr const& ds)
 {
     ds_ = ds;
+}
+
+void layer::set_maximum_extent(box2d<double> const& box)
+{
+    maximum_extent_.reset(box);
+}
+
+boost::optional<box2d<double> > const& layer::maximum_extent() const
+{
+    return maximum_extent_;
+}
+
+void layer::reset_maximum_extent()
+{
+    maximum_extent_.reset();
+}
+
+void layer::set_buffer_size(int size)
+{
+    buffer_size_ = size;
+}
+
+int layer::buffer_size() const
+{
+    return buffer_size_;
 }
 
 box2d<double> layer::envelope() const
@@ -210,7 +237,7 @@ void layer::set_group_by(std::string column)
     group_by_ = column;
 }
 
-std::string layer::group_by() const
+std::string const& layer::group_by() const
 {
     return group_by_;
 }

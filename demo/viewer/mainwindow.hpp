@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id$
 
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
@@ -28,6 +27,7 @@
 #include <QActionGroup>
 #include <QStatusBar>
 #include <QAbstractItemModel>
+#include <QDoubleSpinBox>
 
 #include "mapwidget.hpp"
 
@@ -36,6 +36,8 @@
 class LayerTab;
 class StyleTab;
 class QSlider;
+class QComboBox;
+class QDoubleSpinBox;
 
 class MainWindow : public QMainWindow
 {
@@ -106,6 +108,8 @@ private:
     //status bar
     QStatusBar *status;
     QSlider * slider_;
+    QComboBox * renderer_selector_;
+    QDoubleSpinBox * scale_factor_;
     mapnik::box2d<double> default_extent_;
 };
 

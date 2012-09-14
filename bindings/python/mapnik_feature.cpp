@@ -19,19 +19,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // boost
-
 #include <boost/python/suite/indexing/indexing_suite.hpp>
 //#include <boost/python/suite/indexing/map_indexing_suite.hpp>
-
 #include <boost/python/iterator.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python.hpp>
-#include <boost/scoped_array.hpp>
 
 // mapnik
 #include <mapnik/feature.hpp>
@@ -39,6 +35,7 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/json/geojson_generator.hpp>
 
 namespace {
 
@@ -61,6 +58,17 @@ void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
 {
     bool result = mapnik::from_wkt(wkt, feature.paths());
     if (!result) throw std::runtime_error("Failed to parse WKT");
+}
+
+std::string feature_to_geojson(Feature const& feature)
+{
+    std::string json;
+    mapnik::json::feature_generator g;
+    if (!g.generate(json,feature))
+    {
+        throw std::runtime_error("Failed to generate GeoJSON");
+    }
+    return json;
 }
 
 mapnik::value  __getitem__(Feature const& feature, std::string const& name)
@@ -184,5 +192,6 @@ void export_feature()
         .def("__getitem__",&__getitem2__)
         .def("__len__", &Feature::size)
         .def("context",&Feature::context)
+        .def("to_geojson",&feature_to_geojson)
         ;
 }

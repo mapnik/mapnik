@@ -725,7 +725,6 @@ namespace agg
                                 base_type::m_ry_inv) >> 
                                     image_subpixel_shift;
                 int total_weight = 0;
-                int total_weight_alpha = 0;
                 int x_lr = x >> image_subpixel_shift;
                 int x_hr = ((image_subpixel_mask - (x & image_subpixel_mask)) * 
                                 base_type::m_rx_inv) >> 
@@ -740,21 +739,15 @@ namespace agg
                     x_hr = x_hr2;
                     for(;;)
                     {
-                        int weight = (weight_y * weight_array[x_hr] +
+                        int weight = (weight_y * weight_array[x_hr] + 
                                      image_filter_scale / 2) >> 
                                      downscale_shift;
-                        int weight_alpha = (weight_y * weight_array[x_hr] / base_mask * fg_ptr[3] +
-                                     image_filter_scale / 2) >>
-                                     downscale_shift;
 
-                        fg[0] += *fg_ptr++ * weight_alpha;
-                        fg[1] += *fg_ptr++ * weight_alpha;
-                        fg[2] += *fg_ptr++ * weight_alpha;
+                        fg[0] += *fg_ptr++ * weight;
+                        fg[1] += *fg_ptr++ * weight;
+                        fg[2] += *fg_ptr++ * weight;
                         fg[3] += *fg_ptr++ * weight;
-                        
                         total_weight += weight;
-                        total_weight_alpha += weight_alpha;
-                        
                         x_hr  += base_type::m_rx_inv;
                         if(x_hr >= filter_scale) break;
                         fg_ptr = (const value_type*)base_type::source().next_x();
@@ -763,26 +756,16 @@ namespace agg
                     if(y_hr >= filter_scale) break;
                     fg_ptr = (const value_type*)base_type::source().next_y();
                 }
-                
-                if (total_weight && total_weight_alpha)
-                {
-                    fg[3] /= total_weight;
-                    fg[0] = fg[0] / total_weight_alpha * fg[3] / base_mask;
-                    fg[1] = fg[1] / total_weight_alpha * fg[3] / base_mask;
-                    fg[2] = fg[2] / total_weight_alpha * fg[3] / base_mask;
-    
-                    if(fg[0] < 0) fg[0] = 0;
-                    if(fg[1] < 0) fg[1] = 0;
-                    if(fg[2] < 0) fg[2] = 0;
-                    if(fg[3] < 0) fg[3] = 0;
-                }
-                else
-                {
-                    fg[0] = 0;
-                    fg[1] = 0;
-                    fg[2] = 0;
-                    fg[3] = 0;
-                }
+
+                fg[0] /= total_weight;
+                fg[1] /= total_weight;
+                fg[2] /= total_weight;
+                fg[3] /= total_weight;
+
+                if(fg[0] < 0) fg[0] = 0;
+                if(fg[1] < 0) fg[1] = 0;
+                if(fg[2] < 0) fg[2] = 0;
+                if(fg[3] < 0) fg[3] = 0;
 
                 if(fg[order_type::A] > base_mask)         fg[order_type::A] = base_mask;
                 if(fg[order_type::R] > fg[order_type::A]) fg[order_type::R] = fg[order_type::A];

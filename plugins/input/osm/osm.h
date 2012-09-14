@@ -84,14 +84,6 @@ struct osm_way : public osm_item
 
 class osm_dataset
 {
-private:
-    int next_item_mode;
-    enum { Node, Way };
-    std::vector<osm_node*>::iterator node_i;
-    std::vector<osm_way*>::iterator way_i;
-    std::vector<osm_node*> nodes;
-    std::vector<osm_way*> ways; 
-
 public:
     osm_dataset()
     {
@@ -110,10 +102,10 @@ public:
 
     ~osm_dataset();
 
-    bool load(const char* name, const std::string& parser = "libxml2");
-    bool load_from_url(const std::string&,
-                       const std::string&,
-                       const std::string& parser = "libxml2");
+    bool load(const char* name, std::string const& parser = "libxml2");
+    bool load_from_url(std::string const&,
+                       std::string const&,
+                       std::string const& parser = "libxml2");
     void clear();
     void add_node(osm_node* n) { nodes.push_back(n); }
     void add_way(osm_way* w) { ways.push_back(w); }
@@ -128,6 +120,14 @@ public:
     osm_item * next_item();
     bool current_item_is_node() { return next_item_mode == Node; }
     bool current_item_is_way() { return next_item_mode == Way; }
+
+private:
+    int next_item_mode;
+    enum { Node, Way };
+    std::vector<osm_node*>::iterator node_i;
+    std::vector<osm_way*>::iterator way_i;
+    std::vector<osm_node*> nodes;
+    std::vector<osm_way*> ways;
 };
 
 #endif // OSM_H

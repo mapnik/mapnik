@@ -23,21 +23,25 @@
 #ifndef KISMET_DATASOURCE_HPP
 #define KISMET_DATASOURCE_HPP
 
-// STL
-#include <list>
-
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
-#include <mapnik/wkb.hpp>
 
 // boost
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
 
-// sqlite
+// stl
+#include <list>
+#include <vector>
+#include <string>
+
 #include "kismet_types.hpp"
 
 class kismet_datasource : public mapnik::datasource
@@ -46,7 +50,7 @@ public:
     kismet_datasource(mapnik::parameters const& params, bool bind = true);
     virtual ~kismet_datasource ();
     datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;
@@ -55,7 +59,7 @@ public:
     void bind() const;
 
 private:
-    void run (const std::string& host, const unsigned int port);
+    void run (std::string const& host, const unsigned int port);
 
     mapnik::box2d<double> extent_;
     bool extent_initialized_;

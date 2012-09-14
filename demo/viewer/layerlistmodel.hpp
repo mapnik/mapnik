@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id$
 
 
 #ifndef LAYER_LIST_MODEL_HPP
@@ -26,7 +25,9 @@
 #include <QAbstractListModel>
 #include <QModelIndex>
 #include <QVariant>
+#ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
+#endif
 #include <boost/optional/optional.hpp>
 
 class LayerListModel : public QAbstractListModel

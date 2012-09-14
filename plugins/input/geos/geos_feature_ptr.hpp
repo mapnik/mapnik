@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #ifndef GEOS_FEATURE_PTR_HPP
 #define GEOS_FEATURE_PTR_HPP

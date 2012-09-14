@@ -19,18 +19,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// boost
 #include <boost/python.hpp>
+#include <boost/variant.hpp>
+
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/value.hpp>
 
-#include <boost/variant.hpp>
 
 using mapnik::Feature;
 using mapnik::expression_ptr;
@@ -43,6 +44,11 @@ using mapnik::path_expression_ptr;
 expression_ptr parse_expression_(std::string const& wkt)
 {
     return parse_expression(wkt,"utf8");
+}
+
+std::string expression_to_string_(mapnik::expr_node const& expr)
+{
+    return mapnik::to_expression_string(expr);
 }
 
 mapnik::value expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature const& f)
@@ -74,7 +80,7 @@ void export_expression()
                                                   "TODO"
                                                   "",no_init)
         .def("evaluate", &expression_evaluate_)
-        .def("__str__",&to_expression_string);
+        .def("__str__",&expression_to_string_);
     ;
 
     def("Expression",&parse_expression_,(arg("expr")),"Expression string");

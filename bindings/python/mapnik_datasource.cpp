@@ -19,16 +19,19 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
+
 // boost
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
+
 // stl
 #include <sstream>
 #include <vector>
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature_layer_desc.hpp>
@@ -78,7 +81,7 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
         }
     }
 
-    return mapnik::datasource_cache::create(params, bind);
+    return mapnik::datasource_cache::instance().create(params, bind);
 }
 
 boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)

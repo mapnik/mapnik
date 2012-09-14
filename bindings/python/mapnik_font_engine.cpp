@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #include <boost/python.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -42,6 +41,7 @@ void export_font_engine()
         .def("register_fonts",&freetype_engine::register_fonts)
         .def("face_names",&freetype_engine::face_names)
         .staticmethod("register_font")
+        .staticmethod("register_fonts")
         .staticmethod("face_names")
         ;
 }

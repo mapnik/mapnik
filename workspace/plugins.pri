@@ -30,8 +30,8 @@ HEADERS += \
   $$PWD/../plugins/input/postgis/connection.hpp \
   $$PWD/../plugins/input/postgis/connection_manager.hpp \
   $$PWD/../plugins/input/postgis/cursorresultset.hpp \
-  $$PWD/../plugins/input/postgis/postgis.hpp \
-  $$PWD/../plugins/input/postgis/property_index.hpp \
+  $$PWD/../plugins/input/postgis/postgis_datasource.hpp \
+  $$PWD/../plugins/input/postgis/postgis_featureset.hpp \
   $$PWD/../plugins/input/postgis/resultset.hpp \
   $$PWD/../plugins/input/raster/raster_info.hpp \
   $$PWD/../plugins/input/raster/raster_featureset.hpp \
@@ -41,11 +41,13 @@ HEADERS += \
   $$PWD/../plugins/input/rasterlite/rasterlite_datasource.hpp \
   $$PWD/../plugins/input/shape/dbffile.hpp \
   $$PWD/../plugins/input/shape/shape.hpp \
+  $$PWD/../plugins/input/shape/shape_datasource.hpp \
   $$PWD/../plugins/input/shape/shape_featureset.hpp \
   $$PWD/../plugins/input/shape/shapefile.hpp \
   $$PWD/../plugins/input/shape/shape_index_featureset.hpp \
   $$PWD/../plugins/input/shape/shape_io.hpp \
   $$PWD/../plugins/input/shape/shp_index.hpp \
+  $$PWD/../plugins/input/sqlite/sqlite_connection.hpp \
   $$PWD/../plugins/input/sqlite/sqlite_featureset.hpp \
   $$PWD/../plugins/input/sqlite/sqlite_datasource.hpp \
   $$PWD/../plugins/input/sqlite/sqlite_types.hpp
@@ -66,7 +68,7 @@ SOURCES += \
   $$PWD/../plugins/input/ogr/ogr_converter.cpp \
   $$PWD/../plugins/input/ogr/ogr_featureset.cpp \
   $$PWD/../plugins/input/ogr/ogr_datasource.cpp \
-  $$PWD/../plugins/input/ogr/ogr_index_featureset.hpp \
+  $$PWD/../plugins/input/ogr/ogr_index_featureset.cpp \
   $$PWD/../plugins/input/osm/basiccurl.cpp \
   $$PWD/../plugins/input/osm/dataset_deliverer.cpp \
   $$PWD/../plugins/input/osm/osm.cpp \
@@ -83,6 +85,7 @@ SOURCES += \
   $$PWD/../plugins/input/rasterlite/rasterlite_datasource.cpp \
   $$PWD/../plugins/input/shape/dbffile.cpp \
   $$PWD/../plugins/input/shape/shape.cpp \
+  $$PWD/../plugins/input/shape/shape_datasource.cpp \
   $$PWD/../plugins/input/shape/shape_featureset.cpp \
   $$PWD/../plugins/input/shape/shape_index_featureset.cpp \
   $$PWD/../plugins/input/shape/shape_io.cpp \

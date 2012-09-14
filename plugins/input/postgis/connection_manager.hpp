@@ -20,22 +20,27 @@
  *
  *****************************************************************************/
 
-#ifndef CONNECTION_MANAGER_HPP
-#define CONNECTION_MANAGER_HPP
+#ifndef POSTGIS_CONNECTION_MANAGER_HPP
+#define POSTGIS_CONNECTION_MANAGER_HPP
 
-#include <string>
-#include <sstream>
+#include "connection.hpp"
+
+// mapnik
 #include <mapnik/pool.hpp>
 #include <mapnik/utils.hpp>
-#include "connection.hpp"
+
+// boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
-
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 //using boost::mutex;
 #endif
+
+// stl
+#include <string>
+#include <sstream>
 
 using mapnik::Pool;
 using mapnik::singleton;
@@ -150,4 +155,4 @@ private:
     ConnectionManager& operator=(const ConnectionManager);
 };
 
-#endif //CONNECTION_MANAGER_HPP
+#endif // POSTGIS_CONNECTION_MANAGER_HPP

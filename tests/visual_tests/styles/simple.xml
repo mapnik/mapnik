@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+  <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+    <StyleName>My Style</StyleName>
+    <Datasource>
+      <Parameter name="type">osm</Parameter>
+      <Parameter name="file">../data/points.osm</Parameter>
+    </Datasource>
+  </Layer>
+
+    <Style name="My Style">
+    <Rule>
+      <PointSymbolizer/>
+      <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" dx="5" dy="16" placement-type="simple" placements="N,S,E,W,SW,10,5">[name]</TextSymbolizer>
+    </Rule>
+  </Style>
+
+</Map>

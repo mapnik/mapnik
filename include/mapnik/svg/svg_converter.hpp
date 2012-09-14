@@ -56,22 +56,20 @@ public:
 
     void begin_path()
     {
-        push_attr();
         unsigned idx = source_.start_new_path();
         attributes_.add(path_attributes(cur_attr(), idx));
     }
-
+    
     void end_path()
     {
         if(attributes_.size() == 0)
         {
             throw std::runtime_error("end_path : The path was not begun");
         }
-        path_attributes attr = cur_attr();
-        unsigned idx = attributes_[attributes_.size() - 1].index;
+        path_attributes& attr = attributes_[attributes_.size() - 1];
+        unsigned idx = attr.index;
+        attr = cur_attr();
         attr.index = idx;
-        attributes_[attributes_.size() - 1] = attr;
-        pop_attr();
     }
 
     void move_to(double x, double y, bool rel=false)  // M, m
@@ -195,7 +193,7 @@ public:
     }
 
     // Attribute setting functions.
-    void fill(const agg::rgba8& f)
+    void fill(agg::rgba8 const& f)
     {
         path_attributes& attr = cur_attr();
         double a = attr.fill_color.opacity();
@@ -204,19 +202,19 @@ public:
         attr.fill_flag = true;
     }
 
-    void add_fill_gradient(mapnik::gradient& grad)
+    void add_fill_gradient(mapnik::gradient const& grad)
     {
         path_attributes& attr = cur_attr();
         attr.fill_gradient = grad;
     }
 
-    void add_stroke_gradient(mapnik::gradient& grad)
+    void add_stroke_gradient(mapnik::gradient const& grad)
     {
         path_attributes& attr = cur_attr();
         attr.stroke_gradient = grad;
     }
 
-    void stroke(const agg::rgba8& s)
+    void stroke(agg::rgba8 const& s)
     {
         path_attributes& attr = cur_attr();
         double a = attr.stroke_color.opacity();
@@ -235,7 +233,21 @@ public:
         cur_attr().visibility_flag = flag;
     }
 
+    bool visibility()
+    {
+        return cur_attr().visibility_flag;
+    }
 
+    void display(bool flag)
+    {
+        cur_attr().display_flag = flag;
+    }
+
+    bool display()
+    {
+        return cur_attr().display_flag;
+    }
+    
     void stroke_width(double w)
     {
         cur_attr().stroke_width = w;
@@ -252,16 +264,17 @@ public:
 
     void fill_opacity(double op)
     {
-        cur_attr().fill_color.opacity(op);
+        cur_attr().fill_opacity = op;
     }
     void stroke_opacity(double op)
     {
-        cur_attr().stroke_color.opacity(op);
+        cur_attr().stroke_opacity = op;
     }
 
     void opacity(double op)
     {
-        cur_attr().opacity = op;
+        cur_attr().stroke_opacity = op;
+        cur_attr().fill_opacity = op;
     }
 
     void line_join(agg::line_join_e join)

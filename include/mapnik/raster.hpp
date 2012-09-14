@@ -24,7 +24,8 @@
 #define MAPNIK_RASTER_HPP
 
 // mapnik
-#include <mapnik/graphics.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/image_data.hpp>
 
 namespace mapnik {
 struct raster

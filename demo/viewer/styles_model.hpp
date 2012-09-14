@@ -17,13 +17,16 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id$
 
 #ifndef STYLE_MODEL_HPP
 #define STYLE_MODEL_HPP
 
 #include <QAbstractItemModel>
+
+#ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>
+#endif
+
 #include <boost/scoped_ptr.hpp>
 
 class node;

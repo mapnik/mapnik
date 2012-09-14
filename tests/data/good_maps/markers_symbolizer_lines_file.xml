@@ -1,0 +1,26 @@
+<!DOCTYPE Map>
+<Map background-color="white" srs="+init=epsg:4326" minimum-version="0.7.2">
+    <Style name="1">
+        <Rule>
+            <LineSymbolizer offset="-2" stroke-width="2" stroke="red"/>
+            <LineSymbolizer stroke-width="2" stroke="orange"/>
+            <LineSymbolizer offset="2" stroke-width="2" stroke="yellow"/>
+            <LineSymbolizer offset="4" stroke-width="2" stroke="green"/>
+            <MarkersSymbolizer
+                file="../svg/octocat.svg"
+                transform="scale(.13)"
+                placement="line"
+            />
+        </Rule>
+    </Style>
+
+    <Layer name="point" srs="+init=epsg:4326">
+        <StyleName>1</StyleName>
+        <Datasource>
+            <Parameter name="type">sqlite</Parameter>
+            <Parameter name="file">../sqlite/qgis_spatiallite.sqlite</Parameter>
+            <Parameter name="table">lines</Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>

@@ -20,9 +20,11 @@
  *
  *****************************************************************************/
 
-//$Id:  $
-
+// mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/raster_colorizer.hpp>
+
+// stl
 #include <limits>
 
 namespace mapnik
@@ -265,15 +267,15 @@ color raster_colorizer::get_color(float value) const
 
 
     /*
-      std::clog << "get_color: " << value << "\n";
-      std::clog << "\tstopIdx: " << stopIdx << "\n";
-      std::clog << "\tnextStopIdx: " << nextStopIdx << "\n";
-      std::clog << "\tstopValue: " << stopValue << "\n";
-      std::clog << "\tnextStopValue: " << nextStopValue << "\n";
-      std::clog << "\tstopColor: " << stopColor.to_string() << "\n";
-      std::clog << "\tnextStopColor: " << nextStopColor.to_string() << "\n";
-      std::clog << "\tstopMode: " << stopMode.as_string() << "\n";
-      std::clog << "\toutputColor: " << outputColor.to_string() << "\n";
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "raster_colorizer: get_color " << value;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopIdx: " << stopIdx;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tnextStopIdx: " << nextStopIdx;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopValue: " << stopValue;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tnextStopValue: " << nextStopValue;
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopColor: " << stopColor.to_string();
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tnextStopColor: " << nextStopColor.to_string();
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\tstopMode: " << stopMode.as_string();
+      MAPNIK_LOG_DEBUG(raster_colorizer) << "\toutputColor: " << outputColor.to_string();
     */
 
     return outputColor;

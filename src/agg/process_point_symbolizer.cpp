@@ -19,21 +19,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/metawriter.hpp>
-#include <mapnik/marker_cache.hpp>
-#include <mapnik/expression_evaluator.hpp>
 
-#include "agg_basics.h"
-#include "agg_rendering_buffer.h"
-#include "agg_pixfmt_rgba.h"
-#include "agg_rasterizer_scanline_aa.h"
-#include "agg_scanline_u.h"
+#include <mapnik/geom_util.hpp>
+#include <mapnik/point_symbolizer.hpp>
+#include <mapnik/expression_evaluator.hpp>
+#include <mapnik/marker.hpp>
+#include <mapnik/marker_cache.hpp>
+
+// agg
+#include "agg_trans_affine.h"
 
 // stl
 #include <string>
@@ -45,15 +44,15 @@ namespace mapnik {
 
 template <typename T>
 void agg_renderer<T>::process(point_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
 
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
     {
-        marker = marker_cache::instance()->find(filename, true);
+        marker = marker_cache::instance().find(filename, true);
     }
     else
     {
@@ -62,52 +61,47 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 
     if (marker)
     {
-        int w = (*marker)->width();
-        int h = (*marker)->height();
-        agg::trans_affine tr;
-        boost::array<double,6> const& m = sym.get_transform();
-        tr.load_from(&m[0]);
-        double px0 = - 0.5 * w;
-        double py0 = - 0.5 * h;
-        double px1 = 0.5 * w;
-        double py1 = 0.5 * h;
-        double px2 = px1;
-        double py2 = py0;
-        double px3 = px0;
-        double py3 = py1;
-        tr.transform(&px0,&py0);
-        tr.transform(&px1,&py1);
-        tr.transform(&px2,&py2);
-        tr.transform(&px3,&py3);
-        box2d<double> label_ext (px0, py0, px1, py1);
-        label_ext.expand_to_include(px2, py2);
-        label_ext.expand_to_include(px3, py3);
+        box2d<double> const& bbox = (*marker)->bounding_box();
+        coord2d center = bbox.center();
 
-        for (unsigned i=0; i<feature->num_geometries(); ++i)
+        agg::trans_affine tr;
+        evaluate_transform(tr, feature, sym.get_image_transform());
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine recenter_tr = recenter * tr;
+        box2d<double> label_ext = bbox * recenter_tr;
+
+        for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type const& geom = feature.get_geometry(i);
             double x;
             double y;
             double z=0;
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                geom.label_position(&x, &y);
+            {
+                if (!label::centroid(geom, x, y))
+                    return;
+            }
             else
-                geom.label_interior_position(&x, &y);
+            {
+                if (!label::interior_position(geom ,x, y))
+                    return;
+            }
 
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
             label_ext.re_center(x,y);
-
             if (sym.get_allow_overlap() ||
                 detector_->has_placement(label_ext))
             {
 
-                render_marker(floor(x - 0.5 * w),floor(y - 0.5 * h) ,**marker,tr, sym.get_opacity());
+                render_marker(pixel_position(x, y),
+                              **marker,
+                              tr,
+                              sym.get_opacity(),
+                              sym.comp_op());
 
                 if (!sym.get_ignore_placement())
                     detector_->insert(label_ext);
-                metawriter_with_properties writer = sym.get_metawriter();
-                if (writer.first) writer.first->add_box(label_ext, *feature, t_, writer.second);
             }
         }
     }
@@ -115,8 +109,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
 }
 
 template void agg_renderer<image_32>::process(point_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }
-

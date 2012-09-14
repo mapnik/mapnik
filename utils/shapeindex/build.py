@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id$
+# 
 
 import os
 import glob
@@ -40,6 +40,13 @@ boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 boost_filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 boost_system = 'boost_system%s' % env['BOOST_APPEND']
 libraries =  [boost_program_options, boost_filesystem, boost_system]
+
+if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+    if boost_version_from_header < 46:
+        # avoid ubuntu issue with boost interprocess:
+        # https://github.com/mapnik/mapnik/issues/1082
+        program_env.Append(CXXFLAGS = '-fpermissive')
 
 shapeindex = program_env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 

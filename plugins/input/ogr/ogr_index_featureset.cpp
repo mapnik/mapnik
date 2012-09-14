@@ -19,10 +19,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
@@ -44,7 +44,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
@@ -53,13 +52,11 @@ using mapnik::feature_factory;
 
 template <typename filterT>
 ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & ctx,
-                                                    OGRDataSource & dataset,
                                                     OGRLayer & layer,
                                                     filterT const& filter,
                                                     std::string const& index_file,
                                                     std::string const& encoding)
     : ctx_(ctx),
-      dataset_(dataset),
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       filter_(filter),
@@ -67,7 +64,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & 
       fidcolumn_(layer_.GetFIDColumn())
 {
 
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(index_file.c_str(),true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file.c_str(),true);
     if (memory)
     {
         boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
@@ -76,9 +73,7 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & 
 
     std::sort(ids_.begin(),ids_.end());
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "OGR Plugin: query size=" << ids_.size() << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(ogr) << "ogr_index_featureset: Query size=" << ids_.size();
 
     itr_ = ids_.begin();
 
@@ -110,12 +105,10 @@ feature_ptr ogr_index_featureset<filterT>::next()
             {
                 ogr_converter::convert_geometry (geom, feature);
             }
-#ifdef MAPNIK_DEBUG
             else
             {
-                std::clog << "### Warning: feature with null geometry: " << (*feat)->GetFID() << "\n";
+                MAPNIK_LOG_DEBUG(ogr) << "ogr_index_featureset: Feature with null geometry=" << (*feat)->GetFID();
             }
-#endif
 
             int fld_count = layerdef_->GetFieldCount();
             for (int i = 0; i < fld_count; i++)
@@ -151,17 +144,13 @@ feature_ptr ogr_index_featureset<filterT>::next()
                 case OFTStringList:
                 case OFTWideStringList: // deprecated !
                 {
-#ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-#endif
+                    MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
                     break;
                 }
 
                 case OFTBinary:
                 {
-#ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-#endif
+                    MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
                     //feature->put(name,feat->GetFieldAsBinary (i, size));
                     break;
                 }
@@ -170,17 +159,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
                 case OFTTime:
                 case OFTDateTime:       // unhandled !
                 {
-#ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-#endif
-                    break;
-                }
-
-                default: // unknown
-                {
-#ifdef MAPNIK_DEBUG
-                    std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
+                    MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
                     break;
                 }
                 }
@@ -194,4 +173,3 @@ feature_ptr ogr_index_featureset<filterT>::next()
 
 template class ogr_index_featureset<mapnik::filter_in_box>;
 template class ogr_index_featureset<mapnik::filter_at_point>;
-

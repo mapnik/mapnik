@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
@@ -38,7 +39,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
@@ -47,12 +47,10 @@ using mapnik::feature_factory;
 
 
 ogr_featureset::ogr_featureset(mapnik::context_ptr const & ctx,
-                               OGRDataSource & dataset,
                                OGRLayer & layer,
                                OGRGeometry & extent,
                                std::string const& encoding)
     : ctx_(ctx),
-      dataset_(dataset),
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       tr_(new transcoder(encoding)),
@@ -64,12 +62,10 @@ ogr_featureset::ogr_featureset(mapnik::context_ptr const & ctx,
 }
 
 ogr_featureset::ogr_featureset(mapnik::context_ptr const& ctx,
-                               OGRDataSource & dataset,
                                OGRLayer & layer,
                                mapnik::box2d<double> const& extent,
                                std::string const& encoding)
     : ctx_(ctx),
-      dataset_(dataset),
       layer_(layer),
       layerdef_(layer.GetLayerDefn()),
       tr_(new transcoder(encoding)),
@@ -102,13 +98,11 @@ feature_ptr ogr_featureset::next()
         {
             ogr_converter::convert_geometry(geom, feature);
         }
-#ifdef MAPNIK_DEBUG
         else
         {
-            std::clog << "OGR Plugin: feature with null geometry: "
-                      << (*feat)->GetFID() << std::endl;
+            MAPNIK_LOG_DEBUG(ogr) << "ogr_featureset: Feature with null geometry=" << (*feat)->GetFID();
         }
-#endif
+
         ++count_;
 
         int fld_count = layerdef_->GetFieldCount();
@@ -145,17 +139,13 @@ feature_ptr ogr_featureset::next()
             case OFTStringList:
             case OFTWideStringList: // deprecated !
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-#endif
+                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
                 break;
             }
 
             case OFTBinary:
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-#endif
+                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
                 //feature->put(name,feat->GetFieldAsBinary (i, size));
                 break;
             }
@@ -164,17 +154,13 @@ feature_ptr ogr_featureset::next()
             case OFTTime:
             case OFTDateTime:       // unhandled !
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unhandled type_oid=" << type_oid << std::endl;
-#endif
+                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unhandled type_oid=" << type_oid;
                 break;
             }
 
             default: // unknown
             {
-#ifdef MAPNIK_DEBUG
-                std::clog << "OGR Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
+                MAPNIK_LOG_WARN(ogr) << "ogr_featureset: Unknown type_oid=" << type_oid;
                 break;
             }
             }
@@ -182,8 +168,7 @@ feature_ptr ogr_featureset::next()
         return feature;
     }
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "OGR Plugin: " << count_ << " features" << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(ogr) << "ogr_featureset: " << count_ << " features";
+
     return feature_ptr();
 }

@@ -86,23 +86,20 @@ class quad_tree : boost::noncopyable
     typedef typename node::cont_t cont_t;
     typedef typename cont_t::iterator node_data_iterator;
 
-    nodes_t nodes_;
-    node * root_;
-    const unsigned int max_depth_;
-    const double ratio_;
 public:
     typedef typename nodes_t::iterator iterator;
     typedef typename nodes_t::const_iterator const_iterator;
     typedef typename boost::ptr_vector<T,boost::view_clone_allocator> result_t;
     typedef typename result_t::iterator query_iterator;
 
-    result_t query_result_;
 
     explicit quad_tree(box2d<double> const& ext,
                        unsigned int max_depth = 8,
                        double ratio = 0.55)
         : max_depth_(max_depth),
-          ratio_(ratio)
+          ratio_(ratio),
+          query_result_(),
+          nodes_()
     {
         nodes_.push_back(new node(ext));
         root_ = &nodes_[0];
@@ -219,6 +216,13 @@ private:
         ext[2]=box2d<double>(lox,hiy - height*ratio_,lox + width * ratio_,hiy);
         ext[3]=box2d<double>(hix - width * ratio_,hiy - height*ratio_,hix,hiy);
     }
+
+    const unsigned int max_depth_;
+    const double ratio_;
+    result_t query_result_;
+    nodes_t nodes_;
+    node * root_;
+
 };
 }
 

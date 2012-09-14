@@ -34,6 +34,8 @@
 #include <string>
 
 
+using mapnik::mapped_memory_cache;
+
 dbf_file::dbf_file()
     : num_records_(0),
       num_fields_(0),
@@ -53,7 +55,7 @@ dbf_file::dbf_file(std::string const& file_name)
 {
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::find(file_name.c_str(),true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name.c_str(),true);
     if (memory)
     {
         file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
@@ -127,7 +129,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
 
     if (col>=0 && col<num_fields_)
     {
-        std::string name=fields_[col].name_;
+        std::string const& name=fields_[col].name_;
 
         switch (fields_[col].type_)
         {
@@ -156,16 +158,18 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
                 double val = 0.0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                qi::phrase_parse(itr,end,double_,ascii::space,val);
-                f.put(name,val);
+                bool r = qi::phrase_parse(itr,end,double_,ascii::space,val);
+                if (r && (itr == end))
+                    f.put(name,val);
             }
             else
             {
                 int val = 0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                qi::phrase_parse(itr,end,int_,ascii::space,val);
-                f.put(name,val);
+                bool r = qi::phrase_parse(itr,end,int_,ascii::space,val);
+                if (r && (itr == end))
+                    f.put(name,val);
             }
             break;
         }

@@ -25,6 +25,9 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/geom_util.hpp>
+// boost
+#include <boost/foreach.hpp>
 
 namespace mapnik {
 class hit_test_filter
@@ -35,12 +38,11 @@ public:
           y_(y),
           tol_(tol) {}
 
-    bool pass(Feature const& feature)
+    bool pass(Feature & feature)
     {
-        for (unsigned i=0;i<feature.num_geometries();++i)
+        BOOST_FOREACH(geometry_type & geom, feature.paths())
         {
-            geometry_type const& geom = feature.get_geometry(i);
-            if (geom.hit_test(x_,y_,tol_))
+            if (label::hit_test(geom, x_,y_,tol_))
                 return true;
         }
         return false;

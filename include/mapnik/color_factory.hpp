@@ -24,98 +24,16 @@
 #define MAPNIK_COLOR_FACTORY_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/config_error.hpp>
-
-// boost
-#include <boost/utility.hpp>
-#include <boost/version.hpp>
-
-// boost 1.41 -> 1.44 compatibility, to be removed in mapnik 2.1 (dane)
-#if BOOST_VERSION >= 104500
 #include <mapnik/css_color_grammar.hpp>
 
-namespace mapnik {
-
-class MAPNIK_DECL color_factory : boost::noncopyable
-{
-public:
-
-    static void init_from_string(color & c, std::string const& css_color)
-    {
-        typedef std::string::const_iterator iterator_type;
-        typedef mapnik::css_color_grammar<iterator_type> css_color_grammar;
-
-        css_color_grammar g;
-        iterator_type first = css_color.begin();
-        iterator_type last =  css_color.end();
-        bool result =
-            boost::spirit::qi::phrase_parse(first,
-                                            last,
-                                            g,
-                                            boost::spirit::ascii::space,
-                                            c);
-        if (!result)
-        {
-            throw config_error(std::string("Failed to parse color value: ") +
-                               "Expected a CSS color, but got '" + css_color + "'");
-        }
-    }
-
-    static color from_string(std::string const& css_color)
-    {
-        color c;
-        init_from_string(c,css_color);
-        return c;
-    }
-};
-}
-
-#else
-#include <mapnik/css_color_grammar_deprecated.hpp>
+#include <string>
 
 namespace mapnik {
 
-class MAPNIK_DECL color_factory : boost::noncopyable
-{
-public:
+MAPNIK_DECL mapnik::color parse_color(std::string const& str);
+MAPNIK_DECL mapnik::color parse_color(std::string const& str, mapnik::css_color_grammar<std::string::const_iterator> const& g);
 
-    static void init_from_string(color & c, std::string const& css_color)
-    {
-        typedef std::string::const_iterator iterator_type;
-        typedef mapnik::css_color_grammar<iterator_type> css_color_grammar;
-
-        css_color_grammar g;
-        iterator_type first = css_color.begin();
-        iterator_type last =  css_color.end();
-        mapnik::css css_;
-        bool result =
-            boost::spirit::qi::phrase_parse(first,
-                                            last,
-                                            g,
-                                            boost::spirit::ascii::space,
-                                            css_);
-        if (!result)
-        {
-            throw config_error(std::string("Failed to parse color value: ") +
-                               "Expected a CSS color, but got '" + css_color + "'");
-        }
-        c.set_red(css_.r);
-        c.set_green(css_.g);
-        c.set_blue(css_.b);
-        c.set_alpha(css_.a);
-    }
-
-    static color from_string(std::string const& css_color)
-    {
-        color c;
-        init_from_string(c,css_color);
-        return c;
-    }
-};
 }
-
-#endif
 
 #endif // MAPNIK_COLOR_FACTORY_HPP

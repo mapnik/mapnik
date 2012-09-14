@@ -20,25 +20,22 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/color_factory.hpp>
+#include <mapnik/config_error.hpp>
+
 // boost
 #include <boost/format.hpp>
+
 // stl
 #include <sstream>
 
 namespace mapnik {
 
-color::color( std::string const& css_string)
-    : red_(0),
-      green_(0),
-      blue_(0),
-      alpha_(0xff)
+color::color(std::string const& str)
 {
-    color_factory::init_from_string(*this,css_string);
+    *this = parse_color(str);
 }
 
 std::string color::to_string() const

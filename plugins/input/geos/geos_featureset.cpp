@@ -26,6 +26,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
@@ -39,21 +40,18 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::coord2d;
-using mapnik::CoordTransform;
 using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
 using mapnik::feature_factory;
 
-
 geos_featureset::geos_featureset(GEOSGeometry* geometry,
                                  GEOSGeometry* extent,
                                  int identifier,
-                                 const std::string& field,
-                                 const std::string& field_name,
-                                 const std::string& encoding)
+                                 std::string const& field,
+                                 std::string const& field_name,
+                                 std::string const& encoding)
     : geometry_(geometry),
       tr_(new transcoder(encoding)),
       extent_(extent),
@@ -104,9 +102,7 @@ feature_ptr geos_featureset::next()
                     break;
 
                 default:
-#ifdef MAPNIK_DEBUG
-                    std::clog << "GEOS Plugin: unknown extent geometry_type=" << type << std::endl;
-#endif
+                    MAPNIK_LOG_DEBUG(geos) << "geos_featureset: Unknown extent geometry_type=" << type;
                     break;
                 }
             }
@@ -118,10 +114,10 @@ feature_ptr geos_featureset::next()
                 {
                     feature_ptr feature(feature_factory::create(ctx_,identifier_));
 
-                    geometry_utils::from_wkb(feature->paths(),
+                    if (geometry_utils::from_wkb(feature->paths(),
                                              wkb.data(),
-                                             wkb.size());
-                    if (field_ != "")
+                                             wkb.size())
+                                             && field_ != "")
                     {
                         feature->put(field_name_, tr_->transcode(field_.c_str()));
                     }

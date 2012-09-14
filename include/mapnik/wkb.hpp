@@ -25,8 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/feature.hpp>
+
 // boost
 #include <boost/utility.hpp>
 
@@ -55,7 +54,7 @@ class MAPNIK_DECL geometry_utils : private boost::noncopyable
 {
 public:
 
-    static void from_wkb (boost::ptr_vector<geometry_type>& paths,
+    static bool from_wkb (boost::ptr_vector<geometry_type>& paths,
                           const char* wkb,
                           unsigned size,
                           wkbFormat format = wkbGeneric);

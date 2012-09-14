@@ -19,10 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
+// boost
 #include <boost/python.hpp>
 
+// mapnik
 //symbolizer typdef here rather than mapnik/symbolizer.hpp
 #include <mapnik/rule.hpp>
 
@@ -93,6 +94,13 @@ public:
     std::string operator () ( const markers_symbolizer & /*sym*/ )
     {
         return "markers";
+    }
+ 
+    template <typename Symbolizer>
+    std::string operator() ( Symbolizer const& sym)
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return "unknown";
     }
 };
 

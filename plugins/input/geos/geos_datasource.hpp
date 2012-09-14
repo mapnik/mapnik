@@ -25,11 +25,20 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 
 // boost
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
+
+// stl
+#include <vector>
+#include <string>
 
 #include "geos_feature_ptr.hpp"
 
@@ -39,7 +48,7 @@ public:
     geos_datasource(mapnik::parameters const& params, bool bind = true);
     virtual ~geos_datasource ();
     mapnik::datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
     mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
     mapnik::box2d<double> envelope() const;

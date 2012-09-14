@@ -137,7 +137,6 @@ void SDOPointType::writeSQL(oracle::occi::AnyData& streamOCCI_)
 
 SDOPointType::~SDOPointType()
 {
-    int i;
 }
 
 /*****************************************************************/
@@ -309,6 +308,5 @@ void SDOGeometry::writeSQL(oracle::occi::AnyData& streamOCCI_)
 
 SDOGeometry::~SDOGeometry()
 {
-    int i;
     delete SDO_POINT;
 }

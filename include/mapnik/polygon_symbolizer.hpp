@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/color.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/filter_factory.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/gamma_method.hpp>
 
@@ -36,7 +35,7 @@ namespace mapnik
 struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
 {
     polygon_symbolizer();
-    polygon_symbolizer(color const& fill);
+    explicit polygon_symbolizer(color const& fill);
     color const& get_fill() const;
     void set_fill(color const& fill);
     void set_opacity(double opacity);
@@ -45,7 +44,6 @@ struct MAPNIK_DECL polygon_symbolizer : public symbolizer_base
     double get_gamma() const;
     void set_gamma_method(gamma_method_e gamma_method);
     gamma_method_e get_gamma_method() const;
-
 private:
     color fill_;
     double opacity_;

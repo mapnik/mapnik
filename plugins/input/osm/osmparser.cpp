@@ -5,9 +5,7 @@
 #include <string>
 #include <cassert>
 
-using std::cerr;
 using std::endl;
-
 
 osm_item* osmparser::cur_item=NULL;
 long osmparser::curID=0;
@@ -102,6 +100,11 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
         cur_item->keyvals[(char*)xk] = (char*)xv;
         xmlFree(xk);
         xmlFree(xv);
+    }
+    if (xmlTextReaderIsEmptyElement(reader))
+    {
+        // Fake endElement for empty nodes
+        endElement(name);
     }
 }
 

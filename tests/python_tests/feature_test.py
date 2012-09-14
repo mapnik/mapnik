@@ -1,4 +1,5 @@
-#encoding: utf8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import itertools
 import unittest
 from nose.tools import *
@@ -43,7 +44,7 @@ def test_add_geom_wkb():
             e = g.envelope()
         else:
             e +=g.envelope()
-            
+
     eq_(e, f.envelope())
 
 def test_feature_expression_evaluation():
@@ -67,8 +68,11 @@ def test_feature_expression_evaluation_missing_attr():
     f['name'] = u'a'
     eq_(f['name'],u'a')
     expr = mapnik.Expression("[fielddoesnotexist]='a'")
-    evaluated = expr.evaluate(f)
-    eq_(evaluated,False)
+    eq_(f.has_key('fielddoesnotexist'),False)
+    try:
+        evaluated = expr.evaluate(f)
+    except Exception, e:
+        eq_("Key does not exist" in str(e),True)
     num_attributes = len(f)
     eq_(num_attributes,1)
     eq_(f.id(),1)

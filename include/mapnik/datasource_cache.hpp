@@ -37,25 +37,25 @@
 #include <map>
 
 namespace mapnik {
-class MAPNIK_DECL datasource_cache :
-        public singleton <datasource_cache,CreateStatic>,
-        private boost::noncopyable
+
+class MAPNIK_DECL datasource_cache
+    : public singleton<datasource_cache, CreateStatic>,
+      private boost::noncopyable
 {
     friend class CreateStatic<datasource_cache>;
+public:
+    std::vector<std::string> plugin_names();
+    std::string plugin_directories();
+    void register_datasources(std::string const& path);
+    bool register_datasource(std::string const& path);
+    boost::shared_ptr<datasource> create(parameters const& params, bool bind=true);
 private:
     datasource_cache();
     ~datasource_cache();
-    datasource_cache(const datasource_cache&);
-    datasource_cache& operator=(const datasource_cache&);
-    static std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
-    static bool registered_;
-    static bool insert(const std::string&  name,const lt_dlhandle module);
-    static std::vector<std::string> plugin_directories_;
-public:
-    static std::vector<std::string> plugin_names();
-    static std::string plugin_directories();
-    static void register_datasources(const std::string& path);
-    static boost::shared_ptr<datasource> create(parameters const& params, bool bind=true);
+    std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
+    bool registered_;
+    bool insert(std::string const&  name,const lt_dlhandle module);
+    std::vector<std::string> plugin_directories_;
 };
 }
 

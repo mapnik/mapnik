@@ -25,6 +25,7 @@
 #include <boost/make_shared.hpp>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
@@ -102,7 +103,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             }
             else
             {
-                std::clog <<  "could not unpickle key: " << key << "\n";
+                MAPNIK_LOG_DEBUG(bindings) << "parameters_pickle_suite: Could not unpickle key=" << key;
             }
         }
     }
@@ -134,7 +135,7 @@ mapnik::value_holder get_params_by_key2(mapnik::parameters const& p, std::string
 
 mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
 {
-    if (index < 0 || index > p.size())
+    if (index < 0 || static_cast<unsigned>(index) > p.size())
     {
         PyErr_SetString(PyExc_IndexError, "Index is out of range");
         throw boost::python::error_already_set();
@@ -143,7 +144,7 @@ mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
     parameters::const_iterator itr = p.begin();
     parameters::const_iterator end = p.end();
 
-    unsigned idx = 0;
+    int idx = 0;
     while (itr != end)
     {
         if (idx == index)

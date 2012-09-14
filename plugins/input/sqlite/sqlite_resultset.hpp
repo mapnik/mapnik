@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
 
 // stl
 #include <string.h>
@@ -103,7 +104,7 @@ public:
         return sqlite3_column_int (stmt_, col);
     }
 
-    int column_integer64 (int col)
+    sqlite_int64 column_integer64 (int col)
     {
         return sqlite3_column_int64 (stmt_, col);
     }

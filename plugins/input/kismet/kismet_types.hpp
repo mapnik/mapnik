@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -75,12 +76,12 @@ public:
     {
     }
 
-    const std::string& ssid() const
+    std::string const& ssid() const
     {
         return ssid_;
     }
 
-    const std::string& bssid() const
+    std::string const& bssid() const
     {
         return bssid_;
     }

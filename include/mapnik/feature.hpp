@@ -24,6 +24,7 @@
 #define MAPNIK_FEATURE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/raster.hpp>
@@ -76,6 +77,11 @@ public:
         return index;
     }
 
+    void add(key_type const& name, size_type index)
+    {
+        mapping_.insert(std::make_pair(name, index));
+    }
+
     size_type size() const { return mapping_.size(); }
     const_iterator begin() const { return mapping_.begin();}
     const_iterator end() const { return mapping_.end();}
@@ -84,10 +90,10 @@ private:
     map_type mapping_;
 };
 
-typedef context<std::map<std::string,std::size_t> > context_type;
-typedef boost::shared_ptr<context_type> context_ptr;
+typedef MAPNIK_DECL context<std::map<std::string,std::size_t> > context_type;
+typedef MAPNIK_DECL boost::shared_ptr<context_type> context_ptr;
 
-class feature_impl : private boost::noncopyable
+class MAPNIK_DECL feature_impl : private boost::noncopyable
 {
     friend class feature_kv_iterator;
 public:
@@ -98,9 +104,11 @@ public:
 
     feature_impl(context_ptr const& ctx, int id)
         : id_(id),
-          ctx_(ctx),
-          data_(ctx_->mapping_.size())
-    {}
+        ctx_(ctx),
+        data_(ctx_->mapping_.size()),
+        geom_cont_(),
+        raster_()
+        {}
 
     inline int id() const { return id_;}
 
@@ -128,7 +136,9 @@ public:
             data_[itr->second] = val;
         }
         else
-            throw std::out_of_range("Key doesn't exist");
+        {
+            throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
+        }
     }
 
 
@@ -157,12 +167,10 @@ public:
     value_type const& get(context_type::key_type const& key) const
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
-        if (itr != ctx_->mapping_.end()
-            && itr->second < data_.size())
-        {
-            return data_[itr->second];
-        }
-        throw std::out_of_range("Key doesn't exist");
+        if (itr != ctx_->mapping_.end())
+            return get(itr->second);
+        else
+            throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
     }
 
     value_type const& get(std::size_t index) const
@@ -172,9 +180,26 @@ public:
         throw std::out_of_range("Index out of range");
     }
 
+    boost::optional<value_type const&> get_optional(std::size_t index) const
+    {
+        if (index < data_.size())
+            return boost::optional<value_type const&>(data_[index]);
+        return boost::optional<value_type const&>();
+    }
+
     std::size_t size() const
     {
         return data_.size();
+    }
+
+    cont_type const& get_data() const
+    {
+        return data_;
+    }
+
+    void set_data(cont_type const& data)
+    {
+        data_ = data;
     }
 
     context_ptr context()
@@ -214,13 +239,14 @@ public:
 
     box2d<double> envelope() const
     {
+        // TODO - cache this
         box2d<double> result;
         for (unsigned i=0;i<num_geometries();++i)
         {
             geometry_type const& geom = get_geometry(i);
             if (i==0)
             {
-                box2d<double> box = geom.envelope();
+                box2d<double> const& box = geom.envelope();
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
             }
             else
@@ -254,12 +280,16 @@ public:
     std::string to_string() const
     {
         std::stringstream ss;
-        ss << "Feature (" << std::endl;
+        ss << "Feature ( id=" << id_ << std::endl;
         context_type::map_type::const_iterator itr = ctx_->mapping_.begin();
         context_type::map_type::const_iterator end = ctx_->mapping_.end();
         for ( ;itr!=end; ++itr)
         {
-            ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+            std::size_t index = itr->second;
+            if (index < data_.size())
+            {
+                ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+            }
         }
         ss << ")" << std::endl;
         return ss.str();
@@ -268,9 +298,9 @@ public:
 private:
     int id_;
     context_ptr ctx_;
+    cont_type data_;
     boost::ptr_vector<geometry_type> geom_cont_;
     raster_ptr raster_;
-    cont_type data_;
 };
 
 

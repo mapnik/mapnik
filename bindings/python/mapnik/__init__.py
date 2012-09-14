@@ -39,9 +39,32 @@ Several things happen when you do:
 
 """
 
+import itertools
 import os
 import sys
 import warnings
+
+def bootstrap_env():
+    """
+    If an optional settings file exists, inherit its
+    environment settings before loading the mapnik library.
+
+    This feature is intended for customized packages of mapnik.
+
+    The settings file should be a python file with an 'env' variable
+    that declares a dictionary of key:value pairs to push into the
+    global process environment, if not already set, like:
+
+        env = {'ICU_DATA':'/usr/local/share/icu/'}
+    """
+    if os.path.exists(os.path.join(os.path.dirname(__file__),'mapnik_settings.py')):
+        from mapnik_settings import env
+        process_keys = os.environ.keys()
+        for key, value in env.items():
+            if key not in process_keys:
+                os.environ[key] = value
+
+bootstrap_env()
 
 from _mapnik import *
 from paths import inputpluginspath, fontscollectionpath
@@ -67,13 +90,13 @@ class _MapnikMetaclass(BoostPythonMetaclass):
 _injector = _MapnikMetaclass('_injector', (object, ), {})
 
 def Filter(*args,**kwargs):
-    warnings.warn("'Filter' is deprecated and will be removed in Mapnik 2.0.1, use 'Expression' instead",
+    warnings.warn("'Filter' is deprecated and will be removed in Mapnik 3.x, use 'Expression' instead",
     DeprecationWarning, 2)
     return Expression(*args, **kwargs)
 
 class Envelope(Box2d):
     def __init__(self, *args, **kwargs):
-        warnings.warn("'Envelope' is deprecated and will be removed in Mapnik 2.0.1, use 'Box2d' instead",
+        warnings.warn("'Envelope' is deprecated and will be removed in Mapnik 3.x, use 'Box2d' instead",
         DeprecationWarning, 2)
         Box2d.__init__(self, *args, **kwargs)
 
@@ -113,18 +136,18 @@ class _Coord(Coord,_injector):
 
     def forward(self, projection):
         """
-        Projects the point from the geographic coordinate 
-        space  into the cartesian space. The x component is 
-        considered to be longitude, the y component the 
+        Projects the point from the geographic coordinate
+        space  into the cartesian space. The x component is
+        considered to be longitude, the y component the
         latitude.
 
-        Returns the easting (x) and northing (y) as a 
+        Returns the easting (x) and northing (y) as a
         coordinate pair.
-        
-        Example: Project the geographic coordinates of the 
+
+        Example: Project the geographic coordinates of the
                  city center of Stuttgart into the local
-                 map projection (GK Zone 3/DHDN, EPSG 31467)  
-        >>> p = Projection('+init=epsg:31467') 
+                 map projection (GK Zone 3/DHDN, EPSG 31467)
+        >>> p = Projection('+init=epsg:31467')
         >>> Coord(9.1, 48.7).forward(p)
         Coord(3507360.12813,5395719.2749)
         """
@@ -132,19 +155,19 @@ class _Coord(Coord,_injector):
 
     def inverse(self, projection):
         """
-        Projects the point from the cartesian space 
-        into the geographic space. The x component is 
-        considered to be the easting, the y component 
+        Projects the point from the cartesian space
+        into the geographic space. The x component is
+        considered to be the easting, the y component
         to be the northing.
-        
-        Returns the longitude (x) and latitude (y) as a 
+
+        Returns the longitude (x) and latitude (y) as a
         coordinate pair.
 
-        Example: Project the cartesian coordinates of the 
+        Example: Project the cartesian coordinates of the
                  city center of Stuttgart in the local
                  map projection (GK Zone 3/DHDN, EPSG 31467)
                  into geographic coordinates:
-        >>> p = Projection('+init=epsg:31467') 
+        >>> p = Projection('+init=epsg:31467')
         >>> Coord(3507360.12813,5395719.2749).inverse(p)
         Coord(9.1, 48.7)
         """
@@ -152,13 +175,13 @@ class _Coord(Coord,_injector):
 
 class _Box2d(Box2d,_injector):
     """
-    Represents a spatial envelope (i.e. bounding box). 
-    
-    
+    Represents a spatial envelope (i.e. bounding box).
+
+
     Following operators are defined for Box2d:
 
     Addition:
-    e1 + e2 is equvalent to e1.expand_to_include(e2) but yields 
+    e1 + e2 is equvalent to e1.expand_to_include(e2) but yields
     a new envelope instead of modifying e1
 
     Subtraction:
@@ -168,7 +191,7 @@ class _Box2d(Box2d,_injector):
     Multiplication and division change the width and height of the envelope
     by the given factor without modifying its center..
 
-    That is, e1 * x is equivalent to: 
+    That is, e1 * x is equivalent to:
            e1.width(x * e1.width())
            e1.height(x * e1.height()),
     except that a new envelope is created instead of modifying e1.
@@ -184,8 +207,8 @@ class _Box2d(Box2d,_injector):
 
     def forward(self, projection):
         """
-        Projects the envelope from the geographic space 
-        into the cartesian space by projecting its corner 
+        Projects the envelope from the geographic space
+        into the cartesian space by projecting its corner
         points.
 
         See also:
@@ -195,8 +218,8 @@ class _Box2d(Box2d,_injector):
 
     def inverse(self, projection):
         """
-        Projects the envelope from the cartesian space 
-        into the geographic space by projecting its corner 
+        Projects the envelope from the cartesian space
+        into the geographic space by projecting its corner
         points.
 
         See also:
@@ -211,7 +234,7 @@ class _Projection(Projection,_injector):
 
     def forward(self,obj):
         """
-        Projects the given object (Box2d or Coord) 
+        Projects the given object (Box2d or Coord)
         from the geographic space into the cartesian space.
 
         See also:
@@ -222,7 +245,7 @@ class _Projection(Projection,_injector):
 
     def inverse(self,obj):
         """
-        Projects the given object (Box2d or Coord) 
+        Projects the given object (Box2d or Coord)
         from the cartesian space into the geographic space.
 
         See also:
@@ -250,6 +273,11 @@ class _Datasource(Datasource,_injector):
 class _Color(Color,_injector):
     def __repr__(self):
         return "Color(R=%d,G=%d,B=%d,A=%d)" % (self.r,self.g,self.b,self.a)
+
+class _ProcessedText(ProcessedText, _injector):
+    def append(self, properties, text):
+        #More pythonic name
+        self.push_back(properties, text)
 
 class _Symbolizers(Symbolizers,_injector):
 
@@ -280,12 +308,12 @@ def Datasource(**keywords):
     Create a Mapnik Datasource using a dictionary of parameters.
 
     Keywords must include:
-    
+
       type='plugin_name' # e.g. type='gdal'
-    
+
     See the convenience factory methods of each input plugin for
     details on additional required keyword arguments.
-    
+
     """
 
     return CreateDatasource(keywords)
@@ -303,7 +331,7 @@ def Shapefile(**keywords):
       encoding -- file encoding (default 'utf-8')
 
     >>> from mapnik import Shapefile, Layer
-    >>> shp = Shapefile(base='/home/mapnik/data',file='world_borders') 
+    >>> shp = Shapefile(base='/home/mapnik/data',file='world_borders')
     >>> lyr = Layer('Shapefile Layer')
     >>> lyr.datasource = shp
 
@@ -317,8 +345,8 @@ def PostGIS(**keywords):
     Required keyword arguments:
       dbname -- database name to connect to
       table -- table name or subselect query
-      
-      *Note: if using subselects for the 'table' value consider also 
+
+      *Note: if using subselects for the 'table' value consider also
        passing the 'geometry_field' and 'srid' and 'extent_from_subquery'
        options and/or specifying the 'geometry_table' option.
 
@@ -377,7 +405,7 @@ def Raster(**keywords):
       tile_stride -- if an image is in tiles, what's the increment between rows/cols (default 1)
 
     >>> from mapnik import Raster, Layer
-    >>> raster = Raster(base='/home/mapnik/data',file='elevation.tif',lox=-122.8,loy=48.5,hix=-122.7,hiy=48.6) 
+    >>> raster = Raster(base='/home/mapnik/data',file='elevation.tif',lox=-122.8,loy=48.5,hix=-122.7,hiy=48.6)
     >>> lyr = Layer('Tiff Layer')
     >>> lyr.datasource = raster
 
@@ -451,7 +479,7 @@ def Ogr(**keywords):
       encoding -- file encoding (default 'utf-8')
 
     >>> from mapnik import Ogr, Layer
-    >>> datasource = Ogr(base='/home/mapnik/data',file='rivers.geojson',layer='OGRGeoJSON') 
+    >>> datasource = Ogr(base='/home/mapnik/data',file='rivers.geojson',layer='OGRGeoJSON')
     >>> lyr = Layer('OGR Layer from GeoJSON file')
     >>> lyr.datasource = datasource
 
@@ -479,7 +507,7 @@ def SQLite(**keywords):
       use_spatial_index -- boolean, instruct sqlite plugin to use Rtree spatial index (default True)
 
     >>> from mapnik import SQLite, Layer
-    >>> sqlite = SQLite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239') 
+    >>> sqlite = SQLite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239')
     >>> lyr = Layer('SQLite Layer')
     >>> lyr.datasource = sqlite
 
@@ -499,7 +527,7 @@ def Rasterlite(**keywords):
       extent -- manually specified data extent (comma delimited string, default None)
 
     >>> from mapnik import Rasterlite, Layer
-    >>> rasterlite = Rasterlite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239') 
+    >>> rasterlite = Rasterlite(base='/home/mapnik/data',file='osm.db',table='osm',extent='-20037508,-19929239,20037508,19929239')
     >>> lyr = Layer('Rasterlite Layer')
     >>> lyr.datasource = rasterlite
 
@@ -519,7 +547,7 @@ def Osm(**keywords):
       bbox -- data bounding box for fetching data (default None)
 
     >>> from mapnik import Osm, Layer
-    >>> datasource = Osm(file='test.osm') 
+    >>> datasource = Osm(file='test.osm')
     >>> lyr = Layer('Osm Layer')
     >>> lyr.datasource = datasource
 
@@ -541,7 +569,7 @@ def Kismet(**keywords):
       extent -- manually specified data extent (comma delimited string, default None)
 
     >>> from mapnik import Kismet, Layer
-    >>> datasource = Kismet(host='localhost',port=2501,extent='-179,-85,179,85') 
+    >>> datasource = Kismet(host='localhost',port=2501,extent='-179,-85,179,85')
     >>> lyr = Layer('Kismet Server Layer')
     >>> lyr.datasource = datasource
 
@@ -559,7 +587,7 @@ def Geos(**keywords):
       extent -- manually specified data extent (comma delimited string, default None)
 
     >>> from mapnik import Geos, Layer
-    >>> datasource = Geos(wkt='MULTIPOINT(100 100, 50 50, 0 0)') 
+    >>> datasource = Geos(wkt='MULTIPOINT(100 100, 50 50, 0 0)')
     >>> lyr = Layer('GEOS Layer from WKT string')
     >>> lyr.datasource = datasource
 
@@ -567,12 +595,537 @@ def Geos(**keywords):
     keywords['type'] = 'geos'
     return CreateDatasource(keywords)
 
-def mapnik_version_string(version=mapnik_version()):
-    """Return the Mapnik version as a string."""
-    patch_level = version % 100
-    minor_version = version / 100 % 1000
-    major_version = version / 100000
-    return '%s.%s.%s' % ( major_version, minor_version,patch_level)
+def Python(**keywords):
+    """Create a Python Datasource.
+
+    >>> from mapnik import Python, PythonDatasource
+    >>> datasource = Python('PythonDataSource')
+    >>> lyr = Layer('Python datasource')
+    >>> lyr.datasource = datasource
+    """
+    keywords['type'] = 'python'
+    return CreateDatasource(keywords)
+
+class PythonDatasource(object):
+    """A base class for a Python data source.
+
+    Optional arguments:
+      envelope -- a mapnik.Box2d (minx, miny, maxx, maxy) envelope of the data source, default (-180,-90,180,90)
+      geometry_type -- one of the DataGeometryType enumeration values, default Point
+      data_type -- one of the DataType enumerations, default Vector
+    """
+    def __init__(self, envelope=None, geometry_type=None, data_type=None):
+        self.envelope = envelope or Box2d(-180, -90, 180, 90)
+        self.geometry_type = geometry_type or DataGeometryType.Point
+        self.data_type = data_type or DataType.Vector
+
+    def features(self, query):
+        """Return an iterable which yields instances of Feature for features within the passed query.
+
+        Required arguments:
+          query -- a Query instance specifying the region for which features should be returned
+        """
+        return None
+
+    def features_at_point(self, point):
+        """Rarely uses. Return an iterable which yields instances of Feature for the specified point."""
+        return None
+
+    @classmethod
+    def wkb_features(cls, keys, features):
+        """A convenience function to wrap an iterator yielding pairs of WKB format geometry and dictionaries of
+        key-value pairs into mapnik features. Return this from PythonDatasource.features() passing it a sequence of keys
+        to appear in the output and an iterator yielding features.
+
+        For example. One might have a features() method in a derived class like the following:
+
+        def features(self, query):
+            # ... create WKB features feat1 and feat2
+
+            return mapnik.PythonDatasource.wkb_features(
+                keys = ( 'name', 'author' ),
+                features = [
+                    (feat1, { 'name': 'feat1', 'author': 'alice' }),
+                    (feat2, { 'name': 'feat2', 'author': 'bob' }),
+                ]
+            )
+
+        """
+        ctx = Context()
+        [ctx.push(x) for x in keys]
+
+        def make_it(feat, idx):
+            f = Feature(ctx, idx)
+            geom, attrs = feat
+            f.add_geometries_from_wkb(geom)
+            for k, v in attrs.iteritems():
+                f[k] = v
+            return f
+
+        return itertools.imap(make_it, features, itertools.count(1))
+
+    @classmethod
+    def wkt_features(cls, keys, features):
+        """A convenience function to wrap an iterator yielding pairs of WKT format geometry and dictionaries of
+        key-value pairs into mapnik features. Return this from PythonDatasource.features() passing it a sequence of keys
+        to appear in the output and an iterator yielding features.
+
+        For example. One might have a features() method in a derived class like the following:
+
+        def features(self, query):
+            # ... create WKT features feat1 and feat2
+
+            return mapnik.PythonDatasource.wkt_features(
+                keys = ( 'name', 'author' ),
+                features = [
+                    (feat1, { 'name': 'feat1', 'author': 'alice' }),
+                    (feat2, { 'name': 'feat2', 'author': 'bob' }),
+                ]
+            )
+
+        """
+        ctx = Context()
+        [ctx.push(x) for x in keys]
+
+        def make_it(feat, idx):
+            f = Feature(ctx, idx)
+            geom, attrs = feat
+            f.add_geometries_from_wkt(geom)
+            for k, v in attrs.iteritems():
+                f[k] = v
+            return f
+
+        return itertools.imap(make_it, features, itertools.count(1))
+
+class _TextSymbolizer(TextSymbolizer,_injector):
+    @property
+    def name(self):
+        if isinstance(self.properties.format_tree, FormattingText):
+            return self.properties.format_tree.text
+        else:
+            return None # This text symbolizer is using complex formatting features.
+                        # There is no single expression which could be returned as name
+
+    @name.setter
+    def name(self, name):
+        self.properties.format_tree = FormattingText(name)
+
+    @property
+    def text_size(self):
+        warnings.warn("'text_size' is deprecated, use format.text_size",
+        DeprecationWarning, 2)
+        return self.format.text_size
+
+    @text_size.setter
+    def text_size(self, text_size):
+        warnings.warn("'text_size' is deprecated, use format.text_size",
+        DeprecationWarning, 2)
+        self.format.text_size = text_size
+
+    @property
+    def face_name(self):
+        warnings.warn("'face_name' is deprecated, use format.face_name",
+        DeprecationWarning, 2)
+        return self.format.face_name
+
+    @face_name.setter
+    def face_name(self, face_name):
+        warnings.warn("'face_name' is deprecated, use format.face_name",
+        DeprecationWarning, 2)
+        self.format.face_name = face_name
+
+
+
+    @property
+    def fontset(self):
+        warnings.warn("'fontset' is deprecated, use format.fontset",
+        DeprecationWarning, 2)
+        return self.format.fontset
+
+    @fontset.setter
+    def fontset(self, fontset):
+        warnings.warn("'fontset' is deprecated, use format.fontset",
+        DeprecationWarning, 2)
+        self.format.fontset = fontset
+
+
+
+    @property
+    def character_spacing(self):
+        warnings.warn("'character_spacing' is deprecated, use format.character_spacing",
+        DeprecationWarning, 2)
+        return self.format.character_spacing
+
+    @character_spacing.setter
+    def character_spacing(self, character_spacing):
+        warnings.warn("'character_spacing' is deprecated, use format.character_spacing",
+        DeprecationWarning, 2)
+        self.format.character_spacing = character_spacing
+
+
+
+    @property
+    def line_spacing(self):
+        warnings.warn("'line_spacing' is deprecated, use format.line_spacing",
+        DeprecationWarning, 2)
+        return self.format.line_spacing
+
+    @line_spacing.setter
+    def line_spacing(self, line_spacing):
+        warnings.warn("'line_spacing' is deprecated, use format.line_spacing",
+        DeprecationWarning, 2)
+        self.format.line_spacing = line_spacing
+
+
+
+    @property
+    def text_opacity(self):
+        warnings.warn("'text_opacity' is deprecated, use format.text_opacity",
+        DeprecationWarning, 2)
+        return self.format.text_opacity
+
+    @text_opacity.setter
+    def text_opacity(self, text_opacity):
+        warnings.warn("'text_opacity' is deprecated, use format.text_opacity",
+        DeprecationWarning, 2)
+        self.format.text_opacity = text_opacity
+
+
+
+    @property
+    def wrap_char(self):
+        warnings.warn("'wrap_char' is deprecated, use format.wrap_char",
+        DeprecationWarning, 2)
+        return self.format.wrap_char
+
+    @wrap_char.setter
+    def wrap_char(self, wrap_char):
+        warnings.warn("'wrap_char' is deprecated, use format.wrap_char",
+        DeprecationWarning, 2)
+        self.format.wrap_char = wrap_char
+
+
+    @property
+    def wrap_character(self):
+        warnings.warn("'wrap_character' is deprecated, use format.wrap_character",
+        DeprecationWarning, 2)
+        return self.format.wrap_character
+
+    @wrap_char.setter
+    def wrap_character(self, wrap_character):
+        warnings.warn("'wrap_char' is deprecated, use format.wrap_character",
+        DeprecationWarning, 2)
+        self.format.wrap_character = wrap_character
+
+
+    @property
+    def wrap_before(self):
+        warnings.warn("'wrap_before' is deprecated, use format.wrap_before",
+        DeprecationWarning, 2)
+        return self.format.wrap_before
+
+    @wrap_before.setter
+    def wrap_before(self, wrap_before):
+        warnings.warn("'wrap_before' is deprecated, use format.wrap_before",
+        DeprecationWarning, 2)
+        self.format.wrap_before = wrap_before
+
+
+
+    @property
+    def text_transform(self):
+        warnings.warn("'text_transform' is deprecated, use format.text_transform",
+        DeprecationWarning, 2)
+        return self.format.text_transform
+
+    @text_transform.setter
+    def text_transform(self, text_transform):
+        warnings.warn("'text_transform' is deprecated, use format.text_transform",
+        DeprecationWarning, 2)
+        self.format.text_transform = text_transform
+
+
+
+    @property
+    def fill(self):
+        warnings.warn("'fill' is deprecated, use format.fill",
+        DeprecationWarning, 2)
+        return self.format.fill
+
+    @fill.setter
+    def fill(self, fill):
+        warnings.warn("'fill' is deprecated, use format.fill",
+        DeprecationWarning, 2)
+        self.format.fill = fill
+
+
+
+    @property
+    def halo_fill(self):
+        warnings.warn("'halo_fill' is deprecated, use format.halo_fill",
+        DeprecationWarning, 2)
+        return self.format.halo_fill
+
+    @halo_fill.setter
+    def halo_fill(self, halo_fill):
+        warnings.warn("'halo_fill' is deprecated, use format.halo_fill",
+        DeprecationWarning, 2)
+        self.format.halo_fill = halo_fill
+
+
+
+    @property
+    def halo_radius(self):
+        warnings.warn("'halo_radius' is deprecated, use format.halo_radius",
+        DeprecationWarning, 2)
+        return self.format.halo_radius
+
+    @halo_radius.setter
+    def halo_radius(self, halo_radius):
+        warnings.warn("'halo_radius' is deprecated, use format.halo_radius",
+        DeprecationWarning, 2)
+        self.format.halo_radius = halo_radius
+
+
+    @property
+    def label_placement(self):
+        warnings.warn("'label_placement' is deprecated, use properties.label_placement",
+        DeprecationWarning, 2)
+        return self.properties.label_placement
+
+    @label_placement.setter
+    def label_placement(self, label_placement):
+        warnings.warn("'label_placement' is deprecated, use properties.label_placement",
+        DeprecationWarning, 2)
+        self.properties.label_placement = label_placement
+
+
+
+    @property
+    def horizontal_alignment(self):
+        warnings.warn("'horizontal_alignment' is deprecated, use properties.horizontal_alignment",
+        DeprecationWarning, 2)
+        return self.properties.horizontal_alignment
+
+    @horizontal_alignment.setter
+    def horizontal_alignment(self, horizontal_alignment):
+        warnings.warn("'horizontal_alignment' is deprecated, use properties.horizontal_alignment",
+        DeprecationWarning, 2)
+        self.properties.horizontal_alignment = horizontal_alignment
+
+
+
+    @property
+    def justify_alignment(self):
+        warnings.warn("'justify_alignment' is deprecated, use properties.justify_alignment",
+        DeprecationWarning, 2)
+        return self.properties.justify_alignment
+
+    @justify_alignment.setter
+    def justify_alignment(self, justify_alignment):
+        warnings.warn("'justify_alignment' is deprecated, use properties.justify_alignment",
+        DeprecationWarning, 2)
+        self.properties.justify_alignment = justify_alignment
+
+
+
+    @property
+    def vertical_alignment(self):
+        warnings.warn("'vertical_alignment' is deprecated, use properties.vertical_alignment",
+        DeprecationWarning, 2)
+        return self.properties.vertical_alignment
+
+    @vertical_alignment.setter
+    def vertical_alignment(self, vertical_alignment):
+        warnings.warn("'vertical_alignment' is deprecated, use properties.vertical_alignment",
+        DeprecationWarning, 2)
+        self.properties.vertical_alignment = vertical_alignment
+
+
+
+    @property
+    def orientation(self):
+        warnings.warn("'orientation' is deprecated, use properties.orientation",
+        DeprecationWarning, 2)
+        return self.properties.orientation
+
+    @orientation.setter
+    def orientation(self, orientation):
+        warnings.warn("'orientation' is deprecated, use properties.orientation",
+        DeprecationWarning, 2)
+        self.properties.orientation = orientation
+
+
+
+    @property
+    def displacement(self):
+        warnings.warn("'displacement' is deprecated, use properties.displacement",
+        DeprecationWarning, 2)
+        return self.properties.displacement
+
+    @displacement.setter
+    def displacement(self, displacement):
+        warnings.warn("'displacement' is deprecated, use properties.displacement",
+        DeprecationWarning, 2)
+        self.properties.displacement = displacement
+
+
+
+    @property
+    def label_spacing(self):
+        warnings.warn("'label_spacing' is deprecated, use properties.label_spacing",
+        DeprecationWarning, 2)
+        return self.properties.label_spacing
+
+    @label_spacing.setter
+    def label_spacing(self, label_spacing):
+        warnings.warn("'label_spacing' is deprecated, use properties.label_spacing",
+        DeprecationWarning, 2)
+        self.properties.label_spacing = label_spacing
+
+
+
+    @property
+    def label_position_tolerance(self):
+        warnings.warn("'label_position_tolerance' is deprecated, use properties.label_position_tolerance",
+        DeprecationWarning, 2)
+        return self.properties.label_position_tolerance
+
+    @label_position_tolerance.setter
+    def label_position_tolerance(self, label_position_tolerance):
+        warnings.warn("'label_position_tolerance' is deprecated, use properties.label_position_tolerance",
+        DeprecationWarning, 2)
+        self.properties.label_position_tolerance = label_position_tolerance
+
+
+
+    @property
+    def avoid_edges(self):
+        warnings.warn("'avoid_edges' is deprecated, use properties.avoid_edges",
+        DeprecationWarning, 2)
+        return self.properties.avoid_edges
+
+    @avoid_edges.setter
+    def avoid_edges(self, avoid_edges):
+        warnings.warn("'avoid_edges' is deprecated, use properties.avoid_edges",
+        DeprecationWarning, 2)
+        self.properties.avoid_edges = avoid_edges
+
+
+
+    @property
+    def minimum_distance(self):
+        warnings.warn("'minimum_distance' is deprecated, use properties.minimum_distance",
+        DeprecationWarning, 2)
+        return self.properties.minimum_distance
+
+    @minimum_distance.setter
+    def minimum_distance(self, minimum_distance):
+        warnings.warn("'minimum_distance' is deprecated, use properties.minimum_distance",
+        DeprecationWarning, 2)
+        self.properties.minimum_distance = minimum_distance
+
+
+
+    @property
+    def minimum_padding(self):
+        warnings.warn("'minimum_padding' is deprecated, use properties.minimum_padding",
+        DeprecationWarning, 2)
+        return self.properties.minimum_padding
+
+    @minimum_padding.setter
+    def minimum_padding(self, minimum_padding):
+        warnings.warn("'minimum_padding' is deprecated, use properties.minimum_padding",
+        DeprecationWarning, 2)
+        self.properties.minimum_padding = minimum_padding
+
+
+
+    @property
+    def minimum_path_length(self):
+        warnings.warn("'minimum_path_length' is deprecated, use properties.minimum_path_length",
+        DeprecationWarning, 2)
+        return self.properties.minimum_path_length
+
+    @minimum_path_length.setter
+    def minimum_path_length(self, minimum_path_length):
+        warnings.warn("'minimum_path_length' is deprecated, use properties.minimum_path_length",
+        DeprecationWarning, 2)
+        self.properties.minimum_path_length = minimum_path_length
+
+
+
+    @property
+    def maximum_angle_char_delta(self):
+        warnings.warn("'maximum_angle_char_delta' is deprecated, use properties.maximum_angle_char_delta",
+        DeprecationWarning, 2)
+        return self.properties.maximum_angle_char_delta
+
+    @maximum_angle_char_delta.setter
+    def maximum_angle_char_delta(self, maximum_angle_char_delta):
+        warnings.warn("'maximum_angle_char_delta' is deprecated, use properties.maximum_angle_char_delta",
+        DeprecationWarning, 2)
+        self.properties.maximum_angle_char_delta = maximum_angle_char_delta
+
+
+
+    @property
+    def force_odd_labels(self):
+        warnings.warn("'force_odd_labels' is deprecated, use properties.force_odd_labels",
+        DeprecationWarning, 2)
+        return self.properties.force_odd_labels
+
+    @force_odd_labels.setter
+    def force_odd_labels(self, force_odd_labels):
+        warnings.warn("'force_odd_labels' is deprecated, use properties.force_odd_labels",
+        DeprecationWarning, 2)
+        self.properties.force_odd_labels = force_odd_labels
+
+
+
+    @property
+    def allow_overlap(self):
+        warnings.warn("'allow_overlap' is deprecated, use properties.allow_overlap",
+        DeprecationWarning, 2)
+        return self.properties.allow_overlap
+
+    @allow_overlap.setter
+    def allow_overlap(self, allow_overlap):
+        warnings.warn("'allow_overlap' is deprecated, use properties.allow_overlap",
+        DeprecationWarning, 2)
+        self.properties.allow_overlap = allow_overlap
+
+
+
+    @property
+    def text_ratio(self):
+        warnings.warn("'text_ratio' is deprecated, use properties.text_ratio",
+        DeprecationWarning, 2)
+        return self.properties.text_ratio
+
+    @text_ratio.setter
+    def text_ratio(self, text_ratio):
+        warnings.warn("'text_ratio' is deprecated, use properties.text_ratio",
+        DeprecationWarning, 2)
+        self.properties.text_ratio = text_ratio
+
+
+
+    @property
+    def wrap_width(self):
+        warnings.warn("'wrap_width' is deprecated, use properties.wrap_width",
+        DeprecationWarning, 2)
+        return self.properties.wrap_width
+
+    @wrap_width.setter
+    def wrap_width(self, wrap_width):
+        warnings.warn("'wrap_width' is deprecated, use properties.wrap_width",
+        DeprecationWarning, 2)
+        self.properties.wrap_width = wrap_width
+
+
+
+
 
 def mapnik_version_from_string(version_string):
     """Return the Mapnik version from a string."""
@@ -581,7 +1134,7 @@ def mapnik_version_from_string(version_string):
 
 def register_plugins(path=inputpluginspath):
     """Register plugins located by specified path"""
-    DatasourceCache.instance().register_datasources(path)
+    DatasourceCache.register_datasources(path)
 
 def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont']):
     """Recursively register fonts using path argument as base directory"""
@@ -593,102 +1146,3 @@ def register_fonts(path=fontscollectionpath,valid_extensions=['.ttf','.otf','.tt
 # auto-register known plugins and fonts
 register_plugins()
 register_fonts()
-
-# Explicitly export API members to avoid namespace pollution
-# and ensure correct documentation processing
-__all__ = [
-    # classes
-    'Color',
-    'Coord',
-    'Palette',
-    #'ColorBand',
-    'CompositeOp',
-    'DatasourceCache',
-    'MemoryDatasource',
-    'Box2d',
-    'Feature',
-    'Featureset',
-    'FontEngine',
-    'FontSet',
-    'Geometry2d',
-    'Image',
-    'ImageView',
-    'Grid',
-    'GridView',
-    'Layer',
-    'Layers',
-    'LinePatternSymbolizer',
-    'LineSymbolizer',
-    'Map',
-    'MarkersSymbolizer',
-    'Names',
-    'Path',
-    'Parameter',
-    'Parameters',
-    'PointSymbolizer',
-    'PolygonPatternSymbolizer',
-    'PolygonSymbolizer',
-    'ProjTransform',
-    'Projection',
-    'Query',
-    'RasterSymbolizer',
-    'RasterColorizer',
-    'Rule', 'Rules',
-    'ShieldSymbolizer',
-    'Singleton',
-    'Stroke',
-    'Style',
-    'Symbolizer',
-    'Symbolizers',
-    'TextSymbolizer',
-    'ViewTransform',
-    # enums
-    'aspect_fix_mode',
-    'point_placement',
-    'label_placement',
-    'line_cap',
-    'line_join',
-    'text_transform',
-    'vertical_alignment',
-    'horizontal_alignment',
-    'justify_alignment',
-    'pattern_alignment',
-    'filter_mode',
-    # functions
-    # datasources
-    'Datasource',
-    'CreateDatasource',
-    'Shapefile',
-    'PostGIS',
-    'Raster',
-    'Gdal',
-    'Occi',
-    'Ogr',
-    'SQLite',
-    'Osm',
-    'Kismet',
-    #   version and environment
-    'mapnik_version_string',
-    'mapnik_version',
-    'has_cairo',
-    'has_pycairo',
-    #   factory methods
-    'Expression',
-    'PathExpression',
-    #   load/save/render
-    'load_map',
-    'load_map_from_string',
-    'save_map',
-    'save_map_to_string',
-    'render',
-    'render_grid',
-    'render_tile_to_file',
-    'render_to_file',
-    #   other
-    'register_plugins',
-    'register_fonts',
-    'scale_denominator',
-    # deprecated
-    'Filter',
-    'Envelope',
-    ]

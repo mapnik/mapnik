@@ -61,6 +61,7 @@ public:
         width_ = rhs.width_;
         height_ = rhs.height_;
         data_ = rhs.data_;
+        return *this;
     }
 
     inline unsigned x() const
@@ -77,6 +78,7 @@ public:
     {
         return width_;
     }
+
     inline unsigned height() const
     {
         return height_;

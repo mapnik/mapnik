@@ -39,6 +39,11 @@ def f_(set):
 
 if __name__=='__main__':
     # if passed, set up bbox
+
+    #test_ = "load()"
+    test_ = "render()"
+    init(stylesheet)
+
     if len(sys.argv) == 4:
         bbox = sys.argv[3]
         if ',' in bbox:
@@ -47,10 +52,6 @@ if __name__=='__main__':
             parts = bbox.split(' ')
         env = mapnik.Box2d(*map(float,parts))
         m.zoom_to_box(env)
-
-    #test_ = "load()"
-    test_ = "render()"
-    init(stylesheet)
     
     # load once - making sure mmap'd shapefiles are loaded
     eval(test_)

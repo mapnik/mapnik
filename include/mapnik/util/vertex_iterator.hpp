@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_VERTEX_ITERATOR_HPP
 #define MAPNIK_VERTEX_ITERATOR_HPP
 
@@ -48,7 +46,9 @@ namespace mapnik { namespace util {
         typedef vertex_vector<T> container_type;
 
         vertex_iterator()
-            : v_(SEG_END,0,0)
+            : v_(SEG_END,0,0),
+              vertices_(),
+              pos_(0)
         {}
 
         explicit vertex_iterator(container_type const& vertices)
@@ -76,8 +76,8 @@ namespace mapnik { namespace util {
             return v_;
         }
 
-        container_type const *vertices_;
         value_type v_;
+        container_type const *vertices_;
         unsigned pos_;
     };
 

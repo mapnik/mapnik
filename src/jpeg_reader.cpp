@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id: jpeg_reader.cpp 33 2005-04-04 13:01:03Z dane $
-
 // mapnik
 #include <mapnik/image_reader.hpp>
 #include <mapnik/color.hpp>
@@ -39,10 +37,6 @@ extern "C"
 // std
 #include <cstdio>
 
-#ifdef MAPNIK_DEBUG
-#include <iostream>
-#endif
-
 namespace mapnik
 {
 class JpegReader : public image_reader, boost::noncopyable
@@ -52,7 +46,7 @@ private:
     unsigned width_;
     unsigned height_;
 public:
-    explicit JpegReader(const std::string& fileName);
+    explicit JpegReader(std::string const& fileName);
     ~JpegReader();
     unsigned width() const;
     unsigned height() const;
@@ -63,14 +57,14 @@ private:
 
 namespace
 {
-image_reader* createJpegReader(const std::string& file)
+image_reader* createJpegReader(std::string const& file)
 {
     return new JpegReader(file);
 }
 const bool registered = register_image_reader("jpeg",createJpegReader);
 }
 
-JpegReader::JpegReader(const std::string& fileName)
+JpegReader::JpegReader(std::string const& fileName)
     : fileName_(fileName),
       width_(0),
       height_(0)

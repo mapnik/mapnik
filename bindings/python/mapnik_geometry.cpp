@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 // boost
 #include <boost/python.hpp>
@@ -32,11 +31,14 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/json/geometry_parser.hpp>
+#include <mapnik/json/geojson_generator.hpp>
 
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
+#include <mapnik/util/geometry_to_svg.hpp>
 #endif
 
 namespace {
@@ -48,7 +50,7 @@ typedef boost::ptr_vector<geometry_type> path_type;
 
 geometry_type const& getitem_impl(path_type & p, int key)
 {
-    if (key >=0 && key < p.size())
+    if (key >=0 && key < static_cast<int>(p.size()))
         return p[key];
     PyErr_SetString(PyExc_IndexError, "Index is out of range");
     throw boost::python::error_already_set();
@@ -56,28 +58,63 @@ geometry_type const& getitem_impl(path_type & p, int key)
 
 void add_wkt_impl(path_type& p, std::string const& wkt)
 {
-    bool result = mapnik::from_wkt(wkt , p);
-    if (!result) throw std::runtime_error("Failed to parse WKT");
+    if (!mapnik::from_wkt(wkt , p))
+        throw std::runtime_error("Failed to parse WKT");
 }
 
 void add_wkb_impl(path_type& p, std::string const& wkb)
 {
-    mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size());
+    if (!mapnik::geometry_utils::from_wkb(p, wkb.c_str(), wkb.size()))
+        throw std::runtime_error("Failed to parse WKB");
+}
+
+void add_geojson_impl(path_type& p, std::string const& json)
+{
+    if (!mapnik::json::from_geojson(json, p))
+        throw std::runtime_error("Failed to parse geojson geometry");
 }
 
 boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
 {
     boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
-    bool result = mapnik::from_wkt(wkt, *paths);
-    if (!result) throw std::runtime_error("Failed to parse WKT");
+    if (!mapnik::from_wkt(wkt, *paths))
+        throw std::runtime_error("Failed to parse WKT");
     return paths;
 }
 
 boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
 {
     boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
-    mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size());
+    if (!mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size()))
+        throw std::runtime_error("Failed to parse WKB");
     return paths;
+}
+
+boost::shared_ptr<path_type> from_geojson_impl(std::string const& json)
+{
+    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    if (! mapnik::json::from_geojson(json, *paths))
+        throw std::runtime_error("Failed to parse geojson geometry");
+    return paths;
+}
+
+mapnik::box2d<double> envelope_impl(path_type & p)
+{
+    mapnik::box2d<double> b;
+    bool first = true;
+    BOOST_FOREACH(mapnik::geometry_type const& geom, p)
+    {
+        if (first)
+        {
+            b = geom.envelope();
+            first=false;
+        }
+        else
+        {
+            b.expand_to_include(geom.envelope());
+        }
+    }
+    return b;
 }
 
 }
@@ -93,13 +130,20 @@ inline std::string boost_version()
 PyObject* to_wkb( geometry_type const& geom, mapnik::util::wkbByteOrder byte_order)
 {
     mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(geom,byte_order);
-    return
+    if (wkb)
+    {
+        return
 #if PY_VERSION_HEX >= 0x03000000
-        ::PyBytes_FromStringAndSize
+            ::PyBytes_FromStringAndSize
 #else
-        ::PyString_FromStringAndSize
+            ::PyString_FromStringAndSize
 #endif
-        ((const char*)wkb->buffer(),wkb->size());
+            ((const char*)wkb->buffer(),wkb->size());
+    }
+    else
+    {
+        Py_RETURN_NONE;
+    }
 }
 #else
 PyObject* to_wkb( geometry_type const& geom)
@@ -114,13 +158,20 @@ PyObject* to_wkb( geometry_type const& geom)
 PyObject* to_wkb2( path_type const& p, mapnik::util::wkbByteOrder byte_order)
 {
     mapnik::util::wkb_buffer_ptr wkb = mapnik::util::to_wkb(p,byte_order);
-    return
+    if (wkb)
+    {
+        return
 #if PY_VERSION_HEX >= 0x03000000
-        ::PyBytes_FromStringAndSize
+            ::PyBytes_FromStringAndSize
 #else
-        ::PyString_FromStringAndSize
+            ::PyString_FromStringAndSize
 #endif
-        ((const char*)wkb->buffer(),wkb->size());
+            ((const char*)wkb->buffer(),wkb->size());
+    }
+    else
+    {
+        Py_RETURN_NONE;
+    }
 }
 #else
 PyObject* to_wkb2( path_type const& p)
@@ -163,6 +214,51 @@ std::string to_wkt2( path_type const& geom)
 #endif
 }
 
+std::string to_geojson( path_type const& geom)
+{
+    std::string json;
+    mapnik::json::geometry_generator g;
+    if (!g.generate(json,geom))
+    {
+        throw std::runtime_error("Failed to generate GeoJSON");
+    }
+    return json;
+}
+
+std::string to_svg( geometry_type const& geom)
+{
+#if BOOST_VERSION >= 104700
+    std::string svg; // Use Python String directly ?
+    bool result = mapnik::util::to_svg(svg,geom);
+    if (!result)
+    {
+        throw std::runtime_error("Generate WKT failed");
+    }
+    return svg;
+#else
+    throw std::runtime_error("mapnik::to_wkt() requires at least boost 1.47 while your build was compiled against boost "
+                             + boost_version());
+#endif
+}
+
+/*
+// https://github.com/mapnik/mapnik/issues/1437
+std::string to_svg2( path_type const& geom)
+{
+#if BOOST_VERSION >= 104700
+    std::string svg; // Use Python String directly ?
+    bool result = mapnik::util::to_svg(svg,geom);
+    if (!result)
+    {
+        throw std::runtime_error("Generate WKT failed");
+    }
+    return svg;
+#else
+    throw std::runtime_error("mapnik::to_svg() requires at least boost 1.47 while your build was compiled against boost "
+                             + boost_version());
+#endif
+}*/
+
 
 void export_geometry()
 {
@@ -188,20 +284,27 @@ void export_geometry()
         .def("type",&geometry_type::type)
         .def("to_wkb",&to_wkb)
         .def("to_wkt",&to_wkt)
+        .def("to_svg",&to_svg)
         // TODO add other geometry_type methods
         ;
 
     class_<path_type, boost::shared_ptr<path_type>, boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
         .def("__len__", &path_type::size)
+        .def("envelope",envelope_impl)
         .def("add_wkt",add_wkt_impl)
         .def("add_wkb",add_wkb_impl)
+        .def("add_geojson",add_geojson_impl)
         .def("to_wkt",&to_wkt2)
+        //.def("to_svg",&to_svg2)
         .def("to_wkb",&to_wkb2)
         .def("from_wkt",from_wkt_impl)
         .def("from_wkb",from_wkb_impl)
+        .def("from_geojson",from_geojson_impl)
+        .def("to_geojson",to_geojson)
         .staticmethod("from_wkt")
         .staticmethod("from_wkb")
+        .staticmethod("from_geojson")
         ;
 
 }

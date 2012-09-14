@@ -76,7 +76,7 @@ public:
         return map_.erase(key)==1;
     }
 
-    product_type* create_object(const key_type& key,const std::string& file)
+    product_type* create_object(const key_type& key,std::string const& file)
     {
         typename product_map::const_iterator pos=map_.find(key);
         if (pos!=map_.end())

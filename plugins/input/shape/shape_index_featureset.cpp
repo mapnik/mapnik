@@ -24,6 +24,7 @@
 #include <fstream>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // boost
@@ -44,12 +45,12 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
                                                         std::string const& shape_name,
                                                         int row_limit)
     : filter_(filter),
+      ctx_(boost::make_shared<mapnik::context_type>()),
       shape_(shape),
       tr_(new transcoder(encoding)),
       row_limit_(row_limit),
       count_(0)
 {
-    ctx_ = boost::make_shared<mapnik::context_type>();
     shape_.shp().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
 
@@ -66,9 +67,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
 
     std::sort(ids_.begin(), ids_.end());
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Shape Plugin: query size=" << ids_.size() << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: Query size=" << ids_.size();
 
     itr_ = ids_.begin();
 }
@@ -194,17 +193,15 @@ feature_ptr shape_index_featureset<filterT>::next()
             }
             catch (...)
             {
-                std::cerr << "Shape Plugin: error processing attributes" << std::endl;
+                MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing attributes";
             }
         }
         return feature;
     }
     else
     {
+        MAPNIK_LOG_DEBUG(shape) << "shape_index_featureset: " << count_ << " features";
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Shape Plugin: " << count_ << " features" << std::endl;
-#endif
         return feature_ptr();
     }
 }

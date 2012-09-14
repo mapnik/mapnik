@@ -27,7 +27,8 @@
 #include <mapnik/color.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/text_placements.hpp>
+#include <mapnik/text_placements/base.hpp>
+#include <mapnik/text_placements/dummy.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -36,7 +37,7 @@
 // stl
 #include <string>
 
-#if (1 && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+#if (!defined(NO_DEPRECATION_WARNINGS) && __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
 #define func_deprecated __attribute__ ((deprecated))
 #else
 #define func_deprecated
@@ -65,30 +66,30 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     expression_ptr get_orientation() const func_deprecated; // orienation (rotation angle atm)
     void set_orientation(expression_ptr expr);
 
-    unsigned get_text_ratio() const func_deprecated; // target ratio for text bounding box in pixels
-    void set_text_ratio(unsigned ratio);
-    unsigned get_wrap_width() const func_deprecated; // width to wrap text at, or trigger ratio
-    void set_wrap_width(unsigned ratio);
+    double get_text_ratio() const func_deprecated; // target ratio for text bounding box in pixels
+    void set_text_ratio(double ratio);
+    double get_wrap_width() const func_deprecated; // width to wrap text at, or trigger ratio
+    void set_wrap_width(double width);
     unsigned char get_wrap_char() const func_deprecated; // character used to wrap lines
     std::string get_wrap_char_string() const func_deprecated; // character used to wrap lines as std::string
     void set_wrap_char(unsigned char character);
     void set_wrap_char_from_string(std::string const& character);
     text_transform_e get_text_transform() const func_deprecated; // text conversion on strings before display
     void set_text_transform(text_transform_e convert);
-    unsigned get_line_spacing() const func_deprecated; // spacing between lines of text
-    void set_line_spacing(unsigned spacing);
-    unsigned get_character_spacing() const func_deprecated; // spacing between characters in text
-    void set_character_spacing(unsigned spacing);
-    unsigned get_label_spacing() const func_deprecated; // spacing between repeated labels on lines
-    void set_label_spacing(unsigned spacing);
+    double get_line_spacing() const func_deprecated; // spacing between lines of text
+    void set_line_spacing(double spacing);
+    double get_character_spacing() const func_deprecated; // spacing between characters in text
+    void set_character_spacing(double spacing);
+    double get_label_spacing() const func_deprecated; // spacing between repeated labels on lines
+    void set_label_spacing(double spacing);
     unsigned get_label_position_tolerance() const func_deprecated; //distance the label can be moved on the line to fit, if 0 the default is used
     void set_label_position_tolerance(unsigned tolerance);
     bool get_force_odd_labels() const func_deprecated; // try render an odd amount of labels
     void set_force_odd_labels(bool force);
     double get_max_char_angle_delta() const func_deprecated; // maximum change in angle between adjacent characters
     void set_max_char_angle_delta(double angle);
-    float get_text_size() const func_deprecated;
-    void set_text_size(float size);
+    double get_text_size() const func_deprecated;
+    void set_text_size(double size);
     std::string const& get_face_name() const func_deprecated;
     void set_face_name(std::string face_name);
     font_set const& get_fontset() const func_deprecated;
@@ -126,7 +127,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     justify_alignment_e get_justify_alignment() const func_deprecated;
     text_placements_ptr get_placement_options() const;
     void set_placement_options(text_placements_ptr placement_options);
-
+    void set_largest_bbox_only(bool val);
+    bool largest_bbox_only() const;
 private:
     text_placements_ptr placement_options_;
 };

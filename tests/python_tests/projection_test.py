@@ -21,7 +21,7 @@ def test_wgs84_inverse_forward():
 
     # It appears that the y component changes very slightly, is this OK?
     # so we test for 'almost equal float values'
-    
+
     assert_almost_equal(p.inverse(c).y, c.y)
     assert_almost_equal(p.inverse(c).x, c.x)
 

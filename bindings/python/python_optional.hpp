@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id$
 
 #include <boost/optional/optional.hpp>
 #include <boost/python.hpp>
@@ -100,3 +99,39 @@ struct python_optional : public boost::noncopyable
     }
 };
 
+/** This class works around a bug in boost python.
+
+    See http://osdir.com/ml/python.c++/2003-11/msg00158.html
+*/
+template <typename T, typename X1 = boost::python::detail::not_specified, typename X2 = boost::python::detail::not_specified, typename X3 = boost::python::detail::not_specified>
+class class_with_converter : public boost::python::class_<T, X1, X2, X3>
+{
+public:
+    typedef class_with_converter<T,X1,X2,X3> self;
+    // Construct with the class name, with or without docstring, and default __init__() function
+    class_with_converter(char const* name, char const* doc = 0) : boost::python::class_<T, X1, X2, X3>(name, doc)  { }
+
+    // Construct with class name, no docstring, and an uncallable __init__ function
+    class_with_converter(char const* name, boost::python::no_init_t y) : boost::python::class_<T, X1, X2, X3>(name, y) { }
+
+    // Construct with class name, docstring, and an uncallable __init__ function
+    class_with_converter(char const* name, char const* doc, boost::python::no_init_t y) : boost::python::class_<T, X1, X2, X3>(name, doc, y) { }
+
+    // Construct with class name and init<> function
+    template <class DerivedT> class_with_converter(char const* name, boost::python::init_base<DerivedT> const& i)
+        : boost::python::class_<T, X1, X2, X3>(name, i) { }
+
+    // Construct with class name, docstring and init<> function
+    template <class DerivedT>
+    inline class_with_converter(char const* name, char const* doc, boost::python::init_base<DerivedT> const& i)
+        : boost::python::class_<T, X1, X2, X3>(name, doc, i) { }
+
+    template <class D>
+    self& def_readwrite_convert(char const* name, D const& d, char const* doc=0)
+    {
+        this->add_property(name,
+                           boost::python::make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),
+                           boost::python::make_setter(d, boost::python::default_call_policies()));
+        return *this;
+    }
+};

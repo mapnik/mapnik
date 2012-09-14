@@ -28,8 +28,9 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
 #include <mapnik/sql_utils.hpp>
-
+#include <mapnik/timer.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -50,7 +51,7 @@ class sqlite_connection
 {
 public:
 
-    sqlite_connection (const std::string& file)
+    sqlite_connection (std::string const& file)
         : db_(0),
           file_(file)
     {
@@ -76,7 +77,7 @@ public:
         sqlite3_busy_timeout(db_,5000);
     }
 
-    sqlite_connection (const std::string& file, int flags)
+    sqlite_connection (std::string const& file, int flags)
         : db_(0),
           file_(file)
     {
@@ -103,7 +104,7 @@ public:
         }
     }
 
-    void throw_sqlite_error(const std::string& sql)
+    void throw_sqlite_error(std::string const& sql)
     {
         std::ostringstream s;
         s << "Sqlite Plugin: ";
@@ -118,8 +119,11 @@ public:
         throw mapnik::datasource_exception (s.str());
     }
 
-    boost::shared_ptr<sqlite_resultset> execute_query(const std::string& sql)
+    boost::shared_ptr<sqlite_resultset> execute_query(std::string const& sql)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute_query ") + sql);
+#endif
         sqlite3_stmt* stmt = 0;
 
         const int rc = sqlite3_prepare_v2 (db_, sql.c_str(), -1, &stmt, 0);
@@ -131,8 +135,12 @@ public:
         return boost::make_shared<sqlite_resultset>(stmt);
     }
 
-    void execute(const std::string& sql)
+    void execute(std::string const& sql)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute ") + sql);
+#endif
+
         const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         if (rc != SQLITE_OK)
         {
@@ -140,8 +148,12 @@ public:
         }
     }
 
-    int execute_with_code(const std::string& sql)
+    int execute_with_code(std::string const& sql)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats__(std::clog, std::string("sqlite_resultset::execute_with_code ") + sql);
+#endif
+
         const int rc = sqlite3_exec(db_, sql.c_str(), 0, 0, 0);
         return rc;
     }

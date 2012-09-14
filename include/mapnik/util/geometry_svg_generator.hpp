@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-//$Id$
-
 #ifndef MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 #define MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 
@@ -30,6 +28,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/vertex_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
+
 // boost
 #include <boost/tuple/tuple.hpp>
 #include <boost/spirit/include/karma.hpp>
@@ -47,7 +46,7 @@ namespace mapnik { namespace util {
     namespace karma = boost::spirit::karma;
     namespace phoenix = boost::phoenix;
 
-    namespace detail {
+    namespace svg_detail {
     struct get_type
     {
         template <typename T>
@@ -67,7 +66,7 @@ namespace mapnik { namespace util {
         geometry_type::value_type const operator() (geometry_type const& geom) const
         {
             geometry_type::value_type coord;
-            boost::get<0>(coord) = geom.get_vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+            boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
             return coord;
         }
     };
@@ -134,10 +133,10 @@ namespace mapnik { namespace util {
         karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> svg_path;
 
         // phoenix functions
-        phoenix::function<detail::get_type > _type;
-        phoenix::function<detail::get_first> _first;
+        phoenix::function<svg_detail::get_type > _type;
+        phoenix::function<svg_detail::get_first> _first;
         //
-        karma::real_generator<double, detail::coordinate_policy<double> > coord_type;
+        karma::real_generator<double, svg_detail::coordinate_policy<double> > coord_type;
 
     };
 

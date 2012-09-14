@@ -24,6 +24,8 @@
 #include "osmparser.h"
 #include "basiccurl.h"
 
+#include <mapnik/debug.hpp>
+
 #include <libxml/parser.h>
 #include <iostream>
 #include <fstream>
@@ -32,7 +34,7 @@
 
 polygon_types osm_way::ptypes;
 
-bool osm_dataset::load(const char* filename,const std::string& parser)
+bool osm_dataset::load(const char* filename,std::string const& parser)
 {
     if (parser == "libxml2")
     {
@@ -41,15 +43,13 @@ bool osm_dataset::load(const char* filename,const std::string& parser)
     return false;
 }
 
-bool osm_dataset::load_from_url(const std::string& url,
-                                const std::string& bbox,
-                                const std::string& parser)
+bool osm_dataset::load_from_url(std::string const& url,
+                                std::string const& bbox,
+                                std::string const& parser)
 {
     if (parser == "libxml2")
     {
-#ifdef MAPNIK_DEBUG
-        std::clog << "Osm Plugin: osm_dataset::load_from_url url=" << url << " bbox=" << bbox << std::endl;
-#endif
+        MAPNIK_LOG_DEBUG(osm) << "osm_dataset: load_from_url url=" << url << ",bbox=" << bbox;
 
         std::ostringstream str;
         // use curl to grab the data
@@ -57,9 +57,7 @@ bool osm_dataset::load_from_url(const std::string& url,
 
         str << url << "?bbox=" << bbox;
 
-#ifdef MAPNIK_DEBUG
-        std::clog << "Osm Plugin: FULL URL " << str.str() << std::endl;
-#endif
+        MAPNIK_LOG_DEBUG(osm) << "osm_dataset: Full url=" << str.str();
 
         CURL_LOAD_DATA* resp = grab_http_response(str.str().c_str());
 
@@ -69,9 +67,7 @@ bool osm_dataset::load_from_url(const std::string& url,
             memcpy(blx, resp->data, resp->nbytes);
             blx[resp->nbytes] = '\0';
 
-#ifdef MAPNIK_DEBUG
-            std::clog << "Osm Plugin: CURL RESPONSE: " << blx << std::endl;
-#endif
+            MAPNIK_LOG_DEBUG(osm) << "osm_dataset: CURL Response=" << blx;
 
             delete[] blx;
             bool success = osmparser::parse(this, resp->data, resp->nbytes);
@@ -88,37 +84,25 @@ osm_dataset::~osm_dataset()
 
 void osm_dataset::clear()
 {
-#ifdef MAPNIK_DEBUG
-    std::clog << "Osm Plugin: osm_dataset::clear()" << std::endl;
-    std::clog << "Osm Plugin: deleting ways" << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(osm) << "osm_dataset: Clear";
 
+    MAPNIK_LOG_DEBUG(osm) << "osm_dataset: -- Deleting ways";
     for (unsigned int count = 0; count < ways.size(); ++count)
     {
         delete ways[count];
         ways[count] = NULL;
     }
+    ways.clear();
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Osm Plugin: deleting nodes" << std::endl;
-#endif
-
+    MAPNIK_LOG_DEBUG(osm) << "osm_dataset: -- Deleting nodes";
     for (unsigned int count = 0; count < nodes.size(); ++count)
     {
         delete nodes[count];
         nodes[count] = NULL;
     }
-
-#ifdef MAPNIK_DEBUG
-    std::clog << "Osm Plugin: clearing ways/nodes" << std::endl;
-#endif
-
-    ways.clear();
     nodes.clear();
 
-#ifdef MAPNIK_DEBUG
-    std::clog << "Osm Plugin: done" << std::endl;
-#endif
+    MAPNIK_LOG_DEBUG(osm) << "osm_dataset: Clear done";
 }
 
 std::string osm_dataset::to_string()

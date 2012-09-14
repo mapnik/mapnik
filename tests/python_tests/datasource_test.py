@@ -11,49 +11,61 @@ def setup():
     os.chdir(execution_path('.'))
 
 def test_that_datasources_exist():
-    if len(mapnik.DatasourceCache.instance().plugin_names()) == 0:
+    if len(mapnik.DatasourceCache.plugin_names()) == 0:
         print '***NOTICE*** - no datasource plugins have been loaded'
-    
+
 def test_field_listing():
-    if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'shape' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Shapefile(file='../data/shp/poly.shp')
         fields = ds.fields()
         eq_(fields, ['AREA', 'EAS_ID', 'PRFEDEA'])
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Polygon, 'type': mapnik.DataType.Vector, 'name': 'shape', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Polygon)
+        eq_(desc['name'],'shape')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
 
 def test_total_feature_count_shp():
-    if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'shape' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Shapefile(file='../data/shp/poly.shp')
         features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 10)
 
 def test_total_feature_count_json():
-    if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'ogr' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Ogr(file='../data/json/points.json',layer_by_index=0)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Point, 'type': mapnik.DataType.Vector, 'name': 'ogr', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'ogr')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
         features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 5)
 
 def test_sqlite_reading():
-    if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',table_by_index=0)
-        eq_(ds.describe(),{'geometry_type': mapnik.DataGeometryType.Polygon, 'type': mapnik.DataType.Vector, 'name': 'sqlite', 'encoding': 'utf-8'})
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Polygon)
+        eq_(desc['name'],'sqlite')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
         features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 245)
 
 def test_reading_json_from_string():
     json = open('../data/json/points.json','r').read()
-    if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'ogr' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Ogr(file=json,layer_by_index=0)
         features = ds.all_features()
         num_feats = len(features)
         eq_(num_feats, 5)
-    
+
 def test_feature_envelope():
-    if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'shape' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Shapefile(file='../data/shp/poly.shp')
         features = ds.all_features()
         for feat in features:
@@ -64,7 +76,7 @@ def test_feature_envelope():
             eq_(intersects, True)
 
 def test_feature_attributes():
-    if 'shape' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'shape' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Shapefile(file='../data/shp/poly.shp')
         features = ds.all_features()
         feat = features[0]
@@ -74,7 +86,7 @@ def test_feature_attributes():
         eq_(ds.field_types(),['float','int','str'])
 
 def test_ogr_layer_by_sql():
-    if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'ogr' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Ogr(file='../data/shp/poly.shp', layer_by_sql='SELECT * FROM poly WHERE EAS_ID = 168')
         features = ds.all_features()
         num_feats = len(features)
@@ -110,7 +122,7 @@ def test_hit_grid():
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(str(e))
-        
+
 
 if __name__ == '__main__':
     setup()

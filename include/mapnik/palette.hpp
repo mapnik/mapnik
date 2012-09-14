@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/global.hpp>
-#include <mapnik/config_error.hpp>
 
 // boost
 #include <boost/utility.hpp>
@@ -81,17 +80,22 @@ struct rgba
     byte a;
 
     inline rgba(byte r_, byte g_, byte b_, byte a_)
-        : r(r_), g(g_), b(b_), a(a_) {}
+        : r(r_),
+          g(g_),
+          b(b_),
+          a(a_) {}
 
     inline rgba(rgb const& c)
-        : r(c.r), g(c.g), b(c.b), a(0xFF) {}
+        : r(c.r),
+          g(c.g),
+          b(c.b),
+          a(0xFF) {}
 
-    inline rgba(unsigned const& c) {
-        r = U2RED(c);
-        g = U2GREEN(c);
-        b = U2BLUE(c);
-        a = U2ALPHA(c);
-    }
+    inline rgba(unsigned const& c)
+        : r(U2RED(c)),
+          g(U2GREEN(c)),
+          b(U2BLUE(c)),
+          a(U2ALPHA(c)) {}
 
     inline bool operator==(const rgba& y) const
     {
