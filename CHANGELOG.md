@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Allow style level compositing operations to work outside of featureset extents across tiled requests (#1477)
+
 - Support for encoding `literal` postgres types as strings 69fb17cd3/#1466
 
 - Fixed zoom_all behavior when Map maximum-extent is provided. Previously maximum-extent was used outright but
