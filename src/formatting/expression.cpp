@@ -46,7 +46,6 @@ void expression_format::to_xml(boost::property_tree::ptree &xml) const
     if (character_spacing) set_attr(new_node, "character-spacing", to_expression_string(*character_spacing));
     if (line_spacing) set_attr(new_node, "line-spacing", to_expression_string(*line_spacing));
     if (text_opacity) set_attr(new_node, "opacity", to_expression_string(*text_opacity));
-    if (wrap_before) set_attr(new_node, "wrap-before", to_expression_string(*wrap_before));
     if (wrap_char) set_attr(new_node, "wrap-character", to_expression_string(*wrap_char));
     if (fill) set_attr(new_node, "fill", to_expression_string(*fill));
     if (halo_fill) set_attr(new_node, "halo-fill", to_expression_string(*halo_fill));
@@ -67,7 +66,6 @@ node_ptr expression_format::from_xml(xml_node const& xml)
     n->character_spacing = get_expression(xml, "character-spacing");
     n->line_spacing = get_expression(xml, "line-spacing");
     n->text_opacity = get_expression(xml, "opacity");
-    n->wrap_before = get_expression(xml, "wrap-before");
     n->wrap_char = get_expression(xml, "wrap-character");
     n->fill = get_expression(xml, "fill");
     n->halo_fill = get_expression(xml, "halo-fill");
@@ -96,8 +94,6 @@ void expression_format::apply(char_properties_ptr p, const Feature &feature, tex
                           boost::apply_visitor(evaluate<Feature,value_type>(feature), *line_spacing).to_double();
     if (text_opacity) new_properties->text_opacity =
                           boost::apply_visitor(evaluate<Feature,value_type>(feature), *text_opacity).to_double();
-    if (wrap_before) new_properties->wrap_before =
-                         boost::apply_visitor(evaluate<Feature,value_type>(feature), *wrap_before).to_bool();
     if (wrap_char) new_properties->wrap_char =
                        boost::apply_visitor(evaluate<Feature,value_type>(feature), *character_spacing).to_unicode()[0];
 //    if (fill) new_properties->fill =
@@ -134,7 +130,6 @@ void expression_format::add_expressions(expression_set &output) const
     output.insert(character_spacing);
     output.insert(line_spacing);
     output.insert(text_opacity);
-    output.insert(wrap_before);
     output.insert(wrap_char);
     output.insert(fill);
     output.insert(halo_fill);

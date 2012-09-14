@@ -110,6 +110,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     largest_bbox_only(true),
     text_ratio(0),
     wrap_width(0),
+    wrap_before(false),
     rotate_displacement(false),
     upright(UPRIGHT_AUTO),
     format(boost::make_shared<char_properties>()),
@@ -148,6 +149,8 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (text_ratio_) text_ratio = *text_ratio_;
     optional<double> wrap_width_ = sym.get_opt_attr<double>("wrap-width");
     if (wrap_width_) wrap_width = *wrap_width_;
+    optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
+    if (wrap_before_) wrap_before = *wrap_before_;
     optional<unsigned> label_position_tolerance_ = sym.get_opt_attr<unsigned>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
     optional<double> spacing_ = sym.get_opt_attr<double>("spacing");
@@ -235,6 +238,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     {
         set_attr(node, "wrap-width", wrap_width);
     }
+    if (wrap_before != dfl.wrap_before || explicit_defaults)
+    {
+        set_attr(node, "wrap-before", wrap_before);
+    }
     if (label_position_tolerance != dfl.label_position_tolerance || explicit_defaults)
     {
         set_attr(node, "label-position-tolerance", label_position_tolerance);
@@ -314,7 +321,6 @@ char_properties::char_properties() :
     character_spacing(0),
     line_spacing(0),
     text_opacity(1.0),
-    wrap_before(false),
     wrap_char(' '),
     text_transform(NONE),
     fill(color(0,0,0)),
@@ -336,8 +342,6 @@ void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
     if (halo_fill_) halo_fill = *halo_fill_;
     optional<double> halo_radius_ = sym.get_opt_attr<double>("halo-radius");
     if (halo_radius_) halo_radius = *halo_radius_;
-    optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
-    if (wrap_before_) wrap_before = *wrap_before_;
     optional<text_transform_e> tconvert_ = sym.get_opt_attr<text_transform_e>("text-transform");
     if (tconvert_) text_transform = *tconvert_;
     optional<double> line_spacing_ = sym.get_opt_attr<double>("line-spacing");
@@ -403,10 +407,6 @@ void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_de
     if (halo_fill != dfl.halo_fill || explicit_defaults)
     {
         set_attr(node, "halo-fill", halo_fill);
-    }
-    if (wrap_before != dfl.wrap_before || explicit_defaults)
-    {
-        set_attr(node, "wrap-before", wrap_before);
     }
     if (wrap_char != dfl.wrap_char || explicit_defaults)
     {

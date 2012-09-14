@@ -53,7 +53,7 @@ const UnicodeString &text_layout::get_text() const
     return itemizer_.get_text();
 }
 
-void text_layout::layout(double wrap_width, unsigned text_ratio)
+void text_layout::layout(double wrap_width, unsigned text_ratio, bool wrap_before)
 {
     unsigned num_lines = itemizer_.num_lines();
     for (unsigned i = 0; i < num_lines; i++)
@@ -61,12 +61,12 @@ void text_layout::layout(double wrap_width, unsigned text_ratio)
         std::pair<unsigned, unsigned> line_limits = itemizer_.get_line(i);
         text_line_ptr line = boost::make_shared<text_line>(line_limits.first, line_limits.second);
         shape_text(line);
-        break_line(line, wrap_width, text_ratio); //Break line if neccessary
+        break_line(line, wrap_width, text_ratio, wrap_before); //Break line if neccessary
     }
 }
 
 
-void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned text_ratio)
+void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned text_ratio, bool wrap_before)
 {
     if (!wrap_width || line->width() < wrap_width)
     {

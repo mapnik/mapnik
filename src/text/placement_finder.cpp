@@ -110,7 +110,7 @@ bool placement_finder::next_position()
     }
 
     info_->properties.process(layout_, feature_);
-    layout_.layout(info_->properties.wrap_width, info_->properties.text_ratio);
+    layout_.layout(info_->properties.wrap_width, info_->properties.text_ratio, info_->properties.wrap_before);
 
     if (info_->properties.orientation)
     {

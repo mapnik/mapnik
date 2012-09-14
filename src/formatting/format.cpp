@@ -66,8 +66,6 @@ node_ptr format_node::from_xml(xml_node const& xml)
     n->character_spacing = xml.get_opt_attr<double>("character-spacing");
     n->line_spacing = xml.get_opt_attr<double>("line-spacing");
     n->text_opacity = xml.get_opt_attr<double>("opacity");
-    boost::optional<boolean> wrap = xml.get_opt_attr<boolean>("wrap-before");
-    if (wrap) n->wrap_before = *wrap;
     n->wrap_char = xml.get_opt_attr<unsigned>("wrap-character");
     n->text_transform = xml.get_opt_attr<text_transform_e>("text-transform");
     n->fill = xml.get_opt_attr<color>("fill");
@@ -85,7 +83,6 @@ void format_node::apply(char_properties_ptr p, const Feature &feature, text_layo
     if (character_spacing) new_properties->character_spacing = *character_spacing;
     if (line_spacing) new_properties->line_spacing = *line_spacing;
     if (text_opacity) new_properties->text_opacity = *text_opacity;
-    if (wrap_before) new_properties->wrap_before = *wrap_before;
     if (wrap_char) new_properties->wrap_char = *wrap_char;
     if (text_transform) new_properties->text_transform = *text_transform;
     if (fill) new_properties->fill = *fill;

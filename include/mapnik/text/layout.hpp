@@ -91,7 +91,7 @@ public:
     void add_text(UnicodeString const& str, char_properties_ptr format);
     UnicodeString const& get_text() const;
 
-    void layout(double wrap_width, unsigned text_ratio);
+    void layout(double wrap_width, unsigned text_ratio, bool wrap_before);
 
     void clear();
     double height() const;
@@ -105,7 +105,7 @@ public:
     unsigned glyphs_count() const;
 
 private:
-    void break_line(text_line_ptr line, double wrap_width, unsigned text_ratio);
+    void break_line(text_line_ptr line, double wrap_width, unsigned text_ratio, bool wrap_before);
     void shape_text(text_line_ptr line);
     void add_line(text_line_ptr line);
 

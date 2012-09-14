@@ -66,7 +66,6 @@ struct char_properties
     double character_spacing;
     double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
     double text_opacity;
-    bool wrap_before;
     unsigned wrap_char;
     text_transform_e text_transform; //Per expression
     color fill;
@@ -177,6 +176,7 @@ struct text_symbolizer_properties
     bool largest_bbox_only;
     double text_ratio;
     double wrap_width;
+    bool wrap_before;
     bool rotate_displacement;
     text_upright_e upright;
     /** Default values for char_properties. */

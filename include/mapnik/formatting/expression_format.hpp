@@ -43,7 +43,6 @@ public:
     expression_ptr character_spacing;
     expression_ptr line_spacing;
     expression_ptr text_opacity;
-    expression_ptr wrap_before;
     expression_ptr wrap_char;
     expression_ptr fill;
     expression_ptr halo_fill;

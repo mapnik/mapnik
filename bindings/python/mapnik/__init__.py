@@ -805,13 +805,13 @@ class _TextSymbolizer(TextSymbolizer,_injector):
     def wrap_before(self):
         warnings.warn("'wrap_before' is deprecated, use format.wrap_before",
         DeprecationWarning, 2)
-        return self.format.wrap_before
+        return self.properties.wrap_before
 
     @wrap_before.setter
     def wrap_before(self, wrap_before):
         warnings.warn("'wrap_before' is deprecated, use format.wrap_before",
         DeprecationWarning, 2)
-        self.format.wrap_before = wrap_before
+        self.properties.wrap_before = wrap_before
 
 
 

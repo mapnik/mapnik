@@ -144,12 +144,12 @@ void text_symbolizer::set_wrap_width(double width)
 
 bool  text_symbolizer::get_wrap_before() const
 {
-    return placement_options_->defaults.format->wrap_before;
+    return placement_options_->defaults.wrap_before;
 }
 
 void  text_symbolizer::set_wrap_before(bool wrap_before)
 {
-    placement_options_->defaults.format->wrap_before = wrap_before;
+    placement_options_->defaults.wrap_before = wrap_before;
 }
 
 unsigned char text_symbolizer::get_wrap_char() const
