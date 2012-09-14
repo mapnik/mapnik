@@ -256,6 +256,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     box2d<double> layer_ext = lay.envelope();
     bool fw_success = false;
+    bool early_return = false;
 
     // first, try intersection of map extent forward projected into layer srs
     if (prj_trans.forward(buffered_query_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
@@ -266,10 +267,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     // if no intersection and projections are also equal, early return
     else if (prj_trans.equal())
     {
-#if defined(RENDERING_STATS)
-        layer_timer.discard();
-#endif
-        return;
+        early_return = true;
     }
     // next try intersection of layer extent back projected into map srs
     else if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS) && buffered_query_ext.intersects(layer_ext))
@@ -278,7 +276,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         // forward project layer extent back into native projection
         if (! prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
         {
-            MAPNIK_LOG_DEBUG(feature_style_processor)
+            MAPNIK_LOG_ERROR(feature_style_processor)
                     << "feature_style_processor: Layer=" << lay.name()
                     << " extent=" << layer_ext << " in map projection "
                     << " did not reproject properly back to layer projection";
@@ -287,6 +285,31 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     else
     {
         // if no intersection then nothing to do for layer
+        early_return = true;
+    }
+
+    if (early_return)
+    {
+        // check for styles needing compositing operations applied
+        // https://github.com/mapnik/mapnik/issues/1477
+        BOOST_FOREACH(std::string const& style_name, style_names)
+        {
+            boost::optional<feature_type_style const&> style=m_.find_style(style_name);
+            if (!style)
+            {
+                continue;
+            }
+            if (style->comp_op() || style->image_filters().size() > 0)
+            {
+                if (style->active(scale_denom))
+                {
+                    std::clog << "triggering\n";
+                    // trigger any needed compositing ops
+                    p.start_style_processing(*style);
+                    p.end_style_processing(*style);
+                }
+            }
+        }
 #if defined(RENDERING_STATS)
         layer_timer.discard();
 #endif
@@ -344,9 +367,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             continue;
         }
 
-        const std::vector<rule>& rules=(*style).get_rules();
+        std::vector<rule> const& rules=(*style).get_rules();
         bool active_rules=false;
-
         BOOST_FOREACH(rule const& r, rules)
         {
             if (r.active(scale_denom))
@@ -444,22 +466,21 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
         else if (cache_features)
         {
+            memory_datasource cache;
             featureset_ptr features = ds->features(q);
             if (features) {
                 // Cache all features into the memory_datasource before rendering.
-                memory_datasource cache;
                 feature_ptr feature;
                 while ((feature = features->next()))
                 {
                     cache.push(feature);
                 }
-
-                int i = 0;
-                BOOST_FOREACH (feature_type_style * style, active_styles)
-                {
-                    render_style(lay, p, style, style_names[i++],
-                                 cache.features(q), prj_trans, scale_denom);
-                }
+            }
+            int i = 0;
+            BOOST_FOREACH (feature_type_style * style, active_styles)
+            {
+                render_style(lay, p, style, style_names[i++],
+                             cache.features(q), prj_trans, scale_denom);
             }
         }
         // We only have a single style and no grouping.
@@ -468,11 +489,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             int i = 0;
             BOOST_FOREACH (feature_type_style * style, active_styles)
             {
-                featureset_ptr features = ds->features(q);
-                if (features) {
-                    render_style(lay, p, style, style_names[i++],
-                                 features, prj_trans, scale_denom);
-                }
+                render_style(lay, p, style, style_names[i++],
+                             ds->features(q), prj_trans, scale_denom);
             }
         }
     }
@@ -495,8 +513,12 @@ void feature_style_processor<Processor>::render_style(
     proj_transform const& prj_trans,
     double scale_denom)
 {
-
     p.start_style_processing(*style);
+    if (!features)
+    {
+        p.end_style_processing(*style);
+        return;
+    }
 
 #if defined(RENDERING_STATS)
     std::ostringstream s1;
