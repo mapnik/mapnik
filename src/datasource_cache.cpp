@@ -31,7 +31,9 @@
 #include <boost/algorithm/string.hpp>
 
 // ltdl
+#if !defined(_WINDOWS)
 #include <ltdl.h>
+#endif
 
 // stl
 #include <algorithm>
@@ -48,12 +50,16 @@ bool is_input_plugin (std::string const& filename)
 
 datasource_cache::datasource_cache()
 {
+#if !defined(_WINDOWS)
     if (lt_dlinit()) throw std::runtime_error("lt_dlinit() failed");
+#endif
 }
 
 datasource_cache::~datasource_cache()
 {
+#if !defined(_WINDOWS)
     lt_dlexit();
+#endif
 }
 
 datasource_ptr datasource_cache::create(const parameters& params, bool bind)
@@ -80,20 +86,33 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
     if ( ! itr->second->handle())
     {
         throw std::runtime_error(std::string("Cannot load library: ") +
+#ifdef _WINDOWS
+                                 itr->second->name());
+#else
                                  lt_dlerror());
+#endif // _WINDOWS
     }
 
+#ifdef _WINDOWS
+    create_ds* create_datasource =
+        reinterpret_cast<create_ds*>(GetProcAddress(itr->second->handle(), "create"));
+#else
     // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
 #ifdef __GNUC__
     __extension__
 #endif
         create_ds* create_datasource =
         reinterpret_cast<create_ds*>(lt_dlsym(itr->second->handle(), "create"));
+#endif // _WINDOWS
 
     if (! create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") +
+#ifdef _WINDOWS
+                                 "plugin is lacking compatible interface");
+#else
                                  lt_dlerror());
+#endif // _WINDOWS
     }
 
 #ifdef MAPNIK_LOG
@@ -174,15 +193,24 @@ bool datasource_cache::register_datasource(std::string const& str)
     bool success = false;
     try
     {
+#ifdef _WINDOWS
+        lt_dlhandle module = LoadLibraryA(str.c_str());
+#else
         lt_dlhandle module = lt_dlopen(str.c_str());
+#endif // _WINDOWS
         if (module)
         {
+#ifdef _WINDOWS
+            datasource_name* ds_name =
+            reinterpret_cast<datasource_name*>(GetProcAddress(module, "datasource_name"));
+#else
             // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
 #ifdef __GNUC__
             __extension__
 #endif
                 datasource_name* ds_name =
                 reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
+#endif // _WINDOWS
             if (ds_name && insert(ds_name(),module))
             {
                 MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << ds_name();

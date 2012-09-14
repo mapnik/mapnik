@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 #include <mapnik/plugin.hpp>
-#include <ltdl.h>
 
 namespace mapnik
 {
@@ -33,7 +32,11 @@ PluginInfo::~PluginInfo()
 {
     if (module_)
     {
-        lt_dlclose(module_),module_=0;
+#if defined(_WINDOWS)
+            FreeLibrary(module_);
+#else
+            lt_dlclose(module_);
+#endif
     }
 }
 
