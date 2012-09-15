@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/formatting/list.hpp>
+#include <mapnik/text/formatting/list.hpp>
 // boost
 #include <boost/foreach.hpp>
 

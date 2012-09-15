@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
 
 namespace mapnik {

@@ -22,9 +22,9 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/formatting/base.hpp>
-#include <mapnik/formatting/list.hpp>
-#include <mapnik/formatting/registry.hpp>
+#include <mapnik/text/formatting/base.hpp>
+#include <mapnik/text/formatting/list.hpp>
+#include <mapnik/text/formatting/registry.hpp>
 #include <mapnik/xml_node.hpp>
 
 // boost

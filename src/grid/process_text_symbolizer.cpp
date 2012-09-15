@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
 #include <boost/foreach.hpp>
 

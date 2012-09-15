@@ -19,41 +19,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef PLACEMENTS_DUMMY_HPP
-#define PLACEMENTS_DUMMY_HPP
+#ifndef FORMATTING_TEXT_HPP
+#define FORMATTING_TEXT_HPP
 
-// mapnik
-#include <mapnik/config.hpp>
-#include <mapnik/text_placements/base.hpp>
-// boost
-#include <boost/concept_check.hpp>
+#include <mapnik/text/formatting/base.hpp>
 
-namespace mapnik
-{
-
-class text_placements_info_dummy;
-
-// Dummy placement algorithm. Always takes the default value.
-class MAPNIK_DECL text_placements_dummy: public text_placements
-{
+namespace mapnik {
+namespace formatting {
+class text_node: public node {
 public:
-text_placement_info_ptr get_placement_info(double scale_factor) const;
-friend class text_placement_info_dummy;
-};
+    text_node(expression_ptr text): node(), text_(text) {}
+    text_node(std::string text): node(), text_(parse_expression(text)) {}
+    void to_xml(boost::property_tree::ptree &xml) const;
+    static node_ptr from_xml(xml_node const& xml);
+    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const;
+    virtual void add_expressions(expression_set &output) const;
 
-// Placement info object for dummy placement algorithm. Always takes the default value.
-class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
-{
-public:
-text_placement_info_dummy(text_placements_dummy const* parent, double scale_factor)
-    : text_placement_info(parent, scale_factor),
-      state(0) {}
-
-    bool next();
+    void set_text(expression_ptr text);
+    expression_ptr get_text() const;
 private:
-unsigned state;
+    expression_ptr text_;
 };
-
+} //ns formatting
 } //ns mapnik
 
-#endif // PLACEMENTS_DUMMY_HPP
+#endif // FORMATTING_TEXT_HPP

@@ -19,27 +19,41 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#include <mapnik/text_placements/base.hpp>
+// mapnik
+#include <mapnik/text/formatting/registry.hpp>
+#include <mapnik/text/formatting/text.hpp>
+#include <mapnik/text/formatting/format.hpp>
+#include <mapnik/text/formatting/expression_format.hpp>
+#include <mapnik/xml_node.hpp>
+#include <mapnik/config_error.hpp>
 
-namespace mapnik {
-text_placements::text_placements() : defaults()
+namespace mapnik
 {
-}
-
-void text_placements::add_expressions(expression_set &output)
-{
-    defaults.add_expressions(output);
-}
-
-
-/************************************************************************/
-
-text_placement_info::text_placement_info(text_placements const* parent,
-                                         double scale_factor_)
-    : properties(parent->defaults),
-      scale_factor(scale_factor_)
+namespace formatting
 {
 
+registry::registry()
+{
+    register_name("<xmltext>", &text_node::from_xml);
+    register_name("Format", &format_node::from_xml);
+    register_name("ExpressionFormat", &expression_format::from_xml);
 }
 
+void registry::register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite)
+{
+    if (overwrite) {
+        map_[name] = ptr;
+    } else {
+        map_.insert(make_pair(name, ptr));
+    }
+}
+
+node_ptr registry::from_xml(xml_node const& xml)
+{
+    std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(xml.name());
+    if (itr == map_.end())  throw config_error("Unknown element '" + xml.name() + "'", xml);
+    xml.set_processed(true);
+    return itr->second(xml);
+}
+} //ns formatting
 } //ns mapnik

@@ -28,7 +28,7 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/formatting/base.hpp>
+#include <mapnik/text/formatting/base.hpp>
 #include <mapnik/pixel_position.hpp>
 
 // stl

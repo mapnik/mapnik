@@ -272,7 +272,7 @@ face_set_ptr face_manager<T>::get_face_set(const font_set &fset)
 }
 
 template <typename T>
-face_set_ptr face_manager<T>::get_face_set(const std::string &name, const boost::optional<font_set> &fset)
+face_set_ptr face_manager<T>::get_face_set(const std::string &name, boost::optional<font_set> fset)
 {
     if (fset && fset->size() > 0)
     {

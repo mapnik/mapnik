@@ -22,7 +22,7 @@
 //mapnik
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/text/layout.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>

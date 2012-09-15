@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/layout.hpp>

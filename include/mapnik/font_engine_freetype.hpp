@@ -37,9 +37,10 @@ extern "C"
 #include FT_STROKER_H
 }
 
-//// boost
+// boost
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/optional.hpp>
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
@@ -111,7 +112,7 @@ public:
     face_ptr get_face(std::string const& name);
     face_set_ptr get_face_set(std::string const& name);
     face_set_ptr get_face_set(font_set const& fset);
-    face_set_ptr get_face_set(std::string const& name, font_set const& fset);
+    face_set_ptr get_face_set(std::string const& name, boost::optional<font_set> fset);
 
 
     stroker_ptr get_stroker() { return stroker_; }

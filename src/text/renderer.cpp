@@ -1,7 +1,7 @@
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
 namespace mapnik

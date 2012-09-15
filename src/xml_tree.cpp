@@ -28,7 +28,7 @@
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/line_symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>
 
 //boost

@@ -153,7 +153,6 @@ source = Split(
     memory_datasource.cpp
     stroke.cpp
     symbolizer.cpp
-    symbolizer_helpers.cpp
     unicode.cpp
     markers_symbolizer.cpp
     raster_colorizer.cpp
@@ -161,30 +160,24 @@ source = Split(
     wkt/wkt_generator.cpp
     mapped_memory_cache.cpp
     marker_cache.cpp
+    xml_tree.cpp
+    config_error.cpp
+    color_factory.cpp
+    warp.cpp
     svg/svg_parser.cpp
     svg/svg_path_parser.cpp
     svg/svg_points_parser.cpp
     svg/svg_transform_parser.cpp
-    warp.cpp
     json/geometry_grammar.cpp
     json/geometry_parser.cpp
     json/feature_grammar.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
-    formatting/base.cpp
-    formatting/expression.cpp
-    formatting/list.cpp
-    formatting/text.cpp
-    formatting/format.cpp
-    formatting/registry.cpp
-    text_placements/registry.cpp
-    text_placements/base.cpp
-    text_placements/dummy.cpp
-    text_placements/list.cpp
-    text_placements/simple.cpp
-    text_properties.cpp
-    xml_tree.cpp
-    config_error.cpp
+    text/placements/registry.cpp
+    text/placements/base.cpp
+    text/placements/dummy.cpp
+    text/placements/list.cpp
+    text/placements/simple.cpp
     text/shaping.cpp
     text/layout.cpp
     text/itemizer.cpp
@@ -192,7 +185,14 @@ source = Split(
     text/face.cpp
     text/placement_finder.cpp
     text/renderer.cpp
-    color_factory.cpp
+    text/symbolizer_helpers.cpp
+    text/text_properties.cpp
+    text/formatting/base.cpp
+    text/formatting/expression.cpp
+    text/formatting/list.cpp
+    text/formatting/text.cpp
+    text/formatting/format.cpp
+    text/formatting/registry.cpp
     """
     )
 

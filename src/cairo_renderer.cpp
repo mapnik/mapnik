@@ -36,7 +36,7 @@
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/segment.hpp>
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/warp.hpp>
 #include <mapnik/config.hpp>
