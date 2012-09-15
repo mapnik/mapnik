@@ -29,9 +29,9 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/raster_colorizer.hpp>
-#include <mapnik/text_placements/simple.hpp>
-#include <mapnik/text_placements/list.hpp>
-#include <mapnik/text_placements/dummy.hpp>
+#include <mapnik/text/placements/simple.hpp>
+#include <mapnik/text/placements/list.hpp>
+#include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_filter_types.hpp>

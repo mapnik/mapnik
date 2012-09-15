@@ -22,13 +22,13 @@
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
 
-#include <mapnik/text_properties.hpp>
-#include <mapnik/text_placements/simple.hpp>
-#include <mapnik/text_placements/list.hpp>
-#include <mapnik/formatting/text.hpp>
-#include <mapnik/formatting/list.hpp>
-#include <mapnik/formatting/format.hpp>
-#include <mapnik/formatting/expression_format.hpp>
+#include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/placements/simple.hpp>
+#include <mapnik/text/placements/list.hpp>
+#include <mapnik/text/formatting/text.hpp>
+#include <mapnik/text/formatting/list.hpp>
+#include <mapnik/text/formatting/format.hpp>
+#include <mapnik/text/formatting/expression_format.hpp>
 #include <mapnik/text/layout.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>

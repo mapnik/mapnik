@@ -26,7 +26,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/layout.hpp>
-#include <mapnik/text_placements/base.hpp>
+#include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/text/rotation.hpp>
 

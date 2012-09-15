@@ -20,11 +20,11 @@
  *
  *****************************************************************************/
 // mapnik
-#include <mapnik/formatting/text.hpp>
+#include <mapnik/text/formatting/text.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/text/layout.hpp>
 

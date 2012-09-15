@@ -19,23 +19,42 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef PLACEMENTS_REGISTRY_HPP
+#define PLACEMENTS_REGISTRY_HPP
 
-#include <mapnik/text_placements/dummy.hpp>
-#include <boost/make_shared.hpp>
+// mapnik
+#include <mapnik/utils.hpp>
+#include <mapnik/text/placements/base.hpp>
+
+// boost
+#include <boost/utility.hpp>
+
+// stl
+#include <string>
+#include <map>
 
 namespace mapnik
 {
-bool text_placement_info_dummy::next()
+namespace placements
 {
-    if (state) return false;
-    state++;
-    return true;
-}
 
-text_placement_info_ptr text_placements_dummy::get_placement_info(
-    double scale_factor) const
+typedef text_placements_ptr (*from_xml_function_ptr)(
+    xml_node const& xml, fontset_map const & fontsets);
+
+class registry : public singleton<registry, CreateStatic>,
+                 private boost::noncopyable
 {
-    return boost::make_shared<text_placement_info_dummy>(this, scale_factor);
-}
+public:
+    registry();
+    ~registry() {}
+    void register_name(std::string name, from_xml_function_ptr ptr, bool overwrite=false);
+    text_placements_ptr from_xml(std::string name,
+                                 xml_node const& xml,
+                                 fontset_map const & fontsets);
+private:
+    std::map<std::string, from_xml_function_ptr> map_;
+};
 
+} //ns placements
 } //ns mapnik
+#endif // PLACEMENTS_REGISTRY_HPP

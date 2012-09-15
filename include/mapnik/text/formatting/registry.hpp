@@ -19,39 +19,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef FORMATTING_REGISTRY_HPP
+#define FORMATTING_REGISTRY_HPP
+
 // mapnik
-#include <mapnik/text_placements/registry.hpp>
-#include <mapnik/text_placements/simple.hpp>
-#include <mapnik/text_placements/list.hpp>
-#include <mapnik/text_placements/dummy.hpp>
-#include <mapnik/config_error.hpp>
+#include <mapnik/utils.hpp>
+#include <mapnik/text/formatting/base.hpp>
+
+// boost
+#include <boost/utility.hpp>
+
+// stl
+#include <string>
+#include <map>
 
 namespace mapnik
 {
-namespace placements
+namespace formatting
 {
 
-registry::registry()
-{
-    register_name("simple", &text_placements_simple::from_xml);
-    register_name("list", &text_placements_list::from_xml);
-    register_name("dummy", &text_placements_list::from_xml);
-}
+typedef node_ptr (*from_xml_function_ptr)(xml_node const& xml);
 
-void registry::register_name(std::string name, from_xml_function_ptr ptr, bool overwrite)
+class registry : public singleton<registry, CreateStatic>,
+                 private boost::noncopyable
 {
-    if (overwrite) {
-        map_[name] = ptr;
-    } else {
-        map_.insert(make_pair(name, ptr));
-    }
-}
+public:
+    registry();
+    ~registry() {}
+    void register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite=false);
+    node_ptr from_xml(xml_node const& xml);
+private:
+    std::map<std::string, from_xml_function_ptr> map_;
+};
 
-text_placements_ptr registry::from_xml(std::string name, xml_node const& xml, fontset_map const& fontsets)
-{
-    std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(name);
-    if (itr == map_.end())  throw config_error("Unknown placement-type '" + name + "'", xml);
-    return itr->second(xml, fontsets);
-}
 } //ns formatting
 } //ns mapnik
+#endif // FORMATTING_REGISTRY_HPP

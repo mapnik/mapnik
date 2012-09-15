@@ -19,42 +19,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef PLACEMENTS_REGISTRY_HPP
-#define PLACEMENTS_REGISTRY_HPP
 
-// mapnik
-#include <mapnik/utils.hpp>
-#include <mapnik/text_placements/base.hpp>
+#ifndef FORMATTING_EXPRESSION_HPP
+#define FORMATTING_EXPRESSION_HPP
 
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/text/formatting/base.hpp>
+#include <mapnik/expression.hpp>
 
-// stl
-#include <string>
-#include <map>
-
-namespace mapnik
-{
-namespace placements
-{
-
-typedef text_placements_ptr (*from_xml_function_ptr)(
-    xml_node const& xml, fontset_map const & fontsets);
-
-class registry : public singleton<registry, CreateStatic>,
-                 private boost::noncopyable
-{
+namespace mapnik {
+namespace formatting {
+class expression_format: public node {
 public:
-    registry();
-    ~registry() {}
-    void register_name(std::string name, from_xml_function_ptr ptr, bool overwrite=false);
-    text_placements_ptr from_xml(std::string name,
-                                 xml_node const& xml,
-                                 fontset_map const & fontsets);
-private:
-    std::map<std::string, from_xml_function_ptr> map_;
-};
+    void to_xml(boost::property_tree::ptree &xml) const;
+    static node_ptr from_xml(xml_node const& xml);
+    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const;
+    virtual void add_expressions(expression_set &output) const;
 
-} //ns placements
+    void set_child(node_ptr child);
+    node_ptr get_child() const;
+
+    expression_ptr face_name;
+    expression_ptr text_size;
+    expression_ptr character_spacing;
+    expression_ptr line_spacing;
+    expression_ptr text_opacity;
+    expression_ptr wrap_char;
+    expression_ptr fill;
+    expression_ptr halo_fill;
+    expression_ptr halo_radius;
+
+private:
+    node_ptr child_;
+    static expression_ptr get_expression(xml_node const& xml, std::string name);
+};
+} //ns formatting
 } //ns mapnik
-#endif // PLACEMENTS_REGISTRY_HPP
+#endif // FORMATTING_EXPRESSION_HPP

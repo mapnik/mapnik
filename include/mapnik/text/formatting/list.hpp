@@ -19,41 +19,29 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef FORMATTING_LIST_HPP
+#define FORMATTING_LIST_HPP
 
-#ifndef FORMATTING_FORMAT_HPP
-#define FORMATTING_FORMAT_HPP
-
-#include <mapnik/formatting/base.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/formatting/base.hpp>
 
 namespace mapnik {
 namespace formatting {
-class format_node: public node {
+class list_node: public node {
 public:
-    void to_xml(boost::property_tree::ptree &xml) const;
-    static node_ptr from_xml(xml_node const& xml);
+    list_node() : node(), children_() {}
+    virtual void to_xml(boost::property_tree::ptree &xml) const;
     virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const;
     virtual void add_expressions(expression_set &output) const;
 
-    void set_child(node_ptr child);
-    node_ptr get_child() const;
-
-    boost::optional<std::string> face_name;
-    boost::optional<unsigned> text_size;
-    boost::optional<unsigned> character_spacing;
-    boost::optional<unsigned> line_spacing;
-    boost::optional<double> text_opacity;
-    boost::optional<bool> wrap_before;
-    boost::optional<unsigned> wrap_char;
-    boost::optional<text_transform_e> text_transform;
-    boost::optional<color> fill;
-    boost::optional<color> halo_fill;
-    boost::optional<double> halo_radius;
-
-private:
-    node_ptr child_;
+    void push_back(node_ptr n);
+    void set_children(std::vector<node_ptr> const& children);
+    std::vector<node_ptr> const& get_children() const;
+    void clear();
+protected:
+    std::vector<node_ptr> children_;
 };
 } //ns formatting
 } //ns mapnik
 
-#endif // FORMATTING_FORMAT_HPP
+#endif // FORMATTING_LIST_HPP
+

@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 //mapnik
-#include <mapnik/text_placements/list.hpp>
+#include <mapnik/text/placements/list.hpp>
 #include <mapnik/xml_node.hpp>
 
 //boost

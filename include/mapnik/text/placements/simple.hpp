@@ -24,7 +24,7 @@
 #define MAPNIK_TEXT_PLACEMENTS_SIMPLE_HPP
 
 // mapnik
-#include <mapnik/text_placements/base.hpp>
+#include <mapnik/text/placements/base.hpp>
 
 namespace mapnik {
 

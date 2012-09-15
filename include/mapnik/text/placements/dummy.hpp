@@ -19,39 +19,41 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+#ifndef PLACEMENTS_DUMMY_HPP
+#define PLACEMENTS_DUMMY_HPP
 
-#ifndef FORMATTING_EXPRESSION_HPP
-#define FORMATTING_EXPRESSION_HPP
+// mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/text/placements/base.hpp>
+// boost
+#include <boost/concept_check.hpp>
 
-#include <mapnik/formatting/base.hpp>
-#include <mapnik/expression.hpp>
+namespace mapnik
+{
 
-namespace mapnik {
-namespace formatting {
-class expression_format: public node {
+class text_placements_info_dummy;
+
+// Dummy placement algorithm. Always takes the default value.
+class MAPNIK_DECL text_placements_dummy: public text_placements
+{
 public:
-    void to_xml(boost::property_tree::ptree &xml) const;
-    static node_ptr from_xml(xml_node const& xml);
-    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const;
-    virtual void add_expressions(expression_set &output) const;
-
-    void set_child(node_ptr child);
-    node_ptr get_child() const;
-
-    expression_ptr face_name;
-    expression_ptr text_size;
-    expression_ptr character_spacing;
-    expression_ptr line_spacing;
-    expression_ptr text_opacity;
-    expression_ptr wrap_char;
-    expression_ptr fill;
-    expression_ptr halo_fill;
-    expression_ptr halo_radius;
-
-private:
-    node_ptr child_;
-    static expression_ptr get_expression(xml_node const& xml, std::string name);
+text_placement_info_ptr get_placement_info(double scale_factor) const;
+friend class text_placement_info_dummy;
 };
-} //ns formatting
+
+// Placement info object for dummy placement algorithm. Always takes the default value.
+class MAPNIK_DECL text_placement_info_dummy : public text_placement_info
+{
+public:
+text_placement_info_dummy(text_placements_dummy const* parent, double scale_factor)
+    : text_placement_info(parent, scale_factor),
+      state(0) {}
+
+    bool next();
+private:
+unsigned state;
+};
+
 } //ns mapnik
-#endif // FORMATTING_EXPRESSION_HPP
+
+#endif // PLACEMENTS_DUMMY_HPP

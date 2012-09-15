@@ -22,11 +22,11 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/formatting/expression_format.hpp>
+#include <mapnik/text/formatting/expression_format.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/xml_node.hpp>
 

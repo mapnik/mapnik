@@ -21,7 +21,7 @@
  *****************************************************************************/
 #ifndef TEXT_PLACEMENTS_LIST_HPP
 #define TEXT_PLACEMENTS_LIST_HPP
-#include <mapnik/text_placements/base.hpp>
+#include <mapnik/text/placements/base.hpp>
 
 namespace mapnik {
 

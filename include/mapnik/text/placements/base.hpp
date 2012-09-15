@@ -25,8 +25,8 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/text_properties.hpp>
-#include <mapnik/formatting/base.hpp>
+#include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/formatting/base.hpp>
 
 namespace mapnik
 {

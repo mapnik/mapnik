@@ -19,41 +19,23 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-// mapnik
-#include <mapnik/formatting/registry.hpp>
-#include <mapnik/formatting/text.hpp>
-#include <mapnik/formatting/format.hpp>
-#include <mapnik/formatting/expression_format.hpp>
-#include <mapnik/xml_node.hpp>
-#include <mapnik/config_error.hpp>
+
+#include <mapnik/text/placements/dummy.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
-namespace formatting
+bool text_placement_info_dummy::next()
 {
-
-registry::registry()
-{
-    register_name("<xmltext>", &text_node::from_xml);
-    register_name("Format", &format_node::from_xml);
-    register_name("ExpressionFormat", &expression_format::from_xml);
+    if (state) return false;
+    state++;
+    return true;
 }
 
-void registry::register_name(std::string const& name, from_xml_function_ptr ptr, bool overwrite)
+text_placement_info_ptr text_placements_dummy::get_placement_info(
+    double scale_factor) const
 {
-    if (overwrite) {
-        map_[name] = ptr;
-    } else {
-        map_.insert(make_pair(name, ptr));
-    }
+    return boost::make_shared<text_placement_info_dummy>(this, scale_factor);
 }
 
-node_ptr registry::from_xml(xml_node const& xml)
-{
-    std::map<std::string, from_xml_function_ptr>::const_iterator itr = map_.find(xml.name());
-    if (itr == map_.end())  throw config_error("Unknown element '" + xml.name() + "'", xml);
-    xml.set_processed(true);
-    return itr->second(xml);
-}
-} //ns formatting
 } //ns mapnik

@@ -19,29 +19,27 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-#ifndef FORMATTING_LIST_HPP
-#define FORMATTING_LIST_HPP
-
-#include <mapnik/formatting/base.hpp>
+#include <mapnik/text/placements/base.hpp>
 
 namespace mapnik {
-namespace formatting {
-class list_node: public node {
-public:
-    list_node() : node(), children_() {}
-    virtual void to_xml(boost::property_tree::ptree &xml) const;
-    virtual void apply(char_properties_ptr p, Feature const& feature, text_layout &output) const;
-    virtual void add_expressions(expression_set &output) const;
+text_placements::text_placements() : defaults()
+{
+}
 
-    void push_back(node_ptr n);
-    void set_children(std::vector<node_ptr> const& children);
-    std::vector<node_ptr> const& get_children() const;
-    void clear();
-protected:
-    std::vector<node_ptr> children_;
-};
-} //ns formatting
+void text_placements::add_expressions(expression_set &output)
+{
+    defaults.add_expressions(output);
+}
+
+
+/************************************************************************/
+
+text_placement_info::text_placement_info(text_placements const* parent,
+                                         double scale_factor_)
+    : properties(parent->defaults),
+      scale_factor(scale_factor_)
+{
+
+}
+
 } //ns mapnik
-
-#endif // FORMATTING_LIST_HPP
-
