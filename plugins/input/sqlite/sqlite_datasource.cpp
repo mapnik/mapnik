@@ -339,10 +339,12 @@ void sqlite_datasource::bind() const
             else
             {
                 std::ostringstream s;
-                s << "Sqlite Plugin: key_field is empty for "
-                  << geometry_field_
-                  << " and "
-                  << geometry_table_;
+                s << "Sqlite Plugin: could not generate spatial index"
+                  << " for table '" << geometry_table_ << "'"
+                  << " as no primary key can be detected."
+                  << " You should either declare an INTEGER PRIMARY KEY"
+                  << " or set the 'key_field' option to force a"
+                  << " given field to be used as the primary key";
                 throw datasource_exception(s.str());
             }
         }

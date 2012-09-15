@@ -698,8 +698,8 @@ class _TextSymbolizer(TextSymbolizer,_injector):
         if isinstance(self.properties.format_tree, FormattingText):
             return self.properties.format_tree.text
         else:
-            return None # This text symbolizer is using complex formatting features.
-                        # There is no single expression which could be returned as name
+            # There is no single expression which could be returned as name
+            raise RuntimeError("TextSymbolizer uses complex formatting features, but old compatibility interface is used to access it. Use self.properties.format_tree instead.")
 
     @name.setter
     def name(self, name):
