@@ -264,7 +264,8 @@ void scale_image_agg(Image & target,
                      double ratio)
 {
     typedef agg::pixfmt_rgba32 pixfmt;
-    typedef agg::renderer_base<pixfmt> renderer_base;
+    typedef agg::pixfmt_rgba32_pre pixfmt_pre;
+    typedef agg::renderer_base<pixfmt_pre> renderer_base;
 
     // define some stuff we'll use soon
     agg::rasterizer_scanline_aa<> ras;
@@ -280,7 +281,7 @@ void scale_image_agg(Image & target,
 
     // initialize destination AGG buffer (with transparency)
     agg::rendering_buffer rbuf_dst((unsigned char*)target.getBytes(), target.width(), target.height(), target.width() * 4);
-    pixfmt pixf_dst(rbuf_dst);
+    pixfmt_pre pixf_dst(rbuf_dst);
     renderer_base rb_dst(pixf_dst);
     rb_dst.clear(agg::rgba(0, 0, 0, 0));
 

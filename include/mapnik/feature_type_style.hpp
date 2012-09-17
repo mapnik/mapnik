@@ -72,17 +72,17 @@ public:
     feature_type_style& operator=(feature_type_style const& rhs);
 
     void add_rule(rule const& rule);
-
     rules const& get_rules() const;
     rule_ptrs const& get_if_rules(double scale_denom);
     rule_ptrs const& get_else_rules(double scale_denom);
     rule_ptrs const& get_also_rules(double scale_denom);
-
     rules& get_rules_nonconst();
     
-    void set_filter_mode(filter_mode_e mode);
+    bool active(double scale_denom) const;
 
+    void set_filter_mode(filter_mode_e mode);
     filter_mode_e get_filter_mode() const;
+
     // filters
     std::vector<filter::filter_type> const& image_filters() const;
     std::vector<filter::filter_type> & image_filters();    

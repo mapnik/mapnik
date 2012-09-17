@@ -20,57 +20,20 @@
  *
  *****************************************************************************/
 
-//mapnik
-#include <mapnik/font_set.hpp>
+#ifndef MAPNIK_DEBUG_SYMBOLIZER_HPP
+#define MAPNIK_DEBUG_SYMBOLIZER_HPP
 
-//stl
-#include <string>
-#include <iostream>
+#include <mapnik/config.hpp>
+#include <mapnik/symbolizer.hpp>
 
 namespace mapnik
 {
 
-font_set::font_set(std::string const& name)
-    : name_(name) {}
-
-font_set::font_set(font_set const& rhs)
-    : name_(rhs.name_),
-      face_names_(rhs.face_names_) {}
-
-font_set& font_set::operator=(font_set const& other)
+struct MAPNIK_DECL debug_symbolizer :
+        public symbolizer_base
 {
-    if (this == &other)
-        return *this;
-    name_ = other.name_;
-    face_names_ = other.face_names_;
-
-    return *this;
+    debug_symbolizer() : symbolizer_base() {}
+};
 }
 
-font_set::~font_set() {}
-
-unsigned font_set::size() const
-{
-    return face_names_.size();
-}
-
-void font_set::add_face_name(std::string face_name)
-{
-    face_names_.push_back(face_name);
-}
-
-void font_set::set_name(std::string const& name)
-{
-    name_ = name;
-}
-
-std::string const& font_set::get_name() const
-{
-    return name_;
-}
-
-std::vector<std::string> const& font_set::get_face_names() const
-{
-    return face_names_;
-}
-}
+#endif // DEBUG_SYMBOLIZER_HPP

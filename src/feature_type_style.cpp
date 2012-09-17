@@ -22,6 +22,9 @@
 
 #include <mapnik/feature_type_style.hpp>
 
+// boost
+#include <boost/foreach.hpp>
+
 namespace mapnik
 {
 
@@ -87,6 +90,18 @@ rules const& feature_type_style::get_rules() const
 rules& feature_type_style::get_rules_nonconst()
 {
     return rules_;
+}
+
+bool feature_type_style::active(double scale_denom) const
+{
+    BOOST_FOREACH(rule const& r, rules_)
+    {
+        if (r.active(scale_denom))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void feature_type_style::set_filter_mode(filter_mode_e mode)

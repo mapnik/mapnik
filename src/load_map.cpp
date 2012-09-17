@@ -106,6 +106,7 @@ private:
     void parse_building_symbolizer(rule & rule, xml_node const& sym);
     void parse_raster_symbolizer(rule & rule, xml_node const& sym);
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
+    void parse_debug_symbolizer(rule & rule, xml_node const& sym);
 
     void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     bool parse_stroke(stroke & strk, xml_node const & sym);
@@ -806,6 +807,10 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
             {
                 parse_markers_symbolizer(rule, *symIter);
             }
+            else if (symIter->is("DebugSymbolizer"))
+            {
+                parse_debug_symbolizer(rule, *symIter);
+            }
         }
         style.add_rule(rule);
 
@@ -1149,7 +1154,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
             placement_finder->defaults.from_xml(sym, fontsets_);
         }
         if (strict_ &&
-            !placement_finder->defaults.format.fontset.size())
+            !placement_finder->defaults.format.fontset->size())
         {
             ensure_font_face(placement_finder->defaults.format.face_name);
         }
@@ -1178,7 +1183,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         }
         placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
-            !placement_finder->defaults.format.fontset.size())
+            !placement_finder->defaults.format.fontset->size())
         {
             ensure_font_face(placement_finder->defaults.format.face_name);
         }
@@ -1506,6 +1511,14 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         ex.append_context(sym);
         throw;
     }
+}
+
+void map_parser::parse_debug_symbolizer(rule & rule, xml_node const & sym)
+{
+    debug_symbolizer symbol;
+
+    parse_symbolizer_base(symbol, sym);
+    rule.append(symbol);
 }
 
 void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
