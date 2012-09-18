@@ -42,7 +42,7 @@ MAPNIK_DECL bool from_wkt(std::string const& wkt, boost::ptr_vector<geometry_typ
 
 #if BOOST_VERSION >= 104700
 
-class wkt_parser : boost::noncopyable
+class MAPNIK_DECL wkt_parser : boost::noncopyable
 {
     typedef std::string::const_iterator iterator_type;
 public:

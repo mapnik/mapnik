@@ -40,7 +40,7 @@ template <typename Iterator> struct geometry_grammar;
 MAPNIK_DECL bool from_geojson(std::string const& json, boost::ptr_vector<geometry_type> & paths);
 
 template <typename Iterator>
-class geometry_parser : private boost::noncopyable
+class MAPNIK_DECL geometry_parser : private boost::noncopyable
 {
     typedef Iterator iterator_type;
 public:
