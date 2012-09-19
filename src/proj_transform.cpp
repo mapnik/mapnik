@@ -150,7 +150,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         }
     }
 
-    do {
+    {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
@@ -160,7 +160,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         {
             return false;
         }
-    } while(false);
+    }
 
     if (is_source_longlat_)
     {
