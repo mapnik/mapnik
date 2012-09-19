@@ -58,17 +58,19 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     CoordTransform tt(target.data_.width(), target.data_.height(),
                       target.ext_, offset_x, offset_y);
     unsigned i, j;
-    unsigned mesh_nx = ceil(source.data_.width()/double(mesh_size)+1);
-    unsigned mesh_ny = ceil(source.data_.height()/double(mesh_size)+1);
+    unsigned mesh_nx = ceil(source.data_.width()/double(mesh_size) + 1);
+    unsigned mesh_ny = ceil(source.data_.height()/double(mesh_size) + 1);
 
     ImageData<double> xs(mesh_nx, mesh_ny);
     ImageData<double> ys(mesh_nx, mesh_ny);
 
     // Precalculate reprojected mesh
-    for(j=0; j<mesh_ny; j++) {
-        for (i=0; i<mesh_nx; i++) {
-            xs(i,j) = i*mesh_size;
-            ys(i,j) = j*mesh_size;
+    for(j=0; j<mesh_ny; ++j)
+    {
+        for (i=0; i<mesh_nx; ++i)
+        {
+            xs(i,j) = std::min(i*mesh_size,source.data_.width());
+            ys(i,j) = std::min(j*mesh_size,source.data_.height());
             ts.backward(&xs(i,j), &ys(i,j));
         }
     }
@@ -144,8 +146,10 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     }
 
     // Project mesh cells into target interpolating raster inside each one
-    for(j=0; j<mesh_ny-1; j++) {
-        for (i=0; i<mesh_nx-1; i++) {
+    for(j=0; j<mesh_ny-1; j++)
+    {
+        for (i=0; i<mesh_nx-1; i++)
+        {
             double polygon[8] = {xs(i,j), ys(i,j),
                                  xs(i+1,j), ys(i+1,j),
                                  xs(i+1,j+1), ys(i+1,j+1),
@@ -165,7 +169,8 @@ void reproject_and_scale_raster(raster & target, raster const& source,
             unsigned y0 = j * mesh_size;
             unsigned x1 = (i+1) * mesh_size;
             unsigned y1 = (j+1) * mesh_size;
-
+            x1 = std::min(x1, source.data_.width());
+            y1 = std::min(y1, source.data_.height());
             agg::trans_affine tr(polygon, x0, y0, x1, y1);
             if (tr.is_valid())
             {
