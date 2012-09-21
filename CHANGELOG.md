@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Improved detection of newlines in CSV files - now more robust in the face of mixed newline types (#1497)
+
 - Allow style level compositing operations to work outside of featureset extents across tiled requests (#1477)
 
 - Support for encoding `literal` postgres types as strings 69fb17cd3/#1466
