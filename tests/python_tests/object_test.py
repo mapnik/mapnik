@@ -97,7 +97,7 @@ def test_text_symbolizer():
 
     # old args required method
     ts = mapnik.TextSymbolizer(mapnik.Expression('[Field_Name]'), 'Font Name', 8, mapnik.Color('black'))
-#    eq_(str(ts.name), str(mapnik2.Expression('[Field_Name]'))) name field is no longer supported
+    eq_(str(ts.name), str(mapnik.Expression('[Field_Name]'))) 
     eq_(ts.format.face_name, 'Font Name')
     eq_(ts.format.text_size, 8)
     eq_(ts.format.fill, mapnik.Color('black'))
@@ -112,7 +112,7 @@ def test_shield_symbolizer_init():
     eq_(s.allow_overlap, False)
     eq_(s.avoid_edges, False)
     eq_(s.character_spacing,0)
-    #eq_(str(s.name), str(mapnik2.Expression('[Field Name]'))) name field is no longer supported
+    eq_(str(s.name), str(mapnik.Expression('[Field Name]')))
     eq_(s.face_name, 'DejaVu Sans Bold')
     eq_(s.allow_overlap, False)
     eq_(s.fill, mapnik.Color('#000000'))
