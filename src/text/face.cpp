@@ -19,9 +19,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+// mapnik
 #include <mapnik/text/face.hpp>
 #include <mapnik/debug.hpp>
 
+// boost
 #include <boost/foreach.hpp>
 
 extern "C"
@@ -88,6 +90,7 @@ void font_face::glyph_dimensions(glyph_info &glyph) const
     glyph.ymin = glyph_bbox.yMin; //pixels!
     glyph.ymax = glyph_bbox.yMax;
     glyph.line_height = face_->size->metrics.height/64.0;
+    glyph.width = face_->glyph->advance.x / 64.0;
 
 //TODO:    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
 }
