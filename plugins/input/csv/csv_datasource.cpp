@@ -172,33 +172,19 @@ void csv_datasource::parse_csv(T & stream,
     // autodetect newlines
     char newline = '\n';
     bool has_newline = false;
-    int newline_count = 0;
-    int carriage_count = 0;
-    for (unsigned idx = 0; idx < file_length_; idx++)
+    for (unsigned lidx = 0; lidx < file_length_ && lidx < 4000; lidx++)
     {
         char c = static_cast<char>(stream.get());
+        if (c == '\r')
+        {
+            newline = '\r';
+            has_newline = true;
+            break;
+        }
         if (c == '\n')
         {
-            ++newline_count;
             has_newline = true;
-        }
-        else if (c == '\r')
-        {
-            ++carriage_count;
-            has_newline = true;
-        }
-        // read at least 2000 bytes before testing
-        if (idx == file_length_-1 || idx > 4000)
-        {
-            if (newline_count > carriage_count)
-            {
-                break;
-            }
-            else if (carriage_count > newline_count)
-            {
-                newline = '\r';
-                break;
-            }
+            break;
         }
     }
 

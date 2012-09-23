@@ -58,17 +58,19 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     CoordTransform tt(target.data_.width(), target.data_.height(),
                       target.ext_, offset_x, offset_y);
     unsigned i, j;
-    unsigned mesh_nx = ceil(source.data_.width()/double(mesh_size)+1);
-    unsigned mesh_ny = ceil(source.data_.height()/double(mesh_size)+1);
+    unsigned mesh_nx = ceil(source.data_.width()/double(mesh_size) + 1);
+    unsigned mesh_ny = ceil(source.data_.height()/double(mesh_size) + 1);
 
     ImageData<double> xs(mesh_nx, mesh_ny);
     ImageData<double> ys(mesh_nx, mesh_ny);
 
     // Precalculate reprojected mesh
-    for(j=0; j<mesh_ny; j++) {
-        for (i=0; i<mesh_nx; i++) {
-            xs(i,j) = i*mesh_size;
-            ys(i,j) = j*mesh_size;
+    for(j=0; j<mesh_ny; ++j)
+    {
+        for (i=0; i<mesh_nx; ++i)
+        {
+            xs(i,j) = std::min(i*mesh_size,source.data_.width());
+            ys(i,j) = std::min(j*mesh_size,source.data_.height());
             ts.backward(&xs(i,j), &ys(i,j));
         }
     }
@@ -78,6 +80,8 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     typedef agg::pixfmt_rgba32 pixfmt;
     typedef pixfmt::color_type color_type;
     typedef agg::renderer_base<pixfmt> renderer_base;
+    typedef agg::pixfmt_rgba32_pre pixfmt_pre;
+    typedef agg::renderer_base<pixfmt_pre> renderer_base_pre;
 
     agg::rasterizer_scanline_aa<> rasterizer;
     agg::scanline_u8  scanline;
@@ -85,8 +89,8 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                               target.data_.width(),
                               target.data_.height(),
                               target.data_.width()*4);
-    pixfmt pixf(buf);
-    renderer_base rb(pixf);
+    pixfmt_pre pixf_pre(buf);
+    renderer_base_pre rb_pre(pixf_pre);
     rasterizer.clip_box(0, 0, target.data_.width(), target.data_.height());
     agg::rendering_buffer buf_tile(
         (unsigned char*)source.data_.getData(),
@@ -142,8 +146,10 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     }
 
     // Project mesh cells into target interpolating raster inside each one
-    for(j=0; j<mesh_ny-1; j++) {
-        for (i=0; i<mesh_nx-1; i++) {
+    for(j=0; j<mesh_ny-1; j++)
+    {
+        for (i=0; i<mesh_nx-1; i++)
+        {
             double polygon[8] = {xs(i,j), ys(i,j),
                                  xs(i+1,j), ys(i+1,j),
                                  xs(i+1,j+1), ys(i+1,j+1),
@@ -163,7 +169,8 @@ void reproject_and_scale_raster(raster & target, raster const& source,
             unsigned y0 = j * mesh_size;
             unsigned x1 = (i+1) * mesh_size;
             unsigned y1 = (j+1) * mesh_size;
-
+            x1 = std::min(x1, source.data_.width());
+            y1 = std::min(y1, source.data_.height());
             agg::trans_affine tr(polygon, x0, y0, x1, y1);
             if (tr.is_valid())
             {
@@ -176,13 +183,13 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                         <img_accessor_type, interpolator_type>
                         span_gen_type;
                     span_gen_type sg(ia, interpolator);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb,
+                    agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
                                              sa, sg);
                 } else {
                     typedef mapnik::span_image_resample_rgba_affine
                         <img_accessor_type> span_gen_type;
                     span_gen_type sg(ia, interpolator, filter);
-                    agg::render_scanlines_aa(rasterizer, scanline, rb,
+                    agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
                                              sa, sg);
                 }
             }

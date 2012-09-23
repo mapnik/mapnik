@@ -784,6 +784,7 @@ class _TextSymbolizer(TextSymbolizer,_injector):
     def wrap_before(self, wrap_before):
         self.properties.wrap_before = wrap_before
 
+
     @property
     def text_transform(self):
         return self.format.text_transform

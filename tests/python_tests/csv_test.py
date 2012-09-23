@@ -206,7 +206,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         eq_(desc['type'],mapnik.DataType.Vector)
         eq_(desc['encoding'],'utf-8')
 
-    def test_windows_newlines(**kwargs):
+    def test_reading_windows_newlines(**kwargs):
         ds = get_csv_ds('windows_newlines.csv')
         eq_(len(ds.fields()),3)
         feats = ds.all_features()
@@ -222,8 +222,8 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         eq_(desc['type'],mapnik.DataType.Vector)
         eq_(desc['encoding'],'utf-8')
 
-    def test_mac_newlines(**kwargs):
-        ds = get_csv_ds('windows_newlines.csv')
+    def test_reading_mac_newlines(**kwargs):
+        ds = get_csv_ds('mac_newlines.csv')
         eq_(len(ds.fields()),3)
         feats = ds.all_features()
         eq_(len(feats),1)
@@ -237,6 +237,42 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         eq_(desc['name'],'csv')
         eq_(desc['type'],mapnik.DataType.Vector)
         eq_(desc['encoding'],'utf-8')
+
+    def check_newlines(filename):
+        ds = get_csv_ds(filename)
+        eq_(len(ds.fields()),3)
+        feats = ds.all_features()
+        eq_(len(feats),1)
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['x'],0)
+        eq_(feat['y'],0)
+        eq_(feat['line'],'many\n  lines\n  of text\n  with unix newlines')
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(desc['name'],'csv')
+        eq_(desc['type'],mapnik.DataType.Vector)
+        eq_(desc['encoding'],'utf-8')
+
+    def test_mixed_mac_unix_newlines(**kwargs):
+        check_newlines('mac_newlines_with_unix_inline.csv')
+
+    def test_mixed_mac_unix_newlines_escaped(**kwargs):
+        check_newlines('mac_newlines_with_unix_inline_escaped.csv')
+
+    # To hard to support this case
+    #def test_mixed_unix_windows_newlines(**kwargs):
+    #    check_newlines('unix_newlines_with_windows_inline.csv')
+
+    # To hard to support this case
+    #def test_mixed_unix_windows_newlines_escaped(**kwargs):
+    #    check_newlines('unix_newlines_with_windows_inline_escaped.csv')
+
+    def test_mixed_windows_unix_newlines(**kwargs):
+        check_newlines('windows_newlines_with_unix_inline.csv')
+
+    def test_mixed_windows_unix_newlines_escaped(**kwargs):
+        check_newlines('windows_newlines_with_unix_inline_escaped.csv')
 
     def test_tabs(**kwargs):
         ds = get_csv_ds('tabs_in_csv.csv')
