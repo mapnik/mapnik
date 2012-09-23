@@ -180,6 +180,7 @@ source = Split(
     text/placements/simple.cpp
     text/shaping.cpp
     text/layout.cpp
+    text/layout_shape_hb.cpp
     text/itemizer.cpp
     text/scrptrun.cpp
     text/face.cpp
