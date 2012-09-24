@@ -45,7 +45,7 @@ using mapnik::image_reader;
 
 DATASOURCE_PLUGIN(raster_datasource)
 
-raster_datasource::raster_datasource(const parameters& params, bool bind)
+raster_datasource::raster_datasource(parameters const& params, bool bind)
     : datasource(params),
       desc_(*params.get<std::string>("type"), "utf-8"),
       extent_initialized_(false)
@@ -201,11 +201,11 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         return boost::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
     }
-    else if (width * height > 512*512)
+    else if (width * height > (tile_size_ * tile_size_ << 2))
     {
         MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Tiled policy";
 
-        tiled_file_policy policy(filename_, format_, 256, extent_, q.get_bbox(), width_, height_);
+        tiled_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_);
 
         return boost::make_shared<raster_featureset<tiled_file_policy> >(policy, extent_, q);
     }
