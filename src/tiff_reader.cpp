@@ -23,6 +23,8 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
 
 // stl
@@ -41,6 +43,18 @@ using std::max;
 
 class tiff_reader : public image_reader
 {
+    typedef boost::shared_ptr<TIFF> tiff_ptr;
+    struct tiff_closer
+    {
+        void operator() (TIFF * tif)
+        {
+            if (tif != 0)
+            {
+                TIFFClose(tif);
+            }
+        }
+    };
+
 private:
     std::string file_name_;
     int read_method_;
@@ -49,6 +63,8 @@ private:
     int rows_per_strip_;
     int tile_width_;
     int tile_height_;
+    tiff_ptr tif_;
+
 public:
     enum TiffType {
         generic=1,
@@ -116,11 +132,9 @@ void tiff_reader::init()
         {
             read_method_=stripped;
         }
-        TIFFClose(tif);
     }
     else
     {
-        TIFFClose(tif);
         throw image_reader_exception(msg);
     }
 }
@@ -128,7 +142,6 @@ void tiff_reader::init()
 
 tiff_reader::~tiff_reader()
 {
-    //
 }
 
 
@@ -167,8 +180,6 @@ void tiff_reader::read_generic(unsigned /*x*/,unsigned /*y*/,image_data_32& /*im
     if (tif)
     {
         MAPNIK_LOG_DEBUG(tiff_reader) << "tiff_reader: TODO - tiff is not stripped or tiled";
-
-        TIFFClose(tif);
     }
 }
 
@@ -213,7 +224,6 @@ void tiff_reader::read_tiled(unsigned x0,unsigned y0,image_data_32& image)
             }
         }
         _TIFFfree(buf);
-        TIFFClose(tif);
     }
 }
 
@@ -254,21 +264,21 @@ void tiff_reader::read_stripped(unsigned x0,unsigned y0,image_data_32& image)
             }
         }
         _TIFFfree(buf);
-        TIFFClose(tif);
     }
 }
 
 TIFF* tiff_reader::load_if_exists(std::string const& filename)
 {
-    TIFF * tif = 0;
-    boost::filesystem::path path(file_name_);
-    if (exists(path)) //  && is_regular(path)) { -- not supported in boost-1.33.*
+    if (!tif_)
     {
-        // File path is a full file path and does exist
-        tif = TIFFOpen(filename.c_str(), "rb");
+        boost::filesystem::path path(file_name_);
+        if (boost::filesystem::is_regular(path)) // exists and regular file
+        {
+            // File path is a full file path and does exist
+            tif_ = tiff_ptr(TIFFOpen(filename.c_str(), "rb"), tiff_closer());
+        }
     }
-
-    return tif;
-}
+    return tif_.get();
 }
 
+} // namespace mapnik
