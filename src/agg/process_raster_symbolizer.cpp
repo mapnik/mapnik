@@ -83,7 +83,8 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                 if (scaling_method == SCALING_BILINEAR8)
                 {
                     scale_image_bilinear8<image_data_32>(target.data_,source->data_, 0.0, 0.0);
-                } else
+                }
+                else
                 {
                     double scaling_ratio = ext.width() / source->data_.width();
                     scale_image_agg<image_data_32>(target.data_,
