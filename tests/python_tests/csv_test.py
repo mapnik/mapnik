@@ -137,9 +137,9 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
 
     def test_wkt_field(**kwargs):
         ds = get_csv_ds('wkt.csv')
-        eq_(len(ds.fields()),2)
-        eq_(ds.fields(),['type','WKT'])
-        eq_(ds.field_types(),['str','str'])
+        eq_(len(ds.fields()),1)
+        eq_(ds.fields(),['type'])
+        eq_(ds.field_types(),['str'])
         fs = ds.all_features()
         eq_(len(fs[0].geometries()),1)
         eq_(fs[0].geometries()[0].type(),mapnik.DataGeometryType.Point)
@@ -396,9 +396,9 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         eq_(feat['Name'],u"Winthrop, WA")
 
     def validate_geojson_datasource(ds):
-        eq_(len(ds.fields()),2)
-        eq_(ds.fields(),['type','GeoJSON'])
-        eq_(ds.field_types(),['str','str'])
+        eq_(len(ds.fields()),1)
+        eq_(ds.fields(),['type'])
+        eq_(ds.field_types(),['str'])
         fs = ds.all_features()
         eq_(len(fs[0].geometries()),1)
         eq_(fs[0].geometries()[0].type(),mapnik.DataGeometryType.Point)
