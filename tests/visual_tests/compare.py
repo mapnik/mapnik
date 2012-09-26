@@ -49,7 +49,7 @@ def compare(actual, expected):
     passed += 1
     return diff
 
-def summary():
+def summary(generate=False):
     global errors
     global passed
     print "-"*80
@@ -57,7 +57,13 @@ def summary():
     if len(errors) != 0:
         for error in errors:
             if (error[0] is None):
-                print "Could not verify %s: No reference image found!" % error[1]
+                if generate:
+                    actual = open(error[1],'r').read()
+                    open(error[2],'wb').write(actual)
+                    print "Generating reference image: '%s'" % error[2]
+                    continue
+                else:
+                    print "Could not verify %s: No reference image found!" % error[1]
             else:
                 print "Failed: %d different pixels:\n\t%s (actual)\n\t%s (expected)" % error
         sys.exit(1)
