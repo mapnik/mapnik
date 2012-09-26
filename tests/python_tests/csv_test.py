@@ -6,6 +6,8 @@ from nose.tools import *
 from utilities import execution_path
 
 import os, mapnik
+# make the tests silent since we intentially test error conditions that are noisy
+mapnik.logger.set_severity(mapnik.severity_type.None)
 
 def setup():
     # All of the paths used are relative, if we run the tests
