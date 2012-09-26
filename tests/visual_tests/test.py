@@ -47,6 +47,9 @@ files = [
     {'name': "line-offset", 'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     {'name': "tiff-alpha-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-raster", 'sizes':[(600,400)]},
+    {'name': "tiff-alpha-gradient-gdal", 'sizes':[(600,400)]},
+    {'name': "tiff-nodata-edge-gdal", 'sizes':[(600,400)]},
+    {'name': "tiff-nodata-edge-raster", 'sizes':[(600,400)]},
     ]
 
 def render(filename, width, height, bbox, quiet=False):
