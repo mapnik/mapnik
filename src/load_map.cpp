@@ -1148,7 +1148,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
             placement_finder->defaults.from_xml(sym, fontsets_);
         }
         if (strict_ &&
-            !placement_finder->defaults.format.fontset->size())
+            !placement_finder->defaults.format.fontset)
         {
             ensure_font_face(placement_finder->defaults.format.face_name);
         }
@@ -1177,7 +1177,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         }
         placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
-            !placement_finder->defaults.format.fontset->size())
+            !placement_finder->defaults.format.fontset)
         {
             ensure_font_face(placement_finder->defaults.format.face_name);
         }
