@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, save_data, contains_word
+from utilities import execution_path, contains_word
 
 import os, mapnik
 
@@ -39,8 +39,6 @@ def test_multi_tile_policy():
 
         im = mapnik.Image(_map.width, _map.height)
         mapnik.render(_map, im)
-
-        save_data('test_multi_tile_policy.png', im.tostring('png'))
 
         # test green chunk
         eq_(im.view(0,64,1,1).tostring(), '\x00\xff\x00\xff')
