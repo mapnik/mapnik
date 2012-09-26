@@ -47,11 +47,11 @@
 namespace mapnik {
 
 void reproject_and_scale_raster(raster & target, raster const& source,
-                      proj_transform const& prj_trans,
-                      double offset_x, double offset_y,
-                      unsigned mesh_size,
-                      double filter_radius,
-                      scaling_method_e scaling_method)
+                                proj_transform const& prj_trans,
+                                double offset_x, double offset_y,
+                                unsigned mesh_size,
+                                double filter_radius,
+                                scaling_method_e scaling_method)
 {
     CoordTransform ts(source.data_.width(), source.data_.height(),
                       source.ext_);
@@ -160,10 +160,10 @@ void reproject_and_scale_raster(raster & target, raster const& source,
             tt.forward(polygon+6, polygon+7);
 
             rasterizer.reset();
-            rasterizer.move_to_d(polygon[0]-1, polygon[1]-1);
-            rasterizer.line_to_d(polygon[2]+1, polygon[3]-1);
-            rasterizer.line_to_d(polygon[4]+1, polygon[5]+1);
-            rasterizer.line_to_d(polygon[6]-1, polygon[7]+1);
+            rasterizer.move_to_d(std::floor(polygon[0]), std::floor(polygon[1]));
+            rasterizer.line_to_d(std::floor(polygon[2]), std::floor(polygon[3]));
+            rasterizer.line_to_d(std::floor(polygon[4]), std::floor(polygon[5]));
+            rasterizer.line_to_d(std::floor(polygon[6]), std::floor(polygon[7]));
 
             unsigned x0 = i * mesh_size;
             unsigned y0 = j * mesh_size;
