@@ -252,12 +252,12 @@ private:
     unsigned output_vertex_sleeve(double* x, double* y)
     {
         vertex2d vtx(vertex2d::no_init);
-        std::size_t min_size = 3;
+        std::size_t min_size = 1;
         while ((vtx.cmd = geom_.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
-            if ((std::fabs(vtx.x - previous_vertex_.x) < 0.5) &&
-                (std::fabs(vtx.y - previous_vertex_.y) < 0.5))
-                continue;
+            //if ((std::fabs(vtx.x - previous_vertex_.x) < 0.5) &&
+            //    (std::fabs(vtx.y - previous_vertex_.y) < 0.5))
+            //    continue;
 
             if (status_ == cache &&
                 vertices_.size() >= min_size)
