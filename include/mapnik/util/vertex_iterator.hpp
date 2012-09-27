@@ -33,55 +33,55 @@
 
 namespace mapnik { namespace util {
 
-    template <typename T>
-    class vertex_iterator
-        : public boost::iterator_facade< vertex_iterator<T>,
-                                         typename boost::tuple<unsigned,T,T> const,
-                                         boost::forward_traversal_tag
-                                         >
+template <typename T>
+class vertex_iterator
+    : public boost::iterator_facade< vertex_iterator<T>,
+                                     typename boost::tuple<unsigned,T,T> const,
+                                     boost::forward_traversal_tag
+                                     >
+{
+
+public:
+    typedef typename boost::tuple<unsigned, T, T> value_type;
+    typedef vertex_vector<T> container_type;
+
+    vertex_iterator()
+        : v_(SEG_END,0,0),
+          vertices_(),
+          pos_(0)
+    {}
+
+    explicit vertex_iterator(container_type const& vertices)
+        : vertices_(&vertices),
+          pos_(0)
     {
+        increment();
+    }
 
-    public:
-        typedef typename boost::tuple<unsigned, T, T> value_type;
-        typedef vertex_vector<T> container_type;
+private:
+    friend class boost::iterator_core_access;
 
-        vertex_iterator()
-            : v_(SEG_END,0,0),
-              vertices_(),
-              pos_(0)
-        {}
+    void increment()
+    {
+        boost::get<0>(v_) = vertices_->get_vertex(pos_++, &boost::get<1>(v_), &boost::get<2>(v_));
+    }
 
-        explicit vertex_iterator(container_type const& vertices)
-            : vertices_(&vertices),
-              pos_(0)
-        {
-            increment();
-        }
+    bool equal( vertex_iterator const& other) const
+    {
+        return boost::get<0>(v_) == boost::get<0>(other.v_);
+    }
 
-    private:
-        friend class boost::iterator_core_access;
+    value_type const& dereference() const
+    {
+        return v_;
+    }
 
-        void increment()
-        {
-            boost::get<0>(v_) = vertices_->get_vertex(pos_++, &boost::get<1>(v_), &boost::get<2>(v_));
-        }
+    value_type v_;
+    container_type const *vertices_;
+    unsigned pos_;
+};
 
-        bool equal( vertex_iterator const& other) const
-        {
-            return boost::get<0>(v_) == boost::get<0>(other.v_);
-        }
-
-        value_type const& dereference() const
-        {
-            return v_;
-        }
-
-        value_type v_;
-        container_type const *vertices_;
-        unsigned pos_;
-    };
-
-    }}
+}}
 
 
 #endif // MAPNIK_VERTEX_ITERATOR_HPP
