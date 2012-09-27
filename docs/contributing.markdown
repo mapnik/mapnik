@@ -153,6 +153,14 @@ If you see bits of code around that do not follow these please don't hesitate to
         // more...
     }
 
+#### Prefer `empty()` over `size() == 0` if container supports it
+
+This avoids implicit conversions to bool and reduces compiler warnings.
+
+    if (container.empty()) // please
+
+    if (container.size() == 0) // no
+
 
 ### Other C++ style resources
 

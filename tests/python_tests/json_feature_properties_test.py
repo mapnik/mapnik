@@ -3,7 +3,10 @@
 from nose.tools import *
 import os,sys
 import mapnik
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 chars = [
  {

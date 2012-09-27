@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, save_data, contains_word
+from utilities import execution_path, contains_word
 
 import os, mapnik
 
@@ -51,8 +51,6 @@ def test_dataraster_coloring():
 
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
-        # save a png somewhere so we can see it
-        save_data('test_dataraster_coloring.png', im.tostring('png'))
         imdata = im.tostring()
         # we have some values in the [20,30) interval so check that they're colored
         assert contains_word('\xff\xff\x00\xff', imdata)
@@ -135,8 +133,6 @@ def test_raster_with_alpha_blends_correctly_with_background():
         mim = mapnik.Image(WIDTH, HEIGHT)
 
         mapnik.render(map, mim)
-        save_data('test_raster_with_alpha_blends_correctly_with_background.png',
-                  mim.tostring('png'))
         imdata = mim.tostring()
         # All white is expected
         assert contains_word('\xff\xff\xff\xff', imdata)
@@ -166,8 +162,6 @@ def test_raster_warping():
 
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
-        # save a png somewhere so we can see it
-        save_data('test_raster_warping.png', im.tostring('png'))
         imdata = im.tostring()
         assert contains_word('\xff\xff\x00\xff', imdata)
 
@@ -195,9 +189,6 @@ def test_raster_warping_does_not_overclip_source():
 
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
-        # save a png somewhere so we can see it
-        save_data('test_raster_warping_does_not_overclip_source.png',
-                  im.tostring('png'))
         assert im.view(0,200,1,1).tostring()=='\xff\xff\x00\xff'
 
 if __name__ == "__main__":

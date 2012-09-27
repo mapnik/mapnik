@@ -665,7 +665,9 @@ void csv_datasource::parse_csv(T & stream,
                     }
                 }
 
-                // now, add all values as attributes
+                // now, add attributes, skipping any WKT or JSON fiels
+                if ((has_wkt_field) && (i == wkt_idx)) continue;
+                if ((has_json_field) && (i == json_idx)) continue;
                 /* First we detect likely strings, then try parsing likely numbers,
                    finally falling back to string type
                    * We intentionally do not try to detect boolean or null types
