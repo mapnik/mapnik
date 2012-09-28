@@ -52,12 +52,14 @@ files = [
     {'name': "tiff-alpha-gradient-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-nodata-edge-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-nodata-edge-raster", 'sizes':[(600,400)]},
+    {'name': "tiff-opaque-edge-gdal", 'sizes':[(600,400)]},
+    {'name': "tiff-opaque-edge-raster", 'sizes':[(256,256)]},
+    
     ]
 
 def render(filename, width, height, bbox, quiet=False):
     if not quiet:
-        print "Rendering style \"%s\" with size %dx%d ... \x1b[1;32m✓ \x1b[0m" % (filename, width, height)
-        print "-"*80
+        print "Rendering style \"%s\" with size %dx%d ..." % (filename, width, height),
     m = mapnik.Map(width, height)
     mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
     if bbox is not None:
@@ -72,9 +74,9 @@ def render(filename, width, height, bbox, quiet=False):
         mapnik.render_to_file(m, actual)
         diff = compare(actual, expected)
         if diff > 0:
-            print "-"*80
-            print '\x1b[33mError:\x1b[0m %u different pixels' % diff
-            print "-"*80
+            print '\x1b[31mError:\x1b[0m %u different pixels' % diff
+        else:
+            print '\x1b[1;32m✓ \x1b[0m'
     except Exception, e:
         sys.stderr.write(e.message + '\n')
         fail(actual,expected)
