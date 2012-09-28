@@ -64,7 +64,7 @@ private:
     int tile_width_;
     int tile_height_;
     tiff_ptr tif_;
-
+    bool premultiplied_alpha_;
 public:
     enum TiffType {
         generic=1,
@@ -75,6 +75,7 @@ public:
     virtual ~tiff_reader();
     unsigned width() const;
     unsigned height() const;
+    bool premultiplied_alpha() const;
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
     tiff_reader(const tiff_reader&);
@@ -103,7 +104,8 @@ tiff_reader::tiff_reader(std::string const& file_name)
       height_(0),
       rows_per_strip_(0),
       tile_width_(0),
-      tile_height_(0)
+      tile_height_(0),
+      premultiplied_alpha_(false)
 {
     init();
 }
@@ -132,6 +134,16 @@ void tiff_reader::init()
         {
             read_method_=stripped;
         }
+        //TIFFTAG_EXTRASAMPLES
+        uint16 extrasamples;
+        uint16* sampleinfo;
+        TIFFGetFieldDefaulted(tif, TIFFTAG_EXTRASAMPLES,
+                              &extrasamples, &sampleinfo);
+        if (extrasamples == 1 &&
+            sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
+        {
+            premultiplied_alpha_ = true;
+        }
     }
     else
     {
@@ -156,6 +168,10 @@ unsigned tiff_reader::height() const
     return height_;
 }
 
+bool tiff_reader::premultiplied_alpha() const
+{
+    return premultiplied_alpha_;
+}
 
 void tiff_reader::read(unsigned x,unsigned y,image_data_32& image)
 {

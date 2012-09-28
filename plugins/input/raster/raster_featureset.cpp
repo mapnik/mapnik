@@ -113,7 +113,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 
                         image_data_32 image(width,height);
                         reader->read(x_off, y_off, image);
-                        feature->set_raster(boost::make_shared<raster>(intersect, image));
+                        feature->set_raster(boost::make_shared<raster>(intersect, image,reader->premultiplied_alpha()));
                     }
                 }
             }
