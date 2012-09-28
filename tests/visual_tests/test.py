@@ -73,10 +73,11 @@ def render(filename, width, height, bbox, quiet=False):
     try:
         mapnik.render_to_file(m, actual)
         diff = compare(actual, expected)
-        if diff > 0:
-            print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
-        else:
-            print '\x1b[32m✓\x1b[0m'
+        if not quiet:
+            if diff > 0:
+                print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
+            else:
+                print '\x1b[32m✓\x1b[0m'
     except Exception, e:
         sys.stderr.write(e.message + '\n')
         fail(actual,expected)
