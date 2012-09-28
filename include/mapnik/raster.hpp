@@ -32,11 +32,13 @@ struct raster
 {
     box2d<double> ext_;
     image_data_32 data_;
-    raster(box2d<double> const& ext,image_data_32 const& data)
+    bool premultiplied_alpha_;
+    raster(box2d<double> const& ext,image_data_32 const& data, bool premultiplied_alpha = false)
         : ext_(ext),
-          data_(data) {}
+          data_(data),
+          premultiplied_alpha_(premultiplied_alpha)
+    {}
 };
 }
 
 #endif // MAPNIK_RASTER_HPP
-
