@@ -52,7 +52,7 @@ files = [
     {'name': "tiff-alpha-gradient-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-nodata-edge-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-nodata-edge-raster", 'sizes':[(600,400)]},
-    {'name': "tiff-opaque-edge-gdal", 'sizes':[(600,400)]},
+    {'name': "tiff-opaque-edge-gdal", 'sizes':[(256,256)]},
     {'name': "tiff-opaque-edge-raster", 'sizes':[(256,256)]},
     
     ]
