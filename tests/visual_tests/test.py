@@ -49,6 +49,8 @@ files = [
     {'name': "line-offset", 'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     {'name': "tiff-alpha-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-raster", 'sizes':[(600,400)]},
+    {'name': "tiff-alpha-broken-assoc-alpha-gdal", 'sizes':[(600,400)]},
+    {'name': "tiff-alpha-broken-assoc-alpha-raster", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-gradient-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-nodata-edge-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-nodata-edge-raster", 'sizes':[(600,400)]},
@@ -61,16 +63,16 @@ def render(filename, width, height, bbox, quiet=False):
     if not quiet:
         print "\"%s\" with size %dx%d ..." % (filename, width, height),
     m = mapnik.Map(width, height)
-    mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
-    if bbox is not None:
-        m.zoom_to_box(bbox)
-    else:
-        m.zoom_all()
     expected = os.path.join(dirname, "images", '%s-%d-reference.png' % (filename, width))
-    if not os.path.exists('/tmp/mapnik-visual-images'):
-        os.makedirs('/tmp/mapnik-visual-images')
     actual = os.path.join("/tmp/mapnik-visual-images", '%s-%d-agg.png' % (filename, width))
     try:
+        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
+        if bbox is not None:
+            m.zoom_to_box(bbox)
+        else:
+            m.zoom_all()
+        if not os.path.exists('/tmp/mapnik-visual-images'):
+            os.makedirs('/tmp/mapnik-visual-images')
         mapnik.render_to_file(m, actual)
         diff = compare(actual, expected)
         if not quiet:
@@ -80,7 +82,7 @@ def render(filename, width, height, bbox, quiet=False):
                 print '\x1b[32m✓\x1b[0m'
     except Exception, e:
         sys.stderr.write(e.message + '\n')
-        fail(actual,expected)
+        fail(actual,expected,str(e.message))
     return m
 
 if __name__ == "__main__":
