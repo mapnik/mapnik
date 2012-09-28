@@ -166,7 +166,7 @@ featureset_ptr kismet_datasource::features(query const& q) const
     // return featureset_ptr();
 }
 
-featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr kismet_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     if (! is_bound_) bind();
 

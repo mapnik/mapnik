@@ -29,7 +29,7 @@ public:
 
     // mandatory: function to query features by point (coord2d)
     // not used by rendering, but available to calling applications
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
 
     // mandatory: return the box2d of the datasource
     // called during rendering to determine if the layer should be processed
