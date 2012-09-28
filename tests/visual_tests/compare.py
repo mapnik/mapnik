@@ -24,6 +24,10 @@ def compare_pixels(pixel1, pixel2):
     else:
         return False
 
+def fail(actual,expected):
+    global errors
+    errors.append(('N/A', actual, expected))
+
 # compare two images and return number of different pixels
 def compare(actual, expected):
     global errors
@@ -65,7 +69,7 @@ def summary(generate=False):
                 else:
                     print "Could not verify %s: No reference image found!" % error[1]
             else:
-                print "Failed: %d different pixels:\n\t%s (actual)\n\t%s (expected)" % error
+                print "Failed: %s different pixels:\n\t%s (actual)\n\t%s (expected)" % error
         sys.exit(1)
     else:
         print 'All %s tests passed: \x1b[1;32m✓ \x1b[0m' % passed

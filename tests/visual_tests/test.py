@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import mapnik
+mapnik.logger.set_severity(mapnik.severity_type.None)
+
 import sys
 import os.path
-from compare import compare, summary
+from compare import compare, summary, fail
 
 defaults = {
     'sizes': [(500, 100)]
@@ -66,13 +68,16 @@ def render(filename, width, height, bbox, quiet=False):
     if not os.path.exists('/tmp/mapnik-visual-images'):
         os.makedirs('/tmp/mapnik-visual-images')
     actual = os.path.join("/tmp/mapnik-visual-images", '%s-%d-agg.png' % (filename, width))
-    mapnik.render_to_file(m, actual)
-    diff = compare(actual, expected)
-    if diff > 0:
-        print "-"*80
-        print '\x1b[33mError:\x1b[0m %u different pixels' % diff
-        print "-"*80
-
+    try:
+        mapnik.render_to_file(m, actual)
+        diff = compare(actual, expected)
+        if diff > 0:
+            print "-"*80
+            print '\x1b[33mError:\x1b[0m %u different pixels' % diff
+            print "-"*80
+    except Exception, e:
+        sys.stderr.write(e.message + '\n')
+        fail(actual,expected)
     return m
 
 if __name__ == "__main__":
