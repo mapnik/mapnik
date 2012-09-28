@@ -50,6 +50,7 @@ public:
     ~JpegReader();
     unsigned width() const;
     unsigned height() const;
+    inline bool premultiplied_alpha() const { return true ;}
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
     void init();

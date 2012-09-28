@@ -46,6 +46,7 @@ public:
     ~png_reader();
     unsigned width() const;
     unsigned height() const;
+    bool premultiplied_alpha() const { return false; } //http://www.libpng.org/pub/png/spec/1.1/PNG-Rationale.html
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
     void init();
