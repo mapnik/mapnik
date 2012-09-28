@@ -57,7 +57,8 @@ def summary(generate=False):
     global errors
     global passed
     print "-"*80
-    print "Visual text rendering summary:",
+    print "Visual text rendering summary:"
+    print "-"*80
     if len(errors) != 0:
         for error in errors:
             if (error[0] is None):
@@ -69,7 +70,7 @@ def summary(generate=False):
                 else:
                     print "Could not verify %s: No reference image found!" % error[1]
             else:
-                print "Failed: %s different pixels:\n\t%s (actual)\n\t%s (expected)" % error
+                print "\x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % error
         sys.exit(1)
     else:
         print 'All %s tests passed: \x1b[1;32m✓ \x1b[0m' % passed

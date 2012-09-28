@@ -59,7 +59,7 @@ files = [
 
 def render(filename, width, height, bbox, quiet=False):
     if not quiet:
-        print "Rendering style \"%s\" with size %dx%d ..." % (filename, width, height),
+        print "\"%s\" with size %dx%d ..." % (filename, width, height),
     m = mapnik.Map(width, height)
     mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
     if bbox is not None:
@@ -74,9 +74,9 @@ def render(filename, width, height, bbox, quiet=False):
         mapnik.render_to_file(m, actual)
         diff = compare(actual, expected)
         if diff > 0:
-            print '\x1b[31mError:\x1b[0m %u different pixels' % diff
+            print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
         else:
-            print '\x1b[1;32m✓ \x1b[0m'
+            print '\x1b[32m✓\x1b[0m'
     except Exception, e:
         sys.stderr.write(e.message + '\n')
         fail(actual,expected)
