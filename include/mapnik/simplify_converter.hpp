@@ -101,10 +101,11 @@ struct MAPNIK_DECL simplify_converter
 {
 public:
     simplify_converter(Geometry& geom)
-        : geom_(geom)
-        , tolerance_(0.0)
-        , status_(initial)
-        , algorithm_(radial_distance)
+        : geom_(geom),
+        tolerance_(0.0),
+        status_(initial),
+        algorithm_(radial_distance),
+        pos_(0)
     {}
 
     enum status
@@ -121,8 +122,10 @@ public:
         return algorithm_;
     }
 
-    void set_simplify_algorithm(simplify_algorithm_e value) {
-        if (algorithm_ != value) {
+    void set_simplify_algorithm(simplify_algorithm_e value)
+    {
+        if (algorithm_ != value)
+        {
             algorithm_ = value;
             reset();
         }
@@ -149,7 +152,7 @@ public:
         pos_ = 0;
     }
 
-    void rewind(unsigned int)
+    void rewind(unsigned int) const
     {
         pos_ = 0;
     }
@@ -437,10 +440,10 @@ private:
     double                          tolerance_;
     status                          status_;
     simplify_algorithm_e            algorithm_;
-    size_t                          pos_;
     std::deque<vertex2d>            vertices_;
     std::deque<vertex2d>            sleeve_cont_;
     vertex2d                        previous_vertex_;
+    mutable size_t                  pos_;
 };
 
 
