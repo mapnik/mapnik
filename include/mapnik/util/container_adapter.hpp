@@ -26,7 +26,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/util/vertex_iterator.hpp>
+#include <mapnik/util/path_iterator.hpp>
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -40,26 +40,26 @@ struct is_container<mapnik::geometry_type const> : mpl::true_ {} ;
 template <>
 struct container_iterator<mapnik::geometry_type const>
 {
-    typedef mapnik::util::vertex_iterator<double> type;
+    typedef mapnik::util::path_iterator<mapnik::geometry_type> type;
 };
 
 template <>
 struct begin_container<mapnik::geometry_type const>
 {
-    static mapnik::util::vertex_iterator<double>
+    static mapnik::util::path_iterator<mapnik::geometry_type>
     call (mapnik::geometry_type const& g)
     {
-        return mapnik::util::vertex_iterator<double>(g.data());
+        return mapnik::util::path_iterator<mapnik::geometry_type>(g);
     }
 };
 
 template <>
 struct end_container<mapnik::geometry_type const>
 {
-    static mapnik::util::vertex_iterator<double>
+    static mapnik::util::path_iterator<mapnik::geometry_type>
     call (mapnik::geometry_type const& g)
     {
-        return mapnik::util::vertex_iterator<double>();
+        return mapnik::util::path_iterator<mapnik::geometry_type>();
     }
 };
 

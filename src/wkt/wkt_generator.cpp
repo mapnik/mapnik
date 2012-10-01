@@ -26,7 +26,7 @@
 
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/geometry_wkt_generator.hpp>
-#include <mapnik/util/vertex_iterator.hpp>
+#include <mapnik/util/path_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
 
 namespace mapnik { namespace util {

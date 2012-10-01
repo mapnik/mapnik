@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/util/vertex_iterator.hpp>
 #include <mapnik/util/geometry_wkt_generator.hpp>
 
 // boost
