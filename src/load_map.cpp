@@ -1253,7 +1253,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             sym.get_opt_attr<boolean>("no-text");
         if (no_text)
         {
-            MAPNIK_LOG_ERROR(raster_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
+            MAPNIK_LOG_ERROR(shield_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
             if (*no_text)
                 shield_symbol.set_name(parse_expression("' '"));
         }
