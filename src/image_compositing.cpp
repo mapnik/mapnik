@@ -99,6 +99,21 @@ boost::optional<std::string> comp_op_to_string(composite_mode_e comp_op)
     return mode;
 }
 
+/*
+Note: the difference between agg::pixfmt_rgba32 and agg:pixfmt_rgba32_pre is subtle.
+
+From http://www.antigrain.com/news/release_notes/v22.agdoc.html:
+
+Format agg::pixfmt_rgba32 is the main and the fastest pixel format and it's supposed to be used in most cases. But it always uses plain colors as input and produces pre-multiplied result on the canvas. It has even less number of calculations than agg::pixfmt_rgba32_pre. Format agg::pixfmt_rgba32_plain is slow because of division operations. APIs allowing for alpha-blending require premultiplied colors. Besides, if you display RGBA with RGB API (that is, without alpha, like WinAPI BitBlt), the colors still must be premultiplied. Note that the formulas in agg::pixfmt_rgba32 and agg::pixfmt_rgb24 are exactly the same! So, premultiplied colors are more natural and agg::pixfmt_rgba32_plain is rather useless.
+
+Format agg::pixfmt_rgba32_pre is a bit slower than agg::pixfmt_rgba32 because of additional "cover" values, i.e. secondary alphas, that are to be mixed with the source premultiplied color. That spoils the beauty of the premultiplied colors idea. But the "cover" values are important because there can be other color spaces and color types that don't have any "alpha" at all, or the alpha is incompatible with integral types. So, the "cover" is a secondary, uniform alpha in range of 0…255, used specifically for anti-aliasing purposes. 
+One needs to consider this issue when transforming images. Actually, all RGBA images are supposed to be in the premultiplied color space and the result of filtering is also premultiplied. Since the resulting colors of the filtered images are the source for the renderers, one should use the premultiplied renderers, that is, agg::pixfmt_rgba32_pre, or the new one, agg::pixfmt_rgb24_pre. But it's important only if images are translucent, that is, have actual alpha channel. 
+
+For example, if you generate some pattern with AGG (premultiplied) and would like to use it for filling, you'll need to use agg::pixfmt_rgba32_pre. If you use agg::span_image_filter_rgb24_gamma_bilinear (that is, RGB for input) and draw it on the RGBA canvas, you still need to use agg::pixfmt_rgba32_pre as the destination canvas. The only thing you need is to premultiply the background color used out of bounds.
+
+*/
+
+
 template <typename T1, typename T2>
 void composite(T1 & dst, T2 & src, composite_mode_e mode,
                float opacity,
