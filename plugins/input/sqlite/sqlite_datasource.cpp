@@ -524,7 +524,7 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
             if (data)
             {
                 boost::ptr_vector<mapnik::geometry_type> paths;
-                if (mapnik::geometry_utils::from_wkb(paths, data, size, mapnik::wkbAuto))
+                if (mapnik::geometry_utils::from_wkb(paths, data, size, format_))
                 {
                     mapnik::util::to_ds_type(paths,result);
                     if (result)
