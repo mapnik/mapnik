@@ -48,6 +48,10 @@ void export_line_symbolizer()
                       (&line_symbolizer::get_stroke,
                        return_value_policy<reference_existing_object>()),
                       &line_symbolizer::set_stroke)
+        .add_property("simplify_tolerance",
+                      &line_symbolizer::simplify_tolerance,
+                      &line_symbolizer::set_simplify_tolerance,
+                      "simplification tolerance measure")
         .add_property("offset",
                       &line_symbolizer::offset,
                       &line_symbolizer::set_offset,
