@@ -126,8 +126,8 @@ namespace mapnik { namespace util {
         ss.write(reinterpret_cast<char*>(&byte_order),1);
         int type = static_cast<int>(mapnik::Point);
         write(ss,type,4,byte_order);
-        double x(0);
-        double y(0);
+        double x = 0;
+        double y = 0;
         g.vertex(0,&x,&y);
         write(ss,x,8,byte_order);
         write(ss,y,8,byte_order);
@@ -146,8 +146,8 @@ namespace mapnik { namespace util {
         int type = static_cast<int>(mapnik::LineString);
         write(ss,type,4,byte_order);
         write(ss,num_points,4,byte_order);
-        double x(0);
-        double y(0);
+        double x = 0;
+        double y = 0;
         for (unsigned i=0; i< num_points; ++i)
         {
             g.vertex(i,&x,&y);
@@ -167,8 +167,8 @@ namespace mapnik { namespace util {
         typedef std::vector<point_type> linear_ring;
         boost::ptr_vector<linear_ring> rings;
 
-        double x(0);
-        double y(0);
+        double x = 0;
+        double y = 0;
         std::size_t size = 1 + 4 + 4 ; // byteOrder + wkbType + numRings
         for (unsigned i=0; i< num_points; ++i)
         {
