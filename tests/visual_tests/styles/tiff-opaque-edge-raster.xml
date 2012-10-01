@@ -1,4 +1,4 @@
-<Map srs="+init=EPSG:4326" background-color="white">
+<Map srs="+init=epsg:4326" background-color="white">
 
 <Style name="test">
   <Rule>
@@ -6,10 +6,10 @@
   </Rule>
 </Style>
 
-<Layer name="test" srs="+init=EPSG:4326">
+<Layer name="test" srs="+init=epsg:4326">
     <StyleName>test</StyleName>
     <Datasource>
-        <Parameter name="file">../../data/raster/river.tiff</Parameter>
+        <Parameter name="file">../../data/raster/river_wgs.tiff</Parameter>
         <Parameter name="type">raster</Parameter>
         <Parameter name="extent">0,0,256,210</Parameter>
     </Datasource>

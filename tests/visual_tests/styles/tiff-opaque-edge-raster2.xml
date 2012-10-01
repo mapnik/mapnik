@@ -1,0 +1,18 @@
+<Map srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over" background-color="rgba(255,255,255,1)">
+<Style name="testmerc" filter-mode="first" >
+  <Rule>
+    <RasterSymbolizer opacity="1" scaling="bilinear" />
+  </Rule>
+</Style>
+<Layer name="testmerc"
+  srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over">
+    <StyleName>testmerc</StyleName>
+    <Datasource>
+       <!-- https://github.com/mapnik/mapnik/issues/1508 -->
+       <!-- note: this mis-reports it is premultiplied - it is not -->
+       <Parameter name="file">../../data/raster/river_merc.tiff</Parameter>
+       <Parameter name="extent">-8249238.098993212,-486119.1339340762,-8024337.037783274,-302066.9754826002</Parameter>
+       <Parameter name="type">raster</Parameter>
+    </Datasource>
+  </Layer>
+</Map>
