@@ -48,9 +48,9 @@
 #include <boost/array.hpp>
 
 // mapnik
-#include <mapnik/ctrans.hpp>
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/offset_converter.hpp>
+#include <mapnik/simplify_converter.hpp>
 
 // agg
 #include "agg_conv_clip_polygon.h"
@@ -60,12 +60,14 @@
 #include "agg_conv_dash.h"
 #include "agg_conv_transform.h"
 
+
 namespace mapnik {
 
 struct transform_tag {};
 struct clip_line_tag {};
 struct clip_poly_tag {};
 struct smooth_tag {};
+struct simplify_tag {};
 struct stroke_tag {};
 struct dash_tag {};
 struct affine_transform_tag {};
@@ -98,6 +100,19 @@ struct converter_traits<T,mapnik::smooth_tag>
     }
 };
 
+template <typename T>
+struct converter_traits<T,mapnik::simplify_tag>
+{
+    typedef T geometry_type;
+    typedef simplify_converter<geometry_type> conv_type;
+
+    template <typename Args>
+    static void setup(geometry_type & geom, Args const& args)
+    {
+        geom.set_simplify_algorithm(boost::fusion::at_c<2>(args).simplify_algorithm());
+        geom.set_simplify_tolerance(boost::fusion::at_c<2>(args).simplify_tolerance());
+    }
+};
 
 template <typename T>
 struct converter_traits<T, mapnik::clip_line_tag>
