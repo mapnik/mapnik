@@ -177,6 +177,15 @@ void raster_symbolizer::set_mesh_size(unsigned mesh_size)
     mesh_size_=mesh_size;
 }
 
+void raster_symbolizer::set_premultiplied(bool premultiplied)
+{
+    premultiplied_=premultiplied;
+}
+
+boost::optional<bool> raster_symbolizer::premultiplied() const
+{
+    return premultiplied_;
+}
 
 }
 

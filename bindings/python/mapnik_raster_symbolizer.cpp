@@ -28,6 +28,18 @@
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/image_scaling.hpp>
 
+namespace {
+
+// https://github.com/mapnik/mapnik/issues/1367
+PyObject* get_premultiplied_impl(mapnik::raster_symbolizer & sym)
+{
+    boost::optional<bool> premultiplied = sym.premultiplied();
+    if (premultiplied)
+        return ::PyBool_FromLong(*premultiplied);
+    Py_RETURN_NONE;
+}
+
+}
 using mapnik::raster_symbolizer;
 
 void export_raster_symbolizer()
@@ -118,6 +130,18 @@ void export_raster_symbolizer()
                       ">>> from mapnik import RasterSymbolizer\n"
                       ">>> r = RasterSymbolizer()\n"
                       ">>> r.mesh_size = 32\n"
+            )
+        .add_property("premultiplied",
+                      &get_premultiplied_impl,
+                      &raster_symbolizer::set_premultiplied,
+                      "Get/Set premultiplied status of the source image.\n"
+                      "Can be used to override what the source data reports (when in error)\n"
+                      "\n"
+                      "Usage:\n"
+                      "\n"
+                      ">>> from mapnik import RasterSymbolizer\n"
+                      ">>> r = RasterSymbolizer()\n"
+                      ">>> r.premultiplied = False\n"
             )
         ;
 }

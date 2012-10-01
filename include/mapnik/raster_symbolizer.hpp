@@ -52,6 +52,8 @@ struct MAPNIK_DECL raster_symbolizer : public symbolizer_base
     double calculate_filter_factor() const;
     unsigned get_mesh_size() const;
     void set_mesh_size(unsigned mesh_size);
+    boost::optional<bool> premultiplied() const;
+    void set_premultiplied(bool premultiplied);
 
 private:
     std::string mode_;
@@ -60,6 +62,7 @@ private:
     raster_colorizer_ptr colorizer_;
     double filter_factor_;
     unsigned mesh_size_;
+    boost::optional<bool> premultiplied_;
 };
 }
 

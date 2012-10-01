@@ -1490,6 +1490,9 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         optional<unsigned> mesh_size = sym.get_opt_attr<unsigned>("mesh-size");
         if (mesh_size) raster_sym.set_mesh_size(*mesh_size);
 
+        // premultiplied status of image
+        optional<boolean> premultiplied = sym.get_opt_attr<boolean>("premultiplied");
+        if (premultiplied) raster_sym.set_premultiplied(*premultiplied);
 
         xml_node::const_iterator cssIter = sym.begin();
         xml_node::const_iterator endCss = sym.end();
