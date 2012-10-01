@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/vertex_vector.hpp>
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -34,27 +33,26 @@
 namespace mapnik { namespace util {
 
 template <typename T>
-class vertex_iterator
-    : public boost::iterator_facade< vertex_iterator<T>,
-                                     typename boost::tuple<unsigned,T,T> const,
+class path_iterator
+    : public boost::iterator_facade< path_iterator<T>,
+                                     boost::tuple<unsigned,double,double> const,
                                      boost::forward_traversal_tag
                                      >
 {
 
 public:
-    typedef typename boost::tuple<unsigned, T, T> value_type;
-    typedef vertex_vector<T> container_type;
+    typedef T path_type;
+    typedef typename boost::tuple<unsigned, double, double> value_type;
 
-    vertex_iterator()
-        : v_(SEG_END,0,0),
-          vertices_(),
-          pos_(0)
+    path_iterator()
+        : v_(mapnik::SEG_END,0,0),
+          vertices_()
     {}
 
-    explicit vertex_iterator(container_type const& vertices)
-        : vertices_(&vertices),
-          pos_(0)
+    explicit path_iterator(path_type const& vertices)
+        : vertices_(&vertices)
     {
+        vertices_->rewind(0);
         increment();
     }
 
@@ -63,10 +61,10 @@ private:
 
     void increment()
     {
-        boost::get<0>(v_) = vertices_->get_vertex(pos_++, &boost::get<1>(v_), &boost::get<2>(v_));
+        boost::get<0>(v_) = vertices_->vertex( &boost::get<1>(v_), &boost::get<2>(v_));
     }
 
-    bool equal( vertex_iterator const& other) const
+    bool equal( path_iterator const& other) const
     {
         return boost::get<0>(v_) == boost::get<0>(other.v_);
     }
@@ -77,7 +75,7 @@ private:
     }
 
     value_type v_;
-    container_type const *vertices_;
+    const path_type *vertices_;
     unsigned pos_;
 };
 
