@@ -141,213 +141,35 @@ private:
     bool else_filter_;
     bool also_filter_;
 
-    struct deepcopy_symbolizer : public boost::static_visitor<>
-    {
-        void operator () (raster_symbolizer & sym) const
-        {
-            raster_colorizer_ptr old_colorizer = sym.get_colorizer();
-            raster_colorizer_ptr new_colorizer = raster_colorizer_ptr();
-            new_colorizer->set_stops(old_colorizer->get_stops());
-            new_colorizer->set_default_mode(old_colorizer->get_default_mode());
-            new_colorizer->set_default_color(old_colorizer->get_default_color());
-            new_colorizer->set_epsilon(old_colorizer->get_epsilon());
-            sym.set_colorizer(new_colorizer);
-        }
-
-        void operator () (text_symbolizer & sym) const
-        {
-            copy_text_ptr(sym);
-        }
-
-        void operator () (shield_symbolizer & sym) const
-        {
-            copy_text_ptr(sym);
-        }
-
-        void operator () (building_symbolizer & sym) const
-        {
-            copy_height_ptr(sym);
-        }
-
-        template <typename T> void operator () (T &sym) const
-        {
-            boost::ignore_unused_variable_warning(sym);
-        }
-
-    private:
-
-        template <class T>
-        void copy_text_ptr(T & sym) const
-        {
-            boost::ignore_unused_variable_warning(sym);
-            MAPNIK_LOG_WARN(rule) << "rule: deep copying TextSymbolizers is broken!";
-        }
-
-        template <class T>
-        void copy_height_ptr(T & sym) const
-        {
-            std::string height_expr = to_expression_string(*sym.height());
-            sym.set_height(parse_expression(height_expr,"utf8"));
-        }
-    };
-
 public:
-    rule()
-        : name_(),
-          min_scale_(0),
-          max_scale_(std::numeric_limits<double>::infinity()),
-          syms_(),
-          filter_(boost::make_shared<mapnik::expr_node>(true)),
-          else_filter_(false),
-          also_filter_(false) {}
-
+    rule();
     rule(std::string const& name,
-         double min_scale_denominator=0,
-         double max_scale_denominator=std::numeric_limits<double>::infinity())
-        : name_(name),
-          min_scale_(min_scale_denominator),
-          max_scale_(max_scale_denominator),
-          syms_(),
-          filter_(boost::make_shared<mapnik::expr_node>(true)),
-          else_filter_(false),
-          also_filter_(false)  {}
+         double min_scale_denominator = 0,
+         double max_scale_denominator = std::numeric_limits<double>::infinity());
+    rule(const rule& rhs, bool deep_copy = false);
 
-    rule(const rule& rhs, bool deep_copy = false)
-        : name_(rhs.name_),
-          min_scale_(rhs.min_scale_),
-          max_scale_(rhs.max_scale_),
-          syms_(rhs.syms_),
-          filter_(rhs.filter_),
-          else_filter_(rhs.else_filter_),
-          also_filter_(rhs.also_filter_)
-    {
-        if (deep_copy) {
-
-            std::string expr = to_expression_string(*filter_);
-            filter_ = parse_expression(expr,"utf8");
-            symbolizers::const_iterator it  = syms_.begin();
-            symbolizers::const_iterator end = syms_.end();
-
-            for(; it != end; ++it)
-            {
-                boost::apply_visitor(deepcopy_symbolizer(),*it);
-            }
-        }
-    }
-
-    rule& operator=(rule const& rhs)
-    {
-        rule tmp(rhs);
-        swap(tmp);
-        return *this;
-    }
-    bool operator==(rule const& other)
-    {
-        return  (this == &other);
-    }
-
-    void set_max_scale(double scale)
-    {
-        max_scale_=scale;
-    }
-
-    double get_max_scale() const
-    {
-        return max_scale_;
-    }
-
-    void set_min_scale(double scale)
-    {
-        min_scale_=scale;
-    }
-
-    double get_min_scale() const
-    {
-        return min_scale_;
-    }
-
-    void set_name(std::string const& name)
-    {
-        name_=name;
-    }
-
-    std::string const& get_name() const
-    {
-        return name_;
-    }
-
-    void append(const symbolizer& sym)
-    {
-        syms_.push_back(sym);
-    }
-
-    void remove_at(size_t index)
-    {
-        if (index < syms_.size())
-        {
-            syms_.erase(syms_.begin()+index);
-        }
-    }
-
-    const symbolizers& get_symbolizers() const
-    {
-        return syms_;
-    }
-
-    symbolizers::const_iterator begin() const
-    {
-        return syms_.begin();
-    }
-
-    symbolizers::const_iterator end() const
-    {
-        return syms_.end();
-    }
-
-    symbolizers::iterator begin()
-    {
-        return syms_.begin();
-    }
-
-    symbolizers::iterator end()
-    {
-        return syms_.end();
-    }
-
-    void set_filter(const expression_ptr& filter)
-    {
-        filter_=filter;
-    }
-
-    expression_ptr const& get_filter() const
-    {
-        return filter_;
-    }
-
-    void set_else(bool else_filter)
-    {
-        else_filter_=else_filter;
-    }
-
-    bool has_else_filter() const
-    {
-        return else_filter_;
-    }
-
-    void set_also(bool also_filter)
-    {
-        also_filter_=also_filter;
-    }
-
-    bool has_also_filter() const
-    {
-        return also_filter_;
-    }
-
-    bool active(double scale) const
-    {
-        return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6);
-    }
+    rule& operator=(rule const& rhs);
+    bool operator==(rule const& other);
+    void set_max_scale(double scale);
+    double get_max_scale() const;
+    void set_min_scale(double scale);
+    double get_min_scale() const;
+    void set_name(std::string const& name);
+    std::string const& get_name() const;
+    void append(symbolizer const& sym);
+    void remove_at(size_t index);
+    const symbolizers& get_symbolizers() const;
+    symbolizers::const_iterator begin() const;
+    symbolizers::const_iterator end() const;
+    symbolizers::iterator begin();
+    symbolizers::iterator end();
+    void set_filter(expression_ptr const& filter);
+    expression_ptr const& get_filter() const;
+    void set_else(bool else_filter);
+    bool has_else_filter() const;
+    void set_also(bool also_filter);
+    bool has_also_filter() const;
+    bool active(double scale) const;
 
 private:
 

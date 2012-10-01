@@ -30,6 +30,7 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/raster_colorizer.hpp>
 
 //boost
 #include <boost/lexical_cast.hpp>
