@@ -24,9 +24,9 @@ def compare_pixels(pixel1, pixel2):
     else:
         return False
 
-def fail(actual,expected):
+def fail(actual,expected,message):
     global errors
-    errors.append(('N/A', actual, expected))
+    errors.append((message, actual, expected))
 
 # compare two images and return number of different pixels
 def compare(actual, expected):
@@ -56,12 +56,14 @@ def compare(actual, expected):
 def summary(generate=False):
     global errors
     global passed
-    print "-"*80
-    print "Visual text rendering summary:"
-    print "-"*80
+    
     if len(errors) != 0:
-        for error in errors:
-            if (error[0] is None):
+        msg = "Visual text rendering: %s failures" % len(errors)
+        print "-"*len(msg)
+        print msg
+        print "-"*len(msg)
+        for idx,error in enumerate(errors):
+            if error[0] is None:
                 if generate:
                     actual = open(error[1],'r').read()
                     open(error[2],'wb').write(actual)
@@ -69,9 +71,14 @@ def summary(generate=False):
                     continue
                 else:
                     print "Could not verify %s: No reference image found!" % error[1]
-            else:
-                print "\x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % error
+            elif isinstance(error[0],int):
+                print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % error
+            elif isinstance(error[0],str):
+                print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s" % error[0]
         sys.exit(1)
     else:
-        print 'All %s tests passed: \x1b[1;32m✓ \x1b[0m' % passed
+        msg = 'All %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % passed
+        print "-"*len(msg)
+        print msg
+        print "-"*len(msg)
         sys.exit(0)
