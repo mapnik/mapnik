@@ -98,6 +98,9 @@ def test_compare_images():
         if not validate_pixels_are_not_premultiplied(a):
             print '%s not validly demultiplied' % (name)
         a.save(actual)
+        if not os.path.exists(expected):
+            print 'generating expected test image: %s' % expected
+            a.save(expected)
         expected_im = mapnik.Image.open(expected)
         # compare them
         eq_(a.tostring(),expected_im.tostring(), 'failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))

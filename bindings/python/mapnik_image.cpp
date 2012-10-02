@@ -176,6 +176,7 @@ boost::shared_ptr<image_32> from_cairo(PycairoSurface* surface)
 void export_image()
 {
     using namespace boost::python;
+    // NOTE: must match list in include/mapnik/image_compositing.hpp
     enum_<mapnik::composite_mode_e>("CompositeOp")
         .value("clear", mapnik::clear)
         .value("src", mapnik::src)
@@ -204,7 +205,12 @@ void export_image()
         .value("exclusion", mapnik::exclusion)
         .value("contrast", mapnik::contrast)
         .value("invert", mapnik::invert)
-        .value("invert_rgb", mapnik::invert_rgb)
+        .value("grain_merge", mapnik::grain_merge)
+        .value("grain_extract", mapnik::grain_extract)
+        .value("hue", mapnik::hue)
+        .value("saturation", mapnik::saturation)
+        .value("color", mapnik::_color)
+        .value("value", mapnik::_value)
         ;
 
     class_<image_32,boost::shared_ptr<image_32> >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
