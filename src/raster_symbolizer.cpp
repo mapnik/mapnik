@@ -55,7 +55,8 @@ raster_symbolizer::raster_symbolizer(raster_symbolizer const& rhs)
         opacity_(rhs.opacity_),
         colorizer_(rhs.colorizer_),
         filter_factor_(rhs.filter_factor_),
-        mesh_size_(rhs.mesh_size_) {}
+        mesh_size_(rhs.mesh_size_),
+        premultiplied_(rhs.premultiplied_) {}
 
 std::string const& raster_symbolizer::get_mode() const
 {

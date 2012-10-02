@@ -98,9 +98,20 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                                                    filter_radius);
                 }
             }
+            // handle whether to premultiply the source
+            // data before compositing
+            // first, default to what the data reports
+            bool premultiply_source = !source->premultiplied_alpha_;
+            // the, allow the user to override
+            boost::optional<bool> is_premultiplied = sym.premultiplied();
+            if (is_premultiplied)
+            {
+                if (*is_premultiplied) premultiply_source = false;
+                else premultiply_source = true;
+            }
             composite(current_buffer_->data(), target.data_,
                       sym.comp_op(), sym.get_opacity(),
-                      start_x, start_y, !source->premultiplied_alpha_);
+                      start_x, start_y, premultiply_source);
         }
     }
 }
