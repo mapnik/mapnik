@@ -60,9 +60,16 @@ struct default_color_converter_impl< rgb_t, hsv_t >
       bits32f temp_blue  = channel_convert<bits32f>( get_color( src, blue_t()  ));
 
       bits32f hue, saturation, value;
+      bits32f min_color, max_color;
 
-      bits32f min_color = std::min(temp_red,std::min(temp_green, temp_blue));
-      bits32f max_color = std::max(temp_red,std::max(temp_green, temp_blue));
+      if( temp_red < temp_green ) {
+          min_color = std::min( temp_blue, temp_red );
+          max_color = std::max( temp_blue, temp_green );
+      }
+      else {
+          min_color = std::min( temp_blue, temp_green );
+          max_color = std::max( temp_blue, temp_red );
+      }
 
       value = max_color;
 
@@ -85,7 +92,7 @@ struct default_color_converter_impl< rgb_t, hsv_t >
       }   
       else
       { 
-         if( std::abs( boost::numeric_cast<int>(temp_red - max_color) ) < 0.0001f )
+         if( temp_red == max_color )
          {
             hue = ( temp_green - temp_blue )
                 / diff;
@@ -149,18 +156,23 @@ struct default_color_converter_impl<hsv_t,rgb_t>
 
          frac = h - i;
 
+         // p = value * (1 - saturation)
          p = get_color( src, value_t() ) 
            * ( 1.f - get_color( src, saturation_t() ));
 
+         // q = value * (1 - saturation * hue_frac)
+         // it drops with increasing distance from floor(hue)
          q = get_color( src, value_t() )
            * ( 1.f - ( get_color( src, saturation_t() ) * frac ));
 
+         // t = value * (1 - (saturation * (1 - hue_frac))
+         // it grows with increasing distance from floor(hue)
          t = get_color( src, value_t() ) 
            * ( 1.f - ( get_color( src, saturation_t() ) * ( 1.f - frac )));
 
-         switch( i )
+         switch( i % 6 )
          {         
-            case 0: 
+            case 0: // red to yellow
             {
                red   = get_color( src, value_t() );
                green = t;
@@ -169,7 +181,7 @@ struct default_color_converter_impl<hsv_t,rgb_t>
                break;
             }
 
-            case 1: 
+            case 1: // yellow to green
             {
                red   = q;
                green = get_color( src, value_t() );
@@ -178,7 +190,7 @@ struct default_color_converter_impl<hsv_t,rgb_t>
                break;
             }
 
-            case 2: 
+            case 2: // green to cyan
             {
                red   = p;
                green = get_color( src, value_t() );
@@ -187,7 +199,7 @@ struct default_color_converter_impl<hsv_t,rgb_t>
                break;
             }
 
-            case 3: 
+            case 3: // cyan to blue
             {
                red   = p;
                green = q;
@@ -196,7 +208,7 @@ struct default_color_converter_impl<hsv_t,rgb_t>
                break;
             }
 
-            case 4: 
+            case 4: // blue to magenta
             {
                red   = t;
                green = p;
@@ -205,7 +217,7 @@ struct default_color_converter_impl<hsv_t,rgb_t>
                break;
             }
 
-            case 5: 
+            case 5: // magenta to red
             {
                red   = get_color( src, value_t() );
                green = p; 
