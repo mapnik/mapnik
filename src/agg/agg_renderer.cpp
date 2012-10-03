@@ -300,6 +300,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+    typedef agg::pod_bvector<mapnik::svg::path_attributes> svg_attribute_type;
 
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_power());
@@ -324,9 +325,9 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer_agg<svg_path_adapter,
-            agg::pod_bvector<path_attributes>,
+            svg_attribute_type,
             renderer_type,
-            agg::pixfmt_rgba32> svg_renderer(svg_path,
+            pixfmt_comp_type> svg_renderer(svg_path,
                                                    (*marker.get_vector_data())->attributes());
 
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);
