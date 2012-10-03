@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added ability to pass a pre-created collision detector to the cairo renderer (#1444)
+
 - Tolerance parameter is now supported for querying datasources at a given point (#503/#1499)
 
 - Improved detection of newlines in CSV files - now more robust in the face of mixed newline types (#1497)
