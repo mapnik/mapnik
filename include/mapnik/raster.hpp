@@ -27,9 +27,13 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/image_data.hpp>
 
+// boost
+#include <boost/utility.hpp>
+
 namespace mapnik {
-struct raster
+class raster : private boost::noncopyable
 {
+public:
     box2d<double> ext_;
     image_data_32 data_;
     bool premultiplied_alpha_;
