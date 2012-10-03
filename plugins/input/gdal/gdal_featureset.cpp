@@ -223,7 +223,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
         if (im_width > 0 && im_height > 0)
         {
-            mapnik::image_data_32 image(im_width, im_height);
+            mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(intersect, im_width, im_height);
+            mapnik::image_data_32 & image = raster->data_;
             image.set(0xffffffff);
 
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Image Size=(" << im_width << "," << im_height << ")";
@@ -489,7 +490,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                     image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                 }
 
-                feature->set_raster(boost::make_shared<mapnik::raster>(intersect, image));
+                feature->set_raster(raster);
             }
             return feature;
         }

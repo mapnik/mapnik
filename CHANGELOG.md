@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Faster rendering of rasters by reducing memory allocation of temporary buffers (#1516)
+
 - Added ability to pass a pre-created collision detector to the cairo renderer (#1444)
 
 - Tolerance parameter is now supported for querying datasources at a given point (#503/#1499)
