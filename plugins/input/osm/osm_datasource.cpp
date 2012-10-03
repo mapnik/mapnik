@@ -158,7 +158,7 @@ featureset_ptr osm_datasource::features(const query& q) const
                                                               desc_.get_encoding());
 }
 
-featureset_ptr osm_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr osm_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     if (!is_bound_) bind();
 

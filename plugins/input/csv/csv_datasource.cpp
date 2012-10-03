@@ -959,7 +959,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
     return boost::make_shared<mapnik::memory_featureset>(q.get_bbox(),features_);
 }
 
-mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt) const
+mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
     if (!is_bound_) bind();
 
