@@ -217,7 +217,7 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
 }
 
 // FIXME
-mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d const& pt) const
+mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
     if (!is_bound_) bind();
     throw mapnik::datasource_exception("GeoJSON Plugin: features_at_point is not supported yet");

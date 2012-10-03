@@ -189,7 +189,7 @@ mapnik::featureset_ptr python_datasource::features(mapnik::query const& q) const
     return mapnik::featureset_ptr();
 }
 
-mapnik::featureset_ptr python_datasource::features_at_point(mapnik::coord2d const& pt) const
+mapnik::featureset_ptr python_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
     using namespace boost::python;
 

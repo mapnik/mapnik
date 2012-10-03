@@ -246,7 +246,7 @@ featureset_ptr gdal_datasource::features(query const& q) const
                                               nodata_value_));
 }
 
-featureset_ptr gdal_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     if (! is_bound_) bind();
 

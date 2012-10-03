@@ -548,24 +548,24 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             {
                 throw std::runtime_error("query_point: could not project x,y into layer srs");
             }
-            // TODO - pass tolerance to features_at_point as well
-            featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
+            // calculate default tolerance
+            mapnik::box2d<double> map_ex = current_extent_;
+            if (maximum_extent_)
+            {
+                map_ex.clip(*maximum_extent_);
+            }
+            if (!prj_trans.backward(map_ex,PROJ_ENVELOPE_POINTS))
+            {
+                std::ostringstream s;
+                s << "query_point: could not project map extent '" << map_ex
+                  << "' into layer srs for tolerance calculation";
+                throw std::runtime_error(s.str());
+            }
+            double tol = (map_ex.maxx() - map_ex.minx()) / width_ * 3;
+            featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y), tol);
+            MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
             if (fs)
             {
-                mapnik::box2d<double> map_ex = current_extent_;
-                if (maximum_extent_)
-                {
-                    map_ex.clip(*maximum_extent_);
-                }
-                if (!prj_trans.backward(map_ex,PROJ_ENVELOPE_POINTS))
-                {
-                    std::ostringstream s;
-                    s << "query_point: could not project map extent '" << map_ex
-                      << "' into layer srs for tolerance calculation";
-                    throw std::runtime_error(s.str());
-                }
-                double tol = (map_ex.maxx() - map_ex.minx()) / width_ * 3;
-                MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
                 return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
                                                                                hit_test_filter(x,y,tol));
             }

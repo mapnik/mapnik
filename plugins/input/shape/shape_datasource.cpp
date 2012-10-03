@@ -286,7 +286,7 @@ featureset_ptr shape_datasource::features(const query& q) const
     }
 }
 
-featureset_ptr shape_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     if (!is_bound_) bind();
 
