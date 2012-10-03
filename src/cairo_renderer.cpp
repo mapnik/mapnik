@@ -58,6 +58,8 @@
 #include "agg_conv_clip_polyline.h"
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_smooth_poly1.h"
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
 
 // markers
 #include "agg_path_storage.h"
@@ -1434,10 +1436,22 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)
         {
-            image_data_32 target_data(raster_width,raster_height);
-            raster target(target_ext, target_data);
+            raster target(target_ext, raster_width,raster_height);
             scaling_method_e scaling_method = sym.get_scaling_method();
             double filter_radius = sym.calculate_filter_factor();
+            bool premultiply_source = !source->premultiplied_alpha_;
+            boost::optional<bool> is_premultiplied = sym.premultiplied();
+            if (is_premultiplied)
+            {
+                if (*is_premultiplied) premultiply_source = false;
+                else premultiply_source = true;
+            }
+            if (premultiply_source)
+            {
+                agg::rendering_buffer buffer(source->data_.getBytes(),source->data_.width(),source->data_.height(),source->data_.width() * 4);
+                agg::pixfmt_rgba32 pixf(buffer);
+                pixf.premultiply();
+            }
             if (!prj_trans.equal())
             {
                 double offset_x = ext.minx() - start_x;

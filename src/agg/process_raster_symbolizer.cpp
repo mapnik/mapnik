@@ -38,6 +38,10 @@
 // stl
 #include <cmath>
 
+// agg
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
+
 
 namespace mapnik {
 
@@ -66,10 +70,22 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)
         {
-            image_data_32 target_data(raster_width,raster_height);
-            raster target(target_ext, target_data);
+            raster target(target_ext, raster_width,raster_height);
             scaling_method_e scaling_method = sym.get_scaling_method();
             double filter_radius = sym.calculate_filter_factor();
+            bool premultiply_source = !source->premultiplied_alpha_;
+            boost::optional<bool> is_premultiplied = sym.premultiplied();
+            if (is_premultiplied)
+            {
+                if (*is_premultiplied) premultiply_source = false;
+                else premultiply_source = true;
+            }
+            if (premultiply_source)
+            {
+                agg::rendering_buffer buffer(source->data_.getBytes(),source->data_.width(),source->data_.height(),source->data_.width() * 4);
+                agg::pixfmt_rgba32 pixf(buffer);
+                pixf.premultiply();
+            }
             if (!prj_trans.equal())
             {
                 double offset_x = ext.minx() - start_x;
@@ -98,20 +114,9 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                                                    filter_radius);
                 }
             }
-            // handle whether to premultiply the source
-            // data before compositing
-            // first, default to what the data reports
-            bool premultiply_source = !source->premultiplied_alpha_;
-            // the, allow the user to override
-            boost::optional<bool> is_premultiplied = sym.premultiplied();
-            if (is_premultiplied)
-            {
-                if (*is_premultiplied) premultiply_source = false;
-                else premultiply_source = true;
-            }
             composite(current_buffer_->data(), target.data_,
                       sym.comp_op(), sym.get_opacity(),
-                      start_x, start_y, premultiply_source);
+                      start_x, start_y, false);
         }
     }
 }
