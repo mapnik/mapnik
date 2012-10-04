@@ -82,7 +82,7 @@ mapnik::featureset_ptr hello_datasource::features(mapnik::query const& q) const
     return mapnik::featureset_ptr();
 }
 
-mapnik::featureset_ptr hello_datasource::features_at_point(mapnik::coord2d const& pt) const
+mapnik::featureset_ptr hello_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
     if (!is_bound_) bind();
 

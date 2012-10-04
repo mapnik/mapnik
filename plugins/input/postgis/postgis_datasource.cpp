@@ -709,7 +709,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
     return featureset_ptr();
 }
 
-featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     if (! is_bound_)
     {
@@ -778,7 +778,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt) const
                 }
             }
 
-            box2d<double> box(pt.x, pt.y, pt.x, pt.y);
+            box2d<double> box(pt.x - tol, pt.y - tol, pt.x + tol, pt.y + tol);
             std::string table_with_bbox = populate_tokens(table_, FMAX, box, 0, 0);
 
             s << " FROM " << table_with_bbox;

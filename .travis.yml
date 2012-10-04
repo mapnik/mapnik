@@ -1,0 +1,13 @@
+language: cpp
+
+matrix:
+  include:
+    - compiler: clang
+      env: CXX_SCONS="-Qunused-arguments -fcolor-diagnostics" WARNING_CXXFLAGS="-Wno-unused-function -Wno-uninitialized -Wno-array-bounds -Wno-parentheses -Wno-char-subscripts -Wno-internal-linkage-in-inline"
+
+before_install:
+ - echo 'yes' | sudo add-apt-repository ppa:mapnik/boost
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libpq-dev libgdal-dev libcairomm-1.0-dev python-cairo-dev libsqlite3-dev
+
+script: scons configure JOBS=2 FAST=True CXX="$CXX $CXX_SCONS" WARNING_CXXFLAGS=$WARNING_CXXFLAGS && sudo make install

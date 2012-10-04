@@ -172,7 +172,7 @@ void export_datasource()
         .def("bind",&datasource::bind)
         .def("fields",&fields)
         .def("field_types",&field_types)
-        .def("features_at_point",&datasource::features_at_point)
+        .def("features_at_point",&datasource::features_at_point, (arg("coord"),arg("tolerance")=0))
         .def("params",&datasource::params,return_value_policy<copy_const_reference>(),
              "The configuration parameters of the data source. "
              "These vary depending on the type of data source.")

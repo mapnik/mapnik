@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-// boost
-#include <boost/foreach.hpp>
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/graphics.hpp>
@@ -33,6 +31,7 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
+
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
@@ -46,6 +45,40 @@
 #include "agg_span_pattern_rgba.h"
 #include "agg_renderer_outline_image.h"
 #include "agg_conv_clip_polyline.h"
+
+// boost
+#include <boost/utility.hpp>
+#include <boost/foreach.hpp>
+
+namespace {
+
+class pattern_source : private boost::noncopyable
+{
+public:
+    pattern_source(mapnik::image_data_32 const& pattern)
+        : pattern_(pattern) {}
+
+    unsigned int width() const
+    {
+        return pattern_.width();
+    }
+    unsigned int height() const
+    {
+        return pattern_.height();
+    }
+    agg::rgba8 pixel(int x, int y) const
+    {
+        unsigned c = pattern_(x,y);
+        return agg::rgba8(c & 0xff,
+                          (c >> 8) & 0xff,
+                          (c >> 16) & 0xff,
+                          (c >> 24) & 0xff);
+    }
+private:
+    mapnik::image_data_32 const& pattern_;
+};
+
+}
 
 namespace mapnik {
 

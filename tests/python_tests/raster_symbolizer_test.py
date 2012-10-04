@@ -151,7 +151,7 @@ def test_raster_with_alpha_blends_correctly_with_background():
         mapnik.render(map, mim)
         imdata = mim.tostring()
         # All white is expected
-        eq_(contains_word('\xff\xff\xff\xff', imdata),True,'Image expected to contain true white, instead found %s' % get_unique_colors(mim))
+        eq_(get_unique_colors(mim),['rgba(254,254,254,255)'])
 
 def test_raster_warping():
     lyrSrs = "+init=epsg:32630"

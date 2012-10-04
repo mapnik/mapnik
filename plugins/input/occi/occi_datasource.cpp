@@ -590,7 +590,7 @@ featureset_ptr occi_datasource::features(query const& q) const
                                                row_prefetch_);
 }
 
-featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     if (! is_bound_) bind();
 
