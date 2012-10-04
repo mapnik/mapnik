@@ -30,6 +30,9 @@
 // boost
 #include <boost/scoped_ptr.hpp>
 
+// stl
+#include <deque>
+
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"

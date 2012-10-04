@@ -32,6 +32,9 @@
 // boost
 #include <boost/scoped_ptr.hpp>
 
+// stl
+#include <deque>
+
 // agg
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
