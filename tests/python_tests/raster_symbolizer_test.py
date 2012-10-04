@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, contains_word
+from utilities import execution_path, contains_word, get_unique_colors
 
 import os, mapnik
 
@@ -102,22 +102,6 @@ def test_load_save_map():
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(str(e))
-
-def pixel2rgba(pixel):
-    alpha = (pixel >> 24) & 0xff
-    red = pixel & 0xff
-    green = (pixel >> 8) & 0xff
-    blue = (pixel >> 16) & 0xff
-    return 'rgba(%s,%s,%s,%s)' % (red,green,blue,alpha)
-
-def get_unique_colors(im):
-    pixels = []
-    for x in range(im.width()):
-        for y in range(im.height()):
-            pixel = im.get_pixel(x,y)
-            if pixel not in pixels:
-                 pixels.append(pixel)
-    return map(pixel2rgba,pixels)
 
 def test_raster_with_alpha_blends_correctly_with_background():
     WIDTH = 500

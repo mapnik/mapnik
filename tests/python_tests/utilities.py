@@ -35,3 +35,23 @@ def contains_word(word, bytestring_):
     assert len(bytestring_)%n == 0, "len(bytestring_) not multiple of len(word)"
     chunks = [bytestring_[i:i+n] for i in xrange(0, len(bytestring_), n)]
     return word in chunks
+
+def pixel2channels(pixel):
+    alpha = (pixel >> 24) & 0xff
+    red = pixel & 0xff
+    green = (pixel >> 8) & 0xff
+    blue = (pixel >> 16) & 0xff
+    return red,green,blue,alpha
+
+def pixel2rgba(pixel):
+    return 'rgba(%s,%s,%s,%s)' % pixel2channels(pixel)
+
+def get_unique_colors(im):
+    pixels = []
+    for x in range(im.width()):
+        for y in range(im.height()):
+            pixel = im.get_pixel(x,y)
+            if pixel not in pixels:
+                 pixels.append(pixel)
+    pixels = sorted(pixels)
+    return map(pixel2rgba,pixels)
