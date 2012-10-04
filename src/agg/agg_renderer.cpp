@@ -62,32 +62,6 @@
 
 namespace mapnik
 {
-class pattern_source : private boost::noncopyable
-{
-public:
-    pattern_source(image_data_32 const& pattern)
-        : pattern_(pattern) {}
-
-    unsigned int width() const
-    {
-        return pattern_.width();
-    }
-    unsigned int height() const
-    {
-        return pattern_.height();
-    }
-    agg::rgba8 pixel(int x, int y) const
-    {
-        unsigned c = pattern_(x,y);
-        return agg::rgba8(c & 0xff,
-                          (c >> 8) & 0xff,
-                          (c >> 16) & 0xff,
-                          (c >> 24) & 0xff);
-    }
-private:
-    image_data_32 const& pattern_;
-};
-
 
 template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
