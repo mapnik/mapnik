@@ -67,6 +67,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef _WINDOWS
+#include <Windows.h>
+#endif
+
 using boost::tokenizer;
 
 using std::endl;
@@ -130,6 +134,27 @@ private:
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
 };
+
+#ifdef _WINDOWS
+std::string wstring2string(const std::wstring& s)
+{
+    int slength = (int)s.length() + 1;
+    int len = ::WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, 0, 0, 0, 0);
+    boost::scoped_array<char> buf_ptr(new char [len+1]);
+    ::WideCharToMultiByte(CP_ACP, 0, s.c_str(), slength, buf_ptr.get(), len, 0, 0);
+    std::string r(buf_ptr.get());
+    return r;
+}
+
+std::wstring utf8ToWide( const std::string& str )
+{
+    int len = ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, 0, 0);
+    boost::scoped_array<wchar_t> buf_ptr(new wchar_t [len+1]);
+    ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf_ptr.get(), len);
+    std::wstring rt(buf_ptr.get());
+    return rt;
+}
+#endif
 
 //#include <mapnik/internal/dump_xml.hpp>
 void load_map(Map & map, std::string const& filename, bool strict)
@@ -681,7 +706,18 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                     {
                         std::string name = paramIter->get_attr<std::string>("name");
                         std::string value = paramIter->get_text();
+#ifdef _WINDOWS
+                        if (name == "file")
+                        {
+                            params[name] = wstring2string(utf8ToWide(value));
+                        }
+                        else
+                        {
+                            params[name] = value;
+                        }
+#else
                         params[name] = value;
+#endif
                     }
                 }
 

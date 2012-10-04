@@ -29,8 +29,13 @@
 // stl
 #include <string>
 
+#if defined(_WINDOWS)
+#   include <windows.h>
+#   define lt_dlhandle HMODULE
+#else
 // ltdl
 #include <ltdl.h>
+#endif
 
 namespace mapnik
 {
