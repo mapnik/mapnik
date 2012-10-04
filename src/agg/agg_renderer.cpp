@@ -106,11 +106,24 @@ template <typename T>
 void agg_renderer<T>::setup(Map const &m)
 {
     boost::optional<color> const& bg = m.background();
-    if (bg) pixmap_.set_background(*bg);
+    if (bg)
+    {
+        if (bg->alpha() < 255)
+        {
+            mapnik::color bg_color = *bg;
+            bg_color.premultiply();
+            pixmap_.set_background(bg_color);
+        }
+        else
+        {
+            pixmap_.set_background(*bg);
+        }
+    }
 
     boost::optional<std::string> const& image_filename = m.background_image();
     if (image_filename)
     {
+        // NOTE: marker_cache returns premultiplied image, if needed
         boost::optional<mapnik::marker_ptr> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
         if (bg_marker && (*bg_marker)->is_bitmap())
         {
@@ -126,17 +139,12 @@ void agg_renderer<T>::setup(Map const &m)
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        composite(pixmap_.data(),*bg_image, src_over, 1.0f, x*w, y*h, true);
+                        composite(pixmap_.data(),*bg_image, src_over, 1.0f, x*w, y*h, false);
                     }
                 }
             }
         }
     }
-
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
-    pixf.premultiply();
-
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
 
