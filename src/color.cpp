@@ -25,6 +25,9 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/config_error.hpp>
 
+// agg
+#include "agg_color_rgba.h"
+
 // boost
 #include <boost/format.hpp>
 
@@ -76,6 +79,25 @@ std::string color::to_hex_string() const
                 % blue()
                 % alpha()).str();
     }
+}
+
+void color::premultiply()
+{
+    agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
+    pre_c.premultiply();
+    red_ = pre_c.r;
+    green_ = pre_c.g;
+    blue_ = pre_c.b;
+}
+
+void color::demultiply()
+{
+    // note: this darkens too much: https://github.com/mapnik/mapnik/issues/1519
+    agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
+    pre_c.demultiply();
+    red_ = pre_c.r;
+    green_ = pre_c.g;
+    blue_ = pre_c.b;
 }
 
 }
