@@ -163,6 +163,12 @@ public:
         return db_;
     }
 
+    bool load_extension(std::string const& ext_path)
+    {
+        sqlite3_enable_load_extension(db_, 1);
+        int result = sqlite3_load_extension(db_, ext_path.c_str(), 0 , 0);
+        return (result == SQLITE_OK)? true : false;
+    }
 
 private:
 
