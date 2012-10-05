@@ -40,6 +40,25 @@
 // stl
 #include <string>
 
+namespace mapnik {
+
+// http://www.w3.org/TR/css3-color/#hsl-color
+inline double hue_to_rgb( double m1, double m2, double h)
+{
+    if (h < 0.0) h = h + 1.0;
+    else if (h > 1) h = h - 1.0;
+
+    if (h * 6 < 1.0)
+        return m1 + (m2 - m1) * h * 6.0;
+    if (h * 2 < 1.0)
+        return m2;
+    if (h * 3 < 2.0)
+        return m1 + (m2 - m1)* (2.0/3.0 - h) * 6.0;
+    return m1;
+}
+
+} // namespace mapnik
+
 // boost
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 104500
@@ -104,21 +123,6 @@ struct alpha_conv_impl
         return clip_int<0,255>(int((255.0 * val) + 0.5));
     }
 };
-
-// http://www.w3.org/TR/css3-color/#hsl-color
-inline double hue_to_rgb( double m1, double m2, double h)
-{
-    if (h < 0.0) h = h + 1.0;
-    else if (h > 1) h = h - 1.0;
-
-    if (h * 6 < 1.0)
-        return m1 + (m2 - m1) * h * 6.0;
-    if (h * 2 < 1.0)
-        return m2;
-    if (h * 3 < 2.0)
-        return m1 + (m2 - m1)* (2.0/3.0 - h) * 6.0;
-    return m1;
-}
 
 struct hsl_conv_impl
 {
