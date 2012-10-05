@@ -247,7 +247,8 @@ void csv_datasource::parse_csv(T & stream,
     std::string quo = boost::trim_copy(quote);
     if (quo.empty()) quo = "\"";
 
-    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammer: sep: '" << sep << "' quo: '" << quo << "' esc: '" << esc;
+    MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammar: sep: '" << sep
+                          << "' quo: '" << quo << "' esc: '" << esc << "'";
 
     boost::escaped_list_separator<char> grammer;
     try
