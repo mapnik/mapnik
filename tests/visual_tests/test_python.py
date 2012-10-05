@@ -71,7 +71,7 @@ m.append_style('Style', style)
 
 
 layer = mapnik.Layer('Layer')
-layer.datasource = mapnik.Shapefile(file=os.path.join(dirname,"data/points.shp"))
+layer.datasource = mapnik.Osm(file=os.path.join(dirname,"data/points.osm"))
 layer.styles.append('Style')
 m.layers.append(layer)
 
