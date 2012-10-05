@@ -389,6 +389,7 @@ void postgis_datasource::bind() const
                     case 1042:  // bpchar
                     case 1043:  // varchar
                     case 25:    // text
+                    case 705:   // literal
                         desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::String));
                         break;
                     default: // should not get here
