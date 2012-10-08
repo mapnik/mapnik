@@ -91,7 +91,8 @@ namespace mapnik { namespace wkt {
     };
 
     template <typename Iterator>
-    struct wkt_grammar : qi::grammar<Iterator,  boost::ptr_vector<mapnik::geometry_type>() , ascii::space_type>
+    struct wkt_grammar : qi::grammar<Iterator, ascii::space_type,
+                                     void(boost::ptr_vector<geometry_type>&)>
     {
         wkt_grammar()
             : wkt_grammar::base_type(geometry_tagged_text)
@@ -101,17 +102,17 @@ namespace mapnik { namespace wkt {
             using qi::_2;
             using boost::phoenix::push_back;
 
-            geometry_tagged_text = point_tagged_text
-                | linestring_tagged_text
-                | polygon_tagged_text
-                | multipoint_tagged_text
-                | multilinestring_tagged_text
-                | multipolygon_tagged_text
+            geometry_tagged_text = point_tagged_text(_r1)
+                | linestring_tagged_text(_r1)
+                | polygon_tagged_text(_r1)
+                | multipoint_tagged_text(_r1)
+                | multilinestring_tagged_text(_r1)
+                | multipolygon_tagged_text(_r1)
                 ;
 
             // <point tagged text> ::= point <point text>
             point_tagged_text = no_case[lit("POINT")] [ _a = new_<geometry_type>(Point) ]
-                >> ( point_text(_a) [push_back(_val,_a)]
+                >> ( point_text(_a) [push_back(_r1,_a)]
                      | eps[cleanup_(_a)][_pass = false])
                 ;
 
@@ -122,7 +123,7 @@ namespace mapnik { namespace wkt {
 
             // <linestring tagged text> ::= linestring <linestring text>
             linestring_tagged_text = no_case[lit("LINESTRING")] [ _a = new_<geometry_type>(LineString) ]
-                >> (linestring_text(_a)[push_back(_val,_a)]
+                >> (linestring_text(_a)[push_back(_r1,_a)]
                     | eps[cleanup_(_a)][_pass = false])
                 ;
 
@@ -132,7 +133,7 @@ namespace mapnik { namespace wkt {
 
             // <polygon tagged text> ::= polygon <polygon text>
             polygon_tagged_text = no_case[lit("POLYGON")] [ _a = new_<geometry_type>(Polygon) ]
-                >> ( polygon_text(_a)[push_back(_val,_a)]
+                >> ( polygon_text(_a)[push_back(_r1,_a)]
                      | eps[cleanup_(_a)][_pass = false])
                 ;
 
@@ -142,38 +143,40 @@ namespace mapnik { namespace wkt {
 
             //<multipoint tagged text> ::= multipoint <multipoint text>
             multipoint_tagged_text = no_case[lit("MULTIPOINT")]
-                >>  multipoint_text
+                >>  multipoint_text(_r1)
                 ;
 
             // <multipoint text> ::= <empty set> | <left paren> <point text> {<comma> <point text>}* <right paren>
             multipoint_text = (lit('(')
                                >> ((eps[_a = new_<geometry_type>(Point)]
-                                    >> (point_text(_a) | empty_set) [push_back(_val,_a)]
+                                    >> (point_text(_a) | empty_set) [push_back(_r1,_a)]
                                     | eps[cleanup_(_a)][_pass = false]) % lit(','))
                                >> lit(')')) | empty_set
                 ;
 
             // <multilinestring tagged text> ::= multilinestring <multilinestring text>
             multilinestring_tagged_text = no_case[lit("MULTILINESTRING")]
-                >> multilinestring_text ;
+                >> multilinestring_text(_r1)
+                ;
 
             // <multilinestring text> ::= <empty set> | <left paren> <linestring text> {<comma> <linestring text>}* <right paren>
             multilinestring_text = (lit('(')
                                     >> ((eps[_a = new_<geometry_type>(LineString)]
-                                         >> ( points(_a)[push_back(_val,_a)]
+                                         >> ( points(_a)[push_back(_r1,_a)]
                                               | eps[cleanup_(_a)][_pass = false]))
                                         % lit(','))
                                     >> lit(')')) | empty_set;
 
             // <multipolygon tagged text> ::= multipolygon <multipolygon text>
             multipolygon_tagged_text = no_case[lit("MULTIPOLYGON")]
-                >> multipolygon_text ;
+                >> multipolygon_text(_r1)
+                ;
 
             // <multipolygon text> ::= <empty set> | <left paren> <polygon text> {<comma> <polygon text>}* <right paren>
 
             multipolygon_text = (lit('(')
                                  >> ((eps[_a = new_<geometry_type>(Polygon)]
-                                      >> ( polygon_text(_a)[push_back(_val,_a)]
+                                      >> ( polygon_text(_a)[push_back(_r1,_a)]
                                            | eps[cleanup_(_a)][_pass = false]))
                                      % lit(','))
                                  >> lit(')')) | empty_set;
@@ -188,22 +191,34 @@ namespace mapnik { namespace wkt {
 
         }
 
-        // start
-        qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> geometry_tagged_text;
+        typedef qi::rule<Iterator, ascii::space_type, void(boost::ptr_vector<geometry_type>&)>
+            geometry_collector_rule;
 
-        qi::rule<Iterator,qi::locals<geometry_type*>,boost::ptr_vector<geometry_type>(),ascii::space_type> point_tagged_text;
-        qi::rule<Iterator,qi::locals<geometry_type*>,boost::ptr_vector<geometry_type>(),ascii::space_type> linestring_tagged_text;
-        qi::rule<Iterator,qi::locals<geometry_type*>,boost::ptr_vector<geometry_type>(),ascii::space_type> polygon_tagged_text;
-        qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> multipoint_tagged_text;
-        qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> multilinestring_tagged_text;
-        qi::rule<Iterator,boost::ptr_vector<geometry_type>(),ascii::space_type> multipolygon_tagged_text;
-        //
-        qi::rule<Iterator,void(geometry_type*),ascii::space_type> point_text;
-        qi::rule<Iterator,void(geometry_type*),ascii::space_type> linestring_text;
-        qi::rule<Iterator,void(geometry_type*),ascii::space_type> polygon_text;
-        qi::rule<Iterator, qi::locals<geometry_type*>, boost::ptr_vector<geometry_type>(),ascii::space_type> multipoint_text;
-        qi::rule<Iterator, qi::locals<geometry_type*>, boost::ptr_vector<geometry_type>(),ascii::space_type> multilinestring_text;
-        qi::rule<Iterator, qi::locals<geometry_type*>, boost::ptr_vector<geometry_type>(),ascii::space_type> multipolygon_text;
+        typedef qi::rule<Iterator, ascii::space_type, void(boost::ptr_vector<geometry_type>&),
+                         qi::locals<geometry_type*> >
+            geometry_constructor_rule;
+
+        typedef qi::rule<Iterator, ascii::space_type, void(geometry_type*)>
+            geometry_coordinates_rule;
+
+        // start
+        geometry_collector_rule geometry_tagged_text;
+        // multi-geometry parsers
+        geometry_collector_rule multipoint_tagged_text;
+        geometry_collector_rule multilinestring_tagged_text;
+        geometry_collector_rule multipolygon_tagged_text;
+        // simple geometry parsers
+        geometry_constructor_rule point_tagged_text;
+        geometry_constructor_rule linestring_tagged_text;
+        geometry_constructor_rule polygon_tagged_text;
+        // multi-geometry coordinate parsers
+        geometry_constructor_rule multipoint_text;
+        geometry_constructor_rule multilinestring_text;
+        geometry_constructor_rule multipolygon_text;
+        // simple geometry coordinate parsers
+        geometry_coordinates_rule point_text;
+        geometry_coordinates_rule linestring_text;
+        geometry_coordinates_rule polygon_text;
         //
         qi::rule<Iterator,void(CommandType,geometry_type*),ascii::space_type> point;
         qi::rule<Iterator,qi::locals<CommandType>,void(geometry_type*),ascii::space_type> points;
@@ -215,20 +230,21 @@ namespace mapnik { namespace wkt {
 
 
 template <typename Iterator>
-struct wkt_collection_grammar : qi::grammar<Iterator, boost::ptr_vector<mapnik::geometry_type>(), ascii::space_type>
+struct wkt_collection_grammar : qi::grammar<Iterator, ascii::space_type,
+                                            void(boost::ptr_vector<geometry_type>&)>
 {
     wkt_collection_grammar()
         :  wkt_collection_grammar::base_type(start)
     {
-        using qi::_1;
-        using qi::_val;
+        using qi::_r1;
         using qi::no_case;
-        using boost::phoenix::push_back;
-        start = wkt | no_case[lit("GEOMETRYCOLLECTION")]
-            >> (lit("(") >> wkt % lit(",") >> lit(")"));
+        start = wkt(_r1) | collection(_r1);
+        collection = no_case[lit("GEOMETRYCOLLECTION")]
+            >> lit('(') >> wkt(_r1) % lit(',') >> lit(')');
     }
 
-    qi::rule<Iterator,boost::ptr_vector<mapnik::geometry_type>(),ascii::space_type> start;
+    typename wkt_grammar<Iterator>::geometry_collector_rule start;
+    typename wkt_grammar<Iterator>::geometry_collector_rule collection;
     wkt_grammar<Iterator> wkt;
 };
 

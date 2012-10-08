@@ -34,7 +34,7 @@
 namespace mapnik
 {
 
-#if BOOST_VERSION >= 104700
+#if BOOST_VERSION >= 104200
 wkt_parser::wkt_parser()
     : grammar_(new mapnik::wkt::wkt_collection_grammar<iterator_type>)
 {}
@@ -44,7 +44,9 @@ bool wkt_parser::parse(std::string const& wkt, boost::ptr_vector<geometry_type> 
     using namespace boost::spirit;
     iterator_type first = wkt.begin();
     iterator_type last =  wkt.end();
-    return qi::phrase_parse(first, last, *grammar_, ascii::space, paths);
+    return qi::phrase_parse(first, last,
+                            (*grammar_)(boost::phoenix::ref(paths)),
+                            ascii::space);
 }
 #endif
 

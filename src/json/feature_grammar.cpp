@@ -150,7 +150,9 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
 }
 
 template struct mapnik::json::feature_grammar<std::string::const_iterator,mapnik::Feature>;
+#if BOOST_VERSION > 104200
 template struct mapnik::json::feature_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> >,mapnik::Feature>;
+#endif
 
 }}
 
