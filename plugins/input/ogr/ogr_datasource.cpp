@@ -203,6 +203,7 @@ void ogr_datasource::bind() const
 
         unsigned num_layers = dataset_->GetLayerCount();
         bool layer_found = false;
+        std::vector<std::string> layer_names;
         for (unsigned i = 0; i < num_layers; ++i )
         {
             OGRLayer* ogr_layer = dataset_->GetLayer(i);
@@ -210,13 +211,17 @@ void ogr_datasource::bind() const
             if (ogr_layer_def != 0)
             {
                 layer_found = true;
-                s << " '" << ogr_layer_def->GetName() << "' ";
+                layer_names.push_back(std::string("'") + ogr_layer_def->GetName() + std::string("'"));
             }
         }
 
         if (! layer_found)
         {
             s << "None (no layers were found in dataset)";
+        }
+        else
+        {
+            s << boost::algorithm::join(layer_names,", ");
         }
 
         throw datasource_exception(s.str());
