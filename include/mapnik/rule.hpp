@@ -38,6 +38,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>
+#include <mapnik/config.hpp> // MAPNIK_DECL
 
 // boost
 #include <boost/concept_check.hpp>
@@ -127,7 +128,7 @@ typedef boost::variant<point_symbolizer,
                        markers_symbolizer,
                        debug_symbolizer> symbolizer;
 
-class rule
+class MAPNIK_DECL rule
 {
 public:
     typedef std::vector<symbolizer> symbolizers;
