@@ -135,6 +135,7 @@ private:
     mutable bool style_level_compositing_;
     unsigned width_;
     unsigned height_;
+    unsigned renderer_pass_;
     double scale_factor_;
     CoordTransform t_;
     freetype_engine font_engine_;

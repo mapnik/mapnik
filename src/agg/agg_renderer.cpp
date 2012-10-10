@@ -72,6 +72,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
+      renderer_pass_(0),
       scale_factor_(scale_factor),
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
@@ -92,6 +93,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
       style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
+      renderer_pass_(0),
       scale_factor_(scale_factor),
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
@@ -200,7 +202,7 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
 }
 
 template <typename T>
-void agg_renderer<T>::end_layer_processing(layer const&)
+void agg_renderer<T>::end_layer_processing(layer const& lay)
 {
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End layer processing";
 }
@@ -269,6 +271,8 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
         }
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
+    mapnik::save_to_file(pixmap_, (boost::format("%02d_style.png") % renderer_pass_).str(),"png");
+    renderer_pass_++;
 }
 
 template <typename T>
