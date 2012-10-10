@@ -38,7 +38,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/expression_string.hpp>
-#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 // boost
 #include <boost/concept_check.hpp>
@@ -128,11 +127,12 @@ typedef boost::variant<point_symbolizer,
                        markers_symbolizer,
                        debug_symbolizer> symbolizer;
 
-typedef MAPNIK_DECL std::vector<symbolizer> symbolizers;
-
-class MAPNIK_DECL rule
+class rule
 {
+public:
+    typedef std::vector<symbolizer> symbolizers;
 private:
+
     std::string name_;
     double min_scale_;
     double max_scale_;
@@ -158,7 +158,7 @@ public:
     std::string const& get_name() const;
     void append(symbolizer const& sym);
     void remove_at(size_t index);
-    symbolizers const& get_symbolizers() const;
+    const symbolizers& get_symbolizers() const;
     symbolizers::const_iterator begin() const;
     symbolizers::const_iterator end() const;
     symbolizers::iterator begin();
@@ -172,7 +172,17 @@ public:
     bool active(double scale) const;
 
 private:
-    void swap(rule& rhs) throw();
+
+    void swap(rule& rhs) throw()
+    {
+        name_=rhs.name_;
+        min_scale_=rhs.min_scale_;
+        max_scale_=rhs.max_scale_;
+        syms_=rhs.syms_;
+        filter_=rhs.filter_;
+        else_filter_=rhs.else_filter_;
+        also_filter_=rhs.also_filter_;
+    }
 };
 
 }
