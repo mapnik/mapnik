@@ -88,7 +88,7 @@ public:
      * @brief Overload that process the whole set of symbolizers of a rule.
      * @return true, meaning that this renderer can process multiple symbolizers.
      */
-    bool process(symbolizers const& syms,
+    bool process(rule::symbolizers const& syms,
                  Feature const& feature,
                  proj_transform const& prj_trans);
 

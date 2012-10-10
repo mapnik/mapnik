@@ -323,7 +323,7 @@ StyleModel::StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent)
         for ( ; itr2 != rules.end();++itr2)
         {
             node* rule_n = style_n->add_child(new node(rule_node(QString("Rule"),*itr2),style_n));
-            mapnik::symbolizers::const_iterator itr3 = (*itr2).begin();
+            mapnik::rule::symbolizers::const_iterator itr3 = (*itr2).begin();
             for ( ; itr3 !=itr2->end();++itr3)
             {
             rule_n->add_child(new node(symbolizer_node(*itr3),rule_n));
