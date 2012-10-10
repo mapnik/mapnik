@@ -670,7 +670,14 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                 {
                     std::map<std::string,parameters>::const_iterator base_itr = datasource_templates_.find(*base);
                     if (base_itr!=datasource_templates_.end())
+                    {
                         params = base_itr->second;
+                    }
+                    else
+                    {
+                        MAPNIK_LOG_ERROR(datasource) << "Datasource template '" << *base
+                            << "' not found for layer '" << name << "'";
+                    }
                 }
 
                 xml_node::const_iterator paramIter = child->begin();
