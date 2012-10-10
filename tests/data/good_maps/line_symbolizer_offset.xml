@@ -1,0 +1,18 @@
+<Map minimum-version="2.1.0" background-color="white">
+  <Style name="style">
+    <Rule>
+      <LineSymbolizer offset="2"/>
+      <LineSymbolizer offset="-2"/>
+    </Rule>  
+  </Style>
+  <Layer name="lay">
+    <StyleName>style</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="inline">
+      wkt,name
+      "MULTILINESTRING ((10 10, 20 20, 10 40),(40 40, 30 30, 40 20, 30 10))",line
+      </Parameter>
+    </Datasource>
+  </Layer>
+</Map>
