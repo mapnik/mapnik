@@ -27,6 +27,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/gamma_method.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 namespace mapnik
 {

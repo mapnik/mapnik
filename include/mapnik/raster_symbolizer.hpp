@@ -27,6 +27,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/image_scaling.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 // boost
 #include <boost/shared_ptr.hpp>

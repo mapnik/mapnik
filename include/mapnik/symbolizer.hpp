@@ -29,6 +29,7 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/simplify.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 // boost
 #include <boost/array.hpp>

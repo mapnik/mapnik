@@ -30,6 +30,7 @@
 #include <mapnik/stroke.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 // boost
 #include <boost/optional.hpp>

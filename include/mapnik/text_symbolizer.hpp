@@ -29,6 +29,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/text_placements/base.hpp>
 #include <mapnik/text_placements/dummy.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 // boost
 #include <boost/shared_ptr.hpp>

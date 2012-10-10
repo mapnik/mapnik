@@ -23,7 +23,7 @@
 #ifndef MAPNIK_DEBUG_SYMBOLIZER_HPP
 #define MAPNIK_DEBUG_SYMBOLIZER_HPP
 
-#include <mapnik/config.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 #include <mapnik/symbolizer.hpp>
 
 namespace mapnik

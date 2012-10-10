@@ -98,7 +98,7 @@ rule::rule(std::string const& name,
       else_filter_(false),
       also_filter_(false)  {}
 
-rule::rule(const rule& rhs, bool deep_copy)
+rule::rule(rule const& rhs, bool deep_copy)
     : name_(rhs.name_),
       min_scale_(rhs.min_scale_),
       max_scale_(rhs.max_scale_),
@@ -176,27 +176,27 @@ void rule::remove_at(size_t index)
     }
 }
 
-rule::symbolizers const& rule::get_symbolizers() const
+symbolizers const& rule::get_symbolizers() const
 {
     return syms_;
 }
 
-rule::symbolizers::const_iterator rule::begin() const
+symbolizers::const_iterator rule::begin() const
 {
     return syms_.begin();
 }
 
-rule::symbolizers::const_iterator rule::end() const
+symbolizers::const_iterator rule::end() const
 {
     return syms_.end();
 }
 
-rule::symbolizers::iterator rule::begin()
+symbolizers::iterator rule::begin()
 {
     return syms_.begin();
 }
 
-rule::symbolizers::iterator rule::end()
+symbolizers::iterator rule::end()
 {
     return syms_.end();
 }
@@ -235,5 +235,17 @@ bool rule::active(double scale) const
 {
     return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6);
 }
+
+void rule::swap(rule& rhs) throw()
+{
+    name_=rhs.name_;
+    min_scale_=rhs.min_scale_;
+    max_scale_=rhs.max_scale_;
+    syms_=rhs.syms_;
+    filter_=rhs.filter_;
+    else_filter_=rhs.else_filter_;
+    also_filter_=rhs.also_filter_;
+}
+
 
 }

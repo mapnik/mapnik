@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/symbolizer.hpp>
-//#include <boost/shared_ptr.hpp>
+#include <mapnik/config.hpp> // for MAPNIK_DECL
 
 namespace mapnik
 {
