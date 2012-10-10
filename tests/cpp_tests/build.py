@@ -20,7 +20,8 @@ for cpp_test in glob.glob('*_test.cpp'):
         agg_env = Environment(ENV=os.environ)
         agg_env['CXX'] = env['CXX']
         agg_env['CXXFLAGS'] = env['CXXFLAGS']
-        agg_env.AppendUnique(LIBS='agg')
+        if 'agg' in test_env['LIBS']:
+            agg_env.AppendUnique(LIBS='agg')
         agg_env.Append(CPPPATH = '#deps/agg/include')
         agg_env.Append(LIBPATH = '#deps/agg')
         agg_env['CPPPATH'] = ['#deps/agg/include',env['BOOST_INCLUDES']]
