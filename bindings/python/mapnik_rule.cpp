@@ -32,6 +32,7 @@
 #include <mapnik/expression_string.hpp>
 
 using mapnik::rule;
+using mapnik::symbolizers;
 using mapnik::expr_node;
 using mapnik::expression_ptr;
 using mapnik::Feature;
@@ -62,8 +63,8 @@ void export_rule()
     implicitly_convertible<text_symbolizer,symbolizer>();
     implicitly_convertible<markers_symbolizer,symbolizer>();
 
-    class_<rule::symbolizers>("Symbolizers",init<>("TODO"))
-        .def(vector_indexing_suite<rule::symbolizers>())
+    class_<symbolizers>("Symbolizers",init<>("TODO"))
+        .def(vector_indexing_suite<symbolizers>())
         ;
 
     class_<rule>("Rule",init<>("default constructor"))

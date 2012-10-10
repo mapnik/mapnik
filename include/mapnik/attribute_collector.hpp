@@ -220,8 +220,8 @@ public:
     template <typename RuleType>
     void operator() (RuleType const& r)
     {
-        typename RuleType::symbolizers const& symbols = r.get_symbolizers();
-        typename RuleType::symbolizers::const_iterator symIter=symbols.begin();
+        symbolizers const& symbols = r.get_symbolizers();
+        symbolizers::const_iterator symIter=symbols.begin();
         symbolizer_attributes s_attr(names_);
         while (symIter != symbols.end())
         {

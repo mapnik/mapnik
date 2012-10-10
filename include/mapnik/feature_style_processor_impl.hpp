@@ -398,9 +398,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                     ds->type() == datasource::Raster &&
                     ds->params().get<double>("filter_factor",0.0) == 0.0)
                 {
-                    rule::symbolizers const& symbols = r.get_symbolizers();
-                    rule::symbolizers::const_iterator symIter = symbols.begin();
-                    rule::symbolizers::const_iterator symEnd = symbols.end();
+                    symbolizers const& symbols = r.get_symbolizers();
+                    symbolizers::const_iterator symIter = symbols.begin();
+                    symbolizers::const_iterator symEnd = symbols.end();
                     while (symIter != symEnd)
                     {
                         // if multiple raster symbolizers, last will be respected
@@ -548,7 +548,7 @@ void feature_style_processor<Processor>::render_style(
 
                 do_else=false;
                 do_also=true;
-                rule::symbolizers const& symbols = r->get_symbolizers();
+                symbolizers const& symbols = r->get_symbolizers();
 
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
@@ -577,7 +577,7 @@ void feature_style_processor<Processor>::render_style(
 
                 p.painted(true);
 
-                rule::symbolizers const& symbols = r->get_symbolizers();
+                symbolizers const& symbols = r->get_symbolizers();
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
                 if(!p.process(symbols,*feature,prj_trans))
@@ -599,7 +599,7 @@ void feature_style_processor<Processor>::render_style(
 
                 p.painted(true);
 
-                rule::symbolizers const& symbols = r->get_symbolizers();
+                symbolizers const& symbols = r->get_symbolizers();
                 // if the underlying renderer is not able to process the complete set of symbolizers,
                 // process one by one.
                 if(!p.process(symbols,*feature,prj_trans))
