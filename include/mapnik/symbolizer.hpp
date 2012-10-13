@@ -28,7 +28,7 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/transform_expression.hpp>
-#include <mapnik/metawriter/properties.hpp>
+//#include <mapnik/metawriter/properties.hpp>
 
 // boost
 #include <boost/array.hpp>
