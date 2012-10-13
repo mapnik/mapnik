@@ -14,7 +14,7 @@ distclean:
 	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	if test -e "config.cache"; then rm "config.cache"; fi
-	if test -e "config.py"; then rm "config.py"; fi
+	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
 
 reset: distclean
 

@@ -271,7 +271,10 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
         }
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
-    mapnik::save_to_file(pixmap_, (boost::format("%02d_style.png") % renderer_pass_).str(),"png");
+    // copy pixmap so demultiply will not impact main buffer
+    mapnik::image_32 pix_tmp = pixmap_;
+    pix_tmp.demultiply();
+    mapnik::save_to_file(pix_tmp, (boost::format("%02d_style.png") % renderer_pass_).str(),"png");
     renderer_pass_++;
 }
 
