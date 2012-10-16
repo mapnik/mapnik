@@ -2,7 +2,8 @@
 
 from nose.tools import *
 import os,sys
-from utilities import execution_path, Todo, get_unique_colors, pixel2channels
+from utilities import execution_path, run_tests, Todo
+from utilities import get_unique_colors, pixel2channels
 import mapnik
 
 def setup():
@@ -221,4 +222,4 @@ def test_background_image_with_alpha_and_background_color_against_composited_con
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_tests(eval(x) for x in dir() if x.startswith("test_"))
