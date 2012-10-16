@@ -334,6 +334,32 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             pass
         eq_(feature,None)
 
+    # https://github.com/mapnik/mapnik/issues/1537
+    # this works because key_field is manually set
+    def test_db_with_one_text_column():
+        # form up an in-memory test db
+        wkb = '010100000000000000000000000000000000000000'
+        ds = mapnik.SQLite(file=':memory:',
+            table='test1',
+            initdb='''
+                create table test1 (alias TEXT,geometry BLOB);
+                insert into test1 values ("test",x'%s');
+                ''' % wkb,
+            extent='-180,-60,180,60',
+            use_spatial_index=False,
+            key_field='alias'
+        )
+        eq_(len(ds.fields()),1)
+        eq_(ds.fields(),['alias'])
+        eq_(ds.field_types(),['str'])
+        fs = ds.all_features()
+        eq_(len(fs),1)
+        feat = fs[0]
+        #eq_(feat.id(),1)
+        eq_(feat['alias'],'test')
+        eq_(len(feat.geometries()),1)
+        eq_(feat.geometries()[0].to_wkt(),'Point(0.0 0.0)')
+
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
