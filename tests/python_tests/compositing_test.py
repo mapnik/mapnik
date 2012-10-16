@@ -21,6 +21,10 @@ def debug_image(image,step=2):
             red,green,blue,alpha = pixel2channels(pixel)
             print "rgba(%s,%s,%s,%s) at %s,%s" % (red,green,blue,alpha,x,y)
 
+def replace_style(m, name, style):
+    m.remove_style(name)
+    m.append_style(name, style)
+
 # note: it is impossible to know for all pixel colors
 # we can only detect likely cases of non premultiplied colors
 def validate_pixels_are_not_premultiplied(image):
@@ -144,6 +148,36 @@ def test_pre_multiply_status_of_map2():
     eq_(validate_pixels_are_not_premultiplied(im),True)
     mapnik.render(m,im)
     eq_(validate_pixels_are_not_premultiplied(im),True)
+
+def test_style_level_comp_op():
+    m = mapnik.Map(256, 256)
+    mapnik.load_map(m, '../data/good_maps/style_level_comp_op.xml')
+    m.zoom_all()
+    successes = []
+    fails = []
+    for name in mapnik.CompositeOp.names:
+        # find_style returns a copy of the style object
+        style_markers = m.find_style("markers")
+        style_markers.comp_op = getattr(mapnik.CompositeOp, name)
+        # replace the original style with the modified one
+        replace_style(m, "markers", style_markers)
+        im = mapnik.Image(m.width, m.height)
+        mapnik.render(m, im)
+        actual = '/tmp/mapnik-style-comp-op-' + name + '.png'
+        expected = 'images/style-comp-op/' + name + '.png'
+        im.save(actual)
+        if not os.path.exists(expected):
+            print 'generating expected test image: %s' % expected
+            im.save(expected)
+        expected_im = mapnik.Image.open(expected)
+        # compare them
+        if im.tostring() == expected_im.tostring():
+            successes.append(name)
+        else:
+            fails.append('failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
+            fail_im = side_by_side_image(expected_im, im)
+            fail_im.save('/tmp/mapnik-style-comp-op-' + name + '.fail.png')
+    eq_(len(fails), 0, '\n'+'\n'.join(fails))
 
 def test_style_level_opacity():
     m = mapnik.Map(512,512)
