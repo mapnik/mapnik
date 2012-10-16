@@ -4,6 +4,7 @@
 from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
 
 import os, sys, inspect, traceback
+import mapnik
 
 def execution_path(filename):
     return os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename)
@@ -76,3 +77,11 @@ def run_tests(iterable):
                     sys.stderr.write("  " + line + "\n")
         sys.stderr.flush()
     return failed
+
+def side_by_side_image(left_im, right_im):
+    width = left_im.width() + 1 + right_im.width()
+    height = max(left_im.height(), right_im.height())
+    im = mapnik.Image(width, height)
+    im.blend(0, 0, left_im, 1.0)
+    im.blend(left_im.width() + 1, 0, right_im, 1.0)
+    return im

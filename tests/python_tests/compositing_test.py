@@ -3,7 +3,7 @@
 from nose.tools import *
 import os,sys
 from utilities import execution_path, run_tests, Todo
-from utilities import get_unique_colors, pixel2channels
+from utilities import get_unique_colors, pixel2channels, side_by_side_image
 import mapnik
 
 def setup():
@@ -98,6 +98,8 @@ def test_compare_images():
             successes.append(name)
         else:
             fails.append('failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
+            fail_im = side_by_side_image(expected_im, a)
+            fail_im.save('/tmp/mapnik-comp-op-test-' + name + '.fail.png')
     eq_(len(successes),num_ops,'\n'+'\n'.join(fails))
     b.demultiply()
     # b will be slightly modified by pre and then de multiplication rounding errors
