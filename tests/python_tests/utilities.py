@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from nose.plugins.errorclass import ErrorClass, ErrorClassPlugin
 
-import os, sys, inspect
+import os, sys, inspect, traceback
+import mapnik
 
 def execution_path(filename):
     return os.path.join(os.path.dirname(sys._getframe(1).f_code.co_filename), filename)
@@ -55,3 +57,31 @@ def get_unique_colors(im):
                  pixels.append(pixel)
     pixels = sorted(pixels)
     return map(pixel2rgba,pixels)
+
+def run_tests(iterable):
+    failed = 0
+    for test in iterable:
+        try:
+            test()
+            sys.stderr.write("\x1b[32m✓ \x1b[m" + test.__name__ + "\x1b[m\n")
+        except:
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            failed += 1
+            sys.stderr.write("\x1b[31m✘ \x1b[m" + test.__name__ + "\x1b[m\n")
+            for mline in traceback.format_exception_only(exc_type, exc_value):
+                for line in mline.rstrip().split("\n"):
+                    sys.stderr.write("  \x1b[31m" + line + "\x1b[m\n")
+            sys.stderr.write("  Traceback:\n")
+            for mline in traceback.format_tb(exc_tb):
+                for line in mline.rstrip().split("\n"):
+                    sys.stderr.write("  " + line + "\n")
+        sys.stderr.flush()
+    return failed
+
+def side_by_side_image(left_im, right_im):
+    width = left_im.width() + 1 + right_im.width()
+    height = max(left_im.height(), right_im.height())
+    im = mapnik.Image(width, height)
+    im.blend(0, 0, left_im, 1.0)
+    im.blend(left_im.width() + 1, 0, right_im, 1.0)
+    return im
