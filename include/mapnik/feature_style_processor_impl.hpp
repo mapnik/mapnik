@@ -296,7 +296,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             {
                 if (style->active(scale_denom))
                 {
-                    std::clog << "triggering\n";
                     // trigger any needed compositing ops
                     p.start_style_processing(*style);
                     p.end_style_processing(*style);
