@@ -61,7 +61,6 @@ private:
     std::vector<int> attr_ids_;
     mutable box2d<double> feature_ext_;
     mutable int total_geom_size;
-    mutable int feature_id_;
     osm_dataset *dataset_;
     std::set<std::string> attribute_names_;
     mapnik::context_ptr ctx_;

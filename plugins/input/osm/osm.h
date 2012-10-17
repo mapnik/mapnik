@@ -54,8 +54,9 @@ public:
         ptypes.push_back(std::pair<std::string, std::string>("natural", "heath"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "marsh"));
         ptypes.push_back(std::pair<std::string, std::string>("military", "danger_area"));
-        ptypes.push_back(std::pair<std::string, std::string>("landuse","forest"));
-        ptypes.push_back(std::pair<std::string, std::string>("landuse","industrial"));
+        ptypes.push_back(std::pair<std::string, std::string>("landuse", "forest"));
+        ptypes.push_back(std::pair<std::string, std::string>("landuse", "industrial"));
+        ptypes.push_back(std::pair<std::string, std::string>("leisure", "park"));
     }
 };
 
