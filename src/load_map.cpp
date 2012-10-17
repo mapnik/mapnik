@@ -1663,7 +1663,7 @@ void map_parser::ensure_exists(std::string const& file_path)
     {
        if (!boost::filesystem::exists(file_path))
        {
-           throw mapnik::config_error("point-file could not be found: '" + file_path + "'");
+           throw mapnik::config_error("file could not be found: '" + file_path + "'");
        }
     }
 }
