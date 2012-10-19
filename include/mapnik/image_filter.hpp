@@ -402,10 +402,22 @@ template <typename Src>
 void apply_filter(Src & src, gray const& op)
 {
     using namespace boost::gil;
-    typedef pixel<channel_type<rgba8_view_t>::type, gray_layout_t> gray_pixel_t;
 
     rgba8_view_t src_view = rgba8_view(src);
-    boost::gil::copy_and_convert_pixels(color_converted_view<gray_pixel_t>(src_view), src_view);
+
+    for (int y=0; y<src_view.height(); ++y)
+    {
+        rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+        for (int x=0; x<src_view.width(); ++x)
+        {
+            // formula taken from boost/gil/color_convert.hpp:rgb_to_luminance
+            uint8_t & r = get_color(src_it[x], red_t());
+            uint8_t & g = get_color(src_it[x], green_t());
+            uint8_t & b = get_color(src_it[x], blue_t());
+            uint8_t   v = uint8_t((4915 * r + 9667 * g + 1802 * b + 8192) >> 14);
+            r = g = b = v;
+        }
+    }
 }
 
 template <typename Src, typename Dst>
@@ -460,13 +472,18 @@ void apply_filter(Src & src, invert const& op)
 
     for (int y=0; y<src_view.height(); ++y)
     {
-        rgba8_view_t::x_iterator src_itr = src_view.row_begin(y);
+        rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
         for (int x=0; x<src_view.width(); ++x)
         {
-            get_color(src_itr[x],red_t()) = channel_invert(get_color(src_itr[x],red_t()));
-            get_color(src_itr[x],green_t()) = channel_invert(get_color(src_itr[x],green_t()));
-            get_color(src_itr[x],blue_t()) =  channel_invert(get_color(src_itr[x],blue_t()));
-            get_color(src_itr[x],alpha_t()) = get_color(src_itr[x],alpha_t());
+            // we only work with premultiplied source,
+            // thus all color values must be <= alpha
+            uint8_t   a = get_color(src_it[x], alpha_t());
+            uint8_t & r = get_color(src_it[x], red_t());
+            uint8_t & g = get_color(src_it[x], green_t());
+            uint8_t & b = get_color(src_it[x], blue_t());
+            r = a - r;
+            g = a - g;
+            b = a - b;
         }
     }
 }
