@@ -13,4 +13,6 @@ class ensure_gil
         PyGILState_STATE gil_state_;
 };
 
+std::string extractException();
+
 #endif // PYTHON_UTILS_HPP

@@ -69,38 +69,34 @@ void python_datasource::bind() const
     // if no factory callable is defined, bind is a nop
     if (factory_.empty()) return;
 
-    // split factory at ':' to parse out module and callable
-    std::vector<std::string> factory_split;
-    split(factory_split, factory_, is_any_of(":"));
-    if ((factory_split.size() < 1) || (factory_split.size() > 2))
+    try
     {
-        // FIMXE: is this appropriate error reporting?
-        std::cerr << "python: factory string must be of the form '[module:]callable' when parsing \""
-                  << factory_ << '"' << std::endl;
-        return;
-    }
-
-    // extract the module and the callable
-    str module_name("__main__"), callable_name;
-    if (factory_split.size() == 1)
-    {
-        callable_name = str(factory_split[0]);
-    }
-    else
-    {
-        module_name = str(factory_split[0]);
-        callable_name = str(factory_split[1]);
-    }
-
-    {
+        // split factory at ':' to parse out module and callable
+        std::vector<std::string> factory_split;
+        split(factory_split, factory_, is_any_of(":"));
+        if ((factory_split.size() < 1) || (factory_split.size() > 2))
+        {
+            throw mapnik::datasource_exception(
+                std::string("python: factory string must be of the form '[module:]callable' when parsing \"")
+                      + factory_ + '"');
+        }
+        // extract the module and the callable
+        str module_name("__main__"), callable_name;
+        if (factory_split.size() == 1)
+        {
+            callable_name = str(factory_split[0]);
+        }
+        else
+        {
+            module_name = str(factory_split[0]);
+            callable_name = str(factory_split[1]);
+        }
         ensure_gil lock;
-
         // import the main module from Python (in case we're embedding the
         // interpreter directly) and also import the callable.
         object main_module = import("__main__");
         object callable_module = import(module_name);
         object callable = callable_module.attr(callable_name);
-
         // prepare the arguments
         dict kwargs;
         typedef std::map<std::string, std::string>::value_type kv_type;
@@ -111,6 +107,10 @@ void python_datasource::bind() const
 
         // get our wrapped data source
         datasource_ = callable(*boost::python::make_tuple(), **kwargs);
+    }
+    catch ( error_already_set )
+    {
+        throw mapnik::datasource_exception(extractException());
     }
 
     is_bound_ = true;
@@ -124,11 +124,18 @@ mapnik::datasource::datasource_t python_datasource::type() const
 
     if (!is_bound_) bind();
 
-    ensure_gil lock;
+    try
+    {
+        ensure_gil lock;
+        object data_type = datasource_.attr("data_type");
+        long data_type_integer = extract<long>(data_type);
+        return mapnik::datasource::datasource_t(data_type_integer);
+    }
+    catch ( error_already_set )
+    {
+        throw mapnik::datasource_exception(extractException());
+    }
 
-    object data_type = datasource_.attr("data_type");
-    long data_type_integer = extract<long>(data_type);
-    return mapnik::datasource::datasource_t(data_type_integer);
 }
 
 mapnik::box2d<double> python_datasource::envelope() const
@@ -137,8 +144,15 @@ mapnik::box2d<double> python_datasource::envelope() const
 
     if (!is_bound_) bind();
 
-    ensure_gil lock;
-    return extract<mapnik::box2d<double> >(datasource_.attr("envelope"));
+    try
+    {
+        ensure_gil lock;
+        return extract<mapnik::box2d<double> >(datasource_.attr("envelope"));
+    }
+    catch ( error_already_set )
+    {
+        throw mapnik::datasource_exception(extractException());
+    }
 }
 
 boost::optional<mapnik::datasource::geometry_t> python_datasource::get_geometry_type() const
@@ -149,20 +163,27 @@ boost::optional<mapnik::datasource::geometry_t> python_datasource::get_geometry_
 
     if (!is_bound_) bind();
 
-    ensure_gil lock;
-
-    // if the datasource object has no geometry_type attribute, return a 'none' value
-    if (!PyObject_HasAttrString(datasource_.ptr(), "geometry_type"))
-        return return_type();
-
-    object py_geometry_type = datasource_.attr("geometry_type");
-
-    // if the attribute value is 'None', return a 'none' value
-    if (py_geometry_type.ptr() == object().ptr())
-        return return_type();
-
-    long geom_type_integer = extract<long>(py_geometry_type);
-    return mapnik::datasource::geometry_t(geom_type_integer);
+    try
+    {
+        ensure_gil lock;
+        // if the datasource object has no geometry_type attribute, return a 'none' value
+        if (!PyObject_HasAttrString(datasource_.ptr(), "geometry_type"))
+        {
+            return return_type();
+        }
+        object py_geometry_type = datasource_.attr("geometry_type");
+        // if the attribute value is 'None', return a 'none' value
+        if (py_geometry_type.ptr() == object().ptr())
+        {
+            return return_type();
+        }
+        long geom_type_integer = extract<long>(py_geometry_type);
+        return mapnik::datasource::geometry_t(geom_type_integer);
+    }
+    catch ( error_already_set )
+    {
+        throw mapnik::datasource_exception(extractException());
+    }
 }
 
 mapnik::featureset_ptr python_datasource::features(mapnik::query const& q) const
@@ -171,22 +192,27 @@ mapnik::featureset_ptr python_datasource::features(mapnik::query const& q) const
 
     if (!is_bound_) bind();
 
-    // if the query box intersects our world extent then query for features
-    if (envelope().intersects(q.get_bbox()))
+    try
     {
-        ensure_gil lock;
-
-        object features(datasource_.attr("features")(q));
-
-        // if 'None' was returned, return an empty feature set
-        if(features.ptr() == object().ptr())
-            return mapnik::featureset_ptr();
-
-        return boost::make_shared<python_featureset>(features);
+        // if the query box intersects our world extent then query for features
+        if (envelope().intersects(q.get_bbox()))
+        {
+            ensure_gil lock;
+            object features(datasource_.attr("features")(q));
+            // if 'None' was returned, return an empty feature set
+            if(features.ptr() == object().ptr())
+            {
+                return mapnik::featureset_ptr();
+            }
+            return boost::make_shared<python_featureset>(features);
+        }
+        // otherwise return an empty featureset pointer
+        return mapnik::featureset_ptr();
     }
-
-    // otherwise return an empty featureset pointer
-    return mapnik::featureset_ptr();
+    catch ( error_already_set )
+    {
+        throw mapnik::datasource_exception(extractException());
+    }
 }
 
 mapnik::featureset_ptr python_datasource::features_at_point(mapnik::coord2d const& pt) const
@@ -195,14 +221,21 @@ mapnik::featureset_ptr python_datasource::features_at_point(mapnik::coord2d cons
 
     if (!is_bound_) bind();
 
-    ensure_gil lock;
+    try
+    {
+        ensure_gil lock;
+        object features(datasource_.attr("features_at_point")(pt));
+        // if we returned none, return an empty set
+        if(features.ptr() == object().ptr())
+        {
+            return mapnik::featureset_ptr();
+        }
+        // otherwise, return a feature set which can iterate over the iterator
+        return boost::make_shared<python_featureset>(features);
+    }
+    catch ( error_already_set )
+    {
+        throw mapnik::datasource_exception(extractException());
+    }
 
-    object features(datasource_.attr("features_at_point")(pt));
-
-    // if we returned none, return an empty set
-    if(features.ptr() == object().ptr())
-        return mapnik::featureset_ptr();
-
-    // otherwise, return a feature set which can iterate over the iterator
-    return boost::make_shared<python_featureset>(features);
 }
