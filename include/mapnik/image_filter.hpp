@@ -112,8 +112,6 @@
 //convolve_rows_fixed<rgba32f_pixel_t>(src_view,kernel,src_view);
 // convolve_cols_fixed<rgba32f_pixel_t>(src_view,kernel,dst_view);
 
-using namespace boost::gil;
-
 namespace mapnik {  namespace filter { namespace detail {
 
 static const float blur_matrix[] = {0.1111,0.1111,0.1111,0.1111,0.1111,0.1111,0.1111,0.1111,0.1111};
@@ -123,12 +121,42 @@ static const float edge_detect_matrix[] = {0,1,0,1,-4,1,0,1,0 };
 
 }
 
+using boost::gil::rgba8_image_t;
+using boost::gil::rgba8_view_t;
+
+template <typename Image>
+boost::gil::rgba8_view_t rgba8_view(Image & img)
+{
+    using boost::gil::interleaved_view;
+    using boost::gil::rgba8_pixel_t;
+    return interleaved_view(img.width(), img.height(),
+                            reinterpret_cast<rgba8_pixel_t*>(img.raw_data()),
+                            img.width() * sizeof(rgba8_pixel_t));
+}
+
+template <typename Image>
+struct double_buffer
+{
+    boost::gil::rgba8_image_t   dst_buffer;
+    boost::gil::rgba8_view_t    dst_view;
+    boost::gil::rgba8_view_t    src_view;
+
+    explicit double_buffer(Image & src)
+        : dst_buffer(src.width(), src.height())
+        , dst_view(view(dst_buffer))
+        , src_view(rgba8_view(src)) {}
+
+    ~double_buffer()
+    {
+        copy_pixels(dst_view, src_view);
+    }
+};
 
 template <typename Src, typename Dst, typename Conv>
 void process_channel_impl (Src const& src, Dst & dst, Conv const& k)
 {
-    using namespace boost::gil;
-    typedef boost::gil::bits32f  bits_type;
+    using boost::gil::bits32f;
+
     bits32f out_value =
         k[0]*src[0] + k[1]*src[1] + k[2]*src[2] +
         k[3]*src[3] + k[4]*src[4] + k[5]*src[5] +
@@ -175,8 +203,7 @@ void process_channel (Src const& src, Dst & dst, mapnik::filter::edge_detect)
 template <typename Src, typename Dst>
 void process_channel (Src const& src, Dst & dst, mapnik::filter::sobel)
 {
-    using namespace boost::gil;
-    typedef boost::gil::bits32f  bits_type;
+    using boost::gil::bits32f;
 
     bits32f x_gradient = (src[2] + 2*src[5] + src[8])
         - (src[0] + 2*src[3] + src[6]);
@@ -193,9 +220,12 @@ void process_channel (Src const& src, Dst & dst, mapnik::filter::sobel)
 
 
 
-template <typename Src, typename Dst, typename FilterTag>
-void apply_convolution_3x3(Src const& src_view, Dst & dst_view, FilterTag filter_tag)
+template <typename Src, typename Dst, typename Filter>
+void apply_convolution_3x3(Src const& src_view, Dst & dst_view, Filter const& filter)
 {
+    using boost::gil::bits32f;
+    using boost::gil::point2;
+
     // p0 p1 p2
     // p3 p4 p5
     // p6 p7 p8
@@ -251,7 +281,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, FilterTag filter
             p[1] = p[7];
             p[2] = p[8];
 
-            process_channel(p, (*dst_it)[i], filter_tag);
+            process_channel(p, (*dst_it)[i], filter);
         }
         ++src_loc.x();
         ++dst_it;
@@ -298,7 +328,7 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, FilterTag filter
                     p[5] = src_loc[loc21][i];
                     p[8] = src_loc[loc22][i];
                 }
-                process_channel(p, (*dst_it)[i], filter_tag);
+                process_channel(p, (*dst_it)[i], filter);
             }
             ++dst_it;
             ++src_loc.x();
@@ -346,36 +376,18 @@ void apply_convolution_3x3(Src const& src_view, Dst & dst_view, FilterTag filter
             p[7] = p[1];
             p[8] = p[2];
 
-            process_channel(p, (*dst_it)[i], filter_tag);
+            process_channel(p, (*dst_it)[i], filter);
         }
         ++src_loc.x();
         ++dst_it;
     }
 }
 
-template <typename Src, typename Dst,typename FilterTag>
-void apply_filter(Src const& src, Dst & dst, FilterTag filter_tag)
+template <typename Src, typename Filter>
+void apply_filter(Src & src, Filter const& filter)
 {
-    using namespace boost::gil;
-    rgba8_view_t src_view = interleaved_view(src.width(),src.height(),
-                                             (rgba8_pixel_t*) src.raw_data(),
-                                             src.width()*4);
-    rgba8_view_t dst_view = interleaved_view(dst.width(),dst.height(),
-                                             (rgba8_pixel_t*) dst.raw_data(),
-                                             dst.width()*4);
-    apply_convolution_3x3(src_view,dst_view,filter_tag);
-}
-
-template <typename Src, typename FilterTag>
-void apply_filter(Src & src, FilterTag filter_tag)
-{
-    using namespace boost::gil;
-    rgba8_view_t src_view = interleaved_view(src.width(),src.height(),
-                                             (rgba8_pixel_t*) src.raw_data(),
-                                             src.width()*4);
-    rgba8_image_t temp_buffer(src_view.dimensions());
-    apply_convolution_3x3(src_view,boost::gil::view(temp_buffer), filter_tag);
-    boost::gil::copy_pixels(view(temp_buffer), src_view);
+    double_buffer<Src> tb(src);
+    apply_convolution_3x3(tb.src_view, tb.dst_view, filter);
 }
 
 template <typename Src>
@@ -386,17 +398,26 @@ void apply_filter(Src & src, agg_stack_blur const& op)
     agg::stack_blur_rgba32(pixf,op.rx,op.ry);
 }
 
-
 template <typename Src>
-void apply_filter(Src & src, gray)
+void apply_filter(Src & src, gray const& op)
 {
     using namespace boost::gil;
-    typedef pixel<channel_type<rgba8_view_t>::type, gray_layout_t> gray_pixel_t;
 
-    rgba8_view_t src_view = interleaved_view(src.width(),src.height(),
-                                             (rgba8_pixel_t*) src.raw_data(),
-                                             src.width()*4);
-    boost::gil::copy_and_convert_pixels(color_converted_view<gray_pixel_t>(src_view), src_view);
+    rgba8_view_t src_view = rgba8_view(src);
+
+    for (int y=0; y<src_view.height(); ++y)
+    {
+        rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+        for (int x=0; x<src_view.width(); ++x)
+        {
+            // formula taken from boost/gil/color_convert.hpp:rgb_to_luminance
+            uint8_t & r = get_color(src_it[x], red_t());
+            uint8_t & g = get_color(src_it[x], green_t());
+            uint8_t & b = get_color(src_it[x], blue_t());
+            uint8_t   v = uint8_t((4915 * r + 9667 * g + 1802 * b + 8192) >> 14);
+            r = g = b = v;
+        }
+    }
 }
 
 template <typename Src, typename Dst>
@@ -428,51 +449,41 @@ void x_gradient_impl(Src const& src_view, Dst const& dst_view)
 }
 
 template <typename Src>
-void apply_filter(Src & src, x_gradient)
+void apply_filter(Src & src, x_gradient const& op)
 {
-    using namespace boost::gil;
-
-    rgba8_view_t src_view = interleaved_view(src.width(),src.height(),
-                                             (rgba8_pixel_t*) src.raw_data(),
-                                             src.width()*4);
-
-    rgba8_image_t temp_buffer(src_view.dimensions());
-    rgba8_view_t dst_view = view(temp_buffer);
-
-    x_gradient_impl(src_view, dst_view);
-    boost::gil::copy_pixels(view(temp_buffer), src_view);
+    double_buffer<Src> tb(src);
+    x_gradient_impl(tb.src_view, tb.dst_view);
 }
 
 template <typename Src>
-void apply_filter(Src & src, y_gradient)
+void apply_filter(Src & src, y_gradient const& op)
 {
-    using namespace boost::gil;
-    rgba8_view_t src_view = interleaved_view(src.width(),src.height(),
-                                             (rgba8_pixel_t*) src.raw_data(),
-                                             src.width()*4);
-    rgba8_image_t temp_buffer(src_view.dimensions());
-    rgba8_view_t dst_view = view(temp_buffer);
-    x_gradient_impl(rotated90ccw_view(src_view), rotated90ccw_view(dst_view));
-    boost::gil::copy_pixels(view(temp_buffer), src_view);
+    double_buffer<Src> tb(src);
+    x_gradient_impl(rotated90ccw_view(tb.src_view),
+                    rotated90ccw_view(tb.dst_view));
 }
 
 template <typename Src>
-void apply_filter(Src & src, invert)
+void apply_filter(Src & src, invert const& op)
 {
     using namespace boost::gil;
 
-    rgba8_view_t src_view = interleaved_view(src.width(),src.height(),
-                                             (rgba8_pixel_t*) src.raw_data(),
-                                             src.width()*4);
+    rgba8_view_t src_view = rgba8_view(src);
+
     for (int y=0; y<src_view.height(); ++y)
     {
-        rgba8_view_t::x_iterator src_itr = src_view.row_begin(y);
+        rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
         for (int x=0; x<src_view.width(); ++x)
         {
-            get_color(src_itr[x],red_t()) = channel_invert(get_color(src_itr[x],red_t()));
-            get_color(src_itr[x],green_t()) = channel_invert(get_color(src_itr[x],green_t()));
-            get_color(src_itr[x],blue_t()) =  channel_invert(get_color(src_itr[x],blue_t()));
-            get_color(src_itr[x],alpha_t()) = get_color(src_itr[x],alpha_t());
+            // we only work with premultiplied source,
+            // thus all color values must be <= alpha
+            uint8_t   a = get_color(src_it[x], alpha_t());
+            uint8_t & r = get_color(src_it[x], red_t());
+            uint8_t & g = get_color(src_it[x], green_t());
+            uint8_t & b = get_color(src_it[x], blue_t());
+            r = a - r;
+            g = a - g;
+            b = a - b;
         }
     }
 }
@@ -484,9 +495,9 @@ struct filter_visitor : boost::static_visitor<void>
     : src_(src) {}
 
     template <typename T>
-    void operator () (T const& filter_tag)
+    void operator () (T const& filter)
     {
-        apply_filter(src_,filter_tag);
+        apply_filter(src_, filter);
     }
 
     Src & src_;
