@@ -40,7 +40,6 @@
 #include "ogr_index_featureset.hpp"
 #include "ogr_converter.hpp"
 #include "ogr_index.hpp"
-#include "ogr_feature_ptr.hpp"
 
 using mapnik::query;
 using mapnik::box2d;
@@ -92,24 +91,27 @@ feature_ptr ogr_index_featureset<filterT>::next()
         int pos = *itr_++;
         layer_.SetNextByIndex (pos);
 
-        ogr_feature_ptr feat (layer_.GetNextFeature());
-        if ((*feat) == NULL)
+        OGRFeature *poFeature = layer_.GetNextFeature();
+        if (poFeature == NULL)
         {
-            continue;
+            return feature_ptr();
         }
+
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1
-        int feature_id = ((*feat)->GetFID() + 1);
+        int feature_id = (poFeature->GetFID() + 1);
         feature_ptr feature(feature_factory::create(ctx_,feature_id));
 
-        OGRGeometry* geom=(*feat)->GetGeometryRef();
+        OGRGeometry* geom=poFeature->GetGeometryRef();
         if (geom && !geom->IsEmpty())
         {
             ogr_converter::convert_geometry (geom, feature);
         }
         else
         {
-            MAPNIK_LOG_DEBUG(ogr) << "ogr_index_featureset: Feature with null geometry=" << (*feat)->GetFID();
+            MAPNIK_LOG_DEBUG(ogr) << "ogr_index_featureset: Feature with null geometry="
+                << poFeature->GetFID();
+            OGRFeature::DestroyFeature( poFeature );
             continue;
         }
 
@@ -124,20 +126,20 @@ feature_ptr ogr_index_featureset<filterT>::next()
             {
             case OFTInteger:
             {
-                feature->put(fld_name,(*feat)->GetFieldAsInteger (i));
+                feature->put(fld_name,poFeature->GetFieldAsInteger (i));
                 break;
             }
 
             case OFTReal:
             {
-                feature->put(fld_name,(*feat)->GetFieldAsDouble (i));
+                feature->put(fld_name,poFeature->GetFieldAsDouble (i));
                 break;
             }
 
             case OFTString:
             case OFTWideString:     // deprecated !
             {
-                UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString (i));
+                UnicodeString ustr = tr_->transcode(poFeature->GetFieldAsString (i));
                 feature->put(fld_name,ustr);
                 break;
             }
@@ -167,6 +169,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
             }
             }
         }
+        OGRFeature::DestroyFeature( poFeature );
         return feature;
     }
 
