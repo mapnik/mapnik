@@ -56,6 +56,10 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
         query.add_property_name('bogus')
         fs = ds.features(query)
 
+    def test_handling_of_null_features():
+        ds = mapnik.Ogr(file='../data/json/null_feature.json',layer_by_index=0)
+        fs = ds.all_features()
+        eq_(len(fs),1)
 
 if __name__ == "__main__":
     setup()
