@@ -105,6 +105,9 @@ for lib in extra_link_args:
 
 version = mapnik_config('version')
 
+# nosetests configuration
+os.environ['NOSE_WHERE'] = 'tests/python_tests'
+
 setup(
     name='mapnik',
     version=version,
