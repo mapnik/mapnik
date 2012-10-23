@@ -1,10 +1,10 @@
 global-exclude *
 
 include setup.py
-include *.rst
 include COPYING
 include AUTHORS.md
 include MANIFEST.in
+include bindings/python/*.rst
 
 recursive-include bindings/python *.cpp *.hpp
 recursive-include bindings/python/mapnik *.py

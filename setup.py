@@ -10,7 +10,7 @@ from ctypes import CDLL
 
 def rst(filename):
     '''
-    Load rst file and sanitize it for PyPI.
+    Load an rst file and sanitize it for PyPI.
     Remove unsupported github tags:
      - code-block directive
     '''
@@ -87,8 +87,8 @@ else:
 
 
 long_description = '\n'.join((
-    rst('README.python.rst'),
-    rst('CHANGELOG.python.rst'),
+    rst(os.path.join(bindings_dir, 'README.rst')),
+    rst(os.path.join(bindings_dir, 'CHANGELOG.rst')),
     ''
 ))
 
