@@ -270,7 +270,7 @@ void save_to_stream(T const& image,
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
             int colors  = 256;
-            int compression = Z_DEFAULT_COMPRESSION;
+            int compression = Z_DEFAULT_COMPRESSION; // usually mapped to z=6 in zlib
             int strategy = Z_DEFAULT_STRATEGY;
             int trans_mode = -1;
             double gamma = -1;
