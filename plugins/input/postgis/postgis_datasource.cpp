@@ -386,6 +386,7 @@ void postgis_datasource::bind() const
                     case 701:   // float8
                     case 1700:  // numeric
                         desc_.add_descriptor(attribute_descriptor(fld_name, mapnik::Double));
+                        break;
                     case 1042:  // bpchar
                     case 1043:  // varchar
                     case 25:    // text
