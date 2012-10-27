@@ -24,7 +24,6 @@
 #define MAPNIK_MEMORY_FEATURESET_HPP
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/memory_datasource.hpp>
 
 // boost
@@ -38,13 +37,15 @@ public:
     memory_featureset(box2d<double> const& bbox, memory_datasource const& ds)
         : bbox_(bbox),
           pos_(ds.features_.begin()),
-          end_(ds.features_.end())
+          end_(ds.features_.end()),
+          type_(ds.type())
     {}
 
     memory_featureset(box2d<double> const& bbox, std::vector<feature_ptr> const& features)
         : bbox_(bbox),
           pos_(features.begin()),
-          end_(features.end())
+          end_(features.end()),
+          type_(datasource::Vector)
     {}
 
     virtual ~memory_featureset() {}
@@ -53,20 +54,23 @@ public:
     {
         while (pos_ != end_)
         {
-            for  (unsigned i=0; i<(*pos_)->num_geometries();++i)
+            if (type_ == datasource::Raster)
             {
-                geometry_type & geom = (*pos_)->get_geometry(i);
-
-                MAPNIK_LOG_DEBUG(memory_featureset) << "memory_featureset: BBox=" << bbox_ << ",Envelope=" << geom.envelope();
-
-                if (bbox_.intersects(geom.envelope()))
+                return *pos_++;
+            }
+            else
+            {
+                for (unsigned i=0; i<(*pos_)->num_geometries();++i)
                 {
-                    return *pos_++;
+                    geometry_type & geom = (*pos_)->get_geometry(i);
+                    if (bbox_.intersects(geom.envelope()))
+                    {
+                        return *pos_++;
+                    }
                 }
             }
             ++pos_;
         }
-
         return feature_ptr();
     }
 
@@ -74,6 +78,7 @@ private:
     box2d<double> bbox_;
     std::vector<feature_ptr>::const_iterator pos_;
     std::vector<feature_ptr>::const_iterator end_;
+    datasource::datasource_t type_;
 };
 }
 
