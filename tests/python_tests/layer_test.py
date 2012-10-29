@@ -20,7 +20,7 @@ def test_layer_init():
     eq_(l.maxzoom > 1e+6,True)
     eq_(l.group_by,"")
     eq_(l.maximum_extent,None)
-    eq_(l.buffer_size,0.0)
+    eq_(l.buffer_size,None)
     eq_(len(l.styles),0)
 
 if __name__ == "__main__":

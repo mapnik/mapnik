@@ -42,8 +42,7 @@ layer::layer(std::string const& name, std::string const& srs)
       clear_label_cache_(false),
       cache_features_(false),
       group_by_(""),
-      ds_(),
-      buffer_size_(0) {}
+      ds_() {}
 
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
@@ -198,13 +197,19 @@ void layer::reset_maximum_extent()
 
 void layer::set_buffer_size(int size)
 {
-    buffer_size_ = size;
+    buffer_size_.reset(size);
 }
 
-int layer::buffer_size() const
+boost::optional<int> const& layer::buffer_size() const
 {
     return buffer_size_;
 }
+
+void layer::reset_buffer_size()
+{
+	buffer_size_.reset();
+}
+
 
 box2d<double> layer::envelope() const
 {
