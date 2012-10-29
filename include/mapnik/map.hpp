@@ -342,8 +342,7 @@ public:
     /*! \brief Get current buffered bounding box.
      *  @return The current buffered bounding box.
      */
-    box2d<double> get_buffered_extent() const;
-
+    box2d<double> get_buffered_extent(boost::optional<int> const& buffer_size) const;
     /*!
      * @return The Map Scale.
      */

@@ -194,7 +194,8 @@ public:
     boost::optional<box2d<double> > const&  maximum_extent() const;
     void reset_maximum_extent();
     void set_buffer_size(int size);
-    int buffer_size() const;
+    boost::optional<int> const& buffer_size() const;
+    void reset_buffer_size();
     ~layer();
 private:
     void swap(const layer& other);
@@ -211,7 +212,7 @@ private:
     std::string group_by_;
     std::vector<std::string> styles_;
     datasource_ptr ds_;
-    int buffer_size_;
+    boost::optional<int> buffer_size_;
     boost::optional<box2d<double> > maximum_extent_;
 };
 }

@@ -239,7 +239,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     }
 #endif
 
-    box2d<double> buffered_query_ext = m_.get_buffered_extent(); // buffered
+    box2d<double> buffered_query_ext = m_.get_buffered_extent(lay.buffer_size()); // buffered
 
     // clip buffered extent by maximum extent, if supplied
     boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
