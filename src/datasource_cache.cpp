@@ -36,6 +36,7 @@
 // stl
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 namespace mapnik {
@@ -73,8 +74,17 @@ datasource_ptr datasource_cache::create(const parameters& params, bool bind)
     std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
     if ( itr == plugins_.end() )
     {
-        throw config_error(std::string("Could not create datasource. No plugin ") +
-                           "found for type '" + * type + "' (searched in: " + plugin_directories() + ")");
+        std::ostringstream s;
+        s << "Could not create datasource for type: '" << *type << "'";
+        if (plugin_directories_.empty())
+        {
+            s << " (no datasource plugin directories have been successfully registered)";
+        }
+        else
+        {
+            s << " (searched for datasource plugins in '" << plugin_directories() << "')";
+        }
+        throw config_error(s.str());
     }
 
     if ( ! itr->second->handle())
