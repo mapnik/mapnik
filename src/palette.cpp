@@ -75,9 +75,9 @@ bool rgba_palette::valid() const
 }
 
 // return color index in returned earlier palette
-unsigned rgba_palette::quantize(rgba const& c) const
+unsigned char rgba_palette::quantize(rgba const& c) const
 {
-    unsigned index = 0;
+    unsigned char index = 0;
     if (colors_ == 1) return index;
 
     rgba_hash_table::iterator it = color_hashmap_.find(c);
