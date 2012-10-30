@@ -346,8 +346,10 @@ void Map::zoom_all()
 {
     try
     {
-        if (!layers_.size() > 0)
+        if (layers_.empty())
+        {
             return;
+        }
         projection proj0(srs_);
         box2d<double> ext;
         bool success = false;
@@ -575,7 +577,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
     {
         std::ostringstream s;
         s << "Invalid layer index passed to query_point: '" << index << "'";
-        if (layers_.size() > 0) s << " for map with " << layers_.size() << " layers(s)";
+        if (!layers_.empty()) s << " for map with " << layers_.size() << " layers(s)";
         else s << " (map has no layers)";
         throw std::out_of_range(s.str());
     }
