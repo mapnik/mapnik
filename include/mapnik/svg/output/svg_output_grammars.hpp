@@ -92,6 +92,7 @@ BOOST_FUSION_ADAPT_STRUCT(
  * required by Karma to be recognized as a container of
  * attributes for output generation.
  */
+/*
 namespace boost { namespace spirit { namespace traits {
 
         typedef mapnik::coord_transform<mapnik::CoordTransform, mapnik::geometry_type> path_type;
@@ -125,13 +126,15 @@ namespace boost { namespace spirit { namespace traits {
                 return mapnik::svg::path_iterator_type(path);
             }
         };
-        }}}
+}}}
+*/
 
 namespace mapnik { namespace svg {
 
     using namespace boost::spirit;
     using namespace boost::phoenix;
 
+/*
     template <typename OutputIterator, typename PathType>
     struct svg_path_data_grammar : karma::grammar<OutputIterator, PathType&()>
     {
@@ -165,6 +168,7 @@ namespace mapnik { namespace svg {
 
         PathType const& path_type_;
     };
+*/
 
 template <typename OutputIterator>
 struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::path_output_attributes()>

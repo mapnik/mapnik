@@ -27,8 +27,8 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/svg/svg_output_grammars.hpp>
-#include <mapnik/svg/svg_output_attributes.hpp>
+#include <mapnik/svg/output/svg_output_grammars.hpp>
+#include <mapnik/svg/output/svg_output_attributes.hpp>
 
 // boost
 #include <boost/utility.hpp>
@@ -48,7 +48,7 @@ namespace mapnik { namespace svg {
 
         typedef svg::svg_root_attributes_grammar<OutputIterator> root_attributes_grammar;
         typedef svg::svg_rect_attributes_grammar<OutputIterator> rect_attributes_grammar;
-        typedef svg::svg_path_data_grammar<OutputIterator, path_type> path_data_grammar;
+        //typedef svg::svg_path_data_grammar<OutputIterator, path_type> path_data_grammar;
         typedef svg::svg_path_attributes_grammar<OutputIterator> path_attributes_grammar;
         typedef svg::svg_path_dash_array_grammar<OutputIterator> path_dash_array_grammar;
 
@@ -60,7 +60,7 @@ namespace mapnik { namespace svg {
         void generate_opening_root(root_output_attributes const& root_attributes);
         void generate_closing_root();
         void generate_rect(rect_output_attributes const& rect_attributes);
-        void generate_path(path_type const& path, path_output_attributes const& path_attributes);
+        //void generate_path(path_type const& path, path_output_attributes const& path_attributes);
 
     private:
         OutputIterator& output_iterator_;

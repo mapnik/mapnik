@@ -27,11 +27,10 @@ namespace mapnik {
 
 template <typename OutputIterator>
 bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
-                                           Feature const& feature,
+                                           mapnik::feature_impl & feature,
                                            proj_transform const& prj_trans)
 {
     // svg renderer supports processing of multiple symbolizers.
-
     typedef coord_transform<CoordTransform, geometry_type> path_type;
 
     // process each symbolizer to collect its (path) information.
@@ -48,8 +47,8 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
         geometry_type const& geom = feature.get_geometry(i);
         if(geom.size() > 1)
         {
-            path_type path(t_, geom, prj_trans);
-            generator_.generate_path(path, path_attributes_);
+            //path_type path(t_, geom, prj_trans);
+            //generator_.generate_path(path, path_attributes_);
         }
     }
 
@@ -61,7 +60,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
 };
 
 template bool svg_renderer<std::ostream_iterator<char> >::process(rule::symbolizers const& syms,
-                                                                  Feature const& feature,
+                                                                  mapnik::feature_impl & feature,
                                                                   proj_transform const& prj_trans);
 
 }

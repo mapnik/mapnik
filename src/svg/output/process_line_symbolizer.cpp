@@ -30,7 +30,7 @@ namespace mapnik
  */
 template <typename T>
 void svg_renderer<T>::process(line_symbolizer const& sym,
-                              Feature const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
     path_attributes_.set_stroke_color(sym.get_stroke().get_color());
@@ -43,6 +43,6 @@ void svg_renderer<T>::process(line_symbolizer const& sym,
 }
 
 template void svg_renderer<std::ostream_iterator<char> >::process(line_symbolizer const& sym,
-                                                                  Feature const& feature,
+                                                                  mapnik::feature_impl & feature,
                                                                   proj_transform const& prj_trans);
 }

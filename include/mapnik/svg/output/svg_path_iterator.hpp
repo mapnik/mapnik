@@ -62,7 +62,7 @@ class path_iterator
 public:
     typedef Value value_type;
     typedef Container container_type;
-    typedef typename Container::value_type value_component_type;
+    //typedef typename Container::value_type value_component_type;
 
     /*!
      * @brief Constructor that initializes the reference to the current element to null.
@@ -119,8 +119,8 @@ private:
     void increment()
     {
         // variables used to extract vertex components.
-        geometry_type::value_type x;
-        geometry_type::value_type y;
+        geometry_type::coord_type x;
+        geometry_type::coord_type y;
 
         // extract next vertex components.
         unsigned cmd = path_.vertex(&x, &y);
@@ -173,8 +173,8 @@ private:
  * The Value type is a boost::tuple that holds 5 elements, the command and the x and y coordinate.
  * Each coordinate is stored twice to match the needs of the grammar.
  */
-typedef path_iterator<boost::tuple<unsigned, geometry_type::value_type, geometry_type::value_type>,
-                      coord_transform<CoordTransform, geometry_type> > path_iterator_type;
+//typedef path_iterator<boost::tuple<unsigned, geometry_type::coord_type, geometry_type::value_type>,
+//                      coord_transform<CoordTransform, geometry_type> > path_iterator_type;
 
 }}
 

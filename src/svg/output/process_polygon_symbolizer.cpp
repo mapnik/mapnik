@@ -30,7 +30,7 @@ namespace mapnik
  */
 template <typename T>
 void svg_renderer<T>::process(polygon_symbolizer const& sym,
-                              Feature const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
     path_attributes_.set_fill_color(sym.get_fill());
@@ -38,6 +38,6 @@ void svg_renderer<T>::process(polygon_symbolizer const& sym,
 }
 
 template void svg_renderer<std::ostream_iterator<char> >::process(polygon_symbolizer const& sym,
-                                                                  Feature const& feature,
+                                                                  mapnik::feature_impl & feature,
                                                                   proj_transform const& prj_trans);
 }
