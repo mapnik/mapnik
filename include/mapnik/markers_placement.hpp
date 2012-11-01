@@ -104,7 +104,10 @@ public:
      */
     bool get_point(double & x, double  & y, double & angle,  bool add_to_detector = true)
     {
-        if (done_) return false;
+        if (done_)
+        {
+            return false;
+        }
         unsigned cmd;
         /* This functions starts at the position of the previous marker,
            walks along the path, counting how far it has to go in spacing_left.
@@ -120,7 +123,8 @@ public:
         {
             //First marker
             spacing_left_ = spacing_ / 2;
-        } else
+        }
+        else
         {
             spacing_left_ = spacing_;
         }
@@ -150,7 +154,7 @@ public:
             double segment_length = std::sqrt(dx * dx + dy * dy);
             if (segment_length <= spacing_left_)
             {
-                //Segment is to short to place marker. Find next segment
+                //Segment is too short to place marker. Find next segment
                 spacing_left_ -= segment_length;
                 last_x = next_x;
                 last_y = next_y;
@@ -178,7 +182,8 @@ public:
                 //Segment to short => Skip this segment
                 set_spacing_left(segment_length + marker_width_/2); //Only moves forward
                 continue;
-            } else if (segment_length - spacing_left_ < marker_width_/2)
+            }
+            else if (segment_length - spacing_left_ < marker_width_/2)
             {
                 //Segment is long enough, but we are to close to the end
                 //Note: This function moves backwards. This could lead to an infinite
@@ -187,7 +192,8 @@ public:
                 if (error_ == 0)
                 {
                     set_spacing_left(segment_length - marker_width_/2, true);
-                } else
+                }
+                else
                 {
                     //Skip this segment
                     set_spacing_left(segment_length + marker_width_/2); //Only moves forward
