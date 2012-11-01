@@ -29,6 +29,7 @@ extern "C"
 #include <mapnik/image_util.hpp>
 #include <mapnik/png_io.hpp>
 #include <mapnik/tiff_io.hpp>
+#include <mapnik/image_data.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
