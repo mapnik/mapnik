@@ -239,7 +239,7 @@ void save_to_stream(T const& image,
             else if (colors < 0)
                 save_as_png(stream, image, compression, strategy);
             else if (use_octree)
-                save_as_png8_oct(stream, image, colors, compression, strategy);
+                save_as_png8_oct(stream, image, colors, compression, strategy, trans_mode);
             else
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
         }
@@ -288,7 +288,7 @@ void save_to_stream(T const& image,
             if (colors < 0)
                 save_as_png(stream, image, compression, strategy);
             else if (use_octree)
-                save_as_png8_oct(stream, image, colors, compression, strategy);
+                save_as_png8_oct(stream, image, colors, compression, strategy, trans_mode);
             else
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
         }
