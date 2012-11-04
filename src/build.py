@@ -100,6 +100,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    miniz_png.cpp
     color.cpp
     css_color_grammar.cpp
     conversions.cpp
