@@ -198,6 +198,10 @@ void handle_png_options(std::string const& type,
                 {
                     *strategy = Z_RLE;
                 }
+                else if (s == "fixed")
+                {
+                    *strategy = Z_FIXED;
+                }
                 else
                 {
                     throw ImageWriterException("invalid compression strategy parameter: " + s);

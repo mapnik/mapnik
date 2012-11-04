@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added support for setting zlib `Z_FIXED` strategy with format string: `png:z=fixed`
+
 - Fixed handling of transparency level option in Octree-based PNG encoding (#1556)
 
 - Faster rendering of rasters by reducing memory allocation of temporary buffers (#1516)
