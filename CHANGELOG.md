@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Fixed handling of transparency level option in Octree-based PNG encoding (#1556)
+
 - Faster rendering of rasters by reducing memory allocation of temporary buffers (#1516)
 
 - Added ability to pass a pre-created collision detector to the cairo renderer (#1444)
