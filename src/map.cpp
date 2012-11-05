@@ -481,9 +481,13 @@ const box2d<double>& Map::get_current_extent() const
     return current_extent_;
 }
 
-box2d<double> Map::get_buffered_extent() const
+box2d<double> Map::get_buffered_extent(boost::optional<int> const& buffer_size) const
 {
-    double extra = 2.0 * scale() * buffer_size_;
+	int cur_buffer_size = buffer_size_;
+	if (buffer_size) {
+		cur_buffer_size = *buffer_size;
+	}
+	double extra = 2.0 * scale() * cur_buffer_size;
     box2d<double> ext(current_extent_);
     ext.width(current_extent_.width() + extra);
     ext.height(current_extent_.height() + extra);

@@ -750,10 +750,10 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         set_attr( layer_node, "group-by", layer.group_by() );
     }
 
-    int buffer_size = layer.buffer_size();
+    boost::optional<int> const& buffer_size = layer.buffer_size();
     if ( buffer_size || explicit_defaults)
     {
-        set_attr( layer_node, "buffer-size", buffer_size );
+        set_attr( layer_node, "buffer-size", *buffer_size );
     }
 
     optional<box2d<double> > const& maximum_extent = layer.maximum_extent();
