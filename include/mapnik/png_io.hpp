@@ -361,28 +361,35 @@ void save_as_png8_oct(T1 & file,
     unsigned alphaHist[256];//transparency histogram
     unsigned semiCount = 0;//sum of semitransparent pixels
     unsigned meanAlpha = 0;
-    for(int i=0; i<256; i++)
-    {
-        alphaHist[i] = 0;
+    if (trans_mode == 0) {
+        alphaHist[255] = width * height;
+        meanAlpha = 255;
     }
-    for (unsigned y = 0; y < height; ++y)
+    else
     {
-        for (unsigned x = 0; x < width; ++x)
+        for(int i=0; i<256; i++)
         {
-            unsigned val = U2ALPHA((unsigned)image.getRow(y)[x]);
-            if (trans_mode==0)
+            alphaHist[i] = 0;
+        }
+        for (unsigned y = 0; y < height; ++y)
+        {
+            for (unsigned x = 0; x < width; ++x)
             {
-                val=255;
-            }
-            alphaHist[val]++;
-            meanAlpha += val;
-            if (val>0 && val<255)
-            {
-                semiCount++;
+                unsigned val = U2ALPHA((unsigned)image.getRow(y)[x]);
+                if (trans_mode==0)
+                {
+                    val=255;
+                }
+                alphaHist[val]++;
+                meanAlpha += val;
+                if (val>0 && val<255)
+                {
+                    semiCount++;
+                }
             }
         }
+        meanAlpha /= width*height;
     }
-    meanAlpha /= width*height;
 
     // transparency ranges division points
     unsigned limits[MAX_OCTREE_LEVELS+1];
