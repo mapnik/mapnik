@@ -107,7 +107,6 @@ class octree : private boost::noncopyable
     unsigned colors_;
     unsigned offset_;
     unsigned leaf_level_;
-    bool has_alfa_;
 
 public:
     explicit octree(unsigned max_colors=256)
@@ -115,7 +114,6 @@ public:
           colors_(0),
           offset_(0),
           leaf_level_(InsertPolicy::MAX_LEVELS),
-          has_alfa_(false),
           root_(new node())
     {}
 
@@ -142,16 +140,6 @@ public:
     unsigned getOffset()
     {
         return offset_;
-    }
-
-    void hasAlfa(bool v)
-    {
-        has_alfa_=v;
-    }
-
-    bool hasAlfa()
-    {
-        return has_alfa_;
     }
 
     void insert(T const& data)
@@ -208,11 +196,6 @@ public:
 
     void create_palette(std::vector<rgb> & palette)
     {
-        if (has_alfa_)
-        {
-            max_colors_--;
-            palette.push_back(rgb(0,0,0));
-        }
         reduce();
         palette.reserve(colors_);
         create_palette(palette, root_);
