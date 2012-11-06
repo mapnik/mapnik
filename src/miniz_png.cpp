@@ -84,7 +84,11 @@ PNGWriter::PNGWriter(int level, int strategy)
 
     // Reset output buffer.
     buffer->m_size = 0;
-    tdefl_init(compressor, tdefl_output_buffer_putter, buffer, flags);
+    tdefl_status tdstatus = tdefl_init(compressor, tdefl_output_buffer_putter, buffer, flags);
+    if (tdstatus != TDEFL_STATUS_OKAY)
+    {
+        throw std::runtime_error("tdefl_init failed");
+    }
 
     // Write preamble.
     mz_bool status = tdefl_output_buffer_putter(preamble, 8, buffer);
