@@ -62,11 +62,12 @@ public:
     void writetRNS(std::vector<unsigned> const& alpha);
     template<typename T>
     void writeIDAT(T const& image);
+    template<typename T>
+    void writeIDATStripAlpha(T const& image);
     void writeIEND();
     void toStream(std::ostream& stream);
 
 private:
-    unsigned int flags;
     tdefl_compressor *compressor;
     tdefl_output_buffer *buffer;
     static const unsigned char preamble[];

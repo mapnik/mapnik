@@ -55,8 +55,7 @@ PNGWriter::PNGWriter(int level, int strategy)
     {
         throw std::runtime_error("compression level must be between 0 and 10");
     }
-    flags = s_tdefl_num_probes[level]| (level <= 3) ? TDEFL_GREEDY_PARSING_FLAG : 0 | TDEFL_WRITE_ZLIB_HEADER;
-
+    mz_uint flags = s_tdefl_num_probes[level] | (level <= 3) ? TDEFL_GREEDY_PARSING_FLAG : 0 | TDEFL_WRITE_ZLIB_HEADER;
     if (strategy == Z_FILTERED) flags |= TDEFL_FILTER_MATCHES;
     else if (strategy == Z_HUFFMAN_ONLY) flags &= ~TDEFL_MAX_PROBES_MASK;
     else if (strategy == Z_RLE) flags |= TDEFL_RLE_MATCHES;
@@ -194,7 +193,10 @@ void PNGWriter::writePLTE(std::vector<rgb> const& palette)
 
 void PNGWriter::writetRNS(std::vector<unsigned> const& alpha)
 {
-    if (alpha.size() == 0) return;
+    if (alpha.size() == 0)
+    {
+        return;
+    }
 
     std::vector<unsigned char> transparency(alpha.size());
     unsigned char transparencySize = 0; // Stores position of biggest to nonopaque value.
@@ -256,6 +258,50 @@ void PNGWriter::writeIDAT(T const& image)
     finishChunk(IDAT);
 }
 
+template<typename T>
+void PNGWriter::writeIDATStripAlpha(T const& image) {
+    // Write IDAT chunk.
+    size_t IDAT = startChunk(IDAT_tpl, 8);
+    mz_uint8 filter_type = 0;
+    tdefl_status status;
+
+    size_t stride = image.width() * 3;
+    size_t i, j;
+    mz_uint8 *scanline = (mz_uint8 *)MZ_MALLOC(stride);
+
+    for (unsigned int y = 0; y < image.height(); y++) {
+        // Write filter_type
+        status = tdefl_compress_buffer(compressor, &filter_type, 1, TDEFL_NO_FLUSH);
+        if (status != TDEFL_STATUS_OKAY)
+        {
+            MZ_FREE(scanline);
+            throw std::runtime_error("failed to compress image");
+        }
+
+        // Strip alpha bytes from scanline
+        mz_uint8 *row = (mz_uint8 *)image.getRow(y);
+        for (i = 0, j = 0; j < stride; i += 4, j += 3) {
+            scanline[j] = row[i];
+            scanline[j+1] = row[i+1];
+            scanline[j+2] = row[i+2];
+        }
+
+        // Write scanline
+        status = tdefl_compress_buffer(compressor, scanline, stride, TDEFL_NO_FLUSH);
+        if (status != TDEFL_STATUS_OKAY) {
+            MZ_FREE(scanline);
+            throw std::runtime_error("failed to compress image");
+        }
+    }
+
+    MZ_FREE(scanline);
+
+    status = tdefl_compress_buffer(compressor, NULL, 0, TDEFL_FINISH);
+    if (status != TDEFL_STATUS_DONE) throw std::runtime_error("failed to compress image");
+
+    finishChunk(IDAT);
+}
+
 void PNGWriter::writeIEND()
 {
     // Write IEND chunk.
@@ -308,6 +354,8 @@ template void PNGWriter::writeIDAT<image_data_8>(image_data_8 const& image);
 template void PNGWriter::writeIDAT<image_view<image_data_8> >(image_view<image_data_8> const& image);
 template void PNGWriter::writeIDAT<image_data_32>(image_data_32 const& image);
 template void PNGWriter::writeIDAT<image_view<image_data_32> >(image_view<image_data_32> const& image);
+template void PNGWriter::writeIDATStripAlpha<image_data_32>(image_data_32 const& image);
+template void PNGWriter::writeIDATStripAlpha<image_view<image_data_32> >(image_view<image_data_32> const& image);
 
 }}
 
