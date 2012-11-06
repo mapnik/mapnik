@@ -154,9 +154,6 @@ void handle_png_options(std::string const& type,
             }
             else if (boost::algorithm::starts_with(t, "t="))
             {
-                if (*colors < 0)
-                    throw ImageWriterException("invalid trans_mode parameter: unavailable for true color images");
-
                 if (!mapnik::util::string2int(t.substr(2),*trans_mode) || *trans_mode < 0 || *trans_mode > 2)
                     throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
             }
@@ -255,7 +252,7 @@ void save_to_stream(T const& image,
             }
             else if (colors < 0)
             {
-                save_as_png(stream, image, compression, strategy, use_miniz);
+                save_as_png(stream, image, compression, strategy, trans_mode, use_miniz);
             }
             else if (use_octree)
             {
@@ -312,7 +309,7 @@ void save_to_stream(T const& image,
 
             if (colors < 0)
             {
-                save_as_png(stream, image, compression, strategy, use_miniz);
+                save_as_png(stream, image, compression, strategy, trans_mode, use_miniz);
             }
             else if (use_octree)
             {

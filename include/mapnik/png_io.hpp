@@ -61,14 +61,23 @@ void save_as_png(T1 & file,
                 T2 const& image,
                 int compression = Z_DEFAULT_COMPRESSION,
                 int strategy = Z_DEFAULT_STRATEGY,
+                int trans_mode = -1,
                 bool use_miniz = false)
 
 {
     if (use_miniz)
     {
         MiniZ::PNGWriter writer(compression,strategy);
-        writer.writeIHDR(image.width(), image.height(), 32);
-        writer.writeIDAT(image);
+        if (trans_mode == 0)
+        {
+            writer.writeIHDR(image.width(), image.height(), 24);
+            writer.writeIDATStripAlpha(image);
+        }
+        else
+        {
+            writer.writeIHDR(image.width(), image.height(), 32);
+            writer.writeIDAT(image);
+        }
         writer.writeIEND();
         writer.toStream(file);
         return;
@@ -107,15 +116,14 @@ void save_as_png(T1 & file,
     png_set_compression_buffer_size(png_ptr, 32768);
 
     png_set_IHDR(png_ptr, info_ptr,image.width(),image.height(),8,
-                 PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
+                 (trans_mode == 0) ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
-    png_write_info(png_ptr, info_ptr);
-    for (unsigned i=0;i<image.height();i++)
-    {
-        png_write_row(png_ptr,(png_bytep)image.getRow(i));
+    png_bytep row_pointers[image.height()];
+    for (unsigned int i = 0; i < image.height(); i++) {
+        row_pointers[i] = (png_bytep)image.getRow(i);
     }
-
-    png_write_end(png_ptr, info_ptr);
+    png_set_rows(png_ptr, info_ptr, (png_bytepp)&row_pointers);
+    png_write_png(png_ptr, info_ptr, (trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, NULL);
     png_destroy_write_struct(&png_ptr, &info_ptr);
 }
 
