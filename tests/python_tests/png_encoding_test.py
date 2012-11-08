@@ -130,7 +130,7 @@ def test_transparency_levels_aerial():
 
     im_in = mapnik.Image.open('./images/support/transparency/aerial_rgb.png')
     eq_(len(im.tostring('png')),len(im_in.tostring('png')))
-    #eq_(len(im.tostring('png:t=0')),len(im_in.tostring('png:t=0')))
+    eq_(len(im.tostring('png:t=0')),len(im_in.tostring('png:t=0')))
 
 
 if __name__ == "__main__":
