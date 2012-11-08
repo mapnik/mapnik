@@ -113,6 +113,4 @@ def do_encoding():
 if __name__ == "__main__":
     setup()
     do_encoding()
-    for t in dir():
-        if 'test_' in t:
-            eval(t)()
+    [eval(run)() for run in dir() if 'test_' in run]
