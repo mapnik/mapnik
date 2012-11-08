@@ -14,6 +14,10 @@ For a complete change history, see the SVN log.
 Mapnik 0.7.3 Release
 --------------------
 
+Released Nov 8, 2012
+
+(packaged from 4d04ed01c01e486160f6afd04ec15fcc0d573db0)
+
 - Fixed linking to boost system with recent boost (#1567)
 
 - Fixed compile with clang++
