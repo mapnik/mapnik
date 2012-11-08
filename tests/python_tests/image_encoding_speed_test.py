@@ -62,7 +62,7 @@ def do_encoding():
         min_ = min(set)*1000
         avg = (sum(set)/len(set))*1000
         name = func.__name__ + ' ' + format
-        results[name] = [avg,min_,elapsed*1000,name,len(func())]
+        results[name] = [min_,avg,elapsed*1000,name,len(func())]
         sortable[name] = [min_]
 
     def blank():
@@ -101,13 +101,13 @@ def do_encoding():
 
     for key, value in sorted(sortable.iteritems(), key=lambda (k,v): (v,k)):
         s = results[key]
-        avg = str(s[0])[:6]
-        min_ = str(s[1])[:6]
+        min_ = str(s[0])[:6]
+        avg = str(s[1])[:6]
         elapsed = str(s[2])[:6]
         percent_reduction = s[4]
         name = s[3]
         size = s[4]
-        print 'avg: %sms | min: %sms | total: %sms | len: %s <-- %s' % (min_,avg,elapsed,size,name)
+        print 'min: %sms | avg: %sms | total: %sms | len: %s <-- %s' % (min_,avg,elapsed,size,name)
 
 
 if __name__ == "__main__":
