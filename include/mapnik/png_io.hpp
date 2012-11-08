@@ -361,8 +361,9 @@ void save_as_png8_oct(T1 & file,
     unsigned alphaHist[256];//transparency histogram
     unsigned semiCount = 0;//sum of semitransparent pixels
     unsigned meanAlpha = 0;
-    if (trans_mode == 0) {
-        alphaHist[255] = width * height;
+
+    if (trans_mode == 0)
+    {
         meanAlpha = 255;
     }
     else
@@ -376,10 +377,6 @@ void save_as_png8_oct(T1 & file,
             for (unsigned x = 0; x < width; ++x)
             {
                 unsigned val = U2ALPHA((unsigned)image.getRow(y)[x]);
-                if (trans_mode==0)
-                {
-                    val=255;
-                }
                 alphaHist[val]++;
                 meanAlpha += val;
                 if (val>0 && val<255)
@@ -394,21 +391,24 @@ void save_as_png8_oct(T1 & file,
     // transparency ranges division points
     unsigned limits[MAX_OCTREE_LEVELS+1];
     limits[0] = 0;
-    limits[1] = (alphaHist[0]>0)?1:0;
+    limits[1] = (trans_mode!=0 && alphaHist[0]>0)?1:0;
     limits[TRANSPARENCY_LEVELS] = 256;
-    unsigned alphaHistSum = 0;
-    for(unsigned j=1; j<TRANSPARENCY_LEVELS; j++)
+    for(unsigned j=2; j<TRANSPARENCY_LEVELS; j++)
     {
         limits[j] = limits[1];
     }
-    for(unsigned i=1; i<256; i++)
+    if (trans_mode != 0)
     {
-        alphaHistSum += alphaHist[i];
-        for(unsigned j=1; j<TRANSPARENCY_LEVELS; j++)
+        unsigned alphaHistSum = 0;
+        for(unsigned i=1; i<256; i++)
         {
-            if (alphaHistSum<semiCount*(j)/4)
+            alphaHistSum += alphaHist[i];
+            for(unsigned j=1; j<TRANSPARENCY_LEVELS; j++)
             {
-                limits[j] = i;
+                if (alphaHistSum<semiCount*(j)/4)
+                {
+                    limits[j] = i;
+                }
             }
         }
     }
@@ -429,12 +429,23 @@ void save_as_png8_oct(T1 & file,
     // estimated number of colors from palette assigned to chosen ranges
     unsigned cols[MAX_OCTREE_LEVELS];
     // count colors
-    for(unsigned j=1; j<=TRANSPARENCY_LEVELS; j++)
+    if (trans_mode == 0)
     {
-        cols[j-1] = 0;
-        for(unsigned i=limits[j-1]; i<limits[j]; i++)
+        for (unsigned j=0; j<TRANSPARENCY_LEVELS; j++)
         {
-            cols[j-1] += alphaHist[i];
+            cols[j] = 0;
+        }
+        cols[TRANSPARENCY_LEVELS-1] = width * height;
+    }
+    else
+    {
+        for (unsigned j=0; j<TRANSPARENCY_LEVELS; j++)
+        {
+            cols[j] = 0;
+            for (unsigned i=limits[j]; i<limits[j+1]; i++)
+            {
+                cols[j] += alphaHist[i];
+            }
         }
     }
 
