@@ -164,11 +164,18 @@ void ogr_datasource::bind() const
 
    if (!layer_)
    {
-       std::string s("OGR Plugin: ");
-       if (layer_by_name) s += "cannot find layer by name '" + *layer_by_name;
-       else if (layer_by_index) s += "cannot find layer by index number '" + *layer_by_index;
-       s += "' in dataset '" + dataset_name_ + "'";
-       throw datasource_exception(s);
+        std::ostringstream s("OGR Plugin: ");
+        if (layer_by_name)
+        {
+            s << "cannot find layer by name '" << *layer_by_name;
+        }
+        else if (layer_by_index)
+        {
+            s << "cannot find layer by index number '" << *layer_by_index;
+        }
+        s << "' in dataset '" << dataset_name_ << "'";
+
+        throw datasource_exception(s.str());
    }
    
    // initialize envelope
