@@ -32,11 +32,11 @@ sqlite_src = Split(
         )
 
 libraries = [ 'sqlite3' ]
-if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik')
-    libraries.append(env['ICU_LIB_NAME'])
+libraries.append('mapnik')
+libraries.append(env['ICU_LIB_NAME'])
+if env['HAS_BOOST_SYSTEM']:
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
-    libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
+libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
     
 sqlite_inputdriver = env.SharedLibrary('../sqlite', source=sqlite_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 

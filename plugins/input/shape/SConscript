@@ -37,12 +37,11 @@ shape_src = Split(
         )
 
 libraries = ['boost_iostreams%s' % env['BOOST_APPEND']]    
-
-if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik')
-    libraries.append(env['ICU_LIB_NAME'])
+libraries.append('mapnik')
+libraries.append(env['ICU_LIB_NAME'])
+if env['HAS_BOOST_SYSTEM']:
     libraries.append('boost_system%s' % env['BOOST_APPEND'])
-    libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
+libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 env2 = env.Clone()    
 if env['SHAPE_MEMORY_MAPPED_FILE']:

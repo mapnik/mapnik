@@ -33,11 +33,12 @@ postgis_src = Split(
 
 libraries = ['pq']
 
-if env['PLATFORM'] == 'Darwin':
-    libraries.append('mapnik')
-    libraries.append(env['ICU_LIB_NAME'])
-    if env['THREADING'] == 'multi':
-        libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+libraries.append('mapnik')
+libraries.append(env['ICU_LIB_NAME'])
+if env['THREADING'] == 'multi':
+    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+if env['HAS_BOOST_SYSTEM']:
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
 postgis_inputdriver = env.SharedLibrary('../postgis', source=postgis_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries)
 
