@@ -11,6 +11,18 @@ Developers: Please commit along with changes.
 For a complete change history, see the SVN log.
 
 
+Mapnik 0.7.3 Release
+--------------------
+
+- Fixed linking to boost system with recent boost (#1567)
+
+- Fixed compile with clang++
+
+- backport hextree sorting fix to 0.7.x series - refs #1087
+
+- Add properties and methods onto shield symbolizer - refs #935 and #612
+
+
 Mapnik 0.7.2 Release
 --------------------
  
