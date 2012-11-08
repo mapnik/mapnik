@@ -149,7 +149,7 @@ void handle_png_options(std::string const& type,
                 if (*colors < 0)
                     throw ImageWriterException("invalid color parameter: unavailable for true color images");
 
-                if (!mapnik::util::string2int(t.substr(2),*colors) || *colors < 0 || *colors > 256)
+                if (!mapnik::util::string2int(t.substr(2),*colors) || *colors < 1 || *colors > 256)
                     throw ImageWriterException("invalid color parameter: " + t.substr(2));
             }
             else if (boost::algorithm::starts_with(t, "t="))
