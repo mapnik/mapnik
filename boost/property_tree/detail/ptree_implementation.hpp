@@ -814,7 +814,7 @@ namespace boost { namespace property_tree
                                   const key_type &path,
                                   const std::locale &loc) const
     {
-        return get_child(separator, path).get_own<Type>(loc);
+        return get_child(separator, path).template get_own<Type>(loc);
     }
 
     // Get value from data of child ptree (custom path separator)
@@ -853,7 +853,7 @@ namespace boost { namespace property_tree
                                           const std::locale &loc) const
     {
         if (optional<const basic_ptree<Tr> &> child = get_child_optional(separator, path))
-            return child.get().get_own_optional<Type>(loc);
+            return child.get().template get_own_optional<Type>(loc);
         else
             return optional<Type>();
     }
