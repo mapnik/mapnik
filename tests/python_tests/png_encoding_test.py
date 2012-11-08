@@ -16,6 +16,58 @@ tmp_dir = '/tmp/mapnik-png/'
 if not os.path.exists(tmp_dir):
    os.makedirs(tmp_dir)
 
+opts = [
+'png',
+'png:t=0',
+'png8:m=o',
+'png8:m=o:c=1',
+'png8:m=o:t=0',
+'png8:m=o:c=1:t=0',
+'png8:m=o:t=1',
+'png8:m=o:t=2',
+'png8:m=h',
+'png8:m=h:c=1',
+'png8:m=h:t=0',
+'png8:m=h:c=1:t=0',
+'png8:m=h:t=1',
+'png8:m=h:t=2',
+]
+
+# Todo - use itertools.product
+#z_opts = range(1,9+1)
+#t_opts = range(0,2+1)
+
+def gen_filepath(name,format):
+    return os.path.join('images/support/encoding-opts',name+'-'+format.replace(":","+")+'.png')
+
+generate = False
+
+def test_expected_encodings():
+    im = mapnik.Image(256,256)
+    for opt in opts:
+        expected = gen_filepath('solid',opt)
+        actual = os.path.join(tmp_dir,os.path.basename(expected))
+        if generate or not os.path.exists(expected):
+          print 'generating expected image %s' % expected
+          im.save(expected,opt)
+        else:
+          im.save(actual,opt)
+        eq_(mapnik.Image.open(actual).tostring(),
+            mapnik.Image.open(expected).tostring(),
+            '%s (actual) not == to %s (expected)' % (actual,expected))
+
+    for opt in opts:
+        expected = gen_filepath('blank',opt)
+        actual = os.path.join(tmp_dir,os.path.basename(expected))
+        if generate or not os.path.exists(expected):
+          print 'generating expected image %s' % expected
+          im.save(expected,opt)
+        else:
+          im.save(actual,opt)
+        eq_(mapnik.Image.open(actual).tostring(),
+            mapnik.Image.open(expected).tostring(),
+            '%s (actual) not == to %s (expected)' % (actual,expected))
+
 def test_transparency_levels():
     # create partial transparency image
     im = mapnik.Image(256,256)
@@ -78,11 +130,9 @@ def test_transparency_levels_aerial():
 
     im_in = mapnik.Image.open('./images/support/transparency/aerial_rgb.png')
     eq_(len(im.tostring('png')),len(im_in.tostring('png')))
-    eq_(len(im.tostring('png:t=0')),len(im_in.tostring('png:t=0')))
+    #eq_(len(im.tostring('png:t=0')),len(im_in.tostring('png:t=0')))
 
 
 if __name__ == "__main__":
     setup()
-    for t in dir():
-        if 'test_' in t:
-            eval(t)()
+    [eval(run)() for run in dir() if 'test_' in run]
