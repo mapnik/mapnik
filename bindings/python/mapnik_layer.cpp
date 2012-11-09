@@ -105,27 +105,27 @@ void set_maximum_extent(mapnik::layer & l, boost::optional<mapnik::box2d<double>
 
 void set_buffer_size(mapnik::layer & l, boost::optional<int> const& buffer_size)
 {
-	if (buffer_size)
-	{
-		l.set_buffer_size(*buffer_size);
-	}
-	else
-	{
-		l.reset_buffer_size();
-	}
+    if (buffer_size)
+    {
+        l.set_buffer_size(*buffer_size);
+    }
+    else
+    {
+        l.reset_buffer_size();
+    }
 }
 
 PyObject * get_buffer_size(mapnik::layer & l)
 {
-	 boost::optional<int> buffer_size = l.buffer_size();
-	if (buffer_size)
-	{
-		return PyInt_FromLong(*buffer_size);
-	}
-	else
-	{
-		Py_RETURN_NONE;
-	}
+     boost::optional<int> buffer_size = l.buffer_size();
+    if (buffer_size)
+    {
+        return PyInt_FromLong(*buffer_size);
+    }
+    else
+    {
+        Py_RETURN_NONE;
+    }
 }
 
 void export_layer()
@@ -249,7 +249,7 @@ void export_layer()
             )
 
         .add_property("buffer_size",
-        			  &get_buffer_size,
+                      &get_buffer_size,
                       &set_buffer_size,
                       "Get/Set the size of buffer around layer in pixels.\n"
                       "\n"

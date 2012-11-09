@@ -207,7 +207,7 @@ boost::optional<int> const& layer::buffer_size() const
 
 void layer::reset_buffer_size()
 {
-	buffer_size_.reset();
+    buffer_size_.reset();
 }
 
 
