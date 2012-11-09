@@ -45,10 +45,18 @@ combinations = ['png',
                 'png:m=h;g=1.0',
                ]
 
+tiles = [
+'blank',
+'solid',
+'many_colors',
+'aerial_24'
+]
+
+iterations = 10
+
 def do_encoding():
 
     image = None
-    iterations = 10
 
     results = {}
     sortable = {}
@@ -65,39 +73,39 @@ def do_encoding():
         results[name] = [min_,avg,elapsed*1000,name,len(func())]
         sortable[name] = [min_]
 
-    def blank():
-        return eval('image.tostring("%s")' % c)
-    blank_im = mapnik.Image(512,512)
+    if 'blank' in tiles:
+        def blank():
+            return eval('image.tostring("%s")' % c)
+        blank_im = mapnik.Image(512,512)
+        for c in combinations:
+            t = Timer(blank)
+            run(blank,blank_im,c,t)
 
-    for c in combinations:
-        t = Timer(blank)
-        run(blank,blank_im,c,t)
+    if 'solid' in tiles:
+        def solid():
+            return eval('image.tostring("%s")' % c)
+        solid_im = mapnik.Image(512,512)
+        solid_im.background = mapnik.Color("#f2efe9")
+        for c in combinations:
+            t = Timer(solid)
+            run(solid,solid_im,c,t)
 
-    def solid():
-        return eval('image.tostring("%s")' % c)
-    solid_im = mapnik.Image(512,512)
-    solid_im.background = mapnik.Color("#f2efe9")
+    if 'many_colors' in tiles:
+        def many_colors():
+            return eval('image.tostring("%s")' % c)
+        # lots of colors: http://tile.osm.org/13/4194/2747.png
+        many_colors_im = mapnik.Image.open('../data/images/13_4194_2747.png')
+        for c in combinations:
+            t = Timer(many_colors)
+            run(many_colors,many_colors_im,c,t)
 
-    for c in combinations:
-        t = Timer(solid)
-        run(solid,solid_im,c,t)
-
-    def many_colors():
-        return eval('image.tostring("%s")' % c)
-    # lots of colors: http://tile.osm.org/13/4194/2747.png
-    many_colors_im = mapnik.Image.open('../data/images/13_4194_2747.png')
-
-    for c in combinations:
-        t = Timer(many_colors)
-        run(many_colors,many_colors_im,c,t)
-
-    def aerial_24():
-        return eval('image.tostring("%s")' % c)
-    aerial_24_im = mapnik.Image.open('../data/images/12_654_1580.png')
-
-    for c in combinations:
-        t = Timer(aerial_24)
-        run(aerial_24,aerial_24_im,c,t)
+    if 'aerial_24' in tiles:
+        def aerial_24():
+            return eval('image.tostring("%s")' % c)
+        aerial_24_im = mapnik.Image.open('../data/images/12_654_1580.png')
+        for c in combinations:
+            t = Timer(aerial_24)
+            run(aerial_24,aerial_24_im,c,t)
 
     for key, value in sorted(sortable.iteritems(), key=lambda (k,v): (v,k)):
         s = results[key]
