@@ -139,7 +139,6 @@ void reduce_8(T const& in,
     unsigned width = in.width();
     unsigned height = in.height();
 
-    //unsigned alphaCount[alpha.size()];
     std::vector<unsigned> alphaCount(alpha.size());
     for(unsigned i=0; i<alpha.size(); i++)
     {
