@@ -72,6 +72,11 @@ public:
         return painted_;
     }
 
+    inline void clear()
+    {
+        std::memset(data_.getData(),0,sizeof(mapnik::image_data_32::pixel_type)*data_.width()*data_.height());
+    }
+
     boost::optional<color> const& get_background() const;
 
     void set_background(const color& c);

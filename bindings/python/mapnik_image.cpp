@@ -235,6 +235,7 @@ void export_image()
         .def("demultiply",&image_32::demultiply)
         .def("set_pixel",&set_pixel)
         .def("get_pixel",&get_pixel)
+        .def("clear",&image_32::clear)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 
         .def("tostring",&tostring1)
