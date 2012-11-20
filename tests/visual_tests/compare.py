@@ -94,10 +94,10 @@ def summary(generate=False):
                 if generate:
                     actual = open(error[1],'r').read()
                     open(error[2],'wb').write(actual)
-                    print "Generating reference image: '%s'" % error[2]
+                    print str(idx+1) + ") Generating reference image: '%s'" % error[2]
                     continue
                 else:
-                    print "Could not verify %s: No reference image found!" % error[1]
+                    print str(idx+1) + ")Could not verify %s: No reference image found!" % error[1]
             elif isinstance(error[0],int):
                 print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % error
             elif isinstance(error[0],str):
