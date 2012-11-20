@@ -102,7 +102,7 @@ def render(filename, width, height, bbox, quiet=False):
     except Exception, e:
         sys.stderr.write(e.message + '\n')
         fail(actual_agg,expected,str(e.message))
-    if try_cairo and ('tiff' in actual or 'marker' in actual):
+    if 'tiff' in actual or 'marker' in actual:
         actual_cairo = os.path.join(visual_output_dir, '%s-cairo.png' % actual)
         if not quiet:
             print "\"%s\" with size %dx%d with cairo..." % (filename, width, height),
