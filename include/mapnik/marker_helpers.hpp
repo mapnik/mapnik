@@ -398,6 +398,125 @@ void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, 
     }
 }
 
+// Compute centroid over a set of paths
+template <typename Iter>
+bool centroid_geoms(Iter start, Iter end, double & x, double & y)
+{
+  double x0 = 0.0;
+  double y0 = 0.0;
+  double x1 = 0.0;
+  double y1 = 0.0;
+  double start_x = x0;
+  double start_y = y0;
+
+  bool empty = true;
+
+  double atmp = 0.0;
+  double xtmp = 0.0;
+  double ytmp = 0.0;
+  unsigned count = 1;
+
+  while (start!=end)
+  {
+    geometry_type& path = *start++;
+    path.rewind(0);
+    unsigned command = path.vertex(&x0, &y0);
+    if (command == SEG_END) continue;
+    empty = false;
+
+    while (SEG_END != (command = path.vertex(&x1, &y1)))
+    {
+        double dx0 = x0 - start_x;
+        double dy0 = y0 - start_y;
+        double dx1 = x1 - start_x;
+        double dy1 = y1 - start_y;
+
+        double ai = dx0 * dy1 - dx1 * dy0;
+        atmp += ai;
+        xtmp += (dx1 + dx0) * ai;
+        ytmp += (dy1 + dy0) * ai;
+        x0 = x1;
+        y0 = y1;
+        ++count;
+    }
+
+  }
+
+  if ( empty ) return false;
+
+
+  if (count <= 2) {
+      x = (start_x + x0) * 0.5;
+      y = (start_y + y0) * 0.5;
+      return true;
+  }
+
+  if (atmp != 0)
+  {
+      x = (xtmp/(3*atmp)) + start_x;
+      y = (ytmp/(3*atmp)) + start_y;
+  }
+  else
+  {
+      x = x0;
+      y = y0;
+  }
+
+  return true;
+}
+
+// Apply markers to a feature, dealing with marker-multi-policy
+template <typename Converter>
+void apply_markers(feature_impl & feature, Converter& converter, markers_symbolizer const& sym)
+{
+  marker_multi_policy_e multi_policy = sym.get_marker_multi_policy();
+  marker_placement_e placement = sym.get_marker_placement();
+
+  if ( placement == MARKER_POINT_PLACEMENT &&
+       multi_policy == MARKER_WHOLE_MULTI )
+  {
+    double x, y;
+    if ( centroid_geoms(feature.paths().begin(), feature.paths().end(), x, y) ) {
+      std::auto_ptr<geometry_type> pt(new geometry_type(Point)); // TODO : allocate on stack 
+      pt->move_to(x, y);
+      converter.apply(*pt);
+    } // else it is empty 
+  }
+  else if ( placement == MARKER_POINT_PLACEMENT &&
+            multi_policy == MARKER_LARGEST_MULTI )
+  {
+    // Only apply to path with largest envelope
+    // WARNING: it won't necessarely be the one with 
+    //          largest area !!
+    double maxarea = 0;
+    geometry_type* largest = 0;
+    BOOST_FOREACH(geometry_type & geom, feature.paths())
+    {
+        const box2d<double>& env = geom.envelope();
+        double area = env.width() * env.height();
+        if ( area > maxarea ) {
+          maxarea = area;
+          largest = &geom;
+        }
+    }
+    if ( largest ) converter.apply(*largest); // else empty 
+  }
+  else
+  {
+    if ( multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT ) 
+    {
+      MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
+      // TODO: should we error out instead ?
+      //   throw config_error(std::string("Could not create datasource. No plugin ") 
+    }
+
+    BOOST_FOREACH(geometry_type & path, feature.paths())
+    {
+      converter.apply(path);
+    }
+  }
+}
+
 }
 
 #endif //MAPNIK_MARKER_HELPERS_HPP

@@ -37,6 +37,15 @@ static const char * marker_placement_strings[] = {
 
 IMPLEMENT_ENUM( marker_placement_e, marker_placement_strings )
 
+static const char * marker_multi_policy_strings[] = {
+    "each",
+    "whole",
+    "largest",
+    ""
+};
+
+IMPLEMENT_ENUM( marker_multi_policy_e, marker_multi_policy_strings )
+
 markers_symbolizer::markers_symbolizer()
     : symbolizer_with_image(parse_path("shape://ellipse")),
       symbolizer_base(),
@@ -46,7 +55,10 @@ markers_symbolizer::markers_symbolizer()
       allow_overlap_(false),
       spacing_(100.0),
       max_error_(0.2),
-      marker_p_(MARKER_POINT_PLACEMENT) { }
+      marker_p_(MARKER_POINT_PLACEMENT),
+      // TODO: consider defaulting to MARKER_WHOLE_MULTI,
+      //       for backward compatibility with 2.0.0
+      marker_mp_(MARKER_EACH_MULTI) { }
 
 markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
     : symbolizer_with_image(filename),
@@ -57,7 +69,10 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
       allow_overlap_(false),
       spacing_(100.0),
       max_error_(0.2),
-      marker_p_(MARKER_POINT_PLACEMENT) { }
+      marker_p_(MARKER_POINT_PLACEMENT),
+      // TODO: consider defaulting to MARKER_WHOLE_MULTI,
+      //       for backward compatibility with 2.0.0
+      marker_mp_(MARKER_EACH_MULTI) { }
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
     : symbolizer_with_image(rhs),
@@ -71,7 +86,8 @@ markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
       fill_(rhs.fill_),
       fill_opacity_(rhs.fill_opacity_),
       stroke_(rhs.stroke_),
-      marker_p_(rhs.marker_p_) {}
+      marker_p_(rhs.marker_p_),
+      marker_mp_(rhs.marker_mp_) {}
 
 void markers_symbolizer::set_ignore_placement(bool ignore_placement)
 {
@@ -171,6 +187,16 @@ void markers_symbolizer::set_marker_placement(marker_placement_e marker_p)
 marker_placement_e markers_symbolizer::get_marker_placement() const
 {
     return marker_p_;
+}
+
+void markers_symbolizer::set_marker_multi_policy(marker_multi_policy_e marker_mp)
+{
+    marker_mp_ = marker_mp;
+}
+
+marker_multi_policy_e markers_symbolizer::get_marker_multi_policy() const
+{
+    return marker_mp_;
 }
 
 }
