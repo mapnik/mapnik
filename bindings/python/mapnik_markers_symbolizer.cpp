@@ -89,6 +89,12 @@ void export_markers_symbolizer()
         .value("LINE_PLACEMENT",mapnik::MARKER_LINE_PLACEMENT)
         ;
 
+    mapnik::enumeration_<mapnik::marker_multi_policy_e>("marker_multi_policy")
+        .value("EACH",mapnik::MARKER_EACH_MULTI)
+        .value("WHOLE",mapnik::MARKER_WHOLE_MULTI)
+        .value("LARGEST",mapnik::MARKER_LARGEST_MULTI)
+        ;
+
     class_<markers_symbolizer>("MarkersSymbolizer",
                                init<>("Default Markers Symbolizer - circle"))
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
@@ -143,6 +149,10 @@ void export_markers_symbolizer()
                       &markers_symbolizer::get_marker_placement,
                       &markers_symbolizer::set_marker_placement,
                       "Set/get the marker placement")
+        .add_property("multi_policy",
+                      &markers_symbolizer::get_marker_multi_policy,
+                      &markers_symbolizer::set_marker_multi_policy,
+                      "Set/get the marker multi geometry rendering policy")
         .add_property("comp_op",
                       &markers_symbolizer::comp_op,
                       &markers_symbolizer::set_comp_op,

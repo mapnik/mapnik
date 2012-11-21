@@ -1027,6 +1027,10 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& node)
 
         marker_placement_e placement = node.get_attr<marker_placement_e>("placement",sym.get_marker_placement());
         sym.set_marker_placement(placement);
+
+        marker_multi_policy_e mpolicy = node.get_attr<marker_multi_policy_e>("multi-policy",sym.get_marker_multi_policy());
+        sym.set_marker_multi_policy(mpolicy);
+
         parse_symbolizer_base(sym, node);
         rule.append(sym);
     }

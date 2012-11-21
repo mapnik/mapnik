@@ -27,6 +27,7 @@ files = [
     {'name': "lines-2", 'sizes': sizes_few_square},
     {'name': "lines-3", 'sizes': sizes_few_square},
     {'name': "lines-shield", 'sizes': sizes_few_square},
+    {'name': "marker-multi-policy", 'sizes':[(600,400)]},
     {'name': "simple-E"},
     {'name': "simple-NE"},
     {'name': "simple-NW"},

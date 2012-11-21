@@ -209,6 +209,7 @@ def test_markers_symbolizer():
     eq_(p.fill_opacity,None)
     eq_(p.filename,'shape://ellipse')
     eq_(p.placement,mapnik.marker_placement.POINT_PLACEMENT)
+    eq_(p.multi_policy,mapnik.marker_multi_policy.EACH)
     eq_(p.fill,None)
     eq_(p.ignore_placement,False)
     eq_(p.spacing,100)
@@ -239,10 +240,14 @@ def test_markers_symbolizer():
     p.allow_overlap = True
     p.opacity = 0.5
     p.fill_opacity = 0.5
+    p.placement = mapnik.marker_placement.LINE_PLACEMENT
+    p.multi_policy = mapnik.marker_multi_policy.WHOLE
 
     eq_(p.allow_overlap, True)
     eq_(p.opacity, 0.5)
     eq_(p.fill_opacity, 0.5)
+    eq_(p.multi_policy,mapnik.marker_multi_policy.WHOLE)
+    eq_(p.placement,mapnik.marker_placement.LINE_PLACEMENT)
 
     #https://github.com/mapnik/mapnik/issues/1285
     #https://github.com/mapnik/mapnik/issues/1427

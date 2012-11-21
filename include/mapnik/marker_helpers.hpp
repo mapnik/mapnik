@@ -398,6 +398,68 @@ void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, 
     }
 }
 
+// Apply markers to a feature with multiple geometries
+template <typename Converter>
+void apply_markers_multi(feature_impl & feature, Converter& converter, markers_symbolizer const& sym)
+{
+  std::size_t geom_count = feature.paths().size();
+  if (geom_count == 1)
+  {
+      converter.apply(feature.paths()[0]);
+  }
+  else if (geom_count > 1)
+  {
+      marker_multi_policy_e multi_policy = sym.get_marker_multi_policy();
+      marker_placement_e placement = sym.get_marker_placement();
+      if (placement == MARKER_POINT_PLACEMENT &&
+           multi_policy == MARKER_WHOLE_MULTI)
+      {
+          double x, y;
+          if (label::centroid_geoms(feature.paths().begin(), feature.paths().end(), x, y))
+          {
+              geometry_type pt(Point);
+              pt.move_to(x, y);
+              // unset any clipping since we're now dealing with a point
+              converter.template unset<clip_poly_tag>();
+              converter.apply(pt);
+          }
+      }
+      else if ((placement == MARKER_POINT_PLACEMENT || placement == MARKER_INTERIOR_PLACEMENT) &&
+                multi_policy == MARKER_LARGEST_MULTI)
+      {
+          // Only apply to path with largest envelope area
+          // TODO: consider using true area for polygon types
+          double maxarea = 0;
+          geometry_type* largest = 0;
+          BOOST_FOREACH(geometry_type & geom, feature.paths())
+          {
+              const box2d<double>& env = geom.envelope();
+              double area = env.width() * env.height();
+              if (area > maxarea)
+              {
+                  maxarea = area;
+                  largest = &geom;
+              }
+          }
+          if (largest)
+          {
+              converter.apply(*largest);
+          }
+      }
+      else
+      {
+          if (multi_policy != MARKER_EACH_MULTI && placement != MARKER_POINT_PLACEMENT)
+          {
+              MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
+          }
+          BOOST_FOREACH(geometry_type & path, feature.paths())
+          {
+            converter.apply(path);
+          }
+      }
+  }
+}
+
 }
 
 #endif //MAPNIK_MARKER_HELPERS_HPP
