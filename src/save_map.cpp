@@ -311,6 +311,10 @@ public:
         {
             set_attr( sym_node, "placement", sym.get_marker_placement() );
         }
+        if ( sym.get_marker_multi_policy() != dfl.get_marker_multi_policy() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "multi-policy", sym.get_marker_multi_policy() );
+        }
         if (sym.get_image_transform())
         {
             std::string tr_str = sym.get_image_transform_string();

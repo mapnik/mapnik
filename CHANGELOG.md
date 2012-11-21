@@ -9,6 +9,8 @@ For a complete change history, see the git log.
 
 ## Unreleased
 
+- Added support for controlling rendering behavior of markers on multi-geometries `marker-multi-policy` (#1555,#1573)
+
 - Add DebugSymbolizer (#1366)
 
 
