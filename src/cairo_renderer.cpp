@@ -1762,10 +1762,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     }
                     converter.set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-                    BOOST_FOREACH(geometry_type & geom, feature.paths())
-                    {
-                        converter.apply(geom);
-                    }
+                    apply_markers_multi(feature, converter, sym);
                 }
                 else
                 {
@@ -1790,10 +1787,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     }
                     converter.set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-                    BOOST_FOREACH(geometry_type & geom, feature.paths())
-                    {
-                        converter.apply(geom);
-                    }
+                    apply_markers_multi(feature, converter, sym);
                 }
             }
             else // raster markers
@@ -1823,10 +1817,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     }
                     converter.set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
-                    BOOST_FOREACH(geometry_type & geom, feature.paths())
-                    {
-                        converter.apply(geom);
-                    }
+                    apply_markers_multi(feature, converter, sym);
                 }
             }
         }

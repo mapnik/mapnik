@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added support for controlling rendering behavior of markers on multi-geometries `marker-multi-policy` (#1555,#1573)
+
 - Added alternative PNG/ZLIB implementation (`miniz`) that can be enabled with `e=miniz` (#1554)
 
 - Added support for setting zlib `Z_FIXED` strategy with format string: `png:z=fixed`

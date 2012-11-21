@@ -365,6 +365,16 @@ struct vertex_converter : private boost::noncopyable
             disp_.vec_[index]=1;
     }
 
+    template <typename Conv>
+    void unset()
+    {
+        typedef typename boost::mpl::find<conv_types,Conv>::type iter;
+        typedef typename boost::mpl::end<conv_types>::type end;
+        std::size_t index = boost::mpl::distance<iter,end>::value - 1;
+        if (index < disp_.vec_.size())
+            disp_.vec_[index]=0;
+    }
+
 
     detail::dispatcher<args_type,conv_types> disp_;
 };
