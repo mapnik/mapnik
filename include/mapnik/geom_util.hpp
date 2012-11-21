@@ -329,6 +329,70 @@ bool centroid(PathType & path, double & x, double & y)
     return true;
 }
 
+// Compute centroid over a set of paths
+template <typename Iter>
+bool centroid_geoms(Iter start, Iter end, double & x, double & y)
+{
+  double x0 = 0.0;
+  double y0 = 0.0;
+  double x1 = 0.0;
+  double y1 = 0.0;
+  double start_x = x0;
+  double start_y = y0;
+
+  bool empty = true;
+
+  double atmp = 0.0;
+  double xtmp = 0.0;
+  double ytmp = 0.0;
+  unsigned count = 1;
+
+  while (start!=end)
+  {
+    typename Iter::value_type & path = *start++;
+    path.rewind(0);
+    unsigned command = path.vertex(&x0, &y0);
+    if (command == SEG_END) continue;
+    empty = false;
+
+    while (SEG_END != (command = path.vertex(&x1, &y1)))
+    {
+        double dx0 = x0 - start_x;
+        double dy0 = y0 - start_y;
+        double dx1 = x1 - start_x;
+        double dy1 = y1 - start_y;
+        double ai = dx0 * dy1 - dx1 * dy0;
+        atmp += ai;
+        xtmp += (dx1 + dx0) * ai;
+        ytmp += (dy1 + dy0) * ai;
+        x0 = x1;
+        y0 = y1;
+        ++count;
+    }
+  }
+
+  if ( empty ) return false;
+
+  if (count <= 2) {
+      x = (start_x + x0) * 0.5;
+      y = (start_y + y0) * 0.5;
+      return true;
+  }
+
+  if (atmp != 0)
+  {
+      x = (xtmp/(3*atmp)) + start_x;
+      y = (ytmp/(3*atmp)) + start_y;
+  }
+  else
+  {
+      x = x0;
+      y = y0;
+  }
+
+  return true;
+}
+
 template <typename PathType>
 bool hit_test(PathType & path, double x, double y, double tol)
 {

@@ -26,6 +26,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 
 #include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/vertex_converters.hpp>
@@ -136,10 +137,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     }
                     converter.template set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-                    BOOST_FOREACH(geometry_type & geom, feature.paths())
-                    {
-                        converter.apply(geom);
-                    }
+                    apply_markers_multi(feature, converter, sym);
                 }
                 else
                 {
@@ -172,10 +170,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     }
                     converter.template set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-                    BOOST_FOREACH(geometry_type & geom, feature.paths())
-                    {
-                        converter.apply(geom);
-                    }
+                    apply_markers_multi(feature, converter, sym);
                 }
             }
             else // raster markers
@@ -207,11 +202,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 }
                 converter.template set<transform_tag>(); //always transform
                 if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter
-
-                BOOST_FOREACH(geometry_type & geom, feature.paths())
-                {
-                    converter.apply(geom);
-                }
+                apply_markers_multi(feature, converter, sym);
             }
         }
     }

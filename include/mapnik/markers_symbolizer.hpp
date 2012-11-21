@@ -46,6 +46,15 @@ enum marker_placement_enum {
 
 DEFINE_ENUM( marker_placement_e, marker_placement_enum );
 
+enum marker_multi_policy_enum {
+    MARKER_EACH_MULTI, // each component in a multi gets its marker
+    MARKER_WHOLE_MULTI, // consider all components of a multi as a whole
+    MARKER_LARGEST_MULTI, // only the largest component of a multi gets a marker
+    marker_multi_policy_enum_MAX
+};
+
+DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
+
 struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image, public symbolizer_base
 {
@@ -74,6 +83,8 @@ public:
     boost::optional<stroke> get_stroke() const;
     void set_marker_placement(marker_placement_e marker_p);
     marker_placement_e get_marker_placement() const;
+    void set_marker_multi_policy(marker_multi_policy_e marker_p);
+    marker_multi_policy_e get_marker_multi_policy() const;
 private:
     expression_ptr width_;
     expression_ptr height_;
@@ -86,6 +97,7 @@ private:
     boost::optional<float> opacity_;
     boost::optional<stroke> stroke_;
     marker_placement_e marker_p_;
+    marker_multi_policy_e marker_mp_;
 };
 
 }
