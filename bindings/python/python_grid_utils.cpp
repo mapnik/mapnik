@@ -121,8 +121,7 @@ void grid2utf(T const& grid_type,
     // start counting at utf8 codepoint 32, aka space character
     boost::uint16_t codepoint = 32;
 
-    // TODO - use double?
-    unsigned array_size = static_cast<unsigned int>(grid_type.width()/resolution);
+    unsigned array_size = std::ceil(grid_type.width()/static_cast<float>(resolution));
     for (unsigned y = 0; y < grid_type.height(); y=y+resolution)
     {
         boost::uint16_t idx = 0;
