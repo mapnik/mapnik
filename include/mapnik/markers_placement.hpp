@@ -66,9 +66,17 @@ public:
         tr_(tr),
         detector_(detector),
         max_error_(max_error),
-        allow_overlap_(allow_overlap)
+        allow_overlap_(allow_overlap),
+        marker_width_((size_ * tr_).width()),
+        done_(false),
+        last_x(.0),
+        last_y(.0),
+        next_x(.0),
+        next_y(.0),
+        error_(.0),
+        spacing_left_(.0),
+        marker_nr_(0)
     {
-      marker_width_ = (size_ * tr_).width();
       if (spacing >= 0)
       {
           spacing_ = spacing;
@@ -223,13 +231,15 @@ private:
     agg::trans_affine tr_;
     Detector &detector_;
     double spacing_;
-    double marker_width_;
     double max_error_;
     bool allow_overlap_;
+    double marker_width_;
 
     bool done_;
-    double last_x, last_y;
-    double next_x, next_y;
+    double last_x;
+    double last_y;
+    double next_x;
+    double next_y;
     /** If a marker could not be placed at the exact point where it should
      * go the next marker's distance will be a bit lower. */
     double error_;
