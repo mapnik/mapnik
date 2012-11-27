@@ -616,96 +616,97 @@ featureset_ptr postgis_datasource::features(const query& q) const
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (conn && conn->isOK())
+        if ( ! conn ) {
+          throw mapnik::datasource_exception("Postgis Plugin: out of connection slots (increase max_size?)");
+        }
+
+        PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
+
+        if ( ! conn->isOK() ) {
+          throw mapnik::datasource_exception("Postgis Plugin: bad connection");
+        }
+
+        if (geometryColumn_.empty())
         {
-            PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn ,pool);
+            std::ostringstream s_error;
+            s_error << "PostGIS: geometry name lookup failed for table '";
 
-            if (geometryColumn_.empty())
+            if (! schema_.empty())
             {
-                std::ostringstream s_error;
-                s_error << "PostGIS: geometry name lookup failed for table '";
-
-                if (! schema_.empty())
-                {
-                    s_error << schema_ << ".";
-                }
-                s_error << geometry_table_
-                        << "'. Please manually provide the 'geometry_field' parameter or add an entry "
-                        << "in the geometry_columns for '";
-
-                if (! schema_.empty())
-                {
-                    s_error << schema_ << ".";
-                }
-                s_error << geometry_table_ << "'.";
-
-                throw mapnik::datasource_exception(s_error.str());
+                s_error << schema_ << ".";
             }
+            s_error << geometry_table_
+                    << "'. Please manually provide the 'geometry_field' parameter or add an entry "
+                    << "in the geometry_columns for '";
 
-            std::ostringstream s;
-
-            const double px_gw = 1.0 / boost::get<0>(q.resolution());
-            const double px_gh = 1.0 / boost::get<1>(q.resolution());
-
-            s << "SELECT ST_AsBinary(";
-
-            if (simplify_geometries_) {
-              s << "ST_Simplify(";
-            }
-
-            s << "\"" << geometryColumn_ << "\"";
-
-            if (simplify_geometries_) {
-              const double tolerance = std::min(px_gw, px_gh) / 2.0;
-              s << ", " << tolerance << ")";
-            }
-
-            s << ") AS geom";
-
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-            std::set<std::string> const& props = q.property_names();
-            std::set<std::string>::const_iterator pos = props.begin();
-            std::set<std::string>::const_iterator end = props.end();
-
-            if (! key_field_.empty())
+            if (! schema_.empty())
             {
-                mapnik::sql_utils::quote_attr(s, key_field_);
-                ctx->push(key_field_);
-
-                for (; pos != end; ++pos)
-                {
-                    if (*pos != key_field_)
-                    {
-                        mapnik::sql_utils::quote_attr(s, *pos);
-                        ctx->push(*pos);
-                    }
-                }
+                s_error << schema_ << ".";
             }
-            else
+            s_error << geometry_table_ << "'.";
+
+            throw mapnik::datasource_exception(s_error.str());
+        }
+
+        std::ostringstream s;
+
+        const double px_gw = 1.0 / boost::get<0>(q.resolution());
+        const double px_gh = 1.0 / boost::get<1>(q.resolution());
+
+        s << "SELECT ST_AsBinary(";
+
+        if (simplify_geometries_) {
+          s << "ST_Simplify(";
+        }
+
+        s << "\"" << geometryColumn_ << "\"";
+
+        if (simplify_geometries_) {
+          const double tolerance = std::min(px_gw, px_gh) / 2.0;
+          s << ", " << tolerance << ")";
+        }
+
+        s << ") AS geom";
+
+        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        std::set<std::string> const& props = q.property_names();
+        std::set<std::string>::const_iterator pos = props.begin();
+        std::set<std::string>::const_iterator end = props.end();
+
+        if (! key_field_.empty())
+        {
+            mapnik::sql_utils::quote_attr(s, key_field_);
+            ctx->push(key_field_);
+
+            for (; pos != end; ++pos)
             {
-                for (; pos != end; ++pos)
+                if (*pos != key_field_)
                 {
                     mapnik::sql_utils::quote_attr(s, *pos);
                     ctx->push(*pos);
                 }
             }
-
-            std::string table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
-
-            s << " FROM " << table_with_bbox;
-
-            if (row_limit_ > 0)
-            {
-                s << " LIMIT " << row_limit_;
-            }
-
-            boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
         else
         {
-            throw mapnik::datasource_exception("Postgis Plugin: bad connection");
+            for (; pos != end; ++pos)
+            {
+                mapnik::sql_utils::quote_attr(s, *pos);
+                ctx->push(*pos);
+            }
         }
+
+        std::string table_with_bbox = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
+
+        s << " FROM " << table_with_bbox;
+
+        if (row_limit_ > 0)
+        {
+            s << " LIMIT " << row_limit_;
+        }
+
+        boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
+        return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
     }
 
     return featureset_ptr();
