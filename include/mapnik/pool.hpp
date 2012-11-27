@@ -80,7 +80,7 @@ class Pool : private boost::noncopyable
 #endif
 public:
 
-    Pool(const Creator<T>& creator,unsigned initialSize=1, unsigned maxSize=10)
+    Pool(const Creator<T>& creator,unsigned initialSize, unsigned maxSize)
         :creator_(creator),
          initialSize_(initialSize),
          maxSize_(maxSize)
@@ -107,7 +107,7 @@ public:
             {
                 usedPool_.push_back(*itr);
                 unusedPool_.erase(itr);
-                return usedPool_[usedPool_.size()-1];
+                return usedPool_.back();
             }
             else
             {
@@ -116,6 +116,7 @@ public:
                 itr=unusedPool_.erase(itr);
             }
         }
+        // all connection have been taken, check if we allowed to grow pool
         if (usedPool_.size() < maxSize_)
         {
             HolderType conn(creator_());
