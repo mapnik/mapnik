@@ -68,22 +68,22 @@ postgis_datasource::postgis_datasource(parameters const& params, bool bind)
       srid_(*params_.get<int>("srid", 0)),
       extent_initialized_(false),
       simplify_geometries_(false),
-      desc_(*params_.get<std::string>("type"), "utf-8"),
-      creator_(params.get<std::string>("host"),
-               params.get<std::string>("port"),
-               params.get<std::string>("dbname"),
-               params.get<std::string>("user"),
-               params.get<std::string>("password"),
-               params.get<std::string>("connect_timeout", "4")),
-      bbox_token_("!bbox!"),
-      scale_denom_token_("!scale_denominator!"),
-      pixel_width_token_("!pixel_width!"),
-      pixel_height_token_("!pixel_height!"),
-      persist_connection_(*params_.get<mapnik::boolean>("persist_connection", true)),
-      extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery", false)),
-      // params below are for testing purposes only (will likely be removed at any time)
-      intersect_min_scale_(*params_.get<int>("intersect_min_scale", 0)),
-      intersect_max_scale_(*params_.get<int>("intersect_max_scale", 0))
+    desc_(*params_.get<std::string>("type"), "utf-8"),
+    creator_(params.get<std::string>("host"),
+             params.get<std::string>("port"),
+             params.get<std::string>("dbname"),
+             params.get<std::string>("user"),
+             params.get<std::string>("password"),
+             params.get<std::string>("connect_timeout", "4")),
+    bbox_token_("!bbox!"),
+    scale_denom_token_("!scale_denominator!"),
+    pixel_width_token_("!pixel_width!"),
+    pixel_height_token_("!pixel_height!"),
+    persist_connection_(*params_.get<mapnik::boolean>("persist_connection", true)),
+    extent_from_subquery_(*params_.get<mapnik::boolean>("extent_from_subquery", false)),
+// params below are for testing purposes only (will likely be removed at any time)
+    intersect_min_scale_(*params_.get<int>("intersect_min_scale", 0)),
+    intersect_max_scale_(*params_.get<int>("intersect_max_scale", 0))
 {
     if (table_.empty())
     {
@@ -128,7 +128,7 @@ void postgis_datasource::bind() const
         if (conn && conn->isOK())
         {
             PoolGuard<shared_ptr<Connection>,
-                shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
+                      shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
 
             desc_.set_encoding(conn->client_encoding());
 
@@ -650,14 +650,14 @@ featureset_ptr postgis_datasource::features(const query& q) const
             s << "SELECT ST_AsBinary(";
 
             if (simplify_geometries_) {
-              s << "ST_Simplify(";
+                s << "ST_Simplify(";
             }
 
             s << "\"" << geometryColumn_ << "\"";
 
             if (simplify_geometries_) {
-              const double tolerance = std::min(px_gw, px_gh) / 2.0;
-              s << ", " << tolerance << ")";
+                const double tolerance = std::min(px_gw, px_gh) / 2.0;
+                s << ", " << tolerance << ")";
             }
 
             s << ") AS geom";
@@ -704,7 +704,16 @@ featureset_ptr postgis_datasource::features(const query& q) const
         }
         else
         {
-            throw mapnik::datasource_exception("Postgis Plugin: bad connection");
+            std::string err_msg = "Postgis Plugin:";
+            if (conn)
+            {
+                err_msg += conn->status();
+            }
+            else
+            {
+                err_msg += "Null connection";
+            }
+            throw mapnik::datasource_exception(err_msg);
         }
     }
 
