@@ -979,6 +979,7 @@ void map_parser::parse_markers_symbolizer( rule & rule, ptree const & sym )
         //s << "file,opacity,spacing,max-error,allow-overlap,placement,";
         s << "file,base,transform,fill,opacity,"
           << "spacing,max-error,allow-overlap,"
+          << "ignore-placement,"
           << "width,height,placement,marker-type,"
           << "stroke,stroke-width,stroke-opacity,stroke-linejoin,"
           << "stroke-linecap,stroke-dashoffset,stroke-dasharray,"
