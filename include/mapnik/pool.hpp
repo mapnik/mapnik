@@ -105,9 +105,10 @@ public:
 
             if ((*itr)->isOK())
             {
-                usedPool_.push_back(*itr);
+                HolderType& ht = *itr;
+                usedPool_.push_back(ht);
                 unusedPool_.erase(itr);
-                return usedPool_[usedPool_.size()-1];
+                return ht;
             }
             else
             {
