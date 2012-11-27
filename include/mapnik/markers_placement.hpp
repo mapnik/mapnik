@@ -60,7 +60,13 @@ public:
      *                 converted to a positive value with similar magnitude, but
      *                 choosen to optimize marker placement. 0 = no markers
      */
-    markers_placement(Locator &locator, box2d<double> const& size, agg::trans_affine const& tr, Detector &detector, double spacing, double max_error, bool allow_overlap)
+    markers_placement(Locator &locator,
+                      box2d<double> const& size,
+                      agg::trans_affine const& tr,
+                      Detector &detector,
+                      double spacing,
+                      double max_error,
+                      bool allow_overlap)
       : locator_(locator),
         size_(size),
         tr_(tr),
@@ -80,7 +86,8 @@ public:
       if (spacing >= 0)
       {
           spacing_ = spacing;
-      } else if (spacing < 0)
+      }
+      else if (spacing < 0)
       {
           spacing_ = find_optimal_spacing(-spacing);
       }
