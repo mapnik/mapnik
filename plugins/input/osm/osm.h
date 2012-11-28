@@ -49,6 +49,9 @@ public:
 
     polygon_types()
     {
+        ptypes.push_back(std::pair<std::string, std::string>("water", ""));
+        ptypes.push_back(std::pair<std::string, std::string>("aeroway", ""));
+        ptypes.push_back(std::pair<std::string, std::string>("building", ""));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "wood"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "water"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "heath"));

@@ -251,15 +251,10 @@ bounds osm_way::get_bounds()
 
 bool osm_way::is_polygon()
 {
-    if (keyvals.find("building") != keyvals.end())
-    {
-        return true;
-    }
-
     for (unsigned int count = 0; count < ptypes.ptypes.size(); ++count)
     {
         if (keyvals.find(ptypes.ptypes[count].first) != keyvals.end() &&
-            keyvals[ptypes.ptypes[count].first] == ptypes.ptypes[count].second)
+            (ptypes.ptypes[count].second.empty() || keyvals[ptypes.ptypes[count].first] == ptypes.ptypes[count].second))
         {
             return true;
         }
