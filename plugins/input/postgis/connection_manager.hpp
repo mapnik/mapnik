@@ -122,8 +122,8 @@ public:
 
         if (itr != pools_.end())
         {
-            unsigned cur_size = itr->second->max_size();
-            itr->second->set_max_size(std::max(maxSize, cur_size));
+            itr->second->set_max_size(initialSize);
+            itr->second->set_max_size(maxSize);
         }
         else
         {
