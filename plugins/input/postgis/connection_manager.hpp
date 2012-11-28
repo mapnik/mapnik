@@ -118,12 +118,19 @@ public:
 #ifdef MAPNIK_THREADSAFE
         //mutex::scoped_lock lock(mutex_);
 #endif
-        if (pools_.find(creator.id())==pools_.end())
-        {
-            return pools_.insert(std::make_pair(creator.id(),
-                                                boost::make_shared<PoolType>(creator,initialSize,maxSize))).second;
-        }
+        ContType::const_iterator itr = pools_.find(creator.id());
 
+        if (itr != pools_.end())
+        {
+            unsigned cur_size = itr->second->max_size();
+            itr->second->set_max_size(std::max(maxSize, cur_size));
+        }
+        else
+        {
+            return pools_.insert(
+                std::make_pair(creator.id(),
+                               boost::make_shared<PoolType>(creator,initialSize,maxSize))).second;
+        }
         return false;
 
     }
