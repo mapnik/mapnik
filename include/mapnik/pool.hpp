@@ -72,7 +72,7 @@ class Pool : private boost::noncopyable
 
     Creator<T> creator_;
     const unsigned initialSize_;
-    const unsigned maxSize_;
+    unsigned maxSize_;
     ContType usedPool_;
     ContType unusedPool_;
 #ifdef MAPNIK_THREADSAFE
@@ -159,6 +159,22 @@ public:
 #endif
         std::pair<unsigned,unsigned> size(unusedPool_.size(),usedPool_.size());
         return size;
+    }
+
+    unsigned max_size() const
+    {
+#ifdef MAPNIK_THREADSAFE
+        mutex::scoped_lock lock(mutex_);
+#endif
+        return maxSize_;
+    }
+
+    void set_max_size(unsigned size)
+    {
+#ifdef MAPNIK_THREADSAFE
+        mutex::scoped_lock lock(mutex_);
+#endif
+        maxSize_ = size;
     }
 };
 
