@@ -66,7 +66,7 @@ public:
 
     T* operator()() const
     {
-        return new T(connection_string());
+        return new T(connection_string_safe(),pass_);
     }
 
     inline std::string id() const
@@ -76,13 +76,19 @@ public:
 
     inline std::string connection_string() const
     {
+        std::string connect_str = connection_string_safe();
+        if (pass_   && !pass_->empty()) connect_str += " password=" + *pass_;
+        return connect_str;
+    }
+
+    inline std::string connection_string_safe() const
+    {
         std::string connect_str;
-        if (host_   && (*host_).size()) connect_str += "host=" + *host_;
-        if (port_   && (*port_).size()) connect_str += " port=" + *port_;
-        if (dbname_ && (*dbname_).size()) connect_str += " dbname=" + *dbname_;
-        if (user_   && (*user_).size()) connect_str += " user=" + *user_;
-        if (pass_   && (*pass_).size()) connect_str += " password=" + *pass_;
-        if (connect_timeout_ && (*connect_timeout_).size())
+        if (host_   && !host_->empty()) connect_str += "host=" + *host_;
+        if (port_   && !port_->empty()) connect_str += " port=" + *port_;
+        if (dbname_ && !dbname_->empty()) connect_str += " dbname=" + *dbname_;
+        if (user_   && !user_->empty()) connect_str += " user=" + *user_;
+        if (connect_timeout_ && !connect_timeout_->empty())
             connect_str +=" connect_timeout=" + *connect_timeout_;
         return connect_str;
     }

@@ -44,16 +44,21 @@ extern "C" {
 class Connection
 {
 public:
-    Connection(std::string const& connection_str)
+    Connection(std::string const& connection_str,boost::optional<std::string> const& password)
         : cursorId(0),
           closed_(false)
     {
-        conn_ = PQconnectdb(connection_str.c_str());
+        std::string connect_with_pass = connection_str;
+        if (password && !password->empty())
+        {
+            connect_with_pass += " password=" + *password;
+        }
+        conn_ = PQconnectdb(connect_with_pass.c_str());
         if (PQstatus(conn_) != CONNECTION_OK)
         {
             std::string err_msg = "Postgis Plugin: ";
             err_msg += status();
-            err_msg += "\nConnection string:'";
+            err_msg += "\nConnection string: '";
             err_msg += connection_str;
             err_msg += "'\n";
             throw mapnik::datasource_exception(err_msg);
