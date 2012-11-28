@@ -195,6 +195,7 @@ public:
         {
             initialSize_ = size;
             unsigned total_size = usedPool_.size() + unusedPool_.size();
+            // ensure we don't have ghost obj's in the pool.
             if (total_size < initialSize_)
             {
                 unsigned grow_size = initialSize_ - total_size ;
