@@ -42,6 +42,7 @@ namespace agg
 
         void   smooth_value(double v) { base_type::generator().smooth_value(v); }
         double smooth_value() const { return base_type::generator().smooth_value(); }
+        unsigned type() const { return base_type::type(); }
 
     private:
         conv_smooth_poly1(const conv_smooth_poly1<VertexSource>&);
@@ -64,6 +65,7 @@ namespace agg
 
         void   smooth_value(double v) { m_smooth.generator().smooth_value(v); }
         double smooth_value() const { return m_smooth.generator().smooth_value(); }
+        unsigned type() const { return m_smooth.type(); }
 
     private:
         conv_smooth_poly1_curve(const conv_smooth_poly1_curve<VertexSource>&);
