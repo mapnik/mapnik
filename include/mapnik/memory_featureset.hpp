@@ -56,7 +56,7 @@ public:
     {
         while (pos_ != end_)
         {
-            if (bbox_check_)
+            if (!bbox_check_)
             {
                 return *pos_++;
             }
