@@ -1,0 +1,21 @@
+<Map maximum-extent="736908, 4390316, 2060771, 5942346">
+<Style name="whole">
+  <Rule>
+    <MarkersSymbolizer placement="point" multi-policy="whole" fill="yellow" width="20" allow-overlap="true"/>
+  </Rule>
+</Style>
+<Style name="boundary">
+  <Rule>
+    <LineSymbolizer />
+  </Rule>
+</Style>
+<Layer name="multi">
+    <StyleName>boundary</StyleName>
+    <StyleName>whole</StyleName>
+    <Datasource>
+       <Parameter name="type">csv</Parameter>
+       <Parameter name="file">../data/whole-centroid.csv</Parameter>
+       <Parameter name="separator">|</Parameter>
+    </Datasource>
+  </Layer>
+</Map>
