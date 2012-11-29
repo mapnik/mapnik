@@ -6,6 +6,9 @@ import time
 from utilities import execution_path
 from subprocess import Popen, PIPE
 import os, mapnik
+from Queue import Queue
+import threading
+
 
 MAPNIK_TEST_DBNAME = 'mapnik-tmp-postgis-test-db'
 POSTGIS_TEMPLATE_DBNAME = 'template_postgis'
@@ -443,9 +446,36 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         fs = ds.featureset()
         eq_(fs.next()['gid'],1)
 
+    def create_ds():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+                            table='test',
+                            max_size=20)
+        fs = ds.all_features()
+
+    def test_threaded_create(NUM_THREADS=100):
+        for i in range(NUM_THREADS):
+            t = threading.Thread(target=create_ds)
+            t.start()
+            t.join()
+
+    def create_ds_and_error():
+        try:
+            ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+                                table='asdfasdfasdfasdfasdf',
+                                max_size=20)
+            fs = ds.all_features()
+        except: pass
+
+    def test_threaded_create2(NUM_THREADS=10):
+        for i in range(NUM_THREADS):
+            t = threading.Thread(target=create_ds_and_error)
+            t.start()
+            t.join()
+
+
+
     atexit.register(postgis_takedown)
 
 if __name__ == "__main__":
     setup()
-    #test_auto_detection_and_subquery()
     [eval(run)() for run in dir() if 'test_' in run]
