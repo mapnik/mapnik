@@ -91,7 +91,12 @@ struct vector_markers_rasterizer_dispatch
         {
             double x = 0;
             double y = 0;
-            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            if (path.type() == LineString)
+            {
+                if (!label::middle_point(path, x, y))
+                    return;
+            }
+            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
                     return;
@@ -187,7 +192,12 @@ struct raster_markers_rasterizer_dispatch
         {
             double x = 0;
             double y = 0;
-            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            if (path.type() == LineString)
+            {
+                if (!label::middle_point(path, x, y))
+                    return;
+            }
+            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
                     return;
