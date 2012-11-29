@@ -136,12 +136,24 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
         case 'C':
         case 'D'://todo handle date?
         case 'M':
-        case 'L':
         {
             // FIXME - avoid constructing std::string on stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
             boost::trim(str);
             f.put(name,tr.transcode(str.c_str()));
+            break;
+        }
+        case 'L':
+        {
+            char ch = record_[fields_[col].offset_];
+            if ( ch == '1' || ch == 't' || ch == 'T' || ch == 'y' || ch == 'Y')
+            {
+                f.put(name,true);
+            }
+            else
+            {
+                f.put(name,false);
+            }
             break;
         }
         case 'N':
