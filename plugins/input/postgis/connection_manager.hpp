@@ -122,7 +122,7 @@ public:
 
         if (itr != pools_.end())
         {
-            itr->second->set_max_size(initialSize);
+            itr->second->set_initial_size(initialSize);
             itr->second->set_max_size(maxSize);
         }
         else
