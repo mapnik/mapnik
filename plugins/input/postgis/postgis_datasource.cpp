@@ -711,7 +711,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
             }
             else
             {
-                err_msg += "Null connection";
+                err_msg += " Null connection";
             }
             throw mapnik::datasource_exception(err_msg);
         }
