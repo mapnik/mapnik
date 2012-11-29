@@ -87,88 +87,11 @@ BOOST_FUSION_ADAPT_STRUCT(
     (std::string, svg_namespace_url_)
     )
 
-/*!
- * mapnik::geometry_type is adapted to conform to the concepts
- * required by Karma to be recognized as a container of
- * attributes for output generation.
- */
-/*
-namespace boost { namespace spirit { namespace traits {
-
-        typedef mapnik::coord_transform<mapnik::CoordTransform, mapnik::geometry_type> path_type;
-
-        template <>
-        struct is_container<path_type const>
-            : mpl::true_ {};
-
-        template <>
-        struct container_iterator<path_type const>
-        {
-            typedef mapnik::svg::path_iterator_type type;
-        };
-
-        template <>
-        struct begin_container<path_type const>
-        {
-            static mapnik::svg::path_iterator_type
-            call(path_type const& path)
-            {
-                return mapnik::svg::path_iterator_type(0, path);
-            }
-        };
-
-        template <>
-        struct end_container<path_type const>
-        {
-            static mapnik::svg::path_iterator_type
-            call(path_type const& path)
-            {
-                return mapnik::svg::path_iterator_type(path);
-            }
-        };
-}}}
-*/
-
 namespace mapnik { namespace svg {
 
     using namespace boost::spirit;
     using namespace boost::phoenix;
 
-/*
-    template <typename OutputIterator, typename PathType>
-    struct svg_path_data_grammar : karma::grammar<OutputIterator, PathType&()>
-    {
-        typedef path_iterator_type::value_type vertex_type;
-
-        explicit svg_path_data_grammar(PathType const& path_type)
-            : svg_path_data_grammar::base_type(svg_path),
-              path_type_(path_type)
-        {
-            using karma::int_;
-            using karma::double_;
-            using repository::confix;
-
-            svg_path =
-                lit("d=")
-                << confix('"', '"')[
-                    -(path_vertex % lit(' '))];
-
-            path_vertex =
-                path_vertex_command
-                << double_
-                << lit(' ')
-                << double_;
-
-            path_vertex_command = &int_(1) << lit('M') | lit('L');
-        }
-
-        karma::rule<OutputIterator, PathType&()> svg_path;
-        karma::rule<OutputIterator, vertex_type()> path_vertex;
-        karma::rule<OutputIterator, int()> path_vertex_command;
-
-        PathType const& path_type_;
-    };
-*/
 
 template <typename OutputIterator>
 struct svg_path_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg::path_output_attributes()>

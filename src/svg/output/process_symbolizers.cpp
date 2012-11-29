@@ -44,11 +44,11 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     // generate path output for each geometry of the current feature.
     for(unsigned i=0; i<feature.num_geometries(); ++i)
     {
-        geometry_type const& geom = feature.get_geometry(i);
-        if(geom.size() > 1)
+        geometry_type & geom = feature.get_geometry(i);
+        if(geom.size() > 0)
         {
-            //path_type path(t_, geom, prj_trans);
-            //generator_.generate_path(path, path_attributes_);
+            path_type path(t_, geom, prj_trans);
+            generator_.generate_path(path, path_attributes_);
         }
     }
 

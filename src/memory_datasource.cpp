@@ -62,10 +62,11 @@ struct accumulate_extent
     bool first_;
 };
 
-memory_datasource::memory_datasource(datasource::datasource_t type)
+memory_datasource::memory_datasource(datasource::datasource_t type, bool bbox_check)
     : datasource(parameters()),
       desc_("in-memory datasource","utf-8"),
-      type_(type) {}
+      type_(type),
+      bbox_check_(bbox_check) {}
 
 memory_datasource::~memory_datasource() {}
 
@@ -83,7 +84,7 @@ datasource::datasource_t memory_datasource::type() const
 
 featureset_ptr memory_datasource::features(const query& q) const
 {
-    return boost::make_shared<memory_featureset>(q.get_bbox(),*this);
+    return boost::make_shared<memory_featureset>(q.get_bbox(),*this,bbox_check_);
 }
 
 

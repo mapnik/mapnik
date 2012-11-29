@@ -33,10 +33,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
-#ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
-//using boost::mutex;
-#endif
 
 // stl
 #include <string>
@@ -115,9 +111,6 @@ public:
 
     bool registerPool(const ConnectionCreator<Connection>& creator,unsigned initialSize,unsigned maxSize)
     {
-#ifdef MAPNIK_THREADSAFE
-        //mutex::scoped_lock lock(mutex_);
-#endif
         ContType::const_iterator itr = pools_.find(creator.id());
 
         if (itr != pools_.end())
@@ -137,9 +130,6 @@ public:
 
     boost::shared_ptr<PoolType> getPool(std::string const& key)
     {
-#ifdef MAPNIK_THREADSAFE
-        //mutex::scoped_lock lock(mutex_);
-#endif
         ContType::const_iterator itr=pools_.find(key);
         if (itr!=pools_.end())
         {
@@ -149,19 +139,6 @@ public:
         return emptyPool;
     }
 
-    HolderType get(std::string const& key)
-    {
-#ifdef MAPNIK_THREADSAFE
-        //mutex::scoped_lock lock(mutex_);
-#endif
-        ContType::const_iterator itr=pools_.find(key);
-        if (itr!=pools_.end())
-        {
-            boost::shared_ptr<PoolType> pool=itr->second;
-            return pool->borrowObject();
-        }
-        return HolderType();
-    }
     ConnectionManager() {}
 private:
     ConnectionManager(const ConnectionManager&);

@@ -33,6 +33,7 @@ namespace agg
 
         void rewind(unsigned path_id);
         unsigned vertex(double* x, double* y);
+        unsigned type() const { return m_source->type(); }
 
     private:
         conv_adaptor_vpgen(const conv_adaptor_vpgen<VertexSource, VPGen>&);

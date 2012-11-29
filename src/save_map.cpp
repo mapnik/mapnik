@@ -98,6 +98,10 @@ public:
         {
             set_attr( sym_node, "rasterizer", sym.get_rasterizer() );
         }
+        if ( sym.offset() != dfl.offset() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "offset", sym.offset() );
+        }
         serialize_symbolizer_base(sym_node, sym);
     }
 

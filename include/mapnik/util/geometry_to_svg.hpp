@@ -39,7 +39,7 @@ bool to_svg(std::string & svg, mapnik::geometry_type const& geom)
 {
     typedef std::back_insert_iterator<std::string> sink_type;
     sink_type sink(svg);
-    svg_generator<sink_type> generator;
+    svg_generator<sink_type, mapnik::geometry_type> generator;
     bool result = karma::generate(sink, generator, geom);
     return result;
 }
