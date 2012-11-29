@@ -51,6 +51,7 @@ namespace agg
         double y1() const { return base_type::vpgen().y1(); }
         double x2() const { return base_type::vpgen().x2(); }
         double y2() const { return base_type::vpgen().y2(); }
+        unsigned type() const { return base_type::type(); }
 
     private:
         conv_clip_polygon(const conv_clip_polygon<VertexSource>&);
