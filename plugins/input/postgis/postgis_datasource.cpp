@@ -160,46 +160,49 @@ void postgis_datasource::bind() const
 #ifdef MAPNIK_STATS
                 mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_srid_and_geometry_column)");
 #endif
-
                 std::ostringstream s;
-                s << "SELECT f_geometry_column, srid FROM "
-                  << GEOMETRY_COLUMNS <<" WHERE f_table_name='"
-                  << mapnik::sql_utils::unquote_double(geometry_table_)
-                  << "'";
 
-                if (! schema_.empty())
+                try
                 {
-                    s << " AND f_table_schema='"
-                      << mapnik::sql_utils::unquote_double(schema_)
+                    s << "SELECT f_geometry_column, srid FROM "
+                      << GEOMETRY_COLUMNS <<" WHERE f_table_name='"
+                      << mapnik::sql_utils::unquote_double(geometry_table_)
                       << "'";
-                }
-
-                if (! geometry_field_.empty())
-                {
-                    s << " AND f_geometry_column='"
-                      << mapnik::sql_utils::unquote_double(geometry_field_)
-                      << "'";
-                }
-
-                shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
-                if (rs->next())
-                {
-                    geometryColumn_ = rs->getValue("f_geometry_column");
-
-                    if (srid_ == 0)
+                    if (! schema_.empty())
                     {
-                        const char* srid_c = rs->getValue("srid");
-                        if (srid_c != NULL)
+                        s << " AND f_table_schema='"
+                          << mapnik::sql_utils::unquote_double(schema_)
+                          << "'";
+                    }
+                    if (! geometry_field_.empty())
+                    {
+                        s << " AND f_geometry_column='"
+                          << mapnik::sql_utils::unquote_double(geometry_field_)
+                          << "'";
+                    }
+                    shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
+                    if (rs->next())
+                    {
+                        geometryColumn_ = rs->getValue("f_geometry_column");
+                        if (srid_ == 0)
                         {
-                            int result = 0;
-                            if (mapnik::util::string2int(srid_c, result))
+                            const char* srid_c = rs->getValue("srid");
+                            if (srid_c != NULL)
                             {
-                                srid_ = result;
+                                int result = 0;
+                                if (mapnik::util::string2int(srid_c, result))
+                                {
+                                    srid_ = result;
+                                }
                             }
                         }
                     }
+                    rs->close();
                 }
-                rs->close();
+                catch (mapnik::datasource_exception const& ex) {
+                    // let this pass on query error and use the fallback below
+                    MAPNIK_LOG_WARN(postgis) << "postgis_datasource: metadata query failed: " << ex.what();
+                }
 
                 // If we still do not know the srid then we can try to fetch
                 // it from the 'table_' parameter, which should work even if it is
@@ -929,50 +932,53 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
 
             std::ostringstream s;
             std::string g_type;
-
-            s << "SELECT lower(type) as type FROM "
-              << GEOMETRY_COLUMNS <<" WHERE f_table_name='"
-              << mapnik::sql_utils::unquote_double(geometry_table_)
-              << "'";
-
-            if (! schema_.empty())
+            try
             {
-                s << " AND f_table_schema='"
-                  << mapnik::sql_utils::unquote_double(schema_)
+                s << "SELECT lower(type) as type FROM "
+                  << GEOMETRY_COLUMNS <<" WHERE f_table_name='"
+                  << mapnik::sql_utils::unquote_double(geometry_table_)
                   << "'";
+                if (! schema_.empty())
+                {
+                    s << " AND f_table_schema='"
+                      << mapnik::sql_utils::unquote_double(schema_)
+                      << "'";
+                }
+                if (! geometry_field_.empty())
+                {
+                    s << " AND f_geometry_column='"
+                      << mapnik::sql_utils::unquote_double(geometry_field_)
+                      << "'";
+                }
+                shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
+                if (rs->next())
+                {
+                    g_type = rs->getValue("type");
+                    if (boost::algorithm::contains(g_type, "line"))
+                    {
+                        result.reset(mapnik::datasource::LineString);
+                        return result;
+                    }
+                    else if (boost::algorithm::contains(g_type, "point"))
+                    {
+                        result.reset(mapnik::datasource::Point);
+                        return result;
+                    }
+                    else if (boost::algorithm::contains(g_type, "polygon"))
+                    {
+                        result.reset(mapnik::datasource::Polygon);
+                        return result;
+                    }
+                    else // geometry
+                    {
+                        result.reset(mapnik::datasource::Collection);
+                        return result;
+                    }
+                }
             }
-
-            if (! geometry_field_.empty())
-            {
-                s << " AND f_geometry_column='"
-                  << mapnik::sql_utils::unquote_double(geometry_field_)
-                  << "'";
-            }
-
-            shared_ptr<ResultSet> rs = conn->executeQuery(s.str());
-            if (rs->next())
-            {
-                g_type = rs->getValue("type");
-                if (boost::algorithm::contains(g_type, "line"))
-                {
-                    result.reset(mapnik::datasource::LineString);
-                    return result;
-                }
-                else if (boost::algorithm::contains(g_type, "point"))
-                {
-                    result.reset(mapnik::datasource::Point);
-                    return result;
-                }
-                else if (boost::algorithm::contains(g_type, "polygon"))
-                {
-                    result.reset(mapnik::datasource::Polygon);
-                    return result;
-                }
-                else // geometry
-                {
-                    result.reset(mapnik::datasource::Collection);
-                    return result;
-                }
+            catch (mapnik::datasource_exception const& ex) {
+                // let this pass on query error and use the fallback below
+                MAPNIK_LOG_WARN(postgis) << "postgis_datasource: metadata query failed: " << ex.what();
             }
 
             // fallback to querying first several features
