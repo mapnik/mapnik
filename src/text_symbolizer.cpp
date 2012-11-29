@@ -94,7 +94,7 @@ text_symbolizer::text_symbolizer(text_placements_ptr placements)
 : symbolizer_base(),
     placement_options_(placements)
 {
-
+    this->set_clip(false);
 }
 
 text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_name,
@@ -107,6 +107,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
     set_face_name(face_name);
     set_text_size(size);
     set_fill(fill);
+    this->set_clip(false);
 }
 
 text_symbolizer::text_symbolizer(expression_ptr name, float size, color const& fill,
@@ -117,6 +118,7 @@ text_symbolizer::text_symbolizer(expression_ptr name, float size, color const& f
     set_name(name);
     set_text_size(size);
     set_fill(fill);
+    this->set_clip(false);
 }
 
 text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
@@ -130,9 +132,6 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     if (this == &other)
         return *this;
     placement_options_ = other.placement_options_; /*TODO: Copy options? */
-
-    MAPNIK_LOG_DEBUG(text_symbolizer) << "text_symbolizer: TODO - Metawriter (text_symbolizer::operator=)";
-
     return *this;
 }
 

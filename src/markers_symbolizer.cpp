@@ -58,7 +58,10 @@ markers_symbolizer::markers_symbolizer()
       marker_p_(MARKER_POINT_PLACEMENT),
       // TODO: consider defaulting to MARKER_WHOLE_MULTI,
       //       for backward compatibility with 2.0.0
-      marker_mp_(MARKER_EACH_MULTI) { }
+      marker_mp_(MARKER_EACH_MULTI)
+      {
+          this->set_clip(false);
+      }
 
 markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
     : symbolizer_with_image(filename),
@@ -72,7 +75,10 @@ markers_symbolizer::markers_symbolizer(path_expression_ptr const& filename)
       marker_p_(MARKER_POINT_PLACEMENT),
       // TODO: consider defaulting to MARKER_WHOLE_MULTI,
       //       for backward compatibility with 2.0.0
-      marker_mp_(MARKER_EACH_MULTI) { }
+      marker_mp_(MARKER_EACH_MULTI)
+      {
+          this->set_clip(false);
+      }
 
 markers_symbolizer::markers_symbolizer(markers_symbolizer const& rhs)
     : symbolizer_with_image(rhs),

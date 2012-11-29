@@ -40,6 +40,7 @@ shield_symbolizer::shield_symbolizer(text_placements_ptr placements)
       unlock_image_(false),
       shield_displacement_(0,0)
 {
+    this->set_clip(false);
 }
 
 shield_symbolizer::shield_symbolizer(
@@ -53,6 +54,7 @@ shield_symbolizer::shield_symbolizer(
       unlock_image_(false),
       shield_displacement_(0, 0)
 {
+    this->set_clip(false);
 }
 
 shield_symbolizer::shield_symbolizer(
@@ -65,6 +67,7 @@ shield_symbolizer::shield_symbolizer(
       unlock_image_(false),
       shield_displacement_(0, 0)
 {
+    this->set_clip(false);
 }
 
 void shield_symbolizer::set_unlock_image(bool unlock_image)
