@@ -340,12 +340,10 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
   double start_x = x0;
   double start_y = y0;
 
-  bool empty = true;
-
   double atmp = 0.0;
   double xtmp = 0.0;
   double ytmp = 0.0;
-  unsigned count = 1;
+  unsigned count = 0;
 
   while (start!=end)
   {
@@ -353,7 +351,11 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
     if (command == SEG_END) continue;
-    empty = false;
+
+    if ( ! count++ ) {
+      start_x = x0;
+      start_y = y0;
+    }
 
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
@@ -369,9 +371,10 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
         y0 = y1;
         ++count;
     }
+
   }
 
-  if ( empty ) return false;
+  if (count == 0) return false;
 
   if (count <= 2) {
       x = (start_x + x0) * 0.5;
