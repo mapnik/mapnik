@@ -132,7 +132,7 @@ def render(filename, width, height, bbox, quiet=False):
             grid = mapnik.Grid(m.width,m.height)
             mapnik.render_layer(m,grid,layer=0)
             utf1 = grid.encode('utf',resolution=4)
-            open(actual_grid,'wb').write(json.dumps(utf1))
+            open(actual_grid,'wb').write(json.dumps(utf1,indent=2))
             if not os.path.exists(expected_grid):
                 # generate it on the fly
                 fail(actual_grid,expected_grid,None)
