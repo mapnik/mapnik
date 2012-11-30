@@ -1,4 +1,4 @@
-<Map maximum-extent="-100,-100,100,100">
+<Map maximum-extent="0,0,190,180">
 <Style name="each">
   <Rule>
     <Filter>[i] = 1</Filter>
