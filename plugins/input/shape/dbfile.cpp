@@ -145,9 +145,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
             break;
         }
         case 'N':
-        case 'F':
         {
-
             if (record_[fields_[col].offset_] == '*')
             {
                 f.put(name,0);
