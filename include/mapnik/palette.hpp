@@ -151,6 +151,7 @@ public:
     }
 
     bool valid() const;
+    std::string to_string() const;
 
 private:
     void parse(std::string const& pal, palette_type type);

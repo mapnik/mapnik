@@ -23,6 +23,10 @@
 #include <mapnik/palette.hpp>
 #include <mapnik/config_error.hpp>
 
+// stl
+#include <iostream>
+#include <iomanip>
+
 namespace mapnik
 {
 
@@ -72,6 +76,32 @@ const std::vector<unsigned>& rgba_palette::alphaTable() const
 bool rgba_palette::valid() const
 {
     return colors_ > 0;
+}
+
+std::string rgba_palette::to_string() const
+{
+    unsigned length = rgb_pal_.size();
+    unsigned alphaLength = alpha_pal_.size();
+    std::ostringstream str("");
+    str << "[Palette " << length;
+    if (length == 1)
+    {
+        str << " color";
+    }
+    else
+    {
+        str << " colors";
+    }
+    str << std::hex << std::setfill('0');
+    for (unsigned i = 0; i < length; i++) {
+        str << " #";
+        str << std::setw(2) << (unsigned)rgb_pal_[i].r;
+        str << std::setw(2) << (unsigned)rgb_pal_[i].g;
+        str << std::setw(2) << (unsigned)rgb_pal_[i].b;
+        if (i < alphaLength) str << std::setw(2) << alpha_pal_[i];
+    }
+    str << "]";
+    return str.str();
 }
 
 // return color index in returned earlier palette
