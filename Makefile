@@ -5,10 +5,15 @@ ifeq ($(UNAME), Darwin)
 else
 endif
 
+VERSION = $(shell grep ^__version__ scons/scons.py | cut -d'"' -f2 | cut -d. -f1,2)
+
 all: mapnik
 
 install:
 	@python scons/scons.py --config=cache --implicit-cache --max-drift=1 install
+
+src/libmapnik.so.$(VERSION): mapnik
+	ln -fs src/libmapnik.so libmapnik.so.$(VERSION)
 
 mapnik:
 	@python scons/scons.py --config=cache --implicit-cache --max-drift=1
@@ -16,12 +21,14 @@ mapnik:
 clean:
 	@python scons/scons.py -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
+	@rm -f src/libmapnik.so.$(VERSION)
 
 distclean:
 	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	if test -e "config.cache"; then rm "config.cache"; fi
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
+	rm -f src/libmapnik.so.$(VERSION)
 
 reset: distclean
 
@@ -38,13 +45,15 @@ test:
 	@echo "*** Running python tests..."
 	@python tests/run_tests.py -q
 
-test-local:
+test-local: src/libmapnik.so.$(VERSION)
 	@echo "*** boostrapping local test environment..."
 	export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
 	export PYTHONPATH=`pwd`/bindings/python/:${PYTHONPATH} && \
 	export MAPNIK_FONT_DIRECTORY=`pwd`/fonts/dejavu-fonts-ttf-2.33/ttf/ && \
 	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \
 	make test
+
+check: test-local
 
 demo:
 	@echo "*** Running rundemo.cpp…"
