@@ -136,12 +136,24 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
         case 'C':
         case 'D'://todo handle date?
         case 'M':
-        case 'L':
         {
             // FIXME - avoid constructing std::string on stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
             boost::trim(str);
             f.put(name,tr.transcode(str.c_str()));
+            break;
+        }
+        case 'L':
+        {
+            char ch = record_[fields_[col].offset_];
+            if ( ch == '1' || ch == 't' || ch == 'T' || ch == 'y' || ch == 'Y')
+            {
+                f.put(name,true);
+            }
+            else
+            {
+                f.put(name,false);
+            }
             break;
         }
         case 'N':
@@ -156,8 +168,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
                 double val = 0.0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                bool r = qi::phrase_parse(itr,end,double_,ascii::space,val);
-                if (r && (itr == end))
+                if (qi::phrase_parse(itr,end,double_,ascii::space,val))
                     f.put(name,val);
             }
             else
@@ -165,8 +176,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
                 int val = 0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                bool r = qi::phrase_parse(itr,end,int_,ascii::space,val);
-                if (r && (itr == end))
+                if (qi::phrase_parse(itr,end,int_,ascii::space,val))
                     f.put(name,val);
             }
             break;
