@@ -272,8 +272,11 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
 }
 
 template <typename T>
-void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& marker, agg::trans_affine const& tr,
-                                    double opacity, composite_mode_e comp_op)
+void agg_renderer<T>::render_marker(pixel_position const& pos,
+                                    marker const& marker,
+                                    agg::trans_affine const& tr,
+                                    double opacity,
+                                    composite_mode_e comp_op)
 {
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;

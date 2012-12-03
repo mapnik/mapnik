@@ -52,6 +52,23 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         query.add_property_name('bogus')
         fs = ds.features(query)
 
+    def test_dbf_logical_field_is_boolean():
+        ds = mapnik.Shapefile(file='../data/shp/long_lat')
+        eq_(len(ds.fields()),7)
+        eq_(ds.fields(),['LONG', 'LAT', 'LOGICAL_TR', 'LOGICAL_FA', 'CHARACTER', 'NUMERIC', 'DATE'])
+        eq_(ds.field_types(),['str', 'str', 'bool', 'bool', 'str', 'float', 'str'])
+        query = mapnik.Query(ds.envelope())
+        for fld in ds.fields():
+            query.add_property_name(fld)
+        feat = ds.all_features()[0]
+        eq_(feat.id(),1)
+        eq_(feat['LONG'],'0')
+        eq_(feat['LAT'],'0')
+        eq_(feat['LOGICAL_TR'],True)
+        eq_(feat['LOGICAL_FA'],False)
+        eq_(feat['CHARACTER'],'254')
+        eq_(feat['NUMERIC'],32)
+        eq_(feat['DATE'],'20121202')
 
 if __name__ == "__main__":
     setup()

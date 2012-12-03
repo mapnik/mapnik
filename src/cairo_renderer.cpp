@@ -54,6 +54,7 @@
 // boost
 #include <boost/utility.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"
@@ -1212,7 +1213,13 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
     else if (marker.is_bitmap())
     {
         agg::trans_affine matrix = tr;
-        matrix *= agg::trans_affine_translation(pos.x, pos.y);
+        double width = (*marker.get_bitmap_data())->width();
+        double height = (*marker.get_bitmap_data())->height();
+        double cx = 0.5 * width;
+        double cy = 0.5 * height;
+        matrix *= agg::trans_affine_translation(
+                     boost::math::iround(pos.x - cx),
+                     boost::math::iround(pos.y - cy));
         context.add_image(matrix, **marker.get_bitmap_data(), opacity);
     }
 }
@@ -1294,14 +1301,16 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
         placements_type const& placements = helper.placements();
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
-            pixel_position marker_pos = helper.get_marker_position(placements[ii]);
+            pixel_position pos = helper.get_marker_position(placements[ii]);
+            pos.x += 0.5 * helper.get_marker_width();
+            pos.y += 0.5 * helper.get_marker_height();
             double dx = 0.5 * helper.get_marker_width();
             double dy = 0.5 * helper.get_marker_height();
             agg::trans_affine marker_tr = agg::trans_affine_translation(-dx,-dy);
             marker_tr *= agg::trans_affine_scaling(scale_factor_);
             marker_tr *= agg::trans_affine_translation(dx,dy);
             marker_tr *= helper.get_image_transform();
-            render_marker(marker_pos,
+            render_marker(pos,
                           helper.get_marker(),
                           marker_tr,
                           sym.get_opacity());
@@ -1550,11 +1559,17 @@ struct markers_dispatch
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
 
-        if (placement_method != MARKER_LINE_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT ||
+            path.type() == Point)
         {
             double x = 0;
             double y = 0;
-            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            if (path.type() == LineString)
+            {
+                if (!label::middle_point(path, x, y))
+                    return;
+            }
+            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
                     return;
@@ -1633,11 +1648,17 @@ struct markers_dispatch_2
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
 
-        if (placement_method != MARKER_LINE_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT ||
+            path.type() == Point)
         {
             double x = 0;
             double y = 0;
-            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            if (path.type() == LineString)
+            {
+                if (!label::middle_point(path, x, y))
+                    return;
+            }
+            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
                     return;

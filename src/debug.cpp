@@ -60,14 +60,10 @@ logger::severity_type logger::severity_level_ =
     #if MAPNIK_DEFAULT_LOG_SEVERITY == 0
         logger::debug
     #elif MAPNIK_DEFAULT_LOG_SEVERITY == 1
-        logger::info
-    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
         logger::warn
-    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 3
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 2
         logger::error
-    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 4
-        logger::fatal
-    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 5
+    #elif MAPNIK_DEFAULT_LOG_SEVERITY == 3
         logger::none
     #else
         #error "Wrong default log severity level specified!"
