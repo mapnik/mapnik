@@ -38,7 +38,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
       put_property_(put_property(tr))
 {
     using qi::lit;
-    using qi::int_;
+    using qi::long_long;
     using qi::double_;
 #if BOOST_VERSION > 104200
     using qi::no_skip;
@@ -90,7 +90,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
 #else
     number = strict_double
 #endif
-        | int_
+        //| long_long
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
         | lit("null")[_val = construct<value_null>()]

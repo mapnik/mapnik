@@ -64,7 +64,7 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
         }
 
         extract<std::string> ex0(obj);
-        extract<int> ex1(obj);
+        extract<mapnik::value_integer> ex1(obj);
         extract<double> ex2(obj);
 
         if (ex0.check())

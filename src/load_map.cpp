@@ -369,13 +369,13 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                             if (*type == "int")
                             {
                                 is_string = false;
-                                int value = paramIter->get_value<int>();
+                                mapnik::value_integer value = paramIter->get_value<mapnik::value_integer>();
                                 params[name] = value;
                             }
                             else if (*type == "float")
                             {
                                 is_string = false;
-                                double value = paramIter->get_value<double>();
+                                double value = paramIter->get_value<mapnik::value_double>();
                                 params[name] = value;
                             }
                         }

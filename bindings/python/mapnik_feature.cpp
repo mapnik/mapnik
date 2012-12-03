@@ -162,7 +162,7 @@ void export_feature()
     using mapnik::Feature;
 
     // Python to mapnik::value converters
-    implicitly_convertible<int,mapnik::value>();
+    implicitly_convertible<mapnik::value_integer,mapnik::value>();
     implicitly_convertible<double,mapnik::value>();
     implicitly_convertible<UnicodeString,mapnik::value>();
     implicitly_convertible<bool,mapnik::value>();

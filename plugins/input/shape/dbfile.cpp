@@ -160,7 +160,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
         {
             if (record_[fields_[col].offset_] == '*')
             {
-                f.put(name,0);
+                f.put(name,0LL);
                 break;
             }
             if ( fields_[col].dec_>0 )
@@ -173,7 +173,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
             }
             else
             {
-                int val = 0;
+                mapnik::value_integer val = 0LL;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
                 if (qi::phrase_parse(itr,end,int_,ascii::space,val))

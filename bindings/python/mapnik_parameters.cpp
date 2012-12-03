@@ -78,7 +78,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             std::string key = extract<std::string>(keys[i]);
             object obj = d[key];
             extract<std::string> ex0(obj);
-            extract<int> ex1(obj);
+            extract<mapnik::value_integer> ex1(obj);
             extract<double> ex2(obj);
             extract<UnicodeString> ex3(obj);
 
@@ -185,7 +185,7 @@ boost::shared_ptr<mapnik::parameter> create_parameter_from_string(std::string co
     return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
 }
 
-boost::shared_ptr<mapnik::parameter> create_parameter_from_int(std::string const& key, int value)
+boost::shared_ptr<mapnik::parameter> create_parameter_from_int(std::string const& key, mapnik::value_integer value)
 {
     return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
 }

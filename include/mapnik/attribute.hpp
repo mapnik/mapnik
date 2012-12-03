@@ -59,11 +59,11 @@ struct geometry_type_attribute
         {
             if (type != 0 && itr->type() != type)
             {
-                return 4; // Collection
+                return 4LL; // Collection
             }
             type = itr->type();
         }
-        return type;
+        return static_cast<mapnik::value_integer>(type);
     }
 };
 

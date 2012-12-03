@@ -467,7 +467,7 @@ void csv_datasource::parse_csv(T & stream,
             {
                 csv_utils::fix_json_quoting(csv_line);
             }
-            
+
             Tokenizer tok(csv_line, grammer);
             Tokenizer::iterator beg = tok.begin();
 
@@ -598,7 +598,7 @@ void csv_datasource::parse_csv(T & stream,
                                 MAPNIK_LOG_ERROR(csv) << s.str();
                             }
                         }
-                    }                
+                    }
                 }
                 else
                 {
@@ -709,7 +709,7 @@ void csv_datasource::parse_csv(T & stream,
                         }
                         else
                         {
-                            feature->put(fld_name,static_cast<int>(float_val));
+                            feature->put(fld_name,static_cast<mapnik::value_integer>(float_val));
                             if (feature_count == 1)
                             {
                                 desc_.add_descriptor(

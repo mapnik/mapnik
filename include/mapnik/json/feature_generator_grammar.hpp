@@ -187,6 +187,7 @@ struct feature_generator_grammar:
         using boost::spirit::karma::uint_;
         using boost::spirit::karma::bool_;
         using boost::spirit::karma::int_;
+        using boost::spirit::karma::long_long;
         using boost::spirit::karma::double_;
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
@@ -212,7 +213,7 @@ struct feature_generator_grammar:
             << value(phoenix::at_c<1>(_val))
             ;
 
-        value = (value_null_| bool_ | int_| double_ | ustring)[_1 = value_base_(_r1)]
+        value = (value_null_| bool_ | long_long | double_ | ustring)[_1 = value_base_(_r1)]
             ;
 
         value_null_ = string[_1 = "null"]

@@ -70,7 +70,7 @@ geojson_datasource::geojson_datasource(parameters const& params, bool bind)
 
 struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeType>
 {
-    mapnik::eAttributeType operator() (int /*val*/) const
+    mapnik::eAttributeType operator() (mapnik::value_integer /*val*/) const
     {
         return mapnik::Integer;
     }
@@ -110,29 +110,29 @@ void geojson_datasource::bind() const
 {
     if (is_bound_) return;
 
-    typedef std::istreambuf_iterator<char> base_iterator_type;    
-    
+    typedef std::istreambuf_iterator<char> base_iterator_type;
+
     std::ifstream is(file_.c_str());
-    boost::spirit::multi_pass<base_iterator_type> begin = 
+    boost::spirit::multi_pass<base_iterator_type> begin =
         boost::spirit::make_default_multi_pass(base_iterator_type(is));
 
-    boost::spirit::multi_pass<base_iterator_type> end = 
+    boost::spirit::multi_pass<base_iterator_type> end =
         boost::spirit::make_default_multi_pass(base_iterator_type());
-    
+
     mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
     mapnik::json::feature_collection_parser<boost::spirit::multi_pass<base_iterator_type> > p(ctx,*tr_);
     bool result = p.parse(begin,end, features_);
-    if (!result) 
+    if (!result)
     {
         throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + file_ + "'");
     }
-    
+
     bool first = true;
     std::size_t count=0;
     BOOST_FOREACH (mapnik::feature_ptr f, features_)
     {
         mapnik::box2d<double> const& box = f->envelope();
-        if (first) 
+        if (first)
         {
             extent_ = box;
             first = false;
@@ -147,7 +147,7 @@ void geojson_datasource::bind() const
         else
         {
             extent_.expand_to_include(box);
-        }       
+        }
         tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), count++);
     }
     is_bound_ = true;
@@ -160,7 +160,7 @@ const char * geojson_datasource::name()
     return "geojson";
 }
 
-boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry_type() const 
+boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry_type() const
 {
     boost::optional<mapnik::datasource::geometry_t> result;
     int multi_type = 0;
@@ -182,7 +182,7 @@ boost::optional<mapnik::datasource::geometry_t> geojson_datasource::get_geometry
     return result;
 }
 
-mapnik::datasource::datasource_t geojson_datasource::type() const 
+mapnik::datasource::datasource_t geojson_datasource::type() const
 {
     return type_;
 }
@@ -203,7 +203,7 @@ mapnik::layer_descriptor geojson_datasource::get_descriptor() const
 mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) const
 {
     if (!is_bound_) bind();
-    
+
     // if the query box intersects our world extent then query for features
     mapnik::box2d<double> const& b = q.get_bbox();
     if (extent_.intersects(b))
@@ -211,7 +211,7 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
         index_array_ = tree_.find(box);
         return boost::make_shared<geojson_featureset>(features_, index_array_.begin(), index_array_.end());
-    }    
+    }
     // otherwise return an empty featureset pointer
     return mapnik::featureset_ptr();
 }

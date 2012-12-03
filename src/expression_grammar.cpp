@@ -63,7 +63,8 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
     using qi::lexeme;
     using qi::_val;
     using qi::lit;
-    using qi::int_;
+    //using qi::int_;
+    using qi::long_long;
     using qi::double_;
     using qi::hex;
     using qi::omit;
@@ -138,13 +139,13 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
         ;
 
     primary_expr = strict_double [_val = _1]
-        | int_ [_val = _1]
-        | no_case[lit("true")] [_val = true]
-        | no_case[lit("false")] [_val = false]
-        | no_case[lit("null")] [_val = value_null() ]
-        | no_case[geom_type][_val = _1 ]
+        | long_long [_val = _1]
+        //| no_case[lit("true")] [_val = true]
+        //| no_case[lit("false")] [_val = false]
+        //| no_case[lit("null")] [_val = value_null() ]
+        //| no_case[geom_type][_val = _1 ]
         | ustring [_val = unicode_(_1) ]
-        | lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
+        //| lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
         | attr [_val = construct<mapnik::attribute>( _1 ) ]
         | '(' >> expr [_val = _1 ] >> ')'
         ;
