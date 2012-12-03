@@ -50,6 +50,7 @@ DATASOURCE_PLUGIN(shape_datasource)
 using mapnik::String;
 using mapnik::Double;
 using mapnik::Integer;
+using mapnik::Boolean;
 using mapnik::datasource_exception;
 using mapnik::filter_in_box;
 using mapnik::filter_at_point;
@@ -121,9 +122,11 @@ void shape_datasource::bind() const
             case 'C': // character
             case 'D': // Date
             case 'M': // Memo, a string
-            case 'L': // logical
             case '@': // timestamp
                 desc_.add_descriptor(attribute_descriptor(fld_name, String));
+                break;
+            case 'L': // logical
+                desc_.add_descriptor(attribute_descriptor(fld_name, Boolean));
                 break;
             case 'N':
             case 'O': // double
@@ -153,7 +156,7 @@ void shape_datasource::bind() const
         }
 
     }
-    catch (const datasource_exception& ex)
+    catch (datasource_exception const& ex)
     {
         MAPNIK_LOG_ERROR(shape) << "Shape Plugin: error processing field attributes, " << ex.what();
         throw;

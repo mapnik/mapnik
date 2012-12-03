@@ -134,8 +134,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
         switch (fields_[col].type_)
         {
         case 'C':
-        case 'D'://todo handle date?
-        case 'M':
+        case 'D':
         {
             // FIXME - avoid constructing std::string on stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
@@ -152,6 +151,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
             }
             else
             {
+                // NOTE: null logical fields use '?'
                 f.put(name,false);
             }
             break;
