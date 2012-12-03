@@ -31,6 +31,8 @@ files = [
         'bbox': mapnik.Box2d(0, 0, 190, 180)},
     {'name': "marker-on-line", 'sizes':[(600,400)],
         'bbox': mapnik.Box2d(-10, 0, 15, 20)},
+    {'name': "marker_line_placement_on_points", 'sizes':[(500,100)],
+        'bbox': mapnik.Box2d(0, 0, 5, 5)},
     {'name': "whole-centroid", 'sizes':[(600,400)],
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
     {'name': "simple-E"},

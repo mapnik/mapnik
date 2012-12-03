@@ -87,7 +87,8 @@ struct vector_markers_rasterizer_dispatch
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
 
-        if (placement_method != MARKER_LINE_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT ||
+            path.type() == Point)
         {
             double x = 0;
             double y = 0;
@@ -188,7 +189,8 @@ struct raster_markers_rasterizer_dispatch
         marker_placement_e placement_method = sym_.get_marker_placement();
         box2d<double> bbox_(0,0, src_.width(),src_.height());
 
-        if (placement_method != MARKER_LINE_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT ||
+            path.type() == Point)
         {
             double x = 0;
             double y = 0;
