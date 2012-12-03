@@ -48,8 +48,8 @@ if __name__ == "__main__" :
     print "SHAPES COUNT=",count
     delta = shp_file_length-calc_total_size
     if  delta  > 0 :
-        print "BAD SHAPE FILE: extra ", 2*(shp_file_length-calc_total_size),"bytes"
+        print "BAD SHAPE FILE: extra ", 2*delta,"bytes"
     elif delta < 0:
-        print "BAD SHAPE FILE: missing ", 2*(shp_file_length-calc_total_size),"bytes"
+        print "BAD SHAPE FILE: missing ", 2*delta,"bytes"
     else:
-        print "SHAPE FILE IS GOOD!"
+        print "SHAPE FILE LOOKS GOOD!"
