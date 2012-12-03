@@ -26,8 +26,8 @@ if __name__ == "__main__" :
     _,_,_,_,_,_,shp_file_length = header[0].unpack_from(shp.read(28))
     _,_,lox,loy,hix,hiy,_,_,_,_ = header[1].unpack_from(shp.read(72))
 
-    print "SHX FILE_LENGTH=",shx_file_length
-    print "SHP FILE_LENGTH=",shp_file_length
+    print "SHX FILE_LENGTH=",shx_file_length,"bytes"
+    print "SHP FILE_LENGTH=",shp_file_length,"bytes"
 
     print "BBOX(",lox,loy,hix,hiy,")"
     record_header = struct.Struct(">II")
@@ -35,17 +35,21 @@ if __name__ == "__main__" :
     calc_total_size = 50
     count = 0
     while shx.tell() < shx_file_length * 2 :
-        offset,len =  record.unpack_from(shx.read(8))
+        offset,shx_content_length =  record.unpack_from(shx.read(8))
         shp.seek(offset*2, os.SEEK_SET)
         record_number,content_length = record_header.unpack_from(shp.read(8))
-        print (2*offset),record_number,content_length
+        #print (2*offset),record_number,content_length
+        if shx_content_length <> content_length:
+            print "BAD SHAPE FILE: content_lenght mismatch in SHP and SHX",shx_content_length,content_length
+            sys.exit(1)
         calc_total_size +=(4 + content_length)
         count+=1
 
     print "SHAPES COUNT=",count
-
-    if shp_file_length-calc_total_size <> 0 :
-        print "BAD SHAPE FILE"
-        print "extra ", 2*(shp_file_length-calc_total_size)," bytes"
+    delta = shp_file_length-calc_total_size
+    if  delta  > 0 :
+        print "BAD SHAPE FILE: extra ", 2*(shp_file_length-calc_total_size),"bytes"
+    elif delta < 0:
+        print "BAD SHAPE FILE: missing ", 2*(shp_file_length-calc_total_size),"bytes"
     else:
-        print "GOOD!"
+        print "SHAPE FILE IS GOOD!"
