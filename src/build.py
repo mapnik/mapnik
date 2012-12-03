@@ -393,5 +393,13 @@ else:
     env['create_uninstall_target'](env, target1)
     env['create_uninstall_target'](env, target)
 
+    # to enable local testing
+    lib_major_minor = "%s.%d.%d" % (os.path.basename(env.subst(env['MAPNIK_LIB_NAME'])), int(major), int(minor))
+    local_lib = os.path.basename(env.subst(env['MAPNIK_LIB_NAME']))
+    if os.path.islink(lib_major_minor) or os.path.exists(lib_major_minor):
+        os.remove(lib_major_minor)
+    os.symlink(local_lib,lib_major_minor)
+    Clean(mapnik,lib_major_minor);
+
 if not env['RUNTIME_LINK'] == 'static':
     Depends(mapnik, env.subst('../deps/agg/libagg.a'))
