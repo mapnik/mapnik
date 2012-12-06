@@ -109,8 +109,8 @@ feature_ptr shape_featureset<filterT>::next()
             double y = shape_.shp().read_double();
             // skip z
             shape_.shp().skip(8);
-            // skip m if exists
-            if (shape_.reclength_ == 8 + 36)
+            // skip m if exists: OGR bug
+            if (shape_.reclength_ == 18)
             {
                 shape_.shp().skip(8);
             }
