@@ -10,6 +10,12 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the SVN log.
 
+Future
+
+- Fixed linking to recent boost versions
+
+- Added support for literal types in PostGIS Plugin (#1464)
+
 Mapnik 2.0.2
 ------------
 
