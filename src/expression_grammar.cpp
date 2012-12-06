@@ -47,10 +47,10 @@ expr_node regex_replace_impl::operator() (T0 & node, T1 const& pattern, T2 const
 
 template <typename Iterator>
 expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
-        : expression_grammar::base_type(expr),
-          unicode_(unicode_impl(tr)),
-          regex_match_(regex_match_impl(tr)),
-          regex_replace_(regex_replace_impl(tr))
+    : expression_grammar::base_type(expr),
+      unicode_(unicode_impl(tr)),
+      regex_match_(regex_match_impl(tr)),
+      regex_replace_(regex_replace_impl(tr))
 {
     using boost::phoenix::construct;
     using qi::_1;
@@ -140,12 +140,12 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
 
     primary_expr = strict_double [_val = _1]
         | long_long [_val = _1]
-        //| no_case[lit("true")] [_val = true]
-        //| no_case[lit("false")] [_val = false]
-        //| no_case[lit("null")] [_val = value_null() ]
-        //| no_case[geom_type][_val = _1 ]
+        | no_case[lit("true")] [_val = true]
+        | no_case[lit("false")] [_val = false]
+        | no_case[lit("null")] [_val = value_null() ]
+        | no_case[geom_type][_val = _1 ]
         | ustring [_val = unicode_(_1) ]
-        //| lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
+        | lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
         | attr [_val = construct<mapnik::attribute>( _1 ) ]
         | '(' >> expr [_val = _1 ] >> ')'
         ;

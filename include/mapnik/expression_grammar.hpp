@@ -108,7 +108,7 @@ struct regex_replace_impl
     mapnik::transcoder const& tr_;
 };
 
-struct geometry_types : qi::symbols<char,int>
+struct geometry_types : qi::symbols<char,mapnik::value_integer>
 {
     geometry_types()
     {
