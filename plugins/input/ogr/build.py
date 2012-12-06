@@ -40,7 +40,8 @@ plugin_env['LIBS'] = [env['PLUGINS']['ogr']['lib']]
 # Link Library to Dependencies
 plugin_env['LIBS'].append('mapnik')
 plugin_env['LIBS'].append(env['ICU_LIB_NAME'])
-plugin_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
+if env['HAS_BOOST_SYSTEM']:
+    plugin_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
 plugin_env['LIBS'].append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 if env['RUNTIME_LINK'] == 'static':

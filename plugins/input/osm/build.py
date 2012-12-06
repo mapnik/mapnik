@@ -40,6 +40,8 @@ libraries = [ 'xml2' ]
 libraries.append('curl')
 libraries.append('mapnik')
 libraries.append(env['ICU_LIB_NAME'])
+if env['HAS_BOOST_SYSTEM']:
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
 input_plugin = plugin_env.SharedLibrary('../osm', source=osm_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
 

@@ -41,7 +41,8 @@ libraries = []
 # Link Library to Dependencies
 libraries.append('mapnik')
 libraries.append(env['ICU_LIB_NAME'])
-libraries.append('boost_system%s' % env['BOOST_APPEND'])
+if env['HAS_BOOST_SYSTEM']:
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 if env['SHAPE_MEMORY_MAPPED_FILE']:

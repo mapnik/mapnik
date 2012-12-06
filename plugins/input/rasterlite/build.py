@@ -37,7 +37,8 @@ libraries = [env['PLUGINS']['rasterlite']['lib']]
 # Link Library to Dependencies
 libraries.append('mapnik')
 libraries.append(env['ICU_LIB_NAME'])
-libraries.append('boost_system%s' % env['BOOST_APPEND'])
+if env['HAS_BOOST_SYSTEM']:
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 input_plugin = plugin_env.SharedLibrary('../rasterlite', source=rasterlite_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
