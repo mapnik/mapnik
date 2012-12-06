@@ -45,6 +45,9 @@ target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.pa
 
 libraries = ['mapnik']
 
+if env['HAS_BOOST_SYSTEM']:
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+
 if env['BOOST_PYTHON_LIB']:
     libraries.append(env['BOOST_PYTHON_LIB'])
 else:
