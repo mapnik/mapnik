@@ -52,7 +52,7 @@ struct geometry_type_attribute
     template <typename V, typename F>
     V value(F const& f) const
     {
-        int type = 0;
+        mapnik::value_integer type = 0;
         geometry_container::const_iterator itr = f.paths().begin();
         geometry_container::const_iterator end = f.paths().end();
         for ( ; itr != end; ++itr)
@@ -63,7 +63,7 @@ struct geometry_type_attribute
             }
             type = itr->type();
         }
-        return static_cast<mapnik::value_integer>(type);
+        return type;
     }
 };
 
