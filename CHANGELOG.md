@@ -15,6 +15,8 @@ For a complete change history, see the git log.
 
 - Add DebugSymbolizer (#1366)
 
+- Added support for literal types in PostGIS Plugin (#1464)
+
 
 ## Mapnik 2.1.0
 
