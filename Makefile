@@ -29,14 +29,7 @@ uninstall:
 	python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	@echo "*** Running visual tests..."
-	@python tests/visual_tests/test.py -q || true
-	@echo "*** Running C++ tests..."
-	@for FILE in tests/cpp_tests/*-bin; do \
-		$${FILE}; \
-	done
-	@echo "*** Running python tests..."
-	@python tests/run_tests.py -q
+	./run_tests
 
 test-local:
 	@echo "*** Boostrapping local test environment..."
