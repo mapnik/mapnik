@@ -24,7 +24,6 @@
 #define MAPNIK_FONT_ENGINE_FREETYPE_HPP
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/ctrans.hpp>
@@ -57,7 +56,6 @@ extern "C"
 #include <string>
 #include <vector>
 #include <map>
-#include <iostream>
 #include <algorithm>
 
 // uci
@@ -140,8 +138,6 @@ public:
 
     ~font_face()
     {
-        MAPNIK_LOG_DEBUG(font_engine_freetype) << "font_face: Clean up face \"" << family_name() << " " << style_name() << "\"";
-
         FT_Done_Face(face_);
     }
 
@@ -225,8 +221,6 @@ public:
 
     ~stroker()
     {
-        MAPNIK_LOG_DEBUG(font_engine_freetype) << "stroker: Destroy stroker=" << s_;
-
         FT_Stroker_Done(s_);
     }
 private:
