@@ -29,7 +29,7 @@ uninstall:
 	python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	./run_tests
+	@ ./run_tests
 
 test-local:
 	@echo "*** Boostrapping local test environment..."
