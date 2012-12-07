@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 #include <mapnik/gradient.hpp>
-#include <iostream>
 
 namespace mapnik
 {

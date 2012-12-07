@@ -26,7 +26,6 @@
 #include <libxml/xmlreader.h>
 #include <cstdio>
 #include <cstdlib>
-#include <iostream>
 #include <string>
 #include "osm.h"
 #include <map>

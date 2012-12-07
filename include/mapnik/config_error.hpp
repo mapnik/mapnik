@@ -23,12 +23,13 @@
 #ifndef MAPNIK_CONFIG_ERROR_HPP
 #define MAPNIK_CONFIG_ERROR_HPP
 
-#include <iostream>
-#include <sstream>
+#include <exception>
+#include <string>
 
 namespace mapnik {
 
 class xml_node;
+
 class config_error : public std::exception
 {
 public:
