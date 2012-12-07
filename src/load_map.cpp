@@ -48,12 +48,12 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/trim.hpp>
 #include <mapnik/marker_cache.hpp>
 
 // boost
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -255,8 +255,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tokens.begin();
                      beg != tokens.end(); ++beg)
                 {
-                    std::string item(*beg);
-                    boost::trim(item);
+                    std::string item = mapnik::util::trim_copy(*beg);
                     if (!mapnik::util::string2int(item,n[i]))
                     {
                         throw config_error(std::string("Invalid version string encountered: '")

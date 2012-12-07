@@ -31,16 +31,15 @@
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/util/trim.hpp>
 
 // boost
 #include <boost/utility.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 // stl
 #include <iostream>
 #include <fstream>
 
-using namespace std;
 namespace rapidxml = boost::property_tree::detail::rapidxml;
 namespace mapnik
 {
@@ -108,7 +107,7 @@ public:
 //        {
 //            boost::filesystem::path path(base_path);
 //            if (!boost::filesystem::exists(path)) {
-//                throw config_error(string("Could not locate base_path '") +
+//                throw config_error(std::string("Could not locate base_path '") +
 //                                   base_path + "': file or directory does not exist");
 //            }
 //        }
@@ -145,7 +144,7 @@ private:
         case rapidxml::node_cdata:
         {
             std::string trimmed(cur_node->value());
-            boost::trim(trimmed);
+            mapnik::util::trim(trimmed);
             if (trimmed.empty()) break; //Don't add empty text nodes
             node.add_child(trimmed, 0, true);
         }

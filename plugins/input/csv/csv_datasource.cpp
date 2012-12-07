@@ -41,6 +41,7 @@
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
+#include <mapnik/util/trim.hpp>
 
 // stl
 #include <sstream>
@@ -68,7 +69,7 @@ csv_datasource::csv_datasource(parameters const& params, bool bind)
       separator_(*params_.get<std::string>("separator", "")),
       quote_(*params_.get<std::string>("quote", "")),
       headers_(),
-      manual_headers_(boost::trim_copy(*params_.get<std::string>("headers", ""))),
+      manual_headers_(mapnik::util::trim_copy(*params_.get<std::string>("headers", ""))),
       strict_(*params_.get<mapnik::boolean>("strict", false)),
       quiet_(*params_.get<mapnik::boolean>("quiet", false)),
       filesize_max_(*params_.get<float>("filesize_max", 20.0)),  // MB
@@ -196,7 +197,7 @@ void csv_datasource::parse_csv(T & stream,
 
     // if user has not passed a separator manually
     // then attempt to detect by reading first line
-    std::string sep = boost::trim_copy(separator);
+    std::string sep = mapnik::util::trim_copy(separator);
     if (sep.empty())
     {
         // default to ','
@@ -240,10 +241,10 @@ void csv_datasource::parse_csv(T & stream,
 
     typedef boost::escaped_list_separator<char> escape_type;
 
-    std::string esc = boost::trim_copy(escape);
+    std::string esc = mapnik::util::trim_copy(escape);
     if (esc.empty()) esc = "\\";
 
-    std::string quo = boost::trim_copy(quote);
+    std::string quo = mapnik::util::trim_copy(quote);
     if (quo.empty()) quo = "\"";
 
     MAPNIK_LOG_DEBUG(csv) << "csv_datasource: csv grammar: sep: '" << sep
@@ -281,7 +282,7 @@ void csv_datasource::parse_csv(T & stream,
         unsigned idx(0);
         for (; beg != tok.end(); ++beg)
         {
-            std::string val = boost::trim_copy(*beg);
+            std::string val = mapnik::util::trim_copy(*beg);
             std::string lower_val = boost::algorithm::to_lower_copy(val);
             if (lower_val == "wkt"
                 || (lower_val.find("geom") != std::string::npos))
@@ -324,7 +325,7 @@ void csv_datasource::parse_csv(T & stream,
                 Tokenizer::iterator beg = tok.begin();
                 std::string val;
                 if (beg != tok.end())
-                    val = boost::trim_copy(*beg);
+                    val = mapnik::util::trim_copy(*beg);
 
                 // skip blank lines
                 if (val.empty())
@@ -338,7 +339,7 @@ void csv_datasource::parse_csv(T & stream,
                     for (; beg != tok.end(); ++beg)
                     {
                         ++idx;
-                        val = boost::trim_copy(*beg);
+                        val = mapnik::util::trim_copy(*beg);
                         if (val.empty())
                         {
                             if (strict_)
@@ -522,7 +523,7 @@ void csv_datasource::parse_csv(T & stream,
                 }
                 else
                 {
-                    value = boost::trim_copy(*beg);
+                    value = mapnik::util::trim_copy(*beg);
                     ++beg;
                 }
 
