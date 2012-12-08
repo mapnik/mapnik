@@ -23,16 +23,14 @@
 #ifndef MAPNIK_TRIM_HPP
 #define MAPNIK_TRIM_HPP
 
-// boost
-//#include <boost/algorithm/string/trim.hpp>
-
 // stl
 #include <string>
-#include <iostream>
+#include <algorithm>
 
 namespace mapnik { namespace util {
 
 /*
+   https://github.com/mapnik/mapnik/issues/1633
    faster trim (than boost::trim)
    that intentionally does not respect
    std::locale to avoid overhead in cases
