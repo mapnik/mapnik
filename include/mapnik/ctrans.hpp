@@ -81,6 +81,11 @@ struct MAPNIK_DECL coord_transform
         geom_.rewind(pos);
     }
 
+    unsigned type() const
+    {
+      return static_cast<unsigned>(geom_.type());
+    }
+
     Geometry const& geom() const
     {
         return geom_;
