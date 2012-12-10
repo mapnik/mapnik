@@ -29,6 +29,7 @@ namespace agg
 
         void rewind(unsigned) {}
         unsigned vertex(double*, double*) { return path_cmd_stop; }
+        unsigned type() const { return 0; }
     };
 
 
@@ -64,6 +65,7 @@ namespace agg
         }
 
         unsigned vertex(double* x, double* y);
+        unsigned type() const { return m_source->type(); }
 
     private:
         // Prohibit copying
