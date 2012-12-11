@@ -94,11 +94,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
             padding *= half_stroke;
         if (fabs(sym.offset()) > 0)
             padding *= fabs(sym.offset()) * 1.2;
-        double x0 = query_extent_.minx();
-        double y0 = query_extent_.miny();
-        double x1 = query_extent_.maxx();
-        double y1 = query_extent_.maxy();
-        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+        clipping_extent.pad(padding);
         // debugging
         //box2d<double> inverse(x0 + padding, y0 + padding, x1 - padding , y1 - padding);
         //draw_geo_extent(inverse,mapnik::color("red"));

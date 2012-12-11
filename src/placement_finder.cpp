@@ -482,11 +482,8 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
 
             if (p.minimum_padding > 0)
             {
-                double min_pad = pi.get_actual_minimum_padding();
-                box2d<double> epad(e.minx()-min_pad,
-                                   e.miny()-min_pad,
-                                   e.maxx()+min_pad,
-                                   e.maxy()+min_pad);
+                box2d<double> epad = e;
+                epad.pad(pi.get_actual_minimum_padding());
                 if (!dimensions_.contains(epad))
                 {
                     return;
@@ -963,11 +960,9 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
         }
         if (p.minimum_padding > 0)
         {
-            double min_pad = pi.get_actual_minimum_padding();
-            box2d<double> epad(e.minx()-min_pad,
-                               e.miny()-min_pad,
-                               e.maxx()+min_pad,
-                               e.maxy()+min_pad);
+
+            box2d<double> epad = e;
+            epad.pad(pi.get_actual_minimum_padding());
             if (!dimensions_.contains(epad))
             {
                 status = false;

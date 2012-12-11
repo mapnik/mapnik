@@ -344,6 +344,17 @@ void box2d<T>::clip(const box2d_type& other)
     maxy_ = std::min(maxy_,other.maxy());
 }
 
+template <typename T>
+#if !defined(__SUNPRO_CC)
+inline
+#endif
+void box2d<T>::pad(T padding)
+{
+    minx_ -= padding;
+    miny_ -= padding;
+    maxx_ += padding;
+    maxy_ += padding;
+}
 
 template <typename T>
 #if !defined(__SUNPRO_CC)
