@@ -93,6 +93,8 @@ private:
 typedef MAPNIK_DECL context<std::map<std::string,std::size_t> > context_type;
 typedef MAPNIK_DECL boost::shared_ptr<context_type> context_ptr;
 
+static const value default_value;
+
 class MAPNIK_DECL feature_impl : private boost::noncopyable
 {
     friend class feature_kv_iterator;
@@ -126,7 +128,6 @@ public:
         put_new(key,value(val));
     }
 
-
     void put(context_type::key_type const& key, value const& val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
@@ -140,7 +141,6 @@ public:
             throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
         }
     }
-
 
     void put_new(context_type::key_type const& key, value const& val)
     {
@@ -158,7 +158,6 @@ public:
         }
     }
 
-
     bool has_key(context_type::key_type const& key) const
     {
         return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
@@ -170,14 +169,14 @@ public:
         if (itr != ctx_->mapping_.end())
             return get(itr->second);
         else
-            throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
+            return default_value;
     }
 
     value_type const& get(std::size_t index) const
     {
         if (index < data_.size())
             return data_[index];
-        throw std::out_of_range("Index out of range");
+        return default_value;
     }
 
     boost::optional<value_type const&> get_optional(std::size_t index) const
