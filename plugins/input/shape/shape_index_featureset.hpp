@@ -60,11 +60,12 @@ private:
     context_ptr ctx_;
     shape_io & shape_;
     boost::scoped_ptr<transcoder> tr_;
-    std::vector<int> ids_;
-    std::vector<int>::iterator itr_;
+    std::vector<std::streampos> offsets_;
+    std::vector<std::streampos>::iterator itr_;
     std::vector<int> attr_ids_;
     const int row_limit_;
     mutable int count_;
+    mutable box2d<double> feature_bbox_;
 };
 
 #endif // SHAPE_INDEX_FEATURESET_HPP
