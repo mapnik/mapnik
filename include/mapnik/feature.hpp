@@ -287,7 +287,14 @@ public:
             std::size_t index = itr->second;
             if (index < data_.size())
             {
-                ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+                if (data_[itr->second] == mapnik::value_null())
+                {
+                    ss << "  " << itr->first  << ":null" << std::endl;
+                }
+                else
+                {
+                    ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+                }
             }
         }
         ss << ")" << std::endl;
