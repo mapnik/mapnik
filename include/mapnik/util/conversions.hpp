@@ -68,7 +68,11 @@ struct double_policy : boost::spirit::karma::real_policies<T>
 {
     typedef boost::spirit::karma::real_policies<T> base_type;
     static int floatfield(T n) { return base_type::fmtflags::fixed; }
-    static unsigned precision(T n) { return 16 ;}
+    static unsigned precision(T n) { return 15 - trunc(log10(n)); }
+    template <typename OutputIterator>
+    static bool dot(OutputIterator& sink, T n, unsigned precision) {
+      return n ? *sink = '.', true : false;
+    }
 };
 
 
@@ -77,7 +81,7 @@ template <>
 inline bool to_string(std::string & str, double value)
 {
     namespace karma = boost::spirit::karma;
-    typedef boost::spirit::karma::real_generator<double, double_policy<double> > double_type;
+    typedef karma::real_generator<double, double_policy<double> > double_type;
     std::back_insert_iterator<std::string> sink(str);
     return karma::generate(sink, double_type(), value);
 }
