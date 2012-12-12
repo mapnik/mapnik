@@ -160,7 +160,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
         {
             if (record_[fields_[col].offset_] == '*')
             {
-                f.put(name,0);
+                f.put(name,mapnik::value_null());
                 break;
             }
             if ( fields_[col].dec_>0 )
