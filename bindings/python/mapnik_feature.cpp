@@ -194,11 +194,11 @@ void export_feature()
     // Python to mapnik::value converters
     // NOTE: order matters here. For example value_null must be listed before
     // bool otherwise Py_None will be interpreted as bool (false)
-    implicitly_convertible<int,mapnik::value>();
-    implicitly_convertible<double,mapnik::value>();
     implicitly_convertible<UnicodeString,mapnik::value>();
     implicitly_convertible<mapnik::value_null,mapnik::value>();
     implicitly_convertible<bool,mapnik::value>();
+    implicitly_convertible<int,mapnik::value>();
+    implicitly_convertible<double,mapnik::value>();
 
     // http://misspent.wordpress.com/2009/09/27/how-to-write-boost-python-converters/
     UnicodeString_from_python_str();
