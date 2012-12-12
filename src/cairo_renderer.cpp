@@ -1052,7 +1052,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     if (sym.clip())
     {
         double padding = (double)(query_extent_.width()/width_);
-        float half_stroke = stroke_.get_width()/2.0;
+        double half_stroke = stroke_.get_width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
         if (fabs(sym.offset()) > 0)

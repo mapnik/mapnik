@@ -132,7 +132,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (sym.clip())
     {
         double padding = (double)(query_extent_.width()/pixmap_.width());
-        float half_stroke = (*mark)->width()/2.0;
+        double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
         clipping_extent.pad(padding);
