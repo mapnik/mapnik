@@ -28,12 +28,15 @@
 
 // stl
 #include <string>
+#include <cmath> // log10
+
 // boost
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/karma.hpp>
 
 // boost
 #include <boost/version.hpp>
+#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
 
 #if BOOST_VERSION >= 104500
 #include <boost/config/warning_disable.hpp>
@@ -68,7 +71,7 @@ struct double_policy : boost::spirit::karma::real_policies<T>
 {
     typedef boost::spirit::karma::real_policies<T> base_type;
     static int floatfield(T n) { return base_type::fmtflags::fixed; }
-    static unsigned precision(T n) { return 15 - trunc(log10(n)); }
+    static unsigned precision(T n) { return static_cast<unsigned>(15 - boost::math::trunc(log10(n))); }
     template <typename OutputIterator>
     static bool dot(OutputIterator& sink, T n, unsigned precision) {
       return n ? *sink = '.', true : false;

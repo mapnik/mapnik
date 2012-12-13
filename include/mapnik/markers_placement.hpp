@@ -293,7 +293,7 @@ private:
                 last_y = next_y;
             }
         }
-        unsigned points = round(length / s);
+        unsigned points = static_cast<unsigned>(round(length / s));
         if (points == 0) return 0.0; //Path to short
         return length / points;
     }
