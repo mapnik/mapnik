@@ -655,7 +655,10 @@ featureset_ptr postgis_datasource::features(const query& q) const
             s << "\"" << geometryColumn_ << "\"";
 
             if (simplify_geometries_) {
-              const double tolerance = std::min(px_gw, px_gh) / 2.0;
+              // 1/20 of pixel seems to be a good compromise to avoid
+              // drop of collapsed polygons.
+              // See https://github.com/mapnik/mapnik/issues/1639
+              const double tolerance = std::min(px_gw, px_gh) / 20.0;
               s << ", " << tolerance << ")";
             }
 
