@@ -113,7 +113,8 @@ struct feature_grammar :
     qi::uint_parser< unsigned, 16, 4, 4 > hex4 ;
     qi::rule<Iterator,std::string(), space_type> string_;
     qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,boost::variant<value_null,bool,boost::long_long_type,double>(),space_type> number;
+    qi::rule<Iterator,boost::variant<value_null,bool,
+                                     value_integer,value_double>(),space_type> number;
     qi::rule<Iterator,space_type> object;
     qi::rule<Iterator,space_type> array;
     qi::rule<Iterator,space_type> pairs;
@@ -125,7 +126,7 @@ struct feature_grammar :
 
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
-    qi::rule<Iterator,boost::variant<value_null,bool,boost::long_long_type,double,std::string>(), space_type> attribute_value;
+    qi::rule<Iterator,boost::variant<value_null,bool,value_integer,value_double,std::string>(), space_type> attribute_value;
 
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
