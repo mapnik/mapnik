@@ -5,8 +5,6 @@
 #include <string>
 #include <cassert>
 
-using std::endl;
-
 osm_item* osmparser::cur_item=NULL;
 long osmparser::curID=0;
 bool osmparser::in_node=false, osmparser::in_way=false;

@@ -23,8 +23,8 @@
 #ifndef MAPNIK_VALUE_ERROR_HPP
 #define MAPNIK_VALUE_ERROR_HPP
 
-#include <iostream>
-#include <sstream>
+#include <exception>
+#include <string>
 
 namespace mapnik {
 

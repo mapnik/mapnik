@@ -119,6 +119,10 @@ public:
     };
 
     void painted(bool painted);
+    inline eAttributeCollectionPolicy attribute_collection_policy() const
+    {
+        return DEFAULT;
+    }
 
 protected:
     template <typename R>

@@ -24,7 +24,7 @@
 #include <mapnik/config_error.hpp>
 
 // stl
-#include <iostream>
+#include <sstream>
 #include <iomanip>
 
 namespace mapnik

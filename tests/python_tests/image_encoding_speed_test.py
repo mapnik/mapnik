@@ -23,6 +23,7 @@ combinations = ['png',
                 'png8:m=h:t=1',
                 'png8:m=h:t=2',
                 'png:z=1',
+                'png:z=1:t=0', # forces rbg, no a
                 'png8:z=1',
                 'png8:z=1:m=o',
                 'png8:z=1:m=h',

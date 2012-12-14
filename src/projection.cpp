@@ -23,9 +23,7 @@
 // mapnik
 #include <mapnik/projection.hpp>
 #include <mapnik/utils.hpp>
-
-// boost
-#include <boost/algorithm/string.hpp>
+#include <mapnik/util/trim.hpp>
 
 // proj4
 #include <proj_api.h>
@@ -151,10 +149,7 @@ void projection::init()
 std::string projection::expanded() const
 {
     if (proj_) {
-        std::string def(pj_get_def( proj_, 0 ));
-        //boost::algorithm::ireplace_first(def,params_,"");
-        boost::trim(def);
-        return def;
+        return mapnik::util::trim_copy(pj_get_def( proj_, 0 ));
     }
     return std::string("");
 }

@@ -32,7 +32,6 @@
 
 // stl
 #include <vector>
-#include <iostream>
 #include <deque>
 #include <algorithm>
 
@@ -251,7 +250,7 @@ public:
 
             // select best of all reducible:
             unsigned red_idx = leaf_level_-1;
-            unsigned bestv = (*reducible_[red_idx].begin())->reduce_cost;
+            unsigned bestv = static_cast<unsigned>((*reducible_[red_idx].begin())->reduce_cost);
             for(unsigned i=red_idx; i>=InsertPolicy::MIN_LEVELS; i--)
             {
                 if (!reducible_[i].empty())

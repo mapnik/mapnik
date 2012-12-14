@@ -156,18 +156,53 @@ struct UnicodeString_from_python_str
     }
 };
 
+
+struct value_null_from_python
+{
+    value_null_from_python()
+    {
+        boost::python::converter::registry::push_back(
+            &convertible,
+            &construct,
+            boost::python::type_id<mapnik::value_null>());
+    }
+
+    static void* convertible(PyObject* obj_ptr)
+    {
+        if (obj_ptr == Py_None) return obj_ptr;
+        return 0;
+    }
+
+    static void construct(
+        PyObject* obj_ptr,
+        boost::python::converter::rvalue_from_python_stage1_data* data)
+    {
+        if (obj_ptr != Py_None) boost::python::throw_error_already_set();
+        void* storage = (
+            (boost::python::converter::rvalue_from_python_storage<mapnik::value_null>*)
+            data)->storage.bytes;
+        new (storage) mapnik::value_null();
+        data->convertible = storage;
+    }
+};
+
 void export_feature()
 {
     using namespace boost::python;
     using mapnik::Feature;
 
     // Python to mapnik::value converters
-    implicitly_convertible<mapnik::value_integer,mapnik::value>();
-    implicitly_convertible<double,mapnik::value>();
+    // NOTE: order matters here. For example value_null must be listed before
+    // bool otherwise Py_None will be interpreted as bool (false)
     implicitly_convertible<UnicodeString,mapnik::value>();
+    implicitly_convertible<mapnik::value_null,mapnik::value>();
     implicitly_convertible<bool,mapnik::value>();
+    implicitly_convertible<int,mapnik::value>();
+    implicitly_convertible<double,mapnik::value>();
 
+    // http://misspent.wordpress.com/2009/09/27/how-to-write-boost-python-converters/
     UnicodeString_from_python_str();
+    value_null_from_python();
 
     class_<context_type,context_ptr,boost::noncopyable>
         ("Context",init<>("Default ctor."))

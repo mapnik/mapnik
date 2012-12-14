@@ -382,10 +382,20 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     // Don't even try to do more work if there are no active styles.
     if (active_styles.size() > 0)
     {
-        // push all property names
-        BOOST_FOREACH(std::string const& name, names)
+        if (p.attribute_collection_policy() == COLLECT_ALL)
         {
-            q.add_property_name(name);
+            layer_descriptor lay_desc = ds->get_descriptor();
+            BOOST_FOREACH(attribute_descriptor const& desc, lay_desc.get_descriptors())
+            {
+                q.add_property_name(desc.get_name());
+            }
+        }
+        else
+        {
+            BOOST_FOREACH(std::string const& name, names)
+            {
+                q.add_property_name(name);
+            }
         }
 
         // Update filter_factor for all enabled raster layers.
@@ -397,14 +407,11 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                     ds->type() == datasource::Raster &&
                     ds->params().get<double>("filter_factor",0.0) == 0.0)
                 {
-                    rule::symbolizers const& symbols = r.get_symbolizers();
-                    rule::symbolizers::const_iterator symIter = symbols.begin();
-                    rule::symbolizers::const_iterator symEnd = symbols.end();
-                    while (symIter != symEnd)
+                    BOOST_FOREACH (rule::symbolizers::value_type sym,  r.get_symbolizers())
                     {
                         // if multiple raster symbolizers, last will be respected
                         // should we warn or throw?
-                        boost::apply_visitor(d_collector,*symIter++);
+                        boost::apply_visitor(d_collector,sym);
                     }
                     q.set_filter_factor(filt_factor);
                 }

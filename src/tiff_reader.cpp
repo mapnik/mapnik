@@ -27,9 +27,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
 
-// stl
-#include <iostream>
-
 extern "C"
 {
 #include <tiffio.h>

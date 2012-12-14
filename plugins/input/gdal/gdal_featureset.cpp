@@ -200,8 +200,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         // if layer-level filter_factor is set, apply it
         if (filter_factor_)
         {
-            im_width *= filter_factor_;
-            im_height *= filter_factor_;
+            im_width = int(im_width * filter_factor_ + 0.5);
+            im_height = int(im_height * filter_factor_ + 0.5);
 
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Applying layer filter_factor=" << filter_factor_;
         }
@@ -209,8 +209,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         else
         {
             double sym_downsample_factor = q.get_filter_factor();
-            im_width *= sym_downsample_factor;
-            im_height *= sym_downsample_factor;
+            im_width = int(im_width * sym_downsample_factor + 0.5);
+            im_height = int(im_height * sym_downsample_factor + 0.5);
         }
 
         // case where we need to avoid upsampling so that the

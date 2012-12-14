@@ -40,9 +40,6 @@
 #include <boost/fusion/include/struct.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
 
-// std
-#include <iostream>
-
 /*!
  * mapnik::svg::path_output_attributes is adapted as a fusion sequence
  * in order to be used directly by the svg_path_attributes_grammar (below).

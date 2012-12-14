@@ -35,6 +35,7 @@
 
 // stl
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <cmath>
 
@@ -187,22 +188,21 @@ struct not_equals
 
     bool operator() (value_null, value_null) const
     {
-        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
         return false;
     }
 
     template <typename T>
     bool operator() (value_null, const T &) const
     {
-        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
-        return false;
+        // https://github.com/mapnik/mapnik/issues/1642
+        return true;
     }
 
     template <typename T>
     bool operator() (const T &, value_null) const
     {
-        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
-        return false;
+        // https://github.com/mapnik/mapnik/issues/1642
+        return true;
     }
 };
 

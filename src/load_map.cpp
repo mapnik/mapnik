@@ -48,12 +48,12 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/trim.hpp>
 #include <mapnik/marker_cache.hpp>
 
 // boost
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -62,10 +62,6 @@
 
 // agg
 #include "agg_trans_affine.h"
-
-// stl
-#include <iostream>
-#include <sstream>
 
 using boost::tokenizer;
 
@@ -113,7 +109,7 @@ private:
 
     void ensure_font_face(std::string const& face_name);
     void find_unused_nodes(xml_node const& root);
-    void find_unused_nodes_recursive(xml_node const& node, std::stringstream &error_text);
+    void find_unused_nodes_recursive(xml_node const& node, std::string & error_text);
 
 
     std::string ensure_relative_to_xml(boost::optional<std::string> opt_path);
@@ -222,15 +218,15 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 }
                 else
                 {
-                    std::ostringstream s_err;
-                    s_err << "failed to parse Map maximum-extent '" << *maximum_extent << "'";
+                    std::string s_err("failed to parse Map maximum-extent '");
+                    s_err += *maximum_extent + "'";
                     if (strict_)
                     {
-                        throw config_error(s_err.str());
+                        throw config_error(s_err);
                     }
                     else
                     {
-                        MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err.str();
+                        MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err;
                     }
                 }
             }
@@ -259,8 +255,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tokens.begin();
                      beg != tokens.end(); ++beg)
                 {
-                    std::string item(*beg);
-                    boost::trim(item);
+                    std::string item = mapnik::util::trim_copy(*beg);
                     if (!mapnik::util::string2int(item,n[i]))
                     {
                         throw config_error(std::string("Invalid version string encountered: '")
@@ -622,15 +617,15 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             }
             else
             {
-                    std::ostringstream s_err;
-                    s_err << "failed to parse Layer maximum-extent '" << *maximum_extent << "' for '" << name << "'";
+                    std::string s_err("failed to parse Layer maximum-extent '");
+                    s_err += *maximum_extent + "' for '" + name + "'";
                     if (strict_)
                     {
-                        throw config_error(s_err.str());
+                        throw config_error(s_err);
                     }
                     else
                     {
-                        MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err.str();
+                        MAPNIK_LOG_ERROR(load_map) << "map_parser: " << s_err;
                     }
             }
         }
@@ -646,15 +641,15 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                 std::string style_name = child->get_text();
                 if (style_name.empty())
                 {
-                    std::ostringstream ss;
-                    ss << "StyleName is empty in Layer: '" << lyr.name() << "'";
+                    std::string ss("StyleName is empty in Layer: '");
+                    ss += lyr.name() + "'";
                     if (strict_)
                     {
-                        throw config_error(ss.str());
+                        throw config_error(ss);
                     }
                     else
                     {
-                        MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss.str();
+                        MAPNIK_LOG_WARN(load_map) << "map_parser: " << ss;
                     }
                 }
                 else
@@ -854,10 +849,9 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
         mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
         if (!mapnik::parse_transform(*tl, *geometry_transform_wkt, pt.get_tree().transform_expr_grammar))
         {
-            std::stringstream ss;
-            ss << "Could not parse transform from '" << *geometry_transform_wkt
-               << "', expected transform attribute";
-            throw config_error(ss.str());
+            std::string ss("Could not parse transform from '");
+            ss += *geometry_transform_wkt + "', expected transform attribute";
+            throw config_error(ss);
         }
         sym.set_transform(tl);
     }
@@ -1131,7 +1125,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         symbol.set_alignment(p_alignment);
 
         // opacity
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
+        optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) symbol.set_opacity(*opacity);
 
         // gamma
@@ -1218,7 +1212,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         shield_symbol.set_shield_displacement(shield_dx,shield_dy);
 
         // opacity
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
+        optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity)
         {
             shield_symbol.set_opacity(*opacity);
@@ -1490,7 +1484,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         }
 
         // opacity
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
+        optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) raster_sym.set_opacity(*opacity);
 
         // filter factor
@@ -1674,11 +1668,11 @@ void map_parser::ensure_exists(std::string const& file_path)
 
 void map_parser::find_unused_nodes(xml_node const& root)
 {
-    std::stringstream error_message;
+    std::string error_message;
     find_unused_nodes_recursive(root, error_message);
-    if (!error_message.str().empty())
+    if (!error_message.empty())
     {
-        std::string msg("Unable to process some data while parsing '" + filename_ + "':" + error_message.str());
+        std::string msg("Unable to process some data while parsing '" + filename_ + "':" + error_message);
         if (strict_)
         {
             throw config_error(msg);
@@ -1690,14 +1684,14 @@ void map_parser::find_unused_nodes(xml_node const& root)
     }
 }
 
-void map_parser::find_unused_nodes_recursive(xml_node const& node, std::stringstream &error_message)
+void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string & error_message)
 {
     if (!node.processed())
     {
         if (node.is_text()) {
-            error_message << "\n* text '" << node.text() << "'";
+            error_message += "\n* text '" + node.text() + "'";
         } else {
-            error_message << "\n* node '" << node.name() << "' at line " << node.line();
+            error_message += "\n* node '" + node.name() + "' at line " + node.line_to_string();
         }
         return; //All attributes and children are automatically unprocessed, too.
     }
@@ -1708,9 +1702,9 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::stringst
     {
         if (!aitr->second.processed)
         {
-            error_message << "\n* attribute '" << aitr->first <<
-                "' with value '" << aitr->second.value <<
-                "' at line " << node.line();
+            error_message += "\n* attribute '" + aitr->first +
+                "' with value '" + aitr->second.value +
+                "' at line " + node.line_to_string();
         }
     }
     xml_node::const_iterator itr = node.begin();

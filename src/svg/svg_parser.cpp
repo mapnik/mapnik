@@ -37,7 +37,6 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <iostream>
 #include <string>
 #include <stdexcept>
 #include <vector>

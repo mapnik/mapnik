@@ -448,6 +448,14 @@ unsigned xml_node::line() const
     return line_;
 }
 
+std::string xml_node::line_to_string() const
+{
+    std::string number;
+    util::to_string(number,line_);
+    return number;
+}
+
+
 #define compile_get_opt_attr(T) template boost::optional<T> xml_node::get_opt_attr<T>(std::string const&) const
 #define compile_get_attr(T) template T xml_node::get_attr<T>(std::string const&) const; template T xml_node::get_attr<T>(std::string const&, T const&) const
 #define compile_get_value(T) template T xml_node::get_value<T>() const

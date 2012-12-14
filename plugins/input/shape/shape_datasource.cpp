@@ -41,7 +41,6 @@
 #include <mapnik/timer.hpp>
 
 // stl
-#include <iostream>
 #include <fstream>
 #include <stdexcept>
 
@@ -297,7 +296,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features_at_point");
 #endif
 
-    filter_at_point filter(pt);
+    filter_at_point filter(pt,tol);
     // collect all attribute names
     std::vector<attribute_descriptor> const& desc_vector = desc_.get_descriptors();
     std::vector<attribute_descriptor>::const_iterator itr = desc_vector.begin();

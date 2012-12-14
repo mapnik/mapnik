@@ -24,7 +24,6 @@
 #include "geojson_featureset.hpp"
 
 #include <fstream>
-#include <iostream>
 #include <algorithm>
 
 // boost

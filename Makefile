@@ -16,6 +16,8 @@ mapnik:
 clean:
 	@python scons/scons.py -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
+	@find ./ -name "*.os" -exec rm {} \;
+	@find ./ -name "*.o" -exec rm {} \;
 
 distclean:
 	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
@@ -29,7 +31,7 @@ uninstall:
 	python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	./run_tests
+	@ ./run_tests
 
 test-local:
 	@echo "*** Boostrapping local test environment..."

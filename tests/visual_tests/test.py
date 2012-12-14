@@ -38,6 +38,8 @@ files = [
     {'name': "lines-3", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "lines-shield", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "marker-multi-policy", 'sizes':[(600,400)]},
+    {'name': "marker-on-line", 'sizes':[(600,400)],
+        'bbox': mapnik.Box2d(-10, 0, 15, 20)},
     {'name': "marker_line_placement_on_points"},
     {'name': "whole-centroid", 'sizes':[(600,400)],
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
@@ -73,6 +75,18 @@ files = [
     #{'name': "tiff-opaque-edge-raster", 'sizes':[(256,256)]},
     ]
 
+def report(diff,quiet=False,threshold=0):
+    if diff > threshold:
+        if quiet:
+            sys.stderr.write('\x1b[31m.\x1b[0m')
+        else:
+            print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
+    else:
+        if quiet:
+            sys.stderr.write('\x1b[32m.\x1b[0m')
+        else:
+            print '\x1b[32m✓\x1b[0m'
+
 def render(filename, width, height, bbox, quiet=False):
     m = mapnik.Map(width, height)
     expected = os.path.join(dirname, "images", '%s-%d-reference.png' % (filename, width))
@@ -90,6 +104,7 @@ def render(filename, width, height, bbox, quiet=False):
     actual_agg = os.path.join(visual_output_dir, '%s-agg.png' % actual)
     if not quiet:
         print "\"%s\" with size %dx%d with agg..." % (filename, width, height),
+    
     try:
         mapnik.render_to_file(m, actual_agg)
         if not os.path.exists(expected):
@@ -97,11 +112,7 @@ def render(filename, width, height, bbox, quiet=False):
             fail(actual_agg,expected,None)
         else:
             diff = compare(actual_agg, expected, threshold=1, alpha=True)
-            if not quiet:
-                if diff > 0:
-                    print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
-                else:
-                    print '\x1b[32m✓\x1b[0m'
+            report(diff,quiet)
     except Exception, e:
         sys.stderr.write(e.message + '\n')
         fail(actual_agg,expected,str(e.message))
@@ -116,11 +127,7 @@ def render(filename, width, height, bbox, quiet=False):
             else:
                 # cairo and agg differ in alpha for reasons unknown, so don't test it for now
                 diff = compare(actual_cairo, expected, threshold=1, alpha=False)
-                if not quiet:
-                    if diff > 0:
-                        print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
-                    else:
-                        print '\x1b[32m✓\x1b[0m'
+                report(diff,quiet,threshold=1)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
             fail(actual_cairo,expected,str(e.message))
@@ -139,11 +146,7 @@ def render(filename, width, height, bbox, quiet=False):
                 fail(actual_grid,expected_grid,None)
             else:
                 diff = compare_grids(actual_grid, expected_grid, threshold=1, alpha=False)
-                if not quiet:
-                    if diff > 0:
-                        print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
-                    else:
-                        print '\x1b[32m✓\x1b[0m'
+                report(diff,quiet)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
             fail(actual_grid,expected,str(e.message))

@@ -109,6 +109,10 @@ public:
     {
         pixmap_.painted(painted);
     }
+    inline eAttributeCollectionPolicy attribute_collection_policy() const
+    {
+        return DEFAULT;
+    }
 
 private:
     buffer_type & pixmap_;

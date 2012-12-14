@@ -20,10 +20,6 @@
  *
  *****************************************************************************/
 
-// stl
-#include <iostream>
-#include <fstream>
-
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>

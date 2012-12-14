@@ -24,7 +24,7 @@
 #include "geos_featureset.hpp"
 
 // stl
-#include <iostream>
+#include <sstream>
 #include <fstream>
 #include <stdexcept>
 #include <cstdarg>
@@ -55,7 +55,6 @@ using mapnik::datasource_exception;
 using mapnik::datasource;
 using mapnik::parameters;
 using mapnik::filter_in_box;
-using mapnik::filter_at_point;
 
 DATASOURCE_PLUGIN(geos_datasource)
 
