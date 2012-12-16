@@ -22,6 +22,7 @@
 
 #include <boost/optional/optional.hpp>
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
 
 // boost::optional<T> to/from converter from John Wiegley
 
