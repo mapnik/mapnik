@@ -46,7 +46,7 @@
 class occi_datasource : public mapnik::datasource
 {
 public:
-    occi_datasource(mapnik::parameters const& params, bool bind = true);
+    occi_datasource(mapnik::parameters const& params);
     virtual ~occi_datasource ();
     mapnik::datasource::datasource_t type() const;
     static const char * name();
@@ -55,28 +55,28 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    void bind() const;
 
 private:
     static const std::string METADATA_TABLE;
 
     mapnik::datasource::datasource_t type_;
-    mutable std::string table_;
-    mutable std::string table_name_;
-    mutable std::string fields_;
-    mutable std::string geometry_field_;
-    mutable int srid_;
-    mutable bool srid_initialized_;
+    std::string table_;
+    std::string table_name_;
+    std::string fields_;
+    std::string geometry_field_;
+    int srid_;
+    bool srid_initialized_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
-    mutable mapnik::layer_descriptor desc_;
-    mutable bool use_wkb_;
+    mapnik::layer_descriptor desc_;
+    bool use_wkb_;
     int row_limit_;
     int row_prefetch_;
-    mutable oracle::occi::StatelessConnectionPool* pool_;
-    mutable oracle::occi::Connection* conn_;
+    oracle::occi::StatelessConnectionPool* pool_;
+    oracle::occi::Connection* conn_;
     bool use_connection_pool_;
     bool use_spatial_index_;
+    bool estimate_extent_;
 };
 
 #endif // OCCI_DATASOURCE_HPP
