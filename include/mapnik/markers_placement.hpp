@@ -30,9 +30,7 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/global.hpp> //round
 #include <mapnik/box2d.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -48,7 +46,7 @@
 namespace mapnik {
 
 template <typename Locator, typename Detector>
-class markers_placement : boost::noncopyable
+class markers_placement : mapnik::noncopyable
 {
 public:
     /** Constructor for markers_placement object.

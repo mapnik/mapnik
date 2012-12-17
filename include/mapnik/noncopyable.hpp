@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2012 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,19 +20,26 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_AGG_RASTERIZER_HPP
-#define MAPNIK_AGG_RASTERIZER_HPP
-
-// mapnik
-#include <mapnik/noncopyable.hpp>
-
-// agg
-#include "agg_rasterizer_scanline_aa.h"
+#ifndef MAPNIK_NONCOPYABLE_HPP
+#define MAPNIK_NONCOPYABLE_HPP
 
 namespace mapnik {
 
-struct rasterizer :  agg::rasterizer_scanline_aa<>, mapnik::noncopyable {};
-
+namespace non_copyable_
+{
+  class noncopyable
+  {
+   protected:
+      noncopyable() {}
+      ~noncopyable() {}
+   private:
+      noncopyable( const noncopyable& );
+      const noncopyable& operator=( const noncopyable& );
+  };
 }
 
-#endif // MAPNIK_AGG_RASTERIZER_HPP
+typedef non_copyable_::noncopyable noncopyable;
+
+} // namespace mapnik
+
+#endif  // MAPNIK_NONCOPYABLE_HPP

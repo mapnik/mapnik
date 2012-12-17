@@ -26,13 +26,11 @@
 // mapnik
 #include <mapnik/projection.hpp>
 #include <mapnik/box2d.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 namespace mapnik {
 
-class MAPNIK_DECL proj_transform : private boost::noncopyable
+class MAPNIK_DECL proj_transform : private mapnik::noncopyable
 {
 public:
     proj_transform(projection const& source,

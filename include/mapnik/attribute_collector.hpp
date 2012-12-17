@@ -26,8 +26,9 @@
 // mapnik
 #include <mapnik/rule.hpp>
 #include <mapnik/transform_processor.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // boost
-#include <boost/utility.hpp>
 #include <boost/variant.hpp>
 #include <boost/concept_check.hpp>
 // stl
@@ -206,7 +207,7 @@ private:
 };
 
 
-class attribute_collector : public boost::noncopyable
+class attribute_collector : public mapnik::noncopyable
 {
 private:
     std::set<std::string>& names_;

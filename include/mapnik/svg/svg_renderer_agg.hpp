@@ -29,9 +29,9 @@
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/foreach.hpp>
 
 // agg
@@ -100,7 +100,7 @@ private:
 };
 
 template <typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat>
-class svg_renderer_agg : boost::noncopyable
+class svg_renderer_agg : mapnik::noncopyable
 {
 public:
     typedef agg::conv_curve<VertexSource>            curved_type;

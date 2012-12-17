@@ -25,10 +25,10 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/noncopyable.hpp>
 
 // stl
 #include <vector>
@@ -37,7 +37,7 @@
 namespace mapnik
 {
 template <typename T>
-class quad_tree : boost::noncopyable
+class quad_tree : mapnik::noncopyable
 {
     struct node
     {
