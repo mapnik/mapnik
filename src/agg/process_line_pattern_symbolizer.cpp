@@ -31,6 +31,7 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -47,12 +48,11 @@
 #include "agg_conv_clip_polyline.h"
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/foreach.hpp>
 
 namespace {
 
-class pattern_source : private boost::noncopyable
+class pattern_source : private mapnik::noncopyable
 {
 public:
     pattern_source(mapnik::image_data_32 const& pattern)

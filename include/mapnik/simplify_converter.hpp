@@ -5,6 +5,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/simplify.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // STL
 #include <limits>
@@ -17,7 +18,7 @@
 namespace mapnik
 {
 
-struct weighted_vertex : private boost::noncopyable
+struct weighted_vertex : private mapnik::noncopyable
 {
     vertex2d coord;
     double weight;

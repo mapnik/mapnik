@@ -25,9 +25,7 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/formatting/base.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <string>
@@ -41,7 +39,7 @@ namespace formatting
 typedef node_ptr (*from_xml_function_ptr)(xml_node const& xml);
 
 class registry : public singleton<registry, CreateStatic>,
-                 private boost::noncopyable
+                 private mapnik::noncopyable
 {
 public:
     registry();

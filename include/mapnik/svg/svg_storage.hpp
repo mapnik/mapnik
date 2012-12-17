@@ -25,15 +25,13 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 namespace mapnik {
 namespace svg {
 
 template <typename VertexSource ,typename AttributeSource>
-class svg_storage :  boost::noncopyable
+class svg_storage :  mapnik::noncopyable
 {
 public:
     svg_storage() {}

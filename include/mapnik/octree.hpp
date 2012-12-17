@@ -26,9 +26,7 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <vector>
@@ -51,7 +49,7 @@ struct RGBPolicy
 };
 
 template <typename T, typename InsertPolicy = RGBPolicy >
-class octree : private boost::noncopyable
+class octree : private mapnik::noncopyable
 {
     struct node
     {
