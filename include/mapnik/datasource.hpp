@@ -86,7 +86,7 @@ public:
     };
 
     datasource (parameters const& params)
-       : params__(params) {}
+       : params_(params) {}
 
     /*!
      * @brief Get the configuration parameters of the data source.
@@ -97,7 +97,7 @@ public:
      */
     parameters const& params() const
     {
-        return params__;
+        return params_;
     }
 
     /*!
@@ -112,7 +112,7 @@ public:
     virtual layer_descriptor get_descriptor() const = 0;
     virtual ~datasource() {}
 protected:
-    parameters params__;
+    parameters params_;
 };
 
 typedef const char * datasource_name();
