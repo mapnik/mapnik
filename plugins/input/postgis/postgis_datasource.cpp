@@ -145,7 +145,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
             if (geometryColumn_.empty() || srid_ == 0)
             {
 #ifdef MAPNIK_STATS
-                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::bind(get_srid_and_geometry_column)");
+                mapnik::progress_timer __stats2__(std::clog, "postgis_datasource::init(get_srid_and_geometry_column)");
 #endif
                 std::ostringstream s;
 
