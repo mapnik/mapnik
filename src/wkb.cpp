@@ -27,9 +27,9 @@
 #include <mapnik/coord_array.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/format.hpp>
 
 namespace mapnik
@@ -37,7 +37,7 @@ namespace mapnik
 
 typedef coord_array<coord2d> CoordinateArray;
 
-struct wkb_reader : boost::noncopyable
+struct wkb_reader : mapnik::noncopyable
 {
 private:
     enum wkbByteOrder {

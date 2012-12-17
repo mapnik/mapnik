@@ -26,9 +26,9 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/version.hpp>
 #include <boost/unordered_map.hpp>
 #if BOOST_VERSION >= 104600
@@ -60,7 +60,7 @@ struct RGBAPolicy
 };
 
 template <typename T, typename InsertPolicy = RGBAPolicy >
-class hextree : private boost::noncopyable
+class hextree : private mapnik::noncopyable
 {
     struct node
     {

@@ -25,8 +25,9 @@
 
 #include <mapnik/config.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/noncopyable.hpp>
+
 #include <boost/scoped_ptr.hpp>
-#include <boost/utility.hpp>
 #include <string>
 
 namespace mapnik { namespace json {
@@ -36,7 +37,7 @@ namespace mapnik { namespace json {
 template <typename OutputIterator> struct feature_generator_grammar;
 template <typename OutputIterator> struct multi_geometry_generator_grammar;
 
-class MAPNIK_DECL feature_generator : private boost::noncopyable
+class MAPNIK_DECL feature_generator : private mapnik::noncopyable
 {
     typedef std::back_insert_iterator<std::string> sink_type;
 public:
@@ -47,7 +48,7 @@ private:
     boost::scoped_ptr<feature_generator_grammar<sink_type> > grammar_;
 };
 
-class MAPNIK_DECL geometry_generator : private boost::noncopyable
+class MAPNIK_DECL geometry_generator : private mapnik::noncopyable
 {
     typedef std::back_insert_iterator<std::string> sink_type;
 public:
@@ -60,7 +61,7 @@ private:
 
 #else
 
-class MAPNIK_DECL feature_generator : private boost::noncopyable
+class MAPNIK_DECL feature_generator : private mapnik::noncopyable
 {
 public:
     feature_generator() {}
@@ -68,7 +69,7 @@ public:
     bool generate(std::string & geojson, mapnik::Feature const& f);
 };
 
-class MAPNIK_DECL geometry_generator : private boost::noncopyable
+class MAPNIK_DECL geometry_generator : private mapnik::noncopyable
 {
 public:
     geometry_generator() {}

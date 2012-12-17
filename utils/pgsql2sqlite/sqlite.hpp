@@ -20,10 +20,11 @@
  *
  *****************************************************************************/
 
+#include <mapnik/noncopyable.hpp>
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <boost/variant.hpp>
+
 //sqlite3
 #include <sqlite3.h>
 
@@ -36,7 +37,7 @@
 
 namespace mapnik {  namespace sqlite {
 
-    class database : private boost::noncopyable
+    class database : private mapnik::noncopyable
     {
         friend class prepared_statement;
 
@@ -73,7 +74,7 @@ namespace mapnik {  namespace sqlite {
     typedef boost::variant<int,double,std::string, blob,null_type> value_type;
     typedef std::vector<value_type> record_type;
 
-    class prepared_statement : boost::noncopyable
+    class prepared_statement : mapnik::noncopyable
     {
         struct binder : public boost::static_visitor<bool>
         {

@@ -27,10 +27,11 @@
 #include <mapnik/config.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
-#include <boost/utility.hpp>
+
 // stl
 #include <vector>
 
@@ -39,7 +40,7 @@ namespace mapnik { namespace json {
 template <typename Iterator, typename FeatureType> struct feature_collection_grammar;
 
 template <typename Iterator>
-class feature_collection_parser : private boost::noncopyable
+class feature_collection_parser : private mapnik::noncopyable
 {
     typedef Iterator iterator_type;
     typedef mapnik::Feature feature_type;

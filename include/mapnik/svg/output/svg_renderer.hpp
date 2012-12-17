@@ -28,6 +28,7 @@
 #include <mapnik/map.hpp>
 #include <mapnik/svg/output/svg_generator.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <string>
@@ -39,7 +40,7 @@ namespace mapnik
 // can target many other output destinations besides streams.
 template <typename OutputIterator>
 class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<OutputIterator> >,
-                                 private boost::noncopyable
+                                 private mapnik::noncopyable
 {
 public:
     typedef svg_renderer<OutputIterator> processor_impl_type;

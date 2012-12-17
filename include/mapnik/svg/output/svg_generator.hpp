@@ -30,9 +30,8 @@
 #include <mapnik/util/geometry_svg_generator.hpp>
 #include <mapnik/svg/output/svg_output_grammars.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
+#include <mapnik/noncopyable.hpp>
 
-// boost
-#include <boost/utility.hpp>
 
 namespace mapnik { namespace svg {
 
@@ -43,7 +42,7 @@ namespace mapnik { namespace svg {
      * structure.
      */
     template <typename OutputIterator>
-    class svg_generator : private boost::noncopyable
+    class svg_generator : private mapnik::noncopyable
     {
         typedef svg::svg_root_attributes_grammar<OutputIterator> root_attributes_grammar;
         typedef svg::svg_rect_attributes_grammar<OutputIterator> rect_attributes_grammar;

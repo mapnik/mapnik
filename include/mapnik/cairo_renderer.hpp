@@ -32,13 +32,13 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/rule.hpp> // for all symbolizers
+#include <mapnik/noncopyable.hpp>
 
 // cairo
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
 
 // FIXME
@@ -57,7 +57,7 @@ class cairo_face;
 
 typedef boost::shared_ptr<cairo_face> cairo_face_ptr;
 
-class cairo_face_manager : private boost::noncopyable
+class cairo_face_manager : private mapnik::noncopyable
 {
 public:
     cairo_face_manager(boost::shared_ptr<freetype_engine> engine);
@@ -69,7 +69,7 @@ private:
     cairo_face_cache cache_;
 };
 
-class MAPNIK_DECL cairo_renderer_base : private boost::noncopyable
+class MAPNIK_DECL cairo_renderer_base : private mapnik::noncopyable
 {
 protected:
     cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);

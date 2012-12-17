@@ -27,10 +27,10 @@
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 
 // stl
 #include <string.h>
@@ -42,7 +42,7 @@ extern "C" {
 #include <sqlite3.h>
 }
 
-class prepared_index_statement : boost::noncopyable
+class prepared_index_statement : mapnik::noncopyable
 {
 
 public:
