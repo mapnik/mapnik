@@ -26,10 +26,10 @@
 // mapnik
 #include <mapnik/vertex_vector.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace mapnik {
@@ -42,7 +42,7 @@ enum eGeomType {
 };
 
 template <typename T, template <typename> class Container=vertex_vector>
-class geometry : private::boost::noncopyable
+class geometry : private::mapnik::noncopyable
 {
 public:
     typedef T coord_type;

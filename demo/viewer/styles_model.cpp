@@ -20,17 +20,18 @@
 
 #include "styles_model.hpp"
 #include <mapnik/expression_string.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // boost
 #include <boost/concept_check.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/utility.hpp>
 // qt
 #include <QList>
 #include <QIcon>
 #include <QPainter>
 #include <QPixmap>
 
-class node : private boost::noncopyable
+class node : private mapnik::noncopyable
 {
     struct node_base
     {

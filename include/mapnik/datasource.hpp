@@ -29,9 +29,9 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/query.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 // stl
@@ -42,7 +42,7 @@ namespace mapnik {
 
 typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
 
-struct MAPNIK_DECL Featureset : private boost::noncopyable
+struct MAPNIK_DECL Featureset : private mapnik::noncopyable
 {
     virtual feature_ptr next() = 0;
     virtual ~Featureset() {}
@@ -70,7 +70,7 @@ private:
     std::string message_;
 };
 
-class MAPNIK_DECL datasource : private boost::noncopyable
+class MAPNIK_DECL datasource : private mapnik::noncopyable
 {
 public:
     enum datasource_t {

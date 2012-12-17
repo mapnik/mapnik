@@ -26,10 +26,11 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
-#include <boost/utility.hpp>
+
 // stl
 //#include <vector>
 
@@ -40,7 +41,7 @@ template <typename Iterator> struct geometry_grammar;
 MAPNIK_DECL bool from_geojson(std::string const& json, boost::ptr_vector<geometry_type> & paths);
 
 template <typename Iterator>
-class MAPNIK_DECL geometry_parser : private boost::noncopyable
+class MAPNIK_DECL geometry_parser : private mapnik::noncopyable
 {
     typedef Iterator iterator_type;
 public:

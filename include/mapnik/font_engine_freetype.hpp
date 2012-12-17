@@ -32,6 +32,7 @@
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // freetype2
 extern "C"
@@ -45,7 +46,6 @@ extern "C"
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/foreach.hpp>
 #ifdef MAPNIK_THREADSAFE
@@ -69,7 +69,7 @@ class string_info;
 
 typedef boost::shared_ptr<font_face> face_ptr;
 
-class MAPNIK_DECL font_glyph : private boost::noncopyable
+class MAPNIK_DECL font_glyph : private mapnik::noncopyable
 {
 public:
     font_glyph(face_ptr face, unsigned index)
@@ -91,7 +91,7 @@ private:
 
 typedef boost::shared_ptr<font_glyph> glyph_ptr;
 
-class font_face : boost::noncopyable
+class font_face : mapnik::noncopyable
 {
 public:
     font_face(FT_Face face)
@@ -145,7 +145,7 @@ private:
     FT_Face face_;
 };
 
-class MAPNIK_DECL font_face_set : private boost::noncopyable
+class MAPNIK_DECL font_face_set : private mapnik::noncopyable
 {
 public:
     font_face_set(void)
@@ -200,7 +200,7 @@ private:
 };
 
 // FT_Stroker wrapper
-class stroker : boost::noncopyable
+class stroker : mapnik::noncopyable
 {
 public:
     explicit stroker(FT_Stroker s)
@@ -264,7 +264,7 @@ private:
 };
 
 template <typename T>
-class MAPNIK_DECL face_manager : private boost::noncopyable
+class MAPNIK_DECL face_manager : private mapnik::noncopyable
 {
     typedef T font_engine_type;
     typedef std::map<std::string,face_ptr> face_ptr_cache_type;
@@ -351,9 +351,9 @@ private:
 };
 
 template <typename T>
-struct text_renderer : private boost::noncopyable
+struct text_renderer : private mapnik::noncopyable
 {
-    struct glyph_t : boost::noncopyable
+    struct glyph_t : mapnik::noncopyable
     {
         FT_Glyph image;
         char_properties *properties;

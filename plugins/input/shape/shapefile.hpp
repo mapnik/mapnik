@@ -31,9 +31,9 @@
 #include <mapnik/global.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 
@@ -130,7 +130,7 @@ struct shape_record
 
 using namespace boost::interprocess;
 
-class shape_file : boost::noncopyable
+class shape_file : mapnik::noncopyable
 {
 public:
 

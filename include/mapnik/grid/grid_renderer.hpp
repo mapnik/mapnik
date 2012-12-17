@@ -31,9 +31,9 @@
 #include <mapnik/map.hpp>
 #include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
 
 // FIXME
@@ -52,7 +52,7 @@ struct grid_rasterizer;
 
 template <typename T>
 class MAPNIK_DECL grid_renderer : public feature_style_processor<grid_renderer<T> >,
-                                  private boost::noncopyable
+                                  private mapnik::noncopyable
 {
 
 public:

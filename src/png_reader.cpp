@@ -22,6 +22,7 @@
 
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/noncopyable.hpp>
 
 extern "C"
 {
@@ -29,11 +30,10 @@ extern "C"
 }
 
 #include <boost/scoped_array.hpp>
-#include <boost/utility.hpp>
 
 namespace mapnik
 {
-class png_reader : public image_reader, boost::noncopyable
+class png_reader : public image_reader, mapnik::noncopyable
 {
 private:
     std::string fileName_;

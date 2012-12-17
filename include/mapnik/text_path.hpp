@@ -26,12 +26,12 @@
 // mapnik
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/noncopyable.hpp>
 
 //stl
 #include <vector>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 // uci
@@ -40,7 +40,7 @@
 namespace mapnik
 {
 
-class string_info : private boost::noncopyable
+class string_info : private mapnik::noncopyable
 {
 protected:
     typedef std::vector<char_info> characters_t;
@@ -122,7 +122,7 @@ typedef char_info const * char_info_ptr;
 
 
 /** List of all characters and their positions and formats for a placement. */
-class text_path : boost::noncopyable
+class text_path : mapnik::noncopyable
 {
     struct character_node
     {

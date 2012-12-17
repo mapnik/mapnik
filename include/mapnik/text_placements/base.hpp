@@ -37,7 +37,7 @@ class MAPNIK_DECL text_placements;
  * This placement has first to be tested by placement_finder to verify it
  * can actually be used.
  */
-class text_placement_info : boost::noncopyable
+class text_placement_info : mapnik::noncopyable
 {
 public:
     /** Constructor. Takes the parent text_placements object as a parameter

@@ -32,9 +32,7 @@
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/util/trim.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <iostream>
@@ -43,7 +41,7 @@
 namespace rapidxml = boost::property_tree::detail::rapidxml;
 namespace mapnik
 {
-class rapidxml_loader : boost::noncopyable
+class rapidxml_loader : mapnik::noncopyable
 {
 public:
     rapidxml_loader(const char *encoding = NULL) :
