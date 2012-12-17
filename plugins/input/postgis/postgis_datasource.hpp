@@ -58,7 +58,7 @@ using mapnik::coord2d;
 class postgis_datasource : public datasource
 {
 public:
-    postgis_datasource(const parameters &params, bool bind=true);
+    postgis_datasource(const parameters &params);
     ~postgis_datasource();
     mapnik::datasource::datasource_t type() const;
     static const char * name();
@@ -67,7 +67,6 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    void bind() const;
 
 private:
     std::string sql_bbox(box2d<double> const& env) const;
@@ -104,6 +103,7 @@ private:
     const std::string pixel_height_token_;
     bool persist_connection_;
     bool extent_from_subquery_;
+    bool estimate_extent_;
     // params below are for testing purposes only (will likely be removed at any time)
     int intersect_min_scale_;
     int intersect_max_scale_;

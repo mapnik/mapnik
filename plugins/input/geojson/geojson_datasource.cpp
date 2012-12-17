@@ -49,24 +49,6 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(geojson_datasource)
 
-geojson_datasource::geojson_datasource(parameters const& params, bool bind)
-: datasource(params),
-    type_(datasource::Vector),
-    desc_(*params_.get<std::string>("type"),
-          *params_.get<std::string>("encoding","utf-8")),
-    file_(*params_.get<std::string>("file","")),
-    extent_(),
-    tr_(new mapnik::transcoder(*params_.get<std::string>("encoding","utf-8"))),
-    features_(),
-    tree_(16,1)
-{
-    if (file_.empty()) throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
-    if (bind)
-    {
-        this->bind();
-    }
-}
-
 struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeType>
 {
     mapnik::eAttributeType operator() (int /*val*/) const
@@ -105,9 +87,18 @@ struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeTyp
     }
 };
 
-void geojson_datasource::bind() const
+geojson_datasource::geojson_datasource(parameters const& params)
+: datasource(params),
+    type_(datasource::Vector),
+    desc_(*params.get<std::string>("type"),
+          *params.get<std::string>("encoding","utf-8")),
+    file_(*params.get<std::string>("file","")),
+    extent_(),
+    tr_(new mapnik::transcoder(*params.get<std::string>("encoding","utf-8"))),
+    features_(),
+    tree_(16,1)
 {
-    if (is_bound_) return;
+    if (file_.empty()) throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
 
     typedef std::istreambuf_iterator<char> base_iterator_type;    
     
@@ -149,7 +140,6 @@ void geojson_datasource::bind() const
         }       
         tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), count++);
     }
-    is_bound_ = true;
 }
 
 geojson_datasource::~geojson_datasource() { }
@@ -188,21 +178,16 @@ mapnik::datasource::datasource_t geojson_datasource::type() const
 
 mapnik::box2d<double> geojson_datasource::envelope() const
 {
-    if (!is_bound_) bind();
     return extent_;
 }
 
 mapnik::layer_descriptor geojson_datasource::get_descriptor() const
 {
-    if (!is_bound_) bind();
-
     return desc_;
 }
 
 mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) const
 {
-    if (!is_bound_) bind();
-    
     // if the query box intersects our world extent then query for features
     mapnik::box2d<double> const& b = q.get_bbox();
     if (extent_.intersects(b))
@@ -218,7 +203,6 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
 // FIXME
 mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
-    if (!is_bound_) bind();
     throw mapnik::datasource_exception("GeoJSON Plugin: features_at_point is not supported yet");
     return mapnik::featureset_ptr();
 }

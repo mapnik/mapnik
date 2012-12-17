@@ -55,14 +55,17 @@ using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 using mapnik::attribute_descriptor;
 
-shape_datasource::shape_datasource(const parameters &params, bool bind)
+shape_datasource::shape_datasource(const parameters &params)
     : datasource (params),
       type_(datasource::Vector),
       file_length_(0),
       indexed_(false),
-      row_limit_(*params_.get<int>("row_limit",0)),
+      row_limit_(*params.get<int>("row_limit",0)),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "shape_datasource::init");
+#endif
     boost::optional<std::string> file = params.get<std::string>("file");
     if (!file) throw datasource_exception("Shape Plugin: missing <file> parameter");
 
@@ -73,20 +76,6 @@ shape_datasource::shape_datasource(const parameters &params, bool bind)
         shape_name_ = *file;
 
     boost::algorithm::ireplace_last(shape_name_,".shp","");
-
-    if (bind)
-    {
-        this->bind();
-    }
-}
-
-void shape_datasource::bind() const
-{
-    if (is_bound_) return;
-
-#ifdef MAPNIK_STATS
-    mapnik::progress_timer __stats__(std::clog, "shape_datasource::bind");
-#endif
 
     if (!boost::filesystem::exists(shape_name_ + ".shp"))
     {
@@ -107,7 +96,7 @@ void shape_datasource::bind() const
     try
     {
 #ifdef MAPNIK_STATS
-        mapnik::progress_timer __stats2__(std::clog, "shape_datasource::bind(get_column_description)");
+        mapnik::progress_timer __stats2__(std::clog, "shape_datasource::init(get_column_description)");
 #endif
 
         boost::shared_ptr<shape_io> shape_ref = boost::make_shared<shape_io>(shape_name_);
@@ -171,7 +160,6 @@ void shape_datasource::bind() const
         throw;
     }
 
-    is_bound_ = true;
 }
 
 shape_datasource::~shape_datasource() {}
@@ -252,14 +240,11 @@ datasource::datasource_t shape_datasource::type() const
 
 layer_descriptor shape_datasource::get_descriptor() const
 {
-    if (!is_bound_) bind();
     return desc_;
 }
 
 featureset_ptr shape_datasource::features(const query& q) const
 {
-    if (!is_bound_) bind();
-
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features");
 #endif
@@ -290,8 +275,6 @@ featureset_ptr shape_datasource::features(const query& q) const
 
 featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol) const
 {
-    if (!is_bound_) bind();
-
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::features_at_point");
 #endif
@@ -334,8 +317,6 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
 
 box2d<double> shape_datasource::envelope() const
 {
-    if (!is_bound_) bind();
-
     return extent_;
 }
 

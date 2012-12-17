@@ -53,7 +53,7 @@ using mapnik::box2d;
 class osm_datasource : public datasource
 {
 public:
-    osm_datasource(const parameters& params, bool bind = true);
+    osm_datasource(const parameters& params);
     virtual ~osm_datasource();
     mapnik::datasource::datasource_t type() const;
     static const char * name();
@@ -62,7 +62,6 @@ public:
     box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    void bind() const;
 
 private:
     mutable box2d<double> extent_;

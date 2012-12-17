@@ -48,7 +48,7 @@ public:
     std::string plugin_directories();
     void register_datasources(std::string const& path);
     bool register_datasource(std::string const& path);
-    boost::shared_ptr<datasource> create(parameters const& params, bool bind=true);
+    boost::shared_ptr<datasource> create(parameters const& params);
 private:
     datasource_cache();
     ~datasource_cache();

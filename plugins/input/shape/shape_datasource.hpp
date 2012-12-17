@@ -52,7 +52,7 @@ using mapnik::coord2d;
 class shape_datasource : public datasource
 {
 public:
-    shape_datasource(const parameters &params, bool bind=true);
+    shape_datasource(const parameters &params);
     virtual ~shape_datasource();
     datasource::datasource_t type() const;
     static const char * name();
@@ -61,7 +61,6 @@ public:
     box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    void bind() const;
 
 private:
     void init(shape_io& shape) const;

@@ -73,20 +73,24 @@ inline GDALDataset* gdal_datasource::open_dataset() const
 }
 
 
-gdal_datasource::gdal_datasource(parameters const& params, bool bind)
+gdal_datasource::gdal_datasource(parameters const& params)
     : datasource(params),
       desc_(*params.get<std::string>("type"), "utf-8"),
-      filter_factor_(*params_.get<double>("filter_factor", 0.0)),
-      nodata_value_(params_.get<double>("nodata"))
+      filter_factor_(*params.get<double>("filter_factor", 0.0)),
+      nodata_value_(params.get<double>("nodata"))
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
+
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "gdal_datasource::init");
+#endif
 
     GDALAllRegister();
 
     boost::optional<std::string> file = params.get<std::string>("file");
     if (! file) throw datasource_exception("missing <file> parameter");
 
-    boost::optional<std::string> base = params_.get<std::string>("base");
+    boost::optional<std::string> base = params.get<std::string>("base");
     if (base)
     {
         dataset_name_ = *base + "/" + *file;
@@ -96,22 +100,8 @@ gdal_datasource::gdal_datasource(parameters const& params, bool bind)
         dataset_name_ = *file;
     }
 
-    if (bind)
-    {
-        this->bind();
-    }
-}
-
-void gdal_datasource::bind() const
-{
-    if (is_bound_) return;
-
-#ifdef MAPNIK_STATS
-    mapnik::progress_timer __stats__(std::clog, "gdal_datasource::bind");
-#endif
-
-    shared_dataset_ = *params_.get<mapnik::boolean>("shared", false);
-    band_ = *params_.get<int>("band", -1);
+    shared_dataset_ = *params.get<mapnik::boolean>("shared", false);
+    band_ = *params.get<int>("band", -1);
 
     GDALDataset *dataset = open_dataset();
 
@@ -121,7 +111,7 @@ void gdal_datasource::bind() const
 
     double tr[6];
     bool bbox_override = false;
-    boost::optional<std::string> bbox_s = params_.get<std::string>("extent");
+    boost::optional<std::string> bbox_s = params.get<std::string>("extent");
     if (bbox_s)
     {
         MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: BBox Parameter=" << *bbox_s;
@@ -188,7 +178,6 @@ void gdal_datasource::bind() const
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Size=" << width_ << "," << height_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Raster Extent=" << extent_;
 
-    is_bound_ = true;
 }
 
 gdal_datasource::~gdal_datasource()
@@ -207,8 +196,6 @@ const char * gdal_datasource::name()
 
 box2d<double> gdal_datasource::envelope() const
 {
-    if (! is_bound_) bind();
-
     return extent_;
 }
 
@@ -224,8 +211,6 @@ layer_descriptor gdal_datasource::get_descriptor() const
 
 featureset_ptr gdal_datasource::features(query const& q) const
 {
-    if (! is_bound_) bind();
-
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::features");
 #endif
@@ -248,8 +233,6 @@ featureset_ptr gdal_datasource::features(query const& q) const
 
 featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol) const
 {
-    if (! is_bound_) bind();
-
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "gdal_datasource::features_at_point");
 #endif

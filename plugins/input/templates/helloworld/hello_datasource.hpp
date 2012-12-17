@@ -22,7 +22,7 @@ class hello_datasource : public mapnik::datasource
 public:
     // constructor
     // arguments must not change
-    hello_datasource(mapnik::parameters const& params, bool bind=true);
+    hello_datasource(mapnik::parameters const& params);
 
     // destructor
     virtual ~hello_datasource ();
@@ -51,10 +51,10 @@ public:
     // mandatory: return the layer descriptor
     mapnik::layer_descriptor get_descriptor() const;
 
-    // mandatory: will bind the datasource given params
-    void bind() const;
-
 private:
+    // recommended - do intialization in a so-named init function
+    // to reduce code in constructor
+    void init(mapnik::parameters const& params);
     // recommended naming convention of datasource members:
     // name_, type_, extent_, and desc_
     static const std::string name_;

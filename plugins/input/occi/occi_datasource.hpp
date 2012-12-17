@@ -46,7 +46,7 @@
 class occi_datasource : public mapnik::datasource
 {
 public:
-    occi_datasource(mapnik::parameters const& params, bool bind = true);
+    occi_datasource(mapnik::parameters const& params);
     virtual ~occi_datasource ();
     mapnik::datasource::datasource_t type() const;
     static const char * name();
@@ -55,7 +55,6 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    void bind() const;
 
 private:
     static const std::string METADATA_TABLE;
@@ -77,6 +76,7 @@ private:
     mutable oracle::occi::Connection* conn_;
     bool use_connection_pool_;
     bool use_spatial_index_;
+    bool estimate_extent_;
 };
 
 #endif // OCCI_DATASOURCE_HPP

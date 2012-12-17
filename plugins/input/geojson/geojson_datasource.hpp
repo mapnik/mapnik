@@ -55,7 +55,7 @@ public:
     typedef boost::geometry::index::rtree<box_type,std::size_t> spatial_index_type;
     
     // constructor
-    geojson_datasource(mapnik::parameters const& params, bool bind=true);
+    geojson_datasource(mapnik::parameters const& params);
     virtual ~geojson_datasource ();
     mapnik::datasource::datasource_t type() const;
     static const char * name();
@@ -64,7 +64,6 @@ public:
     mapnik::box2d<double> envelope() const;
     mapnik::layer_descriptor get_descriptor() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
-    void bind() const;
 private:
     mapnik::datasource::datasource_t type_;
     mutable std::map<std::string, mapnik::parameters> statistics_;
