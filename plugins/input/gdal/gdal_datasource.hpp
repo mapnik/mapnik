@@ -56,16 +56,16 @@ public:
     mapnik::layer_descriptor get_descriptor() const;
 private:
     GDALDataset* open_dataset() const;
-    mutable mapnik::box2d<double> extent_;
+    mapnik::box2d<double> extent_;
     std::string dataset_name_;
-    mutable int band_;
+    int band_;
     mapnik::layer_descriptor desc_;
-    mutable unsigned width_;
-    mutable unsigned height_;
-    mutable double dx_;
-    mutable double dy_;
-    mutable int nbands_;
-    mutable bool shared_dataset_;
+    unsigned width_;
+    unsigned height_;
+    double dx_;
+    double dy_;
+    int nbands_;
+    bool shared_dataset_;
     double filter_factor_;
     boost::optional<double> nodata_value_;
 };

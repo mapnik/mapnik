@@ -135,7 +135,7 @@ template <typename T>
 void csv_datasource::parse_csv(T & stream,
                                std::string const& escape,
                                std::string const& separator,
-                               std::string const& quote) const
+                               std::string const& quote)
 {
     stream.seekg(0, std::ios::end);
     file_length_ = stream.tellg();

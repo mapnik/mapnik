@@ -64,10 +64,10 @@ public:
     layer_descriptor get_descriptor() const;
 
 private:
-    mutable box2d<double> extent_;
-    mutable osm_dataset* osm_data_;
+    box2d<double> extent_;
+    osm_dataset* osm_data_;
     mapnik::datasource::datasource_t type_;
-    mutable layer_descriptor desc_;
+    layer_descriptor desc_;
 };
 
 #endif // OSM_DATASOURCE_HPP

@@ -162,9 +162,7 @@ shape_datasource::shape_datasource(const parameters &params)
 
 }
 
-shape_datasource::~shape_datasource() {}
-
-void shape_datasource::init(shape_io& shape) const
+void shape_datasource::init(shape_io& shape)
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "shape_datasource::init");
@@ -227,6 +225,8 @@ void shape_datasource::init(shape_io& shape) const
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: File length=" << file_length_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Shape type=" << shape_type_;
 }
+
+shape_datasource::~shape_datasource() {}
 
 const char * shape_datasource::name()
 {

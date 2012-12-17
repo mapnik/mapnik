@@ -64,8 +64,8 @@ private:
     bool multi_tiles_;
     unsigned tile_size_;
     unsigned tile_stride_;
-    mutable unsigned width_;
-    mutable unsigned height_;
+    unsigned width_;
+    unsigned height_;
 };
 
 #endif // RASTER_DATASOURCE_HPP

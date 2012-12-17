@@ -57,7 +57,7 @@ public:
 
 private:
     void* open_dataset() const;
-    mutable mapnik::box2d<double> extent_;
+    mapnik::box2d<double> extent_;
     std::string dataset_name_;
     std::string table_name_;
     mapnik::layer_descriptor desc_;

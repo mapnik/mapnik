@@ -58,8 +58,8 @@ private:
     // recommended naming convention of datasource members:
     // name_, type_, extent_, and desc_
     static const std::string name_;
-    mutable mapnik::layer_descriptor desc_;
-    mutable mapnik::box2d<double> extent_;
+    mapnik::layer_descriptor desc_;
+    mapnik::box2d<double> extent_;
 };
 
 

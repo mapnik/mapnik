@@ -64,27 +64,27 @@ private:
     void parse_attachdb(std::string const& attachdb) const;
     std::string populate_tokens(std::string const& sql) const;
 
-    mutable mapnik::box2d<double> extent_;
-    mutable bool extent_initialized_;
+    mapnik::box2d<double> extent_;
+    bool extent_initialized_;
     mapnik::datasource::datasource_t type_;
-    mutable std::string dataset_name_;
-    mutable boost::shared_ptr<sqlite_connection> dataset_;
-    mutable std::string table_;
+    std::string dataset_name_;
+    boost::shared_ptr<sqlite_connection> dataset_;
+    std::string table_;
     std::string fields_;
     std::string metadata_;
-    mutable std::string geometry_table_;
-    mutable std::string geometry_field_;
-    mutable std::string index_table_;
-    mutable std::string key_field_;
-    mutable int row_offset_;
-    mutable int row_limit_;
+    std::string geometry_table_;
+    std::string geometry_field_;
+    std::string index_table_;
+    std::string key_field_;
+    int row_offset_;
+    int row_limit_;
     // TODO - also add to postgis.input
     const std::string intersects_token_;
-    mutable mapnik::layer_descriptor desc_;
-    mutable mapnik::wkbFormat format_;
-    mutable bool use_spatial_index_;
-    mutable bool has_spatial_index_;
-    mutable bool using_subquery_;
+    mapnik::layer_descriptor desc_;
+    mapnik::wkbFormat format_;
+    bool use_spatial_index_;
+    bool has_spatial_index_;
+    bool using_subquery_;
     mutable std::vector<std::string> init_statements_;
 };
 
