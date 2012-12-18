@@ -104,6 +104,11 @@ public:
         // nothing to do
     }
 
+    inline eAttributeCollectionPolicy attribute_collection_policy() const
+    {
+        return DEFAULT;
+    }
+
     inline OutputIterator& get_output_iterator()
     {
         return output_iterator_;
