@@ -63,13 +63,12 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
     using qi::lexeme;
     using qi::_val;
     using qi::lit;
-    //using qi::int_;
-    using qi::long_long;
     using qi::double_;
     using qi::hex;
     using qi::omit;
     using standard_wide::char_;
     using standard_wide::no_case;
+
     expr = logical_expr.alias();
 
     logical_expr = not_expr [_val = _1]
@@ -139,7 +138,7 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
         ;
 
     primary_expr = strict_double [_val = _1]
-        | long_long [_val = _1]
+        | int__[_val = _1]
         | no_case[lit("true")] [_val = true]
         | no_case[lit("false")] [_val = false]
         | no_case[lit("null")] [_val = value_null() ]

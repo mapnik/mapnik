@@ -90,7 +90,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
 #else
     number = strict_double
 #endif
-        //| long_long
+        | int__
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
         | lit("null")[_val = construct<value_null>()]

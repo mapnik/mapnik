@@ -111,6 +111,7 @@ struct feature_grammar :
     qi::rule<Iterator,space_type> value;
     qi::symbols<char const, char const> unesc_char;
     qi::uint_parser< unsigned, 16, 4, 4 > hex4 ;
+    qi::int_parser<mapnik::value_integer,10,1,-1> int__;
     qi::rule<Iterator,std::string(), space_type> string_;
     qi::rule<Iterator,space_type> key_value;
     qi::rule<Iterator,boost::variant<value_null,bool,

@@ -108,7 +108,8 @@ struct value_null
 };
 
 
-typedef boost::long_long_type value_integer;
+//typedef boost::long_long_type value_integer;
+typedef int value_integer;
 typedef double value_double;
 typedef UnicodeString  value_unicode_string;
 typedef bool value_bool;
@@ -416,7 +417,7 @@ struct add : public boost::static_visitor<V>
 
     value_type operator() (value_bool lhs, value_bool rhs) const
     {
-        return 0LL;
+        return value_integer(lhs + rhs);
     }
 };
 
@@ -454,7 +455,7 @@ struct sub : public boost::static_visitor<V>
 
     value_type operator() (value_bool lhs, value_bool rhs) const
     {
-        return 0LL;
+        return value_integer(lhs - rhs);
     }
 };
 
@@ -491,7 +492,7 @@ struct mult : public boost::static_visitor<V>
 
     value_type operator() (value_bool lhs, value_bool rhs) const
     {
-        return 0LL;
+        return value_integer(0);
     }
 };
 
@@ -599,7 +600,7 @@ struct negate : public boost::static_visitor<V>
 
     value_type operator() (value_bool val) const
     {
-        return val ? -1LL : 0LL;
+        return val ? value_integer(-1) : value_integer(0);
     }
 
     value_type operator() (value_unicode_string const& ustr) const
@@ -783,9 +784,9 @@ struct to_int : public boost::static_visitor<value_integer>
     value_integer operator() (std::string const& val) const
     {
         value_integer result;
-        if (util::string2longlong(val,result))
+        if (util::string2int(val,result))
             return result;
-        return 0LL;
+        return value_integer(0);
     }
 
     value_integer operator() (value_unicode_string const& val) const
@@ -798,7 +799,7 @@ struct to_int : public boost::static_visitor<value_integer>
     value_integer operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
-        return 0LL;
+        return value_integer(0);
     }
 };
 
@@ -886,13 +887,12 @@ public:
 
     value_double to_double() const
     {
-        return 0.0;
-        //return boost::apply_visitor(impl::to_double(),base_);
+        return boost::apply_visitor(impl::to_double(),base_);
     }
 
     value_integer to_int() const
     {
-        return 0LL;
+        return value_integer(0);
         //return boost::apply_visitor(impl::to_int(),base_);
     }
 
