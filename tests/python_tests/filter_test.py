@@ -20,9 +20,9 @@ map_ = '''<Map>
 
             <![CDATA[
 
-            ([region] >= 0) 
+            ([region] >= 0)
 
-            and 
+            and
 
             ([region] <= 50)
             ]]>
@@ -49,7 +49,7 @@ map_ = '''<Map>
     </Style>
 </Map>'''
 
-def test_filter_init():    
+def test_filter_init():
     m = mapnik.Map(1,1)
     mapnik.load_map_from_string(m,map_)
     filters = []
@@ -74,7 +74,7 @@ def test_filter_init():
     0)
     and
     ([region]
-    <= 
+    <=
     50)
     '''))
 
@@ -169,13 +169,17 @@ def test_float_precision():
     context = mapnik.Context()
     context.push('num')
     f = mapnik.Feature(context,0)
-    f["num"] = 1.0000
-    eq_(f["num"],1.0000)
-    expr = mapnik.Expression("[num] = 1.0000")
+    f["num1"] = 1.0000
+    f["num2"] = 1.0001
+    eq_(f["num1"],1.0000)
+    eq_(f["num2"],1.0001)
+    expr = mapnik.Expression("[num1] = 1.0000")
     eq_(expr.evaluate(f),True)
-    expr = mapnik.Expression("[num].match('.*0$')")
+    expr = mapnik.Expression("[num1].match('1')")
     eq_(expr.evaluate(f),True)
-    expr = mapnik.Expression("[num].match('.*0$')")
+    expr = mapnik.Expression("[num2] = 1.0001")
+    eq_(expr.evaluate(f),True)
+    expr = mapnik.Expression("[num2].match('1.0001')")
     eq_(expr.evaluate(f),True)
 
 def test_string_matching_on_precision():
