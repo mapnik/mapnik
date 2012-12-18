@@ -147,8 +147,9 @@ struct wkt_coordinate_policy : karma::real_policies<T>
     static unsigned precision(T n)
     {
         if (n == 0.0) return 0;
-        using namespace boost::spirit; // for traits
-        return static_cast<unsigned>(15 - boost::math::trunc(log10(traits::get_absolute_value(n))));
+        return 6;
+        //using namespace boost::spirit; // for traits
+        //return std::max(6u, static_cast<unsigned>(15 - boost::math::trunc(log10(traits::get_absolute_value(n)))));
     }
 
     template <typename OutputIterator>
