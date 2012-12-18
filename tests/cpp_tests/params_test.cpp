@@ -19,8 +19,8 @@ int main( int, char*[] )
     //params["bool"] = 1;
     //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
 
-    params["bool"] = "1";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    //params["bool"] = "1";
+    //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
 
     params["bool"] = "True";
     BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
@@ -41,8 +41,8 @@ int main( int, char*[] )
     //params["bool"] = 0;
     //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
 
-    params["bool"] = "0";
-    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
+    //params["bool"] = "0";
+    //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
 
     params["bool"] = "False";
     BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
@@ -58,8 +58,8 @@ int main( int, char*[] )
     BOOST_TEST( (params.get<std::string>("string") && *params.get<std::string>("string") == "hello") );
 
     // int
-    params["int"] = 1;
-    BOOST_TEST( (params.get<int>("int") && *params.get<int>("int") == 1) );
+    params["int"] = mapnik::value_integer(1);
+    BOOST_TEST( (params.get<mapnik::value_integer>("int") && *params.get<mapnik::value_integer>("int") == 1) );
 
     // double
     params["double"] = 1.5;

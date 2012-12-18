@@ -107,9 +107,14 @@ struct value_null
     }
 };
 
+#define BIGINT
 
-//typedef boost::long_long_type value_integer;
+#ifdef BIGINT
+typedef long long value_integer;
+#else
 typedef int value_integer;
+#endif
+
 typedef double value_double;
 typedef UnicodeString  value_unicode_string;
 typedef bool value_bool;
@@ -737,14 +742,19 @@ struct to_expression_string : public boost::static_visitor<std::string>
 
 struct to_double : public boost::static_visitor<value_double>
 {
+    value_double operator() (value_double val) const
+    {
+        return val;
+    }
+
     value_double operator() (value_integer val) const
     {
         return static_cast<value_double>(val);
     }
 
-    value_double operator() (value_double val) const
+    value_double operator() (value_bool val) const
     {
-        return val;
+        return static_cast<value_double>(val);
     }
 
     value_double operator() (std::string const& val) const
@@ -781,10 +791,19 @@ struct to_int : public boost::static_visitor<value_integer>
         return rint(val);
     }
 
+    value_integer operator() (value_bool val) const
+    {
+        return static_cast<int>(val);
+    }
+
     value_integer operator() (std::string const& val) const
     {
         value_integer result;
+#ifdef BIGINT
+        if (util::string2longlong(val,result))
+#else
         if (util::string2int(val,result))
+#endif
             return result;
         return value_integer(0);
     }
@@ -892,8 +911,7 @@ public:
 
     value_integer to_int() const
     {
-        return value_integer(0);
-        //return boost::apply_visitor(impl::to_int(),base_);
+        return boost::apply_visitor(impl::to_int(),base_);
     }
 
 };
