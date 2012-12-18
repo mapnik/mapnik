@@ -59,7 +59,7 @@ struct geometry_type_attribute
         {
             if (type != 0 && itr->type() != type)
             {
-                return 4LL; // Collection
+                return value_integer(4); // Collection
             }
             type = itr->type();
         }
