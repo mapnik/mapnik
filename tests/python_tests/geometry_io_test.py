@@ -14,7 +14,7 @@ def setup():
 
 wkts = [
     [1,"POINT(30 10)"],
-    [1,"POINT(30.0 10.0)"],
+    [1,"POINT(30 10)"],
     [1,"POINT(30.1 10.1)"],
     [1,"LINESTRING(30 10,10 30,40 40)"],
     [1,"POLYGON((30 10,10 20,20 40,40 40,30 10))"],
@@ -61,7 +61,7 @@ wkbs = [
 ]
 
 geojson = [
-[1,'{"type":"Point","coordinates":[30.0,10.0]}'],
+[1,'{"type":"Point","coordinates":[30,10]}'],
 [1,'{"type":"Point","coordinates":[30.0,10.0]}'],
 [1,'{"type":"Point","coordinates":[30.1,10.1]}'],
 [1,'{"type":"LineString","coordinates":[[30.0,10.0],[10.0,30.0],[40.0,40.0]]}'],

@@ -133,7 +133,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         eq_(feat['name'],'test point')
         geoms = feat.geometries()
         eq_(len(geoms),1)
-        eq_(geoms.to_wkt(),'Point(-122.0 48.0)')
+        eq_(geoms.to_wkt(),'Point(-122 48)')
 
         # ensure it matches data read with just sqlite
         cur = conn.cursor()
