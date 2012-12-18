@@ -24,7 +24,7 @@
 #define MAPNIK_SVG_PATH_ADAPTER_HPP
 
 // mapnik
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_math.h"
@@ -40,7 +40,7 @@ namespace svg {
 
 using namespace agg;
 
-template<class VertexContainer> class path_adapter : boost::noncopyable
+template<class VertexContainer> class path_adapter : mapnik::noncopyable
 {
 public:
     typedef VertexContainer            container_type;
@@ -838,7 +838,7 @@ void path_adapter<VC>::translate_all_paths(double dx, double dy)
 }
 
 
-template<class Container> class vertex_stl_adapter : boost::noncopyable
+template<class Container> class vertex_stl_adapter : mapnik::noncopyable
 {
 public:
 

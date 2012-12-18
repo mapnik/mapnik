@@ -119,7 +119,6 @@ namespace mapnik { namespace util {
             feature_type_style style_out(style_in,true); // deep copy
             map_out.insert_style(kv.first, style_out);
         }
-
     }
 
-    }}
+}}

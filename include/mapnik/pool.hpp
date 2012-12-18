@@ -26,10 +26,10 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/utils.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
@@ -65,7 +65,7 @@ private:
 };
 
 template <typename T,template <typename> class Creator>
-class Pool : private boost::noncopyable
+class Pool : private mapnik::noncopyable
 {
     typedef boost::shared_ptr<T> HolderType;
     typedef std::deque<HolderType> ContType;

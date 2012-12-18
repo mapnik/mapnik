@@ -28,9 +28,9 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/gradient.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <libxml/xmlreader.h>
 
 // stl
@@ -38,7 +38,7 @@
 
 namespace  mapnik { namespace svg {
 
-    class svg_parser : private boost::noncopyable
+    class svg_parser : private mapnik::noncopyable
     {
     public:
         explicit svg_parser(svg_converter_type & path);

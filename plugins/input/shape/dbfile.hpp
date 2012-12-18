@@ -23,9 +23,11 @@
 #ifndef DBFFILE_HPP
 #define DBFFILE_HPP
 
+// mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // boost
-#include <boost/utility.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 
 // stl
@@ -48,7 +50,7 @@ struct field_descriptor
 };
 
 
-class dbf_file : private boost::noncopyable
+class dbf_file : private mapnik::noncopyable
 {
 private:
     int num_records_;

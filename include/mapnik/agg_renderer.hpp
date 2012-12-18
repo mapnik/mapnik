@@ -30,9 +30,9 @@
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/rule.hpp> // for all symbolizers
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
@@ -53,7 +53,7 @@ struct rasterizer;
 
 template <typename T>
 class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
-                                 private boost::noncopyable
+                                 private mapnik::noncopyable
 {
 
 public:

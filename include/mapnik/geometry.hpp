@@ -26,10 +26,10 @@
 // mapnik
 #include <mapnik/vertex_vector.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace mapnik {
@@ -42,7 +42,7 @@ enum eGeomType {
 };
 
 template <typename T, template <typename> class Container=vertex_vector>
-class geometry : private::boost::noncopyable
+class geometry : private::mapnik::noncopyable
 {
 public:
     typedef T coord_type;
@@ -91,10 +91,11 @@ public:
         double x = 0;
         double y = 0;
         rewind(0);
-        for (unsigned i=0;i<size();++i)
+        for (unsigned i=0; i < size(); ++i)
         {
-            vertex(&x,&y);
-            if (i==0)
+            unsigned cmd = vertex(&x,&y);
+            if (cmd == SEG_CLOSE) continue;
+            if (i == 0)
             {
                 result.init(x,y,x,y);
             }
@@ -126,11 +127,31 @@ public:
         push_vertex(x,y,SEG_CLOSE);
     }
 
-    void close()
+    void set_close()
     {
         if (cont_.size() > 3)
         {
-            cont_.set_command(cont_.size() - 1, SEG_CLOSE);
+            unsigned cmd;
+            double x,y;
+            int index = cont_.size() - 1;
+            unsigned last_cmd = cont_.get_vertex(index,&x,&y);
+            if (last_cmd == SEG_LINETO)
+            {
+                double last_x = x;
+                double last_y = y;
+                for (int pos = index - 1; pos >=0 ; --pos)
+                {
+                    cmd = cont_.get_vertex(pos,&x,&y);
+                    if (cmd == SEG_MOVETO)
+                    {
+                        if (x == last_x && y == last_y)
+                        {
+                            cont_.set_command(index , SEG_CLOSE);
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 

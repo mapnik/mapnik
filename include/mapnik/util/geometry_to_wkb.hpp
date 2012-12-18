@@ -172,6 +172,8 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
 
     double x = 0;
     double y = 0;
+    double start_x = 0;
+    double start_y = 0;
     std::size_t size = 1 + 4 + 4 ; // byteOrder + wkbType + numRings
     for (unsigned i=0; i< num_points; ++i)
     {
@@ -179,7 +181,14 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
         if (command == SEG_MOVETO)
         {
             rings.push_back(new linear_ring); // start new loop
+            start_x = x;
+            start_y = y;
             size += 4; // num_points
+        }
+        else if (command == SEG_CLOSE)
+        {
+            x = start_x;
+            y = start_y;
         }
         rings.back().push_back(std::make_pair(x,y));
         size += 2 * 8; // point

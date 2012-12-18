@@ -26,11 +26,12 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/noncopyable.hpp>
 
 namespace mapnik
 {
 
-class processed_text : boost::noncopyable
+class processed_text : mapnik::noncopyable
 {
 public:
     class processed_expression

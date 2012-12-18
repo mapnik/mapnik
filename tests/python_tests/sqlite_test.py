@@ -358,7 +358,7 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         #eq_(feat.id(),1)
         eq_(feat['alias'],'test')
         eq_(len(feat.geometries()),1)
-        eq_(feat.geometries()[0].to_wkt(),'Point(0.0 0.0)')
+        eq_(feat.geometries()[0].to_wkt(),'Point(0 0)')
 
 if __name__ == "__main__":
     setup()

@@ -28,6 +28,8 @@
 #include <boost/python/tuple.hpp>
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
+
 
 // mapnik
 #include <mapnik/feature.hpp>

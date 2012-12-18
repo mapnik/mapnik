@@ -20,53 +20,27 @@ using mapnik::parameters;
 
 DATASOURCE_PLUGIN(python_datasource)
 
-python_datasource::python_datasource(parameters const& params, bool bind)
+python_datasource::python_datasource(parameters const& params)
   : datasource(params),
-    desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding","utf-8")),
-    factory_(*params_.get<std::string>("factory", ""))
+    desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8")),
+    factory_(*params.get<std::string>("factory", ""))
 {
     // extract any remaining parameters as keyword args for the factory
-    BOOST_FOREACH(const mapnik::parameters::value_type& kv, params_)
+    BOOST_FOREACH(const mapnik::parameters::value_type& kv, params)
     {
         if((kv.first != "type") && (kv.first != "factory"))
         {
-            kwargs_.insert(std::make_pair(kv.first, *params_.get<std::string>(kv.first)));
+            kwargs_.insert(std::make_pair(kv.first, *params.get<std::string>(kv.first)));
         }
     }
 
-    if (bind)
-    {
-        this->bind();
-    }
-}
-
-python_datasource::~python_datasource() { }
-
-// This name must match the plugin filename, eg 'python.input'
-const char* python_datasource::name_="python";
-
-const char* python_datasource::name()
-{
-    return name_;
-}
-
-mapnik::layer_descriptor python_datasource::get_descriptor() const
-{
-    if (!is_bound_) bind();
-
-    return desc_;
-}
-
-// The following methods call into the Python interpreter and hence require, unfortunately, that the GIL be held.
-
-void python_datasource::bind() const
-{
+    // The following methods call into the Python interpreter and hence require, unfortunately, that the GIL be held.
     using namespace boost;
 
-    if (is_bound_) return;
-
-    // if no factory callable is defined, bind is a nop
-    if (factory_.empty()) return;
+    if (factory_.empty())
+    {
+        throw mapnik::datasource_exception("Python: 'factory' option must be defined");
+    }
 
     try
     {
@@ -111,15 +85,26 @@ void python_datasource::bind() const
     {
         throw mapnik::datasource_exception(extractException());
     }
+}
 
-    is_bound_ = true;
+python_datasource::~python_datasource() { }
+
+// This name must match the plugin filename, eg 'python.input'
+const char* python_datasource::name_="python";
+
+const char* python_datasource::name()
+{
+    return name_;
+}
+
+mapnik::layer_descriptor python_datasource::get_descriptor() const
+{
+    return desc_;
 }
 
 mapnik::datasource::datasource_t python_datasource::type() const
 {
     typedef boost::optional<mapnik::datasource::geometry_t> return_type;
-
-    if (!is_bound_) bind();
 
     try
     {
@@ -137,8 +122,6 @@ mapnik::datasource::datasource_t python_datasource::type() const
 
 mapnik::box2d<double> python_datasource::envelope() const
 {
-    if (!is_bound_) bind();
-
     try
     {
         ensure_gil lock;
@@ -153,8 +136,6 @@ mapnik::box2d<double> python_datasource::envelope() const
 boost::optional<mapnik::datasource::geometry_t> python_datasource::get_geometry_type() const
 {
     typedef boost::optional<mapnik::datasource::geometry_t> return_type;
-
-    if (!is_bound_) bind();
 
     try
     {
@@ -181,8 +162,6 @@ boost::optional<mapnik::datasource::geometry_t> python_datasource::get_geometry_
 
 mapnik::featureset_ptr python_datasource::features(mapnik::query const& q) const
 {
-    if (!is_bound_) bind();
-
     try
     {
         // if the query box intersects our world extent then query for features
@@ -208,8 +187,6 @@ mapnik::featureset_ptr python_datasource::features(mapnik::query const& q) const
 
 mapnik::featureset_ptr python_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
-
-    if (!is_bound_) bind();
 
     try
     {

@@ -25,9 +25,7 @@
 
 // mapnik
 #include <mapnik/image_data.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_color_rgba.h"
@@ -35,7 +33,7 @@
 namespace mapnik
 {
 
-class pattern_source : private boost::noncopyable
+class pattern_source : private mapnik::noncopyable
 {
 public:
     pattern_source(image_data_32 const& pattern)

@@ -44,13 +44,13 @@
 #include <boost/fusion/include/make_vector.hpp>
 
 #include <boost/foreach.hpp>
-#include <boost/utility.hpp>
 #include <boost/array.hpp>
 
 // mapnik
 #include <mapnik/agg_helpers.hpp>
 #include <mapnik/offset_converter.hpp>
 #include <mapnik/simplify_converter.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_conv_clip_polygon.h"
@@ -317,7 +317,7 @@ struct dispatcher
 
 
 template <typename B, typename R, typename S, typename T, typename P, typename A, typename C >
-struct vertex_converter : private boost::noncopyable
+struct vertex_converter : private mapnik::noncopyable
 {
     typedef C conv_types;
     typedef B bbox_type;

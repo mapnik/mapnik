@@ -75,8 +75,9 @@ feature_ptr postgis_featureset::next()
             const char* buf = rs_->getValue(pos);
             std::string name = rs_->getFieldName(pos);
 
-            // validation happens of this type at bind()
+            // validation happens of this type at initialization
             mapnik::value_integer val;
+
             if (oid == 20)
             {
                 val = int8net(buf);

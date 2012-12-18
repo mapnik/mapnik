@@ -50,6 +50,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -71,7 +72,7 @@ namespace mapnik
 {
 using boost::optional;
 
-class map_parser : boost::noncopyable {
+class map_parser : mapnik::noncopyable {
 public:
     map_parser(bool strict, std::string const& filename = "") :
         strict_(strict),

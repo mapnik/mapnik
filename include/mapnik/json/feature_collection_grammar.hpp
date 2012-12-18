@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/json/feature_grammar.hpp>
+#include <mapnik/feature.hpp>
 
 // spirit::qi
 #include <boost/config/warning_disable.hpp>
@@ -88,7 +89,7 @@ struct feature_collection_grammar :
             > lit(']')
             ;
         
-        feature = eps[_a = construct<feature_ptr>(new_<feature_impl>(ctx_,generate_id_()))]
+        feature = eps[_a = construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
             >> feature_g(*_a)[push_back(_r1,_a)]
             ;
         
