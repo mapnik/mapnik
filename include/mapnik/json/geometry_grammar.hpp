@@ -69,7 +69,7 @@ struct close_path
     void operator() (T path) const
     {
         BOOST_ASSERT( path!=0 );
-        path->close();
+        path->set_close();
     }
 };
 

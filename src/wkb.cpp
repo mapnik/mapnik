@@ -357,7 +357,18 @@ private:
                     {
                         poly->line_to(ar[j].x, ar[j].y);
                     }
-                    poly->close(ar[num_points-1].x, ar[num_points-1].y);
+
+                    if (ar[0].x == ar[num_points-1].x &&
+                        ar[0].y == ar[num_points-1].y)
+                    {
+                        poly->close(ar[num_points-1].x, ar[num_points-1].y);
+                    }
+                    else
+                    {
+                        // leave un-closed polygon intact - don't attempt to close them
+                        poly->line_to(ar[num_points-1].x, ar[num_points-1].y);
+                    }
+                    poly->set_close();
                 }
             }
             if (poly->size() > 2) // ignore if polygon has less than 3 vertices
@@ -393,7 +404,16 @@ private:
                     {
                         poly->line_to(ar[j].x, ar[j].y);
                     }
-                    poly->close(ar[num_points-1].x, ar[num_points-1].y);
+                    if (ar[0].x == ar[num_points-1].x &&
+                        ar[0].y == ar[num_points-1].y)
+                    {
+                        poly->close(ar[num_points-1].x, ar[num_points-1].y);
+                    }
+                    else
+                    {
+                        // leave un-closed polygon intact- don't attempt to close them
+                        poly->line_to(ar[num_points-1].x, ar[num_points-1].y);
+                    }
                 }
             }
             if (poly->size() > 2) // ignore if polygon has less than 3 vertices
