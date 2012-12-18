@@ -58,7 +58,7 @@ int main( int, char*[] )
     BOOST_TEST( (params.get<std::string>("string") && *params.get<std::string>("string") == "hello") );
 
     // int
-    params["int"] = 1LL;
+    params["int"] = 1;
     BOOST_TEST( (params.get<int>("int") && *params.get<int>("int") == 1) );
 
     // double
