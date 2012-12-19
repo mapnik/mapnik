@@ -50,6 +50,9 @@ namespace mapnik { namespace util {
 MAPNIK_DECL bool string2int(const char * value, int & result);
 MAPNIK_DECL bool string2int(std::string const& value, int & result);
 
+MAPNIK_DECL bool string2longlong(const char * value, boost::long_long_type & result);
+MAPNIK_DECL bool string2longlong(std::string const& value, boost::long_long_type & result);
+
 MAPNIK_DECL bool string2double(std::string const& value, double & result);
 MAPNIK_DECL bool string2double(const char * value, double & result);
 

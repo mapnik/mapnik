@@ -108,7 +108,7 @@ struct regex_replace_impl
     mapnik::transcoder const& tr_;
 };
 
-struct geometry_types : qi::symbols<char,int>
+struct geometry_types : qi::symbols<char,mapnik::value_integer>
 {
     geometry_types()
     {
@@ -121,6 +121,12 @@ struct geometry_types : qi::symbols<char,int>
     }
 };
 
+template <typename T>
+struct integer_parser
+{
+    typedef qi::int_parser<T,10,1,-1> type;
+};
+
 template <typename Iterator>
 struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 {
@@ -129,6 +135,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     explicit expression_grammar(mapnik::transcoder const& tr);
 
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
+    typename integer_parser<mapnik::value_integer>::type int__;
     boost::phoenix::function<unicode_impl> unicode_;
     boost::phoenix::function<regex_match_impl> regex_match_;
     boost::phoenix::function<regex_replace_impl> regex_replace_;

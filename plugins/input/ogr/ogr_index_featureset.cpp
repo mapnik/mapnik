@@ -126,7 +126,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
             {
             case OFTInteger:
             {
-                feature->put(fld_name,poFeature->GetFieldAsInteger (i));
+                feature->put<mapnik::value_integer>(fld_name,poFeature->GetFieldAsInteger (i));
                 break;
             }
 
