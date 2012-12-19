@@ -198,9 +198,9 @@ void export_feature()
     // bool otherwise Py_None will be interpreted as bool (false)
     implicitly_convertible<mapnik::value_unicode_string,mapnik::value>();
     implicitly_convertible<mapnik::value_null,mapnik::value>();
-    implicitly_convertible<mapnik::value_bool,mapnik::value>();
     implicitly_convertible<mapnik::value_integer,mapnik::value>();
     implicitly_convertible<mapnik::value_double,mapnik::value>();
+    implicitly_convertible<mapnik::value_bool,mapnik::value>();
 
     // http://misspent.wordpress.com/2009/09/27/how-to-write-boost-python-converters/
     UnicodeString_from_python_str();
