@@ -30,7 +30,7 @@ namespace boost { namespace python {
 
     struct value_converter : public boost::static_visitor<PyObject*>
     {
-        PyObject * operator() (int val) const
+        PyObject * operator() (mapnik::value_integer val) const
         {
 #if PY_VERSION_HEX >= 0x03000000
             return ::PyLong_FromLong(val);

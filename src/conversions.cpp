@@ -39,6 +39,7 @@ namespace mapnik { namespace util {
 using namespace boost::spirit;
 
 BOOST_SPIRIT_AUTO(qi, INTEGER, qi::int_)
+BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long)
 BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_)
 BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_)
 
@@ -60,6 +61,27 @@ bool string2int(std::string const& value, int & result)
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,INTEGER,ascii::space,result);
+    return r && (str_beg == str_end);
+}
+
+bool string2longlong(const char * value, boost::long_long_type & result)
+{
+    size_t length = strlen(value);
+    if (length < 1 || value == NULL)
+        return false;
+    const char *iter  = value;
+    const char *end   = value + length;
+    bool r = qi::phrase_parse(iter,end,LONGLONG,ascii::space,result);
+    return r && (iter == end);
+}
+
+bool string2longlong(std::string const& value, boost::long_long_type & result)
+{
+    if (value.empty())
+        return false;
+    std::string::const_iterator str_beg = value.begin();
+    std::string::const_iterator str_end = value.end();
+    bool r = qi::phrase_parse(str_beg,str_end,LONGLONG,ascii::space,result);
     return r && (str_beg == str_end);
 }
 

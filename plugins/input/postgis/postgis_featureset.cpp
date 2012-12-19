@@ -76,7 +76,8 @@ feature_ptr postgis_featureset::next()
             std::string name = rs_->getFieldName(pos);
 
             // validation happens of this type at initialization
-            int val;
+            mapnik::value_integer val;
+
             if (oid == 20)
             {
                 val = int8net(buf);
@@ -94,7 +95,7 @@ feature_ptr postgis_featureset::next()
             // TODO - extend feature class to know
             // that its id is also an attribute to avoid
             // this duplication
-            feature->put(name,val);
+            feature->put<mapnik::value_integer>(name,val);
             ++pos;
         }
         else
@@ -135,24 +136,19 @@ feature_ptr postgis_featureset::next()
 
                     case 23: //int4
                     {
-                        int val = int4net(buf);
-                        feature->put(name, val);
+                        feature->put<mapnik::value_integer>(name, int4net(buf));
                         break;
                     }
 
                     case 21: //int2
                     {
-                        int val = int2net(buf);
-                        feature->put(name, val);
+                        feature->put<mapnik::value_integer>(name, int2net(buf));
                         break;
                     }
 
                     case 20: //int8/BigInt
                     {
-                        // TODO - need to support boost::uint64_t in mapnik::value
-                        // https://github.com/mapnik/mapnik/issues/895
-                        int val = int8net(buf);
-                        feature->put(name, val);
+                        feature->put<mapnik::value_integer>(name, int8net(buf));
                         break;
                     }
 

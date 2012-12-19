@@ -125,7 +125,7 @@ DEFINE_NAME_TRAIT( double, "double")
 DEFINE_NAME_TRAIT( float, "float")
 DEFINE_NAME_TRAIT( unsigned, "unsigned")
 DEFINE_NAME_TRAIT( boolean, "boolean")
-DEFINE_NAME_TRAIT( int, "integer" )
+DEFINE_NAME_TRAIT( mapnik::value_integer, "long long" )
 DEFINE_NAME_TRAIT( std::string, "string" )
 DEFINE_NAME_TRAIT( color, "color" )
 DEFINE_NAME_TRAIT(expression_ptr, "expression_ptr" )
@@ -463,6 +463,7 @@ std::string xml_node::line_to_string() const
 compile_get_opt_attr(boolean);
 compile_get_opt_attr(std::string);
 compile_get_opt_attr(unsigned);
+compile_get_opt_attr(mapnik::value_integer);
 compile_get_opt_attr(float);
 compile_get_opt_attr(double);
 compile_get_opt_attr(color);
@@ -484,7 +485,7 @@ compile_get_attr(pattern_alignment_e);
 compile_get_attr(line_rasterizer_e);
 compile_get_attr(colorizer_mode);
 compile_get_attr(double);
-compile_get_value(int);
+compile_get_value(value_integer);
 compile_get_value(double);
 compile_get_value(expression_ptr);
 } //ns mapnik
