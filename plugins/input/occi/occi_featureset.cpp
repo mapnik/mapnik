@@ -148,7 +148,7 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCIINT:
             case oracle::occi::OCCIUNSIGNED_INT:
             case oracle::occi::OCCIROWID:
-                feature->put(fld_name,rs_->getInt (i + 1));
+                feature->put(fld_name,static_cast<mapnik::value_integer>(rs_->getInt (i + 1)));
                 break;
             case oracle::occi::OCCIFLOAT:
             case oracle::occi::OCCIBFLOAT:
