@@ -198,8 +198,8 @@ void export_feature()
     // bool otherwise Py_None will be interpreted as bool (false)
     implicitly_convertible<UnicodeString,mapnik::value>();
     implicitly_convertible<mapnik::value_null,mapnik::value>();
-    implicitly_convertible<bool,mapnik::value>();
     implicitly_convertible<int,mapnik::value>();
+    implicitly_convertible<bool,mapnik::value>();
     implicitly_convertible<double,mapnik::value>();
 
     // http://misspent.wordpress.com/2009/09/27/how-to-write-boost-python-converters/
