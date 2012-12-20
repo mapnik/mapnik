@@ -59,6 +59,11 @@ mapnik::value expression_evaluate_(mapnik::expr_node const& expr, mapnik::Featur
     return boost::apply_visitor(mapnik::evaluate<mapnik::Feature,mapnik::value>(f),expr);
 }
 
+bool expression_evaluate_to_bool_(mapnik::expr_node const& expr, mapnik::Feature const& f)
+{
+    return boost::apply_visitor(mapnik::evaluate<mapnik::Feature,mapnik::value>(f),expr).to_bool();
+}
+
 // path expression
 path_expression_ptr parse_path_(std::string const& path)
 {
@@ -82,6 +87,7 @@ void export_expression()
                                                   "TODO"
                                                   "",no_init)
         .def("evaluate", &expression_evaluate_)
+        .def("to_bool", &expression_evaluate_to_bool_)
         .def("__str__",&expression_to_string_);
     ;
 
