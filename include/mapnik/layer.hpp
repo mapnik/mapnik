@@ -47,7 +47,7 @@ public:
           std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
 
     layer(layer const& l);
-    layer& operator=(layer const& l);
+    layer& operator=(layer const& rhs);
     bool operator==(layer const& other) const;
 
     /*!
@@ -197,7 +197,7 @@ public:
     int buffer_size() const;
     ~layer();
 private:
-    void swap(const layer& other);
+    void swap(layer& other);
 
     std::string name_;
     std::string srs_;

@@ -58,7 +58,7 @@ layer::layer(const layer& rhs)
       buffer_size_(rhs.buffer_size_),
       maximum_extent_(rhs.maximum_extent_) {}
 
-layer& layer::operator=(const layer& rhs)
+layer& layer::operator=(layer const& rhs)
 {
     layer tmp(rhs);
     swap(tmp);
@@ -70,21 +70,22 @@ bool layer::operator==(layer const& other) const
     return (this == &other);
 }
 
-void layer::swap(const layer& rhs)
+void layer::swap(layer& rhs)
 {
-    name_=rhs.name_;
-    srs_ = rhs.srs_;
-    min_zoom_=rhs.min_zoom_;
-    max_zoom_=rhs.max_zoom_;
-    active_=rhs.active_;
-    queryable_=rhs.queryable_;
-    clear_label_cache_ = rhs.clear_label_cache_;
-    cache_features_ = rhs.cache_features_;
-    group_by_ = rhs.group_by_;
-    styles_=rhs.styles_;
-    ds_=rhs.ds_;
-    buffer_size_ = rhs.buffer_size_;
-    maximum_extent_ = rhs.maximum_extent_;
+    using std::swap;
+    swap(name_, rhs.name_);
+    swap(srs_, rhs.srs_);
+    swap(min_zoom_, rhs.min_zoom_);
+    swap(max_zoom_, rhs.max_zoom_);
+    swap(active_, rhs.active_);
+    swap(queryable_, rhs.queryable_);
+    swap(clear_label_cache_, rhs.clear_label_cache_);
+    swap(cache_features_, rhs.cache_features_);
+    swap(group_by_,  rhs.group_by_);
+    swap(styles_, rhs.styles_);
+    swap(ds_, rhs.ds_);
+    swap(buffer_size_, rhs.buffer_size_);
+    swap(maximum_extent_, rhs.maximum_extent_);
 }
 
 layer::~layer() {}
