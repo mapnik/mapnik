@@ -28,7 +28,6 @@ porting notes -->
  - current_buffer_ -> pixmap_
  - agg::rendering_buffer -> grid_renderering_buffer
  - no gamma
- - mapnik::pixfmt_gray32
  - agg::scanline_bin sl
  - grid_rendering_buffer
  - agg::renderer_scanline_bin_solid
@@ -45,8 +44,7 @@ porting notes -->
 // mapnik
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_pixfmt.hpp>
-#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/grid/grid_marker_helpers.hpp>
 
@@ -84,9 +82,9 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                                proj_transform const& prj_trans)
 {
     typedef grid_rendering_buffer buf_type;
-    typedef mapnik::pixfmt_gray32 pixfmt_type;
-    typedef agg::renderer_base<pixfmt_type> renderer_base;
-    typedef agg::renderer_scanline_bin_solid<renderer_base> renderer_type;
+    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
+    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
+    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
     typedef label_collision_detector4 detector_type;
     typedef boost::mpl::vector<clip_line_tag,clip_poly_tag,transform_tag,smooth_tag> conv_types;
 
@@ -221,7 +219,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 typedef raster_markers_rasterizer_dispatch_grid<buf_type,
                                                             grid_rasterizer,
                                                             pixfmt_type,
-                                                            renderer_base,
+                                                            grid_renderer_base_type,
                                                             renderer_type,
                                                             detector_type,
                                                             mapnik::grid > dispatch_type;
