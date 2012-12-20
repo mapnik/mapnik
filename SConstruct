@@ -326,6 +326,7 @@ opts.AddVariables(
     BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
 
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
+    BoolVariable('CPP_TESTS', 'Compile the C++ tests', 'True'),
 
     # Variables for optional dependencies
     ('GEOS_CONFIG', 'The path to the geos-config executable.', 'geos-config'),
@@ -1742,7 +1743,8 @@ if not HELP_REQUESTED:
 
     # build C++ tests
     # not ready for release
-    SConscript('tests/cpp_tests/build.py')
+    if env['CPP_TESTS']:
+        SConscript('tests/cpp_tests/build.py')
 
     # not currently maintained
     # https://github.com/mapnik/mapnik/issues/1438
