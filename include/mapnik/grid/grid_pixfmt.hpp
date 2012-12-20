@@ -638,7 +638,12 @@ typedef pixfmt_alpha_blend_gray<blender_gray16,
 typedef blender_gray<gray32> blender_gray32;
 
 typedef pixfmt_alpha_blend_gray<blender_gray32,
-                                mapnik::grid_rendering_buffer> pixfmt_gray32;     //----pixfmt_gray16
+                                mapnik::grid_rendering_buffer> pixfmt_gray32;     //----pixfmt_gray32
+
+typedef blender_gray<gray64> blender_gray64;
+
+typedef pixfmt_alpha_blend_gray<blender_gray64,
+                                mapnik::grid_rendering_buffer> pixfmt_gray64;     //----pixfmt_gray64
 
 }
 
