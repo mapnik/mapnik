@@ -29,7 +29,7 @@
 
 namespace mapnik {
 
-typedef agg::renderer_base<mapnik::pixfmt_gray32> grid_renderer_base_type;
+typedef agg::renderer_base<mapnik::pixfmt_gray64> grid_renderer_base_type;
 
 }
 
