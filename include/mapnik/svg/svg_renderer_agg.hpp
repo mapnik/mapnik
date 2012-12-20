@@ -272,7 +272,7 @@ public:
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
 
-            rgba8 color;
+            typename PixelFormat::color_type color;
 
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
@@ -380,7 +380,7 @@ public:
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
 
-            mapnik::gray32 color(feature_id);
+            typename PixelFormat::color_type color(feature_id);
 
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
