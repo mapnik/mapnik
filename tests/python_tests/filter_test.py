@@ -302,6 +302,8 @@ def test_expressions_for_thruthyness():
         eq_(expr.to_bool(f),eq[1])
         expr = mapnik.Expression("not [prop]")
         eq_(expr.to_bool(f),not eq[1])
+        expr = mapnik.Expression("! [prop]")
+        eq_(expr.to_bool(f),not eq[1])
     # also test if feature does not have property at all
     f2 = mapnik.Feature(context,1)
     # no property existing will return value_null since
