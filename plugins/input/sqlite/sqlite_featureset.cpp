@@ -73,7 +73,7 @@ feature_ptr sqlite_featureset::next()
             return feature_ptr();
         }
 
-        feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer(1));
+        feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
         if (!geometry_utils::from_wkb(feature->paths(), data, size, format_))
             continue;
 
@@ -104,7 +104,7 @@ feature_ptr sqlite_featureset::next()
             {
             case SQLITE_INTEGER:
             {
-                feature->put<mapnik::value_integer>(fld_name_str, rs_->column_integer(i));
+                feature->put<mapnik::value_integer>(fld_name_str, rs_->column_integer64(i));
                 break;
             }
 

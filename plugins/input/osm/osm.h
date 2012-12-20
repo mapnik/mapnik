@@ -23,6 +23,7 @@
 #ifndef OSM_H
 #define OSM_H
 
+#include <mapnik/value.hpp>
 #include <vector>
 #include <string>
 #include <map>
@@ -65,7 +66,7 @@ public:
 
 struct osm_item
 {
-    long id;
+    mapnik::value_integer id;
     std::map<std::string, std::string> keyvals;
     virtual std::string to_string();
     virtual ~osm_item() {}

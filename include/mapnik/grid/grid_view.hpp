@@ -201,7 +201,7 @@ private:
     feature_type const& features_;
 };
 
-typedef hit_grid_view<mapnik::ImageData<int> > grid_view;
+typedef hit_grid_view<mapnik::ImageData<mapnik::value_integer> > grid_view;
 
 }
 

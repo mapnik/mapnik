@@ -138,6 +138,6 @@ void hit_grid<T>::add_feature(mapnik::feature_impl & feature)
 }
 
 
-template class hit_grid<int>;
+template class hit_grid<mapnik::value_integer>;
 
 }

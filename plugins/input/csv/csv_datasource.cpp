@@ -398,7 +398,7 @@ void csv_datasource::parse_csv(T & stream,
         throw mapnik::datasource_exception("CSV Plugin: could not detect column headers with the name of wkt, geojson, x/y, or latitude/longitude - this is required for reading geometry data");
     }
 
-    int feature_count(0);
+    mapnik::value_integer feature_count(0);
     bool extent_initialized = false;
     std::size_t num_headers = headers_.size();
 
