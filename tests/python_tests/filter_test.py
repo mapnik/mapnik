@@ -257,7 +257,7 @@ def test_expressions_with_null_equality():
         expr = mapnik.Expression("[prop] is null")
         eq_(expr.evaluate(f),eq[1])
 
-def test_expressions_with_null_equality():
+def test_expressions_with_null_equality2():
     for eq in null_equality:
         context = mapnik.Context()
         f = mapnik.Feature(context,0)
@@ -274,6 +274,44 @@ def test_expressions_with_null_equality():
         # https://github.com/mapnik/mapnik/issues/1642
         expr = mapnik.Expression("[prop] != null")
         eq_(expr.evaluate(f),not eq[1])
+
+truthyness = [
+  [u'hello',True,unicode],
+  [u'',False,unicode],
+  [0,False,int],
+  [123,True,int],
+  [0.0,False,float],
+  [123.123,True,float],
+  [.1,True,float],
+  [False,False,int], # TODO - should become bool
+  [True,True,int], # TODO - should become bool
+  [None,False,None]
+]
+
+def test_expressions_for_thruthyness():
+    context = mapnik.Context()
+    for eq in truthyness:
+        f = mapnik.Feature(context,0)
+        f["prop"] = eq[0]
+        eq_(f["prop"],eq[0])
+        if eq[0] is None:
+            eq_(f["prop"] is None, True)
+        else:
+            eq_(isinstance(f['prop'],eq[2]),True,'%s is not an instance of %s' % (f['prop'],eq[2]))
+        expr = mapnik.Expression("[prop]")
+        eq_(expr.to_bool(f),eq[1])
+        expr = mapnik.Expression("not [prop]")
+        eq_(expr.to_bool(f),not eq[1])
+        expr = mapnik.Expression("! [prop]")
+        eq_(expr.to_bool(f),not eq[1])
+    # also test if feature does not have property at all
+    f2 = mapnik.Feature(context,1)
+    # no property existing will return value_null since
+    # https://github.com/mapnik/mapnik/commit/562fada9d0f680f59b2d9f396c95320a0d753479#include/mapnik/feature.hpp
+    eq_(f2["prop"] is None,True)
+    expr = mapnik.Expression("[prop]")
+    eq_(expr.evaluate(f2),None)
+    eq_(expr.to_bool(f2),False)
 
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]

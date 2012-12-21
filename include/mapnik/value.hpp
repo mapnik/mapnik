@@ -624,8 +624,7 @@ struct to_bool : public boost::static_visitor<value_bool>
 
     value_bool operator() (value_unicode_string const& ustr) const
     {
-        boost::ignore_unused_variable_warning(ustr);
-        return true;
+        return !ustr.isEmpty();
     }
 
     value_bool operator() (value_null const& val) const
