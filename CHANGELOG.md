@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added 64 bit integer support in the grid_renderer (#1662)
+
 - `<Filter>[attr]</Filter>` now returns false if attr is an empty string (#1665)
 
 - Added 64 bit integer support in expressions and feature ids (#1661,#1662)
