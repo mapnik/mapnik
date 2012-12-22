@@ -171,6 +171,11 @@ struct gray32
     typedef agg::int32 value_type;
     typedef agg::int64u calc_type;
     typedef agg::int64  long_type;
+    // NOTE: don't touch this enum since enums cannot be
+    // 64 bit and we need to ensure that alpha = base_mask
+    // in grid_pixfmt.hpp#blend_hiline#l256
+    // otherwise code will get invoked that breaks
+    // with 32 bit or 64 bit ints (blender_gray::blend_pix)
     enum base_scale_e
     {
         base_shift = 16,
@@ -186,8 +191,8 @@ struct gray32
     gray32() {}
 
     //--------------------------------------------------------------------
-    gray32(unsigned v_, unsigned a_=base_mask) :
-        v(agg::int32(v_)), a(agg::int32(a_)) {}
+    gray32(value_type v_, unsigned a_=base_mask) :
+        v(v_), a(value_type(a_)) {}
 
     //--------------------------------------------------------------------
     gray32(const self_type& c, unsigned a_) :
@@ -308,9 +313,14 @@ struct gray64
     typedef agg::int64 value_type;
     typedef agg::int64u calc_type;
     typedef agg::int64  long_type;
+    // NOTE: don't touch this enum since enums cannot be
+    // 64 bit and we need to ensure that alpha = base_mask
+    // in grid_pixfmt.hpp#blend_hiline#l256
+    // otherwise code will get invoked that breaks
+    // with 32 bit or 64 bit ints (blender_gray::blend_pix)
     enum base_scale_e
     {
-        base_shift = 32,
+        base_shift = 16,
         base_scale = 1 << base_shift,
         base_mask  = base_scale - 1
     };
@@ -323,8 +333,8 @@ struct gray64
     gray64() {}
 
     //--------------------------------------------------------------------
-    gray64(value_type v_, value_type a_=base_mask) :
-        v(v_), a(a_) {}
+    gray64(value_type v_, unsigned a_=base_mask) :
+        v(v_), a(value_type(a_)) {}
 
     //--------------------------------------------------------------------
     gray64(const self_type& c, unsigned a_) :

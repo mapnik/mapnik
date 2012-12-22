@@ -51,7 +51,7 @@ public:
 private:
     std::list<kismet_network_data> const& knd_list_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
-    int feature_id_;
+    mapnik::value_integer feature_id_;
     std::list<kismet_network_data>::const_iterator knd_list_it;
     mapnik::projection source_;
     mapnik::context_ptr ctx_;
