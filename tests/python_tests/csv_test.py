@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import glob
+import sys
 from nose.tools import *
 from utilities import execution_path
 
@@ -528,6 +529,46 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
         eq_(len(ds.all_features()),1)
+
+    def test_that_64bit_int_fields_work(**kwargs):
+        ds = get_csv_ds('64bit_int.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','bigint'])
+        eq_(ds.field_types(),['int','int','int'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['bigint'],2147483648)
+        feat = fs.next()
+        eq_(feat['bigint'],sys.maxint)
+        eq_(feat['bigint'],9223372036854775807)
+        eq_(feat['bigint'],0x7FFFFFFFFFFFFFFF)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(len(ds.all_features()),2)
+
+    def test_various_number_types(**kwargs):
+        ds = get_csv_ds('number_types.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','floats'])
+        eq_(ds.field_types(),['int','int','float'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['floats'],.0)
+        feat = fs.next()
+        eq_(feat['floats'],+.0)
+        feat = fs.next()
+        eq_(feat['floats'],1e-06)
+        feat = fs.next()
+        eq_(feat['floats'],-1e-06)
+        feat = fs.next()
+        eq_(feat['floats'],0.000001)
+        feat = fs.next()
+        eq_(feat['floats'],1.234e+16)
+        feat = fs.next()
+        eq_(feat['floats'],1.234e+16)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(len(ds.all_features()),8)
 
 if __name__ == "__main__":
     setup()

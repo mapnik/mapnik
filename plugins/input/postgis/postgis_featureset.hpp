@@ -56,7 +56,7 @@ private:
     context_ptr ctx_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     unsigned totalGeomSize_;
-    int feature_id_;
+    mapnik::value_integer feature_id_;
     bool key_field_;
 };
 

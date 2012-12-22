@@ -41,7 +41,7 @@ class geos_featureset : public mapnik::Featureset
 public:
     geos_featureset(GEOSGeometry* geometry,
                     GEOSGeometry* extent,
-                    int identifier,
+                    mapnik::value_integer feature_id,
                     std::string const& field,
                     std::string const& field_name,
                     std::string const& encoding);
@@ -52,7 +52,7 @@ private:
     GEOSGeometry* geometry_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     geos_feature_ptr extent_;
-    int identifier_;
+    mapnik::value_integer feature_id_;
     std::string field_;
     std::string field_name_;
     bool already_rendered_;
