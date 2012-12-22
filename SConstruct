@@ -1742,14 +1742,11 @@ if not HELP_REQUESTED:
     SConscript('fonts/build.py')
 
     # build C++ tests
-    # not ready for release
     if env['CPP_TESTS']:
         SConscript('tests/cpp_tests/build.py')
 
-    # not currently maintained
-    # https://github.com/mapnik/mapnik/issues/1438
-    if env['SVG_RENDERER']:
-        SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
+        if env['SVG_RENDERER']:
+            SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 
     # install pkg-config script and mapnik-config script
     SConscript('utils/mapnik-config/build.py')
