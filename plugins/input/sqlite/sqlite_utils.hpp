@@ -640,7 +640,7 @@ public:
             found_table = true;
             const char* fld_name = rs->column_text(1);
             std::string fld_type(rs->column_text(2));
-            int fld_pk = rs->column_integer(5);
+            sqlite_int64 fld_pk = rs->column_integer64(5);
             boost::algorithm::to_lower(fld_type);
 
             // TODO - how to handle primary keys on multiple columns ?

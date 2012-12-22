@@ -258,7 +258,16 @@ public:
                      const color_type& c,
                      agg::int8u cover)
     {
-        if (c.a)
+        value_type* p = (value_type*)
+            m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
+        do
+        {
+            *p = c.v;
+            p += Step;
+        }
+        while(--len);
+        // We ignore alpha since grid_renderer is a binary renderer for now
+        /*if (c.a)
         {
             value_type* p = (value_type*)
                 m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
@@ -282,7 +291,7 @@ public:
                 }
                 while(--len);
             }
-        }
+        }*/
     }
 
 

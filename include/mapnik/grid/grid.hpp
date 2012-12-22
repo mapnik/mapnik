@@ -257,7 +257,7 @@ public:
 
 };
 
-typedef MAPNIK_DECL hit_grid<int> grid;
+typedef MAPNIK_DECL hit_grid<mapnik::value_integer> grid;
 
 }
 #endif //MAPNIK_GRID_HPP

@@ -239,7 +239,9 @@ null_equality = [
   [.1,False,float],
   [False,False,int], # TODO - should become bool
   [True,False,int], # TODO - should become bool
-  [None,True,None]
+  [None,True,None],
+  [2147483648,False,int],
+  [922337203685477580,False,int]
 ]
 
 def test_expressions_with_null_equality():
@@ -285,7 +287,9 @@ truthyness = [
   [.1,True,float],
   [False,False,int], # TODO - should become bool
   [True,True,int], # TODO - should become bool
-  [None,False,None]
+  [None,False,None],
+  [2147483648,True,int],
+  [922337203685477580,True,int]
 ]
 
 def test_expressions_for_thruthyness():

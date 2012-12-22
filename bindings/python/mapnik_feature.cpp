@@ -212,7 +212,7 @@ void export_feature()
         ;
 
     class_<Feature,boost::shared_ptr<Feature>,
-        boost::noncopyable>("Feature",init<context_ptr,int>("Default ctor."))
+        boost::noncopyable>("Feature",init<context_ptr,mapnik::value_integer>("Default ctor."))
         .def("id",&Feature::id)
         .def("__str__",&Feature::to_string)
         .def("add_geometries_from_wkb", &feature_add_geometries_from_wkb)
