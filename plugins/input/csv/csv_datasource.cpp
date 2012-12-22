@@ -652,7 +652,7 @@ void csv_datasource::parse_csv(T & stream,
                     }
                 }
 
-                // now, add attributes, skipping any WKT or JSON fiels
+                // now, add attributes, skipping any WKT or JSON fields
                 if ((has_wkt_field) && (i == wkt_idx)) continue;
                 if ((has_json_field) && (i == json_idx)) continue;
                 /* First we detect likely strings, then try parsing likely numbers,
@@ -664,27 +664,34 @@ void csv_datasource::parse_csv(T & stream,
                    to assume are numbers)
                 */
 
+                bool matched = false;
                 bool has_dot = value.find(".") != std::string::npos;
                 if (value.empty() ||
                     (value_length > 20) ||
                     (value_length > 1 && !has_dot && value[0] == '0'))
                 {
+                    matched = true;
                     feature->put(fld_name,tr.transcode(value.c_str()));
                     if (feature_count == 1)
                     {
                         desc_.add_descriptor(mapnik::attribute_descriptor(fld_name,mapnik::String));
                     }
                 }
-                else if ((value[0] >= '0' && value[0] <= '9') || value[0] == '-')
+                else if ((value[0] >= '0' && value[0] <= '9') ||
+                          value[0] == '-' ||
+                          value[0] == '+' ||
+                          value[0] == '.')
                 {
-                    double float_val = 0.0;
-                    std::string::const_iterator str_beg = value.begin();
-                    std::string::const_iterator str_end = value.end();
-                    bool r = qi::phrase_parse(str_beg,str_end,qi::double_,ascii::space,float_val);
-                    if (r && (str_beg == str_end))
+                    bool has_e = value.find("e") != std::string::npos;
+                    if (has_dot || has_e)
                     {
-                        if (has_dot)
+                        double float_val = 0.0;
+                        std::string::const_iterator str_beg = value.begin();
+                        std::string::const_iterator str_end = value.end();
+                        if (qi::phrase_parse(str_beg,str_end,qi::double_,ascii::space,float_val)
+                            && (str_beg == str_end))
                         {
+                            matched = true;
                             feature->put(fld_name,float_val);
                             if (feature_count == 1)
                             {
@@ -693,9 +700,17 @@ void csv_datasource::parse_csv(T & stream,
                                         fld_name,mapnik::Double));
                             }
                         }
-                        else
+                    }
+                    else
+                    {
+                        mapnik::value_integer int_val = 0;
+                        std::string::const_iterator str_beg = value.begin();
+                        std::string::const_iterator str_end = value.end();
+                        if (qi::phrase_parse(str_beg,str_end,qi::long_long,ascii::space,int_val)
+                            && (str_beg == str_end))
                         {
-                            feature->put(fld_name,static_cast<mapnik::value_integer>(float_val));
+                            matched = true;
+                            feature->put(fld_name,int_val);
                             if (feature_count == 1)
                             {
                                 desc_.add_descriptor(
@@ -704,19 +719,8 @@ void csv_datasource::parse_csv(T & stream,
                             }
                         }
                     }
-                    else
-                    {
-                        // fallback to normal string
-                        feature->put(fld_name,tr.transcode(value.c_str()));
-                        if (feature_count == 1)
-                        {
-                            desc_.add_descriptor(
-                                mapnik::attribute_descriptor(
-                                    fld_name,mapnik::String));
-                        }
-                    }
                 }
-                else
+                if (!matched)
                 {
                     // fallback to normal string
                     feature->put(fld_name,tr.transcode(value.c_str()));
