@@ -181,13 +181,6 @@ public:
         return default_value;
     }
 
-    boost::optional<value_type const&> get_optional(std::size_t index) const
-    {
-        if (index < data_.size())
-            return boost::optional<value_type const&>(data_[index]);
-        return boost::optional<value_type const&>();
-    }
-
     std::size_t size() const
     {
         return data_.size();
