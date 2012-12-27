@@ -38,6 +38,7 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
+#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
 
 
 //#define BOOST_SPIRIT_USE_PHOENIX_V3 1
