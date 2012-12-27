@@ -69,6 +69,9 @@ TARGET = plugin_env.SharedLibrary(
               LINKFLAGS=linkflags
               )
 
+# if the plugin links to libmapnik ensure it is built first
+Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+
 # if 'uninstall' is not passed on the command line
 # then we actually create the install targets that
 # scons will install if 'install' is passed as an arg
