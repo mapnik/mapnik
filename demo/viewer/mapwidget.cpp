@@ -533,19 +533,20 @@ void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     try
     {
         ren.apply();
-        int * imdata = static_cast<int*>(buf.raw_data());
+        mapnik::value_integer * imdata = static_cast<mapnik::value_integer*>(buf.raw_data());
 
-        QImage image(width,height,QImage::Format_RGB32);
-        for (unsigned i = 0 ; i < height ; ++i)
-        {
-            for (unsigned j = 0 ; j < width ; ++j)
-            {
-                image.setPixel(j,i,qRgb((uint8_t)(imdata[i*width+j]>>8),
-                                        (uint8_t)(imdata[i*width+j+1]>>8),
-                                        (uint8_t)(imdata[i*width+j+2]>>8)));
-            }
-        }
-        pix = QPixmap::fromImage(image);
+        // Not sure how to display long long values ??
+        //QImage image(width,height,QImage::Format_RGB32);
+        //for (unsigned i = 0 ; i < height ; ++i)
+        //{
+        //     for (unsigned j = 0 ; j < width ; ++j)
+        //    {
+        //        image.setPixel(j,i,qRgb((uint8_t)(imdata[i*width+j]>>8),
+        //                                (uint8_t)(imdata[i*width+j+1]>>8),
+        //                                (uint8_t)(imdata[i*width+j+2]>>8)));
+        //    }
+        //}
+        //pix = QPixmap::fromImage(image);
     }
     catch (mapnik::config_error & ex)
     {
