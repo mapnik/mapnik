@@ -90,7 +90,7 @@ public:
     std::vector<std::string>& styles();
 
     /*!
-     * @param max_zoom The minimum zoom level to set
+     * @param min_zoom The minimum zoom level to set
      */
     void set_min_zoom(double min_zoom);
 
@@ -136,7 +136,7 @@ public:
      *
      * @return true if this layer's data is active and visible at a given scale.
      *         Otherwise returns False.
-     * @return false if:
+     *         false if:
      *         scale >= minzoom - 1e-6
      *         or
      *         scale < maxzoom + 1e-6
@@ -154,7 +154,7 @@ public:
     bool clear_label_cache() const;
 
     /*!
-     * @param clear_cache Set whether this layer's features should be cached if used by multiple styles.
+     * @param cache_features Set whether this layer's features should be cached if used by multiple styles.
      */
     void set_cache_features(bool cache_features);
 
@@ -164,7 +164,7 @@ public:
     bool cache_features() const;
 
     /*!
-     * @param group_by Set the field rendering of this layer is grouped by.
+     * @param column Set the field rendering of this layer is grouped by.
      */
     void set_group_by(std::string column);
 
