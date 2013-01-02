@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Fixed building symbolizer rendering to be fully sensitive to alpha (8b66128c892 / bc8ea1c5a7a)
+
 - Added 64 bit integer support in the grid_renderer (#1662)
 
 - `<Filter>[attr]</Filter>` now returns false if attr is an empty string (#1665)
