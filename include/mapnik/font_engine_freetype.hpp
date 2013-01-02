@@ -148,6 +148,9 @@ private:
 class MAPNIK_DECL font_face_set : private mapnik::noncopyable
 {
 public:
+    typedef std::vector<face_ptr> container_type;
+    typedef container_type::size_type size_type;
+
     font_face_set(void)
         : faces_(),
         dimension_cache_() {}
@@ -158,7 +161,7 @@ public:
         dimension_cache_.clear(); //Make sure we don't use old cached data
     }
 
-    unsigned size() const
+    size_type size() const
     {
         return faces_.size();
     }
@@ -195,7 +198,7 @@ public:
         }
     }
 private:
-    std::vector<face_ptr> faces_;
+    container_type faces_;
     std::map<unsigned, char_info> dimension_cache_;
 };
 
@@ -244,7 +247,7 @@ public:
     static bool register_font(std::string const& file_name);
 
     /*! \brief register a font file
-     *  @param file_name - path to a directory containing fonts or subdirectories.
+     *  @param dir - path to a directory containing fonts or subdirectories.
      *  @param recurse - default false, whether to search for fonts in sub directories.
      *  @return bool - true if at least one face was successfully registered.
      */
