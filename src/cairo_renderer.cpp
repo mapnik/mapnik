@@ -1158,7 +1158,8 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
             else if(attr.fill_flag)
             {
                 double fill_opacity = attr.fill_opacity * opacity * attr.fill_color.opacity();
-                context.set_color(attr.fill_color.r,attr.fill_color.g,attr.fill_color.b, fill_opacity);
+                context.set_color(attr.fill_color.r/255.0,attr.fill_color.g/255.0,
+                                  attr.fill_color.b/255.0, fill_opacity);
                 context.fill();
             }
         }
@@ -1179,7 +1180,8 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
             else if (attr.stroke_flag)
             {
                 double stroke_opacity = attr.stroke_opacity * opacity * attr.stroke_color.opacity();
-                context.set_color(attr.stroke_color.r,attr.stroke_color.g,attr.stroke_color.b, stroke_opacity);
+                context.set_color(attr.stroke_color.r/255.0,attr.stroke_color.g/255.0,
+                                  attr.stroke_color.b/255.0, stroke_opacity);
                 context.set_line_width(attr.stroke_width);
                 context.set_line_cap(line_cap_enum(attr.line_cap));
                 context.set_line_join(line_join_enum(attr.line_join));
