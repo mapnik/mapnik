@@ -27,7 +27,7 @@ struct pixel_position
 {
     double x;
     double y;
-    pixel_position(double x, double y) : x(x), y(y) { }
+    pixel_position(double x_, double y_) : x(x_), y(y_) { }
     pixel_position() : x(0), y(0) { }
 };
 
