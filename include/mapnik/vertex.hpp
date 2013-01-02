@@ -56,8 +56,8 @@ struct vertex<T,2>
     explicit vertex(no_init_t)
         {}
 
-    vertex(coord_type x,coord_type y,unsigned cmd)
-        : x(x),y(y),cmd(cmd) {}
+    vertex(coord_type x_,coord_type y_,unsigned cmd_)
+        : x(x_),y(y_),cmd(cmd_) {}
 
     template <typename T2>
     vertex(const vertex<T2,2>& rhs)
