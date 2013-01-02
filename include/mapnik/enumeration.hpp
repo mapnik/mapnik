@@ -45,7 +45,7 @@ public:
         what_( what )
     {
     }
-    virtual ~illegal_enum_value() throw() {};
+    virtual ~illegal_enum_value() throw() {}
 
     virtual const char * what() const throw()
     {
