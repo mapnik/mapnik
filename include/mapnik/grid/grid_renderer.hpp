@@ -104,7 +104,7 @@ public:
     {
         // grid renderer doesn't support processing of multiple symbolizers.
         return false;
-    };
+    }
     void painted(bool painted)
     {
         pixmap_.painted(painted);
