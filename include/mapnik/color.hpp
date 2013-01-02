@@ -28,7 +28,6 @@
 #include <mapnik/global.hpp>
 
 //boost
-#include <boost/cstdint.hpp>
 #include <boost/operators.hpp>
 
 // stl
@@ -40,10 +39,10 @@ class MAPNIK_DECL color
     : boost::equality_comparable<color>
 {
 private:
-    boost::uint8_t red_;
-    boost::uint8_t green_;
-    boost::uint8_t blue_;
-    boost::uint8_t alpha_;
+    unsigned char red_;
+    unsigned char green_;
+    unsigned char blue_;
+    unsigned char alpha_;
 
 public:
     color()
@@ -53,7 +52,10 @@ public:
         alpha_(0xff)
         {}
 
-    color(unsigned red, unsigned green, unsigned blue, unsigned alpha = 0xff)
+    color(unsigned char red,
+          unsigned char green,
+          unsigned char blue,
+          unsigned char alpha = 0xff)
       : red_(red),
         green_(green),
         blue_(blue),
@@ -95,38 +97,38 @@ public:
                (alpha_ == rhs.alpha());
     }
 
-    inline unsigned red() const
+    inline unsigned char red() const
     {
         return red_;
     }
 
-    inline unsigned green() const
+    inline unsigned char green() const
     {
         return green_;
     }
-    inline unsigned blue() const
+    inline unsigned char blue() const
     {
         return blue_;
     }
-    inline unsigned alpha() const
+    inline unsigned char alpha() const
     {
         return alpha_;
     }
 
-    inline void set_red(unsigned red)
+    inline void set_red(unsigned char red)
     {
         red_ = red;
     }
-    inline void set_green(unsigned green)
+    inline void set_green(unsigned char green)
     {
         green_ = green;
     }
 
-    inline void set_blue(unsigned blue)
+    inline void set_blue(unsigned char blue)
     {
         blue_ = blue;
     }
-    inline void set_alpha(unsigned alpha)
+    inline void set_alpha(unsigned char alpha)
     {
         alpha_ = alpha;
     }
