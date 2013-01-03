@@ -13,7 +13,7 @@ def setup():
 
 if 'osm' in mapnik.DatasourceCache.plugin_names():
 
-    # Shapefile initialization
+    # osm initialization
     def test_osm_init():
         ds = mapnik.Osm(file='../data/osm/nodes.osm')
 
@@ -39,6 +39,18 @@ if 'osm' in mapnik.DatasourceCache.plugin_names():
         # also add an invalid one, triggering throw
         query.add_property_name('bogus')
         fs = ds.features(query)
+
+    def test_that_64bit_int_fields_work():
+        ds = mapnik.Osm(file='../data/osm/64bit.osm')
+        eq_(len(ds.fields()),5)
+        eq_(ds.fields(),['bigint', 'highway', 'junction', 'name', 'note'])
+        eq_(ds.field_types(),['str', 'str', 'str', 'str', 'str'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat.id(),4294968186)
+        eq_(feat['bigint'],'')
+        feat = fs.next()
+        eq_(feat['bigint'],'9223372036854775807')
 
 
 if __name__ == "__main__":
