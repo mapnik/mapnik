@@ -107,8 +107,6 @@ struct value_null
     }
 };
 
-#define BIGINT
-
 #ifdef BIGINT
 typedef long long value_integer;
 #else
