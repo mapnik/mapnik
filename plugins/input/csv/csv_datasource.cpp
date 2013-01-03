@@ -71,7 +71,6 @@ csv_datasource::csv_datasource(parameters const& params)
       headers_(),
       manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
       strict_(*params.get<mapnik::boolean>("strict", false)),
-      quiet_(*params.get<mapnik::boolean>("quiet", false)),
       filesize_max_(*params.get<float>("filesize_max", 20.0)),  // MB
       ctx_(boost::make_shared<mapnik::context_type>())
 {

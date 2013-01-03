@@ -72,7 +72,6 @@ private:
     std::vector<std::string> headers_;
     std::string manual_headers_;
     bool strict_;
-    bool quiet_;
     double filesize_max_;
     mapnik::context_ptr ctx_;
 };
