@@ -505,9 +505,9 @@ bool interior_position(PathType & path, double & x, double & y)
     double max_width = 0;
     for (unsigned ii = 1; ii < intersections.size(); ++ii)
     {
-        double x1=intersections[ii];
-        double xc=(x0+x1)/2.0;
-        double width = std::fabs(x1-x0);
+        double xi=intersections[ii];
+        double xc=(x0+xi)/2.0;
+        double width = std::fabs(xi-x0);
         if (width > max_width && hit_test(path,xc,y,0))
         {
             x=xc;

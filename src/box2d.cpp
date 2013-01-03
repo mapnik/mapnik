@@ -41,9 +41,9 @@ box2d<T>::box2d()
     :minx_(0),miny_(0),maxx_(-1),maxy_(-1) {}
 
 template <typename T>
-box2d<T>::box2d(T minx_,T miny_,T maxx_,T maxy_)
+box2d<T>::box2d(T minx,T miny,T maxx,T maxy)
 {
-    init(minx_,miny_,maxx_,maxy_);
+    init(minx,miny,maxx,maxy);
 }
 
 template <typename T>
