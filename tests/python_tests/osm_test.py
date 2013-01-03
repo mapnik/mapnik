@@ -25,14 +25,9 @@ if 'osm' in mapnik.DatasourceCache.plugin_names():
         eq_(e.maxx <= 180.0,True)
         eq_(e.maxy <= 90,True)
 
-    @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
-        raise Todo("fixme")
         ds = mapnik.Osm(file='../data/osm/nodes.osm')
-        # ugh, more odd stuff hardcoded...
-        eq_(len(ds.fields()),5)
-        eq_(ds.fields(),['bicycle', 'foot', 'horse', 'name', 'width'])
-        eq_(ds.field_types(),['str', 'str', 'str', 'str', 'str'])
+        eq_(len(ds.fields()),0)
         query = mapnik.Query(ds.envelope())
         for fld in ds.fields():
             query.add_property_name(fld)
@@ -42,13 +37,13 @@ if 'osm' in mapnik.DatasourceCache.plugin_names():
 
     def test_that_64bit_int_fields_work():
         ds = mapnik.Osm(file='../data/osm/64bit.osm')
-        eq_(len(ds.fields()),5)
-        eq_(ds.fields(),['bigint', 'highway', 'junction', 'name', 'note'])
-        eq_(ds.field_types(),['str', 'str', 'str', 'str', 'str'])
+        eq_(len(ds.fields()),4)
+        eq_(ds.fields(),['bigint', 'highway', 'junction', 'note'])
+        eq_(ds.field_types(),['str', 'str', 'str', 'str'])
         fs = ds.featureset()
         feat = fs.next()
         eq_(feat.id(),4294968186)
-        eq_(feat['bigint'],'')
+        eq_(feat['bigint'], None)
         feat = fs.next()
         eq_(feat['bigint'],'9223372036854775807')
 
