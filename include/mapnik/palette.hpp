@@ -62,7 +62,7 @@ struct rgb {
     byte g;
     byte b;
 
-    inline rgb(byte r_, byte g_, byte b_) : r(r_), g(g_), b(b_) {};
+    inline rgb(byte r_, byte g_, byte b_) : r(r_), g(g_), b(b_) {}
     rgb(rgba const& c);
 
     inline bool operator==(const rgb& y) const
