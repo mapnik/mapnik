@@ -130,7 +130,11 @@ DEFINE_NAME_TRAIT( double, "double")
 DEFINE_NAME_TRAIT( float, "float")
 DEFINE_NAME_TRAIT( unsigned, "unsigned")
 DEFINE_NAME_TRAIT( boolean, "boolean")
+#ifdef BIGINT
 DEFINE_NAME_TRAIT( mapnik::value_integer, "long long" )
+#else
+DEFINE_NAME_TRAIT( mapnik::value_integer, "int" )
+#endif
 DEFINE_NAME_TRAIT( std::string, "string" )
 DEFINE_NAME_TRAIT( color, "color" )
 DEFINE_NAME_TRAIT(expression_ptr, "expression_ptr" )
