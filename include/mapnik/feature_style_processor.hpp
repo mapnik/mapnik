@@ -24,7 +24,7 @@
 #define MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
 
 // mapnik
-#include <mapnik/memory_datasource.hpp>
+#include <mapnik/datasource.hpp> // for featureset_ptr
 
 // stl
 #include <set>

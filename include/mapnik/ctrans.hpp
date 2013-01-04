@@ -24,7 +24,6 @@
 #define MAPNIK_CTRANS_HPP
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/proj_transform.hpp>

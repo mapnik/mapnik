@@ -28,6 +28,7 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/path_expression.hpp>
 #include <mapnik/path_expression_grammar.hpp>
 
 // boost
@@ -40,8 +41,6 @@
 #include <vector>
 
 namespace mapnik {
-
-typedef boost::shared_ptr<path_expression> path_expression_ptr;
 
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str,
@@ -140,7 +139,7 @@ struct path_processor
     }
 };
 
-typedef mapnik::path_processor<Feature> path_processor_type;
+typedef mapnik::path_processor<feature_impl> path_processor_type;
 
 }
 

@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 // mapnik
+#include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/ptree_helpers.hpp>
