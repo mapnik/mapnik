@@ -24,6 +24,7 @@
 
 // mapnik
 #include <mapnik/layer.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/cairo_renderer.hpp>
@@ -940,7 +941,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
     expression_ptr height_expr = sym.height();
     if (height_expr)
     {
-        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
+        value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr);
         height = result.to_double() * scale_factor_;
     }
 
