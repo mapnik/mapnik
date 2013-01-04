@@ -1699,6 +1699,9 @@ if not HELP_REQUESTED:
             SConscript('plugins/input/%s/build.py' % plugin)
         else:
             color_print(1,"Notice: dependencies not met for plugin '%s', not building..." % plugin)
+            # also clear out locally built target
+            if os.path.exists('plugins/input/%s.input' % plugin):
+                os.unlink('plugins/input/%s.input' % plugin)
 
     create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'], False)
     create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
