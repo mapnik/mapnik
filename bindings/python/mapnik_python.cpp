@@ -79,6 +79,9 @@ void export_logger();
 #include <mapnik/cairo_renderer.hpp>
 #endif
 #include <mapnik/graphics.hpp>
+#include <mapnik/stroke.hpp>
+#include <mapnik/font_set.hpp>
+#include <mapnik/rule.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/config_error.hpp>

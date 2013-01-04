@@ -30,11 +30,13 @@
 
 // stl
 #include <string>
+#include <set>
 
 namespace mapnik
 {
 
 typedef boost::shared_ptr<expr_node> expression_ptr;
+typedef std::set<expression_ptr> expression_set;
 
 
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding = "UTF8");

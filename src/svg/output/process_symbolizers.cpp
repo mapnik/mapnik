@@ -57,7 +57,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     path_attributes_.reset();
 
     return true;
-};
+}
 
 template bool svg_renderer<std::ostream_iterator<char> >::process(rule::symbolizers const& syms,
                                                                   mapnik::feature_impl & feature,

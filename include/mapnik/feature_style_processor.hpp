@@ -24,7 +24,6 @@
 #define MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
 
 // mapnik
-#include <mapnik/map.hpp>
 #include <mapnik/memory_datasource.hpp>
 
 // stl
@@ -39,6 +38,7 @@ class Map;
 class layer;
 class projection;
 class proj_transform;
+class feature_type_style;
 
 enum eAttributeCollectionPolicy
 {

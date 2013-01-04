@@ -24,6 +24,9 @@
 
 #include <mapnik/formatting/base.hpp>
 
+// boost
+#include <boost/property_tree/ptree_fwd.hpp>
+
 namespace mapnik {
 namespace formatting {
 class text_node: public node {

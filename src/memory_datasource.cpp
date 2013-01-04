@@ -26,7 +26,6 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
-#include <mapnik/feature_factory.hpp>
 
 // boost
 #include <boost/make_shared.hpp>

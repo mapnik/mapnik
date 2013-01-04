@@ -1,7 +1,7 @@
 #ifndef MAPNIK_SIMPLIFY_CONVERTER_HPP
 #define MAPNIK_SIMPLIFY_CONVERTER_HPP
 
-#include <mapnik/debug.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/simplify.hpp>

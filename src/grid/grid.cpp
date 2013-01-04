@@ -22,6 +22,12 @@
 
 // mapnik
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/value.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {

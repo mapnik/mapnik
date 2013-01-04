@@ -31,7 +31,7 @@
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/filter_iterator.hpp>
-#include <boost/variant.hpp>
+
 // stl
 #include <map>
 

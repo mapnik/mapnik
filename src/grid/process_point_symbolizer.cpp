@@ -21,16 +21,19 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 
 #include <mapnik/geom_util.hpp>
+#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/parse_path.hpp>
 
 // agg
 #include "agg_trans_affine.h"

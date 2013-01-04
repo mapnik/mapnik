@@ -28,6 +28,9 @@
 #include <mapnik/processed_text.hpp>
 #include <mapnik/xml_node.hpp>
 
+// boost
+#include <boost/property_tree/ptree.hpp>
+
 namespace mapnik
 {
 namespace formatting

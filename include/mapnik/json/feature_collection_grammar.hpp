@@ -24,6 +24,7 @@
 #define MAPNIK_FEATURE_COLLECTION_GRAMMAR_HPP
 
 // mapnik
+#include <mapnik/unicode.hpp>
 #include <mapnik/json/feature_grammar.hpp>
 #include <mapnik/feature.hpp>
 
