@@ -101,7 +101,7 @@ public:
     {
         locator_.rewind(0);
         //Get first point
-        done_ = agg::is_stop(locator_.vertex(&next_x, &next_y)) || spacing_ < marker_width_;
+        done_ = agg::is_stop(locator_.vertex(&next_x, &next_y));
         last_x = next_x;
         last_y = next_y; // Force request of new segment
         error_ = 0;
