@@ -175,17 +175,7 @@ mapnik::value_holder get_param(mapnik::parameter const& p, int index)
     }
 }
 
-boost::shared_ptr<mapnik::parameter> create_parameter_from_string(std::string const& key, std::string const& value)
-{
-    return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
-}
-
-boost::shared_ptr<mapnik::parameter> create_parameter_from_int(std::string const& key, mapnik::value_integer value)
-{
-    return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
-}
-
-boost::shared_ptr<mapnik::parameter> create_parameter_from_float(std::string const& key, double value)
+boost::shared_ptr<mapnik::parameter> create_parameter(std::string const& key, mapnik::value_holder const& value)
 {
     return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
 }
@@ -194,14 +184,13 @@ boost::shared_ptr<mapnik::parameter> create_parameter_from_float(std::string con
 void export_parameters()
 {
     using namespace boost::python;
+    implicitly_convertible<std::string,mapnik::value_holder>();
+    implicitly_convertible<mapnik::value_null,mapnik::value_holder>();
+    implicitly_convertible<mapnik::value_integer,mapnik::value_holder>();
+    implicitly_convertible<mapnik::value_double,mapnik::value_holder>();
+
     class_<parameter,boost::shared_ptr<parameter> >("Parameter",no_init)
-        .def("__init__", make_constructor(create_parameter_from_string),
-             "Create a mapnik.Parameter from a pair of values, the first being a string\n"
-             "and the second being either a string, and integer, or a float")
-        .def("__init__", make_constructor(create_parameter_from_float),
-             "Create a mapnik.Parameter from a pair of values, the first being a string\n"
-             "and the second being either a string, and integer, or a float")
-        .def("__init__", make_constructor(create_parameter_from_int),
+        .def("__init__", make_constructor(create_parameter),
              "Create a mapnik.Parameter from a pair of values, the first being a string\n"
              "and the second being either a string, and integer, or a float")
         .def_pickle(parameter_pickle_suite())

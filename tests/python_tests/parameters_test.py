@@ -11,22 +11,30 @@ import mapnik
 def setup():
     os.chdir(execution_path('.'))
 
-def test_parameter():
+def test_parameter_null():
+    p = mapnik.Parameter('key',None)
+    eq_(p[0],'key')
+    eq_(p[1],None)
+
+def test_parameter_string():
     p = mapnik.Parameter('key','value')
     eq_(p[0],'key')
     eq_(p[1],'value')
 
+def test_parameter_integer():
     p = mapnik.Parameter('int',sys.maxint)
     eq_(p[0],'int')
     eq_(p[1],sys.maxint)
 
-    p = mapnik.Parameter('float',float(sys.maxint))
-    eq_(p[0],'float')
+def test_parameter_double():
+    p = mapnik.Parameter('double',float(sys.maxint))
+    eq_(p[0],'double')
     eq_(p[1],float(sys.maxint))
 
-    p = mapnik.Parameter('bool_string','True')
-    eq_(p[0],'bool_string')
-    eq_(p[1],'True')
+def test_parameter_boolean():
+    p = mapnik.Parameter('boolean',True)
+    eq_(p[0],'boolean')
+    eq_(p[1],True)
     eq_(bool(p[1]),True)
 
 
