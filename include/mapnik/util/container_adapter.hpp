@@ -24,13 +24,11 @@
 #define CONTAINER_ADAPTER_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/path_iterator.hpp>
 
 // boost
-#include <boost/tuple/tuple.hpp>
-#include <boost/spirit/include/karma.hpp>
+#include <boost/spirit/home/support/container.hpp>
 
 namespace boost { namespace spirit { namespace traits {
 
