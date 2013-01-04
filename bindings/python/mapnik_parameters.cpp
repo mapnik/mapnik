@@ -29,6 +29,8 @@
 #include <mapnik/params.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
+// stl
+#include <iterator>
 
 using mapnik::parameter;
 using mapnik::parameters;
@@ -133,7 +135,7 @@ mapnik::value_holder get_params_by_key2(mapnik::parameters const& p, std::string
     return pos->second;
 }
 
-mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
+mapnik::value_holder get_params_by_index(mapnik::parameters const& p, int index)
 {
     if (index < 0 || static_cast<unsigned>(index) > p.size())
     {
@@ -143,16 +145,10 @@ mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
 
     parameters::const_iterator itr = p.begin();
     parameters::const_iterator end = p.end();
-
-    int idx = 0;
-    while (itr != end)
+    std::advance(itr, index);
+    if (itr != p.end())
     {
-        if (idx == index)
-        {
-            return *itr;
-        }
-        ++idx;
-        ++itr;
+        return itr->second;
     }
     PyErr_SetString(PyExc_IndexError, "Index is out of range");
     throw boost::python::error_already_set();
