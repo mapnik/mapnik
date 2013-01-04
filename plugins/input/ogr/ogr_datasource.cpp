@@ -372,7 +372,7 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                 // TODO - csv and shapefile inspect first 4 features
                 if (dataset_ && layer_.is_valid())
                 {
-                    OGRLayer* layer = layer_.layer();
+                    layer = layer_.layer();
                     // only new either reset of setNext
                     //layer->ResetReading();
                     layer->SetNextByIndex(0);
@@ -449,11 +449,11 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
         {
             std::ostringstream s("OGR Plugin: no attribute '");
             s << *pos << "'. Valid attributes are: ";
-            std::vector<attribute_descriptor>::const_iterator itr = names.begin();
-            std::vector<attribute_descriptor>::const_iterator end = names.end();
-            for ( ;itr!=end;++itr)
+            std::vector<attribute_descriptor>::const_iterator e_itr = names.begin();
+            std::vector<attribute_descriptor>::const_iterator e_end = names.end();
+            for ( ;e_itr!=e_end;++e_itr)
             {
-                s << itr->get_name() << std::endl;
+                s << e_itr->get_name() << std::endl;
             }
             throw mapnik::datasource_exception(s.str());
         }
