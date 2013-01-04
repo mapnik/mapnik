@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/formatting/format.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
@@ -77,7 +78,7 @@ node_ptr format_node::from_xml(xml_node const& xml)
 }
 
 
-void format_node::apply(char_properties const& p, const Feature &feature, processed_text &output) const
+void format_node::apply(char_properties const& p, const feature_impl &feature, processed_text &output) const
 {
     char_properties new_properties = p;
     if (face_name) new_properties.face_name = *face_name;
