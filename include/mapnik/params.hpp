@@ -75,9 +75,9 @@ class parameters : public param_map
         typedef boost::optional<T> return_type;
         static return_type extract(parameters const& params,
                                    std::string const& name,
-                                   boost::optional<T> const& default_value)
+                                   boost::optional<T> const& default_opt_value)
         {
-            boost::optional<T> result(default_value);
+            boost::optional<T> result(default_opt_value);
             parameters::const_iterator itr = params.find(name);
             if (itr != params.end())
             {
@@ -98,9 +98,9 @@ public:
     }
 
     template <typename T>
-    boost::optional<T> get(std::string const& key, T const& default_value) const
+    boost::optional<T> get(std::string const& key, T const& default_opt_value) const
     {
-        return converter<T>::extract(*this,key,boost::optional<T>(default_value));
+        return converter<T>::extract(*this,key,boost::optional<T>(default_opt_value));
     }
 };
 }
