@@ -1,7 +1,7 @@
 #ifndef GEOJSON_FEATURESET_HPP
 #define GEOJSON_FEATURESET_HPP
 
-#include <mapnik/datasource.hpp>
+#include <mapnik/feature.hpp>
 #include "geojson_datasource.hpp"
 
 #include <vector>

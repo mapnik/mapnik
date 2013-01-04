@@ -23,12 +23,16 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/unicode.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
 
 #include "osm_featureset.hpp"
 
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_type;
 using mapnik::feature_factory;

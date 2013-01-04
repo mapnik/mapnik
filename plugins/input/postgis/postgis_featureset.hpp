@@ -28,9 +28,9 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/unicode.hpp>
 
 // boost
-
 #include <boost/scoped_ptr.hpp>
 
 using mapnik::Featureset;

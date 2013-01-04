@@ -31,6 +31,7 @@
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/timer.hpp>
+#include <mapnik/value.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -62,7 +63,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
       geometry_table_(*params.get<std::string>("geometry_table", "")),
       geometry_field_(*params.get<std::string>("geometry_field", "")),
       key_field_(*params.get<std::string>("key_field", "")),
-      cursor_fetch_size_(*params.get<int>("cursor_size", 0)),
+      cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
       row_limit_(*params.get<int>("row_limit", 0)),
       type_(datasource::Vector),
       srid_(*params.get<int>("srid", 0)),

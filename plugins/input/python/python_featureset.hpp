@@ -1,6 +1,9 @@
 #ifndef PYTHON_FEATURESET_HPP
 #define PYTHON_FEATURESET_HPP
 
+// mapnik
+#include <mapnik/feature.hpp>
+
 // boost
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
@@ -8,7 +11,6 @@
 // mapnik
 #include <mapnik/datasource.hpp>
 
-// extend the mapnik::Featureset defined in include/mapnik/datasource.hpp
 class python_featureset : public mapnik::Featureset
 {
 public:

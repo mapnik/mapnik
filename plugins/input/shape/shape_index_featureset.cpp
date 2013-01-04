@@ -30,6 +30,7 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
+#include <boost/make_shared.hpp>
 
 #include "shape_index_featureset.hpp"
 #include "shape_utils.hpp"
@@ -47,7 +48,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     : filter_(filter),
       ctx_(boost::make_shared<mapnik::context_type>()),
       shape_(shape),
-      tr_(new transcoder(encoding)),
+      tr_(new mapnik::transcoder(encoding)),
       row_limit_(row_limit),
       count_(0),
       feature_bbox_()

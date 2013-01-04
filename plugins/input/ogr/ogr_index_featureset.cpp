@@ -21,9 +21,9 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/value.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
@@ -43,7 +43,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;

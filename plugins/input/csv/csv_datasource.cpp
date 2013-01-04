@@ -41,6 +41,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
+#include <mapnik/value.hpp>
 
 // stl
 #include <sstream>
@@ -62,7 +63,7 @@ csv_datasource::csv_datasource(parameters const& params)
       filename_(),
       inline_string_(),
       file_length_(0),
-      row_limit_(*params.get<int>("row_limit", 0)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       features_(),
       escape_(*params.get<std::string>("escape", "")),
       separator_(*params.get<std::string>("separator", "")),
@@ -70,7 +71,7 @@ csv_datasource::csv_datasource(parameters const& params)
       headers_(),
       manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
       strict_(*params.get<mapnik::boolean>("strict", false)),
-      filesize_max_(*params.get<float>("filesize_max", 20.0)),  // MB
+      filesize_max_(*params.get<double>("filesize_max", 20.0)),  // MB
       ctx_(boost::make_shared<mapnik::context_type>())
 {
     /* TODO:
@@ -701,7 +702,7 @@ void csv_datasource::parse_csv(T & stream,
                     else
                     {
                         mapnik::value_integer int_val = 0;
-                        if (mapnik::util::string2longlong(value,int_val))
+                        if (mapnik::util::string2int(value,int_val))
                         {
                             matched = true;
                             feature->put(fld_name,int_val);

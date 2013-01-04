@@ -31,6 +31,8 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/value.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -72,7 +74,6 @@ private:
     std::string sql_bbox(box2d<double> const& env) const;
     std::string populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const;
     std::string populate_tokens(std::string const& sql) const;
-    static std::string unquote(std::string const& sql);
     boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, std::string const& sql) const;
 
     static const std::string GEOMETRY_COLUMNS;
@@ -87,8 +88,8 @@ private:
     std::string geometry_table_;
     const std::string geometry_field_;
     std::string key_field_;
-    const int cursor_fetch_size_;
-    const int row_limit_;
+    mapnik::value_integer cursor_fetch_size_;
+    mapnik::value_integer row_limit_;
     std::string geometryColumn_;
     mapnik::datasource::datasource_t type_;
     int srid_;

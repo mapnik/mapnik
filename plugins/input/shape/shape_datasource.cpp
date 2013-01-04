@@ -35,10 +35,10 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/boolean.hpp>
-#include <mapnik/sql_utils.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/timer.hpp>
+#include <mapnik/value.hpp>
 
 // stl
 #include <fstream>
@@ -60,7 +60,7 @@ shape_datasource::shape_datasource(const parameters &params)
       type_(datasource::Vector),
       file_length_(0),
       indexed_(false),
-      row_limit_(*params.get<int>("row_limit",0)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit",0)),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
 #ifdef MAPNIK_STATS

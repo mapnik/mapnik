@@ -32,6 +32,7 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/value.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -77,7 +78,7 @@ private:
     std::string index_table_;
     std::string key_field_;
     int row_offset_;
-    int row_limit_;
+    mapnik::value_integer row_limit_;
     // TODO - also add to postgis.input
     const std::string intersects_token_;
     mapnik::layer_descriptor desc_;

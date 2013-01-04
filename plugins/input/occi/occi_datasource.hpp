@@ -31,6 +31,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/value.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -70,7 +71,7 @@ private:
     mutable mapnik::box2d<double> extent_;
     mapnik::layer_descriptor desc_;
     bool use_wkb_;
-    int row_limit_;
+    mapnik::value_integer row_limit_;
     int row_prefetch_;
     oracle::occi::StatelessConnectionPool* pool_;
     oracle::occi::Connection* conn_;

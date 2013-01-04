@@ -31,6 +31,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/value.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -64,7 +65,7 @@ private:
     std::string filename_;
     std::string inline_string_;
     unsigned file_length_;
-    int row_limit_;
+    mapnik::value_integer row_limit_;
     std::vector<mapnik::feature_ptr> features_;
     std::string escape_;
     std::string separator_;

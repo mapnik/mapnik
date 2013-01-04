@@ -23,11 +23,15 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/image_data.hpp>
+#include <mapnik/raster.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // boost
 #include <boost/format.hpp>
+#include <boost/make_shared.hpp>
 
 #include "gdal_featureset.hpp"
 #include <gdal_priv.h>
@@ -35,7 +39,6 @@
 using mapnik::query;
 using mapnik::coord2d;
 using mapnik::box2d;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::CoordTransform;
 using mapnik::geometry_type;

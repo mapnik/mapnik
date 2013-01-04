@@ -26,6 +26,10 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/unicode.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
 
 #include "shape_featureset.hpp"
 #include "shape_utils.hpp"

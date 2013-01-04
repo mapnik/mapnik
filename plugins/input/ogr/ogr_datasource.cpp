@@ -139,7 +139,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     // initialize layer
     boost::optional<std::string> layer_by_name = params.get<std::string>("layer");
-    boost::optional<unsigned> layer_by_index = params.get<unsigned>("layer_by_index");
+    boost::optional<int> layer_by_index = params.get<int>("layer_by_index");
     boost::optional<std::string> layer_by_sql = params.get<std::string>("layer_by_sql");
 
     int passed_parameters = 0;

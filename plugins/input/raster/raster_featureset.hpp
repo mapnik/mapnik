@@ -27,6 +27,7 @@
 #include "raster_info.hpp"
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
 
 // stl
