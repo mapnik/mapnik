@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/feature_type_style.hpp>
+#include <mapnik/rule.hpp>
 
 // boost
 #include <boost/foreach.hpp>
