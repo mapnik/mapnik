@@ -39,7 +39,7 @@ public:
     {
     }
 
-    virtual ~value_error() throw() {};
+    virtual ~value_error() throw() {}
 
     virtual const char * what() const throw()
     {
