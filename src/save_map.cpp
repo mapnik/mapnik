@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/rule.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
@@ -34,7 +35,10 @@
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_scaling.hpp>
+#include <mapnik/image_filter.hpp>
 #include <mapnik/image_filter_types.hpp>
+#include <mapnik/parse_path.hpp>
+
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
