@@ -283,7 +283,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     if (placement_->properties.orientation)
     {
         // https://github.com/mapnik/mapnik/issues/1352
-        mapnik::evaluate<Feature, value_type> evaluator(feature_);
+        mapnik::evaluate<feature_impl, value_type> evaluator(feature_);
         angle_ = boost::apply_visitor(
             evaluator,
             *(placement_->properties.orientation)).to_double();
