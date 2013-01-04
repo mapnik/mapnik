@@ -369,7 +369,7 @@ struct text_renderer : private mapnik::noncopyable
     typedef T pixmap_type;
 
     text_renderer (pixmap_type & pixmap,
-                   face_manager<freetype_engine> &font_manager_,
+                   face_manager<freetype_engine> & font_manager,
                    stroker & s,
                    composite_mode_e comp_op = src_over,
                    double scale_factor=1.0);
@@ -419,7 +419,7 @@ private:
     }
 
     pixmap_type & pixmap_;
-    face_manager<freetype_engine> &font_manager_;
+    face_manager<freetype_engine> & font_manager_;
     stroker & stroker_;
     glyphs_t glyphs_;
     composite_mode_e comp_op_;

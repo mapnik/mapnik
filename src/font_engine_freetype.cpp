@@ -323,12 +323,12 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 
 template <typename T>
 text_renderer<T>::text_renderer (pixmap_type & pixmap,
-                                 face_manager<freetype_engine> &font_manager_,
+                                 face_manager<freetype_engine> & font_manager,
                                  stroker & s,
                                  composite_mode_e comp_op,
                                  double scale_factor)
     : pixmap_(pixmap),
-      font_manager_(font_manager_),
+      font_manager_(font_manager),
       stroker_(s),
       comp_op_(comp_op),
       scale_factor_(scale_factor) {}
