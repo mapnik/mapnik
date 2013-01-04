@@ -37,6 +37,7 @@
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/rule.hpp> // for rule::symbolizers
 #include <mapnik/expression.hpp>  // for expression_ptr, etc
 #include <mapnik/expression_node.hpp>
 #include <mapnik/parse_path.hpp>  // for path_processor_type
