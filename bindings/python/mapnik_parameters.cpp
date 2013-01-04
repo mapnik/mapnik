@@ -203,10 +203,10 @@ void export_parameters()
         .def("__init__", make_constructor(create_parameter_from_string),
              "Create a mapnik.Parameter from a pair of values, the first being a string\n"
              "and the second being either a string, and integer, or a float")
-        .def("__init__", make_constructor(create_parameter_from_int),
+        .def("__init__", make_constructor(create_parameter_from_float),
              "Create a mapnik.Parameter from a pair of values, the first being a string\n"
              "and the second being either a string, and integer, or a float")
-        .def("__init__", make_constructor(create_parameter_from_float),
+        .def("__init__", make_constructor(create_parameter_from_int),
              "Create a mapnik.Parameter from a pair of values, the first being a string\n"
              "and the second being either a string, and integer, or a float")
         .def_pickle(parameter_pickle_suite())
