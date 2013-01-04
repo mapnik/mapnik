@@ -126,12 +126,12 @@ geojson_datasource::geojson_datasource(parameters const& params)
         {
             extent_ = box;
             first = false;
-            mapnik::feature_kv_iterator itr = f->begin();
-            mapnik::feature_kv_iterator end = f->end();
-            for ( ;itr!=end; ++itr)
+            mapnik::feature_kv_iterator f_itr = f->begin();
+            mapnik::feature_kv_iterator f_end = f->end();
+            for ( ;f_itr!=f_end; ++f_itr)
             {
-                desc_.add_descriptor(mapnik::attribute_descriptor(boost::get<0>(*itr),
-                    boost::apply_visitor(attr_value_converter(),boost::get<1>(*itr).base())));
+                desc_.add_descriptor(mapnik::attribute_descriptor(boost::get<0>(*f_itr),
+                    boost::apply_visitor(attr_value_converter(),boost::get<1>(*f_itr).base())));
             }
         }
         else
