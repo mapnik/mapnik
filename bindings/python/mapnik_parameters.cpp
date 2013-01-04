@@ -29,6 +29,8 @@
 #include <mapnik/params.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
+// stl
+#include <iterator>
 
 using mapnik::parameter;
 using mapnik::parameters;
@@ -142,17 +144,10 @@ mapnik::parameter get_params_by_index(mapnik::parameters const& p, int index)
     }
 
     parameters::const_iterator itr = p.begin();
-    parameters::const_iterator end = p.end();
-
-    int idx = 0;
-    while (itr != end)
+    std::advance(itr, index);
+    if (itr != p.end())
     {
-        if (idx == index)
-        {
-            return *itr;
-        }
-        ++idx;
-        ++itr;
+        return *itr;
     }
     PyErr_SetString(PyExc_IndexError, "Index is out of range");
     throw boost::python::error_already_set();
@@ -203,10 +198,10 @@ void export_parameters()
         .def("__init__", make_constructor(create_parameter_from_string),
              "Create a mapnik.Parameter from a pair of values, the first being a string\n"
              "and the second being either a string, and integer, or a float")
-        .def("__init__", make_constructor(create_parameter_from_int),
+        .def("__init__", make_constructor(create_parameter_from_float),
              "Create a mapnik.Parameter from a pair of values, the first being a string\n"
              "and the second being either a string, and integer, or a float")
-        .def("__init__", make_constructor(create_parameter_from_float),
+        .def("__init__", make_constructor(create_parameter_from_int),
              "Create a mapnik.Parameter from a pair of values, the first being a string\n"
              "and the second being either a string, and integer, or a float")
         .def_pickle(parameter_pickle_suite())

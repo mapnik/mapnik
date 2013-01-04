@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 from nose.tools import *
 from utilities import execution_path
 
@@ -15,13 +16,13 @@ def test_parameter():
     eq_(p[0],'key')
     eq_(p[1],'value')
 
-    p = mapnik.Parameter('int',1)
+    p = mapnik.Parameter('int',sys.maxint)
     eq_(p[0],'int')
-    eq_(p[1],1)
+    eq_(p[1],sys.maxint)
 
-    p = mapnik.Parameter('float',1.0777)
+    p = mapnik.Parameter('float',float(sys.maxint))
     eq_(p[0],'float')
-    eq_(p[1],1.0777)
+    eq_(p[1],float(sys.maxint))
 
     p = mapnik.Parameter('bool_string','True')
     eq_(p[0],'bool_string')
