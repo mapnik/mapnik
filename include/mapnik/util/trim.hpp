@@ -68,6 +68,29 @@ static inline std::string trim_copy(std::string s)
     return ltrim(rtrim(s));
 }
 
+static inline bool not_double_quote(int ch)
+{
+   if (ch == '"') return false;
+   return true;
+}
+
+static inline void unquote_double(std::string & s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), not_double_quote));
+    s.erase(std::find_if(s.rbegin(), s.rend(), not_double_quote).base(), s.end());
+}
+
+static inline bool not_quoted(int ch)
+{
+   if (ch == '"' || ch == '\'') return false;
+   return true;
+}
+
+static inline void unquote(std::string & s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), not_quoted));
+    s.erase(std::find_if(s.rbegin(), s.rend(), not_quoted).base(), s.end());
+}
 
 }} // end of namespace mapnik
 
