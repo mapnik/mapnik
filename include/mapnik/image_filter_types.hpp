@@ -26,9 +26,10 @@
 // boost
 #include <boost/variant.hpp>
 #include <boost/config/warning_disable.hpp>
-#include <boost/spirit/include/karma.hpp>
+
 // stl
 #include <iostream>
+#include <vector>
 
 namespace mapnik { namespace filter {
 
@@ -121,36 +122,9 @@ inline std::ostream& operator<< (std::ostream& os, invert)
     return os;
 }
 
-template <typename Out>
-struct to_string_visitor : boost::static_visitor<void>
-{
-    to_string_visitor(Out & out)
-    : out_(out) {}
+inline std::ostream& operator<< (std::ostream& os, filter_type const& filter);
 
-    template <typename T>
-    void operator () (T const& filter_tag)
-    {
-        out_ << filter_tag;
-    }
-
-    Out & out_;
-};
-
-inline std::ostream& operator<< (std::ostream& os, filter_type const& filter)
-{
-    to_string_visitor<std::ostream> visitor(os);
-    boost::apply_visitor(visitor, filter);
-    return os;
-}
-
-template <typename OutputIterator, typename Container>
-bool generate_image_filters(OutputIterator& sink, Container const& v)
-{
-    using boost::spirit::karma::stream;
-    using boost::spirit::karma::generate;
-    bool r = generate(sink, stream % ' ', v);
-    return r;
-}
+bool generate_image_filters(std::back_insert_iterator<std::string> & sink, std::vector<filter_type> const& v);
 
 }}
 
