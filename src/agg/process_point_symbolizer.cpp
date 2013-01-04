@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
@@ -30,6 +31,8 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/label_collision_detector.hpp>
+#include <mapnik/parse_path.hpp>
 
 // agg
 #include "agg_trans_affine.h"

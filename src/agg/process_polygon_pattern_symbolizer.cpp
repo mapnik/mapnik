@@ -22,7 +22,9 @@
 
 // boost
 #include <boost/foreach.hpp>
+
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -32,6 +34,9 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/parse_path.hpp>
+#include <mapnik/polygon_pattern_symbolizer.hpp>
+
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
