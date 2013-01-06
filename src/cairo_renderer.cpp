@@ -23,10 +23,11 @@
 #if defined(HAVE_CAIRO)
 
 // mapnik
+#include <mapnik/rule.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/debug.hpp>
 #include <mapnik/cairo_renderer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/unicode.hpp>
@@ -34,6 +35,10 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/font_set.hpp>
+#include <mapnik/parse_path.hpp>
+#include <mapnik/map.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/segment.hpp>
