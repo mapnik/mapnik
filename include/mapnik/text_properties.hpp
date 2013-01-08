@@ -24,6 +24,8 @@
 
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
