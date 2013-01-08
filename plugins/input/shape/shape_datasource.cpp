@@ -38,7 +38,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/timer.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 
 // stl
 #include <fstream>

@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/raster_colorizer.hpp>

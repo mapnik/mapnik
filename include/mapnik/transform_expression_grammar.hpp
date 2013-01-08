@@ -28,7 +28,7 @@
 #include <mapnik/transform_expression.hpp>
 
 // spirit
-#include <boost/spirit/home/qi.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 namespace mapnik {
 

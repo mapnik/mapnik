@@ -28,7 +28,7 @@
 #include <boost/optional.hpp>
 
 // mapnik
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 
 // stl
 #include <string>

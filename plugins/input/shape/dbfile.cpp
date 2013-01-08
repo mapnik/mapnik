@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 // mapnik
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/unicode.hpp>

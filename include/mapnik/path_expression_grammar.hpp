@@ -36,7 +36,7 @@
 
 namespace mapnik
 {
-	
+
 using namespace boost;
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;

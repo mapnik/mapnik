@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/util/conversions.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
 #include <boost/spirit/include/qi.hpp>

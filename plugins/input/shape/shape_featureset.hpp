@@ -27,7 +27,7 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 
 #include "shape_io.hpp"
 

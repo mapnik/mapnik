@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
 #include <boost/make_shared.hpp>

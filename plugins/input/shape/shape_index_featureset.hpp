@@ -31,7 +31,7 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>

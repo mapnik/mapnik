@@ -22,7 +22,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
