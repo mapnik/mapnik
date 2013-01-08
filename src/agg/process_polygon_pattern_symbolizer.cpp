@@ -32,7 +32,6 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/polygon_pattern_symbolizer.hpp>

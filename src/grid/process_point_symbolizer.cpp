@@ -30,7 +30,6 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/point_symbolizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/parse_path.hpp>
