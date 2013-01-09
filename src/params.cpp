@@ -36,48 +36,23 @@ namespace mapnik {
 
 namespace params_detail {
 
-    // TODO - rewrite to avoid usage of lexical_cast
-    template <typename T>
-    struct value_extractor_visitor : public boost::static_visitor<>
+template <typename T>
+struct converter
+{
+    typedef boost::optional<T> return_type;
+    static return_type extract(parameters const& params,
+                               std::string const& name,
+                               boost::optional<T> const& default_opt_value)
     {
-        value_extractor_visitor(boost::optional<T> & var)
-            :var_(var) {}
-    
-        void operator () (T val) const
+        boost::optional<T> result(default_opt_value);
+        parameters::const_iterator itr = params.find(name);
+        if (itr != params.end())
         {
-            var_ = val;
+            boost::apply_visitor(value_extractor_visitor<T>(result),itr->second);
         }
-
-        template <typename T1>
-        void operator () (T1 val) const
-        {
-            try
-            {
-                var_ = boost::lexical_cast<T>(val);
-            }
-            catch (boost::bad_lexical_cast & ) {}
-        }
-    
-        boost::optional<T> & var_;
-    };
-    
-    template <typename T>
-    struct converter
-    {
-        typedef boost::optional<T> return_type;
-        static return_type extract(parameters const& params,
-                                   std::string const& name,
-                                   boost::optional<T> const& default_opt_value)
-        {
-            boost::optional<T> result(default_opt_value);
-            parameters::const_iterator itr = params.find(name);
-            if (itr != params.end())
-            {
-                boost::apply_visitor(value_extractor_visitor<T>(result),itr->second);
-            }
-            return result;
-        }
-    };
+        return result;
+    }
+};
 } // end namespace params_detail
 
 // parameters
