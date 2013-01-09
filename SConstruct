@@ -1756,6 +1756,8 @@ if not HELP_REQUESTED:
         if env['SVG_RENDERER']:
             SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 
+    SConscript('benchmark/build.py')
+
     # install pkg-config script and mapnik-config script
     SConscript('utils/mapnik-config/build.py')
 

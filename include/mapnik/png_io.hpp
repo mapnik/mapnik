@@ -156,14 +156,13 @@ void reduce_8(T const& in,
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            mapnik::rgb c(U2RED(val), U2GREEN(val), U2BLUE(val));
             byte index = 0;
             int idx = -1;
             for(int j=levels-1; j>0; j--)
             {
                 if (U2ALPHA(val)>=limits[j] && trees[j].colors()>0)
                 {
-                    index = idx = trees[j].quantize(c);
+                    index = idx = trees[j].quantize(val);
                     break;
                 }
             }
@@ -208,14 +207,13 @@ void reduce_4(T const& in,
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            mapnik::rgb c(U2RED(val), U2GREEN(val), U2BLUE(val));
             byte index = 0;
             int idx=-1;
             for(int j=levels-1; j>0; j--)
             {
                 if (U2ALPHA(val)>=limits[j] && trees[j].colors()>0)
                 {
-                    index = idx = trees[j].quantize(c);
+                    index = idx = trees[j].quantize(val);
                     break;
                 }
             }
