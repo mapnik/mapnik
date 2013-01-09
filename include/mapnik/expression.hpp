@@ -45,7 +45,6 @@ typedef std::set<expression_ptr> expression_set;
 
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, std::string const& encoding = "UTF8");
 MAPNIK_DECL expression_ptr parse_expression (std::string const& wkt, mapnik::expression_grammar<std::string::const_iterator> const& g);
-
 }
 
 #endif // MAPNIK_EXPRESSION_HPP

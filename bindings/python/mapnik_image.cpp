@@ -46,7 +46,7 @@ extern "C"
 
 // cairo
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-#include <cairomm/surface.h>
+#include <mapnik/cairo_context.hpp>
 #include <pycairo.h>
 #endif
 
@@ -158,17 +158,16 @@ void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float op
     im.set_rectangle_alpha2(im2.data(),x,y,opacity);
 }
 
-
 void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity)
 {
     mapnik::composite(dst.data(),src.data(),mode,opacity,0,0,false);
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-boost::shared_ptr<image_32> from_cairo(PycairoSurface* surface)
+boost::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
 {
-    Cairo::RefPtr<Cairo::ImageSurface> s(new Cairo::ImageSurface(surface->surface));
-    boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(s);
+    mapnik::cairo_surface_ptr surface(py_surface->surface, mapnik::cairo_surface_closer());
+    boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(surface);
     return image_ptr;
 }
 #endif

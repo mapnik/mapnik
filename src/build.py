@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# 
+#
 
 
 import os
@@ -204,6 +204,7 @@ if env['HAS_CAIRO']:
     libmapnik_cxxflags.append('-DHAVE_CAIRO')
     lib_env.PrependUnique(CPPPATH=copy(env['CAIROMM_CPPPATHS']))
     source.insert(0,'cairo_renderer.cpp')
+    source.insert(0,'cairo_context.cpp')
 
 if env['JPEG']:
     source += Split(

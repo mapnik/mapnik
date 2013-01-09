@@ -163,92 +163,92 @@ void render_layer2(const mapnik::Map& map,
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
 void render3(const mapnik::Map& map,
-             PycairoSurface* surface,
+             PycairoSurface* py_surface,
              double scale_factor = 1.0,
              unsigned offset_x = 0,
              unsigned offset_y = 0)
 {
     python_unblock_auto_block b;
-    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,scale_factor,offset_x,offset_y);
+    mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
+    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> ren(map,surface,scale_factor,offset_x,offset_y);
     ren.apply();
 }
 
-void render4(const mapnik::Map& map, PycairoSurface* surface)
+void render4(const mapnik::Map& map, PycairoSurface* py_surface)
 {
     python_unblock_auto_block b;
-    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-    mapnik::cairo_renderer<Cairo::Surface> ren(map,s);
+    mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
+    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> ren(map,surface);
     ren.apply();
 }
 
 void render5(const mapnik::Map& map,
-             PycairoContext* context,
+             PycairoContext* py_context,
              double scale_factor = 1.0,
              unsigned offset_x = 0,
              unsigned offset_y = 0)
 {
     python_unblock_auto_block b;
-    Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-    mapnik::cairo_renderer<Cairo::Context> ren(map,c,scale_factor,offset_x, offset_y);
+    mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
+    mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context,scale_factor,offset_x, offset_y);
     ren.apply();
 }
 
-void render6(const mapnik::Map& map, PycairoContext* context)
+void render6(const mapnik::Map& map, PycairoContext* py_context)
 {
     python_unblock_auto_block b;
-    Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-    mapnik::cairo_renderer<Cairo::Context> ren(map,c);
+    mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
+    mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context);
     ren.apply();
 }
 
 void render_with_detector2(
     const mapnik::Map& map,
-    PycairoContext* context,
+    PycairoContext* py_context,
     boost::shared_ptr<mapnik::label_collision_detector4> detector)
 {
     python_unblock_auto_block b;
-    Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-    mapnik::cairo_renderer<Cairo::Context> ren(map,c,detector);
+    mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
+    mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context,detector);
     ren.apply();
 }
 
 void render_with_detector3(
     const mapnik::Map& map,
-    PycairoContext* context,
+    PycairoContext* py_context,
     boost::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)
 {
     python_unblock_auto_block b;
-    Cairo::RefPtr<Cairo::Context> c(new Cairo::Context(context->ctx));
-    mapnik::cairo_renderer<Cairo::Context> ren(map,c,detector,scale_factor,offset_x,offset_y);
+    mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
+    mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context,detector,scale_factor,offset_x,offset_y);
     ren.apply();
 }
 
 void render_with_detector4(
     const mapnik::Map& map,
-    PycairoSurface* surface,
+    PycairoSurface* py_surface,
     boost::shared_ptr<mapnik::label_collision_detector4> detector)
 {
     python_unblock_auto_block b;
-    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,detector);
+    mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
+    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> ren(map, surface, detector);
     ren.apply();
 }
 
 void render_with_detector5(
     const mapnik::Map& map,
-    PycairoSurface* surface,
+    PycairoSurface* py_surface,
     boost::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)
 {
     python_unblock_auto_block b;
-    Cairo::RefPtr<Cairo::Surface> s(new Cairo::Surface(surface->surface));
-    mapnik::cairo_renderer<Cairo::Surface> ren(map,s,detector,scale_factor,offset_x,offset_y);
+    mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
+    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> ren(map, surface, detector, scale_factor, offset_x, offset_y);
     ren.apply();
 }
 
