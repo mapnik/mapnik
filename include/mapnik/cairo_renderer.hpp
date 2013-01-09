@@ -117,7 +117,6 @@ public:
 protected:
 
     Map const& m_;
-    //Cairo::RefPtr<Cairo::Context> context_;
     cairo_context context_;
     unsigned width_;
     unsigned height_;
