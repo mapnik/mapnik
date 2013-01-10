@@ -1666,6 +1666,9 @@ if not HELP_REQUESTED:
     # Install headers
     SConscript('include/build.py')
 
+    # Install auxiliary headers
+    SConscript('deps/build.py')
+
     # Build the requested and able-to-be-compiled input plug-ins
     GDAL_BUILT = False
     OGR_BUILT = False
