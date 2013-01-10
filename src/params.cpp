@@ -23,62 +23,26 @@
 // mapnik
 #include <mapnik/boolean.hpp>
 #include <mapnik/params.hpp>
+#include <mapnik/params_impl.hpp>
 #include <mapnik/value_types.hpp>
-
-// boost
-#include <boost/variant/static_visitor.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/none.hpp>
-#include <boost/optional.hpp>
 
 namespace mapnik {
 
-namespace params_detail {
+template boost::optional<std::string> parameters::get(std::string const& key) const;
+template boost::optional<std::string> parameters::get(std::string const& key, std::string const& default_opt_value) const;
 
-template <typename T>
-struct converter
-{
-    typedef boost::optional<T> return_type;
-    static return_type extract(parameters const& params,
-                               std::string const& name,
-                               boost::optional<T> const& default_opt_value)
-    {
-        boost::optional<T> result(default_opt_value);
-        parameters::const_iterator itr = params.find(name);
-        if (itr != params.end())
-        {
-            boost::apply_visitor(value_extractor_visitor<T>(result),itr->second);
-        }
-        return result;
-    }
-};
-} // end namespace params_detail
+template boost::optional<value_double> parameters::get(std::string const& key) const;
+template boost::optional<value_double> parameters::get(std::string const& key, value_double const& default_opt_value) const;
 
-// parameters
+template boost::optional<int> parameters::get(std::string const& key) const;
+template boost::optional<int> parameters::get(std::string const& key, int const& default_opt_value) const;
 
-parameters::parameters() {}
+template boost::optional<mapnik::boolean> parameters::get(std::string const& key) const;
+template boost::optional<mapnik::boolean> parameters::get(std::string const& key, mapnik::boolean const& default_opt_value) const;
 
-template <typename T>
-boost::optional<T> parameters::get(std::string const& key) const
-{
-    return params_detail::converter<T>::extract(*this,key, boost::none);
-}
-
-template <typename T>
-boost::optional<T> parameters::get(std::string const& key, T const& default_opt_value) const
-{
-    return params_detail::converter<T>::extract(*this,key,boost::optional<T>(default_opt_value));
-}
-
-#define compile_params_get(T) template boost::optional<T> parameters::get(std::string const& key) const; template boost::optional<T> parameters::get(std::string const& key, T const& default_opt_value) const
-
-compile_params_get(std::string);
-compile_params_get(value_double);
-compile_params_get(int);
 #ifdef BIGINT
-compile_params_get(value_integer);
+template boost::optional<value_integer> parameters::get(std::string const& key) const;
+template boost::optional<value_integer> parameters::get(std::string const& key, value_integer const& default_opt_value) const;
 #endif
-compile_params_get(mapnik::boolean);
 
 }
