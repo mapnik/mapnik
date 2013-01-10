@@ -218,7 +218,6 @@ namespace detail {
 
           using namespace boost::spirit; // for traits
           using namespace boost::spirit::karma; // for char_inserter
-          using namespace boost; // for remove_const
 
           if ( traits::test_zero(n) ) return true; // this part added to karma
 
@@ -226,7 +225,7 @@ namespace detail {
           //    generate(sink, right_align(precision, '0')[ulong], n);
           // but it's spelled out to avoid inter-modular dependencies.
 
-          typename remove_const<T>::type digits =
+          typename boost::remove_const<T>::type digits =
               (traits::test_zero(n) ? 0 : floor(log10(n))) + 1;
           bool r = true;
           for (/**/; r && digits < precision_; digits = digits + 1)
