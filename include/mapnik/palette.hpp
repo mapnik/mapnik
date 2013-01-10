@@ -31,7 +31,7 @@
 #define USE_DENSE_HASH_MAP
 
 #ifdef USE_DENSE_HASH_MAP
-    #include "deps/sparsehash/dense_hash_map"
+    #include <mapnik/sparsehash/dense_hash_map>
     typedef google::dense_hash_map<unsigned int, unsigned char> rgba_hash_table;
 #else
     #warning compiling without dense_hash_map
