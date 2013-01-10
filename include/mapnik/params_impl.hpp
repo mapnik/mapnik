@@ -28,6 +28,8 @@
 #include <mapnik/value_types.hpp>
 
 // boost
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp> // keep gcc happy
 #include <boost/variant/variant.hpp>
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
