@@ -7,10 +7,10 @@
 #define GOOGLE_NAMESPACE ::google
 
 /* the location of the header defining hash functions */
-#define HASH_FUN_H <tr1/functional>
+#define HASH_FUN_H <boost/functional/hash.hpp>
 
 /* the namespace of the hash<> function */
-#define HASH_NAMESPACE std::tr1
+#define HASH_NAMESPACE boost
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
