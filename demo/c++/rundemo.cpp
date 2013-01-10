@@ -48,7 +48,7 @@ int main ( int argc , char** argv)
 {
     if (argc != 2)
     {
-        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local/lib/mapnik\n";
+        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local\n";
         std::cout << "Warning: ./rundemo looks for data in ../data/,\nTherefore must be run from within the demo/c++ folder.\n";
         return EXIT_SUCCESS;
     }
@@ -57,10 +57,10 @@ int main ( int argc , char** argv)
     try {
         std::cout << " running demo ... \n";
         std::string mapnik_dir(argv[1]);
-        std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "/input/" << "\n";
-        datasource_cache::instance().register_datasources(mapnik_dir + "/input/");
-        std::cout << " looking for DejaVuSans font in... " << mapnik_dir << "/fonts/DejaVuSans.ttf" << "\n";
-        freetype_engine::register_font(mapnik_dir + "/fonts/DejaVuSans.ttf");
+        std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "/lib/mapnik/input/" << "\n";
+        datasource_cache::instance().register_datasources(mapnik_dir + "/lib/mapnik/input/");
+        std::cout << " looking for DejaVuSans font in... " << mapnik_dir << "/lib/mapnik/fonts/DejaVuSans.ttf" << "\n";
+        freetype_engine::register_font(mapnik_dir + "/lib/mapnik/fonts/DejaVuSans.ttf");
 
         Map m(800,600);
         m.set_background(parse_color("white"));
