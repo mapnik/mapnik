@@ -172,11 +172,6 @@ public:
         MAX = THE_MAX
     };
 
-    ENUM max() const
-    {
-        return THE_MAX;
-    }
-
     /** Converts @p str to an enum.
      * @throw illegal_enum_value @p str is not a legal identifier.
      * */
