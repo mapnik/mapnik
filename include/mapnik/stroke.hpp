@@ -24,6 +24,7 @@
 #define MAPNIK_STROKE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/enumeration.hpp>
