@@ -3,9 +3,6 @@
 // boost.test
 #include <boost/test/included/unit_test.hpp>
 
-// boost.spirit
-#include <boost/spirit/include/karma.hpp>
-
 // boost.filesystem
 #include <boost/filesystem.hpp>
 
@@ -15,7 +12,6 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/datasource_cache.hpp>
-#include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
 
