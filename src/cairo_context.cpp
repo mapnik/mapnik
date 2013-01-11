@@ -47,7 +47,8 @@ void cairo_context::set_color(color const &color, double opacity)
 
 void cairo_context::set_color(double r, double g, double b, double opacity)
 {
-    cairo_set_source_rgb(cairo_.get(), r, g, b);
+    // http://lists.cairographics.org/archives/cairo/2008-August/014759.html
+    cairo_set_source_rgba(cairo_.get(), r, g, b, opacity);
     check_object_status_and_throw_exception(*this);
 }
 
