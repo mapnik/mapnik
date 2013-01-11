@@ -382,7 +382,11 @@ bool has_cairo()
 bool has_pycairo()
 {
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
+#if PY_MAJOR_VERSION >= 3
+    Pycairo_CAPI = (Pycairo_CAPI_t*) PyCapsule_Import(const_cast<char *>("cairo.CAPI"), 0);
+#else
     Pycairo_CAPI = (Pycairo_CAPI_t*) PyCObject_Import(const_cast<char *>("cairo"), const_cast<char *>("CAPI"));
+#endif
     if (Pycairo_CAPI == NULL){
         /*
           Case where pycairo support has been compiled into
