@@ -156,6 +156,15 @@ bool to_string(std::string & str, int value)
   return karma::generate(sink, value);
 }
 
+#ifdef BIGINT
+bool to_string(std::string & str, mapnik::value_integer value)
+{
+  namespace karma = boost::spirit::karma;
+  std::back_insert_iterator<std::string> sink(str);
+  return karma::generate(sink, value);
+}
+#endif
+
 bool to_string(std::string & str, unsigned value)
 {
   namespace karma = boost::spirit::karma;
@@ -164,13 +173,6 @@ bool to_string(std::string & str, unsigned value)
 }
 
 bool to_string(std::string & str, bool value)
-{
-  namespace karma = boost::spirit::karma;
-  std::back_insert_iterator<std::string> sink(str);
-  return karma::generate(sink, value);
-}
-
-bool to_string(std::string & str, boost::long_long_type value)
 {
   namespace karma = boost::spirit::karma;
   std::back_insert_iterator<std::string> sink(str);
@@ -287,6 +289,12 @@ bool to_string(std::string & str, int value)
   return to_string_lexical(str, value);
 }
 
+#ifdef BIGINT
+bool to_string(std::string & str, mapnik::value_integer value)
+{
+  return to_string_lexical(str, value);
+}
+
 bool to_string(std::string & str, unsigned value)
 {
   return to_string_lexical(str, value);
@@ -302,10 +310,7 @@ bool to_string(std::string & str, double value)
   return to_string_lexical(str, value);
 }
 
-bool to_string(std::string & str, boost::long_long_type value)
-{
-  return to_string_lexical(str, value);
-}
+#endif
 
 #endif
 
