@@ -29,7 +29,11 @@
 
 namespace mapnik {
 
+#ifdef BIGINT
 typedef agg::renderer_base<mapnik::pixfmt_gray64> grid_renderer_base_type;
+#else
+typedef agg::renderer_base<mapnik::pixfmt_gray32> grid_renderer_base_type;
+#endif
 
 }
 
