@@ -32,7 +32,6 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/make_shared.hpp>
 
@@ -42,9 +41,6 @@
 #include <set>
 #include <sstream>
 #include <iomanip>
-
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -379,19 +375,12 @@ box2d<double> occi_datasource::envelope() const
             ResultSet* rs = conn.execute_query(s.str());
             if (rs && rs->next())
             {
-                try
-                {
-                    lox = lexical_cast<double>(rs->getDouble(1));
-                    loy = lexical_cast<double>(rs->getDouble(2));
-                    hix = lexical_cast<double>(rs->getDouble(3));
-                    hiy = lexical_cast<double>(rs->getDouble(4));
-                    extent_.init(lox, loy, hix, hiy);
-                    extent_initialized_ = true;
-                }
-                catch (bad_lexical_cast& ex)
-                {
-                    MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
-                }
+                lox = rs->getDouble(1);
+                loy = rs->getDouble(2);
+                hix = rs->getDouble(3);
+                hiy = rs->getDouble(4);
+                extent_.init(lox, loy, hix, hiy);
+                extent_initialized_ = true;
             }
         }
         catch (SQLException& ex)
@@ -427,30 +416,15 @@ box2d<double> occi_datasource::envelope() const
             {
                 if (rs->next())
                 {
-                    try
-                    {
-                        lox = lexical_cast<double>(rs->getDouble(1));
-                        hix = lexical_cast<double>(rs->getDouble(2));
-                    }
-                    catch (bad_lexical_cast& ex)
-                    {
-                        MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
-                    }
+                    lox = rs->getDouble(1);
+                    hix = rs->getDouble(2);
                 }
 
                 if (rs->next())
                 {
-                    try
-                    {
-                        loy = lexical_cast<double>(rs->getDouble(1));
-                        hiy = lexical_cast<double>(rs->getDouble(2));
-                    }
-                    catch (bad_lexical_cast& ex)
-                    {
-                        MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
-                    }
+                    loy = rs->getDouble(1);
+                    hiy = rs->getDouble(2);
                 }
-
                 extent_.init(lox, loy, hix, hiy);
                 extent_initialized_ = true;
             }
