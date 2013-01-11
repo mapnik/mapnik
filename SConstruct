@@ -1262,6 +1262,9 @@ if not preconfigured:
     env.Prepend(CPPPATH = '#deps/agg/include')
     env.Prepend(LIBPATH = '#deps/agg')
 
+    # prepend deps dir for auxillary headers
+    env.Prepend(CPPPATH = '#deps')
+
     if env['CAIRO']:
         if env['CAIRO_LIBS'] or env['CAIRO_INCLUDES']:
             c_inc = env['CAIRO_INCLUDES']
@@ -1667,7 +1670,7 @@ if not HELP_REQUESTED:
     SConscript('include/build.py')
 
     # Install auxiliary headers
-    SConscript('deps/build.py')
+    SConscript('deps/mapnik/build.py')
 
     # Build the requested and able-to-be-compiled input plug-ins
     GDAL_BUILT = False
