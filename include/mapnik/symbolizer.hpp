@@ -27,18 +27,23 @@
 #include <mapnik/config.hpp>
 #include <mapnik/path_expression.hpp>
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/transform_expression.hpp>
 #include <mapnik/simplify.hpp>
 
 // boost
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
 
+namespace agg { struct trans_affine; }
+
 namespace mapnik
 {
 
+// fwd declares
+// TODO - move these transform declares to own header
+namespace detail { struct transform_node; }
+typedef std::vector<detail::transform_node>         transform_list;
+typedef boost::shared_ptr<transform_list>   transform_list_ptr;
 typedef transform_list_ptr transform_type;
-
 class Map;
 class feature_impl;
 

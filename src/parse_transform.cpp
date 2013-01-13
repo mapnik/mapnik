@@ -39,7 +39,7 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
     transform_list_ptr tl = boost::make_shared<transform_list>();
     transcoder tc(encoding);
     expression_grammar<std::string::const_iterator> ge(tc);
-    transform_expression_grammar__string gte(ge);
+    transform_expression_grammar_string gte(ge);
 
     if (!parse_transform(*tl, str, gte))
     {
@@ -50,7 +50,7 @@ transform_list_ptr parse_transform(std::string const& str, std::string const& en
 
 bool parse_transform(transform_list& transform,
                      std::string const& str,
-                     transform_expression_grammar__string const& g)
+                     transform_expression_grammar_string const& g)
 {
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();

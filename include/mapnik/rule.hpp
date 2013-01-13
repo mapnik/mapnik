@@ -41,7 +41,7 @@
 #include <mapnik/config.hpp> // MAPNIK_DECL
 
 // boost
-#include <boost/variant.hpp>
+#include <boost/variant/variant_fwd.hpp>
 
 // stl
 #include <string>

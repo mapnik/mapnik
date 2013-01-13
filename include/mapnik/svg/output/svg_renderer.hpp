@@ -38,6 +38,7 @@
 #include <mapnik/pixel_position.hpp>
 
 // boost
+#include <boost/variant/static_visitor.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 

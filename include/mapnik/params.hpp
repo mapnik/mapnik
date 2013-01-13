@@ -28,7 +28,7 @@
 #include <mapnik/value_types.hpp>
 
 // boost
-#include <boost/variant/variant.hpp>
+#include <boost/variant/variant_fwd.hpp>
 #include <boost/optional.hpp>
 
 // stl

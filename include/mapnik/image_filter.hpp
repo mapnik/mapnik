@@ -26,9 +26,12 @@
 
 //mapnik
 #include <mapnik/image_filter_types.hpp>
+
 // boost
+#include <boost/variant/static_visitor.hpp>
 #include <boost/gil/gil_all.hpp>
 #include <boost/concept_check.hpp>
+
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"

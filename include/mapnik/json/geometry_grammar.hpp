@@ -24,15 +24,12 @@
 #define MAPNIK_GEOMETRY_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
-#include <mapnik/feature.hpp>
+#include <mapnik/geometry.hpp>  // for geometry_type
+#include <mapnik/vertex.hpp>  // for CommandType
 
 // spirit::qi
-#include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/variant.hpp>
 
 namespace mapnik { namespace json {
 

@@ -24,7 +24,7 @@
 #define MAPNIK_IMAGE_FILTER_TYPES_HPP
 
 // boost
-#include <boost/variant.hpp>
+#include <boost/variant/variant_fwd.hpp>
 #include <boost/config/warning_disable.hpp>
 
 // stl

@@ -33,7 +33,6 @@
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>
 #endif
-#include <boost/variant.hpp>
 #include <boost/function.hpp>
 
 namespace mapnik

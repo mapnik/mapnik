@@ -46,6 +46,8 @@
 #include <mapnik/proj_transform.hpp>
 
 // boost
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/static_visitor.hpp>
 #include <boost/foreach.hpp>
 #include <boost/concept_check.hpp>
 

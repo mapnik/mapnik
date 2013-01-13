@@ -28,7 +28,9 @@
 //#include <mapnik/attribute.hpp>
 
 // boost
-#include <boost/variant.hpp>
+#include <boost/variant/variant_fwd.hpp>
+
+namespace boost { template <typename T> class recursive_wrapper; }
 
 namespace mapnik
 {
