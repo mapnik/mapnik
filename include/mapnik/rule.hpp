@@ -46,6 +46,7 @@
 // stl
 #include <string>
 #include <vector>
+#include <limits>
 
 namespace mapnik
 {
