@@ -135,19 +135,19 @@ protected:
  * @endcode
  */
 
-template <class ENUM, int THE_MAX>
+template <typename ENUM, int THE_MAX>
 class MAPNIK_DECL enumeration {
 public:
     typedef ENUM native_type;
 
     enumeration()
-      :  value_() {}
+        :  value_() {}
 
     enumeration( ENUM v )
-      :  value_(v) {}
+        :  value_(v) {}
 
-    enumeration( const enumeration & other )
-      : value_(other.value_) {}
+    enumeration( enumeration const& other )
+        : value_(other.value_) {}
 
     /** Assignment operator for native enum values. */
     void operator=(ENUM v)
@@ -156,7 +156,7 @@ public:
     }
 
     /** Assignment operator. */
-    void operator=(const enumeration & other)
+    void operator=(enumeration const& other)
     {
         value_ = other.value_;
     }
@@ -220,7 +220,7 @@ public:
         {
             from_string( word );
         }
-        catch (const illegal_enum_value &)
+        catch (illegal_enum_value const&)
         {
             is.setstate(std::ios::failbit);
         }
@@ -256,8 +256,8 @@ public:
             if (our_strings_[i] == 0 )
             {
                 std::cerr << "### FATAL: Not enough strings for enum "
-                        << our_name_ << " defined in file '" << filename
-                        << "' at line " << line_no;
+                          << our_name_ << " defined in file '" << filename
+                          << "' at line " << line_no;
             }
         }
         if ( std::string("") != our_strings_[THE_MAX])
