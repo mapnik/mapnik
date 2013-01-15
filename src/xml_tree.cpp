@@ -57,6 +57,15 @@ inline boost::optional<T> fast_cast(xml_tree const& tree, std::string const& val
 }
 
 template <>
+inline boost::optional<mapnik::boolean> fast_cast(xml_tree const& tree, std::string const& value)
+{
+    bool result;
+    if (mapnik::util::string2bool(value, result))
+        return boost::optional<mapnik::boolean>(result);
+    return boost::optional<mapnik::boolean>();
+}
+
+template <>
 inline boost::optional<int> fast_cast(xml_tree const& tree, std::string const& value)
 {
     int result;
@@ -393,7 +402,7 @@ boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
     std::map<std::string, xml_attribute>::const_iterator itr = attributes_.find(name);
     if (itr ==  attributes_.end()) return boost::optional<T>();
     itr->second.processed = true;
-    boost::optional<T> result = fast_cast<T>(tree_, itr->second.value);
+    boost::optional<T> result = fast_cast<T>(tree_, std::string(itr->second.value));
     if (!result)
     {
         throw config_error(std::string("Failed to parse attribute '") +
