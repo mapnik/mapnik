@@ -25,6 +25,8 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/vertex.hpp>    // for CommandType::SEG_MOVETO
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -33,7 +35,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/home/phoenix/statement/if.hpp>
+#include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 

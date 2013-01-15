@@ -25,7 +25,6 @@
 #include <mapnik/attribute.hpp>
 
 // boost
-#include <boost/spirit/home/phoenix/object/construct.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>

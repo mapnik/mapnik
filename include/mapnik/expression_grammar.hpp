@@ -29,17 +29,11 @@
 #include <mapnik/expression_node.hpp>
 
 // spirit2
-#include <boost/spirit/home/qi/domain.hpp>  // for qi
-#include <boost/spirit/home/qi/nonterminal/grammar.hpp>  // for grammar
-#include <boost/spirit/home/qi/nonterminal/rule.hpp>  // for rule
-#include <boost/spirit/home/qi/numeric/int.hpp>  // for int_parser
-#include <boost/spirit/home/qi/numeric/real.hpp>  // for real_parser
-#include <boost/spirit/home/qi/string/symbols.hpp>
-#include <boost/spirit/home/support/common_terminals.hpp>
-#include <boost/spirit/home/support/nonterminal/locals.hpp>  // for locals
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/support_locals.hpp>
 
 // phoenix
-#include <boost/spirit/home/phoenix/function/function.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 
 namespace mapnik
 {

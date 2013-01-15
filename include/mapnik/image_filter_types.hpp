@@ -25,7 +25,6 @@
 
 // boost
 #include <boost/variant/variant_fwd.hpp>
-#include <boost/config/warning_disable.hpp>
 
 // stl
 #include <iostream>
