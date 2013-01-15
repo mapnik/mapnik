@@ -47,6 +47,8 @@
 #include <boost/lexical_cast.hpp>
 #endif
 
+#include <cstring>
+
 namespace mapnik {
 
 namespace util {
@@ -80,7 +82,7 @@ struct bool_symbols : qi::symbols<char,bool>
 bool string2bool(const char * value, bool & result)
 {
     using boost::spirit::qi::no_case;
-    size_t length = strlen(value);
+    size_t length = std::strlen(value);
     if (length < 1 || value == NULL)
         return false;
     const char *iter  = value;
@@ -102,7 +104,7 @@ bool string2bool(std::string const& value, bool & result)
 
 bool string2int(const char * value, int & result)
 {
-    size_t length = strlen(value);
+    size_t length = std::strlen(value);
     if (length < 1 || value == NULL)
         return false;
     const char *iter = value;
@@ -124,7 +126,7 @@ bool string2int(std::string const& value, int & result)
 #ifdef BIGINT
 bool string2int(const char * value, mapnik::value_integer & result)
 {
-    size_t length = strlen(value);
+    size_t length = std::strlen(value);
     if (length < 1 || value == NULL)
         return false;
     const char *iter  = value;
@@ -156,7 +158,7 @@ bool string2double(std::string const& value, double & result)
 
 bool string2double(const char * value, double & result)
 {
-    size_t length = strlen(value);
+    size_t length = std::strlen(value);
     if (length < 1 || value == NULL)
         return false;
     const char *iter  = value;
@@ -177,7 +179,7 @@ bool string2float(std::string const& value, float & result)
 
 bool string2float(const char * value, float & result)
 {
-    size_t length = strlen(value);
+    size_t length = std::strlen(value);
     if (length < 1 || value == NULL)
         return false;
     const char *iter  = value;

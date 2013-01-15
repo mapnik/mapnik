@@ -1,6 +1,6 @@
 #include "MapSource.h"
 #include <gd.h>
-
+#include <cstring>
 
 void MapSource::process_cmd_line_args(int argc,char *argv[])
 {
@@ -15,7 +15,7 @@ void MapSource::process_cmd_line_args(int argc,char *argv[])
 
     while(argc>0)
     {
-        if(argv[0][0]=='-' && strlen(argv[0])>1)
+        if(argv[0][0]=='-' && std::strlen(argv[0])>1)
         {
             switch(argv[0][1])
             {
