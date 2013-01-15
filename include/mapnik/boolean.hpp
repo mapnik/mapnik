@@ -26,38 +26,39 @@
 #include <istream>
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 namespace mapnik
 {
-/** Helper for class bool */
+
+// Helper for class bool
 class boolean {
 public:
-    boolean(): b_(false)  {}
-    boolean(bool b) : b_(b) {}
-    boolean(boolean const& b) : b_(b.b_) {}
+    boolean()
+        : b_(false)  {}
+    boolean(bool b)
+        : b_(b) {}
+    explicit boolean(boolean const& b)
+        : b_(b.b_) {}
 
     operator bool() const
     {
         return b_;
     }
 
-    boolean & operator = (boolean const& other)
+    boolean & operator =(boolean const& other)
     {
+        if (this == &other)
+            return *this;
         b_ = other.b_;
-        return * this;
-    }
-
-    boolean & operator = (bool other)
-    {
-        b_ = other;
-        return * this;
+        return *this;
     }
 
 private:
     bool b_;
 };
 
-/** Special stream input operator for boolean values */
+// Special stream input operator for boolean values
 template <typename charT, typename traits>
 std::basic_istream<charT, traits> &
 operator >> ( std::basic_istream<charT, traits> & s, boolean & b )
