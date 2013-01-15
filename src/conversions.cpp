@@ -84,7 +84,7 @@ bool string2bool(const char * value, bool & result)
     if (length < 1 || value == NULL)
         return false;
     const char *iter  = value;
-    const char *end   = value + length
+    const char *end   = value + length;
     bool r = qi::phrase_parse(iter,end, no_case[bool_symbols()] ,ascii::space,result);
     return r && (iter == end);
 }
