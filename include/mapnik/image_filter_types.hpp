@@ -30,6 +30,8 @@
 // stl
 #include <iostream>
 #include <vector>
+#include <ostream>
+#include <iterator>  // for std::back_insert_iterator
 
 namespace mapnik { namespace filter {
 
