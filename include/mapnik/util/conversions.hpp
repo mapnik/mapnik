@@ -32,6 +32,9 @@
 
 namespace mapnik { namespace util {
 
+MAPNIK_DECL bool string2bool(const char * value, bool & result);
+MAPNIK_DECL bool string2bool(std::string const& value, bool & result);
+
 MAPNIK_DECL bool string2int(const char * value, int & result);
 MAPNIK_DECL bool string2int(std::string const& value, int & result);
 
