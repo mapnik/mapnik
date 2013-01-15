@@ -57,6 +57,15 @@ inline boost::optional<T> fast_cast(xml_tree const& tree, std::string const& val
 }
 
 template <>
+inline boost::optional<mapnik::boolean> fast_cast(xml_tree const& tree, std::string const& value)
+{
+    bool result;
+    if (mapnik::util::string2bool(value, result))
+        return boost::optional<mapnik::boolean>(result);
+    return boost::optional<mapnik::boolean>();
+}
+
+template <>
 inline boost::optional<int> fast_cast(xml_tree const& tree, std::string const& value)
 {
     int result;
