@@ -22,6 +22,7 @@
 
 //mapnik
 #include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_attribute_cast.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/color_factory.hpp>
@@ -37,80 +38,8 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
-//boost
-#include <boost/lexical_cast.hpp>
-
 namespace mapnik
 {
-
-template <typename T>
-inline boost::optional<T> fast_cast(xml_tree const& tree, std::string const& value)
-{
-    try
-    {
-        return boost::lexical_cast<T>(value);
-    }
-    catch (boost::bad_lexical_cast const& ex)
-    {
-        return boost::optional<T>();
-    }
-}
-
-template <>
-inline boost::optional<mapnik::boolean> fast_cast(xml_tree const& tree, std::string const& value)
-{
-    bool result;
-    if (mapnik::util::string2bool(value, result))
-        return boost::optional<mapnik::boolean>(result);
-    return boost::optional<mapnik::boolean>();
-}
-
-template <>
-inline boost::optional<int> fast_cast(xml_tree const& tree, std::string const& value)
-{
-    int result;
-    if (mapnik::util::string2int(value, result))
-        return boost::optional<int>(result);
-    return boost::optional<int>();
-}
-
-template <>
-inline boost::optional<double> fast_cast(xml_tree const& tree, std::string const& value)
-{
-    double result;
-    if (mapnik::util::string2double(value, result))
-        return boost::optional<double>(result);
-    return boost::optional<double>();
-}
-
-template <>
-inline boost::optional<float> fast_cast(xml_tree const& tree, std::string const& value)
-{
-    float result;
-    if (mapnik::util::string2float(value, result))
-        return boost::optional<float>(result);
-    return boost::optional<float>();
-}
-
-template <>
-inline boost::optional<std::string> fast_cast(xml_tree const& tree, std::string const& value)
-{
-    return value;
-}
-
-template <>
-inline boost::optional<color> fast_cast(xml_tree const& tree, std::string const& value)
-{
-    return parse_color(value, tree.color_grammar);
-}
-
-template <>
-inline boost::optional<expression_ptr> fast_cast(xml_tree const& tree, std::string const& value)
-{
-    return parse_expression(value, tree.expr_grammar);
-}
-
-/****************************************************************************/
 
 class boolean;
 template <typename T>
@@ -167,8 +96,6 @@ struct name_trait< mapnik::enumeration<ENUM, MAX> >
     }
 };
 
-/****************************************************************************/
-
 xml_tree::xml_tree(std::string const& encoding)
     : node_(*this, "<root>"),
       file_(),
@@ -202,30 +129,21 @@ const xml_node &xml_tree::root() const
     return node_;
 }
 
-/****************************************************************************/
 xml_attribute::xml_attribute(std::string const& value_)
     : value(value_), processed(false)
 {
 
 }
 
-/****************************************************************************/
-
 node_not_found::node_not_found(std::string const& node_name)
-    : node_name_(node_name)
-{
-
-}
+    : node_name_(node_name) {}
 
 const char* node_not_found::what() const throw()
 {
     return ("Node "+node_name_+ "not found").c_str();
 }
 
-node_not_found::~node_not_found() throw()
-{
-
-}
+node_not_found::~node_not_found() throw() {}
 
 
 attribute_not_found::attribute_not_found(
@@ -233,48 +151,31 @@ attribute_not_found::attribute_not_found(
     std::string const& attribute_name)
     :
     node_name_(node_name),
-    attribute_name_(attribute_name)
-{
-
-}
+    attribute_name_(attribute_name) {}
 
 const char* attribute_not_found::what() const throw()
 {
     return ("Attribute '" + attribute_name_ +"' not found in node '"+node_name_+ "'").c_str();
 }
 
-attribute_not_found::~attribute_not_found() throw()
-{
-
-}
+attribute_not_found::~attribute_not_found() throw() {}
 
 more_than_one_child::more_than_one_child(std::string const& node_name)
-    : node_name_(node_name)
-{
-
-}
+    : node_name_(node_name) {}
 
 const char* more_than_one_child::what() const throw()
 {
     return ("More than one child node in node '" + node_name_ +"'").c_str();
 }
 
-more_than_one_child::~more_than_one_child() throw()
-{
-
-}
-
-/****************************************************************************/
+more_than_one_child::~more_than_one_child() throw() {}
 
 xml_node::xml_node(xml_tree &tree, std::string const& name, unsigned line, bool is_text)
     : tree_(tree),
       name_(name),
       is_text_(is_text),
       line_(line),
-      processed_(false)
-{
-
-}
+      processed_(false) {}
 
 std::string xml_node::xml_text = "<xmltext>";
 
@@ -402,7 +303,7 @@ boost::optional<T> xml_node::get_opt_attr(std::string const& name) const
     std::map<std::string, xml_attribute>::const_iterator itr = attributes_.find(name);
     if (itr ==  attributes_.end()) return boost::optional<T>();
     itr->second.processed = true;
-    boost::optional<T> result = fast_cast<T>(tree_, std::string(itr->second.value));
+    boost::optional<T> result = xml_attribute_cast<T>(tree_, std::string(itr->second.value));
     if (!result)
     {
         throw config_error(std::string("Failed to parse attribute '") +
@@ -451,7 +352,7 @@ std::string xml_node::get_text() const
 template <typename T>
 T xml_node::get_value() const
 {
-    boost::optional<T> result = fast_cast<T>(tree_, get_text());
+    boost::optional<T> result = xml_attribute_cast<T>(tree_, get_text());
     if (!result)
     {
         throw config_error(std::string("Failed to parse value. Expected ")
