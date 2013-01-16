@@ -82,11 +82,8 @@ struct bool_symbols : qi::symbols<char,bool>
 bool string2bool(const char * value, bool & result)
 {
     using boost::spirit::qi::no_case;
-    size_t length = std::strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
-    const char *iter  = value;
-    const char *end   = value + length;
+    const char *iter = value;
+    const char *end  = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end, no_case[bool_symbols()] ,ascii::space,result);
     return r && (iter == end);
 }
@@ -94,8 +91,6 @@ bool string2bool(const char * value, bool & result)
 bool string2bool(std::string const& value, bool & result)
 {
     using boost::spirit::qi::no_case;
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,no_case[bool_symbols()],ascii::space,result);
@@ -104,19 +99,14 @@ bool string2bool(std::string const& value, bool & result)
 
 bool string2int(const char * value, int & result)
 {
-    size_t length = std::strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
     const char *iter = value;
-    const char *end  = value + length;
+    const char *end  = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,INTEGER,ascii::space,result);
     return r && (iter == end);
 }
 
 bool string2int(std::string const& value, int & result)
 {
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,INTEGER,ascii::space,result);
@@ -126,19 +116,14 @@ bool string2int(std::string const& value, int & result)
 #ifdef BIGINT
 bool string2int(const char * value, mapnik::value_integer & result)
 {
-    size_t length = std::strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
     const char *iter  = value;
-    const char *end   = value + length;
+    const char *end   = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,LONGLONG,ascii::space,result);
     return r && (iter == end);
 }
 
 bool string2int(std::string const& value, mapnik::value_integer & result)
 {
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,LONGLONG,ascii::space,result);
@@ -148,8 +133,6 @@ bool string2int(std::string const& value, mapnik::value_integer & result)
 
 bool string2double(std::string const& value, double & result)
 {
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,DOUBLE,ascii::space,result);
@@ -158,19 +141,14 @@ bool string2double(std::string const& value, double & result)
 
 bool string2double(const char * value, double & result)
 {
-    size_t length = std::strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
-    const char *iter  = value;
-    const char *end   = value + length;
+    const char *iter = value;
+    const char *end  = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,DOUBLE,ascii::space,result);
     return r && (iter == end);
 }
 
 bool string2float(std::string const& value, float & result)
 {
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,FLOAT,ascii::space,result);
@@ -179,15 +157,11 @@ bool string2float(std::string const& value, float & result)
 
 bool string2float(const char * value, float & result)
 {
-    size_t length = std::strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
     const char *iter  = value;
-    const char *end   = value + length;
+    const char *end   = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,FLOAT,ascii::space,result);
     return r && (iter == end);
 }
-
 
 #if BOOST_VERSION >= 104500
 
