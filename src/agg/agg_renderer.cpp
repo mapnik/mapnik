@@ -183,13 +183,6 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
     }
 
     query_extent_ = query_extent;
-    int buffer_size = lay.buffer_size();
-    if (buffer_size != 0 )
-    {
-        double padding = buffer_size * (double)(query_extent.width()/pixmap_.width());
-        query_extent_.pad(padding);
-    }
-
     boost::optional<box2d<double> > const& maximum_extent = lay.maximum_extent();
     if (maximum_extent)
     {

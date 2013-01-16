@@ -246,7 +246,21 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     }
 #endif
 
-    box2d<double> buffered_query_ext = m_.get_buffered_extent(); // buffered
+
+    box2d<double> query_ext = m_.get_current_extent(); // unbuffered
+    box2d<double> buffered_query_ext(query_ext);  // buffered
+
+    boost::optional<int> layer_buffer_size = lay.buffer_size();
+    if (layer_buffer_size) // if layer overrides buffer size, use this value to compute buffered extent
+    {
+        double extra = 2.0 * m_.scale() * *layer_buffer_size;
+        buffered_query_ext.width(query_ext.width() + extra);
+        buffered_query_ext.height(query_ext.height() + extra);
+    }
+    else
+    {
+        buffered_query_ext = m_.get_buffered_extent();
+    }
 
     // clip buffered extent by maximum extent, if supplied
     boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
@@ -317,7 +331,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     // if we've got this far, now prepare the unbuffered extent
     // which is used as a bbox for clipping geometries
-    box2d<double> query_ext = m_.get_current_extent(); // unbuffered
     if (maximum_extent)
     {
         query_ext.clip(*maximum_extent);
