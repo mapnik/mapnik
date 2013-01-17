@@ -175,17 +175,22 @@ mapnik::value_holder get_param(mapnik::parameter const& p, int index)
     }
 }
 
-boost::shared_ptr<mapnik::parameter> create_parameter(std::string const& key, mapnik::value_holder const& value)
+boost::shared_ptr<mapnik::parameter> create_parameter(UnicodeString const& key, mapnik::value_holder const& value)
 {
-    return boost::make_shared<mapnik::parameter>(key,value);
+    std::string key_utf8;
+    mapnik::to_utf8(key, key_utf8);
+    return boost::make_shared<mapnik::parameter>(key_utf8,value);
 }
 
 // needed for Python_Unicode to std::string (utf8) conversion
-boost::shared_ptr<mapnik::parameter> create_parameter_from_string(std::string const& key, UnicodeString const& ustr)
+
+boost::shared_ptr<mapnik::parameter> create_parameter_from_string(UnicodeString const& key, UnicodeString const& ustr)
 {
-    std::string buffer;
-    mapnik::to_utf8(ustr, buffer);
-    return boost::make_shared<mapnik::parameter>(key,buffer);
+    std::string key_utf8;
+    std::string ustr_utf8;
+    mapnik::to_utf8(key, key_utf8);
+    mapnik::to_utf8(ustr,ustr_utf8);
+    return boost::make_shared<mapnik::parameter>(key_utf8, ustr_utf8);
 }
 
 void export_parameters()
