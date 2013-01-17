@@ -41,6 +41,7 @@
 //stl
 #include <string>
 #include <vector>
+#include <cmath>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -661,8 +662,8 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                                 anglesum += angle;
                             }
                             anglesum /= current_placement->nodes_.size(); //Now it is angle average
-                            double cosa = orientation * cos(anglesum);
-                            double sina = orientation * sin(anglesum);
+                            double cosa = orientation * std::cos(anglesum);
+                            double sina = orientation * std::sin(anglesum);
 
                             //Offset all the characters by this angle
                             for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
@@ -839,7 +840,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         while (angle_delta < -M_PI)
             angle_delta += 2*M_PI;
         if (p.max_char_angle_delta > 0 &&
-            fabs(angle_delta) > p.max_char_angle_delta)
+            std::fabs(angle_delta) > p.max_char_angle_delta)
         {
             //MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Too Bendy!";
             return std::auto_ptr<text_path>(NULL);

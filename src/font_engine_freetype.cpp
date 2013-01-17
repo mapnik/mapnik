@@ -374,10 +374,10 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
         glyph_ptr glyph = faces->get_glyph(unsigned(c->c));
         FT_Face face = glyph->get_face()->get_face();
 
-        matrix.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
-        matrix.xy = (FT_Fixed)(-sin( angle ) * 0x10000L );
-        matrix.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
-        matrix.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
+        matrix.xx = (FT_Fixed)( std::cos( angle ) * 0x10000L );
+        matrix.xy = (FT_Fixed)(-std::sin( angle ) * 0x10000L );
+        matrix.yx = (FT_Fixed)( std::sin( angle ) * 0x10000L );
+        matrix.yy = (FT_Fixed)( std::cos( angle ) * 0x10000L );
 
         FT_Set_Transform(face, &matrix, &pen);
 

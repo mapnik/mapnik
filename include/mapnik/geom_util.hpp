@@ -439,7 +439,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
 
     if (count == 0) // one vertex
     {
-        return distance(x, y, x0, y0) <= fabs(tol);
+        return distance(x, y, x0, y0) <= std::fabs(tol);
     }
     return inside;
 }

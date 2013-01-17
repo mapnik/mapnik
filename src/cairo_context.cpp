@@ -428,10 +428,10 @@ void cairo_context::add_text(text_path const& path,
         if (glyph)
         {
             cairo_matrix_t matrix;
-            matrix.xx = text_size * cos(angle);
-            matrix.xy = text_size * sin(angle);
-            matrix.yx = text_size * -sin(angle);
-            matrix.yy = text_size * cos(angle);
+            matrix.xx = text_size * std::cos(angle);
+            matrix.xy = text_size * std::sin(angle);
+            matrix.yx = text_size * -std::sin(angle);
+            matrix.yy = text_size * std::cos(angle);
             matrix.x0 = 0;
             matrix.y0 = 0;
 

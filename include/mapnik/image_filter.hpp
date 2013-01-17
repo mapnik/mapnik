@@ -39,6 +39,8 @@
 #include "agg_scanline_u.h"
 #include "agg_blur.h"
 
+// stl
+#include <cmath>
 
 // 8-bit YUV
 //Y = ( (  66 * R + 129 * G +  25 * B + 128) >> 8) +  16

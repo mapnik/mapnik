@@ -65,8 +65,8 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
         box2d<double> ext = t_.forward(target_ext);
         int start_x = static_cast<int>(ext.minx());
         int start_y = static_cast<int>(ext.miny());
-        int end_x = static_cast<int>(ceil(ext.maxx()));
-        int end_y = static_cast<int>(ceil(ext.maxy()));
+        int end_x = static_cast<int>(std::ceil(ext.maxx()));
+        int end_y = static_cast<int>(std::ceil(ext.maxy()));
         int raster_width = end_x - start_x;
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)

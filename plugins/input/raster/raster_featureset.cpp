@@ -89,10 +89,10 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                     if (ext.width() > 0.5 && ext.height() > 0.5 )
                     {
                         // select minimum raster containing whole ext
-                        int x_off = static_cast<int>(floor(ext.minx()));
-                        int y_off = static_cast<int>(floor(ext.miny()));
-                        int end_x = static_cast<int>(ceil(ext.maxx()));
-                        int end_y = static_cast<int>(ceil(ext.maxy()));
+                        int x_off = static_cast<int>(std::floor(ext.minx()));
+                        int y_off = static_cast<int>(std::floor(ext.miny()));
+                        int end_x = static_cast<int>(std::ceil(ext.maxx()));
+                        int end_y = static_cast<int>(std::ceil(ext.maxy()));
 
                         // clip to available data
                         if (x_off < 0)

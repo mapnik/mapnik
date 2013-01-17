@@ -30,6 +30,7 @@
 
 // stl
 #include <limits>
+#include <cmath>
 
 namespace mapnik
 {
@@ -258,7 +259,7 @@ color raster_colorizer::get_color(float value) const
     case COLORIZER_EXACT:
     default:
         //approximately equal (within epsilon)
-        if(fabs(value - stopValue) < epsilon_)
+        if(std::fabs(value - stopValue) < epsilon_)
         {
             outputColor = stopColor;
         }

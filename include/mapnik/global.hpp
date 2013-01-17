@@ -155,14 +155,14 @@ inline void read_double_xdr(const char* data, double & val)
 
 #ifdef _WINDOWS
 // msvc doesn't have rint in <cmath>
-inline int rint( double val)
+inline int rint(double val)
 {
-    return int(floor(val + 0.5));
+    return int(std::floor(val + 0.5));
 }
 
-inline double round (double val)
+inline double round(double val)
 {
-    return floor(val);
+    return std::floor(val);
 }
 
 #define  _USE_MATH_DEFINES
