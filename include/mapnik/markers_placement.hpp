@@ -149,7 +149,7 @@ public:
                 set_spacing_left(marker_width_/2); //Only moves forward
             }
             //Error for this marker is too large. Skip to the next position.
-            if (std::abs(error_) > max_err_allowed)
+            if (std::fabs(error_) > max_err_allowed)
             {
                 if (error_ > spacing_)
                 {
