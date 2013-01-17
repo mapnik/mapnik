@@ -24,8 +24,6 @@
 #define MAPNIK_MARKERS_PLACEMENT_HPP
 
 // mapnik
-#include <mapnik/markers_placement.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>
@@ -35,11 +33,7 @@
 
 // agg
 #include "agg_basics.h"
-#include "agg_conv_clip_polygon.h"
-#include "agg_conv_clip_polyline.h"
 #include "agg_trans_affine.h"
-#include "agg_conv_transform.h"
-#include "agg_conv_smooth_poly1.h"
 
 // stl
 #include <cmath>
