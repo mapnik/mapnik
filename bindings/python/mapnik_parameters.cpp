@@ -177,9 +177,16 @@ mapnik::value_holder get_param(mapnik::parameter const& p, int index)
 
 boost::shared_ptr<mapnik::parameter> create_parameter(std::string const& key, mapnik::value_holder const& value)
 {
-    return boost::make_shared<mapnik::parameter>(key,mapnik::value_holder(value));
+    return boost::make_shared<mapnik::parameter>(key,value);
 }
 
+// needed for Python_Unicode to std::string (utf8) conversion
+boost::shared_ptr<mapnik::parameter> create_parameter_from_string(std::string const& key, UnicodeString const& ustr)
+{
+    std::string buffer;
+    mapnik::to_utf8(ustr, buffer);
+    return boost::make_shared<mapnik::parameter>(key,buffer);
+}
 
 void export_parameters()
 {
@@ -193,6 +200,10 @@ void export_parameters()
         .def("__init__", make_constructor(create_parameter),
              "Create a mapnik.Parameter from a pair of values, the first being a string\n"
              "and the second being either a string, and integer, or a float")
+        .def("__init__", make_constructor(create_parameter_from_string),
+             "Create a mapnik.Parameter from a pair of values, the first being a string\n"
+             "and the second being either a string, and integer, or a float")
+
         .def_pickle(parameter_pickle_suite())
         .def("__getitem__",get_param)
         ;
