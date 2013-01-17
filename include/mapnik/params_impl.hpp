@@ -26,40 +26,139 @@
 // mapnik
 #include <mapnik/params.hpp>
 #include <mapnik/value_types.hpp>
-
+#include <mapnik/util/conversions.hpp>
 // boost
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp> // keep gcc happy
 #include <boost/variant/variant.hpp>
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
-
+#include <boost/format.hpp>
 // stl
 #include <string>
 
-namespace mapnik
+namespace mapnik { namespace detail {
+
+
+template <typename T>
+struct extract_value
 {
+    static inline boost::optional<T> do_extract_from_string(std::string const& source)
+    {
+        std::string err_msg = (boost::format("No conversion from std::string to %s") % typeid(T).name()).str();
+        throw std::runtime_error(err_msg);
+    }
+};
+
+template <>
+struct extract_value<mapnik::boolean>
+{
+    static inline boost::optional<mapnik::boolean> do_extract_from_string(std::string const& source)
+    {
+        bool result;
+        if (mapnik::util::string2bool(source, result))
+            return boost::optional<mapnik::boolean>(result);
+        return boost::optional<mapnik::boolean>();
+    }
+};
+
+template <>
+struct extract_value<int>
+{
+    static inline boost::optional<int> do_extract_from_string(std::string const& source)
+    {
+        mapnik::value_integer result;
+        if (mapnik::util::string2int(source, result))
+            return boost::optional<int>(result);
+        return boost::optional<int>();
+    }
+};
+
+#ifdef BIGINT
+
+template <>
+struct extract_value<mapnik::value_integer>
+{
+    static inline boost::optional<mapnik::value_integer> do_extract_from_string(std::string const& source)
+    {
+        mapnik::value_integer result;
+        if (mapnik::util::string2int(source, result))
+            return boost::optional<mapnik::value_integer>(result);
+        return boost::optional<mapnik::value_integer>();
+    }
+};
+
+#endif
+
+template <>
+struct extract_value<mapnik::value_double>
+{
+    static inline boost::optional<mapnik::value_double> do_extract_from_string(std::string const& source)
+    {
+        mapnik::value_double result;
+        if (mapnik::util::string2double(source, result))
+            return boost::optional<double>(result);
+        return boost::optional<double>();
+    }
+};
+
+template <>
+struct extract_value<mapnik::value_null>
+{
+    static inline boost::optional<mapnik::value_null> do_extract_from_string(std::string const& source)
+    {
+        return boost::optional<mapnik::value_null>(); // FIXME
+    }
+};
+
+
+template <>
+struct extract_value<std::string>
+{
+    static inline boost::optional<std::string> do_extract_from_string(std::string const& source)
+    {
+        return boost::optional<std::string>(source);
+    }
+};
+
+
+
+template <typename T>
+boost::optional<T> param_cast(std::string const& source)
+{
+    return extract_value<T>::do_extract_from_string(source);
+}
+
+} // end namespace detail
 
 template <typename T>
 struct value_extractor_visitor : public boost::static_visitor<>
 {
+
     value_extractor_visitor(boost::optional<T> & var)
         :var_(var) {}
 
-    void operator () (T val) const
+    void operator() (std::string const& val) const
     {
-        var_ = val;
+        var_ = detail::param_cast<T>(val);
+
     }
 
     template <typename T1>
     void operator () (T1 val) const
     {
+        // TODO
         try
         {
             var_ = boost::lexical_cast<T>(val);
         }
         catch (boost::bad_lexical_cast & ) {}
+        //std::string err_msg = (boost::format("No conversion from %s to %s")
+        //                       % typeid(T1).name()
+        //                       % typeid(T).name()).str();
+        //throw std::runtime_error(err_msg);
     }
+
 
     boost::optional<T> & var_;
 };
@@ -69,7 +168,8 @@ namespace params_detail {
 template <typename T>
 struct converter
 {
-    typedef boost::optional<T> return_type;
+    typedef T value_type;
+    typedef boost::optional<value_type> return_type;
     static return_type extract(parameters const& params,
                                std::string const& name,
                                boost::optional<T> const& default_opt_value)
@@ -101,4 +201,3 @@ boost::optional<T> parameters::get(std::string const& key, T const& default_opt_
 
 
 }
-
