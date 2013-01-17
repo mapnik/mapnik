@@ -155,7 +155,7 @@ public:
                 set_spacing_left(marker_width_/2); //Only moves forward
             }
             //Error for this marker is too large. Skip to the next position.
-            if (abs(error_) > max_err_allowed)
+            if (std::abs(error_) > max_err_allowed)
             {
                 if (error_ > spacing_)
                 {
@@ -216,7 +216,7 @@ public:
                 }
                 continue; //Force checking of max_error constraint
             }
-            angle = atan2(dy, dx);
+            angle = std::atan2(dy, dx);
             x = last_x + dx * (spacing_left_ / segment_length);
             y = last_y + dy * (spacing_left_ / segment_length);
             box2d<double> box = perform_transform(angle, x, y);
