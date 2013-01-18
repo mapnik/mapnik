@@ -45,7 +45,7 @@ public:
           bbox_check_(bbox_check)
     {}
 
-    memory_featureset(box2d<double> const& bbox, std::vector<feature_ptr> const& features, bool bbox_check = true)
+    memory_featureset(box2d<double> const& bbox, std::deque<feature_ptr> const& features, bool bbox_check = true)
         : bbox_(bbox),
           pos_(features.begin()),
           end_(features.end()),
@@ -92,8 +92,8 @@ public:
 
 private:
     box2d<double> bbox_;
-    std::vector<feature_ptr>::const_iterator pos_;
-    std::vector<feature_ptr>::const_iterator end_;
+    std::deque<feature_ptr>::const_iterator pos_;
+    std::deque<feature_ptr>::const_iterator end_;
     datasource::datasource_t type_;
     bool bbox_check_;
 };
