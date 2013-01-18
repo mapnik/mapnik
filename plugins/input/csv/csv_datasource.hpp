@@ -38,6 +38,7 @@
 
 // stl
 #include <vector>
+#include <deque>
 #include <string>
 
 class csv_datasource : public mapnik::datasource
@@ -66,7 +67,7 @@ private:
     std::string inline_string_;
     unsigned file_length_;
     mapnik::value_integer row_limit_;
-    std::vector<mapnik::feature_ptr> features_;
+    std::deque<mapnik::feature_ptr> features_;
     std::string escape_;
     std::string separator_;
     std::string quote_;
