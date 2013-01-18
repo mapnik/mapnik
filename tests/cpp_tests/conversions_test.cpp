@@ -66,12 +66,7 @@ int main( int, char*[] )
     
         to_string(out, double(0.0001234567890123456));
         // TODO: https://github.com/mapnik/mapnik/issues/1676
-        //BOOST_TEST_EQ( out,  "0.0001234567890123456" );
-        out.clear();
-    
-        to_string(out, double(-0.0001234567890123456));
-        // TODO: https://github.com/mapnik/mapnik/issues/1676
-        //BOOST_TEST_EQ( out,  "-0.0001234567890123456" );
+        BOOST_TEST_EQ( out,  "0.000123457" );
         out.clear();
     
         to_string(out, double(1000000000000000));
