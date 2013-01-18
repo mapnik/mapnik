@@ -2,7 +2,7 @@
 
 from nose.tools import *
 import os,sys
-from utilities import execution_path, run_tests, Todo
+from utilities import execution_path, run_all, Todo
 from utilities import get_unique_colors, pixel2channels, side_by_side_image
 import mapnik
 
@@ -254,9 +254,9 @@ def test_background_image_with_alpha_and_background_color_against_composited_con
     im1.demultiply()
     # compare image rendered (compositing in `agg_renderer<T>::setup`)
     # vs image composited via python bindings
-    raise Todo("looks like we need to investigate PNG rounding when saving")
+    raise Todo("looks like we need to investigate PNG color rounding when saving")
     eq_(get_unique_colors(im),get_unique_colors(im1))
 
 if __name__ == "__main__":
     setup()
-    run_tests(eval(x) for x in dir() if x.startswith("test_"))
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

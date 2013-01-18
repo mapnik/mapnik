@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, run_tests
+from utilities import execution_path, run_all
 from utilities import side_by_side_image
 import os, mapnik
 import re
@@ -65,4 +65,4 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
 
 if __name__ == "__main__":
     setup()
-    run_tests(eval(x) for x in dir() if x.startswith("test_"))
+    run_all(eval(x) for x in dir() if x.startswith("test_"))
