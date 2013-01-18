@@ -28,7 +28,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 
 // stl
-#include <vector>
+#include <deque>
 
 namespace mapnik {
 
@@ -48,7 +48,7 @@ public:
     size_t size() const;
     void clear();
 private:
-    std::vector<feature_ptr> features_;
+    std::deque<feature_ptr> features_;
     mapnik::layer_descriptor desc_;
     datasource::datasource_t type_;
     bool bbox_check_;
