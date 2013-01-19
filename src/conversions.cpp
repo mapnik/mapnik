@@ -24,7 +24,8 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/value_types.hpp>
 
-// boost
+#include <cstring>
+
 #include <boost/spirit/include/qi.hpp>
 
 #define BOOST_SPIRIT_AUTO(domain_, name, expr)                  \
@@ -34,20 +35,18 @@
         boost::spirit::domain_::domain, name##_expr_type);      \
     BOOST_AUTO(name, boost::proto::deep_copy(expr));            \
 
-#include <cmath> // log10
+//#define MAPNIK_KARMA_TO_STRING
 
-// boost
+#ifdef MAPNIK_KARMA_TO_STRING
 #include <boost/version.hpp>
-#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
-
-#if BOOST_VERSION >= 104500
-#include <boost/config/warning_disable.hpp>
-#include <boost/spirit/include/karma.hpp>
-#else
-#include <boost/lexical_cast.hpp>
+#if BOOST_VERSION < 104500
+#error you must have >= boost 104500 to use karma for string output
 #endif
 
-#include <cstring>
+#include <boost/spirit/include/karma.hpp>
+#include <cmath> // log10
+#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
+#endif
 
 namespace mapnik {
 
@@ -61,8 +60,6 @@ BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long)
 #endif
 BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_)
 BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_)
-
-
 
 struct bool_symbols : qi::symbols<char,bool>
 {
@@ -163,7 +160,7 @@ bool string2float(const char * value, float & result)
     return r && (iter == end);
 }
 
-#if BOOST_VERSION >= 104500
+#ifdef MAPNIK_KARMA_TO_STRING
 
 bool to_string(std::string & str, int value)
 {
@@ -286,47 +283,88 @@ bool to_string(std::string & str, double value)
 
 #else
 
-template <typename T>
-bool to_string_lexical(std::string & str, T value)
+bool to_string(std::string & s, int val)
 {
-    try
+    s.resize(s.capacity());
+    while (true)
     {
-        str = boost::lexical_cast<T>(value);
-        return true;
+        size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%d", val));
+        if (n2 <= s.size())
+        {
+            s.resize(n2);
+            break;
+        }
+        s.resize(n2);
     }
-    catch (std::exception const& ex)
-    {
-        return false;
-    }
-}
-
-bool to_string(std::string & str, int value)
-{
-  return to_string_lexical(str, value);
+    return true;
 }
 
 #ifdef BIGINT
-bool to_string(std::string & str, mapnik::value_integer value)
+bool to_string(std::string & s, mapnik::value_integer val)
 {
-  return to_string_lexical(str, value);
+    s.resize(s.capacity());
+    while (true)
+    {
+        size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%lld", val));
+        if (n2 <= s.size())
+        {
+            s.resize(n2);
+            break;
+        }
+        s.resize(n2);
+    }
+    return true;
 }
-
-bool to_string(std::string & str, unsigned value)
-{
-  return to_string_lexical(str, value);
-}
-
-bool to_string(std::string & str, bool value)
-{
-  return to_string_lexical(str, value);
-}
-
-bool to_string(std::string & str, double value)
-{
-  return to_string_lexical(str, value);
-}
-
 #endif
+
+bool to_string(std::string & s, unsigned val)
+{
+    s.resize(s.capacity());
+    while (true)
+    {
+        size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%u", val));
+        if (n2 <= s.size())
+        {
+            s.resize(n2);
+            break;
+        }
+        s.resize(n2);
+    }
+    return true;
+}
+
+bool to_string(std::string & s, bool val)
+{
+  if (val) s = "true";
+  else s = "false";
+  return true;
+}
+
+bool to_string(std::string & s, double val)
+{
+    double abs_n = std::fabs(val);
+    std::string format;
+    if (abs_n >= 1e16 || abs_n < 1e-4)
+    {
+        format = "%e";
+    }
+    else
+    {
+        format = "%g";
+    }
+    s.resize(s.capacity());
+    while (true)
+    {
+        size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%g", val));
+        if (n2 <= s.size())
+        {
+            s.resize(n2);
+            break;
+        }
+        s.resize(n2);
+    }
+    return true;
+}
 
 #endif
 
