@@ -25,19 +25,25 @@
 //mapnik
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/shield_symbolizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
-#include <mapnik/proj_transform.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/processed_text.hpp>
-#include <mapnik/text_path.hpp>
 
 //boost
 #include <boost/shared_ptr.hpp>
 
+// agg
+#include "agg_trans_affine.h"
+
+// fwd declares
+namespace mapnik {
+  class CoordTransform;
+  class marker;
+  class proj_transform;
+  class string_info;
+  class text_path;
+  template <typename DetectorT> class placement_finder;
+}
 
 namespace mapnik {
 

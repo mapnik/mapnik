@@ -30,8 +30,11 @@
 #include <mapnik/simplify.hpp>
 
 // boost
-#include <boost/array.hpp>
 #include <boost/optional.hpp>
+
+// stl
+#include <vector>
+#include <string>
 
 namespace agg { struct trans_affine; }
 
@@ -44,7 +47,6 @@ namespace detail { struct transform_node; }
 typedef std::vector<detail::transform_node>         transform_list;
 typedef boost::shared_ptr<transform_list>   transform_list_ptr;
 typedef transform_list_ptr transform_type;
-class Map;
 class feature_impl;
 
 MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,

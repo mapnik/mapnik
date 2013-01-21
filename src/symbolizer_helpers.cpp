@@ -22,13 +22,16 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/geom_util.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/geom_util.hpp>
-#include <mapnik/parse_path.hpp>
+#include <mapnik/marker.hpp>
+#include <mapnik/expression_evaluator.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"
