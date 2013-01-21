@@ -107,7 +107,7 @@ struct test1
     {
         mapnik::image_data_32 im(256,256);
         std::string out;
-        for (int i=0;i<iter_;++i) {
+        for (unsigned i=0;i<iter_;++i) {
             out.clear();
             out = mapnik::save_to_string(im,"png");
         }
@@ -145,7 +145,7 @@ struct test2
     void operator()()
     {
         std::string out;
-        for (int i=0;i<iter_;++i) {
+        for (unsigned i=0;i<iter_;++i) {
             out.clear();
             out = mapnik::save_to_string(im_->data(),"png8:m=h");
         }
@@ -171,7 +171,7 @@ struct test3
     void operator()()
     {
         std::string out;
-        for (int i=0;i<iter_;++i) {
+        for (unsigned i=0;i<iter_;++i) {
             std::ostringstream s;
             s << val_;
             out = s.str();
@@ -198,7 +198,7 @@ struct test4
     void operator()()
     {
         std::string out;
-        for (int i=0;i<iter_;++i) {
+        for (unsigned i=0;i<iter_;++i) {
             out.clear();
             mapnik::util::to_string(out,val_);
         }
@@ -222,7 +222,7 @@ struct test5
         to_string_impl(s,val_);
         return (s == "-0.123");
     }
-    void to_string_impl(std::string &s , double val)
+    bool to_string_impl(std::string &s , double val)
     {
         s.resize(s.capacity());
         while (true)
@@ -235,11 +235,12 @@ struct test5
             }
             s.resize(n2);
         }
+        return true;
     }
     void operator()()
     {
         std::string out;
-        for (int i=0;i<iter_;++i)
+        for (unsigned i=0;i<iter_;++i)
         {
             out.clear();
             to_string_impl(out , val_);
@@ -254,33 +255,33 @@ int main( int, char*[] )
     {
         std::cout << "starting benchmark…\n";
         {
-           test1 runner(100);
-           benchmark(runner,"encoding blank image as png");
+            test1 runner(100);
+            benchmark(runner,"encoding blank image as png");
         }
 
         {
-           test2 runner(100);
-           benchmark(runner,"encoding multicolor image as png8:m=h");
+            test2 runner(100);
+            benchmark(runner,"encoding multicolor image as png8:m=h");
         }
 
         {
-           test1 runner(10,10);
-           benchmark(runner,"encoding blank image as png");
+            test1 runner(10,10);
+            benchmark(runner,"encoding blank image as png");
         }
 
         {
-           test2 runner(10,10);
-           benchmark(runner,"encoding multicolor image as png8:m=h");
+            test2 runner(10,10);
+            benchmark(runner,"encoding multicolor image as png8:m=h");
         }
 
         {
-           test3 runner(1000000);
-           benchmark(runner,"double to string conversion with std::ostringstream");
+            test3 runner(1000000);
+            benchmark(runner,"double to string conversion with std::ostringstream");
         }
 
         {
-           test4 runner(1000000);
-           benchmark(runner,"double to string conversion with mapnik::util_to_string");
+            test4 runner(1000000);
+            benchmark(runner,"double to string conversion with mapnik::util_to_string");
         }
 
         {
@@ -288,20 +289,19 @@ int main( int, char*[] )
             benchmark(runner,"double to string conversion with snprintf");
         }
 
-
         {
-           test3 runner(1000000,10);
-           benchmark(runner,"double to string conversion with std::ostringstream");
+            test3 runner(1000000,10);
+            benchmark(runner,"double to string conversion with std::ostringstream");
         }
 
         {
-           test4 runner(1000000,10);
-           benchmark(runner,"double to string conversion with mapnik::util_to_string");
+            test4 runner(1000000,10);
+            benchmark(runner,"double to string conversion with mapnik::util_to_string");
         }
 
         {
-           test5 runner(1000000,10);
-           benchmark(runner,"double to string conversion with snprintf");
+            test5 runner(1000000,10);
+            benchmark(runner,"double to string conversion with snprintf");
         }
 
         std::cout << "...benchmark done\n";
