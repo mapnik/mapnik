@@ -35,17 +35,19 @@
         boost::spirit::domain_::domain, name##_expr_type);      \
     BOOST_AUTO(name, boost::proto::deep_copy(expr));            \
 
-//#define MAPNIK_KARMA_TO_STRING
+// karma is used by default unless
+// the boost version is too old
+#define MAPNIK_KARMA_TO_STRING
 
 #ifdef MAPNIK_KARMA_TO_STRING
-#include <boost/version.hpp>
-#if BOOST_VERSION < 104500
-#error you must have >= boost 104500 to use karma for string output
-#endif
-
-#include <boost/spirit/include/karma.hpp>
-#include <cmath> // log10
-#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
+  #include <boost/version.hpp>
+  #if BOOST_VERSION < 104500
+    #undef MAPNIK_KARMA_TO_STRING
+  #else
+    #include <boost/spirit/include/karma.hpp>
+    #include <cmath> // log10
+    #include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
+  #endif
 #endif
 
 namespace mapnik {
@@ -342,16 +344,6 @@ bool to_string(std::string & s, bool val)
 
 bool to_string(std::string & s, double val)
 {
-    double abs_n = std::fabs(val);
-    std::string format;
-    if (abs_n >= 1e16 || abs_n < 1e-4)
-    {
-        format = "%e";
-    }
-    else
-    {
-        format = "%g";
-    }
     s.resize(s.capacity());
     while (true)
     {
