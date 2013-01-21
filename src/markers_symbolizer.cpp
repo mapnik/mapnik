@@ -24,9 +24,7 @@
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/attribute.hpp>
-
-// boost
-#include <boost/make_shared.hpp>
+#include <mapnik/parse_path.hpp>
 
 namespace mapnik {
 

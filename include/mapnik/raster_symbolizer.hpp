@@ -24,13 +24,16 @@
 #define MAPNIK_RASTER_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/image_scaling.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+
+//stl
+#include <string>
 
 namespace mapnik
 {

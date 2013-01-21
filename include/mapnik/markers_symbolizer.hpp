@@ -24,12 +24,13 @@
 #define MAPNIK_MARKERS_SYMBOLIZER_HPP
 
 //mapnik
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/parse_path.hpp>
 #include <mapnik/color.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/stroke.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
+#include <mapnik/path_expression.hpp>
 
 // boost
 #include <boost/optional.hpp>

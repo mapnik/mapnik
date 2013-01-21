@@ -24,6 +24,7 @@
 #define MAPNIK_POINT_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
 
