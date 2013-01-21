@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdio>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -31,18 +32,22 @@ template <typename T>
 void benchmark(T test, std::string const& name)
 {
     if (!test.validate()) throw std::runtime_error(std::string("test did not validate: ") + name);
-    process_cpu_clock::time_point start = process_cpu_clock::now();
+    process_cpu_clock::time_point start;
+    dur elapsed;
     if (test.threads_ > 0) {
         boost::thread_group tg;
         for (unsigned i=0;i<test.threads_;++i)
         {
             tg.create_thread(test);
         }
+        start = process_cpu_clock::now();
         tg.join_all();
+        elapsed = process_cpu_clock::now() - start;
     } else {
+        start = process_cpu_clock::now();
         test();
+        elapsed = process_cpu_clock::now() - start;
     }
-    dur elapsed = process_cpu_clock::now() - start;
     std::clog << (test.threads_ ? "threaded -> ": "")
         << name << ": "
         << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
@@ -65,7 +70,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     }
     boost::shared_ptr<image_32> image_ptr2 = boost::make_shared<image_32>(reader2->width(),reader2->height());
     reader2->read(0,0,image_ptr2->data());
-    
+
     image_data_32 const& dest = image_ptr1->data();
     image_data_32 const& src = image_ptr2->data();
 
@@ -97,7 +102,7 @@ struct test1
     {
         return true;
     }
-    
+
     void operator()()
     {
         mapnik::image_data_32 im(256,256);
@@ -128,7 +133,7 @@ struct test2
         im_ = boost::make_shared<image_32>(reader->width(),reader->height());
         reader->read(0,0,im_->data());
     }
-    
+
     bool validate()
     {
         std::string expected("./benchmark/data/multicolor-hextree-expected.png");
@@ -136,7 +141,7 @@ struct test2
         mapnik::save_to_file(im_->data(),actual, "png8:m=h");
         return compare_images(actual,expected);
     }
-    
+
     void operator()()
     {
         std::string out;
@@ -156,12 +161,12 @@ struct test3
     explicit test3(unsigned iterations, unsigned threads=0) :
       iter_(iterations),
       threads_(threads),
-      val_(8.3000000000000000001) {}
+      val_(-0.123) {}
     bool validate()
     {
         std::ostringstream s;
         s << val_;
-        return (s.str() == "8.3");
+        return (s.str() == "-0.123");
     }
     void operator()()
     {
@@ -182,21 +187,62 @@ struct test4
     explicit test4(unsigned iterations, unsigned threads=0) :
       iter_(iterations),
       threads_(threads),
-      val_(8.3000000000000000001) {}
+      val_(-0.123) {}
 
     bool validate()
     {
         std::string s;
-        mapnik::util::to_string(s,val_);;
-        return (s == "8.3");
+        mapnik::util::to_string(s,val_);
+        return (s == "-0.123");
     }
     void operator()()
     {
-        std::string o;
+        std::string out;
         for (int i=0;i<iter_;++i) {
-            std::string out;
+            out.clear();
             mapnik::util::to_string(out,val_);
-            o = out;
+        }
+    }
+};
+
+
+struct test5
+{
+    unsigned iter_;
+    unsigned threads_;
+    double val_;
+    explicit test5(unsigned iterations, unsigned threads=0) :
+      iter_(iterations),
+      threads_(threads),
+      val_(-0.123) {}
+
+    bool validate()
+    {
+        std::string s;
+        to_string_impl(s,val_);
+        return (s == "-0.123");
+    }
+    void to_string_impl(std::string &s , double val)
+    {
+        s.resize(s.capacity());
+        while (true)
+        {
+            size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%g", val_));
+            if (n2 <= s.size())
+            {
+                s.resize(n2);
+                break;
+            }
+            s.resize(n2);
+        }
+    }
+    void operator()()
+    {
+        std::string out;
+        for (int i=0;i<iter_;++i)
+        {
+            out.clear();
+            to_string_impl(out , val_);
         }
     }
 };
@@ -238,6 +284,12 @@ int main( int, char*[] )
         }
 
         {
+            test5 runner(1000000);
+            benchmark(runner,"double to string conversion with snprintf");
+        }
+
+
+        {
            test3 runner(1000000,10);
            benchmark(runner,"double to string conversion with std::ostringstream");
         }
@@ -245,6 +297,11 @@ int main( int, char*[] )
         {
            test4 runner(1000000,10);
            benchmark(runner,"double to string conversion with mapnik::util_to_string");
+        }
+
+        {
+           test5 runner(1000000,10);
+           benchmark(runner,"double to string conversion with snprintf");
         }
 
         std::cout << "...benchmark done\n";
