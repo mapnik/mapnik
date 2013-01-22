@@ -25,12 +25,17 @@
 
 #include <mapnik/formatting/base.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/feature.hpp>
 
 // boost
 #include <boost/property_tree/ptree_fwd.hpp>
 
 namespace mapnik {
+
+class feature_impl;
+class processed_text;
+class xml_node;
+struct char_properties;
+
 namespace formatting {
 class expression_format: public node {
 public:
