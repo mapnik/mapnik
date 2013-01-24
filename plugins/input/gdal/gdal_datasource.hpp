@@ -25,9 +25,19 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
+#include <mapnik/feature_layer_desc.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
+
+// stl
+#include <vector>
+#include <string>
 
 // gdal
 #include <gdal_priv.h>
@@ -35,28 +45,27 @@
 class gdal_datasource : public mapnik::datasource
 {
 public:
-    gdal_datasource(mapnik::parameters const& params, bool bind = true);
+    gdal_datasource(mapnik::parameters const& params);
     virtual ~gdal_datasource();
     mapnik::datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    void bind() const;
 private:
     GDALDataset* open_dataset() const;
-    mutable mapnik::box2d<double> extent_;
+    mapnik::box2d<double> extent_;
     std::string dataset_name_;
-    mutable int band_;
+    int band_;
     mapnik::layer_descriptor desc_;
-    mutable unsigned width_;
-    mutable unsigned height_;
-    mutable double dx_;
-    mutable double dy_;
-    mutable int nbands_;
-    mutable bool shared_dataset_;
+    unsigned width_;
+    unsigned height_;
+    double dx_;
+    double dy_;
+    int nbands_;
+    bool shared_dataset_;
     double filter_factor_;
     boost::optional<double> nodata_value_;
 };

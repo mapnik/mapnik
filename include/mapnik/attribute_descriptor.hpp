@@ -79,7 +79,7 @@ public:
         return name_;
     }
 
-    unsigned get_type() const
+    unsigned int get_type() const
     {
         return type_;
     }
@@ -101,7 +101,7 @@ public:
 
 private:
     std::string name_;
-    int type_;
+    unsigned int type_;
     bool primary_key_;
     int size_;
     int precision_;

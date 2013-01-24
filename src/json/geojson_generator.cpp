@@ -22,6 +22,7 @@
 
 // boost
 #include <boost/version.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/json/geojson_generator.hpp>
 
 #if BOOST_VERSION >= 104700
@@ -32,30 +33,30 @@
 
 namespace  mapnik { namespace json {
 
-    feature_generator::feature_generator()
-        : grammar_(new feature_generator_grammar<sink_type>()) {}
+feature_generator::feature_generator()
+    : grammar_(new feature_generator_grammar<sink_type>()) {}
 
-    feature_generator::~feature_generator() {}
+feature_generator::~feature_generator() {}
 
-    bool feature_generator::generate(std::string & geojson, mapnik::Feature const& f)
-    {
-        sink_type sink(geojson);
-        return karma::generate(sink, *grammar_,f);
-    }
+bool feature_generator::generate(std::string & geojson, mapnik::feature_impl const& f)
+{
+    sink_type sink(geojson);
+    return karma::generate(sink, *grammar_,f);
+}
 
 
-    geometry_generator::geometry_generator()
-        : grammar_(new multi_geometry_generator_grammar<sink_type>()) {}
+geometry_generator::geometry_generator()
+    : grammar_(new multi_geometry_generator_grammar<sink_type>()) {}
 
-    geometry_generator::~geometry_generator() {}
+geometry_generator::~geometry_generator() {}
 
-    bool geometry_generator::generate(std::string & geojson, mapnik::geometry_container const& g)
-    {
-        sink_type sink(geojson);
-        return karma::generate(sink, *grammar_,g);
-    }
+bool geometry_generator::generate(std::string & geojson, mapnik::geometry_container const& g)
+{
+    sink_type sink(geojson);
+    return karma::generate(sink, *grammar_,g);
+}
 
-    }}
+}}
 
 #else
 
@@ -65,22 +66,22 @@ namespace  mapnik { namespace json {
 
 namespace  mapnik { namespace json {
 
-    bool feature_generator::generate(std::string & geojson, mapnik::Feature const& f)
-    {
-        std::ostringstream s;
-        s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-        throw std::runtime_error("feature_generator::generate() requires at least boost 1.47 while your build was compiled against boost " + s.str());
-        return false;
-    }
+bool feature_generator::generate(std::string & geojson, mapnik::feature_impl const& f)
+{
+    std::ostringstream s;
+    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+    throw std::runtime_error("feature_generator::generate() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+    return false;
+}
 
-    bool geometry_generator::generate(std::string & geojson, mapnik::geometry_container const& g)
-    {
-        std::ostringstream s;
-        s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
-        throw std::runtime_error("geometry_generator::generate() requires at least boost 1.47 while your build was compiled against boost " + s.str());
-        return false;
-    }
+bool geometry_generator::generate(std::string & geojson, mapnik::geometry_container const& g)
+{
+    std::ostringstream s;
+    s << BOOST_VERSION/100000 << "." << BOOST_VERSION/100 % 1000  << "." << BOOST_VERSION % 100;
+    throw std::runtime_error("geometry_generator::generate() requires at least boost 1.47 while your build was compiled against boost " + s.str());
+    return false;
+}
 
-    }}
+}}
 
 #endif

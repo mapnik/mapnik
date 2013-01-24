@@ -21,10 +21,10 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_pixfmt.hpp>
-#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
 
@@ -42,29 +42,30 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
-    typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+    typedef coord_transform<CoordTransform,geometry_type> path_type;
+    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
+    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
+    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    mapnik::pixfmt_gray16 pixf(buf);
+    pixfmt_type pixf(buf);
 
-    ren_base renb(pixf);
-    renderer ren(renb);
+    grid_renderer_base_type renb(pixf);
+    renderer_type ren(renb);
 
     ras_ptr->reset();
 
     // TODO - actually handle image dimensions
     int stroke_width = 2;
 
-    for (unsigned i=0;i<feature->num_geometries();++i)
+    for (unsigned i=0;i<feature.num_geometries();++i)
     {
-        geometry_type & geom = feature->get_geometry(i);
-        if (geom.num_points() > 1)
+        geometry_type & geom = feature.get_geometry(i);
+        if (geom.size() > 1)
         {
             path_type path(t_,geom,prj_trans);
             agg::conv_stroke<path_type> stroke(path);
@@ -75,7 +76,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     }
 
     // render id
-    ren.color(mapnik::gray16(feature->id()));
+    ren.color(color_type(feature.id()));
     agg::render_scanlines(*ras_ptr, sl, ren);
 
     // add feature properties to grid cache
@@ -85,8 +86,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
 
 template void grid_renderer<grid>::process(line_pattern_symbolizer const&,
-                                           mapnik::feature_ptr const&,
+                                           mapnik::feature_impl &,
                                            proj_transform const&);
 
 }
-

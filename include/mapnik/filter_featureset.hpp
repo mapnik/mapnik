@@ -24,7 +24,8 @@
 #define MAPNIK_FILTER_FEATURESET_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp>
+#include <mapnik/datasource.hpp>  // for featureset_ptr
+#include <mapnik/feature.hpp>
 
 namespace mapnik {
 

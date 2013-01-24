@@ -2,31 +2,44 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 from nose.tools import *
 from utilities import execution_path
 
 import mapnik
-import pickle
 
 def setup():
     os.chdir(execution_path('.'))
 
-def test_parameter():
+def test_parameter_null():
+    p = mapnik.Parameter('key',None)
+    eq_(p[0],'key')
+    eq_(p[1],None)
+
+def test_parameter_string():
     p = mapnik.Parameter('key','value')
     eq_(p[0],'key')
     eq_(p[1],'value')
 
-    p = mapnik.Parameter('int',1)
+def test_parameter_unicode():
+    p = mapnik.Parameter('key',u'value')
+    eq_(p[0],'key')
+    eq_(p[1],u'value')
+
+def test_parameter_integer():
+    p = mapnik.Parameter('int',sys.maxint)
     eq_(p[0],'int')
-    eq_(p[1],1)
+    eq_(p[1],sys.maxint)
 
-    p = mapnik.Parameter('float',1.0777)
-    eq_(p[0],'float')
-    eq_(p[1],1.0777)
+def test_parameter_double():
+    p = mapnik.Parameter('double',float(sys.maxint))
+    eq_(p[0],'double')
+    eq_(p[1],float(sys.maxint))
 
-    p = mapnik.Parameter('bool_string','True')
-    eq_(p[0],'bool_string')
-    eq_(p[1],'True')
+def test_parameter_boolean():
+    p = mapnik.Parameter('boolean',True)
+    eq_(p[0],'boolean')
+    eq_(p[1],True)
     eq_(bool(p[1]),True)
 
 
@@ -42,15 +55,6 @@ def test_parameters():
     eq_(params[0][1],1.0777)
 
     eq_(params.get('float'),1.0777)
-
-def test_parameters_pickling():
-    params = mapnik.Parameters()
-    params.append(mapnik.Parameter('oh',str('yeah')))
-
-    params2 = pickle.loads(pickle.dumps(params,pickle.HIGHEST_PROTOCOL))
-
-    eq_(params[0][0],params2[0][0])
-    eq_(params[0][1],params2[0][1])
 
 
 if __name__ == "__main__":

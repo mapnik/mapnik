@@ -25,10 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/feature.hpp>
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 namespace mapnik
 {
@@ -51,11 +48,11 @@ enum wkbFormat
     wkbSpatiaLite=3
 };
 
-class MAPNIK_DECL geometry_utils : private boost::noncopyable
+class MAPNIK_DECL geometry_utils : private mapnik::noncopyable
 {
 public:
 
-    static void from_wkb (boost::ptr_vector<geometry_type>& paths,
+    static bool from_wkb (boost::ptr_vector<geometry_type>& paths,
                           const char* wkb,
                           unsigned size,
                           wkbFormat format = wkbGeneric);

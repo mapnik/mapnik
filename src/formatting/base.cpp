@@ -50,7 +50,7 @@ node_ptr node::from_xml(xml_node const& xml)
         {
             continue;
         }
-        node_ptr n = registry::instance()->from_xml(*itr);
+        node_ptr n = registry::instance().from_xml(*itr);
         if (n) list->push_back(n);
     }
     if (list->get_children().size() == 1) {

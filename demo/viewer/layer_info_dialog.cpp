@@ -17,11 +17,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id$
 
 #include "layer_info_dialog.hpp"
 
 // mapnik
+#include <mapnik/params.hpp>
+#include <mapnik/params_impl.hpp>
 #include <mapnik/layer.hpp>
 
 

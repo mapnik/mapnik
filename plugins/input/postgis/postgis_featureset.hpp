@@ -28,9 +28,9 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/unicode.hpp>
 
 // boost
-
 #include <boost/scoped_ptr.hpp>
 
 using mapnik::Featureset;
@@ -55,8 +55,8 @@ private:
     boost::shared_ptr<IResultSet> rs_;
     context_ptr ctx_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
-    int totalGeomSize_;
-    int feature_id_;
+    unsigned totalGeomSize_;
+    mapnik::value_integer feature_id_;
     bool key_field_;
 };
 

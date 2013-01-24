@@ -30,21 +30,16 @@
 
 using mapnik::font_set;
 
-struct fontset_pickle_suite : boost::python::pickle_suite
-{
-    static boost::python::tuple
-    getinitargs(const font_set& fs)
-    {
-        return boost::python::make_tuple(fs.get_name());
-    }
-};
-
 void export_fontset ()
 {
     using namespace boost::python;
-    class_<font_set>("FontSet", init<>("default fontset constructor")
+    class_<font_set>("FontSet", init<std::string const&>("default fontset constructor")
         )
-        .def_pickle(fontset_pickle_suite())
+        .add_property("name",
+                       make_function(&font_set::get_name,return_value_policy<copy_const_reference>()),
+                       &font_set::set_name,
+                      "Get/Set the name of the FontSet.\n"
+            )
         .def("add_face_name",&font_set::add_face_name,
              (arg("name")),
              "Add a face-name to the fontset.\n"

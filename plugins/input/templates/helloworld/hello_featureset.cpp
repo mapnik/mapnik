@@ -2,6 +2,9 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry.hpp>
 
+// boost
+#include <boost/make_shared.hpp>
+
 #include "hello_featureset.hpp"
 
 hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string const& encoding)
@@ -16,6 +19,12 @@ mapnik::feature_ptr hello_featureset::next()
 {
     if (feature_id_ == 1)
     {
+        // let us pretend it just has one column/attribute name
+        std::string attribute("key");
+
+        // the featureset context needs to know the field schema
+        ctx_->push(attribute);
+
         // create a new feature
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
 
@@ -24,7 +33,7 @@ mapnik::feature_ptr hello_featureset::next()
 
         // create an attribute pair of key:value
         UnicodeString ustr = tr_->transcode("hello world!");
-        feature->put("key",ustr);
+        feature->put(attribute,ustr);
 
         // we need a geometry to display so just for fun here
         // we take the center of the bbox that was used to query

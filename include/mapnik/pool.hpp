@@ -26,19 +26,19 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/utils.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
 
 // stl
-#include <iostream>
 #include <map>
 #include <deque>
 #include <ctime>
+#include <cassert>
 
 namespace mapnik
 {
@@ -65,14 +65,14 @@ private:
 };
 
 template <typename T,template <typename> class Creator>
-class Pool : private boost::noncopyable
+class Pool : private mapnik::noncopyable
 {
     typedef boost::shared_ptr<T> HolderType;
     typedef std::deque<HolderType> ContType;
 
     Creator<T> creator_;
-    const unsigned initialSize_;
-    const unsigned maxSize_;
+    unsigned initialSize_;
+    unsigned maxSize_;
     ContType usedPool_;
     ContType unusedPool_;
 #ifdef MAPNIK_THREADSAFE
@@ -80,7 +80,7 @@ class Pool : private boost::noncopyable
 #endif
 public:
 
-    Pool(const Creator<T>& creator,unsigned initialSize=1, unsigned maxSize=10)
+    Pool(const Creator<T>& creator,unsigned initialSize, unsigned maxSize)
         :creator_(creator),
          initialSize_(initialSize),
          maxSize_(maxSize)
@@ -107,7 +107,7 @@ public:
             {
                 usedPool_.push_back(*itr);
                 unusedPool_.erase(itr);
-                return usedPool_[usedPool_.size()-1];
+                return usedPool_.back();
             }
             else
             {
@@ -116,6 +116,7 @@ public:
                 itr=unusedPool_.erase(itr);
             }
         }
+        // all connection have been taken, check if we allowed to grow pool
         if (usedPool_.size() < maxSize_)
         {
             HolderType conn(creator_());
@@ -158,6 +159,54 @@ public:
 #endif
         std::pair<unsigned,unsigned> size(unusedPool_.size(),usedPool_.size());
         return size;
+    }
+
+    unsigned max_size() const
+    {
+#ifdef MAPNIK_THREADSAFE
+        mutex::scoped_lock lock(mutex_);
+#endif
+        return maxSize_;
+    }
+
+    void set_max_size(unsigned size)
+    {
+#ifdef MAPNIK_THREADSAFE
+        mutex::scoped_lock lock(mutex_);
+#endif
+        maxSize_ = std::max(maxSize_,size);
+    }
+
+    unsigned initial_size() const
+    {
+#ifdef MAPNIK_THREADSAFE
+        mutex::scoped_lock lock(mutex_);
+#endif
+        return initialSize_;
+    }
+
+    void set_initial_size(unsigned size)
+    {
+#ifdef MAPNIK_THREADSAFE
+        mutex::scoped_lock lock(mutex_);
+#endif
+        if (size > initialSize_)
+        {
+            initialSize_ = size;
+            unsigned total_size = usedPool_.size() + unusedPool_.size();
+            // ensure we don't have ghost obj's in the pool.
+            if (total_size < initialSize_)
+            {
+                unsigned grow_size = initialSize_ - total_size ;
+
+                for (unsigned i=0; i < grow_size; ++i)
+                {
+                    HolderType conn(creator_());
+                    if (conn->isOK())
+                        unusedPool_.push_back(conn);
+                }
+            }
+        }
     }
 };
 

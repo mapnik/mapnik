@@ -27,6 +27,7 @@
 #include "raster_info.hpp"
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
 
 // stl
@@ -315,7 +316,7 @@ public:
 
 private:
     LookupPolicy policy_;
-    int feature_id_;
+    mapnik::value_integer feature_id_;
     mapnik::context_ptr ctx_;
     mapnik::box2d<double> extent_;
     mapnik::box2d<double> bbox_;

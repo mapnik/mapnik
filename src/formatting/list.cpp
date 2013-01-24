@@ -19,7 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
+// mapnik
 #include <mapnik/formatting/list.hpp>
+#include <mapnik/feature.hpp>
+
+// boost
+#include <boost/foreach.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
 using boost::property_tree::ptree;
@@ -27,44 +34,36 @@ using boost::property_tree::ptree;
 namespace formatting {
 /************************************************************/
 
-void list_node::to_xml(boost::property_tree::ptree &xml) const
+void list_node::to_xml(boost::property_tree::ptree & xml) const
 {
-    std::vector<node_ptr>::const_iterator itr = children_.begin();
-    std::vector<node_ptr>::const_iterator end = children_.end();
-    for (;itr != end; itr++)
+    BOOST_FOREACH(node_ptr const& node, children_)
     {
-        (*itr)->to_xml(xml);
+        node->to_xml(xml);
     }
 }
 
 
-void list_node::apply(char_properties const& p, Feature const& feature, processed_text &output) const
-{
-    std::vector<node_ptr>::const_iterator itr = children_.begin();
-    std::vector<node_ptr>::const_iterator end = children_.end();
-    for (;itr != end; itr++)
+void list_node::apply(char_properties const& p, feature_impl const& feature, processed_text &output) const
+{    
+    BOOST_FOREACH(node_ptr const& node, children_)
     {
-        (*itr)->apply(p, feature, output);
-    }
+        node->apply(p, feature, output);
+    }   
 }
 
 
 void list_node::add_expressions(expression_set &output) const
 {
-    std::vector<node_ptr>::const_iterator itr = children_.begin();
-    std::vector<node_ptr>::const_iterator end = children_.end();
-    for (;itr != end; itr++)
+    BOOST_FOREACH(node_ptr const& node, children_)
     {
-        (*itr)->add_expressions(output);
+        node->add_expressions(output);
     }
 }
-
 
 void list_node::push_back(node_ptr n)
 {
     children_.push_back(n);
 }
-
 
 void list_node::clear()
 {

@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
+#include <mapnik/formatting/text.hpp>
 
 
 // boost
@@ -68,7 +69,7 @@ IMPLEMENT_ENUM( horizontal_alignment_e, horizontal_alignment_strings )
 
 static const char * justify_alignment_strings[] = {
     "left",
-    "center",
+    "center", // not 'middle' in order to match CSS
     "right",
     "auto",
     ""
@@ -137,7 +138,9 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
 
 expression_ptr text_symbolizer::get_name() const
 {
-    return expression_ptr();
+    formatting::text_node *node = dynamic_cast<formatting::text_node *>(placement_options_->defaults.format_tree().get());
+    if (!node) return expression_ptr();
+    return node->get_text();
 }
 
 void text_symbolizer::set_name(expression_ptr name)
@@ -170,27 +173,27 @@ void text_symbolizer::set_fontset(font_set const& fontset)
     placement_options_->defaults.format.fontset = fontset;
 }
 
-font_set const& text_symbolizer::get_fontset() const
+boost::optional<font_set> const& text_symbolizer::get_fontset() const
 {
     return placement_options_->defaults.format.fontset;
 }
 
-unsigned  text_symbolizer::get_text_ratio() const
+double text_symbolizer::get_text_ratio() const
 {
     return placement_options_->defaults.text_ratio;
 }
 
-void  text_symbolizer::set_text_ratio(unsigned ratio)
+void  text_symbolizer::set_text_ratio(double ratio)
 {
     placement_options_->defaults.text_ratio = ratio;
 }
 
-unsigned  text_symbolizer::get_wrap_width() const
+double text_symbolizer::get_wrap_width() const
 {
     return placement_options_->defaults.wrap_width;
 }
 
-void  text_symbolizer::set_wrap_width(unsigned width)
+void text_symbolizer::set_wrap_width(double width)
 {
     placement_options_->defaults.wrap_width = width;
 }
@@ -235,32 +238,32 @@ void  text_symbolizer::set_text_transform(text_transform_e convert)
     placement_options_->defaults.format.text_transform = convert;
 }
 
-unsigned  text_symbolizer::get_line_spacing() const
+double text_symbolizer::get_line_spacing() const
 {
     return placement_options_->defaults.format.line_spacing;
 }
 
-void  text_symbolizer::set_line_spacing(unsigned spacing)
+void  text_symbolizer::set_line_spacing(double spacing)
 {
     placement_options_->defaults.format.line_spacing = spacing;
 }
 
-unsigned  text_symbolizer::get_character_spacing() const
+double text_symbolizer::get_character_spacing() const
 {
     return placement_options_->defaults.format.character_spacing;
 }
 
-void  text_symbolizer::set_character_spacing(unsigned spacing)
+void  text_symbolizer::set_character_spacing(double spacing)
 {
     placement_options_->defaults.format.character_spacing = spacing;
 }
 
-unsigned  text_symbolizer::get_label_spacing() const
+double text_symbolizer::get_label_spacing() const
 {
     return placement_options_->defaults.label_spacing;
 }
 
-void  text_symbolizer::set_label_spacing(unsigned spacing)
+void  text_symbolizer::set_label_spacing(double spacing)
 {
     placement_options_->defaults.label_spacing = spacing;
 }
@@ -295,12 +298,12 @@ void text_symbolizer::set_max_char_angle_delta(double angle)
     placement_options_->defaults.max_char_angle_delta = angle;
 }
 
-void text_symbolizer::set_text_size(float size)
+void text_symbolizer::set_text_size(double size)
 {
     placement_options_->defaults.format.text_size = size;
 }
 
-float text_symbolizer::get_text_size() const
+double text_symbolizer::get_text_size() const
 {
     return placement_options_->defaults.format.text_size;
 }
@@ -368,6 +371,16 @@ bool text_symbolizer::get_avoid_edges() const
 void text_symbolizer::set_avoid_edges(bool avoid)
 {
     placement_options_->defaults.avoid_edges = avoid;
+}
+
+bool text_symbolizer::largest_bbox_only() const
+{
+    return placement_options_->defaults.largest_bbox_only;
+}
+
+void text_symbolizer::set_largest_bbox_only(bool v)
+{
+    placement_options_->defaults.largest_bbox_only = v;
 }
 
 double text_symbolizer::get_minimum_distance() const

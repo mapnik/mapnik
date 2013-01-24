@@ -25,41 +25,38 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/raster.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // boost
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 104000
-#include <boost/property_map/property_map.hpp>
-#else
-#include <boost/property_map.hpp>
-#endif
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 // stl
 #include <vector>
 #include <map>
-#include <stdexcept>
+#include <ostream>                      // for basic_ostream, operator<<, etc
+#include <sstream>                      // for basic_stringstream
+#include <stdexcept>                    // for out_of_range
 
 namespace mapnik {
 
-typedef boost::shared_ptr<raster> raster_ptr;
-
+class raster;
 class feature_impl;
 
+typedef boost::shared_ptr<raster> raster_ptr;
+
 template <typename T>
-class context : private boost::noncopyable,
-                public boost::associative_property_map<T>
+class context : private mapnik::noncopyable
 
 {
     friend class feature_impl;
 public:
     typedef T map_type;
-    typedef typename boost::associative_property_map<map_type> base_type;
     typedef typename map_type::value_type value_type;
     typedef typename map_type::key_type key_type;
     typedef typename map_type::size_type size_type;
@@ -68,13 +65,18 @@ public:
     typedef typename map_type::const_iterator const_iterator;
 
     context()
-        : base_type(mapping_) {}
+        : mapping_() {}
 
     size_type push(key_type const& name)
     {
         size_type index = mapping_.size();
         mapping_.insert(std::make_pair(name, index));
         return index;
+    }
+
+    void add(key_type const& name, size_type index)
+    {
+        mapping_.insert(std::make_pair(name, index));
     }
 
     size_type size() const { return mapping_.size(); }
@@ -88,7 +90,9 @@ private:
 typedef MAPNIK_DECL context<std::map<std::string,std::size_t> > context_type;
 typedef MAPNIK_DECL boost::shared_ptr<context_type> context_ptr;
 
-class MAPNIK_DECL feature_impl : private boost::noncopyable
+static const value default_value;
+
+class MAPNIK_DECL feature_impl : private mapnik::noncopyable
 {
     friend class feature_kv_iterator;
 public:
@@ -97,7 +101,7 @@ public:
     typedef std::vector<value_type> cont_type;
     typedef feature_kv_iterator iterator;
 
-    feature_impl(context_ptr const& ctx, int id)
+    feature_impl(context_ptr const& ctx, mapnik::value_integer id)
         : id_(id),
         ctx_(ctx),
         data_(ctx_->mapping_.size()),
@@ -105,9 +109,9 @@ public:
         raster_()
         {}
 
-    inline int id() const { return id_;}
+    inline mapnik::value_integer id() const { return id_;}
 
-    inline void set_id(int id) { id_ = id;}
+    inline void set_id(mapnik::value_integer id) { id_ = id;}
 
     template <typename T>
     void put(context_type::key_type const& key, T const& val)
@@ -120,7 +124,6 @@ public:
     {
         put_new(key,value(val));
     }
-
 
     void put(context_type::key_type const& key, value const& val)
     {
@@ -135,7 +138,6 @@ public:
             throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
         }
     }
-
 
     void put_new(context_type::key_type const& key, value const& val)
     {
@@ -153,7 +155,6 @@ public:
         }
     }
 
-
     bool has_key(context_type::key_type const& key) const
     {
         return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
@@ -165,26 +166,29 @@ public:
         if (itr != ctx_->mapping_.end())
             return get(itr->second);
         else
-            throw std::out_of_range(std::string("Key does not exist: '") + key + "'");
+            return default_value;
     }
 
     value_type const& get(std::size_t index) const
     {
         if (index < data_.size())
             return data_[index];
-        throw std::out_of_range("Index out of range");
-    }
-
-    boost::optional<value_type const&> get_optional(std::size_t index) const
-    {
-        if (index < data_.size())
-            return boost::optional<value_type const&>(data_[index]);
-        return boost::optional<value_type const&>();
+        return default_value;
     }
 
     std::size_t size() const
     {
         return data_.size();
+    }
+
+    cont_type const& get_data() const
+    {
+        return data_;
+    }
+
+    void set_data(cont_type const& data)
+    {
+        data_ = data;
     }
 
     context_ptr context()
@@ -231,7 +235,7 @@ public:
             geometry_type const& geom = get_geometry(i);
             if (i==0)
             {
-                box2d<double> const& box = geom.envelope();
+                box2d<double> box = geom.envelope();
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
             }
             else
@@ -242,7 +246,7 @@ public:
         return result;
     }
 
-    const raster_ptr& get_raster() const
+    raster_ptr const& get_raster() const
     {
         return raster_;
     }
@@ -273,7 +277,14 @@ public:
             std::size_t index = itr->second;
             if (index < data_.size())
             {
-                ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+                if (data_[itr->second] == mapnik::value_null())
+                {
+                    ss << "  " << itr->first  << ":null" << std::endl;
+                }
+                else
+                {
+                    ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+                }
             }
         }
         ss << ")" << std::endl;
@@ -281,7 +292,7 @@ public:
     }
 
 private:
-    int id_;
+    mapnik::value_integer id_;
     context_ptr ctx_;
     cont_type data_;
     boost::ptr_vector<geometry_type> geom_cont_;
@@ -296,6 +307,8 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
 }
 
 typedef feature_impl Feature;
+
+typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
 
 }
 

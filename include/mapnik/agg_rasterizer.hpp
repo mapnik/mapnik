@@ -23,15 +23,15 @@
 #ifndef MAPNIK_AGG_RASTERIZER_HPP
 #define MAPNIK_AGG_RASTERIZER_HPP
 
-// boost
-#include <boost/utility.hpp>
+// mapnik
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"
 
 namespace mapnik {
 
-struct rasterizer :  agg::rasterizer_scanline_aa<>, boost::noncopyable {};
+struct rasterizer :  agg::rasterizer_scanline_aa<>, mapnik::noncopyable {};
 
 }
 

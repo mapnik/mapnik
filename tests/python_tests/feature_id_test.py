@@ -5,6 +5,7 @@ from nose.tools import *
 from utilities import execution_path, Todo
 
 import os, sys, glob, mapnik
+import itertools
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -12,7 +13,7 @@ def setup():
     os.chdir(execution_path('.'))
 
 def compare_shape_between_mapnik_and_ogr(shapefile,query=None):
-    plugins = mapnik.DatasourceCache.instance().plugin_names()
+    plugins = mapnik.DatasourceCache.plugin_names()
     if 'shape' in plugins and 'ogr' in plugins:
         ds1 = mapnik.Ogr(file=shapefile,layer_by_index=0)
         ds2 = mapnik.Shapefile(file=shapefile)
@@ -23,17 +24,12 @@ def compare_shape_between_mapnik_and_ogr(shapefile,query=None):
             fs1 = ds1.featureset()
             fs2 = ds2.featureset()
         count = 0;
-        while(True):
+        for feat1,feat2 in itertools.izip(fs1,fs2):
             count += 1
-            feat1 = fs1.next()
-            feat2 = fs2.next()
-            if not feat1:
-                break
-            #import pdb;pdb.set_trace()
             eq_(feat1.id(),feat2.id(),
-                '%s : ogr feature id %s "%s" does not equal shapefile feature id %s "%s"' 
+                '%s : ogr feature id %s "%s" does not equal shapefile feature id %s "%s"'
                   % (count,feat1.id(),str(feat1.attributes), feat2.id(),str(feat2.attributes)))
-        return True
+    return True
 
 
 def test_shapefile_line_featureset_id():
@@ -45,7 +41,7 @@ def test_shapefile_polygon_featureset_id():
 def test_shapefile_polygon_feature_query_id():
     bbox = (15523428.2632, 4110477.6323, -11218494.8310, 7495720.7404)
     query = mapnik.Query(mapnik.Box2d(*bbox))
-    if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'ogr' in mapnik.DatasourceCache.plugin_names():
         ds = mapnik.Ogr(file='../data/shp/world_merc.shp',layer_by_index=0)
         for fld in ds.fields():
             query.add_property_name(fld)
@@ -57,7 +53,7 @@ def test_feature_hit_count():
     #bbox = (-14284551.8434, 2074195.1992, -7474929.8687, 8140237.7628)
     bbox = (1113194.91,4512803.085,2226389.82,6739192.905)
     query = mapnik.Query(mapnik.Box2d(*bbox))
-    if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'ogr' in mapnik.DatasourceCache.plugin_names():
         ds1 = mapnik.Ogr(file='../data/shp/world_merc.shp',layer_by_index=0)
         for fld in ds1.fields():
             query.add_property_name(fld)

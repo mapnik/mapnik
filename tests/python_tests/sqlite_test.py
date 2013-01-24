@@ -10,7 +10,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
+if 'sqlite' in mapnik.DatasourceCache.plugin_names():
 
     def test_attachdb_with_relative_file():
         # The point table and index is in the qgis_spatiallite.sqlite
@@ -34,14 +34,18 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
                 '''
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = None
+        try :
+            feature = fs.next()
+        except StopIteration:
+            pass
         # the above should not throw but will result in no features
         eq_(feature,None)
 
     def test_attachdb_with_absolute_file():
         # The point table and index is in the qgis_spatiallite.sqlite
         # database.  If either is not found, then this fails
-        ds = mapnik.SQLite(file=os.getcwd() + '/../data/sqlite/world.sqlite', 
+        ds = mapnik.SQLite(file=os.getcwd() + '/../data/sqlite/world.sqlite',
             table='point',
             attachdb='scratch@qgis_spatiallite.sqlite'
             )
@@ -59,8 +63,13 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
                 insert into scratch.idx_attachedtest_the_geom values (1,-7799225.5,-7778571.0,1393264.125,1417719.375);
                 '''
             )
+
         fs = ds.featureset()
-        feature = fs.next()
+        feature = None
+        try :
+            feature = fs.next()
+        except StopIteration:
+            pass
         eq_(feature,None)
 
     def test_attachdb_with_explicit_index():
@@ -75,7 +84,11 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
                 '''
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = None
+        try:
+            feature = fs.next()
+        except StopIteration:
+            pass
         eq_(feature,None)
 
     def test_attachdb_with_sql_join():
@@ -127,7 +140,7 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
                 eq_(feature[str(k)],v)
             except:
                 #import pdb;pdb.set_trace()
-                print 'invalid key/v %s/%s for: %s' % (k,v,feature) 
+                print 'invalid key/v %s/%s for: %s' % (k,v,feature)
 
     def test_attachdb_with_sql_join_count():
         ds = mapnik.SQLite(file='../data/sqlite/world.sqlite',
@@ -267,16 +280,20 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
         eq_(feature['fips'],u'AC')
 
     def test_empty_db():
-        ds = mapnik.SQLite(file='../data/sqlite/empty.db', 
+        ds = mapnik.SQLite(file='../data/sqlite/empty.db',
             table='empty',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = None
+        try:
+            feature = fs.next()
+        except StopIteration:
+            pass
         eq_(feature,None)
 
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
-        ds = mapnik.SQLite(file='../data/sqlite/empty.db', 
+        ds = mapnik.SQLite(file='../data/sqlite/empty.db',
             table='empty',
             )
         eq_(len(ds.fields()),25)
@@ -310,8 +327,57 @@ if 'sqlite' in mapnik.DatasourceCache.instance().plugin_names():
             table='(select * from empty where "a"!="b" and !intersects!)',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = None
+        try :
+            feature = fs.next()
+        except StopIteration:
+            pass
         eq_(feature,None)
+
+    # https://github.com/mapnik/mapnik/issues/1537
+    # this works because key_field is manually set
+    def test_db_with_one_text_column():
+        # form up an in-memory test db
+        wkb = '010100000000000000000000000000000000000000'
+        ds = mapnik.SQLite(file=':memory:',
+            table='test1',
+            initdb='''
+                create table test1 (alias TEXT,geometry BLOB);
+                insert into test1 values ("test",x'%s');
+                ''' % wkb,
+            extent='-180,-60,180,60',
+            use_spatial_index=False,
+            key_field='alias'
+        )
+        eq_(len(ds.fields()),1)
+        eq_(ds.fields(),['alias'])
+        eq_(ds.field_types(),['str'])
+        fs = ds.all_features()
+        eq_(len(fs),1)
+        feat = fs[0]
+        #eq_(feat.id(),1)
+        eq_(feat['alias'],'test')
+        eq_(len(feat.geometries()),1)
+        eq_(feat.geometries()[0].to_wkt(),'Point(0 0)')
+
+
+    def test_that_64bit_int_fields_work():
+        ds = mapnik.SQLite(file='../data/sqlite/64bit_int.sqlite',
+            table='int_table',
+            use_spatial_index=False
+        )
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['OGC_FID','id','bigint'])
+        eq_(ds.field_types(),['int','int','int'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat.id(),1)
+        eq_(feat['OGC_FID'],1)
+        eq_(feat['bigint'],2147483648)
+        feat = fs.next()
+        eq_(feat.id(),2)
+        eq_(feat['OGC_FID'],2)
+        eq_(feat['bigint'],922337203685477580)
 
 if __name__ == "__main__":
     setup()

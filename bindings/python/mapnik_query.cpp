@@ -30,12 +30,19 @@
 using mapnik::query;
 using mapnik::box2d;
 
-struct query_pickle_suite : boost::python::pickle_suite
+namespace python = boost::python;
+
+struct resolution_to_tuple
 {
-    static boost::python::tuple
-    getinitargs(query const& q)
+    static PyObject* convert(query::resolution_type const& x)
     {
-        return boost::python::make_tuple(q.get_bbox(),q.resolution());
+        python::object tuple(python::make_tuple(x.get<0>(), x.get<1>()));
+        return python::incref(tuple.ptr());
+    }
+
+    static PyTypeObject const* get_pytype()
+    {
+        return &PyTuple_Type;
     }
 };
 
@@ -43,10 +50,11 @@ void export_query()
 {
     using namespace boost::python;
 
+    to_python_converter<query::resolution_type, resolution_to_tuple> ();
+
     class_<query>("Query", "a spatial query data object",
                   init<box2d<double>,query::resolution_type const&,double>() )
         .def(init<box2d<double> >())
-        .def_pickle(query_pickle_suite())
         .add_property("resolution",make_function(&query::resolution,
                                                  return_value_policy<copy_const_reference>()))
         .add_property("bbox", make_function(&query::get_bbox,

@@ -25,41 +25,49 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 
 // boost
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
+
+// stl
+#include <vector>
+#include <string>
 
 // ogr
 #include <ogrsf_frmts.h>
-
 #include "ogr_layer_ptr.hpp"
 
 class ogr_datasource : public mapnik::datasource
 {
 public:
-    ogr_datasource(mapnik::parameters const& params, bool bind=true);
+    ogr_datasource(mapnik::parameters const& params);
     virtual ~ogr_datasource ();
     mapnik::datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     mapnik::featureset_ptr features(mapnik::query const& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    void bind() const;
-
+    
 private:
-    mutable mapnik::box2d<double> extent_;
+    void init(mapnik::parameters const& params);
+    mapnik::box2d<double> extent_;
     mapnik::datasource::datasource_t type_;
     std::string dataset_name_;
-    mutable std::string index_name_;
-    mutable OGRDataSource* dataset_;
-    mutable ogr_layer_ptr layer_;
-    mutable std::string layer_name_;
-    mutable mapnik::layer_descriptor desc_;
-    mutable bool indexed_;
+    std::string index_name_;
+    OGRDataSource* dataset_;
+    ogr_layer_ptr layer_;
+    std::string layer_name_;
+    mapnik::layer_descriptor desc_;
+    bool indexed_;
 };
 
 #endif // OGR_DATASOURCE_HPP

@@ -24,18 +24,23 @@
 #define MAPNIK_RASTER_HPP
 
 // mapnik
-#include <mapnik/graphics.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/image_data.hpp>
+#include <mapnik/noncopyable.hpp>
 
 namespace mapnik {
-struct raster
+class raster : private mapnik::noncopyable
 {
+public:
     box2d<double> ext_;
     image_data_32 data_;
-    raster(box2d<double> const& ext,image_data_32 const& data)
+    bool premultiplied_alpha_;
+    raster(box2d<double> const& ext, unsigned width, unsigned height, bool premultiplied_alpha = false)
         : ext_(ext),
-          data_(data) {}
+          data_(width,height),
+          premultiplied_alpha_(premultiplied_alpha)
+    {}
 };
 }
 
 #endif // MAPNIK_RASTER_HPP
-

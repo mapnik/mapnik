@@ -24,9 +24,12 @@
 #define KISMET_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/projection.hpp>
+#include <mapnik/feature.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
@@ -49,8 +52,7 @@ public:
 private:
     std::list<kismet_network_data> const& knd_list_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
-    mapnik::wkbFormat format_;
-    int feature_id_;
+    mapnik::value_integer feature_id_;
     std::list<kismet_network_data>::const_iterator knd_list_it;
     mapnik::projection source_;
     mapnik::context_ptr ctx_;

@@ -25,12 +25,9 @@
 
 //stl
 #include <string>
-#include <iostream>
 
 namespace mapnik
 {
-font_set::font_set()
-    : name_("") {}
 
 font_set::font_set(std::string const& name)
     : name_(name) {}
@@ -59,6 +56,11 @@ unsigned font_set::size() const
 void font_set::add_face_name(std::string face_name)
 {
     face_names_.push_back(face_name);
+}
+
+void font_set::set_name(std::string const& name)
+{
+    name_ = name;
 }
 
 std::string const& font_set::get_name() const

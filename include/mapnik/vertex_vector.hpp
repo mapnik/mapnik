@@ -29,9 +29,9 @@
 
 // mapnik
 #include <mapnik/vertex.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <cstring>  // required for memcpy with linux/g++
@@ -40,7 +40,7 @@ namespace mapnik
 {
 
 template <typename T>
-class vertex_vector : private boost::noncopyable
+class vertex_vector : private mapnik::noncopyable
 {
     typedef T coord_type;
     typedef vertex<coord_type,2> vertex_type;
@@ -115,6 +115,14 @@ public:
         return commands_[block] [pos & block_mask];
     }
 
+    void set_command(unsigned pos, unsigned command)
+    {
+        if (pos < pos_)
+        {
+            unsigned block = pos >> block_shift;
+            commands_[block] [pos & block_mask] = command;
+        }
+    }
 private:
     void allocate_block(unsigned block)
     {

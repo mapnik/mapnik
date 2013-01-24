@@ -39,9 +39,6 @@ extern "C"
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
 
-// stl
-#include <sstream>
-
 // jpeg
 #if defined(HAVE_JPEG)
 #include <mapnik/jpeg_io.hpp>
@@ -49,7 +46,7 @@ extern "C"
 
 // cairo
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-#include <cairomm/surface.h>
+#include <mapnik/cairo_context.hpp>
 #include <pycairo.h>
 #endif
 
@@ -121,6 +118,18 @@ bool painted(mapnik::image_32 const& im)
     return im.painted();
 }
 
+unsigned get_pixel(mapnik::image_32 const& im, int x, int y)
+{
+    if (x < static_cast<int>(im.width()) && y < static_cast<int>(im.height()))
+    {
+        mapnik::image_data_32 const & data = im.data();
+        return data(x,y);
+    }
+    PyErr_SetString(PyExc_IndexError, "invalid x,y for image dimensions");
+    boost::python::throw_error_already_set();
+    return 0;
+}
+
 void set_pixel(mapnik::image_32 & im, unsigned x, unsigned y, mapnik::color const& c)
 {
     im.setPixel(x, y, c.rgba());
@@ -149,17 +158,16 @@ void blend (image_32 & im, unsigned x, unsigned y, image_32 const& im2, float op
     im.set_rectangle_alpha2(im2.data(),x,y,opacity);
 }
 
-
-void composite(image_32 & im, image_32 & im2, mapnik::composite_mode_e mode)
+void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, float opacity)
 {
-    mapnik::composite(im.data(),im2.data(),mode);
+    mapnik::composite(dst.data(),src.data(),mode,opacity,0,0,false);
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
-boost::shared_ptr<image_32> from_cairo(PycairoSurface* surface)
+boost::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
 {
-    Cairo::RefPtr<Cairo::ImageSurface> s(new Cairo::ImageSurface(surface->surface));
-    boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(s);
+    mapnik::cairo_surface_ptr surface(py_surface->surface, mapnik::cairo_surface_closer());
+    boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(surface);
     return image_ptr;
 }
 #endif
@@ -167,6 +175,7 @@ boost::shared_ptr<image_32> from_cairo(PycairoSurface* surface)
 void export_image()
 {
     using namespace boost::python;
+    // NOTE: must match list in include/mapnik/image_compositing.hpp
     enum_<mapnik::composite_mode_e>("CompositeOp")
         .value("clear", mapnik::clear)
         .value("src", mapnik::src)
@@ -195,7 +204,12 @@ void export_image()
         .value("exclusion", mapnik::exclusion)
         .value("contrast", mapnik::contrast)
         .value("invert", mapnik::invert)
-        .value("invert_rgb", mapnik::invert_rgb)
+        .value("grain_merge", mapnik::grain_merge)
+        .value("grain_extract", mapnik::grain_extract)
+        .value("hue", mapnik::hue)
+        .value("saturation", mapnik::saturation)
+        .value("color", mapnik::_color)
+        .value("value", mapnik::_value)
         ;
 
     class_<image_32,boost::shared_ptr<image_32> >("Image","This class represents a 32 bit RGBA image.",init<int,int>())
@@ -210,8 +224,17 @@ void export_image()
         .def("set_color_to_alpha",&image_32::set_color_to_alpha, "Set a given color to the alpha channel of the Image")
         .def("set_alpha",&image_32::set_alpha, "Set the overall alpha channel of the Image")
         .def("blend",&blend)
-        .def("composite",&composite)
+        .def("composite",&composite,
+         ( arg("self"),
+           arg("image"),
+           arg("mode")=mapnik::src_over,
+           arg("opacity")=1.0f
+         ))
+        .def("premultiply",&image_32::premultiply)
+        .def("demultiply",&image_32::demultiply)
         .def("set_pixel",&set_pixel)
+        .def("get_pixel",&get_pixel)
+        .def("clear",&image_32::clear)
         //TODO(haoyu) The method name 'tostring' might be confusing since they actually return bytes in Python 3
 
         .def("tostring",&tostring1)

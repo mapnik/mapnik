@@ -17,13 +17,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//$Id$
 
 #include <QtGui>
 
 #include <boost/bind.hpp>
 
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/graphics.hpp>
+#include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
@@ -31,6 +32,13 @@
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/image_util.hpp>
+
+#ifdef HAVE_CAIRO
+// cairo
+#include <mapnik/cairo_renderer.hpp>
+#endif
+
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
@@ -81,7 +89,8 @@ MapWidget::MapWidget(QWidget *parent)
      first_(true),
      pen_(QColor(0,0,255,96)),
      selectedLayer_(-1),
-     scaling_factor_(1.0)
+     scaling_factor_(1.0),
+     cur_renderer_(AGG)
 {
    pen_.setWidth(3);
    pen_.setCapStyle(Qt::RoundCap);
@@ -173,29 +182,29 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                   feature_ptr feat  = fs->next();
                   if (feat)
                   {
-                      
+
                       feature_kv_iterator itr(*feat,true);
                       feature_kv_iterator end(*feat);
-                      
+
                       for ( ;itr!=end; ++itr)
                       {
                           info.push_back(QPair<QString,QString>(QString(boost::get<0>(*itr).c_str()),
                                                                 boost::get<1>(*itr).to_string().c_str()));
                       }
-                      
-                      typedef mapnik::coord_transform2<mapnik::CoordTransform,mapnik::geometry_type> path_type;
+
+                      typedef mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type> path_type;
 
                      for  (unsigned i=0; i<feat->num_geometries();++i)
                      {
                         mapnik::geometry_type & geom = feat->get_geometry(i);
                         path_type path(t,geom,prj_trans);
-                        if (geom.num_points() > 0)
+                        if (geom.size() > 0)
                         {
                            QPainterPath qpath;
                            double x,y;
                            path.vertex(&x,&y);
                            qpath.moveTo(x,y);
-                           for (unsigned j = 1; j < geom.num_points(); ++j)
+                           for (unsigned j = 1; j < geom.size(); ++j)
                            {
                               path.vertex(&x,&y);
                               qpath.lineTo(x,y);
@@ -278,6 +287,32 @@ void MapWidget::mouseReleaseEvent(QMouseEvent* e)
    }
 }
 
+void MapWidget::wheelEvent(QWheelEvent* e)
+{
+   if (!map_)
+   {
+      return;
+   }
+
+   QPoint corner(map_->width(), map_->height());
+   QPoint zoomCoords;
+   double zoom;
+   if (e->delta() > 0)
+   {
+      zoom = 0.5;
+      QPoint center = corner / 2;
+      QPoint delta = e->pos() - center;
+      zoomCoords = zoom * delta + center;
+   }
+   else
+   {
+      zoom = 2.0;
+      zoomCoords = corner - e->pos();
+   }
+
+   map_->pan_and_zoom(zoomCoords.x(), zoomCoords.y(), zoom);
+   updateMap();
+}
 
 void MapWidget::keyPressEvent(QKeyEvent *e)
 {
@@ -449,6 +484,7 @@ void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::strin
    //agg_renderer renderer(map,image);
    //renderer.apply();
    //image.saveToFile(filename,type);
+    std::cout << "Export to file .." << std::endl;
 }
 
 void MapWidget::set_scaling_factor(double scaling_factor)
@@ -456,24 +492,129 @@ void MapWidget::set_scaling_factor(double scaling_factor)
     scaling_factor_ = scaling_factor;
 }
 
+void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
+{
+    unsigned width=map.width();
+    unsigned height=map.height();
+
+    image_32 buf(width,height);
+    mapnik::agg_renderer<image_32> ren(map,buf,scaling_factor);
+
+    try
+    {
+        ren.apply();
+        QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
+        pix = QPixmap::fromImage(image.rgbSwapped());
+    }
+    catch (mapnik::config_error & ex)
+    {
+        std::cerr << ex.what() << std::endl;
+    }
+    catch (const std::exception & ex)
+    {
+        std::cerr << "exception: " << ex.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unknown exception caught!\n";
+    }
+}
+
+
+void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
+{
+    unsigned width=map.width();
+    unsigned height=map.height();
+
+    mapnik::grid buf(width,height,"F_CODE", 1);
+    mapnik::grid_renderer<mapnik::grid> ren(map,buf,scaling_factor);
+
+    try
+    {
+        ren.apply();
+        mapnik::value_integer * imdata = static_cast<mapnik::value_integer*>(buf.raw_data());
+
+        // Not sure how to display long long values ??
+        //QImage image(width,height,QImage::Format_RGB32);
+        //for (unsigned i = 0 ; i < height ; ++i)
+        //{
+        //     for (unsigned j = 0 ; j < width ; ++j)
+        //    {
+        //        image.setPixel(j,i,qRgb((uint8_t)(imdata[i*width+j]>>8),
+        //                                (uint8_t)(imdata[i*width+j+1]>>8),
+        //                                (uint8_t)(imdata[i*width+j+2]>>8)));
+        //    }
+        //}
+        //pix = QPixmap::fromImage(image);
+    }
+    catch (mapnik::config_error & ex)
+    {
+        std::cerr << ex.what() << std::endl;
+    }
+    catch (const std::exception & ex)
+    {
+        std::cerr << "exception: " << ex.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unknown exception caught!\n";
+    }
+}
+
+
+void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
+{
+
+#ifdef HAVE_CAIRO
+    mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
+                                            mapnik::cairo_surface_closer());
+    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> renderer(map, image_surface, scaling_factor);
+    renderer.apply();
+    image_32 buf(image_surface);
+    QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
+    pix = QPixmap::fromImage(image.rgbSwapped());
+#endif
+}
+
+void MapWidget::updateRenderer(QString const& txt)
+{
+    if (txt == "AGG") cur_renderer_ = AGG;
+    else if (txt == "Cairo") cur_renderer_ = Cairo;
+    else if (txt == "Grid") cur_renderer_ = Grid;
+    std::cerr << "Update renderer called" << std::endl;
+    updateMap();
+}
+
+void MapWidget::updateScaleFactor(double scale_factor)
+{
+    set_scaling_factor(scale_factor);
+    updateMap();
+}
+
 void MapWidget::updateMap()
 {
    if (map_)
    {
-      unsigned width=map_->width();
-      unsigned height=map_->height();
+       if (cur_renderer_== AGG)
+       {
+           render_agg(*map_, scaling_factor_, pix_);
+       }
+       else if (cur_renderer_ == Cairo)
+       {
+           render_cairo(*map_, scaling_factor_, pix_);
+       }
+       else if (cur_renderer_ == Grid)
+       {
+           render_grid(*map_, scaling_factor_, pix_);
+       }
+       else
+       {
+           std::cerr << "Unknown renderer..." << std::endl;
+       }
 
-      image_32 buf(width,height);
-
-      try
-      {
-          mapnik::agg_renderer<image_32> ren(*map_,buf,scaling_factor_);
-          ren.apply();
-
-          QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
-          pix_=QPixmap::fromImage(image.rgbSwapped());
+       try
+       {
           projection prj(map_->srs()); // map projection
-
           box2d<double> ext = map_->get_current_extent();
           double x0 = ext.minx();
           double y0 = ext.miny();
@@ -485,10 +626,6 @@ void MapWidget::updateMap()
           update();
           // emit signal to interested widgets
           emit mapViewChanged();
-      }
-      catch (mapnik::config_error & ex)
-      {
-         std::cerr << ex.what() << std::endl;
       }
       catch (...)
       {

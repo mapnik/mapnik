@@ -26,12 +26,12 @@
 // mapnik
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/noncopyable.hpp>
 
 //stl
 #include <vector>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 // uci
@@ -40,7 +40,7 @@
 namespace mapnik
 {
 
-class string_info : private boost::noncopyable
+class string_info : private mapnik::noncopyable
 {
 protected:
     typedef std::vector<char_info> characters_t;
@@ -122,7 +122,7 @@ typedef char_info const * char_info_ptr;
 
 
 /** List of all characters and their positions and formats for a placement. */
-class text_path : boost::noncopyable
+class text_path : mapnik::noncopyable
 {
     struct character_node
     {
@@ -140,7 +140,7 @@ class text_path : boost::noncopyable
 
         ~character_node() {}
 
-        void vertex(char_info_ptr *c_, double *x_, double *y_, double *angle_)
+        void vertex(char_info_ptr *c_, double *x_, double *y_, double *angle_) const
         {
             *c_ = c;
             *x_ = pos.x;
@@ -149,7 +149,7 @@ class text_path : boost::noncopyable
         }
     };
 
-    int itr_;
+    mutable int itr_;
 public:
     typedef std::vector<character_node> character_nodes_t;
     pixel_position center;
@@ -172,13 +172,13 @@ public:
     }
 
     /** Return node. Always returns a new node. Has no way to report that there are no more nodes. */
-    void vertex(char_info_ptr *c, double *x, double *y, double *angle)
+    void vertex(char_info_ptr *c, double *x, double *y, double *angle) const
     {
         nodes_[itr_++].vertex(c, x, y, angle);
     }
 
     /** Start again at first node. */
-    void rewind()
+    void rewind() const
     {
         itr_ = 0;
     }

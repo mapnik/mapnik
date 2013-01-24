@@ -26,12 +26,14 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/value.hpp>
+
 // boost
+#include <boost/variant/apply_visitor.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/iterator/iterator_traits.hpp>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/filter_iterator.hpp>
-#include <boost/variant.hpp>
+
 // stl
 #include <map>
 
@@ -64,25 +66,11 @@ private:
 
 };
 
-struct is_null : public boost::static_visitor<bool>
-{
-    bool operator() (value_null const& val) const
-    {
-        return true;
-    }
-
-    template <typename T>
-    bool operator() (T val) const
-    {
-        return false;
-    }
-};
-
 struct value_not_null
 {
     bool operator() (feature_kv_iterator::value_type const& kv) const
     {
-        return !boost::apply_visitor(is_null(),boost::get<1>(kv).base());
+        return !boost::apply_visitor(is_null, boost::get<1>(kv).base());
     }
 };
 

@@ -21,13 +21,21 @@
  *
  *****************************************************************************/
 
+/* The functions in this file produce deprecation warnings.
+ * But as shield symbolizer doesn't fully support more than one
+ * placement from python yet these functions are actually the
+ * correct ones.
+ */
+#define NO_DEPRECATION_WARNINGS
+
 // boost
 #include <boost/python.hpp>
 
 // mapnik
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
+#include <mapnik/path_expression.hpp>
 #include "mapnik_svg.hpp"
 
 using mapnik::color;
@@ -53,12 +61,13 @@ tuple get_shield_displacement(const shield_symbolizer& s)
 
 void set_shield_displacement(shield_symbolizer & s, boost::python::tuple arg)
 {
-    s.set_shield_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
+    s.get_placement_options()->defaults.displacement.first = extract<double>(arg[0]);
+    s.get_placement_options()->defaults.displacement.second = extract<double>(arg[1]);
 }
 
 tuple get_text_displacement(const shield_symbolizer& t)
 {
-    position const& pos = t.get_displacement();
+    position const& pos = t.get_placement_options()->defaults.displacement;
     return boost::python::make_tuple(pos.first, pos.second);
 }
 
@@ -67,7 +76,7 @@ void set_text_displacement(shield_symbolizer & t, boost::python::tuple arg)
     t.set_displacement(extract<double>(arg[0]),extract<double>(arg[1]));
 }
 
-const std::string get_filename(shield_symbolizer const& t)
+std::string get_filename(shield_symbolizer const& t)
 {
     return path_processor_type::to_string(*t.get_filename());
 }
@@ -79,46 +88,6 @@ void set_filename(shield_symbolizer & t, std::string const& file_expr)
 
 }
 
-struct shield_symbolizer_pickle_suite : boost::python::pickle_suite
-{
-    static boost::python::tuple
-    getinitargs(const shield_symbolizer& s)
-    {
-        std::string filename = path_processor_type::to_string(*s.get_filename());
-        //(name, font name, font size, font color, image file, image type, width, height)
-        return boost::python::make_tuple( "TODO",//s.get_name(),
-                                          s.get_face_name(),s.get_text_size(),s.get_fill(),filename,guess_type(filename));
-
-    }
-
-    static  boost::python::tuple
-    getstate(const shield_symbolizer& s)
-    {
-        return boost::python::make_tuple(s.get_halo_fill(),s.get_halo_radius());
-    }
-
-    // TODO add lots more...
-    static void
-    setstate (shield_symbolizer& s, boost::python::tuple state)
-    {
-        using namespace boost::python;
-        /*if (len(state) != 1)
-          {
-          PyErr_SetObject(PyExc_ValueError,
-          ("expected 1-item tuple in call to __setstate__; got %s"
-          % state).ptr()
-          );
-          throw_error_already_set();
-          }*/
-
-        s.set_halo_fill(extract<color>(state[0]));
-        s.set_halo_radius(extract<float>(state[1]));
-
-    }
-
-};
-
-
 void export_shield_symbolizer()
 {
     using namespace boost::python;
@@ -126,9 +95,8 @@ void export_shield_symbolizer()
                                                         init<expression_ptr,
                                                         std::string const&,
                                                         unsigned, mapnik::color const&,
-                                                        path_expression_ptr>("TODO")
+                                                        path_expression_ptr>()
         )
-        //.def_pickle(shield_symbolizer_pickle_suite())
         .add_property("allow_overlap",
                       &shield_symbolizer::get_allow_overlap,
                       &shield_symbolizer::set_allow_overlap,
@@ -238,5 +206,13 @@ void export_shield_symbolizer()
         .add_property("transform",
                       mapnik::get_svg_transform<shield_symbolizer>,
                       mapnik::set_svg_transform<shield_symbolizer>)
+        .add_property("comp_op",
+                      &shield_symbolizer::comp_op,
+                      &shield_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &shield_symbolizer::clip,
+                      &shield_symbolizer::set_clip,
+                      "Set/get the shield geometry's clipping status")
         ;
 }

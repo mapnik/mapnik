@@ -26,13 +26,10 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <vector>
-#include <iostream>
 #include <deque>
 #include <algorithm>
 
@@ -52,11 +49,11 @@ struct RGBPolicy
 };
 
 template <typename T, typename InsertPolicy = RGBPolicy >
-class octree : private boost::noncopyable
+class octree : private mapnik::noncopyable
 {
     struct node
     {
-        node ()
+        node()
             :  reds(0),
                greens(0),
                blues(0),
@@ -68,14 +65,22 @@ class octree : private boost::noncopyable
             memset(&children_[0],0,sizeof(children_));
         }
 
-        ~node ()
+        ~node()
         {
-            for (unsigned i = 0;i < 8; ++i) {
-                if (children_[i] != 0) delete children_[i],children_[i]=0;
+            for (unsigned i = 0;i < 8; ++i)
+            {
+                if (children_[i] != 0)
+                {
+                    delete children_[i];
+                    children_[i]=0;
+                }
             }
         }
 
-        bool is_leaf() const { return count == 0; }
+        bool is_leaf() const
+        {
+            return count == 0;
+        }
         node * children_[8];
         boost::uint64_t reds;
         boost::uint64_t greens;
@@ -83,8 +88,8 @@ class octree : private boost::noncopyable
         unsigned count;
         double reduce_cost;
         unsigned count_cum;
-        byte  children_count;
-        byte  index;
+        byte children_count;
+        byte index;
     };
     struct node_cmp
     {
@@ -99,7 +104,6 @@ class octree : private boost::noncopyable
     unsigned colors_;
     unsigned offset_;
     unsigned leaf_level_;
-    bool has_alfa_;
 
 public:
     explicit octree(unsigned max_colors=256)
@@ -107,11 +111,13 @@ public:
           colors_(0),
           offset_(0),
           leaf_level_(InsertPolicy::MAX_LEVELS),
-          has_alfa_(false),
           root_(new node())
     {}
 
-    ~octree() { delete root_;}
+    ~octree()
+    {
+        delete root_;
+    }
 
     unsigned colors()
     {
@@ -133,21 +139,12 @@ public:
         return offset_;
     }
 
-    void hasAlfa(bool v)
-    {
-        has_alfa_=v;
-    }
-
-    bool hasAlfa()
-    {
-        return has_alfa_;
-    }
-
     void insert(T const& data)
     {
         unsigned level = 0;
         node * cur_node = root_;
-        while (true) {
+        while (true)
+        {
             cur_node->count_cum++;
             cur_node->reds   += data.r;
             cur_node->greens += data.g;
@@ -163,7 +160,8 @@ public:
             }
 
             unsigned idx = InsertPolicy::index_from_level(level,data);
-            if (cur_node->children_[idx] == 0) {
+            if (cur_node->children_[idx] == 0)
+            {
                 cur_node->children_count++;
                 cur_node->children_[idx] = new node();
                 if (level < leaf_level_-1)
@@ -176,14 +174,17 @@ public:
         }
     }
 
-    int quantize(rgb const& c) const
+    int quantize(unsigned val) const
     {
         unsigned level = 0;
+        rgb c(val);
         node * cur_node = root_;
         while (cur_node)
         {
             if (cur_node->children_count == 0)
+            {
                 return cur_node->index + offset_;
+            }
             unsigned idx = InsertPolicy::index_from_level(level,c);
             cur_node = cur_node->children_[idx];
             ++level;
@@ -193,11 +194,6 @@ public:
 
     void create_palette(std::vector<rgb> & palette)
     {
-        if (has_alfa_)
-        {
-            max_colors_--;
-            palette.push_back(rgb(0,0,0));
-        }
         reduce();
         palette.reserve(colors_);
         create_palette(palette, root_);
@@ -207,23 +203,26 @@ public:
     {
         r->reduce_cost = 0;
         if (r->children_count==0)
+        {
             return;
+        }
 
         double mean_r = static_cast<double>(r->reds / r->count_cum);
         double mean_g = static_cast<double>(r->greens / r->count_cum);
         double mean_b = static_cast<double>(r->blues / r->count_cum);
-        for (unsigned idx=0; idx < 8; ++idx) if (r->children_[idx] != 0)
-                                             {
-                                                 double dr,dg,db;
-                                                 computeCost(r->children_[idx]);
-
-                                                 dr = r->children_[idx]->reds   / r->children_[idx]->count_cum - mean_r;
-                                                 dg = r->children_[idx]->greens / r->children_[idx]->count_cum - mean_g;
-                                                 db = r->children_[idx]->blues  / r->children_[idx]->count_cum - mean_b;
-
-                                                 r->reduce_cost += r->children_[idx]->reduce_cost;
-                                                 r->reduce_cost += (dr*dr + dg*dg + db*db) * r->children_[idx]->count_cum;
-                                             }
+        for (unsigned idx=0; idx < 8; ++idx)
+        {
+            if (r->children_[idx] != 0)
+            {
+                double dr,dg,db;
+                computeCost(r->children_[idx]);
+                dr = r->children_[idx]->reds   / r->children_[idx]->count_cum - mean_r;
+                dg = r->children_[idx]->greens / r->children_[idx]->count_cum - mean_g;
+                db = r->children_[idx]->blues  / r->children_[idx]->count_cum - mean_b;
+                r->reduce_cost += r->children_[idx]->reduce_cost;
+                r->reduce_cost += (dr*dr + dg*dg + db*db) * r->children_[idx]->count_cum;
+            }
+        }
     }
 
     void reduce()
@@ -236,30 +235,39 @@ public:
         {
             std::sort(reducible_[i].begin(), reducible_[i].end(),node_cmp());
         }
-        while ( colors_ > max_colors_ && colors_ > 1)
+        while (colors_ > max_colors_ && colors_ > 1)
         {
             while (leaf_level_ >0  && reducible_[leaf_level_-1].size() == 0)
             {
                 --leaf_level_;
             }
 
-            if (leaf_level_ <= 0) return;
+            if (leaf_level_ <= 0)
+            {
+                return;
+            }
 
             // select best of all reducible:
             unsigned red_idx = leaf_level_-1;
-            unsigned bestv = (*reducible_[red_idx].begin())->reduce_cost;
-            for(unsigned i=red_idx; i>=InsertPolicy::MIN_LEVELS; i--) if (!reducible_[i].empty()){
+            unsigned bestv = static_cast<unsigned>((*reducible_[red_idx].begin())->reduce_cost);
+            for(unsigned i=red_idx; i>=InsertPolicy::MIN_LEVELS; i--)
+            {
+                if (!reducible_[i].empty())
+                {
                     node *nd = *reducible_[i].begin();
                     unsigned gch = 0;
-                    for(unsigned idx=0; idx<8; idx++){
+                    for(unsigned idx=0; idx<8; idx++)
+                    {
                         if (nd->children_[idx])
                             gch += nd->children_[idx]->children_count;
                     }
-                    if (gch==0 && nd->reduce_cost < bestv){
+                    if (gch==0 && nd->reduce_cost < bestv)
+                    {
                         bestv = static_cast<unsigned>(nd->reduce_cost);
                         red_idx = i;
                     }
                 }
+            }
 
             typename std::deque<node*>::iterator pos = reducible_[red_idx].begin();
             node * cur_node = *pos;
@@ -297,7 +305,9 @@ public:
         for (unsigned i=0; i < 8 ;++i)
         {
             if (itr->children_[i] != 0)
+            {
                 create_palette(palette, itr->children_[i]);
+            }
         }
     }
 private:

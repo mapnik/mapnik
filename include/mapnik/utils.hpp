@@ -33,8 +33,6 @@
 #include <cstdlib>
 #include <limits>
 #include <ctime>
-#include <sstream>
-#include <iostream>
 #include <algorithm>
 #include <cmath>
 
@@ -129,7 +127,7 @@ protected:
 #endif
     singleton() {}
 public:
-    static  T* instance()
+    static T& instance()
     {
         if (! pInstance_)
         {
@@ -140,6 +138,7 @@ public:
             {
                 if (destroyed_)
                 {
+                    destroyed_ = false;
                     onDeadReference();
                 }
                 else
@@ -151,7 +150,7 @@ public:
                 }
             }
         }
-        return pInstance_;
+        return *pInstance_;
     }
 };
 #ifdef MAPNIK_THREADSAFE

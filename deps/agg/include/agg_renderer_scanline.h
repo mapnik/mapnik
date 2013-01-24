@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -23,9 +23,9 @@ namespace agg
 {
 
     //================================================render_scanline_aa_solid
-    template<class Scanline, class BaseRenderer, class ColorT> 
-    void render_scanline_aa_solid(const Scanline& sl, 
-                                  BaseRenderer& ren, 
+    template<class Scanline, class BaseRenderer, class ColorT>
+    void render_scanline_aa_solid(const Scanline& sl,
+                                  BaseRenderer& ren,
                                   const ColorT& color)
     {
         int y = sl.y();
@@ -37,14 +37,14 @@ namespace agg
             int x = span->x;
             if(span->len > 0)
             {
-                ren.blend_solid_hspan(x, y, (unsigned)span->len, 
-                                      color, 
+                ren.blend_solid_hspan(x, y, (unsigned)span->len,
+                                      color,
                                       span->covers);
             }
             else
             {
-                ren.blend_hline(x, y, (unsigned)(x - span->len - 1), 
-                                color, 
+                ren.blend_hline(x, y, (unsigned)(x - span->len - 1),
+                                color,
                                 *(span->covers));
             }
             if(--num_spans == 0) break;
@@ -53,16 +53,16 @@ namespace agg
     }
 
     //===============================================render_scanlines_aa_solid
-    template<class Rasterizer, class Scanline, 
+    template<class Rasterizer, class Scanline,
              class BaseRenderer, class ColorT>
-    void render_scanlines_aa_solid(Rasterizer& ras, Scanline& sl, 
+    void render_scanlines_aa_solid(Rasterizer& ras, Scanline& sl,
                                    BaseRenderer& ren, const ColorT& color)
     {
         if(ras.rewind_scanlines())
         {
             // Explicitly convert "color" to the BaseRenderer color type.
             // For example, it can be called with color type "rgba", while
-            // "rgba8" is needed. Otherwise it will be implicitly 
+            // "rgba8" is needed. Otherwise it will be implicitly
             // converted in the loop many times.
             //----------------------
             typename BaseRenderer::color_type ren_color(color);
@@ -70,34 +70,7 @@ namespace agg
             sl.reset(ras.min_x(), ras.max_x());
             while(ras.sweep_scanline(sl))
             {
-                //render_scanline_aa_solid(sl, ren, ren_color);
-
-                // This code is equivalent to the above call (copy/paste). 
-                // It's just a "manual" optimization for old compilers,
-                // like Microsoft Visual C++ v6.0
-                //-------------------------------
-                int y = sl.y();
-                unsigned num_spans = sl.num_spans();
-                typename Scanline::const_iterator span = sl.begin();
-
-                for(;;)
-                {
-                    int x = span->x;
-                    if(span->len > 0)
-                    {
-                        ren.blend_solid_hspan(x, y, (unsigned)span->len, 
-                                              ren_color, 
-                                              span->covers);
-                    }
-                    else
-                    {
-                        ren.blend_hline(x, y, (unsigned)(x - span->len - 1), 
-                                        ren_color, 
-                                        *(span->covers));
-                    }
-                    if(--num_spans == 0) break;
-                    ++span;
-                }
+                render_scanline_aa_solid(sl, ren, ren_color);
             }
         }
     }
@@ -116,7 +89,7 @@ namespace agg
         {
             m_ren = &ren;
         }
-        
+
         //--------------------------------------------------------------------
         void color(const color_type& c) { m_color = c; }
         const color_type& color() const { return m_color; }
@@ -129,28 +102,17 @@ namespace agg
         {
             render_scanline_aa_solid(sl, *m_ren, m_color);
         }
-        
+
     private:
         base_ren_type* m_ren;
         color_type m_color;
     };
 
 
-
-
-
-
-
-
-
-
-
-
-
     //======================================================render_scanline_aa
-    template<class Scanline, class BaseRenderer, 
-             class SpanAllocator, class SpanGenerator> 
-    void render_scanline_aa(const Scanline& sl, BaseRenderer& ren, 
+    template<class Scanline, class BaseRenderer,
+             class SpanAllocator, class SpanGenerator>
+    void render_scanline_aa(const Scanline& sl, BaseRenderer& ren,
                             SpanAllocator& alloc, SpanGenerator& span_gen)
     {
         int y = sl.y();
@@ -166,7 +128,7 @@ namespace agg
             if(len < 0) len = -len;
             typename BaseRenderer::color_type* colors = alloc.allocate(len);
             span_gen.generate(colors, x, y, len);
-            ren.blend_color_hspan(x, y, len, colors, 
+            ren.blend_color_hspan(x, y, len, colors,
                                   (span->len < 0) ? 0 : covers, *covers);
 
             if(--num_spans == 0) break;
@@ -174,10 +136,38 @@ namespace agg
         }
     }
 
-    //=====================================================render_scanlines_aa
-    template<class Rasterizer, class Scanline, class BaseRenderer, 
+    //======================================================render_scanline_aa_alpha
+    template<class Scanline, class BaseRenderer,
              class SpanAllocator, class SpanGenerator>
-    void render_scanlines_aa(Rasterizer& ras, Scanline& sl, BaseRenderer& ren, 
+    void render_scanline_aa_alpha(const Scanline& sl, BaseRenderer& ren,
+                            SpanAllocator& alloc, SpanGenerator& span_gen, unsigned alpha)
+    {
+        int y = sl.y();
+
+        unsigned num_spans = sl.num_spans();
+        typename Scanline::const_iterator span = sl.begin();
+        for(;;)
+        {
+            int x = span->x;
+            int len = span->len;
+            const typename Scanline::cover_type* covers = span->covers;
+
+            if(len < 0) len = -len;
+            typename BaseRenderer::color_type* colors = alloc.allocate(len);
+            span_gen.generate(colors, x, y, len);
+            ren.blend_color_hspan_alpha(x, y, len, colors, alpha,
+                                  (span->len < 0) ? 0 : covers, *covers);
+
+            if(--num_spans == 0) break;
+            ++span;
+        }
+    }
+
+
+    //=====================================================render_scanlines_aa
+    template<class Rasterizer, class Scanline, class BaseRenderer,
+             class SpanAllocator, class SpanGenerator>
+    void render_scanlines_aa(Rasterizer& ras, Scanline& sl, BaseRenderer& ren,
                              SpanAllocator& alloc, SpanGenerator& span_gen)
     {
         if(ras.rewind_scanlines())
@@ -192,7 +182,7 @@ namespace agg
     }
 
     //====================================================renderer_scanline_aa
-    template<class BaseRenderer, class SpanAllocator, class SpanGenerator> 
+    template<class BaseRenderer, class SpanAllocator, class SpanGenerator>
     class renderer_scanline_aa
     {
     public:
@@ -202,22 +192,22 @@ namespace agg
 
         //--------------------------------------------------------------------
         renderer_scanline_aa() : m_ren(0), m_alloc(0), m_span_gen(0) {}
-        renderer_scanline_aa(base_ren_type& ren, 
-                             alloc_type& alloc, 
+        renderer_scanline_aa(base_ren_type& ren,
+                             alloc_type& alloc,
                              span_gen_type& span_gen) :
             m_ren(&ren),
             m_alloc(&alloc),
             m_span_gen(&span_gen)
         {}
-        void attach(base_ren_type& ren, 
-                    alloc_type& alloc, 
+        void attach(base_ren_type& ren,
+                    alloc_type& alloc,
                     span_gen_type& span_gen)
         {
             m_ren = &ren;
             m_alloc = &alloc;
             m_span_gen = &span_gen;
         }
-        
+
         //--------------------------------------------------------------------
         void prepare() { m_span_gen->prepare(); }
 
@@ -234,26 +224,68 @@ namespace agg
     };
 
 
+//====================================================renderer_scanline_aa
+    template<class BaseRenderer, class SpanAllocator, class SpanGenerator>
+    class renderer_scanline_aa_alpha
+    {
+    public:
+        typedef BaseRenderer  base_ren_type;
+        typedef SpanAllocator alloc_type;
+        typedef SpanGenerator span_gen_type;
 
+        //--------------------------------------------------------------------
+        renderer_scanline_aa_alpha() : m_ren(0), m_alloc(0), m_span_gen(0), m_alpha(1.0) {}
+        renderer_scanline_aa_alpha(base_ren_type& ren,
+                             alloc_type& alloc,
+                             span_gen_type& span_gen,
+                             unsigned alpha) :
+            m_ren(&ren),
+            m_alloc(&alloc),
+            m_span_gen(&span_gen),
+            m_alpha(alpha)
+        {}
+        void attach(base_ren_type& ren,
+                    alloc_type& alloc,
+                    span_gen_type& span_gen)
+        {
+            m_ren = &ren;
+            m_alloc = &alloc;
+            m_span_gen = &span_gen;
+        }
 
+        //--------------------------------------------------------------------
+        void prepare() { m_span_gen->prepare(); }
+
+        //--------------------------------------------------------------------
+        template<class Scanline> void render(const Scanline& sl)
+        {
+            render_scanline_aa_alpha(sl, *m_ren, *m_alloc, *m_span_gen, m_alpha);
+        }
+
+    private:
+        base_ren_type* m_ren;
+        alloc_type*    m_alloc;
+        span_gen_type* m_span_gen;
+        unsigned m_alpha;
+    };
 
 
     //===============================================render_scanline_bin_solid
-    template<class Scanline, class BaseRenderer, class ColorT> 
-    void render_scanline_bin_solid(const Scanline& sl, 
-                                   BaseRenderer& ren, 
+    template<class Scanline, class BaseRenderer, class ColorT>
+    void render_scanline_bin_solid(const Scanline& sl,
+                                   BaseRenderer& ren,
                                    const ColorT& color)
     {
         unsigned num_spans = sl.num_spans();
         typename Scanline::const_iterator span = sl.begin();
         for(;;)
         {
-            ren.blend_hline(span->x, 
-                            sl.y(), 
-                            span->x - 1 + ((span->len < 0) ? 
-                                              -span->len : 
-                                               span->len), 
-                               color, 
+            ren.blend_hline(span->x,
+                            sl.y(),
+                            span->x - 1 + ((span->len < 0) ?
+                                              -span->len :
+                                               span->len),
+                               color,
                                cover_full);
             if(--num_spans == 0) break;
             ++span;
@@ -261,16 +293,16 @@ namespace agg
     }
 
     //==============================================render_scanlines_bin_solid
-    template<class Rasterizer, class Scanline, 
+    template<class Rasterizer, class Scanline,
              class BaseRenderer, class ColorT>
-    void render_scanlines_bin_solid(Rasterizer& ras, Scanline& sl, 
+    void render_scanlines_bin_solid(Rasterizer& ras, Scanline& sl,
                                     BaseRenderer& ren, const ColorT& color)
     {
         if(ras.rewind_scanlines())
         {
             // Explicitly convert "color" to the BaseRenderer color type.
             // For example, it can be called with color type "rgba", while
-            // "rgba8" is needed. Otherwise it will be implicitly 
+            // "rgba8" is needed. Otherwise it will be implicitly
             // converted in the loop many times.
             //----------------------
             typename BaseRenderer::color_type ren_color(color);
@@ -280,7 +312,7 @@ namespace agg
             {
                 //render_scanline_bin_solid(sl, ren, ren_color);
 
-                // This code is equivalent to the above call (copy/paste). 
+                // This code is equivalent to the above call (copy/paste).
                 // It's just a "manual" optimization for old compilers,
                 // like Microsoft Visual C++ v6.0
                 //-------------------------------
@@ -288,12 +320,12 @@ namespace agg
                 typename Scanline::const_iterator span = sl.begin();
                 for(;;)
                 {
-                    ren.blend_hline(span->x, 
-                                    sl.y(), 
-                                    span->x - 1 + ((span->len < 0) ? 
-                                                      -span->len : 
-                                                       span->len), 
-                                       ren_color, 
+                    ren.blend_hline(span->x,
+                                    sl.y(),
+                                    span->x - 1 + ((span->len < 0) ?
+                                                      -span->len :
+                                                       span->len),
+                                       ren_color,
                                        cover_full);
                     if(--num_spans == 0) break;
                     ++span;
@@ -316,7 +348,7 @@ namespace agg
         {
             m_ren = &ren;
         }
-        
+
         //--------------------------------------------------------------------
         void color(const color_type& c) { m_color = c; }
         const color_type& color() const { return m_color; }
@@ -329,7 +361,7 @@ namespace agg
         {
             render_scanline_bin_solid(sl, *m_ren, m_color);
         }
-        
+
     private:
         base_ren_type* m_ren;
         color_type m_color;
@@ -343,9 +375,9 @@ namespace agg
 
 
     //======================================================render_scanline_bin
-    template<class Scanline, class BaseRenderer, 
-             class SpanAllocator, class SpanGenerator> 
-    void render_scanline_bin(const Scanline& sl, BaseRenderer& ren, 
+    template<class Scanline, class BaseRenderer,
+             class SpanAllocator, class SpanGenerator>
+    void render_scanline_bin(const Scanline& sl, BaseRenderer& ren,
                              SpanAllocator& alloc, SpanGenerator& span_gen)
     {
         int y = sl.y();
@@ -359,16 +391,16 @@ namespace agg
             if(len < 0) len = -len;
             typename BaseRenderer::color_type* colors = alloc.allocate(len);
             span_gen.generate(colors, x, y, len);
-            ren.blend_color_hspan(x, y, len, colors, 0, cover_full); 
+            ren.blend_color_hspan(x, y, len, colors, 0, cover_full);
             if(--num_spans == 0) break;
             ++span;
         }
     }
 
     //=====================================================render_scanlines_bin
-    template<class Rasterizer, class Scanline, class BaseRenderer, 
+    template<class Rasterizer, class Scanline, class BaseRenderer,
              class SpanAllocator, class SpanGenerator>
-    void render_scanlines_bin(Rasterizer& ras, Scanline& sl, BaseRenderer& ren, 
+    void render_scanlines_bin(Rasterizer& ras, Scanline& sl, BaseRenderer& ren,
                               SpanAllocator& alloc, SpanGenerator& span_gen)
     {
         if(ras.rewind_scanlines())
@@ -383,7 +415,7 @@ namespace agg
     }
 
     //====================================================renderer_scanline_bin
-    template<class BaseRenderer, class SpanAllocator, class SpanGenerator> 
+    template<class BaseRenderer, class SpanAllocator, class SpanGenerator>
     class renderer_scanline_bin
     {
     public:
@@ -393,22 +425,22 @@ namespace agg
 
         //--------------------------------------------------------------------
         renderer_scanline_bin() : m_ren(0), m_alloc(0), m_span_gen(0) {}
-        renderer_scanline_bin(base_ren_type& ren, 
-                              alloc_type& alloc, 
+        renderer_scanline_bin(base_ren_type& ren,
+                              alloc_type& alloc,
                               span_gen_type& span_gen) :
             m_ren(&ren),
             m_alloc(&alloc),
             m_span_gen(&span_gen)
         {}
-        void attach(base_ren_type& ren, 
-                    alloc_type& alloc, 
+        void attach(base_ren_type& ren,
+                    alloc_type& alloc,
                     span_gen_type& span_gen)
         {
             m_ren = &ren;
             m_alloc = &alloc;
             m_span_gen = &span_gen;
         }
-        
+
         //--------------------------------------------------------------------
         void prepare() { m_span_gen->prepare(); }
 
@@ -423,14 +455,6 @@ namespace agg
         alloc_type*    m_alloc;
         span_gen_type* m_span_gen;
     };
-
-
-
-
-
-
-
-
 
 
     //========================================================render_scanlines
@@ -448,14 +472,15 @@ namespace agg
         }
     }
 
+
     //========================================================render_all_paths
-    template<class Rasterizer, class Scanline, class Renderer, 
+    template<class Rasterizer, class Scanline, class Renderer,
              class VertexSource, class ColorStorage, class PathId>
-    void render_all_paths(Rasterizer& ras, 
+    void render_all_paths(Rasterizer& ras,
                           Scanline& sl,
-                          Renderer& r, 
-                          VertexSource& vs, 
-                          const ColorStorage& as, 
+                          Renderer& r,
+                          VertexSource& vs,
+                          const ColorStorage& as,
                           const PathId& path_id,
                           unsigned num_paths)
     {
@@ -474,13 +499,13 @@ namespace agg
 
 
     //=============================================render_scanlines_compound
-    template<class Rasterizer, 
-             class ScanlineAA, 
-             class ScanlineBin, 
-             class BaseRenderer, 
+    template<class Rasterizer,
+             class ScanlineAA,
+             class ScanlineBin,
+             class BaseRenderer,
              class SpanAllocator,
              class StyleHandler>
-    void render_scanlines_compound(Rasterizer& ras, 
+    void render_scanlines_compound(Rasterizer& ras,
                                    ScanlineAA& sl_aa,
                                    ScanlineBin& sl_bin,
                                    BaseRenderer& ren,
@@ -527,14 +552,14 @@ namespace agg
                             for(;;)
                             {
                                 len = span_aa->len;
-                                sh.generate_span(color_span, 
-                                                 span_aa->x, 
-                                                 sl_aa.y(), 
-                                                 len, 
+                                sh.generate_span(color_span,
+                                                 span_aa->x,
+                                                 sl_aa.y(),
+                                                 len,
                                                  style);
 
-                                ren.blend_color_hspan(span_aa->x, 
-                                                      sl_aa.y(), 
+                                ren.blend_color_hspan(span_aa->x,
+                                                      sl_aa.y(),
                                                       span_aa->len,
                                                       color_span,
                                                       span_aa->covers);
@@ -554,8 +579,8 @@ namespace agg
                         num_spans = sl_bin.num_spans();
                         for(;;)
                         {
-                            memset(mix_buffer + span_bin->x - min_x, 
-                                   0, 
+                            memset(mix_buffer + span_bin->x - min_x,
+                                   0,
                                    span_bin->len * sizeof(color_type));
 
                             if(--num_spans == 0) break;
@@ -587,7 +612,7 @@ namespace agg
                                         covers = span_aa->covers;
                                         do
                                         {
-                                            if(*covers == cover_full) 
+                                            if(*covers == cover_full)
                                             {
                                                 *colors = c;
                                             }
@@ -612,15 +637,15 @@ namespace agg
                                         len = span_aa->len;
                                         colors = mix_buffer + span_aa->x - min_x;
                                         cspan  = color_span;
-                                        sh.generate_span(cspan, 
-                                                         span_aa->x, 
-                                                         sl_aa.y(), 
-                                                         len, 
+                                        sh.generate_span(cspan,
+                                                         span_aa->x,
+                                                         sl_aa.y(),
+                                                         len,
                                                          style);
                                         covers = span_aa->covers;
                                         do
                                         {
-                                            if(*covers == cover_full) 
+                                            if(*covers == cover_full)
                                             {
                                                 *colors = *cspan;
                                             }
@@ -646,8 +671,8 @@ namespace agg
                         num_spans = sl_bin.num_spans();
                         for(;;)
                         {
-                            ren.blend_color_hspan(span_bin->x, 
-                                                  sl_bin.y(), 
+                            ren.blend_color_hspan(span_bin->x,
+                                                  sl_bin.y(),
                                                   span_bin->len,
                                                   mix_buffer + span_bin->x - min_x,
                                                   0,
@@ -662,12 +687,12 @@ namespace agg
     }
 
     //=======================================render_scanlines_compound_layered
-    template<class Rasterizer, 
-             class ScanlineAA, 
-             class BaseRenderer, 
+    template<class Rasterizer,
+             class ScanlineAA,
+             class BaseRenderer,
              class SpanAllocator,
              class StyleHandler>
-    void render_scanlines_compound_layered(Rasterizer& ras, 
+    void render_scanlines_compound_layered(Rasterizer& ras,
                                            ScanlineAA& sl_aa,
                                            BaseRenderer& ren,
                                            SpanAllocator& alloc,
@@ -713,14 +738,14 @@ namespace agg
                             for(;;)
                             {
                                 len = span_aa->len;
-                                sh.generate_span(color_span, 
-                                                 span_aa->x, 
-                                                 sl_aa.y(), 
-                                                 len, 
+                                sh.generate_span(color_span,
+                                                 span_aa->x,
+                                                 sl_aa.y(),
+                                                 len,
                                                  style);
 
-                                ren.blend_color_hspan(span_aa->x, 
-                                                      sl_aa.y(), 
+                                ren.blend_color_hspan(span_aa->x,
+                                                      sl_aa.y(),
                                                       span_aa->len,
                                                       color_span,
                                                       span_aa->covers);
@@ -737,12 +762,12 @@ namespace agg
 
                     if(sl_len)
                     {
-                        memset(mix_buffer + sl_start - min_x, 
-                               0, 
+                        memset(mix_buffer + sl_start - min_x,
+                               0,
                                sl_len * sizeof(color_type));
 
-                        memset(cover_buffer + sl_start - min_x, 
-                               0, 
+                        memset(cover_buffer + sl_start - min_x,
+                               0,
                                sl_len * sizeof(cover_type));
 
                         int sl_y = 0x7FFFFFFF;
@@ -803,10 +828,10 @@ namespace agg
                                         len = span_aa->len;
                                         colors = mix_buffer + span_aa->x - min_x;
                                         cspan  = color_span;
-                                        sh.generate_span(cspan, 
-                                                         span_aa->x, 
-                                                         sl_aa.y(), 
-                                                         len, 
+                                        sh.generate_span(cspan,
+                                                         span_aa->x,
+                                                         sl_aa.y(),
+                                                         len,
                                                          style);
                                         src_covers = span_aa->covers;
                                         dst_covers = cover_buffer + span_aa->x - min_x;
@@ -834,8 +859,8 @@ namespace agg
                                 }
                             }
                         }
-                        ren.blend_color_hspan(sl_start, 
-                                              sl_y, 
+                        ren.blend_color_hspan(sl_start,
+                                              sl_y,
                                               sl_len,
                                               mix_buffer + sl_start - min_x,
                                               0,

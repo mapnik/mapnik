@@ -1,31 +1,60 @@
+UNAME := $(shell uname)
+LINK_FIX=LD_LIBRARY_PATH
+ifeq ($(UNAME), Darwin)
+	LINK_FIX=DYLD_LIBRARY_PATH
+else
+endif
+
 all: mapnik
 
 install:
-	python scons/scons.py install
+	@python scons/scons.py --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	python scons/scons.py
+	@python scons/scons.py --config=cache --implicit-cache --max-drift=1
 
 clean:
-	python scons/scons.py -c
+	@python scons/scons.py -c --config=cache --implicit-cache --max-drift=1
+	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
+	@if test -e "config.log"; then rm  "config.log"; fi
+	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
+	@find ./ -name "*.os" -exec rm {} \;
+	@find ./ -name "*.o" -exec rm {} \;
+	@find ./ -name "*.pyc" -exec rm {} \;
+	@rm bindings/python/mapnik/paths.py
 
-reset:
-	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
-	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
-	if test -e "config.cache"; then rm "config.cache"; fi
+distclean:
+	@if test -e "config.cache"; then rm "config.cache"; fi
+	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
+
+reset: distclean
+
+rebuild:
+	make uninstall && make clean && time make && make install
 
 uninstall:
-	python scons/scons.py uninstall
+	@python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	@echo "*** Running visual tests…"
-	@python tests/visual_tests/test.py -q
-	@echo "*** Running C++ tests..."
-	@for FILE in tests/cpp_tests/*-bin; do \
-		$${FILE}; \
-	done
-	@echo "*** Running python tests..."
-	@python tests/run_tests.py -q
+	@ ./run_tests
+
+test-local:
+	@echo "*** Boostrapping local test environment..."
+	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	export PYTHONPATH=`pwd`/bindings/python/:${PYTHONPATH} && \
+	export MAPNIK_FONT_DIRECTORY=`pwd`/fonts/dejavu-fonts-ttf-2.33/ttf/ && \
+	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \
+	make test
+
+bench:
+	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	./benchmark/run
+
+check: test-local
+
+demo:
+	@echo "*** Running rundemo.cpp…"
+	cd demo/c++; ./rundemo `mapnik-config --prefix`/lib/mapnik
 
 pep8:
 	# https://gist.github.com/1903033
@@ -38,4 +67,9 @@ grind:
 		valgrind --leak-check=full --log-fd=1 $${FILE} | grep definitely; \
 	done
 
-.PHONY: clean reset uninstall test install
+render:
+	@for FILE in tests/data/good_maps/*xml; do \
+		nik2img.py $${FILE} /tmp/$$(basename $${FILE}).png; \
+	done
+
+.PHONY: install mapnik clean distclean reset uninstall test demo pep8 grind render

@@ -25,30 +25,20 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/config_error.hpp>
 
+// agg
+#include "agg_color_rgba.h"
+
 // boost
 #include <boost/format.hpp>
-#include <boost/version.hpp>
 
 // stl
 #include <sstream>
 
-// boost 1.41 -> 1.44 compatibility, to be removed in mapnik 2.1 (dane)
-#if BOOST_VERSION >= 104500
-#include <mapnik/css_color_grammar.hpp>
-#else
-#include <mapnik/css_color_grammar_deprecated.hpp>
-#endif
-
-
 namespace mapnik {
 
-color::color( std::string const& css_string)
-    : red_(0),
-      green_(0),
-      blue_(0),
-      alpha_(0xff)
+color::color(std::string const& str)
 {
-    color_factory::init_from_string(*this,css_string);
+    *this = parse_color(str);
 }
 
 std::string color::to_string() const
@@ -57,17 +47,17 @@ std::string color::to_string() const
     if (alpha_ == 255)
     {
         ss << "rgb("
-           << red()   << ","
-           << green() << ","
-           << blue()  << ")";
+           << static_cast<unsigned>(red())   << ","
+           << static_cast<unsigned>(green()) << ","
+           << static_cast<unsigned>(blue())  << ")";
     }
     else
     {
         ss << "rgba("
-           << red()   << ","
-           << green() << ","
-           << blue()  << ","
-           << alpha()/255.0 << ")";
+           << static_cast<unsigned>(red())   << ","
+           << static_cast<unsigned>(green()) << ","
+           << static_cast<unsigned>(blue()) << ","
+           << alpha() / 255.0 << ")";
     }
     return ss.str();
 }
@@ -77,104 +67,37 @@ std::string color::to_hex_string() const
     if (alpha_ == 255 )
     {
         return (boost::format("#%1$02x%2$02x%3$02x")
-                % red()
-                % green()
-                % blue() ).str();
+                % static_cast<unsigned>(red())
+                % static_cast<unsigned>(green())
+                % static_cast<unsigned>(blue())).str();
     }
     else
     {
         return (boost::format("#%1$02x%2$02x%3$02x%4$02x")
-                % red()
-                % green()
-                % blue()
-                % alpha()).str();
+                % static_cast<unsigned>(red())
+                % static_cast<unsigned>(green())
+                % static_cast<unsigned>(blue())
+                % static_cast<unsigned>(alpha())).str();
     }
 }
 
-
-/****************************************************************************/
-void color_factory::init_from_string(color & c, std::string const& css_color)
+void color::premultiply()
 {
-    typedef std::string::const_iterator iterator_type;
-    typedef mapnik::css_color_grammar<iterator_type> css_color_grammar;
-
-    css_color_grammar g;
-    iterator_type first = css_color.begin();
-    iterator_type last =  css_color.end();
-    // boost 1.41 -> 1.44 compatibility, to be removed in mapnik 2.1 (dane)
-#if BOOST_VERSION >= 104500
-    bool result =
-        boost::spirit::qi::phrase_parse(first,
-                                        last,
-                                        g,
-                                        boost::spirit::ascii::space,
-                                        c);
-    if (!result)
-    {
-        throw config_error(std::string("Failed to parse color value: ") +
-                           "Expected a CSS color, but got '" + css_color + "'");
-    }
-#else
-    mapnik::css css_;
-    bool result =
-        boost::spirit::qi::phrase_parse(first,
-                                        last,
-                                        g,
-                                        boost::spirit::ascii::space,
-                                        css_);
-    if (!result)
-    {
-        throw config_error(std::string("Failed to parse color value: ") +
-                           "Expected a CSS color, but got '" + css_color + "'");
-    }
-    c.set_red(css_.r);
-    c.set_green(css_.g);
-    c.set_blue(css_.b);
-    c.set_alpha(css_.a);
-#endif
+    agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
+    pre_c.premultiply();
+    red_ = pre_c.r;
+    green_ = pre_c.g;
+    blue_ = pre_c.b;
 }
 
-bool color_factory::parse_from_string(color & c, std::string const& css_color,
-                                      mapnik::css_color_grammar<std::string::const_iterator> const& g)
+void color::demultiply()
 {
-    std::string::const_iterator first = css_color.begin();
-    std::string::const_iterator last =  css_color.end();
-    // boost 1.41 -> 1.44 compatibility, to be removed in mapnik 2.1 (dane)
-#if BOOST_VERSION >= 104500
-    bool result =
-        boost::spirit::qi::phrase_parse(first,
-                                        last,
-                                        g,
-                                        boost::spirit::ascii::space,
-                                        c);
-    return result && (first == last);
-#else
-    mapnik::css css_;
-    bool result =
-        boost::spirit::qi::phrase_parse(first,
-                                        last,
-                                        g,
-                                        boost::spirit::ascii::space,
-                                        css_);
-    if (result && (first == last))
-    {
-        c.set_red(css_.r);
-        c.set_green(css_.g);
-        c.set_blue(css_.b);
-        c.set_alpha(css_.a);
-        return true;
-    }
-    return false;
-#endif
-}
-
-
-color color_factory::from_string(std::string const& css_color)
-{
-    color c;
-    init_from_string(c, css_color);
-    return c;
+    // note: this darkens too much: https://github.com/mapnik/mapnik/issues/1519
+    agg::rgba8 pre_c = agg::rgba8(red_,green_,blue_,alpha_);
+    pre_c.demultiply();
+    red_ = pre_c.r;
+    green_ = pre_c.g;
+    blue_ = pre_c.b;
 }
 
 }
-

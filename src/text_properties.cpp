@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 // mapnik
+#include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/ptree_helpers.hpp>
@@ -30,6 +32,7 @@
 
 // boost
 #include <boost/make_shared.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik
 {
@@ -51,6 +54,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
     max_char_angle_delta(22.5 * M_PI/180.0),
     force_odd_labels(false),
     allow_overlap(false),
+    largest_bbox_only(true),
     text_ratio(0),
     wrap_width(0),
     format(),
@@ -59,7 +63,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
 
 }
 
-void text_symbolizer_properties::process(processed_text &output, Feature const& feature) const
+void text_symbolizer_properties::process(processed_text &output, feature_impl const& feature) const
 {
     output.clear();
     if (tree_) {
@@ -85,31 +89,37 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (placement_) label_placement = *placement_;
     optional<vertical_alignment_e> valign_ = sym.get_opt_attr<vertical_alignment_e>("vertical-alignment");
     if (valign_) valign = *valign_;
-    optional<unsigned> text_ratio_ = sym.get_opt_attr<unsigned>("text-ratio");
+    optional<double> text_ratio_ = sym.get_opt_attr<double>("text-ratio");
     if (text_ratio_) text_ratio = *text_ratio_;
-    optional<unsigned> wrap_width_ = sym.get_opt_attr<unsigned>("wrap-width");
+    optional<double> wrap_width_ = sym.get_opt_attr<double>("wrap-width");
     if (wrap_width_) wrap_width = *wrap_width_;
     optional<unsigned> label_position_tolerance_ = sym.get_opt_attr<unsigned>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
-    optional<unsigned> spacing_ = sym.get_opt_attr<unsigned>("spacing");
+    optional<double> spacing_ = sym.get_opt_attr<double>("spacing");
     if (spacing_) label_spacing = *spacing_;
-    optional<unsigned> minimum_distance_ = sym.get_opt_attr<unsigned>("minimum-distance");
+    else {
+        // https://github.com/mapnik/mapnik/issues/1427
+        spacing_ = sym.get_opt_attr<double>("label-spacing");
+        if (spacing_) label_spacing = *spacing_;
+    }
+    optional<double> minimum_distance_ = sym.get_opt_attr<double>("minimum-distance");
     if (minimum_distance_) minimum_distance = *minimum_distance_;
-    optional<unsigned> min_padding_ = sym.get_opt_attr<unsigned>("minimum-padding");
+    optional<double> min_padding_ = sym.get_opt_attr<double>("minimum-padding");
     if (min_padding_) minimum_padding = *min_padding_;
-    optional<unsigned> min_path_length_ = sym.get_opt_attr<unsigned>("minimum-path-length");
+    optional<double> min_path_length_ = sym.get_opt_attr<double>("minimum-path-length");
     if (min_path_length_) minimum_path_length = *min_path_length_;
     optional<boolean> avoid_edges_ = sym.get_opt_attr<boolean>("avoid-edges");
     if (avoid_edges_) avoid_edges = *avoid_edges_;
     optional<boolean> allow_overlap_ = sym.get_opt_attr<boolean>("allow-overlap");
     if (allow_overlap_) allow_overlap = *allow_overlap_;
+    optional<boolean> largest_bbox_only_ = sym.get_opt_attr<boolean>("largest-bbox-only");
+    if (largest_bbox_only_) largest_bbox_only = *largest_bbox_only_;
     optional<horizontal_alignment_e> halign_ = sym.get_opt_attr<horizontal_alignment_e>("horizontal-alignment");
     if (halign_) halign = *halign_;
     optional<justify_alignment_e> jalign_ = sym.get_opt_attr<justify_alignment_e>("justify-alignment");
     if (jalign_) jalign = *jalign_;
-    /* Attributes needing special care */
-    optional<std::string> orientation_ = sym.get_opt_attr<std::string>("orientation");
-    if (orientation_) orientation = parse_expression(*orientation_, "utf8");
+    optional<expression_ptr> orientation_ = sym.get_opt_attr<expression_ptr>("orientation");
+    if (orientation_) orientation = *orientation_;
     optional<double> dx = sym.get_opt_attr<double>("dx");
     if (dx) displacement.first = *dx;
     optional<double> dy = sym.get_opt_attr<double>("dy");
@@ -117,12 +127,12 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     optional<double> max_char_angle_delta_ = sym.get_opt_attr<double>("max-char-angle-delta");
     if (max_char_angle_delta_) max_char_angle_delta=(*max_char_angle_delta_)*(M_PI/180);
 
-    optional<std::string> name_ = sym.get_opt_attr<std::string>("name");
+    optional<expression_ptr> name_ = sym.get_opt_attr<expression_ptr>("name");
     if (name_)
     {
         MAPNIK_LOG_WARN(text_placements) << "Using 'name' in TextSymbolizer/ShieldSymbolizer is deprecated!";
 
-        set_old_style_expression(parse_expression(*name_, "utf8"));
+        set_old_style_expression(*name_);
     }
 
     format.from_xml(sym, fontsets);
@@ -193,6 +203,10 @@ void text_symbolizer_properties::to_xml(boost::property_tree::ptree &node,
     if (avoid_edges != dfl.avoid_edges || explicit_defaults)
     {
         set_attr(node, "avoid-edges", avoid_edges);
+    }
+    if (largest_bbox_only != dfl.largest_bbox_only|| explicit_defaults)
+    {
+        set_attr(node, "largest-bbox_only", largest_bbox_only);
     }
     if (max_char_angle_delta != dfl.max_char_angle_delta || explicit_defaults)
     {
@@ -282,11 +296,11 @@ void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
             throw config_error("Unable to find any fontset named '" + *fontset_name_ + "'", sym);
         }
     }
-    if (!face_name.empty() && !fontset.get_name().empty())
+    if (!face_name.empty() && fontset)
     {
         throw config_error("Can't have both face-name and fontset-name", sym);
     }
-    if (face_name.empty() && fontset.get_name().empty())
+    if (face_name.empty() && !fontset)
     {
         throw config_error("Must have face-name or fontset-name", sym);
     }
@@ -294,11 +308,9 @@ void char_properties::from_xml(xml_node const& sym, fontset_map const& fontsets)
 
 void char_properties::to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const &dfl) const
 {
-    std::string const& fontset_name = fontset.get_name();
-    std::string const& dfl_fontset_name = dfl.fontset.get_name();
-    if (fontset_name != dfl_fontset_name || explicit_defaults)
+    if (fontset)
     {
-        set_attr(node, "fontset-name", fontset_name);
+        set_attr(node, "fontset-name", fontset->get_name());
     }
 
     if (face_name != dfl.face_name || explicit_defaults)

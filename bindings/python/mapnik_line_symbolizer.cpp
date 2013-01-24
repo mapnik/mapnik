@@ -29,38 +29,41 @@ using mapnik::line_symbolizer;
 using mapnik::stroke;
 using mapnik::color;
 
-struct line_symbolizer_pickle_suite : boost::python::pickle_suite
-{
-    static boost::python::tuple
-    getinitargs(const line_symbolizer& l)
-    {
-        return boost::python::make_tuple(l.get_stroke());
-    }
-
-};
-
 void export_line_symbolizer()
 {
     using namespace boost::python;
-
     enumeration_<line_rasterizer_e>("line_rasterizer")
         .value("FULL",RASTERIZER_FULL)
         .value("FAST",RASTERIZER_FAST)
         ;
-
     class_<line_symbolizer>("LineSymbolizer",
                             init<>("Default LineSymbolizer - 1px solid black"))
         .def(init<stroke const&>("TODO"))
         .def(init<color const& ,float>())
-        .def_pickle(line_symbolizer_pickle_suite())
         .add_property("rasterizer",
                       &line_symbolizer::get_rasterizer,
                       &line_symbolizer::set_rasterizer,
                       "Set/get the rasterization method of the line of the point")
         .add_property("stroke",make_function
                       (&line_symbolizer::get_stroke,
-                       return_value_policy<copy_const_reference>()),
+                       return_value_policy<reference_existing_object>()),
                       &line_symbolizer::set_stroke)
+        .add_property("simplify_tolerance",
+                      &line_symbolizer::simplify_tolerance,
+                      &line_symbolizer::set_simplify_tolerance,
+                      "simplification tolerance measure")
+        .add_property("offset",
+                      &line_symbolizer::offset,
+                      &line_symbolizer::set_offset,
+                      "offset value")
+        .add_property("comp_op",
+                      &line_symbolizer::comp_op,
+                      &line_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &line_symbolizer::clip,
+                      &line_symbolizer::set_clip,
+                      "Set/get the line geometry's clipping status")
         .add_property("smooth",
                       &line_symbolizer::smooth,
                       &line_symbolizer::set_smooth,

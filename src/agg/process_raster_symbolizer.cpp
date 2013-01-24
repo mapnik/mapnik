@@ -21,7 +21,13 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
+#include <mapnik/image_scaling.hpp>
+#include <mapnik/image_compositing.hpp>
+#include <mapnik/graphics.hpp>
+#include <mapnik/raster_symbolizer.hpp>
+#include <mapnik/raster_colorizer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_util.hpp>
@@ -33,84 +39,97 @@
 // stl
 #include <cmath>
 
+// agg
+#include "agg_rendering_buffer.h"
+#include "agg_pixfmt_rgba.h"
+
 
 namespace mapnik {
 
 
 template <typename T>
 void agg_renderer<T>::process(raster_symbolizer const& sym,
-                              mapnik::feature_ptr const& feature,
+                              mapnik::feature_impl & feature,
                               proj_transform const& prj_trans)
 {
-    raster_ptr const& source=feature->get_raster();
+    raster_ptr const& source = feature.get_raster();
     if (source)
     {
         // If there's a colorizer defined, use it to color the raster in-place
         raster_colorizer_ptr colorizer = sym.get_colorizer();
         if (colorizer)
-            colorizer->colorize(source,*feature);
+            colorizer->colorize(source,feature);
 
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
-
-        box2d<double> ext=t_.forward(target_ext);
-        int start_x = (int)ext.minx();
-        int start_y = (int)ext.miny();
-        int end_x = (int)ceil(ext.maxx());
-        int end_y = (int)ceil(ext.maxy());
+        box2d<double> ext = t_.forward(target_ext);
+        int start_x = static_cast<int>(ext.minx());
+        int start_y = static_cast<int>(ext.miny());
+        int end_x = static_cast<int>(std::ceil(ext.maxx()));
+        int end_y = static_cast<int>(std::ceil(ext.maxy()));
         int raster_width = end_x - start_x;
         int raster_height = end_y - start_y;
-        double err_offs_x = ext.minx() - start_x;
-        double err_offs_y = ext.miny() - start_y;
-
         if (raster_width > 0 && raster_height > 0)
         {
-            double scale_factor = ext.width() / source->data_.width();
-            image_data_32 target_data(raster_width,raster_height);
-            raster target(target_ext, target_data);
-
-            reproject_raster(target, *source, prj_trans, err_offs_x, err_offs_y,
-                             sym.get_mesh_size(),
-                             sym.calculate_filter_factor(),
-                             scale_factor,
-                             sym.get_scaling());
-
-            if (sym.get_mode() == "normal"){
-                if (sym.get_opacity() == 1.0) {
-                    pixmap_.set_rectangle_alpha(start_x,start_y,target.data_);
-                } else {
-                    pixmap_.set_rectangle_alpha2(target.data_,start_x,start_y, sym.get_opacity());
+            raster target(target_ext, raster_width,raster_height);
+            scaling_method_e scaling_method = sym.get_scaling_method();
+            double filter_radius = sym.calculate_filter_factor();
+            bool premultiply_source = !source->premultiplied_alpha_;
+            boost::optional<bool> is_premultiplied = sym.premultiplied();
+            if (is_premultiplied)
+            {
+                if (*is_premultiplied) premultiply_source = false;
+                else premultiply_source = true;
+            }
+            if (premultiply_source)
+            {
+                agg::rendering_buffer buffer(source->data_.getBytes(),
+                                             source->data_.width(),
+                                             source->data_.height(),
+                                             source->data_.width() * 4);
+                agg::pixfmt_rgba32 pixf(buffer);
+                pixf.premultiply();
+            }
+            if (!prj_trans.equal())
+            {
+                double offset_x = ext.minx() - start_x;
+                double offset_y = ext.miny() - start_y;
+                reproject_and_scale_raster(target, *source, prj_trans,
+                                 offset_x, offset_y,
+                                 sym.get_mesh_size(),
+                                 filter_radius,
+                                 scaling_method);
+            }
+            else
+            {
+                if (scaling_method == SCALING_BILINEAR8)
+                {
+                    scale_image_bilinear8<image_data_32>(target.data_,
+                                                         source->data_,
+                                                         0.0,
+                                                         0.0);
                 }
-            } else if (sym.get_mode() == "grain_merge"){
-                pixmap_.template merge_rectangle<MergeGrain> (target.data_,start_x,start_y, sym.get_opacity());
-            } else if (sym.get_mode() == "grain_merge2"){
-                pixmap_.template merge_rectangle<MergeGrain2> (target.data_,start_x,start_y, sym.get_opacity());
-            } else if (sym.get_mode() == "multiply"){
-                pixmap_.template merge_rectangle<Multiply> (target.data_,start_x,start_y, sym.get_opacity());
-            } else if (sym.get_mode() == "multiply2"){
-                pixmap_.template merge_rectangle<Multiply2> (target.data_,start_x,start_y, sym.get_opacity());
-            } else if (sym.get_mode() == "divide"){
-                pixmap_.template merge_rectangle<Divide> (target.data_,start_x,start_y, sym.get_opacity());
-            } else if (sym.get_mode() == "divide2"){
-                pixmap_.template merge_rectangle<Divide2> (target.data_,start_x,start_y, sym.get_opacity());
-            } else if (sym.get_mode() == "screen"){
-                pixmap_.template merge_rectangle<Screen> (target.data_,start_x,start_y, sym.get_opacity());
-            } else if (sym.get_mode() == "hard_light"){
-                pixmap_.template merge_rectangle<HardLight> (target.data_,start_x,start_y, sym.get_opacity());
-            } else {
-                if (sym.get_opacity() == 1.0){
-                    pixmap_.set_rectangle(start_x,start_y,target.data_);
-                } else {
-                    pixmap_.set_rectangle_alpha2(target.data_,start_x,start_y, sym.get_opacity());
+                else
+                {
+                    double scaling_ratio = ext.width() / source->data_.width();
+                    scale_image_agg<image_data_32>(target.data_,
+                                                   source->data_,
+                                                   scaling_method,
+                                                   scaling_ratio,
+                                                   0.0,
+                                                   0.0,
+                                                   filter_radius);
                 }
             }
-            // TODO: other modes? (add,diff,sub,...)
+            composite(current_buffer_->data(), target.data_,
+                      sym.comp_op(), sym.get_opacity(),
+                      start_x, start_y, false);
         }
     }
 }
 
 template void agg_renderer<image_32>::process(raster_symbolizer const&,
-                                              mapnik::feature_ptr const&,
+                                              mapnik::feature_impl &,
                                               proj_transform const&);
 
 }

@@ -20,6 +20,12 @@
  *
  *****************************************************************************/
 
+// TODO https://github.com/mapnik/mapnik/issues/1658
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 105200
+#define BOOST_SPIRIT_USE_PHOENIX_V3
+#endif
+
 // mapnik
 #include <mapnik/json/feature_collection_parser.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>
@@ -57,5 +63,6 @@ namespace mapnik { namespace json {
 
     template class feature_collection_parser<std::string::const_iterator> ;
     template class feature_collection_parser<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
-    }}
+
+}}
 

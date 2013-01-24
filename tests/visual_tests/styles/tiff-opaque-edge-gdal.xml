@@ -1,0 +1,19 @@
+<Map srs="+init=epsg:4326" background-color="white">
+
+<Style name="test">
+  <Rule>
+    <RasterSymbolizer scaling="bilinear" />
+  </Rule>
+</Style>
+
+<Layer name="test" srs="+init=epsg:4326">
+    <StyleName>test</StyleName>
+    <Datasource>
+       <!-- https://github.com/mapnik/mapnik/issues/1508 -->
+       <!-- note: this mis-reports it is premultiplied - it is not -->
+        <Parameter name="file">../../data/raster/river_wgs.tiff</Parameter>
+        <Parameter name="type">gdal</Parameter>
+    </Datasource>
+</Layer>
+
+</Map>

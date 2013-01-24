@@ -86,6 +86,9 @@ void (box2d<double>::*re_center_p2)(coord<double,2> const& ) = &box2d<double>::r
 // clip
 void (box2d<double>::*clip)(box2d<double> const&) = &box2d<double>::clip;
 
+// pad
+void (box2d<double>::*pad)(double) = &box2d<double>::pad;
+
 // deepcopy
 box2d<double> box2d_deepcopy(box2d<double> & obj, boost::python::dict memo)
 {
@@ -160,13 +163,20 @@ void export_envelope()
              "\n "
              "Example:\n"
              ">>> e = Box2d(0, 0, 100, 100)\n"
-             ">>> e.center(Coord60, 60)\n"
-             ">>> e.center()\n"
-             "Coord(60.0,60.0)\n"
-             ">>> (e.width(), e.height())\n"
-             "(100.0, 100.0)\n"
+             ">>> c = Box2d(-50, -50, 50, 50)\n"
+             ">>> e.clip(c)\n"
              ">>> e\n"
-             "Box2d(10.0, 10.0, 110.0, 110.0)\n"
+             "Box2d(0.0,0.0,50.0,50.0\n"
+            )
+        .def("pad", pad,
+             (arg("padding")),
+             "Pad the envelope based on a padding value.\n"
+             "\n "
+             "Example:\n"
+             ">>> e = Box2d(0, 0, 100, 100)\n"
+             ">>> e.pad(10)\n"
+             ">>> e\n"
+             "Box2d(-10.0,-10.0,110.0,110.0\n"
             )
         .def("width", width_p1,
              (arg("new_width")),

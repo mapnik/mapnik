@@ -23,21 +23,23 @@
 #ifndef MAPNIK_VALUE_ERROR_HPP
 #define MAPNIK_VALUE_ERROR_HPP
 
-#include <iostream>
-#include <sstream>
+#include <exception>
+#include <string>
 
 namespace mapnik {
 
 class value_error : public std::exception
 {
 public:
-    value_error() {}
+    value_error() :
+        what_() {}
 
     value_error( std::string const& what ) :
         what_( what )
     {
     }
-    virtual ~value_error() throw() {};
+
+    virtual ~value_error() throw() {}
 
     virtual const char * what() const throw()
     {

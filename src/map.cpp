@@ -20,11 +20,19 @@
  *
  *****************************************************************************/
 
-//mapnik
+// mapnik
+#include <mapnik/rule.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/font_set.hpp>
+#include <mapnik/enumeration.hpp>
+#include <mapnik/layer.hpp>
+#include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
+#include <mapnik/ctrans.hpp>
 #include <mapnik/filter_featureset.hpp>
 #include <mapnik/hit_test_filter.hpp>
 #include <mapnik/scale_denominator.hpp>
@@ -34,24 +42,8 @@
 // boost
 #include <boost/make_shared.hpp>
 
-// icu
-#include <unicode/uversion.h>
-
 namespace mapnik
 {
-
-/** Call cache_metawriters for each symbolizer.*/
-struct metawriter_cache_dispatch : public boost::static_visitor<>
-{
-    metawriter_cache_dispatch (Map const &m) : m_(m) {}
-
-    template <typename T> void operator () (T &sym) const
-    {
-        sym.cache_metawriters(m_);
-    }
-
-    Map const &m_;
-};
 
 static const char * aspect_fix_mode_strings[] = {
     "GROW_BBOX",
@@ -91,7 +83,6 @@ Map::Map(const Map& rhs)
       background_(rhs.background_),
       background_image_(rhs.background_image_),
       styles_(rhs.styles_),
-      metawriters_(rhs.metawriters_),
       fontsets_(rhs.fontsets_),
       layers_(rhs.layers_),
       aspectFixMode_(rhs.aspectFixMode_),
@@ -99,6 +90,8 @@ Map::Map(const Map& rhs)
       maximum_extent_(rhs.maximum_extent_),
       base_path_(rhs.base_path_),
       extra_params_(rhs.extra_params_) {}
+
+Map::~Map() {}
 
 Map& Map::operator=(const Map& rhs)
 {
@@ -110,7 +103,6 @@ Map& Map::operator=(const Map& rhs)
     background_=rhs.background_;
     background_image_=rhs.background_image_;
     styles_=rhs.styles_;
-    metawriters_ = rhs.metawriters_;
     fontsets_ = rhs.fontsets_;
     layers_=rhs.layers_;
     aspectFixMode_=rhs.aspectFixMode_;
@@ -169,42 +161,12 @@ boost::optional<feature_type_style const&> Map::find_style(std::string const& na
         return boost::optional<feature_type_style const&>() ;
 }
 
-bool Map::insert_metawriter(std::string const& name, metawriter_ptr const& writer)
-{
-    return metawriters_.insert(make_pair(name, writer)).second;
-}
-
-void Map::remove_metawriter(std::string const& name)
-{
-    metawriters_.erase(name);
-}
-
-metawriter_ptr Map::find_metawriter(std::string const& name) const
-{
-    std::map<std::string, metawriter_ptr>::const_iterator itr = metawriters_.find(name);
-    if (itr != metawriters_.end())
-        return itr->second;
-    else
-        return metawriter_ptr();
-}
-
-std::map<std::string,metawriter_ptr> const& Map::metawriters() const
-{
-    return metawriters_;
-}
-
-Map::const_metawriter_iterator Map::begin_metawriters() const
-{
-    return metawriters_.begin();
-}
-
-Map::const_metawriter_iterator Map::end_metawriters() const
-{
-    return metawriters_.end();
-}
-
 bool Map::insert_fontset(std::string const& name, font_set const& fontset)
 {
+    if (fontset.get_name() != name)
+    {
+        throw mapnik::config_error("Fontset name must match the name used to reference it on the map");
+    }
     return fontsets_.insert(make_pair(name, fontset)).second;
 }
 
@@ -246,7 +208,6 @@ void Map::remove_all()
 {
     layers_.clear();
     styles_.clear();
-    metawriters_.clear();
 }
 
 const layer& Map::getLayer(size_t index) const
@@ -281,7 +242,9 @@ unsigned Map::height() const
 
 void Map::set_width(unsigned width)
 {
-    if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE)
+    if (width != width_ &&
+        width >= MIN_MAPSIZE &&
+        width <= MAX_MAPSIZE)
     {
         width_=width;
         fixAspectRatio();
@@ -290,7 +253,9 @@ void Map::set_width(unsigned width)
 
 void Map::set_height(unsigned height)
 {
-    if (height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
+    if (height != height_ &&
+        height >= MIN_MAPSIZE &&
+        height <= MAX_MAPSIZE)
     {
         height_=height;
         fixAspectRatio();
@@ -299,8 +264,12 @@ void Map::set_height(unsigned height)
 
 void Map::resize(unsigned width,unsigned height)
 {
-    if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE &&
-        height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
+    if (width != width_ &&
+        height != height_ &&
+        width >= MIN_MAPSIZE &&
+        width <= MAX_MAPSIZE &&
+        height >= MIN_MAPSIZE &&
+        height <= MAX_MAPSIZE)
     {
         width_=width;
         height_=height;
@@ -350,7 +319,7 @@ void Map::set_background_image(std::string const& image_filename)
 
 void Map::set_maximum_extent(box2d<double> const& box)
 {
-    maximum_extent_ = box;
+    maximum_extent_.reset(box);
 }
 
 boost::optional<box2d<double> > const& Map::maximum_extent() const
@@ -358,9 +327,9 @@ boost::optional<box2d<double> > const& Map::maximum_extent() const
     return maximum_extent_;
 }
 
-boost::optional<box2d<double> > & Map::maximum_extent()
+void Map::reset_maximum_extent()
 {
-    return maximum_extent_;
+    maximum_extent_.reset();
 }
 
 std::string const&  Map::base_path() const
@@ -387,54 +356,61 @@ void Map::zoom(double factor)
 
 void Map::zoom_all()
 {
-    if (maximum_extent_) {
-        zoom_to_box(*maximum_extent_);
-    }
-    else
+    try
     {
-        try
+        if (layers_.empty())
         {
-            if (!layers_.size() > 0)
-                return;
-            projection proj0(srs_);
-            box2d<double> ext;
-            bool success = false;
-            bool first = true;
-            std::vector<layer>::const_iterator itr = layers_.begin();
-            std::vector<layer>::const_iterator end = layers_.end();
-            while (itr != end)
+            return;
+        }
+        projection proj0(srs_);
+        box2d<double> ext;
+        bool success = false;
+        bool first = true;
+        std::vector<layer>::const_iterator itr = layers_.begin();
+        std::vector<layer>::const_iterator end = layers_.end();
+        while (itr != end)
+        {
+            if (itr->active())
             {
-                if (itr->active())
+                std::string const& layer_srs = itr->srs();
+                projection proj1(layer_srs);
+                proj_transform prj_trans(proj0,proj1);
+                box2d<double> layer_ext = itr->envelope();
+                if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
                 {
-                    std::string const& layer_srs = itr->srs();
-                    projection proj1(layer_srs);
-
-                    proj_transform prj_trans(proj0,proj1);
-
-                    box2d<double> layer_ext = itr->envelope();
-                    if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
+                    success = true;
+                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
+                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
+                    if (first)
                     {
-                        success = true;
-
-                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
-                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
-
-                        if (first)
-                        {
-                            ext = layer_ext;
-                            first = false;
-                        }
-                        else
-                        {
-                            ext.expand_to_include(layer_ext);
-                        }
+                        ext = layer_ext;
+                        first = false;
+                    }
+                    else
+                    {
+                        ext.expand_to_include(layer_ext);
                     }
                 }
-                ++itr;
             }
-            if (success) {
-                zoom_to_box(ext);
-            } else {
+            ++itr;
+        }
+        if (success)
+        {
+            if (maximum_extent_) {
+                ext.clip(*maximum_extent_);
+            }
+            zoom_to_box(ext);
+        }
+        else
+        {
+            if (maximum_extent_)
+            {
+                MAPNIK_LOG_ERROR(map) << "could not zoom to combined layer extents"
+                    << " so falling back to maximum-extent for zoom_all result";
+                zoom_to_box(*maximum_extent_);
+            }
+            else
+            {
                 std::ostringstream s;
                 s << "could not zoom to combined layer extents "
                   << "using zoom_all because proj4 could not "
@@ -443,10 +419,10 @@ void Map::zoom_all()
                 throw std::runtime_error(s.str());
             }
         }
-        catch (proj_init_error & ex)
-        {
-            throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
-        }
+    }
+    catch (proj_init_error & ex)
+    {
+        throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
     }
 }
 
@@ -564,123 +540,69 @@ CoordTransform Map::view_transform() const
 
 featureset_ptr Map::query_point(unsigned index, double x, double y) const
 {
-    if ( index< layers_.size())
+    if (!current_extent_.valid())
+    {
+        throw std::runtime_error("query_point: map extent is not intialized, you need to set a valid extent before querying");
+    }
+    if (!current_extent_.intersects(x,y))
+    {
+        throw std::runtime_error("query_point: x,y coords do not intersect map extent");
+    }
+    if (index < layers_.size())
     {
         mapnik::layer const& layer = layers_[index];
-        try
+        mapnik::datasource_ptr ds = layer.datasource();
+        if (ds)
         {
-            double z = 0;
             mapnik::projection dest(srs_);
             mapnik::projection source(layer.srs());
             proj_transform prj_trans(source,dest);
-            prj_trans.backward(x,y,z);
-
-            double minx = current_extent_.minx();
-            double miny = current_extent_.miny();
-            double maxx = current_extent_.maxx();
-            double maxy = current_extent_.maxy();
-
-            prj_trans.backward(minx,miny,z);
-            prj_trans.backward(maxx,maxy,z);
-            double tol = (maxx - minx) / width_ * 3;
-            mapnik::datasource_ptr ds = layer.datasource();
-            if (ds)
+            double z = 0;
+            if (!prj_trans.equal() && !prj_trans.backward(x,y,z))
             {
-                MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
-
-                featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
-                if (fs)
-                    return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                                                                   hit_test_filter(x,y,tol));
+                throw std::runtime_error("query_point: could not project x,y into layer srs");
+            }
+            // calculate default tolerance
+            mapnik::box2d<double> map_ex = current_extent_;
+            if (maximum_extent_)
+            {
+                map_ex.clip(*maximum_extent_);
+            }
+            if (!prj_trans.backward(map_ex,PROJ_ENVELOPE_POINTS))
+            {
+                std::ostringstream s;
+                s << "query_point: could not project map extent '" << map_ex
+                  << "' into layer srs for tolerance calculation";
+                throw std::runtime_error(s.str());
+            }
+            double tol = (map_ex.maxx() - map_ex.minx()) / width_ * 3;
+            featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y), tol);
+            MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
+            if (fs)
+            {
+                return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
+                                                                               hit_test_filter(x,y,tol));
             }
         }
-        catch (...)
-        {
-            MAPNIK_LOG_ERROR(map) << "Exception caught in \"query_point\"";
-        }
+    }
+    else
+    {
+        std::ostringstream s;
+        s << "Invalid layer index passed to query_point: '" << index << "'";
+        if (!layers_.empty()) s << " for map with " << layers_.size() << " layers(s)";
+        else s << " (map has no layers)";
+        throw std::out_of_range(s.str());
     }
     return featureset_ptr();
 }
 
 featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
 {
-    if ( index< layers_.size())
-    {
-        mapnik::layer const& layer = layers_[index];
-        CoordTransform tr = view_transform();
-        tr.backward(&x,&y);
-
-        try
-        {
-            mapnik::projection dest(srs_);
-            mapnik::projection source(layer.srs());
-            proj_transform prj_trans(source,dest);
-            double z = 0;
-            prj_trans.backward(x,y,z);
-
-            double minx = current_extent_.minx();
-            double miny = current_extent_.miny();
-            double maxx = current_extent_.maxx();
-            double maxy = current_extent_.maxy();
-
-            prj_trans.backward(minx,miny,z);
-            prj_trans.backward(maxx,maxy,z);
-            double tol = (maxx - minx) / width_ * 3;
-            mapnik::datasource_ptr ds = layer.datasource();
-            if (ds)
-            {
-                MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
-
-                featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y));
-                if (fs)
-                    return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                                                                   hit_test_filter(x,y,tol));
-            }
-        }
-        catch (...)
-        {
-            MAPNIK_LOG_ERROR(map) << "Exception caught in \"query_map_point\"";
-        }
-    }
-    return featureset_ptr();
+    CoordTransform tr = view_transform();
+    tr.backward(&x,&y);
+    return query_point(index,x,y);
 }
 
-Map::~Map() {}
-
-void Map::init_metawriters()
-{
-    metawriter_cache_dispatch d(*this);
-    Map::style_iterator styIter = begin_styles();
-    Map::style_iterator styEnd = end_styles();
-    for (; styIter!=styEnd; ++styIter) {
-        std::vector<rule>& rules = styIter->second.get_rules_nonconst();
-        std::vector<rule>::iterator ruleIter = rules.begin();
-        std::vector<rule>::iterator ruleEnd = rules.end();
-        for (; ruleIter!=ruleEnd; ++ruleIter) {
-            rule::symbolizers::iterator symIter = ruleIter->begin();
-            rule::symbolizers::iterator symEnd = ruleIter->end();
-            for (; symIter!=symEnd; ++symIter) {
-                boost::apply_visitor(d, *symIter);
-            }
-        }
-    }
-}
-
-void Map::set_metawriter_property(std::string name, std::string value)
-{
-#if (U_ICU_VERSION_MAJOR_NUM > 4) || (U_ICU_VERSION_MAJOR_NUM == 4 && U_ICU_VERSION_MINOR_NUM >=2)
-    metawriter_output_properties[name] = UnicodeString::fromUTF8(value);
-#else
-    metawriter_output_properties[name] = UnicodeString(value.c_str());
-#endif
-}
-
-std::string Map::get_metawriter_property(std::string name) const
-{
-    std::string result;
-    to_utf8(metawriter_output_properties[name], result);
-    return result;
-}
 
 parameters const& Map::get_extra_parameters() const
 {

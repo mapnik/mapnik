@@ -23,10 +23,18 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/image_data.hpp>
+#include <mapnik/raster.hpp>
+#include <mapnik/ctrans.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // boost
 #include <boost/format.hpp>
+#include <boost/make_shared.hpp>
+
+// stl
+#include <cmath>
 
 #include "gdal_featureset.hpp"
 #include <gdal_priv.h>
@@ -34,7 +42,6 @@
 using mapnik::query;
 using mapnik::coord2d;
 using mapnik::box2d;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::CoordTransform;
 using mapnik::geometry_type;
@@ -49,8 +56,8 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  int band,
                                  gdal_query q,
                                  mapnik::box2d<double> extent,
-                                 double width,
-                                 double height,
+                                 unsigned width,
+                                 unsigned height,
                                  int nbands,
                                  double dx,
                                  double dy,
@@ -133,8 +140,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     box2d<double> box = t.forward(intersect);
 
     //size of resized output pixel in source image domain
-    double margin_x = 1.0 / (fabs(dx_) * boost::get<0>(q.resolution()));
-    double margin_y = 1.0 / (fabs(dy_) * boost::get<1>(q.resolution()));
+    double margin_x = 1.0 / (std::fabs(dx_) * boost::get<0>(q.resolution()));
+    double margin_y = 1.0 / (std::fabs(dy_) * boost::get<1>(q.resolution()));
     if (margin_x < 1)
     {
         margin_x = 1.0;
@@ -199,8 +206,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         // if layer-level filter_factor is set, apply it
         if (filter_factor_)
         {
-            im_width *= filter_factor_;
-            im_height *= filter_factor_;
+            im_width = int(im_width * filter_factor_ + 0.5);
+            im_height = int(im_height * filter_factor_ + 0.5);
 
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Applying layer filter_factor=" << filter_factor_;
         }
@@ -208,8 +215,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
         else
         {
             double sym_downsample_factor = q.get_filter_factor();
-            im_width *= sym_downsample_factor;
-            im_height *= sym_downsample_factor;
+            im_width = int(im_width * sym_downsample_factor + 0.5);
+            im_height = int(im_height * sym_downsample_factor + 0.5);
         }
 
         // case where we need to avoid upsampling so that the
@@ -222,13 +229,13 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
         if (im_width > 0 && im_height > 0)
         {
-            mapnik::image_data_32 image(im_width, im_height);
+            mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(intersect, im_width, im_height);
+            feature->set_raster(raster);
+            mapnik::image_data_32 & image = raster->data_;
             image.set(0xffffffff);
 
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Image Size=(" << im_width << "," << im_height << ")";
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Reading band=" << band_;
-
-            typedef std::vector<int,int> pallete;
 
             if (band_ > 0) // we are querying a single band
             {
@@ -254,7 +261,6 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                imageData, image.width(), image.height(),
                                GDT_Float32, 0, 0);
 
-                feature->set_raster(boost::make_shared<mapnik::raster>(intersect,image));
                 if (hasNoData)
                 {
                     feature->put("NODATA",nodata);
@@ -343,8 +349,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 {
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Processing rgb bands...";
 
-                    int hasNoData(0);
-                    double nodata(0);
+                    int hasNoData = 0;
+                    double nodata = 0.0;
                     if (nodata_value_)
                     {
                         hasNoData = 1;
@@ -445,10 +451,10 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     {
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Loading colour table...";
 
-                        unsigned nodata_value = static_cast<unsigned>(nodata);
+                        unsigned nodata_value = static_cast<unsigned>(nodata); // FIXME: is it realy unsigned ?
                         if (hasNoData)
                         {
-                            feature->put("NODATA",static_cast<int>(nodata_value));
+                            feature->put("NODATA",static_cast<mapnik::value_integer>(nodata_value));
                         }
                         for (unsigned y = 0; y < image.height(); ++y)
                         {
@@ -487,8 +493,6 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 3,
                                     image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                 }
-
-                feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect, image)));
             }
             return feature;
         }
@@ -514,7 +518,8 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
         double Y = pt.y - gt[3] - gt[5]/2;
         double det1 = gt[1]*Y + gt[4]*X;
         double det2 = gt[2]*Y + gt[5]*X;
-        unsigned x = det2/det, y = det1/det;
+        unsigned x = static_cast<unsigned>(det2/det);
+        unsigned y = static_cast<unsigned>(det1/det);
 
         if (x < raster_xsize && y < raster_ysize)
         {

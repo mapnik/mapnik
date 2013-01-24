@@ -27,8 +27,6 @@
 #include <mapnik/debug.hpp>
 
 // stl
-#include <iostream>
-#include <fstream>
 #include <stdexcept>
 
 // ogr
@@ -65,7 +63,7 @@ public:
     }
 
     void layer_by_name(OGRDataSource* const datasource,
-                       const std::string& layer_name)
+                       std::string const& layer_name)
     {
         free_layer();
 
@@ -113,7 +111,7 @@ public:
     }
 
     void layer_by_sql(OGRDataSource* const datasource,
-                      const std::string& layer_sql)
+                      std::string const& layer_sql)
     {
         free_layer();
 
@@ -146,7 +144,7 @@ public:
 #endif
     }
 
-    const std::string& layer_name() const
+    std::string const& layer_name() const
     {
         return layer_name_;
     }

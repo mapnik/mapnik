@@ -21,6 +21,10 @@
  *****************************************************************************/
 
 #include <mapnik/feature_type_style.hpp>
+#include <mapnik/rule.hpp>
+
+// boost
+#include <boost/foreach.hpp>
 
 namespace mapnik
 {
@@ -36,11 +40,19 @@ IMPLEMENT_ENUM( filter_mode_e, filter_mode_strings )
 
 feature_type_style::feature_type_style()
 : filter_mode_(FILTER_ALL),
-    scale_denom_validity_(-1) {}
+    filters_(),
+    direct_filters_(),
+    scale_denom_validity_(-1),
+    opacity_(1.0f)
+{}
 
 feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
     : filter_mode_(rhs.filter_mode_),
-      scale_denom_validity_(-1)
+      filters_(rhs.filters_),
+      direct_filters_(rhs.direct_filters_),
+      comp_op_(rhs.comp_op_),
+      scale_denom_validity_(-1),
+      opacity_(rhs.opacity_)
 {
     if (!deep_copy) {
         rules_ = rhs.rules_;
@@ -56,8 +68,12 @@ feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_
 feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
 {
     if (this == &rhs) return *this;
-    rules_=rhs.rules_;
+    rules_=rhs.rules_;   
+    filters_ = rhs.filters_;
+    direct_filters_ = rhs.direct_filters_;
+    comp_op_ = rhs.comp_op_;
     scale_denom_validity_ = -1;
+    opacity_= rhs.opacity_;
     return *this;
 }
 
@@ -72,9 +88,21 @@ rules const& feature_type_style::get_rules() const
     return rules_;
 }
 
-rules &feature_type_style::get_rules_nonconst()
+rules& feature_type_style::get_rules_nonconst()
 {
     return rules_;
+}
+
+bool feature_type_style::active(double scale_denom) const
+{
+    BOOST_FOREACH(rule const& r, rules_)
+    {
+        if (r.active(scale_denom))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void feature_type_style::set_filter_mode(filter_mode_e mode)
@@ -87,6 +115,45 @@ filter_mode_e feature_type_style::get_filter_mode() const
     return filter_mode_;
 }
 
+std::vector<filter::filter_type>&  feature_type_style::image_filters()
+{
+    return filters_;
+}
+
+std::vector<filter::filter_type> const&  feature_type_style::image_filters() const
+{
+    return filters_;
+}
+
+std::vector<filter::filter_type>&  feature_type_style::direct_image_filters()
+{
+    return direct_filters_;
+}
+
+std::vector<filter::filter_type> const&  feature_type_style::direct_image_filters() const
+{
+    return direct_filters_;
+}
+
+void feature_type_style::set_comp_op(composite_mode_e comp_op)
+{
+    comp_op_ = comp_op;
+}
+
+boost::optional<composite_mode_e> feature_type_style::comp_op() const
+{
+    return comp_op_;
+}
+
+void feature_type_style::set_opacity(float opacity)
+{
+    opacity_ = opacity;
+}
+
+float feature_type_style::get_opacity() const
+{
+    return opacity_;
+}
 
 void feature_type_style::update_rule_cache(double scale_denom)
 {

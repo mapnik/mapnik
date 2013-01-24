@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, save_data, contains_word
+from utilities import execution_path, contains_word, get_unique_colors
 
 import os, mapnik
 
@@ -14,7 +14,7 @@ def setup():
 def test_dataraster_coloring():
     srs = '+init=epsg:32630'
     lyr = mapnik.Layer('dataraster')
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Gdal(
             file = '../data/raster/dataraster.tif',
             band = 1,
@@ -51,8 +51,6 @@ def test_dataraster_coloring():
 
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
-        # save a png somewhere so we can see it
-        save_data('test_dataraster_coloring.png', im.tostring('png'))
         imdata = im.tostring()
         # we have some values in the [20,30) interval so check that they're colored
         assert contains_word('\xff\xff\x00\xff', imdata)
@@ -60,7 +58,7 @@ def test_dataraster_coloring():
 def test_dataraster_query_point():
     srs = '+init=epsg:32630'
     lyr = mapnik.Layer('dataraster')
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Gdal(
             file = '../data/raster/dataraster.tif',
             band = 1,
@@ -69,17 +67,20 @@ def test_dataraster_query_point():
         _map = mapnik.Map(256,256, srs)
         _map.layers.append(lyr)
 
-        # point inside raster extent with valid data
-        x, y = 427417, 4477517
+        x, y = 556113.0,4381428.0 # center of extent of raster
+        _map.zoom_all()
         features = _map.query_point(0,x,y).features
         assert len(features) == 1
         feat = features[0]
         center = feat.envelope().center()
         assert center.x==x and center.y==y, center
         value = feat['value']
-        assert value == 21.0, value
+        assert value == 18.0, value
 
-        # point outside raster extent
+        # point inside map extent but outside raster extent
+        current_box = _map.envelope()
+        current_box.expand_to_include(-427417,4477517)
+        _map.zoom_to_box(current_box)
         features = _map.query_point(0,-427417,4477517).features
         assert len(features) == 0
 
@@ -113,9 +114,7 @@ def test_raster_with_alpha_blends_correctly_with_background():
     style = mapnik.Style()
     rule = mapnik.Rule()
     symbolizer = mapnik.RasterSymbolizer()
-    #XXX: This fixes it, see http://trac.mapnik.org/ticket/759#comment:3
-    #     (and remove comment when this test passes)
-    #symbolizer.scaling="bilinear_old"
+    symbolizer.scaling = mapnik.scaling_method.BILINEAR
 
     rule.symbols.append(symbolizer)
     style.rules.append(rule)
@@ -124,7 +123,7 @@ def test_raster_with_alpha_blends_correctly_with_background():
 
     map_layer = mapnik.Layer('test_layer')
     filepath = '../data/raster/white-alpha.png'
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         map_layer.datasource = mapnik.Gdal(file=filepath)
         map_layer.styles.append('raster_style')
         map.layers.append(map_layer)
@@ -134,17 +133,15 @@ def test_raster_with_alpha_blends_correctly_with_background():
         mim = mapnik.Image(WIDTH, HEIGHT)
 
         mapnik.render(map, mim)
-        save_data('test_raster_with_alpha_blends_correctly_with_background.png',
-                  mim.tostring('png'))
         imdata = mim.tostring()
         # All white is expected
-        assert contains_word('\xff\xff\xff\xff', imdata)
+        eq_(get_unique_colors(mim),['rgba(254,254,254,255)'])
 
 def test_raster_warping():
     lyrSrs = "+init=epsg:32630"
     mapSrs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
     lyr = mapnik.Layer('dataraster', lyrSrs)
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Gdal(
             file = '../data/raster/dataraster.tif',
             band = 1,
@@ -160,13 +157,11 @@ def test_raster_warping():
         lyr.styles.append('foo')
         _map.layers.append(lyr)
         prj_trans = mapnik.ProjTransform(mapnik.Projection(mapSrs),
-                                          mapnik.Projection(lyrSrs)) 
+                                          mapnik.Projection(lyrSrs))
         _map.zoom_to_box(prj_trans.backward(lyr.envelope()))
 
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
-        # save a png somewhere so we can see it
-        save_data('test_raster_warping.png', im.tostring('png'))
         imdata = im.tostring()
         assert contains_word('\xff\xff\x00\xff', imdata)
 
@@ -174,7 +169,7 @@ def test_raster_warping_does_not_overclip_source():
     lyrSrs = "+init=epsg:32630"
     mapSrs = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
     lyr = mapnik.Layer('dataraster', lyrSrs)
-    if 'gdal' in mapnik.DatasourceCache.instance().plugin_names():
+    if 'gdal' in mapnik.DatasourceCache.plugin_names():
         lyr.datasource = mapnik.Gdal(
             file = '../data/raster/dataraster.tif',
             band = 1,
@@ -194,9 +189,6 @@ def test_raster_warping_does_not_overclip_source():
 
         im = mapnik.Image(_map.width,_map.height)
         mapnik.render(_map, im)
-        # save a png somewhere so we can see it
-        save_data('test_raster_warping_does_not_overclip_source.png',
-                  im.tostring('png'))
         assert im.view(0,200,1,1).tostring()=='\xff\xff\x00\xff'
 
 if __name__ == "__main__":

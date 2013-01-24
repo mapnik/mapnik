@@ -22,6 +22,9 @@
 #ifndef MAPNIK_PYTHON_BINDING_VALUE_CONVERTER_INCLUDED
 #define MAPNIK_PYTHON_BINDING_VALUE_CONVERTER_INCLUDED
 
+// mapnik
+#include <mapnik/value.hpp>
+
 // boost
 #include <boost/python.hpp>
 #include <boost/implicit_cast.hpp>
@@ -30,7 +33,7 @@ namespace boost { namespace python {
 
     struct value_converter : public boost::static_visitor<PyObject*>
     {
-        PyObject * operator() (int val) const
+        PyObject * operator() (mapnik::value_integer val) const
         {
 #if PY_VERSION_HEX >= 0x03000000
             return ::PyLong_FromLong(val);
@@ -51,23 +54,19 @@ namespace boost { namespace python {
 
         PyObject * operator() (std::string const& s) const
         {
-            PyObject *obj = Py_None;
-            obj = ::PyUnicode_DecodeUTF8(s.c_str(),implicit_cast<ssize_t>(s.length()),0);
-            return obj;
+            return ::PyUnicode_DecodeUTF8(s.c_str(),implicit_cast<ssize_t>(s.length()),0);
         }
 
-        PyObject * operator() (UnicodeString const& s) const
+        PyObject * operator() (mapnik::value_unicode_string const& s) const
         {
             std::string buffer;
             mapnik::to_utf8(s,buffer);
-            PyObject *obj = Py_None;
-            obj = ::PyUnicode_DecodeUTF8(buffer.c_str(),implicit_cast<ssize_t>(buffer.length()),0);
-            return obj;
+            return ::PyUnicode_DecodeUTF8(buffer.c_str(),implicit_cast<ssize_t>(buffer.length()),0);
         }
 
         PyObject * operator() (mapnik::value_null const& /*s*/) const
         {
-            return Py_None;
+            Py_RETURN_NONE;
         }
     };
 

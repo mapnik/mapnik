@@ -24,29 +24,16 @@
 #define MAPNIK_EXPRESSIONS_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
-
-// boost
-#include <boost/version.hpp>
-#include <boost/variant.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/concept_check.hpp>
 
 // spirit2
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_action.hpp>
-
-// fusion
-#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/spirit/include/support_locals.hpp>
 
 // phoenix
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/spirit/home/phoenix/object/construct.hpp>
 
 namespace mapnik
 {
@@ -87,14 +74,7 @@ struct regex_match_impl
         : tr_(tr) {}
 
     template <typename T0,typename T1>
-    expr_node operator() (T0 & node, T1 const& pattern) const
-    {
-#if defined(BOOST_REGEX_HAS_ICU)
-        return regex_match_node(node,tr_.transcode(pattern.c_str()));
-#else
-        return regex_match_node(node,pattern);
-#endif
-    }
+    expr_node operator() (T0 & node, T1 const& pattern) const;
 
     mapnik::transcoder const& tr_;
 };
@@ -111,16 +91,28 @@ struct regex_replace_impl
         : tr_(tr) {}
 
     template <typename T0,typename T1,typename T2>
-    expr_node operator() (T0 & node, T1 const& pattern, T2 const& format) const
-    {
-#if defined(BOOST_REGEX_HAS_ICU)
-        return regex_replace_node(node,tr_.transcode(pattern.c_str()),tr_.transcode(format.c_str()));
-#else
-        return regex_replace_node(node,pattern,format);
-#endif
-    }
+    expr_node operator() (T0 & node, T1 const& pattern, T2 const& format) const;
 
     mapnik::transcoder const& tr_;
+};
+
+struct geometry_types : qi::symbols<char,mapnik::value_integer>
+{
+    geometry_types()
+    {
+        add
+            ("point",1)
+            ("linestring", 2)
+            ("polygon",3)
+            ("collection",4)
+            ;
+    }
+};
+
+template <typename T>
+struct integer_parser
+{
+    typedef qi::int_parser<T,10,1,-1> type;
 };
 
 template <typename Iterator>
@@ -128,128 +120,13 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 {
     typedef qi::rule<Iterator, expr_node(), space_type> rule_type;
 
-    explicit expression_grammar(mapnik::transcoder const& tr)
-        : expression_grammar::base_type(expr),
-          unicode_(unicode_impl(tr)),
-          regex_match_(regex_match_impl(tr)),
-          regex_replace_(regex_replace_impl(tr))
-    {
-        using boost::phoenix::construct;
-        using qi::_1;
-        using qi::_a;
-        using qi::_b;
-        using qi::_r1;
-#if BOOST_VERSION > 104200
-        using qi::no_skip;
-#else
-        using qi::lexeme;
-#endif
-        using qi::_val;
-        using qi::lit;
-        using qi::int_;
-        using qi::double_;
-        using qi::hex;
-        using qi::omit;
-        using standard_wide::char_;
-
-        expr = logical_expr.alias();
-
-        logical_expr = not_expr [_val = _1]
-            >>
-            *(  (  ( lit("and") | lit("&&")) >> not_expr [_val && _1] )
-                | (( lit("or") | lit("||")) >> not_expr [_val || _1])
-                )
-            ;
-
-        not_expr =
-            cond_expr [_val = _1 ]
-            | ((lit("not") | lit('!')) >> cond_expr [ _val = !_1 ])
-            ;
-
-        cond_expr = equality_expr [_val = _1] | additive_expr [_val = _1]
-            ;
-
-        equality_expr =
-            relational_expr [_val = _1]
-            >> *(  ( (lit("=") | lit("eq") | lit("is")) >> relational_expr [_val == _1])
-                   | (( lit("!=") | lit("<>") | lit("neq") ) >> relational_expr [_val != _1])
-                )
-            ;
-
-        regex_match_expr = lit(".match")
-            >> lit('(')
-            >> ustring [_val = _1]
-            >> lit(')')
-            ;
-
-        regex_replace_expr =
-            lit(".replace")
-            >> lit('(')
-            >> ustring           [_a = _1]
-            >> lit(',')
-            >> ustring           [_b = _1]
-            >> lit(')')          [_val = regex_replace_(_r1,_a,_b)]
-            ;
-
-        relational_expr = additive_expr[_val = _1]
-            >>
-            *(  (   (lit("<=") | lit("le") ) >> additive_expr [ _val <= _1 ])
-                | ( (lit('<')  | lit("lt") ) >> additive_expr [ _val <  _1 ])
-                | ( (lit(">=") | lit("ge") ) >> additive_expr [ _val >= _1 ])
-                | ( (lit('>')  | lit("gt") ) >> additive_expr [ _val >  _1 ])
-                )
-            ;
-        additive_expr = multiplicative_expr [_val = _1]
-            >> * (   '+' >> multiplicative_expr[_val += _1]
-                     | '-' >> multiplicative_expr[_val -= _1]
-                )
-            ;
-
-        multiplicative_expr = primary_expr [_val = _1]
-            >> *(     '*' >> primary_expr [_val *= _1]
-                      | '/' >> primary_expr [_val /= _1]
-                      | '%' >> primary_expr [_val %= _1]
-                      |  regex_match_expr[_val = regex_match_(_val, _1)]
-                      |  regex_replace_expr(_val) [_val = _1]
-                )
-            ;
-
-
-        primary_expr = strict_double [_val = _1]
-            | int_ [_val = _1]
-            | lit("true") [_val = true]
-            | lit("false") [_val = false]
-            | lit("null") [_val = value_null() ]
-            | ustring [_val = unicode_(_1) ]
-            | attr [_val = construct<mapnik::attribute>( _1 ) ]
-            | '(' >> expr [_val = _1 ] >> ')'
-            ;
-
-        unesc_char.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
-            ("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
-            ("\\\'", '\'')("\\\"", '\"')
-            ;
-
-#if BOOST_VERSION > 104500
-        quote_char %= char_('\'') | char_('"');
-        ustring %= omit[quote_char[_a = _1]]
-            >> *(unesc_char | "\\x" >> hex | (char_ - lit(_a)))
-            >> lit(_a);
-        attr %= '[' >> no_skip[+~char_(']')] >> ']';
-#else
-        ustring %= lit('\'')
-            >> *(unesc_char | "\\x" >> hex | (char_ - lit('\'')))
-            >> lit('\'');
-        attr %= '[' >> lexeme[+(char_ - ']')] >> ']';
-#endif
-
-    }
+    explicit expression_grammar(mapnik::transcoder const& tr);
 
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
+    typename integer_parser<mapnik::value_integer>::type int__;
     boost::phoenix::function<unicode_impl> unicode_;
     boost::phoenix::function<regex_match_impl> regex_match_;
     boost::phoenix::function<regex_replace_impl> regex_replace_;
-    //
     rule_type expr;
     rule_type equality_expr;
     rule_type cond_expr;
@@ -257,6 +134,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     rule_type logical_expr;
     rule_type additive_expr;
     rule_type multiplicative_expr;
+    rule_type unary_expr;
     rule_type not_expr;
     rule_type primary_expr;
     qi::rule<Iterator, std::string() > regex_match_expr;
@@ -265,6 +143,7 @@ struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
     qi::rule<Iterator, std::string(), qi::locals<char> > ustring;
     qi::symbols<char const, char const> unesc_char;
     qi::rule<Iterator, char() > quote_char;
+    geometry_types geom_type;
 };
 
 } // namespace

@@ -24,6 +24,9 @@
 
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
@@ -33,7 +36,8 @@
 #include <map>
 
 // boost
-#include <boost/property_tree/ptree.hpp>
+#include <boost/optional.hpp>
+#include <boost/property_tree/ptree_fwd.hpp>
 
 namespace mapnik
 {
@@ -58,8 +62,8 @@ struct char_properties
     /** Write object to XML ptree. */
     void to_xml(boost::property_tree::ptree &node, bool explicit_defaults, char_properties const& dfl=char_properties()) const;
     std::string face_name;
-    font_set fontset;
-    float text_size;
+    boost::optional<font_set> fontset;
+    double text_size;
     double character_spacing;
     double line_spacing; //Largest total height (fontsize+line_spacing) per line is chosen
     double text_opacity;
@@ -132,7 +136,7 @@ struct text_symbolizer_properties
     /** Takes a feature and produces formated text as output.
      * The output object has to be created by the caller and passed in for thread safety.
      */
-    void process(processed_text &output, Feature const& feature) const;
+    void process(processed_text &output, feature_impl const& feature) const;
     /** Automatically create processing instructions for a single expression. */
     void set_old_style_expression(expression_ptr expr);
     /** Sets new format tree. */
@@ -151,7 +155,7 @@ struct text_symbolizer_properties
     justify_alignment_e jalign;
     vertical_alignment_e valign;
     /** distance between repeated labels on a single geometry */
-    unsigned label_spacing;
+    double label_spacing;
     /** distance the label can be moved on the line to fit, if 0 the default is used */
     unsigned label_position_tolerance;
     bool avoid_edges;
@@ -162,8 +166,10 @@ struct text_symbolizer_properties
     /** Always try render an odd amount of labels */
     bool force_odd_labels;
     bool allow_overlap;
-    unsigned text_ratio;
-    unsigned wrap_width;
+    /** Only consider geometry with largest bbox (polygons) */
+    bool largest_bbox_only;
+    double text_ratio;
+    double wrap_width;
     /** Default values for char_properties. */
     char_properties format;
 private:

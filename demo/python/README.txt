@@ -1,5 +1,3 @@
-# $Id$
-
 This directory contains a sample python script implementing the Mapnik API.
 
 The script is thoroughly commented and also acts as a mini tutorial.  Reading

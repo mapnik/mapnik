@@ -22,9 +22,13 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/formatting/format.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
+
+// boost
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
 namespace formatting {
@@ -59,10 +63,10 @@ node_ptr format_node::from_xml(xml_node const& xml)
 
     n->face_name = xml.get_opt_attr<std::string>("face-name");
     /*TODO: Fontset is problematic. We don't have the fontsets pointer here... */
-    n->text_size = xml.get_opt_attr<unsigned>("size");
-    n->character_spacing = xml.get_opt_attr<unsigned>("character-spacing");
-    n->line_spacing = xml.get_opt_attr<unsigned>("line-spacing");
-    n->text_opacity = xml.get_opt_attr<double>("opactity");
+    n->text_size = xml.get_opt_attr<double>("size");
+    n->character_spacing = xml.get_opt_attr<double>("character-spacing");
+    n->line_spacing = xml.get_opt_attr<double>("line-spacing");
+    n->text_opacity = xml.get_opt_attr<double>("opacity");
     boost::optional<boolean> wrap = xml.get_opt_attr<boolean>("wrap-before");
     if (wrap) n->wrap_before = *wrap;
     n->wrap_char = xml.get_opt_attr<unsigned>("wrap-character");
@@ -74,7 +78,7 @@ node_ptr format_node::from_xml(xml_node const& xml)
 }
 
 
-void format_node::apply(char_properties const& p, const Feature &feature, processed_text &output) const
+void format_node::apply(char_properties const& p, const feature_impl &feature, processed_text &output) const
 {
     char_properties new_properties = p;
     if (face_name) new_properties.face_name = *face_name;

@@ -24,6 +24,8 @@
 #define MAPNIK_POLYGON_PATTERN_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/color.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/gamma_method.hpp>
@@ -50,7 +52,6 @@ struct MAPNIK_DECL polygon_pattern_symbolizer :
     double get_gamma() const;
     void set_gamma_method(gamma_method_e gamma_method);
     gamma_method_e get_gamma_method() const;
-
 private:
     pattern_alignment_e alignment_;
     double gamma_;

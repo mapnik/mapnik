@@ -29,13 +29,16 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/sql_utils.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/trim.hpp>
+#include <mapnik/global.hpp> // for int2net
+#include <boost/scoped_array.hpp>
+
 
 // boost
-#include <boost/algorithm/string.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/cstdint.hpp> // for boost::int16_t
 
 // stl
 #include <sstream>
@@ -60,9 +63,11 @@ postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
 {
 }
 
+std::string numeric2string(const char* buf);
+
 feature_ptr postgis_featureset::next()
 {
-    if (rs_->next())
+    while (rs_->next())
     {
         // new feature
         unsigned pos = 1;
@@ -75,8 +80,9 @@ feature_ptr postgis_featureset::next()
             const char* buf = rs_->getValue(pos);
             std::string name = rs_->getFieldName(pos);
 
-            // validation happens of this type at bind()
-            int val;
+            // validation happens of this type at initialization
+            mapnik::value_integer val;
+
             if (oid == 20)
             {
                 val = int8net(buf);
@@ -94,7 +100,7 @@ feature_ptr postgis_featureset::next()
             // TODO - extend feature class to know
             // that its id is also an attribute to avoid
             // this duplication
-            feature->put(name,val);
+            feature->put<mapnik::value_integer>(name,val);
             ++pos;
         }
         else
@@ -107,10 +113,12 @@ feature_ptr postgis_featureset::next()
         // parse geometry
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
-        geometry_utils::from_wkb(feature->paths(), data, size);
+        if (!geometry_utils::from_wkb(feature->paths(), data, size))
+            continue;
+
         totalGeomSize_ += size;
 
-        int num_attrs = ctx_->size() + 1;
+        unsigned num_attrs = ctx_->size() + 1;
         for (; pos < num_attrs; ++pos)
         {
             std::string name = rs_->getFieldName(pos);
@@ -133,24 +141,19 @@ feature_ptr postgis_featureset::next()
 
                     case 23: //int4
                     {
-                        int val = int4net(buf);
-                        feature->put(name, val);
+                        feature->put<mapnik::value_integer>(name, int4net(buf));
                         break;
                     }
 
                     case 21: //int2
                     {
-                        int val = int2net(buf);
-                        feature->put(name, val);
+                        feature->put<mapnik::value_integer>(name, int2net(buf));
                         break;
                     }
 
                     case 20: //int8/BigInt
                     {
-                        // TODO - need to support boost::uint64_t in mapnik::value
-                        // https://github.com/mapnik/mapnik/issues/895
-                        int val = int8net(buf);
-                        feature->put(name, val);
+                        feature->put<mapnik::value_integer>(name, int8net(buf));
                         break;
                     }
 
@@ -158,7 +161,7 @@ feature_ptr postgis_featureset::next()
                     {
                         float val;
                         float4net(val, buf);
-                        feature->put(name, val);
+                        feature->put(name, static_cast<double>(val));
                         break;
                     }
 
@@ -172,6 +175,7 @@ feature_ptr postgis_featureset::next()
 
                     case 25:   //text
                     case 1043: //varchar
+                    case 705:  //literal
                     {
                         feature->put(name, tr_->transcode(buf));
                         break;
@@ -179,8 +183,7 @@ feature_ptr postgis_featureset::next()
 
                     case 1042: //bpchar
                     {
-                        std::string str(buf);
-                        boost::trim(str);
+                        std::string str = mapnik::util::trim_copy(buf);
                         feature->put(name, tr_->transcode(str.c_str()));
                         break;
                     }
@@ -188,7 +191,7 @@ feature_ptr postgis_featureset::next()
                     case 1700: //numeric
                     {
                         double val;
-                        std::string str = mapnik::sql_utils::numeric2string(buf);
+                        std::string str = numeric2string(buf);
                         if (mapnik::util::string2double(str, val))
                         {
                             feature->put(name, val);
@@ -207,15 +210,123 @@ feature_ptr postgis_featureset::next()
         }
         return feature;
     }
-    else
-    {
-        rs_->close();
-        return feature_ptr();
-    }
+    return feature_ptr();
 }
 
 
 postgis_featureset::~postgis_featureset()
 {
     rs_->close();
+}
+
+std::string numeric2string(const char* buf)
+{
+    boost::int16_t ndigits = int2net(buf);
+    boost::int16_t weight  = int2net(buf+2);
+    boost::int16_t sign    = int2net(buf+4);
+    boost::int16_t dscale  = int2net(buf+6);
+
+    boost::scoped_array<boost::int16_t> digits(new boost::int16_t[ndigits]);
+    for (int n=0; n < ndigits ;++n)
+    {
+        digits[n] = int2net(buf+8+n*2);
+    }
+
+    std::ostringstream ss;
+
+    if (sign == 0x4000) ss << "-";
+
+    int i = std::max(weight,boost::int16_t(0));
+    int d = 0;
+
+    // Each numeric "digit" is actually a value between 0000 and 9999 stored in a 16 bit field.
+    // For example, the number 1234567809990001 is stored as four digits: [1234] [5678] [999] [1].
+    // Note that the last two digits show that the leading 0's are lost when the number is split.
+    // We must be careful to re-insert these 0's when building the string.
+
+    while ( i >= 0)
+    {
+        if (i <= weight && d < ndigits)
+        {
+            // All digits after the first must be padded to make the field 4 characters long
+            if (d != 0)
+            {
+#ifdef _WINDOWS
+                int dig = digits[d];
+                if (dig < 10)
+                {
+                    ss << "000"; // 0000 - 0009
+                }
+                else if (dig < 100)
+                {
+                    ss << "00";  // 0010 - 0099
+                }
+                else
+                {
+                    ss << "0";   // 0100 - 0999;
+                }
+#else
+                switch(digits[d])
+                {
+                case 0 ... 9:
+                    ss << "000"; // 0000 - 0009
+                    break;
+                case 10 ... 99:
+                    ss << "00";  // 0010 - 0099
+                    break;
+                case 100 ... 999:
+                    ss << "0";   // 0100 - 0999
+                    break;
+                }
+#endif
+            }
+            ss << digits[d++];
+        }
+        else
+        {
+            if (d == 0)
+                ss <<  "0";
+            else
+                ss <<  "0000";
+        }
+
+        i--;
+    }
+    if (dscale > 0)
+    {
+        ss << '.';
+        // dscale counts the number of decimal digits following the point, not the numeric digits
+        while (dscale > 0)
+        {
+            int value;
+            if (i <= weight && d < ndigits)
+                value = digits[d++];
+            else
+                value = 0;
+
+            // Output up to 4 decimal digits for this value
+            if (dscale > 0) {
+                ss << (value / 1000);
+                value %= 1000;
+                dscale--;
+            }
+            if (dscale > 0) {
+                ss << (value / 100);
+                value %= 100;
+                dscale--;
+            }
+            if (dscale > 0) {
+                ss << (value / 10);
+                value %= 10;
+                dscale--;
+            }
+            if (dscale > 0) {
+                ss << value;
+                dscale--;
+            }
+
+            i--;
+        }
+    }
+    return ss.str();
 }

@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/quad_tree.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <vector>
@@ -63,7 +64,7 @@ private:
 };
 
 // quad_tree based label collision detector
-class label_collision_detector2 : boost::noncopyable
+class label_collision_detector2 : mapnik::noncopyable
 {
     typedef quad_tree<box2d<double> > tree_t;
     tree_t tree_;
@@ -97,7 +98,7 @@ public:
 };
 
 // quad_tree based label collision detector with seperate check/insert
-class label_collision_detector3 : boost::noncopyable
+class label_collision_detector3 : mapnik::noncopyable
 {
     typedef quad_tree< box2d<double> > tree_t;
     tree_t tree_;
@@ -135,12 +136,12 @@ public:
 
 
 //quad tree based label collision detector so labels dont appear within a given distance
-class label_collision_detector4 : boost::noncopyable
+class label_collision_detector4 : mapnik::noncopyable
 {
 public:
     struct label
     {
-        label(box2d<double> const& b) : box(b) {}
+        label(box2d<double> const& b) : box(b), text() {}
         label(box2d<double> const& b, UnicodeString const& t) : box(b), text(t) {}
 
         box2d<double> box;

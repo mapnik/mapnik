@@ -53,7 +53,6 @@ public:
     typedef typename T::pixel_type pixel_type;
     typedef std::string lookup_type;
     typedef std::map<value_type, lookup_type> feature_key_type;
-    typedef std::map<lookup_type, value_type> key_type;
     typedef std::map<std::string, mapnik::feature_ptr> feature_type;
 
     hit_grid_view(unsigned x, unsigned y,
@@ -115,6 +114,7 @@ public:
         names_ = rhs.names_;
         f_keys_ = rhs.f_keys_;
         features_ = rhs.features_;
+        return *this;
     }
 
     inline unsigned x() const
@@ -142,7 +142,7 @@ public:
         return id_name_;
     }
 
-    inline const value_type* getRow(unsigned row) const
+    inline value_type const * getRow(unsigned row) const
     {
         return data_.getRow(row + y_) + x_;
     }
@@ -162,22 +162,22 @@ public:
         return data_.getBytes();
     }
 
-    std::set<std::string> const& property_names() const
+    inline std::set<std::string> const& property_names() const
     {
         return names_;
     }
 
-    inline const feature_type& get_grid_features() const
+    inline feature_type const& get_grid_features() const
     {
         return features_;
     }
 
-    inline const feature_key_type& get_feature_keys() const
+    inline feature_key_type const& get_feature_keys() const
     {
         return f_keys_;
     }
 
-    inline const lookup_type& get_key() const
+    inline lookup_type const& get_key() const
     {
         return key_;
     }
@@ -201,9 +201,8 @@ private:
     feature_type const& features_;
 };
 
-typedef hit_grid_view<mapnik::ImageData<boost::uint16_t> > grid_view;
+typedef hit_grid_view<mapnik::ImageData<mapnik::value_integer> > grid_view;
 
 }
 
 #endif // MAPNIK_GRID_VIEW_HPP
-

@@ -29,13 +29,13 @@ extern "C"
 #include <mapnik/image_util.hpp>
 #include <mapnik/png_io.hpp>
 #include <mapnik/tiff_io.hpp>
+#include <mapnik/image_data.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
 #include <mapnik/image_view.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/util/conversions.hpp>
-
 // jpeg
 #if defined(HAVE_JPEG)
 #include <mapnik/jpeg_io.hpp>
@@ -43,7 +43,17 @@ extern "C"
 
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo_renderer.hpp>
-#include <cairo-features.h>
+#include <cairo.h>
+#ifdef CAIRO_HAS_PDF_SURFACE
+#include <cairo-pdf.h>
+#endif // CAIRO_HAS_PDF_SURFACE
+#ifdef CAIRO_HAS_PS_SURFACE
+#include <cairo-ps.h>
+#endif // CAIRO_HAS_PS_SURFACE
+#ifdef CAIRO_HAS_SVG_SURFACE
+#include <cairo-svg.h>
+#endif // CAIRO_HAS_SVG_SURFACE
+
 #endif
 
 // boost
@@ -55,23 +65,11 @@ extern "C"
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
-// agg
-#include "agg_image_accessors.h"
-#include "agg_pixfmt_rgba.h"
-#include "agg_rasterizer_scanline_aa.h"
-#include "agg_renderer_scanline.h"
-#include "agg_rendering_buffer.h"
-#include "agg_scanline_u.h"
-//#include "agg_scanline_p.h"
-#include "agg_span_allocator.h"
-#include "agg_span_image_filter_rgba.h"
-#include "agg_span_interpolator_linear.h"
-#include "agg_trans_affine.h"
-#include "agg_image_filters.h"
+#include <algorithm>
 
 namespace mapnik
 {
+
 
 template <typename T>
 std::string save_to_string(T const& image,
@@ -125,7 +123,8 @@ void handle_png_options(std::string const& type,
                         int * strategy,
                         int * trans_mode,
                         double * gamma,
-                        bool * use_octree)
+                        bool * use_octree,
+                        bool * use_miniz)
 {
     if (type == "png" || type == "png24" || type == "png32")
     {
@@ -152,19 +151,20 @@ void handle_png_options(std::string const& type,
             {
                 *use_octree = true;
             }
+            else if (t == "e=miniz")
+            {
+                *use_miniz = true;
+            }
             else if (boost::algorithm::starts_with(t, "c="))
             {
                 if (*colors < 0)
                     throw ImageWriterException("invalid color parameter: unavailable for true color images");
 
-                if (!mapnik::util::string2int(t.substr(2),*colors) || *colors < 0 || *colors > 256)
+                if (!mapnik::util::string2int(t.substr(2),*colors) || *colors < 1 || *colors > 256)
                     throw ImageWriterException("invalid color parameter: " + t.substr(2));
             }
             else if (boost::algorithm::starts_with(t, "t="))
             {
-                if (*colors < 0)
-                    throw ImageWriterException("invalid trans_mode parameter: unavailable for true color images");
-
                 if (!mapnik::util::string2int(t.substr(2),*trans_mode) || *trans_mode < 0 || *trans_mode > 2)
                     throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
             }
@@ -187,9 +187,9 @@ void handle_png_options(std::string const& type,
                 */
                 if (!mapnik::util::string2int(t.substr(2),*compression)
                     || *compression < Z_DEFAULT_COMPRESSION
-                    || *compression > Z_BEST_COMPRESSION)
+                    || *compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
                 {
-                    throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 9 are valid)");
+                    throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
                 }
             }
             else if (boost::algorithm::starts_with(t, "s="))
@@ -211,11 +211,19 @@ void handle_png_options(std::string const& type,
                 {
                     *strategy = Z_RLE;
                 }
+                else if (s == "fixed")
+                {
+                    *strategy = Z_FIXED;
+                }
                 else
                 {
                     throw ImageWriterException("invalid compression strategy parameter: " + s);
                 }
             }
+        }
+        if ((*use_miniz == false) && *compression > Z_BEST_COMPRESSION)
+        {
+            throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
         }
     }
 }
@@ -228,8 +236,8 @@ void save_to_stream(T const& image,
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
-        //all this should go into image_writer factory
-        std::string t = boost::algorithm::to_lower_copy(type);
+        std::string t = type;
+        std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
             int colors  = 256;
@@ -238,6 +246,7 @@ void save_to_stream(T const& image,
             int trans_mode = -1;
             double gamma = -1;
             bool use_octree = true;
+            bool use_miniz = false;
 
             handle_png_options(t,
                                &colors,
@@ -245,16 +254,25 @@ void save_to_stream(T const& image,
                                &strategy,
                                &trans_mode,
                                &gamma,
-                               &use_octree);
+                               &use_octree,
+                               &use_miniz);
 
             if (palette.valid())
-                save_as_png8_pal(stream, image, palette, compression, strategy);
+            {
+                save_as_png8_pal(stream, image, palette, compression, strategy, use_miniz);
+            }
             else if (colors < 0)
-                save_as_png(stream, image, compression, strategy);
+            {
+                save_as_png(stream, image, compression, strategy, trans_mode, use_miniz);
+            }
             else if (use_octree)
-                save_as_png8_oct(stream, image, colors, compression, strategy);
+            {
+                save_as_png8_oct(stream, image, colors, compression, strategy, trans_mode, use_miniz);
+            }
             else
-                save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
+            {
+                save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma, use_miniz);
+            }
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
@@ -279,16 +297,17 @@ void save_to_stream(T const& image,
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
-        //all this should go into image_writer factory
-        std::string t = boost::algorithm::to_lower_copy(type);
+        std::string t = type;
+        std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
             int colors  = 256;
-            int compression = Z_DEFAULT_COMPRESSION;
+            int compression = Z_DEFAULT_COMPRESSION; // usually mapped to z=6 in zlib
             int strategy = Z_DEFAULT_STRATEGY;
             int trans_mode = -1;
             double gamma = -1;
             bool use_octree = true;
+            bool use_miniz = false;
 
             handle_png_options(t,
                                &colors,
@@ -296,14 +315,21 @@ void save_to_stream(T const& image,
                                &strategy,
                                &trans_mode,
                                &gamma,
-                               &use_octree);
+                               &use_octree,
+                               &use_miniz);
 
             if (colors < 0)
-                save_as_png(stream, image, compression, strategy);
+            {
+                save_as_png(stream, image, compression, strategy, trans_mode, use_miniz);
+            }
             else if (use_octree)
-                save_as_png8_oct(stream, image, colors, compression, strategy);
+            {
+                save_as_png8_oct(stream, image, colors, compression, strategy, trans_mode, use_miniz);
+            }
             else
-                save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma);
+            {
+                save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma, use_miniz);
+            }
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
@@ -351,53 +377,54 @@ void save_to_file(T const& image, std::string const& filename, rgba_palette cons
 
 #if defined(HAVE_CAIRO)
 // TODO - move to separate cairo_io.hpp
-void save_to_cairo_file(mapnik::Map const& map, std::string const& filename)
+void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, double scale_factor)
 {
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-        save_to_cairo_file(map,filename,*type);
+        save_to_cairo_file(map,filename,*type,scale_factor);
     }
 }
 
 void save_to_cairo_file(mapnik::Map const& map,
                         std::string const& filename,
-                        std::string const& type)
+                        std::string const& type,
+                        double scale_factor)
 {
     std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
     if (file)
     {
-        Cairo::RefPtr<Cairo::Surface> surface;
+        cairo_surface_ptr surface;
         unsigned width = map.width();
         unsigned height = map.height();
         if (type == "pdf")
         {
-#if defined(CAIRO_HAS_PDF_SURFACE)
-            surface = Cairo::PdfSurface::create(filename,width,height);
+#ifdef CAIRO_HAS_PDF_SURFACE
+            surface = cairo_surface_ptr(cairo_pdf_surface_create(filename.c_str(),width,height),cairo_surface_closer());
 #else
             throw ImageWriterException("PDFSurface not supported in the cairo backend");
 #endif
         }
-#if defined(CAIRO_HAS_SVG_SURFACE)
+#ifdef CAIRO_HAS_SVG_SURFACE
         else if (type == "svg")
         {
-            surface = Cairo::SvgSurface::create(filename,width,height);
+            surface = cairo_surface_ptr(cairo_svg_surface_create(filename.c_str(),width,height),cairo_surface_closer());
         }
 #endif
-#if defined(CAIRO_HAS_PS_SURFACE)
+#ifdef CAIRO_HAS_PS_SURFACE
         else if (type == "ps")
         {
-            surface = Cairo::PsSurface::create(filename,width,height);
+            surface = cairo_surface_ptr(cairo_ps_surface_create(filename.c_str(),width,height),cairo_surface_closer());
         }
 #endif
-#if defined(CAIRO_HAS_IMAGE_SURFACE)
+#ifdef CAIRO_HAS_IMAGE_SURFACE
         else if (type == "ARGB32")
         {
-            surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,width,height);
+            surface = cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,width,height),cairo_surface_closer());
         }
         else if (type == "RGB24")
         {
-            surface = Cairo::ImageSurface::create(Cairo::FORMAT_RGB24,width,height);
+            surface = cairo_surface_ptr(cairo_image_surface_create(CAIRO_FORMAT_RGB24,width,height),cairo_surface_closer());
         }
 #endif
         else
@@ -405,7 +432,7 @@ void save_to_cairo_file(mapnik::Map const& map,
             throw ImageWriterException("unknown file type: " + type);
         }
 
-        Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create(surface);
+        //cairo_t * ctx = cairo_create(surface);
 
         // TODO - expose as user option
         /*
@@ -415,15 +442,14 @@ void save_to_cairo_file(mapnik::Map const& map,
           }
         */
 
-
-        mapnik::cairo_renderer<Cairo::Context> ren(map, context);
+        mapnik::cairo_renderer<cairo_ptr> ren(map, create_context(surface), scale_factor);
         ren.apply();
 
         if (type == "ARGB32" || type == "RGB24")
         {
-            surface->write_to_png(filename);
+            cairo_surface_write_to_png(&*surface, filename.c_str());
         }
-        surface->finish();
+        cairo_surface_finish(&*surface);
     }
 }
 
@@ -475,309 +501,37 @@ template std::string save_to_string<image_view<image_data_32> > (image_view<imag
                                                                  std::string const&,
                                                                  rgba_palette const& palette);
 
-
-
-// Image scaling functions
-
-scaling_method_e get_scaling_method_by_name (std::string name)
+void save_to_file(image_32 const& image,std::string const& file)
 {
-    // TODO - make into proper ENUMS
-    if (name == "fast" || name == "near")
-        return SCALING_NEAR;
-    else if (name == "bilinear")
-        return SCALING_BILINEAR;
-    else if (name == "cubic" || name == "bicubic")
-        return SCALING_BICUBIC;
-    else if (name == "spline16")
-        return SCALING_SPLINE16;
-    else if (name == "spline36")
-        return SCALING_SPLINE36;
-    else if (name == "hanning")
-        return SCALING_HANNING;
-    else if (name == "hamming")
-        return SCALING_HAMMING;
-    else if (name == "hermite")
-        return SCALING_HERMITE;
-    else if (name == "kaiser")
-        return SCALING_KAISER;
-    else if (name == "quadric")
-        return SCALING_QUADRIC;
-    else if (name == "catrom")
-        return SCALING_CATROM;
-    else if (name == "gaussian")
-        return SCALING_GAUSSIAN;
-    else if (name == "bessel")
-        return SCALING_BESSEL;
-    else if (name == "mitchell")
-        return SCALING_MITCHELL;
-    else if (name == "sinc")
-        return SCALING_SINC;
-    else if (name == "lanczos")
-        return SCALING_LANCZOS;
-    else if (name == "blackman")
-        return SCALING_BLACKMAN;
-    else
-        return SCALING_NEAR;
+    save_to_file<image_data_32>(image.data(), file);
 }
 
-// this has been replaced by agg impl - see https://trac.mapnik.org/ticket/656
-
-template <typename Image>
-void scale_image_bilinear_old (Image& target,const Image& source, double x_off_f, double y_off_f)
+void save_to_file (image_32 const& image,
+                   std::string const& file,
+                   std::string const& type)
 {
-
-    int source_width=source.width();
-    int source_height=source.height();
-
-    int target_width=target.width();
-    int target_height=target.height();
-
-    if (source_width<1 || source_height<1 ||
-        target_width<1 || target_height<1) return;
-    int x=0,y=0,xs=0,ys=0;
-    int tw2 = target_width/2;
-    int th2 = target_height/2;
-    int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
-    int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
-    unsigned yprt, yprt1, xprt, xprt1;
-
-    //no scaling or subpixel offset
-    if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
-        for (y=0;y<target_height;++y)
-            target.setRow(y,source.getRow(y),target_width);
-        return;
-    }
-
-    for (y=0;y<target_height;++y)
-    {
-        ys = (y*source_height+offs_y)/target_height;
-        int ys1 = ys+1;
-        if (ys1>=source_height)
-            ys1--;
-        if (ys<0)
-            ys=ys1=0;
-        if (source_height/2<target_height)
-            yprt = (y*source_height+offs_y)%target_height;
-        else
-            yprt = th2;
-        yprt1 = target_height-yprt;
-        for (x=0;x<target_width;++x)
-        {
-            xs = (x*source_width+offs_x)/target_width;
-            if (source_width/2<target_width)
-                xprt = (x*source_width+offs_x)%target_width;
-            else
-                xprt = tw2;
-            xprt1 = target_width-xprt;
-            int xs1 = xs+1;
-            if (xs1>=source_width)
-                xs1--;
-            if (xs<0)
-                xs=xs1=0;
-
-            unsigned a = source(xs,ys);
-            unsigned b = source(xs1,ys);
-            unsigned c = source(xs,ys1);
-            unsigned d = source(xs1,ys1);
-            unsigned out=0;
-            unsigned t = 0;
-
-            for(int i=0; i<4; i++){
-                unsigned p,r,s;
-                // X axis
-                p = a&0xff;
-                r = b&0xff;
-                if (p!=r)
-                    r = (r*xprt+p*xprt1+tw2)/target_width;
-                p = c&0xff;
-                s = d&0xff;
-                if (p!=s)
-                    s = (s*xprt+p*xprt1+tw2)/target_width;
-                // Y axis
-                if (r!=s)
-                    r = (s*yprt+r*yprt1+th2)/target_height;
-                // channel up
-                out |= r << t;
-                t += 8;
-                a >>= 8;
-                b >>= 8;
-                c >>= 8;
-                d >>= 8;
-            }
-            target(x,y)=out;
-        }
-    }
+    save_to_file<image_data_32>(image.data(), file, type);
 }
 
-
-template <typename Image>
-void scale_image_bilinear8 (Image& target,const Image& source, double x_off_f, double y_off_f)
+void save_to_file (image_32 const& image,
+                   std::string const& file,
+                   std::string const& type,
+                   rgba_palette const& palette)
 {
-
-    int source_width=source.width();
-    int source_height=source.height();
-
-    int target_width=target.width();
-    int target_height=target.height();
-
-    if (source_width<1 || source_height<1 ||
-        target_width<1 || target_height<1) return;
-    int x=0,y=0,xs=0,ys=0;
-    int tw2 = target_width/2;
-    int th2 = target_height/2;
-    int offs_x = rint((source_width-target_width-x_off_f*2*source_width)/2);
-    int offs_y = rint((source_height-target_height-y_off_f*2*source_height)/2);
-    unsigned yprt, yprt1, xprt, xprt1;
-
-    //no scaling or subpixel offset
-    if (target_height == source_height && target_width == source_width && offs_x == 0 && offs_y == 0){
-        for (y=0;y<target_height;++y)
-            target.setRow(y,source.getRow(y),target_width);
-        return;
-    }
-
-    for (y=0;y<target_height;++y)
-    {
-        ys = (y*source_height+offs_y)/target_height;
-        int ys1 = ys+1;
-        if (ys1>=source_height)
-            ys1--;
-        if (ys<0)
-            ys=ys1=0;
-        if (source_height/2<target_height)
-            yprt = (y*source_height+offs_y)%target_height;
-        else
-            yprt = th2;
-        yprt1 = target_height-yprt;
-        for (x=0;x<target_width;++x)
-        {
-            xs = (x*source_width+offs_x)/target_width;
-            if (source_width/2<target_width)
-                xprt = (x*source_width+offs_x)%target_width;
-            else
-                xprt = tw2;
-            xprt1 = target_width-xprt;
-            int xs1 = xs+1;
-            if (xs1>=source_width)
-                xs1--;
-            if (xs<0)
-                xs=xs1=0;
-
-            unsigned a = source(xs,ys);
-            unsigned b = source(xs1,ys);
-            unsigned c = source(xs,ys1);
-            unsigned d = source(xs1,ys1);
-            unsigned p,r,s;
-            // X axis
-            p = a&0xff;
-            r = b&0xff;
-            if (p!=r)
-                r = (r*xprt+p*xprt1+tw2)/target_width;
-            p = c&0xff;
-            s = d&0xff;
-            if (p!=s)
-                s = (s*xprt+p*xprt1+tw2)/target_width;
-            // Y axis
-            if (r!=s)
-                r = (s*yprt+r*yprt1+th2)/target_height;
-            target(x,y)=(0xff<<24) | (r<<16) | (r<<8) | r;
-        }
-    }
+    save_to_file<image_data_32>(image.data(), file, type, palette);
 }
 
-template <typename Image>
-void scale_image_agg (Image& target,const Image& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio)
+std::string save_to_string(image_32 const& image,
+                           std::string const& type)
 {
-    typedef agg::pixfmt_rgba32_plain pixfmt;
-    typedef agg::renderer_base<pixfmt> renderer_base;
-
-    // define some stuff we'll use soon
-    agg::rasterizer_scanline_aa<> ras;
-    agg::scanline_u8 sl;
-    agg::span_allocator<agg::rgba8> sa;
-    agg::image_filter_lut filter;
-
-    // initialize source AGG buffer
-    agg::rendering_buffer rbuf_src((unsigned char*)source.getBytes(), source.width(), source.height(), source.width() * 4);
-    pixfmt pixf_src(rbuf_src);
-
-    typedef agg::image_accessor_clone<pixfmt> img_src_type;
-    img_src_type img_src(pixf_src);
-
-    // initialise destination AGG buffer (with transparency)
-    agg::rendering_buffer rbuf_dst((unsigned char*)target.getBytes(), target.width(), target.height(), target.width() * 4);
-    pixfmt pixf_dst(rbuf_dst);
-    renderer_base rb_dst(pixf_dst);
-    rb_dst.clear(agg::rgba(0, 0, 0, 0));
-
-    // create a scaling matrix
-    agg::trans_affine img_mtx;
-    img_mtx /= agg::trans_affine_scaling(scale_factor * ratio, scale_factor * ratio);
-
-    // create a linear interpolator for our scaling matrix
-    typedef agg::span_interpolator_linear<> interpolator_type;
-    interpolator_type interpolator(img_mtx);
-
-    // draw an anticlockwise polygon to render our image into
-    double scaled_width = source.width() * scale_factor;
-    double scaled_height = source.height() * scale_factor;
-    ras.reset();
-    ras.move_to_d(x_off_f,                y_off_f);
-    ras.line_to_d(x_off_f + scaled_width, y_off_f);
-    ras.line_to_d(x_off_f + scaled_width, y_off_f + scaled_height);
-    ras.line_to_d(x_off_f,                y_off_f + scaled_height);
-
-    switch(scaling_method)
-    {
-    case SCALING_NEAR:
-    {
-        typedef agg::span_image_filter_rgba_nn<img_src_type, interpolator_type> span_gen_type;
-        span_gen_type sg(img_src, interpolator);
-        agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
-        return;
-    }
-    case SCALING_BILINEAR:
-        filter.calculate(agg::image_filter_bilinear(), true); break;
-    case SCALING_BICUBIC:
-        filter.calculate(agg::image_filter_bicubic(), true); break;
-    case SCALING_SPLINE16:
-        filter.calculate(agg::image_filter_spline16(), true); break;
-    case SCALING_SPLINE36:
-        filter.calculate(agg::image_filter_spline36(), true); break;
-    case SCALING_HANNING:
-        filter.calculate(agg::image_filter_hanning(), true); break;
-    case SCALING_HAMMING:
-        filter.calculate(agg::image_filter_hamming(), true); break;
-    case SCALING_HERMITE:
-        filter.calculate(agg::image_filter_hermite(), true); break;
-    case SCALING_KAISER:
-        filter.calculate(agg::image_filter_kaiser(), true); break;
-    case SCALING_QUADRIC:
-        filter.calculate(agg::image_filter_quadric(), true); break;
-    case SCALING_CATROM:
-        filter.calculate(agg::image_filter_catrom(), true); break;
-    case SCALING_GAUSSIAN:
-        filter.calculate(agg::image_filter_gaussian(), true); break;
-    case SCALING_BESSEL:
-        filter.calculate(agg::image_filter_bessel(), true); break;
-    case SCALING_MITCHELL:
-        filter.calculate(agg::image_filter_mitchell(), true); break;
-    case SCALING_SINC:
-        filter.calculate(agg::image_filter_sinc(filter_radius), true); break;
-    case SCALING_LANCZOS:
-        filter.calculate(agg::image_filter_lanczos(filter_radius), true); break;
-    case SCALING_BLACKMAN:
-        filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
-    }
-    typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
-    span_gen_type sg(img_src, interpolator, filter);
-    agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
+    return save_to_string<image_data_32>(image.data(), type);
 }
 
-template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio);
-
-template void scale_image_bilinear_old<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
-
-template void scale_image_bilinear8<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
+std::string save_to_string(image_32 const& image,
+                           std::string const& type,
+                           rgba_palette const& palette)
+{
+    return save_to_string<image_data_32>(image.data(), type, palette);
+}
 
 }

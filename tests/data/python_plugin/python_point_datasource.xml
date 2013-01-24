@@ -1,0 +1,18 @@
+<!DOCTYPE Map>
+<Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum-version="0.7.2">
+    <Style name="1">
+        <Rule>
+            <TextSymbolizer size="10" dy="-5" face-name="DejaVu Sans Book" halo-radius="1">[label]</TextSymbolizer>
+            <PointSymbolizer/>
+        </Rule>
+    </Style>
+
+    <Layer name="point" srs="+init=epsg:4326">
+        <StyleName>1</StyleName>
+        <Datasource>
+            <Parameter name="type">python</Parameter>
+            <Parameter name="factory">python_plugin_test:PointDatasource</Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>

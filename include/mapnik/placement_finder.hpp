@@ -25,11 +25,13 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/text_properties.hpp>
-#include <mapnik/text_placements/base.hpp>
+//#include <mapnik/text_placements/base.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/noncopyable.hpp>
 
 
 // agg
@@ -47,17 +49,17 @@ class string_info;
 class text_path;
 
 typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-typedef coord_transform2<CoordTransform,clipped_geometry_type> ClippedPathType;
-typedef coord_transform2<CoordTransform,geometry_type> PathType;
+typedef coord_transform<CoordTransform,clipped_geometry_type> ClippedPathType;
+typedef coord_transform<CoordTransform,geometry_type> PathType;
 
 typedef label_collision_detector4 DetectorType;
 
 
 template <typename DetectorT>
-class placement_finder : boost::noncopyable
+class placement_finder : mapnik::noncopyable
 {
 public:
-    placement_finder(Feature const& feature,
+    placement_finder(feature_impl const& feature,
                      text_placement_info const& placement_info,
                      string_info const& info,
                      DetectorT & detector,
@@ -80,14 +82,10 @@ public:
     /** Remove old placements. */
     void clear_placements();
 
-    inline placements_type &get_results() { return placements_; }
+    inline placements_type const& get_results() { return placements_; }
 
-    /** Additional boxes to take into account when finding placement.
-     * Used for finding line placements where multiple placements are returned.
-     * Boxes are relative to starting point of current placement.
-     * Only used for point placements!
-     */
-    std::vector<box2d<double> > additional_boxes;
+    std::vector<box2d<double> > & additional_boxes() { return additional_boxes_;}
+    std::vector<box2d<double> > const& additional_boxes() const { return additional_boxes_;}
 
     void set_collect_extents(bool collect) { collect_extents_ = collect; }
     bool get_collect_extents() const { return collect_extents_; }
@@ -160,6 +158,13 @@ private:
     box2d<double> extents_;
     /** Collect a bounding box of all texts placed. */
     bool collect_extents_;
+
+    /** Additional boxes to take into account when finding placement.
+     * Used for finding line placements where multiple placements are returned.
+     * Boxes are relative to starting point of current placement.
+     * Only used for point placements!
+     */
+    std::vector<box2d<double> > additional_boxes_;
 };
 }
 

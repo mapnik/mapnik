@@ -24,24 +24,36 @@
 #define RASTER_DATASOURCE_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
+#include <mapnik/feature_layer_desc.hpp>
+
+// boost
+#include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
+
+// stl
+#include <vector>
+#include <string>
+
 
 class raster_datasource : public mapnik::datasource
 {
 public:
-    raster_datasource(const mapnik::parameters& params, bool bind=true);
+    raster_datasource(const mapnik::parameters& params);
     virtual ~raster_datasource();
     datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     mapnik::featureset_ptr features(const mapnik::query& q) const;
-    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt) const;
+    mapnik::featureset_ptr features_at_point(mapnik::coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
     bool log_enabled() const;
-    void bind() const;
 
 private:
     mapnik::layer_descriptor desc_;
@@ -52,8 +64,8 @@ private:
     bool multi_tiles_;
     unsigned tile_size_;
     unsigned tile_stride_;
-    mutable unsigned width_;
-    mutable unsigned height_;
+    unsigned width_;
+    unsigned height_;
 };
 
 #endif // RASTER_DATASOURCE_HPP

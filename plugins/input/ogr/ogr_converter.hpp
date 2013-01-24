@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
 
 // ogr
 #include <ogrsf_frmts.h>

@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
+
 #include <mapnik/font_engine_freetype.hpp>
 
 void export_font_engine()

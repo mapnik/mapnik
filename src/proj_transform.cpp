@@ -150,7 +150,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         }
     }
 
-    do {
+    {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
@@ -160,7 +160,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         {
             return false;
         }
-    } while(false);
+    }
 
     if (is_source_longlat_)
     {
@@ -226,7 +226,7 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
     if (points <= 4) {
         steps = 0;
     } else {
-        steps = static_cast<int>(ceil((points - 4) / 4.0));
+        steps = static_cast<int>(std::ceil((points - 4) / 4.0));
     }
 
     steps += 1;

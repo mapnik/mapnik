@@ -22,6 +22,7 @@
 
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/noncopyable.hpp>
 
 extern "C"
 {
@@ -29,11 +30,10 @@ extern "C"
 }
 
 #include <boost/scoped_array.hpp>
-#include <boost/utility.hpp>
 
 namespace mapnik
 {
-class png_reader : public image_reader, boost::noncopyable
+class png_reader : public image_reader, mapnik::noncopyable
 {
 private:
     std::string fileName_;
@@ -42,10 +42,11 @@ private:
     int bit_depth_;
     int color_type_;
 public:
-    explicit png_reader(const std::string& fileName);
+    explicit png_reader(std::string const& fileName);
     ~png_reader();
     unsigned width() const;
     unsigned height() const;
+    bool premultiplied_alpha() const { return false; } //http://www.libpng.org/pub/png/spec/1.1/PNG-Rationale.html
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
     void init();
@@ -53,14 +54,14 @@ private:
 
 namespace
 {
-image_reader* create_png_reader(const std::string& file)
+image_reader* create_png_reader(std::string const& file)
 {
     return new png_reader(file);
 }
 const bool registered = register_image_reader("png",create_png_reader);
 }
 
-png_reader::png_reader(const std::string& fileName)
+png_reader::png_reader(std::string const& fileName)
     : fileName_(fileName),
       width_(0),
       height_(0),
@@ -71,6 +72,16 @@ png_reader::png_reader(const std::string& fileName)
 }
 
 png_reader::~png_reader() {}
+
+void user_error_fn(png_structp png_ptr, png_const_charp error_msg)
+{
+    throw image_reader_exception("failed to read invalid png");
+}
+
+void user_warning_fn(png_structp png_ptr, png_const_charp warning_msg)
+{
+    MAPNIK_LOG_DEBUG(png_reader) << "libpng warning: '" << warning_msg << "'";
+}
 
 static void
 png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
@@ -84,7 +95,6 @@ png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
         png_error(png_ptr, "Read Error");
     }
 }
-
 
 void png_reader::init()
 {
@@ -111,12 +121,26 @@ void png_reader::init()
         fclose(fp);
         throw image_reader_exception("failed to allocate png_ptr");
     }
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
+
+    // catch errors in a custom way to avoid the need for setjmp
+    png_set_error_fn(png_ptr, png_get_error_ptr(png_ptr), user_error_fn, user_warning_fn);
+
+    png_infop info_ptr;
+    try
+    {
+        info_ptr = png_create_info_struct(png_ptr);
+        if (!info_ptr)
+        {
+            png_destroy_read_struct(&png_ptr,0,0);
+            fclose(fp);
+            throw image_reader_exception("failed to create info_ptr");
+        }
+    }
+    catch (std::exception const& ex)
     {
         png_destroy_read_struct(&png_ptr,0,0);
         fclose(fp);
-        throw image_reader_exception("failed to create info_ptr");
+        throw;
     }
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
@@ -160,12 +184,25 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
         throw image_reader_exception("failed to allocate png_ptr");
     }
 
-    png_infop info_ptr = png_create_info_struct(png_ptr);
-    if (!info_ptr)
+    // catch errors in a custom way to avoid the need for setjmp
+    png_set_error_fn(png_ptr, png_get_error_ptr(png_ptr), user_error_fn, user_warning_fn);
+
+    png_infop info_ptr;
+    try
+    {
+        info_ptr = png_create_info_struct(png_ptr);
+        if (!info_ptr)
+        {
+            png_destroy_read_struct(&png_ptr,0,0);
+            fclose(fp);
+            throw image_reader_exception("failed to create info_ptr");
+        }
+    }
+    catch (std::exception const& ex)
     {
         png_destroy_read_struct(&png_ptr,0,0);
         fclose(fp);
-        throw image_reader_exception("failed to create info_ptr");
+        throw;
     }
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
@@ -190,22 +227,43 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     if (png_get_gAMA(png_ptr, info_ptr, &gamma))
         png_set_gamma(png_ptr, 2.2, gamma);
 
-    png_read_update_info(png_ptr, info_ptr);
-
-    //START read image rows
-    unsigned w=std::min(unsigned(image.width()),width_);
-    unsigned h=std::min(unsigned(image.height()),height_);
-    unsigned rowbytes=png_get_rowbytes(png_ptr, info_ptr);
-    boost::scoped_array<png_byte> row(new png_byte[rowbytes]);
-    for (unsigned i=0;i<height_;++i)
+    if (x0 == 0 && y0 == 0 && image.width() >= width_ && image.height() >= height_)
     {
-        png_read_row(png_ptr,row.get(),0);
-        if (i>=y0 && i<h)
+
+        if (png_get_interlace_type(png_ptr,info_ptr) == PNG_INTERLACE_ADAM7)
         {
-            image.setRow(i-y0,reinterpret_cast<unsigned*>(&row[x0]),w);
+            png_set_interlace_handling(png_ptr); // FIXME: libpng bug?
+            // according to docs png_read_image
+            // "..automatically handles interlacing,
+            // so you don't need to call png_set_interlace_handling()"
         }
+        png_read_update_info(png_ptr, info_ptr);
+        // we can read whole image at once
+        // alloc row pointers
+        boost::scoped_array<png_byte*> rows(new png_bytep[height_]);
+        for (unsigned i=0; i<height_; ++i)
+            rows[i] = (png_bytep)image.getRow(i);
+        png_read_image(png_ptr, rows.get());
     }
-    //END
+    else
+    {
+        png_read_update_info(png_ptr, info_ptr);
+        unsigned w=std::min(unsigned(image.width()),width_);
+        unsigned h=std::min(unsigned(image.height()),height_);
+        unsigned rowbytes=png_get_rowbytes(png_ptr, info_ptr);
+        boost::scoped_array<png_byte> row(new png_byte[rowbytes]);
+        //START read image rows
+        for (unsigned i=0;i<height_;++i)
+        {
+            png_read_row(png_ptr,row.get(),0);
+            if (i>=y0 && i<h)
+            {
+                image.setRow(i-y0,reinterpret_cast<unsigned*>(&row[x0]),w);
+            }
+        }
+        //END
+    }
+
     png_read_end(png_ptr,0);
     png_destroy_read_struct(&png_ptr, &info_ptr,0);
     fclose(fp);

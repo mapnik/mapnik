@@ -37,7 +37,6 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
@@ -50,9 +49,6 @@
 // If you change this also change the according kismet command length !
 #define MAX_KISMET_LINE 1024 // maximum length of a kismet command (assumed)
 #define KISMET_COMMAND  "*NETWORK: \001%1024[^\001]\001 %1024s %d %lf %lf"
-
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -71,7 +67,7 @@ boost::mutex knd_list_mutex;
 std::list<kismet_network_data> knd_list;
 const unsigned int queue_size = 20;
 
-kismet_datasource::kismet_datasource(parameters const& params, bool bind)
+kismet_datasource::kismet_datasource(parameters const& params)
     : datasource(params),
       extent_(),
       extent_initialized_(false),
@@ -79,7 +75,7 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
       srs_("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding","utf-8"))
 {
-    boost::optional<std::string> host = params_.get<std::string>("host");
+    boost::optional<std::string> host = params.get<std::string>("host");
     if (host)
     {
         host_ = *host;
@@ -89,44 +85,32 @@ kismet_datasource::kismet_datasource(parameters const& params, bool bind)
         throw datasource_exception("Kismet Plugin: missing <host> parameter");
     }
 
-    boost::optional<unsigned int> port = params_.get<unsigned int>("port", 2501);
+    boost::optional<int> port = params.get<int>("port", 2501);
     if (port)
     {
-        port_ = *port;
+        port_ = static_cast<unsigned>(*port);
     }
 
-    boost::optional<std::string> srs = params_.get<std::string>("srs");
+    boost::optional<std::string> srs = params.get<std::string>("srs");
     if (srs)
     {
         srs_ = *srs;
     }
 
-    boost::optional<std::string> ext = params_.get<std::string>("extent");
+    boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext)
     {
         extent_initialized_ = extent_.from_string(*ext);
     }
 
     kismet_thread.reset(new boost::thread(boost::bind(&kismet_datasource::run, this, host_, port_)));
-
-    if (bind)
-    {
-        this->bind();
-    }
-}
-
-void kismet_datasource::bind() const
-{
-    if (is_bound_) return;
-
-    is_bound_ = true;
 }
 
 kismet_datasource::~kismet_datasource()
 {
 }
 
-std::string kismet_datasource::name()
+const char * kismet_datasource::name()
 {
     return "kismet";
 }
@@ -138,7 +122,6 @@ mapnik::datasource::datasource_t kismet_datasource::type() const
 
 box2d<double> kismet_datasource::envelope() const
 {
-    if (! is_bound_) bind();
     return extent_;
 }
 
@@ -154,9 +137,7 @@ layer_descriptor kismet_datasource::get_descriptor() const
 
 featureset_ptr kismet_datasource::features(query const& q) const
 {
-    if (! is_bound_) bind();
-
-    MAPNIK_LOG_INFO(kismet) << "kismet_datasource::features()";
+    MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource::features()";
 
     // TODO: use box2d to filter bbox before adding to featureset_ptr
     // mapnik::box2d<double> const& e = q.get_bbox();
@@ -170,16 +151,14 @@ featureset_ptr kismet_datasource::features(query const& q) const
     // return featureset_ptr();
 }
 
-featureset_ptr kismet_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr kismet_datasource::features_at_point(coord2d const& pt, double tol) const
 {
-    if (! is_bound_) bind();
-
-    MAPNIK_LOG_INFO(kismet) << "kismet_datasource::features_at_point()";
+    MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource::features_at_point()";
 
     return featureset_ptr();
 }
 
-void kismet_datasource::run(const std::string& ip_host, const unsigned int port)
+void kismet_datasource::run(std::string const& ip_host, const unsigned int port)
 {
     MAPNIK_LOG_DEBUG(kismet) << "kismet_datasource: Enter run";
 

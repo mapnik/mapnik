@@ -23,8 +23,20 @@
 #ifndef MAPNIK_AGG_HELPERS_HPP
 #define MAPNIK_AGG_HELPERS_HPP
 
+// mapnik
+#include <mapnik/gamma_method.hpp>
+#include <mapnik/stroke.hpp>
+
+// agg 
+#include "agg_basics.h"
 #include "agg_gamma_functions.h"
 #include "agg_math_stroke.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_scanline_u.h"
+#include "agg_scanline_p.h"
+#include "agg_renderer_outline_aa.h"
+#include "agg_renderer_scanline.h"
+#include "agg_rasterizer_outline_aa.h"
 
 namespace mapnik {
 
@@ -83,6 +95,41 @@ void set_join_caps(Stroke const& stroke_, PathType & stroke)
         break;
     default:
         stroke.generator().line_cap(agg::round_cap);
+    }
+}
+
+
+template <typename Stroke,typename Rasterizer>
+void set_join_caps_aa(Stroke const& stroke_, Rasterizer & ras)
+{
+
+    line_join_e join=stroke_.get_line_join();
+    switch (join)
+    {
+    case MITER_JOIN:
+        ras.line_join(agg::outline_miter_accurate_join);
+        break;
+    case MITER_REVERT_JOIN:
+        ras.line_join(agg::outline_no_join);
+        break;
+    case ROUND_JOIN:
+        ras.line_join(agg::outline_round_join);
+        break;
+    default:
+        ras.line_join(agg::outline_no_join);
+    }
+
+    line_cap_e cap=stroke_.get_line_cap();
+    switch (cap)
+    {
+    case BUTT_CAP:
+        ras.round_cap(false);
+        break;
+    case SQUARE_CAP:
+        ras.round_cap(false);
+        break;
+    default:
+        ras.round_cap(true);
     }
 }
 

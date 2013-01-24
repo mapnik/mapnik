@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#import math, operator
-import Image
 import sys
+import mapnik
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 COMPUTE_THRESHOLD = 16
 
@@ -10,53 +14,94 @@ errors = []
 passed = 0
 
 # returns true if pixels are not identical
-def compare_pixels(pixel1, pixel2):
-    r_diff = abs(pixel1[0] - pixel2[0])
-    g_diff = abs(pixel1[1] - pixel2[1])
-    b_diff = abs(pixel1[2] - pixel2[2])
-    if(r_diff > COMPUTE_THRESHOLD or g_diff > COMPUTE_THRESHOLD or b_diff > COMPUTE_THRESHOLD):
-        return True
-    else:
+def compare_pixels(pixel1, pixel2, alpha=True):
+    if pixel1 == pixel2:
         return False
+    r_diff = abs((pixel1 & 0xff) - (pixel2 & 0xff))
+    g_diff = abs(((pixel1 >> 8) & 0xff) - ((pixel2 >> 8) & 0xff))
+    b_diff = abs(((pixel1 >> 16) & 0xff)- ((pixel2 >> 16) & 0xff))
+    if alpha:
+        a_diff = abs(((pixel1 >> 24) & 0xff) - ((pixel2 >> 24) & 0xff))
+        if(r_diff > COMPUTE_THRESHOLD or
+           g_diff > COMPUTE_THRESHOLD or
+           b_diff > COMPUTE_THRESHOLD or
+           a_diff > COMPUTE_THRESHOLD):
+            return True
+    else:
+        if(r_diff > COMPUTE_THRESHOLD or
+           g_diff > COMPUTE_THRESHOLD or
+           b_diff > COMPUTE_THRESHOLD):
+            return True
+    return False
 
-# compare tow images and return number of different pixels
-def compare(fn1, fn2):
+def fail(actual,expected,message):
+    global errors
+    errors.append((message, actual, expected))
+
+# compare two images and return number of different pixels
+def compare(actual, expected, threshold=0, alpha=True):
     global errors
     global passed
-    im1 = Image.open(fn1)
+    im1 = mapnik.Image.open(actual)
     try:
-        im2 = Image.open(fn2)
-    except IOError:
-        errors.append((fn1, None))
+        im2 = mapnik.Image.open(expected)
+    except RuntimeError:
+        errors.append((None, actual, expected))
         return -1
     diff = 0
-    pixels = im1.size[0] * im1.size[1]
-    delta_pixels = im2.size[0] * im2.size[1]  - pixels
+    pixels = im1.width() * im1.height()
+    delta_pixels = (im2.width() * im2.height()) - pixels
     if delta_pixels != 0:
-        errors.append((fn1, delta_pixels))
+        errors.append((delta_pixels, actual, expected))
         return delta_pixels
-    im1 = im1.getdata()
-    im2 = im2.getdata()
-    for i in range(3, pixels - 1, 3):
-        if(compare_pixels(im1[i], im2[i])):
-            diff = diff + 1
-    if diff != 0:
-        errors.append((fn1, diff))
+    for x in range(0,im1.width(),2):
+        for y in range(0,im1.height(),2):
+            if compare_pixels(im1.get_pixel(x,y),im2.get_pixel(x,y),alpha=alpha):
+                diff += 1
+    if diff > threshold: # accept one pixel different
+        errors.append((diff, actual, expected))
     passed += 1
     return diff
 
-def summary():
+def compare_grids(actual, expected, threshold=0, alpha=True):
     global errors
     global passed
-    print "-"*80
-    print "Visual text rendering summary:",
+    im1 = json.loads(open(actual).read())
+    try:
+        im2 = json.loads(open(expected).read())
+    except RuntimeError:
+        errors.append((None, actual, expected))
+        return -1
+    equal = (im1 == im2)
+    diff = 0
+    # TODO - real diffing
+    if not equal:
+        errors.append((1, actual, expected))
+    passed += 1
+    return diff
+
+def summary(generate=False):
+    global errors
+    global passed
+    
     if len(errors) != 0:
-        for error in errors:
-            if (error[1] is None):
-                print "Could not verify %s: No reference image found!" % error[0]
-            else:
-                print "%s failed: %d different pixels" % error
+        msg = "\nVisual text rendering: %s failed / %s passed" % (len(errors),passed)
+        print msg
+        for idx,error in enumerate(errors):
+            if error[0] is None:
+                if generate:
+                    actual = open(error[1],'r').read()
+                    open(error[2],'wb').write(actual)
+                    print str(idx+1) + ") Generating reference image: '%s'" % error[2]
+                    continue
+                else:
+                    print str(idx+1) + ")Could not verify %s: No reference image found!" % error[1]
+            elif isinstance(error[0],int):
+                print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % error
+            elif isinstance(error[0],str):
+                print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s" % error[0]
         sys.exit(1)
     else:
-        print 'All %s tests passed: \x1b[1;32m✓ \x1b[0m' % passed
+        msg = '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % passed
+        print msg
         sys.exit(0)

@@ -35,10 +35,12 @@ namespace agg
     //------------------------------------------------------------pod_allocator
     template<class T> struct pod_allocator
     {
+        //static T*   allocate(unsigned num)       { return static_cast<T*>(::operator new(sizeof(T)*num));}
+        //static void deallocate(T* ptr, unsigned) { ::operator delete(ptr) ;}  
         static T*   allocate(unsigned num)       { return new T [num]; }
-        static void deallocate(T* ptr, unsigned) { delete [] ptr;      }
+        static void deallocate(T* ptr, unsigned) { delete [] ptr;      }      
     };
-
+    
     // Single object allocator. It's also can be replaced with your custom
     // allocator. The difference is that it can only allocate a single 
     // object and the constructor and destructor must be called. 

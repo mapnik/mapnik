@@ -1,0 +1,2 @@
+x,y,line
+0,0,"\r\nmany\r\nlines\r\nof text\r\nwith unix newlines\r\n"

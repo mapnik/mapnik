@@ -11,7 +11,7 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
+if 'ogr' in mapnik.DatasourceCache.plugin_names():
 
     # Shapefile initialization
     def test_shapefile_init():
@@ -26,7 +26,10 @@ if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
 
     # Shapefile properties
     def test_shapefile_properties():
-        ds = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0,encoding='latin1')
+        # NOTE: encoding is latin1 but gdal >= 1.9 should now expose utf8 encoded features
+        # See SHAPE_ENCODING for overriding: http://gdal.org/ogr/drv_shapefile.html
+        # So: failure for the NOM_FR field is expected for older gdal
+        ds = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0)
         f = ds.features_at_point(ds.envelope().center()).features[0]
         eq_(ds.geometry_type(),mapnik.DataGeometryType.Polygon)
 
@@ -53,6 +56,11 @@ if 'ogr' in mapnik.DatasourceCache.instance().plugin_names():
         query.add_property_name('bogus')
         fs = ds.features(query)
 
+    # disabled because OGR prints an annoying error: ERROR 1: Invalid Point object. Missing 'coordinates' member.
+    #def test_handling_of_null_features():
+    #    ds = mapnik.Ogr(file='../data/json/null_feature.json',layer_by_index=0)
+    #    fs = ds.all_features()
+    #    eq_(len(fs),1)
 
 if __name__ == "__main__":
     setup()

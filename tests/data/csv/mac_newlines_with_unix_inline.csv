@@ -1,0 +1,7 @@
+x,y,line
+0,0,"
+  many
+  lines
+  of text
+  with unix newlines
+  "

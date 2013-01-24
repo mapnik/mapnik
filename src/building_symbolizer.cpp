@@ -22,6 +22,8 @@
 
 // mapnik
 #include <mapnik/building_symbolizer.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/attribute.hpp>
 
 namespace mapnik
 {
@@ -32,7 +34,7 @@ building_symbolizer::building_symbolizer()
       opacity_(1.0)
 {}
 
-building_symbolizer::building_symbolizer(color const& fill, expression_ptr height)
+building_symbolizer::building_symbolizer(color const& fill, expression_ptr const& height)
     : symbolizer_base(),
       fill_(fill),
       height_(height),
@@ -47,12 +49,12 @@ void building_symbolizer::set_fill(color const& fill)
 {
     fill_ = fill;
 }
-expression_ptr building_symbolizer::height() const
+expression_ptr const& building_symbolizer::height() const
 {
     return height_;
 }
 
-void building_symbolizer::set_height(expression_ptr height)
+void building_symbolizer::set_height(expression_ptr const& height)
 {
     height_=height;
 }

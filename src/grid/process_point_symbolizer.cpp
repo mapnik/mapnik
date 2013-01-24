@@ -21,32 +21,41 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_pixfmt.hpp>
-#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
+
+#include <mapnik/geom_util.hpp>
+#include <mapnik/label_collision_detector.hpp>
 #include <mapnik/point_symbolizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/parse_path.hpp>
+
+// agg
+#include "agg_trans_affine.h"
 
 // stl
 #include <string>
+
+// boost
+#include <boost/make_shared.hpp>
 
 namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(point_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    std::string filename = path_processor_type::evaluate(*sym.get_filename(), *feature);
+    std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
 
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )
     {
-        marker = marker_cache::instance()->find(filename, true);
+        marker = marker_cache::instance().find(filename, true);
     }
     else
     {
@@ -55,49 +64,58 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
 
     if (marker)
     {
-        for (unsigned i=0; i<feature->num_geometries(); ++i)
+        box2d<double> const& bbox = (*marker)->bounding_box();
+        coord2d center = bbox.center();
+
+        agg::trans_affine tr;
+        evaluate_transform(tr, feature, sym.get_image_transform());
+        tr = agg::trans_affine_scaling(scale_factor_) * tr;
+
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine recenter_tr = recenter * tr;
+        box2d<double> label_ext = bbox * recenter_tr;
+
+        for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
-            geometry_type const& geom = feature->get_geometry(i);
+            geometry_type const& geom = feature.get_geometry(i);
             double x;
             double y;
             double z=0;
             if (sym.get_point_placement() == CENTROID_POINT_PLACEMENT)
-                geom.label_position(&x, &y);
+            {
+                if (!label::centroid(geom, x, y))
+                    return;
+            }
             else
-                geom.label_interior_position(&x, &y);
+            {
+                if (!label::interior_position(geom ,x, y))
+                    return;
+            }
 
             prj_trans.backward(x,y,z);
             t_.forward(&x,&y);
-
-            double w = (*marker)->width() * (1.0/pixmap_.get_resolution());
-            double h = (*marker)->height() * (1.0/pixmap_.get_resolution());
-
-            double px = x - 0.5 * w;
-            double py = y - 0.5 * h;
-            box2d<double> label_ext (px, py, px + w, py + h);
+            label_ext.re_center(x,y);
             if (sym.get_allow_overlap() ||
-                detector_.has_placement(label_ext))
+                detector_->has_placement(label_ext))
             {
-                agg::trans_affine tr;
-                boost::array<double,6> const& m = sym.get_transform();
-                tr.load_from(&m[0]);
 
-                render_marker(feature, pixmap_.get_resolution(),
-                              pixel_position(px, py),
-                              **marker, tr,
-                              sym.get_opacity());
+                render_marker(feature,
+                              pixmap_.get_resolution(),
+                              pixel_position(x, y),
+                              **marker,
+                              tr,
+                              sym.get_opacity(),
+                              sym.comp_op());
 
                 if (!sym.get_ignore_placement())
-                    detector_.insert(label_ext);
+                    detector_->insert(label_ext);
             }
         }
     }
-
 }
 
 template void grid_renderer<grid>::process(point_symbolizer const&,
-                                           mapnik::feature_ptr const&,
+                                           mapnik::feature_impl &,
                                            proj_transform const&);
 
 }
-

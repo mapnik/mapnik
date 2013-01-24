@@ -23,6 +23,7 @@
 #ifndef OSM_H
 #define OSM_H
 
+#include <mapnik/value_types.hpp>
 #include <vector>
 #include <string>
 #include <map>
@@ -33,12 +34,12 @@ struct bounds
 {
     double w, s, e, n;
     bounds() { w = -180; s = -90; e = 180; n = 90; }
-    bounds(double w, double s, double e, double n)
+    bounds(double w_, double s_, double e_, double n_)
     { 
-        this->w = w;
-        this->s = s;
-        this->e = e;
-        this->n = n;
+        this->w = w_;
+        this->s = s_;
+        this->e = e_;
+        this->n = n_;
     }
 };
 
@@ -49,19 +50,23 @@ public:
 
     polygon_types()
     {
+        ptypes.push_back(std::pair<std::string, std::string>("water", ""));
+        ptypes.push_back(std::pair<std::string, std::string>("aeroway", ""));
+        ptypes.push_back(std::pair<std::string, std::string>("building", ""));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "wood"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "water"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "heath"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "marsh"));
         ptypes.push_back(std::pair<std::string, std::string>("military", "danger_area"));
-        ptypes.push_back(std::pair<std::string, std::string>("landuse","forest"));
-        ptypes.push_back(std::pair<std::string, std::string>("landuse","industrial"));
+        ptypes.push_back(std::pair<std::string, std::string>("landuse", "forest"));
+        ptypes.push_back(std::pair<std::string, std::string>("landuse", "industrial"));
+        ptypes.push_back(std::pair<std::string, std::string>("leisure", "park"));
     }
 };
 
 struct osm_item
 {
-    long id;
+    mapnik::value_integer id;
     std::map<std::string, std::string> keyvals;
     virtual std::string to_string();
     virtual ~osm_item() {}
@@ -102,10 +107,10 @@ public:
 
     ~osm_dataset();
 
-    bool load(const char* name, const std::string& parser = "libxml2");
-    bool load_from_url(const std::string&,
-                       const std::string&,
-                       const std::string& parser = "libxml2");
+    bool load(const char* name, std::string const& parser = "libxml2");
+    bool load_from_url(std::string const&,
+                       std::string const&,
+                       std::string const& parser = "libxml2");
     void clear();
     void add_node(osm_node* n) { nodes.push_back(n); }
     void add_way(osm_way* w) { ways.push_back(w); }

@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/image_reader.hpp>
 #include <mapnik/color.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // jpeg
 extern "C"
@@ -32,24 +33,24 @@ extern "C"
 
 // boost
 #include <boost/scoped_array.hpp>
-#include <boost/utility.hpp>
 
 // std
 #include <cstdio>
 
 namespace mapnik
 {
-class JpegReader : public image_reader, boost::noncopyable
+class JpegReader : public image_reader, mapnik::noncopyable
 {
 private:
     std::string fileName_;
     unsigned width_;
     unsigned height_;
 public:
-    explicit JpegReader(const std::string& fileName);
+    explicit JpegReader(std::string const& fileName);
     ~JpegReader();
     unsigned width() const;
     unsigned height() const;
+    inline bool premultiplied_alpha() const { return true; }
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
     void init();
@@ -57,14 +58,14 @@ private:
 
 namespace
 {
-image_reader* createJpegReader(const std::string& file)
+image_reader* createJpegReader(std::string const& file)
 {
     return new JpegReader(file);
 }
 const bool registered = register_image_reader("jpeg",createJpegReader);
 }
 
-JpegReader::JpegReader(const std::string& fileName)
+JpegReader::JpegReader(std::string const& fileName)
     : fileName_(fileName),
       width_(0),
       height_(0)

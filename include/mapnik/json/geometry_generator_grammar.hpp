@@ -26,8 +26,9 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/util/vertex_iterator.hpp>
+#include <mapnik/util/path_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
+#include <mapnik/vertex.hpp>    // for CommandType::SEG_MOVETO
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -36,8 +37,9 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/home/phoenix/statement/if.hpp>
+#include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
+#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
 
 
 //#define BOOST_SPIRIT_USE_PHOENIX_V3 1
@@ -78,7 +80,7 @@ struct get_first
     geometry_type::value_type const operator() (geometry_type const& geom) const
     {
         geometry_type::value_type coord;
-        boost::get<0>(coord) = geom.get_vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+        boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
         return coord;
     }
 };
@@ -116,7 +118,28 @@ struct json_coordinate_policy : karma::real_policies<T>
 {
     typedef boost::spirit::karma::real_policies<T> base_type;
     static int floatfield(T n) { return base_type::fmtflags::fixed; }
-    static unsigned precision(T n) { return 12 ;}
+
+    static unsigned precision(T n)
+    {
+        if (n == 0.0) return 0;
+        using namespace boost::spirit;
+        return static_cast<unsigned>(15 - boost::math::trunc(log10(traits::get_absolute_value(n))));
+    }
+
+    template <typename OutputIterator>
+    static bool dot(OutputIterator& sink, T n, unsigned precision)
+    {
+        if (n == 0) return true;
+        return base_type::dot(sink, n, precision);
+    }
+
+    template <typename OutputIterator>
+    static bool fraction_part(OutputIterator& sink, T n
+                       , unsigned adjprec, unsigned precision)
+    {
+        if (n == 0) return true;
+        return base_type::fraction_part(sink, n, adjprec, precision);
+    }
 };
 
 }
@@ -136,15 +159,14 @@ struct geometry_generator_grammar :
         using boost::spirit::karma::_a;
         using boost::spirit::karma::_r1;
         using boost::spirit::karma::eps;
-        using boost::spirit::karma::string;
-        
+
         coordinates =  point | linestring | polygon
             ;
-        
+
         point = &uint_(mapnik::Point)[_1 = _type(_val)]
             << point_coord [_1 = _first(_val)]
             ;
-        
+
         linestring = &uint_(mapnik::LineString)[_1 = _type(_val)]
             << lit('[')
             << coords
@@ -156,39 +178,39 @@ struct geometry_generator_grammar :
             << coords2
             << lit("]]")
             ;
-        
-        point_coord = &uint_ 
-            << lit('[') 
+
+        point_coord = &uint_
+            << lit('[')
             << coord_type << lit(',') << coord_type
             << lit("]")
             ;
-        
+
         polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
-                           << string[ if_ (_r1 > 1) [_1 = "],["]
+                           << karma::string[ if_ (_r1 > 1) [_1 = "],["]
                                       .else_[_1 = '[' ]] | &uint_ << lit(','))
             << lit('[') << coord_type
             << lit(',')
             << coord_type << lit(']')
             ;
-        
+
         coords2 %= *polygon_coord(_a)
             ;
-        
+
         coords = point_coord % lit(',')
             ;
-        
+
     }
     // rules
     karma::rule<OutputIterator, geometry_type const& ()> coordinates;
     karma::rule<OutputIterator, geometry_type const& ()> point;
     karma::rule<OutputIterator, geometry_type const& ()> linestring;
     karma::rule<OutputIterator, geometry_type const& ()> polygon;
-    
+
     karma::rule<OutputIterator, geometry_type const& ()> coords;
     karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> coords2;
     karma::rule<OutputIterator, geometry_type::value_type ()> point_coord;
     karma::rule<OutputIterator, geometry_type::value_type (unsigned& )> polygon_coord;
-    
+
     // phoenix functions
     phoenix::function<get_type > _type;
     phoenix::function<get_first> _first;
@@ -200,7 +222,7 @@ struct geometry_generator_grammar :
 
 template <typename OutputIterator>
 struct multi_geometry_generator_grammar :
-        karma::grammar<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >, 
+        karma::grammar<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >,
                        geometry_container const& ()>
 {
 
@@ -213,7 +235,6 @@ struct multi_geometry_generator_grammar :
         using boost::spirit::karma::_1;
         using boost::spirit::karma::_a;
         using boost::spirit::karma::_r1;
-        using boost::spirit::karma::string;
 
         geometry_types.add
             (mapnik::Point,"\"Point\"")
@@ -223,36 +244,36 @@ struct multi_geometry_generator_grammar :
             (mapnik::LineString + 3,"\"MultiLineString\"")
             (mapnik::Polygon + 3,"\"MultiPolygon\"")
             ;
-        
-        start %= ( eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)] 
+
+        start %= ( eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)]
                    << lit("{\"type\":\"GeometryCollection\",\"geometries\":[")
                    << geometry_collection << lit("]}")
                    |
-                   geometry)              
+                   geometry)
             ;
-         
+
         geometry_collection = -(geometry2 % lit(','))
             ;
-        
-        geometry = (lit("{\"type\":") 
-                    << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = _multi_type(_val)] 
+
+        geometry = (lit("{\"type\":")
+                    << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = _multi_type(_val)]
                     << lit(",\"coordinates\":")
-                    << string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = '[']]
+                    << karma::string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = '[']]
                     << coordinates
-                    << string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']']]
-                    << lit('}')) | lit("null")       
+                    << karma::string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']']]
+                    << lit('}')) | lit("null")
             ;
-        
-        geometry2 = lit("{\"type\":") 
+
+        geometry2 = lit("{\"type\":")
             << geometry_types[_1 = _a][_a = type_(_val)]
             << lit(",\"coordinates\":")
             << path
-            << lit('}') 
+            << lit('}')
             ;
-        
+
         coordinates %= path % lit(',')
             ;
-        
+
     }
     // rules
     karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >,

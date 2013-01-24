@@ -3,15 +3,15 @@
     <Style name="test 1">
         <Rule>
             <Filter>[foo]='bar'</Filter>
-            <PointSymbolizer file="../data/images/foobar.png"/>
+            <PointSymbolizer file="../data/images/dummy.png"/>
         </Rule>
         <Rule>
             <ElseFilter/>
-            <PointSymbolizer file="../data/images/else.png"/>
+            <PointSymbolizer file="../data/images/dummy.png"/>
         </Rule>
         <Rule>
             <AlsoFilter/>
-            <PointSymbolizer file="../data/images/also.png"/>
+            <PointSymbolizer file="../data/images/dummy.png"/>
         </Rule>
     </Style>
 </Map>

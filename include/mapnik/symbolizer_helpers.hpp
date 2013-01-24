@@ -25,16 +25,25 @@
 //mapnik
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/shield_symbolizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/processed_text.hpp>
-#include <mapnik/text_path.hpp>
 
 //boost
 #include <boost/shared_ptr.hpp>
 
+// agg
+#include "agg_trans_affine.h"
+
+// fwd declares
+namespace mapnik {
+  class CoordTransform;
+  class marker;
+  class proj_transform;
+  class string_info;
+  class text_path;
+  template <typename DetectorT> class placement_finder;
+}
 
 namespace mapnik {
 
@@ -63,7 +72,6 @@ public:
           t_(t),
           font_manager_(font_manager),
           detector_(detector),
-          writer_(sym.get_metawriter()),
           dims_(0, 0, width, height),
           query_extent_(query_extent),
           text_(font_manager, scale_factor),
@@ -85,10 +93,11 @@ public:
     bool next();
 
     /** Get current placement. next() has to be called before! */
-    placements_type & placements() const;
+    placements_type const& placements() const;
 protected:
     bool next_point_placement();
     bool next_line_placement();
+    bool next_line_placement_clipped();
     bool next_placement();
     void initialize_geometries();
     void initialize_points();
@@ -100,7 +109,6 @@ protected:
     CoordTransform const& t_;
     FaceManagerT & font_manager_;
     DetectorT & detector_;
-    metawriter_with_properties writer_;
     box2d<double> dims_;
     box2d<double> const& query_extent_;
     //Processing
@@ -150,10 +158,25 @@ public:
         init_marker();
     }
 
+    box2d<double> const& get_marker_extent() const
+    {
+        return marker_ext_;
+    }
+
+    double get_marker_height() const
+    {
+        return marker_h_;
+    }
+
+    double get_marker_width() const
+    {
+        return marker_w_;
+    }
+
     bool next();
     pixel_position get_marker_position(text_path const& p);
     marker & get_marker() const;
-    agg::trans_affine const& get_transform() const;
+    agg::trans_affine const& get_image_transform() const;
 protected:
     bool next_point_placement();
     bool next_line_placement();
@@ -161,13 +184,12 @@ protected:
     shield_symbolizer const& sym_;
     box2d<double> marker_ext_;
     boost::optional<marker_ptr> marker_;
-    agg::trans_affine transform_;
+    agg::trans_affine image_transform_;
     double marker_w_;
     double marker_h_;
     double marker_x_;
     double marker_y_;
-    // F***ing templates...
-    // http://womble.decadent.org.uk/c++/template-faq.html#base-lookup
+
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geometries_to_process_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::placement_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement;
@@ -175,7 +197,6 @@ protected:
     using text_symbolizer_helper<FaceManagerT, DetectorT>::geo_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::point_itr_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::points_;
-    using text_symbolizer_helper<FaceManagerT, DetectorT>::writer_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::font_manager_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::feature_;
     using text_symbolizer_helper<FaceManagerT, DetectorT>::t_;

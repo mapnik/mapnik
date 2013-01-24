@@ -23,8 +23,8 @@
 #ifndef MAPNIK_PLUGIN_HPP
 #define MAPNIK_PLUGIN_HPP
 
-// boost
-#include <boost/utility.hpp>
+// mapnik
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <string>
@@ -34,15 +34,15 @@
 
 namespace mapnik
 {
-class PluginInfo : boost::noncopyable
+class PluginInfo : mapnik::noncopyable
 {
 private:
     std::string name_;
     lt_dlhandle module_;
 public:
-    PluginInfo (const std::string& name,const lt_dlhandle module);
+    PluginInfo (std::string const& name,const lt_dlhandle module);
     ~PluginInfo();
-    const std::string& name() const;
+    std::string const& name() const;
     lt_dlhandle handle() const;
 };
 }

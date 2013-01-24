@@ -23,10 +23,9 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
+// boost
+#include <boost/shared_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
-
-// stl
-#include <iostream>
 
 extern "C"
 {
@@ -41,6 +40,18 @@ using std::max;
 
 class tiff_reader : public image_reader
 {
+    typedef boost::shared_ptr<TIFF> tiff_ptr;
+    struct tiff_closer
+    {
+        void operator() (TIFF * tif)
+        {
+            if (tif != 0)
+            {
+                TIFFClose(tif);
+            }
+        }
+    };
+
 private:
     std::string file_name_;
     int read_method_;
@@ -49,16 +60,19 @@ private:
     int rows_per_strip_;
     int tile_width_;
     int tile_height_;
+    tiff_ptr tif_;
+    bool premultiplied_alpha_;
 public:
     enum TiffType {
         generic=1,
         stripped,
         tiled
     };
-    explicit tiff_reader(const std::string& file_name);
+    explicit tiff_reader(std::string const& file_name);
     virtual ~tiff_reader();
     unsigned width() const;
     unsigned height() const;
+    bool premultiplied_alpha() const;
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
     tiff_reader(const tiff_reader&);
@@ -67,12 +81,12 @@ private:
     void read_generic(unsigned x,unsigned y,image_data_32& image);
     void read_stripped(unsigned x,unsigned y,image_data_32& image);
     void read_tiled(unsigned x,unsigned y,image_data_32& image);
-    TIFF* load_if_exists(const std::string& filename);
+    TIFF* load_if_exists(std::string const& filename);
 };
 
 namespace
 {
-image_reader* create_tiff_reader(const std::string& file)
+image_reader* create_tiff_reader(std::string const& file)
 {
     return new tiff_reader(file);
 }
@@ -80,14 +94,15 @@ image_reader* create_tiff_reader(const std::string& file)
 const bool registered = register_image_reader("tiff",create_tiff_reader);
 }
 
-tiff_reader::tiff_reader(const std::string& file_name)
+tiff_reader::tiff_reader(std::string const& file_name)
     : file_name_(file_name),
       read_method_(generic),
       width_(0),
       height_(0),
       rows_per_strip_(0),
       tile_width_(0),
-      tile_height_(0)
+      tile_height_(0),
+      premultiplied_alpha_(false)
 {
     init();
 }
@@ -98,7 +113,7 @@ void tiff_reader::init()
     // TODO: error handling
     TIFFSetWarningHandler(0);
     TIFF* tif = load_if_exists(file_name_);
-    if (!tif) throw image_reader_exception ("Can't load tiff file");
+    if (!tif) throw image_reader_exception( std::string("Can't load tiff file: '") + file_name_ + "'");
 
     char msg[1024];
 
@@ -116,11 +131,19 @@ void tiff_reader::init()
         {
             read_method_=stripped;
         }
-        TIFFClose(tif);
+        //TIFFTAG_EXTRASAMPLES
+        uint16 extrasamples;
+        uint16* sampleinfo;
+        TIFFGetFieldDefaulted(tif, TIFFTAG_EXTRASAMPLES,
+                              &extrasamples, &sampleinfo);
+        if (extrasamples == 1 &&
+            sampleinfo[0] == EXTRASAMPLE_ASSOCALPHA)
+        {
+            premultiplied_alpha_ = true;
+        }
     }
     else
     {
-        TIFFClose(tif);
         throw image_reader_exception(msg);
     }
 }
@@ -128,7 +151,6 @@ void tiff_reader::init()
 
 tiff_reader::~tiff_reader()
 {
-    //
 }
 
 
@@ -143,6 +165,10 @@ unsigned tiff_reader::height() const
     return height_;
 }
 
+bool tiff_reader::premultiplied_alpha() const
+{
+    return premultiplied_alpha_;
+}
 
 void tiff_reader::read(unsigned x,unsigned y,image_data_32& image)
 {
@@ -167,8 +193,6 @@ void tiff_reader::read_generic(unsigned /*x*/,unsigned /*y*/,image_data_32& /*im
     if (tif)
     {
         MAPNIK_LOG_DEBUG(tiff_reader) << "tiff_reader: TODO - tiff is not stripped or tiled";
-
-        TIFFClose(tif);
     }
 }
 
@@ -213,7 +237,6 @@ void tiff_reader::read_tiled(unsigned x0,unsigned y0,image_data_32& image)
             }
         }
         _TIFFfree(buf);
-        TIFFClose(tif);
     }
 }
 
@@ -254,21 +277,21 @@ void tiff_reader::read_stripped(unsigned x0,unsigned y0,image_data_32& image)
             }
         }
         _TIFFfree(buf);
-        TIFFClose(tif);
     }
 }
 
 TIFF* tiff_reader::load_if_exists(std::string const& filename)
 {
-    TIFF * tif = 0;
-    boost::filesystem::path path(file_name_);
-    if (exists(path)) //  && is_regular(path)) { -- not supported in boost-1.33.*
+    if (!tif_)
     {
-        // File path is a full file path and does exist
-        tif = TIFFOpen(filename.c_str(), "rb");
+        boost::filesystem::path path(file_name_);
+        if (boost::filesystem::is_regular(path)) // exists and regular file
+        {
+            // File path is a full file path and does exist
+            tif_ = tiff_ptr(TIFFOpen(filename.c_str(), "rb"), tiff_closer());
+        }
     }
-
-    return tif;
-}
+    return tif_.get();
 }
 
+} // namespace mapnik

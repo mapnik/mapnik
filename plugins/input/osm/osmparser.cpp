@@ -5,10 +5,8 @@
 #include <string>
 #include <cassert>
 
-using std::endl;
-
 osm_item* osmparser::cur_item=NULL;
-long osmparser::curID=0;
+mapnik::value_integer osmparser::curID=0;
 bool osmparser::in_node=false, osmparser::in_way=false;
 osm_dataset* osmparser::components=NULL;
 std::string osmparser::error="";
@@ -66,16 +64,6 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
         assert(xid);
         way->id = atol((char*)xid);
         cur_item  =  way;
-        // Prevent ways with no name being assigned a name of "0"
-        cur_item->keyvals["name"] = "";
-
-        // HACK: allows comparison with "" in the XML file. Otherwise it
-        // doesn't work. Only do for the most crucial tags for Freemap's
-        // purposes.  TODO investigate why this is
-        cur_item->keyvals["width"] = "";
-        cur_item->keyvals["horse"] = "";
-        cur_item->keyvals["foot"] = "";
-        cur_item->keyvals["bicycle"] = "";
         xmlFree(xid);
     }
     else if (xmlStrEqual(name,BAD_CAST "nd"))

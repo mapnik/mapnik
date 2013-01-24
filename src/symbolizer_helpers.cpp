@@ -21,9 +21,19 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/debug.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/geom_util.hpp>
+#include <mapnik/parse_path.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/placement_finder.hpp>
+#include <mapnik/geom_util.hpp>
+#include <mapnik/marker.hpp>
+#include <mapnik/expression_evaluator.hpp>
+
+// agg
 #include "agg_conv_clip_polyline.h"
 
 namespace mapnik {
@@ -34,6 +44,8 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next()
     if (!placement_valid_) return false;
     if (point_placement_)
         return next_point_placement();
+    else if (sym_.clip())
+        return next_line_placement_clipped();
     else
         return next_line_placement();
 }
@@ -52,11 +64,9 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
             continue; //Reexecute size check
         }
 
-        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
-        typedef coord_transform2<CoordTransform,clipped_geometry_type> path_type;
-        clipped_geometry_type clipped(**geo_itr_);
-        clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
-        path_type path(t_, clipped, prj_trans_);
+        typedef coord_transform<CoordTransform,geometry_type> path_type;
+        path_type path(t_, **geo_itr_, prj_trans_);
+
         finder_->clear_placements();
         if (points_on_line_) {
             finder_->find_point_placements(path);
@@ -71,9 +81,48 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
                 finder_->update_detector();
             }
             geo_itr_ = geometries_to_process_.erase(geo_itr_);
-            if (writer_.first) writer_.first->add_text(
-                finder_->get_results(), finder_->get_extents(),
-                feature_, t_, writer_.second);
+            return true;
+        }
+        //No placement for this geometry. Keep it in geometries_to_process_ for next try.
+        geo_itr_++;
+    }
+    return false;
+}
+
+template <typename FaceManagerT, typename DetectorT>
+bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement_clipped()
+{
+    while (!geometries_to_process_.empty())
+    {
+        if (geo_itr_ == geometries_to_process_.end())
+        {
+            //Just processed the last geometry. Try next placement.
+            if (!next_placement()) return false; //No more placements
+            //Start again from begin of list
+            geo_itr_ = geometries_to_process_.begin();
+            continue; //Reexecute size check
+        }
+
+        typedef agg::conv_clip_polyline<geometry_type> clipped_geometry_type;
+        typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+        clipped_geometry_type clipped(**geo_itr_);
+        clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+        path_type path(t_, clipped, prj_trans_);
+
+        finder_->clear_placements();
+        if (points_on_line_) {
+            finder_->find_point_placements(path);
+        } else {
+            finder_->find_line_placements(path);
+        }
+        if (!finder_->get_results().empty())
+        {
+            //Found a placement
+            if (points_on_line_)
+            {
+                finder_->update_detector();
+            }
+            geo_itr_ = geometries_to_process_.erase(geo_itr_);
             return true;
         }
         //No placement for this geometry. Keep it in geometries_to_process_ for next try.
@@ -101,9 +150,6 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         {
             //Found a placement
             point_itr_ = points_.erase(point_itr_);
-            if (writer_.first) writer_.first->add_text(
-                finder_->get_results(), finder_->get_extents(),
-                feature_, t_, writer_.second);
             finder_->update_detector();
             return true;
         }
@@ -134,11 +180,11 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
         geometry_type const& geom = feature_.get_geometry(i);
 
         // don't bother with empty geometries
-        if (geom.num_points() == 0) continue;
+        if (geom.size() == 0) continue;
         eGeomType type = geom.type();
         if (type == Polygon)
         {
-            largest_box_only = true;
+            largest_box_only = sym_.largest_bbox_only();
             if (sym_.get_minimum_path_length() > 0)
             {
                 box2d<double> gbox = t_.forward(geom.envelope(), prj_trans_);
@@ -187,7 +233,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
         if (how_placed == VERTEX_PLACEMENT)
         {
             geom.rewind(0);
-            for(unsigned i = 0; i < geom.num_points(); i++)
+            for(unsigned i = 0; i < geom.size(); i++)
             {
                 geom.vertex(&label_x, &label_y);
                 prj_trans_.backward(label_x, label_y, z);
@@ -197,21 +243,31 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
         }
         else
         {
-            if (how_placed == POINT_PLACEMENT)
+            // https://github.com/mapnik/mapnik/issues/1423
+            bool success = false;
+            // https://github.com/mapnik/mapnik/issues/1350
+            if (geom.type() == LineString)
             {
-                geom.label_position(&label_x, &label_y);
+                success = label::middle_point(geom, label_x,label_y);
+            }
+            else if (how_placed == POINT_PLACEMENT)
+            {
+                success = label::centroid(geom, label_x, label_y);
             }
             else if (how_placed == INTERIOR_PLACEMENT)
             {
-                geom.label_interior_position(&label_x, &label_y);
+                success = label::interior_position(geom, label_x, label_y);
             }
             else
             {
                 MAPNIK_LOG_ERROR(symbolizer_helpers) << "ERROR: Unknown placement type in initialize_points()";
             }
-            prj_trans_.backward(label_x, label_y, z);
-            t_.forward(&label_x, &label_y);
-            points_.push_back(std::make_pair(label_x, label_y));
+            if (success)
+            {
+                prj_trans_.backward(label_x, label_y, z);
+                t_.forward(&label_x, &label_y);
+                points_.push_back(std::make_pair(label_x, label_y));
+            }
         }
     }
     point_itr_ = points_.begin();
@@ -229,8 +285,10 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     info_ = &(text_.get_string_info());
     if (placement_->properties.orientation)
     {
+        // https://github.com/mapnik/mapnik/issues/1352
+        mapnik::evaluate<feature_impl, value_type> evaluator(feature_);
         angle_ = boost::apply_visitor(
-            evaluate<Feature, value_type>(feature_),
+            evaluator,
             *(placement_->properties.orientation)).to_double();
     } else {
         angle_ = 0.0;
@@ -240,14 +298,12 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
 //    boost::make_shared<placement_finder<DetectorT> >(feature_, *placement_, *info_, detector_, dims_);
 
-    if (writer_.first) finder_->set_collect_extents(true);
-
     placement_valid_ = true;
     return true;
 }
 
 template <typename FaceManagerT, typename DetectorT>
-placements_type &text_symbolizer_helper<FaceManagerT, DetectorT>::placements() const
+placements_type const& text_symbolizer_helper<FaceManagerT, DetectorT>::placements() const
 {
     return finder_->get_results();
 }
@@ -316,11 +372,6 @@ bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_point_placement()
         {
             detector_.insert(marker_ext_);
             finder_->update_detector();
-            if (writer_.first) {
-                writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
-                writer_.first->add_text(finder_->get_results(), finder_->get_extents(),
-                                        feature_, t_, writer_.second);
-            }
             point_itr_ = points_.erase(point_itr_);
             return true;
         }
@@ -335,14 +386,17 @@ template <typename FaceManagerT, typename DetectorT>
 bool shield_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement()
 {
     position const& pos = placement_->properties.displacement;
-    finder_->additional_boxes.clear();
+    finder_->additional_boxes().clear();
     //Markers are automatically centered
-    finder_->additional_boxes.push_back(
+    finder_->additional_boxes().push_back(
         box2d<double>(-0.5 * marker_ext_.width()  - pos.first,
                       -0.5 * marker_ext_.height() - pos.second,
                       0.5 * marker_ext_.width()  - pos.first,
                       0.5 * marker_ext_.height() - pos.second));
-    return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement();
+    if ( sym_.clip())
+        return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement_clipped();
+    else
+        return text_symbolizer_helper<FaceManagerT, DetectorT>::next_line_placement();
 }
 
 
@@ -350,12 +404,11 @@ template <typename FaceManagerT, typename DetectorT>
 void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
 {
     std::string filename = path_processor_type::evaluate(*sym_.get_filename(), this->feature_);
-    boost::array<double,6> const& m = sym_.get_transform();
-    transform_.load_from(&m[0]);
+    evaluate_transform(image_transform_, feature_, sym_.get_image_transform());
     marker_.reset();
     if (!filename.empty())
     {
-        marker_ = marker_cache::instance()->find(filename, true);
+        marker_ = marker_cache::instance().find(filename, true);
     }
     if (!marker_) {
         marker_w_ = 0;
@@ -373,10 +426,10 @@ void shield_symbolizer_helper<FaceManagerT, DetectorT>::init_marker()
     double py2 = py0;
     double px3 = px0;
     double py3 = py1;
-    transform_.transform(&px0,&py0);
-    transform_.transform(&px1,&py1);
-    transform_.transform(&px2,&py2);
-    transform_.transform(&px3,&py3);
+    image_transform_.transform(&px0,&py0);
+    image_transform_.transform(&px1,&py1);
+    image_transform_.transform(&px2,&py2);
+    image_transform_.transform(&px3,&py3);
     marker_ext_.init(px0, py0, px1, py1);
     marker_ext_.expand_to_include(px2, py2);
     marker_ext_.expand_to_include(px3, py3);
@@ -394,7 +447,6 @@ pixel_position shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker_pos
         marker_ext_.re_center(lx, ly);
         //label is added to detector by get_line_placement(), but marker isn't
         detector_.insert(marker_ext_);
-        if (writer_.first) writer_.first->add_box(marker_ext_, feature_, t_, writer_.second);
         return pixel_position(px, py);
     } else {
         //collision_detector is already updated for point placement in get_point_placement()
@@ -410,9 +462,9 @@ marker& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_marker() const
 }
 
 template <typename FaceManagerT, typename DetectorT>
-agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_transform() const
+agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_image_transform() const
 {
-    return transform_;
+    return image_transform_;
 }
 
 template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;

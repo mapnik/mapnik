@@ -23,10 +23,14 @@
 #include <boost/python.hpp>
 
 #include <mapnik/graphics.hpp>
+#include <mapnik/expression_node.hpp>
+#include <mapnik/value_error.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/parse_path.hpp>
 #include "mapnik_svg.hpp"
+#include "mapnik_enumeration.hpp"
+#include <mapnik/marker_cache.hpp> // for known_svg_prefix_
 
 using mapnik::markers_symbolizer;
 using mapnik::symbolizer_with_image;
@@ -46,57 +50,61 @@ void set_filename(mapnik::markers_symbolizer & symbolizer, std::string const& fi
     symbolizer.set_filename(parse_path(file_expr));
 }
 
+void set_marker_type(mapnik::markers_symbolizer & symbolizer, std::string const& marker_type)
+{
+    std::string filename;
+    if (marker_type == "ellipse")
+    {
+        filename = mapnik::marker_cache::instance().known_svg_prefix_ + "ellipse";
+    }
+    else if (marker_type == "arrow")
+    {
+        filename = mapnik::marker_cache::instance().known_svg_prefix_ + "arrow";
+    }
+    else
+    {
+        throw mapnik::value_error("Unknown marker-type: '" + marker_type + "'");
+    }
+    symbolizer.set_filename(parse_path(filename));
 }
 
-struct markers_symbolizer_pickle_suite : boost::python::pickle_suite
+}
+
+
+// https://github.com/mapnik/mapnik/issues/1367
+PyObject* get_fill_opacity_impl(markers_symbolizer & sym)
 {
-    static boost::python::tuple
-    getinitargs(markers_symbolizer const& p)
-    {
-        std::string filename = path_processor_type::to_string(*p.get_filename());
-        return boost::python::make_tuple(filename,mapnik::guess_type(filename));
-    }
-
-    static  boost::python::tuple
-    getstate(markers_symbolizer const& p)
-    {
-        return boost::python::make_tuple(p.get_allow_overlap(),
-                                         p.get_ignore_placement());//,p.get_opacity());
-    }
-
-    static void
-    setstate (markers_symbolizer& p, boost::python::tuple state)
-    {
-        using namespace boost::python;
-        if (len(state) != 2)
-        {
-            PyErr_SetObject(PyExc_ValueError,
-                            ("expected 2-item tuple in call to __setstate__; got %s"
-                             % state).ptr()
-                );
-            throw_error_already_set();
-        }
-
-        p.set_allow_overlap(extract<bool>(state[0]));
-        p.set_ignore_placement(extract<bool>(state[1]));
-        //p.set_opacity(extract<float>(state[2]));
-
-    }
-
-};
-
+    boost::optional<float> fill_opacity = sym.get_fill_opacity();
+    if (fill_opacity)
+        return ::PyFloat_FromDouble(*fill_opacity);
+    Py_RETURN_NONE;
+}
 
 void export_markers_symbolizer()
 {
     using namespace boost::python;
 
+    mapnik::enumeration_<mapnik::marker_placement_e>("marker_placement")
+        .value("POINT_PLACEMENT",mapnik::MARKER_POINT_PLACEMENT)
+        .value("INTERIOR_PLACEMENT",mapnik::MARKER_INTERIOR_PLACEMENT)
+        .value("LINE_PLACEMENT",mapnik::MARKER_LINE_PLACEMENT)
+        ;
+
+    mapnik::enumeration_<mapnik::marker_multi_policy_e>("marker_multi_policy")
+        .value("EACH",mapnik::MARKER_EACH_MULTI)
+        .value("WHOLE",mapnik::MARKER_WHOLE_MULTI)
+        .value("LARGEST",mapnik::MARKER_LARGEST_MULTI)
+        ;
+
     class_<markers_symbolizer>("MarkersSymbolizer",
-                               init<>("Default Markers Symbolizer - blue arrow"))
+                               init<>("Default Markers Symbolizer - circle"))
         .def (init<mapnik::path_expression_ptr>("<path expression ptr>"))
-        //.def_pickle(markers_symbolizer_pickle_suite())
         .add_property("filename",
                       &get_filename,
                       &set_filename)
+        .add_property("marker_type",
+                      &get_filename,
+                      &set_marker_type)
         .add_property("allow_overlap",
                       &markers_symbolizer::get_allow_overlap,
                       &markers_symbolizer::set_allow_overlap)
@@ -109,7 +117,11 @@ void export_markers_symbolizer()
         .add_property("opacity",
                       &markers_symbolizer::get_opacity,
                       &markers_symbolizer::set_opacity,
-                      "Set/get the text opacity")
+                      "Set/get the overall opacity")
+        .add_property("fill_opacity",
+                      &get_fill_opacity_impl,
+                      &markers_symbolizer::set_fill_opacity,
+                      "Set/get the fill opacity")
         .add_property("ignore_placement",
                       &markers_symbolizer::get_ignore_placement,
                       &markers_symbolizer::set_ignore_placement)
@@ -117,12 +129,42 @@ void export_markers_symbolizer()
                       &mapnik::get_svg_transform<markers_symbolizer>,
                       &mapnik::set_svg_transform<markers_symbolizer>)
         .add_property("width",
-                      &markers_symbolizer::get_width,
+                      make_function(&markers_symbolizer::get_width,
+                                    return_value_policy<copy_const_reference>()),
                       &markers_symbolizer::set_width,
                       "Set/get the marker width")
         .add_property("height",
-                      &markers_symbolizer::get_height,
+                      make_function(&markers_symbolizer::get_height,
+                                    return_value_policy<copy_const_reference>()),
                       &markers_symbolizer::set_height,
                       "Set/get the marker height")
+        .add_property("fill",
+                      &markers_symbolizer::get_fill,
+                      &markers_symbolizer::set_fill,
+                      "Set/get the marker fill color")
+        .add_property("stroke",
+                      &markers_symbolizer::get_stroke,
+                      &markers_symbolizer::set_stroke,
+                      "Set/get the marker stroke (outline)")
+        .add_property("placement",
+                      &markers_symbolizer::get_marker_placement,
+                      &markers_symbolizer::set_marker_placement,
+                      "Set/get the marker placement")
+        .add_property("multi_policy",
+                      &markers_symbolizer::get_marker_multi_policy,
+                      &markers_symbolizer::set_marker_multi_policy,
+                      "Set/get the marker multi geometry rendering policy")
+        .add_property("comp_op",
+                      &markers_symbolizer::comp_op,
+                      &markers_symbolizer::set_comp_op,
+                      "Set/get the marker comp-op")
+        .add_property("clip",
+                      &markers_symbolizer::clip,
+                      &markers_symbolizer::set_clip,
+                      "Set/get the marker geometry's clipping status")
+        .add_property("smooth",
+                      &markers_symbolizer::smooth,
+                      &markers_symbolizer::set_smooth,
+                      "Set/get the marker geometry's smooth value")
         ;
 }

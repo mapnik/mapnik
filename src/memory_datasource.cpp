@@ -22,9 +22,10 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/memory_featureset.hpp>
-#include <mapnik/feature_factory.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
@@ -60,9 +61,11 @@ struct accumulate_extent
     bool first_;
 };
 
-memory_datasource::memory_datasource()
+memory_datasource::memory_datasource(datasource::datasource_t type, bool bbox_check)
     : datasource(parameters()),
-      desc_("in-memory datasource","utf-8") {}
+      desc_("in-memory datasource","utf-8"),
+      type_(type),
+      bbox_check_(bbox_check) {}
 
 memory_datasource::~memory_datasource() {}
 
@@ -75,16 +78,16 @@ void memory_datasource::push(feature_ptr feature)
 
 datasource::datasource_t memory_datasource::type() const
 {
-    return datasource::Vector;
+    return type_;
 }
 
 featureset_ptr memory_datasource::features(const query& q) const
 {
-    return boost::make_shared<memory_featureset>(q.get_bbox(),*this);
+    return boost::make_shared<memory_featureset>(q.get_bbox(),*this,bbox_check_);
 }
 
 
-featureset_ptr memory_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
 

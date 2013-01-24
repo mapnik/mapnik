@@ -1,0 +1,52 @@
+<Map srs="+init=epsg:4326" background-color="steelblue">
+<!-- test case for https://github.com/mapnik/mapnik/issues/1354 -->
+
+    <Style name="labels">
+        <Rule>
+            <TextSymbolizer 
+              face-name="DejaVu Sans Book"
+              size="22"
+              halo-radius="10"
+              placement="point"
+              allow-overlap="false">
+                'this text halos should not overlap vertically'
+              </TextSymbolizer>
+        </Rule>
+    </Style>
+
+
+    <Layer name="points" srs="+init=epsg:4326">
+        <StyleName>labels</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+2,2
+2,2.3
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- points to frame data view -->
+
+    <Style name="frame">
+        <Rule>
+            <PointSymbolizer />
+        </Rule>
+    </Style>
+
+    <Layer name="frame" srs="+init=epsg:4326">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+0,0
+5,0
+0,5
+5,5
+            </Parameter>
+        </Datasource>
+    </Layer>
+    
+</Map>

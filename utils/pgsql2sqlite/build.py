@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id$
+# 
 
 import os
 from copy import copy
@@ -35,12 +35,23 @@ source = Split(
     """
     )
 
-headers = ['#plugins/input/postgis'] + env['CPPPATH'] 
+program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
 
+if env['HAS_CAIRO']:
+    program_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
+    program_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+
+program_env.PrependUnique(CPPPATH=['#plugins/input/postgis'])
 
 libraries = []
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 libraries.extend([boost_program_options,'sqlite3','pq','mapnik','icuuc'])
+
+if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+    if boost_version_from_header >= 50:
+        boost_system = 'boost_system%s' % env['BOOST_APPEND']
+        libraries.extend([boost_system])
 
 linkflags = env['CUSTOM_LDFLAGS']
 if env['SQLITE_LINKFLAGS']:
@@ -49,7 +60,7 @@ if env['SQLITE_LINKFLAGS']:
 if env['RUNTIME_LINK'] == 'static':
     libraries.extend(['ldap','pam','ssl','crypto','krb5'])
 
-pgsql2sqlite = program_env.Program('pgsql2sqlite', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=linkflags)
+pgsql2sqlite = program_env.Program('pgsql2sqlite', source, LIBS=libraries, LINKFLAGS=linkflags)
 Depends(pgsql2sqlite, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
 if 'uninstall' not in COMMAND_LINE_TARGETS:

@@ -23,11 +23,12 @@
 // boost
 #include <boost/python.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/noncopyable.hpp>
 
 //mapnik
 #include <mapnik/palette.hpp>
 
-static boost::shared_ptr<mapnik::rgba_palette> make_palette( const std::string& palette, const std::string& format )
+static boost::shared_ptr<mapnik::rgba_palette> make_palette( std::string const& palette, std::string const& format )
 {
     mapnik::rgba_palette::palette_type type = mapnik::rgba_palette::PALETTE_RGBA;
     if (format == "rgb")
@@ -51,5 +52,8 @@ void export_palette ()
         // "Creates a new color palette from a file\n"
         // )
         .def( "__init__", boost::python::make_constructor(make_palette))
+        .def("to_string", &mapnik::rgba_palette::to_string,
+             "Returns the palette as a string.\n"
+            )
         ;
 }

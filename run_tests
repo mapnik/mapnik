@@ -1,0 +1,19 @@
+#!/bin/sh
+
+failures=0
+
+echo "*** Running visual tests..."
+python tests/visual_tests/test.py -q
+failures=$((failures+$?))
+
+echo "*** Running C++ tests..."
+for FILE in tests/cpp_tests/*-bin; do 
+	${FILE};
+  failures=$((failures+$?))
+done
+
+echo "*** Running python tests..."
+python tests/run_tests.py -q
+failures=$((failures+$?))
+
+exit $failures

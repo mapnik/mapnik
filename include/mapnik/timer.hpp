@@ -157,6 +157,6 @@ private:
     std::string base_message_;
 };
 
-};
+}
 
 #endif // MAPNIK_TIMER_HPP

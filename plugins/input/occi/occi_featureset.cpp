@@ -23,7 +23,6 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
@@ -37,8 +36,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::CoordTransform;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_type;
 using mapnik::geometry_utils;
@@ -149,7 +146,7 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCIINT:
             case oracle::occi::OCCIUNSIGNED_INT:
             case oracle::occi::OCCIROWID:
-                feature->put(fld_name,rs_->getInt (i + 1));
+                feature->put(fld_name,static_cast<mapnik::value_integer>(rs_->getInt (i + 1)));
                 break;
             case oracle::occi::OCCIFLOAT:
             case oracle::occi::OCCIBFLOAT:
@@ -288,8 +285,6 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
         {
             const bool is_single_geom = false;
             const bool is_point_type = true;
-
-            // FIXME :http://trac.mapnik.org/ticket/458
             convert_ordinates(feature,
                               mapnik::Point,
                               elem_info,

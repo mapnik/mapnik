@@ -17,7 +17,7 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# $Id$
+# 
 
 Import ('plugin_base')
 Import ('env')
@@ -41,7 +41,7 @@ plugin_env['LIBS'].append('mapnik')
 plugin_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
 plugin_env['LIBS'].append(env['ICU_LIB_NAME'])
 if env['THREADING'] == 'multi':
-	plugin_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
+  plugin_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
 
 if env['RUNTIME_LINK'] == 'static':
     #cmd = 'pg_config --libs'

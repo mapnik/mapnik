@@ -25,11 +25,12 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
-#include <mapnik/datasource.hpp>
 
 // boost
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
+
+#include "gdal_datasource.hpp"
 
 class GDALDataset;
 class GDALRasterBand;
@@ -43,8 +44,8 @@ public:
                     int band,
                     gdal_query q,
                     mapnik::box2d<double> extent,
-                    double width,
-                    double height,
+                    unsigned width,
+                    unsigned height,
                     int nbands,
                     double dx,
                     double dy,

@@ -24,8 +24,11 @@
 #define SHAPE_FEATURESET_HPP
 
 //mapnik
-#include <mapnik/geom_util.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/geom_util.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 
 #include "shape_io.hpp"
 
@@ -56,10 +59,11 @@ private:
     filterT filter_;
     shape_io shape_;
     box2d<double> query_ext_;
+    mutable box2d<double> feature_bbox_;
     boost::scoped_ptr<transcoder> tr_;
     long file_length_;
     std::vector<int> attr_ids_;
-    const int row_limit_;
+    mapnik::value_integer row_limit_;
     mutable int count_;
     context_ptr ctx_;
 };

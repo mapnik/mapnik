@@ -47,70 +47,86 @@ private:
 
 public:
     color()
-        : red_(0xff),
+      : red_(0xff),
         green_(0xff),
         blue_(0xff),
         alpha_(0xff)
         {}
 
-    color(unsigned red, unsigned green, unsigned blue, unsigned alpha = 0xff)
-        :  red_(red),
+    color(boost::uint8_t red, boost::uint8_t green, boost::uint8_t blue, boost::uint8_t alpha = 0xff)
+      : red_(red),
         green_(green),
         blue_(blue),
         alpha_(alpha)
         {}
 
-    color( std::string const& css_string);
-
     color(const color& rhs)
-        : red_(rhs.red_),
+      : red_(rhs.red_),
         green_(rhs.green_),
         blue_(rhs.blue_),
         alpha_(rhs.alpha_)
         {}
 
-    color& operator=(const color& rhs)
-        {
-            if (this==&rhs) return *this;
-            red_=rhs.red_;
-            green_=rhs.green_;
-            blue_=rhs.blue_;
-            alpha_=rhs.alpha_;
-            return *this;
-        }
+    color( std::string const& str);
 
-    inline unsigned red() const
+    std::string to_string() const;
+    std::string to_hex_string() const;
+    void premultiply();
+    void demultiply();
+
+    color& operator=(color const& rhs)
+    {
+        if (this==&rhs)
+            return *this;
+
+        red_   = rhs.red_;
+        green_ = rhs.green_;
+        blue_  = rhs.blue_;
+        alpha_ = rhs.alpha_;
+
+        return *this;
+    }
+
+    inline bool operator==(color const& rhs) const
+    {
+        return (red_== rhs.red()) &&
+               (green_ == rhs.green()) &&
+               (blue_  == rhs.blue()) &&
+               (alpha_ == rhs.alpha());
+    }
+
+    inline boost::uint8_t red() const
     {
         return red_;
     }
 
-    inline unsigned green() const
+    inline boost::uint8_t green() const
     {
         return green_;
     }
-    inline unsigned blue() const
+    inline boost::uint8_t blue() const
     {
         return blue_;
     }
-    inline unsigned alpha() const
+    inline boost::uint8_t alpha() const
     {
         return alpha_;
     }
 
-    inline void set_red(unsigned red)
+    inline void set_red(boost::uint8_t red)
     {
         red_ = red;
     }
-    inline void set_green(unsigned green)
+    inline void set_green(boost::uint8_t green)
     {
         green_ = green;
     }
 
-    inline void set_blue(unsigned blue)
+    inline void set_blue(boost::uint8_t blue)
     {
         blue_ = blue;
     }
-    inline void set_alpha(unsigned alpha)
+    inline void set_alpha(boost::uint8_t alpha)
     {
         alpha_ = alpha;
     }
@@ -123,18 +139,6 @@ public:
         return (alpha_ << 24) | (blue_ << 16) | (green_ << 8) | (red_) ;
 #endif
     }
-
-    inline bool operator==(color const& rhs) const
-    {
-        return (red_== rhs.red()) &&
-            (green_ == rhs.green()) &&
-            (blue_  == rhs.blue()) &&
-            (alpha_ == rhs.alpha());
-
-    }
-
-    std::string to_string() const;
-    std::string to_hex_string() const;
 };
 
 template <typename charT, typename traits>

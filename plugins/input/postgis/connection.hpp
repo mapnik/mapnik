@@ -44,34 +44,24 @@ extern "C" {
 class Connection
 {
 public:
-    Connection(std::string const& connection_str)
+    Connection(std::string const& connection_str,boost::optional<std::string> const& password)
         : cursorId(0),
           closed_(false)
     {
-        conn_ = PQconnectdb(connection_str.c_str());
+        std::string connect_with_pass = connection_str;
+        if (password && !password->empty())
+        {
+            connect_with_pass += " password=" + *password;
+        }
+        conn_ = PQconnectdb(connect_with_pass.c_str());
         if (PQstatus(conn_) != CONNECTION_OK)
         {
-            std::ostringstream s;
-            s << "Postgis Plugin: ";
-            if (conn_ )
-            {
-                std::string msg = PQerrorMessage(conn_);
-                if (! msg.empty())
-                {
-                    s << msg.substr(0, msg.size() - 1);
-                }
-                else
-                {
-                    s << "unable to connect to postgres server";
-                }
-            }
-            else
-            {
-                s << "unable to connect to postgres server";
-            }
-            s << "\n" << connection_str;
-
-            throw mapnik::datasource_exception(s.str());
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
+            err_msg += "\nConnection string: '";
+            err_msg += connection_str;
+            err_msg += "'\n";
+            throw mapnik::datasource_exception(err_msg);
         }
     }
 
@@ -87,7 +77,7 @@ public:
         }
     }
 
-    bool execute(const std::string& sql) const
+    bool execute(std::string const& sql) const
     {
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute ") + sql);
@@ -99,7 +89,7 @@ public:
         return ok;
     }
 
-    boost::shared_ptr<ResultSet> executeQuery(const std::string& sql, int type = 0) const
+    boost::shared_ptr<ResultSet> executeQuery(std::string const& sql, int type = 0) const
     {
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, std::string("postgis_connection::execute_query ") + sql);
@@ -117,32 +107,33 @@ public:
 
         if (! result || (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
-            std::ostringstream s;
-            s << "Postgis Plugin: PSQL error";
-            if (conn_)
-            {
-                std::string msg = PQerrorMessage(conn_);
-                if (! msg.empty())
-                {
-                    s << ":\n" <<  msg.substr(0, msg.size() - 1);
-                }
-
-                s << "\nFull sql was: '" <<  sql << "'\n";
-            }
-            else
-            {
-                s << "unable to connect to database";
-            }
-
+            std::string err_msg = status();
+            err_msg += "\nFull sql was: '";
+            err_msg += sql;
+            err_msg += "'\n";
             if (result)
             {
                 PQclear(result);
             }
 
-            throw mapnik::datasource_exception(s.str());
+            throw mapnik::datasource_exception(err_msg);
         }
 
         return boost::make_shared<ResultSet>(result);
+    }
+
+    std::string status() const
+    {
+        std::string status;
+        if (conn_)
+        {
+            status = PQerrorMessage(conn_);
+        }
+        else
+        {
+            status = "Uninitialized connection";
+        }
+        return status;
     }
 
     std::string client_encoding() const

@@ -29,10 +29,10 @@ namespace mapnik
 {
 
 enum CommandType {
-    SEG_END   =0,
-    SEG_MOVETO=1,
-    SEG_LINETO=2,
-    SEG_CLOSE =3
+    SEG_END    = 0,
+    SEG_MOVETO = 1,
+    SEG_LINETO = 2,
+    SEG_CLOSE = (0x40 | 0x0f)
 };
 
 template <typename T,int dim>
@@ -43,14 +43,21 @@ struct vertex {
 template <typename T>
 struct vertex<T,2>
 {
+    enum no_init_t { no_init };
+
     typedef T coord_type;
     coord_type x;
     coord_type y;
     unsigned cmd;
+
     vertex()
         : x(0),y(0),cmd(SEG_END) {}
-    vertex(coord_type x,coord_type y,unsigned cmd)
-        : x(x),y(y),cmd(cmd) {}
+
+    explicit vertex(no_init_t)
+        {}
+
+    vertex(coord_type x_,coord_type y_,unsigned cmd_)
+        : x(x_),y(y_),cmd(cmd_) {}
 
     template <typename T2>
     vertex(const vertex<T2,2>& rhs)
@@ -60,13 +67,12 @@ struct vertex<T,2>
 
     template <typename T2> vertex<T,2> operator=(const vertex<T2,2>& rhs)
     {
-        if ((void*)this == (void*)&rhs)
+        if (&cmd != &rhs.cmd)
         {
-            return *this;
+            x = coord_type(rhs.x);
+            y = coord_type(rhs.y);
+            cmd = rhs.cmd;
         }
-        x=coord_type(rhs.x);
-        y=coord_type(rhs.y);
-        cmd=rhs.cmd;
         return *this;
     }
 };
@@ -87,9 +93,15 @@ operator << (std::basic_ostream<charT,traits>& out,
     std::basic_ostringstream<charT,traits> s;
     s.copyfmt(out);
     s.width(0);
-    s<<"vertex2("<<v.x<<","<<v.y<<",cmd="<<v.cmd<<" )";
-    out << s.str();
-    return out;
+    switch (v.cmd)
+    {
+        case SEG_END: s << "End "; break;
+        case SEG_MOVETO: s << "MoveTo "; break;
+        case SEG_LINETO: s << "LineTo "; break;
+        case SEG_CLOSE: s << "Close "; break;
+    }
+    s << "(" << v.x << ", " << v.y << ")";
+    return out << s.str();
 }
 
 template <class charT,class traits,class T>

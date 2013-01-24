@@ -32,11 +32,6 @@
             <TextSymbolizer size="10" dy="20" face-name="DejaVu Sans Book" halo-radius="1">[name] + ' (jpg)'</TextSymbolizer>
             <PointSymbolizer file="../images/dummy.jpg"/>
         </Rule>
-        <Rule>
-            <ElseFilter/>
-            <TextSymbolizer size="10" dy="20" face-name="DejaVu Sans Book" halo-radius="1">[name]</TextSymbolizer>
-            <PointSymbolizer file="../images/bogus_will_fail.png"/>
-        </Rule>
     </Style>
 
     <Layer name="point" srs="+init=epsg:4326">

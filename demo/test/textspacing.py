@@ -43,7 +43,7 @@ road_rule.symbols.append(LineSymbolizer(road_stroke))
 road_style.rules.append(road_rule);
 
 #Road text
-text_symbolizer = TextSymbolizer('NAME', 'DejaVu Sans Book', 10, Color('black'))
+text_symbolizer = TextSymbolizer(Expression('[NAME]'), 'DejaVu Sans Book', 10, Color('black'))
 text_symbolizer.label_placement=label_placement.LINE_PLACEMENT
 text_symbolizer.minimum_distance = 0
 #text_symbolizer.max_char_angle_delta = 40
@@ -77,6 +77,6 @@ im = Image(m.width,m.height)
 render(m, im)
 
 # Save image to file
-save_to_file('output.png', 'png',im) # true-colour RGBA
+im.save('output.png') # true-colour RGBA
 
 print "Done\n"

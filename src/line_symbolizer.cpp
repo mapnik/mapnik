@@ -32,8 +32,6 @@ static const char * line_rasterizer_strings[] = {
     "fast",
     ""
 };
-
-
 IMPLEMENT_ENUM( line_rasterizer_e, line_rasterizer_strings )
 
 }

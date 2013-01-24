@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 //mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/text_path.hpp>
@@ -40,6 +41,7 @@
 //stl
 #include <string>
 #include <vector>
+#include <cmath>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -95,7 +97,7 @@ double get_total_distance(T & shape_path)
 }
 
 template <typename DetectorT>
-placement_finder<DetectorT>::placement_finder(Feature const& feature,
+placement_finder<DetectorT>::placement_finder(feature_impl const& feature,
                                               text_placement_info const& placement_info,
                                               string_info const& info,
                                               DetectorT & detector,
@@ -132,7 +134,7 @@ void placement_finder<DetectorT>::find_point_placements(T & shape_path)
     double total_distance = get_total_distance<T>(shape_path);
     shape_path.rewind(0);
 
-    if (distance == 0) //Point data, not a line
+    if (total_distance == 0) //Point data, not a line
     {
         double x, y;
         shape_path.vertex(&x,&y);
@@ -482,11 +484,8 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
 
             if (p.minimum_padding > 0)
             {
-                double min_pad = pi.get_actual_minimum_padding();
-                box2d<double> epad(e.minx()-min_pad,
-                                   e.miny()-min_pad,
-                                   e.maxx()+min_pad,
-                                   e.maxy()+min_pad);
+                box2d<double> epad = e;
+                epad.pad(pi.get_actual_minimum_padding());
                 if (!dimensions_.contains(epad))
                 {
                     return;
@@ -500,9 +499,9 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     }
 
     // check the placement of any additional envelopes
-    if (!p.allow_overlap && !additional_boxes.empty())
+    if (!p.allow_overlap && !additional_boxes_.empty())
     {
-        BOOST_FOREACH(box2d<double> box, additional_boxes)
+        BOOST_FOREACH(box2d<double> const& box, additional_boxes_)
         {
             box2d<double> pt(box.minx() + current_placement->center.x,
                              box.miny() + current_placement->center.y,
@@ -663,8 +662,8 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                                 anglesum += angle;
                             }
                             anglesum /= current_placement->nodes_.size(); //Now it is angle average
-                            double cosa = orientation * cos(anglesum);
-                            double sina = orientation * sin(anglesum);
+                            double cosa = orientation * std::cos(anglesum);
+                            double sina = orientation * std::sin(anglesum);
 
                             //Offset all the characters by this angle
                             for (unsigned i = 0; i < current_placement->nodes_.size(); i++)
@@ -841,7 +840,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         while (angle_delta < -M_PI)
             angle_delta += 2*M_PI;
         if (p.max_char_angle_delta > 0 &&
-            fabs(angle_delta) > p.max_char_angle_delta)
+            std::fabs(angle_delta) > p.max_char_angle_delta)
         {
             //MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Too Bendy!";
             return std::auto_ptr<text_path>(NULL);
@@ -963,11 +962,9 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
         }
         if (p.minimum_padding > 0)
         {
-            double min_pad = pi.get_actual_minimum_padding();
-            box2d<double> epad(e.minx()-min_pad,
-                               e.miny()-min_pad,
-                               e.maxx()+min_pad,
-                               e.maxy()+min_pad);
+
+            box2d<double> epad = e;
+            epad.pad(pi.get_actual_minimum_padding());
             if (!dimensions_.contains(epad))
             {
                 status = false;

@@ -21,27 +21,72 @@
  *****************************************************************************/
 
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
+
 #include <mapnik/datasource_cache.hpp>
+
+namespace  {
+
+using namespace boost::python;
+
+boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
+{
+    mapnik::parameters params;
+    boost::python::list keys=d.keys();
+    for (int i=0; i<len(keys); ++i)
+    {
+        std::string key = extract<std::string>(keys[i]);
+        object obj = d[key];
+        extract<std::string> ex0(obj);
+        extract<mapnik::value_integer> ex1(obj);
+        extract<double> ex2(obj);
+
+        if (ex0.check())
+        {
+            params[key] = ex0();
+        }
+        else if (ex1.check())
+        {
+            params[key] = ex1();
+        }
+        else if (ex2.check())
+        {
+            params[key] = ex2();
+        }
+    }
+
+    return mapnik::datasource_cache::instance().create(params);
+}
+
+void register_datasources(std::string const& path)
+{
+    mapnik::datasource_cache::instance().register_datasources(path);
+}
+
+std::vector<std::string> plugin_names()
+{
+    return mapnik::datasource_cache::instance().plugin_names();
+}
+
+std::string plugin_directories()
+{
+    return mapnik::datasource_cache::instance().plugin_directories();
+}
+
+}
 
 void export_datasource_cache()
 {
     using mapnik::datasource_cache;
-    using mapnik::singleton;
-    using mapnik::CreateStatic;
-    using namespace boost::python;
-    class_<singleton<datasource_cache,CreateStatic>,boost::noncopyable>("Singleton",no_init)
-        .def("instance",&singleton<datasource_cache,CreateStatic>::instance,
-             return_value_policy<reference_existing_object>())
-        .staticmethod("instance")
-        ;
-
-    class_<datasource_cache,bases<singleton<datasource_cache,CreateStatic> >,
-        boost::noncopyable>("DatasourceCache",no_init)
-        .def("create",&datasource_cache::create)
+    class_<datasource_cache,
+           boost::noncopyable>("DatasourceCache",no_init)
+        .def("create",&create_datasource)
         .staticmethod("create")
-        .def("register_datasources",&datasource_cache::register_datasources)
+        .def("register_datasources",&register_datasources)
         .staticmethod("register_datasources")
-        .def("plugin_names",&datasource_cache::plugin_names)
+        .def("plugin_names",&plugin_names)
         .staticmethod("plugin_names")
+        .def("plugin_directories",&plugin_directories)
+        .staticmethod("plugin_directories")
         ;
 }

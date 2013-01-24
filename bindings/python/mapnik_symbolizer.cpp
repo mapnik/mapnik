@@ -22,6 +22,7 @@
 
 // boost
 #include <boost/python.hpp>
+#include <boost/variant.hpp>
 
 // mapnik
 //symbolizer typdef here rather than mapnik/symbolizer.hpp
@@ -94,6 +95,13 @@ public:
     std::string operator () ( const markers_symbolizer & /*sym*/ )
     {
         return "markers";
+    }
+ 
+    template <typename Symbolizer>
+    std::string operator() ( Symbolizer const& sym)
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return "unknown";
     }
 };
 

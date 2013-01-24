@@ -31,20 +31,17 @@
 #include <boost/property_tree/detail/xml_parser_read_rapidxml.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
-
-// boost
-#include <boost/utility.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include <mapnik/util/trim.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <iostream>
 #include <fstream>
 
-using namespace std;
 namespace rapidxml = boost::property_tree::detail::rapidxml;
 namespace mapnik
 {
-class rapidxml_loader : boost::noncopyable
+class rapidxml_loader : mapnik::noncopyable
 {
 public:
     rapidxml_loader(const char *encoding = NULL) :
@@ -57,7 +54,7 @@ public:
     {
     }
 
-    void load(const std::string & filename, xml_node &node)
+    void load(std::string const& filename, xml_node &node)
     {
         filename_ = filename;
         std::basic_ifstream<char> stream(filename.c_str());
@@ -101,14 +98,14 @@ public:
         }
     }
 
-    void load_string(const std::string & buffer, xml_node &node, std::string const & base_path )
+    void load_string(std::string const& buffer, xml_node &node, std::string const & base_path )
     {
 
 //        if (!base_path.empty())
 //        {
 //            boost::filesystem::path path(base_path);
 //            if (!boost::filesystem::exists(path)) {
-//                throw config_error(string("Could not locate base_path '") +
+//                throw config_error(std::string("Could not locate base_path '") +
 //                                   base_path + "': file or directory does not exist");
 //            }
 //        }
@@ -145,7 +142,7 @@ private:
         case rapidxml::node_cdata:
         {
             std::string trimmed(cur_node->value());
-            boost::trim(trimmed);
+            mapnik::util::trim(trimmed);
             if (trimmed.empty()) break; //Don't add empty text nodes
             node.add_child(trimmed, 0, true);
         }

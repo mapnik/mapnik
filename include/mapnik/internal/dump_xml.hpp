@@ -2,6 +2,9 @@
 #define DUMP_XML_HPP
 #include <mapnik/xml_node.hpp>
 
+namespace mapnik
+{
+
 /* Debug dump ptree XML representation.
  */
 void dump_xml(xml_node const& xml, unsigned level=0)
@@ -31,5 +34,5 @@ void dump_xml(xml_node const& xml, unsigned level=0)
     std::cerr << indent << "[/" << xml.name() << "]" << "\n";
 }
 
-
+}
 #endif // DUMP_XML_HPP

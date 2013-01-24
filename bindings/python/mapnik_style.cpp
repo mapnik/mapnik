@@ -25,51 +25,41 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 // mapnik
+#include <mapnik/value_error.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/feature_type_style.hpp>
+#include <mapnik/image_filter_grammar.hpp> // image_filter_grammar
+#include <mapnik/image_filter_types.hpp> // generate_image_filters
 
 using mapnik::feature_type_style;
 using mapnik::rules;
 using mapnik::rule;
 
-struct style_pickle_suite : boost::python::pickle_suite
+std::string get_image_filters(feature_type_style & style)
 {
-    static boost::python::tuple
-    getstate(const feature_type_style& s)
+    std::string filters_str;
+    std::back_insert_iterator<std::string> sink(filters_str);
+    generate_image_filters(sink, style.image_filters());
+    return filters_str;
+}
+
+void set_image_filters(feature_type_style & style, std::string const& filters)
+{
+    std::string::const_iterator itr = filters.begin();
+    std::string::const_iterator end = filters.end();
+    mapnik::image_filter_grammar<std::string::const_iterator,
+                                 std::vector<mapnik::filter::filter_type> > filter_grammar;
+    std::vector<mapnik::filter::filter_type> new_filters;
+    bool result = boost::spirit::qi::phrase_parse(itr,end,
+                                                  filter_grammar,
+                                                  boost::spirit::qi::ascii::space,
+                                                  new_filters);
+    if (!result || itr!=end)
     {
-        boost::python::list rule_list;
-
-        rules::const_iterator it = s.get_rules().begin();
-        rules::const_iterator end = s.get_rules().end();
-        for (; it != end; ++it)
-        {
-            rule_list.append( *it );
-        }
-
-        return boost::python::make_tuple(rule_list);
+        throw mapnik::value_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
     }
-
-    static void
-    setstate (feature_type_style& s, boost::python::tuple state)
-    {
-        using namespace boost::python;
-        if (len(state) != 1)
-        {
-            PyErr_SetObject(PyExc_ValueError,
-                            ("expected 1-item tuple in call to __setstate__; got %s"
-                             % state).ptr()
-                );
-            throw_error_already_set();
-        }
-
-        boost::python::list rules = extract<boost::python::list>(state[0]);
-        for (int i=0; i<len(rules); ++i)
-        {
-            s.add_rule(extract<rule>(rules[i]));
-        }
-    }
-
-};
+    style.image_filters().swap(new_filters);
+}
 
 void export_style()
 {
@@ -85,9 +75,6 @@ void export_style()
         ;
     class_<feature_type_style>("Style",init<>("default style constructor"))
 
-        .def_pickle(style_pickle_suite()
-            )
-
         .add_property("rules",make_function
                       (&feature_type_style::get_rules,
                        return_value_policy<reference_existing_object>()),
@@ -102,7 +89,19 @@ void export_style()
         .add_property("filter_mode",
                       &feature_type_style::get_filter_mode,
                       &feature_type_style::set_filter_mode,
-                      "Set/get the placement of the label")
+                      "Set/get the filter mode of the style")
+        .add_property("opacity",
+                      &feature_type_style::get_opacity,
+                      &feature_type_style::set_opacity,
+                      "Set/get the opacity of the style")
+        .add_property("comp_op",
+                      &feature_type_style::comp_op,
+                      &feature_type_style::set_comp_op,
+                      "Set/get the comp-op (composite operation) of the style")
+        .add_property("image_filters",
+                      get_image_filters,
+                      set_image_filters,
+                      "Set/get the comp-op (composite operation) of the style")
         ;
 
 }

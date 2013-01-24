@@ -24,38 +24,50 @@
 #define MAPNIK_MARKERS_SYMBOLIZER_HPP
 
 //mapnik
-#include <mapnik/symbolizer.hpp>
-#include <mapnik/parse_path.hpp>
 #include <mapnik/color.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/stroke.hpp>
+#include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
+#include <mapnik/expression.hpp>
+#include <mapnik/path_expression.hpp>
+
+// boost
+#include <boost/optional.hpp>
 
 namespace mapnik {
 
 // TODO - consider merging with text_symbolizer label_placement_e
 enum marker_placement_enum {
     MARKER_POINT_PLACEMENT,
+    MARKER_INTERIOR_PLACEMENT,
     MARKER_LINE_PLACEMENT,
     marker_placement_enum_MAX
 };
 
 DEFINE_ENUM( marker_placement_e, marker_placement_enum );
 
-enum marker_type_enum {
-    ARROW,
-    ELLIPSE,
-    marker_type_enum_MAX
+enum marker_multi_policy_enum {
+    MARKER_EACH_MULTI, // each component in a multi gets its marker
+    MARKER_WHOLE_MULTI, // consider all components of a multi as a whole
+    MARKER_LARGEST_MULTI, // only the largest component of a multi gets a marker
+    marker_multi_policy_enum_MAX
 };
 
-DEFINE_ENUM( marker_type_e, marker_type_enum );
+DEFINE_ENUM( marker_multi_policy_e, marker_multi_policy_enum );
 
 struct MAPNIK_DECL markers_symbolizer :
         public symbolizer_with_image, public symbolizer_base
 {
 public:
-    explicit markers_symbolizer();
-    markers_symbolizer(path_expression_ptr filename);
+    markers_symbolizer();
+    markers_symbolizer(path_expression_ptr const& filename);
     markers_symbolizer(markers_symbolizer const& rhs);
+
+    void set_width(expression_ptr const& width);
+    expression_ptr const& get_width() const;
+    void set_height(expression_ptr const& height);
+    expression_ptr const& get_height() const;
     void set_ignore_placement(bool ignore_placement);
     bool get_ignore_placement() const;
     void set_allow_overlap(bool overlap);
@@ -64,31 +76,29 @@ public:
     double get_spacing() const;
     void set_max_error(double max_error);
     double get_max_error() const;
-    void set_fill(color fill);
-    color const& get_fill() const;
-    void set_width(double width);
-    double get_width() const;
-    void set_height(double height);
-    double get_height() const;
-    stroke const& get_stroke() const;
+    void set_fill(color const& fill);
+    boost::optional<color> get_fill() const;
+    void set_fill_opacity(float opacity);
+    boost::optional<float> get_fill_opacity() const;
     void set_stroke(stroke const& stroke);
+    boost::optional<stroke> get_stroke() const;
     void set_marker_placement(marker_placement_e marker_p);
     marker_placement_e get_marker_placement() const;
-    void set_marker_type(marker_type_e marker_p);
-    marker_type_e get_marker_type() const;
-
+    void set_marker_multi_policy(marker_multi_policy_e marker_p);
+    marker_multi_policy_e get_marker_multi_policy() const;
 private:
+    expression_ptr width_;
+    expression_ptr height_;
     bool ignore_placement_;
     bool allow_overlap_;
-    color fill_;
     double spacing_;
     double max_error_;
-    double width_;
-    double height_;
-    stroke stroke_;
+    boost::optional<color> fill_;
+    boost::optional<float> fill_opacity_;
+    boost::optional<float> opacity_;
+    boost::optional<stroke> stroke_;
     marker_placement_e marker_p_;
-    marker_type_e marker_type_;
-
+    marker_multi_policy_e marker_mp_;
 };
 
 }

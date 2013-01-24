@@ -49,15 +49,13 @@ void feature_kv_iterator::advance(boost::iterator_difference<feature_kv_iterator
 
 bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
 {
-    return ( itr_ == other.itr_);
+    return ( itr_ == other.itr_ );
 }
 
 feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
 {
     boost::get<0>(kv_) = itr_->first;
-    boost::optional<mapnik::value const&> val = f_.get_optional(itr_->second);
-    if (val) boost::get<1>(kv_) = *val;
-    else boost::get<1>(kv_) = value_null();
+    boost::get<1>(kv_) = f_.get(itr_->second);
     return kv_;
 }
 

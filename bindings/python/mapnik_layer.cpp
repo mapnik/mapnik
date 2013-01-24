@@ -77,7 +77,7 @@ struct layer_pickle_suite : boost::python::pickle_suite
         l.set_queryable(extract<bool>(state[3]));
 
         mapnik::parameters params = extract<parameters>(state[4]);
-        l.set_datasource(datasource_cache::instance()->create(params));
+        l.set_datasource(datasource_cache::instance().create(params));
 
         boost::python::list s = extract<boost::python::list>(state[5]);
         for (int i=0;i<len(s);++i)
@@ -90,6 +90,43 @@ struct layer_pickle_suite : boost::python::pickle_suite
 };
 
 std::vector<std::string> & (mapnik::layer::*_styles_)() = &mapnik::layer::styles;
+
+void set_maximum_extent(mapnik::layer & l, boost::optional<mapnik::box2d<double> > const& box)
+{
+    if (box)
+    {
+        l.set_maximum_extent(*box);
+    }
+    else
+    {
+        l.reset_maximum_extent();
+    }
+}
+
+void set_buffer_size(mapnik::layer & l, boost::optional<int> const& buffer_size)
+{
+    if (buffer_size)
+    {
+        l.set_buffer_size(*buffer_size);
+    }
+    else
+    {
+        l.reset_buffer_size();
+    }
+}
+
+PyObject * get_buffer_size(mapnik::layer & l)
+{
+     boost::optional<int> buffer_size = l.buffer_size();
+    if (buffer_size)
+    {
+        return PyInt_FromLong(*buffer_size);
+    }
+    else
+    {
+        Py_RETURN_NONE;
+    }
+}
 
 void export_layer()
 {
@@ -149,7 +186,7 @@ void export_layer()
         .add_property("active",
                       &layer::active,
                       &layer::set_active,
-                      "Get/Set whether this layer is active and will be rendered.\n"
+                      "Get/Set whether this layer is active and will be rendered (same as status property).\n"
                       "\n"
                       "Usage:\n"
                       ">>> from mapnik import Layer\n"
@@ -158,6 +195,21 @@ void export_layer()
                       "True # Active by default\n"
                       ">>> lyr.active = False # set False to disable layer rendering\n"
                       ">>> lyr.active\n"
+                      "False\n"
+            )
+
+        .add_property("status",
+                      &layer::active,
+                      &layer::set_active,
+                      "Get/Set whether this layer is active and will be rendered.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> from mapnik import Layer\n"
+                      ">>> lyr = Layer('My Layer','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')\n"
+                      ">>> lyr.status\n"
+                      "True # Active by default\n"
+                      ">>> lyr.status = False # set False to disable layer rendering\n"
+                      ">>> lyr.status\n"
                       "False\n"
             )
 
@@ -194,6 +246,28 @@ void export_layer()
                       ">>> lyr.datasource = Datasource(type='shape',file='world_borders')\n"
                       ">>> lyr.datasource\n"
                       "<mapnik.Datasource object at 0x65470>\n"
+            )
+
+        .add_property("buffer_size",
+                      &get_buffer_size,
+                      &set_buffer_size,
+                      "Get/Set the size of buffer around layer in pixels.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> print(l.buffer_size)\n"
+                      "None # None by default\n"
+                      ">>> l.buffer_size = 2\n"
+                      ">>> l.buffer_size\n"
+                      "2\n"
+            )
+
+        .add_property("maximum_extent",make_function
+                      (&layer::maximum_extent,return_value_policy<copy_const_reference>()),
+                      &set_maximum_extent,
+                      "The maximum extent of the map.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.maximum_extent = Box2d(-180,-90,180,90)\n"
             )
 
         .add_property("maxzoom",
@@ -269,6 +343,14 @@ void export_layer()
                       ">>> # set to google mercator with Proj.4 literal\n"
                       "... \n"
                       ">>> lyr.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'\n"
+            )
+
+        .add_property("group_by",
+                      make_function(&layer::group_by,return_value_policy<copy_const_reference>()),
+                      &layer::set_group_by,
+                      "Get/Set the optional layer group name.\n"
+                      "\n"
+                      "More details at https://github.com/mapnik/mapnik/wiki/Grouped-rendering:\n"
             )
 
         .add_property("styles",

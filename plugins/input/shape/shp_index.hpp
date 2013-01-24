@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef SHP_INDEX_HH
-#define SHP_INDEX_HH
+#ifndef SHP_INDEX_HPP
+#define SHP_INDEX_HPP
 
 // stl
 #include <fstream>
@@ -38,7 +38,7 @@ template <typename filterT, typename IStream = std::ifstream>
 class shp_index
 {
 public:
-    static void query(const filterT& filter, IStream& file,std::vector<int>& pos);
+    static void query(filterT const& filter, IStream& file,std::vector<std::streampos>& pos);
 private:
     shp_index();
     ~shp_index();
@@ -46,18 +46,18 @@ private:
     shp_index& operator=(const shp_index&);
     static int read_ndr_integer(IStream& in);
     static void read_envelope(IStream& in, box2d<double>& envelope);
-    static void query_node(const filterT& filter, IStream& in, std::vector<int>& pos);
+    static void query_node(const filterT& filter, IStream& in, std::vector<std::streampos>& pos);
 };
 
 template <typename filterT, typename IStream>
-void shp_index<filterT, IStream>::query(const filterT& filter, IStream& file, std::vector<int>& pos)
+void shp_index<filterT, IStream>::query(const filterT& filter, IStream& file, std::vector<std::streampos>& pos)
 {
     file.seekg(16, std::ios::beg);
     query_node(filter, file, pos);
 }
 
 template <typename filterT, typename IStream>
-void shp_index<filterT, IStream>::query_node(const filterT& filter, IStream& file, std::vector<int>& ids)
+void shp_index<filterT, IStream>::query_node(const filterT& filter, IStream& file, std::vector<std::streampos>& ids)
 {
     int offset = read_ndr_integer(file);
 
@@ -100,4 +100,4 @@ void shp_index<filterT, IStream>::read_envelope(IStream& file, box2d<double>& en
     file.read(reinterpret_cast<char*>(&envelope), sizeof(envelope));
 }
 
-#endif // SHP_INDEX_HH
+#endif // SHP_INDEX_HPP

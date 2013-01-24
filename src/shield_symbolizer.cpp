@@ -28,9 +28,6 @@
 // boost
 #include <boost/scoped_ptr.hpp>
 
-// stl
-#include <iostream>
-
 namespace mapnik
 {
 
@@ -88,4 +85,3 @@ position const& shield_symbolizer::get_shield_displacement() const
 }
 
 }
-

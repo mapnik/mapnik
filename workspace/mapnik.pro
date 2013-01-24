@@ -69,7 +69,6 @@ HEADERS += \
     ../include/mapnik/agg_pattern_source.hpp \
     ../include/mapnik/agg_rasterizer.hpp \
     ../include/mapnik/agg_renderer.hpp \
-    ../include/mapnik/arrow.hpp \
     ../include/mapnik/attribute.hpp \
     ../include/mapnik/attribute_collector.hpp \
     ../include/mapnik/attribute_descriptor.hpp \
@@ -85,7 +84,6 @@ HEADERS += \
     ../include/mapnik/coord.hpp \
     ../include/mapnik/coord_array.hpp \
     ../include/mapnik/css_color_grammar.hpp \
-    ../include/mapnik/css_color_grammar_deprecated.hpp \
     ../include/mapnik/ctrans.hpp \
     ../include/mapnik/debug.hpp \
     ../include/mapnik/datasource.hpp \
@@ -137,10 +135,6 @@ HEADERS += \
     ../include/mapnik/memory.hpp \
     ../include/mapnik/memory_datasource.hpp \
     ../include/mapnik/memory_featureset.hpp \
-    ../include/mapnik/metawriter.hpp \
-    ../include/mapnik/metawriter_factory.hpp \
-    ../include/mapnik/metawriter_inmem.hpp \
-    ../include/mapnik/metawriter_json.hpp \
     ../include/mapnik/octree.hpp \
     ../include/mapnik/palette.hpp \
     ../include/mapnik/params.hpp \
@@ -280,9 +274,6 @@ SOURCES += \
     ../src/markers_symbolizer.cpp \
     ../src/memory.cpp \
     ../src/memory_datasource.cpp \
-    ../src/metawriter.cpp \
-    ../src/metawriter_factory.cpp \
-    ../src/metawriter_inmem.cpp \
     ../src/palette.cpp \
     ../src/parse_path.cpp \
     ../src/placement_finder.cpp \
@@ -316,7 +307,8 @@ SOURCES += \
 
 OTHER_FILES += \
     ../SConstruct \
-    ../config.py
+    ../config.py \
+    ../CHANGELOG.md
 
 include(agg.pri)
 include(plugins.pri)

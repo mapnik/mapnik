@@ -23,35 +23,32 @@
 #define MAPNIK_PYTHON_BINDING_SVG_INCLUDED
 
 // mapnik
+#include <mapnik/parse_transform.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/svg/svg_path_parser.hpp>
 #include <mapnik/value_error.hpp>
-
-// agg
-#include "agg_trans_affine.h"
 
 namespace mapnik {
 using namespace boost::python;
 
 template <class T>
-const std::string get_svg_transform(T& symbolizer)
+std::string get_svg_transform(T& symbolizer)
 {
-    return symbolizer.get_transform_string();
+    return symbolizer.get_image_transform_string();
 }
 
 template <class T>
 void set_svg_transform(T& symbolizer, std::string const& transform_wkt)
 {
-    agg::trans_affine tr;
-    if (!mapnik::svg::parse_transform(transform_wkt.c_str(), tr))
+    transform_list_ptr trans_expr = mapnik::parse_transform(transform_wkt);
+    if (!trans_expr)
     {
         std::stringstream ss;
-        ss << "Could not parse transform from '" << transform_wkt << "', expected string like: 'matrix(1, 0, 0, 1, 0, 0)'";
+        ss << "Could not parse transform from '" 
+           << transform_wkt 
+           << "', expected SVG transform attribute";
         throw mapnik::value_error(ss.str());
     }
-    mapnik::transform_type matrix;
-    tr.store_to(&matrix[0]);
-    symbolizer.set_transform(matrix);
+    symbolizer.set_image_transform(trans_expr);
 }
 
 } // end of namespace mapnik

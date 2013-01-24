@@ -22,19 +22,19 @@
 
 #ifndef MAPNIK_XML_TREE_H
 #define MAPNIK_XML_TREE_H
-//mapnik
+
+// mapnik
 #include <mapnik/xml_node.hpp>
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/transform_expression_grammar.hpp>
+#include <mapnik/image_filter_grammar.hpp>
+#include <mapnik/image_filter.hpp>
+#include <mapnik/css_color_grammar.hpp>
+#include <mapnik/unicode.hpp>
 
 // boost
 #include <boost/format.hpp>
-
-#if BOOST_VERSION >= 104500
-#include <mapnik/css_color_grammar.hpp>
-#else
-#include <mapnik/css_color_grammar_deprecated.hpp>
-#endif
 
 //stl
 #include <string>
@@ -49,6 +49,7 @@ public:
     void set_filename(std::string fn);
     std::string const& filename() const;
     xml_node &root();
+    xml_node const& root() const;
 private:
     xml_node node_;
     std::string file_;
@@ -57,6 +58,9 @@ public:
     mapnik::css_color_grammar<std::string::const_iterator> color_grammar;
     mapnik::expression_grammar<std::string::const_iterator> expr_grammar;
     path_expression_grammar<std::string::const_iterator> path_expr_grammar;
+    transform_expression_grammar<std::string::const_iterator> transform_expr_grammar;
+    image_filter_grammar<std::string::const_iterator,std::vector<filter::filter_type> > image_filters_grammar;
+
 };
 
 } //ns mapnik

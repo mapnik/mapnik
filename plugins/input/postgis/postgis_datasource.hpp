@@ -25,11 +25,23 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/params.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
+#include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
+
+// stl
+#include <vector>
+#include <string>
 
 #include "connection_manager.hpp"
 #include "resultset.hpp"
@@ -48,22 +60,20 @@ using mapnik::coord2d;
 class postgis_datasource : public datasource
 {
 public:
-    postgis_datasource(const parameters &params, bool bind=true);
+    postgis_datasource(const parameters &params);
     ~postgis_datasource();
     mapnik::datasource::datasource_t type() const;
-    static std::string name();
+    static const char * name();
     featureset_ptr features(const query& q) const;
-    featureset_ptr features_at_point(coord2d const& pt) const;
+    featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    void bind() const;
 
 private:
     std::string sql_bbox(box2d<double> const& env) const;
-    std::string populate_tokens(const std::string& sql, double scale_denom, box2d<double> const& env) const;
-    std::string populate_tokens(const std::string& sql) const;
-    static std::string unquote(const std::string& sql);
+    std::string populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const;
+    std::string populate_tokens(std::string const& sql) const;
     boost::shared_ptr<IResultSet> get_resultset(boost::shared_ptr<Connection> const &conn, std::string const& sql) const;
 
     static const std::string GEOMETRY_COLUMNS;
@@ -74,23 +84,27 @@ private:
     const std::string username_;
     const std::string password_;
     const std::string table_;
-    mutable std::string schema_;
-    mutable std::string geometry_table_;
+    std::string schema_;
+    std::string geometry_table_;
     const std::string geometry_field_;
-    mutable std::string key_field_;
-    const int cursor_fetch_size_;
-    const int row_limit_;
-    mutable std::string geometryColumn_;
+    std::string key_field_;
+    mapnik::value_integer cursor_fetch_size_;
+    mapnik::value_integer row_limit_;
+    std::string geometryColumn_;
     mapnik::datasource::datasource_t type_;
-    mutable int srid_;
+    int srid_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
-    mutable layer_descriptor desc_;
+    bool simplify_geometries_;
+    layer_descriptor desc_;
     ConnectionCreator<Connection> creator_;
     const std::string bbox_token_;
     const std::string scale_denom_token_;
+    const std::string pixel_width_token_;
+    const std::string pixel_height_token_;
     bool persist_connection_;
     bool extent_from_subquery_;
+    bool estimate_extent_;
     // params below are for testing purposes only (will likely be removed at any time)
     int intersect_min_scale_;
     int intersect_max_scale_;

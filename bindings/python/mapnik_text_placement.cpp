@@ -21,6 +21,7 @@
  *****************************************************************************/
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <mapnik/text_properties.hpp>
 #include <mapnik/text_placements/simple.hpp>
@@ -28,7 +29,7 @@
 #include <mapnik/formatting/text.hpp>
 #include <mapnik/formatting/list.hpp>
 #include <mapnik/formatting/format.hpp>
-#include <mapnik/formatting/expression.hpp>
+#include <mapnik/formatting/expression_format.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text_symbolizer.hpp>
@@ -230,16 +231,16 @@ struct ListNodeWrap: formatting::list_node, wrapper<formatting::list_node>
 
     formatting::node_ptr get_item(int i)
     {
-        if (i<0) i+= children_.size();
-        if (i<children_.size()) return children_[i];
+        if (i < 0) i+= children_.size();
+        if (i < static_cast<int>(children_.size())) return children_[i];
         IndexError();
         return formatting::node_ptr(); //Avoid compiler warning
     }
 
     void set_item(int i, formatting::node_ptr ptr)
     {
-        if (i<0) i+= children_.size();
-        if (i<children_.size()) children_[i] = ptr;
+        if (i < 0) i+= children_.size();
+        if (i < static_cast<int>(children_.size())) children_[i] = ptr;
         IndexError();
     }
 
@@ -354,6 +355,14 @@ void export_text_placement()
                       make_function(&get_properties, return_value_policy<reference_existing_object>()),
                       &set_properties,
                       "Shortcut for placements.defaults")
+        .add_property("comp_op",
+                      &text_symbolizer::comp_op,
+                      &text_symbolizer::set_comp_op,
+                      "Set/get the comp-op")
+        .add_property("clip",
+                      &text_symbolizer::clip,
+                      &text_symbolizer::set_clip,
+                      "Set/get the text geometry's clipping status")
         ;
 
 
@@ -376,6 +385,7 @@ void export_text_placement()
         .def_readwrite("maximum_angle_char_delta", &text_symbolizer_properties::max_char_angle_delta)
         .def_readwrite("force_odd_labels", &text_symbolizer_properties::force_odd_labels)
         .def_readwrite("allow_overlap", &text_symbolizer_properties::allow_overlap)
+        .def_readwrite("largest_bbox_only", &text_symbolizer_properties::largest_bbox_only)
         .def_readwrite("text_ratio", &text_symbolizer_properties::text_ratio)
         .def_readwrite("wrap_width", &text_symbolizer_properties::wrap_width)
         .def_readwrite("format", &text_symbolizer_properties::format)
@@ -389,18 +399,20 @@ void export_text_placement()
        set_old_style expression is just a compatibility wrapper and doesn't need to be exposed in python. */
     ;
 
-    class_<char_properties>
+
+    class_with_converter<char_properties>
         ("CharProperties")
+        .def_readwrite_convert("text_transform", &char_properties::text_transform)
+        .def_readwrite_convert("fontset", &char_properties::fontset)
         .def(init<char_properties const&>()) //Copy constructor
         .def_readwrite("face_name", &char_properties::face_name)
-        .def_readwrite("fontset", &char_properties::fontset)
         .def_readwrite("text_size", &char_properties::text_size)
         .def_readwrite("character_spacing", &char_properties::character_spacing)
         .def_readwrite("line_spacing", &char_properties::line_spacing)
         .def_readwrite("text_opacity", &char_properties::text_opacity)
         .def_readwrite("wrap_char", &char_properties::wrap_char)
+        .def_readwrite("wrap_character", &char_properties::wrap_char)
         .def_readwrite("wrap_before", &char_properties::wrap_before)
-        .def_readwrite("text_transform", &char_properties::text_transform)
         .def_readwrite("fill", &char_properties::fill)
         .def_readwrite("halo_fill", &char_properties::halo_fill)
         .def_readwrite("halo_radius", &char_properties::halo_radius)
@@ -487,6 +499,7 @@ void export_text_placement()
         .def_readwrite_convert("line_spacing", &formatting::format_node::line_spacing)
         .def_readwrite_convert("text_opacity", &formatting::format_node::text_opacity)
         .def_readwrite_convert("wrap_char", &formatting::format_node::wrap_char)
+        .def_readwrite_convert("wrap_character", &formatting::format_node::wrap_char)
         .def_readwrite_convert("wrap_before", &formatting::format_node::wrap_before)
         .def_readwrite_convert("text_transform", &formatting::format_node::text_transform)
         .def_readwrite_convert("fill", &formatting::format_node::fill)
@@ -526,6 +539,7 @@ void export_text_placement()
         .def_readwrite("line_spacing", &formatting::expression_format::line_spacing)
         .def_readwrite("text_opacity", &formatting::expression_format::text_opacity)
         .def_readwrite("wrap_char", &formatting::expression_format::wrap_char)
+        .def_readwrite("wrap_character", &formatting::expression_format::wrap_char)
         .def_readwrite("wrap_before", &formatting::expression_format::wrap_before)
         .def_readwrite("fill", &formatting::expression_format::fill)
         .def_readwrite("halo_fill", &formatting::expression_format::halo_fill)

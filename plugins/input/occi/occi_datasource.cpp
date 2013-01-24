@@ -28,10 +28,10 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/timer.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/make_shared.hpp>
 
@@ -41,9 +41,6 @@
 #include <set>
 #include <sstream>
 #include <iomanip>
-
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -68,25 +65,29 @@ const std::string occi_datasource::METADATA_TABLE = "USER_SDO_GEOM_METADATA";
 
 DATASOURCE_PLUGIN(occi_datasource)
 
-occi_datasource::occi_datasource(parameters const& params, bool bind)
+occi_datasource::occi_datasource(parameters const& params)
     : datasource (params),
       type_(datasource::Vector),
-      fields_(*params_.get<std::string>("fields", "*")),
-      geometry_field_(*params_.get<std::string>("geometry_field", "")),
+      fields_(*params.get<std::string>("fields", "*")),
+      geometry_field_(*params.get<std::string>("geometry_field", "")),
       srid_initialized_(false),
       extent_initialized_(false),
-      desc_(*params_.get<std::string>("type"), *params_.get<std::string>("encoding", "utf-8")),
-      use_wkb_(*params_.get<mapnik::boolean>("use_wkb", false)),
-      row_limit_(*params_.get<int>("row_limit", 0)),
-      row_prefetch_(*params_.get<int>("row_prefetch", 100)),
+      desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
+      use_wkb_(*params.get<mapnik::boolean>("use_wkb", false)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
+      row_prefetch_(*params.get<int>("row_prefetch", 100)),
       pool_(0),
       conn_(0)
 {
-    if (! params_.get<std::string>("user")) throw datasource_exception("OCCI Plugin: no <user> specified");
-    if (! params_.get<std::string>("password")) throw datasource_exception("OCCI Plugin: no <password> specified");
-    if (! params_.get<std::string>("host")) throw datasource_exception("OCCI Plugin: no <host> string specified");
+#ifdef MAPNIK_STATS
+    mapnik::progress_timer __stats__(std::clog, "occi_datasource::init");
+#endif
 
-    boost::optional<std::string> table = params_.get<std::string>("table");
+    if (! params.get<std::string>("user")) throw datasource_exception("OCCI Plugin: no <user> specified");
+    if (! params.get<std::string>("password")) throw datasource_exception("OCCI Plugin: no <password> specified");
+    if (! params.get<std::string>("host")) throw datasource_exception("OCCI Plugin: no <host> string specified");
+
+    boost::optional<std::string> table = params.get<std::string>("table");
     if (! table)
     {
         throw datasource_exception("OCCI Plugin: no <table> parameter specified");
@@ -95,56 +96,19 @@ occi_datasource::occi_datasource(parameters const& params, bool bind)
     {
         table_ = *table;
     }
+    estimate_extent_ = *params.get<mapnik::boolean>("estimate_extent",false);
+    use_spatial_index_ = *params.get<mapnik::boolean>("use_spatial_index",true);
+    use_connection_pool_ = *params.get<mapnik::boolean>("use_connection_pool",true);
 
-    use_spatial_index_ = *params_.get<mapnik::boolean>("use_spatial_index",true);
-    use_connection_pool_ = *params_.get<mapnik::boolean>("use_connection_pool",true);
-
-    boost::optional<std::string> ext = params_.get<std::string>("extent");
+    boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
 
-    boost::optional<int> srid = params_.get<int>("srid");
+    boost::optional<int> srid = params.get<int>("srid");
     if (srid)
     {
         srid_ = *srid;
         srid_initialized_ = true;
     }
-
-    if (bind)
-    {
-        this->bind();
-    }
-}
-
-occi_datasource::~occi_datasource()
-{
-    if (is_bound_)
-    {
-        Environment* env = occi_environment::get_environment();
-
-        if (use_connection_pool_)
-        {
-            if (pool_ != 0)
-            {
-                env->terminateStatelessConnectionPool(pool_, StatelessConnectionPool::SPD_FORCE);
-            }
-        }
-        else
-        {
-            if (conn_ != 0)
-            {
-                env->terminateConnection(conn_);
-            }
-        }
-    }
-}
-
-void occi_datasource::bind() const
-{
-    if (is_bound_) return;
-
-#ifdef MAPNIK_STATS
-    mapnik::progress_timer __stats__(std::clog, "occi_datasource::bind");
-#endif
 
     // connect to environment
     if (use_connection_pool_)
@@ -154,11 +118,11 @@ void occi_datasource::bind() const
             Environment* env = occi_environment::get_environment();
 
             pool_ = env->createStatelessConnectionPool(
-                *params_.get<std::string>("user"),
-                *params_.get<std::string>("password"),
-                *params_.get<std::string>("host"),
-                *params_.get<int>("max_size", 10),
-                *params_.get<int>("initial_size", 1),
+                *params.get<std::string>("user"),
+                *params.get<std::string>("password"),
+                *params.get<std::string>("host"),
+                *params.get<int>("max_size", 5),
+                *params.get<int>("initial_size", 1),
                 1,
                 StatelessConnectionPool::HOMOGENEOUS);
         }
@@ -174,9 +138,9 @@ void occi_datasource::bind() const
             Environment* env = occi_environment::get_environment();
 
             conn_ = env->createConnection(
-                *params_.get<std::string>("user"),
-                *params_.get<std::string>("password"),
-                *params_.get<std::string>("host"));
+                *params.get<std::string>("user"),
+                *params.get<std::string>("password"),
+                *params.get<std::string>("host"));
         }
         catch (SQLException& ex)
         {
@@ -348,11 +312,31 @@ void occi_datasource::bind() const
             throw datasource_exception(ex.getMessage());
         }
     }
-
-    is_bound_ = true;
 }
 
-std::string occi_datasource::name()
+occi_datasource::~occi_datasource()
+{
+    {
+        Environment* env = occi_environment::get_environment();
+
+        if (use_connection_pool_)
+        {
+            if (pool_ != 0)
+            {
+                env->terminateStatelessConnectionPool(pool_, StatelessConnectionPool::SPD_FORCE);
+            }
+        }
+        else
+        {
+            if (conn_ != 0)
+            {
+                env->terminateConnection(conn_);
+            }
+        }
+    }
+}
+
+const char * occi_datasource::name()
 {
     return "occi";
 }
@@ -365,14 +349,11 @@ mapnik::datasource::datasource_t occi_datasource::type() const
 box2d<double> occi_datasource::envelope() const
 {
     if (extent_initialized_) return extent_;
-    if (! is_bound_) bind();
 
     double lox = 0.0, loy = 0.0, hix = 0.0, hiy = 0.0;
 
-    boost::optional<mapnik::boolean> estimate_extent =
-        params_.get<mapnik::boolean>("estimate_extent",false);
 
-    if (estimate_extent && *estimate_extent)
+    if (estimate_extent_)
     {
 #ifdef MAPNIK_STATS
         mapnik::progress_timer __stats__(std::clog, "occi_datasource::envelope(estimate_extent)");
@@ -394,19 +375,12 @@ box2d<double> occi_datasource::envelope() const
             ResultSet* rs = conn.execute_query(s.str());
             if (rs && rs->next())
             {
-                try
-                {
-                    lox = lexical_cast<double>(rs->getDouble(1));
-                    loy = lexical_cast<double>(rs->getDouble(2));
-                    hix = lexical_cast<double>(rs->getDouble(3));
-                    hiy = lexical_cast<double>(rs->getDouble(4));
-                    extent_.init(lox, loy, hix, hiy);
-                    extent_initialized_ = true;
-                }
-                catch (bad_lexical_cast& ex)
-                {
-                    MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
-                }
+                lox = rs->getDouble(1);
+                loy = rs->getDouble(2);
+                hix = rs->getDouble(3);
+                hiy = rs->getDouble(4);
+                extent_.init(lox, loy, hix, hiy);
+                extent_initialized_ = true;
             }
         }
         catch (SQLException& ex)
@@ -442,30 +416,15 @@ box2d<double> occi_datasource::envelope() const
             {
                 if (rs->next())
                 {
-                    try
-                    {
-                        lox = lexical_cast<double>(rs->getDouble(1));
-                        hix = lexical_cast<double>(rs->getDouble(2));
-                    }
-                    catch (bad_lexical_cast& ex)
-                    {
-                        MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
-                    }
+                    lox = rs->getDouble(1);
+                    hix = rs->getDouble(2);
                 }
 
                 if (rs->next())
                 {
-                    try
-                    {
-                        loy = lexical_cast<double>(rs->getDouble(1));
-                        hiy = lexical_cast<double>(rs->getDouble(2));
-                    }
-                    catch (bad_lexical_cast& ex)
-                    {
-                        MAPNIK_LOG_WARN(occi) << "OCCI Plugin: " << ex.what();
-                    }
+                    loy = rs->getDouble(1);
+                    hiy = rs->getDouble(2);
                 }
-
                 extent_.init(lox, loy, hix, hiy);
                 extent_initialized_ = true;
             }
@@ -487,22 +446,16 @@ box2d<double> occi_datasource::envelope() const
 
 boost::optional<mapnik::datasource::geometry_t> occi_datasource::get_geometry_type() const
 {
-    // FIXME
-    //if (! is_bound_) bind();
     return boost::optional<mapnik::datasource::geometry_t>();
 }
 
 layer_descriptor occi_datasource::get_descriptor() const
 {
-    if (! is_bound_) bind();
-
     return desc_;
 }
 
 featureset_ptr occi_datasource::features(query const& q) const
 {
-    if (! is_bound_) bind();
-
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "occi_datasource::features");
 #endif
@@ -590,10 +543,8 @@ featureset_ptr occi_datasource::features(query const& q) const
                                                row_prefetch_);
 }
 
-featureset_ptr occi_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol) const
 {
-    if (! is_bound_) bind();
-
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "occi_datasource::features_at_point");
 #endif

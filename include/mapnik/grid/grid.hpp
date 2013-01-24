@@ -25,13 +25,14 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/debug.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/grid/grid_view.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/feature_factory.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/cstdint.hpp>
@@ -56,50 +57,31 @@ public:
     typedef std::string lookup_type;
     // mapping between pixel id and key
     typedef std::map<value_type, lookup_type> feature_key_type;
-    typedef std::map<lookup_type, value_type> key_type;
-    typedef std::map<std::string, mapnik::feature_ptr> feature_type;
+    typedef std::map<lookup_type, mapnik::feature_ptr> feature_type;
+    static const value_type base_mask;
 
 private:
     unsigned width_;
     unsigned height_;
     std::string key_;
-    feature_key_type f_keys_;
-    feature_type features_;
     data_type data_;
-    std::set<std::string> names_;
     unsigned int resolution_;
     std::string id_name_;
     bool painted_;
+    std::set<std::string> names_;
+    feature_key_type f_keys_;
+    feature_type features_;
+    mapnik::context_ptr ctx_;
 
 public:
 
-    hit_grid(int width, int height, std::string const& key, unsigned int resolution)
-        :width_(width),
-        height_(height),
-        key_(key),
-        data_(width,height),
-        resolution_(resolution),
-        id_name_("__id__"),
-        painted_(false)
-        {
-            // this only works if each datasource's
-            // feature count starts at 1
-            f_keys_[0] = "";
-        }
+    hit_grid(int width, int height, std::string const& key, unsigned int resolution);
 
-    hit_grid(const hit_grid<T>& rhs)
-        :width_(rhs.width_),
-        height_(rhs.height_),
-        key_(rhs.key_),
-        data_(rhs.data_),
-        resolution_(rhs.resolution_),
-        id_name_("__id__"),
-        painted_(rhs.painted_)
-        {
-            f_keys_[0] = "";
-        }
+    hit_grid(hit_grid<T> const& rhs);
 
     ~hit_grid() {}
+
+    void clear();
 
     inline void painted(bool painted)
     {
@@ -116,46 +98,7 @@ public:
         return id_name_;
     }
 
-    inline void add_feature(mapnik::feature_ptr const& feature)
-    {
-
-        // NOTE: currently lookup keys must be strings,
-        // but this should be revisited
-        boost::optional<lookup_type> lookup_value;
-        if (key_ == id_name_)
-        {
-            std::stringstream s;
-            s << feature->id();
-            lookup_value = s.str();
-        }
-        else
-        {
-            if (feature->has_key(key_))
-            {
-                lookup_value = feature->get(key_).to_string();
-            }
-            else
-            {
-                MAPNIK_LOG_DEBUG(grid) << "hit_grid: Should not get here: key '" << key_ << "' not found in feature properties";
-            }
-        }
-
-        if (lookup_value)
-        {
-            // TODO - consider shortcutting f_keys if feature_id == lookup_value
-            // create a mapping between the pixel id and the feature key
-            f_keys_.insert(std::make_pair(feature->id(),*lookup_value));
-            // if extra fields have been supplied, push them into grid memory
-            if (!names_.empty())
-            {
-                features_.insert(std::make_pair(*lookup_value,feature));
-            }
-        }
-        else
-        {
-            MAPNIK_LOG_DEBUG(grid) << "hit_grid: Warning - key '" << key_ << "' was blank for " << *feature;
-        }
-    }
+    void add_feature(mapnik::feature_impl & feature);
 
     inline void add_property_name(std::string const& name)
     {
@@ -167,27 +110,17 @@ public:
         return names_;
     }
 
-    inline const feature_type& get_grid_features() const
+    inline feature_type const& get_grid_features() const
     {
         return features_;
     }
 
-    inline feature_type& get_grid_features()
-    {
-        return features_;
-    }
-
-    inline const feature_key_type& get_feature_keys() const
+    inline feature_key_type const& get_feature_keys() const
     {
         return f_keys_;
     }
 
-    inline feature_key_type& get_feature_keys()
-    {
-        return f_keys_;
-    }
-
-    inline const std::string& get_key() const
+    inline std::string const& get_key() const
     {
         return key_;
     }
@@ -207,7 +140,7 @@ public:
         resolution_ = res;
     }
 
-    inline const data_type& data() const
+    inline data_type const& data() const
     {
         return data_;
     }
@@ -217,7 +150,7 @@ public:
         return data_;
     }
 
-    inline const T* raw_data() const
+    inline T const * raw_data() const
     {
         return data_.getData();
     }
@@ -227,7 +160,7 @@ public:
         return data_.getData();
     }
 
-    inline const value_type* getRow(unsigned row) const
+    inline value_type const * getRow(unsigned row) const
     {
         return data_.getRow(row);
     }
@@ -323,7 +256,7 @@ public:
 
 };
 
-typedef MAPNIK_DECL hit_grid<boost::uint16_t> grid;
+typedef MAPNIK_DECL hit_grid<mapnik::value_integer> grid;
 
 }
 #endif //MAPNIK_GRID_HPP

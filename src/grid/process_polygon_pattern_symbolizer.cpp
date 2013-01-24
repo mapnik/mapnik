@@ -20,13 +20,17 @@
  *
  *****************************************************************************/
 
+// boost
+#include <boost/foreach.hpp>
+
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_pixfmt.hpp>
-#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/polygon_pattern_symbolizer.hpp>
+#include <mapnik/vertex_converters.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"
@@ -41,34 +45,45 @@ namespace mapnik {
 
 template <typename T>
 void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
-                               mapnik::feature_ptr const& feature,
+                               mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
-    typedef coord_transform2<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<mapnik::pixfmt_gray16> ren_base;
-    typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
-    agg::scanline_bin sl;
-
-    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    mapnik::pixfmt_gray16 pixf(buf);
-
-    ren_base renb(pixf);
-    renderer ren(renb);
-
     ras_ptr->reset();
 
-    for (unsigned i=0;i<feature->num_geometries();++i)
+    agg::trans_affine tr;
+    evaluate_transform(tr, feature, sym.get_transform());
+
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,smooth_tag> conv_types;
+    vertex_converter<box2d<double>, grid_rasterizer, polygon_pattern_symbolizer,
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+
+    if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
+    converter.set<transform_tag>(); //always transform
+    converter.set<affine_transform_tag>();
+    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+
+
+    BOOST_FOREACH( geometry_type & geom, feature.paths())
     {
-        geometry_type & geom = feature->get_geometry(i);
-        if (geom.num_points() > 2)
+        if (geom.size() > 2)
         {
-            path_type path(t_,geom,prj_trans);
-            ras_ptr->add_path(path);
+            converter.apply(geom);
         }
     }
+    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
+    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
+    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
+
+    grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
+    pixfmt_type pixf(buf);
+
+    grid_renderer_base_type renb(pixf);
+    renderer_type ren(renb);
 
     // render id
-    ren.color(mapnik::gray16(feature->id()));
+    ren.color(color_type(feature.id()));
+    agg::scanline_bin sl;
     agg::render_scanlines(*ras_ptr, sl, ren);
 
     // add feature properties to grid cache
@@ -77,7 +92,7 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
 
 template void grid_renderer<grid>::process(polygon_pattern_symbolizer const&,
-                                           mapnik::feature_ptr const&,
+                                           mapnik::feature_impl &,
                                            proj_transform const&);
 
 }
