@@ -17,7 +17,7 @@ config_variables = '''#!/bin/sh
 
 ## variables
 
-CONFIG_PREFIX=%(prefix)s
+CONFIG_PREFIX="$( cd "$( dirname $( dirname "${BASH_SOURCE[0]}" ))" && pwd )"
 CONFIG_MAPNIK_LIBNAME=%(mapnik_libname)s
 CONFIG_MAPNIK_INCLUDE=${CONFIG_PREFIX}/include
 CONFIG_MAPNIK_LIB=${CONFIG_PREFIX}/%(libdir_schema)s
@@ -74,7 +74,6 @@ else:
         git_revision = stdin.strip()
 
 configuration = {
-    "prefix": config_env['PREFIX'],
     "mapnik_libname": 'mapnik',
     "libdir_schema": config_env['LIBDIR_SCHEMA'],
     "ldflags": ldflags,
