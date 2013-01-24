@@ -59,7 +59,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(bbox, backend, sym, t, prj_trans, tr, 1.0);
 
-    converter.template set<clip_line_tag>();
+    converter.set<clip_line_tag>();
 
     boost::ptr_vector<geometry_type> p;
     if (!mapnik::from_wkt(wkt_in , p))
@@ -99,7 +99,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(bbox, backend, sym, t, prj_trans, tr, 1.0);
 
-    converter.template set<clip_poly_tag>();
+    converter.set<clip_poly_tag>();
 
     boost::ptr_vector<geometry_type> p;
     if (!mapnik::from_wkt(wkt_in , p))
@@ -160,7 +160,6 @@ int main( int, char*[] )
         BOOST_TEST(result);
         BOOST_TEST_EQ(*result,std::string("Polygon((50 50,50 100,75 150,125 150,150 100,150 50,50 50))"));
     }
-
 
     if (!::boost::detail::test_errors())
     {
