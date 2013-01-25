@@ -1,4 +1,4 @@
-<Map srs="+proj=lonlat +ellps=WGS84 +datum=WGS84 +no_defs +over" background-color="lightsteelblue">
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="lightsteelblue">
   <Style name="My Style">
     <Rule>
       <PolygonSymbolizer fill="#f2eff9"/><LineSymbolizer stroke="rgb(50%,50%,50%)" stroke-width="0.1"/>

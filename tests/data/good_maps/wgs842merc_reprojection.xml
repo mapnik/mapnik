@@ -4,7 +4,7 @@
       <PolygonSymbolizer fill="#f2eff9"/><LineSymbolizer stroke="rgb(50%,50%,50%)" stroke-width="0.1"/></Rule>
   </Style>
 
-  <Layer name="world" srs="+proj=lonlat +ellps=WGS84 +datum=WGS84 +no_defs +over">
+  <Layer name="world" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>My Style</StyleName>
     <Datasource>
       <Parameter name="type">shape</Parameter>
