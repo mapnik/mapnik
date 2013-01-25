@@ -1,5 +1,5 @@
 <!DOCTYPE Map>
-<Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum-version="0.7.2">
+<Map background-color="#b5d0d0" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="0.7.2">
     <Style name="1">
         <Rule>
             <LineSymbolizer stroke="rgb(80%,0%,0%)" />
@@ -18,7 +18,7 @@
         </Rule>
     </Style>
 
-    <Layer name="circles1" srs="+init=epsg:4326">
+    <Layer name="circles1" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>1</StyleName>
         <Datasource>
             <Parameter name="type">python</Parameter>
@@ -26,7 +26,7 @@
         </Datasource>
     </Layer>
 
-    <Layer name="circles2" srs="+init=epsg:4326">
+    <Layer name="circles2" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>2</StyleName>
         <Datasource>
             <Parameter name="type">python</Parameter>
@@ -36,7 +36,7 @@
         </Datasource>
     </Layer>
 
-    <Layer name="circles3" srs="+init=epsg:4326">
+    <Layer name="circles3" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>3</StyleName>
         <Datasource>
             <Parameter name="type">python</Parameter>

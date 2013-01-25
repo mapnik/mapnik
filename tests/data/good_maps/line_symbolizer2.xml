@@ -1,4 +1,4 @@
-<Map srs="+init=epsg:4326" background-color="rgb(233,233,233)" minimum-version="0.7.2">
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="rgb(233,233,233)" minimum-version="0.7.2">
 
     <Datasource name="sqlite">
         <Parameter name="type">sqlite</Parameter>
@@ -12,7 +12,7 @@
         </Rule>
     </Style>
 
-    <Layer name="polygons" srs="+init=epsg:4326">
+    <Layer name="polygons" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>polygon_style</StyleName>
         <Datasource base="sqlite">
             <Parameter name="table">multipolygon</Parameter>
@@ -26,7 +26,7 @@
         </Rule>
     </Style>
     
-    <Layer name="lines" srs="+init=epsg:4326">
+    <Layer name="lines" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>line_style</StyleName>
         <Datasource base="sqlite">
             <Parameter name="table">lines</Parameter>

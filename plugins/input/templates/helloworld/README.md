@@ -15,14 +15,14 @@ the center of any query. This means that it should place a point in
 the middle of any map tile and display a "hello world!" label if used like:
 
 <?xml version="1.0" encoding="utf-8"?>
-<Map srs="+init=epsg:4326" background-color="white">
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="white">
     <Style name="style">
         <Rule>
             <PointSymbolizer />
             <TextSymbolizer name="[key]" face_name="DejaVu Sans Book" size="10" dx="5" dy="5"/>
         </Rule>
     </Style>
-    <Layer name="test" srs="+init=epsg:4326">
+    <Layer name="test" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>style</StyleName>
         <Datasource>
             <Parameter name="type">hello</Parameter>
