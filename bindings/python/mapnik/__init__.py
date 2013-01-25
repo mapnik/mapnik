@@ -1004,7 +1004,12 @@ def mapnik_version_from_string(version_string):
 
 def register_plugins(path=None):
     """Register plugins located by specified path"""
-    DatasourceCache.instance().register_datasources(path)
+    if not path:
+        if os.environ.has_key('MAPNIK_INPUT_PLUGINS_DIRECTORY'):
+            path = os.environ.get('MAPNIK_INPUT_PLUGINS_DIRECTORY')
+        else:
+            path = inputpluginspath
+    DatasourceCache.register_datasources(path)
 
 def register_fonts(path=None,valid_extensions=['.ttf','.otf','.ttc','.pfa','.pfb','.ttc','.dfont']):
     """Recursively register fonts using path argument as base directory"""
