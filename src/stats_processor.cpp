@@ -22,16 +22,29 @@
 
 //mapnik
 #include <mapnik/stats_processor.hpp>
-#include <mapnik/box2d.hpp>
+#include <mapnik/map.hpp>
+#include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/feature_style_processor.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/memory_datasource.hpp>
+#include <mapnik/feature_type_style.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/layer.hpp>
+#include <mapnik/rule.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/scale_denominator.hpp>
+#include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
 
 // boost
 #include <boost/foreach.hpp>
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 //stl
 #include <vector>
@@ -143,7 +156,7 @@ void stats_processor::apply_to_layer(layer const& lay, projection const& proj0,
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
     double filt_factor = 1;
-    directive_collector d_collector(&filt_factor);
+    directive_collector d_collector(filt_factor);
 
     // iterate through all named styles collecting active styles and attribute names
     BOOST_FOREACH(std::string const& style_name, style_names)

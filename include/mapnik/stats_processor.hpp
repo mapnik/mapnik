@@ -25,8 +25,6 @@
 
 // mapnik
 #include <mapnik/map.hpp>
-#include <mapnik/projection.hpp>
-#include <mapnik/memory_datasource.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -44,6 +42,8 @@ namespace mapnik
 class Map;
 class layer;
 class projection;
+class proj_transform;
+class feature_type_style;
 
 struct stats
 {
