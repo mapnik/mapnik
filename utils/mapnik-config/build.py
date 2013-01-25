@@ -17,7 +17,7 @@ config_variables = '''#!/bin/sh
 
 ## variables
 
-CONFIG_PREFIX="$( cd "$( dirname $( dirname "${BASH_SOURCE[0]}" ))" && pwd )"
+CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
 CONFIG_MAPNIK_LIBNAME=%(mapnik_libname)s
 CONFIG_MAPNIK_INCLUDE=${CONFIG_PREFIX}/include
 CONFIG_MAPNIK_LIB=${CONFIG_PREFIX}/%(libdir_schema)s
