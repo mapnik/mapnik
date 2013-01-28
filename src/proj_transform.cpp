@@ -54,12 +54,21 @@ proj_transform::proj_transform(projection const& source,
         is_dest_longlat_ = dest_.is_geographic();
         boost::optional<well_known_srs_e> src_k = source.well_known();
         boost::optional<well_known_srs_e> dest_k = dest.well_known();
+        bool known_trans = false;
         if (src_k && dest_k)
         {
-            if (*src_k == WGS_84) wgs84_to_merc_ = true;
-            else merc_to_wgs84_ = true;
+            if (*src_k == WGS_84 && *dest_k == G_MERC)
+            {
+                wgs84_to_merc_ = true;
+                known_trans = true;
+            }
+            else if (*src_k == G_MERC && *dest_k == WGS_84)
+            {
+                merc_to_wgs84_ = true;
+                known_trans = true;
+            }
         }
-        else
+        if (!known_trans)
         {
 #ifdef MAPNIK_USE_PROJ4
             source_.init_proj4();
