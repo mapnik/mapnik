@@ -24,11 +24,12 @@
 #define MAPNIK_WARP_HPP
 
 // mapnik
-#include <mapnik/raster.hpp>
-#include <mapnik/proj_transform.hpp>
 #include <mapnik/image_scaling.hpp>
 
 namespace mapnik {
+
+class raster;
+class proj_transform;
 
 void reproject_and_scale_raster(raster & target,
                                 raster const& source,
