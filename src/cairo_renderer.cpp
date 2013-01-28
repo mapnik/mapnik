@@ -26,7 +26,9 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/layer.hpp>
+#include <mapnik/raster.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/proj_transform.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/cairo_renderer.hpp>
 #include <mapnik/cairo_context.hpp>
