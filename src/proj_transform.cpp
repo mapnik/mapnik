@@ -26,8 +26,12 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/utils.hpp>
 
+#define MAPNIK_USE_PROJ4
+
+#ifdef MAPNIK_USE_PROJ4
 // proj4
 #include <proj_api.h>
+#endif
 
 // stl
 #include <vector>
@@ -68,7 +72,6 @@ bool proj_transform::equal() const
     return is_source_equal_dest_;
 }
 
-
 bool proj_transform::forward (double & x, double & y , double & z) const
 {
     return forward(&x, &y, &z, 1);
@@ -89,6 +92,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         return merc2lonlat(x,y,point_count);
     }
 
+#ifdef MAPNIK_USE_PROJ4
     if (is_source_longlat_)
     {
         int i;
@@ -98,7 +102,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         }
     }
 
-    do {
+    {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
@@ -107,7 +111,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         {
             return false;
         }
-    } while(false);
+    }
 
     if (is_dest_longlat_)
     {
@@ -117,7 +121,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
             y[i] *= RAD_TO_DEG;
         }
     }
-
+#endif
     return true;
 }
 
@@ -135,6 +139,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         return lonlat2merc(x,y,point_count);
     }
 
+#ifdef MAPNIK_USE_PROJ4
     if (is_dest_longlat_)
     {
         int i;
@@ -164,7 +169,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
             y[i] *= RAD_TO_DEG;
         }
     }
-
+#endif
     return true;
 }
 
