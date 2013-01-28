@@ -61,8 +61,12 @@ proj_transform::proj_transform(projection const& source,
         }
         else
         {
+#ifdef MAPNIK_USE_PROJ4
             source_.init_proj4();
             dest_.init_proj4();
+#else
+            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ4): '") + source_.params() + "'->'" + dest_.params() + "'");
+#endif
         }
     }
 }
