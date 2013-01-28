@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdio>
+#include <set>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -25,32 +26,51 @@
 using namespace boost::chrono;
 using namespace mapnik;
 
+static unsigned test_num = 1;
+static bool dry_run = false;
+static std::set<int> test_set;
+
 typedef process_cpu_clock clock_type;
 typedef clock_type::duration dur;
 
 template <typename T>
 void benchmark(T test, std::string const& name)
 {
-    if (!test.validate()) throw std::runtime_error(std::string("test did not validate: ") + name);
-    process_cpu_clock::time_point start;
-    dur elapsed;
-    if (test.threads_ > 0) {
-        boost::thread_group tg;
-        for (unsigned i=0;i<test.threads_;++i)
-        {
-            tg.create_thread(test);
-        }
-        start = process_cpu_clock::now();
-        tg.join_all();
-        elapsed = process_cpu_clock::now() - start;
-    } else {
-        start = process_cpu_clock::now();
-        test();
-        elapsed = process_cpu_clock::now() - start;
+    bool should_run_test = true;
+    if (!test_set.empty()) {
+        should_run_test = test_set.find(test_num) != test_set.end();
     }
-    std::clog << (test.threads_ ? "threaded -> ": "")
-        << name << ": "
-        << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
+    if (should_run_test) {
+        if (!test.validate()) {
+            std::clog << "test did not validate: " << name << "\n";
+            //throw std::runtime_error(std::string("test did not validate: ") + name);
+        }
+        if (dry_run) {
+            std::clog << test_num << ") " << (test.threads_ ? "threaded -> ": "")
+                << name << "\n";
+        } else {
+            process_cpu_clock::time_point start;
+            dur elapsed;
+            if (test.threads_ > 0) {
+                boost::thread_group tg;
+                for (unsigned i=0;i<test.threads_;++i)
+                {
+                    tg.create_thread(test);
+                }
+                start = process_cpu_clock::now();
+                tg.join_all();
+                elapsed = process_cpu_clock::now() - start;
+            } else {
+                start = process_cpu_clock::now();
+                test();
+                elapsed = process_cpu_clock::now() - start;
+            }
+            std::clog << test_num << ") " << (test.threads_ ? "threaded -> ": "")
+                << name << ": "
+                << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
+        }
+    }
+    test_num++;
 }
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
@@ -249,11 +269,25 @@ struct test5
 };
 
 
-int main( int, char*[] )
+int main( int argc, char** argv)
 {
+    if (argc > 0) {
+        for (int i=0;i<argc;++i) {
+            std::string opt(argv[i]);
+            if (opt == "-d" || opt == "--dry-run") {
+                dry_run = true;
+            } else if (opt[0] != '-') {
+                int arg;
+                if (mapnik::util::string2int(opt,arg)) {
+                    test_set.insert(arg);
+                }
+            }
+        }
+    }
     try
     {
         std::cout << "starting benchmark…\n";
+
         {
             test1 runner(100);
             benchmark(runner,"encoding blank image as png");
