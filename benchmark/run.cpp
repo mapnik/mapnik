@@ -332,6 +332,65 @@ struct test6
     }
 };
 
+#include <mapnik/unicode.hpp>
+#include <mapnik/expression.hpp>
+#include <mapnik/expression_string.hpp>
+
+struct test7
+{
+    unsigned iter_;
+    unsigned threads_;
+    std::string expr_;
+    explicit test7(unsigned iterations,
+                   unsigned threads,
+                   std::string const& expr) :
+      iter_(iterations),
+      threads_(threads),
+      expr_(expr)
+      {}
+
+    bool validate()
+    {
+        mapnik::expression_ptr expr = mapnik::parse_expression(expr_,"utf-8");
+        return mapnik::to_expression_string(*expr) == expr_;
+    }
+    void operator()()
+    {
+         for (int i=0;i<iter_;++i) {
+             mapnik::expression_ptr expr = mapnik::parse_expression(expr_,"utf-8");
+         }
+    }
+};
+
+#include <mapnik/expression_grammar.hpp>
+
+struct test8
+{
+    unsigned iter_;
+    unsigned threads_;
+    std::string expr_;
+    explicit test8(unsigned iterations,
+                   unsigned threads,
+                   std::string const& expr) :
+      iter_(iterations),
+      threads_(threads),
+      expr_(expr)
+      {}
+
+    bool validate()
+    {
+        mapnik::expression_grammar<std::string::const_iterator> expr_grammar(transcoder("utf-8"));
+        mapnik::expression_ptr expr = mapnik::parse_expression(expr_,expr_grammar);
+        return mapnik::to_expression_string(*expr) == expr_;
+    }
+    void operator()()
+    {
+         mapnik::expression_grammar<std::string::const_iterator> expr_grammar(transcoder("utf-8"));
+         for (int i=0;i<iter_;++i) {
+             mapnik::expression_ptr expr = mapnik::parse_expression(expr_,expr_grammar);
+         }
+    }
+};
 
 int main( int argc, char** argv)
 {
@@ -436,6 +495,16 @@ int main( int argc, char** argv)
                          "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
                          to,from,true);
             benchmark(runner,"merc -> lonlat coord transformation (literal)");
+        }
+
+        {
+            test7 runner(10000,100,"([foo]=1)");
+            benchmark(runner,"expression parsing with grammer per parse");
+        }
+
+        {
+            test8 runner(10000,100,"([foo]=1)");
+            benchmark(runner,"expression parsing by re-using grammar");
         }
 
         std::cout << "...benchmark done\n";
