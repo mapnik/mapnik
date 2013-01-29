@@ -1491,7 +1491,7 @@ if not preconfigured:
 
         # Common C++ flags.
         if env['THREADING'] == 'multi':
-            common_cxx_flags = '-D%s -DBOOST_SPIRIT_THREADSAFE -DMAPNIK_THREADSAFE ' % env['PLATFORM'].upper()
+            common_cxx_flags = '-D%s -DMAPNIK_THREADSAFE ' % env['PLATFORM'].upper()
         else :
             common_cxx_flags = '-D%s ' % env['PLATFORM'].upper()
 
