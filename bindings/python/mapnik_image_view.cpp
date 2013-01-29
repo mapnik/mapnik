@@ -20,22 +20,14 @@
  *
  *****************************************************************************/
 
-extern "C"
-{
-#include <png.h>
-}
 
 #include <boost/python.hpp>
+#include <mapnik/image_data.hpp>
+#include <mapnik/image_view.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/image_view.hpp>
-#include <mapnik/png_io.hpp>
 #include <sstream>
-
-// jpeg
-#if defined(HAVE_JPEG)
-#include <mapnik/jpeg_io.hpp>
-#endif
 
 using mapnik::image_data_32;
 using mapnik::image_view;

@@ -20,11 +20,6 @@
  *
  *****************************************************************************/
 
-extern "C"
-{
-#include <png.h>
-}
-
 // boost
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
@@ -35,14 +30,8 @@ extern "C"
 #include <mapnik/graphics.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/png_io.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_compositing.hpp>
-
-// jpeg
-#if defined(HAVE_JPEG)
-#include <mapnik/jpeg_io.hpp>
-#endif
 
 // cairo
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
