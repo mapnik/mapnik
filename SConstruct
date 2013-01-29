@@ -318,6 +318,7 @@ PathVariable.PathAccept),
     BoolVariable('TIFF', 'Build Mapnik with TIFF read and write support', 'True'),
     PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    BoolVariable('PROJ', 'Build Mapnik with proj4 support to enable transformations between many different projections', 'True'),
     PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PROJ_LIBS', 'Search path for PROJ.4 library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('PKG_CONFIG_PATH', 'Use this path to point pkg-config to .pc files instead of the PKG_CONFIG_PATH environment setting',''),
@@ -1062,7 +1063,7 @@ if not preconfigured:
 
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('PROJ', 'ICU', 'SQLITE', 'LTDL'):
+    for required in ('ICU', 'SQLITE', 'LTDL'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1100,6 +1101,16 @@ if not preconfigured:
         env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['jpeg'])
+
+    if env['PROJ']:
+        env.Append(CXXFLAGS = '-DMAPNIK_USE_PROJ4')
+        LIBSHEADERS.append(['proj', 'proj_api.h', True,'C'])
+        inc_path = env['%s_INCLUDES' % 'PROJ']
+        lib_path = env['%s_LIBS' % 'PROJ']
+        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+    else:
+        env['SKIPPED_DEPS'].extend(['proj'])
 
     if env['PNG']:
         env.Append(CXXFLAGS = '-DHAVE_PNG')
