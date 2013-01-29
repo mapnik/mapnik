@@ -313,7 +313,7 @@ struct test6
         mapnik::projection dest(dest_);
         mapnik::proj_transform tr(src,dest);
         unsigned count=0;
-        for (int i=-180;i<180;i=++i)
+        for (int i=-180;i<180;++i)
         {
             for (int j=-85;j<85;++j)
             {
