@@ -36,39 +36,43 @@ typedef clock_type::duration dur;
 template <typename T>
 void benchmark(T test, std::string const& name)
 {
-    bool should_run_test = true;
-    if (!test_set.empty()) {
-        should_run_test = test_set.find(test_num) != test_set.end();
-    }
-    if (should_run_test) {
-        if (!test.validate()) {
-            std::clog << "test did not validate: " << name << "\n";
-            //throw std::runtime_error(std::string("test did not validate: ") + name);
+    try {
+        bool should_run_test = true;
+        if (!test_set.empty()) {
+            should_run_test = test_set.find(test_num) != test_set.end();
         }
-        if (dry_run) {
-            std::clog << test_num << ") " << (test.threads_ ? "threaded -> ": "")
-                << name << "\n";
-        } else {
-            process_cpu_clock::time_point start;
-            dur elapsed;
-            if (test.threads_ > 0) {
-                boost::thread_group tg;
-                for (unsigned i=0;i<test.threads_;++i)
-                {
-                    tg.create_thread(test);
-                }
-                start = process_cpu_clock::now();
-                tg.join_all();
-                elapsed = process_cpu_clock::now() - start;
-            } else {
-                start = process_cpu_clock::now();
-                test();
-                elapsed = process_cpu_clock::now() - start;
+        if (should_run_test || dry_run) {
+            if (!test.validate()) {
+                std::clog << "test did not validate: " << name << "\n";
+                //throw std::runtime_error(std::string("test did not validate: ") + name);
             }
-            std::clog << test_num << ") " << (test.threads_ ? "threaded -> ": "")
-                << name << ": "
-                << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
+            if (dry_run) {
+                std::clog << test_num << ") " << (test.threads_ ? "threaded -> ": "")
+                    << name << "\n";
+            } else {
+                process_cpu_clock::time_point start;
+                dur elapsed;
+                if (test.threads_ > 0) {
+                    boost::thread_group tg;
+                    for (unsigned i=0;i<test.threads_;++i)
+                    {
+                        tg.create_thread(test);
+                    }
+                    start = process_cpu_clock::now();
+                    tg.join_all();
+                    elapsed = process_cpu_clock::now() - start;
+                } else {
+                    start = process_cpu_clock::now();
+                    test();
+                    elapsed = process_cpu_clock::now() - start;
+                }
+                std::clog << test_num << ") " << (test.threads_ ? "threaded -> ": "")
+                    << name << ": "
+                    << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
+            }
         }
+    } catch (std::exception const& ex) {
+        std::clog << "test runner did not complete: " << ex.what() << "\n";
     }
     test_num++;
 }
@@ -281,23 +285,26 @@ struct test6
     std::string dest_;
     mapnik::box2d<double> from_;
     mapnik::box2d<double> to_;
+    bool defer_proj4_init_;
     explicit test6(unsigned iterations,
                    unsigned threads,
                    std::string const& src,
                    std::string const& dest,
                    mapnik::box2d<double> from,
-                   mapnik::box2d<double> to) :
+                   mapnik::box2d<double> to,
+                   bool defer_proj) :
       iter_(iterations),
       threads_(threads),
       src_(src),
       dest_(dest),
       from_(from),
-      to_(to) {}
+      to_(to),
+      defer_proj4_init_(defer_proj) {}
 
     bool validate()
     {
-        mapnik::projection src(src_);
-        mapnik::projection dest(dest_);
+        mapnik::projection src(src_,defer_proj4_init_);
+        mapnik::projection dest(dest_,defer_proj4_init_);
         mapnik::proj_transform tr(src,dest);
         mapnik::box2d<double> bbox = from_;
         if (!tr.forward(bbox)) return false;
@@ -309,17 +316,17 @@ struct test6
     }
     void operator()()
     {
-        mapnik::projection src(src_);
-        mapnik::projection dest(dest_);
-        mapnik::proj_transform tr(src,dest);
         unsigned count=0;
         for (int i=-180;i<180;++i)
         {
             for (int j=-85;j<85;++j)
             {
-                 mapnik::box2d<double> box(i,j,i,j);
-                 if (!tr.forward(box)) throw std::runtime_error("could not transform coords");
-                 ++count;
+                mapnik::projection src(src_,defer_proj4_init_);
+                mapnik::projection dest(dest_,defer_proj4_init_);
+                mapnik::proj_transform tr(src,dest);
+                mapnik::box2d<double> box(i,j,i,j);
+                if (!tr.forward(box)) throw std::runtime_error("could not transform coords");
+                ++count;
             }
         }
     }
@@ -397,12 +404,13 @@ int main( int argc, char** argv)
 
         mapnik::box2d<double> from(-180,-80,180,80);
         mapnik::box2d<double> to(-20037508.3427892476,-15538711.0963092316,20037508.3427892476,15538711.0963092316);
+
         {
             // echo -180 -60 | cs2cs -f "%.10f" +init=epsg:4326 +to +init=epsg:3857
             test6 runner(100000000,100,
                          "+init=epsg:4326",
                          "+init=epsg:3857",
-                         from,to);
+                         from,to,true);
             benchmark(runner,"lonlat -> merc coord transformation (epsg)");
         }
 
@@ -410,7 +418,7 @@ int main( int argc, char** argv)
             test6 runner(100000000,100,
                          "+init=epsg:3857",
                          "+init=epsg:4326",
-                         to,from);
+                         to,from,true);
             benchmark(runner,"merc -> lonlat coord transformation (epsg)");
         }
 
@@ -418,7 +426,7 @@ int main( int argc, char** argv)
             test6 runner(100000000,100,
                          "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
                          "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
-                         from,to);
+                         from,to,true);
             benchmark(runner,"lonlat -> merc coord transformation (literal)");
         }
 
@@ -426,7 +434,7 @@ int main( int argc, char** argv)
             test6 runner(100000000,100,
                          "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
                          "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
-                         to,from);
+                         to,from,true);
             benchmark(runner,"merc -> lonlat coord transformation (literal)");
         }
 

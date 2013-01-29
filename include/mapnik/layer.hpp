@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/well_known_srs.hpp>
 
 // stl
 #include <vector>
@@ -44,7 +45,7 @@ class MAPNIK_DECL layer
 {
 public:
     layer(std::string const& name,
-          std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+          std::string const& srs=MAPNIK_LONGLAT_PROJ);
 
     layer(layer const& l);
     layer& operator=(layer const& rhs);

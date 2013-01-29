@@ -24,27 +24,51 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/util/trim.hpp>
+#include <mapnik/well_known_srs.hpp>
 
+#ifdef MAPNIK_USE_PROJ4
 // proj4
 #include <proj_api.h>
+#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
+#include <boost/thread/mutex.hpp>
+#warning mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8
+static boost::mutex mutex_;
+#endif
+
+#endif
 
 namespace mapnik {
 
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-#warning mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8
-boost::mutex projection::mutex_;
-#endif
 
-projection::projection(std::string const& params)
-    : params_(params)
+projection::projection(std::string const& params, bool defer_proj_init)
+    : params_(params),
+      defer_proj_init_(defer_proj_init),
+      proj_(NULL),
+      proj_ctx_(NULL)
 {
-    init();
+    boost::optional<bool> is_known = is_known_geographic(params_);
+    if (is_known){
+        is_geographic_ = *is_known;
+    }
+    else
+    {
+#ifdef MAPNIK_USE_PROJ4
+        init_proj4();
+#else
+        throw std::runtime_error(std::string("Cannot initialize projection '") + params_ + " ' without proj4 support (-DMAPNIK_USE_PROJ4)");
+#endif
+    }
+    if (!defer_proj_init_) init_proj4();
 }
 
 projection::projection(projection const& rhs)
-    : params_(rhs.params_)
+    : params_(rhs.params_),
+      defer_proj_init_(rhs.defer_proj_init_),
+      is_geographic_(rhs.is_geographic_),
+      proj_(NULL),
+      proj_ctx_(NULL)
 {
-    init();
+    if (!rhs.defer_proj_init_) init_proj4();
 }
 
 projection& projection::operator=(projection const& rhs)
@@ -64,6 +88,31 @@ bool projection::operator!=(const projection& other) const
     return !(*this == other);
 }
 
+void projection::init_proj4() const
+{
+#ifdef MAPNIK_USE_PROJ4
+    if (!proj_)
+    {
+#if PJ_VERSION >= 480
+        proj_ctx_ = pj_ctx_alloc();
+        proj_ = pj_init_plus_ctx(proj_ctx_, params_.c_str());
+        if (!proj_)
+        {
+            if (proj_ctx_) pj_ctx_free(proj_ctx_);
+            throw proj_init_error(params_);
+        }
+#else
+        #if defined(MAPNIK_THREADSAFE)
+        mutex::scoped_lock lock(mutex_);
+        #endif
+        proj_ = pj_init_plus(params_.c_str());
+        if (!proj_) throw proj_init_error(params_);
+#endif
+        is_geographic_ = pj_is_latlong(proj_) ? true : false;
+    }
+#endif
+}
+
 bool projection::is_initialized() const
 {
     return proj_ ? true : false;
@@ -74,6 +123,11 @@ bool projection::is_geographic() const
     return is_geographic_;
 }
 
+boost::optional<well_known_srs_e> projection::well_known() const
+{
+    return is_well_known_srs(params_);
+}
+
 std::string const& projection::params() const
 {
     return params_;
@@ -81,9 +135,14 @@ std::string const& projection::params() const
 
 void projection::forward(double & x, double &y ) const
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
+#ifdef MAPNIK_USE_PROJ4
+    if (!proj_)
+    {
+        throw std::runtime_error("projection::forward not supported unless proj4 is initialized");
+    }
+    #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
-#endif
+    #endif
     projUV p;
     p.u = x * DEG_TO_RAD;
     p.v = y * DEG_TO_RAD;
@@ -95,13 +154,22 @@ void projection::forward(double & x, double &y ) const
         x *=RAD_TO_DEG;
         y *=RAD_TO_DEG;
     }
+#else
+    throw std::runtime_error("projection::forward not supported without proj4 support (-DMAPNIK_USE_PROJ4)");
+#endif
 }
 
 void projection::inverse(double & x,double & y) const
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
+#ifdef MAPNIK_USE_PROJ4
+    if (!proj_)
+    {
+        throw std::runtime_error("projection::inverse not supported unless proj4 is initialized");
+    }
+
+    #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
     mutex::scoped_lock lock(mutex_);
-#endif
+    #endif
     if (is_geographic_)
     {
         x *=DEG_TO_RAD;
@@ -113,50 +181,35 @@ void projection::inverse(double & x,double & y) const
     p = pj_inv(p,proj_);
     x = RAD_TO_DEG * p.u;
     y = RAD_TO_DEG * p.v;
+#else
+    throw std::runtime_error("projection::inverse not supported without proj4 support (-DMAPNIK_USE_PROJ4)");
+#endif
 }
 
 projection::~projection()
 {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mutex::scoped_lock lock(mutex_);
-#endif
-    if (proj_) pj_free(proj_);
-#if PJ_VERSION >= 480
-    if (proj_ctx_) pj_ctx_free(proj_ctx_);
-#endif
-}
-
-void projection::init()
-{
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mutex::scoped_lock lock(mutex_);
-#endif
-#if PJ_VERSION >= 480
-    proj_ctx_ = pj_ctx_alloc();
-    proj_ = pj_init_plus_ctx(proj_ctx_, params_.c_str());
-    if (!proj_)
-    {
+#ifdef MAPNIK_USE_PROJ4
+    #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
+        mutex::scoped_lock lock(mutex_);
+    #endif
+        if (proj_) pj_free(proj_);
+    #if PJ_VERSION >= 480
         if (proj_ctx_) pj_ctx_free(proj_ctx_);
-        throw proj_init_error(params_);
-    }
-#else
-    proj_ = pj_init_plus(params_.c_str());
-    if (!proj_) throw proj_init_error(params_);
+    #endif
 #endif
-    is_geographic_ = pj_is_latlong(proj_) ? true : false;
 }
 
 std::string projection::expanded() const
 {
-    if (proj_) {
-        return mapnik::util::trim_copy(pj_get_def( proj_, 0 ));
-    }
-    return std::string("");
+#ifdef MAPNIK_USE_PROJ4
+    if (proj_) return mapnik::util::trim_copy(pj_get_def( proj_, 0 ));
+#endif
+    return params_;
 }
 
 void projection::swap(projection& rhs)
 {
     std::swap(params_,rhs.params_);
-    init();
 }
+
 }
