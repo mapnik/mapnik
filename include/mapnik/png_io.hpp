@@ -24,7 +24,6 @@
 #define MAPNIK_PNG_IO_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
@@ -32,10 +31,13 @@
 #include <mapnik/image_data.hpp>
 
 // zlib
-#include <zlib.h>
+#include <zlib.h>  // for Z_DEFAULT_COMPRESSION
 
 // boost
 #include <boost/scoped_array.hpp>
+
+// stl
+#include <cassert>
 
 extern "C"
 {

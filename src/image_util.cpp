@@ -20,15 +20,27 @@
  *
  *****************************************************************************/
 
+#if defined(HAVE_PNG)
 extern "C"
 {
 #include <png.h>
 }
+#endif
 
 // mapnik
-#include <mapnik/image_util.hpp>
+#if defined(HAVE_PNG)
 #include <mapnik/png_io.hpp>
+#endif
+
+#if defined(HAVE_TIFF)
 #include <mapnik/tiff_io.hpp>
+#endif
+
+#if defined(HAVE_JPEG)
+#include <mapnik/jpeg_io.hpp>
+#endif
+
+#include <mapnik/image_util.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/memory.hpp>
@@ -36,10 +48,6 @@ extern "C"
 #include <mapnik/palette.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/util/conversions.hpp>
-// jpeg
-#if defined(HAVE_JPEG)
-#include <mapnik/jpeg_io.hpp>
-#endif
 
 #ifdef HAVE_CAIRO
 #include <mapnik/cairo_renderer.hpp>
@@ -53,7 +61,6 @@ extern "C"
 #ifdef CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
 #endif // CAIRO_HAS_SVG_SURFACE
-
 #endif
 
 // boost
@@ -117,6 +124,7 @@ void save_to_file(T const& image,
     else throw ImageWriterException("Could not write file to " + filename );
 }
 
+#if defined(HAVE_PNG)
 void handle_png_options(std::string const& type,
                         int * colors,
                         int * compression,
@@ -227,6 +235,7 @@ void handle_png_options(std::string const& type,
         }
     }
 }
+#endif
 
 template <typename T>
 void save_to_stream(T const& image,
@@ -240,6 +249,7 @@ void save_to_stream(T const& image,
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
+#if defined(HAVE_PNG)
             int colors  = 256;
             int compression = Z_DEFAULT_COMPRESSION;
             int strategy = Z_DEFAULT_STRATEGY;
@@ -273,17 +283,18 @@ void save_to_stream(T const& image,
             {
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma, use_miniz);
             }
+#else
+            throw ImageWriterException("png output is not enabled in your build of Mapnik");
+#endif
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
             throw ImageWriterException("palettes are not currently supported when writing to tiff format (yet)");
         }
-#if defined(HAVE_JPEG)
         else if (boost::algorithm::starts_with(t, "jpeg"))
         {
             throw ImageWriterException("palettes are not currently supported when writing to jpeg format");
         }
-#endif
         else throw ImageWriterException("unknown file type: " + type);
     }
     else throw ImageWriterException("Could not write to empty stream" );
@@ -301,6 +312,7 @@ void save_to_stream(T const& image,
         std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
+#if defined(HAVE_PNG)
             int colors  = 256;
             int compression = Z_DEFAULT_COMPRESSION; // usually mapped to z=6 in zlib
             int strategy = Z_DEFAULT_STRATEGY;
@@ -330,14 +342,21 @@ void save_to_stream(T const& image,
             {
                 save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma, use_miniz);
             }
+#else
+            throw ImageWriterException("png output is not enabled in your build of Mapnik");
+#endif
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
-            save_as_tiff(stream, image);
-        }
 #if defined(HAVE_JPEG)
+            save_as_tiff(stream, image);
+#else
+            throw ImageWriterException("tiff output is not enabled in your build of Mapnik");
+#endif
+        }
         else if (boost::algorithm::starts_with(t, "jpeg"))
         {
+#if defined(HAVE_JPEG)
             int quality = 85;
             std::string const& val = t.substr(4);
             if (!val.empty())
@@ -348,8 +367,10 @@ void save_to_stream(T const& image,
                 }
             }
             save_as_jpeg(stream, quality, image);
-        }
+#else
+            throw ImageWriterException("jpeg output is not enabled in your build of Mapnik");
 #endif
+        }
         else throw ImageWriterException("unknown file type: " + type);
     }
     else throw ImageWriterException("Could not write to empty stream" );
