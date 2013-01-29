@@ -26,8 +26,6 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/utils.hpp>
 
-#define MAPNIK_USE_PROJ4
-
 #ifdef MAPNIK_USE_PROJ4
 // proj4
 #include <proj_api.h>
