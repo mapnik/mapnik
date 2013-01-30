@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 //mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/placement_finder.hpp>
 #include <mapnik/geometry.hpp>
