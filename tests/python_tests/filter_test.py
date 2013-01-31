@@ -169,22 +169,20 @@ def test_float_precision():
     context = mapnik.Context()
     context.push('num')
     f = mapnik.Feature(context,0)
-    f["num"] = 1.0000
-    eq_(f["num"],1.0000)
-    expr = mapnik.Expression("[num] = 1.0000")
+    f["num"] = 1.0001
+    eq_(f["num"],1.0001)
+    expr = mapnik.Expression("[num] = 1.0001")
     eq_(expr.evaluate(f),True)
-    expr = mapnik.Expression("[num].match('.*0$')")
-    eq_(expr.evaluate(f),True)
-    expr = mapnik.Expression("[num].match('.*0$')")
+    expr = mapnik.Expression("[num].match('.*01$')")
     eq_(expr.evaluate(f),True)
 
 def test_string_matching_on_precision():
     context = mapnik.Context()
     context.push('num')
     f = mapnik.Feature(context,0)
-    f["num"] = "1.0000"
-    eq_(f["num"],"1.0000")
-    expr = mapnik.Expression("[num].match('.*(^0|00)$')")
+    f["num"] = "1.0001"
+    eq_(f["num"],"1.0001")
+    expr = mapnik.Expression("[num].match('.*(^0|01)$')")
     eq_(expr.evaluate(f),True)
 
 if __name__ == "__main__":

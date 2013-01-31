@@ -170,11 +170,11 @@ def test_shield_symbolizer_modify():
     def check_transform(expr, expect_str=None):
         s.transform = expr
         eq_(s.transform, expr if expect_str is None else expect_str)
-    check_transform("matrix(1 2 3 4 5 6)", "matrix(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)")
+    check_transform("matrix(1 2 3 4 5 6)", "matrix(1, 2, 3, 4, 5, 6)")
     check_transform("matrix(1, 2, 3, 4, 5, 6 +7)", "matrix(1, 2, 3, 4, 5, (6+7))")
     check_transform("rotate([a])")
     check_transform("rotate([a] -2)", "rotate(([a]-2))")
-    check_transform("rotate([a] -2 -3)", "rotate([a], -2.0, -3.0)")
+    check_transform("rotate([a] -2 -3)", "rotate([a], -2, -3)")
     check_transform("rotate([a] -2 -3 -4)", "rotate(((([a]-2)-3)-4))")
     check_transform("rotate([a] -2, 3, 4)", "rotate(([a]-2), 3, 4)")
     check_transform("translate([tx]) rotate([a])")
