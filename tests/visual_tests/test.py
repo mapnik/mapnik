@@ -70,6 +70,7 @@ files = [
     {'name': "tiff-opaque-edge-gdal", 'sizes':[(256,256)]},
     {'name': "tiff-opaque-edge-gdal2", 'sizes':[(600,400)]},
     {'name': "tiff-opaque-edge-raster2", 'sizes':[(600,400)]},
+    {'name': "tiff-resampling", 'sizes':[(600,400)]},
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
     #{'name': "tiff-alpha-raster", 'sizes':[(600,400)]},
