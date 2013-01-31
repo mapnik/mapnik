@@ -429,6 +429,7 @@ postgis_datasource::~postgis_datasource()
             if (conn)
             {
                 conn->close();
+                pool->returnObject(conn);
             }
         }
     }
