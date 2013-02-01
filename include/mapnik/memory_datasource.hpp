@@ -40,7 +40,7 @@ public:
     virtual ~memory_datasource();
     void push(feature_ptr feature);
     datasource::datasource_t type() const;
-    featureset_ptr features(const query& q) const;
+    featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     box2d<double> envelope() const;
     boost::optional<geometry_t> get_geometry_type() const;
