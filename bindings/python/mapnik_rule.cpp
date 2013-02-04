@@ -84,7 +84,6 @@ void export_rule()
         .def("has_also",&rule::has_also_filter)
         .def("active",&rule::active)
         .add_property("symbols",make_function
-                      (&rule::get_symbolizers,return_value_policy<reference_existing_object>()))
+                      (&rule::get_symbolizers,return_value_policy<copy_const_reference>()))
         ;
 }
-
