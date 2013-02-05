@@ -873,7 +873,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     }
 
     // simplify value
-    optional<double> simplify_tolerance = pt.get_opt_attr<double>("simplify-tolerance");
+    optional<double> simplify_tolerance = pt.get_opt_attr<double>("simplify");
     if (simplify_tolerance) sym.set_simplify_tolerance(*simplify_tolerance);
 
     // smooth value

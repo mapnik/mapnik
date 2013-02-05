@@ -376,7 +376,7 @@ private:
         }
         if (sym.simplify_tolerance() != dfl.simplify_tolerance() || explicit_defaults_)
         {
-            set_attr( node, "simplify-tolerance", sym.simplify_tolerance() );
+            set_attr( node, "simplify", sym.simplify_tolerance() );
         }
         if (sym.smooth() != dfl.smooth() || explicit_defaults_)
         {
