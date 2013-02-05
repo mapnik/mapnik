@@ -27,6 +27,7 @@
 // mapnik
 //symbolizer typdef here rather than mapnik/symbolizer.hpp
 #include <mapnik/rule.hpp>
+#include <mapnik/symbolizer_hash.hpp>
 
 using mapnik::symbolizer;
 
@@ -169,6 +170,20 @@ const markers_symbolizer& markers_( const symbolizer& symbol )
     return boost::get<markers_symbolizer>(symbol);
 }
 
+struct symbolizer_hash_visitor : public boost::static_visitor<std::size_t>
+{
+    template <typename T>
+    std::size_t operator() (T const& sym) const
+    {
+        return mapnik::symbolizer_hash::value(sym);
+    }
+};
+
+std::size_t hash_impl(symbolizer const& sym)
+{
+    return boost::apply_visitor(symbolizer_hash_visitor(), sym);
+}
+
 void export_symbolizer()
 {
     using namespace boost::python;
@@ -176,6 +191,8 @@ void export_symbolizer()
     class_<symbolizer>("Symbolizer",no_init)
 
         .def("type",get_symbol_type)
+
+        .def("__hash__",hash_impl)
 
         .def("point",point_,
              return_value_policy<copy_const_reference>())
