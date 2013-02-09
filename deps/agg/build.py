@@ -30,10 +30,3 @@ else:
     cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
 
 agg_env.StaticLibrary('agg', glob('./src/' + '*.cpp'), LIBS=[], CXXFLAGS=cxxflags, LINKFLAGS=env['CUSTOM_LDFLAGS'])
-
-if 'install' in COMMAND_LINE_TARGETS:
-    inc_target = os.path.normpath(env['INSTALL_PREFIX']+'/include/mapnik/agg')
-    # TODO - restrict to just agg headers used in mapnik includes?
-    includes = glob('./include/*.h')
-    target = env.Install(inc_target, includes)
-    env.Alias(target='install', source=target)
