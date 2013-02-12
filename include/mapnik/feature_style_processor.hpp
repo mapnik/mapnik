@@ -62,7 +62,6 @@ public:
      * \brief apply renderer to a single layer, providing pre-populated set of query attribute names.
      */
     void apply(mapnik::layer const& lyr, std::set<std::string>& names);
-private:
     /*!
      * \brief render a layer given a projection and scale.
      */
@@ -72,6 +71,7 @@ private:
                         double scale_denom,
                         std::set<std::string>& names);
 
+private:
     /*!
      * \brief renders a featureset with the given styles.
      */
