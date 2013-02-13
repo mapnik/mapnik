@@ -28,7 +28,7 @@ namespace agg
 
     template<class VSA, class VSB> class conv_clipper
     {
-        enum status { status_move_to, status_line_to, status_next };
+        enum status { status_move_to, status_line_to, status_stop };
         typedef VSA source_a_type;
         typedef VSB source_b_type;
         typedef conv_clipper<source_a_type, source_b_type> self_type;
@@ -36,16 +36,15 @@ namespace agg
     private:
         source_a_type*                                                  m_src_a;
         source_b_type*                                                  m_src_b;
-        status                                                                  m_status;
-        int                                                                             m_vertex;
-        int                                     m_contour;
-        int                                     m_expoly;
-        int                                                                             m_scaling_factor;
+        status                                                          m_status;
+        int                                                             m_vertex;
+        int                                                             m_contour;
+        int                                                             m_scaling_factor;
         clipper_op_e                                                    m_operation;
-        pod_bvector<ClipperLib::IntPoint, 8>            m_vertex_accumulator;
+        pod_bvector<ClipperLib::IntPoint, 8>                    m_vertex_accumulator;
         ClipperLib::Polygons                                            m_poly_a;
         ClipperLib::Polygons                                            m_poly_b;
-        ClipperLib::ExPolygons                                          m_result;
+        ClipperLib::Polygons                                            m_result;
         ClipperLib::Clipper                                             m_clipper;
         clipper_PolyFillType                                    m_subjFillType;
         clipper_PolyFillType                                    m_clipFillType;
@@ -63,10 +62,9 @@ namespace agg
                  int scaling_factor = 2) :
         m_src_a(&a),
             m_src_b(&b),
-            m_status(status_next),
+            m_status(status_move_to),
             m_vertex(-1),
             m_contour(-1),
-            m_expoly(-1),
             m_operation(op),
             m_subjFillType(subjFillType),
             m_clipFillType(clipFillType)
@@ -81,10 +79,9 @@ namespace agg
                  clipper_PolyFillType clipFillType = clipper_non_zero,
                  int scaling_factor = 6) :
         m_src_a(&a),
-            m_status(status_next),
+            m_status(status_move_to),
             m_vertex(-1),
             m_contour(-1),
-            m_expoly(-1),
             m_operation(op),
             m_subjFillType(subjFillType),
             m_clipFillType(clipFillType)
@@ -92,12 +89,11 @@ namespace agg
                 m_scaling_factor = std::max(std::min(scaling_factor, 6),0);
                 m_scaling_factor = Round(std::pow((double)10, m_scaling_factor));
             }
-        unsigned type() const { return m_src_a->type(); }
+
         ~conv_clipper()
         {
         }
-
-
+        unsigned type() const { return m_src_a->type(); }
         void attach1(VSA &source, clipper_PolyFillType subjFillType = clipper_even_odd)
         { m_src_a = &source; m_subjFillType = subjFillType; }
         void attach2(VSB &source, clipper_PolyFillType clipFillType = clipper_even_odd)
@@ -108,13 +104,11 @@ namespace agg
         void rewind(unsigned path_id);
         unsigned vertex(double* x, double* y);
 
-        bool next_poly();
         bool next_contour();
         bool next_vertex(double* x, double* y);
         void start_extracting();
         void add_vertex_(double &x, double &y);
         void end_contour(ClipperLib::Polygons &p);
-        void reverse(bool reverse);
 
         template<class VS> void add(VS &src, ClipperLib::Polygons &p){
             unsigned cmd;
@@ -152,17 +146,11 @@ namespace agg
     };
 
     //------------------------------------------------------------------------
-    template<class VSA, class VSB>
-        void conv_clipper<VSA, VSB>::reverse(bool reverse)
-    {
-        m_clipper.ReverseSolution(true);
-    };
 
     template<class VSA, class VSB>
         void conv_clipper<VSA, VSB>::start_extracting()
     {
-        m_status = status_next;
-        m_expoly = -1;
+        m_status = status_move_to;
         m_contour = -1;
         m_vertex = -1;
     }
@@ -263,34 +251,10 @@ namespace agg
     //------------------------------------------------------------------------------
 
     template<class VSA, class VSB>
-        bool conv_clipper<VSA, VSB>::next_poly()
-    {
-        m_expoly++;
-
-        if (m_expoly >= (int) m_result.size())
-            return false;
-
-        //std::cout << "next poly: " << m_expoly << " " << m_result.size() << " "<< m_result[m_expoly].outer.size() <<"\n";
-        m_contour = -2;
-        m_vertex = -1;
-        return true;
-    }
-
-    template<class VSA, class VSB>
         bool conv_clipper<VSA, VSB>::next_contour()
     {
-
         m_contour++;
-        if (m_contour < 0){
-            // outer ring
-            //if (!m_result[m_expoly].outer)
-            //    return false;
-        } else {
-            // inner rings
-            if(m_contour >= (int)m_result[m_expoly].holes.size())
-                return false;
-        }
-        // std::cout << "next contour: " << m_contour << "\n";
+        if(m_contour >= (int)m_result.size()) return false;
         m_vertex =-1;
         return true;
     }
@@ -299,26 +263,10 @@ namespace agg
     template<class VSA, class VSB>
         bool conv_clipper<VSA, VSB>::next_vertex(double *x, double *y)
     {
-
         m_vertex++;
-        //std::cout << "next vertex: " << m_vertex << "\n";
-
-        if (m_contour < 0)
-        {
-            if (m_vertex >= (int) m_result[m_expoly].outer.size())
-                return false;
-            *x = (double) m_result[m_expoly].outer[m_vertex].X / m_scaling_factor;
-            *y = (double) m_result[m_expoly].outer[m_vertex].Y / m_scaling_factor;
-        }
-        else
-        {
-            if (m_vertex >= (int) m_result[m_expoly].holes[m_contour].size())
-                return false;
-            *x = (double) m_result[m_expoly].holes[m_contour][m_vertex].X
-                / m_scaling_factor;
-            *y = (double) m_result[m_expoly].holes[m_contour][m_vertex].Y
-                / m_scaling_factor;
-        }
+        if(m_vertex >= (int)m_result[m_contour].size()) return false;
+        *x = (double)m_result[ m_contour ][ m_vertex ].X / m_scaling_factor;
+        *y = (double)m_result[ m_contour ][ m_vertex ].Y / m_scaling_factor;
         return true;
     }
     //------------------------------------------------------------------------------
@@ -326,38 +274,27 @@ namespace agg
     template<class VSA, class VSB>
         unsigned conv_clipper<VSA, VSB>::vertex(double *x, double *y)
     {
-        if (m_status == status_next)
+        if(  m_status == status_move_to )
         {
-            if (next_poly())
-                m_status = status_move_to;
-            else
-                return path_cmd_stop;
-        }
-
-        if (m_status == status_move_to)
-        {
-            if (next_contour())
+            if( next_contour() )
             {
-                if (next_vertex(x, y))
+                if(  next_vertex( x, y ) )
                 {
-                    m_status = status_line_to;
+                    m_status =status_line_to;
                     return path_cmd_move_to;
                 }
-            }
-
-            if (next_poly())
-            {
-                m_status = status_move_to;
-                // return two times SEG_CLOSE to indicate
-                // that all holes of this ExPolygon are finished
-                return path_cmd_end_poly | path_flags_close;
+                else
+                {
+                    m_status = status_stop;
+                    return path_cmd_end_poly | path_flags_close;
+                }
             }
             else
                 return path_cmd_stop;
         }
         else
         {
-            if (next_vertex(x, y))
+            if(  next_vertex( x, y ) )
             {
                 return path_cmd_line_to;
             }

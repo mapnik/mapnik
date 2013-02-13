@@ -203,7 +203,7 @@ struct converter_traits<T,mapnik::clipper_tag>
         ps->line_to(box.maxx(),box.miny());
         ps->close_polygon();
         geom.attach2(*ps, agg::clipper_non_zero);
-        geom.reverse(true);
+        //geom.reverse(true);
     }
 };
 
