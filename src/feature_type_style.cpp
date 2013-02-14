@@ -68,7 +68,7 @@ feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_
 feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
 {
     if (this == &rhs) return *this;
-    rules_=rhs.rules_;   
+    rules_=rhs.rules_;
     filters_ = rhs.filters_;
     direct_filters_ = rhs.direct_filters_;
     comp_op_ = rhs.comp_op_;
@@ -161,21 +161,21 @@ void feature_type_style::update_rule_cache(double scale_denom)
     else_rules_.clear();
     also_rules_.clear();
 
-    BOOST_FOREACH(rule const& r, rules_)
+    BOOST_FOREACH(rule & r, rules_)
     {
         if (r.active(scale_denom))
         {
             if (r.has_else_filter())
             {
-                else_rules_.push_back(const_cast<rule*>(&r));
+                else_rules_.push_back(&r);
             }
             else if (r.has_also_filter())
             {
-                also_rules_.push_back(const_cast<rule*>(&r));
+                also_rules_.push_back(&r);
             }
             else
             {
-                if_rules_.push_back(const_cast<rule*>(&r));
+                if_rules_.push_back(&r);
             }
         }
     }
