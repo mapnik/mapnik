@@ -55,6 +55,7 @@
 // agg
 #include "agg_conv_clip_polygon.h"
 #include "agg_conv_clip_polyline.h"
+#include "agg_conv_close_polygon.h"
 #include "agg_conv_smooth_poly1.h"
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
@@ -66,6 +67,7 @@ namespace mapnik {
 struct transform_tag {};
 struct clip_line_tag {};
 struct clip_poly_tag {};
+struct close_poly_tag {};
 struct smooth_tag {};
 struct simplify_tag {};
 struct stroke_tag {};
@@ -177,7 +179,6 @@ struct converter_traits<T,mapnik::clip_poly_tag>
 {
     typedef T geometry_type;
     typedef typename agg::conv_clip_polygon<geometry_type> conv_type;
-
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
@@ -186,6 +187,17 @@ struct converter_traits<T,mapnik::clip_poly_tag>
     }
 };
 
+template <typename T>
+struct converter_traits<T,mapnik::close_poly_tag>
+{
+    typedef T geometry_type;
+    typedef typename agg::conv_close_polygon<geometry_type> conv_type;
+    template <typename Args>
+    static void setup(geometry_type & geom, Args const& args)
+    {
+        //
+    }
+};
 
 template <typename T>
 struct converter_traits<T,mapnik::transform_tag>
