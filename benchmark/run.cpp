@@ -356,7 +356,7 @@ struct test7
     }
     void operator()()
     {
-         for (int i=0;i<iter_;++i) {
+         for (unsigned i=0;i<iter_;++i) {
              mapnik::expression_ptr expr = mapnik::parse_expression(expr_,"utf-8");
          }
     }
@@ -386,7 +386,7 @@ struct test8
     void operator()()
     {
          mapnik::expression_grammar<std::string::const_iterator> expr_grammar(transcoder("utf-8"));
-         for (int i=0;i<iter_;++i) {
+         for (unsigned i=0;i<iter_;++i) {
              mapnik::expression_ptr expr = mapnik::parse_expression(expr_,expr_grammar);
          }
     }
