@@ -237,44 +237,48 @@ occi_datasource::occi_datasource(parameters const& params)
                     switch (type_oid)
                     {
                     case oracle::occi::OCCIBOOL:
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Boolean));
+                        break;
                     case oracle::occi::OCCIINT:
                     case oracle::occi::OCCIUNSIGNED_INT:
-                    case oracle::occi::OCCIROWID:
                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
                         break;
                     case oracle::occi::OCCIFLOAT:
                     case oracle::occi::OCCIBFLOAT:
                     case oracle::occi::OCCIDOUBLE:
                     case oracle::occi::OCCIBDOUBLE:
-                    case oracle::occi::OCCINUMBER:
-                    case oracle::occi::OCCI_SQLT_NUM:
                         desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
                         break;
+                    case oracle::occi::OCCINUMBER:
+                    case oracle::occi::OCCI_SQLT_NUM:
                     case oracle::occi::OCCICHAR:
                     case oracle::occi::OCCISTRING:
                     case oracle::occi::OCCI_SQLT_AFC:
                     case oracle::occi::OCCI_SQLT_AVC:
                     case oracle::occi::OCCI_SQLT_CHR:
+                    case oracle::occi::OCCI_SQLT_LNG:
                     case oracle::occi::OCCI_SQLT_LVC:
-                    case oracle::occi::OCCI_SQLT_RDD:
                     case oracle::occi::OCCI_SQLT_STR:
                     case oracle::occi::OCCI_SQLT_VCS:
                     case oracle::occi::OCCI_SQLT_VNU:
                     case oracle::occi::OCCI_SQLT_VBI:
                     case oracle::occi::OCCI_SQLT_VST:
-                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-                        break;
                     case oracle::occi::OCCIDATE:
-                    case oracle::occi::OCCITIMESTAMP:
-                    case oracle::occi::OCCIINTERVALDS:
-                    case oracle::occi::OCCIINTERVALYM:
                     case oracle::occi::OCCI_SQLT_DAT:
                     case oracle::occi::OCCI_SQLT_DATE:
+                    case oracle::occi::OCCIROWID:
+                    case oracle::occi::OCCI_SQLT_RDD:
+                    case oracle::occi::OCCI_SQLT_RID:
                     case oracle::occi::OCCI_SQLT_TIME:
                     case oracle::occi::OCCI_SQLT_TIME_TZ:
+                    case oracle::occi::OCCITIMESTAMP:
                     case oracle::occi::OCCI_SQLT_TIMESTAMP:
                     case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
                     case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                        break;
+                    case oracle::occi::OCCIINTERVALDS:
+                    case oracle::occi::OCCIINTERVALYM:
                     case oracle::occi::OCCI_SQLT_INTERVAL_YM:
                     case oracle::occi::OCCI_SQLT_INTERVAL_DS:
                     case oracle::occi::OCCIANYDATA:
