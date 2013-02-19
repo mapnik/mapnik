@@ -671,13 +671,10 @@ def update_linux_project_files():
             iterate_dirs(headers_content, source_content, d)
 
     headers_content.sort()
-    source_content.sort()
-
     headers_content = ['HEADERS += \\'] + headers_content + ['','']
-    source_content = ['SOURCES += \\'] + source_content + ['','']
 
-    #files_content.append('../../SConstruct')
-    #files_content.append('../../Dependencies')
+    source_content.sort()
+    source_content = ['SOURCES += \\'] + source_content + ['','']
 
     files_name = os.path.join('.', 'workspace', 'All.files')
     f = open(files_name, "w")
