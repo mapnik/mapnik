@@ -495,6 +495,25 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(feat['gid'],2)
         eq_(feat['int_field'],922337203685477580)
 
+    def test_persist_connection_off():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+                            max_size=1,
+                            persist_connection=False,
+                            table='(select ST_MakePoint(0,0) as g, pg_backend_pid() as p, 1 as v) as w',
+                            geometry_field='g')
+        fs = ds.featureset()
+        eq_(fs.next()['v'], 1)
+        # next call should destroy the potgis datasource
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+                            max_size=1,
+                            persist_connection=False,
+                            table='(select ST_MakePoint(0,0) as g, pg_backend_pid() as p, 1 as v) as w',
+                            geometry_field='g')
+        # If ~postgis_datasource destructor leaks, we'd get:
+        # RuntimeError: Postgis Plugin: bad connection
+        fs = ds.featureset()
+        eq_(fs.next()['v'], 1)
+
     atexit.register(postgis_takedown)
 
 if __name__ == "__main__":
