@@ -98,7 +98,7 @@ feature_ptr occi_featureset::next()
 
         if (use_wkb_)
         {
-            Blob blob = rs_->getBlob (1);
+            Blob blob = rs_->getBlob(1);
             blob.open(oracle::occi::OCCI_LOB_READONLY);
 
             int size = blob.length();
@@ -143,44 +143,50 @@ feature_ptr occi_featureset::next()
             switch (type_oid)
             {
             case oracle::occi::OCCIBOOL:
+                feature->put(fld_name, (rs_->getInt(i + 1) != 0));
+                break;
             case oracle::occi::OCCIINT:
             case oracle::occi::OCCIUNSIGNED_INT:
-            case oracle::occi::OCCIROWID:
-                feature->put(fld_name,static_cast<mapnik::value_integer>(rs_->getInt (i + 1)));
+                feature->put(fld_name, static_cast<mapnik::value_integer>(rs_->getInt(i + 1)));
                 break;
             case oracle::occi::OCCIFLOAT:
             case oracle::occi::OCCIBFLOAT:
+                feature->put(fld_name, (double)rs_->getFloat(i + 1));
+                break;
             case oracle::occi::OCCIDOUBLE:
             case oracle::occi::OCCIBDOUBLE:
+                feature->put(fld_name, rs_->getDouble(i + 1));
+                break;
             case oracle::occi::OCCINUMBER:
             case oracle::occi::OCCI_SQLT_NUM:
-                feature->put(fld_name,rs_->getDouble (i + 1));
-                break;
             case oracle::occi::OCCICHAR:
             case oracle::occi::OCCISTRING:
             case oracle::occi::OCCI_SQLT_AFC:
             case oracle::occi::OCCI_SQLT_AVC:
             case oracle::occi::OCCI_SQLT_CHR:
+            case oracle::occi::OCCI_SQLT_LNG:
             case oracle::occi::OCCI_SQLT_LVC:
-            case oracle::occi::OCCI_SQLT_RDD:
             case oracle::occi::OCCI_SQLT_STR:
             case oracle::occi::OCCI_SQLT_VCS:
             case oracle::occi::OCCI_SQLT_VNU:
             case oracle::occi::OCCI_SQLT_VBI:
             case oracle::occi::OCCI_SQLT_VST:
-                feature->put(fld_name,(UnicodeString) tr_->transcode (rs_->getString (i + 1).c_str()));
-                break;
+            case oracle::occi::OCCIROWID:
+            case oracle::occi::OCCI_SQLT_RDD:
+            case oracle::occi::OCCI_SQLT_RID:
             case oracle::occi::OCCIDATE:
-            case oracle::occi::OCCITIMESTAMP:
-            case oracle::occi::OCCIINTERVALDS:
-            case oracle::occi::OCCIINTERVALYM:
             case oracle::occi::OCCI_SQLT_DAT:
             case oracle::occi::OCCI_SQLT_DATE:
             case oracle::occi::OCCI_SQLT_TIME:
             case oracle::occi::OCCI_SQLT_TIME_TZ:
+            case oracle::occi::OCCITIMESTAMP:
             case oracle::occi::OCCI_SQLT_TIMESTAMP:
             case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
             case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
+                feature->put(fld_name, (UnicodeString)tr_->transcode(rs_->getString(i + 1).c_str()));
+                break;
+            case oracle::occi::OCCIINTERVALDS:
+            case oracle::occi::OCCIINTERVALYM:
             case oracle::occi::OCCI_SQLT_INTERVAL_YM:
             case oracle::occi::OCCI_SQLT_INTERVAL_DS:
             case oracle::occi::OCCIANYDATA:

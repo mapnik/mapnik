@@ -96,12 +96,19 @@ featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double to
     return boost::make_shared<memory_featureset>(box,*this);
 }
 
+void memory_datasource::set_envelope(box2d<double> const& box)
+{
+    extent_ = box;
+}
+
 box2d<double> memory_datasource::envelope() const
 {
-    box2d<double> ext;
-    accumulate_extent func(ext);
-    std::for_each(features_.begin(),features_.end(),func);
-    return ext;
+    if (!extent_.valid())
+    {
+        accumulate_extent func(extent_);
+        std::for_each(features_.begin(),features_.end(),func);
+    }
+    return extent_;
 }
 
 boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() const
