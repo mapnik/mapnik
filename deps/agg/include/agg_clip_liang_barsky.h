@@ -200,14 +200,13 @@ namespace agg
                                 *x++ = (T)(x1 + touty * deltax);
                                 *y++ = (T)yout;
                             }
-                            ++np;
                         }
-                        else if(*x != x2 && *y != y2)
+                        else
                         {
                             *x++ = x2;
                             *y++ = y2;
-                            ++np;
                         }
+                        ++np;
                     }
                     else
                     {
