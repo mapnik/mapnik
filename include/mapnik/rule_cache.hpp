@@ -43,13 +43,7 @@ public:
     rule_cache()
      : if_rules_(),
        else_rules_(),
-       also_rules_(),
-       active_(false) {}
-
-    bool active()
-    {
-        return active_;
-    }
+       also_rules_() {}
 
     void add_rule(rule const& r)
     {
@@ -65,7 +59,6 @@ public:
         {
             if_rules_.push_back(&r);
         }
-        active_ = true;
     }
 
     rule_ptrs const& get_if_rules() const
@@ -87,7 +80,6 @@ private:
     rule_ptrs if_rules_;
     rule_ptrs else_rules_;
     rule_ptrs also_rules_;
-    bool active_;
 };
 
 }
