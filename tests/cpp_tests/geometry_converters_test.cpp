@@ -7,6 +7,7 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/well_known_srs.hpp>
 
 #if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
@@ -46,8 +47,8 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
 {
     using namespace mapnik;
     agg::trans_affine tr;
-    projection src;
-    projection dst;
+    projection src(MAPNIK_LONGLAT_PROJ);
+    projection dst(MAPNIK_LONGLAT_PROJ);
     proj_transform prj_trans(src,dst);
     line_symbolizer sym;
     CoordTransform t(bbox.width(),bbox.height(), bbox);
@@ -86,8 +87,8 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
 {
     using namespace mapnik;
     agg::trans_affine tr;
-    projection src;
-    projection dst;
+    projection src(MAPNIK_LONGLAT_PROJ);
+    projection dst(MAPNIK_LONGLAT_PROJ);
     proj_transform prj_trans(src,dst);
     polygon_symbolizer sym;
     CoordTransform t(bbox.width(),bbox.height(), bbox);

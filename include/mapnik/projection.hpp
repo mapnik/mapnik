@@ -48,7 +48,7 @@ class MAPNIK_DECL projection
     friend class proj_transform;
 public:
 
-    explicit projection(std::string const& params = MAPNIK_LONGLAT_PROJ,
+    projection(std::string const& params,
                         bool defer_proj_init = false);
     projection(projection const& rhs);
     ~projection();
