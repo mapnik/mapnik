@@ -51,7 +51,6 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/foreach.hpp>
 #include <boost/concept_check.hpp>
-#include <boost/container/vector.hpp>
 
 // stl
 #include <vector>
@@ -397,7 +396,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     attribute_collector collector(names);
     double filt_factor = 1.0;
     directive_collector d_collector(filt_factor);
-    boost::container::vector<rule_cache> rule_caches;
+    boost::ptr_vector<rule_cache> rule_caches;
+
     // iterate through all named styles collecting active styles and attribute names
     BOOST_FOREACH(std::string const& style_name, style_names)
     {
@@ -413,12 +413,12 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
         std::vector<rule> const& rules = style->get_rules();
         bool active_rules = false;
-        rule_cache rc;
+        std::auto_ptr<rule_cache> rc(new rule_cache);
         BOOST_FOREACH(rule const& r, rules)
         {
             if (r.active(scale_denom))
             {
-                rc.add_rule(r);
+                rc->add_rule(r);
                 active_rules = true;
                 if (ds->type() == datasource::Vector)
                 {
@@ -429,7 +429,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
         if (active_rules)
         {
-            rule_caches.push_back(boost::move(rc));
+            rule_caches.push_back(rc);
             active_styles.push_back(&(*style));
         }
     }
