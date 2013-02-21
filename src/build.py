@@ -232,6 +232,12 @@ source += Split(
     """
     )
 
+# clipper
+source += Split(
+    """
+     ../deps/clipper/src/clipper.cpp
+    """)
+
 if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')
 

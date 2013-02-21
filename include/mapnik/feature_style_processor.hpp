@@ -39,6 +39,7 @@ class layer;
 class projection;
 class proj_transform;
 class feature_type_style;
+class rule_cache;
 
 enum eAttributeCollectionPolicy
 {
@@ -82,11 +83,11 @@ private:
      */
     void render_style(layer const& lay,
                       Processor & p,
-                      feature_type_style* style,
+                      feature_type_style const* style,
+                      rule_cache const& rules,
                       std::string const& style_name,
                       featureset_ptr features,
-                      proj_transform const& prj_trans,
-                      double scale_denom);
+                      proj_transform const& prj_trans);
 
     Map const& m_;
     double scale_factor_;

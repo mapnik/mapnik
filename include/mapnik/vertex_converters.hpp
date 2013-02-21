@@ -60,13 +60,15 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
 #include "agg_conv_transform.h"
-
+#include "agg_conv_clipper.h"
+#include "agg_path_storage.h"
 
 namespace mapnik {
 
 struct transform_tag {};
 struct clip_line_tag {};
 struct clip_poly_tag {};
+struct clipper_tag {};
 struct close_poly_tag {};
 struct smooth_tag {};
 struct simplify_tag {};
@@ -188,6 +190,26 @@ struct converter_traits<T,mapnik::clip_poly_tag>
 };
 
 template <typename T>
+struct converter_traits<T,mapnik::clipper_tag>
+{
+    typedef T geometry_type;
+    typedef typename agg::conv_clipper<geometry_type,agg::path_storage> conv_type;
+    template <typename Args>
+    static void setup(geometry_type & geom, Args const& args)
+    {
+        typename boost::mpl::at<Args,boost::mpl::int_<0> >::type box = boost::fusion::at_c<0>(args);
+        agg::path_storage * ps = new agg::path_storage(); // FIXME: this will leak memory!
+        ps->move_to(box.minx(),box.miny());
+        ps->line_to(box.minx(),box.maxy());
+        ps->line_to(box.maxx(),box.maxy());
+        ps->line_to(box.maxx(),box.miny());
+        ps->close_polygon();
+        geom.attach2(*ps, agg::clipper_non_zero);
+        //geom.reverse(true);
+    }
+};
+
+template <typename T>
 struct converter_traits<T,mapnik::close_poly_tag>
 {
     typedef T geometry_type;
@@ -195,7 +217,7 @@ struct converter_traits<T,mapnik::close_poly_tag>
     template <typename Args>
     static void setup(geometry_type & geom, Args const& args)
     {
-        //
+        // no-op
     }
 };
 
