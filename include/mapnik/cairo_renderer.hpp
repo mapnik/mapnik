@@ -127,6 +127,7 @@ protected:
     cairo_face_manager face_manager_;
     boost::shared_ptr<label_collision_detector4> detector_;
     box2d<double> query_extent_;
+    void setup(Map const& m);
 };
 
 template <typename T>

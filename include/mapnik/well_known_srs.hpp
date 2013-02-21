@@ -24,6 +24,7 @@
 #define MAPNIK_WELL_KNOWN_SRS_HPP
 
 // mapnik
+#include <mapnik/global.hpp> // for M_PI on windows
 #include <mapnik/enumeration.hpp>
 
 // boost

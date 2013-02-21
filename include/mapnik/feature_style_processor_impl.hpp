@@ -139,8 +139,14 @@ struct has_process
 
 template <typename Processor>
 feature_style_processor<Processor>::feature_style_processor(Map const& m, double scale_factor)
-    : m_(m), scale_factor_(scale_factor)
+    : m_(m),
+      scale_factor_(scale_factor)
 {
+    // https://github.com/mapnik/mapnik/issues/1100
+    if (scale_factor_ <= 0)
+    {
+        throw std::runtime_error("scale_factor must be greater than 0.0");
+    }
 }
 
 template <typename Processor>
@@ -157,7 +163,7 @@ void feature_style_processor<Processor>::apply()
     try
     {
         projection proj(m_.srs(),true);
-        double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
+        double scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
         BOOST_FOREACH ( layer const& lyr, m_.layers() )
@@ -191,7 +197,7 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
     try
     {
         projection proj(m_.srs(),true);
-        double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
+        double scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
         if (lyr.visible(scale_denom))

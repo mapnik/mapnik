@@ -530,7 +530,7 @@ double Map::scale() const
 double Map::scale_denominator() const
 {
     projection map_proj(srs_);
-    return mapnik::scale_denominator( *this, map_proj.is_geographic());
+    return mapnik::scale_denominator( scale(), map_proj.is_geographic());
 }
 
 CoordTransform Map::view_transform() const

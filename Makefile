@@ -18,6 +18,7 @@ clean:
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	@if test -e "config.log"; then rm  "config.log"; fi
 	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
+	@find ./ -name "*.pyc" -exec rm {} \;
 	@find ./ -name "*.os" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./ -name "*.pyc" -exec rm {} \;
