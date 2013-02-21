@@ -159,7 +159,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
             QVector<QPair<QString,QString> > info;
 
             projection map_proj(map_->srs()); // map projection
-            double scale_denom = scale_denominator(*map_,map_proj.is_geographic());
+            double scale_denom = scale_denominator(map_->scale(),map_proj.is_geographic());
             CoordTransform t(map_->width(),map_->height(),map_->get_current_extent());
 
             for (unsigned index = 0; index <  map_->layer_count();++index)
