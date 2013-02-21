@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Changed scale_denominator C++ interface to take scale as first argument rather than map.
+
 - Added support for `background-image` in cairo_renderer (#1724)
 
 - Added Layer `buffer-size` that can be used to override Map `buffer-size` to avoid
