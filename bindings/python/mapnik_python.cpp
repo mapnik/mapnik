@@ -329,7 +329,7 @@ void render_to_file3(const mapnik::Map& map,
 
 double scale_denominator(mapnik::Map const &map, bool geographic)
 {
-    return mapnik::scale_denominator(map, geographic);
+    return mapnik::scale_denominator(map.scale(), geographic);
 }
 
 // http://docs.python.org/c-api/exceptions.html#standard-exceptions
@@ -691,6 +691,7 @@ BOOST_PYTHON_MODULE(_mapnik)
 #endif
 
     def("scale_denominator", &scale_denominator,
+        (arg("map"),arg("is_geographic")),
         "\n"
         "Return the Map Scale Denominator.\n"
         "Also available as Map.scale_denominator()\n"

@@ -157,7 +157,7 @@ void feature_style_processor<Processor>::apply()
     try
     {
         projection proj(m_.srs(),true);
-        double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
+        double scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
         BOOST_FOREACH ( layer const& lyr, m_.layers() )
@@ -191,7 +191,7 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
     try
     {
         projection proj(m_.srs(),true);
-        double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
+        double scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
         if (lyr.visible(scale_denom))

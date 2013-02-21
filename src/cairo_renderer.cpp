@@ -137,7 +137,7 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
           box2d<double>(-m.buffer_size(), -m.buffer_size(),
           m.width() + m.buffer_size(), m.height() + m.buffer_size())))
 {
-    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Scale=" << m.scale();
+    setup(m);
 }
 
 cairo_renderer_base::cairo_renderer_base(Map const& m,
@@ -182,6 +182,46 @@ cairo_renderer<cairo_surface_ptr>::cairo_renderer(Map const& m, cairo_surface_pt
 
 cairo_renderer_base::~cairo_renderer_base() {}
 
+void cairo_renderer_base::setup(Map const& map)
+{
+    boost::optional<color> bg = m_.background();
+    if (bg)
+    {
+        cairo_save_restore guard(context_);
+        context_.set_color(*bg);
+        context_.paint();
+    }
+    boost::optional<std::string> const& image_filename = map.background_image();
+    if (image_filename)
+    {
+        // NOTE: marker_cache returns premultiplied image, if needed
+        boost::optional<mapnik::marker_ptr> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
+        if (bg_marker && (*bg_marker)->is_bitmap())
+        {
+            mapnik::image_ptr bg_image = *(*bg_marker)->get_bitmap_data();
+            int w = bg_image->width();
+            int h = bg_image->height();
+            if ( w > 0 && h > 0)
+            {
+                // repeat background-image both vertically and horizontally
+                unsigned x_steps = unsigned(std::ceil(width_/double(w)));
+                unsigned y_steps = unsigned(std::ceil(height_/double(h)));
+                for (unsigned x=0;x<x_steps;++x)
+                {
+                    for (unsigned y=0;y<y_steps;++y)
+                    {
+                        agg::trans_affine matrix = agg::trans_affine_translation(
+                                                       x*w,
+                                                       y*h);
+                        context_.add_image(matrix, *bg_image, 1.0f);
+                    }
+                }
+            }
+        }
+    }
+    MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Scale=" << map.scale();
+}
+
 void cairo_renderer_base::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Start map processing bbox=" << map.get_current_extent();
@@ -193,14 +233,6 @@ void cairo_renderer_base::start_map_processing(Map const& map)
 #else
 #warning building against cairo older that 1.6.0, map clipping is disabled
 #endif
-
-    boost::optional<color> bg = m_.background();
-    if (bg)
-    {
-        cairo_save_restore guard(context_);
-        context_.set_color(*bg);
-        context_.paint();
-    }
 }
 
 template <>
