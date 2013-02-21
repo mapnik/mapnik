@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added support for `background-image` in cairo_renderer (#1724)
+
 - Added Layer `buffer-size` that can be used to override Map `buffer-size` to avoid
   over-fetching of data that does not need to be buffered as much as other layers.
   Map level `buffer-size` will be default if layers do not set the option. Renamed a
