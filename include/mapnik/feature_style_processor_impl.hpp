@@ -139,8 +139,14 @@ struct has_process
 
 template <typename Processor>
 feature_style_processor<Processor>::feature_style_processor(Map const& m, double scale_factor)
-    : m_(m), scale_factor_(scale_factor)
+    : m_(m),
+      scale_factor_(scale_factor)
 {
+    // https://github.com/mapnik/mapnik/issues/1100
+    if (scale_factor_ <= 0)
+    {
+        throw std::runtime_error("scale_factor must be greater than 0.0");
+    }
 }
 
 template <typename Processor>
