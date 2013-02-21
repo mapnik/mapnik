@@ -68,7 +68,12 @@ public:
     void apply_to_layer(layer const& lay,
                         Processor & p,
                         projection const& proj0,
+                        double scale,
                         double scale_denom,
+                        unsigned width,
+                        unsigned height,
+                        box2d<double> const& extent,
+                        int buffer_size,
                         std::set<std::string>& names);
 
 private:

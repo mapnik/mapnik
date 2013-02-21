@@ -85,6 +85,25 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
 }
 
 template <typename T>
+agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor)
+    : feature_style_processor<agg_renderer>(m, scale_factor),
+      pixmap_(pixmap),
+      internal_buffer_(),
+      current_buffer_(&pixmap),
+      style_level_compositing_(false),
+      width_(pixmap_.width()),
+      height_(pixmap_.height()),
+      scale_factor_(scale_factor),
+      t_(req.width(),req.height(),req.get_current_extent(),0.0,0.0),
+      font_engine_(),
+      font_manager_(font_engine_),
+      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
+      ras_ptr(new rasterizer)
+{
+    setup(m);
+}
+
+template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_collision_detector4> detector,
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),

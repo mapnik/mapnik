@@ -100,6 +100,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    request.cpp
     well_known_srs.cpp
     params.cpp
     image_filter_types.cpp

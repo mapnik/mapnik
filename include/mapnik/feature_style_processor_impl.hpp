@@ -171,7 +171,17 @@ void feature_style_processor<Processor>::apply()
             if (lyr.visible(scale_denom))
             {
                 std::set<std::string> names;
-                apply_to_layer(lyr, p, proj, scale_denom, names);
+                apply_to_layer(lyr,
+                               p,
+                               proj,
+                               m_.scale(),
+                               scale_denom,
+                               m_.width(),
+                               m_.height(),
+                               m_.get_current_extent(),
+                               m_.buffer_size(),
+                               names);
+
             }
         }
     }
@@ -202,7 +212,16 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
 
         if (lyr.visible(scale_denom))
         {
-            apply_to_layer(lyr, p, proj, scale_denom, names);
+            apply_to_layer(lyr,
+                           p,
+                           proj,
+                           m_.scale(),
+                           scale_denom,
+                           m_.width(),
+                           m_.height(),
+                           m_.get_current_extent(),
+                           m_.buffer_size(),
+                           names);
         }
     }
     catch (proj_init_error& ex)
@@ -215,7 +234,12 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
 template <typename Processor>
 void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Processor & p,
                                                         projection const& proj0,
+                                                        double scale,
                                                         double scale_denom,
+                                                        unsigned width,
+                                                        unsigned height,
+                                                        box2d<double> const& extent,
+                                                        int buffer_size,
                                                         std::set<std::string>& names)
 {
     std::vector<std::string> const& style_names = lay.styles();
@@ -253,20 +277,21 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 #endif
 
 
-    box2d<double> query_ext = m_.get_current_extent(); // unbuffered
+    box2d<double> query_ext = extent; // unbuffered
     box2d<double> buffered_query_ext(query_ext);  // buffered
 
+    double buffer_padding = 2.0 * scale;
     boost::optional<int> layer_buffer_size = lay.buffer_size();
     if (layer_buffer_size) // if layer overrides buffer size, use this value to compute buffered extent
     {
-        double extra = 2.0 * m_.scale() * *layer_buffer_size;
-        buffered_query_ext.width(query_ext.width() + extra);
-        buffered_query_ext.height(query_ext.height() + extra);
+        buffer_padding *= *layer_buffer_size;
     }
     else
     {
-        buffered_query_ext = m_.get_buffered_extent();
+        buffer_padding *= buffer_size;
     }
+    buffered_query_ext.width(query_ext.width() + buffer_padding);
+    buffered_query_ext.height(query_ext.height() + buffer_padding);
 
     // clip buffered extent by maximum extent, if supplied
     boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
@@ -363,10 +388,10 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     double qw = query_ext.width()>0 ? query_ext.width() : 1;
     double qh = query_ext.height()>0 ? query_ext.height() : 1;
-    query::resolution_type res(m_.width()/qw,
-                               m_.height()/qh);
+    query::resolution_type res(width/qw,
+                               height/qh);
 
-    query q(layer_ext,res,scale_denom,m_.get_current_extent());
+    query q(layer_ext,res,scale_denom,extent);
     std::vector<feature_type_style*> active_styles;
     attribute_collector collector(names);
     double filt_factor = 1.0;
