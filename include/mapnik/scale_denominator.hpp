@@ -28,7 +28,6 @@
 
 namespace mapnik {
 
-class Map;
 MAPNIK_DECL double scale_denominator(double map_scale, bool geographic);
 }
 
