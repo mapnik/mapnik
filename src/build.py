@@ -56,10 +56,19 @@ regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype','ltdl','png','tiff','z','proj',env['ICU_LIB_NAME'],filesystem,system,regex]
+lib_env['LIBS'] = ['freetype','ltdl','z',env['ICU_LIB_NAME'],filesystem,system,regex]
+
+if env['PROJ']:
+   lib_env['LIBS'].append('proj')
+
+if env['PNG']:
+   lib_env['LIBS'].append('png')
 
 if env['JPEG']:
    lib_env['LIBS'].append('jpeg')
+
+if env['TIFF']:
+   lib_env['LIBS'].append('tiff')
 
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
