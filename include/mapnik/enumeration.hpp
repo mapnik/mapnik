@@ -320,9 +320,14 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
 /** Helper macro. Creates a typedef.
  * @relates mapnik::enumeration
  */
+#ifdef _MSC_VER_
 #define DEFINE_ENUM( name, e)                   \
     template enumeration<e, e ## _MAX>;         \
     typedef enumeration<e, e ## _MAX> name
+#else
+#define DEFINE_ENUM( name, e)                   \
+    typedef enumeration<e, e ## _MAX> name
+#endif
 
 /** Helper macro. Runs the verify_mapnik_enum() method during static initialization.
  * @relates mapnik::enumeration
