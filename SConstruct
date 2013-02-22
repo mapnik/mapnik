@@ -454,6 +454,8 @@ HELP_REQUESTED = False
 if ('-h' in command_line_args) or ('--help' in command_line_args):
     HELP_REQUESTED = True
 
+if ('-c' in command_line_args) or ('--clean' in command_line_args):
+    HELP_REQUESTED = True
 
 if 'configure' in command_line_args and not HELP_REQUESTED:
     force_configure = True
