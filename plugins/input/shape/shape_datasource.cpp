@@ -315,9 +315,9 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     }
 }
 
-box2d<double> shape_datasource::envelope() const
+boost::optional<box2d<double> > shape_datasource::envelope() const
 {
-    return extent_;
+    return boost::optional<box2d<double> >(extent_);
 }
 
 boost::optional<mapnik::datasource::geometry_t> shape_datasource::get_geometry_type() const

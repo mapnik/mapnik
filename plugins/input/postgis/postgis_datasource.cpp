@@ -785,11 +785,13 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
     return featureset_ptr();
 }
 
-box2d<double> postgis_datasource::envelope() const
+boost::optional<box2d<double> > postgis_datasource::envelope() const
 {
+    boost::optional<box2d<double> > ext;
     if (extent_initialized_)
     {
-        return extent_;
+        ext.reset(extent_);
+        return ext;
     }
 
     shared_ptr< Pool<Connection,ConnectionCreator> > pool = ConnectionManager::instance().getPool(creator_.id());
@@ -801,12 +803,10 @@ box2d<double> postgis_datasource::envelope() const
             PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
 
             std::ostringstream s;
-
             if (geometryColumn_.empty())
             {
                 std::ostringstream s_error;
                 s_error << "PostGIS: unable to query the layer extent of table '";
-
                 if (! schema_.empty())
                 {
                     s_error << schema_ << ".";
@@ -823,12 +823,10 @@ box2d<double> postgis_datasource::envelope() const
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
                   << " FROM (SELECT ST_Estimated_Extent('";
-
                 if (! schema_.empty())
                 {
                     s << mapnik::sql_utils::unquote_double(schema_) << "','";
                 }
-
                 s << mapnik::sql_utils::unquote_double(geometry_table_) << "','"
                   << mapnik::sql_utils::unquote_double(geometryColumn_) << "') as ext) as tmp";
             }
@@ -836,7 +834,6 @@ box2d<double> postgis_datasource::envelope() const
             {
                 s << "SELECT ST_XMin(ext),ST_YMin(ext),ST_XMax(ext),ST_YMax(ext)"
                   << " FROM (SELECT ST_Extent(" <<geometryColumn_<< ") as ext from ";
-
                 if (extent_from_subquery_)
                 {
                     // if a subselect limits records then calculating the extent upon the
@@ -867,6 +864,7 @@ box2d<double> postgis_datasource::envelope() const
                 {
                     extent_.init(lox, loy, hix, hiy);
                     extent_initialized_ = true;
+                    ext.reset(extent_);
                 }
                 else
                 {
@@ -876,8 +874,7 @@ box2d<double> postgis_datasource::envelope() const
             rs->close();
         }
     }
-
-    return extent_;
+    return ext;
 }
 
 boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry_type() const

@@ -274,7 +274,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         buffered_query_ext.clip(*maximum_extent);
     }
 
-    box2d<double> layer_ext = lay.envelope();
+    box2d<double> layer_ext = *lay.envelope();
     bool fw_success = false;
     bool early_return = false;
 
@@ -342,7 +342,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         query_ext.clip(*maximum_extent);
     }
 
-    box2d<double> layer_ext2 = lay.envelope();
+    box2d<double> layer_ext2 = *lay.envelope();
     if (fw_success)
     {
         if (prj_trans.forward(query_ext, PROJ_ENVELOPE_POINTS))

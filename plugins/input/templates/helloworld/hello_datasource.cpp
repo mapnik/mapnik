@@ -42,9 +42,9 @@ mapnik::datasource::datasource_t hello_datasource::type() const
     return datasource::Vector;
 }
 
-mapnik::box2d<double> hello_datasource::envelope() const
+boost::optional<mapnik::box2d<double> > hello_datasource::envelope() const
 {
-    return extent_;
+    return boost::optional<mapnik::box2d<double> >(extent_);
 }
 
 boost::optional<mapnik::datasource::geometry_t> hello_datasource::get_geometry_type() const

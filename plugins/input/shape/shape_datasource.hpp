@@ -59,7 +59,7 @@ public:
     static const char * name();
     featureset_ptr features(const query& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
-    box2d<double> envelope() const;
+    boost::optional<box2d<double> > envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
 

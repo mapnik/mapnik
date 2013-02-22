@@ -53,16 +53,19 @@ private:
     container_type cont_;
     eGeomType type_;
     mutable unsigned itr_;
+    mutable box2d<double> extent_;
 public:
 
     geometry()
         : type_(Unknown),
-          itr_(0)
+          itr_(0),
+          extent_()
     {}
 
     explicit geometry(eGeomType type)
         : type_(type),
-          itr_(0)
+          itr_(0),
+          extent_()
     {}
 
     eGeomType type() const
@@ -85,9 +88,17 @@ public:
         return cont_.size();
     }
 
-    box2d<double> envelope() const
+    void set_extent(box2d<double> const& box)
     {
-        box2d<double> result;
+        return extent_ = box;
+    }
+
+    box2d<double> const& envelope() const
+    {
+        if (extent_.valid())
+        {
+            return extent_;
+        }
         double x = 0;
         double y = 0;
         rewind(0);
@@ -97,14 +108,14 @@ public:
             if (cmd == SEG_CLOSE) continue;
             if (i == 0)
             {
-                result.init(x,y,x,y);
+                extent_.init(x,y,x,y);
             }
             else
             {
-                result.expand_to_include(x,y);
+                extent_.expand_to_include(x,y);
             }
         }
-        return result;
+        return extent_;
     }
 
     void push_vertex(coord_type x, coord_type y, CommandType c)

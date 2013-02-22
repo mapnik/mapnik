@@ -189,7 +189,7 @@ public:
     /*!
      * @return the geographic envelope/bounding box of the data in the layer.
      */
-    box2d<double> envelope() const;
+    boost::optional<box2d<double> > envelope() const;
 
     void set_maximum_extent(box2d<double> const& box);
     boost::optional<box2d<double> > const&  maximum_extent() const;

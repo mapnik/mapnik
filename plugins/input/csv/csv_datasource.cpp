@@ -875,9 +875,9 @@ datasource::datasource_t csv_datasource::type() const
     return datasource::Vector;
 }
 
-mapnik::box2d<double> csv_datasource::envelope() const
+boost::optional<mapnik::box2d<double> > csv_datasource::envelope() const
 {
-    return extent_;
+    return boost::optional<mapnik::box2d<double> >(extent_);
 }
 
 boost::optional<mapnik::datasource::geometry_t> csv_datasource::get_geometry_type() const

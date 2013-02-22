@@ -9,7 +9,7 @@ def test_layer_init():
     l = mapnik.Layer('test')
     eq_(l.name,'test')
     eq_(l.srs,'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-    eq_(l.envelope(),mapnik.Box2d())
+    eq_(l.envelope(),None)
     eq_(l.clear_label_cache,False)
     eq_(l.cache_features,False)
     eq_(l.visible(1),True)

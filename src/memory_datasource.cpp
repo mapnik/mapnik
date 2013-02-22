@@ -101,14 +101,14 @@ void memory_datasource::set_envelope(box2d<double> const& box)
     extent_ = box;
 }
 
-box2d<double> memory_datasource::envelope() const
+boost::optional<box2d<double> > memory_datasource::envelope() const
 {
     if (!extent_.valid())
     {
         accumulate_extent func(extent_);
         std::for_each(features_.begin(),features_.end(),func);
     }
-    return extent_;
+    return boost::optional<box2d<double> >(extent_);
 }
 
 boost::optional<datasource::geometry_t> memory_datasource::get_geometry_type() const

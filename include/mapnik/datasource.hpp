@@ -106,7 +106,7 @@ public:
     virtual datasource_t type() const = 0;
     virtual featureset_ptr features(query const& q) const = 0;
     virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const = 0;
-    virtual box2d<double> envelope() const = 0;
+    virtual boost::optional<box2d<double> > envelope() const = 0;
     virtual boost::optional<geometry_t> get_geometry_type() const = 0;
     virtual layer_descriptor get_descriptor() const = 0;
     virtual ~datasource() {}

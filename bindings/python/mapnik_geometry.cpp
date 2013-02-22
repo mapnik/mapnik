@@ -281,7 +281,7 @@ void export_geometry()
 
     using mapnik::geometry_type;
     class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
-        .def("envelope",&geometry_type::envelope)
+        //.def("envelope",&geometry_type::envelope)
         // .def("__str__",&geometry_type::to_string)
         .def("type",&geometry_type::type)
         .def("to_wkb",&to_wkb)

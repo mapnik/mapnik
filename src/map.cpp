@@ -372,23 +372,27 @@ void Map::zoom_all()
         {
             if (itr->active())
             {
-                std::string const& layer_srs = itr->srs();
-                projection proj1(layer_srs);
-                proj_transform prj_trans(proj0,proj1);
-                box2d<double> layer_ext = itr->envelope();
-                if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
+                boost::optional<box2d<double> > layer_envelope = itr->envelope();
+                if (layer_envelope)
                 {
-                    success = true;
-                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
-                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
-                    if (first)
+                    std::string const& layer_srs = itr->srs();
+                    projection proj1(layer_srs);
+                    proj_transform prj_trans(proj0,proj1);
+                    box2d<double> layer_ext = *layer_envelope;
+                    if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
                     {
-                        ext = layer_ext;
-                        first = false;
-                    }
-                    else
-                    {
-                        ext.expand_to_include(layer_ext);
+                        success = true;
+                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
+                        MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
+                        if (first)
+                        {
+                            ext = layer_ext;
+                            first = false;
+                        }
+                        else
+                        {
+                            ext.expand_to_include(layer_ext);
+                        }
                     }
                 }
             }
