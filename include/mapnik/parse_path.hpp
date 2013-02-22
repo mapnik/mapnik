@@ -41,14 +41,14 @@ MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str,
                                            path_expression_grammar<std::string::const_iterator> const& g);
 
-struct path_processor
+struct MAPNIK_DECL path_processor
 {
     static std::string evaluate(path_expression const& path, feature_impl const& f);
     static std::string to_string(path_expression const& path);
     static void collect_attributes(path_expression const& path, std::set<std::string>& names);
 };
 
-typedef mapnik::path_processor path_processor_type;
+typedef MAPNIK_DECL mapnik::path_processor path_processor_type;
 
 }
 

@@ -23,6 +23,9 @@
 #ifndef MAPNIK_IMAGE_FILTER_TYPES_HPP
 #define MAPNIK_IMAGE_FILTER_TYPES_HPP
 
+// mapnik
+#include <mapnik/config.hpp>
+
 // boost
 #include <boost/variant/variant_fwd.hpp>
 
@@ -125,7 +128,9 @@ inline std::ostream& operator<< (std::ostream& os, invert)
 
 inline std::ostream& operator<< (std::ostream& os, filter_type const& filter);
 
-bool generate_image_filters(std::back_insert_iterator<std::string> & sink, std::vector<filter_type> const& v);
+MAPNIK_DECL bool generate_image_filters(std::back_insert_iterator<std::string> & sink, std::vector<filter_type> const& v);
+
+MAPNIK_DECL bool parse_image_filters(std::string const& filters, std::vector<filter_type>& image_filters);
 
 }}
 
