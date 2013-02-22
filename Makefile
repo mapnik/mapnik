@@ -22,7 +22,7 @@ clean:
 	@find ./ -name "*.os" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./ -name "*.pyc" -exec rm {} \;
-	@rm bindings/python/mapnik/paths.py
+	@if test -e "bindings/python/mapnik/paths.py"; then rm "bindings/python/mapnik/paths.py"; fi
 
 distclean:
 	@if test -e "config.cache"; then rm "config.cache"; fi

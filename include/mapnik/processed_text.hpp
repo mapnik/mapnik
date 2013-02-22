@@ -37,7 +37,7 @@ namespace mapnik
 class freetype_engine;
 template <typename T> class face_manager;
 
-class processed_text : mapnik::noncopyable
+class MAPNIK_DECL processed_text : mapnik::noncopyable
 {
 public:
     class processed_expression

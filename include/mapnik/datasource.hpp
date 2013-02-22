@@ -99,6 +99,11 @@ public:
         return params_;
     }
 
+    parameters & params()
+    {
+        return params_;
+    }
+
     /*!
      * @brief Get the type of the datasource
      * @return The type of the datasource (Vector or Raster)

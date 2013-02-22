@@ -62,7 +62,7 @@ pretty_dep_names = {
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
-    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki//PostGIS',
+    'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki//PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki//SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
@@ -454,6 +454,8 @@ HELP_REQUESTED = False
 if ('-h' in command_line_args) or ('--help' in command_line_args):
     HELP_REQUESTED = True
 
+if ('-c' in command_line_args) or ('--clean' in command_line_args):
+    HELP_REQUESTED = True
 
 if 'configure' in command_line_args and not HELP_REQUESTED:
     force_configure = True
