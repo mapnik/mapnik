@@ -5,16 +5,28 @@ ifeq ($(UNAME), Darwin)
 else
 endif
 
+OS:=$(shell uname -s)
+
+ifeq ($(NPROCS),)
+	NPROCS:=1
+	ifeq ($(OS),Linux)
+		NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
+	endif
+	ifeq ($(OS),Darwin)
+		NPROCS:=$(shell sysctl -n hw.ncpu)
+	endif
+endif
+
 all: mapnik
 
 install:
-	@python scons/scons.py --config=cache --implicit-cache --max-drift=1 install
+	@python scons/scons.py -j$(NPROCS) --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	@python scons/scons.py --config=cache --implicit-cache --max-drift=1
+	@python scons/scons.py -j$(NPROCS) --config=cache --implicit-cache --max-drift=1
 
 clean:
-	@python scons/scons.py -c --config=cache --implicit-cache --max-drift=1
+	@python scons/scons.py -j$(NPROCS) -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	@if test -e "config.log"; then rm  "config.log"; fi
 	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
@@ -34,7 +46,7 @@ rebuild:
 	make uninstall && make clean && time make && make install
 
 uninstall:
-	@python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
+	@python scons/scons.py -j$(NPROCS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
 	@ ./run_tests
