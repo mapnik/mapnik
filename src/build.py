@@ -151,7 +151,6 @@ source = Split(
     path_expression_grammar.cpp
     placement_finder.cpp
     plugin.cpp
-    png_reader.cpp
     point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
     polygon_symbolizer.cpp
@@ -159,7 +158,6 @@ source = Split(
     save_map.cpp
     shield_symbolizer.cpp
     text_symbolizer.cpp
-    tiff_reader.cpp
     wkb.cpp
     projection.cpp
     proj_transform.cpp
@@ -220,6 +218,18 @@ if env['JPEG']:
     source += Split(
         """
         jpeg_reader.cpp
+        """)
+
+if env['TIFF']:
+    source += Split(
+        """
+        tiff_reader.cpp
+        """)
+
+if env['PNG']:
+    source += Split(
+        """
+        png_reader.cpp
         """)
 
 # agg backend
