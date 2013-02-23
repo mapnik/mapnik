@@ -36,6 +36,7 @@
 #include <boost/variant/variant.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp>
+#include <boost/functional/hash.hpp>
 
 // stl
 #include <iostream>
@@ -903,6 +904,10 @@ operator << (std::basic_ostream<charT,traits>& out,
 {
     out << v.to_string();
     return out;
+}
+
+inline std::size_t hash_value(const value& val) {
+    return hash_value(val.base());
 }
 
 } // namespace value_adl_barrier
