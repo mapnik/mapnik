@@ -51,7 +51,7 @@ private:
 };
 }
 
-namespace icu_50 {
+namespace U_ICU_NAMESPACE {
 inline std::size_t hash_value(const UnicodeString& val) {
     return val.hashCode();
 }
