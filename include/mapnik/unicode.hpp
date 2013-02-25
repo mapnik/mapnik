@@ -51,4 +51,10 @@ private:
 };
 }
 
+namespace U_ICU_NAMESPACE {
+inline std::size_t hash_value(const UnicodeString& val) {
+    return val.hashCode();
+}
+}
+
 #endif // MAPNIK_UNICODE_HPP

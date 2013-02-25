@@ -8,6 +8,10 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added ability to access style list from map by (name,obj) in python (#1725)
+
+- Added `is_solid` method to python mapnik.Image and mapnik.ImageView classes (#1728)
+
 - Changed scale_denominator C++ interface to take scale as first argument rather than map.
 
 - Added support for `background-image` in cairo_renderer (#1724)
