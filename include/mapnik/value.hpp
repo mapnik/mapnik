@@ -37,6 +37,7 @@
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp>
 #include <boost/functional/hash.hpp>
+#include "hash_variant.hpp"
 
 // stl
 #include <iostream>
