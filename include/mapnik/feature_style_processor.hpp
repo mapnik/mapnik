@@ -52,7 +52,8 @@ class feature_style_processor
 {
     struct symbol_dispatch;
 public:
-    explicit feature_style_processor(Map const& m, double scale_factor = 1.0);
+    explicit feature_style_processor(Map const& m,
+                                     double scale_factor = 1.0);
 
     /*!
      * \brief apply renderer to all map layers.
@@ -62,7 +63,9 @@ public:
     /*!
      * \brief apply renderer to a single layer, providing pre-populated set of query attribute names.
      */
-    void apply(mapnik::layer const& lyr, std::set<std::string>& names,double scale_denom_override=0.0);
+    void apply(mapnik::layer const& lyr,
+               std::set<std::string>& names,
+               double scale_denom_override=0.0);
     /*!
      * \brief render a layer given a projection and scale.
      */
