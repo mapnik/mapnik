@@ -231,7 +231,7 @@ stroker_ptr freetype_engine::create_stroker()
     return stroker_ptr();
 }
 
-char_info font_face_set::character_dimensions(const unsigned c)
+char_info font_face_set::character_dimensions(unsigned int c)
 {
     //Check if char is already in cache
     std::map<unsigned, char_info>::const_iterator itr;
@@ -466,7 +466,7 @@ void text_renderer<T>::render(pixel_position pos)
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
                 composite_bitmap(pixmap_, &bit->bitmap, itr->properties->halo_fill.rgba(),
                                  bit->left,
-                                 height - bit->top, 
+                                 height - bit->top,
                                  itr->properties->text_opacity,
                                  comp_op_
                     );
@@ -488,10 +488,10 @@ void text_renderer<T>::render(pixel_position pos)
             //render_bitmap(&bit->bitmap, itr->properties->fill.rgba(),
             //              bit->left,
             //              height - bit->top, itr->properties->text_opacity);
-            
+
             composite_bitmap(pixmap_, &bit->bitmap, itr->properties->fill.rgba(),
                              bit->left,
-                             height - bit->top, 
+                             height - bit->top,
                              itr->properties->text_opacity,
                              comp_op_
                 );
