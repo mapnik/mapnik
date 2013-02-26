@@ -150,7 +150,7 @@ feature_style_processor<Processor>::feature_style_processor(Map const& m, double
 }
 
 template <typename Processor>
-void feature_style_processor<Processor>::apply()
+void feature_style_processor<Processor>::apply(double scale_denom)
 {
 #if defined(RENDERING_STATS)
     std::clog << "\n//-- starting rendering timer...\n";
@@ -163,7 +163,8 @@ void feature_style_processor<Processor>::apply()
     try
     {
         projection proj(m_.srs(),true);
-        double scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
+        if (scale_denom <= 0.0)
+            scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
         BOOST_FOREACH ( layer const& lyr, m_.layers() )
@@ -200,14 +201,17 @@ void feature_style_processor<Processor>::apply()
 }
 
 template <typename Processor>
-void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::set<std::string>& names)
+void feature_style_processor<Processor>::apply(mapnik::layer const& lyr,
+                                               std::set<std::string>& names,
+                                               double scale_denom)
 {
     Processor & p = static_cast<Processor&>(*this);
     p.start_map_processing(m_);
     try
     {
         projection proj(m_.srs(),true);
-        double scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
+        if (scale_denom <= 0.0)
+            scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
         if (lyr.visible(scale_denom))
