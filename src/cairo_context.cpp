@@ -210,7 +210,7 @@ void cairo_context::set_dash(dash_array const &dashes, double scale_factor)
         d[index++] = itr->second * scale_factor;
     }
 
-    cairo_set_dash(cairo_.get() , &d[0], dashes.size(), 0/*offset*/);
+    cairo_set_dash(cairo_.get() , &d[0], d.size(), 0/*offset*/);
     check_object_status_and_throw_exception(*this);
 }
 
