@@ -78,11 +78,9 @@ struct bool_symbols : qi::symbols<char,bool>
     }
 };
 
-bool string2bool(const char * value, bool & result)
+bool string2bool(const char * iter, const char * end, bool & result)
 {
     using boost::spirit::qi::no_case;
-    const char *iter = value;
-    const char *end  = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end, no_case[bool_symbols()] ,ascii::space,result);
     return r && (iter == end);
 }
@@ -96,10 +94,8 @@ bool string2bool(std::string const& value, bool & result)
     return r && (str_beg == str_end);
 }
 
-bool string2int(const char * value, int & result)
+bool string2int(const char * iter, const char * end, int & result)
 {
-    const char *iter = value;
-    const char *end  = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,INTEGER,ascii::space,result);
     return r && (iter == end);
 }
@@ -113,10 +109,8 @@ bool string2int(std::string const& value, int & result)
 }
 
 #ifdef BIGINT
-bool string2int(const char * value, mapnik::value_integer & result)
+bool string2int(const char * iter, const char * end, mapnik::value_integer & result)
 {
-    const char *iter  = value;
-    const char *end   = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,LONGLONG,ascii::space,result);
     return r && (iter == end);
 }
@@ -138,10 +132,8 @@ bool string2double(std::string const& value, double & result)
     return r && (str_beg == str_end);
 }
 
-bool string2double(const char * value, double & result)
+bool string2double(const char * iter, const char * end, double & result)
 {
-    const char *iter = value;
-    const char *end  = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,DOUBLE,ascii::space,result);
     return r && (iter == end);
 }
@@ -154,10 +146,8 @@ bool string2float(std::string const& value, float & result)
     return r && (str_beg == str_end);
 }
 
-bool string2float(const char * value, float & result)
+bool string2float(const char * iter, const char * end, float & result)
 {
-    const char *iter  = value;
-    const char *end   = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,FLOAT,ascii::space,result);
     return r && (iter == end);
 }

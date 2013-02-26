@@ -32,22 +32,28 @@
 
 namespace mapnik { namespace util {
 
-MAPNIK_DECL bool string2bool(const char * value, bool & result);
-MAPNIK_DECL bool string2bool(std::string const& value, bool & result);
+/*
+Note: this file intentionally provides non-templated methods
+to avoid the compile time overhead given it is included
+by many other headers inside mapnik.
+*/
 
-MAPNIK_DECL bool string2int(const char * value, int & result);
+MAPNIK_DECL bool string2bool(std::string const& value, bool & result);
+MAPNIK_DECL bool string2bool(const char * iter, const char * end, bool & result);
+
 MAPNIK_DECL bool string2int(std::string const& value, int & result);
+MAPNIK_DECL bool string2int(const char * iter, const char * end, int & result);
 
 #ifdef BIGINT
-MAPNIK_DECL bool string2int(const char * value, mapnik::value_integer & result);
 MAPNIK_DECL bool string2int(std::string const& value, mapnik::value_integer & result);
+MAPNIK_DECL bool string2int(const char * iter, const char * end, mapnik::value_integer & result);
 #endif
 
 MAPNIK_DECL bool string2double(std::string const& value, double & result);
-MAPNIK_DECL bool string2double(const char * value, double & result);
+MAPNIK_DECL bool string2double(const char * iter, const char * end, double & result);
 
 MAPNIK_DECL bool string2float(std::string const& value, float & result);
-MAPNIK_DECL bool string2float(const char * value, float & result);
+MAPNIK_DECL bool string2float(const char * iter, const char * end, float & result);
 
 MAPNIK_DECL bool to_string(std::string & str, int value);
 #ifdef BIGINT
