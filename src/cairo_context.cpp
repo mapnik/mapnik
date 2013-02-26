@@ -417,7 +417,7 @@ void cairo_context::add_text(text_path const& path,
         char_info_ptr c;
         double x, y, angle;
 
-        path.vertex(&c, &x, &y, &angle);
+        path.vertex(c, x, y, angle);
 
         face_set_ptr faces = font_manager.get_face_set(c->format->face_name, c->format->fontset);
         double text_size = c->format->text_size * scale_factor;

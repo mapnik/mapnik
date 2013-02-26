@@ -919,7 +919,7 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
         double cwidth = ci.width + ci.format->character_spacing;
         char_info_ptr c;
         double x, y, angle;
-        current_placement->vertex(&c, &x, &y, &angle);
+        current_placement->vertex(c, x, y, angle);
         x = current_placement->center.x + x;
         y = current_placement->center.y - y;
 

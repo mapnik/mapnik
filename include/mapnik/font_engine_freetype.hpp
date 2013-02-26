@@ -98,12 +98,12 @@ public:
     font_face(FT_Face face)
         : face_(face) {}
 
-    std::string  family_name() const
+    std::string family_name() const
     {
         return std::string(face_->family_name);
     }
 
-    std::string  style_name() const
+    std::string style_name() const
     {
         return std::string(face_->style_name);
     }
@@ -312,9 +312,9 @@ public:
     {
         std::vector<std::string> const& names = fset.get_face_names();
         face_set_ptr face_set = boost::make_shared<font_face_set>();
-        for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
+        BOOST_FOREACH( std::string const& name, names)
         {
-            face_ptr face = get_face(*name);
+            face_ptr face = get_face(name);
             if (face)
             {
                 face_set->add(face);
@@ -323,7 +323,7 @@ public:
             else
             {
                 MAPNIK_LOG_DEBUG(font_engine_freetype)
-                        << "Failed to find face '" << *name
+                        << "Failed to find face '" << name
                         << "' in font set '" << fset.get_name() << "'\n";
             }
 #endif
@@ -375,11 +375,11 @@ struct text_renderer : private mapnik::noncopyable
                    composite_mode_e comp_op = src_over,
                    double scale_factor=1.0);
     box2d<double> prepare_glyphs(text_path const& path);
-    void render(pixel_position pos);
-    void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
+    void render(pixel_position const& pos);
+    void render_id(int feature_id, pixel_position const& pos, double min_radius=1.0);
 
 private:
-    
+
     void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
     {
         int x_max=x+bitmap->width;
