@@ -98,12 +98,12 @@ public:
     font_face(FT_Face face)
         : face_(face) {}
 
-    std::string  family_name() const
+    std::string family_name() const
     {
         return std::string(face_->family_name);
     }
 
-    std::string  style_name() const
+    std::string style_name() const
     {
         return std::string(face_->style_name);
     }
@@ -379,7 +379,7 @@ struct text_renderer : private mapnik::noncopyable
     void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
 
 private:
-    
+
     void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
     {
         int x_max=x+bitmap->width;
