@@ -29,7 +29,7 @@
 
 namespace csv_utils
 {
-    static void fix_json_quoting(std::string & csv_line)
+    static inline void fix_json_quoting(std::string & csv_line)
     {
         std::string wrapping_char;
         std::string::size_type j_idx = std::string::npos;
