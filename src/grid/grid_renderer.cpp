@@ -39,6 +39,7 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/request.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
@@ -66,6 +67,24 @@ grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, u
       font_engine_(),
       font_manager_(font_engine_),
       detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
+      ras_ptr(new grid_rasterizer)
+{
+    setup(m);
+}
+
+template <typename T>
+grid_renderer<T>::grid_renderer(Map const& m, request const& req, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<grid_renderer>(m, scale_factor),
+      pixmap_(pixmap),
+      width_(pixmap_.width()),
+      height_(pixmap_.height()),
+      scale_factor_(scale_factor),
+      // NOTE: can change this to m dims instead of pixmap_ if render-time
+      // resolution support is dropped from grid_renderer python interface
+      t_(pixmap_.width(),pixmap_.height(),req.extent(),offset_x,offset_y),
+      font_engine_(),
+      font_manager_(font_engine_),
+      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
       ras_ptr(new grid_rasterizer)
 {
     setup(m);

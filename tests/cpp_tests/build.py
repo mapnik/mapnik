@@ -11,6 +11,12 @@ test_env.AppendUnique(LIBS='mapnik')
 test_env.AppendUnique(LIBS='sqlite3')
 test_env.AppendUnique(CXXFLAGS='-g')
 
+test_env['CXXFLAGS'] = copy(test_env['LIBMAPNIK_CXXFLAGS'])
+
+if test_env['HAS_CAIRO']:
+    test_env.PrependUnique(CPPPATH=test_env['CAIRO_CPPPATHS'])
+    test_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+
 for cpp_test in glob.glob('*_test.cpp'):
     name = cpp_test.replace('.cpp','-bin')
     source_files = [cpp_test]
