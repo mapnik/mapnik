@@ -179,7 +179,7 @@ public:
         return boost::make_shared<font_glyph>(*faces_.begin(), 0);
     }
 
-    char_info character_dimensions(const unsigned c);
+    char_info character_dimensions(unsigned c);
 
     void get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format);
 
