@@ -5,6 +5,10 @@
 #include <mapnik/map.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/agg_renderer.hpp>
+#if defined(HAVE_CAIRO)
+#include <mapnik/cairo_renderer.hpp>
+#include <mapnik/cairo_context.hpp>
+#endif
 #include <mapnik/graphics.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/datasource_cache.hpp>
@@ -54,6 +58,8 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 
 int main( int, char*[] )
 {
+    std::string expected("./tests/cpp_tests/support/map-request-marker-text-line-expected.png");
+    std::string expected_cairo("./tests/cpp_tests/support/map-request-marker-text-line-expected-cairo.png");
     try {
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         mapnik::freetype_engine::register_fonts("./fonts", true );
@@ -62,7 +68,6 @@ int main( int, char*[] )
         m.zoom_all();
         mapnik::image_32 im(m.width(),m.height());
         double scale_factor = 1.2;
-        std::string expected("./tests/cpp_tests/support/map-request-marker-text-line-expected.png");
 
         // render normally with apply() and just map and image
         mapnik::agg_renderer<mapnik::image_32> renderer1(m,im,scale_factor);
@@ -117,6 +122,21 @@ int main( int, char*[] )
         std::string actual3("/tmp/map-request-marker-text-line-actual3.png");
         mapnik::save_to_file(im,actual3);
         BOOST_TEST(compare_images(actual3,expected));
+
+        // also test cairo
+#if defined(HAVE_CAIRO)
+        mapnik::cairo_surface_ptr image_surface(
+            cairo_image_surface_create(CAIRO_FORMAT_ARGB32,req.width(),req.height()),
+            mapnik::cairo_surface_closer());
+        mapnik::cairo_ptr image_context = (mapnik::create_context(image_surface));
+        mapnik::cairo_renderer<mapnik::cairo_ptr> png_render(m,req,image_context,scale_factor);
+        png_render.apply();
+        //cairo_surface_write_to_png(&*image_surface, expected_cairo.c_str());
+        std::string actual_cairo("/tmp/map-request-marker-text-line-actual4.png");
+        cairo_surface_write_to_png(&*image_surface, actual_cairo.c_str());
+        BOOST_TEST(compare_images(actual_cairo,expected_cairo));
+#endif
+        // TODO - test grid_renderer
 
     } catch (std::exception const& ex) {
         std::clog << ex.what() << "\n";

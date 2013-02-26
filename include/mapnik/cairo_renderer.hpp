@@ -31,6 +31,7 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/request.hpp>
 #include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/cairo_context.hpp>
@@ -57,6 +58,7 @@ class MAPNIK_DECL cairo_renderer_base : private mapnik::noncopyable
 {
 protected:
     cairo_renderer_base(Map const& m, cairo_ptr const& cairo, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    cairo_renderer_base(Map const& m, request const& req, cairo_ptr const& cairo, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     cairo_renderer_base(Map const& m, cairo_ptr const& cairo, boost::shared_ptr<label_collision_detector4> detector, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
 public:
     ~cairo_renderer_base();
@@ -137,6 +139,7 @@ class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer
 public:
     typedef cairo_renderer_base processor_impl_type;
     cairo_renderer(Map const& m, T const& obj, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    cairo_renderer(Map const& m, request const& req, T const& obj, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     cairo_renderer(Map const& m, T const& obj, boost::shared_ptr<label_collision_detector4> detector, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     void end_map_processing(Map const& map);
 };
