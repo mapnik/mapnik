@@ -99,7 +99,7 @@ public:
         return at(i);
     }
 
-    UnicodeString const&  get_string() const
+    UnicodeString const& get_string() const
     {
         return text_;
     }
@@ -110,10 +110,10 @@ public:
         return (text_.indexOf(break_char) >= 0);
     }
 
-    /** Resets object to initial state. */
-    void clear(void)
+    // Resets object to initial state.
+    void clear()
     {
-        text_ = "";
+        text_.remove();
         characters_.clear();
     }
 };
@@ -121,7 +121,7 @@ public:
 typedef char_info const * char_info_ptr;
 
 
-/** List of all characters and their positions and formats for a placement. */
+// List of all characters and their positions and formats for a placement.
 class text_path : mapnik::noncopyable
 {
     struct character_node
