@@ -236,7 +236,8 @@ char_info font_face_set::character_dimensions(unsigned int c)
     //Check if char is already in cache
     std::map<unsigned, char_info>::const_iterator itr;
     itr = dimension_cache_.find(c);
-    if (itr != dimension_cache_.end()) {
+    if (itr != dimension_cache_.end())
+    {
         return itr->second;
     }
 
@@ -351,7 +352,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
     bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
     bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
 
-    for (int i = 0; i < path.num_nodes(); i++)
+    for (int i = 0; i < path.num_nodes(); ++i)
     {
         char_info_ptr c;
         double x, y, angle;
@@ -436,7 +437,7 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
 }
 
 template <typename T>
-void text_renderer<T>::render(pixel_position pos)
+void text_renderer<T>::render(pixel_position const& pos)
 {
     FT_Error  error;
     FT_Vector start;
@@ -501,7 +502,7 @@ void text_renderer<T>::render(pixel_position pos)
 
 
 template <typename T>
-void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_radius)
+void text_renderer<T>::render_id(int feature_id, pixel_position const& pos, double min_radius)
 {
     FT_Error  error;
     FT_Vector start;
@@ -540,11 +541,11 @@ void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_
 boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-template void text_renderer<image_32>::render(pixel_position);
+template void text_renderer<image_32>::render(pixel_position const&);
 template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path const&);
 
-template void text_renderer<grid>::render_id(int, pixel_position, double );
+template void text_renderer<grid>::render_id(int, pixel_position const& , double );
 template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path const& );
 }
