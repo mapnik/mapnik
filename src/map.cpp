@@ -75,7 +75,7 @@ Map::Map(int width,int height, std::string const& srs)
       aspectFixMode_(GROW_BBOX),
       base_path_("") {}
 
-Map::Map(const Map& rhs)
+Map::Map(Map const& rhs)
     : width_(rhs.width_),
       height_(rhs.height_),
       srs_(rhs.srs_),
@@ -93,7 +93,7 @@ Map::Map(const Map& rhs)
 
 Map::~Map() {}
 
-Map& Map::operator=(const Map& rhs)
+Map& Map::operator=(Map const& rhs)
 {
     if (this==&rhs) return *this;
     width_=rhs.width_;
@@ -132,12 +132,12 @@ Map::style_iterator Map::end_styles()
     return styles_.end();
 }
 
-Map::const_style_iterator  Map::begin_styles() const
+Map::const_style_iterator Map::begin_styles() const
 {
     return styles_.begin();
 }
 
-Map::const_style_iterator  Map::end_styles() const
+Map::const_style_iterator Map::end_styles() const
 {
     return styles_.end();
 }
@@ -194,7 +194,7 @@ size_t Map::layer_count() const
     return layers_.size();
 }
 
-void Map::addLayer(const layer& l)
+void Map::addLayer(layer const& l)
 {
     layers_.push_back(l);
 }
@@ -210,7 +210,7 @@ void Map::remove_all()
     styles_.clear();
 }
 
-const layer& Map::getLayer(size_t index) const
+layer const& Map::getLayer(size_t index) const
 {
     return layers_[index];
 }
@@ -302,7 +302,7 @@ boost::optional<color> const& Map::background() const
     return background_;
 }
 
-void Map::set_background(const color& c)
+void Map::set_background(color const& c)
 {
     background_ = c;
 }
@@ -426,7 +426,7 @@ void Map::zoom_all()
     }
 }
 
-void Map::zoom_to_box(const box2d<double> &box)
+void Map::zoom_to_box(box2d<double> const& box)
 {
     current_extent_=box;
     fixAspectRatio();
@@ -488,7 +488,7 @@ void Map::fixAspectRatio()
     }
 }
 
-const box2d<double>& Map::get_current_extent() const
+box2d<double> const& Map::get_current_extent() const
 {
     return current_extent_;
 }
