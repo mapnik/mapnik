@@ -252,10 +252,10 @@ occi_datasource::occi_datasource(parameters const& params)
                     case oracle::occi::OCCIBFLOAT:
                     case oracle::occi::OCCIDOUBLE:
                     case oracle::occi::OCCIBDOUBLE:
-                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                        break;
                     case oracle::occi::OCCINUMBER:
                     case oracle::occi::OCCI_SQLT_NUM:
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                        break;
                     case oracle::occi::OCCICHAR:
                     case oracle::occi::OCCISTRING:
                     case oracle::occi::OCCI_SQLT_AFC:

@@ -33,7 +33,7 @@
 
 namespace mapnik { namespace util {
 
-    void to_ds_type(mapnik::geometry_container const& paths,
+    static inline void to_ds_type(mapnik::geometry_container const& paths,
                     boost::optional<mapnik::datasource::geometry_t> & result)
     {
         if (paths.size() == 1)

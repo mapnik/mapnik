@@ -20,15 +20,16 @@
  *
  *****************************************************************************/
 
-#ifndef CHAR_INFO_HPP
-#define CHAR_INFO_HPP
+#ifndef MAPNIK_CHAR_INFO_HPP
+#define MAPNIK_CHAR_INFO_HPP
 
 #include <boost/shared_ptr.hpp>
 
 namespace mapnik {
 struct char_properties;
 
-class char_info {
+class char_info
+{
 public:
     char_info(unsigned c_, double width_, double ymax_, double ymin_, double line_height_)
         :  c(c_),
@@ -36,7 +37,7 @@ public:
            line_height(line_height_),
            ymin(ymin_),
            ymax(ymax_),
-           avg_height(ymax_-ymin_),
+           avg_height(ymax - ymin),
            format()
     {
     }
@@ -52,6 +53,8 @@ public:
     {
     }
 
+    double height() const { return ymax-ymin; }
+
     unsigned c;
     double width;
     double line_height;
@@ -59,7 +62,8 @@ public:
     double ymax;
     double avg_height;
     char_properties *format;
-    double height() const { return ymax-ymin; }
+
 };
 }
-#endif
+
+#endif //MAPNIK_CHAR_INFO_HPP

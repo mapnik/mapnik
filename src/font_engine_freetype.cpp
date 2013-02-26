@@ -61,7 +61,7 @@ freetype_engine::~freetype_engine()
 
 bool freetype_engine::is_font_file(std::string const& file_name)
 {
-    /** only accept files that will be matched by freetype2's `figurefiletype()` */
+    // only accept files that will be matched by freetype2's `figurefiletype()`
     std::string fn = file_name;
     std::transform(fn.begin(), fn.end(), fn.begin(), ::tolower);
     return boost::algorithm::ends_with(fn,std::string(".ttf")) ||
@@ -70,7 +70,7 @@ bool freetype_engine::is_font_file(std::string const& file_name)
         boost::algorithm::ends_with(fn,std::string(".pfa")) ||
         boost::algorithm::ends_with(fn,std::string(".pfb")) ||
         boost::algorithm::ends_with(fn,std::string(".ttc")) ||
-        /** Plus OSX custom ext */
+        // Plus OSX custom ext
         boost::algorithm::ends_with(fn,std::string(".dfont"));
 }
 
@@ -231,12 +231,13 @@ stroker_ptr freetype_engine::create_stroker()
     return stroker_ptr();
 }
 
-char_info font_face_set::character_dimensions(const unsigned c)
+char_info font_face_set::character_dimensions(unsigned int c)
 {
     //Check if char is already in cache
-    std::map<unsigned, char_info>::const_iterator itr;
-    itr = dimension_cache_.find(c);
-    if (itr != dimension_cache_.end()) {
+    typedef std::map<unsigned, char_info>::const_iterator iterator_type;
+    iterator_type itr = dimension_cache_.find(c);
+    if (itr != dimension_cache_.end())
+    {
         return itr->second;
     }
 
@@ -273,8 +274,8 @@ char_info font_face_set::character_dimensions(const unsigned c)
 
     unsigned tempx = face->glyph->advance.x >> 6;
 
-    char_info dim(c, tempx, glyph_bbox.yMax, glyph_bbox.yMin, face->size->metrics.height/64.0 /* >> 6 */);
-    dimension_cache_.insert(std::pair<unsigned, char_info>(c, dim));
+    char_info dim(c, tempx, glyph_bbox.yMax, glyph_bbox.yMin, face->size->metrics.height/64.0);
+    dimension_cache_.insert(std::make_pair(c, dim));
     return dim;
 }
 
@@ -351,12 +352,12 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
     bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
     bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
 
-    for (int i = 0; i < path.num_nodes(); i++)
+    for (int i = 0; i < path.num_nodes(); ++i)
     {
         char_info_ptr c;
         double x, y, angle;
 
-        path.vertex(&c, &x, &y, &angle);
+        path.vertex(c, x, y, angle);
 
         // TODO Enable when we have support for setting verbosity
         // MAPNIK_LOG_DEBUG(font_engine_freetype) << "text_renderer: prepare_glyphs="
@@ -436,7 +437,7 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
 }
 
 template <typename T>
-void text_renderer<T>::render(pixel_position pos)
+void text_renderer<T>::render(pixel_position const& pos)
 {
     FT_Error  error;
     FT_Vector start;
@@ -466,7 +467,7 @@ void text_renderer<T>::render(pixel_position pos)
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
                 composite_bitmap(pixmap_, &bit->bitmap, itr->properties->halo_fill.rgba(),
                                  bit->left,
-                                 height - bit->top, 
+                                 height - bit->top,
                                  itr->properties->text_opacity,
                                  comp_op_
                     );
@@ -488,10 +489,10 @@ void text_renderer<T>::render(pixel_position pos)
             //render_bitmap(&bit->bitmap, itr->properties->fill.rgba(),
             //              bit->left,
             //              height - bit->top, itr->properties->text_opacity);
-            
+
             composite_bitmap(pixmap_, &bit->bitmap, itr->properties->fill.rgba(),
                              bit->left,
-                             height - bit->top, 
+                             height - bit->top,
                              itr->properties->text_opacity,
                              comp_op_
                 );
@@ -501,7 +502,7 @@ void text_renderer<T>::render(pixel_position pos)
 
 
 template <typename T>
-void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_radius)
+void text_renderer<T>::render_id(int feature_id, pixel_position const& pos, double min_radius)
 {
     FT_Error  error;
     FT_Vector start;
@@ -540,11 +541,11 @@ void text_renderer<T>::render_id(int feature_id, pixel_position pos, double min_
 boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-template void text_renderer<image_32>::render(pixel_position);
+template void text_renderer<image_32>::render(pixel_position const&);
 template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path const&);
 
-template void text_renderer<grid>::render_id(int, pixel_position, double );
+template void text_renderer<grid>::render_id(int, pixel_position const& , double );
 template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path const& );
 }
