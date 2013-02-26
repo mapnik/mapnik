@@ -357,7 +357,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
         char_info_ptr c;
         double x, y, angle;
 
-        path.vertex(&c, &x, &y, &angle);
+        path.vertex(c, x, y, angle);
 
         // TODO Enable when we have support for setting verbosity
         // MAPNIK_LOG_DEBUG(font_engine_freetype) << "text_renderer: prepare_glyphs="

@@ -140,12 +140,12 @@ class text_path : mapnik::noncopyable
 
         ~character_node() {}
 
-        void vertex(char_info_ptr *c_, double *x_, double *y_, double *angle_) const
+        void vertex(char_info_ptr & c_, double & x_, double  & y_, double & angle_) const
         {
-            *c_ = c;
-            *x_ = pos.x;
-            *y_ = pos.y;
-            *angle_ = angle;
+            c_ = c;
+            x_ = pos.x;
+            y_ = pos.y;
+            angle_ = angle;
         }
     };
 
@@ -172,7 +172,7 @@ public:
     }
 
     /** Return node. Always returns a new node. Has no way to report that there are no more nodes. */
-    void vertex(char_info_ptr *c, double *x, double *y, double *angle) const
+    void vertex(char_info_ptr & c, double & x, double & y, double & angle) const
     {
         nodes_[itr_++].vertex(c, x, y, angle);
     }
