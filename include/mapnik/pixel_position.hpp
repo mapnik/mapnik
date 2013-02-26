@@ -22,7 +22,7 @@
 #ifndef MAPNIK_PIXEL_POSITION_HPP
 #define MAPNIK_PIXEL_POSITION_HPP
 
-/** Store a pixel position. */
+// Store a pixel position.
 struct pixel_position
 {
     double x;
