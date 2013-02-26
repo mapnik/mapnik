@@ -70,8 +70,8 @@ public:
     // create with external placement detector, possibly non-empty
     agg_renderer(Map const &m, T & pixmap, boost::shared_ptr<label_collision_detector4> detector,
                  double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
-    // create with mapnik.request object that holds request-specific stuff
-    agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0);
+    // pass in mapnik::request object to provide the mutable things per render
+    agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~agg_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
