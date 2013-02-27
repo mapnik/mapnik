@@ -83,6 +83,8 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         agg_blur_filter(_val)
         |
         hsla_filter(_val)
+        |
+        colorize_alpha_filter(_val)
         ;
 
     agg_blur_filter = lit("agg-stack-blur")[_a = 1, _b = 1]
@@ -92,11 +94,18 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         [push_back(_r1,construct<mapnik::filter::agg_stack_blur>(_a,_b))]
         ;
 
-    hsla_filter = (lit("hsla") >> lit('(') >> string_arg[_a = _1] >> lit(')'))
+    hsla_filter = lit("hsla") >> lit('(') >> string_arg(')')[_a = _1] >> lit(')')
         [push_back(_r1,construct<mapnik::filter::hsla>(_a))]
         ;
 
-    string_arg = +~char_(')');
+    colorize_alpha_filter = lit("colorize-alpha")
+        >> lit('(')
+        >> css_color_[_a = _1] >> lit(',')
+        >> css_color_[_b = _1] >> lit(')')
+        [push_back(_r1,construct<mapnik::filter::colorize_alpha>(_a,_b))]
+        ;
+
+    string_arg = + (char_ - lit(_r1));
     no_args = -(lit('(') >> lit(')'));
 }
 

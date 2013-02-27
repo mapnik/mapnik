@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-
+#include <mapnik/color.hpp>
 // boost
 #include <boost/variant/variant_fwd.hpp>
 
@@ -61,6 +61,16 @@ struct hsla
     std::string tinter;
 };
 
+
+
+struct colorize_alpha
+{
+    colorize_alpha(mapnik::color const& c0, mapnik::color const& c1)
+    {
+        //do work
+    }
+};
+
 typedef boost::variant<filter::blur,
                        filter::gray,
                        filter::agg_stack_blur,
@@ -71,7 +81,8 @@ typedef boost::variant<filter::blur,
                        filter::x_gradient,
                        filter::y_gradient,
                        filter::invert,
-                       filter::hsla> filter_type;
+                       filter::hsla,
+                       filter::colorize_alpha> filter_type;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
 {
