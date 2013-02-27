@@ -55,6 +55,13 @@ struct agg_stack_blur
     unsigned ry;
 };
 
+struct hsla
+{
+    hsla(std::string const& tinter)
+        : tinter_(tinter) {}
+    std::string tinter_;
+};
+
 typedef boost::variant<filter::blur,
                        filter::gray,
                        filter::agg_stack_blur,
