@@ -62,23 +62,23 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
 #endif
 
     filter =
-        lit("emboss")[push_back(_val,construct<mapnik::filter::emboss>())]
+        lit("emboss") >> no_args [push_back(_val,construct<mapnik::filter::emboss>())]
         |
-        lit("blur")[push_back(_val,construct<mapnik::filter::blur>())]
+        lit("blur") >> no_args [push_back(_val,construct<mapnik::filter::blur>())]
         |
-        lit("gray")[push_back(_val,construct<mapnik::filter::gray>())]
+        lit("gray") >> no_args [push_back(_val,construct<mapnik::filter::gray>())]
         |
-        lit("edge-detect")[push_back(_val,construct<mapnik::filter::edge_detect>())]
+        lit("edge-detect") >> no_args [push_back(_val,construct<mapnik::filter::edge_detect>())]
         |
-        lit("sobel")[push_back(_val,construct<mapnik::filter::sobel>())]
+        lit("sobel") >> no_args [push_back(_val,construct<mapnik::filter::sobel>())]
         |
-        lit("sharpen")[push_back(_val,construct<mapnik::filter::sharpen>())]
+        lit("sharpen") >> no_args [push_back(_val,construct<mapnik::filter::sharpen>())]
         |
-        lit("x-gradient")[push_back(_val,construct<mapnik::filter::x_gradient>())]
+        lit("x-gradient") >> no_args [push_back(_val,construct<mapnik::filter::x_gradient>())]
         |
-        lit("y-gradient")[push_back(_val,construct<mapnik::filter::y_gradient>())]
+        lit("y-gradient") >> no_args [push_back(_val,construct<mapnik::filter::y_gradient>())]
         |
-        lit("invert")[push_back(_val,construct<mapnik::filter::invert>())]
+        lit("invert") >> no_args [push_back(_val,construct<mapnik::filter::invert>())]
         |
         agg_blur_filter(_val)
         |
@@ -98,6 +98,7 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         ;
 
     string_arg = +~char_(')');
+    no_args = -(lit('(') >> lit(')'));
 }
 
 template struct mapnik::image_filter_grammar<std::string::const_iterator,std::vector<mapnik::filter::filter_type> >;

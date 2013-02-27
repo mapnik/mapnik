@@ -43,6 +43,7 @@ struct image_filter_grammar :
     qi::rule<Iterator, qi::locals<int,int>, void(ContType&), qi::ascii::space_type> agg_blur_filter;
     qi::rule<Iterator, qi::locals<std::string>, void(ContType&), qi::ascii::space_type> hsla_filter;
     qi::rule<Iterator, std::string(), qi::ascii::space_type> string_arg;
+    qi::rule<Iterator, qi::ascii::space_type> no_args;
     qi::uint_parser< unsigned, 10, 1, 3 > radius_;
 };
 
