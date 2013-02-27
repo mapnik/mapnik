@@ -30,7 +30,6 @@
 #include <boost/variant/variant_fwd.hpp>
 
 // stl
-#include <iostream>
 #include <vector>
 #include <ostream>
 #include <iterator>  // for std::back_insert_iterator
@@ -71,7 +70,8 @@ typedef boost::variant<filter::blur,
                        filter::sobel,
                        filter::x_gradient,
                        filter::y_gradient,
-                       filter::invert> filter_type;
+                       filter::invert,
+                       filter::hsla> filter_type;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
 {

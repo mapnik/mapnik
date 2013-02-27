@@ -449,11 +449,11 @@ void apply_filter(Src & src, hsla const& op)
                     double s2 = tint.s0 + (s * (tint.s1 - tint.s0));
                     double l2 = tint.l0 + (l * (tint.l1 - tint.l0));
                     if (h2 > 1) h2 = 1;
-                    if (h2 < 0) h2 = 0;
+                    else if (h2 < 0) h2 = 0;
                     if (s2 > 1) s2 = 1;
-                    if (s2 < 0) s2 = 0;
+                    else if (s2 < 0) s2 = 0;
                     if (l2 > 1) l2 = 1;
-                    if (l2 < 0) l2 = 0;
+                    else if (l2 < 0) l2 = 0;
                     hsl2rgb(h2,s2,l2,r,g,b);
                     // premultiply
                     // we only work with premultiplied source,
