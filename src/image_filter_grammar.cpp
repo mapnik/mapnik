@@ -85,11 +85,10 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         hsla_filter(_val)
         ;
 
-    agg_blur_filter = (lit("agg-stack-blur")[_a = 1, _b = 1]
-        >> -( lit('(') >> radius_[_a = _1]
-              >> lit(',')
-              >> radius_[_b = _1]
-              >> lit(')')))
+    agg_blur_filter = lit("agg-stack-blur")[_a = 1, _b = 1]
+        >> -( lit('(') >> -( radius_[_a = _1][_b = _1]
+                             >> -(lit(',') >> radius_[_b = _1]))
+              >> lit(')'))
         [push_back(_r1,construct<mapnik::filter::agg_stack_blur>(_a,_b))]
         ;
 
