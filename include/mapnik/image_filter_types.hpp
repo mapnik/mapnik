@@ -75,7 +75,7 @@ inline std::ostream& operator<< (std::ostream& os, gray)
 
 inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
 {
-    os << "agg-stack-blur:" << filter.rx << ',' << filter.ry;
+    os << "agg-stack-blur(" << filter.rx << ',' << filter.ry << ')';
     return os;
 }
 
