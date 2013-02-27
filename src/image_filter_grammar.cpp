@@ -44,8 +44,11 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
     using qi::_1;
     using qi::_a;
     using qi::_b;
+    using qi::_r1;
     using qi::eps;
     using qi::char_;
+    using qi::lexeme;
+    using boost::spirit::ascii::string;
     using phoenix::push_back;
     using phoenix::construct;
 
@@ -75,15 +78,26 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         |
         lit("y-gradient")[push_back(_val,construct<mapnik::filter::y_gradient>())]
         |
-        (lit("agg-stack-blur")[_a = 1, _b = 1]
-         >> -( lit('(') >> radius_[_a = _1]
-               >> lit(',')
-               >> radius_[_b = _1]
-               >> lit(')'))
-         [push_back(_val,construct<mapnik::filter::agg_stack_blur>(_a,_b))])
-        |
         lit("invert")[push_back(_val,construct<mapnik::filter::invert>())]
+        |
+        agg_blur_filter(_val)
+        |
+        hsla_filter(_val)
         ;
+
+    agg_blur_filter = (lit("agg-stack-blur")[_a = 1, _b = 1]
+        >> -( lit('(') >> radius_[_a = _1]
+              >> lit(',')
+              >> radius_[_b = _1]
+              >> lit(')')))
+        [push_back(_r1,construct<mapnik::filter::agg_stack_blur>(_a,_b))]
+        ;
+
+    hsla_filter = (lit("hsla") >> lit('(') >> string_arg[_a = _1] >> lit(')'))
+        [push_back(_r1,construct<mapnik::filter::hsla>(_a))]
+        ;
+
+    string_arg = +~char_(')');
 }
 
 template struct mapnik::image_filter_grammar<std::string::const_iterator,std::vector<mapnik::filter::filter_type> >;
