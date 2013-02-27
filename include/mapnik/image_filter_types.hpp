@@ -56,9 +56,9 @@ struct agg_stack_blur
 
 struct hsla
 {
-    hsla(std::string const& tinter)
-        : tinter_(tinter) {}
-    std::string tinter_;
+    hsla(std::string const& tint_string)
+        : tinter(tint_string) {}
+    std::string tinter;
 };
 
 typedef boost::variant<filter::blur,
@@ -87,7 +87,13 @@ inline std::ostream& operator<< (std::ostream& os, gray)
 
 inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
 {
-    os << "agg-stack-blur:" << filter.rx << ',' << filter.ry;
+    os << "agg-stack-blur(" << filter.rx << ',' << filter.ry << ')';
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, hsla const& filter)
+{
+    os << "hsla(" << filter.tinter << ')';
     return os;
 }
 
