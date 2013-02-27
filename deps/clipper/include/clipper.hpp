@@ -1,8 +1,8 @@
 /*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
-* Version   :  5.1.0                                                           *
-* Date      :  1 February 2013                                                 *
+* Version   :  5.1.3                                                           *
+* Date      :  27 February 2013                                                *
 * Website   :  http://www.angusj.com                                           *
 * Copyright :  Angus Johnson 2010-2013                                         *
 *                                                                              *
@@ -71,40 +71,42 @@ std::ostream& operator <<(std::ostream &s, Polygons &p);
 class PolyNode;
 typedef std::vector< PolyNode* > PolyNodes;
 
-class PolyNode
-{
+class PolyNode 
+{ 
 public:
+    PolyNode();
     Polygon Contour;
     PolyNodes Childs;
     PolyNode* Parent;
-    PolyNode* GetNext();
-    bool IsHole();
-    int ChildCount();
+    PolyNode* GetNext() const;
+    bool IsHole() const;
+    int ChildCount() const;
 private:
-    PolyNode* GetNextSiblingUp();
+    PolyNode* GetNextSiblingUp() const;
     unsigned Index; //node index in Parent.Childs
     void AddChild(PolyNode& child);
     friend class Clipper; //to access Index
 };
 
 class PolyTree: public PolyNode
-{
+{ 
 public:
     ~PolyTree(){Clear();};
-    PolyNode* GetFirst();
+    PolyNode* GetFirst() const;
     void Clear();
-    int Total();
+    int Total() const;
 private:
     PolyNodes AllNodes;
     friend class Clipper; //to access AllNodes
 };
-
+        
 enum JoinType { jtSquare, jtRound, jtMiter };
 
 bool Orientation(const Polygon &poly);
 double Area(const Polygon &poly);
+
 void OffsetPolygons(const Polygons &in_polys, Polygons &out_polys,
-  double delta, JoinType jointype = jtSquare, double MiterLimit = 2, bool AutoFix = true);
+  double delta, JoinType jointype = jtSquare, double limit = 0, bool autoFix = true);
 
 void SimplifyPolygon(const Polygon &in_poly, Polygons &out_polys, PolyFillType fillType = pftEvenOdd);
 void SimplifyPolygons(const Polygons &in_polys, Polygons &out_polys, PolyFillType fillType = pftEvenOdd);
@@ -262,7 +264,7 @@ private:
   PolyFillType     m_ClipFillType;
   PolyFillType     m_SubjFillType;
   bool             m_ReverseOutput;
-  bool             m_UsingPolyTree;
+  bool             m_UsingPolyTree; 
   void DisposeScanbeamList();
   void SetWindingCount(TEdge& edge);
   bool IsEvenOddFillType(const TEdge& edge) const;
@@ -304,7 +306,7 @@ private:
   void BuildResult2(PolyTree& polytree);
   void SetHoleState(TEdge *e, OutRec *OutRec);
   void DisposeIntersectNodes();
-  bool FixupIntersections();
+  bool FixupIntersectionOrder();
   void FixupOutPolygon(OutRec &outRec);
   bool IsHole(TEdge *e);
   void FixHoleLinkage(OutRec &outRec);
@@ -336,3 +338,5 @@ class clipperException : public std::exception
 } //ClipperLib namespace
 
 #endif //clipper_hpp
+
+
