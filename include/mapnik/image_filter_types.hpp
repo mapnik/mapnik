@@ -27,8 +27,8 @@
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 // boost
+#include <boost/variant.hpp>
 #include <boost/variant/variant_fwd.hpp>
-
 // stl
 #include <vector>
 #include <ostream>
@@ -56,18 +56,20 @@ struct agg_stack_blur
 
 struct hsla
 {
-    hsla(std::string const& tint_string)
-        : tinter(tint_string) {}
-    std::string tinter;
+    hsla(double h0, double h1,
+         double s0, double s1,
+         double l0, double l1,
+         double a0, double a1)
+    {
+        // TODO: implement me!
+    }
 };
-
-
 
 struct colorize_alpha
 {
     colorize_alpha(mapnik::color const& c0, mapnik::color const& c1)
     {
-        //do work
+         // TODO: implement me!
     }
 };
 
@@ -104,7 +106,7 @@ inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
 
 inline std::ostream& operator<< (std::ostream& os, hsla const& filter)
 {
-    os << "hsla(" << filter.tinter << ')';
+    os << "hsla(" << "TODO" << ')';
     return os;
 }
 
