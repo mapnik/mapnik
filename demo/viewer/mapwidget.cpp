@@ -20,6 +20,8 @@
 
 #include <QtGui>
 
+#define BOOST_CHRONO_HEADER_ONLY
+#include <boost/timer/timer.hpp>
 #include <boost/bind.hpp>
 
 #include <mapnik/agg_renderer.hpp>
@@ -502,7 +504,10 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
     try
     {
-        ren.apply();
+        {
+            boost::timer::auto_cpu_timer t;
+            ren.apply();
+        }
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
