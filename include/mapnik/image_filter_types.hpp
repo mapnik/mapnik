@@ -56,13 +56,46 @@ struct agg_stack_blur
 
 struct hsla
 {
-    hsla(double h0, double h1,
-         double s0, double s1,
-         double l0, double l1,
-         double a0, double a1)
-    {
-        // TODO: implement me!
+    hsla(double _h0, double _h1,
+         double _s0, double _s1,
+         double _l0, double _l1,
+         double _a0, double _a1) :
+      h0(_h0),
+      h1(_h1),
+      s0(_s0),
+      s1(_s1),
+      l0(_l0),
+      l1(_l1),
+      a0(_a0),
+      a1(_a1) {}
+    inline bool is_identity() const {
+        return (h0 == 0 &&
+                h1 == 1 &&
+                s0 == 0 &&
+                s1 == 1 &&
+                l0 == 0 &&
+                l1 == 1);
     }
+    inline bool is_alpha_identity() const {
+        return (a0 == 0 &&
+                a1 == 1);
+    }
+    std::string to_string() const {
+        std::ostringstream s;
+        s << h0 << "x" << h1 << ";"
+          << s0 << "x" << s1 << ";"
+          << l0 << "x" << l1 << ";"
+          << a0 << "x" << a1;
+        return s.str();
+    }
+    double h0;
+    double h1;
+    double s0;
+    double s1;
+    double l0;
+    double l1;
+    double a0;
+    double a1;
 };
 
 struct colorize_alpha
@@ -106,7 +139,10 @@ inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
 
 inline std::ostream& operator<< (std::ostream& os, hsla const& filter)
 {
-    os << "hsla(" << "TODO" << ')';
+    os << "hsla(" << filter.h0 << 'x' << filter.h1 << ':'
+                  << filter.s0 << 'x' << filter.s1 << ':'
+                  << filter.l0 << 'x' << filter.l1 << ':'
+                  << filter.a0 << 'x' << filter.a1 << ')';
     return os;
 }
 

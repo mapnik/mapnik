@@ -27,41 +27,6 @@
 
 namespace mapnik {
 
-struct Tinter {
-    double h0;
-    double h1;
-    double s0;
-    double s1;
-    double l0;
-    double l1;
-    double a0;
-    double a1;
-
-    Tinter() :
-      h0(0),
-      h1(1),
-      s0(0),
-      s1(1),
-      l0(0),
-      l1(1),
-      a0(0),
-      a1(1) { }
-
-    bool is_identity() {
-        return (h0 == 0 &&
-                h1 == 1 &&
-                s0 == 0 &&
-                s1 == 1 &&
-                l0 == 0 &&
-                l1 == 1);
-    }
-
-    bool is_alpha_identity() {
-        return (a0 == 0 &&
-                a1 == 1);
-    }
-};
-
 static inline void rgb2hsl(unsigned char red, unsigned char green, unsigned char blue,
              double & h, double & s, double & l) {
     double r = red/255.0;
