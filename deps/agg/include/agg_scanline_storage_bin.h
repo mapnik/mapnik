@@ -25,9 +25,9 @@
 #ifndef AGG_SCANLINE_STORAGE_BIN_INCLUDED
 #define AGG_SCANLINE_STORAGE_BIN_INCLUDED
 
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cstring>
+#include <cstdlib>
+#include <cmath>
 #include "agg_array.h"
 
 

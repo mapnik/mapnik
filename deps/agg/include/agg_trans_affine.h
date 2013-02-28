@@ -19,7 +19,7 @@
 #ifndef AGG_TRANS_AFFINE_INCLUDED
 #define AGG_TRANS_AFFINE_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 namespace agg

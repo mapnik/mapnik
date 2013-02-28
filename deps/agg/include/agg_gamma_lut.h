@@ -16,7 +16,7 @@
 #ifndef AGG_GAMMA_LUT_INCLUDED
 #define AGG_GAMMA_LUT_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 namespace agg

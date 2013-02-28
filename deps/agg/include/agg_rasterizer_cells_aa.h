@@ -29,7 +29,7 @@
 #ifndef AGG_RASTERIZER_CELLS_AA_INCLUDED
 #define AGG_RASTERIZER_CELLS_AA_INCLUDED
 
-#include <string.h>
+#include <cstring>
 #include <cstdlib>
 #include <limits>
 #include "agg_math.h"
