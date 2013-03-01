@@ -111,21 +111,21 @@ void ogr_converter::convert_polygon(OGRPolygon* geom, feature_ptr feature)
     std::auto_ptr<geometry_type> poly(new geometry_type(mapnik::Polygon));
 
     poly->move_to(exterior->getX(0), exterior->getY(0));
-    for (int i = 1; i < num_points - 1; ++i)
+    for (int i = 1; i < num_points; ++i)
     {
         poly->line_to(exterior->getX(i), exterior->getY(i));
     }
-    poly->close(exterior->getX(num_points-1), exterior->getY(num_points-1));
+    poly->close_path();
     for (int r = 0; r < num_interior; ++r)
     {
         OGRLinearRing* interior = geom->getInteriorRing(r);
         num_points = interior->getNumPoints();
         poly->move_to(interior->getX(0), interior->getY(0));
-        for (int i = 1; i < num_points - 1; ++i)
+        for (int i = 1; i < num_points; ++i)
         {
             poly->line_to(interior->getX(i), interior->getY(i));
         }
-        poly->close(interior->getX(num_points-1), interior->getY(num_points-1));
+        poly->close_path();
     }
     feature->paths().push_back(poly);
 }

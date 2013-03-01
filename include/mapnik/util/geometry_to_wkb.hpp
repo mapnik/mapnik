@@ -181,17 +181,15 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
         if (command == SEG_MOVETO)
         {
             rings.push_back(new linear_ring); // start new loop
-            start_x = x;
-            start_y = y;
+            rings.back().push_back(std::make_pair(x,y));
             size += 4; // num_points
+            size += 2 * 8; // point
         }
-        else if (command == SEG_CLOSE)
+        else if (command == SEG_LINETO)
         {
-            x = start_x;
-            y = start_y;
+            rings.back().push_back(std::make_pair(x,y));
+            size += 2 * 8; // point
         }
-        rings.back().push_back(std::make_pair(x,y));
-        size += 2 * 8; // point
     }
     unsigned num_rings = rings.size();
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);

@@ -245,6 +245,7 @@ double path_length(PathType & path)
     double length = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         length += distance(x0,y0,x1,y1);
         x0 = x1;
         y0 = y1;
@@ -268,6 +269,7 @@ bool middle_point(PathType & path, double & x, double & y)
     double dist = 0.0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double seg_length = distance(x0, y0, x1, y1);
 
         if ( dist + seg_length >= mid_length)
@@ -307,6 +309,7 @@ bool centroid(PathType & path, double & x, double & y)
     unsigned count = 1;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double dx0 = x0 - start_x;
         double dy0 = y0 - start_y;
         double dx1 = x1 - start_x;
@@ -370,6 +373,7 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
 
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double dx0 = x0 - start_x;
         double dy0 = y0 - start_y;
         double dx1 = x1 - start_x;

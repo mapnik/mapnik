@@ -104,6 +104,10 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
                 }
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close_path();
+                }
                 x0 = x;
                 y0 = y;
             }
@@ -144,6 +148,11 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                 {
                     frame->line_to(x,y+height);
                     roof->line_to(x,y+height);
+                }
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close_path();
+                    roof->close_path();
                 }
             }
 
