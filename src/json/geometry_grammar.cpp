@@ -28,6 +28,11 @@
 
 // boost
 #include <boost/spirit/include/support_multi_pass.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <iostream>                     // for clog, endl, etc
+#include <string>                       // for string
 
 namespace mapnik { namespace json {
 
@@ -52,9 +57,9 @@ geometry_grammar<Iterator>::geometry_grammar()
     using qi::_pass;
     using qi::fail;
     using qi::on_error;
-    using phoenix::new_;
-    using phoenix::push_back;
-    using phoenix::construct;
+    using boost::phoenix::new_;
+    using boost::phoenix::push_back;
+    using boost::phoenix::construct;
    // Nabialek trick - FIXME: how to bind argument to dispatch rule?
     // geometry = lit("\"geometry\"")
     //    >> lit(':') >> lit('{')
@@ -144,11 +149,11 @@ geometry_grammar<Iterator>::geometry_grammar()
         (
             geometry
             , std::clog
-            << phoenix::val("Error! Expecting ")
+            << boost::phoenix::val("Error! Expecting ")
             << _4                               // what failed?
-            << phoenix::val(" here: \"")
+            << boost::phoenix::val(" here: \"")
             << construct<std::string>(_3, _2)   // iterators to error-pos, end
-            << phoenix::val("\"")
+            << boost::phoenix::val("\"")
             << std::endl
             );
 }

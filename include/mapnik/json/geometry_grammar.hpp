@@ -29,13 +29,11 @@
 
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
-namespace phoenix = boost::phoenix;
-namespace fusion = boost::fusion;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
