@@ -128,6 +128,30 @@ T box2d<T>::maxy() const
     return maxy_;
 }
 
+template<typename T>
+void box2d<T>::set_minx(T v)
+{
+    minx_ = v;
+}
+
+template<typename T>
+void box2d<T>::set_miny(T v)
+{
+    miny_ = v;
+}
+
+template<typename T>
+void box2d<T>::set_maxx(T v)
+{
+    maxx_ = v;
+}
+
+template<typename T>
+void box2d<T>::set_maxy(T v)
+{
+    maxy_ = v;
+}
+
 template <typename T>
 #if !defined(__SUNPRO_CC)
 inline
