@@ -69,7 +69,7 @@ private:
                              const bool is_point_geom);
 
     occi_connection_ptr conn_;
-    oracle::occi::ResultSet* rs_;
+    boost::shared_ptr<oracle::occi::ResultSet> rs_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     mapnik::value_integer feature_id_;
     mapnik::context_ptr ctx_;

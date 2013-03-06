@@ -77,7 +77,7 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
 
     try
     {
-        rs_ = conn_.execute_query(sqlstring, prefetch_rows);
+        rs_.reset(conn_.execute_query(sqlstring, prefetch_rows));
     }
     catch (SQLException &ex)
     {
@@ -91,9 +91,9 @@ occi_featureset::~occi_featureset()
 
 feature_ptr occi_featureset::next()
 {
-    if (rs_ && rs_->next())
+    if (rs_ != NULL && rs_->next())
     {
-        feature_ptr feature(feature_factory::create(ctx_,feature_id_));
+        feature_ptr feature(feature_factory::create(ctx_, feature_id_));
         ++feature_id_;
 
         if (use_wkb_)
@@ -101,13 +101,13 @@ feature_ptr occi_featureset::next()
             Blob blob = rs_->getBlob(1);
             blob.open(oracle::occi::OCCI_LOB_READONLY);
 
-            int size = blob.length();
+            unsigned int size = blob.length();
             if (buffer_.size() < size)
             {
                 buffer_.resize(size);
             }
 
-            oracle::occi::Stream* instream = blob.getStream(1,0);
+            oracle::occi::Stream* instream = blob.getStream(1, 0);
             instream->readBuffer(buffer_.data(), size);
             blob.closeStream(instream);
             blob.close();
