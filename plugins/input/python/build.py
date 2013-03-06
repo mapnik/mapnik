@@ -26,12 +26,7 @@ libraries = ['mapnik',env['BOOST_PYTHON_LIB'],boost_system,env['ICU_LIB_NAME']]
 # python plugin is used by a app in python using mapnik's python bindings
 # we explicitly link to libpython here so that this plugin
 # can be used from a pure C++ calling application or a different binding language
-python_link_flag = '-lpython%s' % env['PYTHON_VERSION']
-
-if env['PLATFORM'] == 'Darwin':
-    if env['PYTHON_DYNAMIC_LOOKUP']:
-        python_link_flag = '-undefined dynamic_lookup'
-    elif env['FRAMEWORK_PYTHON']:
+if env['PLATFORM'] == 'Darwin' and env['FRAMEWORK_PYTHON']:
         if env['FRAMEWORK_SEARCH_PATH']:
             python_link_flag = '-F%s -framework Python -Z' % env['FRAMEWORK_SEARCH_PATH']
         else:
@@ -42,6 +37,11 @@ if env['PLATFORM'] == 'Darwin':
                 python_link_flag = '-F/System/Library/Frameworks/ -framework Python -Z'
             else:
                 python_link_flag = '-F/ -framework Python'
+else:
+    # on linux the linkflags end up to early in the compile flags to work correctly
+    python_link_flag = ''
+    # so instead add to libraries
+    libraries.append('python%s' % env['PYTHON_VERSION'])
 
 if env['CUSTOM_LDFLAGS']:
     linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], python_link_flag)
