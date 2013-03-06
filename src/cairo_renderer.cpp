@@ -383,7 +383,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
                 }
-                else if (cm = SEG_CLOSE)
+                else if (cm == SEG_CLOSE)
                 {
                     frame->close_path();
                 }
