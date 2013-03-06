@@ -61,7 +61,8 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
                                  bool use_connection_pool,
                                  bool use_wkb,
                                  unsigned prefetch_rows)
-    : tr_(new transcoder(encoding)),
+    : rs_(NULL),
+      tr_(new transcoder(encoding)),
       feature_id_(1),
       ctx_(ctx),
       use_wkb_(use_wkb)
@@ -77,11 +78,13 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
 
     try
     {
-        rs_.reset(conn_.execute_query(sqlstring, prefetch_rows));
+        rs_ = conn_.execute_query(sqlstring, prefetch_rows);
     }
     catch (SQLException &ex)
     {
         MAPNIK_LOG_ERROR(occi) << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage();
+
+        rs_ = NULL;
     }
 }
 
