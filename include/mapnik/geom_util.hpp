@@ -425,6 +425,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
     unsigned count = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         ++count;
         if (command == SEG_MOVETO)
         {
@@ -472,6 +473,8 @@ bool interior_position(PathType & path, double & x, double & y)
     double y1 = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE)
+            continue;
         if (command != SEG_MOVETO)
         {
             // if the segments overlap
