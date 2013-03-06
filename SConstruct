@@ -666,8 +666,9 @@ def update_linux_project_files():
                 if f.endswith(".cpp") or f.endswith(".c"):
                     source_content.append("  ../%s \\" % os.path.join(root, f))
             for sd in subFolders:
-                headers_content, source_content = \
-                    iterate_dirs(headers_content, source_content, sd)
+                if sd != "uninstall-":
+                    headers_content, source_content = \
+                        iterate_dirs(headers_content, source_content, sd)
         return headers_content, source_content
 
     for d in directories:
