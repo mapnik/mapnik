@@ -72,11 +72,18 @@ files = [
     {'name': "tiff-alpha-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-broken-assoc-alpha-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-gradient-gdal", 'sizes':[(600,400)]},
-    {'name': "tiff-nodata-edge-gdal", 'sizes':[(600,400)]},
-    {'name': "tiff-opaque-edge-gdal", 'sizes':[(256,256)]},
-    {'name': "tiff-opaque-edge-gdal2", 'sizes':[(600,400)]},
-    {'name': "tiff-opaque-edge-raster2", 'sizes':[(600,400)]},
+    {'name': "tiff-nodata-edge-gdal", 'sizes':[(600,400),(969,793)]},
+    {'name': "tiff-opaque-edge-gdal", 'sizes':[(256,256),(969,793)]},
+    {'name': "tiff-opaque-edge-gdal2", 'sizes':[(600,400),(969,793)]},
+    {'name': "tiff-opaque-edge-raster2", 'sizes':[(600,400),(969,793)]},
     {'name': "tiff-resampling", 'sizes':[(600,400)]},
+    # https://github.com/mapnik/mapnik/issues/1622
+    {'name': "tiff-edge-alignment-gdal1", 'sizes':[(256,256),(255,257)],
+        'bbox':mapnik.Box2d(-13267022.12540147,4618019.500877209,-13247454.246160466,4637587.380118214)
+    },
+    {'name': "tiff-edge-alignment-gdal2", 'sizes':[(256,256),(255,257)],
+        'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
+    },
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
     #{'name': "tiff-alpha-raster", 'sizes':[(600,400)]},

@@ -198,8 +198,11 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
             // TODO - remove support for step != or add support for agg scaling with opacity
             double ratio = (1.0/step);
             image_data_32 target(ratio * data.width(), ratio * data.height());
-            mapnik::scale_image_agg<image_data_32>(target,data, SCALING_NEAR,
-                                                   scale_factor_, 0.0, 0.0, 1.0, ratio);
+            mapnik::scale_image_agg<image_data_32>(target,
+                                                   data,
+                                                   SCALING_NEAR,
+                                                   ratio,
+                                                   ratio);
             pixmap_.set_rectangle(feature.id(), target,
                                   boost::math::iround(pos.x - cx),
                                   boost::math::iround(pos.y - cy));
