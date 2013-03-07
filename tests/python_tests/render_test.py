@@ -189,7 +189,6 @@ def test_render_with_scale_factor():
         actual = mapnik.Image.open(expected_file)
         expected = mapnik.Image.open(expected_file)
         eq_(actual.tostring(),expected.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
-        im.save('./images/support/marker-text-line-scale-factor-%s.png' % size,'png8')
 
 if __name__ == "__main__":
     setup()
