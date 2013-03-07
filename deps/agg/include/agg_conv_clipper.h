@@ -48,6 +48,8 @@ private:
     ClipperLib::Clipper                                     m_clipper;
     clipper_PolyFillType                                    m_subjFillType;
     clipper_PolyFillType                                    m_clipFillType;
+    double start_x_;
+    double start_y_;
 
     int Round(double val)
     {
@@ -67,7 +69,9 @@ public:
         m_contour(-1),
         m_operation(op),
         m_subjFillType(subjFillType),
-        m_clipFillType(clipFillType)
+        m_clipFillType(clipFillType),
+        start_x_(0),
+        start_y_(0)
     {
         m_scaling_factor = std::max(std::min(scaling_factor, 6),0);
         m_scaling_factor = Round(std::pow((double)10, m_scaling_factor));
@@ -84,7 +88,9 @@ public:
         m_contour(-1),
         m_operation(op),
         m_subjFillType(subjFillType),
-        m_clipFillType(clipFillType)
+        m_clipFillType(clipFillType),
+        start_x_(0),
+        start_y_(0)
     {
         m_scaling_factor = std::max(std::min(scaling_factor, 6),0);
         m_scaling_factor = Round(std::pow((double)10, m_scaling_factor));
@@ -276,19 +282,21 @@ bool conv_clipper<VSA, VSB>::next_vertex(double *x, double *y)
 template<class VSA, class VSB>
 unsigned conv_clipper<VSA, VSB>::vertex(double *x, double *y)
 {
-    switch (m_status)
-    {
-    case status_move_to:
+    if(  m_status == status_move_to )
     {
         if( next_contour() )
         {
-            if ( next_vertex( x, y ) )
+            if(  next_vertex( x, y ) )
             {
                 m_status = status_line_to;
+                start_x_ = *x;
+                start_y_ = *y;
                 return path_cmd_move_to;
             }
             else
             {
+                *x = start_x_;
+                *y = start_y_;
                 m_status = status_close_path;
                 return path_cmd_line_to;
             }
@@ -296,18 +304,18 @@ unsigned conv_clipper<VSA, VSB>::vertex(double *x, double *y)
         else
             return path_cmd_stop;
     }
-    case status_close_path:
+    else if ( m_status == status_close_path)
     {
         *x = 0;
         *y = 0;
         m_status = status_move_to;
         return path_cmd_end_poly | path_flags_close;
     }
-    case status_stop:
+    else if (m_status == status_stop)
     {
         return path_cmd_stop;
     }
-    default:
+    else
     {
         if( next_vertex( x, y ) )
         {
@@ -315,10 +323,11 @@ unsigned conv_clipper<VSA, VSB>::vertex(double *x, double *y)
         }
         else
         {
+            *x = start_x_;
+            *y = start_y_;
             m_status = status_close_path;
-            return path_cmd_line_to;
+            return path_cmd_line_to;//path_cmd_end_poly | path_flags_close;
         }
-    }
     }
 }
 //------------------------------------------------------------------------------
