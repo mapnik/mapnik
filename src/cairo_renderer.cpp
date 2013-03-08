@@ -891,10 +891,10 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
         box2d<double> ext = t_.forward(target_ext);
-        int start_x = static_cast<int>(ext.minx());
-        int start_y = static_cast<int>(ext.miny());
-        int end_x = static_cast<int>(std::ceil(ext.maxx()));
-        int end_y = static_cast<int>(std::ceil(ext.maxy()));
+        int start_x = static_cast<int>(std::floor(ext.minx()+.5));
+        int start_y = static_cast<int>(std::floor(ext.miny()+.5));
+        int end_x = static_cast<int>(std::floor(ext.maxx()+.5));
+        int end_y = static_cast<int>(std::floor(ext.maxy()+.5));
         int raster_width = end_x - start_x;
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)
@@ -911,7 +911,10 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
             }
             if (premultiply_source)
             {
-                agg::rendering_buffer buffer(source->data_.getBytes(),source->data_.width(),source->data_.height(),source->data_.width() * 4);
+                agg::rendering_buffer buffer(source->data_.getBytes(),
+                                             source->data_.width(),
+                                             source->data_.height(),
+                                             source->data_.width() * 4);
                 agg::pixfmt_rgba32 pixf(buffer);
                 pixf.premultiply();
             }
@@ -929,8 +932,12 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
             {
                 if (scaling_method == SCALING_BILINEAR8)
                 {
-                    scale_image_bilinear8<image_data_32>(target.data_,source->data_, 0.0, 0.0);
-                } else
+                    scale_image_bilinear8<image_data_32>(target.data_,
+                                                         source->data_,
+                                                         0.0,
+                                                         0.0);
+                }
+                else
                 {
                     double image_ratio_x = ext.width() / source->data_.width();
                     double image_ratio_y = ext.height() / source->data_.height();
