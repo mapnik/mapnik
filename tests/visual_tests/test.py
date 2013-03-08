@@ -92,7 +92,7 @@ files = [
     #{'name': "tiff-opaque-edge-raster", 'sizes':[(256,256)]},
     ]
 
-def report(diff,quiet=False,threshold=0):
+def report(diff,threshold,quiet=False):
     if diff > threshold:
         if quiet:
             sys.stderr.write('\x1b[31m.\x1b[0m')
@@ -104,7 +104,7 @@ def report(diff,quiet=False,threshold=0):
         else:
             print '\x1b[32m✓\x1b[0m'
 
-def render(config, width, height, bbox, quiet=False):
+def render(config, width, height, bbox, quiet=False, overwrite_failures=False):
     filename = config['name']
     m = mapnik.Map(width, height)
     
@@ -133,7 +133,11 @@ def render(config, width, height, bbox, quiet=False):
                 fail(actual_agg,expected,None)
             else:
                 diff = compare(actual_agg, expected, threshold=1, alpha=True)
-                report(diff,quiet)
+                threshold = 0
+                if overwrite_failures and diff > threshold:
+                    fail(actual_agg,expected,None)
+                else:
+                    report(diff,threshold,quiet)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
             fail(actual_agg,expected,str(e.message))
@@ -153,9 +157,12 @@ def render(config, width, height, bbox, quiet=False):
                 fail(actual_cairo,expected_cairo,None)
             else:
                 # cairo and agg differ in alpha for reasons unknown, so don't test it for now
-                diff_threshold = 1
-                diff = compare(actual_cairo, expected_cairo, threshold=diff_threshold, alpha=False)
-                report(diff,quiet,threshold=diff_threshold)
+                threshold = 0
+                diff = compare(actual_cairo, expected_cairo, threshold=threshold, alpha=False)
+                if overwrite_failures and diff > threshold:
+                    fail(actual_cairo,expected_cairo,None)
+                else:
+                    report(diff,threshold,quiet)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
             fail(actual_cairo,expected_cairo,str(e.message))
@@ -175,8 +182,12 @@ def render(config, width, height, bbox, quiet=False):
                 # generate it on the fly
                 fail(actual_grid,expected_grid,None)
             else:
-                diff = compare_grids(actual_grid, expected_grid, threshold=1, alpha=False)
-                report(diff,quiet)
+                threshold = 1
+                diff = compare_grids(actual_grid, expected_grid, threshold=threshold, alpha=False)
+                if overwrite_failures and diff > threshold:
+                    fail(actual_grid,expected_grid,None)
+                else:
+                    report(diff,threshold,quiet)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
             fail(actual_grid,expected,str(e.message))
@@ -188,6 +199,12 @@ if __name__ == "__main__":
        sys.argv.remove('-q')
     else:
        quiet = False
+
+    if '--overwrite' in sys.argv:
+       overwrite_failures = True
+       sys.argv.remove('--overwrite')
+    else:
+       overwrite_failures = False
 
     if len(sys.argv) == 2:
         files = [{"name": sys.argv[1], "sizes": sizes_few_square}]
@@ -204,7 +221,7 @@ if __name__ == "__main__":
             config = dict(defaults)
             config.update(f)
             for size in config['sizes']:
-                m = render(config, size[0], size[1], config.get('bbox'), quiet=quiet)
+                m = render(config, size[0], size[1], config.get('bbox'), quiet=quiet, overwrite_failures=overwrite_failures)
             mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
 
         summary(generate=True)
