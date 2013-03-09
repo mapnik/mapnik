@@ -167,7 +167,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
                 else
                 {
                     box2d<double> const& bbox = (*mark)->bounding_box();
-                    setup_transform_scaling(tr, bbox, feature, sym);
+                    setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, sym);
                     evaluate_transform(tr, feature, sym.get_image_transform());
                     // TODO - clamping to >= 4 pixels
                     coord2d center = bbox.center();
@@ -210,7 +210,7 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
             else // raster markers
             {
                 box2d<double> const& bbox = (*mark)->bounding_box();
-                setup_transform_scaling(tr, bbox, feature, sym);
+                setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, sym);
                 evaluate_transform(tr, feature, sym.get_image_transform());
                 // - clamp sizes to > 4 pixels of interactivity
                 coord2d center = bbox.center();

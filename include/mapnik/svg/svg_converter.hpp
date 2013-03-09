@@ -308,6 +308,22 @@ public:
         agg::bounding_rect(trans, *this, 0, attributes_.size(), x1, y1, x2, y2);
     }
 
+    void set_dimensions(double w, double h)
+    {
+        svg_width_ = w;
+        svg_height_ = h;
+    }
+
+    double width()
+    {
+        return svg_width_;
+    }
+
+    double height()
+    {
+        return svg_height_;
+    }
+
     VertexSource & storage()
     {
         return source_;
@@ -333,6 +349,8 @@ private:
     AttributeSource & attributes_;
     AttributeSource  attr_stack_;
     agg::trans_affine transform_;
+    double svg_width_;
+    double svg_height_;
 };
 
 

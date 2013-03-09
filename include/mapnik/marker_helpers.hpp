@@ -365,6 +365,8 @@ void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storag
     styled_svg.pop_attr();
     double lox,loy,hix,hiy;
     styled_svg.bounding_rect(&lox, &loy, &hix, &hiy);
+    styled_svg.set_dimensions(width,height);
+    marker_ellipse.set_dimensions(width,height);
     marker_ellipse.set_bounding_box(lox,loy,hix,hiy);
 }
 
@@ -419,7 +421,11 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
 }
 
 template <typename T>
-void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
+void setup_transform_scaling(agg::trans_affine & tr,
+                             double svg_width,
+                             double svg_height,
+                             mapnik::feature_impl const& feature,
+                             T const& sym)
 {
     double width = 0;
     double height = 0;
@@ -434,18 +440,18 @@ void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, 
 
     if (width > 0 && height > 0)
     {
-        double sx = width/bbox.width();
-        double sy = height/bbox.height();
+        double sx = width/svg_width;
+        double sy = height/svg_height;
         tr *= agg::trans_affine_scaling(sx,sy);
     }
     else if (width > 0)
     {
-        double sx = width/bbox.width();
+        double sx = width/svg_width;
         tr *= agg::trans_affine_scaling(sx);
     }
     else if (height > 0)
     {
-        double sy = height/bbox.height();
+        double sy = height/svg_height;
         tr *= agg::trans_affine_scaling(sy);
     }
 }
