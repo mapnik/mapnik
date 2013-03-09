@@ -45,6 +45,7 @@
 
 namespace mapnik
 {
+
 freetype_engine::freetype_engine()
 {
     FT_Error error = FT_Init_FreeType( &library_ );
@@ -326,15 +327,124 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
     ubidi_close(bidi);
 }
 
+
 template <typename T>
-text_renderer<T>::text_renderer (pixmap_type & pixmap,
-                                 face_manager<freetype_engine> & font_manager,
-                                 stroker & s,
-                                 composite_mode_e comp_op,
-                                 double scale_factor)
+void composite_bitmap(T & pixmap,
+                      FT_Bitmap *bitmap,
+                      unsigned rgba,
+                      int x,
+                      int y,
+                      double opacity,
+                      composite_mode_e comp_op)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            unsigned gray=bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                pixmap.composite_pixel(comp_op, i, j, rgba, gray, opacity);
+            }
+        }
+    }
+}
+
+/*
+template <typename T>
+void render_bitmap(T & pixmap,
+                   FT_Bitmap *bitmap,
+                   unsigned rgba,
+                   int x,
+                   int y,
+                   double opacity)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            int gray=bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                pixmap_.blendPixel2(i, j, rgba, gray, opacity);
+            }
+        }
+    }
+}
+*/
+
+template <typename T>
+void render_halo(T & pixmap,
+                 FT_Bitmap *bitmap,
+                 unsigned rgba,
+                 int x,
+                 int y,
+                 int halo_radius,
+                 double opacity)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            int gray = bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                for (int n=-halo_radius; n <=halo_radius; ++n)
+                    for (int m=-halo_radius;m <= halo_radius; ++m)
+                        pixmap.blendPixel2(i+m,j+n,rgba,gray,opacity);
+            }
+        }
+    }
+}
+
+template <typename T>
+void render_halo_id(T & pixmap,
+                    FT_Bitmap *bitmap,
+                    mapnik::value_integer feature_id,
+                    int x,
+                    int y,
+                    int halo_radius)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            int gray = bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                for (int n=-halo_radius; n <=halo_radius; ++n)
+                    for (int m=-halo_radius;m <= halo_radius; ++m)
+                        pixmap.setPixel(i+m,j+n,feature_id);
+            }
+        }
+    }
+}
+
+template <typename T>
+text_renderer<T>::text_renderer(pixmap_type & pixmap,
+                                face_manager<freetype_engine> & font_manager,
+                                halo_rasterizer_e rasterizer,
+                                composite_mode_e comp_op,
+                                double scale_factor)
     : pixmap_(pixmap),
       font_manager_(font_manager),
-      stroker_(s),
+      rasterizer_(rasterizer),
       comp_op_(comp_op),
       scale_factor_(scale_factor) {}
 
@@ -417,26 +527,6 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
 }
 
 template <typename T>
-void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity, composite_mode_e comp_op)
-{
-    int x_max=x+bitmap->width;
-    int y_max=y+bitmap->rows;
-    int i,p,j,q;
-
-    for (i=x,p=0;i<x_max;++i,++p)
-    {
-        for (j=y,q=0;j<y_max;++j,++q)
-        {
-            unsigned gray=bitmap->buffer[q*bitmap->width+p];
-            if (gray)
-            {
-                pixmap.composite_pixel(comp_op, i, j, rgba, gray, opacity);
-            }
-        }
-    }
-}
-
-template <typename T>
 void text_renderer<T>::render(pixel_position const& pos)
 {
     FT_Error  error;
@@ -453,24 +543,43 @@ void text_renderer<T>::render(pixel_position const& pos)
         double halo_radius = itr->properties->halo_radius * scale_factor_;
         //make sure we've got reasonable values.
         if (halo_radius <= 0.0 || halo_radius > 1024.0) continue;
-        stroker_.init(halo_radius);
         FT_Glyph g;
         error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
             FT_Glyph_Transform(g,0,&start);
-            FT_Glyph_Stroke(&g,stroker_.get(),1);
-            error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
-            if ( ! error )
+            if (rasterizer_ == HALO_RASTERIZER_FULL)
             {
-
-                FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                composite_bitmap(pixmap_, &bit->bitmap, itr->properties->halo_fill.rgba(),
-                                 bit->left,
-                                 height - bit->top,
-                                 itr->properties->text_opacity,
-                                 comp_op_
-                    );
+                stroker_ptr stk = font_manager_.get_stroker();
+                stk->init(halo_radius);
+                FT_Glyph_Stroke(&g,stk->get(),1);
+                error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
+                if (!error)
+                {
+                    FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
+                    composite_bitmap(pixmap_,
+                                     &bit->bitmap,
+                                     itr->properties->halo_fill.rgba(),
+                                     bit->left,
+                                     height - bit->top,
+                                     itr->properties->text_opacity,
+                                     comp_op_);
+                }
+            }
+            else
+            {
+                error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
+                if (!error)
+                {
+                    FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
+                    render_halo(pixmap_,
+                                &bit->bitmap,
+                                itr->properties->halo_fill.rgba(),
+                                bit->left,
+                                height - bit->top,
+                                halo_radius,
+                                itr->properties->text_opacity);
+                }
             }
         }
         FT_Done_Glyph(g);
@@ -490,7 +599,9 @@ void text_renderer<T>::render(pixel_position const& pos)
             //              bit->left,
             //              height - bit->top, itr->properties->text_opacity);
 
-            composite_bitmap(pixmap_, &bit->bitmap, itr->properties->fill.rgba(),
+            composite_bitmap(pixmap_,
+                             &bit->bitmap,
+                             itr->properties->fill.rgba(),
                              bit->left,
                              height - bit->top,
                              itr->properties->text_opacity,
@@ -500,9 +611,9 @@ void text_renderer<T>::render(pixel_position const& pos)
     }
 }
 
-
 template <typename T>
-void text_renderer<T>::render_id(int feature_id, pixel_position const& pos, double min_radius)
+void text_renderer<T>::render_id(mapnik::value_integer feature_id,
+                                 pixel_position const& pos)
 {
     FT_Error  error;
     FT_Vector start;
@@ -515,22 +626,21 @@ void text_renderer<T>::render_id(int feature_id, pixel_position const& pos, doub
     typename glyphs_t::iterator itr;
     for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-        stroker_.init(std::max(itr->properties->halo_radius, min_radius));
         FT_Glyph g;
         error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
             FT_Glyph_Transform(g,0,&start);
-            FT_Glyph_Stroke(&g,stroker_.get(),1);
             error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
-            //error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_MONO,0,1);
             if ( ! error )
             {
-
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                render_bitmap_id(&bit->bitmap, feature_id,
-                                 bit->left,
-                                 height - bit->top);
+                render_halo_id(pixmap_,
+                               &bit->bitmap,
+                               feature_id,
+                               bit->left,
+                               height - bit->top,
+                               itr->properties->halo_radius);
             }
         }
         FT_Done_Glyph(g);
@@ -541,11 +651,18 @@ void text_renderer<T>::render_id(int feature_id, pixel_position const& pos, doub
 boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-template void text_renderer<image_32>::render(pixel_position const&);
-template text_renderer<image_32>::text_renderer(image_32&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
+template text_renderer<image_32>::text_renderer(image_32&,
+                                                face_manager<freetype_engine>&,
+                                                halo_rasterizer_e,
+                                                composite_mode_e,
+                                                double);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path const&);
-
-template void text_renderer<grid>::render_id(int, pixel_position const& , double );
-template text_renderer<grid>::text_renderer(grid&, face_manager<freetype_engine>&, stroker&, composite_mode_e, double);
+template void text_renderer<image_32>::render(pixel_position const&);
+template void text_renderer<grid>::render_id(mapnik::value_integer,
+                                             pixel_position const&);
+template text_renderer<grid>::text_renderer(grid&,
+                                            face_manager<freetype_engine>&,
+                                            halo_rasterizer_e,
+                                            composite_mode_e, double);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path const& );
 }

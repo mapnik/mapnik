@@ -340,6 +340,11 @@ void export_text_placement()
         .value("CAPITALIZE",CAPITALIZE)
         ;
 
+    enumeration_<halo_rasterizer_e>("halo_rasterizer")
+        .value("FULL",HALO_RASTERIZER_FULL)
+        .value("FAST",HALO_RASTERIZER_FAST)
+        ;
+
     class_<text_symbolizer>("TextSymbolizer",
                             init<>())
         .def(init<expression_ptr, std::string const&, unsigned, color const&>())
@@ -363,6 +368,10 @@ void export_text_placement()
                       &text_symbolizer::clip,
                       &text_symbolizer::set_clip,
                       "Set/get the text geometry's clipping status")
+        .add_property("halo_rasterizer",
+                      &text_symbolizer::get_halo_rasterizer,
+                      &text_symbolizer::set_halo_rasterizer,
+                      "Set/get the halo rasterizer method")
         ;
 
 

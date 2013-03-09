@@ -52,6 +52,7 @@ files = [
     {'name': "marker-on-hex-grid", 'sizes':[(600,400),(400,600),(257,256)]},
     {'name': "whole-centroid", 'sizes':[(600,400)],
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
+    {'name': "text-halo-rasterizer", 'sizes':[(600,400)]},
     {'name': "simple-E", 'bbox':mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)},
     {'name': "simple-NE",'bbox':default_text_box},
     {'name': "simple-NW",'bbox':default_text_box},
@@ -132,8 +133,8 @@ def render(config, width, height, bbox, quiet=False, overwrite_failures=False):
                 # generate it on the fly
                 fail(actual_agg,expected,None)
             else:
-                diff = compare(actual_agg, expected, threshold=1, alpha=True)
                 threshold = 0
+                diff = compare(actual_agg, expected, threshold=0, alpha=True)
                 if overwrite_failures and diff > threshold:
                     fail(actual_agg,expected,None)
                 else:
@@ -182,7 +183,7 @@ def render(config, width, height, bbox, quiet=False, overwrite_failures=False):
                 # generate it on the fly
                 fail(actual_grid,expected_grid,None)
             else:
-                threshold = 1
+                threshold = 0
                 diff = compare_grids(actual_grid, expected_grid, threshold=threshold, alpha=False)
                 if overwrite_failures and diff > threshold:
                     fail(actual_grid,expected_grid,None)

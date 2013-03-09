@@ -1159,6 +1159,9 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
 
         text_symbolizer text_symbol = text_symbolizer(placement_finder);
         parse_symbolizer_base(text_symbol, sym);
+        optional<halo_rasterizer_e> halo_rasterizer = sym.get_opt_attr<halo_rasterizer_e>("halo-rasterizer");
+        if (halo_rasterizer) text_symbol.set_halo_rasterizer(*halo_rasterizer);
+
         rule.append(text_symbol);
     }
     catch (const config_error & ex)

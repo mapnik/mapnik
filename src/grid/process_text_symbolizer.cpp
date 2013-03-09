@@ -43,7 +43,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
 
     text_renderer<T> ren(pixmap_,
                          font_manager_,
-                         *(font_manager_.get_stroker()),
+                         sym.get_halo_rasterizer(),
                          sym.comp_op(),
                          scale_factor_);
 
@@ -53,7 +53,7 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
         for (unsigned int ii = 0; ii < placements.size(); ++ii)
         {
             ren.prepare_glyphs(placements[ii]);
-            ren.render_id(feature.id(), placements[ii].center, 2);
+            ren.render_id(feature.id(), placements[ii].center);
         }
     }
     if (placement_found) pixmap_.add_feature(feature);

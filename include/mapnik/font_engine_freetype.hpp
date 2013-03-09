@@ -33,7 +33,9 @@
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/text_symbolizer.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
 
 // freetype2
 extern "C"
@@ -343,7 +345,7 @@ public:
         }
     }
 
-    stroker_ptr get_stroker()
+    inline stroker_ptr get_stroker()
     {
         return stroker_;
     }
@@ -362,8 +364,12 @@ struct text_renderer : private mapnik::noncopyable
         FT_Glyph image;
         char_properties *properties;
         glyph_t(FT_Glyph image_, char_properties *properties_)
-            : image(image_), properties(properties_) {}
-        ~glyph_t () { FT_Done_Glyph(image);}
+            : image(image_),
+            properties(properties_) {}
+        ~glyph_t()
+        {
+            FT_Done_Glyph(image);
+        }
     };
 
     typedef boost::ptr_vector<glyph_t> glyphs_t;
@@ -371,57 +377,17 @@ struct text_renderer : private mapnik::noncopyable
 
     text_renderer (pixmap_type & pixmap,
                    face_manager<freetype_engine> & font_manager,
-                   stroker & s,
+                   halo_rasterizer_e rasterizer,
                    composite_mode_e comp_op = src_over,
                    double scale_factor=1.0);
     box2d<double> prepare_glyphs(text_path const& path);
     void render(pixel_position const& pos);
-    void render_id(int feature_id, pixel_position const& pos, double min_radius=1.0);
-
+    void render_id(mapnik::value_integer feature_id,
+                   pixel_position const& pos);
 private:
-
-    void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
-    {
-        int x_max=x+bitmap->width;
-        int y_max=y+bitmap->rows;
-        int i,p,j,q;
-
-        for (i=x,p=0;i<x_max;++i,++p)
-        {
-            for (j=y,q=0;j<y_max;++j,++q)
-            {
-                int gray=bitmap->buffer[q*bitmap->width+p];
-                if (gray)
-                {
-                    pixmap_.blendPixel2(i, j, rgba, gray, opacity);
-                }
-            }
-        }
-    }
-
-    void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y)
-    {
-        int x_max=x+bitmap->width;
-        int y_max=y+bitmap->rows;
-        int i,p,j,q;
-
-        for (i=x,p=0;i<x_max;++i,++p)
-        {
-            for (j=y,q=0;j<y_max;++j,++q)
-            {
-                int gray=bitmap->buffer[q*bitmap->width+p];
-                if (gray)
-                {
-                    pixmap_.setPixel(i,j,feature_id);
-                    //pixmap_.blendPixel2(i,j,rgba,gray,opacity_);
-                }
-            }
-        }
-    }
-
     pixmap_type & pixmap_;
     face_manager<freetype_engine> & font_manager_;
-    stroker & stroker_;
+    halo_rasterizer_e rasterizer_;
     glyphs_t glyphs_;
     composite_mode_e comp_op_;
     double scale_factor_;
