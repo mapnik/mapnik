@@ -28,6 +28,10 @@
 
 #include <boost/spirit/include/qi.hpp>
 
+#if _MSC_VER
+#define snprintf _snprintf
+#endif
+
 #define BOOST_SPIRIT_AUTO(domain_, name, expr)                  \
     typedef boost::proto::result_of::                           \
     deep_copy<BOOST_TYPEOF(expr)>::type name##_expr_type;       \
