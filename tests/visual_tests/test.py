@@ -42,6 +42,7 @@ files = [
     # fails with clang++ on os x
     #{'name': "lines-shield", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "collision", 'sizes':[(600,400)]},
+    {'name': "marker-svg-opacity"},
     {'name': "marker-multi-policy", 'sizes':[(600,400)]},
     {'name': "marker-on-line", 'sizes':[(600,400)],
         'bbox': mapnik.Box2d(-10, 0, 15, 20)},
