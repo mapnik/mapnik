@@ -601,24 +601,18 @@ void text_renderer<T>::render_id(mapnik::value_integer feature_id,
     typename glyphs_t::iterator itr;
     for (itr = glyphs_.begin(); itr != glyphs_.end(); ++itr)
     {
-        FT_Glyph g;
-        error = FT_Glyph_Copy(itr->image, &g);
-        if (!error)
+        FT_Glyph_Transform(itr->image,0,&start);
+        error = FT_Glyph_To_Bitmap( &(itr->image),FT_RENDER_MODE_NORMAL,0,1);
+        if ( ! error )
         {
-            FT_Glyph_Transform(g,0,&start);
-            error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
-            if ( ! error )
-            {
-                FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                render_halo_id(pixmap_,
-                               &bit->bitmap,
-                               feature_id,
-                               bit->left,
-                               height - bit->top,
-                               itr->properties->halo_radius);
-            }
+            FT_BitmapGlyph bit = (FT_BitmapGlyph)itr->image;
+            render_halo_id(pixmap_,
+                           &bit->bitmap,
+                           feature_id,
+                           bit->left,
+                           height - bit->top,
+                           itr->properties->halo_radius);
         }
-        FT_Done_Glyph(g);
     }
 }
 
