@@ -354,33 +354,6 @@ void composite_bitmap(T & pixmap,
     }
 }
 
-/*
-template <typename T>
-void render_bitmap(T & pixmap,
-                   FT_Bitmap *bitmap,
-                   unsigned rgba,
-                   int x,
-                   int y,
-                   double opacity)
-{
-    int x_max=x+bitmap->width;
-    int y_max=y+bitmap->rows;
-    int i,p,j,q;
-
-    for (i=x,p=0;i<x_max;++i,++p)
-    {
-        for (j=y,q=0;j<y_max;++j,++q)
-        {
-            int gray=bitmap->buffer[q*bitmap->width+p];
-            if (gray)
-            {
-                pixmap_.blendPixel2(i, j, rgba, gray, opacity);
-            }
-        }
-    }
-}
-*/
-
 template <typename T>
 void render_halo(T & pixmap,
                  FT_Bitmap *bitmap,
@@ -388,7 +361,8 @@ void render_halo(T & pixmap,
                  int x,
                  int y,
                  int halo_radius,
-                 double opacity)
+                 double opacity,
+                 composite_mode_e comp_op)
 {
     int x_max=x+bitmap->width;
     int y_max=y+bitmap->rows;
@@ -403,7 +377,7 @@ void render_halo(T & pixmap,
             {
                 for (int n=-halo_radius; n <=halo_radius; ++n)
                     for (int m=-halo_radius;m <= halo_radius; ++m)
-                        pixmap.blendPixel2(i+m,j+n,rgba,gray,opacity);
+                        pixmap.composite_pixel(comp_op, i+m, j+n, rgba, gray, opacity);
             }
         }
     }
@@ -578,7 +552,8 @@ void text_renderer<T>::render(pixel_position const& pos)
                                 bit->left,
                                 height - bit->top,
                                 halo_radius,
-                                itr->properties->text_opacity);
+                                itr->properties->text_opacity,
+                                comp_op_);
                 }
             }
         }
