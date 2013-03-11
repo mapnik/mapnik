@@ -570,10 +570,6 @@ void text_renderer<T>::render(pixel_position const& pos)
         {
 
             FT_BitmapGlyph bit = (FT_BitmapGlyph)itr->image;
-            //render_bitmap(&bit->bitmap, itr->properties->fill.rgba(),
-            //              bit->left,
-            //              height - bit->top, itr->properties->text_opacity);
-
             composite_bitmap(pixmap_,
                              &bit->bitmap,
                              itr->properties->fill.rgba(),
