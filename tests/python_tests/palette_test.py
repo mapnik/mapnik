@@ -40,9 +40,9 @@ def test_render_with_palette():
     # test saving to a string
     open('/tmp/mapnik-palette-test2.png','wb').write(im.tostring('png',palette));
     # compare the two methods
-    eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('/tmp/mapnik-palette-test2.png').tostring())
+    eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('/tmp/mapnik-palette-test2.png').tostring(),'%s not eq to %s' % ('/tmp/mapnik-palette-test.png','/tmp/mapnik-palette-test2.png'))
     # compare to expected
-    eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('./images/support/mapnik-palette-test.png').tostring())
+    eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('./images/support/mapnik-palette-test.png').tostring(),'%s not eq to %s' % ('/tmp/mapnik-palette-test.png','./images/support/mapnik-palette-test.png'))
 
 if __name__ == "__main__":
     setup()
