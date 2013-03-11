@@ -16,7 +16,8 @@ except ImportError:
 visual_output_dir = "/tmp/mapnik-visual-images"
 
 defaults = {
-    'sizes': [(500, 100)]
+    'sizes': [(500, 100)],
+    'scales':[1.0,2.0]
 }
 
 sizes_many_in_big_range = [(800, 100), (600, 100), (400, 100),
@@ -105,14 +106,15 @@ def report(diff,threshold,quiet=False):
         else:
             print '\x1b[32m✓\x1b[0m'
 
-def render(config, width, height, bbox, quiet=False, overwrite_failures=False):
+def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_failures=False):
     filename = config['name']
     m = mapnik.Map(width, height)
+    postfix = "%s-%d-%d-%s" % (filename,width,height,scale_factor)
     
     ## AGG rendering
     if config.get('agg',True):
-        expected = os.path.join(dirname, "images", '%s-%d-reference.png' % (filename, width))
-        actual = '%s-%d' % (filename, width)
+        expected_agg = os.path.join(dirname, "images", postfix + '-agg-reference.png')
+        actual_agg = os.path.join(visual_output_dir, '%s-agg.png' % postfix)
         try:
             mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
             if bbox is not None:
@@ -121,38 +123,39 @@ def render(config, width, height, bbox, quiet=False, overwrite_failures=False):
                 m.zoom_all()
         except Exception, e:
             sys.stderr.write(e.message + '\n')
-            fail(actual,expected,str(e.message))
+            fail(actual_agg,expected_agg,str(e.message))
             return
-        actual_agg = os.path.join(visual_output_dir, '%s-agg.png' % actual)
         if not quiet:
-            print "\"%s\" with size %dx%d with agg..." % (filename, width, height),
-        
+            print "\"%s\" with agg..." % (postfix),
         try:
-            mapnik.render_to_file(m, actual_agg)
-            if not os.path.exists(expected):
+            mapnik.render_to_file(m, actual_agg, 'png8:m=h', scale_factor)
+            if not os.path.exists(expected_agg):
                 # generate it on the fly
-                fail(actual_agg,expected,None)
+                fail(actual_agg,expected_agg,None)
             else:
                 threshold = 0
-                diff = compare(actual_agg, expected, threshold=0, alpha=True)
+                diff = compare(actual_agg, expected_agg, threshold=0, alpha=True)
                 if overwrite_failures and diff > threshold:
-                    fail(actual_agg,expected,None)
+                    fail(actual_agg,expected_agg,None)
                 else:
                     report(diff,threshold,quiet)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
-            fail(actual_agg,expected,str(e.message))
+            fail(actual_agg,expected_agg,str(e.message))
     
     ### TODO - set up tests to compare agg and cairo png output
     
     ### Cairo rendering
     if config.get('cairo',True):
-        expected_cairo = os.path.join(dirname, "images", '%s-%d-reference-cairo.png' % (filename, width))
-        actual_cairo = os.path.join(visual_output_dir, '%s-cairo.png' % actual)
+        expected_cairo = os.path.join(dirname, "images", postfix + '-cairo-reference.png')
+        actual_cairo = os.path.join(visual_output_dir, '%s-cairo.png' % postfix)
         if not quiet:
-            print "\"%s\" with size %dx%d with cairo..." % (filename, width, height),
+            print "\"%s\" with cairo..." % (postfix),
         try:
-            mapnik.render_to_file(m, actual_cairo,'ARGB32')
+            mapnik.render_to_file(m, actual_cairo,'ARGB32', scale_factor)
+            # open and re-save as png8 to save space
+            new_im = mapnik.Image.open(actual_cairo)
+            new_im.save(actual_cairo,'png8:m=h')
             if not os.path.exists(expected_cairo):
                 # generate it on the fly
                 fail(actual_cairo,expected_cairo,None)
@@ -169,16 +172,17 @@ def render(config, width, height, bbox, quiet=False, overwrite_failures=False):
             fail(actual_cairo,expected_cairo,str(e.message))
     
     ## Grid rendering
-    if config.get('grid',True):
-        expected_grid = os.path.join(dirname, "grids", '%s-%d-reference.json' % (filename, width))
-        actual_grid = os.path.join(visual_output_dir, '%s-grid.json' % actual)
+    # TODO - grid renderer does not support scale_factor yet via python
+    if scale_factor == 1.0 and config.get('grid',True):
+        expected_grid = os.path.join(dirname, "grids", postfix + '-grid-reference.json')
+        actual_grid = os.path.join(visual_output_dir, '%s-grid.json' % postfix)
         if not quiet:
-            print "\"%s\" with size %dx%d with grid..." % (filename, width, height),
+            print "\"%s\" with grid..." % (postfix),
         try:
             grid = mapnik.Grid(m.width,m.height)
             mapnik.render_layer(m,grid,layer=0)
             utf1 = grid.encode('utf',resolution=4)
-            open(actual_grid,'wb').write(json.dumps(utf1,indent=2))
+            open(actual_grid,'wb').write(json.dumps(utf1,indent=1))
             if not os.path.exists(expected_grid):
                 # generate it on the fly
                 fail(actual_grid,expected_grid,None)
@@ -191,7 +195,7 @@ def render(config, width, height, bbox, quiet=False, overwrite_failures=False):
                     report(diff,threshold,quiet)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
-            fail(actual_grid,expected,str(e.message))
+            fail(actual_grid,expected_grid,str(e.message))
     return m
 
 if __name__ == "__main__":
@@ -222,7 +226,14 @@ if __name__ == "__main__":
             config = dict(defaults)
             config.update(f)
             for size in config['sizes']:
-                m = render(config, size[0], size[1], config.get('bbox'), quiet=quiet, overwrite_failures=overwrite_failures)
+                for scale_factor in config['scales']:
+                    m = render(config,
+                               size[0],
+                               size[1],
+                               config.get('bbox'),
+                               scale_factor,
+                               quiet=quiet,
+                               overwrite_failures=overwrite_failures)
             mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
 
         summary(generate=True)
