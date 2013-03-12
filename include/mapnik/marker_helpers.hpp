@@ -114,17 +114,18 @@ struct vector_markers_rasterizer_dispatch
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
+            if (snap_to_pixels_)
+            {
+                // https://github.com/mapnik/mapnik/issues/1316
+                matrix.tx = std::floor(matrix.tx+.5);
+                matrix.ty = std::floor(matrix.ty+.5);
+            }
+            // TODO https://github.com/mapnik/mapnik/issues/1754
             box2d<double> transformed_bbox = bbox_ * matrix;
 
             if (sym_.get_allow_overlap() ||
                 detector_.has_placement(transformed_bbox))
             {
-                if (snap_to_pixels_)
-                {
-                    // https://github.com/mapnik/mapnik/issues/1316
-                    matrix.tx = std::floor(matrix.tx+.5);
-                    matrix.ty = std::floor(matrix.ty+.5);
-                }
                 svg_renderer_.render(ras_, sl_, renb_, matrix, sym_.get_opacity(), bbox_);
                 if (!sym_.get_ignore_placement())
                 {
