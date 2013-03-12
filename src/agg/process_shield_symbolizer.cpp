@@ -26,6 +26,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // boost
 #include <boost/make_shared.hpp>

@@ -40,6 +40,7 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/pixel_position.hpp>
 
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>

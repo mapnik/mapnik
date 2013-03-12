@@ -27,6 +27,8 @@
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/pixel_position.hpp>
+
 
 // boost
 #include <boost/algorithm/string.hpp>

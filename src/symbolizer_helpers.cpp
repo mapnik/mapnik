@@ -32,6 +32,7 @@
 #include <mapnik/geom_util.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/expression_evaluator.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"

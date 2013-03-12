@@ -53,6 +53,7 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // cairo
 #include <cairo.h>
