@@ -111,7 +111,7 @@ private:
     void find_unused_nodes_recursive(xml_node const& node, std::string & error_text);
 
 
-    std::string ensure_relative_to_xml(boost::optional<std::string> opt_path);
+    std::string ensure_relative_to_xml(boost::optional<std::string> const& opt_path);
     void ensure_exists(std::string const& file_path);
     boost::optional<color> get_opt_color_attr(boost::property_tree::ptree const& node,
                                               std::string const& name);
@@ -1634,7 +1634,7 @@ void map_parser::ensure_font_face(std::string const& face_name)
     }
 }
 
-std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> opt_path)
+std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> const& opt_path)
 {
     if (marker_cache::instance().is_uri(*opt_path))
         return *opt_path;
