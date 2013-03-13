@@ -23,7 +23,6 @@ def setup():
 #    eq_(m2.base, m1.base)
 #    eq_(m2.background, m1.background)
 #    eq_(m2.buffer_size, m1.buffer_size)
-#    eq_(m2.aspect_fix_mode, m1.aspect_fix_mode)
 #    eq_(m2.envelope(),m1.envelope())
 #    eq_(m2.buffered_envelope(),m1.buffered_envelope())
 #    eq_(m2.scale(),m1.scale())

@@ -137,18 +137,6 @@ void export_map()
 {
     using namespace boost::python;
 
-    // aspect ratio fix modes
-    mapnik::enumeration_<mapnik::aspect_fix_mode_e>("aspect_fix_mode")
-        .value("GROW_BBOX", mapnik::Map::GROW_BBOX)
-        .value("GROW_CANVAS",mapnik::Map::GROW_CANVAS)
-        .value("SHRINK_BBOX",mapnik::Map::SHRINK_BBOX)
-        .value("SHRINK_CANVAS",mapnik::Map::SHRINK_CANVAS)
-        .value("ADJUST_BBOX_WIDTH",mapnik::Map::ADJUST_BBOX_WIDTH)
-        .value("ADJUST_BBOX_HEIGHT",mapnik::Map::ADJUST_BBOX_HEIGHT)
-        .value("ADJUST_CANVAS_WIDTH",mapnik::Map::ADJUST_CANVAS_WIDTH)
-        .value("ADJUST_CANVAS_HEIGHT", mapnik::Map::ADJUST_CANVAS_HEIGHT)
-        ;
-
     class_<std::vector<layer> >("Layers")
         .def(vector_indexing_suite<std::vector<layer> >())
         ;
@@ -384,17 +372,6 @@ void export_map()
 
         //.def("__deepcopy__",&map_deepcopy)
         .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
-
-        .add_property("aspect_fix_mode",
-                      &Map::get_aspect_fix_mode,
-                      &Map::set_aspect_fix_mode,
-                      // TODO - how to add arg info to properties?
-                      //(arg("aspect_fix_mode")),
-                      "Get/Set aspect fix mode.\n"
-                      "Usage:\n"
-                      "\n"
-                      ">>> m.aspect_fix_mode = aspect_fix_mode.GROW_BBOX\n"
-            )
 
         .add_property("background",make_function
                       (&Map::background,return_value_policy<copy_const_reference>()),

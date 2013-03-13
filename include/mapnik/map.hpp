@@ -43,29 +43,6 @@ class CoordTransform;
 
 class MAPNIK_DECL Map
 {
-public:
-
-    enum aspect_fix_mode
-    {
-        // grow the width or height of the specified geo bbox to fill the map size. default behaviour.
-        GROW_BBOX,
-        // grow the width or height of the map to accomodate the specified geo bbox.
-        GROW_CANVAS,
-        // shrink the width or height of the specified geo bbox to fill the map size.
-        SHRINK_BBOX,
-        // shrink the width or height of the map to accomodate the specified geo bbox.
-        SHRINK_CANVAS,
-        // adjust the width of the specified geo bbox, leave height and map size unchanged
-        ADJUST_BBOX_WIDTH,
-        // adjust the height of the specified geo bbox, leave width and map size unchanged
-        ADJUST_BBOX_HEIGHT,
-        // adjust the width of the map, leave height and geo bbox unchanged
-        ADJUST_CANVAS_WIDTH,
-        //adjust the height of the map, leave width and geo bbox unchanged
-        ADJUST_CANVAS_HEIGHT,
-        //
-        aspect_fix_mode_MAX
-    };
 
 private:
     static const unsigned MIN_MAPSIZE=16;
@@ -79,7 +56,6 @@ private:
     std::map<std::string,feature_type_style> styles_;
     std::map<std::string,font_set> fontsets_;
     std::vector<layer> layers_;
-    aspect_fix_mode aspectFixMode_;
     box2d<double> current_extent_;
     boost::optional<box2d<double> > maximum_extent_;
     std::string base_path_;
@@ -324,7 +300,6 @@ public:
 
     /*! \brief Zoom the map to a bounding box.
      *
-     *  Aspect is handled automatic if not fitting to width/height.
      *  @param box The bounding box where to zoom.
      */
     void zoom_to_box(box2d<double> const& box);
@@ -384,9 +359,6 @@ public:
 
     ~Map();
 
-    inline void set_aspect_fix_mode(aspect_fix_mode afm) { aspectFixMode_ = afm; }
-    inline aspect_fix_mode get_aspect_fix_mode() const { return aspectFixMode_; }
-
     /*!
      * @brief Get extra, arbitrary Parameters attached to the Map
      */
@@ -401,12 +373,8 @@ public:
      * @brief Set extra, arbitary Parameters of the Map
      */
     void set_extra_parameters(parameters& params);
-
-private:
-    void fixAspectRatio();
 };
 
-DEFINE_ENUM(aspect_fix_mode_e,Map::aspect_fix_mode);
 }
 
 #endif // MAPNIK_MAP_HPP

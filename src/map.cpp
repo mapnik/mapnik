@@ -45,26 +45,11 @@
 namespace mapnik
 {
 
-static const char * aspect_fix_mode_strings[] = {
-    "GROW_BBOX",
-    "GROW_CANVAS",
-    "SHRINK_BBOX",
-    "SHRINK_CANVAS",
-    "ADJUST_BBOX_WIDTH",
-    "ADJUST_BBOX_HEIGHT",
-    "ADJUST_CANVAS_WIDTH",
-    "ADJUST_CANVAS_HEIGHT",
-    ""
-};
-
-IMPLEMENT_ENUM( aspect_fix_mode_e, aspect_fix_mode_strings )
-
 Map::Map()
 : width_(400),
     height_(400),
     srs_(MAPNIK_LONGLAT_PROJ),
     buffer_size_(0),
-    aspectFixMode_(GROW_BBOX),
     base_path_("") {}
 
 Map::Map(int width,int height, std::string const& srs)
@@ -72,7 +57,6 @@ Map::Map(int width,int height, std::string const& srs)
       height_(height),
       srs_(srs),
       buffer_size_(0),
-      aspectFixMode_(GROW_BBOX),
       base_path_("") {}
 
 Map::Map(Map const& rhs)
@@ -85,7 +69,6 @@ Map::Map(Map const& rhs)
       styles_(rhs.styles_),
       fontsets_(rhs.fontsets_),
       layers_(rhs.layers_),
-      aspectFixMode_(rhs.aspectFixMode_),
       current_extent_(rhs.current_extent_),
       maximum_extent_(rhs.maximum_extent_),
       base_path_(rhs.base_path_),
@@ -105,7 +88,6 @@ Map& Map::operator=(Map const& rhs)
     styles_=rhs.styles_;
     fontsets_ = rhs.fontsets_;
     layers_=rhs.layers_;
-    aspectFixMode_=rhs.aspectFixMode_;
     maximum_extent_=rhs.maximum_extent_;
     base_path_=rhs.base_path_;
     extra_params_=rhs.extra_params_;
@@ -242,38 +224,31 @@ unsigned Map::height() const
 
 void Map::set_width(unsigned width)
 {
-    if (width != width_ &&
-        width >= MIN_MAPSIZE &&
+    if (width >= MIN_MAPSIZE &&
         width <= MAX_MAPSIZE)
     {
-        width_=width;
-        fixAspectRatio();
+        width_ = width;
     }
 }
 
 void Map::set_height(unsigned height)
 {
-    if (height != height_ &&
-        height >= MIN_MAPSIZE &&
+    if (height >= MIN_MAPSIZE &&
         height <= MAX_MAPSIZE)
     {
-        height_=height;
-        fixAspectRatio();
+        height_ = height;
     }
 }
 
 void Map::resize(unsigned width,unsigned height)
 {
-    if (width != width_ &&
-        height != height_ &&
-        width >= MIN_MAPSIZE &&
+    if (width >= MIN_MAPSIZE &&
         width <= MAX_MAPSIZE &&
         height >= MIN_MAPSIZE &&
         height <= MAX_MAPSIZE)
     {
-        width_=width;
-        height_=height;
-        fixAspectRatio();
+        width_ = width;
+        height_ = height;
     }
 }
 
@@ -351,7 +326,6 @@ void Map::zoom(double factor)
                                     center.y - 0.5 * h,
                                     center.x + 0.5 * w,
                                     center.y + 0.5 * h);
-    fixAspectRatio();
 }
 
 void Map::zoom_all()
@@ -428,64 +402,7 @@ void Map::zoom_all()
 
 void Map::zoom_to_box(box2d<double> const& box)
 {
-    current_extent_=box;
-    fixAspectRatio();
-}
-
-void Map::fixAspectRatio()
-{
-    if (current_extent_.width() > 0 && current_extent_.height() > 0)
-    {
-        double ratio1 = static_cast<double>(width_) / static_cast<double>(height_);
-        double ratio2 = current_extent_.width() / current_extent_.height();
-        if (ratio1 == ratio2) return;
-
-        switch(aspectFixMode_)
-        {
-        case ADJUST_BBOX_HEIGHT:
-            current_extent_.height(current_extent_.width() / ratio1);
-            break;
-        case ADJUST_BBOX_WIDTH:
-            current_extent_.width(current_extent_.height() * ratio1);
-            break;
-        case ADJUST_CANVAS_HEIGHT:
-            height_ = int (width_ / ratio2 + 0.5);
-            break;
-        case ADJUST_CANVAS_WIDTH:
-            width_ = int (height_ * ratio2 + 0.5);
-            break;
-        case GROW_BBOX:
-            if (ratio2 > ratio1)
-                current_extent_.height(current_extent_.width() / ratio1);
-            else
-                current_extent_.width(current_extent_.height() * ratio1);
-            break;
-        case SHRINK_BBOX:
-            if (ratio2 < ratio1)
-                current_extent_.height(current_extent_.width() / ratio1);
-            else
-                current_extent_.width(current_extent_.height() * ratio1);
-            break;
-        case GROW_CANVAS:
-            if (ratio2 > ratio1)
-                width_ = static_cast<int>(height_ * ratio2 + 0.5);
-            else
-                height_ = int (width_ / ratio2 + 0.5);
-            break;
-        case SHRINK_CANVAS:
-            if (ratio2 > ratio1)
-                height_ = int (width_ / ratio2 + 0.5);
-            else
-                width_ = static_cast<int>(height_ * ratio2 + 0.5);
-            break;
-        default:
-            if (ratio2 > ratio1)
-                current_extent_.height(current_extent_.width() / ratio1);
-            else
-                current_extent_.width(current_extent_.height() * ratio1);
-            break;
-        }
-    }
+    current_extent_ = box;
 }
 
 box2d<double> const& Map::get_current_extent() const
