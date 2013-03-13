@@ -28,6 +28,7 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/text_path.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/font_util.hpp>
 
 
 // boost
@@ -48,7 +49,10 @@
 namespace mapnik
 {
 
-freetype_engine::freetype_engine()
+
+freetype_engine::freetype_engine() :
+    library_(NULL)
+
 {
     FT_Error error = FT_Init_FreeType( &library_ );
     if (error)
@@ -234,6 +238,29 @@ stroker_ptr freetype_engine::create_stroker()
     return stroker_ptr();
 }
 
+void font_face_set::add(face_ptr face)
+{
+    faces_.push_back(face);
+    dimension_cache_.clear(); //Make sure we don't use old cached data
+}
+
+font_face_set::size_type font_face_set::size() const
+{
+    return faces_.size();
+}
+
+glyph_ptr font_face_set::get_glyph(unsigned c) const
+{
+    BOOST_FOREACH ( face_ptr const& face, faces_)
+    {
+        FT_UInt g = face->get_char(c);
+        if (g) return boost::make_shared<font_glyph>(face, g);
+    }
+
+    // Final fallback to empty square if nothing better in any font
+    return boost::make_shared<font_glyph>(*faces_.begin(), 0);
+}
+
 char_info font_face_set::character_dimensions(unsigned int c)
 {
     //Check if char is already in cache
@@ -327,6 +354,22 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 #endif
 
     ubidi_close(bidi);
+}
+
+void font_face_set::set_pixel_sizes(unsigned size)
+{
+    BOOST_FOREACH ( face_ptr const& face, faces_)
+    {
+        face->set_pixel_sizes(size);
+    }
+}
+
+void font_face_set::set_character_sizes(double size)
+{
+    BOOST_FOREACH ( face_ptr const& face, faces_)
+    {
+        face->set_character_sizes(size);
+    }
 }
 
 

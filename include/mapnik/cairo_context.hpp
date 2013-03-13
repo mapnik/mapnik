@@ -72,23 +72,9 @@ void check_object_status_and_throw_exception(const T& object)
 class cairo_face : private mapnik::noncopyable
 {
 public:
-    cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
-        : face_(face)
-    {
-        static cairo_user_data_key_t key;
-        c_face_ = cairo_ft_font_face_create_for_ft_face(face->get_face(), FT_LOAD_NO_HINTING);
-        cairo_font_face_set_user_data(c_face_, &key, new handle(engine, face), destroy);
-    }
-    ~cairo_face()
-    {
-        if (c_face_) cairo_font_face_destroy(c_face_);
-    }
-
-    cairo_font_face_t * face() const
-    {
-        return c_face_;
-    }
-
+    cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face);
+    ~cairo_face();
+    cairo_font_face_t * face() const;
 private:
     class handle
     {

@@ -29,6 +29,7 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/font_util.hpp>
 
 // agg
 #include "agg_trans_affine.h"

@@ -26,6 +26,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/font_util.hpp>
 
 namespace mapnik {
 
