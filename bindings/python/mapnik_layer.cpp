@@ -117,10 +117,14 @@ void set_buffer_size(mapnik::layer & l, boost::optional<int> const& buffer_size)
 
 PyObject * get_buffer_size(mapnik::layer & l)
 {
-     boost::optional<int> buffer_size = l.buffer_size();
+    boost::optional<int> buffer_size = l.buffer_size();
     if (buffer_size)
     {
+#if PY_VERSION_HEX >= 0x03000000
+        return PyLong_FromLong(*buffer_size);
+#else
         return PyInt_FromLong(*buffer_size);
+#endif
     }
     else
     {
