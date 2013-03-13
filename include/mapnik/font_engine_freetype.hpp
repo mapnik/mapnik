@@ -38,15 +38,6 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/pixel_position.hpp>
 
-// freetype2
-extern "C"
-{
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
-#include FT_STROKER_H
-}
-
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -64,12 +55,16 @@ extern "C"
 // uci
 #include <unicode/unistr.h>
 
+struct FT_LibraryRec_;
+
 namespace mapnik
 {
 class font_face;
 class text_path;
 class string_info;
 struct char_properties;
+class stroker;
+struct glyph_t;
 
 typedef boost::shared_ptr<font_face> face_ptr;
 
@@ -95,59 +90,7 @@ private:
 
 typedef boost::shared_ptr<font_glyph> glyph_ptr;
 
-class font_face : mapnik::noncopyable
-{
-public:
-    font_face(FT_Face face)
-        : face_(face) {}
 
-    std::string family_name() const
-    {
-        return std::string(face_->family_name);
-    }
-
-    std::string style_name() const
-    {
-        return std::string(face_->style_name);
-    }
-
-    FT_GlyphSlot glyph() const
-    {
-        return face_->glyph;
-    }
-
-    FT_Face get_face() const
-    {
-        return face_;
-    }
-
-    unsigned get_char(unsigned c) const
-    {
-        return FT_Get_Char_Index(face_, c);
-    }
-
-    bool set_pixel_sizes(unsigned size)
-    {
-        if (! FT_Set_Pixel_Sizes( face_, 0, size ))
-            return true;
-        return false;
-    }
-
-    bool set_character_sizes(double size)
-    {
-        if ( !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0))
-            return true;
-        return false;
-    }
-
-    ~font_face()
-    {
-        FT_Done_Face(face_);
-    }
-
-private:
-    FT_Face face_;
-};
 
 class MAPNIK_DECL font_face_set : private mapnik::noncopyable
 {
@@ -159,82 +102,17 @@ public:
         : faces_(),
         dimension_cache_() {}
 
-    void add(face_ptr face)
-    {
-        faces_.push_back(face);
-        dimension_cache_.clear(); //Make sure we don't use old cached data
-    }
-
-    size_type size() const
-    {
-        return faces_.size();
-    }
-
-    glyph_ptr get_glyph(unsigned c) const
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            FT_UInt g = face->get_char(c);
-            if (g) return boost::make_shared<font_glyph>(face, g);
-        }
-
-        // Final fallback to empty square if nothing better in any font
-        return boost::make_shared<font_glyph>(*faces_.begin(), 0);
-    }
-
+    void add(face_ptr face);
+    size_type size() const;
+    glyph_ptr get_glyph(unsigned c) const;
     char_info character_dimensions(unsigned c);
-
     void get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format);
-
-    void set_pixel_sizes(unsigned size)
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            face->set_pixel_sizes(size);
-        }
-    }
-
-    void set_character_sizes(double size)
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            face->set_character_sizes(size);
-        }
-    }
+    void set_pixel_sizes(unsigned size);
+    void set_character_sizes(double size);
 private:
     container_type faces_;
     std::map<unsigned, char_info> dimension_cache_;
 };
-
-// FT_Stroker wrapper
-class stroker : mapnik::noncopyable
-{
-public:
-    explicit stroker(FT_Stroker s)
-        : s_(s) {}
-
-    void init(double radius)
-    {
-        FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
-                       FT_STROKER_LINECAP_ROUND,
-                       FT_STROKER_LINEJOIN_ROUND,
-                       0);
-    }
-
-    FT_Stroker const& get() const
-    {
-        return s_;
-    }
-
-    ~stroker()
-    {
-        FT_Stroker_Done(s_);
-    }
-private:
-    FT_Stroker s_;
-};
-
-
 
 typedef boost::shared_ptr<font_face_set> face_set_ptr;
 typedef boost::shared_ptr<stroker> stroker_ptr;
@@ -263,7 +141,7 @@ public:
     virtual ~freetype_engine();
     freetype_engine();
 private:
-    FT_Library library_;
+    FT_LibraryRec_ * library_;
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif
@@ -360,18 +238,6 @@ private:
 template <typename T>
 struct text_renderer : private mapnik::noncopyable
 {
-    struct glyph_t : mapnik::noncopyable
-    {
-        FT_Glyph image;
-        char_properties *properties;
-        glyph_t(FT_Glyph image_, char_properties *properties_)
-            : image(image_),
-            properties(properties_) {}
-        ~glyph_t()
-        {
-            FT_Done_Glyph(image);
-        }
-    };
 
     typedef boost::ptr_vector<glyph_t> glyphs_t;
     typedef T pixmap_type;
