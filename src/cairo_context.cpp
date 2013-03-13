@@ -21,8 +21,27 @@
  *****************************************************************************/
 
 #include <mapnik/cairo_context.hpp>
+#include <mapnik/font_util.hpp>
 
 namespace mapnik {
+
+cairo_face::cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
+    : face_(face)
+{
+    static cairo_user_data_key_t key;
+    c_face_ = cairo_ft_font_face_create_for_ft_face(face->get_face(), FT_LOAD_NO_HINTING);
+    cairo_font_face_set_user_data(c_face_, &key, new handle(engine, face), destroy);
+}
+
+cairo_face::~cairo_face()
+{
+    if (c_face_) cairo_font_face_destroy(c_face_);
+}
+
+cairo_font_face_t * cairo_face::face() const
+{
+    return c_face_;
+}
 
 cairo_context::cairo_context(cairo_ptr const& cairo)
     : cairo_(cairo)

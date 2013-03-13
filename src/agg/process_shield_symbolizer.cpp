@@ -27,6 +27,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/font_util.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
