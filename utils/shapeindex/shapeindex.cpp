@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: shapeindex.cc 27 2005-03-30 21:45:40Z pavlenko $
 
 
 #include <iostream>

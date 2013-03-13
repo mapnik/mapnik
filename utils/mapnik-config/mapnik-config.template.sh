@@ -15,6 +15,7 @@ CONFIG_JSON="{
   \"git_revision\": \"${CONFIG_GIT_REVISION}\"
 }"
 
+## https://github.com/mapnik/mapnik/issues/1443
 usage()
 {
     cat <<EOF
@@ -27,8 +28,11 @@ Known values for OPTION are:
   --libs            print library linking information
   --dep-libs        print library linking information for Mapnik dependencies
   --ldflags         print library paths (-L) information
-  --cxxflags        print pre-processor and compiler flags
-  --cflags          print pre-processor and compiler flags (same as cxxflags, for back-compatibility)
+  --defines         print pre-processor defines for mapnik build
+  --includes        print include paths
+  --dep-includes    print include paths
+  --cxxflags        print c++ compiler flags and pre-processor defines
+  --cflags          print c++ compiler flags and pre-processor defines (same as cxxflags, for back-compatibility)
   --fonts           print default fonts directory
   --input-plugins   print default input plugins directory
   --json            print all config options as json object
