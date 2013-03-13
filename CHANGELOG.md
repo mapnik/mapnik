@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Removed `Map.aspect_fix_mode` (#1758)
+
 - Added `text-halo-rasterizer` property. Set to `fast` for lower quality but faster
   halo rendering (#1298)
 

@@ -62,7 +62,6 @@ namespace mapnik { namespace util {
 //  *   styles_(rhs.styles_),
 //      fontsets_(rhs.fontsets_),
 //  *   layers_(rhs.layers_),
-//      aspectFixMode_(rhs.aspectFixMode_),
 //      current_extent_(rhs.current_extent_),
 //  *   maximum_extent_(rhs.maximum_extent_),
 //  *   base_path_(rhs.base_path_),
