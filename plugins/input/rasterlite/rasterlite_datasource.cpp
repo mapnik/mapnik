@@ -91,11 +91,6 @@ rasterlite_datasource::rasterlite_datasource(parameters const& params)
     else
         dataset_name_ = *file;
 
-    this->init(params);
-}
-
-void rasterlite_datasource::init(mapnik::parameters const& params)
-{
     if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
 
     void *dataset = open_dataset();

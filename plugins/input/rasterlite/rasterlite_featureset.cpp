@@ -24,7 +24,10 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/image_data.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/raster.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 
@@ -32,7 +35,6 @@
 #include <boost/make_shared.hpp>
 
 
-using mapnik::query;
 using mapnik::coord2d;
 using mapnik::box2d;
 using mapnik::feature_ptr;
@@ -127,7 +129,8 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
         {
             if (size > 0)
             {
-                mapnik::image_data_32 image(width, height);
+                mapnik::raster_ptr rasterp = boost::make_shared<mapnik::raster>(intersect, width, height);
+                mapnik::image_data_32 & image = rasterp->data_;
                 image.set(0xffffffff);
 
                 unsigned char* raster_data = static_cast<unsigned char*>(raster);
@@ -135,7 +138,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
 
                 memcpy (image_data, raster_data, size);
 
-                feature->set_raster(boost::make_shared<mapnik::raster>(intersect,image));
+                feature->set_raster(rasterp);
 
                 free (raster);
 
