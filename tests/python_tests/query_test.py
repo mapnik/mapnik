@@ -17,6 +17,10 @@ def test_query_init():
     r = query.resolution
     assert_almost_equal(r[0], 1.0, places=7)
     assert_almost_equal(r[1], 1.0, places=7)
+    # https://github.com/mapnik/mapnik/issues/1762
+    eq_(query.property_names,[])
+    query.add_property_name('migurski')
+    eq_(query.property_names,['migurski'])
 
 # Converting *from* tuples *to* resolutions is not yet supported
 @raises(TypeError)
