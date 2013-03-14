@@ -148,16 +148,17 @@ struct value_extractor_visitor : public boost::static_visitor<>
     template <typename T1>
     void operator () (T1 val) const
     {
-        // TODO
         try
         {
             var_ = boost::lexical_cast<T>(val);
         }
-        catch (boost::bad_lexical_cast & ) {}
-        //std::string err_msg = (boost::format("No conversion from %s to %s")
-        //                       % typeid(T1).name()
-        //                       % typeid(T).name()).str();
-        //throw std::runtime_error(err_msg);
+        catch (boost::bad_lexical_cast & )
+        {
+            std::string err_msg = (boost::format("Failed converting from %s to %s")
+                                   % typeid(T1).name()
+                                   % typeid(T).name()).str();
+            throw std::runtime_error(err_msg);
+        }
     }
 
 
