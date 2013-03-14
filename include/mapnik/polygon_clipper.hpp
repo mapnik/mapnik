@@ -179,7 +179,7 @@ private:
         }
 
         polygon_list clipped_polygons;
-        bool dissolved = false;
+
         try
         {
             boost::geometry::intersection(clip_box_, subject_poly, clipped_polygons);
@@ -189,7 +189,6 @@ private:
             std::cerr << ex.what() << std::endl;
         }
 
-        unsigned count=0;
         BOOST_FOREACH(polygon_2d const& poly, clipped_polygons)
         {
             bool move_to = true;
