@@ -175,13 +175,13 @@ if 'install' in COMMAND_LINE_TARGETS:
 if 'uninstall' not in COMMAND_LINE_TARGETS:
     if env['HAS_CAIRO']:
         py_env.Append(CPPPATH = env['CAIRO_CPPPATHS'])
-        py_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+        py_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
         if env['PLATFORM'] == 'Darwin':
             py_env.Append(LIBS=env['CAIRO_LINKFLAGS'])
     
     if env['HAS_PYCAIRO']:
         py_env.ParseConfig('pkg-config --cflags pycairo')
-        py_env.Append(CXXFLAGS = '-DHAVE_PYCAIRO')
+        py_env.Append(CPPDEFINES = '-DHAVE_PYCAIRO')
 
 libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 _mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)

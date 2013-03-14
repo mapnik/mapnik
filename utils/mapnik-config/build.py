@@ -17,18 +17,20 @@ config_variables = '''#!/bin/sh
 
 ## variables
 
-CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
-CONFIG_MAPNIK_LIBNAME=%(mapnik_libname)s
-CONFIG_MAPNIK_INCLUDE=${CONFIG_PREFIX}/include
-CONFIG_MAPNIK_LIB=${CONFIG_PREFIX}/%(libdir_schema)s
 CONFIG_MAPNIK_VERSION='%(version)s'
-CONFIG_MAPNIK_LDFLAGS='%(ldflags)s'
-CONFIG_DEP_LIBS='%(dep_libs)s'
-CONFIG_OTHER_INCLUDES='%(other_includes)s'
+CONFIG_GIT_REVISION='%(git_revision)s'
+CONFIG_GIT_DESCRIBE='%(git_describe)s'
 CONFIG_FONTS='%(fonts)s'
 CONFIG_INPUT_PLUGINS='%(input_plugins)s'
-CONFIG_GIT_REVISION='%(git_revision)s'
-CONFIG_MAPNIK_AGG_INCLUDE=${CONFIG_PREFIX}/include/mapnik/agg
+CONFIG_MAPNIK_DEFINES='%(defines)s'
+CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
+CONFIG_MAPNIK_LIBNAME='%(mapnik_libname)s'
+CONFIG_MAPNIK_LIB="${CONFIG_PREFIX}/%(libdir_schema)s"
+CONFIG_DEP_LIBS='%(dep_libs)s'
+CONFIG_MAPNIK_LDFLAGS='%(ldflags)s'
+CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapnik/agg"
+CONFIG_DEP_INCLUDES='%(dep_includes)s'
+CONFIG_CXXFLAGS='%(cxxflags)s'
 
 '''
 
@@ -39,20 +41,16 @@ def write_config(configuration,template,config_file):
         os.chmod(config_file,0755)
     except: pass
 
+cxxflags = ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
 
-# todo - refine this list
+defines = ' '.join(config_env['LIBMAPNIK_DEFINES'])
 
-other_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
+dep_includes = ''.join([' -I%s' % i for i in config_env['CPPPATH'] if not i.startswith('#')])
 
-other_includes += ' '
-
-other_includes += ' '.join(config_env['LIBMAPNIK_CXXFLAGS'])
-
-other_includes += ' '
+dep_includes += ' '
 
 if config_env['HAS_CAIRO']:
-    other_includes += ''.join([' -I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
-
+    dep_includes += ''.join([' -I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
 
 ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
 
@@ -62,7 +60,9 @@ dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 dep_libs = dep_libs.replace('-lagg','')
 
 git_revision = 'unknown'
-# present only for official releases where git metadata is stripped
+git_describe = 'unknown'
+# special GIT_REVISION/GIT_DESCRIBE files present only for official releases
+# where the git directory metadata is stripped
 # more info: https://github.com/mapnik/mapnik/wiki/MapnikReleaseSteps
 revision_release_file = '../../GIT_REVISION'
 if os.path.exists(revision_release_file):
@@ -73,16 +73,28 @@ else:
     if not stderr:
         git_revision = stdin.strip()
 
+describe_release_file = '../../GIT_DESCRIBE'
+if os.path.exists(describe_release_file):
+    git_describe = open(describe_release_file,'r').read()
+else:
+    git_cmd = "git describe"
+    stdin, stderr = Popen(git_cmd, shell=True, stdout=PIPE, stderr=PIPE).communicate()
+    if not stderr:
+        git_describe = stdin.strip()
+
 configuration = {
+    "git_revision": git_revision,
+    "git_describe": git_describe,
+    "version": config_env['MAPNIK_VERSION_STRING'],
     "mapnik_libname": 'mapnik',
     "libdir_schema": config_env['LIBDIR_SCHEMA'],
     "ldflags": ldflags,
     "dep_libs": dep_libs,
-    "other_includes": other_includes,
+    "dep_includes": dep_includes,
     "fonts": config_env['MAPNIK_FONTS'],
     "input_plugins": config_env['MAPNIK_INPUT_PLUGINS'],
-    "git_revision": git_revision,
-    "version": config_env['MAPNIK_VERSION_STRING'],
+    "defines":defines,
+    "cxxflags":cxxflags
 }
 
 ## if we are statically linking depedencies

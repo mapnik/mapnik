@@ -48,6 +48,7 @@ mapnik_lib_link_flag = ''
 # note: .data gets the actual list to allow a true copy
 # and avoids unintended pollution of other environments
 libmapnik_cxxflags = copy(lib_env['CXXFLAGS'].data)
+libmapnik_defines = copy(lib_env['CPPDEFINES'])
 
 ABI_VERSION = env['ABI_VERSION']
 
@@ -209,8 +210,8 @@ source = Split(
 if env['HAS_CAIRO']:
     lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])
     lib_env.Append(LIBS=env['CAIRO_LINKFLAGS'])
-    lib_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
-    libmapnik_cxxflags.append('-DHAVE_CAIRO')
+    lib_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
+    libmapnik_defines.append('-DHAVE_CAIRO')
     lib_env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
     source.insert(0,'cairo_renderer.cpp')
     source.insert(0,'cairo_context.cpp')
@@ -296,8 +297,8 @@ if env['SVG_RENDERER']: # svg backend
     svg/output/process_shield_symbolizer.cpp
     svg/output/process_text_symbolizer.cpp
     """)
-    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
-    libmapnik_cxxflags.append('-DSVG_RENDERER')
+    lib_env.Append(CPPDEFINES = '-DSVG_RENDERER')
+    libmapnik_defines.append('-DSVG_RENDERER')
 
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
@@ -320,8 +321,8 @@ if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
         libxml2_loader.cpp
         """)
     env2 = lib_env.Clone()
-    env2.Append(CXXFLAGS = '-DHAVE_LIBXML2')
-    libmapnik_cxxflags.append('-DHAVE_LIBXML2')
+    env2.Append(CPPDEFINES = '-DHAVE_LIBXML2')
+    libmapnik_defines.append('-DHAVE_LIBXML2')
     fixup = ['libxml2_loader.cpp']
     for cpp in fixup:
         if cpp in source:
@@ -341,7 +342,7 @@ processor_cpp = 'feature_style_processor.cpp'
 
 if env['RENDERING_STATS']:
     env3 = lib_env.Clone()
-    env3.Append(CXXFLAGS='-DRENDERING_STATS')
+    env3.Append(CPPDEFINES='-DRENDERING_STATS')
     if env['LINKING'] == 'static':
         source.insert(0,env3.StaticObject(processor_cpp))
     else:
@@ -357,6 +358,7 @@ else:
 # cache library values for other builds to use
 env['LIBMAPNIK_LIBS'] = copy(lib_env['LIBS'])
 env['LIBMAPNIK_CXXFLAGS'] = libmapnik_cxxflags
+env['LIBMAPNIK_DEFINES'] = libmapnik_defines
 
 mapnik = None
 
