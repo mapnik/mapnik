@@ -127,8 +127,8 @@ public:
     tiled_file_policy(std::string const& file,
                       std::string const& format,
                       unsigned tile_size,
-                      box2d<double> extent,
-                      box2d<double> bbox,
+                      box2d<double> const& extent,
+                      box2d<double> const& bbox,
                       unsigned width,
                       unsigned height)
     {
