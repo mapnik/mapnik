@@ -27,7 +27,6 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
-#include <mapnik/path_expression.hpp>
 
 // boost
 #include <boost/variant.hpp>
