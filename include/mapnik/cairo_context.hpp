@@ -25,28 +25,35 @@
 #define MAPNIK_CAIRO_CONTEXT_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/stroke.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/font_set.hpp>
-#include <mapnik/text_path.hpp>
-#include <mapnik/text_properties.hpp>
 #include <mapnik/gradient.hpp>
+#include <mapnik/vertex.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+
 // cairo
 #include <cairo.h>
 #include <cairo-ft.h>
+
 // stl
-#include <valarray>
+#include <map>
+#include <vector>
+#include <stdexcept>
+
 // agg
 #include "agg_basics.h"
 
 namespace mapnik {
+
+class text_path;
 
 typedef cairo_status_t ErrorStatus;
 
@@ -301,7 +308,7 @@ public:
     void fill();
     void paint();
     void set_pattern(cairo_pattern const& pattern);
-    void set_gradient(cairo_gradient const& pattern, const box2d<double> &bbox);
+    void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
     void add_image(double x, double y, image_data_32 & data, double opacity = 1.0);
     void add_image(agg::trans_affine const& tr, image_data_32 & data, double opacity = 1.0);
     void set_font_face(cairo_face_manager & manager, face_ptr face);

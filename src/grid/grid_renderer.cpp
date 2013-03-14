@@ -46,7 +46,6 @@
 #include <mapnik/pixel_position.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 // agg
