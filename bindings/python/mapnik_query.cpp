@@ -22,10 +22,14 @@
 
 // boost
 #include <boost/python.hpp>
+#include <boost/foreach.hpp>
 
 // mapnik
 #include <mapnik/query.hpp>
 #include <mapnik/box2d.hpp>
+
+#include <string>
+#include <set>
 
 using mapnik::query;
 using mapnik::box2d;
@@ -46,11 +50,30 @@ struct resolution_to_tuple
     }
 };
 
+struct names_to_list
+{
+    static PyObject* convert(std::set<std::string> const& names)
+    {
+        boost::python::list l;
+        BOOST_FOREACH( std::string const& name, names )
+        {
+            l.append(name);
+        }
+        return python::incref(l.ptr());
+    }
+
+    static PyTypeObject const* get_pytype()
+    {
+        return &PyList_Type;
+    }
+};
+
 void export_query()
 {
     using namespace boost::python;
 
     to_python_converter<query::resolution_type, resolution_to_tuple> ();
+    to_python_converter<std::set<std::string>, names_to_list> ();
 
     class_<query>("Query", "a spatial query data object",
                   init<box2d<double>,query::resolution_type const&,double>() )
