@@ -16,7 +16,7 @@ int main( int, char*[] )
     BOOST_TEST( mapnik::label::centroid(pt, x, y) );
     BOOST_TEST( x == 10 );
     BOOST_TEST( y == 10 );
-    
+
     // two points
     pt.move_to(20,20);
     BOOST_TEST( mapnik::label::centroid(pt, x, y) );
@@ -30,7 +30,7 @@ int main( int, char*[] )
     BOOST_TEST( mapnik::label::centroid(line, x, y) );
     BOOST_TEST( x == 25 );
     BOOST_TEST( y == 25 );
-    
+
     // TODO - centroid and interior should be equal but they appear not to be (check largest)
     // MULTIPOLYGON(((-52 40,-60 32,-68 40,-60 48,-52 40)),((-60 50,-80 30,-100 49.9999999999999,-80.0000000000001 70,-60 50)),((-52 60,-60 52,-68 60,-60 68,-52 60)))
 

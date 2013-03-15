@@ -50,7 +50,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
         const unsigned int* row_to = dest.getRow(y);
         for (unsigned int x = 0; x < width; ++x)
         {
-           if (row_from[x] != row_to[x]) return false;
+            if (row_from[x] != row_to[x]) return false;
         }
     }
     return true;
@@ -76,7 +76,7 @@ int main( int, char*[] )
         //mapnik::save_to_file(im,expected);
         mapnik::save_to_file(im,actual1);
         BOOST_TEST(compare_images(actual1,expected));
-        
+
         // reset image
         im.clear();
 
@@ -93,7 +93,7 @@ int main( int, char*[] )
 
         // reset image
         im.clear();
-                
+
         // render with apply_to_layer api and mapnik::request params passed to apply_to_layer
         mapnik::agg_renderer<mapnik::image_32> renderer3(m,req,im,scale_factor);
         renderer3.start_map_processing(m);
@@ -106,15 +106,15 @@ int main( int, char*[] )
             {
                 std::set<std::string> names;
                 renderer3.apply_to_layer(lyr,
-                               renderer3,
-                               map_proj,
-                               req.scale(),
-                               scale_denom,
-                               req.width(),
-                               req.height(),
-                               req.extent(),
-                               req.buffer_size(),
-                               names);
+                                         renderer3,
+                                         map_proj,
+                                         req.scale(),
+                                         scale_denom,
+                                         req.width(),
+                                         req.height(),
+                                         req.extent(),
+                                         req.buffer_size(),
+                                         names);
 
             }
         }

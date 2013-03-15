@@ -86,19 +86,19 @@ int main( int, char*[] )
     /*
     // not working, oddly segfaults valgrind
     try {
-        sqlite3_initialize();
-        // http://stackoverflow.com/questions/11107703/sqlite3-sigsegvs-with-valgrind
-        sqlite3_config(SQLITE_CONFIG_HEAP, malloc (1024*1024), 1024*1024, 64);
-        mapnik::datasource_cache::instance().register_datasource("./plugins/input/sqlite.input");
-        mapnik::parameters p;
-        p["type"]="sqlite";
-        p["file"]="tests/data/sqlite/world.sqlite";
-        p["table"]="world_merc";
-        mapnik::datasource_cache::instance().create(p);
-        sqlite3_shutdown();
-        BOOST_TEST(true);
+    sqlite3_initialize();
+    // http://stackoverflow.com/questions/11107703/sqlite3-sigsegvs-with-valgrind
+    sqlite3_config(SQLITE_CONFIG_HEAP, malloc (1024*1024), 1024*1024, 64);
+    mapnik::datasource_cache::instance().register_datasource("./plugins/input/sqlite.input");
+    mapnik::parameters p;
+    p["type"]="sqlite";
+    p["file"]="tests/data/sqlite/world.sqlite";
+    p["table"]="world_merc";
+    mapnik::datasource_cache::instance().create(p);
+    sqlite3_shutdown();
+    BOOST_TEST(true);
     } catch (...) {
-        BOOST_TEST(false);
+    BOOST_TEST(false);
     }
     */
 

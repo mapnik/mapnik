@@ -57,7 +57,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
 
     typedef boost::mpl::vector<clip_line_tag> conv_types;
     vertex_converter<box2d<double>, output_geometry_backend, line_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+        CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(bbox, backend, sym, t, prj_trans, tr, 1.0);
 
     converter.set<clip_line_tag>();
@@ -97,7 +97,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
 
     typedef boost::mpl::vector<clip_poly_tag> conv_types;
     vertex_converter<box2d<double>, output_geometry_backend, polygon_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+        CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(bbox, backend, sym, t, prj_trans, tr, 1.0);
 
     converter.set<clip_poly_tag>();

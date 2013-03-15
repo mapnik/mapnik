@@ -83,7 +83,7 @@ int main( int, char*[] )
         std::ifstream stream(filename.c_str(),std::ios_base::in | std::ios_base::binary);
         if (!stream.is_open())
             throw std::runtime_error("could not open: '" + filename + "'");
-    
+
         std::string csv_line;
         while(std::getline(stream,csv_line,'\n'))
         {
