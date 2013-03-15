@@ -154,14 +154,13 @@ int main( int, char*[] )
         BOOST_TEST(result);
         BOOST_TEST_EQ(*result, std::string("GeometryCollection EMPTY"));
     }
-#endif
     {
         std::string wkt_in("Polygon((0 0,100 200,200 0,0 0 ))");
         boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
         BOOST_TEST(result);
         BOOST_TEST_EQ(*result,std::string("Polygon((50 50,50 100,75 150,125 150,150 100,150 50,50 50))"));
     }
-
+#endif
     if (!::boost::detail::test_errors())
     {
         std::clog << "C++ geometry conversions: \x1b[1;32m✓ \x1b[0m\n";
