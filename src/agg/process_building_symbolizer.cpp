@@ -70,7 +70,12 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
     agg::scanline_u8 sl;
 
     ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_power());
+    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+    {
+        ras_ptr->gamma(agg::gamma_power());
+        gamma_method_ = GAMMA_POWER;
+        gamma_ = 1.0;
+    }
 
     double height = 0.0;
     expression_ptr height_expr = sym.height();

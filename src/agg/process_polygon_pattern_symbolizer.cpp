@@ -61,8 +61,12 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
     ras_ptr->reset();
-    set_gamma_method(sym,ras_ptr);
-
+    if (sym.get_gamma() != gamma_ || sym.get_gamma_method() != gamma_method_)
+    {
+        set_gamma_method(sym, ras_ptr);
+        gamma_method_ = sym.get_gamma_method();
+        gamma_ = sym.get_gamma();
+    }
     std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
     boost::optional<mapnik::marker_ptr> marker;
     if ( !filename.empty() )

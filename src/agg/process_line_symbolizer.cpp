@@ -66,7 +66,12 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     unsigned a=col.alpha();
 
     ras_ptr->reset();
-    set_gamma_method(stroke_, ras_ptr);
+    if (stroke_.get_gamma() != gamma_ || stroke_.get_gamma_method() != gamma_method_)
+    {
+        set_gamma_method(stroke_, ras_ptr);
+        gamma_method_ = stroke_.get_gamma_method();
+        gamma_ = stroke_.get_gamma();
+    }
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
 
