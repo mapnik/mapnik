@@ -128,7 +128,7 @@ Released Aug 23, 2012
 - Improved logging/debugging system with release logs and file redirection (https://github.com/mapnik/mapnik/wiki/Runtime-Logging) (#937 and partially #986, #467)
 
 - GDAL: allow setting nodata value on the fly (will override value if nodata is set in data) (#1161)
- 
+
 - GDAL: respect nodata for paletted/colormapped images (#1160)
 
 - PostGIS: Added a new option called `autodetect_key_field` (by default false) that if true will
@@ -184,7 +184,7 @@ Released Aug 3, 2012
 
 - Fixed possible breakage registering plugins via python if a custom PREFIX or DESTDIR was used (e.g. macports/homebrew) (#1171)
 
-- Fixed memory leak in the case of proj >= 4.8 and a projection initialization error (#1173) 
+- Fixed memory leak in the case of proj >= 4.8 and a projection initialization error (#1173)
 
 
 ## Mapnik 2.0.1
