@@ -531,12 +531,12 @@ struct mod: public boost::static_visitor<V>
 
     value_type operator() (value_double lhs, value_integer rhs) const
     {
-        return std::fmod(lhs, rhs);
+        return std::fmod(lhs, static_cast<value_double>(rhs));
     }
 
     value_type operator() (value_integer lhs, value_double rhs) const
     {
-        return std::fmod(lhs, rhs);
+        return std::fmod(static_cast<value_double>(lhs), rhs);
     }
 
     value_type operator() (value_double lhs, value_double rhs) const
