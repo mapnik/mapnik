@@ -143,7 +143,7 @@ public:
 
     bool isOK() const
     {
-        return (PQstatus(conn_) != CONNECTION_BAD);
+        return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD);
     }
 
     void close()
