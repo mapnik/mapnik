@@ -154,6 +154,8 @@ private:
     boost::shared_ptr<label_collision_detector4> detector_;
     boost::scoped_ptr<rasterizer> ras_ptr;
     box2d<double> query_extent_;
+    gamma_method_e gamma_method_;
+    double gamma_;
     void setup(Map const& m);
 };
 }
