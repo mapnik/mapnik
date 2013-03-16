@@ -12,8 +12,9 @@
     <StyleName>style</StyleName>
     <Datasource>
        <!-- https://github.com/mapnik/mapnik/issues/1471 -->
-       <Parameter name="file">../raster/nodata-edge.tif</Parameter>
-       <Parameter name="type">gdal</Parameter>
+       <Parameter name="file">../../data/raster/nodata-edge.tif</Parameter>
+       <Parameter name="type">raster</Parameter>
+       <Parameter name="extent">-12329035.765216826,4508650.398543958,-12328653.027947057,4508957.346255356</Parameter>
     </Datasource>
   </Layer>
 
