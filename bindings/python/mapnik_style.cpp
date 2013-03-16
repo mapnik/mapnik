@@ -49,14 +49,16 @@ void set_image_filters(feature_type_style & style, std::string const& filters)
     std::string::const_iterator end = filters.end();
     mapnik::image_filter_grammar<std::string::const_iterator,
                                  std::vector<mapnik::filter::filter_type> > filter_grammar;
+    std::vector<mapnik::filter::filter_type> new_filters;
     bool result = boost::spirit::qi::phrase_parse(itr,end,
                                                   filter_grammar,
                                                   boost::spirit::qi::ascii::space,
-                                                  style.image_filters());
+                                                  new_filters);
     if (!result || itr!=end)
     {
         throw mapnik::value_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
     }
+    style.image_filters().swap(new_filters);
 }
 
 void export_style()

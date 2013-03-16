@@ -228,7 +228,7 @@ void export_image()
         .def("composite",&composite,
          ( arg("self"),
            arg("image"),
-           arg("mode"),
+           arg("mode")=mapnik::src_over,
            arg("opacity")=1.0f
          ))
         .def("premultiply",&image_32::premultiply)

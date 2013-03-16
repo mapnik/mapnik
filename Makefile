@@ -14,6 +14,7 @@ distclean:
 	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	if test -e "config.cache"; then rm "config.cache"; fi
+	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
 
 reset: distclean
 
@@ -50,4 +51,4 @@ render:
 		nik2img.py $${FILE} /tmp/$$(basename $${FILE}).png; \
 	done
 
-.PHONY: clean reset uninstall test install demo
+.PHONY: install mapnik clean distclean reset uninstall test demo pep8 grind render

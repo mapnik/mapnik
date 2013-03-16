@@ -398,4 +398,5 @@ else:
     env['create_uninstall_target'](env, target1)
     env['create_uninstall_target'](env, target)
 
-Depends(mapnik, env.subst('../deps/agg/libagg.a'))
+if not env['RUNTIME_LINK'] == 'static':
+    Depends(mapnik, env.subst('../deps/agg/libagg.a'))

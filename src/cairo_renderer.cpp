@@ -43,6 +43,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_helpers.hpp>
+
 // cairo
 #include <cairomm/context.h>
 #include <cairomm/surface.h>
@@ -63,6 +64,9 @@
 // markers
 #include "agg_path_storage.h"
 #include "agg_ellipse.h"
+
+// stl
+#include <deque>
 
 namespace mapnik
 {

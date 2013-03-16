@@ -62,32 +62,6 @@
 
 namespace mapnik
 {
-class pattern_source : private boost::noncopyable
-{
-public:
-    pattern_source(image_data_32 const& pattern)
-        : pattern_(pattern) {}
-
-    unsigned int width() const
-    {
-        return pattern_.width();
-    }
-    unsigned int height() const
-    {
-        return pattern_.height();
-    }
-    agg::rgba8 pixel(int x, int y) const
-    {
-        unsigned c = pattern_(x,y);
-        return agg::rgba8(c & 0xff,
-                          (c >> 8) & 0xff,
-                          (c >> 16) & 0xff,
-                          (c >> 24) & 0xff);
-    }
-private:
-    image_data_32 const& pattern_;
-};
-
 
 template <typename T>
 agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
@@ -132,11 +106,24 @@ template <typename T>
 void agg_renderer<T>::setup(Map const &m)
 {
     boost::optional<color> const& bg = m.background();
-    if (bg) pixmap_.set_background(*bg);
+    if (bg)
+    {
+        if (bg->alpha() < 255)
+        {
+            mapnik::color bg_color = *bg;
+            bg_color.premultiply();
+            pixmap_.set_background(bg_color);
+        }
+        else
+        {
+            pixmap_.set_background(*bg);
+        }
+    }
 
     boost::optional<std::string> const& image_filename = m.background_image();
     if (image_filename)
     {
+        // NOTE: marker_cache returns premultiplied image, if needed
         boost::optional<mapnik::marker_ptr> bg_marker = mapnik::marker_cache::instance().find(*image_filename,true);
         if (bg_marker && (*bg_marker)->is_bitmap())
         {
@@ -152,17 +139,12 @@ void agg_renderer<T>::setup(Map const &m)
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        composite(pixmap_.data(),*bg_image, src_over, 1.0f, x*w, y*h, true);
+                        composite(pixmap_.data(),*bg_image, src_over, 1.0f, x*w, y*h, false);
                     }
                 }
             }
         }
     }
-
-    agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
-    pixf.premultiply();
-
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Scale=" << m.scale();
 }
 
@@ -300,6 +282,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
+    typedef agg::pod_bvector<mapnik::svg::path_attributes> svg_attribute_type;
 
     ras_ptr->reset();
     ras_ptr->gamma(agg::gamma_power());
@@ -324,9 +307,9 @@ void agg_renderer<T>::render_marker(pixel_position const& pos, marker const& mar
         vertex_stl_adapter<svg_path_storage> stl_storage((*marker.get_vector_data())->source());
         svg_path_adapter svg_path(stl_storage);
         svg_renderer_agg<svg_path_adapter,
-            agg::pod_bvector<path_attributes>,
+            svg_attribute_type,
             renderer_type,
-            agg::pixfmt_rgba32> svg_renderer(svg_path,
+            pixfmt_comp_type> svg_renderer(svg_path,
                                                    (*marker.get_vector_data())->attributes());
 
         svg_renderer.render(*ras_ptr, sl, renb, mtx, opacity, bbox);

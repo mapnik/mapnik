@@ -111,9 +111,10 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                                                             rem.maxy() + y_off + height);
                         intersect = t.backward(feature_raster_extent);
 
-                        image_data_32 image(width,height);
-                        reader->read(x_off, y_off, image);
-                        feature->set_raster(boost::make_shared<raster>(intersect, image,reader->premultiplied_alpha()));
+                        mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(intersect, width, height);
+                        reader->read(x_off, y_off, raster->data_);
+                        raster->premultiplied_alpha_ = reader->premultiplied_alpha();
+                        feature->set_raster(raster);
                     }
                 }
             }

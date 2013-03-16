@@ -87,85 +87,87 @@ ogr_index_featureset<filterT>::~ogr_index_featureset() {}
 template <typename filterT>
 feature_ptr ogr_index_featureset<filterT>::next()
 {
-    if (itr_ != ids_.end())
+    while (itr_ != ids_.end())
     {
         int pos = *itr_++;
         layer_.SetNextByIndex (pos);
 
         ogr_feature_ptr feat (layer_.GetNextFeature());
-        if ((*feat) != NULL)
+        if ((*feat) == NULL)
         {
-            // ogr feature ids start at 0, so add one to stay
-            // consistent with other mapnik datasources that start at 1
-            int feature_id = ((*feat)->GetFID() + 1);
-            feature_ptr feature(feature_factory::create(ctx_,feature_id));
-
-            OGRGeometry* geom=(*feat)->GetGeometryRef();
-            if (geom && !geom->IsEmpty())
-            {
-                ogr_converter::convert_geometry (geom, feature);
-            }
-            else
-            {
-                MAPNIK_LOG_DEBUG(ogr) << "ogr_index_featureset: Feature with null geometry=" << (*feat)->GetFID();
-            }
-
-            int fld_count = layerdef_->GetFieldCount();
-            for (int i = 0; i < fld_count; i++)
-            {
-                OGRFieldDefn* fld = layerdef_->GetFieldDefn (i);
-                OGRFieldType type_oid = fld->GetType ();
-                std::string fld_name = fld->GetNameRef ();
-
-                switch (type_oid)
-                {
-                case OFTInteger:
-                {
-                    feature->put(fld_name,(*feat)->GetFieldAsInteger (i));
-                    break;
-                }
-
-                case OFTReal:
-                {
-                    feature->put(fld_name,(*feat)->GetFieldAsDouble (i));
-                    break;
-                }
-
-                case OFTString:
-                case OFTWideString:     // deprecated !
-                {
-                    UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString (i));
-                    feature->put(fld_name,ustr);
-                    break;
-                }
-
-                case OFTIntegerList:
-                case OFTRealList:
-                case OFTStringList:
-                case OFTWideStringList: // deprecated !
-                {
-                    MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
-                    break;
-                }
-
-                case OFTBinary:
-                {
-                    MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
-                    //feature->put(name,feat->GetFieldAsBinary (i, size));
-                    break;
-                }
-
-                case OFTDate:
-                case OFTTime:
-                case OFTDateTime:       // unhandled !
-                {
-                    MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
-                    break;
-                }
-                }
-            }
-            return feature;
+            continue;
         }
+        // ogr feature ids start at 0, so add one to stay
+        // consistent with other mapnik datasources that start at 1
+        int feature_id = ((*feat)->GetFID() + 1);
+        feature_ptr feature(feature_factory::create(ctx_,feature_id));
+
+        OGRGeometry* geom=(*feat)->GetGeometryRef();
+        if (geom && !geom->IsEmpty())
+        {
+            ogr_converter::convert_geometry (geom, feature);
+        }
+        else
+        {
+            MAPNIK_LOG_DEBUG(ogr) << "ogr_index_featureset: Feature with null geometry=" << (*feat)->GetFID();
+            continue;
+        }
+
+        int fld_count = layerdef_->GetFieldCount();
+        for (int i = 0; i < fld_count; i++)
+        {
+            OGRFieldDefn* fld = layerdef_->GetFieldDefn (i);
+            OGRFieldType type_oid = fld->GetType ();
+            std::string fld_name = fld->GetNameRef ();
+
+            switch (type_oid)
+            {
+            case OFTInteger:
+            {
+                feature->put(fld_name,(*feat)->GetFieldAsInteger (i));
+                break;
+            }
+
+            case OFTReal:
+            {
+                feature->put(fld_name,(*feat)->GetFieldAsDouble (i));
+                break;
+            }
+
+            case OFTString:
+            case OFTWideString:     // deprecated !
+            {
+                UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString (i));
+                feature->put(fld_name,ustr);
+                break;
+            }
+
+            case OFTIntegerList:
+            case OFTRealList:
+            case OFTStringList:
+            case OFTWideStringList: // deprecated !
+            {
+                MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
+                break;
+            }
+
+            case OFTBinary:
+            {
+                MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
+                //feature->put(name,feat->GetFieldAsBinary (i, size));
+                break;
+            }
+
+            case OFTDate:
+            case OFTTime:
+            case OFTDateTime:       // unhandled !
+            {
+                MAPNIK_LOG_WARN(ogr) << "ogr_index_featureset: Unhandled type_oid=" << type_oid;
+                break;
+            }
+            }
+        }
+        return feature;
     }
 
     return feature_ptr();

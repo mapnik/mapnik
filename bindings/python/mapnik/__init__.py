@@ -778,11 +778,11 @@ class _TextSymbolizer(TextSymbolizer,_injector):
 
     @property
     def wrap_before(self):
-        return self.properties.wrap_before
+        return self.format.wrap_before
 
     @wrap_before.setter
     def wrap_before(self, wrap_before):
-        self.properties.wrap_before = wrap_before
+        self.format.wrap_before = wrap_before
 
 
     @property

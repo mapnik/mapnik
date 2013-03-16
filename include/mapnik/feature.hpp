@@ -257,7 +257,7 @@ public:
         return result;
     }
 
-    const raster_ptr& get_raster() const
+    raster_ptr const& get_raster() const
     {
         return raster_;
     }

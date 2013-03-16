@@ -140,7 +140,7 @@ def test_render_points():
         p = mapnik.Projection(projs[projdescr])
         m.zoom_to_box(p.forward(mapnik.Box2d(ul_lonlat,lr_lonlat)))
         # Render to SVG so that it can be checked how many points are there with string comparison
-        svg_file = os.path.join(tempfile.gettempdir(),'%s.svg')
+        svg_file = os.path.join(tempfile.gettempdir(), 'mapnik-render-points-%s.svg' % projdescr)
         mapnik.render_to_file(m, svg_file)
         num_points_present = len(ds.all_features())
         svg = open(svg_file,'r').read()
