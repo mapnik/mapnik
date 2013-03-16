@@ -1,3 +1,10 @@
+UNAME := $(shell uname)
+LINK_FIX=LD_LIBRARY_PATH
+ifeq ($(UNAME), Darwin)
+	LINK_FIX=DYLD_LIBRARY_PATH
+else
+endif
+
 all: mapnik
 
 install:
@@ -30,6 +37,14 @@ test:
 	done
 	@echo "*** Running python tests..."
 	@python tests/run_tests.py -q
+
+test-local:
+	@echo "*** boostrapping local test environment..."
+	export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	export PYTHONPATH=`pwd`/bindings/python/:${PYTHONPATH} && \
+	export MAPNIK_FONT_DIRECTORY=`pwd`/fonts/dejavu-fonts-ttf-2.33/ttf/ && \
+	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \
+	make test
 
 demo:
 	@echo "*** Running rundemo.cpp…"

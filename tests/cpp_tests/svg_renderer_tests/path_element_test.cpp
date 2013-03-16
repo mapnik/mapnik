@@ -21,7 +21,7 @@
 #include <fstream>
 #include <iterator>
 
-namespace filesystem = boost::filesystem;
+namespace fs = boost::filesystem;
 using namespace mapnik;
 
 void prepare_map(Map& m)
@@ -205,10 +205,10 @@ void render_to_file(Map const& m, const std::string output_filename)
 
         output_stream.close();
 
-        filesystem::path output_filename_path =
-            filesystem::system_complete(filesystem::path(".")) / filesystem::path(output_filename);
+        fs::path output_filename_path =
+            fs::system_complete(fs::path(".")) / fs::path(output_filename);
 
-        BOOST_CHECK_MESSAGE(filesystem::exists(output_filename_path),
+        BOOST_CHECK_MESSAGE(fs::exists(output_filename_path),
                             "File '"+output_filename_path.string()+"' was created.");
     }
     else

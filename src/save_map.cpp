@@ -98,6 +98,10 @@ public:
         {
             set_attr( sym_node, "rasterizer", sym.get_rasterizer() );
         }
+        if ( sym.get_offset() != dfl.get_offset() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "offset", sym.get_offset() );
+        }
         serialize_symbolizer_base(sym_node, sym);
     }
 
@@ -318,6 +322,10 @@ public:
         if (sym.get_marker_placement() != dfl.get_marker_placement() || explicit_defaults_)
         {
             set_attr( sym_node, "placement", sym.get_marker_placement() );
+        }
+        if ( sym.get_marker_multi_policy() != dfl.get_marker_multi_policy() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "multi-policy", sym.get_marker_multi_policy() );
         }
         if (sym.get_image_transform())
         {

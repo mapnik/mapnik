@@ -82,6 +82,8 @@ public:
 
     ~hit_grid() {}
 
+    void clear();
+
     inline void painted(bool painted)
     {
         painted_ = painted;

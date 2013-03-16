@@ -42,54 +42,60 @@ class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<Out
                                  private boost::noncopyable
 {
 public:
+    typedef svg_renderer<OutputIterator> processor_impl_type;
     svg_renderer(Map const& m, OutputIterator& output_iterator, unsigned offset_x=0, unsigned offset_y=0);
     ~svg_renderer();
 
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
-    void start_layer_processing(layer const& lay);
+    void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
+    void start_style_processing(feature_type_style const& st) {}
+    void end_style_processing(feature_type_style const& st) {}
 
     /*!
      * @brief Overloads that process each kind of symbolizer individually.
      */
     void process(point_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(line_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(line_pattern_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(polygon_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(polygon_pattern_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(raster_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(shield_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(text_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(building_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
     void process(markers_symbolizer const& sym,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
+    void process(debug_symbolizer const& sym,
+                 mapnik::feature_impl & feature,
+                 proj_transform const& prj_trans) {}
 
     /*!
      * @brief Overload that process the whole set of symbolizers of a rule.
      * @return true, meaning that this renderer can process multiple symbolizers.
      */
     bool process(rule::symbolizers const& syms,
-                 Feature const& feature,
+                 mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
 
     void painted(bool painted)
@@ -114,6 +120,7 @@ private:
     CoordTransform t_;
     svg::svg_generator<OutputIterator> generator_;
     svg::path_output_attributes path_attributes_;
+    box2d<double> query_extent_;
     bool painted_;
 
     /*!
@@ -125,7 +132,7 @@ private:
     struct symbol_dispatch : public boost::static_visitor<>
     {
         symbol_dispatch(svg_renderer<OutputIterator>& processor,
-                        Feature const& feature,
+                        mapnik::feature_impl & feature,
                         proj_transform const& prj_trans)
             : processor_(processor),
               feature_(feature),
@@ -138,7 +145,7 @@ private:
         }
 
         svg_renderer<OutputIterator>& processor_;
-        Feature const& feature_;
+        mapnik::feature_impl & feature_;
         proj_transform const& prj_trans_;
     };
 };

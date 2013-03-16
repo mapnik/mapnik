@@ -137,8 +137,8 @@ public:
     const std::vector<rgb>& palette() const;
     const std::vector<unsigned>& alphaTable() const;
 
-    unsigned quantize(rgba const& c) const;
-    inline unsigned quantize(unsigned const& c) const
+    unsigned char quantize(rgba const& c) const;
+    inline unsigned char quantize(unsigned const& c) const
     {
         rgba_hash_table::const_iterator it = color_hashmap_.find(c);
         if (it != color_hashmap_.end())

@@ -21,7 +21,7 @@
 #include <fstream>
 #include <iterator>
 
-namespace filesystem = boost::filesystem;
+namespace fs = boost::filesystem;
 
 /*
  * This test case tests the generation of an SVG document
@@ -57,10 +57,10 @@ BOOST_AUTO_TEST_CASE(file_output_test_case)
 
         output_stream.close();
 
-        filesystem::path output_filename_path =
-            filesystem::system_complete(filesystem::path(".")) / filesystem::path(output_filename);
+        fs::path output_filename_path =
+            fs::system_complete(fs::path(".")) / fs::path(output_filename);
 
-        BOOST_CHECK_MESSAGE(filesystem::exists(output_filename_path), "File '"+output_filename_path.string()+"' was created.");
+        BOOST_CHECK_MESSAGE(fs::exists(output_filename_path), "File '"+output_filename_path.string()+"' was created.");
     }
     else
     {

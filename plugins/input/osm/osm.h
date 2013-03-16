@@ -49,13 +49,17 @@ public:
 
     polygon_types()
     {
+        ptypes.push_back(std::pair<std::string, std::string>("water", ""));
+        ptypes.push_back(std::pair<std::string, std::string>("aeroway", ""));
+        ptypes.push_back(std::pair<std::string, std::string>("building", ""));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "wood"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "water"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "heath"));
         ptypes.push_back(std::pair<std::string, std::string>("natural", "marsh"));
         ptypes.push_back(std::pair<std::string, std::string>("military", "danger_area"));
-        ptypes.push_back(std::pair<std::string, std::string>("landuse","forest"));
-        ptypes.push_back(std::pair<std::string, std::string>("landuse","industrial"));
+        ptypes.push_back(std::pair<std::string, std::string>("landuse", "forest"));
+        ptypes.push_back(std::pair<std::string, std::string>("landuse", "industrial"));
+        ptypes.push_back(std::pair<std::string, std::string>("leisure", "park"));
     }
 };
 

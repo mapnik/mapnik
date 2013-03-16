@@ -90,9 +90,13 @@ transform_type const& symbolizer_base::get_transform() const
 std::string symbolizer_base::get_transform_string() const
 {
     if (affine_transform_)
+    {
         return transform_processor_type::to_string(*affine_transform_);
+    }
     else
+    {
         return std::string();
+    }
 }
 
 void symbolizer_base::set_clip(bool clip)
@@ -190,9 +194,13 @@ transform_type const& symbolizer_with_image::get_image_transform() const
 std::string symbolizer_with_image::get_image_transform_string() const
 {
     if (image_transform_)
+    {
         return transform_processor_type::to_string(*image_transform_);
+    }
     else
+    {
         return std::string();
+    }
 }
 
 } // end of namespace mapnik

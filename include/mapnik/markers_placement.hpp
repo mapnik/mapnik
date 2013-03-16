@@ -60,19 +60,34 @@ public:
      *                 converted to a positive value with similar magnitude, but
      *                 choosen to optimize marker placement. 0 = no markers
      */
-    markers_placement(Locator &locator, box2d<double> const& size, agg::trans_affine const& tr, Detector &detector, double spacing, double max_error, bool allow_overlap)
+    markers_placement(Locator &locator,
+                      box2d<double> const& size,
+                      agg::trans_affine const& tr,
+                      Detector &detector,
+                      double spacing,
+                      double max_error,
+                      bool allow_overlap)
       : locator_(locator),
         size_(size),
         tr_(tr),
         detector_(detector),
         max_error_(max_error),
-        allow_overlap_(allow_overlap)
+        allow_overlap_(allow_overlap),
+        marker_width_((size_ * tr_).width()),
+        done_(false),
+        last_x(.0),
+        last_y(.0),
+        next_x(.0),
+        next_y(.0),
+        error_(.0),
+        spacing_left_(.0),
+        marker_nr_(0)
     {
-      marker_width_ = (size_ * tr_).width();
       if (spacing >= 0)
       {
           spacing_ = spacing;
-      } else if (spacing < 0)
+      }
+      else if (spacing < 0)
       {
           spacing_ = find_optimal_spacing(-spacing);
       }
@@ -104,7 +119,10 @@ public:
      */
     bool get_point(double & x, double  & y, double & angle,  bool add_to_detector = true)
     {
-        if (done_) return false;
+        if (done_)
+        {
+            return false;
+        }
         unsigned cmd;
         /* This functions starts at the position of the previous marker,
            walks along the path, counting how far it has to go in spacing_left.
@@ -120,7 +138,8 @@ public:
         {
             //First marker
             spacing_left_ = spacing_ / 2;
-        } else
+        }
+        else
         {
             spacing_left_ = spacing_;
         }
@@ -150,7 +169,7 @@ public:
             double segment_length = std::sqrt(dx * dx + dy * dy);
             if (segment_length <= spacing_left_)
             {
-                //Segment is to short to place marker. Find next segment
+                //Segment is too short to place marker. Find next segment
                 spacing_left_ -= segment_length;
                 last_x = next_x;
                 last_y = next_y;
@@ -178,7 +197,8 @@ public:
                 //Segment to short => Skip this segment
                 set_spacing_left(segment_length + marker_width_/2); //Only moves forward
                 continue;
-            } else if (segment_length - spacing_left_ < marker_width_/2)
+            }
+            else if (segment_length - spacing_left_ < marker_width_/2)
             {
                 //Segment is long enough, but we are to close to the end
                 //Note: This function moves backwards. This could lead to an infinite
@@ -187,7 +207,8 @@ public:
                 if (error_ == 0)
                 {
                     set_spacing_left(segment_length - marker_width_/2, true);
-                } else
+                }
+                else
                 {
                     //Skip this segment
                     set_spacing_left(segment_length + marker_width_/2); //Only moves forward
@@ -217,13 +238,15 @@ private:
     agg::trans_affine tr_;
     Detector &detector_;
     double spacing_;
-    double marker_width_;
     double max_error_;
     bool allow_overlap_;
+    double marker_width_;
 
     bool done_;
-    double last_x, last_y;
-    double next_x, next_y;
+    double last_x;
+    double last_y;
+    double next_x;
+    double next_y;
     /** If a marker could not be placed at the exact point where it should
      * go the next marker's distance will be a bit lower. */
     double error_;

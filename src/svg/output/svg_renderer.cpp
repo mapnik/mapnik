@@ -76,7 +76,7 @@ void svg_renderer<T>::end_map_processing(Map const& map)
 }
 
 template <typename T>
-void svg_renderer<T>::start_layer_processing(layer const& lay)
+void svg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
     MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: Start layer processing=" << lay.name();
 }

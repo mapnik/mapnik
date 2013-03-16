@@ -57,7 +57,7 @@ shape_featureset<filterT>::shape_featureset(filterT const& filter,
 template <typename filterT>
 feature_ptr shape_featureset<filterT>::next()
 {
-    if (row_limit_ && count_ > row_limit_)
+    if (row_limit_ && count_ >= row_limit_)
     {
         return feature_ptr();
     }

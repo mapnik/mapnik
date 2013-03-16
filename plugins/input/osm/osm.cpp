@@ -254,7 +254,7 @@ bool osm_way::is_polygon()
     for (unsigned int count = 0; count < ptypes.ptypes.size(); ++count)
     {
         if (keyvals.find(ptypes.ptypes[count].first) != keyvals.end() &&
-            keyvals[ptypes.ptypes[count].first] == ptypes.ptypes[count].second)
+            (ptypes.ptypes[count].second.empty() || keyvals[ptypes.ptypes[count].first] == ptypes.ptypes[count].second))
         {
             return true;
         }

@@ -100,6 +100,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    miniz_png.cpp
     color.cpp
     css_color_grammar.cpp
     conversions.cpp
@@ -292,26 +293,26 @@ source += Split(
     """)
 
 # https://github.com/mapnik/mapnik/issues/1438
-#if env['SVG_RENDERER']: # svg backend
-#    source += Split(
-#              """
-#        svg/output/svg_renderer.cpp
-#        svg/output/svg_generator.cpp
-#        svg/output/svg_output_attributes.cpp
-#        svg/output/process_symbolizers.cpp
-#        svg/output/process_building_symbolizer.cpp
-#        svg/output/process_line_pattern_symbolizer.cpp
-#        svg/output/process_line_symbolizer.cpp
-#        svg/output/process_markers_symbolizer.cpp
-#        svg/output/process_point_symbolizer.cpp
-#        svg/output/process_polygon_pattern_symbolizer.cpp
-#        svg/output/process_polygon_symbolizer.cpp
-#        svg/output/process_raster_symbolizer.cpp
-#        svg/output/process_shield_symbolizer.cpp
-#        svg/output/process_text_symbolizer.cpp
-#        """)
-#    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
-#    libmapnik_cxxflags.append('-DSVG_RENDERER')
+if env['SVG_RENDERER']: # svg backend
+    source += Split(
+    """
+    svg/output/svg_renderer.cpp
+    svg/output/svg_generator.cpp
+    svg/output/svg_output_attributes.cpp
+    svg/output/process_symbolizers.cpp
+    svg/output/process_building_symbolizer.cpp
+    svg/output/process_line_pattern_symbolizer.cpp
+    svg/output/process_line_symbolizer.cpp
+    svg/output/process_markers_symbolizer.cpp
+    svg/output/process_point_symbolizer.cpp
+    svg/output/process_polygon_pattern_symbolizer.cpp
+    svg/output/process_polygon_symbolizer.cpp
+    svg/output/process_raster_symbolizer.cpp
+    svg/output/process_shield_symbolizer.cpp
+    svg/output/process_text_symbolizer.cpp
+    """)
+    lib_env.Append(CXXFLAGS = '-DSVG_RENDERER')
+    libmapnik_cxxflags.append('-DSVG_RENDERER')
 
 if env['XMLPARSER'] == 'libxml2' and env['HAS_LIBXML2']:
     source += Split(

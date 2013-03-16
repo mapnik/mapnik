@@ -112,7 +112,7 @@ struct expression_string : boost::static_visitor<void>
 #else
         str_ += x.pattern.str();
         str_ +="','";
-        str_ += x.pattern.str();
+        str_ += x.format;
 #endif
         str_ +="')";
     }

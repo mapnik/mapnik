@@ -238,7 +238,9 @@ unsigned Map::height() const
 
 void Map::set_width(unsigned width)
 {
-    if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE)
+    if (width != width_ &&
+        width >= MIN_MAPSIZE &&
+        width <= MAX_MAPSIZE)
     {
         width_=width;
         fixAspectRatio();
@@ -247,7 +249,9 @@ void Map::set_width(unsigned width)
 
 void Map::set_height(unsigned height)
 {
-    if (height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
+    if (height != height_ &&
+        height >= MIN_MAPSIZE &&
+        height <= MAX_MAPSIZE)
     {
         height_=height;
         fixAspectRatio();
@@ -256,8 +260,12 @@ void Map::set_height(unsigned height)
 
 void Map::resize(unsigned width,unsigned height)
 {
-    if (width >= MIN_MAPSIZE && width <= MAX_MAPSIZE &&
-        height >= MIN_MAPSIZE && height <= MAX_MAPSIZE)
+    if (width != width_ &&
+        height != height_ &&
+        width >= MIN_MAPSIZE &&
+        width <= MAX_MAPSIZE &&
+        height >= MIN_MAPSIZE &&
+        height <= MAX_MAPSIZE)
     {
         width_=width;
         height_=height;
@@ -346,8 +354,10 @@ void Map::zoom_all()
 {
     try
     {
-        if (!layers_.size() > 0)
+        if (layers_.empty())
+        {
             return;
+        }
         projection proj0(srs_);
         box2d<double> ext;
         bool success = false;
@@ -575,7 +585,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
     {
         std::ostringstream s;
         s << "Invalid layer index passed to query_point: '" << index << "'";
-        if (layers_.size() > 0) s << " for map with " << layers_.size() << " layers(s)";
+        if (!layers_.empty()) s << " for map with " << layers_.size() << " layers(s)";
         else s << " (map has no layers)";
         throw std::out_of_range(s.str());
     }

@@ -23,7 +23,6 @@
 #include "ogr_datasource.hpp"
 #include "ogr_featureset.hpp"
 #include "ogr_index_featureset.hpp"
-#include "ogr_feature_ptr.hpp"
 
 #include <gdal_version.h>
 
@@ -394,10 +393,10 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                     // only new either reset of setNext
                     //layer->ResetReading();
                     layer->SetNextByIndex(0);
-                    ogr_feature_ptr feat(layer->GetNextFeature());
-                    if ((*feat) != NULL)
+                    OGRFeature *poFeature;
+                    while ((poFeature = layer->GetNextFeature()) != NULL)
                     {
-                        OGRGeometry* geom = (*feat)->GetGeometryRef();
+                        OGRGeometry* geom = poFeature->GetGeometryRef();
                         if (geom && ! geom->IsEmpty())
                         {
                             switch (wkbFlatten(geom->getGeometryType()))
@@ -422,6 +421,8 @@ boost::optional<mapnik::datasource::geometry_t> ogr_datasource::get_geometry_typ
                                 break;
                             }
                         }
+                        OGRFeature::DestroyFeature( poFeature );
+                        break;
                     }
                 }
                 break;

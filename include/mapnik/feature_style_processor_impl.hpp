@@ -296,7 +296,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             {
                 if (style->active(scale_denom))
                 {
-                    std::clog << "triggering\n";
                     // trigger any needed compositing ops
                     p.start_style_processing(*style);
                     p.end_style_processing(*style);
@@ -459,7 +458,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
         else if (cache_features)
         {
-            memory_datasource cache;
+            memory_datasource cache(ds->type());
             featureset_ptr features = ds->features(q);
             if (features) {
                 // Cache all features into the memory_datasource before rendering.

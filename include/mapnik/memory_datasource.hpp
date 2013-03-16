@@ -36,7 +36,7 @@ class MAPNIK_DECL memory_datasource : public datasource
 {
     friend class memory_featureset;
 public:
-    memory_datasource();
+    memory_datasource(datasource::datasource_t type=datasource::Vector);
     virtual ~memory_datasource();
     void push(feature_ptr feature);
     datasource::datasource_t type() const;
@@ -50,6 +50,7 @@ public:
 private:
     std::vector<feature_ptr> features_;
     mapnik::layer_descriptor desc_;
+    datasource::datasource_t type_;
 };
 
 }

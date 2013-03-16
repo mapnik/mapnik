@@ -59,9 +59,18 @@ struct default_color_converter_impl< rgb_t, hsl_t >
       bits32f temp_blue  = channel_convert<bits32f>( get_color( src, blue_t()  ));
 
       bits32f hue, saturation, lightness;
+      bits32f min_color, max_color;
 
-      bits32f min_color = std::min( temp_red, std::min( temp_green, temp_blue ));
-      bits32f max_color = std::max( temp_red, std::max( temp_green, temp_blue ));
+      if( temp_red < temp_green )
+      {
+          min_color = std::min( temp_blue, temp_red );
+          max_color = std::max( temp_blue, temp_green );
+      }
+      else
+      {
+          min_color = std::min( temp_blue, temp_green );
+          max_color = std::max( temp_blue, temp_red );
+      }
 
       if ( max_color - min_color < 0.001 )
       {

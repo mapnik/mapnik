@@ -35,7 +35,6 @@
 // ogr
 #include "ogr_featureset.hpp"
 #include "ogr_converter.hpp"
-#include "ogr_feature_ptr.hpp"
 
 using mapnik::query;
 using mapnik::box2d;
@@ -84,23 +83,24 @@ ogr_featureset::~ogr_featureset()
 
 feature_ptr ogr_featureset::next()
 {
-    ogr_feature_ptr feat (layer_.GetNextFeature());
-
-    while ((*feat) != NULL)
+    OGRFeature *poFeature;
+    while ((poFeature = layer_.GetNextFeature()) != NULL)
     {
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1
-        const int feature_id = ((*feat)->GetFID() + 1);
+        const int feature_id = (poFeature->GetFID() + 1);
         feature_ptr feature(feature_factory::create(ctx_,feature_id));
 
-        OGRGeometry* geom = (*feat)->GetGeometryRef();
+        OGRGeometry* geom = poFeature->GetGeometryRef();
         if (geom && ! geom->IsEmpty())
         {
             ogr_converter::convert_geometry(geom, feature);
         }
         else
         {
-            MAPNIK_LOG_DEBUG(ogr) << "ogr_featureset: Feature with null geometry=" << (*feat)->GetFID();
+            MAPNIK_LOG_DEBUG(ogr) << "ogr_featureset: Feature with null geometry="
+                << poFeature->GetFID();
+            OGRFeature::DestroyFeature( poFeature );
             continue;
         }
 
@@ -117,20 +117,20 @@ feature_ptr ogr_featureset::next()
             {
             case OFTInteger:
             {
-                feature->put( fld_name, (*feat)->GetFieldAsInteger(i));
+                feature->put( fld_name, poFeature->GetFieldAsInteger(i));
                 break;
             }
 
             case OFTReal:
             {
-                feature->put( fld_name, (*feat)->GetFieldAsDouble(i));
+                feature->put( fld_name, poFeature->GetFieldAsDouble(i));
                 break;
             }
 
             case OFTString:
             case OFTWideString:     // deprecated !
             {
-                UnicodeString ustr = tr_->transcode((*feat)->GetFieldAsString(i));
+                UnicodeString ustr = tr_->transcode(poFeature->GetFieldAsString(i));
                 feature->put( fld_name, ustr);
                 break;
             }
@@ -166,6 +166,7 @@ feature_ptr ogr_featureset::next()
             }
             }
         }
+        OGRFeature::DestroyFeature( poFeature );
         return feature;
     }
 

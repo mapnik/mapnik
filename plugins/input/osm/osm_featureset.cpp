@@ -45,7 +45,6 @@ osm_featureset<filterT>::osm_featureset(const filterT& filter,
     : filter_(filter),
       query_ext_(),
       tr_(new transcoder(encoding)),
-      feature_id_(1),
       dataset_ (dataset),
       attribute_names_ (attribute_names),
       ctx_(boost::make_shared<mapnik::context_type>())
@@ -62,8 +61,7 @@ feature_ptr osm_featureset<filterT>::next()
     if (!cur_item) return feature_ptr();
     if (dataset_->current_item_is_node())
     {
-        feature = feature_factory::create(ctx_, feature_id_);
-        ++feature_id_;
+        feature = feature_factory::create(ctx_, cur_item->id);
         double lat = static_cast<osm_node*>(cur_item)->lat;
         double lon = static_cast<osm_node*>(cur_item)->lon;
         geometry_type* point = new geometry_type(mapnik::Point);
@@ -83,8 +81,7 @@ feature_ptr osm_featureset<filterT>::next()
         }
 
         if (!cur_item) return feature_ptr();
-        feature = feature_factory::create(ctx_, feature_id_);
-        ++feature_id_;
+        feature = feature_factory::create(ctx_, cur_item->id);
         geometry_type* geom;
         if (static_cast<osm_way*>(cur_item)->is_polygon())
         {

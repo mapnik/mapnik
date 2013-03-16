@@ -62,9 +62,10 @@ struct accumulate_extent
     bool first_;
 };
 
-memory_datasource::memory_datasource()
+memory_datasource::memory_datasource(datasource::datasource_t type)
     : datasource(parameters()),
-      desc_("in-memory datasource","utf-8") {}
+      desc_("in-memory datasource","utf-8"),
+      type_(type) {}
 
 memory_datasource::~memory_datasource() {}
 
@@ -77,7 +78,7 @@ void memory_datasource::push(feature_ptr feature)
 
 datasource::datasource_t memory_datasource::type() const
 {
-    return datasource::Vector;
+    return type_;
 }
 
 featureset_ptr memory_datasource::features(const query& q) const

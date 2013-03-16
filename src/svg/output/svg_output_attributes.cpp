@@ -22,7 +22,7 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/svg/svg_output_attributes.hpp>
+#include <mapnik/svg/output/svg_output_attributes.hpp>
 
 namespace mapnik { namespace svg {
 

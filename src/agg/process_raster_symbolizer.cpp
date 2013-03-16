@@ -82,7 +82,10 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
             }
             if (premultiply_source)
             {
-                agg::rendering_buffer buffer(source->data_.getBytes(),source->data_.width(),source->data_.height(),source->data_.width() * 4);
+                agg::rendering_buffer buffer(source->data_.getBytes(),
+                                             source->data_.width(),
+                                             source->data_.height(),
+                                             source->data_.width() * 4);
                 agg::pixfmt_rgba32 pixf(buffer);
                 pixf.premultiply();
             }
@@ -100,7 +103,10 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
             {
                 if (scaling_method == SCALING_BILINEAR8)
                 {
-                    scale_image_bilinear8<image_data_32>(target.data_,source->data_, 0.0, 0.0);
+                    scale_image_bilinear8<image_data_32>(target.data_,
+                                                         source->data_,
+                                                         0.0,
+                                                         0.0);
                 }
                 else
                 {
