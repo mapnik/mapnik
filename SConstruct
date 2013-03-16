@@ -663,15 +663,16 @@ def update_linux_project_files():
     ]
 
     def iterate_dirs(headers_content, source_content, d):
-        for root, subFolders, files in os.walk(d):
-            for f in files:
-                if f.endswith(".h") or f.endswith(".hpp"):
-                    headers_content.append("  ../%s \\" % os.path.join(root, f))
-                if f.endswith(".cpp") or f.endswith(".c"):
-                    source_content.append("  ../%s \\" % os.path.join(root, f))
-            for sd in subFolders:
-                headers_content, source_content = \
-                    iterate_dirs(headers_content, source_content, sd)
+        if not "uninstall-" in d:
+            for root, subFolders, files in os.walk(d):
+                for f in files:
+                    if f.endswith(".h") or f.endswith(".hpp"):
+                        headers_content.append("  ../%s \\" % os.path.join(root, f))
+                    if f.endswith(".cpp") or f.endswith(".c"):
+                        source_content.append("  ../%s \\" % os.path.join(root, f))
+                for sd in subFolders:
+                    headers_content, source_content = \
+                        iterate_dirs(headers_content, source_content, os.path.join(root, sd))
         return headers_content, source_content
 
     for d in directories:

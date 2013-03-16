@@ -16,7 +16,7 @@
 #ifndef AGG_GLYPH_RASTER_BIN_INCLUDED
 #define AGG_GLYPH_RASTER_BIN_INCLUDED
 
-#include <string.h>
+#include <cstring>
 #include "agg_basics.h"
 
 namespace agg

@@ -16,8 +16,8 @@
 #ifndef AGG_PATH_STORAGE_INCLUDED
 #define AGG_PATH_STORAGE_INCLUDED
 
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 #include "agg_math.h"
 #include "agg_array.h"
 #include "agg_bezier_arc.h"

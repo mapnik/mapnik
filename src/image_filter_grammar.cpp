@@ -44,10 +44,17 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
     using qi::_1;
     using qi::_a;
     using qi::_b;
+    using qi::_c;
+    using qi::_d;
+    using qi::_e;
+    using qi::_f;
+    using qi::_g;
+    using qi::_h;
     using qi::_r1;
     using qi::eps;
     using qi::char_;
     using qi::lexeme;
+    using qi::double_;
     using boost::spirit::ascii::string;
     using phoenix::push_back;
     using phoenix::construct;
@@ -62,42 +69,55 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
 #endif
 
     filter =
-        lit("emboss")[push_back(_val,construct<mapnik::filter::emboss>())]
+        lit("emboss") >> no_args [push_back(_val,construct<mapnik::filter::emboss>())]
         |
-        lit("blur")[push_back(_val,construct<mapnik::filter::blur>())]
+        lit("blur") >> no_args [push_back(_val,construct<mapnik::filter::blur>())]
         |
-        lit("gray")[push_back(_val,construct<mapnik::filter::gray>())]
+        lit("gray") >> no_args [push_back(_val,construct<mapnik::filter::gray>())]
         |
-        lit("edge-detect")[push_back(_val,construct<mapnik::filter::edge_detect>())]
+        lit("edge-detect") >> no_args [push_back(_val,construct<mapnik::filter::edge_detect>())]
         |
-        lit("sobel")[push_back(_val,construct<mapnik::filter::sobel>())]
+        lit("sobel") >> no_args [push_back(_val,construct<mapnik::filter::sobel>())]
         |
-        lit("sharpen")[push_back(_val,construct<mapnik::filter::sharpen>())]
+        lit("sharpen") >> no_args [push_back(_val,construct<mapnik::filter::sharpen>())]
         |
-        lit("x-gradient")[push_back(_val,construct<mapnik::filter::x_gradient>())]
+        lit("x-gradient") >> no_args [push_back(_val,construct<mapnik::filter::x_gradient>())]
         |
-        lit("y-gradient")[push_back(_val,construct<mapnik::filter::y_gradient>())]
+        lit("y-gradient") >> no_args [push_back(_val,construct<mapnik::filter::y_gradient>())]
         |
-        lit("invert")[push_back(_val,construct<mapnik::filter::invert>())]
+        lit("invert") >> no_args [push_back(_val,construct<mapnik::filter::invert>())]
         |
         agg_blur_filter(_val)
         |
         hsla_filter(_val)
+        |
+        colorize_alpha_filter(_val)
         ;
 
-    agg_blur_filter = (lit("agg-stack-blur")[_a = 1, _b = 1]
-        >> -( lit('(') >> radius_[_a = _1]
-              >> lit(',')
-              >> radius_[_b = _1]
-              >> lit(')')))
+    agg_blur_filter = lit("agg-stack-blur")[_a = 1, _b = 1]
+        >> -( lit('(') >> -( radius_[_a = _1][_b = _1]
+                             >> -(lit(',') >> radius_[_b = _1]))
+              >> lit(')'))
         [push_back(_r1,construct<mapnik::filter::agg_stack_blur>(_a,_b))]
         ;
 
-    hsla_filter = (lit("hsla") >> lit('(') >> string_arg[_a = _1] >> lit(')'))
-        [push_back(_r1,construct<mapnik::filter::hsla>(_a))]
+    hsla_filter = lit("hsla")
+        >> lit('(')
+        >> double_[_a = _1] >> lit('x') >> double_[_b = _1] >> lit(';')
+        >> double_[_c = _1] >> lit('x') >> double_[_d = _1] >> lit(';')
+        >> double_[_e = _1] >> lit('x') >> double_[_f = _1] >> lit(';')
+        >> double_[_g = _1] >> lit('x') >> double_[_h = _1] >> lit(')')
+        [push_back(_r1, construct<mapnik::filter::hsla>(_a,_b,_c,_d,_e,_f,_g,_h))]
         ;
 
-    string_arg = +~char_(')');
+    colorize_alpha_filter = lit("colorize-alpha")
+        >> lit('(')
+        >> css_color_[_a = _1] >> lit(',')
+        >> css_color_[_b = _1] >> lit(')')
+        [push_back(_r1,construct<mapnik::filter::colorize_alpha>(_a,_b))]
+        ;
+
+    no_args = -(lit('(') >> lit(')'));
 }
 
 template struct mapnik::image_filter_grammar<std::string::const_iterator,std::vector<mapnik::filter::filter_type> >;

@@ -19,7 +19,7 @@
 #ifndef AGG_ALPHA_MASK_U8_INCLUDED
 #define AGG_ALPHA_MASK_U8_INCLUDED
 
-#include <string.h>
+#include <cstring>
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 

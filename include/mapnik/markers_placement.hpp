@@ -174,7 +174,7 @@ public:
                     last_x = next_x;
                     last_y = next_y;
                 }
-                if (agg::is_stop(cmd))
+                if (agg::is_stop(cmd) || cmd == SEG_CLOSE)
                 {
                     done_ = true;
                     return false;

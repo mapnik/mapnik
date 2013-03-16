@@ -16,7 +16,7 @@
 #ifndef AGG_GAMMA_FUNCTIONS_INCLUDED
 #define AGG_GAMMA_FUNCTIONS_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 namespace agg

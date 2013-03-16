@@ -68,6 +68,10 @@ public:
     T miny() const;
     T maxx() const;
     T maxy() const;
+    void set_minx(T v);
+    void set_miny(T v);
+    void set_maxx(T v);
+    void set_maxy(T v);
     T width() const;
     T height() const;
     void width(T w);

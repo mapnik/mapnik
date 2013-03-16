@@ -177,22 +177,13 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
         poly->move_to(x, y);
         double start_x = x;
         double start_y = y;
-        for (int j=start+1;j<end-1;j++)
+        for (int j=start+1;j<end;j++)
         {
             x = record.read_double();
             y = record.read_double();
             poly->line_to(x, y);
         }
-        x = record.read_double();
-        y = record.read_double();
-        if (x == start_x && y == start_y)
-        {
-            poly->close(x, y);
-        }
-        else
-        {
-            poly->line_to(x, y);
-        }
+        poly->close_path();
         geom.push_back(poly);
     }
 }

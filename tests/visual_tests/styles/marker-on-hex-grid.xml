@@ -1,0 +1,24 @@
+<!DOCTYPE Map>
+<Map background-color="white" srs="+init=epsg:4326" minimum-version="0.7.2">
+    <Style name="1">
+        <Rule>
+            <LineSymbolizer stroke-width=".2" stroke="grey"/>
+            <MarkersSymbolizer
+                allow-overlap="true"
+                clip="true"
+                file="shape://arrow"
+                transform="scale(.5,.5)"
+                placement="line"
+                spacing="50"
+            />
+        </Rule>
+    </Style>
+    <Layer name="point" srs="+init=epsg:4326">
+        <StyleName>1</StyleName>
+        <Datasource>
+            <Parameter name="type">shape</Parameter>
+            <Parameter name="file">../data/hex.shp</Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>

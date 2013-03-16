@@ -16,8 +16,8 @@
 #ifndef AGG_SCANLINE_BOOLEAN_ALGEBRA_INCLUDED
 #define AGG_SCANLINE_BOOLEAN_ALGEBRA_INCLUDED
 
-#include <stdlib.h>
-#include <math.h>
+#include <cstdlib>
+#include <cmath>
 #include "agg_basics.h"
 
 

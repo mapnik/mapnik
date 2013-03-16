@@ -17,7 +17,7 @@
 #define AGG_PIXFMT_AMASK_ADAPTOR_INCLUDED
 
 
-#include <string.h>
+#include <cstring>
 #include "agg_array.h"
 #include "agg_rendering_buffer.h"
 

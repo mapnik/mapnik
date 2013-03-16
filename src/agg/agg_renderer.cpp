@@ -270,13 +270,12 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
         {
             composite(pixmap_.data(),current_buffer_->data(), src_over, st.get_opacity(), 0, 0, false);
         }
-
-        // apply any 'direct' image filters
-        mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
-        BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.direct_image_filters())
-        {
-            boost::apply_visitor(visitor, filter_tag);
-        }
+    }
+    // apply any 'direct' image filters
+    mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
+    BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.direct_image_filters())
+    {
+        boost::apply_visitor(visitor, filter_tag);
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }

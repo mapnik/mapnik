@@ -29,13 +29,11 @@
 
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
 
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
-namespace phoenix = boost::phoenix;
-namespace fusion = boost::fusion;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
@@ -67,7 +65,7 @@ struct close_path
     void operator() (T path) const
     {
         BOOST_ASSERT( path!=0 );
-        path->set_close();
+        path->close_path();
     }
 };
 

@@ -377,10 +377,14 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                 {
                     frame->move_to(x,y);
                 }
-                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
+                else if (cm == SEG_LINETO)
                 {
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
+                }
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close_path();
                 }
                 x0 = x;
                 y0 = y;
@@ -416,10 +420,15 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                     frame->move_to(x,y+height);
                     roof->move_to(x,y+height);
                 }
-                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
+                else if (cm == SEG_LINETO)
                 {
                     frame->line_to(x,y+height);
                     roof->line_to(x,y+height);
+                }
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close_path();
+                    roof->close_path();
                 }
             }
 

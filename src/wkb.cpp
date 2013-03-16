@@ -353,25 +353,14 @@ private:
                     CoordinateArray ar(num_points);
                     read_coords(ar);
                     poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points - 1; ++j)
+                    for (int j = 1; j < num_points ; ++j)
                     {
                         poly->line_to(ar[j].x, ar[j].y);
                     }
-
-                    if (ar[0].x == ar[num_points-1].x &&
-                        ar[0].y == ar[num_points-1].y)
-                    {
-                        poly->close(ar[num_points-1].x, ar[num_points-1].y);
-                    }
-                    else
-                    {
-                        // leave un-closed polygon intact - don't attempt to close them
-                        poly->line_to(ar[num_points-1].x, ar[num_points-1].y);
-                    }
-                    poly->set_close();
+                    poly->close_path();
                 }
             }
-            if (poly->size() > 2) // ignore if polygon has less than 3 vertices
+            if (poly->size() > 3) // ignore if polygon has less than (3 + close_path) vertices
                 paths.push_back(poly);
         }
     }
@@ -400,20 +389,11 @@ private:
                     CoordinateArray ar(num_points);
                     read_coords_xyz(ar);
                     poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points - 1; ++j)
+                    for (int j = 1; j < num_points; ++j)
                     {
                         poly->line_to(ar[j].x, ar[j].y);
                     }
-                    if (ar[0].x == ar[num_points-1].x &&
-                        ar[0].y == ar[num_points-1].y)
-                    {
-                        poly->close(ar[num_points-1].x, ar[num_points-1].y);
-                    }
-                    else
-                    {
-                        // leave un-closed polygon intact- don't attempt to close them
-                        poly->line_to(ar[num_points-1].x, ar[num_points-1].y);
-                    }
+                    poly->close_path();
                 }
             }
             if (poly->size() > 2) // ignore if polygon has less than 3 vertices

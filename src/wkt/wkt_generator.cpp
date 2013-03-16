@@ -66,8 +66,6 @@ wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
     using boost::spirit::karma::_b;
     using boost::spirit::karma::_c;
     using boost::spirit::karma::_r1;
-    using boost::spirit::karma::_r2;
-    using boost::spirit::karma::_r3;
     using boost::spirit::karma::eps;
     using boost::spirit::karma::string;
 
@@ -98,15 +96,12 @@ wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
         ;
 
     polygon_coord %= ( &uint_(mapnik::SEG_MOVETO)
-                       << eps[_r1 += 1][_a = _r2 = _x(_val)][ _b = _r3 = _y(_val)]
+                       << eps[_r1 += 1][_a  = _x(_val)][ _b = _y(_val)]
                        << string[ if_ (_r1 > 1) [_1 = "),("]
                                   .else_[_1 = "("]]
                        |
                        &uint_(mapnik::SEG_LINETO)
                        << lit(',') << eps[_a = _x(_val)][_b = _y(_val)]
-                       |
-                       &uint_(mapnik::SEG_CLOSE)
-                       << lit(',') << eps[_a = _r2][_b = _r3]
         )
         << coordinate[_1 = _a]
         << lit(' ')

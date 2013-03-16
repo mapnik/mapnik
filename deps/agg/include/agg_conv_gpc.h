@@ -24,7 +24,7 @@
 #ifndef AGG_CONV_GPC_INCLUDED
 #define AGG_CONV_GPC_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 #include "agg_array.h"
 
