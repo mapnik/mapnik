@@ -39,9 +39,6 @@
 // boost
 #include <boost/scoped_array.hpp>
 
-// stl
-#include <iostream>
-
 namespace mapnik
 {
 image_32::image_32(int width,int height)

@@ -21,9 +21,6 @@
  *****************************************************************************/
 
 // stl
-#include <iostream>
-#include <sstream>
-#include <fstream>
 #include <stdexcept>
 #include <set>
 
@@ -91,9 +88,9 @@ void osm_datasource::bind() const
         // if we supplied a filename, load from file
         if ((osm_data_ = dataset_deliverer::load_from_file(osm_filename, parser)) == NULL)
         {
-            std::ostringstream s;
-            s << "OSM Plugin: Error loading from file '" << osm_filename << "'";
-            throw datasource_exception(s.str());
+            std::string s("OSM Plugin: Error loading from file '");
+            s += osm_filename + "'";
+            throw datasource_exception(s);
         }
     }
     else

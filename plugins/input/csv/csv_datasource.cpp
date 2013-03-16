@@ -159,9 +159,8 @@ void csv_datasource::parse_csv(T & stream,
         if (file_mb > filesize_max_)
         {
             std::ostringstream s;
-            s << "CSV Plugin: csv file is greater than " << filesize_max_ << "MB "
-              << " - you should use a more efficient data format like sqlite, postgis or a shapefile "
-              << " to render this data (set 'filesize_max=0' to disable this restriction if you have lots of memory)";
+            s << "CSV Plugin: csv file is greater than ";
+            s << filesize_max_ << "MB - you should use a more efficient data format like sqlite, postgis or a shapefile to render this data (set 'filesize_max=0' to disable this restriction if you have lots of memory)";
             throw mapnik::datasource_exception(s.str());
         }
     }
@@ -258,9 +257,9 @@ void csv_datasource::parse_csv(T & stream,
     }
     catch(std::exception const& ex)
     {
-        std::ostringstream s;
-        s << "CSV Plugin: " << ex.what();
-        throw mapnik::datasource_exception(s.str());
+        std::string s("CSV Plugin: ");
+        s += ex.what();
+        throw mapnik::datasource_exception(s);
     }
 
     typedef boost::tokenizer< escape_type > Tokenizer;
@@ -345,10 +344,10 @@ void csv_datasource::parse_csv(T & stream,
                             if (strict_)
                             {
                                 std::ostringstream s;
-                                s << "CSV Plugin: expected a column header at line "
-                                  << line_number << ", column " << idx
-                                  << " - ensure this row contains valid header fields: '"
-                                  << csv_line << "'\n";
+                                s << "CSV Plugin: expected a column header at line ";
+                                s << line_number << ", column " << idx;
+                                s << " - ensure this row contains valid header fields: '";
+                                s << csv_line << "'\n";
                                 throw mapnik::datasource_exception(s.str());
                             }
                             else
@@ -398,18 +397,16 @@ void csv_datasource::parse_csv(T & stream,
             }
             catch(const std::exception & ex)
             {
-                std::ostringstream s;
-                s << "CSV Plugin: error parsing headers: " << ex.what();
-                throw mapnik::datasource_exception(s.str());
+                std::string s("CSV Plugin: error parsing headers: ");
+                s += ex.what();
+                throw mapnik::datasource_exception(s);
             }
         }
     }
 
     if (!has_wkt_field && !has_json_field && (!has_lon_field || !has_lat_field) )
     {
-        std::ostringstream s;
-        s << "CSV Plugin: could not detect column headers with the name of wkt, geojson, x/y, or latitude/longitude - this is required for reading geometry data";
-        throw mapnik::datasource_exception(s.str());
+        throw mapnik::datasource_exception("CSV Plugin: could not detect column headers with the name of wkt, geojson, x/y, or latitude/longitude - this is required for reading geometry data");
     }
 
     int feature_count(0);
@@ -948,10 +945,8 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
         if (! found_name)
         {
             std::ostringstream s;
-
             s << "CSV Plugin: no attribute '" << *pos << "'. Valid attributes are: "
               << boost::algorithm::join(headers_, ",") << ".";
-
             throw mapnik::datasource_exception(s.str());
         }
         ++pos;

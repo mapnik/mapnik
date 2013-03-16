@@ -28,9 +28,6 @@
 // boost
 #include <boost/scoped_ptr.hpp>
 
-// stl
-#include <iostream>
-
 namespace mapnik
 {
 

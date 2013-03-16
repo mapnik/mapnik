@@ -32,7 +32,6 @@
 #include <boost/concept_check.hpp>
 // stl
 #include <set>
-#include <iostream>
 
 namespace mapnik {
 

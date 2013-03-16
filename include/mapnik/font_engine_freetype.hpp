@@ -60,7 +60,6 @@ public:
     ~stroker();
 
     void init(double radius);
-
     FT_Stroker const& get() const { return s_; }
 private:
     FT_Stroker s_;

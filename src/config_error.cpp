@@ -1,35 +1,61 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/xml_tree.hpp>
+#include <mapnik/util/conversions.hpp>
 
 namespace mapnik
 {
 
 config_error::config_error(std::string const& what)
-    : what_(what), line_number_(0), file_(), node_name_(), msg_()
+    : what_(what),
+      line_number_(0),
+      file_(),
+      node_name_(),
+      msg_()
 {
 }
 
 
-config_error::config_error(std::string const& what, xml_node const& node)
-    : what_(what), line_number_(node.line()), file_(node.filename()), node_name_(node.name()), msg_()
+config_error::config_error(std::string const& what,
+                           xml_node const& node)
+    : what_(what),
+      line_number_(node.line()),
+      file_(node.filename()),
+      node_name_(node.name()),
+      msg_()
 {
 }
 
 
-config_error::config_error(std::string const& what, unsigned line_number, std::string const& filename)
-    : what_(what), line_number_(line_number), file_(filename), node_name_(), msg_()
+config_error::config_error(std::string const& what,
+                           unsigned line_number,
+                           std::string const& filename)
+    : what_(what),
+      line_number_(line_number),
+      file_(filename),
+      node_name_(),
+      msg_()
 {
-
 }
 
 char const* config_error::what() const throw()
 {
-    std::stringstream s;
-    s << what_;
-    if (!node_name_.empty()) s << " in " << node_name_;
-    if (line_number_ > 0) s << " at line " << line_number_;
-    if (!file_.empty()) s << " of '" << file_ << "'";
-    msg_ = s.str(); //Avoid returning pointer to dead object
+    msg_ = what_;
+    if (!node_name_.empty())
+    {
+        msg_ += " in " + node_name_;
+    }
+    if (line_number_ > 0)
+    {
+        std::string number;
+        if (util::to_string(number,line_number_))
+        {
+            msg_ += " at line " + number;
+        }
+    }
+    if (!file_.empty())
+    {
+        msg_ += " of '" + file_ + "'";
+    }
     return msg_.c_str();
 }
 

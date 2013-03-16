@@ -34,9 +34,6 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/variant.hpp>
 
-// stl
-#include <iostream>
-
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;

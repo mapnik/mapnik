@@ -23,8 +23,6 @@
 #ifndef MAPNIK_MEMORY_HPP
 #define MAPNIK_MEMORY_HPP
 
-// stl
-#include <iostream>
 #include <cassert>
 
 namespace mapnik

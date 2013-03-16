@@ -100,6 +100,7 @@ public:
     void set_processed(bool processed) const;
 
     unsigned line() const;
+    std::string line_to_string() const;
 
     const_iterator begin() const;
     const_iterator end() const;

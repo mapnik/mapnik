@@ -24,7 +24,7 @@
 #include "geos_featureset.hpp"
 
 // stl
-#include <iostream>
+#include <sstream>
 #include <fstream>
 #include <stdexcept>
 #include <cstdarg>

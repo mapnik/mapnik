@@ -39,9 +39,6 @@
 #include <libxml/parserInternals.h>
 #include <libxml/xinclude.h>
 
-// stl
-#include <iostream>
-
 using namespace std;
 
 #define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
@@ -88,11 +85,10 @@ public:
             xmlError * error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
-                std::ostringstream os;
-                os << "XML document not well formed";
-                os << ": " << std::endl << error->message;
+                std::string msg("XML document not well formed:\n");
+                msg += error->message;
                 // remove CR
-                std::string msg = os.str().substr(0, os.str().size() - 1);
+                msg = msg.substr(0, msg.size() - 1);
                 throw config_error(msg, error->line, error->file);
             }
         }
@@ -132,18 +128,18 @@ public:
     {
         if (!doc)
         {
+            std::string msg("XML document not well formed");
             xmlError * error = xmlCtxtGetLastError( ctx_ );
-            std::ostringstream os;
-            os << "XML document not well formed";
-            int line=0;
-            std::string file;
             if (error)
             {
-                os << ": " << std::endl << error->message;
-                line = error->line;
-                file = error->file;
+                msg += ":\n";
+                msg += error->message;
+                throw config_error(msg, error->line, error->file);
             }
-            throw config_error(os.str(), line, file);
+            else
+            {
+                throw config_error(msg);
+            }
         }
 
         int iXIncludeReturn = xmlXIncludeProcessFlags(doc, options_);

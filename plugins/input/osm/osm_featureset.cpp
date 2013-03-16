@@ -21,9 +21,6 @@
  *
  *****************************************************************************/
 
-// stl
-#include <iostream>
-
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature_factory.hpp>

@@ -37,8 +37,8 @@
 #include <boost/make_shared.hpp>
 
 // stl
-#include <iostream>
 #include <fstream>
+#include <sstream>
 #include <stdexcept>
 
 using mapnik::datasource;
@@ -174,11 +174,8 @@ void ogr_datasource::bind() const
         const unsigned num_layers = dataset_->GetLayerCount();
         if (*layer_by_index >= num_layers)
         {
-            std::ostringstream s;
-            s << "OGR Plugin: only ";
-            s << num_layers;
-            s << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
-
+            std::ostringstream s("OGR Plugin: only ");
+            s << num_layers << " layer(s) exist, cannot find layer by index '" << *layer_by_index << "'";
             throw datasource_exception(s.str());
         }
 
@@ -196,9 +193,7 @@ void ogr_datasource::bind() const
     }
     else
     {
-        std::ostringstream s;
-        s << "OGR Plugin: missing <layer> or <layer_by_index> or <layer_by_sql> "
-          << "parameter, available layers are: ";
+        std::string s("OGR Plugin: missing <layer> or <layer_by_index> or <layer_by_sql>  parameter, available layers are: ");
 
         unsigned num_layers = dataset_->GetLayerCount();
         bool layer_found = false;
@@ -216,14 +211,14 @@ void ogr_datasource::bind() const
 
         if (! layer_found)
         {
-            s << "None (no layers were found in dataset)";
+            s += "None (no layers were found in dataset)";
         }
         else
         {
-            s << boost::algorithm::join(layer_names,", ");
+            s += boost::algorithm::join(layer_names,", ");
         }
 
-        throw datasource_exception(s.str());
+        throw datasource_exception(s);
     }
 
     if (! layer_.is_valid())
@@ -465,10 +460,10 @@ void validate_attribute_names(query const& q, std::vector<attribute_descriptor> 
 
         if (! found_name)
         {
-            std::ostringstream s;
+            std::ostringstream s("OGR Plugin: no attribute '");
+            s << *pos << "'. Valid attributes are: ";
             std::vector<attribute_descriptor>::const_iterator itr = names.begin();
             std::vector<attribute_descriptor>::const_iterator end = names.end();
-            s << "OGR Plugin: no attribute '" << *pos << "'. Valid attributes are: ";
             for ( ;itr!=end;++itr)
             {
                 s << itr->get_name() << std::endl;

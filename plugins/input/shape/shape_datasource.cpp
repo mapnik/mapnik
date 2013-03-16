@@ -41,7 +41,6 @@
 #include <mapnik/timer.hpp>
 
 // stl
-#include <iostream>
 #include <fstream>
 #include <stdexcept>
 

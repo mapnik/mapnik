@@ -25,7 +25,6 @@
 
 //stl
 #include <string>
-#include <iostream>
 
 namespace mapnik
 {

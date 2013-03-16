@@ -85,10 +85,8 @@ def summary(generate=False):
     global passed
     
     if len(errors) != 0:
-        msg = "Visual text rendering: %s failed / %s passed" % (len(errors),passed)
-        print "-"*len(msg)
+        msg = "\nVisual text rendering: %s failed / %s passed" % (len(errors),passed)
         print msg
-        print "-"*len(msg)
         for idx,error in enumerate(errors):
             if error[0] is None:
                 if generate:
@@ -104,8 +102,6 @@ def summary(generate=False):
                 print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s" % error[0]
         sys.exit(1)
     else:
-        msg = 'All %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % passed
-        print "-"*len(msg)
+        msg = '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % passed
         print msg
-        print "-"*len(msg)
         sys.exit(0)
