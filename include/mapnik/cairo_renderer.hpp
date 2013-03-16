@@ -74,6 +74,7 @@ class MAPNIK_DECL cairo_renderer_base : private boost::noncopyable
 {
 protected:
     cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, boost::shared_ptr<label_collision_detector4> detector, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
 public:
     ~cairo_renderer_base();
     void start_map_processing(Map const& map);
@@ -137,7 +138,7 @@ protected:
     boost::shared_ptr<freetype_engine> font_engine_;
     face_manager<freetype_engine> font_manager_;
     cairo_face_manager face_manager_;
-    label_collision_detector4 detector_;
+    boost::shared_ptr<label_collision_detector4> detector_;
     box2d<double> query_extent_;
 };
 
@@ -148,6 +149,7 @@ class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer
 public:
     typedef cairo_renderer_base processor_impl_type;
     cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, boost::shared_ptr<label_collision_detector4> detector, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     void end_map_processing(Map const& map);
 };
 }

@@ -201,7 +201,7 @@ featureset_ptr rasterlite_datasource::features(query const& q) const
     return boost::make_shared<rasterlite_featureset>(open_dataset(), gq);
 }
 
-featureset_ptr rasterlite_datasource::features_at_point(coord2d const& pt) const
+featureset_ptr rasterlite_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     if (!is_bound_) bind();
 

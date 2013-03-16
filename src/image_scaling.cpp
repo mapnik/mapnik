@@ -263,12 +263,12 @@ void scale_image_agg(Image & target,
                      double filter_radius,
                      double ratio)
 {
-    // TODO - should all types here be *_pre ?
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
-    typedef agg::pixfmt_rgba32 pixfmt;
+    // "Yes, you need to use premultiplied images only. Only in this case the simple weighted averaging works correctly in the image fitering."
+    // http://permalink.gmane.org/gmane.comp.graphics.agg/3443
     typedef agg::pixfmt_rgba32_pre pixfmt_pre;
-    typedef agg::renderer_base<pixfmt_pre> renderer_base;
+    typedef agg::renderer_base<pixfmt_pre> renderer_base_pre;
 
     // define some stuff we'll use soon
     agg::rasterizer_scanline_aa<> ras;
@@ -278,15 +278,15 @@ void scale_image_agg(Image & target,
 
     // initialize source AGG buffer
     agg::rendering_buffer rbuf_src((unsigned char*)source.getBytes(), source.width(), source.height(), source.width() * 4);
-    pixfmt pixf_src(rbuf_src);
-    typedef agg::image_accessor_clone<pixfmt> img_src_type;
+    pixfmt_pre pixf_src(rbuf_src);
+    typedef agg::image_accessor_clone<pixfmt_pre> img_src_type;
     img_src_type img_src(pixf_src);
 
     // initialize destination AGG buffer (with transparency)
     agg::rendering_buffer rbuf_dst((unsigned char*)target.getBytes(), target.width(), target.height(), target.width() * 4);
     pixfmt_pre pixf_dst(rbuf_dst);
-    renderer_base rb_dst(pixf_dst);
-    rb_dst.clear(agg::rgba(0, 0, 0, 0));
+    renderer_base_pre rb_dst_pre(pixf_dst);
+    rb_dst_pre.clear(agg::rgba(0, 0, 0, 0));
 
     // create a scaling matrix
     agg::trans_affine img_mtx;
@@ -311,7 +311,7 @@ void scale_image_agg(Image & target,
     {
         typedef agg::span_image_filter_rgba_nn<img_src_type, interpolator_type> span_gen_type;
         span_gen_type sg(img_src, interpolator);
-        agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
+        agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
         return;
     }
     case SCALING_BILINEAR:
@@ -348,9 +348,21 @@ void scale_image_agg(Image & target,
     case SCALING_BLACKMAN:
         filter.calculate(agg::image_filter_blackman(filter_radius), true); break;
     }
+    // details on various resampling considerations
+    // http://old.nabble.com/Re%3A-Newbie---texture-p5057255.html
+
+    // high quality resampler
+    //typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
+
+    // faster, lower quality
+    //typedef agg::span_image_filter_rgba<img_src_type,interpolator_type> span_gen_type;
+
+    // local, modified agg::span_image_resample_rgba_affine
+    // not convinced we need this
+    // https://github.com/mapnik/mapnik/issues/1489
     typedef mapnik::span_image_resample_rgba_affine<img_src_type> span_gen_type;
     span_gen_type sg(img_src, interpolator, filter);
-    agg::render_scanlines_aa(ras, sl, rb_dst, sa, sg);
+    agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }
 
 template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio);

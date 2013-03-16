@@ -8,6 +8,8 @@ import sys
 import os.path
 from compare import compare, summary, fail
 
+visual_output_dir = "/tmp/mapnik-visual-images"
+
 defaults = {
     'sizes': [(500, 100)]
 }
@@ -72,21 +74,25 @@ files = [
     ]
 
 def render(filename, width, height, bbox, quiet=False):
-    if not quiet:
-        print "\"%s\" with size %dx%d ..." % (filename, width, height),
     m = mapnik.Map(width, height)
     expected = os.path.join(dirname, "images", '%s-%d-reference.png' % (filename, width))
-    actual = os.path.join("/tmp/mapnik-visual-images", '%s-%d-agg.png' % (filename, width))
+    actual = '%s-%d' % (filename, width)
     try:
         mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
         if bbox is not None:
             m.zoom_to_box(bbox)
         else:
             m.zoom_all()
-        if not os.path.exists('/tmp/mapnik-visual-images'):
-            os.makedirs('/tmp/mapnik-visual-images')
-        mapnik.render_to_file(m, actual)
-        diff = compare(actual, expected)
+    except Exception, e:
+        sys.stderr.write(e.message + '\n')
+        fail(actual,expected,str(e.message))
+        return
+    actual_agg = os.path.join(visual_output_dir, '%s-agg.png' % actual)
+    if not quiet:
+        print "\"%s\" with size %dx%d with agg..." % (filename, width, height),
+    try:
+        mapnik.render_to_file(m, actual_agg)
+        diff = compare(actual_agg, expected)
         if not quiet:
             if diff > 0:
                 print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
@@ -94,7 +100,22 @@ def render(filename, width, height, bbox, quiet=False):
                 print '\x1b[32m✓\x1b[0m'
     except Exception, e:
         sys.stderr.write(e.message + '\n')
-        fail(actual,expected,str(e.message))
+        fail(actual_agg,expected,str(e.message))
+    if 'tiff' in actual:
+        actual_cairo = os.path.join(visual_output_dir, '%s-cairo.png' % actual)
+        if not quiet:
+            print "\"%s\" with size %dx%d with cairo..." % (filename, width, height),
+        try:
+            mapnik.render_to_file(m, actual_cairo,'ARGB32')
+            diff = compare(actual_cairo, expected)
+            if not quiet:
+                if diff > 0:
+                    print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
+                else:
+                    print '\x1b[32m✓\x1b[0m'
+        except Exception, e:
+            sys.stderr.write(e.message + '\n')
+            fail(actual_cairo,expected,str(e.message))
     return m
 
 if __name__ == "__main__":
@@ -118,6 +139,9 @@ if __name__ == "__main__":
         else:
             for name in sys.argv[1:]:
                 active.append({"name": name})
+
+    if not os.path.exists(visual_output_dir):
+        os.makedirs(visual_output_dir)
 
     if 'osm' in mapnik.DatasourceCache.plugin_names():
         for f in active:
