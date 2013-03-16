@@ -858,6 +858,25 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     optional<boolean> clip = pt.get_opt_attr<boolean>("clip");
     if (clip) sym.set_clip(*clip);
 
+    // simplify algorithm
+    optional<std::string> simplify_algorithm_name = pt.get_opt_attr<std::string>("simplify-algorithm");
+    if (simplify_algorithm_name)
+    {
+        optional<simplify_algorithm_e> simplify_algorithm = simplify_algorithm_from_string(*simplify_algorithm_name);
+        if (simplify_algorithm)
+        {
+            sym.set_simplify_algorithm(*simplify_algorithm);
+        }
+        else
+        {
+            throw config_error("failed to parse simplify-algorithm: '" + *simplify_algorithm_name + "'");
+        }
+    }
+
+    // simplify value
+    optional<double> simplify_tolerance = pt.get_opt_attr<double>("simplify-tolerance");
+    if (simplify_tolerance) sym.set_simplify_tolerance(*simplify_tolerance);
+
     // smooth value
     optional<double> smooth = pt.get_opt_attr<double>("smooth");
     if (smooth) sym.set_smooth(*smooth);

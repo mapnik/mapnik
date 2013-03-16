@@ -150,6 +150,7 @@ source = Split(
     proj_transform.cpp
     distance.cpp
     scale_denominator.cpp
+    simplify.cpp
     memory_datasource.cpp
     stroke.cpp
     symbolizer.cpp

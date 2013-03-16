@@ -28,7 +28,7 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/transform_expression.hpp>
-//#include <mapnik/metawriter/properties.hpp>
+#include <mapnik/simplify.hpp>
 
 // boost
 #include <boost/array.hpp>
@@ -56,12 +56,18 @@ public:
     std::string get_transform_string() const;
     void set_clip(bool clip);
     bool clip() const;
+    void set_simplify_algorithm(simplify_algorithm_e algorithm);
+    simplify_algorithm_e simplify_algorithm() const;
+    void set_simplify_tolerance(double simplify_tolerance);
+    double simplify_tolerance() const;
     void set_smooth(double smooth);
     double smooth() const;
 private:
     composite_mode_e comp_op_;
     transform_type affine_transform_;
     bool clip_;
+    simplify_algorithm_e simplify_algorithm_value_;
+    double simplify_tolerance_value_;
     double smooth_value_;
 };
 

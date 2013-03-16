@@ -54,7 +54,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     typedef agg::renderer_scanline_bin_solid<renderer_base> renderer_type;
     typedef boost::mpl::vector<clip_line_tag, transform_tag,
                                offset_transform_tag, affine_transform_tag,
-                               smooth_tag, dash_tag, stroke_tag> conv_types;
+                               simplify_tag, smooth_tag, dash_tag, stroke_tag> conv_types;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
@@ -93,6 +93,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     converter.set<transform_tag>(); // always transform
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
+    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
     if (stroke_.has_dash()) converter.set<dash_tag>();
     converter.set<stroke_tag>(); //always stroke
