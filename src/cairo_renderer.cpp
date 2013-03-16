@@ -1042,11 +1042,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
             padding *= half_stroke;
         if (fabs(sym.offset()) > 0)
             padding *= fabs(sym.offset()) * 1.2;
-        double x0 = query_extent_.minx();
-        double y0 = query_extent_.miny();
-        double x1 = query_extent_.maxx();
-        double y1 = query_extent_.maxy();
-        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+        clipping_extent.pad(padding);
     }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
