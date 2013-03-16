@@ -149,8 +149,8 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
 
 }
 
-template struct mapnik::json::feature_grammar<std::string::const_iterator,mapnik::Feature>;
-template struct mapnik::json::feature_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> >,mapnik::Feature>;
+template struct mapnik::json::feature_grammar<std::string::const_iterator,mapnik::feature_impl>;
+template struct mapnik::json::feature_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> >,mapnik::feature_impl>;
 
 }}
 

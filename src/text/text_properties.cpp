@@ -122,7 +122,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
 
 }
 
-void text_symbolizer_properties::process(text_layout &output, Feature const& feature) const
+void text_symbolizer_properties::process(text_layout &output, feature_impl const& feature) const
 {
     output.clear();
     if (tree_) {
