@@ -50,7 +50,7 @@ freetype_engine::~freetype_engine()
 
 bool freetype_engine::is_font_file(std::string const& file_name)
 {
-    /** only accept files that will be matched by freetype2's `figurefiletype()` */
+    // only accept files that will be matched by freetype2's `figurefiletype()`
     std::string fn = file_name;
     std::transform(fn.begin(), fn.end(), fn.begin(), ::tolower);
     return boost::algorithm::ends_with(fn,std::string(".ttf")) ||
@@ -59,7 +59,7 @@ bool freetype_engine::is_font_file(std::string const& file_name)
         boost::algorithm::ends_with(fn,std::string(".pfa")) ||
         boost::algorithm::ends_with(fn,std::string(".pfb")) ||
         boost::algorithm::ends_with(fn,std::string(".ttc")) ||
-        /** Plus OSX custom ext */
+        // Plus OSX custom ext
         boost::algorithm::ends_with(fn,std::string(".dfont"));
 }
 
