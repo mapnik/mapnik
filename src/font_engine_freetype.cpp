@@ -227,6 +227,7 @@ face_ptr face_manager<T>::get_face(const std::string &name)
     itr = face_ptr_cache_.find(name);
     if (itr != face_ptr_cache_.end())
     {
+    {
         return itr->second;
     }
     else
