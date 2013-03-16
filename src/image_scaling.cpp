@@ -258,11 +258,11 @@ template <typename Image>
 void scale_image_agg(Image & target,
                      Image const& source,
                      scaling_method_e scaling_method,
-                     double image_ratio,
+                     double image_ratio_x,
+                     double image_ratio_y,
                      double x_off_f,
                      double y_off_f,
-                     double filter_radius,
-                     double ratio)
+                     double filter_radius)
 {
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
@@ -291,7 +291,7 @@ void scale_image_agg(Image & target,
 
     // create a scaling matrix
     agg::trans_affine img_mtx;
-    img_mtx /= agg::trans_affine_scaling(image_ratio * ratio, image_ratio * ratio);
+    img_mtx /= agg::trans_affine_scaling(image_ratio_x, image_ratio_y);
 
     // create a linear interpolator for our scaling matrix
     typedef agg::span_interpolator_linear<> interpolator_type;
@@ -367,7 +367,14 @@ void scale_image_agg(Image & target,
     agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }
 
-template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio);
+template void scale_image_agg<image_data_32>(image_data_32& target,
+                                             const image_data_32& source,
+                                             scaling_method_e scaling_method,
+                                             double image_ratio_x,
+                                             double image_ratio_y,
+                                             double x_off_f,
+                                             double y_off_f,
+                                             double filter_radius);
 
 template void scale_image_bilinear_old<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
 
