@@ -23,7 +23,7 @@
 #ifndef OSMPARSER_H
 #define OSMPARSER_H
 
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 #include <libxml/xmlreader.h>
 #include <cstdio>
 #include <cstdlib>

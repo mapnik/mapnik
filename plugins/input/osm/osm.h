@@ -23,7 +23,7 @@
 #ifndef OSM_H
 #define OSM_H
 
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 #include <vector>
 #include <string>
 #include <map>

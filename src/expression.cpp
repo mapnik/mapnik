@@ -24,7 +24,9 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/expression_node.hpp>
 #include <mapnik/expression_grammar.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>

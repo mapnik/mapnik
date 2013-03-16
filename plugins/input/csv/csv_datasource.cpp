@@ -41,7 +41,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/trim.hpp>
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 
 // stl
 #include <sstream>

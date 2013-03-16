@@ -24,29 +24,22 @@
 #define MAPNIK_EXPRESSIONS_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
 
-// boost
-#include <boost/version.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/concept_check.hpp>
-
 // spirit2
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/qi_action.hpp>
-
-// fusion
-#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/spirit/home/qi/domain.hpp>  // for qi
+#include <boost/spirit/home/qi/nonterminal/grammar.hpp>  // for grammar
+#include <boost/spirit/home/qi/nonterminal/rule.hpp>  // for rule
+#include <boost/spirit/home/qi/numeric/int.hpp>  // for int_parser
+#include <boost/spirit/home/qi/numeric/real.hpp>  // for real_parser
+#include <boost/spirit/home/qi/string/symbols.hpp>
+#include <boost/spirit/home/support/common_terminals.hpp>
+#include <boost/spirit/home/support/nonterminal/locals.hpp>  // for locals
 
 // phoenix
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
-#include <boost/spirit/home/phoenix/object/construct.hpp>
+#include <boost/spirit/home/phoenix/function/function.hpp>
 
 namespace mapnik
 {

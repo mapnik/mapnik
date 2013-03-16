@@ -24,7 +24,7 @@
 #define MAPNIK_ATTRIBUTE_HPP
 
 // mapnik
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/geometry.hpp>
 
 // stl

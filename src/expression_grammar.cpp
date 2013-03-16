@@ -20,7 +20,23 @@
  *
  *****************************************************************************/
 
+// mapnik
 #include <mapnik/expression_grammar.hpp>
+#include <mapnik/expression_node.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
+
+// boost
+#include <boost/version.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/home/phoenix/object/construct.hpp>
+
+// fwd declare
+namespace mapnik {
+  struct attribute;
+  struct geometry_type_attribute;
+}
 
 namespace mapnik
 {

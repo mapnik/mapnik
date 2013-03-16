@@ -1704,6 +1704,9 @@ if not HELP_REQUESTED:
             SConscript('plugins/input/%s/build.py' % plugin)
         else:
             color_print(1,"Notice: dependencies not met for plugin '%s', not building..." % plugin)
+            # also clear out locally built target
+            if os.path.exists('plugins/input/%s.input' % plugin):
+                os.unlink('plugins/input/%s.input' % plugin)
 
     create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'], False)
     create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
@@ -1757,6 +1760,8 @@ if not HELP_REQUESTED:
 
         if env['SVG_RENDERER']:
             SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
+
+    SConscript('benchmark/build.py')
 
     # install pkg-config script and mapnik-config script
     SConscript('utils/mapnik-config/build.py')

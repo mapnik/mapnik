@@ -340,9 +340,9 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                 {
                     if (paramIter->is("Parameter"))
                     {
-                        name = paramIter->get_attr<std::string>("name");
+                        std::string param_name = paramIter->get_attr<std::string>("name");
                         std::string value = paramIter->get_text();
-                        params[name] = value;
+                        params[param_name] = value;
                     }
                 }
                 datasource_templates_[name] = params;

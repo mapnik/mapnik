@@ -41,6 +41,10 @@ test-local:
 	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \
 	make test
 
+bench:
+	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	./benchmark/run
+
 check: test-local
 
 demo:

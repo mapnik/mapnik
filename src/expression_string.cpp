@@ -21,7 +21,9 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/expression_string.hpp>
+#include <mapnik/expression_node.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/value.hpp>
 
 // boost
 #include <boost/variant.hpp>

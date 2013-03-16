@@ -47,21 +47,22 @@ bool rgba::mean_sort_cmp::operator() (const rgba& x, const rgba& y) const
     return x.b < y.b;
 }
 
-std::size_t rgba::hash_func::operator()(rgba const& p) const
-{
-    return ((std::size_t)p.r * 33023 + (std::size_t)p.g * 30013 +
-            (std::size_t)p.b * 27011 + (std::size_t)p.a * 24007) % 21001;
-}
-
-
 rgba_palette::rgba_palette(std::string const& pal, palette_type type)
     : colors_(0)
 {
+#ifdef USE_DENSE_HASH_MAP
+    color_hashmap_.set_empty_key(0);
+#endif
     parse(pal, type);
 }
 
 rgba_palette::rgba_palette()
-    : colors_(0) {}
+    : colors_(0)
+{
+#ifdef USE_DENSE_HASH_MAP
+    color_hashmap_.set_empty_key(0);
+#endif
+}
 
 const std::vector<rgb>& rgba_palette::palette() const
 {
@@ -105,18 +106,19 @@ std::string rgba_palette::to_string() const
 }
 
 // return color index in returned earlier palette
-unsigned char rgba_palette::quantize(rgba const& c) const
+unsigned char rgba_palette::quantize(unsigned val) const
 {
     unsigned char index = 0;
-    if (colors_ == 1) return index;
+    if (colors_ == 1 || val == 0) return index;
 
-    rgba_hash_table::iterator it = color_hashmap_.find(c);
+    rgba_hash_table::iterator it = color_hashmap_.find(val);
     if (it != color_hashmap_.end())
     {
         index = it->second;
     }
     else
     {
+        rgba c(val);
         int dr, dg, db, da;
         int dist, newdist;
 
@@ -173,7 +175,7 @@ unsigned char rgba_palette::quantize(rgba const& c) const
         }
 
         // Cache found index for the color c into the hashmap.
-        color_hashmap_[c] = index;
+        color_hashmap_[val] = index;
     }
 
     return index;
@@ -196,7 +198,6 @@ void rgba_palette::parse(std::string const& pal, palette_type type)
     }
 
     sorted_pal_.clear();
-    color_hashmap_.clear();
     rgb_pal_.clear();
     alpha_pal_.clear();
 
@@ -223,6 +224,11 @@ void rgba_palette::parse(std::string const& pal, palette_type type)
 
     colors_ = sorted_pal_.size();
 
+#ifdef USE_DENSE_HASH_MAP
+    color_hashmap_.resize((colors_*2));
+#endif
+    color_hashmap_.clear();
+
     // Sort palette for binary searching in quantization
     std::sort(sorted_pal_.begin(), sorted_pal_.end(), rgba::mean_sort_cmp());
 
@@ -230,7 +236,11 @@ void rgba_palette::parse(std::string const& pal, palette_type type)
     for (unsigned i = 0; i < colors_; i++)
     {
         rgba c = sorted_pal_[i];
-        color_hashmap_[c] = i;
+        unsigned val = c.r | (c.g << 8) | (c.b << 16) | (c.a << 24);
+        if (val != 0)
+        {
+            color_hashmap_[val] = i;
+        }
         rgb_pal_.push_back(rgb(c));
         if (c.a < 0xFF)
         {

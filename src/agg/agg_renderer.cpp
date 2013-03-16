@@ -368,7 +368,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
                                              src.width(),
                                              src.height(),
                                              src.width()*4);
-            agg::pixfmt_rgba32_pre pixf(marker_buf);
+            agg::pixfmt_rgba32_pre marker_pixf(marker_buf);
             typedef agg::image_accessor_clone<agg::pixfmt_rgba32_pre> img_accessor_type;
             typedef agg::span_interpolator_linear<agg::trans_affine> interpolator_type;
             typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
@@ -376,7 +376,7 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
             typedef agg::renderer_scanline_aa_alpha<renderer_base,
                         agg::span_allocator<agg::rgba8>,
                         span_gen_type> renderer_type;
-            img_accessor_type ia(pixf);
+            img_accessor_type ia(marker_pixf);
             interpolator_type interpolator(agg::trans_affine(p, 0, 0, width, height) );
             span_gen_type sg(ia, interpolator, filter);
             renderer_type rp(renb,sa, sg, unsigned(opacity*255));

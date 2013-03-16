@@ -165,9 +165,9 @@ void datasource_cache::register_datasources(std::string const& str)
 #endif
                 {
 #if (BOOST_FILESYSTEM_VERSION == 3)
-                    if (register_datasource(itr->path().string().c_str()))
+                    if (register_datasource(itr->path().string()))
 #else // v2
-                    if (register_datasource(itr->string().c_str()))
+                    if (register_datasource(itr->string()))
 #endif
                     {
                         registered_ = true;

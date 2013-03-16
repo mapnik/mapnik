@@ -34,21 +34,26 @@
 #include <mapnik/color.hpp>     // for color
 #include <mapnik/ctrans.hpp>    // for CoordTransform
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
+#include <mapnik/pixel_position.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
+// fwd declaration to avoid depedence on agg headers
 namespace agg { struct trans_affine; }
-namespace mapnik { class Map; }
-namespace mapnik { class feature_impl; }
-namespace mapnik { class feature_type_style; }
-namespace mapnik { class label_collision_detector4; }
-namespace mapnik { class layer; }
-namespace mapnik { class marker; }
-namespace mapnik { class proj_transform; }
-namespace mapnik { struct rasterizer; }
-struct pixel_position;
+
+// fwd declarations to speed up compile
+namespace mapnik {
+  class Map;
+  class feature_impl;
+  class feature_type_style;
+  class label_collision_detector4;
+  class layer;
+  class marker;
+  class proj_transform;
+  struct rasterizer;
+}
 
 namespace mapnik {
 

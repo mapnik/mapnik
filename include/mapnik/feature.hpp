@@ -25,43 +25,38 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/value.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
-#include <mapnik/raster.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 104000
-#include <boost/property_map/property_map.hpp>
-#else
-#include <boost/property_map.hpp>
-#endif
-
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 // stl
 #include <vector>
 #include <map>
-#include <stdexcept>
+#include <ostream>                      // for basic_ostream, operator<<, etc
+#include <sstream>                      // for basic_stringstream
+#include <stdexcept>                    // for out_of_range
 
 namespace mapnik {
 
-typedef boost::shared_ptr<raster> raster_ptr;
-
+class raster;
 class feature_impl;
 
+typedef boost::shared_ptr<raster> raster_ptr;
+
 template <typename T>
-class context : private mapnik::noncopyable,
-                public boost::associative_property_map<T>
+class context : private mapnik::noncopyable
 
 {
     friend class feature_impl;
 public:
     typedef T map_type;
-    typedef typename boost::associative_property_map<map_type> base_type;
     typedef typename map_type::value_type value_type;
     typedef typename map_type::key_type key_type;
     typedef typename map_type::size_type size_type;
@@ -70,7 +65,7 @@ public:
     typedef typename map_type::const_iterator const_iterator;
 
     context()
-        : base_type(mapping_) {}
+        : mapping_() {}
 
     size_type push(key_type const& name)
     {

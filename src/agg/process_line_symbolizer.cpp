@@ -153,7 +153,6 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         }
 
         typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
-        renderer_base renb(pixf);
         renderer_type ren(renb);
         ren.color(agg::rgba8_pre(r, g, b, int(a * stroke_.get_opacity())));
         agg::scanline_u8 sl;
