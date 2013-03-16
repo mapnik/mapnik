@@ -306,17 +306,20 @@ opts.AddVariables(
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
-    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
+    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc',
+PathVariable.PathAccept),
     PathVariable('HB_INCLUDES', 'Search path for HarfBuzz include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('HB_LIBS','Search path for HarfBuzz include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc'),
-    PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('LTDL_INCLUDES', 'Search path for libltdl (part of libtool) include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('LTDL_LIBS','Search path for libltdl (ltdl.h) library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
+    PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
+    PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('JPEG', 'Build Mapnik with JPEG read and write support', 'True'),
     PathVariable('JPEG_INCLUDES', 'Search path for libjpeg include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('JPEG_LIBS', 'Search path for libjpeg library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    BoolVariable('TIFF', 'Build Mapnik with TIFF read and write support', 'True'),
     PathVariable('TIFF_INCLUDES', 'Search path for libtiff include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('TIFF_LIBS', 'Search path for libtiff library files', '/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     PathVariable('PROJ_INCLUDES', 'Search path for PROJ.4 include files', '/usr/include', PathVariable.PathAccept),
@@ -1063,7 +1066,7 @@ if not preconfigured:
 
     # Adding the required prerequisite library directories to the include path for
     # compiling and the library path for linking, respectively.
-    for required in ('PNG', 'JPEG', 'TIFF','PROJ','ICU', 'SQLITE', 'LTDL', 'HB'):
+    for required in ('PROJ','ICU', 'SQLITE', 'LTDL', 'HB'):
         inc_path = env['%s_INCLUDES' % required]
         lib_path = env['%s_LIBS' % required]
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1087,12 +1090,8 @@ if not preconfigured:
         env['HAS_LIBXML2'] = True
 
     LIBSHEADERS = [
-        ['m', 'math.h', True,'C'],
-        ['ltdl', 'ltdl.h', True,'C'],
-        ['png', 'png.h', True,'C'],
-        ['tiff', 'tiff.h', True,'C'],
         ['z', 'zlib.h', True,'C'],
-        ['proj', 'proj_api.h', True,'C'],
+        ['ltdl', 'ltdl.h', True,'C'],
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
         ['harfbuzz', 'harfbuzz/hb.h',True,'C++'],
     ]
@@ -1100,8 +1099,32 @@ if not preconfigured:
     if env['JPEG']:
         env.Append(CXXFLAGS = '-DHAVE_JPEG')
         LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], True,'C'])
+        inc_path = env['%s_INCLUDES' % 'JPEG']
+        lib_path = env['%s_LIBS' % 'JPEG']
+        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
     else:
         env['SKIPPED_DEPS'].extend(['jpeg'])
+
+    if env['PNG']:
+        env.Append(CXXFLAGS = '-DHAVE_PNG')
+        LIBSHEADERS.append(['png', 'png.h', True,'C'])
+        inc_path = env['%s_INCLUDES' % 'PNG']
+        lib_path = env['%s_LIBS' % 'PNG']
+        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+    else:
+        env['SKIPPED_DEPS'].extend(['png'])
+
+    if env['TIFF']:
+        env.Append(CXXFLAGS = '-DHAVE_TIFF')
+        LIBSHEADERS.append(['tiff', 'tiff.h', True,'C'])
+        inc_path = env['%s_INCLUDES' % 'TIFF']
+        lib_path = env['%s_LIBS' % 'TIFF']
+        env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
+        env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
+    else:
+        env['SKIPPED_DEPS'].extend(['tiff'])
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:

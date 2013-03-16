@@ -5,6 +5,7 @@ from nose.tools import *
 import mapnik
 import random
 import math
+from utilities import run_all
 
 # Tests that exercise map projections.
 
@@ -77,25 +78,41 @@ def test_proj_transform_between_init_and_literal():
     one = mapnik.Projection('+init=epsg:4326')
     two = mapnik.Projection('+init=epsg:3857')
     tr1 = mapnik.ProjTransform(one,two)
+    tr1b = mapnik.ProjTransform(two,one)
     wgs84 = '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
     merc = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over'
     src = mapnik.Projection(wgs84)
     dest = mapnik.Projection(merc)
     tr2 = mapnik.ProjTransform(src,dest)
+    tr2b = mapnik.ProjTransform(dest,src)
     for x in xrange(-180,180,10):
         for y in xrange(-60,60,10):
             coord = mapnik.Coord(x,y)
             merc_coord1 = tr1.forward(coord)
-            merc_coord2 = tr2.forward(coord)
-            assert_almost_equal(merc_coord1.x,merc_coord2.x)
-            assert_almost_equal(merc_coord1.y,merc_coord2.y)
+            merc_coord2 = tr1b.backward(coord)
+            merc_coord3 = tr2.forward(coord)
+            merc_coord4 = tr2b.backward(coord)
+            eq_(math.fabs(merc_coord1.x - merc_coord1.x) < 1,True)
+            eq_(math.fabs(merc_coord1.x - merc_coord2.x) < 1,True)
+            eq_(math.fabs(merc_coord1.x - merc_coord3.x) < 1,True)
+            eq_(math.fabs(merc_coord1.x - merc_coord4.x) < 1,True)
+            eq_(math.fabs(merc_coord1.y - merc_coord1.y) < 1,True)
+            eq_(math.fabs(merc_coord1.y - merc_coord2.y) < 1,True)
+            eq_(math.fabs(merc_coord1.y - merc_coord3.y) < 1,True)
+            eq_(math.fabs(merc_coord1.y - merc_coord4.y) < 1,True)
             lon_lat_coord1 = tr1.backward(merc_coord1)
-            lon_lat_coord2 = tr2.backward(merc_coord2)
-            assert_almost_equal(coord.x,lon_lat_coord1.x)
-            assert_almost_equal(coord.y,lon_lat_coord1.y)
-            assert_almost_equal(coord.x,lon_lat_coord2.x)
-            assert_almost_equal(coord.y,lon_lat_coord2.y)
+            lon_lat_coord2 = tr1b.forward(merc_coord2)
+            lon_lat_coord3 = tr2.backward(merc_coord3)
+            lon_lat_coord4 = tr2b.forward(merc_coord4)
+            eq_(math.fabs(coord.x - lon_lat_coord1.x) < 1,True)
+            eq_(math.fabs(coord.x - lon_lat_coord2.x) < 1,True)
+            eq_(math.fabs(coord.x - lon_lat_coord3.x) < 1,True)
+            eq_(math.fabs(coord.x - lon_lat_coord4.x) < 1,True)
+            eq_(math.fabs(coord.y - lon_lat_coord1.y) < 1,True)
+            eq_(math.fabs(coord.y - lon_lat_coord2.y) < 1,True)
+            eq_(math.fabs(coord.y - lon_lat_coord3.y) < 1,True)
+            eq_(math.fabs(coord.y - lon_lat_coord4.y) < 1,True)
 
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

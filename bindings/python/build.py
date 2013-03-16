@@ -48,7 +48,8 @@ libraries = ['mapnik',env['BOOST_PYTHON_LIB']]
 # TODO - do solaris/fedora need direct linking too?
 if env['PLATFORM'] == 'Darwin':
     if not env['PYTHON_DYNAMIC_LOOKUP']:
-        libraries.append('png')
+        if env['PNG']:
+            libraries.append('png')
         if env['JPEG']:
             libraries.append('jpeg')
         libraries.append(env['ICU_LIB_NAME'])

@@ -272,7 +272,6 @@ struct test5
 #include <mapnik/box2d.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
-#include <mapnik/well_known_srs.hpp>
 
 struct test6
 {
