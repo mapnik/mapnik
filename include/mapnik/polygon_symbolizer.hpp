@@ -25,8 +25,8 @@
 
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/enumeration.hpp>
 #include <mapnik/gamma_method.hpp>
 
 namespace mapnik

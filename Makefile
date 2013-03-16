@@ -16,23 +16,24 @@ mapnik:
 clean:
 	@python scons/scons.py -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
+	@if test -e "config.log"; then rm  "config.log"; fi
+	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	@find ./ -name "*.os" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
 	@find ./ -name "*.pyc" -exec rm {} \;
 	@rm bindings/python/mapnik/paths.py
 
 distclean:
-	if test -e "config.cache"; then rm -r "config.cache"; fi
-	if test -e "config.log"; then rm -r "config.log"; fi
-	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
-	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
-	if test -e "config.cache"; then rm "config.cache"; fi
+	@if test -e "config.cache"; then rm "config.cache"; fi
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
 
 reset: distclean
 
+rebuild:
+	make uninstall && make clean && time make && make install
+
 uninstall:
-	python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
+	@python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
 	@ ./run_tests

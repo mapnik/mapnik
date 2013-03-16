@@ -2,6 +2,7 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
+#include <mapnik/util/conversions.hpp>
 
 
 // stl
@@ -9,10 +10,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdio>
 
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/bind.hpp>
 
 #define BOOST_CHRONO_HEADER_ONLY
 #include <boost/chrono/process_cpu_clocks.hpp>
@@ -29,8 +32,25 @@ template <typename T>
 void benchmark(T test, std::string const& name)
 {
     if (!test.validate()) throw std::runtime_error(std::string("test did not validate: ") + name);
-    dur elapsed = test.run();
-    std::clog << name << ": " << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
+    process_cpu_clock::time_point start;
+    dur elapsed;
+    if (test.threads_ > 0) {
+        boost::thread_group tg;
+        for (unsigned i=0;i<test.threads_;++i)
+        {
+            tg.create_thread(test);
+        }
+        start = process_cpu_clock::now();
+        tg.join_all();
+        elapsed = process_cpu_clock::now() - start;
+    } else {
+        start = process_cpu_clock::now();
+        test();
+        elapsed = process_cpu_clock::now() - start;
+    }
+    std::clog << (test.threads_ ? "threaded -> ": "")
+        << name << ": "
+        << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
 }
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
@@ -50,7 +70,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     }
     boost::shared_ptr<image_32> image_ptr2 = boost::make_shared<image_32>(reader2->width(),reader2->height());
     reader2->read(0,0,image_ptr2->data());
-    
+
     image_data_32 const& dest = image_ptr1->data();
     image_data_32 const& src = image_ptr2->data();
 
@@ -72,35 +92,36 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 struct test1
 {
     unsigned iter_;
-    
-    explicit test1(unsigned iterations) :
-      iter_(iterations) {}
+    unsigned threads_;
+    explicit test1(unsigned iterations, unsigned threads=0) :
+      iter_(iterations),
+      threads_(threads)
+      {}
 
     bool validate()
     {
         return true;
     }
-    
-    dur run()
+
+    void operator()()
     {
         mapnik::image_data_32 im(256,256);
         std::string out;
-        process_cpu_clock::time_point start = process_cpu_clock::now();
-        for (int i=0;i<iter_;++i) {
+        for (unsigned i=0;i<iter_;++i) {
             out.clear();
             out = mapnik::save_to_string(im,"png");
         }
-        return process_cpu_clock::now() - start;
     }
 };
 
 struct test2
 {
     unsigned iter_;
+    unsigned threads_;
     boost::shared_ptr<image_32> im_;
-    
-    explicit test2(unsigned iterations) :
+    explicit test2(unsigned iterations, unsigned threads=0) :
       iter_(iterations),
+      threads_(threads),
       im_()
     {
         std::string filename("./benchmark/data/multicolor.png");
@@ -112,7 +133,7 @@ struct test2
         im_ = boost::make_shared<image_32>(reader->width(),reader->height());
         reader->read(0,0,im_->data());
     }
-    
+
     bool validate()
     {
         std::string expected("./benchmark/data/multicolor-hextree-expected.png");
@@ -120,19 +141,112 @@ struct test2
         mapnik::save_to_file(im_->data(),actual, "png8:m=h");
         return compare_images(actual,expected);
     }
-    
-    dur run()
+
+    void operator()()
     {
         std::string out;
-        process_cpu_clock::time_point start = process_cpu_clock::now();
-        for (int i=0;i<iter_;++i) {
+        for (unsigned i=0;i<iter_;++i) {
             out.clear();
             out = mapnik::save_to_string(im_->data(),"png8:m=h");
         }
-        return process_cpu_clock::now() - start;
     }
 };
 
+
+struct test3
+{
+    unsigned iter_;
+    unsigned threads_;
+    double val_;
+    explicit test3(unsigned iterations, unsigned threads=0) :
+      iter_(iterations),
+      threads_(threads),
+      val_(-0.123) {}
+    bool validate()
+    {
+        std::ostringstream s;
+        s << val_;
+        return (s.str() == "-0.123");
+    }
+    void operator()()
+    {
+        std::string out;
+        for (unsigned i=0;i<iter_;++i) {
+            std::ostringstream s;
+            s << val_;
+            out = s.str();
+        }
+    }
+};
+
+struct test4
+{
+    unsigned iter_;
+    unsigned threads_;
+    double val_;
+    explicit test4(unsigned iterations, unsigned threads=0) :
+      iter_(iterations),
+      threads_(threads),
+      val_(-0.123) {}
+
+    bool validate()
+    {
+        std::string s;
+        mapnik::util::to_string(s,val_);
+        return (s == "-0.123");
+    }
+    void operator()()
+    {
+        std::string out;
+        for (unsigned i=0;i<iter_;++i) {
+            out.clear();
+            mapnik::util::to_string(out,val_);
+        }
+    }
+};
+
+
+struct test5
+{
+    unsigned iter_;
+    unsigned threads_;
+    double val_;
+    explicit test5(unsigned iterations, unsigned threads=0) :
+      iter_(iterations),
+      threads_(threads),
+      val_(-0.123) {}
+
+    bool validate()
+    {
+        std::string s;
+        to_string_impl(s,val_);
+        return (s == "-0.123");
+    }
+    bool to_string_impl(std::string &s , double val)
+    {
+        s.resize(s.capacity());
+        while (true)
+        {
+            size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%g", val_));
+            if (n2 <= s.size())
+            {
+                s.resize(n2);
+                break;
+            }
+            s.resize(n2);
+        }
+        return true;
+    }
+    void operator()()
+    {
+        std::string out;
+        for (unsigned i=0;i<iter_;++i)
+        {
+            out.clear();
+            to_string_impl(out , val_);
+        }
+    }
+};
 
 
 int main( int, char*[] )
@@ -141,13 +255,53 @@ int main( int, char*[] )
     {
         std::cout << "starting benchmark…\n";
         {
-           test1 runner(100);
-           benchmark(runner,"encoding blank image as png");
+            test1 runner(100);
+            benchmark(runner,"encoding blank image as png");
         }
 
         {
-           test2 runner(100);
-           benchmark(runner,"encoding multicolor image as png8:m=h");
+            test2 runner(100);
+            benchmark(runner,"encoding multicolor image as png8:m=h");
+        }
+
+        {
+            test1 runner(10,10);
+            benchmark(runner,"encoding blank image as png");
+        }
+
+        {
+            test2 runner(10,10);
+            benchmark(runner,"encoding multicolor image as png8:m=h");
+        }
+
+        {
+            test3 runner(1000000);
+            benchmark(runner,"double to string conversion with std::ostringstream");
+        }
+
+        {
+            test4 runner(1000000);
+            benchmark(runner,"double to string conversion with mapnik::util_to_string");
+        }
+
+        {
+            test5 runner(1000000);
+            benchmark(runner,"double to string conversion with snprintf");
+        }
+
+        {
+            test3 runner(1000000,10);
+            benchmark(runner,"double to string conversion with std::ostringstream");
+        }
+
+        {
+            test4 runner(1000000,10);
+            benchmark(runner,"double to string conversion with mapnik::util_to_string");
+        }
+
+        {
+            test5 runner(1000000,10);
+            benchmark(runner,"double to string conversion with snprintf");
         }
 
         std::cout << "...benchmark done\n";

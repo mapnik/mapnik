@@ -159,7 +159,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     {
         std::vector<std::string> tables;
         sqlite_utils::get_tables(dataset_,tables);
-        if (*table_by_index >= tables.size())
+        if (*table_by_index < 0 || *table_by_index >= static_cast<int>(tables.size()))
         {
             std::ostringstream s;
             s << "SQLite Plugin: only "

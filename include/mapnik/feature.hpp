@@ -235,7 +235,7 @@ public:
             geometry_type const& geom = get_geometry(i);
             if (i==0)
             {
-                box2d<double> const& box = geom.envelope();
+                box2d<double> box = geom.envelope();
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
             }
             else

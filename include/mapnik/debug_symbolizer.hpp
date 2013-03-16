@@ -34,6 +34,7 @@ struct MAPNIK_DECL debug_symbolizer :
 {
     debug_symbolizer() : symbolizer_base() {}
 };
+
 }
 
 #endif // DEBUG_SYMBOLIZER_HPP

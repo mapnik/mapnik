@@ -24,11 +24,13 @@
 #define MAPNIK_SHIELD_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/color.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/text_symbolizer.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
 namespace mapnik
