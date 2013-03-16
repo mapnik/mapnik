@@ -22,6 +22,7 @@
 
 #include <mapnik/processed_text.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 namespace mapnik
 {

@@ -33,13 +33,14 @@
 
 // boost
 #include <boost/property_tree/ptree.hpp>
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
 namespace formatting
 {
-using boost::property_tree::ptree;
 
+using boost::property_tree::ptree;
 
 void text_node::to_xml(ptree &xml) const
 {
