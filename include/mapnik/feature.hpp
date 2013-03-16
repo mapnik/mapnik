@@ -313,6 +313,8 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
 
 typedef feature_impl Feature;
 
+typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
+
 }
 
 #endif // MAPNIK_FEATURE_HPP

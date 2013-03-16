@@ -24,6 +24,7 @@
 #define MAPNIK_MARKER_HELPERS_HPP
 
 #include <mapnik/color.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/markers_symbolizer.hpp>
@@ -303,17 +304,17 @@ void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storag
     double height = 0;
     if (width_expr && height_expr)
     {
-        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
-        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
     }
     else if (width_expr)
     {
-        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
         height = width;
     }
     else if (height_expr)
     {
-        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
         width = height;
     }
     svg::svg_converter_type styled_svg(svg_path, marker_ellipse.attributes());
@@ -386,11 +387,11 @@ void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, 
 
     expression_ptr const& width_expr = sym.get_width();
     if (width_expr)
-        width = boost::apply_visitor(evaluate<Feature,value_type>(feature), *width_expr).to_double();
+        width = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *width_expr).to_double();
 
     expression_ptr const& height_expr = sym.get_height();
     if (height_expr)
-        height = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr).to_double();
+        height = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr).to_double();
 
     if (width > 0 && height > 0)
     {
