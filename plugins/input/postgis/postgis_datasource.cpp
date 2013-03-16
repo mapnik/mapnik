@@ -178,7 +178,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
                             if (srid_c != NULL)
                             {
                                 int result = 0;
-                                if (mapnik::util::string2int(srid_c, result))
+                                const char * end = srid_c + std::strlen(srid_c);
+                                if (mapnik::util::string2int(srid_c, end, result))
                                 {
                                     srid_ = result;
                                 }
@@ -209,7 +210,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         if (srid_c != NULL)
                         {
                             int result = 0;
-                            if (mapnik::util::string2int(srid_c, result))
+                            const char * end = srid_c + std::strlen(srid_c);
+                            if (mapnik::util::string2int(srid_c, end, result))
                             {
                                 srid_ = result;
                             }
