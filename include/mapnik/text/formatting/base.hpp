@@ -40,7 +40,7 @@ namespace formatting {
 class node;
 typedef boost::shared_ptr<node> node_ptr;
 
-class node
+class MAPNIK_DECL node
 {
 public:
     virtual ~node() {}

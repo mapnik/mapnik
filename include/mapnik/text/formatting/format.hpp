@@ -32,7 +32,7 @@
 
 namespace mapnik {
 namespace formatting {
-class format_node: public node {
+class MAPNIK_DECL format_node: public node {
 public:
     void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(xml_node const& xml);

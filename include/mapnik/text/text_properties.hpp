@@ -57,7 +57,7 @@ DEFINE_ENUM(text_transform_e, text_transform);
 
 typedef std::map<std::string, font_set> fontset_map;
 
-struct char_properties
+struct MAPNIK_DECL char_properties
 {
     char_properties();
     /** Construct object from XML. */
@@ -135,7 +135,7 @@ class text_layout;
 
 
 /** Contains all text symbolizer properties which are not directly related to text formatting. */
-struct text_symbolizer_properties
+struct MAPNIK_DECL text_symbolizer_properties
 {
     text_symbolizer_properties();
     /** Load all values from XML ptree. */

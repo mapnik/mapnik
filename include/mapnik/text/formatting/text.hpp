@@ -30,7 +30,7 @@
 
 namespace mapnik {
 namespace formatting {
-class text_node: public node {
+class MAPNIK_DECL text_node: public node {
 public:
     text_node(expression_ptr text): node(), text_(text) {}
     text_node(std::string text): node(), text_(parse_expression(text)) {}
