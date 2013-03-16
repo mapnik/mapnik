@@ -49,12 +49,13 @@ public:
     mapnik::projection const& dest() const;
 
 private:
-    projection const source_;
-    projection const dest_;
+    projection const& source_;
+    projection const& dest_;
     bool is_source_longlat_;
     bool is_dest_longlat_;
     bool is_source_equal_dest_;
     bool wgs84_to_merc_;
+    bool merc_to_wgs84_;
 };
 }
 

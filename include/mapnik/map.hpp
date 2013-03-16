@@ -31,6 +31,7 @@
 #include <mapnik/layer.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/well_known_srs.hpp>
 
 // boost
 #include <boost/optional/optional.hpp>
@@ -106,7 +107,7 @@ public:
      *  @param height Initial map height.
      *  @param srs Initial map projection.
      */
-    Map(int width, int height, std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+    Map(int width, int height, std::string const& srs=MAPNIK_LONGLAT_PROJ);
 
     /*! \brief Copy Constructur.
      *

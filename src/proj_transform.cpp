@@ -32,30 +32,34 @@
 // stl
 #include <vector>
 
-static const float MAXEXTENT = 20037508.34;
-static const float M_PI_by2 = M_PI / 2;
-static const float D2R = M_PI / 180;
-static const float R2D = 180 / M_PI;
-static const float M_PIby360 = M_PI / 360;
-static const float MAXEXTENTby180 = MAXEXTENT/180;
-
 namespace mapnik {
 
 proj_transform::proj_transform(projection const& source,
                                projection const& dest)
     : source_(source),
-      dest_(dest)
+      dest_(dest),
+      is_source_longlat_(false),
+      is_dest_longlat_(false),
+      wgs84_to_merc_(false),
+      merc_to_wgs84_(false)
 {
-    is_source_longlat_ = source_.is_geographic();
-    is_dest_longlat_ = dest_.is_geographic();
     is_source_equal_dest_ = (source_ == dest_);
-    if (source.params() == "+init=epsg:3857" && dest.params() == "+init=epsg:4326")
+    if (!is_source_equal_dest_)
     {
-        wgs84_to_merc_ = true;
-    }
-    else
-    {
-        wgs84_to_merc_ = false;
+        is_source_longlat_ = source_.is_geographic();
+        is_dest_longlat_ = dest_.is_geographic();
+        boost::optional<well_known_srs_e> src_k = source.well_known();
+        boost::optional<well_known_srs_e> dest_k = dest.well_known();
+        if (src_k && dest_k)
+        {
+            if (*src_k == WGS_84) wgs84_to_merc_ = true;
+            else merc_to_wgs84_ = true;
+        }
+        else
+        {
+            source_.init_proj4();
+            dest_.init_proj4();
+        }
     }
 }
 
@@ -76,18 +80,13 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     if (is_source_equal_dest_)
         return true;
 
-    if (wgs84_to_merc_) {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i] = (x[i] / MAXEXTENT) * 180;
-            y[i] = (y[i] / MAXEXTENT) * 180;
-            y[i] = R2D * (2 * atan(exp(y[i] * D2R)) - M_PI_by2);
-            if (x[i] > 180) x[i] = 180;
-            if (x[i] < -180) x[i] = -180;
-            if (y[i] > 85.0511) y[i] = 85.0511;
-            if (y[i] < -85.0511) y[i] = -85.0511;
-        }
-        return true;
+    if (wgs84_to_merc_)
+    {
+        return lonlat2merc(x,y,point_count);
+    }
+    else if (merc_to_wgs84_)
+    {
+        return merc2lonlat(x,y,point_count);
     }
 
     if (is_source_longlat_)
@@ -127,18 +126,13 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
     if (is_source_equal_dest_)
         return true;
 
-    if (wgs84_to_merc_) {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i] = x[i] * MAXEXTENTby180;
-            y[i] = std::log(tan((90 + y[i]) * M_PIby360)) / D2R;
-            y[i] = y[i] * MAXEXTENTby180;
-            if (x[i] > MAXEXTENT) x[i] = MAXEXTENT;
-            if (x[i] < -MAXEXTENT) x[i] = -MAXEXTENT;
-            if (y[i] > MAXEXTENT) y[i] = MAXEXTENT;
-            if (y[i] < -MAXEXTENT) y[i] = -MAXEXTENT;
-        }
-        return true;
+    if (wgs84_to_merc_)
+    {
+        return merc2lonlat(x,y,point_count);
+    }
+    else if (merc_to_wgs84_)
+    {
+        return lonlat2merc(x,y,point_count);
     }
 
     if (is_dest_longlat_)
