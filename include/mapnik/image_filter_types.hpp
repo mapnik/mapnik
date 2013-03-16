@@ -30,7 +30,6 @@
 #include <boost/variant/variant_fwd.hpp>
 
 // stl
-#include <iostream>
 #include <vector>
 #include <ostream>
 #include <iterator>  // for std::back_insert_iterator
@@ -55,6 +54,13 @@ struct agg_stack_blur
     unsigned ry;
 };
 
+struct hsla
+{
+    hsla(std::string const& tint_string)
+        : tinter(tint_string) {}
+    std::string tinter;
+};
+
 typedef boost::variant<filter::blur,
                        filter::gray,
                        filter::agg_stack_blur,
@@ -64,7 +70,8 @@ typedef boost::variant<filter::blur,
                        filter::sobel,
                        filter::x_gradient,
                        filter::y_gradient,
-                       filter::invert> filter_type;
+                       filter::invert,
+                       filter::hsla> filter_type;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
 {
@@ -80,7 +87,13 @@ inline std::ostream& operator<< (std::ostream& os, gray)
 
 inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
 {
-    os << "agg-stack-blur:" << filter.rx << ',' << filter.ry;
+    os << "agg-stack-blur(" << filter.rx << ',' << filter.ry << ')';
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, hsla const& filter)
+{
+    os << "hsla(" << filter.tinter << ')';
     return os;
 }
 

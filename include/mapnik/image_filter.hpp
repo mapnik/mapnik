@@ -26,6 +26,7 @@
 
 //mapnik
 #include <mapnik/image_filter_types.hpp>
+#include <mapnik/util/hsl.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
@@ -401,6 +402,69 @@ void apply_filter(Src & src, agg_stack_blur const& op)
     agg::rendering_buffer buf(src.raw_data(),src.width(),src.height(), src.width() * 4);
     agg::pixfmt_rgba32 pixf(buf);
     agg::stack_blur_rgba32(pixf,op.rx,op.ry);
+}
+
+template <typename Src>
+void apply_filter(Src & src, hsla const& op)
+{
+    using namespace boost::gil;
+    Tinter tint;
+    tint.h0 = .1;
+    tint.s0 = .3;
+    tint.l1 = .9;
+    bool tinting = !tint.is_identity();
+    bool set_alpha = !tint.is_alpha_identity();
+    // todo - should filters be able to report if they should be run?
+    if (tinting || set_alpha)
+    {
+        rgba8_view_t src_view = rgba8_view(src);
+        for (int y=0; y<src_view.height(); ++y)
+        {
+            rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+            for (int x=0; x<src_view.width(); ++x)
+            {
+                uint8_t & a = get_color(src_it[x], alpha_t());
+                uint8_t a_original = a;
+                if (set_alpha)
+                {
+                    double a2 = tint.a0 + (a/255.0 * (tint.a1 - tint.a0));
+                    if (a2 > 1) a2 = 1;
+                    if (a2 < 0) a2 = 0;
+                    a = static_cast<unsigned>(std::floor(a2 * 255.0));
+                }
+                if (a > 1 && tinting)
+                {
+                    double h;
+                    double s;
+                    double l;
+                    uint8_t & r = get_color(src_it[x], red_t());
+                    uint8_t & g = get_color(src_it[x], green_t());
+                    uint8_t & b = get_color(src_it[x], blue_t());
+                    // demultiply
+                    r /= a_original;
+                    g /= a_original;
+                    b /= a_original;
+                    rgb2hsl(r,g,b,h,s,l);
+                    double h2 = tint.h0 + (h * (tint.h1 - tint.h0));
+                    double s2 = tint.s0 + (s * (tint.s1 - tint.s0));
+                    double l2 = tint.l0 + (l * (tint.l1 - tint.l0));
+                    if (h2 > 1) h2 = 1;
+                    else if (h2 < 0) h2 = 0;
+                    if (s2 > 1) s2 = 1;
+                    else if (s2 < 0) s2 = 0;
+                    if (l2 > 1) l2 = 1;
+                    else if (l2 < 0) l2 = 0;
+                    hsl2rgb(h2,s2,l2,r,g,b);
+                    // premultiply
+                    // we only work with premultiplied source,
+                    // thus all color values must be <= alpha
+                    r *= a;
+                    g *= a;
+                    b *= a;
+                }
+            }
+        }
+    }
 }
 
 template <typename Src>

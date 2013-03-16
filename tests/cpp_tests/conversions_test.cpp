@@ -65,11 +65,6 @@ int main( int, char*[] )
         BOOST_TEST_EQ( out,  "-0.0001" );
         out.clear();
     
-        to_string(out, double(0.0001234567890123456));
-        // TODO: https://github.com/mapnik/mapnik/issues/1676
-        BOOST_TEST_EQ( out,  "0.000123457" );
-        out.clear();
-    
         to_string(out, double(0.0001));
         BOOST_TEST_EQ( out,  "0.0001" );
         out.clear();
@@ -96,6 +91,23 @@ int main( int, char*[] )
 
         to_string(out, double(0.0000000001));
         BOOST_TEST_EQ( out,  "1e-10" );
+        out.clear();
+
+        to_string(out, double(-1.234e+16));
+        BOOST_TEST_EQ( out,  "-1.234e+16" );
+        out.clear();
+
+        // critical failure when karam is used
+        // https://github.com/mapnik/mapnik/issues/1741
+        // https://github.com/mapbox/tilemill/issues/1456
+        to_string(out, double(8.3));
+        BOOST_TEST_EQ( out,  "8.3" );
+        out.clear();
+
+        // non-critical failures if karma is used
+        to_string(out, double(0.0001234567890123456));
+        // TODO: https://github.com/mapnik/mapnik/issues/1676
+        BOOST_TEST_EQ( out,  "0.000123457" );
         out.clear();
 
         to_string(out, double(0.00000000001));
@@ -185,15 +197,7 @@ int main( int, char*[] )
         to_string(out, double(1.234e+16));
         BOOST_TEST_EQ( out,  "1.234e+16" );
         out.clear();
-    
-        to_string(out, double(-1.234e+16));
-        BOOST_TEST_EQ( out,  "-1.234e+16" );
-        out.clear();
-        // https://github.com/mapbox/tilemill/issues/1456
-        to_string(out, double(8.3));
-        BOOST_TEST_EQ( out,  "8.3" );
-        out.clear();
-    
+
         // int
         to_string(out, int(2));
         BOOST_TEST_EQ( out, "2" );

@@ -27,7 +27,7 @@ Known values for OPTION are:
   --libs            print library linking information
   --dep-libs        print library linking information for Mapnik dependencies
   --ldflags         print library paths (-L) information
-  --cflags          print pre-processor and compiler flags
+  --cxxflags          print pre-processor and compiler flags
   --fonts           print default fonts directory
   --input-plugins   print default input plugins directory
   --json            print all config options as json object
@@ -89,7 +89,7 @@ while test $# -gt 0; do
       echo ${CONFIG_INPUT_PLUGINS}
       ;;
 
-    --cflags)
+    --cxxflags)
       echo -I${CONFIG_MAPNIK_INCLUDE} -I${CONFIG_MAPNIK_AGG_INCLUDE} ${CONFIG_OTHER_INCLUDES}
       ;;
 

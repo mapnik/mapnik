@@ -140,6 +140,28 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
 }
 
 cairo_renderer_base::cairo_renderer_base(Map const& m,
+                                         request const& req,
+                                         cairo_ptr const& cairo,
+                                         double scale_factor,
+                                         unsigned offset_x,
+                                         unsigned offset_y)
+    : m_(m),
+      context_(cairo),
+      width_(req.width()),
+      height_(req.height()),
+      scale_factor_(scale_factor),
+      t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
+      font_engine_(boost::make_shared<freetype_engine>()),
+      font_manager_(*font_engine_),
+      face_manager_(font_engine_),
+      detector_(boost::make_shared<label_collision_detector4>(
+          box2d<double>(-req.buffer_size(), -req.buffer_size(),
+          req.width() + req.buffer_size(), req.height() + req.buffer_size())))
+{
+    setup(m);
+}
+
+cairo_renderer_base::cairo_renderer_base(Map const& m,
                                          cairo_ptr const& cairo,
                                          boost::shared_ptr<label_collision_detector4> detector,
                                          double scale_factor,
@@ -168,6 +190,16 @@ template <>
 cairo_renderer<cairo_surface_ptr>::cairo_renderer(Map const& m, cairo_surface_ptr const& surface, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m,scale_factor),
       cairo_renderer_base(m,create_context(surface),scale_factor,offset_x,offset_y) {}
+
+template <>
+cairo_renderer<cairo_ptr>::cairo_renderer(Map const& m, request const& req, cairo_ptr const& cairo, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<cairo_renderer>(m,scale_factor),
+      cairo_renderer_base(m,req,cairo,scale_factor,offset_x,offset_y) {}
+
+template <>
+cairo_renderer<cairo_surface_ptr>::cairo_renderer(Map const& m, request const& req, cairo_surface_ptr const& surface, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<cairo_renderer>(m,scale_factor),
+      cairo_renderer_base(m,req, create_context(surface),scale_factor,offset_x,offset_y) {}
 
 template <>
 cairo_renderer<cairo_ptr>::cairo_renderer(Map const& m, cairo_ptr const& cairo, boost::shared_ptr<label_collision_detector4> detector, double scale_factor, unsigned offset_x, unsigned offset_y)

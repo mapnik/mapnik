@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2012 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,32 +20,41 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_IMAGE_FILITER_GRAMMAR_HPP
-#define MAPNIK_IMAGE_FILITER_GRAMMAR_HPP
+#ifndef MAPNIK_REQUEST_HPP
+#define MAPNIK_REQUEST_HPP
+
+// mapnik
+#include <mapnik/config.hpp>
+#include <mapnik/box2d.hpp>
 
 // boost
-#include <boost/spirit/include/qi.hpp>
+#include <boost/optional/optional.hpp>
 
-// stl
-#include <vector>
-
-namespace mapnik {
-
-namespace qi = boost::spirit::qi;
-
-template <typename Iterator, typename ContType>
-struct image_filter_grammar :
-        qi::grammar<Iterator, ContType(), qi::ascii::space_type>
+namespace mapnik
 {
-    image_filter_grammar();
-    qi::rule<Iterator, ContType(), qi::ascii::space_type> start;
-    qi::rule<Iterator, ContType(), qi::ascii::space_type> filter;
-    qi::rule<Iterator, qi::locals<int,int>, void(ContType&), qi::ascii::space_type> agg_blur_filter;
-    qi::rule<Iterator, qi::locals<std::string>, void(ContType&), qi::ascii::space_type> hsla_filter;
-    qi::rule<Iterator, std::string(), qi::ascii::space_type> string_arg;
-    qi::uint_parser< unsigned, 10, 1, 3 > radius_;
+
+class MAPNIK_DECL request
+{
+public:
+    request(unsigned width,
+            unsigned height,
+            box2d<double> const& extent);
+    unsigned width() const;
+    unsigned height() const;
+    void set_buffer_size(int buffer_size);
+    int buffer_size() const;
+    box2d<double> const& extent() const;
+    void set_extent(box2d<double> const& box);
+    box2d<double> get_buffered_extent() const;
+    double scale() const;
+    ~request();
+private:
+    unsigned width_;
+    unsigned height_;
+    box2d<double> extent_;
+    int buffer_size_;
 };
 
 }
 
-#endif // MAPNIK_IMAGE_FILITER_PARSER_HPP
+#endif // MAPNIK_REQUEST_HPP
