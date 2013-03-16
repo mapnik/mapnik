@@ -28,8 +28,7 @@
 #include <mapnik/grid/grid.hpp>
 
 #if defined(HAVE_CAIRO)
-#include <cairomm/context.h>
-#include <cairomm/surface.h>
+#include <cairo.h>
 #include <mapnik/cairo_renderer.hpp>
 #endif
 
@@ -41,8 +40,8 @@ namespace mapnik
 {
 
 #if defined(HAVE_CAIRO)
-template class feature_style_processor<cairo_renderer<Cairo::Context> >;
-template class feature_style_processor<cairo_renderer<Cairo::Surface> >;
+template class feature_style_processor<cairo_renderer<cairo_ptr> >;
+template class feature_style_processor<cairo_renderer<cairo_surface_ptr> >;
 #endif
 
 #if defined(SVG_RENDERER)

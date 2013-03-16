@@ -21,6 +21,8 @@
 #include "styles_model.hpp"
 #include <mapnik/expression_string.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/rule.hpp>
+#include <mapnik/feature_type_style.hpp>
 
 // boost
 #include <boost/concept_check.hpp>
@@ -162,6 +164,18 @@ struct symbolizer_info : public boost::static_visitor<QString>
         return QString("ShieldSymbolizer");
     }
 
+    QString operator() (mapnik::markers_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return QString("MarkersSymbolizer");
+    }
+
+    QString operator() (mapnik::building_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return QString("BuildingSymbolizer");
+    }
+
     template <typename T>
     QString operator() (T const& ) const
     {
@@ -223,7 +237,7 @@ class symbolizer_node
 {
 public:
     symbolizer_node(mapnik::symbolizer const & sym)
-    : sym_(sym) {}
+        : sym_(sym) {}
     ~symbolizer_node(){}
 
     QString name() const

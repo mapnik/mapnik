@@ -49,7 +49,7 @@ SCONF_TEMP_DIR = '.sconf_temp'
 # auto-search directories for boost libs/headers
 BOOST_SEARCH_PREFIXES = ['/usr/local','/opt/local','/sw','/usr',]
 BOOST_MIN_VERSION = '1.47'
-CAIROMM_MIN_VERSION = '1.8.0'
+#CAIROMM_MIN_VERSION = '1.8.0'
 
 DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
 
@@ -60,8 +60,8 @@ pretty_dep_names = {
     'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki//OGR',
     'geos_c':'GEOS Simple Geometry Specification C Library | configured with GEOS_LIB & GEOS_INCLUDE | more info: https://github.com/mapnik/mapnik/wiki//GEOS',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
-    'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
-    'cairomm-version':'Cairomm version is too old (so cairo renderer will not be built), you need at least %s' % CAIROMM_MIN_VERSION,
+    #'cairomm':'Cairomm C++ bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
+    #'cairomm-version':'Cairomm version is too old (so cairo renderer will not be built), you need at least %s' % CAIROMM_MIN_VERSION,
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
     'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki//PostGIS',
@@ -337,8 +337,8 @@ opts.AddVariables(
     # Note: cairo, cairomm, and pycairo all optional but configured automatically through pkg-config
     # Therefore, we use a single boolean for whether to attempt to build cairo support.
     BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'),
-    PathVariable('CAIRO_INCLUDES', 'Search path for cairo/cairomm include files', '',PathVariable.PathAccept),
-    PathVariable('CAIRO_LIBS', 'Search path for cairo/cairomm library files','',PathVariable.PathAccept),
+    PathVariable('CAIRO_INCLUDES', 'Search path for cairo include files', '',PathVariable.PathAccept),
+    PathVariable('CAIRO_LIBS', 'Search path for cairo library files','',PathVariable.PathAccept),
     ('GDAL_CONFIG', 'The path to the gdal-config executable for finding gdal and ogr details.', 'gdal-config'),
     ('PG_CONFIG', 'The path to the pg_config executable.', 'pg_config'),
     PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept),
@@ -1282,17 +1282,17 @@ if not preconfigured:
                     c_inc = os.path.dirname(c_inc)
                 env["CAIROMM_CPPPATHS"].extend(
                     [
-                      os.path.join(c_inc,'include/cairomm-1.0'),
-                      os.path.join(c_inc,'lib/cairomm-1.0/include'),
+                      #os.path.join(c_inc,'include/cairomm-1.0'),
+                      #os.path.join(c_inc,'lib/cairomm-1.0/include'),
                       os.path.join(c_inc,'include/cairo'),
-                      os.path.join(c_inc,'include/sigc++-2.0'),
-                      os.path.join(c_inc,'lib/sigc++-2.0/include'),
+                      #os.path.join(c_inc,'include/sigc++-2.0'),
+                      #os.path.join(c_inc,'lib/sigc++-2.0/include'),
                       os.path.join(c_inc,'include/pixman-1'),
                       #os.path.join(c_inc,'include/freetype2'),
                       #os.path.join(c_inc,'include/libpng'),
                     ]
                 )
-                env["CAIROMM_LINKFLAGS"] = ['cairo','cairomm-1.0']
+                env["CAIROMM_LINKFLAGS"] = ['cairo']
                 if env['RUNTIME_LINK'] == 'static':
                     env["CAIROMM_LINKFLAGS"].extend(
                         ['sigc-2.0','pixman-1','expat','fontconfig','iconv']
@@ -1304,40 +1304,40 @@ if not preconfigured:
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('pkg-config')
                 env['SKIPPED_DEPS'].append('cairo')
-                env['SKIPPED_DEPS'].append('cairomm')
+                #env['SKIPPED_DEPS'].append('cairomm')
             elif not conf.CheckPKG('cairo'):
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('cairo')
-            elif not conf.CheckPKG('cairomm-1.0'):
-                env['HAS_CAIRO'] = False
-                env['SKIPPED_DEPS'].append('cairomm')
-            elif not conf.CheckPKGVersion('cairomm-1.0',CAIROMM_MIN_VERSION):
-                env['HAS_CAIRO'] = False
-                env['SKIPPED_DEPS'].append('cairomm-version')
-            else:
-                print 'Checking for cairo/cairomm lib and include paths... ',
-                cmd = 'pkg-config --libs --cflags cairomm-1.0'
-                if env['RUNTIME_LINK'] == 'static':
-                    cmd += ' --static'
-                cairo_env = env.Clone()
-                try:
-                    cairo_env.ParseConfig(cmd)
-                    for lib in cairo_env['LIBS']:
-                        if not lib in env['LIBS']:
-                            env["CAIROMM_LINKFLAGS"].append(lib)
-                    for lpath in cairo_env['LIBPATH']:
-                        if not lpath in env['LIBPATH']:
-                            env["CAIROMM_LIBPATHS"].append(lpath)
-                    for inc in cairo_env['CPPPATH']:
-                        if not inc in env['CPPPATH']:
-                            env["CAIROMM_CPPPATHS"].append(inc)
-                    env['HAS_CAIRO'] = True
-                    print 'yes'
-                except OSError,e:
-                    color_print(1,'no')
-                    env['SKIPPED_DEPS'].append('cairo')
-                    env['SKIPPED_DEPS'].append('cairomm')
-                    color_print(1,'pkg-config reported: %s' % e)
+            #elif not conf.CheckPKG('cairomm-1.0'):
+            #    env['HAS_CAIRO'] = False
+            #    env['SKIPPED_DEPS'].append('cairomm')
+            #elif not conf.CheckPKGVersion('cairomm-1.0',CAIROMM_MIN_VERSION):
+            #    env['HAS_CAIRO'] = False
+            #    env['SKIPPED_DEPS'].append('cairomm-version')
+            #else:
+            #    print 'Checking for cairo/cairomm lib and include paths... ',
+            #    cmd = 'pkg-config --libs --cflags cairomm-1.0'
+            #    if env['RUNTIME_LINK'] == 'static':
+            #        cmd += ' --static'
+            #    cairo_env = env.Clone()
+            #    try:
+            #        cairo_env.ParseConfig(cmd)
+            #        for lib in cairo_env['LIBS']:
+            #            if not lib in env['LIBS']:
+            #                env["CAIROMM_LINKFLAGS"].append(lib)
+            #        for lpath in cairo_env['LIBPATH']:
+            #            if not lpath in env['LIBPATH']:
+            #                env["CAIROMM_LIBPATHS"].append(lpath)
+            #        for inc in cairo_env['CPPPATH']:
+            #            if not inc in env['CPPPATH']:
+            #                env["CAIROMM_CPPPATHS"].append(inc)
+            #        env['HAS_CAIRO'] = True
+            #        print 'yes'
+            #    except OSError,e:
+            #        color_print(1,'no')
+            #        env['SKIPPED_DEPS'].append('cairo')
+            #        env['SKIPPED_DEPS'].append('cairomm')
+            #        color_print(1,'pkg-config reported: %s' % e)
 
     else:
         color_print(4,'Not building with cairo support, pass CAIRO=True to enable')

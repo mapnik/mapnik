@@ -37,7 +37,6 @@
 #ifdef HAVE_CAIRO
 // cairo
 #include <mapnik/cairo_renderer.hpp>
-#include <cairomm/surface.h>
 #endif
 
 #include "mapwidget.hpp"
@@ -567,12 +566,10 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
 
 #ifdef HAVE_CAIRO
-    Cairo::RefPtr<Cairo::ImageSurface> image_surface =
-        Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, map.width(),map.height());
-
-    mapnik::cairo_renderer<Cairo::Surface> png_render(map, image_surface, scaling_factor);
-    png_render.apply();
-
+    mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
+                                            mapnik::cairo_surface_closer());
+    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> renderer(map, image_surface, scaling_factor);
+    renderer.apply();
     image_32 buf(image_surface);
     QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());

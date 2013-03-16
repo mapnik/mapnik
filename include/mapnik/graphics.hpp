@@ -37,7 +37,7 @@
 
 // cairo
 #ifdef HAVE_CAIRO
-#include <cairomm/surface.h>
+#include <mapnik/cairo_context.hpp>
 #endif
 
 // boost
@@ -58,7 +58,7 @@ public:
     image_32(int width,int height);
     image_32(image_32 const& rhs);
 #ifdef HAVE_CAIRO
-    image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs);
+    explicit image_32(cairo_surface_ptr const& surface);
 #endif
     ~image_32();
 
@@ -184,9 +184,9 @@ public:
 #endif
         }
     }
-    
+
     void composite_pixel(unsigned op, int x,int y,unsigned c, unsigned cover, double opacity);
-    
+
     inline unsigned width() const
     {
         return width_;

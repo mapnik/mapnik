@@ -26,7 +26,7 @@
 // boost
 #include <boost/variant/variant.hpp>
 #include <boost/optional.hpp>
-
+#include <boost/lexical_cast.hpp>
 // mapnik
 #include <mapnik/value_types.hpp>
 
@@ -39,6 +39,31 @@ namespace mapnik
 typedef boost::variant<value_null,value_integer,value_double,std::string> value_holder;
 typedef std::pair<std::string, value_holder> parameter;
 typedef std::map<std::string, value_holder> param_map;
+
+// TODO - rewrite to avoid usage of lexical_cast
+template <typename T>
+struct value_extractor_visitor : public boost::static_visitor<>
+{
+    value_extractor_visitor(boost::optional<T> & var)
+        :var_(var) {}
+
+    void operator () (T val) const
+    {
+        var_ = val;
+    }
+
+    template <typename T1>
+    void operator () (T1 val) const
+    {
+        try
+        {
+            var_ = boost::lexical_cast<T>(val);
+        }
+        catch (boost::bad_lexical_cast & ) {}
+    }
+
+    boost::optional<T> & var_;
+};
 
 class parameters : public param_map
 {
