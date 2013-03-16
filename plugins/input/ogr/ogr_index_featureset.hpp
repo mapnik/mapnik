@@ -26,6 +26,7 @@
 #include <set>
 #include <vector>
 #include <boost/scoped_ptr.hpp>
+#include <mapnik/feature.hpp>
 #include "ogr_featureset.hpp"
 
 template <typename filterT>

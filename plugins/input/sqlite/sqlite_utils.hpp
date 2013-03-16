@@ -644,7 +644,6 @@ public:
             std::string fld_type(rs->column_text(2));
             sqlite_int64 fld_pk = rs->column_integer64(5);
             std::transform(fld_type.begin(), fld_type.end(), fld_type.begin(), ::tolower);
-
             // TODO - how to handle primary keys on multiple columns ?
             if (key_field.empty() && ! found_pk && fld_pk != 0)
             {

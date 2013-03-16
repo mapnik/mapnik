@@ -31,6 +31,7 @@
 #include <mapnik/image_filter_grammar.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/css_color_grammar.hpp>
+#include <mapnik/unicode.hpp>
 
 // boost
 #include <boost/format.hpp>

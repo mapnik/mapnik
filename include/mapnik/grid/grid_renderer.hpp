@@ -27,29 +27,31 @@
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/label_collision_detector.hpp>
-#include <mapnik/map.hpp>
-#include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/rule.hpp>              // for rule, symbolizers
+#include <mapnik/box2d.hpp>     // for box2d
+#include <mapnik/color.hpp>     // for color
+#include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/image_compositing.hpp>  // for composite_mode_e
 
 // boost
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
-// FIXME
-// forward declare so that
-// apps using mapnik do not
-// need agg headers
-namespace agg {
-struct trans_affine;
-}
+namespace agg { struct trans_affine; }
+namespace mapnik { class Map; }
+namespace mapnik { class feature_impl; }
+namespace mapnik { class feature_type_style; }
+namespace mapnik { class label_collision_detector4; }
+namespace mapnik { class layer; }
+namespace mapnik { class marker; }
+namespace mapnik { class proj_transform; }
+namespace mapnik { struct grid_rasterizer; }
+struct pixel_position;
 
 namespace mapnik {
-
-class marker;
-
-struct grid_rasterizer;
 
 template <typename T>
 class MAPNIK_DECL grid_renderer : public feature_style_processor<grid_renderer<T> >,

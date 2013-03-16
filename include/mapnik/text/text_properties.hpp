@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/text/char_properties_ptr.hpp>
 #include <mapnik/color.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
@@ -143,7 +144,7 @@ struct text_symbolizer_properties
     /** Takes a feature and produces formated text as output.
      * The output object has to be created by the caller and passed in for thread safety.
      */
-    void process(text_layout &output, Feature const& feature) const;
+    void process(text_layout &output, feature_impl const& feature) const;
     /** Automatically create processing instructions for a single expression. */
     void set_old_style_expression(expression_ptr expr);
     /** Sets new format tree. */

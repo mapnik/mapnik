@@ -36,7 +36,11 @@
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/extensions/index/rtree/rtree.hpp>
+
 // mapnik
+#include <mapnik/unicode.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>

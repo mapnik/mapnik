@@ -24,14 +24,36 @@
 #define MAPNIK_SVG_RENDERER_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/map.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/svg/output/svg_generator.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/rule.hpp>              // for rule, symbolizers
+#include <mapnik/box2d.hpp>     // for box2d
+#include <mapnik/color.hpp>     // for color
+#include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/image_compositing.hpp>  // for composite_mode_e
+
+// boost
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 // stl
 #include <string>
+
+namespace agg { struct trans_affine; }
+namespace mapnik { class Map; }
+namespace mapnik { class feature_impl; }
+namespace mapnik { class feature_type_style; }
+namespace mapnik { class label_collision_detector4; }
+namespace mapnik { class layer; }
+namespace mapnik { class marker; }
+namespace mapnik { class proj_transform; }
+namespace mapnik { struct grid_rasterizer; }
+struct pixel_position;
+
 
 namespace mapnik
 {

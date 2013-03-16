@@ -22,7 +22,6 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
@@ -33,7 +32,9 @@
 
 #include "kismet_featureset.hpp"
 
-using mapnik::Feature;
+// boost
+#include <boost/make_shared.hpp>
+
 using mapnik::feature_ptr;
 using mapnik::geometry_type;
 using mapnik::geometry_utils;

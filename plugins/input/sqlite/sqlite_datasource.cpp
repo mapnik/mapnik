@@ -65,8 +65,8 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
       geometry_field_(*params.get<std::string>("geometry_field", "")),
       index_table_(*params.get<std::string>("index_table", "")),
       key_field_(*params.get<std::string>("key_field", "")),
-      row_offset_(*params.get<int>("row_offset", 0)),
-      row_limit_(*params.get<int>("row_limit", 0)),
+      row_offset_(*params.get<mapnik::value_integer>("row_offset", 0)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       intersects_token_("!intersects!"),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
       format_(mapnik::wkbAuto)
@@ -142,7 +142,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     // now actually create the connection and start executing setup sql
     dataset_ = boost::make_shared<sqlite_connection>(dataset_name_);
 
-    boost::optional<unsigned> table_by_index = params.get<unsigned>("table_by_index");
+    boost::optional<int> table_by_index = params.get<int>("table_by_index");
 
     int passed_parameters = 0;
     passed_parameters += params.get<std::string>("table") ? 1 : 0;

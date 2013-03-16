@@ -28,6 +28,7 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/timer.hpp>
+#include <mapnik/value.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -77,7 +78,7 @@ occi_datasource::occi_datasource(parameters const& params)
       extent_initialized_(false),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
       use_wkb_(*params.get<mapnik::boolean>("use_wkb", false)),
-      row_limit_(*params.get<int>("row_limit", 0)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       row_prefetch_(*params.get<int>("row_prefetch", 100)),
       pool_(0),
       conn_(0)

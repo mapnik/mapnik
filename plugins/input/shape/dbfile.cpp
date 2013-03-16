@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 // mapnik
+#include <mapnik/value.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/unicode.hpp>
@@ -124,7 +125,7 @@ const field_descriptor& dbf_file::descriptor(int col) const
 }
 
 
-void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f) const throw()
+void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const throw()
 {
     using namespace boost::spirit;
 

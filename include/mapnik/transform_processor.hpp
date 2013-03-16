@@ -25,7 +25,9 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
+#endif
 #include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/transform_expression.hpp>
@@ -225,7 +227,7 @@ struct transform_processor
     }
 };
 
-typedef mapnik::transform_processor<Feature> transform_processor_type;
+typedef mapnik::transform_processor<feature_impl> transform_processor_type;
 
 } // namespace mapnik
 

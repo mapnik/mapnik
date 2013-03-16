@@ -85,10 +85,10 @@ kismet_datasource::kismet_datasource(parameters const& params)
         throw datasource_exception("Kismet Plugin: missing <host> parameter");
     }
 
-    boost::optional<unsigned int> port = params.get<unsigned int>("port", 2501);
+    boost::optional<int> port = params.get<int>("port", 2501);
     if (port)
     {
-        port_ = *port;
+        port_ = static_cast<unsigned>(*port);
     }
 
     boost::optional<std::string> srs = params.get<std::string>("srs");

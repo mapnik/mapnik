@@ -24,7 +24,6 @@
 #define KISMET_TYPES_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 
 // boost

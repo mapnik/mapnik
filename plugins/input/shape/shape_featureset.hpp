@@ -25,7 +25,9 @@
 
 //mapnik
 #include <mapnik/geom_util.hpp>
-#include <mapnik/datasource.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/value.hpp>
 
 #include "shape_io.hpp"
 
@@ -60,7 +62,7 @@ private:
     boost::scoped_ptr<transcoder> tr_;
     long file_length_;
     std::vector<int> attr_ids_;
-    const int row_limit_;
+    mapnik::value_integer row_limit_;
     mutable int count_;
     context_ptr ctx_;
 };

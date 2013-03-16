@@ -3,11 +3,12 @@
 
 // mapnik
 #include <mapnik/datasource.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/unicode.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp> // needed for wrapping the transcoder
 
-// extend the mapnik::Featureset defined in include/mapnik/datasource.hpp
 class hello_featureset : public mapnik::Featureset
 {
 public:

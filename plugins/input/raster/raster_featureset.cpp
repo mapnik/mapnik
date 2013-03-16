@@ -22,6 +22,8 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/image_data.hpp>
+#include <mapnik/raster.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
@@ -29,12 +31,12 @@
 
 // boost
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/make_shared.hpp>
 
 #include "raster_featureset.hpp"
 
 using mapnik::query;
 using mapnik::image_reader;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::image_data_32;
 using mapnik::raster;

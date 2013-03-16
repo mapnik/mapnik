@@ -25,6 +25,7 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // boost
@@ -34,7 +35,6 @@
 using mapnik::query;
 using mapnik::coord2d;
 using mapnik::box2d;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_type;
 using mapnik::query;

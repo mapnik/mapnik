@@ -24,33 +24,33 @@
 #define MAPNIK_AGG_RENDERER_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
+#include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/label_collision_detector.hpp>
-#include <mapnik/map.hpp>
+#include <mapnik/font_engine_freetype.hpp>  // for face_manager, etc
+#include <mapnik/noncopyable.hpp>       // for noncopyable
+#include <mapnik/rule.hpp>              // for rule, symbolizers
+#include <mapnik/box2d.hpp>     // for box2d
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/rule.hpp> // for all symbolizers
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/color.hpp>     // for color
+#include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/image_compositing.hpp>  // for composite_mode_e
 
 // boost
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
 
-// FIXME
-// forward declare so that
-// apps using mapnik do not
-// need agg headers
-namespace agg {
-struct trans_affine;
-}
+namespace agg { struct trans_affine; }
+namespace mapnik { class Map; }
+namespace mapnik { class feature_impl; }
+namespace mapnik { class feature_type_style; }
+namespace mapnik { class label_collision_detector4; }
+namespace mapnik { class layer; }
+namespace mapnik { class marker; }
+namespace mapnik { class proj_transform; }
+namespace mapnik { struct rasterizer; }
+struct pixel_position;
 
 namespace mapnik {
-
-class marker;
-
-struct rasterizer;
 
 template <typename T>
 class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,

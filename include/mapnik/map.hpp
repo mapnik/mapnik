@@ -24,9 +24,10 @@
 #define MAPNIK_MAP_HPP
 
 // mapnik
+#include <mapnik/color.hpp>
+#include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/feature_type_style.hpp>
-#include <mapnik/datasource.hpp>
+#include <mapnik/datasource.hpp>  // for featureset_ptr
 #include <mapnik/layer.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/ctrans.hpp>
@@ -37,6 +38,7 @@
 namespace mapnik
 {
 
+class feature_type_style;
 class CoordTransform;
 
 class MAPNIK_DECL Map

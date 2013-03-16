@@ -2,6 +2,9 @@
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry.hpp>
 
+// boost
+#include <boost/make_shared.hpp>
+
 #include "hello_featureset.hpp"
 
 hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string const& encoding)

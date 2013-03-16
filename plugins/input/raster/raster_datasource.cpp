@@ -61,9 +61,9 @@ raster_datasource::raster_datasource(parameters const& params)
     else
         filename_ = *file;
 
-    multi_tiles_ = *params.get<bool>("multi", false);
-    tile_size_ = *params.get<unsigned>("tile_size", 256);
-    tile_stride_ = *params.get<unsigned>("tile_stride", 1);
+    multi_tiles_ = *params.get<mapnik::boolean>("multi", false);
+    tile_size_ = *params.get<int>("tile_size", 256);
+    tile_stride_ = *params.get<int>("tile_stride", 1);
 
     format_ = *params.get<std::string>("format","tiff");
 
@@ -91,8 +91,8 @@ raster_datasource::raster_datasource(parameters const& params)
     
     if (multi_tiles_)
     {
-        boost::optional<unsigned> x_width = params.get<unsigned>("x_width");
-        boost::optional<unsigned> y_width = params.get<unsigned>("y_width");
+        boost::optional<int> x_width = params.get<int>("x_width");
+        boost::optional<int> y_width = params.get<int>("y_width");
 
         if (! x_width)
         {
