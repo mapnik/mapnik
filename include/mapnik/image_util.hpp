@@ -64,6 +64,9 @@ public:
 #if defined(HAVE_CAIRO)
 MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
                                     std::string const& filename,
+                                    double scale_factor=1.0);
+MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
+                                    std::string const& filename,
                                     std::string const& type,
                                     double scale_factor=1.0);
 #endif
