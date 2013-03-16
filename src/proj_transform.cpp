@@ -113,15 +113,10 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         }
     }
 
+    if (pj_transform( source_.proj_, dest_.proj_, point_count,
+                      0, x,y,z) != 0)
     {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-        mutex::scoped_lock lock(projection::mutex_);
-#endif
-        if (pj_transform( source_.proj_, dest_.proj_, point_count,
-                          0, x,y,z) != 0)
-        {
-            return false;
-        }
+        return false;
     }
 
     if (is_dest_longlat_)
@@ -160,16 +155,10 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         }
     }
 
+    if (pj_transform( dest_.proj_, source_.proj_, point_count,
+                      0, x,y,z) != 0)
     {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-        mutex::scoped_lock lock(projection::mutex_);
-#endif
-
-        if (pj_transform( dest_.proj_, source_.proj_, point_count,
-                          0, x,y,z) != 0)
-        {
-            return false;
-        }
+        return false;
     }
 
     if (is_source_longlat_)

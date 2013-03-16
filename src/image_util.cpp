@@ -348,7 +348,7 @@ void save_to_stream(T const& image,
         }
         else if (boost::algorithm::starts_with(t, "tif"))
         {
-#if defined(HAVE_JPEG)
+#if defined(HAVE_TIFF)
             save_as_tiff(stream, image);
 #else
             throw ImageWriterException("tiff output is not enabled in your build of Mapnik");
