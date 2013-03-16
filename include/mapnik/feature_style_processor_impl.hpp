@@ -38,6 +38,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
+#include <mapnik/rule_cache.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/utils.hpp>
@@ -136,11 +137,16 @@ struct has_process
         );
 };
 
-
 template <typename Processor>
 feature_style_processor<Processor>::feature_style_processor(Map const& m, double scale_factor)
-    : m_(m), scale_factor_(scale_factor)
+    : m_(m),
+      scale_factor_(scale_factor)
 {
+    // https://github.com/mapnik/mapnik/issues/1100
+    if (scale_factor_ <= 0)
+    {
+        throw std::runtime_error("scale_factor must be greater than 0.0");
+    }
 }
 
 template <typename Processor>
@@ -157,7 +163,7 @@ void feature_style_processor<Processor>::apply()
     try
     {
         projection proj(m_.srs(),true);
-        double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
+        double scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
         BOOST_FOREACH ( layer const& lyr, m_.layers() )
@@ -191,7 +197,7 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr, std::se
     try
     {
         projection proj(m_.srs(),true);
-        double scale_denom = mapnik::scale_denominator(m_,proj.is_geographic());
+        double scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
         if (lyr.visible(scale_denom))
@@ -361,10 +367,11 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                                m_.height()/qh);
 
     query q(layer_ext,res,scale_denom,m_.get_current_extent());
-    std::vector<feature_type_style*> active_styles;
+    std::vector<feature_type_style const*> active_styles;
     attribute_collector collector(names);
     double filt_factor = 1.0;
     directive_collector d_collector(filt_factor);
+    boost::ptr_vector<rule_cache> rule_caches;
 
     // iterate through all named styles collecting active styles and attribute names
     BOOST_FOREACH(std::string const& style_name, style_names)
@@ -379,12 +386,14 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             continue;
         }
 
-        std::vector<rule> const& rules=(*style).get_rules();
-        bool active_rules=false;
+        std::vector<rule> const& rules = style->get_rules();
+        bool active_rules = false;
+        std::auto_ptr<rule_cache> rc(new rule_cache);
         BOOST_FOREACH(rule const& r, rules)
         {
             if (r.active(scale_denom))
             {
+                rc->add_rule(r);
                 active_rules = true;
                 if (ds->type() == datasource::Vector)
                 {
@@ -395,7 +404,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
         if (active_rules)
         {
-            active_styles.push_back(const_cast<feature_type_style*>(&(*style)));
+            rule_caches.push_back(rc);
+            active_styles.push_back(&(*style));
         }
     }
 
@@ -419,7 +429,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
 
         // Update filter_factor for all enabled raster layers.
-        BOOST_FOREACH (feature_type_style * style, active_styles)
+        BOOST_FOREACH (feature_type_style const* style, active_styles)
         {
             BOOST_FOREACH(rule const& r, style->get_rules())
             {
@@ -464,10 +474,11 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         // We're at a value boundary, so render what we have
                         // up to this point.
                         int i = 0;
-                        BOOST_FOREACH (feature_type_style * style, active_styles)
+                        BOOST_FOREACH (feature_type_style const* style, active_styles)
                         {
-                            render_style(lay, p, style, style_names[i++],
-                                         cache.features(q), prj_trans, scale_denom);
+                            render_style(lay, p, style, rule_caches[i], style_names[i],
+                                         cache.features(q), prj_trans);
+                            i++;
                         }
                         cache.clear();
                     }
@@ -476,10 +487,11 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 }
 
                 int i = 0;
-                BOOST_FOREACH (feature_type_style * style, active_styles)
+                BOOST_FOREACH (feature_type_style const* style, active_styles)
                 {
-                    render_style(lay, p, style, style_names[i++],
-                                 cache.features(q), prj_trans, scale_denom);
+                    render_style(lay, p, style, rule_caches[i], style_names[i],
+                                 cache.features(q), prj_trans);
+                    i++;
                 }
             }
         }
@@ -496,20 +508,22 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 }
             }
             int i = 0;
-            BOOST_FOREACH (feature_type_style * style, active_styles)
+            BOOST_FOREACH (feature_type_style const* style, active_styles)
             {
-                render_style(lay, p, style, style_names[i++],
-                             cache.features(q), prj_trans, scale_denom);
+                render_style(lay, p, style, rule_caches[i], style_names[i],
+                             cache.features(q), prj_trans);
+                i++;
             }
         }
         // We only have a single style and no grouping.
         else
         {
             int i = 0;
-            BOOST_FOREACH (feature_type_style * style, active_styles)
+            BOOST_FOREACH (feature_type_style const* style, active_styles)
             {
-                render_style(lay, p, style, style_names[i++],
-                             ds->features(q), prj_trans, scale_denom);
+                render_style(lay, p, style, rule_caches[i], style_names[i],
+                             ds->features(q), prj_trans);
+                i++;
             }
         }
     }
@@ -526,11 +540,11 @@ template <typename Processor>
 void feature_style_processor<Processor>::render_style(
     layer const& lay,
     Processor & p,
-    feature_type_style* style,
+    feature_type_style const* style,
+    rule_cache const& rc,
     std::string const& style_name,
     featureset_ptr features,
-    proj_transform const& prj_trans,
-    double scale_denom)
+    proj_transform const& prj_trans)
 {
     p.start_style_processing(*style);
     if (!features)
@@ -560,7 +574,7 @@ void feature_style_processor<Processor>::render_style(
         bool do_else = true;
         bool do_also = false;
 
-        BOOST_FOREACH(rule * r, style->get_if_rules(scale_denom) )
+        BOOST_FOREACH(rule const* r, rc.get_if_rules() )
         {
             expression_ptr const& expr=r->get_filter();
             value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
@@ -589,13 +603,14 @@ void feature_style_processor<Processor>::render_style(
                 if (style->get_filter_mode() == FILTER_FIRST)
                 {
                     // Stop iterating over rules and proceed with next feature.
+                    do_also=false;
                     break;
                 }
             }
         }
         if (do_else)
         {
-            BOOST_FOREACH( rule * r, style->get_else_rules(scale_denom) )
+            BOOST_FOREACH( rule const* r, rc.get_else_rules() )
             {
 #if defined(RENDERING_STATS)
                 feat_processed = true;
@@ -617,7 +632,7 @@ void feature_style_processor<Processor>::render_style(
         }
         if (do_also)
         {
-            BOOST_FOREACH( rule * r, style->get_also_rules(scale_denom) )
+            BOOST_FOREACH( rule const* r, rc.get_also_rules() )
             {
 #if defined(RENDERING_STATS)
                 feat_processed = true;

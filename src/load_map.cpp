@@ -103,7 +103,7 @@ private:
     void parse_markers_symbolizer(rule & rule, xml_node const& sym);
     void parse_debug_symbolizer(rule & rule, xml_node const& sym);
 
-    void parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
+    bool parse_raster_colorizer(raster_colorizer_ptr const& rc, xml_node const& node);
     bool parse_stroke(stroke & strk, xml_node const & sym);
 
     void ensure_font_face(std::string const& face_name);
@@ -873,7 +873,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     }
 
     // simplify value
-    optional<double> simplify_tolerance = pt.get_opt_attr<double>("simplify-tolerance");
+    optional<double> simplify_tolerance = pt.get_opt_attr<double>("simplify");
     if (simplify_tolerance) sym.set_simplify_tolerance(*simplify_tolerance);
 
     // smooth value
@@ -1501,14 +1501,25 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         xml_node::const_iterator cssIter = sym.begin();
         xml_node::const_iterator endCss = sym.end();
 
+        bool found_colorizer = false;
         for(; cssIter != endCss; ++cssIter)
         {
             if (cssIter->is("RasterColorizer"))
             {
+                found_colorizer = true;
                 raster_colorizer_ptr colorizer = boost::make_shared<raster_colorizer>();
                 raster_sym.set_colorizer(colorizer);
-                parse_raster_colorizer(colorizer, *cssIter);
+                if (parse_raster_colorizer(colorizer, *cssIter))
+                    raster_sym.set_colorizer(colorizer);
+
             }
+        }
+        // look for properties one level up
+        if (!found_colorizer)
+        {
+            raster_colorizer_ptr colorizer = boost::make_shared<raster_colorizer>();
+            if (parse_raster_colorizer(colorizer, sym))
+                raster_sym.set_colorizer(colorizer);
         }
         parse_symbolizer_base(raster_sym, sym);
         rule.append(raster_sym);
@@ -1528,9 +1539,10 @@ void map_parser::parse_debug_symbolizer(rule & rule, xml_node const & sym)
     rule.append(symbol);
 }
 
-void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
+bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
                                         xml_node const& node)
 {
+    bool found_stops = false;
     try
     {
         // mode
@@ -1569,6 +1581,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
         {
             if (stopIter->is("stop"))
             {
+                found_stops = true;
                 // colour is optional.
                 optional<color> stopcolor = stopIter->get_opt_attr<color>("color");
                 if (!stopcolor) {
@@ -1612,6 +1625,7 @@ void map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
         ex.append_context(node);
         throw;
     }
+    return found_stops;
 }
 
 void map_parser::ensure_font_face(std::string const& face_name)

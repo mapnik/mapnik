@@ -85,6 +85,7 @@ void export_rule()
         .def("active",&rule::active)
         .add_property("symbols",make_function
                       (&rule::get_symbolizers,return_value_policy<reference_existing_object>()))
+        .add_property("copy_symbols",make_function
+                      (&rule::get_symbolizers,return_value_policy<copy_const_reference>()))
         ;
 }
-

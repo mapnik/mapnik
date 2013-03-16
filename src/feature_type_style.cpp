@@ -42,7 +42,6 @@ feature_type_style::feature_type_style()
 : filter_mode_(FILTER_ALL),
     filters_(),
     direct_filters_(),
-    scale_denom_validity_(-1),
     opacity_(1.0f)
 {}
 
@@ -51,7 +50,6 @@ feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_
       filters_(rhs.filters_),
       direct_filters_(rhs.direct_filters_),
       comp_op_(rhs.comp_op_),
-      scale_denom_validity_(-1),
       opacity_(rhs.opacity_)
 {
     if (!deep_copy) {
@@ -68,11 +66,10 @@ feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_
 feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
 {
     if (this == &rhs) return *this;
-    rules_=rhs.rules_;   
+    rules_=rhs.rules_;
     filters_ = rhs.filters_;
     direct_filters_ = rhs.direct_filters_;
     comp_op_ = rhs.comp_op_;
-    scale_denom_validity_ = -1;
     opacity_= rhs.opacity_;
     return *this;
 }
@@ -80,7 +77,6 @@ feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
 void feature_type_style::add_rule(rule const& rule)
 {
     rules_.push_back(rule);
-    scale_denom_validity_ = -1;
 }
 
 rules const& feature_type_style::get_rules() const
@@ -155,59 +151,5 @@ float feature_type_style::get_opacity() const
     return opacity_;
 }
 
-void feature_type_style::update_rule_cache(double scale_denom)
-{
-    if_rules_.clear();
-    else_rules_.clear();
-    also_rules_.clear();
-
-    BOOST_FOREACH(rule const& r, rules_)
-    {
-        if (r.active(scale_denom))
-        {
-            if (r.has_else_filter())
-            {
-                else_rules_.push_back(const_cast<rule*>(&r));
-            }
-            else if (r.has_also_filter())
-            {
-                also_rules_.push_back(const_cast<rule*>(&r));
-            }
-            else
-            {
-                if_rules_.push_back(const_cast<rule*>(&r));
-            }
-        }
-    }
-
-    scale_denom_validity_ = scale_denom;
-}
-
-rule_ptrs const& feature_type_style::get_if_rules(double scale_denom)
-{
-    if (scale_denom_validity_ != scale_denom)
-    {
-        update_rule_cache(scale_denom);
-    }
-    return if_rules_;
-}
-
-rule_ptrs const& feature_type_style::get_else_rules(double scale_denom)
-{
-    if (scale_denom_validity_ != scale_denom)
-    {
-        update_rule_cache(scale_denom);
-    }
-    return else_rules_;
-}
-
-rule_ptrs const& feature_type_style::get_also_rules(double scale_denom)
-{
-    if (scale_denom_validity_ != scale_denom)
-    {
-        update_rule_cache(scale_denom);
-    }
-    return also_rules_;
-}
 
 }

@@ -62,7 +62,7 @@ pretty_dep_names = {
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
-    'pg':'Postgres C Library requiered for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki//PostGIS',
+    'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki//PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki//SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
@@ -458,6 +458,8 @@ HELP_REQUESTED = False
 if ('-h' in command_line_args) or ('--help' in command_line_args):
     HELP_REQUESTED = True
 
+if ('-c' in command_line_args) or ('--clean' in command_line_args):
+    HELP_REQUESTED = True
 
 if 'configure' in command_line_args and not HELP_REQUESTED:
     force_configure = True
@@ -644,6 +646,47 @@ def rollback_option(context,variable):
     for item in opts.options:
         if item.key == variable:
             env[variable] = item.default
+
+def update_linux_project_files():
+    headers_content = []
+    source_content = []
+
+    directories = [
+        'include',
+        'src',
+        'bindings',
+        'boost',
+        'plugins',
+        'deps',
+    ]
+
+    def iterate_dirs(headers_content, source_content, d):
+        for root, subFolders, files in os.walk(d):
+            for f in files:
+                if f.endswith(".h") or f.endswith(".hpp"):
+                    headers_content.append("  ../%s \\" % os.path.join(root, f))
+                if f.endswith(".cpp") or f.endswith(".c"):
+                    source_content.append("  ../%s \\" % os.path.join(root, f))
+            for sd in subFolders:
+                headers_content, source_content = \
+                    iterate_dirs(headers_content, source_content, sd)
+        return headers_content, source_content
+
+    for d in directories:
+        headers_content, source_content = \
+            iterate_dirs(headers_content, source_content, d)
+
+    headers_content.sort()
+    headers_content = ['HEADERS += \\'] + headers_content + ['','']
+
+    source_content.sort()
+    source_content = ['SOURCES += \\'] + source_content + ['','']
+
+    files_name = os.path.join('.', 'workspace', 'All.files')
+    f = open(files_name, "w")
+    f.writelines([l + '\n' for l in headers_content])
+    f.writelines([l + '\n' for l in source_content])
+    f.close()
 
 def FindBoost(context, prefixes, thread_flag):
     """Routine to auto-find boost header dir, lib dir, and library naming structure.
@@ -1301,7 +1344,7 @@ if not preconfigured:
     # prepend to make sure we link locally
     env.Prepend(CPPPATH = '#deps/agg/include')
     env.Prepend(LIBPATH = '#deps/agg')
-
+    env.Prepend(CPPPATH = '#deps/clipper/include')
     # prepend deps dir for auxillary headers
     env.Prepend(CPPPATH = '#deps')
 
@@ -1812,3 +1855,7 @@ if not HELP_REQUESTED:
         if os.path.exists(plugin_path):
             color_print(3,"Notice: removing out of date plugin: '%s'" % plugin_path)
             os.unlink(plugin_path)
+
+    # update linux project files
+    if env['PLATFORM'] == 'Linux':
+        update_linux_project_files()

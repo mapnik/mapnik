@@ -40,8 +40,9 @@ public:
     virtual ~memory_datasource();
     void push(feature_ptr feature);
     datasource::datasource_t type() const;
-    featureset_ptr features(const query& q) const;
+    featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
+    void set_envelope(box2d<double> const& box);
     box2d<double> envelope() const;
     boost::optional<geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
@@ -52,6 +53,7 @@ private:
     mapnik::layer_descriptor desc_;
     datasource::datasource_t type_;
     bool bbox_check_;
+    mutable box2d<double> extent_;
 };
 
 }

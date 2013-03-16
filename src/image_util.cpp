@@ -384,6 +384,7 @@ void save_to_file(T const& image, std::string const& filename)
     {
         save_to_file<T>(image, filename, *type);
     }
+    else throw ImageWriterException("Could not write file to " + filename );
 }
 
 template <typename T>
@@ -394,6 +395,7 @@ void save_to_file(T const& image, std::string const& filename, rgba_palette cons
     {
         save_to_file<T>(image, filename, *type, palette);
     }
+    else throw ImageWriterException("Could not write file to " + filename );
 }
 
 #if defined(HAVE_CAIRO)
@@ -405,6 +407,7 @@ void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, dou
     {
         save_to_cairo_file(map,filename,*type,scale_factor);
     }
+    else throw ImageWriterException("Could not write file to " + filename );
 }
 
 void save_to_cairo_file(mapnik::Map const& map,

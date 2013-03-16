@@ -47,6 +47,7 @@ files = [
     {'name': "marker-on-line-spacing-eq-width", 'sizes':[(600,400)]},
     {'name': "marker-on-line-spacing-eq-width-overlap", 'sizes':[(600,400)]},
     {'name': "marker_line_placement_on_points"},
+    {'name': "marker-with-background-image", 'sizes':[(600,400),(400,600),(257,256)]},
     {'name': "whole-centroid", 'sizes':[(600,400)],
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
     {'name': "simple-E", 'bbox':mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)},
@@ -74,6 +75,7 @@ files = [
     {'name': "tiff-opaque-edge-gdal", 'sizes':[(256,256)]},
     {'name': "tiff-opaque-edge-gdal2", 'sizes':[(600,400)]},
     {'name': "tiff-opaque-edge-raster2", 'sizes':[(600,400)]},
+    {'name': "tiff-resampling", 'sizes':[(600,400)]},
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
     #{'name': "tiff-alpha-raster", 'sizes':[(600,400)]},

@@ -23,7 +23,8 @@
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_scaling.hpp>
-#include <mapnik/span_image_filter.hpp>
+// does not handle alpha correctly
+//#include <mapnik/span_image_filter.hpp>
 
 // boost
 #include <boost/assign/list_of.hpp>
@@ -352,15 +353,16 @@ void scale_image_agg(Image & target,
     // http://old.nabble.com/Re%3A-Newbie---texture-p5057255.html
 
     // high quality resampler
-    //typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
+    typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
 
     // faster, lower quality
     //typedef agg::span_image_filter_rgba<img_src_type,interpolator_type> span_gen_type;
 
     // local, modified agg::span_image_resample_rgba_affine
-    // not convinced we need this
+    // dating back to when we were not handling alpha correctly
+    // and this file helped work around symptoms
     // https://github.com/mapnik/mapnik/issues/1489
-    typedef mapnik::span_image_resample_rgba_affine<img_src_type> span_gen_type;
+    //typedef mapnik::span_image_resample_rgba_affine<img_src_type> span_gen_type;
     span_gen_type sg(img_src, interpolator, filter);
     agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }

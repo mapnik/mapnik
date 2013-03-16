@@ -149,6 +149,22 @@ def test_render_points():
         num_points_rendered = svg.count('<image ')
         eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr)) 
 
+@raises(RuntimeError)
+def test_render_with_scale_factor_zero_throws():
+    m = mapnik.Map(256,256)
+    im = mapnik.Image(256, 256)
+    mapnik.render(m,im,0.0)
+
+def test_render_with_scale_factor():
+    m = mapnik.Map(256,256)
+    mapnik.load_map(m,'../data/good_maps/marker-text-line.xml')
+    m.zoom_all()
+    sizes = [.00001,.005,.1,.899,1,1.5,2,5,10,100]
+    for size in sizes:
+        im = mapnik.Image(256, 256)
+        mapnik.render(m,im,size)
+        im.save('./images/support/marker-text-line-scale-factor-%s.png' % size,'png8')
+
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]

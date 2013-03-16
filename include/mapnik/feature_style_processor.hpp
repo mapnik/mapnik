@@ -39,6 +39,7 @@ class layer;
 class projection;
 class proj_transform;
 class feature_type_style;
+class rule_cache;
 
 enum eAttributeCollectionPolicy
 {
@@ -62,7 +63,6 @@ public:
      * \brief apply renderer to a single layer, providing pre-populated set of query attribute names.
      */
     void apply(mapnik::layer const& lyr, std::set<std::string>& names);
-private:
     /*!
      * \brief render a layer given a projection and scale.
      */
@@ -72,16 +72,17 @@ private:
                         double scale_denom,
                         std::set<std::string>& names);
 
+private:
     /*!
      * \brief renders a featureset with the given styles.
      */
     void render_style(layer const& lay,
                       Processor & p,
-                      feature_type_style* style,
+                      feature_type_style const* style,
+                      rule_cache const& rules,
                       std::string const& style_name,
                       featureset_ptr features,
-                      proj_transform const& prj_trans,
-                      double scale_denom);
+                      proj_transform const& prj_trans);
 
     Map const& m_;
     double scale_factor_;

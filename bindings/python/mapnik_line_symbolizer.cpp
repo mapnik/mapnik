@@ -23,11 +23,18 @@
 #include <boost/python.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/line_symbolizer.hpp>
+#include <mapnik/symbolizer_hash.hpp>
 
 using namespace mapnik;
 using mapnik::line_symbolizer;
 using mapnik::stroke;
 using mapnik::color;
+
+std::size_t line_symbolizer_hash(line_symbolizer const& sym)
+{
+    return symbolizer_hash::value(sym);
+}
+
 
 void export_line_symbolizer()
 {
@@ -68,5 +75,6 @@ void export_line_symbolizer()
                       &line_symbolizer::smooth,
                       &line_symbolizer::set_smooth,
                       "smooth value (0..1.0)")
+        .def("__hash__", line_symbolizer_hash)
         ;
 }

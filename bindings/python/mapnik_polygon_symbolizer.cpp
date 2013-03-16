@@ -22,10 +22,16 @@
 
 #include <boost/python.hpp>
 #include <mapnik/polygon_symbolizer.hpp>
+#include <mapnik/symbolizer_hash.hpp>
 
 using namespace mapnik;
 using mapnik::polygon_symbolizer;
 using mapnik::color;
+
+std::size_t polygon_symbolizer_hash(polygon_symbolizer const& sym)
+{
+    return symbolizer_hash::value(sym);
+}
 
 void export_polygon_symbolizer()
 {
@@ -64,6 +70,7 @@ void export_polygon_symbolizer()
                       &polygon_symbolizer::simplify_tolerance,
                       &polygon_symbolizer::set_simplify_tolerance,
                       "simplfication tolerance measure")
+        .def("__hash__", polygon_symbolizer_hash)
         ;
 
 }

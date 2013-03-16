@@ -14,6 +14,7 @@
 #include <set>
 
 // boost
+#include <boost/version.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/bind.hpp>
@@ -356,7 +357,7 @@ struct test7
     }
     void operator()()
     {
-         for (int i=0;i<iter_;++i) {
+         for (unsigned i=0;i<iter_;++i) {
              mapnik::expression_ptr expr = mapnik::parse_expression(expr_,"utf-8");
          }
     }
@@ -386,8 +387,206 @@ struct test8
     void operator()()
     {
          mapnik::expression_grammar<std::string::const_iterator> expr_grammar(transcoder("utf-8"));
-         for (int i=0;i<iter_;++i) {
+         for (unsigned i=0;i<iter_;++i) {
              mapnik::expression_ptr expr = mapnik::parse_expression(expr_,expr_grammar);
+         }
+    }
+};
+
+#include <mapnik/rule_cache.hpp>
+
+#if BOOST_VERSION >= 105300
+#include <boost/container/vector.hpp>
+#include <boost/move/utility.hpp>
+
+class rule_cache_move
+{
+private:
+    BOOST_MOVABLE_BUT_NOT_COPYABLE(rule_cache_move)
+public:
+    typedef std::vector<rule const*> rule_ptrs;
+    rule_cache_move()
+     : if_rules_(),
+       else_rules_(),
+       also_rules_() {}
+
+    rule_cache_move(BOOST_RV_REF(rule_cache_move) rhs) // move ctor
+        :  if_rules_(boost::move(rhs.if_rules_)),
+           else_rules_(boost::move(rhs.else_rules_)),
+           also_rules_(boost::move(rhs.also_rules_))
+    {}
+
+    rule_cache_move& operator=(BOOST_RV_REF(rule_cache_move) rhs) // move assign
+    {
+        std::swap(if_rules_, rhs.if_rules_);
+        std::swap(else_rules_,rhs.else_rules_);
+        std::swap(also_rules_, rhs.also_rules_);
+        return *this;
+   }
+
+    void add_rule(rule const& r)
+    {
+        if (r.has_else_filter())
+        {
+            else_rules_.push_back(&r);
+        }
+        else if (r.has_also_filter())
+        {
+            also_rules_.push_back(&r);
+        }
+        else
+        {
+            if_rules_.push_back(&r);
+        }
+    }
+
+    rule_ptrs const& get_if_rules() const
+    {
+        return if_rules_;
+    }
+
+    rule_ptrs const& get_else_rules() const
+    {
+        return else_rules_;
+    }
+
+    rule_ptrs const& get_also_rules() const
+    {
+        return also_rules_;
+    }
+
+private:
+    rule_ptrs if_rules_;
+    rule_ptrs else_rules_;
+    rule_ptrs also_rules_;
+};
+
+struct test9
+{
+    unsigned iter_;
+    unsigned threads_;
+    unsigned num_rules_;
+    unsigned num_styles_;
+    std::vector<rule> rules_;
+    explicit test9(unsigned iterations,
+                   unsigned threads,
+                   unsigned num_rules,
+                   unsigned num_styles) :
+      iter_(iterations),
+      threads_(threads),
+      num_rules_(num_rules),
+      num_styles_(num_styles),
+      rules_() {
+          mapnik::rule r("test");
+          for (unsigned i=0;i<num_rules_;++i) {
+              rules_.push_back(r);
+          }
+      }
+
+    bool validate()
+    {
+        return true;
+    }
+    void operator()()
+    {
+         for (unsigned i=0;i<iter_;++i) {
+             boost::container::vector<rule_cache_move> rule_caches;
+             for (unsigned i=0;i<num_styles_;++i) {
+                 rule_cache_move rc;
+                 for (unsigned i=0;i<num_rules_;++i) {
+                     rc.add_rule(rules_[i]);
+                 }
+                 rule_caches.push_back(boost::move(rc));
+             }
+         }
+    }
+};
+
+#endif
+
+class rule_cache_heap
+{
+public:
+    typedef std::vector<rule const*> rule_ptrs;
+    rule_cache_heap()
+     : if_rules_(),
+       else_rules_(),
+       also_rules_() {}
+
+    void add_rule(rule const& r)
+    {
+        if (r.has_else_filter())
+        {
+            else_rules_.push_back(&r);
+        }
+        else if (r.has_also_filter())
+        {
+            also_rules_.push_back(&r);
+        }
+        else
+        {
+            if_rules_.push_back(&r);
+        }
+    }
+
+    rule_ptrs const& get_if_rules() const
+    {
+        return if_rules_;
+    }
+
+    rule_ptrs const& get_else_rules() const
+    {
+        return else_rules_;
+    }
+
+    rule_ptrs const& get_also_rules() const
+    {
+        return also_rules_;
+    }
+
+private:
+    rule_ptrs if_rules_;
+    rule_ptrs else_rules_;
+    rule_ptrs also_rules_;
+};
+
+struct test10
+{
+    unsigned iter_;
+    unsigned threads_;
+    unsigned num_rules_;
+    unsigned num_styles_;
+    std::vector<rule> rules_;
+    explicit test10(unsigned iterations,
+                   unsigned threads,
+                   unsigned num_rules,
+                   unsigned num_styles) :
+      iter_(iterations),
+      threads_(threads),
+      num_rules_(num_rules),
+      num_styles_(num_styles),
+      rules_() {
+          mapnik::rule r("test");
+          for (unsigned i=0;i<num_rules_;++i) {
+              rules_.push_back(r);
+          }
+      }
+
+    bool validate()
+    {
+        return true;
+    }
+    void operator()()
+    {
+         for (unsigned i=0;i<iter_;++i) {
+             boost::ptr_vector<rule_cache_heap> rule_caches;
+             for (unsigned i=0;i<num_styles_;++i) {
+                 std::auto_ptr<rule_cache_heap> rc(new rule_cache_heap);
+                 for (unsigned i=0;i<num_rules_;++i) {
+                     rc->add_rule(rules_[i]);
+                 }
+                 rule_caches.push_back(rc);
+             }
          }
     }
 };
@@ -505,6 +704,20 @@ int main( int argc, char** argv)
         {
             test8 runner(10000,100,"([foo]=1)");
             benchmark(runner,"expression parsing by re-using grammar");
+        }
+
+        {
+#if BOOST_VERSION >= 105300
+            test9 runner(1000,10,200,50);
+            benchmark(runner,"rule caching using boost::move");
+#else
+            std::clog << "not running: 'rule caching using boost::move'\n";
+#endif
+        }
+
+        {
+            test10 runner(1000,10,200,50);
+            benchmark(runner,"rule caching using heap allocation");
         }
 
         std::cout << "...benchmark done\n";
