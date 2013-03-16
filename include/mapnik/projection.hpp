@@ -28,9 +28,6 @@
 #include <mapnik/well_known_srs.hpp>
 
 // boost
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-#include <boost/thread/mutex.hpp>
-#endif
 #include <boost/optional.hpp>
 
 // stl
@@ -63,10 +60,8 @@ public:
     bool is_geographic() const;
     boost::optional<well_known_srs_e> well_known() const;
     std::string const& params() const;
-
     void forward(double & x, double & y) const;
     void inverse(double & x,double & y) const;
-
     std::string expanded() const;
     void init_proj4() const;
 
@@ -79,9 +74,6 @@ private:
     mutable bool is_geographic_;
     mutable void * proj_;
     mutable void * proj_ctx_;
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    static boost::mutex mutex_;
-#endif
 };
 
 }

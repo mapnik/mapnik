@@ -51,6 +51,7 @@ static const double D2R = M_PI / 180;
 static const double R2D = 180 / M_PI;
 static const double M_PIby360 = M_PI / 360;
 static const double MAXEXTENTby180 = MAXEXTENT / 180;
+static const double MAX_LATITUDE = R2D * (2 * std::atan(std::exp(180 * D2R)) - M_PI_by2);
 static const std::string MAPNIK_LONGLAT_PROJ = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 static const std::string MAPNIK_GMERC_PROJ = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over";
 
@@ -60,31 +61,29 @@ boost::optional<bool> is_known_geographic(std::string const& srs);
 
 static inline bool lonlat2merc(double * x, double * y , int point_count)
 {
-    int i;
-    for(i=0; i<point_count; i++) {
+    for(int i=0; i<point_count; i++) {
+        if (x[i] > 180) x[i] = 180;
+        else if (x[i] < -180) x[i] = -180;
+        if (y[i] > MAX_LATITUDE) y[i] = MAX_LATITUDE;
+        else if (y[i] < -MAX_LATITUDE) y[i] = -MAX_LATITUDE;
         x[i] = x[i] * MAXEXTENTby180;
         y[i] = std::log(std::tan((90 + y[i]) * M_PIby360)) * R2D;
         y[i] = y[i] * MAXEXTENTby180;
-        if (x[i] > MAXEXTENT) x[i] = MAXEXTENT;
-        if (x[i] < -MAXEXTENT) x[i] = -MAXEXTENT;
-        if (y[i] > MAXEXTENT) y[i] = MAXEXTENT;
-        if (y[i] < -MAXEXTENT) y[i] = -MAXEXTENT;
     }
     return true;
 }
 
 static inline bool merc2lonlat(double * x, double * y , int point_count)
 {
-    int i;
-    for(i=0; i<point_count; i++)
+    for(int i=0; i<point_count; i++)
     {
+        if (x[i] > MAXEXTENT) x[i] = MAXEXTENT;
+        else if (x[i] < -MAXEXTENT) x[i] = -MAXEXTENT;
+        if (y[i] > MAXEXTENT) y[i] = MAXEXTENT;
+        else if (y[i] < -MAXEXTENT) y[i] = -MAXEXTENT;
         x[i] = (x[i] / MAXEXTENT) * 180;
         y[i] = (y[i] / MAXEXTENT) * 180;
         y[i] = R2D * (2 * std::atan(std::exp(y[i] * D2R)) - M_PI_by2);
-        if (x[i] > 180) x[i] = 180;
-        if (x[i] < -180) x[i] = -180;
-        if (y[i] > 85.0511) y[i] = 85.0511;
-        if (y[i] < -85.0511) y[i] = -85.0511;
     }
     return true;
 }

@@ -128,17 +128,19 @@ def test_render_points():
     lr_lonlat = mapnik.Coord(143.40,-38.80)
     # render for different projections 
     projs = { 
+        'google': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over',
         'latlon': '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs',
         'merc': '+proj=merc +datum=WGS84 +k=1.0 +units=m +over +no_defs',
-        'google': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over',
         'utm': '+proj=utm +zone=54 +datum=WGS84'
         }
     for projdescr in projs.iterkeys():
         m = mapnik.Map(1000, 500, projs[projdescr])
         m.append_style('places_labels',s)
         m.layers.append(lyr)
-        p = mapnik.Projection(projs[projdescr])
-        m.zoom_to_box(p.forward(mapnik.Box2d(ul_lonlat,lr_lonlat)))
+        dest_proj = mapnik.Projection(projs[projdescr])
+        src_proj = mapnik.Projection('+init=epsg:4326')
+        tr = mapnik.ProjTransform(src_proj,dest_proj)
+        m.zoom_to_box(tr.forward(mapnik.Box2d(ul_lonlat,lr_lonlat)))
         # Render to SVG so that it can be checked how many points are there with string comparison
         svg_file = os.path.join(tempfile.gettempdir(), 'mapnik-render-points-%s.svg' % projdescr)
         mapnik.render_to_file(m, svg_file)

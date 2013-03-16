@@ -26,8 +26,10 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/utils.hpp>
 
+#ifdef MAPNIK_USE_PROJ4
 // proj4
 #include <proj_api.h>
+#endif
 
 // stl
 #include <vector>
@@ -50,15 +52,28 @@ proj_transform::proj_transform(projection const& source,
         is_dest_longlat_ = dest_.is_geographic();
         boost::optional<well_known_srs_e> src_k = source.well_known();
         boost::optional<well_known_srs_e> dest_k = dest.well_known();
+        bool known_trans = false;
         if (src_k && dest_k)
         {
-            if (*src_k == WGS_84) wgs84_to_merc_ = true;
-            else merc_to_wgs84_ = true;
+            if (*src_k == WGS_84 && *dest_k == G_MERC)
+            {
+                wgs84_to_merc_ = true;
+                known_trans = true;
+            }
+            else if (*src_k == G_MERC && *dest_k == WGS_84)
+            {
+                merc_to_wgs84_ = true;
+                known_trans = true;
+            }
         }
-        else
+        if (!known_trans)
         {
+#ifdef MAPNIK_USE_PROJ4
             source_.init_proj4();
             dest_.init_proj4();
+#else
+            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ4): '") + source_.params() + "'->'" + dest_.params() + "'");
+#endif
         }
     }
 }
@@ -67,7 +82,6 @@ bool proj_transform::equal() const
 {
     return is_source_equal_dest_;
 }
-
 
 bool proj_transform::forward (double & x, double & y , double & z) const
 {
@@ -89,6 +103,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         return merc2lonlat(x,y,point_count);
     }
 
+#ifdef MAPNIK_USE_PROJ4
     if (is_source_longlat_)
     {
         int i;
@@ -98,7 +113,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         }
     }
 
-    do {
+    {
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
         mutex::scoped_lock lock(projection::mutex_);
 #endif
@@ -107,7 +122,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         {
             return false;
         }
-    } while(false);
+    }
 
     if (is_dest_longlat_)
     {
@@ -117,7 +132,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
             y[i] *= RAD_TO_DEG;
         }
     }
-
+#endif
     return true;
 }
 
@@ -135,6 +150,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         return lonlat2merc(x,y,point_count);
     }
 
+#ifdef MAPNIK_USE_PROJ4
     if (is_dest_longlat_)
     {
         int i;
@@ -164,7 +180,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
             y[i] *= RAD_TO_DEG;
         }
     }
-
+#endif
     return true;
 }
 
