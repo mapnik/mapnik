@@ -196,11 +196,11 @@ void export_feature()
     // Python to mapnik::value converters
     // NOTE: order matters here. For example value_null must be listed before
     // bool otherwise Py_None will be interpreted as bool (false)
-    implicitly_convertible<UnicodeString,mapnik::value>();
+    implicitly_convertible<mapnik::value_unicode_string,mapnik::value>();
     implicitly_convertible<mapnik::value_null,mapnik::value>();
-    implicitly_convertible<bool,mapnik::value>();
-    implicitly_convertible<int,mapnik::value>();
-    implicitly_convertible<double,mapnik::value>();
+    implicitly_convertible<mapnik::value_integer,mapnik::value>();
+    implicitly_convertible<mapnik::value_double,mapnik::value>();
+    implicitly_convertible<mapnik::value_bool,mapnik::value>();
 
     // http://misspent.wordpress.com/2009/09/27/how-to-write-boost-python-converters/
     UnicodeString_from_python_str();
@@ -212,7 +212,7 @@ void export_feature()
         ;
 
     class_<Feature,boost::shared_ptr<Feature>,
-        boost::noncopyable>("Feature",init<context_ptr,int>("Default ctor."))
+        boost::noncopyable>("Feature",init<context_ptr,mapnik::value_integer>("Default ctor."))
         .def("id",&Feature::id)
         .def("__str__",&Feature::to_string)
         .def("add_geometries_from_wkb", &feature_add_geometries_from_wkb)

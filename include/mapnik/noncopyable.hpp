@@ -20,43 +20,26 @@
  *
  *****************************************************************************/
 
-#include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/feature.hpp>
-#include <boost/optional.hpp>
+#ifndef MAPNIK_NONCOPYABLE_HPP
+#define MAPNIK_NONCOPYABLE_HPP
 
 namespace mapnik {
 
-
-feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
-    : f_(f),
-      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
-
-
-void feature_kv_iterator::increment()
+namespace non_copyable_
 {
-    ++itr_;
+  class noncopyable
+  {
+   protected:
+      noncopyable() {}
+      ~noncopyable() {}
+   private:
+      noncopyable( const noncopyable& );
+      const noncopyable& operator=( const noncopyable& );
+  };
 }
 
-void feature_kv_iterator::decrement()
-{
-    // dummy //--itr_;
-}
+typedef non_copyable_::noncopyable noncopyable;
 
-void feature_kv_iterator::advance(boost::iterator_difference<feature_kv_iterator>::type )
-{
-    // dummy
-}
+} // namespace mapnik
 
-bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
-{
-    return ( itr_ == other.itr_ );
-}
-
-feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
-{
-    boost::get<0>(kv_) = itr_->first;
-    boost::get<1>(kv_) = f_.get(itr_->second);
-    return kv_;
-}
-
-} // endof mapnik namespace
+#endif  // MAPNIK_NONCOPYABLE_HPP

@@ -258,7 +258,16 @@ public:
                      const color_type& c,
                      agg::int8u cover)
     {
-        if (c.a)
+        value_type* p = (value_type*)
+            m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
+        do
+        {
+            *p = c.v;
+            p += Step;
+        }
+        while(--len);
+        // We ignore alpha since grid_renderer is a binary renderer for now
+        /*if (c.a)
         {
             value_type* p = (value_type*)
                 m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
@@ -282,7 +291,7 @@ public:
                 }
                 while(--len);
             }
-        }
+        }*/
     }
 
 
@@ -638,7 +647,12 @@ typedef pixfmt_alpha_blend_gray<blender_gray16,
 typedef blender_gray<gray32> blender_gray32;
 
 typedef pixfmt_alpha_blend_gray<blender_gray32,
-                                mapnik::grid_rendering_buffer> pixfmt_gray32;     //----pixfmt_gray16
+                                mapnik::grid_rendering_buffer> pixfmt_gray32;     //----pixfmt_gray32
+
+typedef blender_gray<gray64> blender_gray64;
+
+typedef pixfmt_alpha_blend_gray<blender_gray64,
+                                mapnik::grid_rendering_buffer> pixfmt_gray64;     //----pixfmt_gray64
 
 }
 

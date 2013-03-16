@@ -49,11 +49,11 @@ int main( int, char*[] )
         out.clear();
     
         to_string(out, double(1e-05));
-        BOOST_TEST_EQ( out,  "0.00001" );
+        BOOST_TEST_EQ( out,  "1e-05" );
         out.clear();
     
         to_string(out, double(-1e-05));
-        BOOST_TEST_EQ( out,  "-0.00001" );
+        BOOST_TEST_EQ( out,  "-1e-05" );
         out.clear();
     
         to_string(out, double(0.0001));

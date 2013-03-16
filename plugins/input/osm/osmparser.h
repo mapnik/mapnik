@@ -23,6 +23,7 @@
 #ifndef OSMPARSER_H
 #define OSMPARSER_H
 
+#include <mapnik/value.hpp>
 #include <libxml/xmlreader.h>
 #include <cstdio>
 #include <cstdlib>
@@ -41,7 +42,7 @@ public:
 
 private:
     static osm_item *cur_item;
-    static long curID;
+    static mapnik::value_integer curID;
     static bool in_node, in_way;
     static osm_dataset* components;
     static std::string error;

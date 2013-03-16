@@ -6,7 +6,7 @@
 #include <cassert>
 
 osm_item* osmparser::cur_item=NULL;
-long osmparser::curID=0;
+mapnik::value_integer osmparser::curID=0;
 bool osmparser::in_node=false, osmparser::in_way=false;
 osm_dataset* osmparser::components=NULL;
 std::string osmparser::error="";

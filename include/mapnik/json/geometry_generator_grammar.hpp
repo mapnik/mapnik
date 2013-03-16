@@ -38,6 +38,7 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
+#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
 
 
 //#define BOOST_SPIRIT_USE_PHOENIX_V3 1
@@ -116,7 +117,28 @@ struct json_coordinate_policy : karma::real_policies<T>
 {
     typedef boost::spirit::karma::real_policies<T> base_type;
     static int floatfield(T n) { return base_type::fmtflags::fixed; }
-    static unsigned precision(T n) { return 12 ;}
+
+    static unsigned precision(T n)
+    {
+        if (n == 0.0) return 0;
+        using namespace boost::spirit;
+        return static_cast<unsigned>(15 - boost::math::trunc(log10(traits::get_absolute_value(n))));
+    }
+
+    template <typename OutputIterator>
+    static bool dot(OutputIterator& sink, T n, unsigned precision)
+    {
+        if (n == 0) return true;
+        return base_type::dot(sink, n, precision);
+    }
+
+    template <typename OutputIterator>
+    static bool fraction_part(OutputIterator& sink, T n
+                       , unsigned adjprec, unsigned precision)
+    {
+        if (n == 0) return true;
+        return base_type::fraction_part(sink, n, adjprec, precision);
+    }
 };
 
 }

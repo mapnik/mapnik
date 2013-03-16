@@ -38,7 +38,7 @@
 
 namespace mapnik
 {
-typedef boost::variant<value_null,int,double,std::string> value_holder;
+typedef boost::variant<value_null,value_integer,value_double,std::string> value_holder;
 typedef std::pair<std::string, value_holder> parameter;
 typedef std::map<std::string, value_holder> param_map;
 

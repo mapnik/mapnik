@@ -186,7 +186,8 @@ struct feature_generator_grammar:
         using boost::spirit::karma::lit;
         using boost::spirit::karma::uint_;
         using boost::spirit::karma::bool_;
-        using boost::spirit::karma::int_;
+        //using boost::spirit::karma::int_;
+        //using boost::spirit::karma::long_long;
         using boost::spirit::karma::double_;
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
@@ -212,7 +213,7 @@ struct feature_generator_grammar:
             << value(phoenix::at_c<1>(_val))
             ;
 
-        value = (value_null_| bool_ | int_| double_ | ustring)[_1 = value_base_(_r1)]
+        value = (value_null_| bool_ | int__ | double_ | ustring)[_1 = value_base_(_r1)]
             ;
 
         value_null_ = string[_1 = "null"]
@@ -231,6 +232,7 @@ struct feature_generator_grammar:
     karma::rule<OutputIterator, void(mapnik::value const&)> value;
     karma::rule<OutputIterator, mapnik::value_null()> value_null_;
     karma::rule<OutputIterator, UnicodeString()> ustring;
+    typename karma::int_generator<mapnik::value_integer,10, false> int__;
     // phoenix functions
     phoenix::function<get_id> id_;
     phoenix::function<value_base> value_base_;

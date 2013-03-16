@@ -106,7 +106,7 @@ public:
     typedef std::vector<value_type> cont_type;
     typedef feature_kv_iterator iterator;
 
-    feature_impl(context_ptr const& ctx, int id)
+    feature_impl(context_ptr const& ctx, mapnik::value_integer id)
         : id_(id),
         ctx_(ctx),
         data_(ctx_->mapping_.size()),
@@ -114,9 +114,9 @@ public:
         raster_()
         {}
 
-    inline int id() const { return id_;}
+    inline mapnik::value_integer id() const { return id_;}
 
-    inline void set_id(int id) { id_ = id;}
+    inline void set_id(mapnik::value_integer id) { id_ = id;}
 
     template <typename T>
     void put(context_type::key_type const& key, T const& val)
@@ -179,13 +179,6 @@ public:
         if (index < data_.size())
             return data_[index];
         return default_value;
-    }
-
-    boost::optional<value_type const&> get_optional(std::size_t index) const
-    {
-        if (index < data_.size())
-            return boost::optional<value_type const&>(data_[index]);
-        return boost::optional<value_type const&>();
     }
 
     std::size_t size() const
@@ -304,7 +297,7 @@ public:
     }
 
 private:
-    int id_;
+    mapnik::value_integer id_;
     context_ptr ctx_;
     cont_type data_;
     boost::ptr_vector<geometry_type> geom_cont_;

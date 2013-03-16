@@ -44,8 +44,8 @@ namespace mapnik {
 template <typename BufferType, typename Rasterizer, typename PixFmt, typename RendererBase, typename RendererType, typename Detector, typename PixMapType>
 struct raster_markers_rasterizer_dispatch_grid
 {
-    typedef mapnik::gray32 color_type;
     typedef typename RendererBase::pixfmt_type pixfmt_type;
+    typedef typename RendererBase::pixfmt_type::color_type color_type;
 
     raster_markers_rasterizer_dispatch_grid(BufferType & render_buffer,
                                        Rasterizer & ras,
@@ -156,7 +156,7 @@ struct raster_markers_rasterizer_dispatch_grid
         ras_.line_to_d(p[4],p[5]);
         ras_.line_to_d(p[6],p[7]);
         RendererType ren(renb_);
-        ren.color(mapnik::gray32(feature_.id()));
+        ren.color(color_type(feature_.id()));
         agg::render_scanlines(ras_, sl_, ren);
     }
 

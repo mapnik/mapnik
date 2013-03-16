@@ -23,8 +23,7 @@
 // mapnik
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_pixfmt.hpp>
-#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 
 #include <mapnik/debug.hpp>
@@ -130,15 +129,16 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
     if (marker.is_vector())
     {
         typedef coord_transform<CoordTransform,geometry_type> path_type;
-        typedef agg::renderer_base<mapnik::pixfmt_gray32> ren_base;
-        typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+        typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
+        typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
+        typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
         agg::scanline_bin sl;
 
         grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-        mapnik::pixfmt_gray32 pixf(buf);
+        pixfmt_type pixf(buf);
 
-        ren_base renb(pixf);
-        renderer ren(renb);
+        grid_renderer_base_type renb(pixf);
+        renderer_type ren(renb);
 
         ras_ptr->reset();
 
@@ -156,8 +156,8 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
         svg_path_adapter svg_path(stl_storage);
         svg_renderer_agg<svg_path_adapter,
             agg::pod_bvector<path_attributes>,
-            renderer,
-            mapnik::pixfmt_gray32> svg_renderer(svg_path,
+            renderer_type,
+            pixfmt_type> svg_renderer(svg_path,
                                                 (*marker.get_vector_data())->attributes());
 
         svg_renderer.render_id(*ras_ptr, sl, renb, feature.id(), mtx, opacity, bbox);

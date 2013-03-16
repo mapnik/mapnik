@@ -664,12 +664,12 @@ public:
     serialize_type( boost::property_tree::ptree & node):
         node_(node) {}
 
-    void operator () ( int val ) const
+    void operator () ( mapnik::value_integer val ) const
     {
         node_.put("<xmlattr>.type", "int" );
     }
 
-    void operator () ( double val ) const
+    void operator () ( mapnik::value_double val ) const
     {
         node_.put("<xmlattr>.type", "float" );
     }

@@ -358,7 +358,26 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         #eq_(feat.id(),1)
         eq_(feat['alias'],'test')
         eq_(len(feat.geometries()),1)
-        eq_(feat.geometries()[0].to_wkt(),'Point(0.0 0.0)')
+        eq_(feat.geometries()[0].to_wkt(),'Point(0 0)')
+
+
+    def test_that_64bit_int_fields_work():
+        ds = mapnik.SQLite(file='../data/sqlite/64bit_int.sqlite',
+            table='int_table',
+            use_spatial_index=False
+        )
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['OGC_FID','id','bigint'])
+        eq_(ds.field_types(),['int','int','int'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat.id(),1)
+        eq_(feat['OGC_FID'],1)
+        eq_(feat['bigint'],2147483648)
+        feat = fs.next()
+        eq_(feat.id(),2)
+        eq_(feat['OGC_FID'],2)
+        eq_(feat['bigint'],922337203685477580)
 
 if __name__ == "__main__":
     setup()

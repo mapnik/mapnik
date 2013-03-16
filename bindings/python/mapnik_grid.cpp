@@ -39,13 +39,12 @@ bool painted(mapnik::grid const& grid)
     return grid.painted();
 }
 
-int get_pixel(mapnik::grid const& grid, int x, int y)
+mapnik::grid::value_type get_pixel(mapnik::grid const& grid, int x, int y)
 {
     if (x < static_cast<int>(grid.width()) && y < static_cast<int>(grid.height()))
     {
-        mapnik::grid::value_type const * row = grid.getRow(y);
-        mapnik::grid::value_type const pixel = row[x];
-        return pixel;
+        mapnik::grid::data_type const & data = grid.data();
+        return data(x,y);
     }
     PyErr_SetString(PyExc_IndexError, "invalid x,y for grid dimensions");
     boost::python::throw_error_already_set();

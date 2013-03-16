@@ -132,6 +132,12 @@ CREATE TABLE test7(gid serial PRIMARY KEY, geom geometry);
 INSERT INTO test7(gid, geom) values (1, GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(MULTILINESTRING((10 10,20 20,10 40),(40 40,30 30,40 20,30 10)),LINESTRING EMPTY)'));
 '''
 
+insert_table_8 = '''
+CREATE TABLE test8(gid serial PRIMARY KEY,int_field bigint, geom geometry);
+INSERT INTO test8(gid, int_field, geom) values (1, 2147483648, ST_MakePoint(1,1));
+INSERT INTO test8(gid, int_field, geom) values (2, 922337203685477580, ST_MakePoint(1,1));
+'''
+
 
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
@@ -146,6 +152,7 @@ def postgis_setup():
     call("""psql -q %s -c '%s'""" % (MAPNIK_TEST_DBNAME,insert_table_5b),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_6),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_7),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_8),silent=False)
 
 def postgis_takedown():
     pass
@@ -472,7 +479,21 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
             t.start()
             t.join()
 
-
+    def test_that_64bit_int_fields_work():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
+                            table='test8')
+        eq_(len(ds.fields()),2)
+        eq_(ds.fields(),['gid','int_field'])
+        eq_(ds.field_types(),['int','int'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat.id(),1)
+        eq_(feat['gid'],1)
+        eq_(feat['int_field'],2147483648)
+        feat = fs.next()
+        eq_(feat.id(),2)
+        eq_(feat['gid'],2)
+        eq_(feat['int_field'],922337203685477580)
 
     atexit.register(postgis_takedown)
 

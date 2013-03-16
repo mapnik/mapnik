@@ -20,43 +20,17 @@
  *
  *****************************************************************************/
 
-#include <mapnik/feature_kv_iterator.hpp>
-#include <mapnik/feature.hpp>
-#include <boost/optional.hpp>
+#ifndef MAPNIK_GRID_RENDERER_BASE_HPP
+#define MAPNIK_GRID_RENDERER_BASE_HPP
+
+#include "agg_renderer_base.h"
+#include <mapnik/grid/grid_pixfmt.hpp>
+#include <mapnik/grid/grid_pixel.hpp>
 
 namespace mapnik {
 
+typedef agg::renderer_base<mapnik::pixfmt_gray64> grid_renderer_base_type;
 
-feature_kv_iterator::feature_kv_iterator (feature_impl const& f, bool begin)
-    : f_(f),
-      itr_( begin ? f_.ctx_->begin() : f_.ctx_->end())  {}
-
-
-void feature_kv_iterator::increment()
-{
-    ++itr_;
 }
 
-void feature_kv_iterator::decrement()
-{
-    // dummy //--itr_;
-}
-
-void feature_kv_iterator::advance(boost::iterator_difference<feature_kv_iterator>::type )
-{
-    // dummy
-}
-
-bool feature_kv_iterator::equal( feature_kv_iterator const& other) const
-{
-    return ( itr_ == other.itr_ );
-}
-
-feature_kv_iterator::value_type const& feature_kv_iterator::dereference() const
-{
-    boost::get<0>(kv_) = itr_->first;
-    boost::get<1>(kv_) = f_.get(itr_->second);
-    return kv_;
-}
-
-} // endof mapnik namespace
+#endif //MAPNIK_AGG_RASTERIZER_HPP

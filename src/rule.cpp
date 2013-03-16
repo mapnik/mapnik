@@ -233,7 +233,7 @@ bool rule::has_also_filter() const
 
 bool rule::active(double scale) const
 {
-    return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6);
+    return ( !syms_.empty() && scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6);
 }
 
 }

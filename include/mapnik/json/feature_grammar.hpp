@@ -29,6 +29,7 @@
 
 // spirit::qi
 #include <boost/config/warning_disable.hpp>
+#include <boost/cstdint.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -59,6 +60,7 @@ public:
     {
         return mapnik::value(val);
     }
+
     mapnik::transcoder const& tr_;
 };
 
@@ -109,9 +111,11 @@ struct feature_grammar :
     qi::rule<Iterator,space_type> value;
     qi::symbols<char const, char const> unesc_char;
     qi::uint_parser< unsigned, 16, 4, 4 > hex4 ;
+    qi::int_parser<mapnik::value_integer,10,1,-1> int__;
     qi::rule<Iterator,std::string(), space_type> string_;
     qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,boost::variant<value_null,bool,int,double>(),space_type> number;
+    qi::rule<Iterator,boost::variant<value_null,bool,
+                                     value_integer,value_double>(),space_type> number;
     qi::rule<Iterator,space_type> object;
     qi::rule<Iterator,space_type> array;
     qi::rule<Iterator,space_type> pairs;
@@ -123,7 +127,7 @@ struct feature_grammar :
 
     qi::rule<Iterator,void(FeatureType &),space_type> properties;
     qi::rule<Iterator,qi::locals<std::string>, void(FeatureType &),space_type> attributes;
-    qi::rule<Iterator,boost::variant<value_null,bool,int,double,std::string>(), space_type> attribute_value;
+    qi::rule<Iterator,boost::variant<value_null,bool,value_integer,value_double,std::string>(), space_type> attribute_value;
 
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
