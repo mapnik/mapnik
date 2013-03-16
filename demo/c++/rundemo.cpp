@@ -37,9 +37,8 @@
 #include <mapnik/config_error.hpp>
 
 #if defined(HAVE_CAIRO)
-// cairo
 #include <mapnik/cairo_renderer.hpp>
-#include <cairomm/surface.h>
+#include <mapnik/cairo_context.hpp>
 #endif
 
 #include <iostream>
@@ -259,7 +258,7 @@ int main ( int argc , char** argv)
 
         save_to_file(buf,"demo.jpg","jpeg");
         save_to_file(buf,"demo.png","png");
-        save_to_file(buf,"demo256.png","png256");
+        save_to_file(buf,"demo256.png","png8");
         save_to_file(buf,"demo.tif","tiff");
 
         std::cout << "Three maps have been rendered using AGG in the current directory:\n"
@@ -270,24 +269,31 @@ int main ( int argc , char** argv)
             "Have a look!\n";
 
 #if defined(HAVE_CAIRO)
-        Cairo::RefPtr<Cairo::ImageSurface> image_surface;
+        // save to pdf/svg files
+        save_to_cairo_file(m,"cairo-demo.pdf");
+        save_to_cairo_file(m,"cairo-demo.svg");
 
-        image_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, m.width(),m.height());
-        cairo_renderer<Cairo::Surface> png_render(m, image_surface);
+        /* we could also do:
+
+            save_to_cairo_file(m,"cairo-demo.png");
+
+        but instead let's build up a surface for more flexibility
+        */
+
+        cairo_surface_ptr image_surface(
+            cairo_image_surface_create(CAIRO_FORMAT_ARGB32,m.width(),m.height()),
+            cairo_surface_closer());
+        double scale_factor = 1.0;
+        cairo_ptr image_context = (create_context(image_surface));
+        mapnik::cairo_renderer<cairo_ptr> png_render(m,image_context,scale_factor);
         png_render.apply();
-        image_surface->write_to_png("cairo-demo.png");
-
+        // we can now write to png with cairo functionality
+        cairo_surface_write_to_png(&*image_surface, "cairo-demo.png");
+        // but we can also benefit from quantization by converting
+        // to a mapnik image object and then saving that
         image_32 im(image_surface);
-        save_to_file(im, "cairo-demo256.png","png256");
-
-        Cairo::RefPtr<Cairo::Surface> surface;
-        surface = Cairo::PdfSurface::create("cairo-demo.pdf", m.width(),m.height());
-        cairo_renderer<Cairo::Surface> pdf_render(m, surface);
-        pdf_render.apply();
-
-        surface = Cairo::SvgSurface::create("cairo-demo.svg", m.width(),m.height());
-        cairo_renderer<Cairo::Surface> svg_render(m, surface);
-        svg_render.apply();
+        save_to_file(im, "cairo-demo256.png","png8");
+        cairo_surface_finish(&*image_surface);
 
         std::cout << "Three maps have been rendered using Cairo in the current directory:\n"
             "- cairo-demo.png\n"

@@ -63,8 +63,6 @@ Optional dependencies:
 
  * Cairo - Graphics library for PDF, PS, and SVG formats
     - pkg-config - Required for building with cairo support
-    - libsigc++ - C++ support for cairomm
-    - cairomm - C++ bindings for cairo
     - pycairo - Python bindings for cairo
  * libpq - PostgreSQL libraries (For PostGIS plugin support)
  * libgdal - GDAL/OGR input (For gdal and ogr plugin support)
