@@ -37,8 +37,8 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/scale_denominator.hpp>
-#include <mapnik/agg_renderer.hpp>
-#include <mapnik/grid/grid_renderer.hpp>
+#include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
 
 // boost
 #include <boost/foreach.hpp>
@@ -47,13 +47,6 @@
 // stl
 #include <vector>
 
-#if defined(HAVE_CAIRO)
-#include <mapnik/cairo_renderer.hpp>
-#endif
-
-#if defined(SVG_RENDERER)
-#include <mapnik/svg/output/svg_renderer.hpp>
-#endif
 
 #if defined(RENDERING_STATS)
 #include <mapnik/timer.hpp>

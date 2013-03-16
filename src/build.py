@@ -141,6 +141,7 @@ source = Split(
     point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
     polygon_symbolizer.cpp
+    rule.cpp
     save_map.cpp
     shield_symbolizer.cpp
     text_symbolizer.cpp
@@ -157,6 +158,7 @@ source = Split(
     unicode.cpp
     markers_symbolizer.cpp
     raster_colorizer.cpp
+    raster_symbolizer.cpp
     wkt/wkt_factory.cpp
     wkt/wkt_generator.cpp
     mapped_memory_cache.cpp

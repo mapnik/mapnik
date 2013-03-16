@@ -25,6 +25,7 @@
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
 #include <boost/foreach.hpp>
+#include <mapnik/graphics.hpp>
 
 namespace mapnik {
 

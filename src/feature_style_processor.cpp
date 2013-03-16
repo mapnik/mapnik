@@ -22,6 +22,20 @@
 
 // mapnik
 #include <mapnik/feature_style_processor_impl.hpp>
+#include <mapnik/agg_renderer.hpp>
+#include <mapnik/graphics.hpp>
+#include <mapnik/grid/grid_renderer.hpp>
+#include <mapnik/grid/grid.hpp>
+
+#if defined(HAVE_CAIRO)
+#include <cairomm/context.h>
+#include <cairomm/surface.h>
+#include <mapnik/cairo_renderer.hpp>
+#endif
+
+#if defined(SVG_RENDERER)
+#include <mapnik/svg/output/svg_renderer.hpp>
+#endif
 
 namespace mapnik
 {

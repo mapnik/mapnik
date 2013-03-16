@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/raster_symbolizer.hpp>
+#include <mapnik/raster_colorizer.hpp>
 #include <mapnik/image_scaling.hpp>
 
 using mapnik::raster_symbolizer;

@@ -263,6 +263,9 @@ void scale_image_agg(Image & target,
                      double filter_radius,
                      double ratio)
 {
+    // TODO - should all types here be *_pre ?
+    // "the image filters should work namely in the premultiplied color space"
+    // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
     typedef agg::pixfmt_rgba32 pixfmt;
     typedef agg::pixfmt_rgba32_pre pixfmt_pre;
     typedef agg::renderer_base<pixfmt_pre> renderer_base;
