@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added serialization of `line-offset` to save_map (#1562)
+
 - Enabled default input plugin directory and fonts path to be set inherited from environment settings in
   python bindings to make it easier to run tests locally (#1594). New environment settings are:
     - MAPNIK_INPUT_PLUGINS_DIRECTORY

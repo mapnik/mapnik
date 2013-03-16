@@ -427,7 +427,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             featureset_ptr features = ds->features(q);
             if (features) {
                 // Cache all features into the memory_datasource before rendering.
-                memory_datasource cache;
+                memory_datasource cache(ds->type(),false);
                 feature_ptr feature, prev;
 
                 while ((feature = features->next()))
@@ -458,7 +458,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
         else if (cache_features)
         {
-            memory_datasource cache(ds->type());
+            memory_datasource cache(ds->type(),false);
             featureset_ptr features = ds->features(q);
             if (features) {
                 // Cache all features into the memory_datasource before rendering.

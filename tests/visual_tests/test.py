@@ -41,6 +41,8 @@ files = [
     {'name': "lines-6", 'sizes': sizes_few_square},
     {'name': "lines-shield", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "marker-multi-policy", 'sizes':[(600,400)]},
+    {'name': "whole-centroid", 'sizes':[(600,400)],
+        'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
     {'name': "simple-E", 'bbox':mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)},
     {'name': "simple-NE",'bbox':default_text_box},
     {'name': "simple-NW",'bbox':default_text_box},
@@ -141,7 +143,7 @@ def render(filename, width, height, bbox, quiet=False):
             grid = mapnik.Grid(m.width,m.height)
             mapnik.render_layer(m,grid,layer=0)
             utf1 = grid.encode('utf',resolution=4)
-            open(actual_grid,'wb').write(json.dumps(utf1))
+            open(actual_grid,'wb').write(json.dumps(utf1,indent=2))
             if not os.path.exists(expected_grid):
                 # generate it on the fly
                 fail(actual_grid,expected_grid,None)
