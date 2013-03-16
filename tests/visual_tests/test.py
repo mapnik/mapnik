@@ -41,6 +41,8 @@ files = [
     {'name': "lines-6", 'sizes': sizes_few_square},
     {'name': "lines-shield", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "marker-multi-policy", 'sizes':[(600,400)]},
+    {'name': "marker-on-line", 'sizes':[(600,400)],
+        'bbox': mapnik.Box2d(-10, 0, 15, 20)},
     {'name': "marker_line_placement_on_points"},
     {'name': "whole-centroid", 'sizes':[(600,400)],
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},

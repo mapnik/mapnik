@@ -32,9 +32,9 @@
 #include <mapnik/sql_utils.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/trim.hpp>
 
 // boost
-#include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 // stl
@@ -182,8 +182,7 @@ feature_ptr postgis_featureset::next()
 
                     case 1042: //bpchar
                     {
-                        std::string str(buf);
-                        boost::trim(str);
+                        std::string str = mapnik::util::trim_copy(buf);
                         feature->put(name, tr_->transcode(str.c_str()));
                         break;
                     }

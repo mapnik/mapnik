@@ -56,6 +56,7 @@ private:
     filterT filter_;
     shape_io shape_;
     box2d<double> query_ext_;
+    mutable box2d<double> feature_bbox_;
     boost::scoped_ptr<transcoder> tr_;
     long file_length_;
     std::vector<int> attr_ids_;

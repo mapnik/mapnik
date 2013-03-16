@@ -22,13 +22,13 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/util/trim.hpp>
 
 // stl
 #include <stdexcept>
 
 // boost
 #include <boost/tokenizer.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 // agg
@@ -359,14 +359,17 @@ bool box2d<T>::from_string(std::string const& s)
     for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
          beg != tok.end(); ++beg)
     {
-        std::string item(*beg);
-        boost::trim(item);
+        std::string item = mapnik::util::trim_copy(*beg);
         // note: we intentionally do not use mapnik::util::conversions::string2double
         // here to ensure that shapeindex can statically compile mapnik::box2d without
         // needing to link to libmapnik
         std::string::const_iterator str_beg = item.begin();
         std::string::const_iterator str_end = item.end();
-        bool r = boost::spirit::qi::phrase_parse(str_beg,str_end,boost::spirit::qi::double_,boost::spirit::ascii::space,d[i]);
+        bool r = boost::spirit::qi::phrase_parse(str_beg,
+                                                 str_end,
+                                                 boost::spirit::qi::double_,
+                                                 boost::spirit::ascii::space,
+                                                 d[i]);
         if (!(r && (str_beg == str_end)))
         {
             break;

@@ -23,23 +23,20 @@
 #ifdef HAVE_LIBXML2
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/util/trim.hpp>
 
 // boost
 #include <boost/utility.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 // libxml
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/parserInternals.h>
 #include <libxml/xinclude.h>
-
-using namespace std;
 
 #define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 
@@ -75,7 +72,7 @@ public:
         boost::filesystem::path path(filename);
         if (!boost::filesystem::exists(path))
         {
-            throw config_error(string("Could not load map file: File does not exist"), 0, filename);
+            throw config_error(std::string("Could not load map file: File does not exist"), 0, filename);
         }
 
         xmlDocPtr doc = xmlCtxtReadFile(ctx_, filename.c_str(), encoding_, options_);
@@ -92,13 +89,6 @@ public:
                 throw config_error(msg, error->line, error->file);
             }
         }
-
-        /*
-          if ( ! ctx->valid )
-          {
-            MAPNIK_LOG_WARN(libxml2_loader) << "libxml2_loader: Failed to validate DTD.";
-          }
-        */
         load(doc, node);
     }
 
@@ -114,7 +104,7 @@ public:
         {
             boost::filesystem::path path(base_path);
             if (!boost::filesystem::exists(path)) {
-                throw config_error(string("Could not locate base_path '") +
+                throw config_error(std::string("Could not locate base_path '") +
                                    base_path + "': file or directory does not exist");
             }
         }
@@ -186,7 +176,7 @@ private:
             case XML_TEXT_NODE:
             {
                 std::string trimmed((const char*)cur_node->content);
-                boost::algorithm::trim(trimmed);
+                mapnik::util::trim(trimmed);
                 if (trimmed.empty()) break; //Don't add empty text nodes
                 node.add_child(trimmed, cur_node->line, true);
             }
