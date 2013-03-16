@@ -78,6 +78,10 @@ struct value_null
     }
 };
 
+inline std::size_t hash_value(const value_null& val) {
+    return 0;
+}
+
 inline std::ostream& operator<< (std::ostream & out,value_null const& v)
 {
     return out;

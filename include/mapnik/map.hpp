@@ -113,14 +113,14 @@ public:
      *
      *  @param rhs Map to copy from.
      */
-    Map(const Map& rhs);
+    Map(Map const& rhs);
 
     /*! \brief Assignment operator
      *
      *  TODO: to be documented
      *
      */
-    Map& operator=(const Map& rhs);
+    Map& operator=(Map const& rhs);
 
     /*! \brief Get all styles
      * @return Const reference to styles
@@ -202,13 +202,13 @@ public:
     /*! \brief Add a layer to the map.
      *  @param l The layer to add.
      */
-    void addLayer(const layer& l);
+    void addLayer(layer const& l);
 
     /*! \brief Get a layer.
      *  @param index layer number.
      *  @return Constant layer.
      */
-    const layer& getLayer(size_t index) const;
+    layer const& getLayer(size_t index) const;
 
     /*! \brief Get a layer.
      *  @param index layer number.
@@ -268,7 +268,7 @@ public:
     /*! \brief Set the map background color.
      *  @param c Background color.
      */
-    void set_background(const color& c);
+    void set_background(color const& c);
 
     /*! \brief Get the map background color
      *  @return Background color as boost::optional
@@ -328,7 +328,7 @@ public:
      *  Aspect is handled automatic if not fitting to width/height.
      *  @param box The bounding box where to zoom.
      */
-    void zoom_to_box(const box2d<double>& box);
+    void zoom_to_box(box2d<double> const& box);
 
     /*! \brief Zoom the map to show all data.
      */
@@ -341,7 +341,7 @@ public:
     /*! \brief Get current bounding box.
      *  @return The current bounding box.
      */
-    const box2d<double>& get_current_extent() const;
+    box2d<double> const& get_current_extent() const;
 
     /*! \brief Get current buffered bounding box.
      *  @return The current buffered bounding box.
