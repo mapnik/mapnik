@@ -102,7 +102,7 @@ public:
         if (is_bitmap())
             return (*bitmap_data_)->width();
         else if (is_vector())
-            return (*vector_data_)->bounding_box().width();
+            return (*vector_data_)->width();
         return 0;
     }
     inline double height() const
@@ -110,7 +110,7 @@ public:
         if (is_bitmap())
             return (*bitmap_data_)->height();
         else if (is_vector())
-            return (*vector_data_)->bounding_box().height();
+            return (*vector_data_)->height();
         return 0;
     }
 

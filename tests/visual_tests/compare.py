@@ -73,12 +73,12 @@ def compare_grids(actual, expected, threshold=0, alpha=True):
         errors.append((None, actual, expected))
         return -1
     equal = (im1 == im2)
-    diff = 0
     # TODO - real diffing
     if not equal:
-        errors.append((1, actual, expected))
+        errors.append((9999, actual, expected))
+        return 9999
     passed += 1
-    return diff
+    return 0
 
 def summary(generate=False):
     global errors

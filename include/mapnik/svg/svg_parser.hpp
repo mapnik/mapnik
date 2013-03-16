@@ -51,6 +51,7 @@ namespace  mapnik { namespace svg {
         void start_element(xmlTextReaderPtr reader);
         void end_element(xmlTextReaderPtr reader);
         void parse_path(xmlTextReaderPtr reader);
+        void parse_dimensions(xmlTextReaderPtr reader);
         void parse_polygon(xmlTextReaderPtr reader);
         void parse_polyline(xmlTextReaderPtr reader);
         void parse_line(xmlTextReaderPtr reader);

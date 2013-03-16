@@ -265,6 +265,10 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
                 {
                     parse_ellipse(reader);
                 }
+                else if (xmlStrEqual(name, BAD_CAST "svg"))
+                {
+                    parse_dimensions(reader);
+                }
 #ifdef MAPNIK_LOG
                 else if (!xmlStrEqual(name, BAD_CAST "svg"))
                 {
@@ -450,6 +454,28 @@ void svg_parser::parse_attr(xmlTextReaderPtr reader)
         } while(xmlTextReaderMoveToNextAttribute(reader) == 1);
     }
     xmlTextReaderMoveToElement(reader);
+}
+
+void svg_parser::parse_dimensions(xmlTextReaderPtr reader)
+{
+    xmlChar *value;
+    double width = 0;
+    double height = 0;
+    value = xmlTextReaderGetAttribute(reader, BAD_CAST "width");
+    if (value)
+    {
+        width = parse_double((const char*)value);
+        xmlFree(value);
+    }
+    xmlChar *value2;
+    value2 = xmlTextReaderGetAttribute(reader, BAD_CAST "width");
+    if (value2)
+    {
+        height = parse_double((const char*)value2);
+        xmlFree(value2);
+    }
+    path_.set_dimensions(width,height);
+
 }
 void svg_parser::parse_path(xmlTextReaderPtr reader)
 {
