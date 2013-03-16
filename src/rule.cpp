@@ -24,6 +24,25 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/raster_colorizer.hpp>
+#include <mapnik/expression_string.hpp>
+
+// all symbolizers
+#include <mapnik/building_symbolizer.hpp>
+#include <mapnik/line_symbolizer.hpp>
+#include <mapnik/line_pattern_symbolizer.hpp>
+#include <mapnik/polygon_symbolizer.hpp>
+#include <mapnik/polygon_pattern_symbolizer.hpp>
+#include <mapnik/point_symbolizer.hpp>
+#include <mapnik/raster_symbolizer.hpp>
+#include <mapnik/shield_symbolizer.hpp>
+#include <mapnik/text_symbolizer.hpp>
+#include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/debug_symbolizer.hpp>
+
+// boost
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/concept_check.hpp>
 
 // stl
 #include <limits>

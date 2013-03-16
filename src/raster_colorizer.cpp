@@ -22,6 +22,9 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/raster.hpp>
 #include <mapnik/raster_colorizer.hpp>
 
 // stl
@@ -116,7 +119,7 @@ bool raster_colorizer::add_stop(colorizer_stop const& stop)
     return true;
 }
 
-void raster_colorizer::colorize(raster_ptr const& raster, Feature const& f) const
+void raster_colorizer::colorize(raster_ptr const& raster, feature_impl const& f) const
 {
     unsigned *imageData = raster->data_.getData();
 
