@@ -26,6 +26,10 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text/layout.hpp>
 #include <mapnik/geom_util.hpp>
+#include <mapnik/parse_path.hpp>
+#include <mapnik/debug.hpp>
+
+//agg
 #include "agg_conv_clip_polyline.h"
 
 namespace mapnik {

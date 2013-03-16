@@ -32,6 +32,7 @@
 
 //boost
 #include <boost/make_shared.hpp>
+#include <boost/foreach.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"

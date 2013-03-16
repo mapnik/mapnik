@@ -25,23 +25,24 @@
 #define MAPNIK_CAIRO_CONTEXT_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/stroke.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/font_set.hpp>
-#include <mapnik/text_path.hpp>
-#include <mapnik/text_properties.hpp>
 #include <mapnik/gradient.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
 // boost
 #include <boost/utility.hpp>
+#include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 // cairo
 #include <cairo.h>
 #include <cairo-ft.h>
+#include <cairomm/cairomm.h>
 // stl
 #include <valarray>
 // agg
@@ -316,7 +317,7 @@ public:
     void fill();
     void paint();
     void set_pattern(cairo_pattern const& pattern);
-    void set_gradient(cairo_gradient const& pattern, const box2d<double> &bbox);
+    void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
     void add_image(double x, double y, image_data_32 & data, double opacity = 1.0);
     void add_image(agg::trans_affine const& tr, image_data_32 & data, double opacity = 1.0);
     void set_font_face(cairo_face_manager & manager, face_ptr face);
@@ -328,7 +329,7 @@ public:
     void restore();
     void show_glyph(unsigned long index, pixel_position const pos);
     void glyph_path(unsigned long index, pixel_position const pos);
-    void add_text(glyph_position_ptr pos,
+    void add_text(glyph_positions_ptr pos,
                   cairo_face_manager & manager,
                   face_manager<freetype_engine> & font_manager,
                   double scale_factor = 1.0);

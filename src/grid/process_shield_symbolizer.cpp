@@ -31,6 +31,9 @@
 // agg
 #include "agg_trans_affine.h"
 
+//boost
+#include <boost/foreach.hpp>
+
 namespace mapnik {
 
 template <typename T>

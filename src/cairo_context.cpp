@@ -402,7 +402,7 @@ void cairo_context::glyph_path(unsigned long index, pixel_position const pos)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::add_text(glyph_position_ptr pos,
+void cairo_context::add_text(glyph_positions_ptr pos,
                              cairo_face_manager & manager,
                              face_manager<freetype_engine> & font_manager,
                              double scale_factor)
