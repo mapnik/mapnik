@@ -155,10 +155,10 @@ feature_ptr occi_featureset::next()
                 break;
             case oracle::occi::OCCIDOUBLE:
             case oracle::occi::OCCIBDOUBLE:
-                feature->put(fld_name, rs_->getDouble(i + 1));
-                break;
             case oracle::occi::OCCINUMBER:
             case oracle::occi::OCCI_SQLT_NUM:
+                feature->put(fld_name, rs_->getDouble(i + 1));
+                break;
             case oracle::occi::OCCICHAR:
             case oracle::occi::OCCISTRING:
             case oracle::occi::OCCI_SQLT_AFC:
