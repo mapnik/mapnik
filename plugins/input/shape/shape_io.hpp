@@ -26,16 +26,16 @@
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/datasource.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "dbfile.hpp"
 #include "shapefile.hpp"
 #include "shp_index.hpp"
 
-struct shape_io : boost::noncopyable
+struct shape_io : mapnik::noncopyable
 {
 public:
     enum shapeType

@@ -26,9 +26,7 @@
 // mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_path_storage.h"
@@ -46,7 +44,7 @@ namespace mapnik {
 namespace svg {
 
 template <typename VertexSource, typename AttributeSource>
-class svg_converter : boost::noncopyable
+class svg_converter : mapnik::noncopyable
 {
 public:
 

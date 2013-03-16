@@ -27,6 +27,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/text/face.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // freetype2
 extern "C"
@@ -52,7 +53,7 @@ namespace mapnik
 {
 
 // FT_Stroker wrapper
-class stroker : boost::noncopyable
+class stroker : mapnik::noncopyable
 {
 public:
     explicit stroker(FT_Stroker s)
@@ -97,7 +98,7 @@ private:
 };
 
 template <typename T>
-class MAPNIK_DECL face_manager : private boost::noncopyable
+class MAPNIK_DECL face_manager : private mapnik::noncopyable
 {
     typedef T font_engine_type;
     typedef std::map<std::string, face_ptr> face_ptr_cache_type;

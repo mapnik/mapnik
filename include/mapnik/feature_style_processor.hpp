@@ -40,6 +40,12 @@ class layer;
 class projection;
 class proj_transform;
 
+enum eAttributeCollectionPolicy
+{
+    DEFAULT = 0,
+    COLLECT_ALL = 1
+};
+
 template <typename Processor>
 class feature_style_processor
 {

@@ -50,6 +50,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -71,7 +72,7 @@ namespace mapnik
 {
 using boost::optional;
 
-class map_parser : boost::noncopyable {
+class map_parser : mapnik::noncopyable {
 public:
     map_parser(bool strict, std::string const& filename = "") :
         strict_(strict),
@@ -1125,7 +1126,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         symbol.set_alignment(p_alignment);
 
         // opacity
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
+        optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) symbol.set_opacity(*opacity);
 
         // gamma
@@ -1213,7 +1214,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         shield_symbol.set_shield_displacement(shield_dx,shield_dy);
 
         // opacity
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
+        optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity)
         {
             shield_symbol.set_opacity(*opacity);
@@ -1485,7 +1486,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         }
 
         // opacity
-        optional<double> opacity = sym.get_opt_attr<double>("opacity");
+        optional<float> opacity = sym.get_opt_attr<float>("opacity");
         if (opacity) raster_sym.set_opacity(*opacity);
 
         // filter factor

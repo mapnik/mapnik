@@ -29,6 +29,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // boost
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 104000
@@ -36,7 +38,7 @@
 #else
 #include <boost/property_map.hpp>
 #endif
-#include <boost/utility.hpp>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
@@ -52,7 +54,7 @@ typedef boost::shared_ptr<raster> raster_ptr;
 class feature_impl;
 
 template <typename T>
-class context : private boost::noncopyable,
+class context : private mapnik::noncopyable,
                 public boost::associative_property_map<T>
 
 {
@@ -95,7 +97,7 @@ typedef MAPNIK_DECL boost::shared_ptr<context_type> context_ptr;
 
 static const value default_value;
 
-class MAPNIK_DECL feature_impl : private boost::noncopyable
+class MAPNIK_DECL feature_impl : private mapnik::noncopyable
 {
     friend class feature_kv_iterator;
 public:
@@ -287,7 +289,14 @@ public:
             std::size_t index = itr->second;
             if (index < data_.size())
             {
-                ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+                if (data_[itr->second] == mapnik::value_null())
+                {
+                    ss << "  " << itr->first  << ":null" << std::endl;
+                }
+                else
+                {
+                    ss << "  " << itr->first  << ":" <<  data_[itr->second] << std::endl;
+                }
             }
         }
         ss << ")" << std::endl;

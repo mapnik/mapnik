@@ -43,6 +43,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_helpers.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // cairo
 #include <cairomm/context.h>
@@ -51,7 +52,6 @@
 #include <cairo-version.h>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
 
@@ -71,7 +71,7 @@
 
 namespace mapnik
 {
-class cairo_pattern : private boost::noncopyable
+class cairo_pattern : private mapnik::noncopyable
 {
 public:
     cairo_pattern(image_data_32 const& data)
@@ -145,7 +145,7 @@ private:
     Cairo::RefPtr<Cairo::SurfacePattern> pattern_;
 };
 
-class cairo_gradient : private boost::noncopyable
+class cairo_gradient : private mapnik::noncopyable
 {
 public:
     cairo_gradient(const mapnik::gradient &grad, double opacity=1.0)
@@ -201,7 +201,7 @@ private:
 
 };
 
-class cairo_face : private boost::noncopyable
+class cairo_face : private mapnik::noncopyable
 {
 public:
     cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
@@ -268,7 +268,7 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
     return entry;
 }
 
-class cairo_context : private boost::noncopyable
+class cairo_context : private mapnik::noncopyable
 {
 public:
     cairo_context(Cairo::RefPtr<Cairo::Context> const& context)
@@ -1037,7 +1037,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     if (sym.clip())
     {
         double padding = (double)(query_extent_.width()/width_);
-        float half_stroke = stroke_.get_width()/2.0;
+        double half_stroke = stroke_.get_width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
         if (fabs(sym.offset()) > 0)

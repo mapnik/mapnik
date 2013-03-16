@@ -212,11 +212,22 @@ struct filter_in_box
 struct filter_at_point
 {
     coord2d pt_;
-    explicit filter_at_point(const coord2d& pt)
-        : pt_(pt) {}
+    double tol_;
+    explicit filter_at_point(const coord2d& pt, double tol=0)
+        : pt_(pt),
+          tol_(tol) {}
     bool pass(const box2d<double>& extent) const
     {
-        return extent.contains(pt_);
+        if (tol_ == 0)
+        {
+            return extent.contains(pt_);
+        }
+        else
+        {
+            box2d<double> extent2 = extent;
+            extent2.pad(tol_);
+            return extent2.contains(pt_);
+        }
     }
 };
 

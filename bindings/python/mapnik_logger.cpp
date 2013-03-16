@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
+
 #include <mapnik/debug.hpp>
 #include <mapnik/utils.hpp>
 #include "mapnik_enumeration.hpp"

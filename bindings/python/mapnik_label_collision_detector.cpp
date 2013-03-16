@@ -24,6 +24,8 @@
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/noncopyable.hpp>
+
 
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>

@@ -31,6 +31,7 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -47,12 +48,11 @@
 #include "agg_conv_clip_polyline.h"
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/foreach.hpp>
 
 namespace {
 
-class pattern_source : private boost::noncopyable
+class pattern_source : private mapnik::noncopyable
 {
 public:
     pattern_source(mapnik::image_data_32 const& pattern)
@@ -132,7 +132,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (sym.clip())
     {
         double padding = (double)(query_extent_.width()/pixmap_.width());
-        float half_stroke = (*mark)->width()/2.0;
+        double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
         clipping_extent.pad(padding);

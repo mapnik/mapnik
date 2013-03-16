@@ -21,6 +21,7 @@
  *****************************************************************************/
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements/simple.hpp>

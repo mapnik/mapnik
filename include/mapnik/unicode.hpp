@@ -25,13 +25,13 @@
 
 //mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ucnv.h>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
 
 // stl
@@ -39,7 +39,7 @@
 
 namespace mapnik {
 
-class MAPNIK_DECL transcoder : private boost::noncopyable
+class MAPNIK_DECL transcoder : private mapnik::noncopyable
 {
 public:
     explicit transcoder (std::string const& encoding);

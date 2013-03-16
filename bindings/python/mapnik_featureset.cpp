@@ -22,6 +22,7 @@
 
 // boost
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
 
 // mapnik
 #include <mapnik/feature.hpp>

@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
+
 #include <mapnik/datasource_cache.hpp>
 
 namespace  {

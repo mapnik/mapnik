@@ -192,5 +192,78 @@ def test_string_matching_on_precision():
     expr = mapnik.Expression("[num].match('.*(^0|00)$')")
     eq_(expr.evaluate(f),True)
 
+def test_creation_of_null_value():
+    context = mapnik.Context()
+    context.push('nv')
+    f = mapnik.Feature(context,0)
+    f["nv"] = None
+    eq_(f["nv"],None)
+    eq_(f["nv"] is None,True)
+    # test boolean
+    f["nv"] = 0
+    eq_(f["nv"],0)
+    eq_(f["nv"] is not None,True)
+
+def test_creation_of_bool():
+    context = mapnik.Context()
+    context.push('bool')
+    f = mapnik.Feature(context,0)
+    f["bool"] = True
+    eq_(f["bool"],True)
+    eq_(isinstance(f["bool"],bool),True)
+    f["bool"] = False
+    eq_(f["bool"],False)
+    eq_(isinstance(f["bool"],bool),True)
+    # test NoneType
+    f["bool"] = None
+    eq_(f["bool"],None)
+    eq_(isinstance(f["bool"],bool),False)
+    # test integer
+    f["bool"] = 0
+    eq_(f["bool"],0)
+    # ugh, boost_python's built into converter does not work right
+    #eq_(isinstance(f["bool"],bool),False)
+
+null_equality = [
+  ['hello',False,unicode],
+  [0,False,int],
+  [0.0,False,float],
+  [False,False,bool],
+  [None,True,None]
+]
+
+def test_expressions_with_null_equality():
+    for eq in null_equality:
+        context = mapnik.Context()
+        f = mapnik.Feature(context,0)
+        f["prop"] = eq[0]
+        eq_(f["prop"],eq[0])
+        if eq[0] is None:
+            eq_(f["prop"] is None, True)
+        else:
+            eq_(isinstance(f['prop'],eq[2]),True,'%s is not an instance of %s' % (f['prop'],eq[2]))
+        expr = mapnik.Expression("[prop] = null")
+        eq_(expr.evaluate(f),eq[1])
+        expr = mapnik.Expression("[prop] is null")
+        eq_(expr.evaluate(f),eq[1])
+
+def test_expressions_with_null_equality():
+    for eq in null_equality:
+        context = mapnik.Context()
+        f = mapnik.Feature(context,0)
+        f["prop"] = eq[0]
+        eq_(f["prop"],eq[0])
+        if eq[0] is None:
+            eq_(f["prop"] is None, True)
+        else:
+            eq_(isinstance(f['prop'],eq[2]),True,'%s is not an instance of %s' % (f['prop'],eq[2]))
+        # TODO - support `is not` syntax:
+        # https://github.com/mapnik/mapnik/issues/796
+        expr = mapnik.Expression("not [prop] is null")
+        eq_(expr.evaluate(f),not eq[1])
+        # https://github.com/mapnik/mapnik/issues/1642
+        expr = mapnik.Expression("[prop] != null")
+        eq_(expr.evaluate(f),not eq[1])
+
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]

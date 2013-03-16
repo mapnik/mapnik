@@ -1336,7 +1336,7 @@ if not preconfigured:
     else:
         color_print(4,'Not building with cairo support, pass CAIRO=True to enable')
 
-    if 'python' in env['BINDINGS']:
+    if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
         if not os.access(env['PYTHON'], os.X_OK):
             color_print(1,"Cannot run python interpreter at '%s', make sure that you have the permissions to execute it." % env['PYTHON'])
             Exit(1)
@@ -1391,22 +1391,22 @@ if not preconfigured:
         else:
             env['PYTHON_IS_64BIT'] = False
 
-        if py3 and env['BOOST_PYTHON_LIB'] == 'boost_python':
-            env['BOOST_PYTHON_LIB'] = 'boost_python3%s' % env['BOOST_APPEND']
-        elif env['BOOST_PYTHON_LIB'] == 'boost_python':
-            env['BOOST_PYTHON_LIB'] = 'boost_python%s' % env['BOOST_APPEND']
+        if 'python' in env['BINDINGS']:
+            if py3 and env['BOOST_PYTHON_LIB'] == 'boost_python':
+                env['BOOST_PYTHON_LIB'] = 'boost_python3%s' % env['BOOST_APPEND']
+            elif env['BOOST_PYTHON_LIB'] == 'boost_python':
+                env['BOOST_PYTHON_LIB'] = 'boost_python%s' % env['BOOST_APPEND']
+            if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
+                color_print(1,'Could not find required header files for boost python')
+                env['MISSING_DEPS'].append('boost python')
 
-        if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
-            color_print(1,'Could not find required header files for boost python')
-            env['MISSING_DEPS'].append('boost python')
-
-        if env['CAIRO']:
-            if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
-                env['HAS_PYCAIRO'] = True
+            if env['CAIRO']:
+                if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
+                    env['HAS_PYCAIRO'] = True
+                else:
+                    env['SKIPPED_DEPS'].extend(['pycairo'])
             else:
-                env['SKIPPED_DEPS'].extend(['pycairo'])
-        else:
-            color_print(4,'Not building with pycairo support, pass CAIRO=True to enable')
+                color_print(4,'Not building with pycairo support, pass CAIRO=True to enable')
 
 
     #### End Config Stage for Required Dependencies ####
@@ -1531,7 +1531,7 @@ if not preconfigured:
             if env['DEBUG_UNDEFINED']:
                 env.Append(CXXFLAGS = '-fcatch-undefined-behavior -ftrapv -fwrapv')
 
-        if 'python' in env['BINDINGS']:
+        if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
             majver, minver = env['PYTHON_VERSION'].split('.')
             # we don't want the includes it in the main environment...
             # as they are later set in the python build.py
@@ -1547,9 +1547,10 @@ if not preconfigured:
                 color_print(1,"Python version 2.2 or greater required")
                 Exit(1)
 
-            color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
-            color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
-            color_print(4,'Python bindings will install in... %s' % os.path.normpath(env['PYTHON_INSTALL_LOCATION']))
+            if 'python' in env['BINDINGS']:
+                color_print(4,'Bindings Python version... %s' % env['PYTHON_VERSION'])
+                color_print(4,'Python %s prefix... %s' % (env['PYTHON_VERSION'], env['PYTHON_SYS_PREFIX']))
+                color_print(4,'Python bindings will install in... %s' % os.path.normpath(env['PYTHON_INSTALL_LOCATION']))
             env.Replace(**backup)
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
