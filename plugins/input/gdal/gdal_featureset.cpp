@@ -489,7 +489,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                     image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                 }
 
-                feature->set_raster(mapnik::raster_ptr(new mapnik::raster(intersect, image)));
+                feature->set_raster(boost::make_shared<mapnik::raster>(intersect, image));
             }
             return feature;
         }

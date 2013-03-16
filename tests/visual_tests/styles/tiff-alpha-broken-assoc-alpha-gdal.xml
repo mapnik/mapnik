@@ -4,7 +4,7 @@
 
 <Style name="white">
   <Rule>
-    <RasterSymbolizer opacity="1" scaling="bilinear" comp-op="src-over"/>
+    <RasterSymbolizer />
   </Rule>
 </Style>
 <Layer name="white"

@@ -345,6 +345,8 @@ else:
 env['LIBMAPNIK_LIBS'] = copy(lib_env['LIBS'])
 env['LIBMAPNIK_CXXFLAGS'] = libmapnik_cxxflags
 
+mapnik = None
+
 if env['PLATFORM'] == 'Darwin':
     target_path = env['MAPNIK_LIB_BASE_DEST']
     if 'uninstall' not in COMMAND_LINE_TARGETS:
@@ -395,3 +397,5 @@ else:
     env['create_uninstall_target'](env, target2)
     env['create_uninstall_target'](env, target1)
     env['create_uninstall_target'](env, target)
+
+Depends(mapnik, env.subst('../deps/agg/libagg.a'))

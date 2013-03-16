@@ -14,6 +14,18 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
+def test_raster_symbolizer():
+    s = mapnik.RasterSymbolizer()
+    eq_(s.comp_op,mapnik.CompositeOp.src_over) # note: mode is deprecated
+    eq_(s.scaling,mapnik.scaling_method.NEAR)
+    eq_(s.opacity,1.0)
+    eq_(s.colorizer,None)
+    eq_(s.filter_factor,-1)
+    eq_(s.mesh_size,16)
+    eq_(s.premultiplied,None)
+    s.premultiplied = True
+    eq_(s.premultiplied,True)
+
 def test_line_pattern():
     s = mapnik.LinePatternSymbolizer(mapnik.PathExpression('../data/images/dummy.png'))
     eq_(s.filename, '../data/images/dummy.png')

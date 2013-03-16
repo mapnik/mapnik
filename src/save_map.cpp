@@ -180,10 +180,18 @@ public:
             set_attr( sym_node, "mesh-size", sym.get_mesh_size() );
         }
 
-        if (sym.get_colorizer()) {
+        if (sym.get_colorizer())
+        {
             serialize_raster_colorizer(sym_node, sym.get_colorizer(),
                                        explicit_defaults_);
         }
+
+        boost::optional<bool> premultiplied = sym.premultiplied();
+        if (premultiplied)
+        {
+            set_attr( sym_node, "premultiplied", *sym.premultiplied());
+        }
+
         serialize_symbolizer_base(sym_node, sym);
     }
 

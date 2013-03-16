@@ -1254,7 +1254,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
             sym.get_opt_attr<boolean>("no-text");
         if (no_text)
         {
-            MAPNIK_LOG_ERROR(raster_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
+            MAPNIK_LOG_ERROR(shield_symbolizer) << "'no-text' is deprecated and will be removed in Mapnik 3.x, to create a ShieldSymbolizer without text just provide an element like: \"<ShieldSymbolizer ... />' '</>\"";
             if (*no_text)
                 shield_symbol.set_name(parse_expression("' '"));
         }
@@ -1491,6 +1491,9 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         optional<unsigned> mesh_size = sym.get_opt_attr<unsigned>("mesh-size");
         if (mesh_size) raster_sym.set_mesh_size(*mesh_size);
 
+        // premultiplied status of image
+        optional<boolean> premultiplied = sym.get_opt_attr<boolean>("premultiplied");
+        if (premultiplied) raster_sym.set_premultiplied(*premultiplied);
 
         xml_node::const_iterator cssIter = sym.begin();
         xml_node::const_iterator endCss = sym.end();

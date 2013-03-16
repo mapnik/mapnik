@@ -85,6 +85,9 @@ def validate_pixels_are_premultiplied(image):
 def test_compare_images():
     b = mapnik.Image.open('./images/support/b.png')
     b.premultiply()
+    num_ops = len(mapnik.CompositeOp.names)
+    successes = []
+    fails = []
     for name in mapnik.CompositeOp.names:
         a = mapnik.Image.open('./images/support/a.png')
         a.premultiply()
@@ -98,9 +101,16 @@ def test_compare_images():
         if not validate_pixels_are_not_premultiplied(a):
             print '%s not validly demultiplied' % (name)
         a.save(actual)
+        if not os.path.exists(expected):
+            print 'generating expected test image: %s' % expected
+            a.save(expected)
         expected_im = mapnik.Image.open(expected)
         # compare them
-        eq_(a.tostring(),expected_im.tostring(), 'failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
+        if a.tostring() == expected_im.tostring():
+            successes.append(name)
+        else:
+            fails.append('failed comparing actual (%s) and expected(%s)' % (actual,'tests/python_tests/'+ expected))
+    eq_(len(successes),num_ops,'\n'+'\n'.join(fails))
     b.demultiply()
     # b will be slightly modified by pre and then de multiplication rounding errors
     # TODO - write test to ensure the image is 99% the same.
