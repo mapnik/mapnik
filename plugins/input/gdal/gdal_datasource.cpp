@@ -121,7 +121,7 @@ void gdal_datasource::bind() const
 
     double tr[6];
     bool bbox_override = false;
-    boost::optional<std::string> bbox_s = params_.get<std::string>("bbox");
+    boost::optional<std::string> bbox_s = params_.get<std::string>("extent");
     if (bbox_s)
     {
         MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: BBox Parameter=" << *bbox_s;

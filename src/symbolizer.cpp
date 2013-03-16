@@ -31,15 +31,12 @@ namespace mapnik {
 void evaluate_transform(agg::trans_affine& tr, Feature const& feature,
                         transform_list_ptr const& trans_expr)
 {
-    #ifdef MAPNIK_LOG
-    MAPNIK_LOG_DEBUG(transform) << "transform: evaluate "
-        << (trans_expr
-            ? transform_processor_type::to_string(*trans_expr)
-            : std::string("null"));
-    #endif
-
     if (trans_expr)
     {
+#ifdef MAPNIK_LOG
+    MAPNIK_LOG_DEBUG(transform) << "transform: evaluate "
+                                << transform_processor_type::to_string(*trans_expr);
+#endif
         transform_processor_type::evaluate(tr, feature, *trans_expr);
     }
 }

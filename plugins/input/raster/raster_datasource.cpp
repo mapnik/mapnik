@@ -45,7 +45,7 @@ using mapnik::image_reader;
 
 DATASOURCE_PLUGIN(raster_datasource)
 
-raster_datasource::raster_datasource(const parameters& params, bool bind)
+raster_datasource::raster_datasource(parameters const& params, bool bind)
     : datasource(params),
       desc_(*params.get<std::string>("type"), "utf-8"),
       extent_initialized_(false)
@@ -62,8 +62,8 @@ raster_datasource::raster_datasource(const parameters& params, bool bind)
         filename_ = *file;
 
     multi_tiles_ = *params_.get<bool>("multi", false);
-    tile_size_ = *params_.get<unsigned>("tile_size", 256);
-    tile_stride_ = *params_.get<unsigned>("tile_stride", 1);
+    tile_size_ = *params_.get<unsigned>("tile-size", 256);
+    tile_stride_ = *params_.get<unsigned>("tile-stride", 1);
 
     format_ = *params_.get<std::string>("format","tiff");
 
@@ -100,8 +100,8 @@ void raster_datasource::bind() const
 
     if (multi_tiles_)
     {
-        boost::optional<unsigned> x_width = params_.get<unsigned>("x_width");
-        boost::optional<unsigned> y_width = params_.get<unsigned>("y_width");
+        boost::optional<unsigned> x_width = params_.get<unsigned>("x-width");
+        boost::optional<unsigned> y_width = params_.get<unsigned>("y-width");
 
         if (! x_width)
         {
@@ -201,11 +201,11 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         return boost::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
     }
-    else if (width * height > 512*512)
+    else if (width * height > (tile_size_ * tile_size_ << 2))
     {
         MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Tiled policy";
 
-        tiled_file_policy policy(filename_, format_, 256, extent_, q.get_bbox(), width_, height_);
+        tiled_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_);
 
         return boost::make_shared<raster_featureset<tiled_file_policy> >(policy, extent_, q);
     }
