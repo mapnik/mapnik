@@ -72,8 +72,8 @@ def main():
         argv.append('-v')
         argv.append('-v')
 
-    dirname = os.path.dirname(sys.argv[0]) 
-    argv.extend(['-w', dirname+'/python_tests'])
+    dirname = os.path.dirname(sys.argv[0])
+    argv.extend(['-w', os.path.join(dirname,'python_tests')])
 
     if not nose.run(argv=argv, plugins=[TodoPlugin(), Doctest()]):
         sys.exit(1)

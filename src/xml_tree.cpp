@@ -182,9 +182,13 @@ std::string xml_node::xml_text = "<xmltext>";
 std::string const& xml_node::name() const
 {
     if (!is_text_)
+    {
         return name_;
+    }
     else
+    {
         return xml_text;
+    }
 }
 
 std::string const& xml_node::text() const
@@ -193,7 +197,8 @@ std::string const& xml_node::text() const
     {
         processed_ = true;
         return name_;
-    } else
+    }
+    else
     {
         throw config_error("text() called on non-text node", *this);
     }
@@ -336,7 +341,8 @@ std::string xml_node::get_text() const
         if (is_text_)
         {
             return name_;
-        } else
+        }
+        else
         {
             return "";
         }

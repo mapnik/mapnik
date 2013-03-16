@@ -107,6 +107,28 @@ bool painted(mapnik::image_32 const& im)
     return im.painted();
 }
 
+bool is_solid(mapnik::image_32 const& im)
+{
+    if (im.width() > 0 && im.height() > 0)
+    {
+        mapnik::image_data_32 const & data = im.data();
+        mapnik::image_data_32::pixel_type const* first_row = data.getRow(0);
+        mapnik::image_data_32::pixel_type const first_pixel = first_row[0];
+        for (unsigned y = 0; y < im.height(); ++y)
+        {
+            mapnik::image_data_32::pixel_type const * row = data.getRow(y);
+            for (unsigned x = 0; x < im.width(); ++x)
+            {
+                if (first_pixel != row[x])
+                {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 unsigned get_pixel(mapnik::image_32 const& im, int x, int y)
 {
     if (x < static_cast<int>(im.width()) && y < static_cast<int>(im.height()))
@@ -206,6 +228,7 @@ void export_image()
         .def("height",&image_32::height)
         .def("view",&image_32::get_view)
         .def("painted",&painted)
+        .def("is_solid",&is_solid)
         .add_property("background",make_function
                       (&image_32::get_background,return_value_policy<copy_const_reference>()),
                       &image_32::set_background, "The background color of the image.")

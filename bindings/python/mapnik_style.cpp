@@ -28,7 +28,6 @@
 #include <mapnik/value_error.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/image_filter_grammar.hpp> // image_filter_grammar
 #include <mapnik/image_filter_types.hpp> // generate_image_filters
 
 using mapnik::feature_type_style;
@@ -45,18 +44,12 @@ std::string get_image_filters(feature_type_style & style)
 
 void set_image_filters(feature_type_style & style, std::string const& filters)
 {
-    std::string::const_iterator itr = filters.begin();
-    std::string::const_iterator end = filters.end();
-    mapnik::image_filter_grammar<std::string::const_iterator,
-                                 std::vector<mapnik::filter::filter_type> > filter_grammar;
     std::vector<mapnik::filter::filter_type> new_filters;
-    bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                  filter_grammar,
-                                                  boost::spirit::qi::ascii::space,
-                                                  new_filters);
-    if (!result || itr!=end)
+
+    bool result = parse_image_filters(filters, new_filters);
+    if (!result)
     {
-        throw mapnik::value_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
+        throw mapnik::value_error("failed to parse image-filters: '" + filters + "'");
     }
     style.image_filters().swap(new_filters);
 }

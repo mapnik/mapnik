@@ -370,6 +370,8 @@ PathVariable.PathAccept),
     ('JOBS', 'Set the number of parallel compilations', "1", lambda key, value, env: int(value), int),
     BoolVariable('DEMO', 'Compile demo c++ application', 'True'),
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
+    BoolVariable('SHAPEINDEX', 'Compile and install a utility to generate shapefile indexes in the custom format (.index) Mapnik supports', 'True'),
+    BoolVariable('SVG2PNG', 'Compile and install a utility to generate render an svg file to a png on the command line', 'False'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
     BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
@@ -1805,13 +1807,15 @@ if not HELP_REQUESTED:
 
     # Build shapeindex and remove its dependency from the LIBS
     if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
-        SConscript('utils/shapeindex/build.py')
+        if env['SHAPEINDEX']:
+            SConscript('utils/shapeindex/build.py')
 
         # Build the pgsql2psqlite app if requested
         if env['PGSQL2SQLITE']:
             SConscript('utils/pgsql2sqlite/build.py')
 
-        SConscript('utils/svg2png/build.py')
+        if env['SVG2PNG']:
+            SConscript('utils/svg2png/build.py')
 
         # devtools not ready for public
         #SConscript('utils/ogrindex/build.py')

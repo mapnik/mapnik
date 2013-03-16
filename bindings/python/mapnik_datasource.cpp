@@ -138,6 +138,9 @@ boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
     return fld_types;
 }}
 
+mapnik::parameters const& (mapnik::datasource::*params_const)() const =  &mapnik::datasource::params;
+
+
 void export_datasource()
 {
     using namespace boost::python;
@@ -164,7 +167,7 @@ void export_datasource()
         .def("fields",&fields)
         .def("field_types",&field_types)
         .def("features_at_point",&datasource::features_at_point, (arg("coord"),arg("tolerance")=0))
-        .def("params",&datasource::params,return_value_policy<copy_const_reference>(),
+        .def("params",make_function(params_const,return_value_policy<copy_const_reference>()),
              "The configuration parameters of the data source. "
              "These vary depending on the type of data source.")
         ;

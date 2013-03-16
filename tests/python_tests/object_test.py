@@ -335,6 +335,16 @@ def test_map_init():
     m = mapnik.Map(256, 256, '+proj=latlong')
     eq_(m.srs, '+proj=latlong')
 
+def test_map_style_access():
+    m = mapnik.Map(256, 256)
+    sty = mapnik.Style()
+    m.append_style("style",sty)
+    styles = list(m.styles)
+    eq_(len(styles),1)
+    eq_(styles[0][0],'style')
+    # returns a copy so let's just check it is the right instance
+    eq_(isinstance(styles[0][1],mapnik.Style),True)
+
 def test_map_maximum_extent_modification():
     m = mapnik.Map(256, 256)
     eq_(m.maximum_extent, None)

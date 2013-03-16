@@ -425,15 +425,10 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         if (filters)
         {
             std::string filter_str = *filters;
-            std::string::const_iterator itr = filter_str.begin();
-            std::string::const_iterator end = filter_str.end();
-            bool result = boost::spirit::qi::phrase_parse(itr,end,
-                                                          sty.get_tree().image_filters_grammar,
-                                                          boost::spirit::qi::ascii::space,
-                                                          style.image_filters());
-            if (!result || itr!=end)
+            bool result = filter::parse_image_filters(filter_str, style.image_filters());
+            if (!result)
             {
-                throw config_error("failed to parse image-filters: '" + std::string(itr,end) + "'");
+                throw config_error("failed to parse image-filters: '" + filter_str + "'");
             }
         }
 
