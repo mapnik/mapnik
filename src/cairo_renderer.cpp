@@ -53,6 +53,7 @@
 // boost
 #include <boost/utility.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/round.hpp>
 
 // agg
 #include "agg_conv_clip_polyline.h"
@@ -1197,7 +1198,13 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
     else if (marker.is_bitmap())
     {
         agg::trans_affine matrix = tr;
-        matrix *= agg::trans_affine_translation(pos.x, pos.y);
+        double width = (*marker.get_bitmap_data())->width();
+        double height = (*marker.get_bitmap_data())->height();
+        double cx = 0.5 * width;
+        double cy = 0.5 * height;
+        matrix *= agg::trans_affine_translation(
+                     boost::math::iround(pos.x - cx),
+                     boost::math::iround(pos.y - cy));
         context.add_image(matrix, **marker.get_bitmap_data(), opacity);
     }
 }
@@ -1279,8 +1286,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
     {
         if (glyphs->marker())
         {
-            // Position is handled differently by cairo renderer
-            pixel_position pos = glyphs->marker_pos() - 0.5 *
+            pixel_position pos = glyphs->marker_pos() + 0.5 *
                     pixel_position(glyphs->marker()->marker->width(),
                                    glyphs->marker()->marker->height());
 
@@ -1538,11 +1544,17 @@ struct markers_dispatch
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
 
-        if (placement_method != MARKER_LINE_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT ||
+            path.type() == Point)
         {
             double x = 0;
             double y = 0;
-            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            if (path.type() == LineString)
+            {
+                if (!label::middle_point(path, x, y))
+                    return;
+            }
+            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
                     return;
@@ -1621,11 +1633,17 @@ struct markers_dispatch_2
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
 
-        if (placement_method != MARKER_LINE_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT ||
+            path.type() == Point)
         {
             double x = 0;
             double y = 0;
-            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            if (path.type() == LineString)
+            {
+                if (!label::middle_point(path, x, y))
+                    return;
+            }
+            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
                     return;

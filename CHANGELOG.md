@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added support for DBF `Logical` type: #1614
+
 - Added serialization of `line-offset` to save_map (#1562)
 
 - Enabled default input plugin directory and fonts path to be set inherited from environment settings in

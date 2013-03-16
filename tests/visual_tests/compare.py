@@ -85,7 +85,7 @@ def summary(generate=False):
     global passed
     
     if len(errors) != 0:
-        msg = "Visual text rendering: %s failures" % len(errors)
+        msg = "Visual text rendering: %s failed / %s passed" % (len(errors),passed)
         print "-"*len(msg)
         print msg
         print "-"*len(msg)
