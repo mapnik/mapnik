@@ -82,7 +82,7 @@ expression_ptr expression_format::get_expression(xml_node const& xml, std::strin
 }
 
 
-void expression_format::apply(char_properties_ptr p, const feature_impl &feature, text_layout &output) const
+void expression_format::apply(char_properties_ptr p, feature_impl const& feature, text_layout &output) const
 {
     char_properties_ptr new_properties = boost::make_shared<char_properties>(*p);
     if (face_name) new_properties->face_name =

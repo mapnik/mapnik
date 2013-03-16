@@ -23,10 +23,8 @@
 #define FORMATTING_BASE_HPP
 
 // mapnik
-#include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
 #include <mapnik/text/char_properties_ptr.hpp>
-#include <mapnik/feature.hpp>
 
 // boost
 #include <boost/property_tree/ptree_fwd.hpp>
@@ -34,6 +32,7 @@
 namespace mapnik {
 
 class text_layout;
+class feature_impl;
 class xml_node;
 
 namespace formatting {
