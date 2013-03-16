@@ -967,6 +967,7 @@ if not preconfigured:
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
     env['SQLITE_LINKFLAGS'] = []
+    env['PYTHON_INCLUDES'] = []
     # previously a leading / was expected for LIB_DIR_NAME
     # now strip it to ensure expected behavior
     if env['LIB_DIR_NAME'].startswith(os.path.sep):
@@ -1267,6 +1268,9 @@ if not preconfigured:
     env.Prepend(CPPPATH = '#deps/agg/include')
     env.Prepend(LIBPATH = '#deps/agg')
 
+    # prepend deps dir for auxillary headers
+    env.Prepend(CPPPATH = '#deps')
+
     if env['CAIRO']:
         if env['CAIRO_LIBS'] or env['CAIRO_INCLUDES']:
             c_inc = env['CAIRO_INCLUDES']
@@ -1352,7 +1356,14 @@ if not preconfigured:
                 py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())"''' % env['PYTHON']
             else:
                 py_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc()"''' % env['PYTHON']
-            env['PYTHON_INCLUDES'] = call(py_includes)
+            env['PYTHON_INCLUDES'].append(call(py_includes))
+
+            # also append platform specific includes
+            if py3:
+                py_plat_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print(get_python_inc(plat_specific=True))"''' % env['PYTHON']
+            else:
+                py_plat_includes = '''%s -c "from distutils.sysconfig import get_python_inc; print get_python_inc(plat_specific=True)"''' % env['PYTHON']
+            env['PYTHON_INCLUDES'].append(call(py_plat_includes))
 
             # Note: we use the plat_specific argument here to make sure to respect the arch-specific site-packages location
             if py3:
@@ -1363,7 +1374,7 @@ if not preconfigured:
         else:
             env['PYTHON_SYS_PREFIX'] = os.popen('''%s -c "import sys; print sys.prefix"''' % env['PYTHON']).read().strip()
             env['PYTHON_VERSION'] = os.popen('''%s -c "import sys; print sys.version"''' % env['PYTHON']).read()[0:3]
-            env['PYTHON_INCLUDES'] = env['PYTHON_SYS_PREFIX'] + '/include/python' + env['PYTHON_VERSION']
+            env['PYTHON_INCLUDES'] = [env['PYTHON_SYS_PREFIX'] + '/include/python' + env['PYTHON_VERSION']]
             env['PYTHON_SITE_PACKAGES'] = env['DESTDIR'] + os.path.sep + env['PYTHON_SYS_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA'] + '/python' + env['PYTHON_VERSION'] + '/site-packages/'
 
         # if user-requested custom prefix fall back to manual concatenation for building subdirectories
@@ -1529,7 +1540,8 @@ if not preconfigured:
             # as they are later set in the python build.py
             # ugly hack needed until we have env specific conf
             backup = env.Clone().Dictionary()
-            env.AppendUnique(CPPPATH = os.path.realpath(env['PYTHON_INCLUDES']))
+            for pyinc in env['PYTHON_INCLUDES']:
+                env.AppendUnique(CPPPATH = os.path.realpath(pyinc))
 
             if not conf.CheckHeader(header='Python.h',language='C'):
                 color_print(1,'Could not find required header files for the Python language (version %s)' % env['PYTHON_VERSION'])
@@ -1670,6 +1682,9 @@ if not HELP_REQUESTED:
 
     # Install headers
     SConscript('include/build.py')
+
+    # Install auxiliary headers
+    SConscript('deps/mapnik/build.py')
 
     # Build the requested and able-to-be-compiled input plug-ins
     GDAL_BUILT = False

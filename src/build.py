@@ -204,11 +204,11 @@ source = Split(
     )
 
 if env['HAS_CAIRO']:
-    lib_env.PrependUnique(LIBPATH=env['CAIRO_LIBPATHS'])
+    lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])
     lib_env.Append(LIBS=env['CAIRO_LINKFLAGS'])
     lib_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
     libmapnik_cxxflags.append('-DHAVE_CAIRO')
-    lib_env.PrependUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
+    lib_env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
     source.insert(0,'cairo_renderer.cpp')
     source.insert(0,'cairo_context.cpp')
 

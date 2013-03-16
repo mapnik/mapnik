@@ -24,12 +24,13 @@
 #define MAPNIK_IMAGE_FILTER_TYPES_HPP
 
 // boost
-#include <boost/variant.hpp>
-#include <boost/config/warning_disable.hpp>
+#include <boost/variant/variant_fwd.hpp>
 
 // stl
 #include <iostream>
 #include <vector>
+#include <ostream>
+#include <iterator>  // for std::back_insert_iterator
 
 namespace mapnik { namespace filter {
 

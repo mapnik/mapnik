@@ -24,8 +24,6 @@
 #define MAPNIK_MARKERS_PLACEMENT_HPP
 
 // mapnik
-#include <mapnik/markers_placement.hpp>
-#include <mapnik/geometry.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>
@@ -35,11 +33,7 @@
 
 // agg
 #include "agg_basics.h"
-#include "agg_conv_clip_polygon.h"
-#include "agg_conv_clip_polyline.h"
 #include "agg_trans_affine.h"
-#include "agg_conv_transform.h"
-#include "agg_conv_smooth_poly1.h"
 
 // stl
 #include <cmath>
@@ -74,12 +68,12 @@ public:
         allow_overlap_(allow_overlap),
         marker_width_((size_ * tr_).width()),
         done_(false),
-        last_x(.0),
-        last_y(.0),
-        next_x(.0),
-        next_y(.0),
-        error_(.0),
-        spacing_left_(.0),
+        last_x(0.0),
+        last_y(0.0),
+        next_x(0.0),
+        next_y(0.0),
+        error_(0.0),
+        spacing_left_(0.0),
         marker_nr_(0)
     {
       if (spacing >= 0)
@@ -104,7 +98,7 @@ public:
         done_ = agg::is_stop(locator_.vertex(&next_x, &next_y));
         last_x = next_x;
         last_y = next_y; // Force request of new segment
-        error_ = 0;
+        error_ = 0.0;
         marker_nr_ = 0;
     }
 
@@ -133,9 +127,10 @@ public:
            error = 0: Perfect position.
            error < 0: Marker too near to the beginning of the path.
         */
-        if (marker_nr_++ == 0)
+        if (marker_nr_ == 0)
         {
             //First marker
+            marker_nr_++;
             spacing_left_ = spacing_ / 2;
         }
         else
@@ -143,7 +138,8 @@ public:
             spacing_left_ = spacing_;
         }
         spacing_left_ -= error_;
-        error_ = 0;
+        error_ = 0.0;
+        double max_err_allowed = max_error_ * spacing_;
         //Loop exits when a position is found or when no more segments are available
         while (true)
         {
@@ -153,15 +149,15 @@ public:
                 set_spacing_left(marker_width_/2); //Only moves forward
             }
             //Error for this marker is too large. Skip to the next position.
-            if (abs(error_) > max_error_ * spacing_)
+            if (std::fabs(error_) > max_err_allowed)
             {
                 if (error_ > spacing_)
                 {
-                    error_ = 0; //Avoid moving backwards
-                    MAPNIK_LOG_WARN(markers_placement) << "Extremely large error in markers_placement. Please file a bug report.";
+                    MAPNIK_LOG_WARN(markers_placement) << "Extremely large error (" << error_ << ") in markers_placement. Please file a bug report.";
+                    error_ = 0.0; //Avoid moving backwards
                 }
                 spacing_left_ += spacing_ - error_;
-                error_ = 0;
+                error_ = 0.0;
             }
             double dx = next_x - last_x;
             double dy = next_y - last_y;
@@ -214,7 +210,7 @@ public:
                 }
                 continue; //Force checking of max_error constraint
             }
-            angle = atan2(dy, dx);
+            angle = std::atan2(dy, dx);
             x = last_x + dx * (spacing_left_ / segment_length);
             y = last_y + dy * (spacing_left_ / segment_length);
             box2d<double> box = perform_transform(angle, x, y);

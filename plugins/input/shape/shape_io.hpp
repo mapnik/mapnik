@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/datasource.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/noncopyable.hpp>
 
 // boost
@@ -33,7 +33,6 @@
 
 #include "dbfile.hpp"
 #include "shapefile.hpp"
-#include "shp_index.hpp"
 
 struct shape_io : mapnik::noncopyable
 {

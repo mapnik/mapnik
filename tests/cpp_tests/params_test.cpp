@@ -1,8 +1,11 @@
 #include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
+#include <mapnik/value_types.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/boolean.hpp>
+
+#include <boost/variant.hpp>
 
 int main( int, char*[] )
 {

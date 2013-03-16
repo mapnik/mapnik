@@ -24,18 +24,22 @@
 #define SVG_OUTPUT_GRAMMARS_HPP
 
 // mapnik
-#include <mapnik/vertex.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/geometry.hpp>
-#include <mapnik/svg/output/svg_path_iterator.hpp>
-#include <mapnik/svg/output/svg_output_attributes.hpp>
+#include <mapnik/stroke.hpp>
+
+// fwd declare
+namespace mapnik { namespace svg {
+  struct path_output_attributes;
+  struct rect_output_attributes;
+  struct root_output_attributes;
+} }
 
 // boost
 #include <boost/spirit/include/karma.hpp>
 #include <boost/spirit/include/karma_omit.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/repository/include/karma_confix.hpp>
-#include <boost/spirit/home/phoenix/bind/bind_member_function.hpp>
+#include <boost/spirit/include/phoenix_function.hpp>
+#include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/fusion/include/struct.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>

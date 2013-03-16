@@ -26,6 +26,7 @@
 #include <mapnik/svg/svg_converter.hpp>
 // stl
 #include <string>
+#include <cstring>
 
 namespace mapnik { namespace svg {
 

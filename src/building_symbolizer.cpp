@@ -22,6 +22,8 @@
 
 // mapnik
 #include <mapnik/building_symbolizer.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/attribute.hpp>
 
 namespace mapnik
 {

@@ -28,6 +28,7 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/path_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
+#include <mapnik/vertex.hpp>    // for CommandType::SEG_MOVETO
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -36,7 +37,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/home/phoenix/statement/if.hpp>
+#include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
 #include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
 
@@ -158,7 +159,6 @@ struct geometry_generator_grammar :
         using boost::spirit::karma::_a;
         using boost::spirit::karma::_r1;
         using boost::spirit::karma::eps;
-        using boost::spirit::karma::string;
 
         coordinates =  point | linestring | polygon
             ;
@@ -186,7 +186,7 @@ struct geometry_generator_grammar :
             ;
 
         polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
-                           << string[ if_ (_r1 > 1) [_1 = "],["]
+                           << karma::string[ if_ (_r1 > 1) [_1 = "],["]
                                       .else_[_1 = '[' ]] | &uint_ << lit(','))
             << lit('[') << coord_type
             << lit(',')
@@ -235,7 +235,6 @@ struct multi_geometry_generator_grammar :
         using boost::spirit::karma::_1;
         using boost::spirit::karma::_a;
         using boost::spirit::karma::_r1;
-        using boost::spirit::karma::string;
 
         geometry_types.add
             (mapnik::Point,"\"Point\"")
@@ -259,9 +258,9 @@ struct multi_geometry_generator_grammar :
         geometry = (lit("{\"type\":")
                     << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = _multi_type(_val)]
                     << lit(",\"coordinates\":")
-                    << string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = '[']]
+                    << karma::string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = '[']]
                     << coordinates
-                    << string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']']]
+                    << karma::string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']']]
                     << lit('}')) | lit("null")
             ;
 

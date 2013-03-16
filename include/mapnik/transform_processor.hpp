@@ -28,18 +28,21 @@
 #ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
 #endif
-#include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
 
 // boost
 #include <boost/foreach.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
 
 // agg
 #include <agg_trans_affine.h>
 
 namespace mapnik {
+
+class feature_impl;
 
 template <typename Container> struct expression_attributes;
 

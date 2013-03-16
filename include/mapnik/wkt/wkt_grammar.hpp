@@ -32,7 +32,7 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/home/phoenix/object/new.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_stl.hpp>
 // mapnik
 #include <mapnik/geometry.hpp>

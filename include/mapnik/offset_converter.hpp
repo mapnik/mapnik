@@ -38,7 +38,6 @@ namespace mapnik
 {
 
 const double pi = boost::math::constants::pi<double>();
-const double half_pi = pi/2.0;
 
 template <typename Geometry>
 struct MAPNIK_DECL offset_converter

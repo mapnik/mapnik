@@ -21,6 +21,11 @@ def test_parameter_string():
     eq_(p[0],'key')
     eq_(p[1],'value')
 
+def test_parameter_unicode():
+    p = mapnik.Parameter('key',u'value')
+    eq_(p[0],'key')
+    eq_(p[1],u'value')
+
 def test_parameter_integer():
     p = mapnik.Parameter('int',sys.maxint)
     eq_(p[0],'int')

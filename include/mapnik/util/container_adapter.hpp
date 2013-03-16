@@ -28,7 +28,7 @@
 #include <mapnik/util/path_iterator.hpp>
 
 // boost
-#include <boost/spirit/home/support/container.hpp>
+#include <boost/spirit/include/support_container.hpp>
 
 namespace boost { namespace spirit { namespace traits {
 

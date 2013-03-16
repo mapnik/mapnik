@@ -29,6 +29,7 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <string>
+#include <iterator>
 
 namespace mapnik { namespace json {
 

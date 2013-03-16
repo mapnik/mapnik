@@ -40,6 +40,7 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
+#include <cstring>
 
 namespace mapnik { namespace svg {
 
@@ -86,7 +87,7 @@ double parse_double(const char* str)
 {
     using namespace boost::spirit::qi;
     double val = 0.0;
-    parse(str, str+ strlen(str),double_,val);
+    parse(str, str + std::strlen(str),double_,val);
     return val;
 }
 
@@ -102,7 +103,7 @@ double parse_double_optional_percent(const char* str, bool &percent)
 
     double val = 0.0;
     char unit='\0';
-    parse(str, str+ strlen(str),double_[ref(val)=_1] >> *char_('%')[ref(unit)=_1]);
+    parse(str, str + std::strlen(str),double_[ref(val)=_1] >> *char_('%')[ref(unit)=_1]);
     if (unit =='%')
     {
         percent = true;
@@ -120,7 +121,7 @@ bool parse_style (const char* str, pairs_type & v)
     using namespace boost::spirit::qi;
     typedef boost::spirit::ascii::space_type skip_type;
     key_value_sequence_ordered<const char*, skip_type> kv_parser;
-    return phrase_parse(str, str + strlen(str), kv_parser, skip_type(), v);
+    return phrase_parse(str, str + std::strlen(str), kv_parser, skip_type(), v);
 }
 
 svg_parser::svg_parser(svg_converter<svg_path_adapter,
@@ -458,7 +459,7 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
     if (value)
     {
         // d="" (empty paths) are valid
-        if (strlen((const char*)value) < 1)
+        if (std::strlen((const char*)value) < 1)
         {
             xmlFree(value);
         }

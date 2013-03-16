@@ -29,7 +29,7 @@
 // boost
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/variant.hpp>
+#include <boost/variant/variant.hpp>
 
 // fusion
 #include <boost/fusion/include/at.hpp>

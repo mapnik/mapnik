@@ -33,6 +33,7 @@
 
 // boost
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 // stl
 #include <map>

@@ -31,6 +31,7 @@
 
 // stl
 #include <string>
+#include <cstring>
 
 namespace mapnik { namespace svg {
 

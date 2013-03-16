@@ -34,6 +34,7 @@
 
 #include "shape_index_featureset.hpp"
 #include "shape_utils.hpp"
+#include "shp_index.hpp"
 
 using mapnik::feature_factory;
 using mapnik::geometry_type;

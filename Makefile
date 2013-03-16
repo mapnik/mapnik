@@ -18,8 +18,12 @@ clean:
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	@find ./ -name "*.os" -exec rm {} \;
 	@find ./ -name "*.o" -exec rm {} \;
+	@find ./ -name "*.pyc" -exec rm {} \;
+	@rm bindings/python/mapnik/paths.py
 
 distclean:
+	if test -e "config.cache"; then rm -r "config.cache"; fi
+	if test -e "config.log"; then rm -r "config.log"; fi
 	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
 	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
 	if test -e "config.cache"; then rm "config.cache"; fi

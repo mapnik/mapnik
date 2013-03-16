@@ -29,11 +29,8 @@
 #include <mapnik/feature.hpp>
 
 // spirit::qi
-#include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/variant.hpp>
 
 namespace mapnik { namespace json {
 

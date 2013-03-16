@@ -47,6 +47,8 @@
 #include <boost/lexical_cast.hpp>
 #endif
 
+#include <cstring>
+
 namespace mapnik {
 
 namespace util {
@@ -60,21 +62,51 @@ BOOST_SPIRIT_AUTO(qi, LONGLONG, qi::long_long)
 BOOST_SPIRIT_AUTO(qi, FLOAT, qi::float_)
 BOOST_SPIRIT_AUTO(qi, DOUBLE, qi::double_)
 
+
+
+struct bool_symbols : qi::symbols<char,bool>
+{
+    bool_symbols()
+    {
+        add("true",true)
+            ("false",false)
+            ("yes",true)
+            ("no",false)
+            ("on",true)
+            ("off",false)
+            ("1",true)
+            ("0",false);
+    }
+};
+
+bool string2bool(const char * value, bool & result)
+{
+    using boost::spirit::qi::no_case;
+    const char *iter = value;
+    const char *end  = value + std::strlen(value);
+    bool r = qi::phrase_parse(iter,end, no_case[bool_symbols()] ,ascii::space,result);
+    return r && (iter == end);
+}
+
+bool string2bool(std::string const& value, bool & result)
+{
+    using boost::spirit::qi::no_case;
+    std::string::const_iterator str_beg = value.begin();
+    std::string::const_iterator str_end = value.end();
+    bool r = qi::phrase_parse(str_beg,str_end,no_case[bool_symbols()],ascii::space,result);
+    return r && (str_beg == str_end);
+}
+
 bool string2int(const char * value, int & result)
 {
-    size_t length = strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
-    const char *iter  = value;
-    const char *end   = value + length;
+    const char *iter = value;
+    const char *end  = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,INTEGER,ascii::space,result);
     return r && (iter == end);
 }
 
 bool string2int(std::string const& value, int & result)
 {
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,INTEGER,ascii::space,result);
@@ -84,19 +116,14 @@ bool string2int(std::string const& value, int & result)
 #ifdef BIGINT
 bool string2int(const char * value, mapnik::value_integer & result)
 {
-    size_t length = strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
     const char *iter  = value;
-    const char *end   = value + length;
+    const char *end   = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,LONGLONG,ascii::space,result);
     return r && (iter == end);
 }
 
 bool string2int(std::string const& value, mapnik::value_integer & result)
 {
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,LONGLONG,ascii::space,result);
@@ -106,8 +133,6 @@ bool string2int(std::string const& value, mapnik::value_integer & result)
 
 bool string2double(std::string const& value, double & result)
 {
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,DOUBLE,ascii::space,result);
@@ -116,19 +141,14 @@ bool string2double(std::string const& value, double & result)
 
 bool string2double(const char * value, double & result)
 {
-    size_t length = strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
-    const char *iter  = value;
-    const char *end   = value + length;
+    const char *iter = value;
+    const char *end  = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,DOUBLE,ascii::space,result);
     return r && (iter == end);
 }
 
 bool string2float(std::string const& value, float & result)
 {
-    if (value.empty())
-        return false;
     std::string::const_iterator str_beg = value.begin();
     std::string::const_iterator str_end = value.end();
     bool r = qi::phrase_parse(str_beg,str_end,FLOAT,ascii::space,result);
@@ -137,15 +157,11 @@ bool string2float(std::string const& value, float & result)
 
 bool string2float(const char * value, float & result)
 {
-    size_t length = strlen(value);
-    if (length < 1 || value == NULL)
-        return false;
     const char *iter  = value;
-    const char *end   = value + length;
+    const char *end   = value + std::strlen(value);
     bool r = qi::phrase_parse(iter,end,FLOAT,ascii::space,result);
     return r && (iter == end);
 }
-
 
 #if BOOST_VERSION >= 104500
 
@@ -156,6 +172,15 @@ bool to_string(std::string & str, int value)
   return karma::generate(sink, value);
 }
 
+#ifdef BIGINT
+bool to_string(std::string & str, mapnik::value_integer value)
+{
+  namespace karma = boost::spirit::karma;
+  std::back_insert_iterator<std::string> sink(str);
+  return karma::generate(sink, value);
+}
+#endif
+
 bool to_string(std::string & str, unsigned value)
 {
   namespace karma = boost::spirit::karma;
@@ -164,13 +189,6 @@ bool to_string(std::string & str, unsigned value)
 }
 
 bool to_string(std::string & str, bool value)
-{
-  namespace karma = boost::spirit::karma;
-  std::back_insert_iterator<std::string> sink(str);
-  return karma::generate(sink, value);
-}
-
-bool to_string(std::string & str, boost::long_long_type value)
 {
   namespace karma = boost::spirit::karma;
   std::back_insert_iterator<std::string> sink(str);
@@ -287,6 +305,12 @@ bool to_string(std::string & str, int value)
   return to_string_lexical(str, value);
 }
 
+#ifdef BIGINT
+bool to_string(std::string & str, mapnik::value_integer value)
+{
+  return to_string_lexical(str, value);
+}
+
 bool to_string(std::string & str, unsigned value)
 {
   return to_string_lexical(str, value);
@@ -302,10 +326,7 @@ bool to_string(std::string & str, double value)
   return to_string_lexical(str, value);
 }
 
-bool to_string(std::string & str, boost::long_long_type value)
-{
-  return to_string_lexical(str, value);
-}
+#endif
 
 #endif
 

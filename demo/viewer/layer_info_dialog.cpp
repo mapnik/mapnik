@@ -21,6 +21,8 @@
 #include "layer_info_dialog.hpp"
 
 // mapnik
+#include <mapnik/params.hpp>
+#include <mapnik/params_impl.hpp>
 #include <mapnik/layer.hpp>
 
 

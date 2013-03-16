@@ -23,6 +23,7 @@
 #include <boost/python.hpp>
 
 #include <mapnik/graphics.hpp>
+#include <mapnik/expression_node.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/markers_symbolizer.hpp>

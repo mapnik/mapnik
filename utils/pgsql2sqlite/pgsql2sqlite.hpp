@@ -25,20 +25,19 @@
 // mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/global.hpp>
 #include <mapnik/sql_utils.hpp>
+#include <mapnik/util/conversions.hpp>
 
 #include "connection_manager.hpp"
 #include "cursorresultset.hpp"
 
 // boost
 #include <boost/cstdint.hpp>
-#include <boost/optional.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <boost/scoped_array.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/program_options.hpp>
 
 //stl
 #include <iostream>
@@ -213,14 +212,7 @@ void pgsql2sqlite(Connection conn,
 
     if ( rs->next())
     {
-        try
-        {
-            srid = boost::lexical_cast<int>(rs->getValue("srid"));
-        }
-        catch (boost::bad_lexical_cast &ex)
-        {
-            std::clog << ex.what() << std::endl;
-        }
+        mapnik::util::string2int(rs->getValue("srid"),srid);
         geom_col = rs->getValue("f_geometry_column");
         geom_type = rs->getValue("type");
     }
@@ -376,14 +368,10 @@ void pgsql2sqlite(Connection conn,
                 case 1700:
                 {
                     std::string str = numeric2string(buf);
-                    try
+                    double val;
+                    if (mapnik::util::string2double(str,val))
                     {
-                        double val = boost::lexical_cast<double>(str);
                         output_rec.push_back(sqlite::value_type(val));
-                    }
-                    catch (boost::bad_lexical_cast & ex)
-                    {
-                        std::clog << ex.what() << "\n";
                     }
                     break;
                 }

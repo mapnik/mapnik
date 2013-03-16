@@ -20,6 +20,12 @@
  *
  *****************************************************************************/
 
+// TODO https://github.com/mapnik/mapnik/issues/1658
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 105200
+#define BOOST_SPIRIT_USE_PHOENIX_V3
+#endif
+
 // mapnik
 #include <mapnik/json/feature_collection_parser.hpp>
 #include <mapnik/json/feature_collection_grammar.hpp>

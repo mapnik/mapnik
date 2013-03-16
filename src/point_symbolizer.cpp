@@ -22,6 +22,8 @@
 
 // mapnik
 #include <mapnik/point_symbolizer.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/attribute.hpp>
 #include <mapnik/enumeration.hpp>
 
 namespace mapnik

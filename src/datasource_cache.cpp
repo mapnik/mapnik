@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/params.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
@@ -36,6 +37,7 @@
 // stl
 #include <algorithm>
 #include <stdexcept>
+#include <map>
 
 namespace mapnik {
 
@@ -123,7 +125,7 @@ datasource_ptr datasource_cache::create(const parameters& params)
 
 bool datasource_cache::insert(std::string const& type,const lt_dlhandle module)
 {
-    return plugins_.insert(make_pair(type,boost::make_shared<PluginInfo>
+    return plugins_.insert(std::make_pair(type,boost::make_shared<PluginInfo>
                                      (type,module))).second;
 }
 

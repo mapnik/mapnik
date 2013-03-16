@@ -27,6 +27,7 @@
 #include <mapnik/transform_processor.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/attribute.hpp>
+#include <mapnik/symbolizer.hpp>  // for transform_list_ptr
 #include <mapnik/building_symbolizer.hpp>
 #include <mapnik/line_symbolizer.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
@@ -39,15 +40,17 @@
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/rule.hpp> // for rule::symbolizers
 #include <mapnik/expression.hpp>  // for expression_ptr, etc
+#include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_node.hpp>
 #include <mapnik/parse_path.hpp>  // for path_processor_type
 #include <mapnik/path_expression.hpp>  // for path_expression_ptr
 #include <mapnik/text_placements/base.hpp>  // for text_placements
-#include <mapnik/transform_expression.hpp>
 
 // boost
-#include <boost/variant.hpp>
 #include <boost/concept_check.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
+
 // stl
 #include <set>
 

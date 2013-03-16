@@ -24,7 +24,7 @@
 #define MAPNIK_PATH_EXPRESSION_HPP
 
 // boost
-#include <boost/variant.hpp>
+#include <boost/variant/variant_fwd.hpp>
 #include <boost/shared_ptr.hpp>
 
 // stl

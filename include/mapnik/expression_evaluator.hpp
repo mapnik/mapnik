@@ -29,6 +29,8 @@
 #include <mapnik/expression_node.hpp>
 
 // boost
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
 #include <boost/regex.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)
 #include <boost/regex/icu.hpp>

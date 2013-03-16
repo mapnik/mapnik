@@ -35,7 +35,6 @@
 namespace mapnik { namespace svg {
 
     using namespace boost::spirit;
-    using namespace boost::fusion;
     using namespace boost::phoenix;
 
     template <typename Iterator, typename SkipType, typename PathType>
@@ -135,7 +134,7 @@ namespace mapnik { namespace svg {
         qi::rule<Iterator,qi::locals<bool>,SkipType> A; // A,a
         qi::rule<Iterator,SkipType> Z;                  // Z,z
 
-        qi::rule<Iterator,vector2<double,double>(),SkipType> coord;
+        qi::rule<Iterator,boost::fusion::vector2<double,double>(),SkipType> coord;
 
         // commands
         function<move_to<PathType> > move_to_;

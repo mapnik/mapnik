@@ -27,7 +27,7 @@
 #include <boost/version.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/home/phoenix/object/construct.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
 
 
 namespace mapnik {

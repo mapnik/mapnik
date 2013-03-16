@@ -51,6 +51,7 @@
 
 // boost
 #include <boost/optional.hpp>
+#include <boost/variant/apply_visitor.hpp>
 
 namespace mapnik {
 

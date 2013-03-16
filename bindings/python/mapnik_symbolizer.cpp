@@ -22,6 +22,7 @@
 
 // boost
 #include <boost/python.hpp>
+#include <boost/variant.hpp>
 
 // mapnik
 //symbolizer typdef here rather than mapnik/symbolizer.hpp
