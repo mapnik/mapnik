@@ -29,7 +29,6 @@ namespace mapnik
 {
 
 struct rotation;
-/** Store a pixel position. */
 struct pixel_position
 {
     double x;
