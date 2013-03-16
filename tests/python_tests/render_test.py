@@ -120,7 +120,7 @@ def test_render_points():
     symb.allow_overlap = True
     r.symbols.append(symb)
     s.rules.append(r)
-    lyr = mapnik.Layer('Places','+proj=latlon +datum=WGS84')
+    lyr = mapnik.Layer('Places','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     lyr.datasource = ds
     lyr.styles.append('places_labels')
     # latlon bounding box corners
@@ -128,9 +128,9 @@ def test_render_points():
     lr_lonlat = mapnik.Coord(143.40,-38.80)
     # render for different projections 
     projs = { 
-        'latlon': '+proj=latlon +datum=WGS84',
+        'latlon': '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs',
         'merc': '+proj=merc +datum=WGS84 +k=1.0 +units=m +over +no_defs',
-        'google': '+proj=merc +ellps=sphere +R=6378137 +a=6378137 +units=m',
+        'google': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over',
         'utm': '+proj=utm +zone=54 +datum=WGS84'
         }
     for projdescr in projs.iterkeys():

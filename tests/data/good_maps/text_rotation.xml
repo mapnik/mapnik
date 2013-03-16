@@ -31,7 +31,7 @@
         </Rule>
     </Style>
 
-    <Layer name="point" srs="+init=epsg:4326">
+    <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>labels</StyleName>
         <Datasource>
             <Parameter name="type">sqlite</Parameter>

@@ -156,8 +156,10 @@ def test_raster_warping():
         _map.append_style('foo', style)
         lyr.styles.append('foo')
         _map.layers.append(lyr)
-        prj_trans = mapnik.ProjTransform(mapnik.Projection(mapSrs),
-                                          mapnik.Projection(lyrSrs))
+        map_proj = mapnik.Projection(mapSrs)
+        layer_proj = mapnik.Projection(lyrSrs)
+        prj_trans = mapnik.ProjTransform(map_proj,
+                                         layer_proj)
         _map.zoom_to_box(prj_trans.backward(lyr.envelope()))
 
         im = mapnik.Image(_map.width,_map.height)

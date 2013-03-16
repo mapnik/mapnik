@@ -28,6 +28,8 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/span_image_filter.hpp>
+#include <mapnik/raster.hpp>
+#include <mapnik/proj_transform.hpp>
 
 // agg
 #include "agg_image_filters.h"

@@ -17,7 +17,7 @@ config_variables = '''#!/bin/sh
 
 ## variables
 
-CONFIG_PREFIX=%(prefix)s
+CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
 CONFIG_MAPNIK_LIBNAME=%(mapnik_libname)s
 CONFIG_MAPNIK_INCLUDE=${CONFIG_PREFIX}/include
 CONFIG_MAPNIK_LIB=${CONFIG_PREFIX}/%(libdir_schema)s
@@ -74,7 +74,6 @@ else:
         git_revision = stdin.strip()
 
 configuration = {
-    "prefix": config_env['PREFIX'],
     "mapnik_libname": 'mapnik',
     "libdir_schema": config_env['LIBDIR_SCHEMA'],
     "ldflags": ldflags,
@@ -86,6 +85,11 @@ configuration = {
     "version": config_env['MAPNIK_VERSION_STRING'],
 }
 
+## if we are statically linking depedencies
+## then they do not need to be reported in ldflags
+if env['RUNTIME_LINK'] == 'static':
+    configuration['ldflags'] = ''
+    configuration['dep_libs'] = ''
 
 template = 'mapnik-config.template.sh'
 config_file = 'mapnik-config'

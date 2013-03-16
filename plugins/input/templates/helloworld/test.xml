@@ -1,4 +1,4 @@
-<Map srs="+init=epsg:4326" background-color="white" minimum-version="0.7.2">
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="white" minimum-version="0.7.2">
     <Style name="style">
         <Rule>
             <PointSymbolizer/>
@@ -8,7 +8,7 @@
         </Rule>
     </Style>
     <!-- this example only works in EPSG:4326 -->
-    <Layer name="test" srs="+init=epsg:4326">
+    <Layer name="test" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>style</StyleName>
         <Datasource>
             <!-- here we create a 'hello' type datasource which simply

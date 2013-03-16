@@ -1,4 +1,4 @@
-<Map background-color="#eee" srs="+init=epsg:4326" minimum-version="0.7.2" font-directory="../fonts/XB Zar.ttf">
+<Map background-color="#eee" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="0.7.2" font-directory="../fonts/XB Zar.ttf">
   
 <!-- nik2img.py -b 60 46 80 28 rtl_text_map.xml text_styles.png -->
 
@@ -9,7 +9,7 @@
     </Rule>
   </Style>
 
-  <Layer srs="+init=epsg:4326">
+  <Layer srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>custom_font</StyleName>
     <Datasource>
       <Parameter name="file">../shp/farsi-labels</Parameter>

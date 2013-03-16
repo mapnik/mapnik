@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdio>
+#include <set>
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -25,32 +26,51 @@
 using namespace boost::chrono;
 using namespace mapnik;
 
+static unsigned test_num = 1;
+static bool dry_run = false;
+static std::set<int> test_set;
+
 typedef process_cpu_clock clock_type;
 typedef clock_type::duration dur;
 
 template <typename T>
 void benchmark(T test, std::string const& name)
 {
-    if (!test.validate()) throw std::runtime_error(std::string("test did not validate: ") + name);
-    process_cpu_clock::time_point start;
-    dur elapsed;
-    if (test.threads_ > 0) {
-        boost::thread_group tg;
-        for (unsigned i=0;i<test.threads_;++i)
-        {
-            tg.create_thread(test);
-        }
-        start = process_cpu_clock::now();
-        tg.join_all();
-        elapsed = process_cpu_clock::now() - start;
-    } else {
-        start = process_cpu_clock::now();
-        test();
-        elapsed = process_cpu_clock::now() - start;
+    bool should_run_test = true;
+    if (!test_set.empty()) {
+        should_run_test = test_set.find(test_num) != test_set.end();
     }
-    std::clog << (test.threads_ ? "threaded -> ": "")
-        << name << ": "
-        << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
+    if (should_run_test) {
+        if (!test.validate()) {
+            std::clog << "test did not validate: " << name << "\n";
+            //throw std::runtime_error(std::string("test did not validate: ") + name);
+        }
+        if (dry_run) {
+            std::clog << test_num << ") " << (test.threads_ ? "threaded -> ": "")
+                << name << "\n";
+        } else {
+            process_cpu_clock::time_point start;
+            dur elapsed;
+            if (test.threads_ > 0) {
+                boost::thread_group tg;
+                for (unsigned i=0;i<test.threads_;++i)
+                {
+                    tg.create_thread(test);
+                }
+                start = process_cpu_clock::now();
+                tg.join_all();
+                elapsed = process_cpu_clock::now() - start;
+            } else {
+                start = process_cpu_clock::now();
+                test();
+                elapsed = process_cpu_clock::now() - start;
+            }
+            std::clog << test_num << ") " << (test.threads_ ? "threaded -> ": "")
+                << name << ": "
+                << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
+        }
+    }
+    test_num++;
 }
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
@@ -249,11 +269,83 @@ struct test5
 };
 
 
-int main( int, char*[] )
+#include <mapnik/box2d.hpp>
+#include <mapnik/projection.hpp>
+#include <mapnik/proj_transform.hpp>
+#include <mapnik/well_known_srs.hpp>
+
+struct test6
 {
+    unsigned iter_;
+    unsigned threads_;
+    std::string src_;
+    std::string dest_;
+    mapnik::box2d<double> from_;
+    mapnik::box2d<double> to_;
+    explicit test6(unsigned iterations,
+                   unsigned threads,
+                   std::string const& src,
+                   std::string const& dest,
+                   mapnik::box2d<double> from,
+                   mapnik::box2d<double> to) :
+      iter_(iterations),
+      threads_(threads),
+      src_(src),
+      dest_(dest),
+      from_(from),
+      to_(to) {}
+
+    bool validate()
+    {
+        mapnik::projection src(src_);
+        mapnik::projection dest(dest_);
+        mapnik::proj_transform tr(src,dest);
+        mapnik::box2d<double> bbox = from_;
+        if (!tr.forward(bbox)) return false;
+        return ((std::fabs(bbox.minx() - to_.minx()) < .5) &&
+                (std::fabs(bbox.maxx() - to_.maxx()) < .5) &&
+                (std::fabs(bbox.miny() - to_.miny()) < .5) &&
+                (std::fabs(bbox.maxy() - to_.maxy()) < .5)
+               );
+    }
+    void operator()()
+    {
+        mapnik::projection src(src_);
+        mapnik::projection dest(dest_);
+        mapnik::proj_transform tr(src,dest);
+        unsigned count=0;
+        for (int i=-180;i<180;i=++i)
+        {
+            for (int j=-85;j<85;++j)
+            {
+                 mapnik::box2d<double> box(i,j,i,j);
+                 if (!tr.forward(box)) throw std::runtime_error("could not transform coords");
+                 ++count;
+            }
+        }
+    }
+};
+
+
+int main( int argc, char** argv)
+{
+    if (argc > 0) {
+        for (int i=0;i<argc;++i) {
+            std::string opt(argv[i]);
+            if (opt == "-d" || opt == "--dry-run") {
+                dry_run = true;
+            } else if (opt[0] != '-') {
+                int arg;
+                if (mapnik::util::string2int(opt,arg)) {
+                    test_set.insert(arg);
+                }
+            }
+        }
+    }
     try
     {
         std::cout << "starting benchmark…\n";
+
         {
             test1 runner(100);
             benchmark(runner,"encoding blank image as png");
@@ -302,6 +394,41 @@ int main( int, char*[] )
         {
             test5 runner(1000000,10);
             benchmark(runner,"double to string conversion with snprintf");
+        }
+
+        mapnik::box2d<double> from(-180,-80,180,80);
+        mapnik::box2d<double> to(-20037508.3427892476,-15538711.0963092316,20037508.3427892476,15538711.0963092316);
+        {
+            // echo -180 -60 | cs2cs -f "%.10f" +init=epsg:4326 +to +init=epsg:3857
+            test6 runner(100000000,100,
+                         "+init=epsg:4326",
+                         "+init=epsg:3857",
+                         from,to);
+            benchmark(runner,"lonlat -> merc coord transformation (epsg)");
+        }
+
+        {
+            test6 runner(100000000,100,
+                         "+init=epsg:3857",
+                         "+init=epsg:4326",
+                         to,from);
+            benchmark(runner,"merc -> lonlat coord transformation (epsg)");
+        }
+
+        {
+            test6 runner(100000000,100,
+                         "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+                         "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+                         from,to);
+            benchmark(runner,"lonlat -> merc coord transformation (literal)");
+        }
+
+        {
+            test6 runner(100000000,100,
+                         "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
+                         "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+                         to,from);
+            benchmark(runner,"merc -> lonlat coord transformation (literal)");
         }
 
         std::cout << "...benchmark done\n";
