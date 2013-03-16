@@ -23,6 +23,11 @@
 #ifndef MAPNIK_EXPRESSION_EVALUATOR_HPP
 #define MAPNIK_EXPRESSION_EVALUATOR_HPP
 
+// mapnik
+#include <mapnik/attribute.hpp>
+#include <mapnik/unicode.hpp>
+#include <mapnik/expression_node.hpp>
+
 // boost
 #include <boost/regex.hpp>
 #if defined(BOOST_REGEX_HAS_ICU)

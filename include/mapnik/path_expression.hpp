@@ -20,40 +20,26 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_VALUE_ERROR_HPP
-#define MAPNIK_VALUE_ERROR_HPP
+#ifndef MAPNIK_PATH_EXPRESSION_HPP
+#define MAPNIK_PATH_EXPRESSION_HPP
 
-#include <exception>
+// boost
+#include <boost/variant.hpp>
+#include <boost/shared_ptr.hpp>
+
+// stl
 #include <string>
+#include <vector>
 
-namespace mapnik {
-
-class value_error : public std::exception
+namespace mapnik
 {
-public:
-    value_error() :
-        what_() {}
 
-    value_error( std::string const& what ) :
-        what_( what )
-    {
-    }
+struct attribute;
 
-    virtual ~value_error() throw() {}
+typedef boost::variant<std::string, attribute> path_component;
+typedef std::vector<path_component> path_expression;
+typedef boost::shared_ptr<path_expression> path_expression_ptr;
 
-    virtual const char * what() const throw()
-    {
-        return what_.c_str();
-    }
-
-    void append_context(std::string const& ctx) const
-    {
-        what_ += " " + ctx;
-    }
-
-protected:
-    mutable std::string what_;
-};
 }
 
-#endif // MAPNIK_VALUE_ERROR_HPP
+#endif  // MAPNIK_PATH_EXPRESSION_HPP

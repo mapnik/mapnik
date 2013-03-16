@@ -26,6 +26,7 @@
 // stl
 #include <string>
 #include <vector>
+#include <algorithm>
 
 // mapnik
 #include <mapnik/datasource.hpp>
@@ -492,7 +493,23 @@ public:
                               std::string const& table
         )
     {
-        if (has_spatial_index)
+        if (! metadata.empty())
+        {
+            std::ostringstream s;
+            s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata;
+            s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table << "')";
+            boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+            if (rs->is_valid() && rs->step_next())
+            {
+                double xmin = rs->column_double(0);
+                double ymin = rs->column_double(1);
+                double xmax = rs->column_double(2);
+                double ymax = rs->column_double(3);
+                extent.init (xmin, ymin, xmax, ymax);
+                return true;
+            }
+        }
+        else if (has_spatial_index)
         {
             std::ostringstream s;
             s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM "
@@ -512,22 +529,7 @@ public:
                 }
             }
         }
-        else if (! metadata.empty())
-        {
-            std::ostringstream s;
-            s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata;
-            s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table << "')";
-            boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
-            if (rs->is_valid() && rs->step_next())
-            {
-                double xmin = rs->column_double(0);
-                double ymin = rs->column_double(1);
-                double xmax = rs->column_double(2);
-                double ymax = rs->column_double(3);
-                extent.init (xmin, ymin, xmax, ymax);
-                return true;
-            }
-        }
+
         else if (! key_field.empty())
         {
             std::ostringstream s;
@@ -641,7 +643,7 @@ public:
             const char* fld_name = rs->column_text(1);
             std::string fld_type(rs->column_text(2));
             sqlite_int64 fld_pk = rs->column_integer64(5);
-            boost::algorithm::to_lower(fld_type);
+            std::transform(fld_type.begin(), fld_type.end(), fld_type.begin(), ::tolower);
 
             // TODO - how to handle primary keys on multiple columns ?
             if (key_field.empty() && ! found_pk && fld_pk != 0)

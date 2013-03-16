@@ -1,6 +1,7 @@
 #ifndef DUMP_XML_HPP
 #define DUMP_XML_HPP
 #include <mapnik/xml_node.hpp>
+
 namespace mapnik
 {
 

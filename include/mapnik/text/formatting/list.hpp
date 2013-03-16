@@ -22,7 +22,11 @@
 #ifndef FORMATTING_LIST_HPP
 #define FORMATTING_LIST_HPP
 
+// mapnik
 #include <mapnik/text/formatting/base.hpp>
+
+// boost
+#include <boost/property_tree/ptree_fwd.hpp>
 
 namespace mapnik {
 namespace formatting {

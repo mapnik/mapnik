@@ -27,11 +27,10 @@
 #include <boost/make_shared.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry.hpp>
@@ -49,10 +48,10 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 using mapnik::datasource;
 using mapnik::parameters;
-using namespace boost::spirit;
 
 DATASOURCE_PLUGIN(csv_datasource)
 
@@ -71,7 +70,6 @@ csv_datasource::csv_datasource(parameters const& params)
       headers_(),
       manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
       strict_(*params.get<mapnik::boolean>("strict", false)),
-      quiet_(*params.get<mapnik::boolean>("quiet", false)),
       filesize_max_(*params.get<float>("filesize_max", 20.0)),  // MB
       ctx_(boost::make_shared<mapnik::context_type>())
 {
@@ -271,7 +269,8 @@ void csv_datasource::parse_csv(T & stream,
         for (; beg != tok.end(); ++beg)
         {
             std::string val = mapnik::util::trim_copy(*beg);
-            std::string lower_val = boost::algorithm::to_lower_copy(val);
+            std::string lower_val = val;
+            std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
             if (lower_val == "wkt"
                 || (lower_val.find("geom") != std::string::npos))
             {
@@ -349,7 +348,8 @@ void csv_datasource::parse_csv(T & stream,
                         }
                         else
                         {
-                            std::string lower_val = boost::algorithm::to_lower_copy(val);
+                            std::string lower_val = val;
+                            std::transform(lower_val.begin(), lower_val.end(), lower_val.begin(), ::tolower);
                             if (lower_val == "wkt"
                                 || (lower_val.find("geom") != std::string::npos))
                             {
@@ -686,10 +686,7 @@ void csv_datasource::parse_csv(T & stream,
                     if (has_dot || has_e)
                     {
                         double float_val = 0.0;
-                        std::string::const_iterator str_beg = value.begin();
-                        std::string::const_iterator str_end = value.end();
-                        if (qi::phrase_parse(str_beg,str_end,qi::double_,ascii::space,float_val)
-                            && (str_beg == str_end))
+                        if (mapnik::util::string2double(value,float_val))
                         {
                             matched = true;
                             feature->put(fld_name,float_val);
@@ -704,10 +701,7 @@ void csv_datasource::parse_csv(T & stream,
                     else
                     {
                         mapnik::value_integer int_val = 0;
-                        std::string::const_iterator str_beg = value.begin();
-                        std::string::const_iterator str_end = value.end();
-                        if (qi::phrase_parse(str_beg,str_end,qi::long_long,ascii::space,int_val)
-                            && (str_beg == str_end))
+                        if (mapnik::util::string2longlong(value,int_val))
                         {
                             matched = true;
                             feature->put(fld_name,int_val);
@@ -927,7 +921,6 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
                 break;
             }
         }
-
         if (! found_name)
         {
             std::ostringstream s;
@@ -937,7 +930,6 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
         }
         ++pos;
     }
-
     return boost::make_shared<mapnik::memory_featureset>(q.get_bbox(),features_);
 }
 

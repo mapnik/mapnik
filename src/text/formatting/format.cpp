@@ -28,6 +28,7 @@
 
 //boost
 #include <boost/make_shared.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
 namespace formatting {

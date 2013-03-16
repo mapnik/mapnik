@@ -26,6 +26,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 // mapnik
+#include <mapnik/rule.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/projection.hpp>

@@ -34,7 +34,8 @@
 // mapnik
 #include <mapnik/shield_symbolizer.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/path_expression_grammar.hpp>
+#include <mapnik/parse_path.hpp>
+#include <mapnik/path_expression.hpp>
 #include "mapnik_svg.hpp"
 
 using mapnik::color;

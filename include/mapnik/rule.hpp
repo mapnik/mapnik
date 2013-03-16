@@ -174,16 +174,7 @@ public:
 
 private:
 
-    void swap(rule& rhs) throw()
-    {
-        name_=rhs.name_;
-        min_scale_=rhs.min_scale_;
-        max_scale_=rhs.max_scale_;
-        syms_=rhs.syms_;
-        filter_=rhs.filter_;
-        else_filter_=rhs.else_filter_;
-        also_filter_=rhs.also_filter_;
-    }
+    void swap(rule& rhs) throw();
 };
 
 }

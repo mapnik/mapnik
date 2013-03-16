@@ -32,6 +32,7 @@
 #include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/timer.hpp>
 #include <mapnik/wkb.hpp>
+#include <mapnik/util/trim.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -429,8 +430,8 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
         }
 
         // Break out the dbname and the filename
-        std::string dbname = boost::trim_copy(spec.substr(0, atpos));
-        std::string filename = boost::trim_copy(spec.substr(atpos + 1));
+        std::string dbname = mapnik::util::trim_copy(spec.substr(0, atpos));
+        std::string filename = mapnik::util::trim_copy(spec.substr(atpos + 1));
 
         // Normalize the filename and make it relative to dataset_name_
         if (filename.compare(":memory:") != 0)

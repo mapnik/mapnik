@@ -117,8 +117,8 @@ feature_ptr sqlite_featureset::next()
             case SQLITE_TEXT:
             {
                 int text_col_size;
-                const char * data = rs_->column_text(i, text_col_size);
-                UnicodeString ustr = tr_->transcode(data, text_col_size);
+                const char * text_data = rs_->column_text(i, text_col_size);
+                UnicodeString ustr = tr_->transcode(text_data, text_col_size);
                 feature->put(fld_name_str, ustr);
                 break;
             }

@@ -24,7 +24,10 @@
 #define MAPNIK_MEMORY_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/datasource.hpp>
 #include <mapnik/memory_datasource.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/raster.hpp>
 
 // boost
 #include <boost/utility.hpp>

@@ -29,6 +29,9 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 
+// stl
+#include <algorithm>
+
 namespace mapnik
 {
 freetype_engine::freetype_engine()
@@ -48,7 +51,8 @@ freetype_engine::~freetype_engine()
 bool freetype_engine::is_font_file(std::string const& file_name)
 {
     /** only accept files that will be matched by freetype2's `figurefiletype()` */
-    std::string const& fn = boost::algorithm::to_lower_copy(file_name);
+    std::string fn = file_name;
+    std::transform(fn.begin(), fn.end(), fn.begin(), ::tolower);
     return boost::algorithm::ends_with(fn,std::string(".ttf")) ||
         boost::algorithm::ends_with(fn,std::string(".otf")) ||
         boost::algorithm::ends_with(fn,std::string(".ttc")) ||

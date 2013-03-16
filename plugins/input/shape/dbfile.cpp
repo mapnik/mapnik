@@ -23,16 +23,17 @@
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/util/trim.hpp>
 
 #include "dbfile.hpp"
 
 // boost
-#include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/cstdint.hpp> // for int16_t and int32_t
 #include <mapnik/mapped_memory_cache.hpp>
+
 // stl
 #include <string>
-
 
 using mapnik::mapped_memory_cache;
 
@@ -138,7 +139,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
         {
             // FIXME - avoid constructing std::string on stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
-            boost::trim(str);
+            mapnik::util::trim(str);
             f.put(name,tr.transcode(str.c_str()));
             break;
         }
@@ -206,7 +207,9 @@ void dbf_file::read_header()
             field_descriptor desc;
             desc.index_=i;
             file_.read(name,10);
-            desc.name_=boost::trim_left_copy(std::string(name));
+            desc.name_=name;
+            // TODO - when is this trim needed?
+            mapnik::util::trim(desc.name_);
             skip(1);
             desc.type_=file_.get();
             skip(4);

@@ -42,6 +42,7 @@ porting notes -->
 */
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
@@ -60,6 +61,7 @@ porting notes -->
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/parse_path.hpp>
 
 // agg
 #include "agg_basics.h"

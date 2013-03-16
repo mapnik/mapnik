@@ -27,15 +27,11 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/text/char_properties_ptr.hpp>
 
-// stl
-#include <set>
-
 // boost
-#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ptree_fwd.hpp>
 
 namespace mapnik {
 
-typedef std::set<expression_ptr> expression_set;
 class text_layout;
 class xml_node;
 

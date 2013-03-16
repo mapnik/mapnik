@@ -22,6 +22,8 @@
 // mapnik
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/layout.hpp>
+#include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/expression_string.hpp>
 #include <mapnik/text/formatting/text.hpp>
@@ -30,6 +32,7 @@
 
 // boost
 #include <boost/make_shared.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik
 {

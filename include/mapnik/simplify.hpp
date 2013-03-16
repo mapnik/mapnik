@@ -1,9 +1,13 @@
 #ifndef MAPNIK_SIMPLIFY_HPP
 #define MAPNIK_SIMPLIFY_HPP
 
-#include <mapnik/debug.hpp>
+// mapnik
+#include <mapnik/config.hpp>
 
-// Boost
+// stl
+#include <string>
+
+// boost
 #include <boost/optional.hpp>
 
 namespace mapnik

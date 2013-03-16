@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/feature.hpp>
 
 // spirit::qi
 #include <boost/config/warning_disable.hpp>

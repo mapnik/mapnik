@@ -150,15 +150,15 @@ class cairo_gradient : private mapnik::noncopyable
 public:
     cairo_gradient(const mapnik::gradient &grad, double opacity=1.0)
     {
-        double x1,x2,y1,y2,r;
-        grad.get_control_points(x1,y1,x2,y2,r);
+        double x1,x2,y1,y2,rad;
+        grad.get_control_points(x1,y1,x2,y2,rad);
         if (grad.get_gradient_type() == LINEAR)
         {
             pattern_ = Cairo::LinearGradient::create(x1, y1, x2, y2);
         }
         else if (grad.get_gradient_type() == RADIAL)
         {
-            pattern_ = Cairo::RadialGradient::create(x1, y1, 0, x2, y2, r);
+            pattern_ = Cairo::RadialGradient::create(x1, y1, 0, x2, y2, rad);
         }
 
         units_ = grad.get_units();
@@ -284,12 +284,12 @@ public:
 
     void set_color(color const &color, double opacity = 1.0)
     {
-        set_color(color.red(), color.green(), color.blue(), color.alpha() * opacity / 255.0);
+        set_color(color.red()/255.0, color.green()/255.0, color.blue()/255.0, color.alpha() * opacity / 255.0);
     }
 
-    void set_color(int r, int g, int b, double opacity = 1.0)
+    void set_color(double r, double g, double b, double opacity = 1.0)
     {
-        context_->set_source_rgba(r / 255.0, g / 255.0, b / 255.0, opacity);
+        context_->set_source_rgba(r, g, b, opacity);
     }
 
     void set_operator(composite_mode_e comp_op)
@@ -970,8 +970,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                 faces->line_to(itr->get<0>(), itr->get<1>() + height);
 
                 path_type faces_path(t_, *faces, prj_trans);
-                context.set_color(int(fill.red() * 0.8), int(fill.green() * 0.8),
-                                  int(fill.blue() * 0.8), fill.alpha() * sym.get_opacity() / 255.0);
+                context.set_color(fill.red()  * 0.8 / 255.0, fill.green() * 0.8 / 255.0,
+                                  fill.blue() * 0.8 / 255.0, fill.alpha() * sym.get_opacity() / 255.0);
                 context.add_path(faces_path);
                 context.fill();
 
@@ -996,13 +996,14 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             }
 
             path_type path(t_, *frame, prj_trans);
-            context.set_color(fill.red()*0.8, fill.green()*0.8, fill.blue()*0.8,sym.get_opacity());
+            context.set_color(fill.red()  * 0.8 / 255.0, fill.green() * 0.8/255.0,
+                              fill.blue() * 0.8 / 255.0, fill.alpha() * sym.get_opacity() / 255.0);
             context.set_line_width(scale_factor_);
             context.add_path(path);
             context.stroke();
 
             path_type roof_path(t_, *roof, prj_trans);
-            context.set_color(fill, fill.alpha() * sym.get_opacity() / 255.0 );
+            context.set_color(fill, sym.get_opacity());
             context.add_path(roof_path);
             context.fill();
         }
@@ -1142,7 +1143,8 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
             else if(attr.fill_flag)
             {
                 double fill_opacity = attr.fill_opacity * opacity * attr.fill_color.opacity();
-                context.set_color(attr.fill_color.r,attr.fill_color.g,attr.fill_color.b, fill_opacity);
+                context.set_color(attr.fill_color.r/255.0,attr.fill_color.g/255.0,
+                                  attr.fill_color.b/255.0, fill_opacity);
                 context.fill();
             }
         }
@@ -1163,7 +1165,8 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
             else if (attr.stroke_flag)
             {
                 double stroke_opacity = attr.stroke_opacity * opacity * attr.stroke_color.opacity();
-                context.set_color(attr.stroke_color.r,attr.stroke_color.g,attr.stroke_color.b, stroke_opacity);
+                context.set_color(attr.stroke_color.r/255.0,attr.stroke_color.g/255.0,
+                                  attr.stroke_color.b/255.0, stroke_opacity);
                 context.set_line_width(attr.stroke_width);
                 context.set_line_cap(line_cap_enum(attr.line_cap));
                 context.set_line_join(line_join_enum(attr.line_join));
@@ -1744,10 +1747,10 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
                     agg::trans_affine marker_tr = agg::trans_affine_scaling(scale_factor_);
                     evaluate_transform(marker_tr, feature, sym.get_image_transform());
-                    box2d<double> bbox = marker_ellipse.bounding_box();
+                    box2d<double> new_bbox = marker_ellipse.bounding_box();
 
                     dispatch_type dispatch(context, marker_ellipse, result?attributes:(*stock_vector_marker)->attributes(),
-                                           *detector_, sym, bbox, marker_tr, scale_factor_);
+                                           *detector_, sym, new_bbox, marker_tr, scale_factor_);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(query_extent_, dispatch, sym, t_, prj_trans, marker_tr, scale_factor_);

@@ -55,6 +55,7 @@ extern "C"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 namespace mapnik
 {
@@ -225,8 +226,8 @@ void save_to_stream(T const& image,
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
-        //all this should go into image_writer factory
-        std::string t = boost::algorithm::to_lower_copy(type);
+        std::string t = type;
+        std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
             int colors  = 256;
@@ -286,8 +287,8 @@ void save_to_stream(T const& image,
 {
     if (stream && image.width() > 0 && image.height() > 0)
     {
-        //all this should go into image_writer factory
-        std::string t = boost::algorithm::to_lower_copy(type);
+        std::string t = type;
+        std::transform(t.begin(), t.end(), t.begin(), ::tolower);
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
             int colors  = 256;

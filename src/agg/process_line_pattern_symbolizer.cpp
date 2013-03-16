@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
@@ -32,6 +33,7 @@
 #include <mapnik/line_pattern_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/parse_path.hpp>
 
 // agg
 #include "agg_basics.h"

@@ -370,6 +370,7 @@ opts.AddVariables(
     BoolVariable('PGSQL2SQLITE', 'Compile and install a utility to convert postgres tables to sqlite', 'False'),
     BoolVariable('COLOR_PRINT', 'Print build status information in color', 'True'),
     BoolVariable('SAMPLE_INPUT_PLUGINS', 'Compile and install sample plugins', 'False'),
+    BoolVariable('BIGINT', 'Compile support for 64-bit integers in mapnik::value', 'True'),
     )
 
 # variables to pickle after successful configure step
@@ -433,7 +434,8 @@ pickle_store = [# Scons internal variables
         'CAIROMM_CPPPATHS',
         'SVG_RENDERER',
         'SQLITE_LINKFLAGS',
-        'BOOST_LIB_VERSION_FROM_HEADER'
+        'BOOST_LIB_VERSION_FROM_HEADER',
+        'BIGINT'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -1119,6 +1121,9 @@ if not preconfigured:
         if not conf.icu_at_least_four_two():
             # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
             env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
+
+    if env['BIGINT']:
+        env.Append(CXXFLAGS = '-DBIGINT')
 
     if env['THREADING'] == 'multi':
         thread_flag = thread_suffix

@@ -25,6 +25,8 @@
 
 // mapnik
 #include <mapnik/json/geometry_grammar.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
 
 // spirit::qi

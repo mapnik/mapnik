@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/image_scaling.hpp>
 #include <mapnik/image_compositing.hpp>

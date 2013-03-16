@@ -117,7 +117,7 @@ public:
     {
         // agg renderer doesn't support processing of multiple symbolizers.
         return false;
-    };
+    }
 
     void painted(bool painted);
     inline eAttributeCollectionPolicy attribute_collection_policy() const

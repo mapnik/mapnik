@@ -21,12 +21,15 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
+#include <mapnik/building_symbolizer.hpp>
+#include <mapnik/expression.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
@@ -66,7 +69,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
     expression_ptr height_expr = sym.height();
     if (height_expr)
     {
-        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
+        value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr);
         height = result.to_double() * scale_factor_;
     }
 
@@ -123,7 +126,7 @@ void grid_renderer<T>::process(building_symbolizer const& sym,
             for (unsigned j=0;j<geom.size();++j)
             {
                 double x,y;
-                unsigned cm = geom.vertex(&x,&y);
+                cm = geom.vertex(&x,&y);
                 if (cm == SEG_MOVETO)
                 {
                     frame->move_to(x,y+height);

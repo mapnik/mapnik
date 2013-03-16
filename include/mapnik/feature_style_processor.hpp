@@ -24,8 +24,7 @@
 #define MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
 
 // mapnik
-#include <mapnik/map.hpp>
-#include <mapnik/memory_datasource.hpp>
+#include <mapnik/datasource.hpp> // for featureset_ptr
 
 // stl
 #include <set>
@@ -39,6 +38,7 @@ class Map;
 class layer;
 class projection;
 class proj_transform;
+class feature_type_style;
 
 enum eAttributeCollectionPolicy
 {
@@ -54,17 +54,17 @@ public:
     explicit feature_style_processor(Map const& m, double scale_factor = 1.0);
 
     /*!
-     * @return apply renderer to all map layers.
+     * \brief apply renderer to all map layers.
      */
     void apply();
 
     /*!
-     * @return apply renderer to a single layer, providing pre-populated set of query attribute names.
+     * \brief apply renderer to a single layer, providing pre-populated set of query attribute names.
      */
     void apply(mapnik::layer const& lyr, std::set<std::string>& names);
 private:
     /*!
-     * @return render a layer given a projection and scale.
+     * \brief render a layer given a projection and scale.
      */
     void apply_to_layer(layer const& lay,
                         Processor & p,
@@ -73,7 +73,7 @@ private:
                         std::set<std::string>& names);
 
     /*!
-     * @return renders a featureset with the given styles.
+     * \brief renders a featureset with the given styles.
      */
     void render_style(layer const& lay,
                       Processor & p,

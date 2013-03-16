@@ -153,7 +153,7 @@ public:
      *  @param name The name of the style.
      *  @param style The style to insert.
      *  @return true If success.
-     *  @return false If no success.
+     *          false If no success.
      */
     bool insert_style(std::string const& name,feature_type_style const& style);
 
@@ -170,9 +170,9 @@ public:
 
     /*! \brief Insert a fontset into the map.
      *  @param name The name of the fontset.
-     *  @param style The fontset to insert.
+     *  @param fontset The fontset to insert.
      *  @return true If success.
-     *  @return false If failure.
+     *          false If failure.
      */
     bool insert_fontset(std::string const& name, font_set const& fontset);
 
@@ -274,7 +274,7 @@ public:
     boost::optional<color> const& background() const;
 
     /*! \brief Set the map background image filename.
-     *  @param c Background image filename.
+     *  @param image_filename Background image filename.
      */
     void set_background_image(std::string const& image_filename);
 
@@ -310,8 +310,8 @@ public:
      */
     std::string const& base_path() const;
 
-    /*! \brief Set the map base path where paths should be releative to.
-     *  @param srs Map base_path.
+    /*! \brief Set the map base path where paths should be relative to.
+     *  @param base Map base_path.
      */
     void set_base_path(std::string const& base);
 

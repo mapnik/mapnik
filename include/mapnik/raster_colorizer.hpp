@@ -72,7 +72,7 @@ public:
     //!
     //! \param[in] value The stop value
     //! \param[in] mode The stop mode
-    //! \param[in] color The stop color
+    //! \param[in] _color The stop color
     colorizer_stop(float value = 0,
                    colorizer_mode mode = COLORIZER_INHERIT,
                    color const& _color = color(0,0,0,0),
@@ -87,39 +87,39 @@ public:
 
     //! \brief Set the stop value
     //! \param[in] value The stop value
-    inline void set_value(float value) { value_ = value; };
+    inline void set_value(float value) { value_ = value; }
 
     //! \brief Get the stop value
     //! \return The stop value
-    inline float get_value() const {return value_; };
+    inline float get_value() const { return value_; }
 
 
     //! \brief Set the stop mode
     //! \param[in] mode The stop mode
-    inline void set_mode(colorizer_mode mode) { mode_ = mode; };
-    inline void set_mode_enum(colorizer_mode_enum mode) { set_mode(mode); };
+    inline void set_mode(colorizer_mode mode) { mode_ = mode; }
+    inline void set_mode_enum(colorizer_mode_enum mode) { set_mode(mode); }
 
     //! \brief Get the stop mode
     //! \return The stop mode
-    inline colorizer_mode get_mode() const { return mode_; };
-    inline colorizer_mode_enum get_mode_enum() const { return get_mode(); };
+    inline colorizer_mode get_mode() const { return mode_; }
+    inline colorizer_mode_enum get_mode_enum() const { return get_mode(); }
 
 
     //! \brief set the stop color
-    //! \param[in] the stop color
-    inline void set_color(color const& _color) { color_ = _color; };
+    //! \param[in] _color The stop color
+    inline void set_color(color const& _color) { color_ = _color; }
 
     //! \brief get the stop color
     //! \return The stop color
-    inline color const& get_color() const {return color_; };
+    inline color const& get_color() const { return color_; }
 
     //! \brief set the stop label
-    //! \param[in] the stop label
-    inline void set_label(std::string const& label) { label_ = label; };
+    //! \param[in] label The stop label
+    inline void set_label(std::string const& label) { label_ = label; }
 
     //! \brief get the stop label
     //! \return The stop label
-    inline std::string const& get_label() const {return label_; };
+    inline std::string const& get_label() const { return label_; }
 
 
     //! \brief Equality operator
@@ -160,22 +160,22 @@ public:
     void set_default_mode(colorizer_mode mode)
     {
         default_mode_ = (mode == COLORIZER_INHERIT) ? COLORIZER_LINEAR:(colorizer_mode_enum)mode;
-    };
+    }
 
-    void set_default_mode_enum(colorizer_mode_enum mode) { set_default_mode(mode); };
+    void set_default_mode_enum(colorizer_mode_enum mode) { set_default_mode(mode); }
 
     //! \brief Get the default mode
     //! \return The default mode
-    colorizer_mode get_default_mode() const {return default_mode_; };
-    colorizer_mode_enum get_default_mode_enum() const {return get_default_mode(); };
+    colorizer_mode get_default_mode() const { return default_mode_; }
+    colorizer_mode_enum get_default_mode_enum() const { return get_default_mode(); }
 
     //! \brief Set the default color
     //! \param[in] color The default color
-    void set_default_color(color const& color) { default_color_ = color; };
+    void set_default_color(color const& color) { default_color_ = color; }
 
     //! \brief Get the default color
     //! \return The default color
-    color const& get_default_color() const {return default_color_; };
+    color const& get_default_color() const { return default_color_; }
 
 
     //! \brief Add a stop
@@ -186,17 +186,17 @@ public:
 
     //! \brief Set the list of stops
     //! \param[in] stops The list of stops
-    void set_stops(colorizer_stops const& stops) { stops_ = stops; };
+    void set_stops(colorizer_stops const& stops) { stops_ = stops; }
 
     //! \brief Get the list of stops
     //! \return The list of stops
-    colorizer_stops const& get_stops() const {return stops_; };
+    colorizer_stops const& get_stops() const { return stops_; }
 
 
     //! \brief Colorize a raster
     //!
     //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
-    //! \param[in] feature used to find 'NODATA' information if available
+    //! \param[in] f The feature used to find 'NODATA' information if available
     void colorize(raster_ptr const& raster, Feature const& f) const;
 
 
@@ -209,11 +209,11 @@ public:
 
     //! \brief Set the epsilon value for exact mode
     //! \param[in] e The epsilon value
-    inline void set_epsilon(const float e) { if(e > 0) epsilon_ = e; };
+    inline void set_epsilon(const float e) { if(e > 0) epsilon_ = e; }
 
     //! \brief Get the epsilon value for exact mode
     //! \return The epsilon value
-    inline float get_epsilon() const { return epsilon_; };
+    inline float get_epsilon() const { return epsilon_; }
 
 private:
     colorizer_stops stops_;         //!< The vector of stops

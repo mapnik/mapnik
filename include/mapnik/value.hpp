@@ -48,10 +48,10 @@ namespace mapnik  {
 
 inline void to_utf8(UnicodeString const& input, std::string & target)
 {
-    if (input.length() == 0) return;
+    if (input.isEmpty()) return;
 
     const int BUF_SIZE = 256;
-    char  buf [BUF_SIZE];
+    char buf [BUF_SIZE];
     int len;
 
     UErrorCode err = U_ZERO_ERROR;
@@ -61,11 +61,11 @@ inline void to_utf8(UnicodeString const& input, std::string & target)
         boost::scoped_array<char> buf_ptr(new char [len+1]);
         err = U_ZERO_ERROR;
         u_strToUTF8(buf_ptr.get() , len + 1, &len, input.getBuffer(), input.length(), &err);
-        target.assign(buf_ptr.get() , len);
+        target.assign(buf_ptr.get() , static_cast<std::size_t>(len));
     }
     else
     {
-        target.assign(buf, len);
+        target.assign(buf, static_cast<std::size_t>(len));
     }
 }
 
@@ -106,8 +106,6 @@ struct value_null
         return *this;
     }
 };
-
-#define BIGINT
 
 #ifdef BIGINT
 typedef long long value_integer;
@@ -497,6 +495,8 @@ struct mult : public boost::static_visitor<V>
 
     value_type operator() (value_bool lhs, value_bool rhs) const
     {
+        boost::ignore_unused_variable_warning(lhs);
+        boost::ignore_unused_variable_warning(rhs);
         return value_integer(0);
     }
 };
@@ -787,12 +787,12 @@ struct to_int : public boost::static_visitor<value_integer>
 
     value_integer operator() (value_double val) const
     {
-        return rint(val);
+        return static_cast<value_integer>(rint(val));
     }
 
     value_integer operator() (value_bool val) const
     {
-        return static_cast<int>(val);
+        return static_cast<value_integer>(val);
     }
 
     value_integer operator() (std::string const& val) const

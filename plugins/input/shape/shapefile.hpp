@@ -72,9 +72,9 @@ struct shape_record
     size_t size;
     mutable size_t pos;
 
-    explicit shape_record(size_t size)
-        : data(Tag::alloc(size)),
-          size(size),
+    explicit shape_record(size_t size_)
+        : data(Tag::alloc(size_)),
+          size(size_),
           pos(0)
     {}
 

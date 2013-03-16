@@ -51,6 +51,9 @@ extern "C"
 
 namespace mapnik
 {
+    typedef std::vector<face_ptr> container_type;
+    typedef container_type::size_type size_type;
+
 
 // FT_Stroker wrapper
 class stroker : mapnik::noncopyable
@@ -78,7 +81,7 @@ public:
      */
     static bool register_font(std::string const& file_name);
     /*! \brief register a font file
-     *  @param file_name - path to a directory containing fonts or subdirectories.
+     *  @param dir - path to a directory containing fonts or subdirectories.
      *  @param recurse - default false, whether to search for fonts in sub directories.
      *  @return bool - true if at least one face was successfully registered.
      */

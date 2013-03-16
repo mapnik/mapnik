@@ -24,9 +24,8 @@
 
 // std
 #include <istream>
-
-// boost
-#include <boost/algorithm/string.hpp>
+#include <algorithm>
+#include <string>
 
 namespace mapnik
 {
@@ -65,7 +64,7 @@ operator >> ( std::basic_istream<charT, traits> & s, boolean & b )
 {
     std::string word;
     s >> word;
-    boost::algorithm::to_lower(word);
+    std::transform(word.begin(), word.end(), word.begin(), ::tolower);
     if ( s )
     {
         if ( word == "true" || word == "yes" || word == "on" ||

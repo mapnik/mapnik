@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/debug.hpp>
 
 // stl
 #include <vector>
@@ -45,7 +44,7 @@ public:
         what_( what )
     {
     }
-    virtual ~illegal_enum_value() throw() {};
+    virtual ~illegal_enum_value() throw() {}
 
     virtual const char * what() const throw()
     {
@@ -261,21 +260,17 @@ public:
         {
             if (our_strings_[i] == 0 )
             {
-                MAPNIK_LOG_ERROR(enumeration)
-                        << "### FATAL: Not enough strings for enum "
+                std::cerr << "### FATAL: Not enough strings for enum "
                         << our_name_ << " defined in file '" << filename
                         << "' at line " << line_no;
-                //std::exit(1);
             }
         }
         if ( std::string("") != our_strings_[THE_MAX])
         {
-            MAPNIK_LOG_ERROR(enumeration)
-                    << "### FATAL: The string array for enum " << our_name_
-                    << " defined in file '" << filename << "' at line " << line_no
-                    << " has too many items or is not terminated with an "
-                    << "empty string";
-            //std::exit(1);
+            std::cerr << "### FATAL: The string array for enum " << our_name_
+                      << " defined in file '" << filename << "' at line " << line_no
+                      << " has too many items or is not terminated with an "
+                      << "empty string";
         }
         return true;
     }

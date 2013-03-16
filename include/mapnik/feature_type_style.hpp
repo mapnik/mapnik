@@ -24,18 +24,22 @@
 #define MAPNIK_FEATURE_TYPE_STYLE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/rule.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/image_filter_types.hpp>
+#include <mapnik/image_compositing.hpp>
 
 // boost
 #include <boost/optional.hpp>
+
 // stl
 #include <vector>
 
 namespace mapnik
 {
+
+class rule;
 
 enum filter_mode_enum {
     FILTER_ALL,

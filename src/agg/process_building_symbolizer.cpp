@@ -22,10 +22,13 @@
 
 // mapnik
 #include <mapnik/graphics.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/segment.hpp>
 #include <mapnik/expression_evaluator.hpp>
+#include <mapnik/building_symbolizer.hpp>
+#include <mapnik/expression.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
@@ -73,7 +76,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
     expression_ptr height_expr = sym.height();
     if (height_expr)
     {
-        value_type result = boost::apply_visitor(evaluate<Feature,value_type>(feature), *height_expr);
+        value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *height_expr);
         height = result.to_double() * scale_factor_;
     }
 
@@ -148,7 +151,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             agg::conv_stroke<path_type> stroke(path);
             stroke.width(scale_factor_);
             ras_ptr->add_path(stroke);
-            ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(255 * sym.get_opacity())));
+            ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
 

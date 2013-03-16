@@ -21,6 +21,10 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/rule.hpp>
+#include <mapnik/color.hpp>
+#include <mapnik/font_set.hpp>
+#include <mapnik/enumeration.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>

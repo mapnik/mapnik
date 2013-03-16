@@ -118,7 +118,7 @@ public:
     {
         // cairo renderer doesn't support processing of multiple symbolizers.
         return false;
-    };
+    }
     void painted(bool /*painted*/)
     {
         // nothing to do

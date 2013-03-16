@@ -42,7 +42,7 @@ enum eGeomType {
 };
 
 template <typename T, template <typename> class Container=vertex_vector>
-class geometry : private::mapnik::noncopyable
+class geometry : private mapnik::noncopyable
 {
 public:
     typedef T coord_type;

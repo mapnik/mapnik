@@ -24,7 +24,6 @@
 #define MAPNIK_SVG_RENDERER_AGG_HPP
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>

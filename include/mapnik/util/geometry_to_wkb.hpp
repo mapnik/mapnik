@@ -204,14 +204,12 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
 
     BOOST_FOREACH ( linear_ring const& ring, rings)
     {
-        unsigned num_points = ring.size();
-        write(ss,num_points,4,byte_order);
+        unsigned num_ring_points = ring.size();
+        write(ss,num_ring_points,4,byte_order);
         BOOST_FOREACH ( point_type const& pt, ring)
         {
-            double x = pt.first;
-            double y = pt.second;
-            write(ss,x,8,byte_order);
-            write(ss,y,8,byte_order);
+            write(ss,pt.first,8,byte_order);
+            write(ss,pt.second,8,byte_order);
         }
     }
 

@@ -18,7 +18,7 @@ def setup():
 if 'csv' in mapnik.DatasourceCache.plugin_names():
 
     def get_csv_ds(filename):
-        return mapnik.Datasource(type='csv',file=os.path.join('../data/csv/',filename),quiet=True)
+        return mapnik.Datasource(type='csv',file=os.path.join('../data/csv/',filename))
 
     def test_broken_files(visual=False):
         broken = glob.glob("../data/csv/fails/*.*")
@@ -31,7 +31,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
             throws = False
             if visual:
                 try:
-                    ds = mapnik.Datasource(type='csv',file=csv,strict=True,quiet=True)
+                    ds = mapnik.Datasource(type='csv',file=csv,strict=True)
                     print '\x1b[33mfailed\x1b[0m',csv
                 except Exception:
                     print '\x1b[1;32m✓ \x1b[0m', csv
@@ -43,7 +43,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         for csv in good_files:
             if visual:
                 try:
-                    ds = mapnik.Datasource(type='csv',file=csv,quiet=True)
+                    ds = mapnik.Datasource(type='csv',file=csv)
                     print '\x1b[1;32m✓ \x1b[0m', csv
                 except Exception:
                     print '\x1b[33mfailed\x1b[0m',csv
@@ -459,8 +459,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
 
     def test_that_feature_id_only_incremented_for_valid_rows(**kwargs):
         ds = mapnik.Datasource(type='csv',
-                               file=os.path.join('../data/csv/warns','feature_id_counting.csv'),
-                               quiet=True)
+                               file=os.path.join('../data/csv/warns','feature_id_counting.csv'))
         eq_(len(ds.fields()),3)
         eq_(ds.fields(),['x','y','id'])
         eq_(ds.field_types(),['int','int','int'])
@@ -482,7 +481,6 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
     def test_dynamically_defining_headers1(**kwargs):
         ds = mapnik.Datasource(type='csv',
                                file=os.path.join('../data/csv/fails','needs_headers_two_lines.csv'),
-                               quiet=True,
                                headers='x,y,name')
         eq_(len(ds.fields()),3)
         eq_(ds.fields(),['x','y','name'])
@@ -499,7 +497,6 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
     def test_dynamically_defining_headers2(**kwargs):
         ds = mapnik.Datasource(type='csv',
                                file=os.path.join('../data/csv/fails','needs_headers_one_line.csv'),
-                               quiet=True,
                                headers='x,y,name')
         eq_(len(ds.fields()),3)
         eq_(ds.fields(),['x','y','name'])
@@ -516,7 +513,6 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
     def test_dynamically_defining_headers3(**kwargs):
         ds = mapnik.Datasource(type='csv',
                                file=os.path.join('../data/csv/fails','needs_headers_one_line_no_newline.csv'),
-                               quiet=True,
                                headers='x,y,name')
         eq_(len(ds.fields()),3)
         eq_(ds.fields(),['x','y','name'])

@@ -52,8 +52,8 @@ struct coord<T,2>
 public:
     coord()
         : x(),y() {}
-    coord(T x,T y)
-        : x(x),y(y) {}
+    coord(T x_,T y_)
+        : x(x_),y(y_) {}
     template <typename T2>
     coord (const coord<T2,2>& rhs)
         : x(type(rhs.x)),
@@ -128,8 +128,8 @@ struct coord<T,3>
 public:
     coord()
         : x(),y(),z() {}
-    coord(T x,T y,T z)
-        : x(x),y(y),z(z) {}
+    coord(T x_,T y_,T z_)
+        : x(x_),y(y_),z(z_) {}
     template <typename T2>
     coord (const coord<T2,3>& rhs)
         : x(type(rhs.x)),

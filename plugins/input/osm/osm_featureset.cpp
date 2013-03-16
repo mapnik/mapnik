@@ -115,9 +115,6 @@ feature_ptr osm_featureset<filterT>::next()
         if (i != end_keyvals)
         {
             feature->put_new(i->first, tr_->transcode(i->second.c_str()));
-        } else
-        {
-            feature->put_new(*itr, "");
         }
     }
     return feature;

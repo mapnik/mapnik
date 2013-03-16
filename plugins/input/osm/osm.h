@@ -34,12 +34,12 @@ struct bounds
 {
     double w, s, e, n;
     bounds() { w = -180; s = -90; e = 180; n = 90; }
-    bounds(double w, double s, double e, double n)
+    bounds(double w_, double s_, double e_, double n_)
     { 
-        this->w = w;
-        this->s = s;
-        this->e = e;
-        this->n = n;
+        this->w = w_;
+        this->s = s_;
+        this->e = e_;
+        this->n = n_;
     }
 };
 

@@ -25,7 +25,7 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/parse_path.hpp>
+#include <mapnik/path_expression.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/simplify.hpp>
@@ -39,10 +39,11 @@ namespace mapnik
 
 typedef transform_list_ptr transform_type;
 
-MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr, Feature const& feature,
-                                    transform_type const& trans_expr);
-
 class Map;
+class feature_impl;
+
+MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,
+                                    transform_type const& trans_expr);
 
 class MAPNIK_DECL symbolizer_base
 {
@@ -79,7 +80,7 @@ public:
     void set_filename(path_expression_ptr const& filename);
     void set_opacity(float opacity);
     float get_opacity() const;
-    void  set_image_transform(transform_type const& tr);
+    void set_image_transform(transform_type const& tr);
     transform_type const& get_image_transform() const;
     std::string get_image_transform_string() const;
 protected:

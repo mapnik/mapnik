@@ -59,24 +59,24 @@ namespace mapnik { namespace svg {
         {}
 
         void set_fill_color(color const& fill_color);
-        void set_fill_opacity(const double fill_opacity);
+        void set_fill_opacity(double fill_opacity);
         void set_stroke_color(color const& stroke_color);
-        void set_stroke_opacity(const double stroke_opacity);
-        void set_stroke_width(const double stroke_width);
-        void set_stroke_linecap(const line_cap_e stroke_linecap);
-        void set_stroke_linejoin(const line_join_e stroke_linejoin);
-        void set_stroke_dasharray(const dash_array stroke_dasharray);
-        void set_stroke_dashoffset(const double stroke_dashoffset);
+        void set_stroke_opacity(double stroke_opacity);
+        void set_stroke_width(double stroke_width);
+        void set_stroke_linecap(line_cap_e stroke_linecap);
+        void set_stroke_linejoin(line_join_e stroke_linejoin);
+        void set_stroke_dasharray(dash_array const& stroke_dasharray);
+        void set_stroke_dashoffset(double stroke_dashoffset);
 
-        const std::string fill_color() const;
-        const double fill_opacity() const;
-        const std::string stroke_color() const;
-        const double stroke_opacity() const;
-        const double stroke_width() const;
-        const std::string stroke_linecap() const;
-        const std::string stroke_linejoin() const;
-        const dash_array stroke_dasharray() const;
-        const double stroke_dashoffset() const;
+        std::string const& fill_color() const;
+        double fill_opacity() const;
+        std::string const& stroke_color() const;
+        double stroke_opacity() const;
+        double stroke_width() const;
+        std::string const& stroke_linecap() const;
+        std::string const& stroke_linejoin() const;
+        dash_array const& stroke_dasharray() const;
+        double stroke_dashoffset() const;
 
         /*!
          * @brief Set members back to their default values.
@@ -134,11 +134,11 @@ namespace mapnik { namespace svg {
         void set_height(const unsigned height);
         void set_fill_color(color const& fill_color);
 
-        const int x() const;
-        const int y() const;
-        const int width() const;
-        const int height() const;
-        const std::string fill_color() const;
+        int x() const;
+        int y() const;
+        int width() const;
+        int height() const;
+        std::string const& fill_color() const;
 
         /*!
          * @brief Set members back to their default values.
@@ -172,13 +172,13 @@ namespace mapnik { namespace svg {
 
         void set_width(const unsigned width);
         void set_height(const unsigned height);
-        void set_svg_version(const double svg_version);
+        void set_svg_version(double svg_version);
         void set_svg_namespace_url(std::string const& svg_namespace_url);
 
-        const unsigned width() const;
-        const unsigned height() const;
-        const double svg_version() const;
-        const std::string svg_namespace_url() const;
+        unsigned width() const;
+        unsigned height() const;
+        double svg_version() const;
+        std::string const& svg_namespace_url() const;
 
         /*!
          * @brief Set members back to their default values.

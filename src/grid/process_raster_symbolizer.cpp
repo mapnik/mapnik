@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
 

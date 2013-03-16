@@ -27,6 +27,7 @@
 #include <mapnik/markers_placement.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/global.hpp> //round
 #include <mapnik/box2d.hpp>

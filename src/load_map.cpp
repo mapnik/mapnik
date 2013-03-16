@@ -340,7 +340,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                 {
                     if (paramIter->is("Parameter"))
                     {
-                        std::string name = paramIter->get_attr<std::string>("name");
+                        name = paramIter->get_attr<std::string>("name");
                         std::string value = paramIter->get_text();
                         params[name] = value;
                     }
@@ -349,7 +349,6 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
             }
             else if (itr->is("Parameters"))
             {
-                std::string name = itr->get_attr("name", std::string("Unnamed"));
                 parameters & params = map.get_extra_parameters();
                 xml_node::const_iterator paramIter = itr->begin();
                 xml_node::const_iterator endParam = itr->end();
@@ -427,9 +426,9 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         optional<std::string> filters = sty.get_opt_attr<std::string>("image-filters");
         if (filters)
         {
-            std::string filter_mode = *filters;
-            std::string::const_iterator itr = filter_mode.begin();
-            std::string::const_iterator end = filter_mode.end();
+            std::string filter_str = *filters;
+            std::string::const_iterator itr = filter_str.begin();
+            std::string::const_iterator end = filter_str.end();
             bool result = boost::spirit::qi::phrase_parse(itr,end,
                                                           sty.get_tree().image_filters_grammar,
                                                           boost::spirit::qi::ascii::space,
@@ -447,9 +446,9 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         optional<std::string> direct_filters = sty.get_opt_attr<std::string>("direct-image-filters");
         if (direct_filters)
         {
-            std::string filter_mode = *direct_filters;
-            std::string::const_iterator itr = filter_mode.begin();
-            std::string::const_iterator end = filter_mode.end();
+            std::string filter_str = *direct_filters;
+            std::string::const_iterator itr = filter_str.begin();
+            std::string::const_iterator end = filter_str.end();
             bool result = boost::spirit::qi::phrase_parse(itr,end,
                                                           sty.get_tree().image_filters_grammar,
                                                           boost::spirit::qi::ascii::space,
@@ -682,9 +681,9 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                 {
                     if (paramIter->is("Parameter"))
                     {
-                        std::string name = paramIter->get_attr<std::string>("name");
+                        std::string param_name = paramIter->get_attr<std::string>("name");
                         std::string value = paramIter->get_text();
-                        params[name] = value;
+                        params[param_name] = value;
                     }
                 }
 

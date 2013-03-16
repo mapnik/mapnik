@@ -23,6 +23,9 @@
 #include <mapnik/map.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
+#include <mapnik/line_symbolizer.hpp>
+#include <mapnik/polygon_symbolizer.hpp>
+#include <mapnik/text_symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/datasource_cache.hpp>
