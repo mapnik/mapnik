@@ -12,6 +12,7 @@
 #include <set>
 #include <vector>
 #include <deque>
+#include <cmath>
 // Boost
 #include <boost/optional.hpp>
 
@@ -57,9 +58,9 @@ struct sleeve
 
     sleeve(vertex2d const& v0, vertex2d const& v1, double offset)
     {
-        double a = atan2((v1.y - v0.y), (v1.x - v0.x));
-        double dx = offset * cos(a);
-        double dy = offset * sin(a);
+        double a = std::atan2((v1.y - v0.y), (v1.x - v0.x));
+        double dx = offset * std::cos(a);
+        double dy = offset * std::sin(a);
         v[0].x = v0.x + dy;
         v[0].y = v0.y - dx;
         v[1].x = v0.x - dy;

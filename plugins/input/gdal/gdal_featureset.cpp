@@ -33,6 +33,9 @@
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
 
+// stl
+#include <cmath>
+
 #include "gdal_featureset.hpp"
 #include <gdal_priv.h>
 
@@ -137,8 +140,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     box2d<double> box = t.forward(intersect);
 
     //size of resized output pixel in source image domain
-    double margin_x = 1.0 / (fabs(dx_) * boost::get<0>(q.resolution()));
-    double margin_y = 1.0 / (fabs(dy_) * boost::get<1>(q.resolution()));
+    double margin_x = 1.0 / (std::fabs(dx_) * boost::get<0>(q.resolution()));
+    double margin_y = 1.0 / (std::fabs(dy_) * boost::get<1>(q.resolution()));
     if (margin_x < 1)
     {
         margin_x = 1.0;

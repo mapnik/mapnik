@@ -58,8 +58,8 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     CoordTransform tt(target.data_.width(), target.data_.height(),
                       target.ext_, offset_x, offset_y);
     unsigned i, j;
-    unsigned mesh_nx = ceil(source.data_.width()/double(mesh_size) + 1);
-    unsigned mesh_ny = ceil(source.data_.height()/double(mesh_size) + 1);
+    unsigned mesh_nx = std::ceil(source.data_.width()/double(mesh_size) + 1);
+    unsigned mesh_ny = std::ceil(source.data_.height()/double(mesh_size) + 1);
 
     ImageData<double> xs(mesh_nx, mesh_ny);
     ImageData<double> ys(mesh_nx, mesh_ny);

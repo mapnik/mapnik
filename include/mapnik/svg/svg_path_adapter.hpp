@@ -369,8 +369,8 @@ void path_adapter<VC>::arc_to(double rx, double ry,
         double y0 = 0.0;
         vertices_.last_vertex(&x0, &y0);
 
-        rx = fabs(rx);
-        ry = fabs(ry);
+        rx = std::fabs(rx);
+        ry = std::fabs(ry);
 
         // Ensure radii are valid
         //-------------------------

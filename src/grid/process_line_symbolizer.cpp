@@ -78,8 +78,8 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
         double half_stroke = stroke_.get_width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
-        if (fabs(sym.offset()) > 0)
-            padding *= fabs(sym.offset()) * 1.2;
+        if (std::fabs(sym.offset()) > 0)
+            padding *= std::fabs(sym.offset()) * 1.2;
         clipping_extent.pad(padding);
     }
 
@@ -88,7 +88,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
         converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
     if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
-    if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter

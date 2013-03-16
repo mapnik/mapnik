@@ -29,12 +29,6 @@
 
 namespace mapnik {
 
-using std::atan2;
-using std::cos;
-using std::pow;
-using std::sin;
-using std::sqrt;
-
 static const double deg2rad = 0.0174532925199432958;
 static const double R = 6372795.0; // average great-circle radius of the earth
 
@@ -49,11 +43,11 @@ double great_circle_distance::operator() (coord2d const& pt0,
     double dlat = lat1 - lat0;
     double dlon = lon1 - lon0;
 
-    double sin_dlat = sin(0.5 * dlat);
-    double sin_dlon = sin(0.5 * dlon);
+    double sin_dlat = std::sin(0.5 * dlat);
+    double sin_dlon = std::sin(0.5 * dlon);
 
-    double a = pow(sin_dlat,2.0) + cos(lat0)*cos(lat1)*pow(sin_dlon,2.0);
-    double c = 2 * atan2(sqrt(a),sqrt(1 - a));
+    double a = std::pow(sin_dlat,2.0) + std::cos(lat0)*std::cos(lat1)*std::pow(sin_dlon,2.0);
+    double c = 2 * std::atan2(std::sqrt(a),std::sqrt(1 - a));
     return R * c;
 }
 }

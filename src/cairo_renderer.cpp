@@ -403,8 +403,8 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
         double half_stroke = stroke_.get_width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
-        if (fabs(sym.offset()) > 0)
-            padding *= fabs(sym.offset()) * 1.2;
+        if (std::fabs(sym.offset()) > 0)
+            padding *= std::fabs(sym.offset()) * 1.2;
         clipping_extent.pad(padding);
     }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
@@ -413,7 +413,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
 
     if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
     converter.set<transform_tag>(); // always transform
-    if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     converter.set<affine_transform_tag>(); // optional affine transform
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
@@ -817,8 +817,8 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
         box2d<double> ext = t_.forward(target_ext);
         int start_x = static_cast<int>(ext.minx());
         int start_y = static_cast<int>(ext.miny());
-        int end_x = static_cast<int>(ceil(ext.maxx()));
-        int end_y = static_cast<int>(ceil(ext.maxy()));
+        int end_x = static_cast<int>(std::ceil(ext.maxx()));
+        int end_y = static_cast<int>(std::ceil(ext.maxy()));
         int raster_width = end_x - start_x;
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)
