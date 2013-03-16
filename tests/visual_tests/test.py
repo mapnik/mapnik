@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import mapnik
+mapnik.logger.set_severity(mapnik.severity_type.None)
+
 import sys
 import os.path
-from compare import compare, summary
+from compare import compare, summary, fail
 
 defaults = {
     'sizes': [(500, 100)]
@@ -51,12 +53,16 @@ files = [
     {'name': "line-offset", 'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     {'name': "tiff-alpha-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-raster", 'sizes':[(600,400)]},
+    {'name': "tiff-alpha-broken-assoc-alpha-gdal", 'sizes':[(600,400)]},
+    {'name': "tiff-alpha-broken-assoc-alpha-raster", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-gradient-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-nodata-edge-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-nodata-edge-raster", 'sizes':[(600,400)]},
+    {'name': "tiff-opaque-edge-gdal", 'sizes':[(256,256)]},
+    {'name': "tiff-opaque-edge-raster", 'sizes':[(256,256)]},
     {'name': "shieldsymbolizer-2"},
     {'name': "shieldsymbolizer-3"},
-    {'name': "shieldsymbolizer-4"},
+    {'name': "shieldsymbolizer-4"},    
     {'name': "orientation", 'sizes': [(800, 200)]},
     {'name': "hb-fontsets", 'sizes': [(800, 200)]},
     {'name': "charspacing", 'sizes': [(200, 400)]},
@@ -65,25 +71,28 @@ files = [
 
 def render(filename, width, height, bbox, quiet=False):
     if not quiet:
-        print "Rendering style \"%s\" with size %dx%d ... \x1b[1;32m✓ \x1b[0m" % (filename, width, height)
-        print "-"*80
+        print "\"%s\" with size %dx%d ..." % (filename, width, height),
     m = mapnik.Map(width, height)
-    mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
-    if bbox is not None:
-        m.zoom_to_box(bbox)
-    else:
-        m.zoom_all()
     expected = os.path.join(dirname, "images", '%s-%d-reference.png' % (filename, width))
-    if not os.path.exists('/tmp/mapnik-visual-images'):
-        os.makedirs('/tmp/mapnik-visual-images')
     actual = os.path.join("/tmp/mapnik-visual-images", '%s-%d-agg.png' % (filename, width))
-    mapnik.render_to_file(m, actual)
-    diff = compare(actual, expected)
-    if diff > 0:
-        print "-"*80
-        print '\x1b[33mError:\x1b[0m %u different pixels' % diff
-        print "-"*80
-
+    try:
+        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
+        if bbox is not None:
+            m.zoom_to_box(bbox)
+        else:
+            m.zoom_all()
+        if not os.path.exists('/tmp/mapnik-visual-images'):
+            os.makedirs('/tmp/mapnik-visual-images')
+        mapnik.render_to_file(m, actual)
+        diff = compare(actual, expected)
+        if not quiet:
+            if diff > 0:
+                print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
+            else:
+                print '\x1b[32m✓\x1b[0m'
+    except Exception, e:
+        sys.stderr.write(e.message + '\n')
+        fail(actual,expected,str(e.message))
     return m
 
 if __name__ == "__main__":

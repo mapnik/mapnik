@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/global.hpp>
-#include <mapnik/geometry.hpp>
 
 // boost
 #include <boost/tuple/tuple.hpp>
@@ -36,7 +35,7 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/home/phoenix/statement/if.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
-
+#include <boost/type_traits/remove_pointer.hpp>
 
 //#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
@@ -50,7 +49,6 @@ struct is_container<mapnik::geometry_container>
 
 }}}
 
-
 namespace mapnik { namespace util {
 
 namespace karma = boost::spirit::karma;
@@ -58,34 +56,41 @@ namespace phoenix = boost::phoenix;
 
 namespace detail {
 
+template <typename Geometry>
 struct get_type
 {
     template <typename T>
     struct result { typedef int type; };
 
-    int operator() (geometry_type const& geom) const
+    int operator() (Geometry const& geom) const
     {
         return static_cast<int>(geom.type());
     }
 };
 
+template <typename T>
 struct get_first
 {
-    template <typename T>
-    struct result { typedef geometry_type::value_type const type; };
+    typedef T geometry_type;
 
-    geometry_type::value_type const operator() (geometry_type const& geom) const
+    template <typename U>
+    struct result { typedef typename geometry_type::value_type const type; };
+
+    typename geometry_type::value_type const operator() (geometry_type const& geom) const
     {
-        geometry_type::value_type coord;
-        boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+        typename geometry_type::value_type coord;
+        geom.rewind(0);
+        boost::get<0>(coord) = geom.vertex(&boost::get<1>(coord),&boost::get<2>(coord));
         return coord;
     }
 };
 
-
+template <typename T>
 struct multi_geometry_
 {
-    template <typename T>
+    typedef T geometry_container;
+
+    template <typename U>
     struct result { typedef bool type; };
 
     bool operator() (geometry_container const& geom) const
@@ -94,9 +99,12 @@ struct multi_geometry_
     }
 };
 
+template <typename T>
 struct multi_geometry_type
 {
-    template <typename T>
+    typedef T geometry_container;
+
+    template <typename U>
     struct result { typedef boost::tuple<unsigned,bool> type; };
 
     boost::tuple<unsigned,bool> operator() (geometry_container const& geom) const;
@@ -113,10 +121,13 @@ struct wkt_coordinate_policy : karma::real_policies<T>
 
 }
 
-template <typename OutputIterator>
+template <typename OutputIterator, typename Geometry>
 struct wkt_generator :
-    karma::grammar<OutputIterator, geometry_type const& ()>
+    karma::grammar<OutputIterator, Geometry const& ()>
 {
+    typedef Geometry geometry_type;
+    typedef typename boost::remove_pointer<typename geometry_type::value_type>::type coord_type;
+
     wkt_generator(bool single = false);
     // rules
     karma::rule<OutputIterator, geometry_type const& ()> wkt;
@@ -126,33 +137,35 @@ struct wkt_generator :
 
     karma::rule<OutputIterator, geometry_type const& ()> coords;
     karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> coords2;
-    karma::rule<OutputIterator, geometry_type::value_type ()> point_coord;
-    karma::rule<OutputIterator, geometry_type::value_type (unsigned& )> polygon_coord;
+    karma::rule<OutputIterator, coord_type ()> point_coord;
+    karma::rule<OutputIterator, coord_type (unsigned& )> polygon_coord;
 
     // phoenix functions
-    phoenix::function<detail::get_type > _type;
-    phoenix::function<detail::get_first> _first;
+    phoenix::function<detail::get_type<geometry_type> > _type;
+    phoenix::function<detail::get_first<geometry_type> > _first;
     //
-    karma::real_generator<double, detail::wkt_coordinate_policy<double> > coord_type;
+    karma::real_generator<double, detail::wkt_coordinate_policy<double> > coordinate;
 };
 
 
-template <typename OutputIterator>
+template <typename OutputIterator, typename GeometryContainer>
 struct wkt_multi_generator :
-        karma::grammar<OutputIterator, karma::locals< boost::tuple<unsigned,bool> >, geometry_container const& ()>
+        karma::grammar<OutputIterator, karma::locals< boost::tuple<unsigned,bool> >, GeometryContainer const& ()>
 {
+    typedef GeometryContainer geometry_contaner;
+    typedef boost::remove_pointer<typename geometry_container::value_type>::type geometry_type;
 
     wkt_multi_generator();
     // rules
-    karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >, geometry_container const& ()> wkt;
-    karma::rule<OutputIterator, geometry_container const& ()> geometry;
+    karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >, GeometryContainer const& ()> wkt;
+    karma::rule<OutputIterator, GeometryContainer const& ()> geometry;
     karma::rule<OutputIterator, geometry_type const& ()> single_geometry;
-    karma::rule<OutputIterator, geometry_container const& ()> multi_geometry;
-    wkt_generator<OutputIterator>  path;
+    karma::rule<OutputIterator, GeometryContainer const& ()> multi_geometry;
+    wkt_generator<OutputIterator, geometry_type >  path;
     // phoenix
-    phoenix::function<detail::multi_geometry_> is_multi;
-    phoenix::function<detail::multi_geometry_type> _multi_type;
-    phoenix::function<detail::get_type > _type;
+    phoenix::function<detail::multi_geometry_<GeometryContainer> > is_multi;
+    phoenix::function<detail::multi_geometry_type<GeometryContainer> > _multi_type;
+    phoenix::function<detail::get_type<geometry_type> > _type;
     //
     karma::symbols<unsigned, char const*> geometry_types;
 };

@@ -96,7 +96,9 @@ void agg_renderer<T>::process(raster_symbolizer const& sym,
                                                    filter_radius);
                 }
             }
-            composite(current_buffer_->data(), target.data_, sym.comp_op(), sym.get_opacity(), start_x, start_y, true);
+            composite(current_buffer_->data(), target.data_,
+                      sym.comp_op(), sym.get_opacity(),
+                      start_x, start_y, !source->premultiplied_alpha_);
         }
     }
 }

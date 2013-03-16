@@ -17,7 +17,8 @@
 namespace mapnik
 {
 
-struct weighted_vertex : private boost::noncopyable {
+struct weighted_vertex : private boost::noncopyable
+{
     vertex2d coord;
     double weight;
     weighted_vertex *prev;
@@ -27,20 +28,23 @@ struct weighted_vertex : private boost::noncopyable {
         coord(coord_),
         weight(std::numeric_limits<double>::infinity()),
         prev(NULL),
-        next(NULL) { }
+        next(NULL) {}
 
-    double nominalWeight() {
+    double nominalWeight()
+    {
         if (prev == NULL || next == NULL || coord.cmd != SEG_LINETO) {
             return std::numeric_limits<double>::infinity();
         }
-        vertex2d& A = prev->coord;
-        vertex2d& B = next->coord;
-        vertex2d& C = coord;
+        vertex2d const& A = prev->coord;
+        vertex2d const& B = next->coord;
+        vertex2d const& C = coord;
         return std::abs((double)((A.x - C.x) * (B.y - A.y) - (A.x - B.x) * (C.y - A.y))) / 2.0;
     }
 
-    struct ascending_sort {
-        bool operator() (const weighted_vertex *a, const weighted_vertex *b) {
+    struct ascending_sort
+    {
+        bool operator() (const weighted_vertex *a, const weighted_vertex *b)
+        {
             return b->weight > a->weight;
         }
     };
@@ -97,10 +101,11 @@ struct MAPNIK_DECL simplify_converter
 {
 public:
     simplify_converter(Geometry& geom)
-        : geom_(geom)
-        , tolerance_(0.0)
-        , status_(initial)
-        , algorithm_(radial_distance)
+        : geom_(geom),
+        tolerance_(0.0),
+        status_(initial),
+        algorithm_(radial_distance),
+        pos_(0)
     {}
 
     enum status
@@ -117,8 +122,10 @@ public:
         return algorithm_;
     }
 
-    void set_simplify_algorithm(simplify_algorithm_e value) {
-        if (algorithm_ != value) {
+    void set_simplify_algorithm(simplify_algorithm_e value)
+    {
+        if (algorithm_ != value)
+        {
             algorithm_ = value;
             reset();
         }
@@ -145,7 +152,7 @@ public:
         pos_ = 0;
     }
 
-    void rewind(unsigned int)
+    void rewind(unsigned int) const
     {
         pos_ = 0;
     }
@@ -360,7 +367,8 @@ private:
         }
     }
 
-    status init_vertices_visvalingam_whyatt() {
+    status init_vertices_visvalingam_whyatt()
+    {
         typedef std::set<weighted_vertex *, weighted_vertex::ascending_sort> VertexSet;
         typedef std::vector<weighted_vertex *> VertexList;
 
@@ -371,13 +379,13 @@ private:
             v_list.push_back(new weighted_vertex(vtx));
         }
 
-        if (!v_list.size()) {
+        if (v_list.empty()) {
             return status_ = process;
         }
 
         // Connect the vertices in a linked list and insert them into the set.
         VertexSet v;
-        for (VertexList::iterator i = v_list.begin(); i != v_list.end(); i++)
+        for (VertexList::iterator i = v_list.begin(); i != v_list.end(); ++i)
         {
             (*i)->prev = i == v_list.begin() ? NULL : *(i - 1);
             (*i)->next = i + 1 == v_list.end() ? NULL : *(i + 1);
@@ -415,9 +423,10 @@ private:
         v.clear();
 
         // Traverse the remaining list and insert them into the vertex cache.
-        for (VertexList::iterator i = v_list.begin(); i != v_list.end(); i++)
+        for (VertexList::iterator i = v_list.begin(); i != v_list.end(); ++i)
         {
-            if ((*i)->weight >= tolerance_) {
+            if ((*i)->weight >= tolerance_)
+            {
                 vertices_.push_back((*i)->coord);
             }
             delete *i;
@@ -431,10 +440,10 @@ private:
     double                          tolerance_;
     status                          status_;
     simplify_algorithm_e            algorithm_;
-    size_t                          pos_;
     std::deque<vertex2d>            vertices_;
     std::deque<vertex2d>            sleeve_cont_;
     vertex2d                        previous_vertex_;
+    mutable size_t                  pos_;
 };
 
 
