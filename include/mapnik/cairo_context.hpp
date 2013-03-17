@@ -42,7 +42,6 @@
 // cairo
 #include <cairo.h>
 #include <cairo-ft.h>
-#include <cairomm/cairomm.h>
 // stl
 #include <valarray>
 // agg

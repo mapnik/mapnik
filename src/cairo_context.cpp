@@ -416,7 +416,7 @@ void cairo_context::add_text(glyph_positions_ptr pos,
         double text_size = glyph.format->text_size * scale_factor;
         glyph.face->set_character_sizes(text_size);
 
-        Cairo::Matrix matrix;
+        cairo_matrix_t matrix;
         matrix.xx = text_size * itr->rot.cos;
         matrix.xy = text_size * itr->rot.sin;
         matrix.yx = text_size * -itr->rot.sin;
