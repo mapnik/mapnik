@@ -120,7 +120,7 @@ private:
 
     inline bool checkBounds(int x, int y) const
     {
-        return (x >= 0 && x < width_ && y >= 0 && y < height_);
+        return (x >= 0 && x < static_cast<int>(width_) && y >= 0 && y < static_cast<int>(height_));
     }
 
 public:
