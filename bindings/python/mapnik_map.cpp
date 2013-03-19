@@ -155,7 +155,7 @@ void export_map()
 
     class_<style_range>("StyleRange")
         .def("__iter__",
-             range(&style_range::first, &style_range::second))
+             boost::python::range(&style_range::first, &style_range::second))
         ;
 
     class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(
