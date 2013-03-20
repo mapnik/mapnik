@@ -41,13 +41,13 @@ void grid_renderer<T>::process(text_symbolizer const& sym,
             t_, font_manager_, *detector_,
             query_extent_);
 
-    grid_text_renderer<T> ren(pixmap_, *(font_manager_.get_stroker()), sym.comp_op(), scale_factor_);
+    grid_text_renderer<T> ren(pixmap_, sym.comp_op(), scale_factor_);
 
     placements_list const& placements = helper.get();
     if (!placements.size()) return;
     BOOST_FOREACH(glyph_positions_ptr glyphs, placements)
     {
-        ren.render(glyphs, feature.id(), 2);
+        ren.render(glyphs, feature.id());
     }
     pixmap_.add_feature(feature);
 }

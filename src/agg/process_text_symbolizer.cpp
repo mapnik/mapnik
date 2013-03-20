@@ -42,7 +42,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
             t_, font_manager_, *detector_,
             query_extent_);
 
-    agg_text_renderer<T> ren(*current_buffer_, *(font_manager_.get_stroker()), sym.comp_op(), scale_factor_);
+    agg_text_renderer<T> ren(*current_buffer_, sym.get_halo_rasterizer(), sym.comp_op(), scale_factor_, font_manager_.get_stroker());
 
     placements_list const& placements = helper.get();
     BOOST_FOREACH(glyph_positions_ptr glyphs, placements)

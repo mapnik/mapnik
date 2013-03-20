@@ -46,6 +46,15 @@
 namespace mapnik
 {
 
+enum halo_rasterizer_enum
+{
+    HALO_RASTERIZER_FULL,
+    HALO_RASTERIZER_FAST,
+    halo_rasterizer_enum_MAX
+};
+
+DEFINE_ENUM(halo_rasterizer_e, halo_rasterizer_enum);
+
 struct MAPNIK_DECL text_symbolizer : public symbolizer_base
 {
     // Note - we do not use boost::make_shared below as VC2008 and VC2010 are
@@ -100,6 +109,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     color const& get_halo_fill() const func_deprecated;
     void set_halo_radius(double radius);
     double get_halo_radius() const func_deprecated;
+    void set_halo_rasterizer(halo_rasterizer_e rasterizer_p);
+    halo_rasterizer_e get_halo_rasterizer() const;
     void set_label_placement(label_placement_e label_p);
     label_placement_e get_label_placement() const func_deprecated;
     void set_vertical_alignment(vertical_alignment_e valign);
@@ -131,6 +142,7 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     bool largest_bbox_only() const;
 private:
     text_placements_ptr placement_options_;
+    halo_rasterizer_e halo_rasterizer_;
 };
 }
 

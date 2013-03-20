@@ -27,7 +27,9 @@
 #include <mapnik/config.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/text/face.hpp>
+#include <mapnik/text_symbolizer.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
 
 // freetype2
 extern "C"
@@ -118,7 +120,7 @@ public:
     face_set_ptr get_face_set(std::string const& name, boost::optional<font_set> fset);
 
 
-    stroker_ptr get_stroker() { return stroker_; }
+    inline stroker_ptr get_stroker() { return stroker_; }
 
 private:
     font_engine_type & engine_;

@@ -254,6 +254,11 @@ public:
 
         add_font_attributes( sym_node, sym);
         serialize_symbolizer_base(sym_node, sym);
+        text_symbolizer dfl;
+        if (sym.get_halo_rasterizer() != dfl.get_halo_rasterizer() || explicit_defaults_)
+        {
+            set_attr(sym_node, "halo-rasterizer", sym.get_halo_rasterizer());
+        }
     }
 
     void operator () ( building_symbolizer const& sym )

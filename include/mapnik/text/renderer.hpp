@@ -4,6 +4,9 @@
 //mapnik
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/image_compositing.hpp>
+#include <mapnik/text_symbolizer.hpp>
+//TODO: Find a better place for halo_rasterizer_e!
+//TODO: Halo rasterizer selection should go to text_properties because it might make sense to use a different rasterizer for different fonts
 
 //boost
 #include <boost/utility.hpp>
@@ -24,7 +27,7 @@ namespace mapnik
 class text_renderer : private boost::noncopyable
 {
 public:
-    text_renderer (stroker &stroker, composite_mode_e comp_op = src_over, double scale_factor=1.0);
+    text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op = src_over, double scale_factor=1.0, stroker_ptr stroker=stroker_ptr());
 protected:
     struct glyph_t : boost::noncopyable
     {
@@ -40,10 +43,12 @@ protected:
 
     void prepare_glyphs(glyph_positions_ptr pos);
 
+    halo_rasterizer_e rasterizer_;
     composite_mode_e comp_op_;
     double scale_factor_;
     boost::ptr_vector<glyph_t> glyphs_;
-    stroker & stroker_;
+    stroker_ptr stroker_;
+
 };
 
 template <typename T>
@@ -51,11 +56,14 @@ class agg_text_renderer : public text_renderer
 {
 public:
     typedef T pixmap_type;
-    agg_text_renderer (pixmap_type & pixmap, stroker &stroker,
-                       composite_mode_e comp_op = src_over, double scale_factor=1.0);
+    agg_text_renderer (pixmap_type & pixmap, halo_rasterizer_e rasterizer,
+                       composite_mode_e comp_op = src_over,
+                       double scale_factor=1.0,
+                       stroker_ptr stroker=stroker_ptr());
     void render(glyph_positions_ptr pos);
 private:
     pixmap_type & pixmap_;
+    void render_halo(FT_Bitmap *bitmap, unsigned rgba, int x, int y, int halo_radius, double opacity);
 };
 
 template <typename T>
@@ -63,12 +71,12 @@ class grid_text_renderer : public text_renderer
 {
 public:
     typedef T pixmap_type;
-    grid_text_renderer (pixmap_type & pixmap, stroker &stroker,
-                       composite_mode_e comp_op = src_over, double scale_factor=1.0);
-    void render(glyph_positions_ptr pos, int feature_id, double min_radius=1.0);
+    grid_text_renderer (pixmap_type & pixmap, composite_mode_e comp_op = src_over,
+                        double scale_factor=1.0);
+    void render(glyph_positions_ptr pos, value_integer feature_id);
 private:
     pixmap_type & pixmap_;
-    void render_bitmap_id(FT_Bitmap *bitmap, int feature_id, int x, int y);
+    void render_halo_id(FT_Bitmap *bitmap, mapnik::value_integer feature_id, int x, int y, int halo_radius);
 };
 
 }

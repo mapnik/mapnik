@@ -87,6 +87,7 @@ def test_text_symbolizer():
     s = mapnik.TextSymbolizer()
     eq_(s.comp_op,mapnik.CompositeOp.src_over)
     eq_(s.clip,True)
+    eq_(s.halo_rasterizer,mapnik.halo_rasterizer.FULL)
 
     # https://github.com/mapnik/mapnik/issues/1420
     eq_(s.text_transform, mapnik.text_transform.NONE)

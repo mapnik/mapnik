@@ -7,8 +7,9 @@
 namespace mapnik
 {
 
-text_renderer::text_renderer (stroker &stroker, composite_mode_e comp_op, double scale_factor)
-    : comp_op_(comp_op),
+text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op, double scale_factor, stroker_ptr stroker)
+    : rasterizer_(rasterizer),
+      comp_op_(comp_op),
       scale_factor_(scale_factor),
       stroker_(stroker)
 {}
@@ -74,9 +75,12 @@ void composite_bitmap(T & pixmap, FT_Bitmap *bitmap, unsigned rgba, int x, int y
 }
 
 template <typename T>
-agg_text_renderer<T>::agg_text_renderer (pixmap_type & pixmap, stroker &stroker,
-                        composite_mode_e comp_op, double scale_factor)
-    : text_renderer(stroker, comp_op, scale_factor), pixmap_(pixmap)
+agg_text_renderer<T>::agg_text_renderer (pixmap_type & pixmap,
+                                         halo_rasterizer_e rasterizer,
+                                         composite_mode_e comp_op,
+                                         double scale_factor,
+                                         stroker_ptr stroker)
+    : text_renderer(rasterizer, comp_op, scale_factor, stroker), pixmap_(pixmap)
 {
 
 }
@@ -107,26 +111,46 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
             halo_radius = itr->properties->halo_radius;
             //make sure we've got reasonable values.
             if (halo_radius <= 0.0 || halo_radius > 1024.0) break;
-            stroker_.init(halo_radius);
+            stroker_->init(halo_radius);
         }
         FT_Glyph g;
         error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
-            FT_Glyph_Transform(g, 0, &start);
-            FT_Glyph_Stroke(&g, stroker_.get(), 1);
-            error = FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
-            if (!error)
+            FT_Glyph_Transform(g,0,&start);
+            if (rasterizer_ == HALO_RASTERIZER_FULL)
             {
-                FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                composite_bitmap(pixmap_, &bit->bitmap, format->halo_fill.rgba(),
-                                 bit->left,
-                                 height - bit->top,
-                                 format->text_opacity,
-                                 comp_op_);
+                FT_Glyph_Stroke(&g, stroker_->get(), 1);
+                error = FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
+                if (!error)
+                {
+                    FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
+                    composite_bitmap(pixmap_,
+                                     &bit->bitmap,
+                                     format->halo_fill.rgba(),
+                                     bit->left,
+                                     height - bit->top,
+                                     format->text_opacity,
+                                     comp_op_);
+                }
+            }
+            else
+            {
+                error = FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
+                if (!error)
+                {
+                    FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
+                    render_halo(&bit->bitmap,
+                                format->halo_fill.rgba(),
+                                bit->left,
+                                height - bit->top,
+                                halo_radius,
+                                format->text_opacity);
+                }
             }
         }
         FT_Done_Glyph(g);
+
     }
 
     //render actual text
@@ -155,7 +179,7 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
 
 
 template <typename T>
-void grid_text_renderer<T>::render(glyph_positions_ptr pos, int feature_id, double min_radius)
+void grid_text_renderer<T>::render(glyph_positions_ptr pos, value_integer feature_id)
 {
     FT_Error  error;
     FT_Vector start;
@@ -166,32 +190,43 @@ void grid_text_renderer<T>::render(glyph_positions_ptr pos, int feature_id, doub
 
     // now render transformed glyphs
     typename boost::ptr_vector<glyph_t>::iterator itr, end = glyphs_.end();
+    double halo_radius = 0.;
     for (itr = glyphs_.begin(); itr != end; ++itr)
     {
-        stroker_.init(std::max(itr->properties->halo_radius, min_radius));
+        if (itr->properties)
+        {
+            halo_radius = itr->properties->halo_radius;
+        }
         FT_Glyph g;
         error = FT_Glyph_Copy(itr->image, &g);
         if (!error)
         {
-            FT_Glyph_Transform(g,0,&start);
-            FT_Glyph_Stroke(&g,stroker_.get(),1);
-            error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_NORMAL,0,1);
-            //error = FT_Glyph_To_Bitmap( &g,FT_RENDER_MODE_MONO,0,1);
+            FT_Glyph_Transform(g, 0, &start);
+            error = FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
             if ( ! error )
             {
 
                 FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                render_bitmap_id(&bit->bitmap, feature_id,
-                                 bit->left,
-                                 height - bit->top);
+                render_halo_id(&bit->bitmap,
+                               feature_id,
+                               bit->left,
+                               height - bit->top,
+                               halo_radius);
             }
         }
         FT_Done_Glyph(g);
     }
 }
 
+
 template <typename T>
-void grid_text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap, int feature_id, int x, int y)
+void agg_text_renderer<T>::render_halo(
+                 FT_Bitmap *bitmap,
+                 unsigned rgba,
+                 int x,
+                 int y,
+                 int halo_radius,
+                 double opacity)
 {
     int x_max=x+bitmap->width;
     int y_max=y+bitmap->rows;
@@ -201,21 +236,49 @@ void grid_text_renderer<T>::render_bitmap_id(FT_Bitmap *bitmap, int feature_id, 
     {
         for (j=y,q=0;j<y_max;++j,++q)
         {
-            int gray=bitmap->buffer[q*bitmap->width+p];
+            int gray = bitmap->buffer[q*bitmap->width+p];
             if (gray)
             {
-                pixmap_.setPixel(i,j,feature_id);
-                //pixmap_.blendPixel2(i,j,rgba,gray,opacity_);
+                for (int n=-halo_radius; n <=halo_radius; ++n)
+                    for (int m=-halo_radius;m <= halo_radius; ++m)
+                        pixmap_.blendPixel2(i+m,j+n,rgba,gray,opacity);
             }
         }
     }
 }
 
 template <typename T>
-grid_text_renderer<T>::grid_text_renderer(grid_text_renderer::pixmap_type &pixmap,
-                                          stroker &stroker, composite_mode_e comp_op,
+void grid_text_renderer<T>::render_halo_id(
+                    FT_Bitmap *bitmap,
+                    mapnik::value_integer feature_id,
+                    int x,
+                    int y,
+                    int halo_radius)
+{
+    int x_max=x+bitmap->width;
+    int y_max=y+bitmap->rows;
+    int i,p,j,q;
+
+    for (i=x,p=0;i<x_max;++i,++p)
+    {
+        for (j=y,q=0;j<y_max;++j,++q)
+        {
+            int gray = bitmap->buffer[q*bitmap->width+p];
+            if (gray)
+            {
+                for (int n=-halo_radius; n <=halo_radius; ++n)
+                    for (int m=-halo_radius;m <= halo_radius; ++m)
+                        pixmap_.setPixel(i+m,j+n,feature_id);
+            }
+        }
+    }
+}
+
+template <typename T>
+grid_text_renderer<T>::grid_text_renderer(pixmap_type &pixmap,
+                                          composite_mode_e comp_op,
                                           double scale_factor) :
-    text_renderer(stroker, comp_op, scale_factor), pixmap_(pixmap)
+    text_renderer(HALO_RASTERIZER_FAST, comp_op, scale_factor), pixmap_(pixmap)
 {
 }
 

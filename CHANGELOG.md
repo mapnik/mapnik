@@ -8,6 +8,9 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added `text-halo-rasterizer` property. Set to `fast` for lower quality but faster
+  halo rendering (#1298)
+
 - Added ability to access style list from map by (name,obj) in python (#1725)
 
 - Added `is_solid` method to python mapnik.Image and mapnik.ImageView classes (#1728)
