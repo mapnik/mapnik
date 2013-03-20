@@ -63,7 +63,9 @@ public:
     void render(glyph_positions_ptr pos);
 private:
     pixmap_type & pixmap_;
-    void render_halo(FT_Bitmap *bitmap, unsigned rgba, int x, int y, int halo_radius, double opacity);
+    void render_halo(FT_Bitmap *bitmap, unsigned rgba, int x, int y,
+                     int halo_radius, double opacity,
+                     composite_mode_e comp_op);
 };
 
 template <typename T>

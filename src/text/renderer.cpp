@@ -145,7 +145,8 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
                                 bit->left,
                                 height - bit->top,
                                 halo_radius,
-                                format->text_opacity);
+                                format->text_opacity,
+                                comp_op_);
                 }
             }
         }
@@ -220,13 +221,13 @@ void grid_text_renderer<T>::render(glyph_positions_ptr pos, value_integer featur
 
 
 template <typename T>
-void agg_text_renderer<T>::render_halo(
-                 FT_Bitmap *bitmap,
+void agg_text_renderer<T>::render_halo(FT_Bitmap *bitmap,
                  unsigned rgba,
                  int x,
                  int y,
                  int halo_radius,
-                 double opacity)
+                 double opacity,
+                 composite_mode_e comp_op)
 {
     int x_max=x+bitmap->width;
     int y_max=y+bitmap->rows;
@@ -241,7 +242,7 @@ void agg_text_renderer<T>::render_halo(
             {
                 for (int n=-halo_radius; n <=halo_radius; ++n)
                     for (int m=-halo_radius;m <= halo_radius; ++m)
-                        pixmap_.blendPixel2(i+m,j+n,rgba,gray,opacity);
+                        pixmap_.composite_pixel(comp_op, i+m, j+n, rgba, gray, opacity);
             }
         }
     }

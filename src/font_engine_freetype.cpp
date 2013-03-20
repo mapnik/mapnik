@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/debug.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
