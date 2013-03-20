@@ -185,7 +185,7 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
     
     ## Grid rendering
     # TODO - grid renderer does not support scale_factor yet via python
-    if 0 and scale_factor == 1.0 and config.get('grid',True):
+    if scale_factor == 1.0 and config.get('grid',True):
         expected_grid = os.path.join(dirname, "grids", postfix + '-grid-reference.json')
         actual_grid = os.path.join(visual_output_dir, '%s-grid.json' % postfix)
         if not quiet:
