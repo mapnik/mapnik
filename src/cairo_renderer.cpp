@@ -613,7 +613,11 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
 }
 
 
-void cairo_renderer_base::render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity, bool recenter)
+void cairo_renderer_base::render_marker(pixel_position const& pos,
+                                        marker const& marker,
+                                        agg::trans_affine const& tr,
+                                        double opacity,
+                                        bool recenter)
 
 {
     cairo_save_restore guard(context_);

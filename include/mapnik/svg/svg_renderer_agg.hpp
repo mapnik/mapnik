@@ -290,13 +290,13 @@ public:
 
                 if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.fill_gradient, transform, attr.fill_opacity * opacity, symbol_bbox, path_bbox);
+                    render_gradient(ras, sl, ren, attr.fill_gradient, transform, attr.fill_opacity * attr.opacity * opacity, symbol_bbox, path_bbox);
                 }
                 else
                 {
                     ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
                     color = attr.fill_color;
-                    color.opacity(color.opacity() * attr.fill_opacity * opacity);
+                    color.opacity(color.opacity() * attr.fill_opacity * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
                     color.premultiply();
                     ren_s.color(color);
@@ -326,13 +326,13 @@ public:
 
                 if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform, attr.stroke_opacity * opacity, symbol_bbox, path_bbox);
+                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform, attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, path_bbox);
                 }
                 else
                 {
                     ras.filling_rule(fill_non_zero);
                     color = attr.stroke_color;
-                    color.opacity(color.opacity() * attr.stroke_opacity * opacity);
+                    color.opacity(color.opacity() * attr.stroke_opacity * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
                     color.premultiply();
                     ren_s.color(color);
