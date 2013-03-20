@@ -32,6 +32,8 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/pixel_position.hpp>
+
 
 // agg
 #include "agg_trans_affine.h"

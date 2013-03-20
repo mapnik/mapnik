@@ -33,6 +33,7 @@
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // agg
 #include "agg_trans_affine.h"

@@ -36,6 +36,7 @@
 #include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/cairo_context.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // cairo
 #include <cairo.h>

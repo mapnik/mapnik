@@ -25,11 +25,13 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/text/face.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // freetype2
 extern "C"
@@ -53,6 +55,7 @@ extern "C"
 
 namespace mapnik
 {
+struct char_properties;
     typedef std::vector<face_ptr> container_type;
     typedef container_type::size_type size_type;
 
