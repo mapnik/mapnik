@@ -32,6 +32,7 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/gil/gil_all.hpp>
 #include <boost/concept_check.hpp>
+#include <boost/foreach.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -39,7 +40,7 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_scanline_u.h"
 #include "agg_blur.h"
-
+#include "agg_gradient_lut.h"
 // stl
 #include <cmath>
 
@@ -409,18 +410,22 @@ void apply_filter(Src & src, colorize_alpha const& op)
 {
     using namespace boost::gil;
 
-    mapnik::color const& c0 = op.c0_;
-    mapnik::color const& c1 = op.c1_;
-    uint8_t reds[256];
-    uint8_t greens[256];
-    uint8_t blues[256];
+    agg::gradient_lut<agg::color_interpolator<agg::rgba8> > grad_lut;
+    grad_lut.remove_all();
+    std::size_t size = op.size();
+    if (size < 2) return;
 
-    for (unsigned a=0; a < 256;++a)
+    double step = 1.0/(size-1);
+    double offset = 0.0;
+    BOOST_FOREACH( mapnik::color const& c, op)
     {
-        reds[a] = (c0.red() + (c1.red() - c0.red()) * a) >> 8;
-        greens[a] = (c0.green() + (c1.green() - c0.green()) * a) >> 8;
-        blues[a] = (c0.blue() + (c1.blue() - c0.blue()) * a) >> 8;
+        grad_lut.add_color(offset, agg::rgba(c.red()/256.0,
+                                          c.green()/256.0,
+                                          c.blue()/256.0,
+                                          c.alpha()/256.0));
+        offset += step;
     }
+    grad_lut.build_lut();
 
     rgba8_view_t src_view = rgba8_view(src);
     for (int y=0; y<src_view.height(); ++y)
@@ -434,14 +439,10 @@ void apply_filter(Src & src, colorize_alpha const& op)
             uint8_t & a = get_color(src_it[x], alpha_t());
             if ( a > 0)
             {
-
-                //r = (c0.red() + (c1.red() - c0.red()) * a) >> 8;
-                //g = (c0.green() + (c1.green() - c0.green()) * a) >> 8;
-                //b = (c0.blue() + (c1.blue() - c0.blue()) * a) >> 8;
-                r = (reds[a] * a + 255) >> 8;
-                g = (greens[a] * a + 255) >> 8;
-                b = (blues[a] * a + 255) >> 8;
-
+                agg::rgba8 c = grad_lut[a];
+                r = (c.r * a + 255) >> 8;
+                g = (c.g * a + 255) >> 8;
+                b = (c.b * a + 255) >> 8;
 #if 0
                 // rainbow
                 r = 0;
