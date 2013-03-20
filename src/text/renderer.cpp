@@ -198,24 +198,18 @@ void grid_text_renderer<T>::render(glyph_positions_ptr pos, value_integer featur
         {
             halo_radius = itr->properties->halo_radius;
         }
-        FT_Glyph g;
-        error = FT_Glyph_Copy(itr->image, &g);
+        FT_Glyph_Transform(itr->image, 0, &start);
+        error = FT_Glyph_To_Bitmap(&(itr->image), FT_RENDER_MODE_NORMAL, 0, 1);
         if (!error)
         {
-            FT_Glyph_Transform(g, 0, &start);
-            error = FT_Glyph_To_Bitmap(&g, FT_RENDER_MODE_NORMAL, 0, 1);
-            if ( ! error )
-            {
 
-                FT_BitmapGlyph bit = (FT_BitmapGlyph)g;
-                render_halo_id(&bit->bitmap,
-                               feature_id,
-                               bit->left,
-                               height - bit->top,
-                               halo_radius);
-            }
+            FT_BitmapGlyph bit = (FT_BitmapGlyph)itr->image;
+            render_halo_id(&bit->bitmap,
+                           feature_id,
+                           bit->left,
+                           height - bit->top,
+                           halo_radius);
         }
-        FT_Done_Glyph(g);
     }
 }
 
