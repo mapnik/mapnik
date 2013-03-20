@@ -37,6 +37,10 @@ files = [
     {'name': "lines-1", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "lines-2", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "lines-3", 'sizes': sizes_few_square,'bbox':default_text_box},
+    {'name': "lines-4", 'sizes': sizes_few_square,'bbox':default_text_box},
+    {'name': "lines-5", 'sizes': sizes_few_square,'bbox':default_text_box},
+    {'name': "lines-6", 'sizes': sizes_few_square,'bbox':default_text_box},
+    {'name': "formatting", 'bbox':default_text_box},
     # https://github.com/mapnik/mapnik/issues/1696
     # https://github.com/mapnik/mapnik/issues/1521
     # fails with clang++ on os x
@@ -69,6 +73,13 @@ files = [
     {'name': "formatting-4",'bbox':default_text_box},
     {'name': "expressionformat",'bbox':default_text_box},
     {'name': "shieldsymbolizer-1", 'sizes': sizes_many_in_small_range,'bbox':default_text_box},
+    {'name': "shieldsymbolizer-2", 'bbox':default_text_box},
+    {'name': "shieldsymbolizer-3", 'bbox':default_text_box},
+    {'name': "shieldsymbolizer-4", 'bbox':default_text_box},
+    {'name': "orientation", 'sizes': [(800, 200)]},
+    {'name': "hb-fontsets", 'sizes': [(800, 200)]},
+    {'name': "charspacing", 'sizes': [(200, 400)]},
+    {'name': "line_break", 'sizes': [(800, 800)]},
     {'name': "rtl-point", 'sizes': [(200, 200)],'bbox':default_text_box},
     {'name': "jalign-auto", 'sizes': [(200, 200)],'bbox':default_text_box},
     {'name': "line-offset", 'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
@@ -125,7 +136,7 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
         except Exception, e:
             sys.stderr.write(e.message + '\n')
             fail(actual_agg,expected_agg,str(e.message))
-            return
+	    return m
         if not quiet:
             print "\"%s\" with agg..." % (postfix),
         try:
@@ -174,7 +185,7 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
     
     ## Grid rendering
     # TODO - grid renderer does not support scale_factor yet via python
-    if scale_factor == 1.0 and config.get('grid',True):
+    if 0 and scale_factor == 1.0 and config.get('grid',True):
         expected_grid = os.path.join(dirname, "grids", postfix + '-grid-reference.json')
         actual_grid = os.path.join(visual_output_dir, '%s-grid.json' % postfix)
         if not quiet:
