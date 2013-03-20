@@ -405,6 +405,78 @@ void apply_filter(Src & src, agg_stack_blur const& op)
 }
 
 template <typename Src>
+void apply_filter(Src & src, colorize_alpha const& op)
+{
+    using namespace boost::gil;
+
+    mapnik::color const& c0 = op.c0_;
+    mapnik::color const& c1 = op.c1_;
+    uint8_t reds[256];
+    uint8_t greens[256];
+    uint8_t blues[256];
+
+    for (unsigned a=0; a < 256;++a)
+    {
+        reds[a] = (c0.red() + (c1.red() - c0.red()) * a) >> 8;
+        greens[a] = (c0.green() + (c1.green() - c0.green()) * a) >> 8;
+        blues[a] = (c0.blue() + (c1.blue() - c0.blue()) * a) >> 8;
+    }
+
+    rgba8_view_t src_view = rgba8_view(src);
+    for (int y=0; y<src_view.height(); ++y)
+    {
+        rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+        for (int x=0; x<src_view.width(); ++x)
+        {
+            uint8_t & r = get_color(src_it[x], red_t());
+            uint8_t & g = get_color(src_it[x], green_t());
+            uint8_t & b = get_color(src_it[x], blue_t());
+            uint8_t & a = get_color(src_it[x], alpha_t());
+            if ( a > 0)
+            {
+
+                //r = (c0.red() + (c1.red() - c0.red()) * a) >> 8;
+                //g = (c0.green() + (c1.green() - c0.green()) * a) >> 8;
+                //b = (c0.blue() + (c1.blue() - c0.blue()) * a) >> 8;
+                r = (reds[a] * a + 255) >> 8;
+                g = (greens[a] * a + 255) >> 8;
+                b = (blues[a] * a + 255) >> 8;
+
+#if 0
+                // rainbow
+                r = 0;
+                g = 0;
+                b = 0;
+                if (a < 64)
+                {
+                    g = a * 4;
+                    b = 255;
+                }
+                else if (a >= 64 && a < 128)
+                {
+                    g = 255;
+                    b = 255 - ((a - 64) * 4);
+                }
+                else if (a >= 128 && a < 192)
+                {
+                    r = (a - 128) * 4;
+                    g = 255;
+                }
+                else // >= 192
+                {
+                    r = 255;
+                    g = 255 - ((a - 192) * 4);
+                }
+                r = (r * a + 255) >> 8;
+                g = (g * a + 255) >> 8;
+                b = (b * a + 255) >> 8;
+#endif
+            }
+        }
+    }
+}
+
+template <typename Src>
 void apply_filter(Src & src, hsla const& transform)
 {
     using namespace boost::gil;

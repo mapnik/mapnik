@@ -101,9 +101,14 @@ struct hsla
 struct colorize_alpha
 {
     colorize_alpha(mapnik::color const& c0, mapnik::color const& c1)
+        : c0_(c0),
+          c1_(c1)
     {
-         // TODO: implement me!
+        // TODO: support multiple color-stops
+        // https://developer.mozilla.org/en-US/docs/CSS/linear-gradient
     }
+    mapnik::color c0_;
+    mapnik::color c1_;
 };
 
 typedef boost::variant<filter::blur,
