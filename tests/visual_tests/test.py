@@ -125,7 +125,7 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
         except Exception, e:
             sys.stderr.write(e.message + '\n')
             fail(actual_agg,expected_agg,str(e.message))
-            return
+            return m
         if not quiet:
             print "\"%s\" with agg..." % (postfix),
         try:
