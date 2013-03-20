@@ -192,9 +192,9 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             }
             else // raster markers
             {
-                box2d<double> const& bbox = (*mark)->bounding_box();
-                setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, sym);
+                setup_transform_scaling(tr, (*mark)->width(), (*mark)->height(), feature, sym);
                 evaluate_transform(tr, feature, sym.get_image_transform());
+                box2d<double> const& bbox = (*mark)->bounding_box();
                 coord2d center = bbox.center();
                 agg::trans_affine_translation recenter(-center.x, -center.y);
                 agg::trans_affine marker_trans = recenter * tr;
