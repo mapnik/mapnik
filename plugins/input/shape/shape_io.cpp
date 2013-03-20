@@ -175,8 +175,6 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
         double x = record.read_double();
         double y = record.read_double();
         poly->move_to(x, y);
-        double start_x = x;
-        double start_y = y;
         for (int j=start+1;j<end;j++)
         {
             x = record.read_double();
