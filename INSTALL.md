@@ -7,7 +7,7 @@ To configure and build Mapnik do:
     ./configure
     make
 
-NOTE: the above will not work on windows, rather see https://github.com/mapnik/mapnik/wiki/BuildingOnWindows
+NOTE: the above will not work on windows, rather see https://github.com/mapnik/mapnik/wiki/WindowsInstallation
 
 Then to run the tests locally (without needing to install):
 
