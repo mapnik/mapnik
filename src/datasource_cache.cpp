@@ -42,11 +42,10 @@
 
 namespace mapnik {
 
-bool is_input_plugin (std::string const& filename)
+bool is_input_plugin(std::string const& filename)
 {
     return boost::algorithm::ends_with(filename,std::string(".input"));
 }
-
 
 datasource_cache::datasource_cache()
 {
@@ -58,7 +57,7 @@ datasource_cache::~datasource_cache()
     lt_dlexit();
 }
 
-datasource_ptr datasource_cache::create(const parameters& params)
+datasource_ptr datasource_cache::create(parameters const& params)
 {
     boost::optional<std::string> type = params.get<std::string>("type");
     if ( ! type)
@@ -88,7 +87,7 @@ datasource_ptr datasource_cache::create(const parameters& params)
         throw config_error(s);
     }
 
-    if ( ! itr->second->handle())
+    if (!itr->second->handle())
     {
         throw std::runtime_error(std::string("Cannot load library: ") +
                                  lt_dlerror());
@@ -101,25 +100,31 @@ datasource_ptr datasource_cache::create(const parameters& params)
         create_ds* create_datasource =
         reinterpret_cast<create_ds*>(lt_dlsym(itr->second->handle(), "create"));
 
-    if (! create_datasource)
+    if (!create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") +
                                  lt_dlerror());
     }
 
 #ifdef MAPNIK_LOG
-    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Size=" << params.size();
+    MAPNIK_LOG_DEBUG(datasource_cache)
+        << "datasource_cache: Size="
+        << params.size();
 
     parameters::const_iterator i = params.begin();
     for (; i != params.end(); ++i)
     {
-        MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: -- " << i->first << "=" << i->second;
+        MAPNIK_LOG_DEBUG(datasource_cache)
+            << "datasource_cache: -- "
+            << i->first << "=" << i->second;
     }
 #endif
 
     ds = datasource_ptr(create_datasource(params), datasource_deleter());
 
-    MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Datasource=" << ds << " type=" << type;
+    MAPNIK_LOG_DEBUG(datasource_cache)
+        << "datasource_cache: Datasource="
+        << ds << " type=" << type;
 
     return ds;
 }
@@ -196,7 +201,9 @@ bool datasource_cache::register_datasource(std::string const& str)
                 reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
             if (ds_name && insert(ds_name(),module))
             {
-                MAPNIK_LOG_DEBUG(datasource_cache) << "datasource_cache: Registered=" << ds_name();
+                MAPNIK_LOG_DEBUG(datasource_cache)
+                        << "datasource_cache: Registered="
+                        << ds_name();
 
                 success = true;
             }
@@ -210,13 +217,15 @@ bool datasource_cache::register_datasource(std::string const& str)
         else
         {
             MAPNIK_LOG_ERROR(datasource_cache)
-                    << "Problem loading plugin library: " << str
-                    << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
+                    << "Problem loading plugin library: "
+                    << str << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
         }
     }
-    catch (...) {
+    catch (...)
+    {
             MAPNIK_LOG_ERROR(datasource_cache)
-                    << "Exception caught while loading plugin library: " << str;
+                    << "Exception caught while loading plugin library: "
+                    << str;
     }
     return success;
 }

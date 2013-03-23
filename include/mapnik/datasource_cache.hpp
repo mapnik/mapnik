@@ -57,7 +57,7 @@ private:
     ~datasource_cache();
     std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
     bool registered_;
-    bool insert(std::string const&  name,lt__handle * const module);
+    bool insert(std::string const& name,lt__handle * const module);
     std::vector<std::string> plugin_directories_;
 };
 }
