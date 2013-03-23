@@ -35,7 +35,7 @@
 // stl
 #include <map>
 
-class lt__handle;
+struct lt__handle;
 
 namespace mapnik {
 
