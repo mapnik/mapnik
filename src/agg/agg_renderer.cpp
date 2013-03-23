@@ -79,7 +79,10 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       font_engine_(),
       font_manager_(font_engine_),
       detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
-      ras_ptr(new rasterizer)
+      ras_ptr(new rasterizer),
+      query_extent_(),
+      gamma_method_(GAMMA_POWER),
+      gamma_(1.0)
 {
     setup(m);
 }
@@ -98,7 +101,10 @@ agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, doub
       font_engine_(),
       font_manager_(font_engine_),
       detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
-      ras_ptr(new rasterizer)
+      ras_ptr(new rasterizer),
+      query_extent_(),
+      gamma_method_(GAMMA_POWER),
+      gamma_(1.0)
 {
     setup(m);
 }
@@ -118,7 +124,10 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
       font_engine_(),
       font_manager_(font_engine_),
       detector_(detector),
-      ras_ptr(new rasterizer)
+      ras_ptr(new rasterizer),
+      query_extent_(),
+      gamma_method_(GAMMA_POWER),
+      gamma_(1.0)
 {
     setup(m);
 }
@@ -297,7 +306,12 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
     typedef agg::pod_bvector<mapnik::svg::path_attributes> svg_attribute_type;
 
     ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_power());
+    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+    {
+        ras_ptr->gamma(agg::gamma_power());
+        gamma_method_ = GAMMA_POWER;
+        gamma_ = 1.0;
+    }
     agg::scanline_u8 sl;
     agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
     pixfmt_comp_type pixf(buf);

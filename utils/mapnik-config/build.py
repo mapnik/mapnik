@@ -17,15 +17,16 @@ config_variables = '''#!/bin/sh
 
 ## variables
 
+CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
+
 CONFIG_MAPNIK_VERSION='%(version)s'
 CONFIG_GIT_REVISION='%(git_revision)s'
 CONFIG_GIT_DESCRIBE='%(git_describe)s'
-CONFIG_FONTS='%(fonts)s'
-CONFIG_INPUT_PLUGINS='%(input_plugins)s'
+CONFIG_FONTS="%(fonts)s"
+CONFIG_INPUT_PLUGINS="%(input_plugins)s"
 CONFIG_MAPNIK_DEFINES='%(defines)s'
-CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
 CONFIG_MAPNIK_LIBNAME='%(mapnik_libname)s'
-CONFIG_MAPNIK_LIB="${CONFIG_PREFIX}/%(libdir_schema)s"
+CONFIG_MAPNIK_LIBPATH="%(mapnik_libpath)s"
 CONFIG_DEP_LIBS='%(dep_libs)s'
 CONFIG_MAPNIK_LDFLAGS='%(ldflags)s'
 CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapnik/agg"
@@ -82,17 +83,29 @@ else:
     if not stderr:
         git_describe = stdin.strip()
 
+# for fonts and input plugins we should try
+# to store the relative path, if feasible
+fontspath = config_env['MAPNIK_FONTS']
+lib_root = os.path.join(config_env['INSTALL_PREFIX'], config_env['LIBDIR_SCHEMA'])
+if lib_root in fontspath:
+    fontspath = "${CONFIG_PREFIX}/" + os.path.relpath(fontspath,config_env['INSTALL_PREFIX'])
+inputpluginspath = config_env['MAPNIK_INPUT_PLUGINS']
+if lib_root in inputpluginspath:
+    inputpluginspath = "${CONFIG_PREFIX}/" + os.path.relpath(inputpluginspath,config_env['INSTALL_PREFIX'])
+
+lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
+
 configuration = {
     "git_revision": git_revision,
     "git_describe": git_describe,
     "version": config_env['MAPNIK_VERSION_STRING'],
     "mapnik_libname": 'mapnik',
-    "libdir_schema": config_env['LIBDIR_SCHEMA'],
+    "mapnik_libpath": lib_path,
     "ldflags": ldflags,
     "dep_libs": dep_libs,
     "dep_includes": dep_includes,
-    "fonts": config_env['MAPNIK_FONTS'],
-    "input_plugins": config_env['MAPNIK_INPUT_PLUGINS'],
+    "fonts": fontspath,
+    "input_plugins": inputpluginspath,
     "defines":defines,
     "cxxflags":cxxflags
 }

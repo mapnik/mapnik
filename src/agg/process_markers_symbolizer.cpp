@@ -83,7 +83,12 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
         if (mark && *mark)
         {
             ras_ptr->reset();
-            ras_ptr->gamma(agg::gamma_power());
+            if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+            {
+                ras_ptr->gamma(agg::gamma_power());
+                gamma_method_ = GAMMA_POWER;
+                gamma_ = 1.0;
+            }
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
             agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);

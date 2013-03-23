@@ -86,7 +86,7 @@ while test $# -gt 0; do
       ;;
 
     --libs)
-      echo -L${CONFIG_MAPNIK_LIB} -l${CONFIG_MAPNIK_LIBNAME}
+      echo -L${CONFIG_MAPNIK_LIBPATH} -l${CONFIG_MAPNIK_LIBNAME}
       ;;
 
     --dep-libs)

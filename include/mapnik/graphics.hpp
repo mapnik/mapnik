@@ -118,9 +118,9 @@ public:
 
 private:
 
-    inline bool checkBounds(unsigned x, unsigned y) const
+    inline bool checkBounds(int x, int y) const
     {
-        return (x < width_ && y < height_);
+        return (x >= 0 && x < width_ && y >= 0 && y < height_);
     }
 
 public:

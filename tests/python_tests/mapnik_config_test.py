@@ -46,8 +46,7 @@ def test_mapnik_config_valid_opts():
       '--includes',
       '--dep-includes',
       '--cxxflags',
-      '--cflags',
-      '--all-flags'
+      '--cflags'
     ]
     for item in valid_args:
         cmd = 'mapnik-config ' + item
