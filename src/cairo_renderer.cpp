@@ -628,21 +628,24 @@ void cairo_renderer_base::render_marker(pixel_position const& pos,
         mapnik::svg_path_ptr vmarker = *marker.get_vector_data();
         if (vmarker)
         {
+            agg::trans_affine marker_tr = tr;
+            marker_tr *=agg::trans_affine_scaling(scale_factor_);
             agg::pod_bvector<svg::path_attributes> const & attributes = vmarker->attributes();
-            render_vector_marker(context_, pos, *vmarker, attributes, tr, opacity, recenter);
+            render_vector_marker(context_, pos, *vmarker, attributes, marker_tr, opacity, recenter);
         }
     }
     else if (marker.is_bitmap())
     {
-        agg::trans_affine matrix = tr;
         double width = (*marker.get_bitmap_data())->width();
         double height = (*marker.get_bitmap_data())->height();
         double cx = 0.5 * width;
         double cy = 0.5 * height;
-        matrix *= agg::trans_affine_translation(
-                     boost::math::iround(pos.x - cx),
-                     boost::math::iround(pos.y - cy));
-        context_.add_image(matrix, **marker.get_bitmap_data(), opacity);
+        agg::trans_affine marker_tr;
+        marker_tr *= agg::trans_affine_translation(-cx,-cy);
+        marker_tr *= tr;
+        marker_tr *= agg::trans_affine_scaling(scale_factor_);
+        marker_tr *= agg::trans_affine_translation(pos.x,pos.y);
+        context_.add_image(marker_tr, **marker.get_bitmap_data(), opacity);
     }
 }
 
@@ -688,7 +691,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
             double dx = 0.5 * (*marker)->width();
             double dy = 0.5 * (*marker)->height();
-            agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
+            agg::trans_affine tr;
             evaluate_transform(tr, feature, sym.get_image_transform());
             box2d<double> label_ext (-dx, -dy, dx, dy);
             label_ext *= tr;
@@ -726,13 +729,6 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             pixel_position pos = glyphs->marker_pos() + 0.5 *
                     pixel_position(glyphs->marker()->marker->width(),
                                    glyphs->marker()->marker->height());
-
-            double dx = 0.5 * glyphs->marker()->marker->width();
-            double dy = 0.5 * glyphs->marker()->marker->height();
-            agg::trans_affine marker_tr = agg::trans_affine_translation(-dx,-dy);
-            marker_tr *= agg::trans_affine_scaling(scale_factor_);
-            marker_tr *= agg::trans_affine_translation(dx, dy);
-            marker_tr *= glyphs->marker()->transform;
 
             render_marker(pos,
                       *(glyphs->marker()->marker), glyphs->marker()->transform,
