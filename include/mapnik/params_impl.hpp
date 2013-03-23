@@ -152,7 +152,7 @@ struct value_extractor_visitor : public boost::static_visitor<>
         {
             var_ = boost::lexical_cast<T>(val);
         }
-        catch (boost::bad_lexical_cast & )
+        catch (boost::bad_lexical_cast const& )
         {
             std::string err_msg = (boost::format("Failed converting from %s to %s")
                                    % typeid(T1).name()

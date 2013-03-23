@@ -99,7 +99,7 @@ agg::rgba8 parse_color(const char* str)
     {
         c = mapnik::parse_color(str);
     }
-    catch (mapnik::config_error & ex)
+    catch (mapnik::config_error const& ex)
     {
         MAPNIK_LOG_ERROR(svg_parser) << ex.what();
     }
@@ -800,7 +800,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
                 {
                     stop_color = mapnik::parse_color(kv.second.c_str());
                 }
-                catch (mapnik::config_error & ex)
+                catch (mapnik::config_error const& ex)
                 {
                     MAPNIK_LOG_ERROR(svg_parser) << ex.what();
                 }
@@ -820,7 +820,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
         {
             stop_color = mapnik::parse_color((const char *) value);
         }
-        catch (mapnik::config_error & ex)
+        catch (mapnik::config_error const& ex)
         {
             MAPNIK_LOG_ERROR(svg_parser) << ex.what();
         }

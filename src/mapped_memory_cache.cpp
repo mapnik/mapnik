@@ -79,9 +79,11 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
             }
             return result;
         }
-        catch (...)
+        catch (std::exception const& ex)
         {
-            MAPNIK_LOG_ERROR(mapped_memory_cache) << "Exception caught while loading mapping memory file: " << uri;
+            MAPNIK_LOG_ERROR(mapped_memory_cache)
+                << "Error loading mapped memory file: '"
+                << uri << "' (" << ex.what() << ")";
         }
     }
     /*
