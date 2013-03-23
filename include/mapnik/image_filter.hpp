@@ -417,12 +417,18 @@ void apply_filter(Src & src, colorize_alpha const& op)
 
     double step = 1.0/(size-1);
     double offset = 0.0;
-    BOOST_FOREACH( mapnik::color const& c, op)
+    BOOST_FOREACH( mapnik::filter::color_stop const& stop, op)
     {
-        grad_lut.add_color(offset, agg::rgba(c.red()/256.0,
-                                          c.green()/256.0,
-                                          c.blue()/256.0,
-                                          c.alpha()/256.0));
+        mapnik::color const& c = stop.color;
+        double stop_offset = stop.offset;
+        if (stop_offset == 0)
+        {
+            stop_offset = offset;
+        }
+        grad_lut.add_color(stop_offset, agg::rgba(c.red()/256.0,
+                                                  c.green()/256.0,
+                                                  c.blue()/256.0,
+                                                  c.alpha()/256.0));
         offset += step;
     }
     grad_lut.build_lut();

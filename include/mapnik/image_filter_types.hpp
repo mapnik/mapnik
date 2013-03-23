@@ -98,16 +98,18 @@ struct hsla
     double a1;
 };
 
-struct colorize_alpha : std::vector<mapnik::color>
+struct color_stop
+{
+    color_stop() {}
+    color_stop(mapnik::color const& c, double val = 0.0)
+        : color(c),offset(val) {}
+    mapnik::color color;
+    double offset;
+};
+
+struct colorize_alpha : std::vector<color_stop>
 {
     colorize_alpha() {}
-    colorize_alpha(mapnik::color const& c0, mapnik::color const& c1)
-    {
-        this->push_back(c0);
-        this->push_back(c1);
-        // TODO: support multiple color-stops
-        // https://developer.mozilla.org/en-US/docs/CSS/linear-gradient
-    }
 };
 
 typedef boost::variant<filter::blur,
