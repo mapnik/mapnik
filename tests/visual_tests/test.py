@@ -129,6 +129,19 @@ def report(diff,threshold,quiet=False):
         else:
             print '\x1b[32m✓\x1b[0m'
 
+def report_overwrite(quiet=False):
+    if quiet:
+	sys.stderr.write('\x1b[33m.\x1b[0m')
+    else:
+	print '\x1b[33m?\x1b[0m (\x1b[34mReference file replaced with new version\x1b[0m)'
+
+def report_create(quiet=False):
+    if quiet:
+	sys.stderr.write('\x1b[33m.\x1b[0m')
+    else:
+	print '\x1b[33m?\x1b[0m (\x1b[34mNew reference file created\x1b[0m)'
+
+
 def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_failures=False):
     filename = config['name']
     m = mapnik.Map(width, height)
@@ -154,14 +167,16 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
             mapnik.render_to_file(m, actual_agg, 'png8:m=h', scale_factor)
             if not os.path.exists(expected_agg):
                 # generate it on the fly
+		report_create(quiet)
 		fail(actual_agg, expected_agg, None)
             else:
                 threshold = 0
                 diff = compare(actual_agg, expected_agg, threshold=0, alpha=True)
                 if overwrite_failures and diff > threshold:
 		    fail(actual_agg, expected_agg, None)
+		    report_overwrite(quiet)
                 else:
-                    report(diff,threshold,quiet)
+		    report(diff, threshold, quiet)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
 	    fail(actual_agg,expected_agg, str(e.message))
@@ -181,12 +196,14 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
             new_im.save(actual_cairo,'png8:m=h')
             if not os.path.exists(expected_cairo):
                 # generate it on the fly
+		report_create(quiet)
                 fail(actual_cairo,expected_cairo,None)
             else:
                 # cairo and agg differ in alpha for reasons unknown, so don't test it for now
                 threshold = 0
                 diff = compare(actual_cairo, expected_cairo, threshold=threshold, alpha=False)
                 if overwrite_failures and diff > threshold:
+		    report_overwrite(quiet)
                     fail(actual_cairo,expected_cairo,None)
                 else:
                     report(diff,threshold,quiet)
@@ -208,11 +225,13 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
             open(actual_grid,'wb').write(json.dumps(utf1,indent=1))
             if not os.path.exists(expected_grid):
                 # generate it on the fly
+		report_create(quiet)
                 fail(actual_grid,expected_grid,None)
             else:
                 threshold = 0
                 diff = compare_grids(actual_grid, expected_grid, threshold=threshold, alpha=False)
                 if overwrite_failures and diff > threshold:
+		    report_overwrite(quiet)
                     fail(actual_grid,expected_grid,None)
                 else:
                     report(diff,threshold,quiet)
