@@ -17,7 +17,10 @@ visual_output_dir = "/tmp/mapnik-visual-images"
 
 defaults = {
     'sizes': [(500, 100)],
-    'scales':[1.0,2.0]
+    'scales':[1.0,2.0],
+    'agg': True,
+    'cairo': True,
+    'grid': True,
 }
 
 sizes_many_in_big_range = [(800, 100), (600, 100), (400, 100),
@@ -31,7 +34,7 @@ default_text_box = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
 
 dirname = os.path.dirname(__file__)
 
-files = [
+text_tests = [
     {'name': "list", 'sizes': sizes_many_in_big_range,'bbox':default_text_box},
     {'name': "simple", 'sizes': sizes_many_in_big_range,'bbox':default_text_box},
     {'name': "lines-1", 'sizes': sizes_few_square,'bbox':default_text_box},
@@ -46,18 +49,6 @@ files = [
     # fails with clang++ on os x
     #{'name': "lines-shield", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "collision", 'sizes':[(600,400)]},
-    {'name': "marker-svg-opacity"},
-    {'name': "marker-multi-policy", 'sizes':[(600,400)]},
-    {'name': "marker-on-line", 'sizes':[(600,400)],
-        'bbox': mapnik.Box2d(-10, 0, 15, 20)},
-    {'name': "marker-on-line-spacing-eq-width", 'sizes':[(600,400)]},
-    {'name': "marker-on-line-spacing-eq-width-overlap", 'sizes':[(600,400)]},
-    {'name': "marker_line_placement_on_points"},
-    {'name': "marker-with-background-image", 'sizes':[(600,400),(400,600),(257,256)]},
-    {'name': "marker-with-background-image-and-hsla-transform", 'sizes':[(600,400),(400,600),(257,256)]},
-    {'name': "marker-on-hex-grid", 'sizes':[(600,400),(400,600),(257,256)]},
-    {'name': "whole-centroid", 'sizes':[(600,400)],
-        'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
     {'name': "text-halo-rasterizer", 'sizes':[(600,400)]},
     {'name': "simple-E", 'bbox':default_text_box},
     {'name': "simple-NE",'bbox':default_text_box},
@@ -83,6 +74,9 @@ files = [
     {'name': "rtl-point", 'sizes': [(200, 200)],'bbox':default_text_box},
     {'name': "jalign-auto", 'sizes': [(200, 200)],'bbox':default_text_box},
     {'name': "line-offset", 'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
+]
+
+tiff_tests = [
     {'name': "tiff-alpha-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-broken-assoc-alpha-gdal", 'sizes':[(600,400)]},
     {'name': "tiff-alpha-gradient-gdal", 'sizes':[(600,400)]},
@@ -93,10 +87,10 @@ files = [
     {'name': "tiff-resampling", 'sizes':[(600,400)]},
     # https://github.com/mapnik/mapnik/issues/1622
     {'name': "tiff-edge-alignment-gdal1", 'sizes':[(256,256),(255,257)],
-        'bbox':mapnik.Box2d(-13267022.12540147,4618019.500877209,-13247454.246160466,4637587.380118214)
+	'bbox':mapnik.Box2d(-13267022.12540147,4618019.500877209,-13247454.246160466,4637587.380118214)
     },
     {'name': "tiff-edge-alignment-gdal2", 'sizes':[(256,256),(255,257)],
-        'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
+	'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
     },
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
@@ -104,7 +98,24 @@ files = [
     #{'name': "tiff-alpha-broken-assoc-alpha-raster", 'sizes':[(600,400)]},
     #{'name': "tiff-nodata-edge-raster", 'sizes':[(600,400)]},
     #{'name': "tiff-opaque-edge-raster", 'sizes':[(256,256)]},
-    ]
+]
+
+other_tests = [
+    {'name': "marker-svg-opacity"},
+    {'name': "marker-multi-policy", 'sizes':[(600,400)]},
+    {'name': "marker-on-line", 'sizes':[(600,400)],
+	'bbox': mapnik.Box2d(-10, 0, 15, 20)},
+    {'name': "marker-on-line-spacing-eq-width", 'sizes':[(600,400)]},
+    {'name': "marker-on-line-spacing-eq-width-overlap", 'sizes':[(600,400)]},
+    {'name': "marker_line_placement_on_points"},
+    {'name': "marker-with-background-image", 'sizes':[(600,400),(400,600),(257,256)]},
+    {'name': "marker-with-background-image-and-hsla-transform", 'sizes':[(600,400),(400,600),(257,256)]},
+    {'name': "marker-on-hex-grid", 'sizes':[(600,400),(400,600),(257,256)]},
+    {'name': "whole-centroid", 'sizes':[(600,400)],
+	'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
+]
+
+files = text_tests + tiff_tests + other_tests
 
 def report(diff,threshold,quiet=False):
     if diff > threshold:
@@ -124,7 +135,7 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
     postfix = "%s-%d-%d-%s" % (filename,width,height,scale_factor)
     
     ## AGG rendering
-    if config.get('agg',True):
+    if config.get('agg', True):
         expected_agg = os.path.join(dirname, "images", postfix + '-agg-reference.png')
         actual_agg = os.path.join(visual_output_dir, '%s-agg.png' % postfix)
         try:
@@ -135,7 +146,7 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
                 m.zoom_all()
         except Exception, e:
             sys.stderr.write(e.message + '\n')
-            fail(actual_agg,expected_agg,str(e.message))
+	    fail(actual_agg, expected_agg, str(e.message))
 	    return m
         if not quiet:
             print "\"%s\" with agg..." % (postfix),
@@ -143,22 +154,22 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
             mapnik.render_to_file(m, actual_agg, 'png8:m=h', scale_factor)
             if not os.path.exists(expected_agg):
                 # generate it on the fly
-                fail(actual_agg,expected_agg,None)
+		fail(actual_agg, expected_agg, None)
             else:
                 threshold = 0
                 diff = compare(actual_agg, expected_agg, threshold=0, alpha=True)
                 if overwrite_failures and diff > threshold:
-                    fail(actual_agg,expected_agg,None)
+		    fail(actual_agg, expected_agg, None)
                 else:
                     report(diff,threshold,quiet)
         except Exception, e:
             sys.stderr.write(e.message + '\n')
-            fail(actual_agg,expected_agg,str(e.message))
+	    fail(actual_agg,expected_agg, str(e.message))
     
     ### TODO - set up tests to compare agg and cairo png output
     
     ### Cairo rendering
-    if config.get('cairo',True):
+    if config.get('cairo', True):
         expected_cairo = os.path.join(dirname, "images", postfix + '-cairo-reference.png')
         actual_cairo = os.path.join(visual_output_dir, '%s-cairo.png' % postfix)
         if not quiet:
@@ -185,7 +196,7 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
     
     ## Grid rendering
     # TODO - grid renderer does not support scale_factor yet via python
-    if scale_factor == 1.0 and config.get('grid',True):
+    if scale_factor == 1.0 and config.get('grid', True):
         expected_grid = os.path.join(dirname, "grids", postfix + '-grid-reference.json')
         actual_grid = os.path.join(visual_output_dir, '%s-grid.json' % postfix)
         if not quiet:
