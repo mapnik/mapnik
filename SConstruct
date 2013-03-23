@@ -262,6 +262,7 @@ opts.AddVariables(
     ('CXX', 'The C++ compiler to use to compile mapnik (defaults to g++).', 'g++'),
     ('CC', 'The C compiler used for configure checks of C libs (defaults to gcc).', 'gcc'),
     ('CUSTOM_CXXFLAGS', 'Custom C++ flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir>', ''),
+    ('CUSTOM_DEFINES', 'Custom Compiler DEFINES, e.g. -DENABLE_THIS', ''),
     ('CUSTOM_CFLAGS', 'Custom C flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir> (only used for configure checks)', ''),
     ('CUSTOM_LDFLAGS', 'Custom linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>', ''),
     EnumVariable('LINKING', "Set library format for libmapnik",'shared', ['shared','static']),
@@ -392,6 +393,7 @@ pickle_store = [# Scons internal variables
         'LIBS',
         'LINKFLAGS',
         'CUSTOM_LDFLAGS', # user submitted
+        'CUSTOM_DEFINES', # user submitted
         'CUSTOM_CXXFLAGS', # user submitted
         'CUSTOM_CFLAGS', # user submitted
         'MAPNIK_LIB_NAME',
@@ -432,6 +434,7 @@ pickle_store = [# Scons internal variables
         'MAPNIK_LIB_BASE_DEST',
         'EXTRA_FREETYPE_LIBS',
         'LIBMAPNIK_CPPATHS',
+        'LIBMAPNIK_DEFINES',
         'LIBMAPNIK_CXXFLAGS',
         'CAIRO_LIBPATHS',
         'CAIRO_LINKFLAGS',
@@ -1013,6 +1016,7 @@ if not preconfigured:
     env['HAS_LIBXML2'] = False
     env['LIBMAPNIK_LIBS'] = []
     env['LIBMAPNIK_CPPATHS'] = []
+    env['LIBMAPNIK_DEFINES'] = []
     env['LIBMAPNIK_CXXFLAGS'] = []
     env['PLUGINS'] = PLUGINS
     env['EXTRA_FREETYPE_LIBS'] = []
@@ -1072,6 +1076,7 @@ if not preconfigured:
     env['LIBPATH'] = ['#src']
 
     # set any custom cxxflags and ldflags to come first
+    env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
@@ -1105,8 +1110,8 @@ if not preconfigured:
     # http://www.opensource.apple.com/tarballs/ICU/
     # then copy the headers to a location that mapnik will find
     if 'core' in env['ICU_LIB_NAME']:
-        env.Append(CXXFLAGS = '-DU_HIDE_DRAFT_API')
-        env.Append(CXXFLAGS = '-DUDISABLE_RENAMING')
+        env.Append(CPPDEFINES = '-DU_HIDE_DRAFT_API')
+        env.Append(CPPDEFINES = '-DUDISABLE_RENAMING')
         if os.path.exists(env['ICU_LIB_NAME']):
             #-sICU_LINK=" -L/usr/lib -licucore
             env['ICU_LIB_NAME'] = os.path.basename(env['ICU_LIB_NAME']).replace('.dylib','').replace('lib','')
@@ -1144,7 +1149,7 @@ if not preconfigured:
     ]
 
     if env['JPEG']:
-        env.Append(CXXFLAGS = '-DHAVE_JPEG')
+        env.Append(CPPDEFINES = '-DHAVE_JPEG')
         LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], True,'C'])
         inc_path = env['%s_INCLUDES' % 'JPEG']
         lib_path = env['%s_LIBS' % 'JPEG']
@@ -1154,7 +1159,7 @@ if not preconfigured:
         env['SKIPPED_DEPS'].extend(['jpeg'])
 
     if env['PROJ']:
-        env.Append(CXXFLAGS = '-DMAPNIK_USE_PROJ4')
+        env.Append(CPPDEFINES = '-DMAPNIK_USE_PROJ4')
         LIBSHEADERS.append(['proj', 'proj_api.h', True,'C'])
         inc_path = env['%s_INCLUDES' % 'PROJ']
         lib_path = env['%s_LIBS' % 'PROJ']
@@ -1164,7 +1169,7 @@ if not preconfigured:
         env['SKIPPED_DEPS'].extend(['proj'])
 
     if env['PNG']:
-        env.Append(CXXFLAGS = '-DHAVE_PNG')
+        env.Append(CPPDEFINES = '-DHAVE_PNG')
         LIBSHEADERS.append(['png', 'png.h', True,'C'])
         inc_path = env['%s_INCLUDES' % 'PNG']
         lib_path = env['%s_LIBS' % 'PNG']
@@ -1174,7 +1179,7 @@ if not preconfigured:
         env['SKIPPED_DEPS'].extend(['png'])
 
     if env['TIFF']:
-        env.Append(CXXFLAGS = '-DHAVE_TIFF')
+        env.Append(CPPDEFINES = '-DHAVE_TIFF')
         LIBSHEADERS.append(['tiff', 'tiff.h', True,'C'])
         inc_path = env['%s_INCLUDES' % 'TIFF']
         lib_path = env['%s_LIBS' % 'TIFF']
@@ -1202,7 +1207,7 @@ if not preconfigured:
             env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
 
     if env['BIGINT']:
-        env.Append(CXXFLAGS = '-DBIGINT')
+        env.Append(CPPDEFINES = '-DBIGINT')
 
     if env['THREADING'] == 'multi':
         thread_flag = thread_suffix
@@ -1257,7 +1262,7 @@ if not preconfigured:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
         if conf.boost_regex_has_icu():
             # TODO - should avoid having this be globally defined...
-            env.Append(CXXFLAGS = '-DBOOST_REGEX_HAS_ICU')
+            env.Append(CPPDEFINES = '-DBOOST_REGEX_HAS_ICU')
         else:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
 
@@ -1540,29 +1545,22 @@ if not preconfigured:
         env['ABI_VERSION'] = abi.replace('-pre','').split('.')
         env['MAPNIK_VERSION_STRING'] = abi
 
-        # Common C++ flags.
+        # Common DEFINES.
+        env.Append(CPPDEFINES = '-D%s' % env['PLATFORM'].upper())
         if env['THREADING'] == 'multi':
-            common_cxx_flags = '-D%s -DMAPNIK_THREADSAFE ' % env['PLATFORM'].upper()
-        else :
-            common_cxx_flags = '-D%s ' % env['PLATFORM'].upper()
+            env.Append(CPPDEFINES = '-DMAPNIK_THREADSAFE')
 
         # Mac OSX (Darwin) special settings
         if env['PLATFORM'] == 'Darwin':
             pthread = ''
-            # Getting the macintosh version number, sticking as a compiler macro
-            # for Leopard -- needed because different workarounds are needed than
-            # for Tiger.
-            # this was used for fribidi - not longer needed
-            # but will retain logic for future use
-            #if platform.mac_ver()[0].startswith('10.5'):
-            #    common_cxx_flags += '-DOSX_LEOPARD '
         else:
             pthread = '-pthread'
 
         # Common debugging flags.
         # http://lists.fedoraproject.org/pipermail/devel/2010-November/144952.html
-        debug_flags  = '-g -fno-omit-frame-pointer -DDEBUG -DMAPNIK_DEBUG'
-        ndebug_flags = '-DNDEBUG'
+        debug_flags  = '-g -fno-omit-frame-pointer'
+        debug_defines = '-DDEBUG -DMAPNIK_DEBUG'
+        ndebug_defines = '-DNDEBUG'
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
@@ -1580,39 +1578,37 @@ if not preconfigured:
         log_enabled = ' -DMAPNIK_LOG -DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % log_severity
 
         if env['DEBUG']:
-            debug_flags += log_enabled
+            debug_defines += log_enabled
         else:
             if env['ENABLE_LOG']:
-                ndebug_flags += log_enabled
+                ndebug_defines += log_enabled
 
         # Enable statistics reporting
         if env['ENABLE_STATS']:
-            debug_flags += ' -DMAPNIK_STATS'
-            ndebug_flags += ' -DMAPNIK_STATS'
+            debug_defines += ' -DMAPNIK_STATS'
+            ndebug_defines += ' -DMAPNIK_STATS'
 
         # Add rdynamic to allow using statics between application and plugins
         # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
         if env['PLATFORM'] != 'Darwin' and env['CXX'] == 'g++':
             env.MergeFlags('-rdynamic')
 
-        # Customizing the C++ compiler flags depending on:
-        #  (1) the C++ compiler used; and
-        #  (2) whether debug binaries are requested.
-        if env['SUNCC']:
-            if env['DEBUG']:
-                env.Append(CXXFLAGS = common_cxx_flags + debug_flags)
-            else:
-                env.Append(CXXFLAGS = common_cxx_flags + '-O %s' % ndebug_flags)
+        if env['DEBUG']:
+            env.Append(CXXFLAGS = debug_flags)
+            env.Append(CPPDEFINES = debug_defines)
         else:
+            env.Append(CPPDEFINES = ndebug_defines)
+
+        if not env['SUNCC']:
             # Common flags for GCC.
-            gcc_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 %s' % (env['WARNING_CXXFLAGS'], pthread, common_cxx_flags)
+            gcc_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
             if env['DEBUG']:
-                env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline %s' % debug_flags)
+                env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline')
             else:
-                env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts %s' % (env['OPTIMIZATION'],ndebug_flags))
+                env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
 
             if env['DEBUG_UNDEFINED']:
-                env.Append(CXXFLAGS = '-fcatch-undefined-behavior -ftrapv -fwrapv')
+                env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
         if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
             majver, minver = env['PYTHON_VERSION'].split('.')
@@ -1735,13 +1731,6 @@ if not HELP_REQUESTED:
     #plugin_base.Append(CXXFLAGS='-fvisibility-inlines-hidden')
 
     Export('plugin_base')
-
-    # clear the '_CPPDEFFLAGS' variable
-    # for unknown reasons this variable puts -DNone
-    # in the g++ args prompting unnecessary recompiles
-    env['_CPPDEFFLAGS'] = None
-    plugin_base['_CPPDEFFLAGS'] = None
-
 
     if env['FAST']:
         # caching is 'auto' by default in SCons

@@ -54,6 +54,7 @@ test:
 test-local:
 	@echo "*** Boostrapping local test environment..."
 	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	export PATH=`pwd`/utils/mapnik-config/:${PATH} && \
 	export PYTHONPATH=`pwd`/bindings/python/:${PYTHONPATH} && \
 	export MAPNIK_FONT_DIRECTORY=`pwd`/fonts/dejavu-fonts-ttf-2.33/ttf/ && \
 	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \

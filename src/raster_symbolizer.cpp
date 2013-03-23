@@ -28,6 +28,7 @@
 #include <mapnik/config.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/raster_colorizer.hpp>
+#include <mapnik/attribute.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_compositing.hpp>

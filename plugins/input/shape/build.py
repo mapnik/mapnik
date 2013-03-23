@@ -47,7 +47,7 @@ libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 if env['SHAPE_MEMORY_MAPPED_FILE']:
-    plugin_env.Append(CXXFLAGS = '-DSHAPE_MEMORY_MAPPED_FILE')
+    plugin_env.Append(CPPDEFINES = '-DSHAPE_MEMORY_MAPPED_FILE')
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])

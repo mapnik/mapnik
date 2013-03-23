@@ -8,6 +8,8 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added new mapnik-config options: `git-describe`, `defines`, `includes`, `dep-includes`, and `cxxflags` (#1443)
+
 - Added `text-halo-rasterizer` property. Set to `fast` for lower quality but faster
   halo rendering (#1298)
 

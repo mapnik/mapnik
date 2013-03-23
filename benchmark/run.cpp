@@ -18,7 +18,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
 
 #define BOOST_CHRONO_HEADER_ONLY
 #include <boost/chrono/process_cpu_clocks.hpp>
@@ -40,32 +39,40 @@ void benchmark(T & test_runner, std::string const& name)
 {
     try {
         bool should_run_test = true;
-        if (!test_set.empty()) {
+        if (!test_set.empty())
+        {
             should_run_test = test_set.find(test_num) != test_set.end();
         }
-        if (should_run_test || dry_run) {
-            if (!test_runner.validate()) {
+        if (should_run_test || dry_run)
+        {
+            if (!test_runner.validate())
+            {
                 std::clog << "test did not validate: " << name << "\n";
                 //throw std::runtime_error(std::string("test did not validate: ") + name);
             }
-            if (dry_run) {
+            if (dry_run)
+            {
                 std::clog << test_num << ") " << (test_runner.threads_ ? "threaded -> ": "")
                     << name << "\n";
-            } else {
+            }
+            else
+            {
                 process_cpu_clock::time_point start;
                 dur elapsed;
-                if (test_runner.threads_ > 0) {
+                if (test_runner.threads_ > 0)
+                {
                     boost::thread_group tg;
                     for (unsigned i=0;i<test_runner.threads_;++i)
                     {
-                        boost::function<void()> _p;
-                        _p = boost::bind(&T::operator(),&test_runner);
-                        tg.create_thread(_p);
+                        tg.create_thread(test_runner);
+                        //tg.create_thread(boost::bind(&T::operator(),&test_runner));
                     }
                     start = process_cpu_clock::now();
                     tg.join_all();
                     elapsed = process_cpu_clock::now() - start;
-                } else {
+                }
+                else
+                {
                     start = process_cpu_clock::now();
                     test_runner();
                     elapsed = process_cpu_clock::now() - start;
@@ -75,7 +82,9 @@ void benchmark(T & test_runner, std::string const& name)
                     << boost::chrono::duration_cast<milliseconds>(elapsed) << "\n";
             }
         }
-    } catch (std::exception const& ex) {
+    }
+    catch (std::exception const& ex)
+    {
         std::clog << "test runner did not complete: " << ex.what() << "\n";
     }
     test_num++;
@@ -594,6 +603,7 @@ struct test10
     }
 };
 
+
 #include <mapnik/wkt/wkt_factory.hpp>
 #include "agg_conv_clipper.h"
 #include "agg_path_storage.h"
@@ -603,21 +613,19 @@ struct test11
 {
     unsigned iter_;
     unsigned threads_;
-    boost::ptr_vector<geometry_type> paths_;
+    std::string wkt_in_;
     mapnik::box2d<double> extent_;
     typedef agg::conv_clipper<mapnik::geometry_type, agg::path_storage> poly_clipper;
-    explicit test11(unsigned iterations,
-                   unsigned threads,
-                   std::string wkt_in,
-                   mapnik::box2d<double> const& extent)
-                   : iter_(iterations),
-                     threads_(threads),
-                     extent_(extent) {
-                        if (!mapnik::from_wkt(wkt_in, paths_))
-                        {
-                            throw std::runtime_error("Failed to parse WKT");
-                        }
-      }
+    test11(unsigned iterations,
+           unsigned threads,
+           std::string wkt_in,
+           mapnik::box2d<double> const& extent)
+        : iter_(iterations),
+          threads_(threads),
+          wkt_in_(wkt_in),
+          extent_(extent) {
+
+    }
 
     bool validate()
     {
@@ -625,6 +633,11 @@ struct test11
     }
     void operator()()
     {
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
         agg::path_storage ps;
         ps.move_to(extent_.minx(), extent_.miny());
         ps.line_to(extent_.minx(), extent_.maxy());
@@ -632,7 +645,7 @@ struct test11
         ps.line_to(extent_.maxx(), extent_.miny());
         ps.close_polygon();
         for (unsigned i=0;i<iter_;++i) {
-            BOOST_FOREACH( geometry_type & geom, paths_)
+            BOOST_FOREACH( geometry_type & geom, paths)
             {
                 poly_clipper clipped(geom,ps,
                     agg::clipper_and,
@@ -640,6 +653,51 @@ struct test11
                     agg::clipper_non_zero,
                     1);
                 clipped.rewind(0);
+                unsigned cmd;
+                double x,y;
+                while ((cmd = geom.vertex(&x, &y)) != SEG_END) {}
+            }
+        }
+    }
+};
+
+#include <mapnik/polygon_clipper.hpp>
+
+struct test12
+{
+    unsigned iter_;
+    unsigned threads_;
+    std::string wkt_in_;
+
+    mapnik::box2d<double> extent_;
+    typedef mapnik::polygon_clipper<mapnik::geometry_type> poly_clipper;
+    test12(unsigned iterations,
+           unsigned threads,
+           std::string wkt_in,
+           mapnik::box2d<double> const& extent)
+        : iter_(iterations),
+          threads_(threads),
+          wkt_in_(wkt_in),
+          extent_(extent)
+    {
+    }
+
+    bool validate()
+    {
+        return true;
+    }
+    void operator()()
+    {
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        for (unsigned i=0;i<iter_;++i)
+        {
+            BOOST_FOREACH( geometry_type & geom, paths)
+            {
+                poly_clipper clipped(extent_, geom);
                 unsigned cmd;
                 double x,y;
                 while ((cmd = geom.vertex(&x, &y)) != SEG_END) {}
@@ -785,8 +843,23 @@ int main( int argc, char** argv)
             std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
                        (std::istreambuf_iterator<char>()) );
             mapnik::box2d<double> clipping_box(0,0,40,40);
+
             test11 runner(100000,10,wkt_in,clipping_box);
             benchmark(runner,"clipping polygon with agg_conv_clipper");
+        }
+
+        {
+
+            std::string filename_("benchmark/data/polygon.wkt");
+            std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
+            if (!in.is_open())
+                throw std::runtime_error("could not open: '" + filename_ + "'");
+            std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
+                       (std::istreambuf_iterator<char>()) );
+            mapnik::box2d<double> clipping_box(0,0,40,40);
+
+            test12 runner(100000,10,wkt_in,clipping_box);
+            benchmark(runner,"clipping polygon with mapnik::polygon_clipper");
         }
 
         std::cout << "...benchmark done\n";

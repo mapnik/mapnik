@@ -49,8 +49,6 @@
     #undef MAPNIK_KARMA_TO_STRING
   #else
     #include <boost/spirit/include/karma.hpp>
-    #include <cmath> // log10
-    #include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
   #endif
 #endif
 

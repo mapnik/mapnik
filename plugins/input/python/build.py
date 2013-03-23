@@ -39,7 +39,7 @@ if env['PLATFORM'] == 'Darwin' and env['FRAMEWORK_PYTHON']:
                 python_link_flag = '-F/ -framework Python'
 else:
     # on linux the linkflags end up to early in the compile flags to work correctly
-    python_link_flag = ''
+    python_link_flag = '-L%s' % env['PYTHON_SYS_PREFIX'] + os.path.sep + env['LIBDIR_SCHEMA']
     # so instead add to libraries
     libraries.append('python%s' % env['PYTHON_VERSION'])
 

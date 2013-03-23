@@ -451,7 +451,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     {
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Loading colour table...";
 
-                        unsigned nodata_value = static_cast<unsigned>(nodata); // FIXME: is it realy unsigned ?
+                        unsigned nodata_value = static_cast<unsigned>(std::floor(nodata+.5)); // FIXME: is it realy unsigned ?
                         if (hasNoData)
                         {
                             feature->put("NODATA",static_cast<mapnik::value_integer>(nodata_value));

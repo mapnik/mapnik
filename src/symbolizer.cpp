@@ -21,8 +21,9 @@
  *****************************************************************************/
 
 //mapnik
-#include <mapnik/feature.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/transform_processor.hpp>
 #include <mapnik/metawriter.hpp>
 

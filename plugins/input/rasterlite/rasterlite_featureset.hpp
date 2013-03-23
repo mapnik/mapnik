@@ -25,6 +25,8 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/query.hpp>
+#include <mapnik/datasource.hpp>
 
 // boost
 #include <boost/variant.hpp>
