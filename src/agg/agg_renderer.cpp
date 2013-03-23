@@ -344,11 +344,10 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
     {
         double width = (*marker.get_bitmap_data())->width();
         double height = (*marker.get_bitmap_data())->height();
-        double cx = 0.5 * width;
-        double cy = 0.5 * height;
-
         if (std::fabs(1.0 - scale_factor_) < 0.001 && tr.is_identity())
         {
+            double cx = 0.5 * width;
+            double cy = 0.5 * height;
             composite(current_buffer_->data(), **marker.get_bitmap_data(),
                       comp_op, opacity,
                       boost::math::iround(pos.x - cx),

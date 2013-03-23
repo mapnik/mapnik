@@ -98,12 +98,18 @@ struct hsla
     double a1;
 };
 
-struct colorize_alpha
+struct color_stop
 {
-    colorize_alpha(mapnik::color const& c0, mapnik::color const& c1)
-    {
-         // TODO: implement me!
-    }
+    color_stop() {}
+    color_stop(mapnik::color const& c, double val = 0.0)
+        : color(c),offset(val) {}
+    mapnik::color color;
+    double offset;
+};
+
+struct colorize_alpha : std::vector<color_stop>
+{
+    colorize_alpha() {}
 };
 
 typedef boost::variant<filter::blur,
