@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/params.hpp>
-#include <mapnik/plugin.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/noncopyable.hpp>
 
@@ -36,7 +35,11 @@
 // stl
 #include <map>
 
+class lt__handle;
+
 namespace mapnik {
+
+class PluginInfo;
 
 class MAPNIK_DECL datasource_cache
     : public singleton<datasource_cache, CreateStatic>,
@@ -54,7 +57,7 @@ private:
     ~datasource_cache();
     std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
     bool registered_;
-    bool insert(std::string const&  name,const lt_dlhandle module);
+    bool insert(std::string const&  name,lt__handle * const module);
     std::vector<std::string> plugin_directories_;
 };
 }

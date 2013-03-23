@@ -25,6 +25,7 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/params.hpp>
+#include <mapnik/plugin.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
