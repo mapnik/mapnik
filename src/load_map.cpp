@@ -281,7 +281,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
 
             }
         }
-        catch (const config_error & ex)
+        catch (config_error const& ex)
         {
             ex.append_context(map_node);
             throw;
@@ -382,7 +382,7 @@ void map_parser::parse_map_include(Map & map, xml_node const& include)
                 }
             }
         }
-    } catch (const config_error & ex) {
+    } catch (config_error const& ex) {
         ex.append_context(include);
         throw;
     }
@@ -465,7 +465,7 @@ void map_parser::parse_style(Map & map, xml_node const& sty)
         }
 
         map.insert_style(name, style);
-    } catch (const config_error & ex) {
+    } catch (config_error const& ex) {
         ex.append_context(std::string("in style '") + name + "'", sty);
         throw;
     }
@@ -505,7 +505,7 @@ void map_parser::parse_fontset(Map & map, xml_node const& fset)
         // when it's parsed
         fontsets_.insert(std::pair<std::string, font_set>(name, fontset));
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(std::string("in FontSet '") + name + "'", fset);
         throw;
@@ -710,7 +710,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
         }
         map.addLayer(lyr);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         if (!name.empty())
         {
@@ -810,7 +810,7 @@ void map_parser::parse_rule(feature_type_style & style, xml_node const& r)
         style.add_rule(rule);
 
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         if (!name.empty())
         {
@@ -933,7 +933,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1079,7 +1079,7 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1132,7 +1132,7 @@ void map_parser::parse_polygon_pattern_symbolizer(rule & rule,
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1164,7 +1164,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
 
         rule.append(text_symbol);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1265,7 +1265,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         parse_symbolizer_base(shield_symbol, sym);
         rule.append(shield_symbol);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1374,7 +1374,7 @@ void map_parser::parse_line_symbolizer(rule & rule, xml_node const & sym)
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1403,7 +1403,7 @@ void map_parser::parse_polygon_symbolizer(rule & rule, xml_node const & sym)
         parse_symbolizer_base(poly_sym, sym);
         rule.append(poly_sym);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1429,7 +1429,7 @@ void map_parser::parse_building_symbolizer(rule & rule, xml_node const & sym)
         parse_symbolizer_base(building_sym, sym);
         rule.append(building_sym);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1521,7 +1521,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         parse_symbolizer_base(raster_sym, sym);
         rule.append(raster_sym);
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(sym);
         throw;
@@ -1617,7 +1617,7 @@ bool map_parser::parse_raster_colorizer(raster_colorizer_ptr const& rc,
             }
         }
     }
-    catch (const config_error & ex)
+    catch (config_error const& ex)
     {
         ex.append_context(node);
         throw;

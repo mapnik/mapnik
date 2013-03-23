@@ -224,10 +224,6 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
     {
         MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading: '" << uri << "' (" << ex.what() << ")";
     }
-    catch (...)
-    {
-        MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading: '" << uri << "'";
-    }
     return result;
 }
 

@@ -90,7 +90,7 @@ public:
                 populate_tree(child, node);
             }
         }
-        catch (rapidxml::parse_error &e)
+        catch (rapidxml::parse_error const& e)
         {
             long line = static_cast<long>(
                 std::count(&v.front(), e.where<char>(), '\n') + 1);

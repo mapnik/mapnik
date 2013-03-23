@@ -221,11 +221,11 @@ bool datasource_cache::register_datasource(std::string const& str)
                     << str << " (dlopen failed - plugin likely has an unsatisfied dependency or incompatible ABI)";
         }
     }
-    catch (...)
+    catch (std::exception const& ex)
     {
             MAPNIK_LOG_ERROR(datasource_cache)
                     << "Exception caught while loading plugin library: "
-                    << str;
+                    << str << " (" << ex.what() << ")";
     }
     return success;
 }
