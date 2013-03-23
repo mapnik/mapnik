@@ -186,7 +186,7 @@ void feature_style_processor<Processor>::apply(double scale_denom)
             }
         }
     }
-    catch (proj_init_error& ex)
+    catch (proj_init_error const& ex)
     {
         MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
     }
@@ -228,7 +228,7 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr,
                            names);
         }
     }
-    catch (proj_init_error& ex)
+    catch (proj_init_error const& ex)
     {
         MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
     }
