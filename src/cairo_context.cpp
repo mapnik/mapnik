@@ -432,8 +432,9 @@ void cairo_context::add_text(glyph_positions_ptr pos,
 {
     pixel_position const& base = pos->get_base_point();
 
-    glyph_positions::const_iterator itr = pos->begin(), end = pos->end();
-    for (; itr != end; itr++)
+    //Render halo
+    glyph_positions::const_iterator itr, end = pos->end();
+    for (itr = pos->begin(); itr != end; itr++)
     {
         glyph_info const& glyph = *(itr->glyph);
         double text_size = glyph.format->text_size * scale_factor;
@@ -455,8 +456,28 @@ void cairo_context::add_text(glyph_positions_ptr pos,
         set_line_join(ROUND_JOIN);
         set_color(glyph.format->halo_fill);
         stroke();
+    }
+    //Render text
+    glyph_positions::const_iterator itr, end = pos->end();
+    for (itr = pos->begin(); itr != end; itr++)
+    {
+        glyph_info const& glyph = *(itr->glyph);
+        double text_size = glyph.format->text_size * scale_factor;
+        glyph.face->set_character_sizes(text_size);
+
+        cairo_matrix_t matrix;
+        matrix.xx = text_size * itr->rot.cos;
+        matrix.xy = text_size * itr->rot.sin;
+        matrix.yx = text_size * -itr->rot.sin;
+        matrix.yy = text_size * itr->rot.cos;
+        matrix.x0 = 0;
+        matrix.y0 = 0;
+
+        set_font_matrix(matrix);
+        set_font_face(manager, glyph.face);
         set_color(glyph.format->fill);
         show_glyph(glyph.glyph_index, base + itr->pos);
     }
 }
-}
+
+} //ns mapnik
