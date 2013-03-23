@@ -24,6 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/text/face.hpp>
 
 
 // boost
@@ -34,9 +35,20 @@
 // stl
 #include <algorithm>
 
+// freetype2
+extern "C"
+{
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_STROKER_H
+}
+
 namespace mapnik
 {
-freetype_engine::freetype_engine()
+
+freetype_engine::freetype_engine() :
+    library_(NULL)
+
 {
     FT_Error error = FT_Init_FreeType( &library_ );
     if (error)
@@ -211,6 +223,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
     return face_ptr();
 }
 
+
 stroker_ptr freetype_engine::create_stroker()
 {
     FT_Stroker s;
@@ -295,20 +308,6 @@ boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 
-void stroker::init(double radius)
-{
-    FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
-                   FT_STROKER_LINECAP_ROUND,
-                   FT_STROKER_LINEJOIN_ROUND,
-                   0);
-}
-
-stroker::~stroker()
-{
-    MAPNIK_LOG_DEBUG(font_engine_freetype) << "stroker: Destroy stroker=" << s_;
-
-    FT_Stroker_Done(s_);
-}
 
 template class face_manager<freetype_engine>;
 

@@ -25,16 +25,17 @@
 //mapnik
 #include <mapnik/text/glyph_info.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // freetype2
 extern "C"
 {
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_STROKER_H
 }
 
 //boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 //stl
@@ -45,7 +46,7 @@ extern "C"
 namespace mapnik
 {
 
-class font_face : boost::noncopyable
+class font_face : mapnik::noncopyable
 {
 public:
     font_face(FT_Face face);
@@ -78,10 +79,10 @@ private:
     mutable std::map<glyph_index_t, glyph_info> dimension_cache_;
     mutable double char_height_;
 };
+typedef boost::shared_ptr<font_face> face_ptr;
 
 
-
-class MAPNIK_DECL font_face_set : private boost::noncopyable
+class MAPNIK_DECL font_face_set : private mapnik::noncopyable
 {
 public:
     typedef std::vector<face_ptr>::iterator iterator;
@@ -98,6 +99,20 @@ private:
 };
 typedef boost::shared_ptr<font_face_set> face_set_ptr;
 
+
+// FT_Stroker wrapper
+class stroker : mapnik::noncopyable
+{
+public:
+    explicit stroker(FT_Stroker s)
+        : s_(s) {}
+    ~stroker();
+
+    void init(double radius);
+    FT_Stroker const& get() const { return s_; }
+private:
+    FT_Stroker s_;
+};
 
 } //ns mapnik
 

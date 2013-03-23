@@ -119,4 +119,21 @@ void font_face_set::set_character_sizes(double size)
     }
 }
 
+/******************************************************************************/
+
+void stroker::init(double radius)
+{
+    FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
+                   FT_STROKER_LINECAP_ROUND,
+                   FT_STROKER_LINEJOIN_ROUND,
+                   0);
+}
+
+stroker::~stroker()
+{
+    MAPNIK_LOG_DEBUG(font_engine_freetype) << "stroker: Destroy stroker=" << s_;
+
+    FT_Stroker_Done(s_);
+}
+
 }//ns mapnik

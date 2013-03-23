@@ -22,12 +22,9 @@
  *****************************************************************************/
 
 // mapnik
-#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
-#include <mapnik/pixel_position.hpp>
 
 // agg
 #include "agg_trans_affine.h"

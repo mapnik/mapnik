@@ -27,20 +27,10 @@
 #include <mapnik/config.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/font_set.hpp>
-#include <mapnik/text/face.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/pixel_position.hpp>
-
-// freetype2
-extern "C"
-{
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
-#include FT_STROKER_H
-}
 
 // boost
 #include <boost/shared_ptr.hpp>
@@ -53,27 +43,20 @@ extern "C"
 //// stl
 #include <vector>
 
+struct FT_LibraryRec_;
+
 namespace mapnik
 {
-struct char_properties;
-    typedef std::vector<face_ptr> container_type;
-    typedef container_type::size_type size_type;
+//struct char_properties;
+//    typedef std::vector<face_ptr> container_type;
+//    typedef container_type::size_type size_type;
 
-
-// FT_Stroker wrapper
-class stroker : mapnik::noncopyable
-{
-public:
-    explicit stroker(FT_Stroker s)
-        : s_(s) {}
-    ~stroker();
-
-    void init(double radius);
-    FT_Stroker const& get() const { return s_; }
-private:
-    FT_Stroker s_;
-};
+class stroker;
 typedef boost::shared_ptr<stroker> stroker_ptr;
+class font_face_set;
+typedef boost::shared_ptr<font_face_set> face_set_ptr;
+class font_face;
+typedef boost::shared_ptr<font_face> face_ptr;
 
 
 class MAPNIK_DECL freetype_engine
@@ -98,7 +81,7 @@ public:
     virtual ~freetype_engine();
     freetype_engine();
 private:
-    FT_Library library_;
+    FT_LibraryRec_ *library_;
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif

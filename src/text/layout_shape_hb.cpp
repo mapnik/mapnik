@@ -2,6 +2,7 @@
 #include <mapnik/text/layout.hpp>
 #include <mapnik/text/shaping.hpp>
 #include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/face.hpp>
 
 //stl
 #include <list>

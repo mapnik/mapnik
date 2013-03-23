@@ -1,16 +1,64 @@
+/*****************************************************************************
+ *
+ * This file is part of Mapnik (c++ mapping toolkit)
+ *
+ * Copyright (C) 2013 Artem Pavlenko
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *****************************************************************************/
+
+// mapnik
 #include <mapnik/text/renderer.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/text/face.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
+
+// freetype2
+extern "C"
+{
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_STROKER_H
+}
 
 namespace mapnik
 {
+
+struct glyph_t : boost::noncopyable
+{
+    FT_Glyph image;
+    char_properties_ptr properties;
+
+    glyph_t(FT_Glyph image_, char_properties_ptr properties_)
+        : image(image_), properties(properties_) {}
+
+    ~glyph_t () { FT_Done_Glyph(image);}
+
+};
 
 text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op, double scale_factor, stroker_ptr stroker)
     : rasterizer_(rasterizer),
       comp_op_(comp_op),
       scale_factor_(scale_factor),
+      glyphs_(boost::make_shared<glyph_vector>()),
       stroker_(stroker)
 {}
 
@@ -18,7 +66,7 @@ text_renderer::text_renderer (halo_rasterizer_e rasterizer, composite_mode_e com
 void text_renderer::prepare_glyphs(glyph_positions_ptr pos)
 {
     //clear glyphs
-    glyphs_.clear();
+    glyphs_->clear();
 
     FT_Matrix matrix;
     FT_Vector pen;
@@ -50,7 +98,7 @@ void text_renderer::prepare_glyphs(glyph_positions_ptr pos)
         if (error) continue;
 
         // take ownership of the glyph
-        glyphs_.push_back(new glyph_t(image, glyph.format));
+        glyphs_->push_back(new glyph_t(image, glyph.format));
     }
 }
 
@@ -88,7 +136,7 @@ agg_text_renderer<T>::agg_text_renderer (pixmap_type & pixmap,
 template <typename T>
 void agg_text_renderer<T>::render(glyph_positions_ptr pos)
 {
-    glyphs_.clear();
+    glyphs_->clear();
     prepare_glyphs(pos);
     FT_Error  error;
     FT_Vector start;
@@ -99,10 +147,10 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
     start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
 
     //render halo
-    typename boost::ptr_vector<glyph_t>::iterator itr, end = glyphs_.end();
+    typename glyph_vector::iterator itr, end = glyphs_->end();
     double halo_radius = 0;
     char_properties_ptr format;
-    for (itr = glyphs_.begin(); itr != end; ++itr)
+    for (itr = glyphs_->begin(); itr != end; ++itr)
     {
         if (itr->properties)
         {
@@ -155,7 +203,7 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
     }
 
     //render actual text
-    for (itr = glyphs_.begin(); itr != end; ++itr)
+    for (itr = glyphs_->begin(); itr != end; ++itr)
     {
         if (itr->properties)
         {
@@ -190,9 +238,9 @@ void grid_text_renderer<T>::render(glyph_positions_ptr pos, value_integer featur
     start.y =  static_cast<FT_Pos>((height - base_point.y) * (1 << 6));
 
     // now render transformed glyphs
-    typename boost::ptr_vector<glyph_t>::iterator itr, end = glyphs_.end();
+    typename glyph_vector::iterator itr, end = glyphs_->end();
     double halo_radius = 0.;
-    for (itr = glyphs_.begin(); itr != end; ++itr)
+    for (itr = glyphs_->begin(); itr != end; ++itr)
     {
         if (itr->properties)
         {
