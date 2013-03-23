@@ -98,11 +98,15 @@ struct hsla
     double a1;
 };
 
-struct colorize_alpha
+struct colorize_alpha : std::vector<mapnik::color>
 {
+    colorize_alpha() {}
     colorize_alpha(mapnik::color const& c0, mapnik::color const& c1)
     {
-         // TODO: implement me!
+        this->push_back(c0);
+        this->push_back(c1);
+        // TODO: support multiple color-stops
+        // https://developer.mozilla.org/en-US/docs/CSS/linear-gradient
     }
 };
 

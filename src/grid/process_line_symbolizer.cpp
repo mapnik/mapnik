@@ -80,6 +80,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
             padding *= half_stroke;
         if (std::fabs(sym.offset()) > 0)
             padding *= std::fabs(sym.offset()) * 1.2;
+        padding *= scale_factor_;
         clipping_extent.pad(padding);
     }
 

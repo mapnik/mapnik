@@ -480,6 +480,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
             padding *= half_stroke;
         if (std::fabs(sym.offset()) > 0)
             padding *= std::fabs(sym.offset()) * 1.2;
+        padding *= scale_factor_;
         clipping_extent.pad(padding);
     }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,

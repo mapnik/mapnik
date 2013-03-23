@@ -392,13 +392,15 @@ struct test8
 
     bool validate()
     {
-        mapnik::expression_grammar<std::string::const_iterator> expr_grammar(transcoder("utf-8"));
-        mapnik::expression_ptr expr = mapnik::parse_expression(expr_,expr_grammar);
-        return mapnik::to_expression_string(*expr) == expr_;
+         transcoder tr("utf-8");
+         mapnik::expression_grammar<std::string::const_iterator> expr_grammar(tr);
+         mapnik::expression_ptr expr = mapnik::parse_expression(expr_,expr_grammar);
+         return mapnik::to_expression_string(*expr) == expr_;
     }
     void operator()()
     {
-         mapnik::expression_grammar<std::string::const_iterator> expr_grammar(transcoder("utf-8"));
+         transcoder tr("utf-8");
+         mapnik::expression_grammar<std::string::const_iterator> expr_grammar(tr);
          for (unsigned i=0;i<iter_;++i) {
              mapnik::expression_ptr expr = mapnik::parse_expression(expr_,expr_grammar);
          }

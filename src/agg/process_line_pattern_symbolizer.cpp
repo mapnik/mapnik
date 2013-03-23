@@ -136,6 +136,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
         double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
+        padding *= scale_factor_;
         clipping_extent.pad(padding);
     }
 

@@ -162,7 +162,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     else if (layer_by_index)
     {
-        const unsigned num_layers = dataset_->GetLayerCount();
+        int num_layers = dataset_->GetLayerCount();
         if (*layer_by_index >= num_layers)
         {
             std::ostringstream s("OGR Plugin: only ");
