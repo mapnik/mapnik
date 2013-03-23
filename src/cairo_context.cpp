@@ -22,8 +22,7 @@
 
 #include <mapnik/cairo_context.hpp>
 #include <mapnik/text/face.hpp>
-#include <mapnik/text_properties.hpp>
-#include <mapnik/text_path.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/font_set.hpp>
 
 #include <valarray>
@@ -458,7 +457,6 @@ void cairo_context::add_text(glyph_positions_ptr pos,
         stroke();
     }
     //Render text
-    glyph_positions::const_iterator itr, end = pos->end();
     for (itr = pos->begin(); itr != end; itr++)
     {
         glyph_info const& glyph = *(itr->glyph);
