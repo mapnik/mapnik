@@ -35,19 +35,28 @@
 #include <mapnik/gradient.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/placements_list.hpp>
+#include <mapnik/vertex.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // boost
-#include <boost/utility.hpp>
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
+
 // cairo
 #include <cairo.h>
 #include <cairo-ft.h>
+
 // stl
-#include <valarray>
+#include <map>
+#include <vector>
+#include <stdexcept>
+
 // agg
 #include "agg_basics.h"
 
 namespace mapnik {
+
+class text_path;
 
 typedef cairo_status_t ErrorStatus;
 

@@ -22,7 +22,11 @@
 
 #include <mapnik/cairo_context.hpp>
 #include <mapnik/text/face.hpp>
+#include <mapnik/text_properties.hpp>
+#include <mapnik/text_path.hpp>
+#include <mapnik/font_set.hpp>
 
+#include <valarray>
 namespace mapnik {
 
 cairo_face::cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
