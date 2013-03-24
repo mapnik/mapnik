@@ -111,7 +111,7 @@ bool placement_finder::next_position()
     }
 
     info_->properties.process(layout_, feature_);
-    layout_.layout(info_->properties.wrap_width, info_->properties.text_ratio, info_->properties.wrap_before);
+    layout_.layout(info_->properties.wrap_width * scale_factor_, info_->properties.text_ratio, info_->properties.wrap_before);
 
     if (info_->properties.orientation)
     {
@@ -293,7 +293,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
                 continue;
             }
         } else {
-            if ((pp.length() < info_->properties.minimum_path_length)
+            if ((pp.length() < info_->properties.minimum_path_length * scale_factor_)
                 ||
                 (pp.length() < layout_.width())) continue;
         }
@@ -305,7 +305,7 @@ bool placement_finder::find_line_placements(T & path, bool points)
         path_move_dx(pp);
         do
         {
-            tolerance_iterator tolerance_offset(info_->properties.label_position_tolerance, spacing);
+            tolerance_iterator tolerance_offset(info_->properties.label_position_tolerance * scale_factor_, spacing);
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(pp);
@@ -341,7 +341,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         real_orientation = (fabs(normalize_angle(pp.angle())) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
     }
     double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
-    double offset = alignment_offset().y + info_->properties.displacement.y + sign * layout_.height()/2.;
+    double offset = alignment_offset().y + info_->properties.displacement.y * scale_factor_ + sign * layout_.height()/2.;
 
     glyphs->reserve(layout_.glyphs_count());
     text_layout::const_iterator line_itr = layout_.begin(), line_end = layout_.end();
@@ -420,7 +420,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
 void placement_finder::path_move_dx(vertex_cache &pp)
 {
-    double dx = info_->properties.displacement.x;
+    double dx = info_->properties.displacement.x * scale_factor_;
     if (dx != 0.0)
     {
         vertex_cache::state state = pp.save_state();
