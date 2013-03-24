@@ -29,7 +29,7 @@ void text_layout::shape_text(text_line_ptr line)
     for (; itr != list_end; itr++)
     {
         face_set_ptr face_set = font_manager_.get_face_set(itr->format->face_name, itr->format->fontset);
-        face_set->set_character_sizes(itr->format->text_size);
+        face_set->set_character_sizes(itr->format->text_size * scale_factor_);
         font_face_set::iterator face_itr = face_set->begin(), face_end = face_set->end();
         for (; face_itr != face_end; face_itr++)
         {

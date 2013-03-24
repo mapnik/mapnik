@@ -39,7 +39,7 @@ void text_layout::shape_text(text_line_ptr line)
     for (; itr != list_end; itr++)
     {
         face_set_ptr face_set = font_manager_.get_face_set(itr->format->face_name, itr->format->fontset);
-        face_set->set_character_sizes(itr->format->text_size);
+        face_set->set_character_sizes(itr->format->text_size * scale_factor_);
         if (face_set->begin() == face_set->end()) return; //Invalid face set
         face_ptr face = *(face_set->begin());
         FT_Face freetype_face = face->get_face();

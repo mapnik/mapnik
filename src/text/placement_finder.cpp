@@ -93,7 +93,7 @@ private:
 };
 
 placement_finder::placement_finder(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager, double scale_factor)
-    : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager), info_(placement_info), valid_(true), scale_factor_(scale_factor), placements_(), has_marker_(false), marker_(), marker_box_()
+    : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager, scale_factor), info_(placement_info), valid_(true), scale_factor_(scale_factor), placements_(), has_marker_(false), marker_(), marker_box_()
 {
 }
 
@@ -268,7 +268,7 @@ bool placement_finder::find_point_placement(pixel_position pos)
             if (glyph_itr->width)
             {
                 //Only advance if glyph is not part of a multiple glyph sequence
-                x += glyph_itr->width + glyph_itr->format->character_spacing;
+                x += glyph_itr->width + glyph_itr->format->character_spacing * scale_factor_;
             }
         }
     }

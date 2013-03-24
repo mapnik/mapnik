@@ -31,8 +31,9 @@
 
 namespace mapnik
 {
-text_layout::text_layout(face_manager_freetype &font_manager)
-    : font_manager_(font_manager), itemizer_(), width_(0), height_(0), glyphs_count_(0),
+text_layout::text_layout(face_manager_freetype &font_manager, double scale_factor)
+    : font_manager_(font_manager), scale_factor_(scale_factor),
+      itemizer_(), width_(0), height_(0), glyphs_count_(0),
       lines_()
 {
 }

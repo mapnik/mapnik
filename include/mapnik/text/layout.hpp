@@ -87,7 +87,7 @@ class text_layout
 public:
     typedef std::vector<text_line_ptr> line_vector;
     typedef line_vector::const_iterator const_iterator;
-    text_layout(face_manager_freetype & font_manager);
+    text_layout(face_manager_freetype & font_manager, double scale_factor);
     void add_text(UnicodeString const& str, char_properties_ptr format);
     UnicodeString const& get_text() const;
 
@@ -111,6 +111,7 @@ private:
 
     //input
     face_manager_freetype &font_manager_;
+    double scale_factor_;
 
     //processing
     text_itemizer itemizer_;
