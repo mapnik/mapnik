@@ -73,7 +73,7 @@ void text_layout::shape_text(text_line_ptr line)
 
                 width_map_[glyphs[i].cluster] += tmp.width;
 
-                line->add_glyph(tmp);
+                line->add_glyph(tmp, scale_factor_);
             }
             line->update_max_char_height(face->get_char_height());
             break; //When we reach this point the current font had all glyphs.

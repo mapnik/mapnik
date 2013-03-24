@@ -89,7 +89,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
     unsigned last_break_position = 0;
     for (unsigned i=line->get_first_char(); i<line->get_last_char(); i++)
     {
-        //TODO: Char spacing
+        //TODO: character_spacing
         std::map<unsigned, double>::const_iterator width_itr = width_map_.find(i);
         if (width_itr != width_map_.end())
         {
@@ -192,14 +192,15 @@ text_line::text_line(unsigned first_char, unsigned last_char)
 {
 }
 
-void text_line::add_glyph(const glyph_info &glyph)
+void text_line::add_glyph(const glyph_info &glyph, double scale_factor_)
 {
     line_height_ = std::max(line_height_, glyph.line_height + glyph.format->line_spacing);
     if (glyphs_.empty())
     {
         width_ = glyph.width;
-    } else {
-        width_ += glyph.width + glyphs_.back().format->character_spacing;
+    } else if (glyph.width) {
+        //Only add character spacing if the character is not a zero-width part of a cluster.
+        width_ += glyph.width + glyphs_.back().format->character_spacing  * scale_factor_;
     }
     glyphs_.push_back(glyph);
 }

@@ -51,7 +51,7 @@ public:
     typedef std::vector<glyph_info> glyph_vector;
     typedef glyph_vector::const_iterator const_iterator;
     glyph_vector const& get_glyphs() const { return glyphs_; }
-    void add_glyph(glyph_info const& glyph);
+    void add_glyph(glyph_info const& glyph, double scale_factor_);
 
     void reserve(glyph_vector::size_type length);
     const_iterator begin() const;
