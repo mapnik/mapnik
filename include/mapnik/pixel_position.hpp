@@ -63,7 +63,7 @@ struct pixel_position
     }
 
     pixel_position rotate(rotation const& rot) const;
-    pixel_position operator~()
+    pixel_position operator~() const
     {
         return pixel_position(x, -y);
     }
