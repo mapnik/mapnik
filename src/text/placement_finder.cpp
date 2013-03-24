@@ -360,6 +360,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         pixel_position cluster_offset;
         double angle;
         rotation rot;
+        double last_glyph_spacing = 0.;
 
         text_line::const_iterator glyph_itr = (*line_itr)->begin(), glyph_end = (*line_itr)->end();
         for (; glyph_itr != glyph_end; glyph_itr++)
@@ -367,8 +368,12 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
             glyph_info const& glyph = *glyph_itr;
             if (current_cluster != glyph.char_index)
             {
-                if (!off_pp.move(sign * layout_.cluster_width(current_cluster))) return false;
+                if (!off_pp.move(sign * (layout_.cluster_width(current_cluster) + last_glyph_spacing)))
+                {
+                    return false;
+                }
                 current_cluster = glyph.char_index;
+                last_glyph_spacing = glyph.format->character_spacing;
                 //Only calculate new angle at the start of each cluster!
                 angle = normalize_angle(off_pp.angle(sign * layout_.cluster_width(current_cluster)));
                 rot.init(angle);
