@@ -266,7 +266,8 @@ struct converter_traits<T,mapnik::offset_transform_tag>
     static void setup(geometry_type & geom, Args const& args)
     {
         typename boost::mpl::at<Args,boost::mpl::int_<2> >::type sym = boost::fusion::at_c<2>(args);
-        geom.set_offset(sym.offset());
+        double scale_factor = boost::fusion::at_c<6>(args);
+        geom.set_offset(sym.offset()*scale_factor);
     }
 };
 
