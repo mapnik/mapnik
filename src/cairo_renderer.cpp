@@ -697,6 +697,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
             box2d<double> label_ext (-dx, -dy, dx, dy);
             label_ext *= tr;
             label_ext *= agg::trans_affine_translation(x,y);
+            label_ext *= agg::trans_affine_scaling(scale_factor_);
             if (sym.get_allow_overlap() ||
                 detector_->has_placement(label_ext))
             {
