@@ -156,7 +156,7 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
         {
             format = itr->properties;
             /* Settings have changed. */
-            halo_radius = itr->properties->halo_radius;
+            halo_radius = itr->properties->halo_radius * scale_factor_;
             //make sure we've got reasonable values.
             if (halo_radius <= 0.0 || halo_radius > 1024.0) break;
             stroker_->init(halo_radius);
@@ -244,7 +244,7 @@ void grid_text_renderer<T>::render(glyph_positions_ptr pos, value_integer featur
     {
         if (itr->properties)
         {
-            halo_radius = itr->properties->halo_radius;
+            halo_radius = itr->properties->halo_radius * scale_factor_;
         }
         FT_Glyph_Transform(itr->image, 0, &start);
         error = FT_Glyph_To_Bitmap(&(itr->image), FT_RENDER_MODE_NORMAL, 0, 1);
