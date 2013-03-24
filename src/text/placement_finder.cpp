@@ -373,7 +373,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
                     return false;
                 }
                 current_cluster = glyph.char_index;
-                last_glyph_spacing = glyph.format->character_spacing;
+                last_glyph_spacing = glyph.format->character_spacing * scale_factor_;
                 //Only calculate new angle at the start of each cluster!
                 angle = normalize_angle(off_pp.angle(sign * layout_.cluster_width(current_cluster)));
                 rot.init(angle);
