@@ -27,11 +27,11 @@
 #include <mapnik/text/placement_finder.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/text_symbolizer.hpp>
+#include <mapnik/noncopyable.hpp>
 //TODO: Find a better place for halo_rasterizer_e!
 //TODO: Halo rasterizer selection should go to text_properties because it might make sense to use a different rasterizer for different fonts
 
 //boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 struct FT_Bitmap_;
@@ -41,7 +41,7 @@ namespace mapnik
 
 struct glyph_t;
 
-class text_renderer : private boost::noncopyable
+class text_renderer : private mapnik::noncopyable
 {
 public:
     text_renderer (halo_rasterizer_e rasterizer, composite_mode_e comp_op = src_over, double scale_factor=1.0, stroker_ptr stroker=stroker_ptr());

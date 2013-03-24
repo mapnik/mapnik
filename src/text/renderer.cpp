@@ -42,7 +42,7 @@ extern "C"
 namespace mapnik
 {
 
-struct glyph_t : boost::noncopyable
+struct glyph_t : mapnik::noncopyable
 {
     FT_Glyph image;
     char_properties_ptr properties;

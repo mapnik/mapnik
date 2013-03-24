@@ -29,11 +29,9 @@
 #include <mapnik/text/placements/base.hpp>
 #include <mapnik/text/placements_list.hpp>
 #include <mapnik/text/rotation.hpp>
-
-//stl
+#include <mapnik/noncopyable.hpp>
 
 //boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace mapnik
@@ -46,7 +44,7 @@ class feature_impl;
 typedef feature_impl Feature;
 class vertex_cache;
 
-class placement_finder : boost::noncopyable
+class placement_finder : mapnik::noncopyable
 {
 public:
     placement_finder(Feature const& feature,
