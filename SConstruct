@@ -274,6 +274,7 @@ opts.AddVariables(
     ('WARNING_CXXFLAGS', 'Compiler flags you can set to reduce warning levels which are placed after -Wall.', ''),
 
     # SCons build behavior options
+    ('HOST', 'Set the target host for cross compiling"', ''),
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     # http://www.scons.org/wiki/GoFastButton
@@ -1187,19 +1188,21 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=False)
 
-    for libname, headers, required, lang in LIBSHEADERS:
-        if not conf.CheckLibWithHeader(libname, headers, lang):
-            if required:
-                color_print(1, 'Could not find required header or shared library for %s' % libname)
-                env['MISSING_DEPS'].append(libname)
-            else:
-                color_print(4, 'Could not find optional header or shared library for %s' % libname)
-                env['SKIPPED_DEPS'].append(libname)
+    if not env['HOST']:
+        for libname, headers, required, lang in LIBSHEADERS:
+            if not conf.CheckLibWithHeader(libname, headers, lang):
+                if required:
+                    color_print(1, 'Could not find required header or shared library for %s' % libname)
+                    env['MISSING_DEPS'].append(libname)
+                else:
+                    color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                    env['SKIPPED_DEPS'].append(libname)
 
-    if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
-        if not conf.icu_at_least_four_two():
-            # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
-            env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
+    if not env['HOST']:
+        if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
+            if not conf.icu_at_least_four_two():
+                # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
+                env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
 
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
@@ -1234,24 +1237,26 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths()
 
-    # if the user is not setting custom boost configuration
-    # enforce boost version greater than or equal to BOOST_MIN_VERSION
-    if not conf.CheckBoost(BOOST_MIN_VERSION):
-        color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
-        color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
-        if not env['BOOST_VERSION']:
-            env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
-    else:
-        color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
+    if not env['HOST']:
+        # if the user is not setting custom boost configuration
+        # enforce boost version greater than or equal to BOOST_MIN_VERSION
+        if not conf.CheckBoost(BOOST_MIN_VERSION):
+            color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
+            color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
+            if not env['BOOST_VERSION']:
+                env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
+        else:
+            color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
 
-    for count, libinfo in enumerate(BOOST_LIBSHEADERS):
-        if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
-            if libinfo[2]:
-                color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
-                env['MISSING_DEPS'].append('boost ' + libinfo[0])
-            else:
-                color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
-                env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
+    if not env['HOST']:
+        for count, libinfo in enumerate(BOOST_LIBSHEADERS):
+            if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
+                if libinfo[2]:
+                    color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
+                    env['MISSING_DEPS'].append('boost ' + libinfo[0])
+                else:
+                    color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
+                    env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
 
     if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
@@ -1479,9 +1484,10 @@ if not preconfigured:
                 env['BOOST_PYTHON_LIB'] = 'boost_python3%s' % env['BOOST_APPEND']
             elif env['BOOST_PYTHON_LIB'] == 'boost_python':
                 env['BOOST_PYTHON_LIB'] = 'boost_python%s' % env['BOOST_APPEND']
-            if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
-                color_print(1,'Could not find required header files for boost python')
-                env['MISSING_DEPS'].append('boost python')
+            if not env['HOST']:
+                if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
+                    color_print(1,'Could not find required header files for boost python')
+                    env['MISSING_DEPS'].append('boost python')
 
             if env['CAIRO']:
                 if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
