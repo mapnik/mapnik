@@ -70,6 +70,7 @@ text_tests = [
     {'name': "orientation", 'sizes': [(800, 200)], 'bbox':default_text_box},
     {'name': "hb-fontsets", 'sizes': [(800, 200)], 'bbox':default_text_box},
     {'name': "charspacing", 'sizes': [(200, 400)], 'bbox':default_text_box},
+    {'name': "charspacing-lines", 'sizes': [(300, 300)], 'bbox':default_text_box},
     {'name': "line_break", 'sizes': [(800, 800)], 'bbox':default_text_box},
     {'name': "rtl-point", 'sizes': [(200, 200)],'bbox':default_text_box},
     {'name': "jalign-auto", 'sizes': [(200, 200)],'bbox':default_text_box},
@@ -144,7 +145,7 @@ def report_create(quiet=False):
 
 def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_failures=False):
     filename = config['name']
-    m = mapnik.Map(width, height)
+    m = mapnik.Map(int(width*scale_factor), int(height*scale_factor))
     postfix = "%s-%d-%d-%s" % (filename,width,height,scale_factor)
     
     ## AGG rendering
