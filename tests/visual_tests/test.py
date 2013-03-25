@@ -111,21 +111,22 @@ def render(config, width, height, bbox, scale_factor, quiet=False, overwrite_fai
     filename = config['name']
     m = mapnik.Map(width, height)
     postfix = "%s-%d-%d-%s" % (filename,width,height,scale_factor)
+
+    try:
+        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
+        if bbox is not None:
+            m.zoom_to_box(bbox)
+        else:
+            m.zoom_all()
+    except Exception, e:
+        sys.stderr.write(e.message + '\n')
+        fail(actual_agg,expected_agg,str(e.message))
+        return m
     
     ## AGG rendering
     if config.get('agg',True):
         expected_agg = os.path.join(dirname, "images", postfix + '-agg-reference.png')
         actual_agg = os.path.join(visual_output_dir, '%s-agg.png' % postfix)
-        try:
-            mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
-            if bbox is not None:
-                m.zoom_to_box(bbox)
-            else:
-                m.zoom_all()
-        except Exception, e:
-            sys.stderr.write(e.message + '\n')
-            fail(actual_agg,expected_agg,str(e.message))
-            return m
         if not quiet:
             print "\"%s\" with agg..." % (postfix),
         try:
