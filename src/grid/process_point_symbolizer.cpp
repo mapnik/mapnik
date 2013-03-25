@@ -74,7 +74,7 @@ void grid_renderer<T>::process(point_symbolizer const& sym,
 
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;
-        box2d<double> label_ext = bbox * recenter_tr;
+        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_) ;
 
         for (unsigned i=0; i<feature.num_geometries(); ++i)
         {
