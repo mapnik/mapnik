@@ -19,7 +19,7 @@ defaults = {
     'sizes': [(500, 100)],
     'scales':[1.0,2.0],
     'agg': True,
-    'cairo': False,
+    'cairo': True,
     'grid': False,
 }
 
@@ -172,7 +172,7 @@ class Reporting:
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % message
 
-    def summary(self, generate=False):
+    def summary(self):
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
             return 0
@@ -272,16 +272,16 @@ def render(config, width, height, bbox, scale_factor, reporting):
 
 if __name__ == "__main__":
     if '-q' in sys.argv:
-       quiet = True
-       sys.argv.remove('-q')
+        quiet = True
+        sys.argv.remove('-q')
     else:
-       quiet = False
+        quiet = False
 
     if '--overwrite' in sys.argv:
-       overwrite_failures = True
-       sys.argv.remove('--overwrite')
+        overwrite_failures = True
+        sys.argv.remove('--overwrite')
     else:
-       overwrite_failures = False
+        overwrite_failures = False
 
     if len(sys.argv) == 2:
         files = [{"name": sys.argv[1], "sizes": sizes_few_square}]
@@ -295,7 +295,7 @@ if __name__ == "__main__":
 
 
     if 'osm' in mapnik.DatasourceCache.plugin_names():
-        reporting = Reporting(quiet, overwrite_failures)
+        reporting = Reporting(quiet=quiet, generate=False, overwrite_failures=overwrite_failures)
         for f in files:
             config = dict(defaults)
             config.update(f)
@@ -309,6 +309,6 @@ if __name__ == "__main__":
                                reporting)
             mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
 
-        sys.exit(reporting.summary(generate=True))
+        sys.exit(reporting.summary())
     else:
         print "OSM plugin required"
