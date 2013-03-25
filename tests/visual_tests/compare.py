@@ -42,7 +42,7 @@ def compare(actual, expected, alpha=True):
     pixels = im1.width() * im1.height()
     delta_pixels = (im2.width() * im2.height()) - pixels
     if delta_pixels != 0:
-        return delta_pixels
+        return abs(delta_pixels)
     for x in range(0,im1.width(),2):
         for y in range(0,im1.height(),2):
             if compare_pixels(im1.get_pixel(x,y),im2.get_pixel(x,y),alpha=alpha):
