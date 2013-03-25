@@ -473,9 +473,9 @@ bool placement_finder::collision(const box2d<double> &box) const
 void placement_finder::set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, const pixel_position &marker_displacement)
 {
     marker_ = m;
-    marker_box_ = box;
+    marker_box_ = box * scale_factor_;
+    marker_displacement_ = marker_displacement * scale_factor_;
     marker_unlocked_ = marker_unlocked;
-    marker_displacement_ = marker_displacement;
     has_marker_ = true;
 }
 
@@ -485,7 +485,6 @@ bool placement_finder::add_marker(glyph_positions_ptr glyphs, const pixel_positi
     pixel_position real_pos = (marker_unlocked_ ? pos : glyphs->get_base_point()) + marker_displacement_;
     box2d<double> bbox = marker_box_;
     bbox.move(real_pos.x, real_pos.y);
-    bbox *= scale_factor_;
     glyphs->set_marker(marker_, real_pos);
     if (collision(bbox)) return false;
     detector_.insert(bbox);
