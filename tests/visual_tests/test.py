@@ -139,7 +139,7 @@ class Reporting:
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
 
-        if self.generate:
+        if self.overwrite_failures:
             self.errors.append((self.REPLACE, actual, expected, diff, None))
             contents = open(actual, 'r').read()
             open(expected, 'wb').write(contents)
@@ -283,6 +283,12 @@ if __name__ == "__main__":
     else:
         overwrite_failures = False
 
+    if '--no-generate' in sys.argv:
+        generate = False
+        sys.argv.remove('--no-generate')
+    else:
+        generate = True
+
     if len(sys.argv) == 2:
         files = [{"name": sys.argv[1], "sizes": sizes_few_square}]
     elif len(sys.argv) > 2:
@@ -295,7 +301,7 @@ if __name__ == "__main__":
 
 
     if 'osm' in mapnik.DatasourceCache.plugin_names():
-        reporting = Reporting(quiet=quiet, generate=False, overwrite_failures=overwrite_failures)
+        reporting = Reporting(quiet=quiet, generate=generate, overwrite_failures=overwrite_failures)
         for f in files:
             config = dict(defaults)
             config.update(f)
