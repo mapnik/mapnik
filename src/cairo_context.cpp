@@ -450,7 +450,7 @@ void cairo_context::add_text(glyph_positions_ptr pos,
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
 
-        glyph_path(glyph.glyph_index, base + ~itr->pos);
+        glyph_path(glyph.glyph_index, base + ~(itr->pos + glyph.offset.rotate(itr->rot)));
         set_line_width(2.0 * glyph.format->halo_radius * scale_factor);
         set_line_join(ROUND_JOIN);
         set_color(glyph.format->halo_fill);
@@ -474,7 +474,7 @@ void cairo_context::add_text(glyph_positions_ptr pos,
         set_font_matrix(matrix);
         set_font_face(manager, glyph.face);
         set_color(glyph.format->fill);
-        show_glyph(glyph.glyph_index, base + ~itr->pos);
+        show_glyph(glyph.glyph_index, base + ~(itr->pos + glyph.offset.rotate(itr->rot)));
     }
 }
 
