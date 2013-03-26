@@ -45,6 +45,9 @@ private:
     std::string fileName_;
     unsigned width_;
     unsigned height_;
+    jpeg_decompress_struct cinfo;
+    jpeg_error_mgr jerr;
+    FILE *fp;
 public:
     explicit JpegReader(std::string const& fileName);
     ~JpegReader();
@@ -54,6 +57,8 @@ public:
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
     void init();
+    static void on_error(j_common_ptr cinfo);
+    static void on_error_message(j_common_ptr cinfo);
 };
 
 namespace
@@ -68,27 +73,43 @@ const bool registered = register_image_reader("jpeg",createJpegReader);
 JpegReader::JpegReader(std::string const& fileName)
     : fileName_(fileName),
       width_(0),
-      height_(0)
+      height_(0),
+      fp(NULL)
 {
     init();
 }
 
-JpegReader::~JpegReader() {}
+JpegReader::~JpegReader() {
+    if (fp)
+    {
+        fclose(fp);
+    }
+    jpeg_destroy_decompress(&cinfo);
+}
+
+void JpegReader::on_error(j_common_ptr cinfo)
+{
+    (*cinfo->err->output_message)(cinfo);
+    jpeg_destroy(cinfo);
+    throw image_reader_exception("JPEG Reader: libjpeg could not read image");
+}
+
+void JpegReader::on_error_message(j_common_ptr cinfo)
+{
+    // used to supress jpeg from printing to stderr
+}
 
 void JpegReader::init()
 {
-    FILE *fp = fopen(fileName_.c_str(),"rb");
+    fp = fopen(fileName_.c_str(),"rb");
     if (!fp) throw image_reader_exception("JPEG Reader: cannot open image file " + fileName_);
 
-    struct jpeg_decompress_struct cinfo;
-    struct jpeg_error_mgr jerr;
-
     cinfo.err = jpeg_std_error(&jerr);
-
+    jerr.error_exit = on_error;
+    jerr.output_message = on_error_message;
     jpeg_create_decompress(&cinfo);
     jpeg_stdio_src(&cinfo, fp);
     jpeg_read_header(&cinfo, TRUE);
-
     jpeg_start_decompress(&cinfo);
     width_ = cinfo.output_width;
     height_ = cinfo.output_height;
@@ -110,12 +131,9 @@ unsigned JpegReader::height() const
 
 void JpegReader::read(unsigned x0, unsigned y0, image_data_32& image)
 {
-    struct jpeg_decompress_struct cinfo;
-
-    FILE *fp = fopen(fileName_.c_str(),"rb");
+    fp = fopen(fileName_.c_str(),"rb");
     if (!fp) throw image_reader_exception("JPEG Reader: cannot open image file " + fileName_);
 
-    struct jpeg_error_mgr jerr;
     cinfo.err = jpeg_std_error(&jerr);
 
     jpeg_create_decompress(&cinfo);
@@ -129,7 +147,6 @@ void JpegReader::read(unsigned x0, unsigned y0, image_data_32& image)
 
     if (cinfo.output_width == 0) {
         jpeg_destroy_decompress (&cinfo);
-        fclose(fp);
         throw image_reader_exception("JPEG Reader: failed to read image size of " + fileName_);
     }
 
@@ -168,6 +185,5 @@ void JpegReader::read(unsigned x0, unsigned y0, image_data_32& image)
     }
     jpeg_finish_decompress(&cinfo);
     jpeg_destroy_decompress(&cinfo);
-    fclose(fp);
 }
 }

@@ -82,6 +82,7 @@ private:
     void read_stripped(unsigned x,unsigned y,image_data_32& image);
     void read_tiled(unsigned x,unsigned y,image_data_32& image);
     TIFF* load_if_exists(std::string const& filename);
+    static void on_error(const char* /*module*/, const char* fmt, va_list argptr);
 };
 
 namespace
@@ -107,11 +108,18 @@ tiff_reader::tiff_reader(std::string const& file_name)
     init();
 }
 
+void tiff_reader::on_error(const char* /*module*/, const char* fmt, va_list argptr)
+{
+  char msg[10240];
+  vsprintf(msg, fmt, argptr);
+  throw image_reader_exception(msg);
+}
 
 void tiff_reader::init()
 {
     // TODO: error handling
     TIFFSetWarningHandler(0);
+    TIFFSetErrorHandler(on_error);
     TIFF* tif = load_if_exists(file_name_);
     if (!tif) throw image_reader_exception( std::string("Can't load tiff file: '") + file_name_ + "'");
 
