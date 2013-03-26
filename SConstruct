@@ -1559,9 +1559,9 @@ if not preconfigured:
 
         # Common debugging flags.
         # http://lists.fedoraproject.org/pipermail/devel/2010-November/144952.html
-        debug_flags  = '-g -fno-omit-frame-pointer'
-        debug_defines = '-DDEBUG -DMAPNIK_DEBUG'
-        ndebug_defines = '-DNDEBUG'
+        debug_flags  = ['-g', '-fno-omit-frame-pointer']
+        debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
+        ndebug_defines = ['-DNDEBUG']
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
@@ -1576,7 +1576,7 @@ if not preconfigured:
             color_print(1,"No logger severity specified, available options are %s." % severities_list)
             Exit(1)
 
-        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % log_severity
+        log_enabled = ['-DMAPNIK_LOG', '-DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % log_severity]
 
         if env['DEBUG']:
             debug_defines += log_enabled
@@ -1586,8 +1586,8 @@ if not preconfigured:
 
         # Enable statistics reporting
         if env['ENABLE_STATS']:
-            debug_defines += ' -DMAPNIK_STATS'
-            ndebug_defines += ' -DMAPNIK_STATS'
+            debug_defines.append('-DMAPNIK_STATS')
+            ndebug_defines.append('-DMAPNIK_STATS')
 
         # Add rdynamic to allow using statics between application and plugins
         # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux
