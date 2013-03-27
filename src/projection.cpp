@@ -68,13 +68,16 @@ projection::projection(projection const& rhs)
       proj_(NULL),
       proj_ctx_(NULL)
 {
-    if (!rhs.defer_proj_init_) init_proj4();
+    if (!defer_proj_init_) init_proj4();
 }
 
 projection& projection::operator=(projection const& rhs)
 {
     projection tmp(rhs);
     swap(tmp);
+    proj_ctx_ = 0;
+    proj_ = 0;
+    if (!defer_proj_init_) init_proj4();
     return *this;
 }
 
@@ -210,6 +213,8 @@ std::string projection::expanded() const
 void projection::swap(projection& rhs)
 {
     std::swap(params_,rhs.params_);
+    std::swap(defer_proj_init_,rhs.defer_proj_init_);
+    std::swap(is_geographic_,rhs.is_geographic_);
 }
 
 }
