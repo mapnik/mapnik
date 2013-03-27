@@ -123,6 +123,7 @@ class Reporting:
     NOT_FOUND = 2
     OTHER = 3
     REPLACE = 4
+    LOAD_ERROR = 5
     def __init__(self, quiet, generate = False, overwrite_failures = False):
         self.quiet = quiet
         self.passed = 0
@@ -172,6 +173,14 @@ class Reporting:
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % message
 
+    def load_error(self, name, message):
+        self.failed += 1
+        self.errors.append((self.LOAD_ERROR, name, None, 0, message))
+        if self.quiet:
+            sys.stderr.write('\x1b[31m.\x1b[0m')
+        else:
+            print '"%s": error while loading style file: \x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % (name, message)
+
     def summary(self):
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
@@ -179,7 +188,7 @@ class Reporting:
         print "\nVisual rendering: %s failed / %s passed" % (len(self.errors), self.passed)
         for idx, error in enumerate(self.errors):
             if error[0] == self.OTHER:
-                print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s" % error[3]
+                print str(idx+1) + ") \x1b[31mfailure to run test \"%s\":\x1b[0m %s" % (error[1], error[4])
             elif error[0] == self.NOT_FOUND:
                 if self.generate:
                     print str(idx+1) + ") Generating reference image: '%s'" % error[2]
@@ -242,7 +251,7 @@ def render(config, width, height, bbox, scale_factor, reporting):
         else:
             m.zoom_all()
     except Exception, e:
-        reporting.other_error(filename, repr(e))
+        reporting.load_error(filename, repr(e))
         return m
     
     for renderer in renderers:
