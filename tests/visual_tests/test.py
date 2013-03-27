@@ -7,6 +7,7 @@ mapnik.logger.set_severity(mapnik.severity_type.None)
 import sys
 import os.path
 from compare import compare, compare_grids
+from time import time
 
 try:
     import json
@@ -133,12 +134,12 @@ class Reporting:
         self.errors = [ #(type, actual, expected, diff, message)
          ]
         
-    def result_fail(self, actual, expected, diff):
+    def result_fail(self, actual, expected, diff, render_time):
         self.failed += 1
         if self.quiet:
             sys.stderr.write('\x1b[31m.\x1b[0m')
         else:
-            print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
+            print '\x1b[31m✘\x1b[0m (\x1b[34m%.2fs, %u different pixels\x1b[0m)' % (render_time, diff)
 
         if self.overwrite_failures:
             self.errors.append((self.REPLACE, actual, expected, diff, None))
@@ -147,12 +148,12 @@ class Reporting:
         else:
             self.errors.append((self.DIFF, actual, expected, diff, None))
             
-    def result_pass(self, actual, expected, diff):
+    def result_pass(self, actual, expected, diff, render_time):
         self.passed += 1
         if self.quiet:
             sys.stderr.write('\x1b[32m.\x1b[0m')
         else:
-            print '\x1b[32m✓\x1b[0m'
+            print '\x1b[32m✓\x1b[0m (\x1b[34m%.2fs\x1b[0m)' % render_time
 
     def not_found(self, actual, expected):
         self.failed += 1
@@ -266,15 +267,18 @@ def render(config, width, height, bbox, scale_factor, reporting):
             if not quiet:
                 print "\"%s\" with %s..." % (postfix, renderer['name']),
             try:
+                start = time()
                 renderer['render'](m, actual, scale_factor)
+                render_time = time() - start
+                
                 if not os.path.exists(expected):
                     reporting.not_found(actual, expected)
                 else:
                     diff = renderer['compare'](actual, expected)
                     if diff > renderer['threshold']:
-                        reporting.result_fail(actual, expected, diff)
+                        reporting.result_fail(actual, expected, diff, render_time)
                     else:
-                        reporting.result_pass(actual, expected, diff)
+                        reporting.result_pass(actual, expected, diff, render_time)
             except Exception, e:
                 reporting.other_error(expected, repr(e))
     return m
