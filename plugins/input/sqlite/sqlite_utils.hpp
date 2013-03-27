@@ -29,6 +29,7 @@
 #include <algorithm>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/geometry.hpp>
@@ -556,7 +557,7 @@ public:
         }
         catch (std::exception const& ex)
         {
-            //std::clog << "no: " << ex.what() << "\n";
+            MAPNIK_LOG_DEBUG(sqlite) << "has_rtree returned:" <<  ex.what();
             return false;
         }
         return false;
@@ -609,9 +610,7 @@ public:
                     break;
 
                 default:
-#ifdef MAPNIK_DEBUG
-                    std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
+                    MAPNIK_LOG_DEBUG(sqlite) << "detect_types_from_subquery: unknown type_oid=" << type_oid;
                     break;
                 }
             }
@@ -691,20 +690,22 @@ public:
                         desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
                     }
                 }
-#ifdef MAPNIK_DEBUG
                 else
                 {
                     // "Column Affinity" says default to "Numeric" but for now we pass..
                     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
 
-                    // TODO - this should not fail when we specify geometry_field in XML file
-
-                    std::clog << "Sqlite Plugin: column '"
-                              << std::string(fld_name)
-                              << "' unhandled due to unknown type: "
-                              << fld_type << std::endl;
-                }
+#ifdef MAPNIK_LOG
+                    // Do not fail when we specify geometry_field in XML file
+                    if (field.empty())
+                    {
+                        MAPNIK_LOG_DEBUG(sqlite) << "Column '"
+                                                 << std::string(fld_name)
+                                                 << "' unhandled due to unknown type: "
+                                                 << fld_type;
+                    }
 #endif
+                }
             }
         }
 

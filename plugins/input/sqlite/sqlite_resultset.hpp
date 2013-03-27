@@ -24,6 +24,7 @@
 #define MAPNIK_SQLITE_RESULTSET_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 
