@@ -275,6 +275,7 @@ opts.AddVariables(
     ('WARNING_CXXFLAGS', 'Compiler flags you can set to reduce warning levels which are placed after -Wall.', ''),
 
     # SCons build behavior options
+    ('HOST', 'Set the target host for cross compiling"', ''),
     ('CONFIG', "The path to the python file in which to save user configuration options. Currently : '%s'" % SCONS_LOCAL_CONFIG,SCONS_LOCAL_CONFIG),
     BoolVariable('USE_CONFIG', "Use SCons user '%s' file (will also write variables after successful configuration)", 'True'),
     # http://www.scons.org/wiki/GoFastButton
@@ -354,7 +355,7 @@ PathVariable.PathAccept),
     # Variables for logging and statistics
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
-    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. ' + ', '.join(severities), 'error'),
+    ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. ' + ', '.join(severities) + ')', 'error'),
 
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -1192,19 +1193,21 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=False)
 
-    for libname, headers, required, lang in LIBSHEADERS:
-        if not conf.CheckLibWithHeader(libname, headers, lang):
-            if required:
-                color_print(1, 'Could not find required header or shared library for %s' % libname)
-                env['MISSING_DEPS'].append(libname)
-            else:
-                color_print(4, 'Could not find optional header or shared library for %s' % libname)
-                env['SKIPPED_DEPS'].append(libname)
+    if not env['HOST']:
+        for libname, headers, required, lang in LIBSHEADERS:
+            if not conf.CheckLibWithHeader(libname, headers, lang):
+                if required:
+                    color_print(1, 'Could not find required header or shared library for %s' % libname)
+                    env['MISSING_DEPS'].append(libname)
+                else:
+                    color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                    env['SKIPPED_DEPS'].append(libname)
 
-    if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
-        if not conf.icu_at_least_four_two():
-            # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
-            env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
+    if not env['HOST']:
+        if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
+            if not conf.icu_at_least_four_two():
+                # expression_string.cpp and map.cpp use fromUTF* function only available in >= ICU 4.2
+                env['MISSING_DEPS'].append(env['ICU_LIB_NAME'])
 
     if env['BIGINT']:
         env.Append(CPPDEFINES = '-DBIGINT')
@@ -1239,24 +1242,26 @@ if not preconfigured:
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths()
 
-    # if the user is not setting custom boost configuration
-    # enforce boost version greater than or equal to BOOST_MIN_VERSION
-    if not conf.CheckBoost(BOOST_MIN_VERSION):
-        color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
-        color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
-        if not env['BOOST_VERSION']:
-            env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
-    else:
-        color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
+    if not env['HOST']:
+        # if the user is not setting custom boost configuration
+        # enforce boost version greater than or equal to BOOST_MIN_VERSION
+        if not conf.CheckBoost(BOOST_MIN_VERSION):
+            color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
+            color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
+            if not env['BOOST_VERSION']:
+                env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
+        else:
+            color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
 
-    for count, libinfo in enumerate(BOOST_LIBSHEADERS):
-        if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
-            if libinfo[2]:
-                color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
-                env['MISSING_DEPS'].append('boost ' + libinfo[0])
-            else:
-                color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
-                env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
+    if not env['HOST']:
+        for count, libinfo in enumerate(BOOST_LIBSHEADERS):
+            if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
+                if libinfo[2]:
+                    color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
+                    env['MISSING_DEPS'].append('boost ' + libinfo[0])
+                else:
+                    color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
+                    env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
 
     if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
@@ -1484,9 +1489,10 @@ if not preconfigured:
                 env['BOOST_PYTHON_LIB'] = 'boost_python3%s' % env['BOOST_APPEND']
             elif env['BOOST_PYTHON_LIB'] == 'boost_python':
                 env['BOOST_PYTHON_LIB'] = 'boost_python%s' % env['BOOST_APPEND']
-            if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
-                color_print(1,'Could not find required header files for boost python')
-                env['MISSING_DEPS'].append('boost python')
+            if not env['HOST']:
+                if not conf.CheckHeader(header='boost/python/detail/config.hpp',language='C++'):
+                    color_print(1,'Could not find required header files for boost python')
+                    env['MISSING_DEPS'].append('boost python')
 
             if env['CAIRO']:
                 if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
@@ -1558,9 +1564,9 @@ if not preconfigured:
 
         # Common debugging flags.
         # http://lists.fedoraproject.org/pipermail/devel/2010-November/144952.html
-        debug_flags  = '-g -fno-omit-frame-pointer'
-        debug_defines = '-DDEBUG -DMAPNIK_DEBUG'
-        ndebug_defines = '-DNDEBUG'
+        debug_flags  = ['-g', '-fno-omit-frame-pointer']
+        debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
+        ndebug_defines = ['-DNDEBUG']
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
@@ -1575,7 +1581,7 @@ if not preconfigured:
             color_print(1,"No logger severity specified, available options are %s." % severities_list)
             Exit(1)
 
-        log_enabled = ' -DMAPNIK_LOG -DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % log_severity
+        log_enabled = ['-DMAPNIK_LOG', '-DMAPNIK_DEFAULT_LOG_SEVERITY=%d' % log_severity]
 
         if env['DEBUG']:
             debug_defines += log_enabled
@@ -1585,8 +1591,8 @@ if not preconfigured:
 
         # Enable statistics reporting
         if env['ENABLE_STATS']:
-            debug_defines += ' -DMAPNIK_STATS'
-            ndebug_defines += ' -DMAPNIK_STATS'
+            debug_defines.append('-DMAPNIK_STATS')
+            ndebug_defines.append('-DMAPNIK_STATS')
 
         # Add rdynamic to allow using statics between application and plugins
         # http://stackoverflow.com/questions/8623657/multiple-instances-of-singleton-across-shared-libraries-on-linux

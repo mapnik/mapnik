@@ -76,6 +76,15 @@ private:
     mutable void * proj_ctx_;
 };
 
+template <typename charT, typename traits>
+std::basic_ostream<charT, traits> &
+operator << ( std::basic_ostream<charT, traits> & s, mapnik::projection const& p )
+{
+    s << "projection(\"" << p.params() << "\")";
+    return s;
+}
+
+
 }
 
 #endif // MAPNIK_PROJECTION_HPP

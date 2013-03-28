@@ -264,8 +264,8 @@ void Map::set_height(unsigned height)
 
 void Map::resize(unsigned width,unsigned height)
 {
-    if (width != width_ &&
-        height != height_ &&
+    if ((width != width_ ||
+        height != height_) &&
         width >= MIN_MAPSIZE &&
         width <= MAX_MAPSIZE &&
         height >= MIN_MAPSIZE &&

@@ -24,6 +24,7 @@
 #define MAPNIK_SQLITE_PREPARED_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/box2d.hpp>
@@ -77,11 +78,13 @@ public:
             {
                 if (*(*ds_))
                 {
-                    std::cerr << "ERR:" << sqlite3_errmsg(*(*ds_)) << "\n";
+                    MAPNIK_LOG_ERROR(sqlite) << "~prepared_index_statement:"
+                                             << sqlite3_errmsg(*(*ds_));
                 }
                 else
                 {
-                    std::cerr << "SQLite Plugin: " << res << "\n";
+                    MAPNIK_LOG_ERROR(sqlite) << "~prepared_index_statement:"
+                                             << res;
                 }
             }
         }
