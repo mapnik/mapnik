@@ -18,7 +18,7 @@ visual_output_dir = "/tmp/mapnik-visual-images"
 
 defaults = {
     'sizes': [(500, 100)],
-    'scales':[1.0,2.0],
+    'scales':[1.0, 2.0],
     'agg': True,
     'cairo': True,
     'grid': False,
@@ -133,13 +133,19 @@ class Reporting:
         self.overwrite_failures = overwrite_failures
         self.errors = [ #(type, actual, expected, diff, message)
          ]
+
+    def format_time(self, render_time):
+        if render_time > 0.5:
+            return "%.2fs" % render_time
+        else:
+            return "%.0fms" % (render_time * 1000)
         
     def result_fail(self, actual, expected, diff, render_time):
         self.failed += 1
         if self.quiet:
             sys.stderr.write('\x1b[31m.\x1b[0m')
         else:
-            print '\x1b[31m✘\x1b[0m (\x1b[34m%.2fs, %u different pixels\x1b[0m)' % (render_time, diff)
+            print '\x1b[31m✘\x1b[0m (\x1b[34m%s, %u different pixels\x1b[0m)' % (self.format_time(render_time), diff)
 
         if self.overwrite_failures:
             self.errors.append((self.REPLACE, actual, expected, diff, None))
@@ -153,7 +159,7 @@ class Reporting:
         if self.quiet:
             sys.stderr.write('\x1b[32m.\x1b[0m')
         else:
-            print '\x1b[32m✓\x1b[0m (\x1b[34m%.2fs\x1b[0m)' % render_time
+            print '\x1b[32m✓\x1b[0m (\x1b[34m%s\x1b[0m)' % self.format_time(render_time)
 
     def not_found(self, actual, expected):
         self.failed += 1
@@ -240,20 +246,16 @@ renderers = [
 ]
 
 
-def render(config, width, height, bbox, scale_factor, reporting):
+def render(m, config, width, height, scale_factor, reporting):
     filename = config['name']
-    m = mapnik.Map(int(width*scale_factor), int(height*scale_factor))
     postfix = "%s-%d-%d-%s" % (filename, width, height, scale_factor)
 
-    try:
-        mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % filename), False)
-        if bbox is not None:
-            m.zoom_to_box(bbox)
-        else:
-            m.zoom_all()
-    except Exception, e:
-        reporting.load_error(filename, repr(e))
-        return m
+    bbox = config.get('bbox')
+    m.resize(int(width*scale_factor), int(height*scale_factor))
+    if bbox is not None:
+        m.zoom_to_box(bbox)
+    else:
+        m.zoom_all()
     
     for renderer in renderers:
         # TODO - grid renderer does not support scale_factor yet via python
@@ -281,7 +283,6 @@ def render(config, width, height, bbox, scale_factor, reporting):
                         reporting.result_pass(actual, expected, diff, render_time)
             except Exception, e:
                 reporting.other_error(expected, repr(e))
-    return m
 
 if __name__ == "__main__":
     if '-q' in sys.argv:
@@ -318,12 +319,18 @@ if __name__ == "__main__":
         for f in files:
             config = dict(defaults)
             config.update(f)
+            m = mapnik.Map(16, 16)
+            try:
+                start = time()
+                mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % config['name']), False)
+            except Exception, e:
+                reporting.load_error(filename, repr(e))
+
             for size in config['sizes']:
                 for scale_factor in config['scales']:
-                    m = render(config,
+                    render(m, config,
                                size[0],
                                size[1],
-                               config.get('bbox'),
                                scale_factor,
                                reporting)
             mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
