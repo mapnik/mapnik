@@ -727,11 +727,7 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
     {
         if (glyphs->marker())
         {
-            pixel_position pos = glyphs->marker_pos() + 0.5 *
-                    pixel_position(glyphs->marker()->marker->width(),
-                                   glyphs->marker()->marker->height());
-
-            render_marker(pos,
+            render_marker(glyphs->marker_pos(),
                       *(glyphs->marker()->marker), glyphs->marker()->transform,
                       sym.get_opacity());
         }
