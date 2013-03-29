@@ -6,12 +6,11 @@ class Reporting:
     OTHER = 3
     REPLACE = 4
     LOAD_ERROR = 5
-    def __init__(self, quiet, generate = False, overwrite_failures = False):
+    def __init__(self, quiet):
         self.quiet = quiet
         self.passed = 0
         self.failed = 0
-        self.generate = generate
-        self.overwrite_failures = overwrite_failures
+        self.overwrite_failures = False
         self.errors = [ #(type, actual, expected, diff, message)
          ]
 
@@ -88,3 +87,7 @@ class Reporting:
             elif error[0] == self.REPLACE:
                 print str(idx+1) + ") \x1b[31mreplaced reference with new version:\x1b[0m %s" % error[2]
         return 1
+
+    def show_file(self, postfix, renderer):
+        if not self.quiet:
+            print "\"%s\" with %s..." % (postfix, renderer),

@@ -6,14 +6,8 @@ mapnik.logger.set_severity(mapnik.severity_type.None)
 
 import sys
 import os.path
-from compare import compare, compare_grids
-from time import time
 from reporting import Reporting
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
+from renderjob import RenderJob
 
 visual_output_dir = "/tmp/mapnik-visual-images"
 
@@ -22,8 +16,10 @@ defaults = {
     'scales':[1.0, 2.0],
     'agg': True,
     'cairo': True,
-    'grid': False,
+    'grid': True,
 }
+
+dirname = os.path.dirname(__file__)
 
 sizes_many_in_big_range = [(800, 100), (600, 100), (400, 100),
     (300, 100), (250, 100), (150, 100), (100, 100)]
@@ -34,7 +30,6 @@ sizes_many_in_small_range = [(490, 100), (495, 100), (497, 100), (498, 100),
 
 default_text_box = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
 
-dirname = os.path.dirname(__file__)
 
 text_tests = [
     {'name': "list", 'sizes': sizes_many_in_big_range,'bbox':default_text_box},
@@ -120,82 +115,6 @@ other_tests = [
 
 files = text_tests + tiff_tests + other_tests
 
-def render_cairo(m, output, scale_factor):
-    mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
-    # open and re-save as png8 to save space
-    new_im = mapnik.Image.open(output)
-    new_im.save(output, 'png8:m=h')
-
-def render_grid(m, output, scale_factor):
-    grid = mapnik.Grid(m.width, m.height)
-    mapnik.render_layer(m, grid, layer=0)
-    utf1 = grid.encode('utf', resolution=4)
-    open(output,'wb').write(json.dumps(utf1, indent=1))
-
-            
-renderers = [
-    { 'name': 'agg',
-      'render': lambda m, output, scale_factor: mapnik.render_to_file(m, output, 'png8:m=h', scale_factor),
-      'compare': lambda actual, reference: compare(actual, reference, alpha=True),
-      'threshold': 0,
-      'filetype': 'png',
-      'dir': 'images'
-    },
-    { 'name': 'cairo',
-      'render': render_cairo,
-      'compare': lambda actual, reference: compare(actual, reference, alpha=False),
-      'threshold': 0,
-      'filetype': 'png',
-      'dir': 'images'
-    },
-    { 'name': 'grid',
-      'render': render_grid,
-      'compare': lambda actual, reference: compare_grids(actual, reference, alpha=False),
-      'threshold': 0,
-      'filetype': 'json',
-      'dir': 'grids'
-    }
-]
-
-
-def render(m, config, width, height, scale_factor, reporting):
-    filename = config['name']
-    postfix = "%s-%d-%d-%s" % (filename, width, height, scale_factor)
-
-    bbox = config.get('bbox')
-    m.resize(int(width*scale_factor), int(height*scale_factor))
-    if bbox is not None:
-        m.zoom_to_box(bbox)
-    else:
-        m.zoom_all()
-    
-    for renderer in renderers:
-        # TODO - grid renderer does not support scale_factor yet via python
-        if renderer['name'] == 'grid' and scale_factor != 1.0:
-            continue
-        if config.get(renderer['name'], True):
-            expected = os.path.join(dirname, renderer['dir'], '%s-%s-reference.%s' %
-                (postfix, renderer['name'], renderer['filetype']))
-            actual = os.path.join(visual_output_dir, '%s-%s.%s' %
-                (postfix, renderer['name'], renderer['filetype']))
-            if not quiet:
-                print "\"%s\" with %s..." % (postfix, renderer['name']),
-            try:
-                start = time()
-                renderer['render'](m, actual, scale_factor)
-                render_time = time() - start
-                
-                if not os.path.exists(expected):
-                    reporting.not_found(actual, expected)
-                else:
-                    diff = renderer['compare'](actual, expected)
-                    if diff > renderer['threshold']:
-                        reporting.result_fail(actual, expected, diff, render_time)
-                    else:
-                        reporting.result_pass(actual, expected, diff, render_time)
-            except Exception, e:
-                reporting.other_error('%s-%s' % (postfix, renderer['name']), repr(e))
-
 if __name__ == "__main__":
     if '-q' in sys.argv:
         quiet = True
@@ -203,17 +122,20 @@ if __name__ == "__main__":
     else:
         quiet = False
 
+    reporting = Reporting(quiet=quiet)
+    render_job = RenderJob(reporting, dirname, visual_output_dir)
+
     if '--overwrite' in sys.argv:
-        overwrite_failures = True
+        render_job.set_overwrite_failures(True)
         sys.argv.remove('--overwrite')
     else:
-        overwrite_failures = False
+        render_job.set_overwrite_failures(False)
 
     if '--no-generate' in sys.argv:
-        generate = False
+        render_job.set_generate(False)
         sys.argv.remove('--no-generate')
     else:
-        generate = True
+        render_job.set_generate(True)
 
     if len(sys.argv) == 2:
         files = [{"name": sys.argv[1], "sizes": sizes_few_square}]
@@ -226,27 +148,18 @@ if __name__ == "__main__":
         os.makedirs(visual_output_dir)
 
 
-    if 'osm' in mapnik.DatasourceCache.plugin_names():
-        reporting = Reporting(quiet=quiet, generate=generate, overwrite_failures=overwrite_failures)
-        for f in files:
-            config = dict(defaults)
-            config.update(f)
-            m = mapnik.Map(16, 16)
-            try:
-                start = time()
-                mapnik.load_map(m, os.path.join(dirname, "styles", "%s.xml" % config['name']), False)
-            except Exception, e:
-                reporting.load_error(filename, repr(e))
-
-            for size in config['sizes']:
-                for scale_factor in config['scales']:
-                    render(m, config,
-                               size[0],
-                               size[1],
-                               scale_factor,
-                               reporting)
-            mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
-
-        sys.exit(reporting.summary())
-    else:
+    if 'osm' not in mapnik.DatasourceCache.plugin_names():
         print "OSM plugin required"
+        sys.exit(2)
+    for f in files:
+        config = dict(defaults)
+        config.update(f)
+        render_job.load_and_save(config['name'], os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
+        for size in config['sizes']:
+            for scale_factor in config['scales']:
+                render_job.render(config,
+                            size[0],
+                            size[1],
+                            scale_factor)
+
+    sys.exit(reporting.summary())
