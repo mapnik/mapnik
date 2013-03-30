@@ -56,6 +56,11 @@ class vertex_cache
     /* The first segment always has the length 0 and just defines the starting point. */
     struct segment_vector
     {
+        segment_vector() : vector(), length(0.) {}
+        void add_segment(double x, double y, double len) {
+            vector.push_back(segment(x, y, len));
+            length += len;
+        }
         typedef std::vector<segment>::iterator iterator;
         std::vector<segment> vector;
         double length;
@@ -162,20 +167,15 @@ vertex_cache::vertex_cache(T &path)
     path.rewind(0);
     unsigned cmd;
     double new_x = 0., new_y = 0., old_x = 0., old_y = 0.;
-    double path_length = 0.;
     bool first = true; //current_subpath_ uninitalized
     while (!agg::is_stop(cmd = path.vertex(&new_x, &new_y)))
     {
         if (agg::is_move_to(cmd))
         {
-            if (!first)
-            {
-                current_subpath_->length = path_length;
-            }
             //Create new sub path
             subpaths_.push_back(segment_vector());
             current_subpath_ = subpaths_.end()-1;
-            current_subpath_->vector.push_back(segment(new_x, new_y, 0));
+            current_subpath_->add_segment(new_x, new_y, 0);
             first = false;
         }
         if (agg::is_line_to(cmd))
@@ -188,16 +188,10 @@ vertex_cache::vertex_cache(T &path)
             double dx = old_x - new_x;
             double dy = old_y - new_y;
             double segment_length = std::sqrt(dx*dx + dy*dy);
-            path_length += segment_length;
-            current_subpath_->vector.push_back(segment(new_x, new_y, segment_length));
+            current_subpath_->add_segment(new_x, new_y, segment_length);
         }
         old_x = new_x;
         old_y = new_y;
-    }
-    if (!first) {
-        current_subpath_->length = path_length;
-    } else {
-        MAPNIK_LOG_DEBUG(vertex_cache) << "Empty path\n";
     }
 }
 
