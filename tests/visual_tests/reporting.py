@@ -13,6 +13,7 @@ class Reporting:
         self.passed = 0
         self.failed = 0
         self.overwrite_failures = False
+        self.generate = False
         self.errors = [ #(type, actual, expected, diff, message)
          ]
 
@@ -82,7 +83,7 @@ class Reporting:
                 if self.generate:
                     print str(idx+1) + ") Generating reference image: '%s'" % error[2]
                 else:
-                    print str(idx+1) + ")Could not verify %s: No reference image found!" % error[1]
+                    print str(idx+1) + ") Could not verify %s: No reference image found!" % error[1]
                 continue
             elif error[0] == self.DIFF:
                 print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % (error[3], error[1], error[2])

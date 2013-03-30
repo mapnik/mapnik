@@ -62,6 +62,7 @@ class RenderJob:
 
     def set_generate(self, state):
         self.generate = state
+        self.reporting.generate = state
 
     def load_and_save(self, filename, output):
         self.m = mapnik.Map(16, 16)

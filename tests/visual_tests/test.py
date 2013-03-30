@@ -141,6 +141,9 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--disable-renderer', action='append',
         help='disable a renderer (options: agg, cairo, grid)',
         choices=['agg', 'cairo', 'grid'], metavar='NAME', default=[])
+    parser.add_argument('-s', '--scale-factor', action='append',
+        help='use fixed scale factor',
+        type=float, metavar='FACTOR', default=None)
     parser.add_argument('-o', '--output-dir', action='store',
         default=visual_output_dir, help='output directory (default: %(default)s)', metavar='DIR')
     parser.add_argument('file', nargs='*', action='store',
@@ -159,6 +162,12 @@ if __name__ == "__main__":
             new_files.append(find_file(f))
         print new_files
         files = new_files
+
+    for renderer in args.disable_renderer:
+        defaults[renderer] = False
+
+    if args.scale_factor is not None:
+        defaults['scales'] = args.scale_factor
 
     if 'osm' not in mapnik.DatasourceCache.plugin_names():
         print "OSM plugin required"
