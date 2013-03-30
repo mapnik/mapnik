@@ -33,7 +33,7 @@
 #include <vector>
 #include <map>
 
-//boost
+// boost
 #include <boost/shared_ptr.hpp>
 
 namespace mapnik
