@@ -71,6 +71,8 @@ class RenderJob:
             mapnik.save_map(self.m, output)
         except Exception, e:
             self.reporting.load_error(filename, repr(e))
+            return False
+        return True
 
     def render(self, config, width, height, scale_factor):
         filename = config['name']
@@ -95,7 +97,8 @@ class RenderJob:
                 self.reporting.show_file(postfix, renderer['name'])
                 try:
                     start = time()
-                    renderer['render'](self.m, actual, scale_factor)
+                    for i in range(self.repeat):
+                        renderer['render'](self.m, actual, scale_factor)
                     render_time = time() - start
 
                     if not os.path.exists(expected):

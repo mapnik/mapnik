@@ -8,6 +8,7 @@ import sys
 import os.path
 from reporting import Reporting
 from renderjob import RenderJob
+import argparse
 
 visual_output_dir = "/tmp/mapnik-visual-images"
 
@@ -115,46 +116,63 @@ other_tests = [
 
 files = text_tests + tiff_tests + other_tests
 
+def find_file(filename):
+    if filename.startswith('styles/'):
+        filename = filename[7:]
+    if filename.endswith('.xml'):
+        filename = filename[:-4]
+    for f in files:
+        if f['name'] == filename:
+            return f
+    #not found => default sizes
+    return {'name': filename, 'sizes': sizes_few_square}
+    
 if __name__ == "__main__":
-    if '-q' in sys.argv:
-        quiet = True
-        sys.argv.remove('-q')
-    else:
-        quiet = False
-
-    reporting = Reporting(quiet=quiet)
-    render_job = RenderJob(reporting, dirname, visual_output_dir)
-
-    if '--overwrite' in sys.argv:
-        render_job.set_overwrite_failures(True)
-        sys.argv.remove('--overwrite')
-    else:
-        render_job.set_overwrite_failures(False)
-
-    if '--no-generate' in sys.argv:
-        render_job.set_generate(False)
-        sys.argv.remove('--no-generate')
-    else:
-        render_job.set_generate(True)
-
-    if len(sys.argv) == 2:
-        files = [{"name": sys.argv[1], "sizes": sizes_few_square}]
-    elif len(sys.argv) > 2:
-        files = []
-        for name in sys.argv[1:]:
-            files.append({"name": name})
-
-    if not os.path.exists(visual_output_dir):
-        os.makedirs(visual_output_dir)
-
+    parser = argparse.ArgumentParser(description='Run mapnik\'s visual tests.')
+    parser.add_argument('-q', '--quiet', action='store_true',
+        help='output colored dots on stderr instead of detailed information on stdout')
+    parser.add_argument('-O', '--overwrite', action='store_true',
+        help='overwrite reference images')
+    parser.add_argument('-g', '--generate', action='store_true',
+        help='generate missing reference images')
+    parser.add_argument('-r', '--repeat', action='store',
+        help='repeat rendering N times. Useful for finding bugs and benchmarking',
+        default=1, type=int, metavar='N')
+    parser.add_argument('-d', '--disable-renderer', action='append',
+        help='disable a renderer (options: agg, cairo, grid)',
+        choices=['agg', 'cairo', 'grid'], metavar='NAME', default=[])
+    parser.add_argument('-o', '--output-dir', action='store',
+        default=visual_output_dir, help='output directory (default: %(default)s)', metavar='DIR')
+    parser.add_argument('file', nargs='*', action='store',
+        help='only render these files')
+    args = parser.parse_args()
+    
+    print args
+    reporting = Reporting(quiet=args.quiet)
+    render_job = RenderJob(reporting, dirname, args.output_dir)
+    render_job.repeat = args.repeat
+    render_job.set_overwrite_failures(args.overwrite)
+    render_job.set_generate(args.generate)
+    if args.file:
+        new_files = []
+        for f in args.file:
+            new_files.append(find_file(f))
+        print new_files
+        files = new_files
 
     if 'osm' not in mapnik.DatasourceCache.plugin_names():
         print "OSM plugin required"
         sys.exit(2)
+
+
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+
     for f in files:
         config = dict(defaults)
         config.update(f)
-        render_job.load_and_save(config['name'], os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
+        if not render_job.load_and_save(config['name'], os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name'])):
+            continue
         for size in config['sizes']:
             for scale_factor in config['scales']:
                 render_job.render(config,

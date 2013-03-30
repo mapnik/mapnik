@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 class Reporting:
     DIFF = 1
     NOT_FOUND = 2
@@ -86,6 +88,8 @@ class Reporting:
                 print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % (error[3], error[1], error[2])
             elif error[0] == self.REPLACE:
                 print str(idx+1) + ") \x1b[31mreplaced reference with new version:\x1b[0m %s" % error[2]
+            elif error[0] == self.LOAD_ERROR:
+                print str(idx+1) + ") \x1b[31mfailure to load style \"%s\":\x1b[0m %s" % (error[1], error[4])
         return 1
 
     def show_file(self, postfix, renderer):
