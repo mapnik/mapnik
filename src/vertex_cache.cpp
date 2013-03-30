@@ -33,17 +33,32 @@ double vertex_cache::angle(double width)
 
 bool vertex_cache::next_subpath()
 {
-    if (first_subpath_)
+    if (!initialized_)
     {
         current_subpath_ = subpaths_.begin();
-        first_subpath_ = false;
+        initialized_ = true;
     } else
     {
         current_subpath_++;
     }
     if (current_subpath_ == subpaths_.end()) return false;
-    rewind_subpath();
+    rewind_subpath(); //Initialize position values
     return true;
+}
+
+void vertex_cache::rewind_subpath()
+{
+    current_segment_ = current_subpath_->vector.begin();
+    //All subpaths contain at least one segment (i.e. the starting point)
+    segment_starting_point_ = current_position_ = current_segment_->pos;
+    position_in_segment_ = 0;
+    angle_valid_ = false;
+    position_ = 0;
+}
+
+void vertex_cache::reset()
+{
+    initialized_ = false;
 }
 
 bool vertex_cache::next_segment()
@@ -77,17 +92,25 @@ vertex_cache & vertex_cache::get_offseted(double offset, double region_width)
     {
         return *this;
     }
-    std::cout << "Creating new offseted line: " << offset << "\n";
-    //TODO: Cache offseted lines
-    offset_converter<vertex_cache> converter(*this);
-    converter.set_offset(offset);
-    offseted_line_ = vertex_cache_ptr(new vertex_cache(converter));
-    offseted_line_->rewind_subpath(); //TODO: Multiple subpath support
-    double seek = (position_ + region_width/2.) * offseted_line_->length() / length() - region_width/2.;
+
+    vertex_cache_ptr offseted_line;
+    offseted_lines_map::iterator pos = offseted_lines_.find(offset);
+    if (pos != offseted_lines_.end())
+    {
+        offseted_line = pos->second;
+    } else {
+        offset_converter<vertex_cache> converter(*this);
+        converter.set_offset(offset);
+        offseted_line = vertex_cache_ptr(new vertex_cache(converter));
+    }
+    offseted_line->reset();
+    offseted_line->next_subpath(); //TODO: Multiple subpath support
+    double seek = (position_ + region_width/2.) * offseted_line->length() / length() - region_width/2.;
     if (seek < 0) seek = 0;
-    if (seek > offseted_line_->length()) seek = offseted_line_->length();
-    offseted_line_->move(seek);
-    return *offseted_line_;
+    if (seek > offseted_line->length()) seek = offseted_line->length();
+    offseted_line->move(seek);
+    offseted_lines_[offset] = offseted_line;
+    return *offseted_line;
 }
 
 bool vertex_cache::forward(double length)
@@ -128,17 +151,6 @@ bool vertex_cache::move(double length)
     position_in_segment_ = length;
     current_position_ = segment_starting_point_ + (current_segment_->pos - segment_starting_point_) * factor;
     return true;
-}
-
-void vertex_cache::rewind_subpath()
-{
-    current_segment_ = current_subpath_->vector.begin();
-    //All subpaths contain at least one segment
-    current_position_ = current_segment_->pos;
-    position_in_segment_ = 0;
-    segment_starting_point_ = current_position_;
-    angle_valid_ = false;
-    position_ = 0;
 }
 
 void vertex_cache::rewind(unsigned)

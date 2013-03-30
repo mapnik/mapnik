@@ -31,8 +31,7 @@
 
 // stl
 #include <vector>
-//#include <utility>
-//#include <cmath>
+#include <map>
 
 //boost
 #include <boost/shared_ptr.hpp>
@@ -58,6 +57,7 @@ class vertex_cache
     {
         segment_vector() : vector(), length(0.) {}
         void add_segment(double x, double y, double len) {
+            if (len == 0. && !vector.empty()) return; //Don't add zero length segments
             vector.push_back(segment(x, y, len));
             length += len;
         }
@@ -105,7 +105,7 @@ public:
     double angle(double width=0.);
 
 
-    /** Moves all positions to a parallel line in the specified distance. */
+    /** Returns a parallel line in the specified distance. */
     vertex_cache &get_offseted(double offset, double region_width);
 
 
@@ -115,8 +115,11 @@ public:
      * on a point on the path.
      */
     bool forward(double length);
+    /** Go backwards. */
     bool backward(double length);
-    bool move(double length); //Move works in both directions
+    /** Move in any direction (based on sign of length). Returns false if it reaches either end of the path. */
+    bool move(double length);
+    /** Work on next subpath. Returns false if the is no next subpath. */
     bool next_subpath();
 
     // Compatibility with standard path interface
@@ -126,24 +129,41 @@ public:
     //State
     state save_state() const;
     void restore_state(state const& s);
+    /** Go back to initial state. */
+    void reset();
 
 
 private:
     void rewind_subpath();
     bool next_segment();
     bool previous_segment();
+    /** Position as calculated by last move/forward/next call. */
     pixel_position current_position_;
+    /** First pixel of current segment. */
     pixel_position segment_starting_point_;
+    /** List of all subpaths. */
     std::vector<segment_vector> subpaths_;
+    /** Currently active subpath. */
     std::vector<segment_vector>::iterator current_subpath_;
+    /** Current segment for normal operation (move()). */
     segment_vector::iterator current_segment_;
-    segment_vector::iterator vertex_segment_; //Only for vertex()
+    /** Current segment in compatibility mode (vertex(), rewind()). */
+    segment_vector::iterator vertex_segment_;
+    /** Currently active subpath in compatibility mode. */
     std::vector<segment_vector>::iterator vertex_subpath_;
-    bool first_subpath_;
+    /** State is initialized (after first call to next_subpath()). */
+    bool initialized_;
+    /** Position from start of segment. */
     double position_in_segment_;
+    /** Angle for current segment. */
     mutable double angle_;
+    /** Is the value in angle_ valid?
+     * Used to avoid unnecessary calculations. */
     mutable bool angle_valid_;
-    vertex_cache_ptr offseted_line_;
+    typedef std::map<double, vertex_cache_ptr> offseted_lines_map;
+    /** Cache of all offseted lines already computed. */
+    offseted_lines_map offseted_lines_;
+    /** Linear position, i.e distance from start of line. */
     double position_;
 };
 
@@ -157,11 +177,11 @@ vertex_cache::vertex_cache(T &path)
           current_segment_(),
           vertex_segment_(),
           vertex_subpath_(),
-          first_subpath_(true),
+          initialized_(false),
           position_in_segment_(0.),
           angle_(0.),
           angle_valid_(false),
-          offseted_line_(),
+          offseted_lines_(),
           position_(0.)
 {
     path.rewind(0);
