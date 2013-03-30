@@ -115,6 +115,12 @@ other_tests = [
 	'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
 ]
 
+test_names = {
+    '!text': text_tests,
+    '!tiff': tiff_tests,
+    '!other': other_tests,
+}
+
 files = text_tests + tiff_tests + other_tests
 
 def find_file(filename):
@@ -148,10 +154,9 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--output-dir', action='store',
         default=visual_output_dir, help='output directory (default: %(default)s)', metavar='DIR')
     parser.add_argument('file', nargs='*', action='store',
-        help='only render these files')
+        help='only render these files (select groups of tests with "!text", "!tiff", "!other")')
     args = parser.parse_args()
     
-    print args
     reporting = Reporting(quiet=args.quiet)
     render_job = RenderJob(reporting, dirname, args.output_dir)
     render_job.repeat = args.repeat
@@ -160,8 +165,10 @@ if __name__ == "__main__":
     if args.file:
         new_files = []
         for f in args.file:
-            new_files.append(find_file(f))
-        print new_files
+            if f in test_names:
+                new_files += test_names[f]
+            else:
+                new_files.append(find_file(f))
         files = new_files
 
     for renderer in args.disable_renderer:
