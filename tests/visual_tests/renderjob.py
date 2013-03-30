@@ -32,6 +32,14 @@ class RenderJob:
       'filetype': 'png',
       'dir': 'images'
     },
+    { 'name': 'agg_benchmark',
+      'render': lambda m, output, scale_factor: mapnik.render(m, mapnik.Image(m.width, m.height), scale_factor),
+      'compare': lambda actual, reference: 0,
+      'threshold': 0,
+      'filetype': 'png',
+      'dir': 'images',
+      'no_reference': True
+    },
     { 'name': 'cairo',
       'render': render_cairo,
       'compare': lambda actual, reference: compare(actual, reference, alpha=False),
@@ -102,7 +110,7 @@ class RenderJob:
                         renderer['render'](self.m, actual, scale_factor)
                     render_time = time() - start
 
-                    if not os.path.exists(expected):
+                    if not os.path.exists(expected) and not renderer.get('no_reference', False):
                         self.reporting.not_found(actual, expected)
                     else:
                         diff = renderer['compare'](actual, expected)

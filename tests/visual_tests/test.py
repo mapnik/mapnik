@@ -18,6 +18,7 @@ defaults = {
     'agg': True,
     'cairo': True,
     'grid': True,
+    'agg_benchmark': True,
 }
 
 dirname = os.path.dirname(__file__)
