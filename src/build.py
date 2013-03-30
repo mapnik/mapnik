@@ -179,6 +179,7 @@ source = Split(
     xml_tree.cpp
     config_error.cpp
     color_factory.cpp
+    vertex_cache.cpp
     warp.cpp
     svg/svg_parser.cpp
     svg/svg_path_parser.cpp
