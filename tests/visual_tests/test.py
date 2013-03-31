@@ -18,7 +18,7 @@ defaults = {
     'agg': True,
     'cairo': True,
     'grid': True,
-    'agg_benchmark': True,
+    'agg_benchmark': False,
 }
 
 dirname = os.path.dirname(__file__)
@@ -145,6 +145,8 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--repeat', action='store',
         help='repeat rendering N times. Useful for finding bugs and benchmarking',
         default=1, type=int, metavar='N')
+    parser.add_argument('-b', '--benchmark', action='store_true',
+        help='disable all normal renderers and enable special agg renderer writing no output file.')
     parser.add_argument('-d', '--disable-renderer', action='append',
         help='disable a renderer (options: agg, cairo, grid)',
         choices=['agg', 'cairo', 'grid'], metavar='NAME', default=[])
@@ -173,6 +175,12 @@ if __name__ == "__main__":
 
     for renderer in args.disable_renderer:
         defaults[renderer] = False
+
+    if args.benchmark:
+        defaults['agg'] = False
+        defaults['cairo'] = False
+        defaults['grid'] = False
+        defaults['agg_benchmark'] = True
 
     if args.scale_factor is not None:
         defaults['scales'] = args.scale_factor
