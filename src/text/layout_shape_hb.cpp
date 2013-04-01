@@ -75,7 +75,7 @@ void text_layout::shape_text(text_line_ptr line)
                     break;
                 }
             }
-            if (!font_has_all_glyphs)
+            if (!font_has_all_glyphs && face_itr+1 != face_end)
             {
                 //Try next font in fontset
                 continue;
