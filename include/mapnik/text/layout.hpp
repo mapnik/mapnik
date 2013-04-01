@@ -108,6 +108,7 @@ private:
     void break_line(text_line_ptr line, double wrap_width, unsigned text_ratio, bool wrap_before);
     void shape_text(text_line_ptr line);
     void add_line(text_line_ptr line);
+    void clear_cluster_widths(unsigned first, unsigned last);
 
     //input
     face_manager_freetype &font_manager_;
@@ -115,7 +116,9 @@ private:
 
     //processing
     text_itemizer itemizer_;
-    /// Maps char index (UTF-16) to width. If multiple glyphs map to the same char the sum of all widths is used
+    /** Maps char index (UTF-16) to width. If multiple glyphs map to the same char the sum of all widths is used
+        note: this probably isn't the best solution. it would be better to have an object for each cluster, but
+        it needs to be implemented with no overhead. */
     std::map<unsigned, double> width_map_;
     double width_;
     double height_;

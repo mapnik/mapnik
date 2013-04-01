@@ -83,7 +83,10 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
     UErrorCode status = U_ZERO_ERROR;
     BreakIterator *breakitr = BreakIterator::createLineInstance(locale, status);
     //Not breaking the text if an error occurs is probably the best thing we can do.
-    if (!U_SUCCESS(status)) return;
+    if (!U_SUCCESS(status)) {
+        add_line(line);
+        return;
+    }
     breakitr->setText(text);
     unsigned current_line_length = 0;
     unsigned last_break_position = 0;
@@ -110,6 +113,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
                 }
             }
             text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
+            clear_cluster_widths(last_break_position, break_position);
             shape_text(new_line);
             add_line(new_line);
             last_break_position = break_position;
@@ -117,13 +121,21 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
             current_line_length = 0;
         }
     }
-    if (last_break_position != line->get_last_char())
+    if (last_break_position == 0)
+    {
+        //No line breaks => no reshaping
+        add_line(line);
+    }
+    else if (last_break_position != line->get_last_char())
     {
         text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, line->get_last_char());
+        clear_cluster_widths(last_break_position, line->get_last_char());
         shape_text(new_line);
         add_line(new_line);
     }
 }
+
+
 
 void text_layout::add_line(text_line_ptr line)
 {
@@ -135,6 +147,14 @@ void text_layout::add_line(text_line_ptr line)
     width_ = std::max(width_, line->width());
     height_ += line->height();
     glyphs_count_ += line->size();
+}
+
+void text_layout::clear_cluster_widths(unsigned first, unsigned last)
+{
+    for (int i=first; i<last; i++)
+    {
+        width_map_[i] = 0;
+    }
 }
 
 void text_layout::clear()
