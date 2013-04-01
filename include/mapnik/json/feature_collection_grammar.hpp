@@ -87,7 +87,7 @@ struct feature_collection_grammar :
             > lit(']')
             ;
         
-        feature = eps[_a = construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
+        feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
             >> feature_g(*_a)[push_back(_r1,_a)]
             ;
         
