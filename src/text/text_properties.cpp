@@ -89,6 +89,8 @@ static const char * text_upright_strings[] = {
     "auto",
     "left",
     "right",
+    "left_only",
+    "right_only",
     ""
 };
 IMPLEMENT_ENUM(text_upright_e, text_upright_strings)

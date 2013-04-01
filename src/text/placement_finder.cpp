@@ -323,9 +323,29 @@ bool placement_finder::find_line_placements(T & path, bool points)
     return success;
 }
 
+text_upright_e placement_finder::simplify_upright(text_upright_e upright, double angle) const
+{
+    if (upright == UPRIGHT_AUTO)
+    {
+        return (fabs(normalize_angle(angle)) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
+    }
+    if (upright == UPRIGHT_LEFT_ONLY)
+    {
+        return UPRIGHT_LEFT;
+    }
+    if (upright == UPRIGHT_RIGHT_ONLY)
+    {
+        return  UPRIGHT_RIGHT;
+    }
+    return upright;
+}
+
 
 bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e orientation)
 {
+    /********************************************************************************
+     * IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! *
+     ********************************************************************************/
     vertex_cache::scoped_state s(pp);
 
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
@@ -334,12 +354,8 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     unsigned upside_down_glyph_count = 0;
 
 
-    /* IMPORTANT NOTE: See note about coordinate systems in find_point_placement()! */
-    text_upright_e real_orientation = orientation;
-    if (orientation == UPRIGHT_AUTO)
-    {
-        real_orientation = (fabs(normalize_angle(pp.angle())) > 0.5*M_PI) ? UPRIGHT_LEFT : UPRIGHT_RIGHT;
-    }
+    text_upright_e real_orientation = simplify_upright(orientation, pp.angle());
+
     double sign = (real_orientation == UPRIGHT_LEFT) ? -1 : 1;
     double offset = alignment_offset().y + info_->properties.displacement.y * scale_factor_ + sign * layout_.height()/2.;
 
@@ -404,11 +420,19 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         //See comment above
         offset -= sign * (*line_itr)->height()/2;
     }
-    if (orientation == UPRIGHT_AUTO && (upside_down_glyph_count > layout_.get_text().length()/2))
+    if (upside_down_glyph_count > layout_.get_text().length()/2)
     {
-        //Try again with oposite orientation
-        s.restore();
-        return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
+        if (orientation == UPRIGHT_AUTO)
+        {
+            //Try again with oposite orientation
+            s.restore();
+            return single_line_placement(pp, real_orientation == UPRIGHT_RIGHT ? UPRIGHT_LEFT : UPRIGHT_RIGHT);
+        }
+        //upright==left_only or right_only and more than 50% of characters upside down => no placement
+        if (orientation == UPRIGHT_LEFT_ONLY || orientation == UPRIGHT_RIGHT_ONLY)
+        {
+            return false;
+        }
     }
     BOOST_FOREACH(box2d<double> bbox, bboxes)
     {

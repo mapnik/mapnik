@@ -81,6 +81,9 @@ private:
     bool collision(box2d<double> const& box) const;
     /** Adds marker to glyph_positions and to collision detector. Returns false if there is a collision. */
     bool add_marker(glyph_positions_ptr glyphs, pixel_position const& pos) const;
+    /** Maps upright==auto, left_only and right_only to left,right to simplify processing.
+        angle = angle of at start of line (to estimate best option for upright==auto) */
+    text_upright_e simplify_upright(text_upright_e upright, double angle) const;
     box2d<double> get_bbox(glyph_info const& glyph, pixel_position const& pos, rotation const& rot);
     Feature const& feature_;
     DetectorType &detector_;
