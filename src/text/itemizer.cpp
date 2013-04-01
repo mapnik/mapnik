@@ -129,7 +129,7 @@ void text_itemizer::itemize_direction(unsigned start, unsigned end)
 
 void text_itemizer::itemize_script()
 {
-    if (!script_runs_.empty()) return; //Already done
+    script_runs_.clear();
 
     ScriptRun runs(text_.getBuffer(), text_.length());
     while (runs.next())
