@@ -151,10 +151,9 @@ public:
             //Error for this marker is too large. Skip to the next position.
             if (std::fabs(error_) > max_err_allowed)
             {
-                if (error_ > spacing_)
+                while (error_ > spacing_)
                 {
-                    MAPNIK_LOG_WARN(markers_placement) << "Extremely large error (" << error_ << ") in markers_placement. Please file a bug report.";
-                    error_ = 0.0; //Avoid moving backwards
+                    error_ -= spacing_; //Avoid moving backwards
                 }
                 spacing_left_ += spacing_ - error_;
                 error_ = 0.0;
