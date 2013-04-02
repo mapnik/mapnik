@@ -53,7 +53,7 @@ public:
         {
             std::ostringstream s;
             s << "Postgis Plugin: ";
-            if (conn_ )
+            if (conn_)
             {
                 std::string msg = PQerrorMessage(conn_);
                 if (! msg.empty())
@@ -64,14 +64,13 @@ public:
                 {
                     s << "unable to connect to postgres server";
                 }
+                PQfinish(conn_);
             }
             else
             {
                 s << "unable to connect to postgres server";
             }
             s << "\n" << connection_str;
-
-            PQfinish(conn_);
             throw mapnik::datasource_exception(s.str());
         }
     }
