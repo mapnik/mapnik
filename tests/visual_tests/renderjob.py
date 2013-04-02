@@ -76,7 +76,7 @@ class RenderJob:
         self.m = mapnik.Map(16, 16)
         try:
             start = time()
-            mapnik.load_map(self.m, os.path.join(self.dirname, "styles", "%s.xml" % filename), False)
+            mapnik.load_map(self.m, os.path.join(self.dirname, "styles", "%s.xml" % filename), True)
             mapnik.save_map(self.m, output)
         except Exception, e:
             self.reporting.load_error(filename, repr(e))
