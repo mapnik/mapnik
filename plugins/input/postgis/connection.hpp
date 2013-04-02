@@ -71,6 +71,7 @@ public:
             }
             s << "\n" << connection_str;
 
+            PQfinish(conn_);
             throw mapnik::datasource_exception(s.str());
         }
     }
@@ -152,7 +153,7 @@ public:
 
     bool isOK() const
     {
-        return (PQstatus(conn_) != CONNECTION_BAD);
+        return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD);
     }
 
     void close()
