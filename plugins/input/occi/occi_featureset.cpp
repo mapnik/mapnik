@@ -94,10 +94,9 @@ occi_featureset::~occi_featureset()
 
 feature_ptr occi_featureset::next()
 {
-    if (rs_ != NULL && rs_->next())
+    while (rs_ != NULL && rs_->next() == oracle::occi::ResultSet::DATA_AVAILABLE)
     {
         feature_ptr feature(feature_factory::create(ctx_, feature_id_));
-        ++feature_id_;
 
         if (use_wkb_)
         {
@@ -115,7 +114,10 @@ feature_ptr occi_featureset::next()
             blob.closeStream(instream);
             blob.close();
 
-            geometry_utils::from_wkb(feature->paths(), buffer_.data(), size);
+            if (! geometry_utils::from_wkb(feature->paths(), buffer_.data(), size))
+            {
+                continue;
+            }
         }
         else
         {
@@ -124,7 +126,13 @@ feature_ptr occi_featureset::next()
             {
                 convert_geometry(geom.get(), feature);
             }
+            else
+            {
+                continue;
+            }
         }
+
+        ++feature_id_;
 
         std::vector<MetaData> listOfColumns = rs_->getColumnListMetaData();
 
