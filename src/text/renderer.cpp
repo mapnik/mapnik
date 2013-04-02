@@ -230,6 +230,8 @@ void agg_text_renderer<T>::render(glyph_positions_ptr pos)
 template <typename T>
 void grid_text_renderer<T>::render(glyph_positions_ptr pos, value_integer feature_id)
 {
+    glyphs_->clear();
+    prepare_glyphs(pos);
     FT_Error  error;
     FT_Vector start;
     unsigned height = pixmap_.height();
