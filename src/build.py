@@ -195,7 +195,6 @@ source = Split(
     text/placements/dummy.cpp
     text/placements/list.cpp
     text/placements/simple.cpp
-    text/shaping.cpp
     text/layout.cpp
     text/layout_shape_hb.cpp
     text/itemizer.cpp

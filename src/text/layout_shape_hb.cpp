@@ -21,7 +21,6 @@
  *****************************************************************************/
 // mapnik
 #include <mapnik/text/layout.hpp>
-#include <mapnik/text/shaping.hpp>
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/text/face.hpp>
 
@@ -30,6 +29,8 @@
 
 // harfbuzz
 #include <harfbuzz/hb.h>
+#include <harfbuzz/hb-ft.h>
+#include <harfbuzz/hb-icu.h>
 
 namespace mapnik
 {
@@ -42,24 +43,38 @@ void text_layout::shape_text(text_line_ptr line)
     UnicodeString const& text = itemizer_.get_text();
 
     size_t length = end - start;
+    if (!length) return;
+
+    hb_buffer_t *buffer(hb_buffer_create());
+    hb_buffer_set_unicode_funcs(buffer, hb_icu_get_unicode_funcs());
 
     line->reserve(length); //Preallocate memory
+    hb_buffer_pre_allocate(buffer, length);
 
     std::list<text_item> const& list = itemizer_.itemize(start, end);
     std::list<text_item>::const_iterator itr = list.begin(), list_end = list.end();
     for (; itr != list_end; itr++)
     {
         face_set_ptr face_set = font_manager_.get_face_set(itr->format->face_name, itr->format->fontset);
-        face_set->set_character_sizes(itr->format->text_size * scale_factor_);
+
+        double size = itr->format->text_size * scale_factor_;
+        face_set->set_character_sizes(size);
         font_face_set::iterator face_itr = face_set->begin(), face_end = face_set->end();
         for (; face_itr != face_end; face_itr++)
         {
+            hb_buffer_clear_contents(buffer);
+            hb_buffer_add_utf16(buffer, text.getBuffer(), text.length(), itr->start, itr->end - itr->start);
+            hb_buffer_set_direction(buffer, (itr->rtl == UBIDI_RTL)?HB_DIRECTION_RTL:HB_DIRECTION_LTR);
+            hb_buffer_set_script(buffer, hb_icu_script_to_script(itr->script));
+        #if 0
+            hb_buffer_set_language(buffer, hb_language_from_string (language, -1));
+        #endif
+
             face_ptr face = *face_itr;
-            text_shaping shaper(face->get_face()); //TODO: Make this more efficient by caching this object in font_face
 
-            shaper.process_text(text, itr->start, itr->end, itr->rtl == UBIDI_RTL, itr->script);
-            hb_buffer_t *buffer = shaper.get_buffer();
-
+            hb_font_t *font(hb_ft_font_create(face->get_face(), NULL));
+            hb_shape(font, buffer, 0 /*features*/, 0 /*num_features*/);
+            hb_font_destroy(font);
             unsigned num_glyphs = hb_buffer_get_length(buffer);
 
             hb_glyph_info_t *glyphs = hb_buffer_get_glyph_infos(buffer, NULL);
@@ -100,6 +115,8 @@ void text_layout::shape_text(text_line_ptr line)
             break; //When we reach this point the current font had all glyphs.
         }
     }
+
+    hb_buffer_destroy(buffer);
 }
 
 } //ns mapnik
