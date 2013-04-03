@@ -42,6 +42,8 @@
 
 namespace mapnik {
 
+extern datasource_ptr create_static_datasource(parameters const& params);
+
 bool is_input_plugin(std::string const& filename)
 {
     return boost::algorithm::ends_with(filename,std::string(".input"));
@@ -66,46 +68,6 @@ datasource_ptr datasource_cache::create(parameters const& params)
                            "parameter 'type' is missing");
     }
 
-#ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
-#endif
-
-    datasource_ptr ds;
-    std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
-    if ( itr == plugins_.end() )
-    {
-        std::string s("Could not create datasource for type: '");
-        s += *type + "'";
-        if (plugin_directories_.empty())
-        {
-            s + " (no datasource plugin directories have been successfully registered)";
-        }
-        else
-        {
-            s + " (searched for datasource plugins in '" + plugin_directories() + "')";
-        }
-        throw config_error(s);
-    }
-
-    if (!itr->second->handle())
-    {
-        throw std::runtime_error(std::string("Cannot load library: ") +
-                                 lt_dlerror());
-    }
-
-    // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
-#ifdef __GNUC__
-    __extension__
-#endif
-        create_ds* create_datasource =
-        reinterpret_cast<create_ds*>(lt_dlsym(itr->second->handle(), "create"));
-
-    if (!create_datasource)
-    {
-        throw std::runtime_error(std::string("Cannot load symbols: ") +
-                                 lt_dlerror());
-    }
-
 #ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(datasource_cache)
         << "datasource_cache: Size="
@@ -120,7 +82,63 @@ datasource_ptr datasource_cache::create(parameters const& params)
     }
 #endif
 
+    datasource_ptr ds;
+
+#ifdef MAPNIK_STATIC_PLUGINS
+    // return if it's created, raise otherwise
+    ds = create_static_datasource(params);
+    if (ds)
+    {
+        return ds;
+    }
+    else
+    {
+        throw std::runtime_error(std::string("Cannot load static datasource: ") +
+                                 *type);
+    }
+#else
+
+#ifdef MAPNIK_THREADSAFE
+    mutex::scoped_lock lock(mutex_);
+#endif
+
+    std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
+    if (itr == plugins_.end())
+    {
+        std::string s("Could not create datasource for type: '");
+        s += *type + "'";
+        if (plugin_directories_.empty())
+        {
+            s + " (no datasource plugin directories have been successfully registered)";
+        }
+        else
+        {
+            s + " (searched for datasource plugins in '" + plugin_directories() + "')";
+        }
+        throw config_error(s);
+    }
+
+    if (! itr->second->handle())
+    {
+        throw std::runtime_error(std::string("Cannot load library: ") +
+                                 lt_dlerror());
+    }
+
+    // http://www.mr-edd.co.uk/blog/supressing_gcc_warnings
+#ifdef __GNUC__
+    __extension__
+#endif
+        create_ds* create_datasource =
+        reinterpret_cast<create_ds*>(lt_dlsym(itr->second->handle(), "create"));
+
+    if (! create_datasource)
+    {
+        throw std::runtime_error(std::string("Cannot load symbols: ") +
+                                 lt_dlerror());
+    }
+
     ds = datasource_ptr(create_datasource(params), datasource_deleter());
+#endif
 
     MAPNIK_LOG_DEBUG(datasource_cache)
         << "datasource_cache: Datasource="
@@ -132,7 +150,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 bool datasource_cache::insert(std::string const& type,const lt_dlhandle module)
 {
     return plugins_.insert(std::make_pair(type,boost::make_shared<PluginInfo>
-                                     (type,module))).second;
+                                     (type, module))).second;
 }
 
 std::string datasource_cache::plugin_directories()
@@ -144,7 +162,7 @@ std::vector<std::string> datasource_cache::plugin_names()
 {
     std::vector<std::string> names;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::const_iterator itr;
-    for (itr = plugins_.begin();itr!=plugins_.end();++itr)
+    for (itr = plugins_.begin(); itr != plugins_.end(); ++itr)
     {
         names.push_back(itr->first);
     }
@@ -156,6 +174,7 @@ void datasource_cache::register_datasources(std::string const& str)
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
+
     boost::filesystem::path path(str);
     // TODO - only push unique paths
     plugin_directories_.push_back(str);
@@ -163,24 +182,24 @@ void datasource_cache::register_datasources(std::string const& str)
 
     if (exists(path) && is_directory(path))
     {
-        for (boost::filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
+        for (boost::filesystem::directory_iterator itr(path); itr != end_itr; ++itr )
         {
 
 #if (BOOST_FILESYSTEM_VERSION == 3)
-            if (!is_directory( *itr )  && is_input_plugin(itr->path().filename().string()))
+            if (! is_directory(*itr) && is_input_plugin(itr->path().filename().string()))
 #else // v2
-                if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
+            if (! is_directory(*itr) && is_input_plugin(itr->path().leaf()))
+#endif
+            {
+#if (BOOST_FILESYSTEM_VERSION == 3)
+                if (register_datasource(itr->path().string()))
+#else // v2
+                if (register_datasource(itr->string()))
 #endif
                 {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                    if (register_datasource(itr->path().string()))
-#else // v2
-                    if (register_datasource(itr->string()))
-#endif
-                    {
-                        registered_ = true;
-                    }
+                    registered_ = true;
                 }
+            }
         }
     }
 }
@@ -199,7 +218,7 @@ bool datasource_cache::register_datasource(std::string const& str)
 #endif
                 datasource_name* ds_name =
                 reinterpret_cast<datasource_name*>(lt_dlsym(module, "datasource_name"));
-            if (ds_name && insert(ds_name(),module))
+            if (ds_name && insert(ds_name(), module))
             {
                 MAPNIK_LOG_DEBUG(datasource_cache)
                         << "datasource_cache: Registered="
@@ -207,7 +226,7 @@ bool datasource_cache::register_datasource(std::string const& str)
 
                 success = true;
             }
-            else if (!ds_name)
+            else if (! ds_name)
             {
                 MAPNIK_LOG_ERROR(datasource_cache)
                         << "Problem loading plugin library '"
@@ -223,9 +242,9 @@ bool datasource_cache::register_datasource(std::string const& str)
     }
     catch (std::exception const& ex)
     {
-            MAPNIK_LOG_ERROR(datasource_cache)
-                    << "Exception caught while loading plugin library: "
-                    << str << " (" << ex.what() << ")";
+        MAPNIK_LOG_ERROR(datasource_cache)
+                << "Exception caught while loading plugin library: "
+                << str << " (" << ex.what() << ")";
     }
     return success;
 }

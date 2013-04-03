@@ -307,8 +307,7 @@ opts.AddVariables(
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
-    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc',
-PathVariable.PathAccept),
+    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc', PathVariable.PathAccept),
     PathVariable('LTDL_INCLUDES', 'Search path for libltdl (part of libtool) include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('LTDL_LIBS','Search path for libltdl (ltdl.h) library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
@@ -352,6 +351,9 @@ PathVariable.PathAccept),
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
     ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. ' + ', '.join(severities) + ')', 'error'),
+
+    # Plugin linking
+    EnumVariable('PLUGIN_LINKING', "Set plugin linking with libmapnik", 'shared', ['shared','static']),
 
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -1762,7 +1764,8 @@ if not HELP_REQUESTED:
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS']:
-            SConscript('plugins/input/%s/build.py' % plugin)
+			if env['PLUGIN_LINKING'] == 'shared':
+	            SConscript('plugins/input/%s/build.py' % plugin)
             if plugin == 'ogr': OGR_BUILT = True
             if plugin == 'gdal': GDAL_BUILT = True
             if plugin == 'ogr' or plugin == 'gdal':
@@ -1771,8 +1774,9 @@ if not HELP_REQUESTED:
             else:
                 env['LIBS'].remove(details['lib'])
         elif not details['lib']:
-            # build internal shape and raster plugins
-            SConscript('plugins/input/%s/build.py' % plugin)
+            if env['PLUGIN_LINKING'] == 'shared':
+                # build internal datasource input plugins
+                SConscript('plugins/input/%s/build.py' % plugin)
         else:
             color_print(1,"Notice: dependencies not met for plugin '%s', not building..." % plugin)
             # also clear out locally built target
