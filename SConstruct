@@ -1764,8 +1764,8 @@ if not HELP_REQUESTED:
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS']:
-			if env['PLUGIN_LINKING'] == 'shared':
-	            SConscript('plugins/input/%s/build.py' % plugin)
+            if env['PLUGIN_LINKING'] == 'shared':
+                SConscript('plugins/input/%s/build.py' % plugin)
             if plugin == 'ogr': OGR_BUILT = True
             if plugin == 'gdal': GDAL_BUILT = True
             if plugin == 'ogr' or plugin == 'gdal':
