@@ -709,7 +709,7 @@ struct test12
 };
 
 #include <mapnik/font_engine_freetype.hpp>
-
+#include <boost/format.hpp>
 struct test13
 {
     unsigned iter_;
@@ -719,9 +719,7 @@ struct test13
            unsigned threads)
         : iter_(iterations),
           threads_(threads)
-    {
-        mapnik::freetype_engine::register_fonts("./fonts", true);
-    }
+    {}
 
     bool validate()
     {
@@ -900,8 +898,10 @@ int main( int argc, char** argv)
         }
 
         {
+            mapnik::freetype_engine::register_fonts("./fonts", true);
+            unsigned face_count = mapnik::freetype_engine::face_names().size();
             test13 runner(1000,10);
-            benchmark(runner,"create font faces");
+            benchmark(runner, (boost::format("font_engihe: created %ld faces in ") % (face_count * 1000 * 10)).str());
         }
         std::cout << "...benchmark done\n";
         return 0;
