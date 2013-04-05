@@ -133,6 +133,7 @@ def init_environment(env):
         env['AR'] = os.environ['AR']
 
 #### SCons build options and initial setup ####
+mingwbuild=False
 if (sys.platform == "win32" and sys.version.upper().find('GCC') >= 0):
     if sysconfig.get_config_var('CFLAGS').find('MINGW')>=0:
         mingwbuild=True
