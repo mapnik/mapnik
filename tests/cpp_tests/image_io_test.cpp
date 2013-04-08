@@ -12,17 +12,17 @@ namespace sys = boost::system;
 
 int main( int, char*[] )
 {
-    std::string blank;
+    std::string should_throw;
     boost::optional<std::string> type;
     try
     {
-        blank = "./tests/cpp_tests/data/blank.jpg";
-        BOOST_TEST( fs::exists( blank ) );
-        type = mapnik::type_from_filename(blank);
+        should_throw = "./tests/cpp_tests/data/blank.jpg";
+        BOOST_TEST( fs::exists( should_throw ) );
+        type = mapnik::type_from_filename(should_throw);
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(blank,*type));
+            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
             BOOST_TEST( false );
         }
         catch (std::exception const&)
@@ -30,13 +30,13 @@ int main( int, char*[] )
             BOOST_TEST( true );
         }
 
-        blank = "./tests/cpp_tests/data/blank.png";
-        BOOST_TEST( fs::exists( blank ) );
-        type = mapnik::type_from_filename(blank);
+        should_throw = "./tests/cpp_tests/data/blank.png";
+        BOOST_TEST( fs::exists( should_throw ) );
+        type = mapnik::type_from_filename(should_throw);
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(blank,*type));
+            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
             BOOST_TEST( false );
         }
         catch (std::exception const&)
@@ -44,19 +44,34 @@ int main( int, char*[] )
             BOOST_TEST( true );
         }
 
-        blank = "./tests/cpp_tests/data/blank.tiff";
-        BOOST_TEST( fs::exists( blank ) );
-        type = mapnik::type_from_filename(blank);
+        should_throw = "./tests/cpp_tests/data/blank.tiff";
+        BOOST_TEST( fs::exists( should_throw ) );
+        type = mapnik::type_from_filename(should_throw);
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(blank,*type));
+            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
             BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
             BOOST_TEST( true );
         }
+
+        should_throw = "./tests/data/images/xcode-CgBI.png";
+        BOOST_TEST( fs::exists( should_throw ) );
+        type = mapnik::type_from_filename(should_throw);
+        BOOST_TEST( type );
+        try
+        {
+            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
+            BOOST_TEST( false );
+        }
+        catch (std::exception const&)
+        {
+            BOOST_TEST( true );
+        }
+
     }
     catch (std::exception const & ex)
     {
