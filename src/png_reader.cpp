@@ -248,17 +248,17 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     else
     {
         png_read_update_info(png_ptr, info_ptr);
-        unsigned w=std::min(unsigned(image.width()),width_);
-        unsigned h=std::min(unsigned(image.height()),height_);
+        unsigned w=std::min(unsigned(image.width()),width_ - x0);
+        unsigned h=std::min(unsigned(image.height()),height_ - y0);
         unsigned rowbytes=png_get_rowbytes(png_ptr, info_ptr);
         boost::scoped_array<png_byte> row(new png_byte[rowbytes]);
         //START read image rows
-        for (unsigned i=0;i<height_;++i)
+        for (unsigned i = 0;i < height_; ++i)
         {
             png_read_row(png_ptr,row.get(),0);
-            if (i>=y0 && i<h)
+            if (i >= y0 && i < (y0 + h))
             {
-                image.setRow(i-y0,reinterpret_cast<unsigned*>(&row[x0]),w);
+                image.setRow(i-y0,reinterpret_cast<unsigned*>(&row[x0 * 4]),w);
             }
         }
         //END
