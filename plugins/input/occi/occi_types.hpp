@@ -100,6 +100,56 @@ public:
         return env_;
     }
 
+    static oracle::occi::Connection* create_connection(
+        const std::string& user,
+        const std::string& password,
+        const std::string& host)
+    {
+        oracle::occi::Environment* env = get_environment();
+
+        MAPNIK_LOG_DEBUG(occi) << "occi_environment: create_connection";
+
+        return env->createConnection(user, password, host);
+    }
+
+    static void destroy_connection(oracle::occi::Connection* conn)
+    {
+        oracle::occi::Environment* env = get_environment();
+
+        env->terminateConnection(conn);
+    }
+
+    static oracle::occi::StatelessConnectionPool* create_pool(
+        const std::string& user,
+        const std::string& password,
+        const std::string& host,
+        int max_size,
+        int initial_size,
+        int incr_size)
+    {
+        oracle::occi::Environment* env = get_environment();
+
+        MAPNIK_LOG_DEBUG(occi) << "occi_environment: create_pool";
+
+        return env->createStatelessConnectionPool(
+            user,
+            password,
+            host,
+            max_size,
+            initial_size,
+            incr_size,
+            oracle::occi::StatelessConnectionPool::HOMOGENEOUS);
+    }
+
+    static void destroy_pool(oracle::occi::StatelessConnectionPool* pool)
+    {
+        oracle::occi::Environment* env = get_environment();
+
+        env->terminateStatelessConnectionPool(
+            pool,
+            oracle::occi::StatelessConnectionPool::SPD_FORCE);
+    }
+
 private:
 
     occi_environment()
@@ -120,12 +170,12 @@ private:
     static oracle::occi::Environment* env_;
 };
 
+
 class occi_connection_ptr
 {
 public:
     explicit occi_connection_ptr()
-        : env_(occi_environment::get_environment()),
-          pool_(0),
+        : pool_(0),
           conn_(0),
           stmt_(0),
           rs_(0),
@@ -175,11 +225,6 @@ public:
         return rs_;
     }
 
-    oracle::occi::Connection* operator*()
-    {
-        return conn_;
-    }
-
 private:
     void close_query(const bool release_connection)
     {
@@ -207,7 +252,7 @@ private:
                 {
                     if (owns_connection_)
                     {
-                        env_->terminateConnection(conn_);
+                        occi_environment::destroy_connection(conn_);
                     }
                 }
 
@@ -216,7 +261,6 @@ private:
         }
     }
 
-    oracle::occi::Environment* env_;
     oracle::occi::StatelessConnectionPool* pool_;
     oracle::occi::Connection* conn_;
     oracle::occi::Statement* stmt_;
