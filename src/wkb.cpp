@@ -82,7 +82,8 @@ public:
         {
             if (size_ >= 44
                 && (unsigned char)(wkb_[0]) == (unsigned char)(0x00)
-                && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C))
+                && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C)
+                && (unsigned char)(wkb_[size_ - 1]) == (unsigned char)(0xFE))
             {
                 format_ = wkbSpatiaLite;
             }
