@@ -120,7 +120,7 @@ occi_datasource::occi_datasource(parameters const& params)
     {
         try
         {
-            pool_ = occi_environment::create_pool(
+            pool_ = occi_environment::instance().create_pool(
                 *params.get<std::string>("user"),
                 *params.get<std::string>("password"),
                 *params.get<std::string>("host"),
@@ -137,7 +137,7 @@ occi_datasource::occi_datasource(parameters const& params)
     {
         try
         {
-            conn_ = occi_environment::create_connection(
+            conn_ = occi_environment::instance().create_connection(
                 *params.get<std::string>("user"),
                 *params.get<std::string>("password"),
                 *params.get<std::string>("host"));
@@ -324,14 +324,14 @@ occi_datasource::~occi_datasource()
     {
         if (pool_ != 0)
         {
-            occi_environment::destroy_pool(pool_);
+            occi_environment::instance().destroy_pool(pool_);
         }
     }
     else
     {
         if (conn_ != 0)
         {
-            occi_environment::destroy_connection(conn_);
+            occi_environment::instance().destroy_connection(conn_);
         }
     }
 }

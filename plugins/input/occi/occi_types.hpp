@@ -27,6 +27,11 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/utils.hpp>
 
+// boost
+#ifdef MAPNIK_THREADSAFE
+#include <boost/thread/mutex.hpp>
+#endif
+
 // occi
 #include <occi.h>
 
@@ -84,42 +89,27 @@ class occi_environment : public mapnik::singleton<occi_environment, mapnik::Crea
 
 public:
 
-    static oracle::occi::Environment* get_environment()
+    oracle::occi::Environment* get_environment()
     {
-        if (env_ == 0)
-        {
-            MAPNIK_LOG_DEBUG(occi) << "occi_environment: constructor";
-
-            const int mode = oracle::occi::Environment::OBJECT
-                | oracle::occi::Environment::THREADED_MUTEXED;
-
-            env_ = oracle::occi::Environment::createEnvironment((oracle::occi::Environment::Mode) mode);
-            RegisterClasses(env_);
-        }
-
         return env_;
     }
 
-    static oracle::occi::Connection* create_connection(
+    oracle::occi::Connection* create_connection(
         const std::string& user,
         const std::string& password,
         const std::string& host)
     {
-        oracle::occi::Environment* env = get_environment();
-
         MAPNIK_LOG_DEBUG(occi) << "occi_environment: create_connection";
 
-        return env->createConnection(user, password, host);
+        return env_->createConnection(user, password, host);
     }
 
-    static void destroy_connection(oracle::occi::Connection* conn)
+    void destroy_connection(oracle::occi::Connection* conn)
     {
-        oracle::occi::Environment* env = get_environment();
-
-        env->terminateConnection(conn);
+        env_->terminateConnection(conn);
     }
 
-    static oracle::occi::StatelessConnectionPool* create_pool(
+    oracle::occi::StatelessConnectionPool* create_pool(
         const std::string& user,
         const std::string& password,
         const std::string& host,
@@ -127,11 +117,9 @@ public:
         int initial_size,
         int incr_size)
     {
-        oracle::occi::Environment* env = get_environment();
-
         MAPNIK_LOG_DEBUG(occi) << "occi_environment: create_pool";
 
-        return env->createStatelessConnectionPool(
+        return env_->createStatelessConnectionPool(
             user,
             password,
             host,
@@ -141,11 +129,9 @@ public:
             oracle::occi::StatelessConnectionPool::HOMOGENEOUS);
     }
 
-    static void destroy_pool(oracle::occi::StatelessConnectionPool* pool)
+    void destroy_pool(oracle::occi::StatelessConnectionPool* pool)
     {
-        oracle::occi::Environment* env = get_environment();
-
-        env->terminateStatelessConnectionPool(
+        env_->terminateStatelessConnectionPool(
             pool,
             oracle::occi::StatelessConnectionPool::SPD_FORCE);
     }
@@ -153,21 +139,25 @@ public:
 private:
 
     occi_environment()
+        : env_(0)
     {
+        MAPNIK_LOG_DEBUG(occi) << "occi_environment: constructor";
+
+        env_ = oracle::occi::Environment::createEnvironment(
+            (oracle::occi::Environment::Mode)(oracle::occi::Environment::OBJECT
+                                              | oracle::occi::Environment::THREADED_MUTEXED));
+        RegisterClasses(env_);
     }
 
     ~occi_environment()
     {
-        if (env_)
-        {
-            MAPNIK_LOG_DEBUG(occi) << "occi_environment: destructor";
+        MAPNIK_LOG_DEBUG(occi) << "occi_environment: destructor";
 
-            oracle::occi::Environment::terminateEnvironment(env_);
-            env_ = 0;
-        }
+        oracle::occi::Environment::terminateEnvironment(env_);
+        env_ = 0;
     }
 
-    static oracle::occi::Environment* env_;
+    oracle::occi::Environment* env_;
 };
 
 
@@ -252,7 +242,7 @@ private:
                 {
                     if (owns_connection_)
                     {
-                        occi_environment::destroy_connection(conn_);
+                        occi_environment::instance().destroy_connection(conn_);
                     }
                 }
 
