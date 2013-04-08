@@ -132,8 +132,6 @@ feature_ptr occi_featureset::next()
             }
         }
 
-        ++feature_id_;
-
         std::vector<MetaData> listOfColumns = rs_->getColumnListMetaData();
 
         for (unsigned int i = 1; i < listOfColumns.size(); ++i)
@@ -232,6 +230,8 @@ feature_ptr occi_featureset::next()
                 }
             }
         }
+
+        ++feature_id_;
 
         return feature;
     }
