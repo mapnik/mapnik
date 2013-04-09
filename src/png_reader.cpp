@@ -33,8 +33,20 @@ extern "C"
 
 namespace mapnik
 {
-class png_reader : public image_reader, mapnik::noncopyable
+class png_reader : public image_reader
 {
+    struct png_file_guard
+    {
+        png_file_guard(FILE * fd)
+            : fd_(fd) {}
+
+        ~png_file_guard()
+        {
+            if (fd_) fclose(fd_);
+        }
+        FILE * fd_;
+    };
+
 private:
     std::string fileName_;
     unsigned width_;
@@ -100,17 +112,17 @@ void png_reader::init()
 {
     FILE *fp=fopen(fileName_.c_str(),"rb");
     if (!fp) throw image_reader_exception("cannot open image file "+fileName_);
+    png_file_guard guard(fp);
+
     png_byte header[8];
     memset(header,0,8);
     if ( fread(header,1,8,fp) != 8)
     {
-        fclose(fp);
         throw image_reader_exception("Could not read " + fileName_);
     }
     int is_png=!png_sig_cmp(header,0,8);
     if (!is_png)
     {
-        fclose(fp);
         throw image_reader_exception(fileName_ + " is not a png file");
     }
     png_structp png_ptr = png_create_read_struct
@@ -118,7 +130,6 @@ void png_reader::init()
 
     if (!png_ptr)
     {
-        fclose(fp);
         throw image_reader_exception("failed to allocate png_ptr");
     }
 
@@ -132,14 +143,12 @@ void png_reader::init()
         if (!info_ptr)
         {
             png_destroy_read_struct(&png_ptr,0,0);
-            fclose(fp);
             throw image_reader_exception("failed to create info_ptr");
         }
     }
     catch (std::exception const& ex)
     {
         png_destroy_read_struct(&png_ptr,0,0);
-        fclose(fp);
         throw;
     }
 
@@ -155,9 +164,7 @@ void png_reader::init()
     height_=height;
 
     MAPNIK_LOG_DEBUG(png_reader) << "png_reader: bit_depth=" << bit_depth_ << ",color_type=" << color_type_;
-
     png_destroy_read_struct(&png_ptr,&info_ptr,0);
-    fclose(fp);
 }
 
 unsigned png_reader::width() const
@@ -174,13 +181,13 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
 {
     FILE *fp=fopen(fileName_.c_str(),"rb");
     if (!fp) throw image_reader_exception("cannot open image file "+fileName_);
+    png_file_guard guard(fp);
 
     png_structp png_ptr = png_create_read_struct
         (PNG_LIBPNG_VER_STRING,0,0,0);
 
     if (!png_ptr)
     {
-        fclose(fp);
         throw image_reader_exception("failed to allocate png_ptr");
     }
 
@@ -194,14 +201,12 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
         if (!info_ptr)
         {
             png_destroy_read_struct(&png_ptr,0,0);
-            fclose(fp);
             throw image_reader_exception("failed to create info_ptr");
         }
     }
     catch (std::exception const& ex)
     {
         png_destroy_read_struct(&png_ptr,0,0);
-        fclose(fp);
         throw;
     }
 
@@ -263,9 +268,7 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
         }
         //END
     }
-
     png_read_end(png_ptr,0);
     png_destroy_read_struct(&png_ptr, &info_ptr,0);
-    fclose(fp);
 }
 }
