@@ -26,7 +26,8 @@
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/config.hpp>
-
+// boost
+#include <boost/utility.hpp>
 // stl
 #include <stdexcept>
 #include <string>
@@ -49,7 +50,7 @@ public:
     }
 };
 
-struct MAPNIK_DECL image_reader
+struct MAPNIK_DECL image_reader : private boost::noncopyable
 {
     virtual unsigned width() const=0;
     virtual unsigned height() const=0;
