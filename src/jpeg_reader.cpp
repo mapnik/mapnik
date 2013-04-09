@@ -40,7 +40,7 @@ extern "C"
 
 namespace mapnik
 {
-class JpegReader : public image_reader, mapnik::noncopyable
+class jpeg_reader : public image_reader
 {
     struct file_closer
     {
@@ -52,15 +52,15 @@ class JpegReader : public image_reader, mapnik::noncopyable
     typedef boost::shared_ptr<FILE> file_ptr;
 
 private:
-    std::string fileName_;
+    std::string file_name_;
     unsigned width_;
     unsigned height_;
     jpeg_decompress_struct cinfo;
     jpeg_error_mgr jerr;
     file_ptr file_;
 public:
-    explicit JpegReader(std::string const& fileName);
-    ~JpegReader();
+    explicit jpeg_reader(std::string const& fileName);
+    ~jpeg_reader();
     unsigned width() const;
     unsigned height() const;
     inline bool premultiplied_alpha() const { return true; }
@@ -73,15 +73,15 @@ private:
 
 namespace
 {
-image_reader* createJpegReader(std::string const& file)
+image_reader* create_jpeg_reader(std::string const& file)
 {
-    return new JpegReader(file);
+    return new jpeg_reader(file);
 }
-const bool registered = register_image_reader("jpeg",createJpegReader);
+const bool registered = register_image_reader("jpeg",create_jpeg_reader);
 }
 
-JpegReader::JpegReader(std::string const& fileName)
-    : fileName_(fileName),
+jpeg_reader::jpeg_reader(std::string const& fileName)
+    : file_name_(fileName),
       width_(0),
       height_(0),
       file_()
@@ -89,27 +89,27 @@ JpegReader::JpegReader(std::string const& fileName)
     init();
 }
 
-JpegReader::~JpegReader()
+jpeg_reader::~jpeg_reader()
 {
     jpeg_destroy_decompress(&cinfo);
 }
 
-void JpegReader::on_error(j_common_ptr cinfo)
+void jpeg_reader::on_error(j_common_ptr cinfo)
 {
     (*cinfo->err->output_message)(cinfo);
     jpeg_destroy(cinfo);
     throw image_reader_exception("JPEG Reader: libjpeg could not read image");
 }
 
-void JpegReader::on_error_message(j_common_ptr cinfo)
+void jpeg_reader::on_error_message(j_common_ptr cinfo)
 {
     // used to supress jpeg from printing to stderr
 }
 
-void JpegReader::init()
+void jpeg_reader::init()
 {
-    FILE * fp = fopen(fileName_.c_str(),"rb");
-    if (!fp) throw image_reader_exception("JPEG Reader: cannot open image file " + fileName_);
+    FILE * fp = fopen(file_name_.c_str(),"rb");
+    if (!fp) throw image_reader_exception("JPEG Reader: cannot open image file " + file_name_);
     file_ = boost::shared_ptr<FILE>(fp,file_closer());
     cinfo.err = jpeg_std_error(&jerr);
     jerr.error_exit = on_error;
@@ -123,26 +123,26 @@ void JpegReader::init()
 
     if (cinfo.out_color_space == JCS_UNKNOWN)
     {
-        throw image_reader_exception("JPEG Reader: failed to read unknown color space in " + fileName_);
+        throw image_reader_exception("JPEG Reader: failed to read unknown color space in " + file_name_);
     }
     if (cinfo.output_width == 0 || cinfo.output_height == 0)
     {
         jpeg_destroy_decompress (&cinfo);
-        throw image_reader_exception("JPEG Reader: failed to read image size of " + fileName_);
+        throw image_reader_exception("JPEG Reader: failed to read image size of " + file_name_);
     }
 }
 
-unsigned JpegReader::width() const
+unsigned jpeg_reader::width() const
 {
     return width_;
 }
 
-unsigned JpegReader::height() const
+unsigned jpeg_reader::height() const
 {
     return height_;
 }
 
-void JpegReader::read(unsigned x0, unsigned y0, image_data_32& image)
+void jpeg_reader::read(unsigned x0, unsigned y0, image_data_32& image)
 {
     JSAMPARRAY buffer;
     int row_stride;
