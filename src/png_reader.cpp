@@ -146,7 +146,7 @@ void png_reader::init()
             throw image_reader_exception("failed to create info_ptr");
         }
     }
-    catch (std::exception const& ex)
+    catch (std::exception const& /*ex*/)
     {
         png_destroy_read_struct(&png_ptr,0,0);
         throw;
@@ -204,7 +204,7 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
             throw image_reader_exception("failed to create info_ptr");
         }
     }
-    catch (std::exception const& ex)
+    catch (std::exception const& /*ex*/)
     {
         png_destroy_read_struct(&png_ptr,0,0);
         throw;
