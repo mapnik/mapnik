@@ -153,6 +153,7 @@ void png_reader::init()
     png_infop info_ptr;
     png_struct_guard sguard(&png_ptr,&info_ptr);
     info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) throw image_reader_exception("failed to create info_ptr");
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
 
@@ -198,6 +199,7 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     png_infop info_ptr;
     png_struct_guard sguard(&png_ptr,&info_ptr);
     info_ptr = png_create_info_struct(png_ptr);
+    if (!info_ptr) throw image_reader_exception("failed to create info_ptr");
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
     png_read_info(png_ptr, info_ptr);
@@ -258,6 +260,5 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
         //END
     }
     png_read_end(png_ptr,0);
-    png_destroy_read_struct(&png_ptr, &info_ptr,0);
 }
 }
