@@ -47,6 +47,20 @@ class png_reader : public image_reader
         FILE * fd_;
     };
 
+    struct png_struct_guard
+    {
+        png_struct_guard(png_structpp png_ptr_ptr, png_infopp info_ptr_ptr)
+            : p_(png_ptr_ptr),
+              i_(info_ptr_ptr) {}
+
+        ~png_struct_guard()
+        {
+            png_destroy_read_struct(p_,i_,0);
+        }
+        png_structpp p_;
+        png_infopp i_;
+    };
+
 private:
     std::string fileName_;
     unsigned width_;
@@ -137,20 +151,8 @@ void png_reader::init()
     png_set_error_fn(png_ptr, png_get_error_ptr(png_ptr), user_error_fn, user_warning_fn);
 
     png_infop info_ptr;
-    try
-    {
-        info_ptr = png_create_info_struct(png_ptr);
-        if (!info_ptr)
-        {
-            png_destroy_read_struct(&png_ptr,0,0);
-            throw image_reader_exception("failed to create info_ptr");
-        }
-    }
-    catch (std::exception const& /*ex*/)
-    {
-        png_destroy_read_struct(&png_ptr,0,0);
-        throw;
-    }
+    png_struct_guard sguard(&png_ptr,&info_ptr);
+    info_ptr = png_create_info_struct(png_ptr);
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
 
@@ -164,7 +166,6 @@ void png_reader::init()
     height_=height;
 
     MAPNIK_LOG_DEBUG(png_reader) << "png_reader: bit_depth=" << bit_depth_ << ",color_type=" << color_type_;
-    png_destroy_read_struct(&png_ptr,&info_ptr,0);
 }
 
 unsigned png_reader::width() const
@@ -195,20 +196,8 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     png_set_error_fn(png_ptr, png_get_error_ptr(png_ptr), user_error_fn, user_warning_fn);
 
     png_infop info_ptr;
-    try
-    {
-        info_ptr = png_create_info_struct(png_ptr);
-        if (!info_ptr)
-        {
-            png_destroy_read_struct(&png_ptr,0,0);
-            throw image_reader_exception("failed to create info_ptr");
-        }
-    }
-    catch (std::exception const& /*ex*/)
-    {
-        png_destroy_read_struct(&png_ptr,0,0);
-        throw;
-    }
+    png_struct_guard sguard(&png_ptr,&info_ptr);
+    info_ptr = png_create_info_struct(png_ptr);
 
     png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
     png_read_info(png_ptr, info_ptr);
