@@ -118,10 +118,11 @@ void tiff_reader::on_error(const char* /*module*/, const char* fmt, va_list argp
 void tiff_reader::init()
 {
     // TODO: error handling
-    TIFFSetWarningHandler(0);
-    TIFFSetErrorHandler(on_error);
     TIFF* tif = load_if_exists(file_name_);
     if (!tif) throw image_reader_exception( std::string("Can't load tiff file: '") + file_name_ + "'");
+
+    TIFFSetWarningHandler(0);
+    TIFFSetErrorHandler(on_error);
 
     char msg[1024];
 
