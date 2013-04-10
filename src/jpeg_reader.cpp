@@ -42,22 +42,34 @@ namespace mapnik
 {
 class jpeg_reader : public image_reader
 {
-    struct file_closer
+    struct jpeg_file_guard
     {
-       void operator() (FILE * file)
-       {
-           if (file != 0) fclose(file);
-       }
+        jpeg_file_guard(FILE * fd)
+            : fd_(fd) {}
+
+        ~jpeg_file_guard()
+        {
+            if (fd_) fclose(fd_);
+        }
+        FILE * fd_;
     };
-    typedef boost::shared_ptr<FILE> file_ptr;
+
+    struct jpeg_info_guard
+    {
+        jpeg_info_guard(jpeg_decompress_struct * cinfo)
+            : i_(cinfo) {}
+
+        ~jpeg_info_guard()
+        {
+            jpeg_destroy_decompress(i_);
+        }
+        jpeg_decompress_struct * i_;
+    };
 
 private:
     std::string file_name_;
     unsigned width_;
     unsigned height_;
-    jpeg_decompress_struct cinfo;
-    jpeg_error_mgr jerr;
-    file_ptr file_;
 public:
     explicit jpeg_reader(std::string const& fileName);
     ~jpeg_reader();
@@ -83,21 +95,17 @@ const bool registered = register_image_reader("jpeg",create_jpeg_reader);
 jpeg_reader::jpeg_reader(std::string const& fileName)
     : file_name_(fileName),
       width_(0),
-      height_(0),
-      file_()
+      height_(0)
 {
     init();
 }
 
-jpeg_reader::~jpeg_reader()
-{
-    jpeg_destroy_decompress(&cinfo);
-}
+jpeg_reader::~jpeg_reader() {}
 
 void jpeg_reader::on_error(j_common_ptr cinfo)
 {
-    (*cinfo->err->output_message)(cinfo);
-    jpeg_destroy(cinfo);
+    //(*cinfo->err->output_message)(cinfo);
+    //jpeg_destroy(cinfo);
     throw image_reader_exception("JPEG Reader: libjpeg could not read image");
 }
 
@@ -110,13 +118,17 @@ void jpeg_reader::init()
 {
     FILE * fp = fopen(file_name_.c_str(),"rb");
     if (!fp) throw image_reader_exception("JPEG Reader: cannot open image file " + file_name_);
-    file_ = boost::shared_ptr<FILE>(fp,file_closer());
+    jpeg_file_guard guard(fp);
+    jpeg_decompress_struct cinfo;
+    jpeg_info_guard iguard(&cinfo);
+    jpeg_error_mgr jerr;
     cinfo.err = jpeg_std_error(&jerr);
     jerr.error_exit = on_error;
     jerr.output_message = on_error_message;
     jpeg_create_decompress(&cinfo);
-    jpeg_stdio_src(&cinfo, &*file_);
-    jpeg_read_header(&cinfo, TRUE);
+    jpeg_stdio_src(&cinfo, fp);
+    int ret = jpeg_read_header(&cinfo, TRUE);
+    if (ret != JPEG_HEADER_OK) throw image_reader_exception("JPEG Reader: failed to read header in " + file_name_);
     jpeg_start_decompress(&cinfo);
     width_ = cinfo.output_width;
     height_ = cinfo.output_height;
@@ -127,7 +139,6 @@ void jpeg_reader::init()
     }
     if (cinfo.output_width == 0 || cinfo.output_height == 0)
     {
-        jpeg_destroy_decompress (&cinfo);
         throw image_reader_exception("JPEG Reader: failed to read image size of " + file_name_);
     }
 }
@@ -144,6 +155,20 @@ unsigned jpeg_reader::height() const
 
 void jpeg_reader::read(unsigned x0, unsigned y0, image_data_32& image)
 {
+    FILE * fp = fopen(file_name_.c_str(),"rb");
+    if (!fp) throw image_reader_exception("JPEG Reader: cannot open image file " + file_name_);
+    jpeg_file_guard guard(fp);
+    jpeg_decompress_struct cinfo;
+    jpeg_info_guard iguard(&cinfo);
+    jpeg_error_mgr jerr;
+    cinfo.err = jpeg_std_error(&jerr);
+    jerr.error_exit = on_error;
+    jerr.output_message = on_error_message;
+    jpeg_create_decompress(&cinfo);
+    jpeg_stdio_src(&cinfo, fp);
+    int ret = jpeg_read_header(&cinfo, TRUE);
+    if (ret != JPEG_HEADER_OK) throw image_reader_exception("JPEG Reader: failed to read header in " + file_name_);
+    jpeg_start_decompress(&cinfo);
     JSAMPARRAY buffer;
     int row_stride;
     unsigned char a,r,g,b;
@@ -179,7 +204,7 @@ void jpeg_reader::read(unsigned x0, unsigned y0, image_data_32& image)
         }
         ++row;
     }
-    jpeg_destroy_decompress(&cinfo);
+    jpeg_finish_decompress(&cinfo);
 }
 
 }
