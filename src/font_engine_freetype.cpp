@@ -177,8 +177,8 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
             std::string base_name = itr->filename();
 #endif
             if (!boost::algorithm::starts_with(base_name,".") &&
-                     boost::filesystem::is_regular_file(file_name) &&
-                     is_font_file(file_name))
+                boost::filesystem::is_regular_file(file_name) &&
+                is_font_file(file_name))
             {
                 if (mapnik::freetype_engine::register_font(file_name))
                 {
@@ -231,19 +231,25 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
         else
         {
             // load font into memory
+#ifdef MAPNIK_THREADSAFE
+            mutex::scoped_lock lock(mutex_);
+#endif
             std::ifstream is(itr->second.second.c_str() , std::ios::binary);
             std::string buffer((std::istreambuf_iterator<char>(is)),
                                std::istreambuf_iterator<char>());
+            std::pair<std::map<std::string,std::string>::iterator,bool> result
+                = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
 
             FT_Error error = FT_New_Memory_Face (library_,
-                                                 (FT_Byte const*) buffer.c_str(),
+                                                 (FT_Byte const*) result.first->second.c_str(),
                                                  buffer.size(),
                                                  itr->second.first,
                                                  &face);
-            if (!error)
+            if (!error) return boost::make_shared<font_face>(face);
+            else
             {
-                memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
-                return boost::make_shared<font_face>(face);
+                // we can't load font, erase it.
+                memory_fonts_.erase(result.first);
             }
         }
     }
