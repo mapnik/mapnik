@@ -232,6 +232,7 @@ def test_creation_of_bool():
 
 null_equality = [
   ['hello',False,unicode],
+  [u'',False,unicode],
   [0,False,int],
   [123,False,int],
   [0.0,False,float],
