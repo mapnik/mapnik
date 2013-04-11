@@ -29,7 +29,7 @@
 #include <mapnik/text_path.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/font_util.hpp>
-
+#include <mapnik/mapped_memory_cache.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -216,13 +216,14 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
     {
         FT_Face face;
 
-        std::map<std::string,std::string>::const_iterator mem_font_itr = memory_fonts_.find(itr->second.second);
+        boost::optional<mapnik::mapped_region_ptr> memory =
+            mapnik::mapped_memory_cache::instance().find(itr->second.second.c_str(),true);
 
-        if (mem_font_itr != memory_fonts_.end()) // memory font
+        if (memory) // memory font
         {
             FT_Error error = FT_New_Memory_Face(library_,
-                                                (FT_Byte const*) mem_font_itr->second.c_str(), //buffer
-                                                mem_font_itr->second.size(), // size
+                                                (FT_Byte const*) (*memory)->get_address(), //buffer
+                                                (*memory)->get_size(), // size
                                                 itr->second.first, // face index
                                                 &face);
 
@@ -230,21 +231,12 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
         }
         else
         {
-            // load font into memory
-            std::ifstream is(itr->second.second.c_str() , std::ios::binary);
-            std::string buffer((std::istreambuf_iterator<char>(is)),
-                               std::istreambuf_iterator<char>());
+            FT_Error error = FT_New_Face (library_,
+                                          itr->second.second.c_str(),
+                                          itr->second.first,
+                                          &face);
 
-            FT_Error error = FT_New_Memory_Face (library_,
-                                                 (FT_Byte const*) buffer.c_str(),
-                                                 buffer.size(),
-                                                 itr->second.first,
-                                                 &face);
-            if (!error)
-            {
-                memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
-                return boost::make_shared<font_face>(face);
-            }
+            if (!error) return boost::make_shared<font_face>(face);
         }
     }
     return face_ptr();
@@ -682,7 +674,6 @@ void text_renderer<T>::render_id(mapnik::value_integer feature_id,
 boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-std::map<std::string,std::string> freetype_engine::memory_fonts_;
 
 template text_renderer<image_32>::text_renderer(image_32&,
                                                 face_manager<freetype_engine>&,
