@@ -55,10 +55,9 @@ ABI_VERSION = env['ABI_VERSION']
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
 regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
-iostreams = 'boost_iostreams%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype','z',env['ICU_LIB_NAME'],filesystem,system,regex,iostreams]
+lib_env['LIBS'] = ['freetype','z',env['ICU_LIB_NAME'],filesystem,system,regex]
 
 if env['PROJ']:
    lib_env['LIBS'].append('proj')

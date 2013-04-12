@@ -33,7 +33,8 @@ extern "C"
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/device/file.hpp>
+//#include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 
@@ -98,7 +99,7 @@ namespace
 {
 image_reader* create_jpeg_reader(std::string const& file)
 {
-    return new jpeg_reader<boost::iostreams::file_descriptor_source>(file);
+    return new jpeg_reader<boost::iostreams::file_source>(file);
 }
 
 image_reader* create_jpeg_reader2(char const* data, size_t size)
