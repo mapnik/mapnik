@@ -20,32 +20,29 @@
  *
  *****************************************************************************/
 
+// mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
-#include <mapnik/noncopyable.hpp>
 
 extern "C"
 {
 #include <png.h>
 }
-
+// boost
 #include <boost/scoped_array.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+//#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/iostreams/stream.hpp>
 
 namespace mapnik
 {
+
+template <typename T>
 class png_reader : public image_reader
 {
-    struct png_file_guard
-    {
-        png_file_guard(FILE * fd)
-            : fd_(fd) {}
-
-        ~png_file_guard()
-        {
-            if (fd_) fclose(fd_);
-        }
-        FILE * fd_;
-    };
+    typedef T source_type;
+    typedef boost::iostreams::stream<source_type> ifstream;
 
     struct png_struct_guard
     {
@@ -62,13 +59,16 @@ class png_reader : public image_reader
     };
 
 private:
-    std::string fileName_;
+
+    source_type source_;
+    ifstream stream_;
     unsigned width_;
     unsigned height_;
     int bit_depth_;
     int color_type_;
 public:
-    explicit png_reader(std::string const& fileName);
+    explicit png_reader(std::string const& file_name);
+    explicit png_reader(char const* data, std::size_t size);
     ~png_reader();
     unsigned width() const;
     unsigned height() const;
@@ -76,28 +76,26 @@ public:
     void read(unsigned x,unsigned y,image_data_32& image);
 private:
     void init();
+    static void png_read_data(png_structp png_ptr, png_bytep data, png_size_t length);
 };
 
 namespace
 {
+
 image_reader* create_png_reader(std::string const& file)
 {
-    return new png_reader(file);
-}
-const bool registered = register_image_reader("png",create_png_reader);
+      return new png_reader<boost::iostreams::file_descriptor_source>(file);
 }
 
-png_reader::png_reader(std::string const& fileName)
-    : fileName_(fileName),
-      width_(0),
-      height_(0),
-      bit_depth_(0),
-      color_type_(0)
+image_reader* create_png_reader2(char const * data, std::size_t size)
 {
-    init();
+    return new png_reader<boost::iostreams::array_source>(data, size);
 }
 
-png_reader::~png_reader() {}
+const bool registered = register_image_reader("png",create_png_reader);
+const bool registered2 = register_image_reader("png", create_png_reader2);
+}
+
 
 void user_error_fn(png_structp png_ptr, png_const_charp error_msg)
 {
@@ -109,35 +107,64 @@ void user_warning_fn(png_structp png_ptr, png_const_charp warning_msg)
     MAPNIK_LOG_DEBUG(png_reader) << "libpng warning: '" << warning_msg << "'";
 }
 
-static void
-png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
+template <typename T>
+void png_reader<T>::png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-    png_size_t check;
-    check = (png_size_t)fread(data, (png_size_t)1, length,
-                              (FILE *)png_get_io_ptr(png_ptr));
-
-    if (check != length)
+    ifstream * fin = reinterpret_cast<ifstream*>(png_get_io_ptr(png_ptr));
+    fin->read(reinterpret_cast<char*>(data), length);
+    if (fin->gcount() != length)
     {
         png_error(png_ptr, "Read Error");
     }
 }
 
-void png_reader::init()
+template <typename T>
+png_reader<T>::png_reader(std::string const& file_name)
+    : source_(file_name,std::ios_base::in | std::ios_base::binary),
+      stream_(source_),
+      width_(0),
+      height_(0),
+      bit_depth_(0),
+      color_type_(0)
 {
-    FILE *fp=fopen(fileName_.c_str(),"rb");
-    if (!fp) throw image_reader_exception("cannot open image file "+fileName_);
-    png_file_guard guard(fp);
 
+    if (!stream_) throw image_reader_exception("cannot open image file "+ file_name);
+    init();
+}
+
+template <typename T>
+png_reader<T>::png_reader(char const* data, std::size_t size)
+    : source_(data,size),
+      stream_(source_),
+      width_(0),
+      height_(0),
+      bit_depth_(0),
+      color_type_(0)
+{
+
+    if (!stream_) throw image_reader_exception("cannot open image stream");
+    init();
+}
+
+
+template <typename T>
+png_reader<T>::~png_reader() {}
+
+
+template <typename T>
+void png_reader<T>::init()
+{
     png_byte header[8];
     memset(header,0,8);
-    if ( fread(header,1,8,fp) != 8)
+    stream_.read(reinterpret_cast<char*>(header),8);
+    if ( stream_.gcount() != 8)
     {
-        throw image_reader_exception("Could not read " + fileName_);
+        throw image_reader_exception("Could not read image");
     }
     int is_png=!png_sig_cmp(header,0,8);
     if (!is_png)
     {
-        throw image_reader_exception(fileName_ + " is not a png file");
+        throw image_reader_exception(" File or steam is not a png");
     }
     png_structp png_ptr = png_create_read_struct
         (PNG_LIBPNG_VER_STRING,0,0,0);
@@ -155,7 +182,7 @@ void png_reader::init()
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) throw image_reader_exception("failed to create info_ptr");
 
-    png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
+    png_set_read_fn(png_ptr, (png_voidp)&stream_, png_read_data);
 
     png_set_sig_bytes(png_ptr,8);
     png_read_info(png_ptr, info_ptr);
@@ -169,21 +196,23 @@ void png_reader::init()
     MAPNIK_LOG_DEBUG(png_reader) << "png_reader: bit_depth=" << bit_depth_ << ",color_type=" << color_type_;
 }
 
-unsigned png_reader::width() const
+template <typename T>
+unsigned png_reader<T>::width() const
 {
     return width_;
 }
 
-unsigned png_reader::height() const
+template <typename T>
+unsigned png_reader<T>::height() const
 {
     return height_;
 }
 
-void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
+template <typename T>
+void png_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
 {
-    FILE *fp=fopen(fileName_.c_str(),"rb");
-    if (!fp) throw image_reader_exception("cannot open image file "+fileName_);
-    png_file_guard guard(fp);
+    stream_.clear();
+    stream_.seekg(0, std::ios_base::beg);
 
     png_structp png_ptr = png_create_read_struct
         (PNG_LIBPNG_VER_STRING,0,0,0);
@@ -201,7 +230,7 @@ void png_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     info_ptr = png_create_info_struct(png_ptr);
     if (!info_ptr) throw image_reader_exception("failed to create info_ptr");
 
-    png_set_read_fn(png_ptr, (png_voidp)fp, png_read_data);
+    png_set_read_fn(png_ptr, (png_voidp)&stream_, png_read_data);
     png_read_info(png_ptr, info_ptr);
 
     if (color_type_ == PNG_COLOR_TYPE_PALETTE)
