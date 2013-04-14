@@ -76,6 +76,7 @@ text_tests = [
     {'name': "line-offset", 'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     {'name': "text-bug1532", 'sizes':[(600, 165)]},
     {'name': "text-bug1533", 'sizes':[(600, 600)]},
+    {'name': "text-expressionformat-color", 'sizes':[(800, 100)], 'bbox':default_text_box},
 ]
 
 tiff_tests = [
