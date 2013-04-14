@@ -27,6 +27,7 @@
 #include <mapnik/expression_string.hpp>
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/text/text_properties.hpp>
+#include <mapnik/color_factory.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/xml_node.hpp>
 
@@ -97,10 +98,10 @@ void expression_format::apply(char_properties_ptr p, feature_impl const& feature
                           boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *text_opacity).to_double();
     if (wrap_char) new_properties->wrap_char =
                        boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *character_spacing).to_unicode()[0];
-//    if (fill) new_properties->fill =
-//            boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *fill).to_color();
-//    if (halo_fill) new_properties->halo_fill =
-//            boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *halo_fill).to_color();
+    if (fill) new_properties->fill = parse_color(
+            boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *fill).to_string());
+    if (halo_fill) new_properties->halo_fill = parse_color(
+            boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *halo_fill).to_string());
     if (halo_radius) new_properties->halo_radius =
                          boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *halo_radius).to_double();
 
