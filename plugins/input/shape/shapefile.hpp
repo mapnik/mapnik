@@ -155,7 +155,7 @@ public:
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         boost::optional<mapnik::mapped_region_ptr> memory =
-            mapnik::mapped_memory_cache::instance().find(file_name.c_str(),true);
+            mapnik::mapped_memory_cache::instance().find(file_name,true);
 
         if (memory)
         {

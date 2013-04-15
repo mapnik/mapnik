@@ -57,7 +57,7 @@ dbf_file::dbf_file(std::string const& file_name)
 {
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name.c_str(),true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name,true);
     if (memory)
     {
         file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
@@ -162,7 +162,8 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
         {
             if (record_[fields_[col].offset_] == '*')
             {
-                f.put(name,mapnik::value_null());
+                // NOTE: we intentionally do not store null here
+                // since it is equivalent to the attribute not existing
                 break;
             }
             if ( fields_[col].dec_>0 )

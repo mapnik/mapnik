@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <stdexcept>
@@ -49,7 +50,7 @@ public:
     }
 };
 
-struct MAPNIK_DECL image_reader
+struct MAPNIK_DECL image_reader : private mapnik::noncopyable
 {
     virtual unsigned width() const=0;
     virtual unsigned height() const=0;

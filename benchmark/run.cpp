@@ -708,6 +708,39 @@ struct test12
     }
 };
 
+#include <mapnik/font_engine_freetype.hpp>
+#include <boost/format.hpp>
+struct test13
+{
+    unsigned iter_;
+    unsigned threads_;
+
+    test13(unsigned iterations,
+           unsigned threads)
+        : iter_(iterations),
+          threads_(threads)
+    {}
+
+    bool validate()
+    {
+        return true;
+    }
+
+    void operator()()
+    {
+        mapnik::freetype_engine engine;
+        unsigned long count = 0;
+        for (unsigned i=0;i<iter_;++i)
+        {
+            BOOST_FOREACH( std::string const& name, mapnik::freetype_engine::face_names())
+            {
+                mapnik::face_ptr f = engine.create_face(name);
+                if (f) ++count;
+            }
+        }
+    }
+};
+
 int main( int argc, char** argv)
 {
     if (argc > 0) {
@@ -864,6 +897,12 @@ int main( int argc, char** argv)
             benchmark(runner,"clipping polygon with mapnik::polygon_clipper");
         }
 
+        {
+            mapnik::freetype_engine::register_fonts("./fonts", true);
+            unsigned face_count = mapnik::freetype_engine::face_names().size();
+            test13 runner(1000,10);
+            benchmark(runner, (boost::format("font_engihe: created %ld faces in ") % (face_count * 1000 * 10)).str());
+        }
         std::cout << "...benchmark done\n";
         return 0;
     }

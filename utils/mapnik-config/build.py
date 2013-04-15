@@ -112,9 +112,9 @@ configuration = {
 
 ## if we are statically linking depedencies
 ## then they do not need to be reported in ldflags
-if env['RUNTIME_LINK'] == 'static':
-    configuration['ldflags'] = ''
-    configuration['dep_libs'] = ''
+#if env['RUNTIME_LINK'] == 'static':
+#    configuration['ldflags'] = ''
+#    configuration['dep_libs'] = ''
 
 template = 'mapnik-config.template.sh'
 config_file = 'mapnik-config'

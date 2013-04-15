@@ -117,11 +117,14 @@ void tiff_reader::on_error(const char* /*module*/, const char* fmt, va_list argp
 
 void tiff_reader::init()
 {
-    // TODO: error handling
     TIFFSetWarningHandler(0);
-    TIFFSetErrorHandler(on_error);
+    // Note - we intentially set the error handling to null
+    // when opening the image for the first time to avoid
+    // leaking in TiffOpen: https://github.com/mapnik/mapnik/issues/1783
+    TIFFSetErrorHandler(0);
     TIFF* tif = load_if_exists(file_name_);
     if (!tif) throw image_reader_exception( std::string("Can't load tiff file: '") + file_name_ + "'");
+    TIFFSetErrorHandler(on_error);
 
     char msg[1024];
 

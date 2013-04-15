@@ -138,6 +138,20 @@ INSERT INTO test8(gid, int_field, geom) values (1, 2147483648, ST_MakePoint(1,1)
 INSERT INTO test8(gid, int_field, geom) values (2, 922337203685477580, ST_MakePoint(1,1));
 '''
 
+insert_table_9 = '''
+CREATE TABLE test9(gid serial PRIMARY KEY, name varchar, geom geometry);
+INSERT INTO test9(gid, name, geom) values (1, 'name', ST_MakePoint(1,1));
+INSERT INTO test9(gid, name, geom) values (2, '', ST_MakePoint(1,1));
+INSERT INTO test9(gid, name, geom) values (3, null, ST_MakePoint(1,1));
+'''
+
+insert_table_10 = '''
+CREATE TABLE test10(gid serial PRIMARY KEY, bool_field boolean, geom geometry);
+INSERT INTO test10(gid, bool_field, geom) values (1, TRUE, ST_MakePoint(1,1));
+INSERT INTO test10(gid, bool_field, geom) values (2, FALSE, ST_MakePoint(1,1));
+INSERT INTO test10(gid, bool_field, geom) values (3, null, ST_MakePoint(1,1));
+'''
+
 
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
@@ -153,6 +167,8 @@ def postgis_setup():
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_6),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_7),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_8),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_9),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_10),silent=False)
 
 def postgis_takedown():
     pass
@@ -510,6 +526,98 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                               geometry_field='g')
           fs = ds.featureset()
           eq_(fs.next()['v'], 1)
+
+    def test_null_comparision():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test9',
+                            geometry_field='geom')
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['gid'],1)
+        eq_(feat['name'],'name')
+        eq_(mapnik.Expression("[name] = 'name'").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] = ''").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = null").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = true").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = false").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] != 'name'").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] != ''").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] != null").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
+
+        feat = fs.next()
+        eq_(feat['gid'],2)
+        eq_(feat['name'],'')
+        eq_(mapnik.Expression("[name] = 'name'").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = ''").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] = null").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = true").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = false").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] != 'name'").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] != ''").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] != null").evaluate(feat),True)
+        eq_[bool_field]
+        eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
+
+        feat = fs.next()
+        eq_(feat['gid'],3)
+        eq_(feat['name'],None) # null
+        eq_(mapnik.Expression("[name] = 'name'").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = ''").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = null").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] = true").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] = false").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] != 'name'").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] != ''").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] != null").evaluate(feat),False)
+        eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
+        eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
+
+    def test_null_comparision():
+        ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test10',
+                            geometry_field='geom')
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['gid'],1)
+        eq_(feat['bool_field'],True)
+        eq_(mapnik.Expression("[bool_field] = 'name'").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = ''").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = null").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True)
+
+        feat = fs.next()
+        eq_(feat['gid'],2)
+        eq_(feat['bool_field'],False)
+        eq_(mapnik.Expression("[bool_field] = 'name'").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = ''").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = null").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),False)
+
+        feat = fs.next()
+        eq_(feat['gid'],3)
+        eq_(feat['bool_field'],None) # null
+        eq_(mapnik.Expression("[bool_field] = 'name'").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = ''").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = null").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),False)
+        eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True)
 
     atexit.register(postgis_takedown)
 

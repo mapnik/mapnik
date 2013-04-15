@@ -123,11 +123,9 @@ feature_ptr postgis_featureset::next()
         {
             std::string name = rs_->getFieldName(pos);
 
-            if (rs_->isNull(pos))
-            {
-                feature->put(name, mapnik::value_null());
-            }
-            else
+            // NOTE: we intentionally do not store null here
+            // since it is equivalent to the attribute not existing
+            if (!rs_->isNull(pos))
             {
                 const char* buf = rs_->getValue(pos);
                 const int oid = rs_->getTypeOID(pos);

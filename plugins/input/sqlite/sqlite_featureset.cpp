@@ -123,7 +123,8 @@ feature_ptr sqlite_featureset::next()
 
             case SQLITE_NULL:
             {
-                feature->put(fld_name_str, mapnik::value_null());
+                // NOTE: we intentionally do not store null here
+                // since it is equivalent to the attribute not existing
                 break;
             }
 
