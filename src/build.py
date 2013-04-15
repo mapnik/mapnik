@@ -71,6 +71,9 @@ if env['JPEG']:
 if env['TIFF']:
    lib_env['LIBS'].append('tiff')
 
+if env['WEBP']:
+   lib_env['LIBS'].append('webp')
+
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
 
@@ -233,6 +236,13 @@ if env['PNG']:
         """
         png_reader.cpp
         """)
+
+if env['WEBP']:
+    source += Split(
+        """
+        webp_reader.cpp
+        """)
+
 
 # agg backend
 source += Split(
