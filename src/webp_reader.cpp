@@ -129,8 +129,8 @@ void webp_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     config.options.use_cropping = 1;
     config.options.crop_left = x0;
     config.options.crop_top = y0;
-    config.options.crop_width = image.width();
-    config.options.crop_height = image.height();
+    config.options.crop_width = std::min(width_ - x0, image.width());
+    config.options.crop_height = std::min(height_ - y0, image.height());
 
     if (WebPGetFeatures(data_, size_, &config.input) != VP8_STATUS_OK)
     {
