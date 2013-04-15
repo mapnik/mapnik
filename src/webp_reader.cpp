@@ -41,6 +41,19 @@ namespace mapnik
 class webp_reader : public image_reader
 {
 private:
+
+    struct config_guard
+    {
+        config_guard(WebPDecoderConfig & config)
+            : config_(config) {}
+
+        ~config_guard()
+        {
+            WebPFreeDecBuffer(&config_.output);
+        }
+        WebPDecoderConfig & config_;
+    };
+
     uint8_t const* data_;
     size_t size_;
     unsigned width_;
@@ -85,13 +98,13 @@ webp_reader::~webp_reader()
 
 void webp_reader::init()
 {
-    WebPDecoderConfig config;
-    if (!WebPGetFeatures(data_, size_, &config.input) == VP8_STATUS_OK)
+    int width, height;
+    if (!WebPGetInfo(data_, size_, &width, &height))
     {
-        throw image_reader_exception("WEBP: can't open image");
+        throw image_reader_exception("WEBP reader: WebPGetInfo failed");
     }
-    width_ = config.input.width;
-    height_ = config.input.height;
+    width_ = width;
+    height_ = height;
 }
 
 unsigned webp_reader::width() const
@@ -107,6 +120,12 @@ unsigned webp_reader::height() const
 void webp_reader::read(unsigned x0, unsigned y0,image_data_32& image)
 {
     WebPDecoderConfig config;
+    config_guard guard(config);
+    if (!WebPInitDecoderConfig(&config))
+    {
+        throw image_reader_exception("WEBP reader: WebPInitDecoderConfig failed");
+    }
+
     config.options.use_cropping = 1;
     config.options.crop_left = x0;
     config.options.crop_top = y0;
@@ -119,9 +138,10 @@ void webp_reader::read(unsigned x0, unsigned y0,image_data_32& image)
     }
 
     config.output.colorspace = MODE_RGBA;
-    config.output.u.RGBA.rgba = (uint8_t*)image.getBytes();
+    config.output.u.RGBA.rgba = (uint8_t *)image.getBytes();
     config.output.u.RGBA.stride = 4 * image.width();
-    config.output.u.RGBA.size = image.width()*image.height()*4;
+    config.output.u.RGBA.size = image.width() * image.height() * 4;
+    config.output.is_external_memory = 1;
     if (WebPDecode(data_, size_, &config) != VP8_STATUS_OK)
     {
         throw image_reader_exception("WEBP reader: WebPDecode failed");
