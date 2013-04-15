@@ -227,7 +227,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
     {
         MAPNIK_LOG_ERROR(datasource_cache)
                 << "Exception caught while loading plugin library: "
-                << str << " (" << ex.what() << ")";
+                << ex.what();
     }
     return success;
 }
