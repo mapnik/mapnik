@@ -34,7 +34,6 @@ extern "C"
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/iostreams/device/file.hpp>
-//#include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 

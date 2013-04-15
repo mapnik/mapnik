@@ -30,9 +30,9 @@ extern "C"
 }
 // boost
 #include <boost/scoped_array.hpp>
+// iostreams
 #include <boost/iostreams/device/file.hpp>
-//#include <boost/iostreams/device/file_descriptor.hpp>
-//#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 
 namespace mapnik
