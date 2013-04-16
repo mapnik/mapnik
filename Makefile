@@ -25,7 +25,7 @@ test:
 	@python tests/visual_tests/test.py -q || true
 	@echo "*** Running C++ tests..."
 	@for FILE in tests/cpp_tests/*-bin; do \
-		$${FILE}; \
+		$${FILE} || exit 1;\
 	done
 	@echo "*** Running python tests..."
 	@python tests/run_tests.py -q
