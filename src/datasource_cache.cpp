@@ -64,20 +64,6 @@ datasource_ptr datasource_cache::create(parameters const& params)
                            "parameter 'type' is missing");
     }
 
-#ifdef MAPNIK_LOG
-    MAPNIK_LOG_DEBUG(datasource_cache)
-        << "datasource_cache: Size="
-        << params.size();
-
-    parameters::const_iterator i = params.begin();
-    for (; i != params.end(); ++i)
-    {
-        MAPNIK_LOG_DEBUG(datasource_cache)
-            << "datasource_cache: -- "
-            << i->first << "=" << i->second;
-    }
-#endif
-
     datasource_ptr ds;
 
 #ifdef MAPNIK_STATIC_PLUGINS
@@ -87,12 +73,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
     {
         return ds;
     }
-    else
-    {
-        throw std::runtime_error(std::string("Cannot load static datasource: ") +
-                                 *type);
-    }
-#else
+#endif
 
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
@@ -114,7 +95,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
         throw config_error(s);
     }
 
-    if (! itr->second->handle())
+    if (! itr->second->valid())
     {
         throw std::runtime_error(std::string("Cannot load library: ") +
                                  itr->second->get_error());
@@ -133,11 +114,24 @@ datasource_ptr datasource_cache::create(parameters const& params)
     }
 
     ds = datasource_ptr(create_datasource(params), datasource_deleter());
-#endif
 
+#ifdef MAPNIK_LOG
     MAPNIK_LOG_DEBUG(datasource_cache)
         << "datasource_cache: Datasource="
         << ds << " type=" << type;
+
+    MAPNIK_LOG_DEBUG(datasource_cache)
+        << "datasource_cache: Size="
+        << params.size();
+
+    parameters::const_iterator i = params.begin();
+    for (; i != params.end(); ++i)
+    {
+        MAPNIK_LOG_DEBUG(datasource_cache)
+            << "datasource_cache: -- "
+            << i->first << "=" << i->second;
+    }
+#endif
 
     return ds;
 }
@@ -227,7 +221,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
     {
         MAPNIK_LOG_ERROR(datasource_cache)
                 << "Exception caught while loading plugin library: "
-                << ex.what();
+                << filename << " (" << ex.what() << ")";
     }
     return success;
 }
