@@ -68,7 +68,8 @@ image_reader* get_image_reader(char const* data, size_t size)
     boost::optional<std::string> type = type_from_bytes(data,size);
     if (type)
         return factory<image_reader,std::string,char const*,size_t>::instance().create_object(*type, data,size);
-    return 0;
+    else
+        throw image_reader_exception("image_reader: can't determine type from input data");
 }
 
 image_reader* get_image_reader(std::string const& filename,std::string const& type)
