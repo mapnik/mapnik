@@ -145,6 +145,11 @@ inline bool is_ps (std::string const& filename)
     return boost::algorithm::iends_with(filename,std::string(".ps"));
 }
 
+inline bool is_webp (std::string const& filename)
+{
+    return boost::algorithm::iends_with(filename,std::string(".webp"));
+}
+
 inline boost::optional<std::string> type_from_filename(std::string const& filename)
 
 {
@@ -155,6 +160,7 @@ inline boost::optional<std::string> type_from_filename(std::string const& filena
     if (is_pdf(filename)) return result_type("pdf");
     if (is_svg(filename)) return result_type("svg");
     if (is_ps(filename)) return result_type("ps");
+    if (is_webp(filename)) return result_type("webp");
     return result_type();
 }
 
