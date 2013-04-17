@@ -619,6 +619,13 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True) # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True) # in 2.1.x used to be False
 
+    # https://github.com/mapnik/mapnik/issues/1816
+    def test_exception_message_reporting():
+        try:
+            ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='doesnotexist')
+        except Exception, e:
+            eq_(e.message != 'unidentifiable C++ exception', True)
+
     atexit.register(postgis_takedown)
 
 if __name__ == "__main__":
