@@ -75,10 +75,17 @@ feature_ptr postgis_featureset::next()
 
         if (key_field_)
         {
+            std::string name = rs_->getFieldName(pos);
+
+            // null feature id is not acceptable
+            if (rs_->isNull(pos))
+            {
+                MAPNIK_LOG_WARN(postgis) << "postgis_featureset: null value encountered for key_field: " << name;
+                continue;
+            }
             // create feature with user driven id from attribute
             int oid = rs_->getTypeOID(pos);
             const char* buf = rs_->getValue(pos);
-            std::string name = rs_->getFieldName(pos);
 
             // validation happens of this type at initialization
             mapnik::value_integer val;
