@@ -40,6 +40,10 @@ extern "C"
 #include <mapnik/jpeg_io.hpp>
 #endif
 
+#if defined(HAVE_WEBP)
+#include <mapnik/webp_io.hpp>
+#endif
+
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/graphics.hpp>
@@ -358,7 +362,7 @@ void save_to_stream(T const& image,
         {
 #if defined(HAVE_JPEG)
             int quality = 85;
-            std::string const& val = t.substr(4);
+            std::string val = t.substr(4);
             if (!val.empty())
             {
                 if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
@@ -369,6 +373,24 @@ void save_to_stream(T const& image,
             save_as_jpeg(stream, quality, image);
 #else
             throw ImageWriterException("jpeg output is not enabled in your build of Mapnik");
+#endif
+        }
+        else if (boost::algorithm::starts_with(t, "webp"))
+        {
+#if defined(HAVE_WEBP)
+            int quality = 100;
+            std::string val = t.substr(4);
+            if (!val.empty())
+            {
+                if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
+                {
+                    throw ImageWriterException("invalid webp quality: '" + val + "'");
+                }
+            }
+            int compression = 0;
+            save_as_webp(stream, quality, compression, image);
+#else
+            throw ImageWriterException("webp output is not enabled in your build of Mapnik");
 #endif
         }
         else throw ImageWriterException("unknown file type: " + type);
