@@ -556,7 +556,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[name] != 'name'").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != ''").evaluate(feat),False)
         eq_(mapnik.Expression("[name] != null").evaluate(feat),True)
-        eq_[bool_field]
+        eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
 
         feat = fs.next()
@@ -573,7 +573,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
 
-    def test_null_comparision():
+    def test_null_comparision2():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test10',
                             geometry_field='geom')
         fs = ds.featureset()
@@ -586,8 +586,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True) # in 2.1.x used to be False
+        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True) # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True)
 
@@ -601,7 +601,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True) # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),False)
 
@@ -613,11 +613,11 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] = null").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),False)
-        eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)  # in 2.1.x used to be False
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)  # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),False)
-        eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True) # in 2.1.x used to be False
+        eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True) # in 2.1.x used to be False
 
     atexit.register(postgis_takedown)
 
