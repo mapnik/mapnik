@@ -348,6 +348,11 @@ void runtime_error_translator(std::runtime_error const & ex)
     PyErr_SetString(PyExc_RuntimeError, ex.what());
 }
 
+void out_of_range_error_translator(std::out_of_range const & ex)
+{
+    PyErr_SetString(PyExc_IndexError, ex.what());
+}
+
 void standard_error_translator(std::exception const & ex)
 {
     PyErr_SetString(PyExc_RuntimeError, ex.what());
@@ -426,11 +431,11 @@ BOOST_PYTHON_MODULE(_mapnik)
     using mapnik::save_map_to_string;
     using mapnik::render_grid;
 
+    register_exception_translator<std::exception>(&standard_error_translator);
+    register_exception_translator<std::out_of_range>(&out_of_range_error_translator);
     register_exception_translator<mapnik::config_error>(&config_error_translator);
     register_exception_translator<mapnik::value_error>(&value_error_translator);
     register_exception_translator<std::runtime_error>(&runtime_error_translator);
-    // catch the rest
-    register_exception_translator<std::exception>(&standard_error_translator);
     register_cairo();
     export_query();
     export_geometry();
