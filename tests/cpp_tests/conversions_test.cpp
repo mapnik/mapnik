@@ -82,14 +82,22 @@ int main( int, char*[] )
         BOOST_TEST_EQ( out,  "-1000000000000000" );
         out.clear();
     
-        to_string(out, double(100000000000000.1));
-        BOOST_TEST_EQ( out,  "100000000000000.1" );
+        to_string(out, double(10000000000000.1));
+        BOOST_TEST_EQ( out,  "10000000000000.1" );
         out.clear();
     
         to_string(out, double(1.00001));
         BOOST_TEST_EQ( out,  "1.00001" );
         out.clear();
-    
+
+        to_string(out, double(67.65));
+        BOOST_TEST_EQ( out,  "67.65" );
+        out.clear();
+
+        to_string(out, double(67.35));
+        BOOST_TEST_EQ( out,  "67.35" );
+        out.clear();
+
         to_string(out, double(1234000000000000));
         BOOST_TEST_EQ( out,  "1234000000000000" );
         out.clear();
