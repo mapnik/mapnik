@@ -54,6 +54,7 @@ struct agg_stack_blur
     unsigned ry;
 };
 
+/*
 struct hsla
 {
     hsla(double _h0, double _h1,
@@ -97,6 +98,7 @@ struct hsla
     double a0;
     double a1;
 };
+*/
 
 struct color_stop
 {
@@ -122,7 +124,7 @@ typedef boost::variant<filter::blur,
                        filter::x_gradient,
                        filter::y_gradient,
                        filter::invert,
-                       filter::hsla,
+                       //filter::hsla,
                        filter::colorize_alpha> filter_type;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
@@ -143,6 +145,7 @@ inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
     return os;
 }
 
+/*
 inline std::ostream& operator<< (std::ostream& os, hsla const& filter)
 {
     os << "hsla(" << filter.h0 << 'x' << filter.h1 << ':'
@@ -151,6 +154,7 @@ inline std::ostream& operator<< (std::ostream& os, hsla const& filter)
                   << filter.a0 << 'x' << filter.a1 << ')';
     return os;
 }
+*/
 
 inline std::ostream& operator<< (std::ostream& os, emboss)
 {
