@@ -442,7 +442,7 @@ private:
         case wkbMultiLineStringZ:    s << "MultiLineStringZ"; break;
         case wkbMultiPolygonZ:       s << "MultiPolygonZ"; break;
         case wkbGeometryCollectionZ: s << "GeometryCollectionZ"; break;
-        default:                     s << "wkbUknown(" << type << ")"; break;
+        default:                     s << "wkbUnknown(" << type << ")"; break;
         }
 
         return s.str();

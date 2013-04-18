@@ -186,6 +186,14 @@ int main( int, char*[] )
         BOOST_TEST_EQ( out,  "1.00001" );
         out.clear();
 
+        to_string(out, double(67.65));
+        BOOST_TEST_EQ( out,  "67.65" );
+        out.clear();
+
+        to_string(out, double(67.35));
+        BOOST_TEST_EQ( out,  "67.35" );
+        out.clear();
+
         to_string(out, double(1234000000000000));
         BOOST_TEST_EQ( out,  "1.234e+15" );
         out.clear();

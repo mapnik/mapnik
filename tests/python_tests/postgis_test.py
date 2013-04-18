@@ -556,7 +556,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[name] != 'name'").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != ''").evaluate(feat),False)
         eq_(mapnik.Expression("[name] != null").evaluate(feat),True)
-        eq_[bool_field]
+        eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
 
         feat = fs.next()
@@ -573,7 +573,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
 
-    def test_null_comparision():
+    def test_null_comparision2():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='test10',
                             geometry_field='geom')
         fs = ds.featureset()
@@ -586,8 +586,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True) # in 2.1.x used to be False
+        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True) # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True)
 
@@ -601,7 +601,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),True) # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),False)
 
@@ -613,11 +613,40 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] = null").evaluate(feat),True)
         eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),False)
-        eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)  # in 2.1.x used to be False
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)  # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),False)
-        eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True)
-        eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True)
+        eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True) # in 2.1.x used to be False
+        eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True) # in 2.1.x used to be False
+
+    # https://github.com/mapnik/mapnik/issues/1816
+    def test_exception_message_reporting():
+        try:
+            ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='doesnotexist')
+        except Exception, e:
+            eq_(e.message != 'unidentifiable C++ exception', True)
+
+    def test_null_id_field():
+        opts = {'type':'postgis',
+                'dbname':MAPNIK_TEST_DBNAME,
+                'geometry_field':'geom',
+                'table':"(select null::bigint as osm_id, GeomFromEWKT('SRID=4326;POINT(0 0)') as geom) as tmp"}
+        ds = mapnik.Datasource(**opts)
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat.id(),1L)
+        eq_(feat['osm_id'],None)
+
+    @raises(StopIteration)
+    def test_null_key_field():
+        opts = {'type':'postgis',
+                "key_field": 'osm_id',
+                'dbname':MAPNIK_TEST_DBNAME,
+                'geometry_field':'geom',
+                'table':"(select null::bigint as osm_id, GeomFromEWKT('SRID=4326;POINT(0 0)') as geom) as tmp"}
+        ds = mapnik.Datasource(**opts)
+        fs = ds.featureset()
+        feat = fs.next() ## should throw since key_field is null: StopIteration: No more features.
 
     atexit.register(postgis_takedown)
 
