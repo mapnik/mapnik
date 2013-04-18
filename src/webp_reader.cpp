@@ -148,7 +148,7 @@ webp_reader<T>::webp_reader(char const* data, std::size_t size)
 
 template <typename T>
 webp_reader<T>::webp_reader(std::string const& filename)
-    : buffer_(0),
+    : buffer_(nullptr),
       size_(0),
       width_(0),
       height_(0)
