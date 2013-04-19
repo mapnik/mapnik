@@ -40,7 +40,6 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
-#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
 
 namespace boost { namespace spirit { namespace traits {
 
@@ -121,7 +120,7 @@ struct json_coordinate_policy : karma::real_policies<T>
     {
         if (n == 0.0) return 0;
         using namespace boost::spirit;
-        return static_cast<unsigned>(15 - boost::math::trunc(log10(traits::get_absolute_value(n))));
+        return static_cast<unsigned>(14 - std::trunc(log10(traits::get_absolute_value(n))));
     }
 
     template <typename OutputIterator>
