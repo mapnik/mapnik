@@ -23,6 +23,7 @@
 #ifndef MAPNIK_FEATURE_GRAMMAR_HPP
 #define MAPNIK_FEATURE_GRAMMAR_HPP
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // mapnik
 #include <mapnik/json/geometry_grammar.hpp>
 #include <mapnik/value.hpp>
@@ -30,7 +31,6 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // spirit::qi
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
