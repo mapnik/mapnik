@@ -184,7 +184,10 @@ struct geometry_generator_grammar :
 
         polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
                            << karma::string[ if_ (_r1 > 1) [_1 = "],["]
-                                      .else_[_1 = '[' ]] | &uint_ << lit(','))
+                                             .else_[_1 = '[' ]]
+                           |
+                           &uint_(mapnik::SEG_LINETO))
+            << lit(',')
             << lit('[') << coord_type
             << lit(',')
             << coord_type << lit(']')
