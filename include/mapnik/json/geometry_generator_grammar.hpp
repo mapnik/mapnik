@@ -42,7 +42,6 @@
 #include <boost/fusion/include/boost_tuple.hpp>
 #include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
 
-
 namespace boost { namespace spirit { namespace traits {
 
 // make gcc and darwin toolsets happy.
@@ -234,6 +233,7 @@ struct multi_geometry_generator_grammar :
         using boost::spirit::karma::_1;
         using boost::spirit::karma::_a;
         using boost::spirit::karma::_r1;
+        using boost::spirit::karma::string;
 
         geometry_types.add
             (mapnik::Point,"\"Point\"")
@@ -257,9 +257,9 @@ struct multi_geometry_generator_grammar :
         geometry = (lit("{\"type\":")
                     << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = _multi_type(_val)]
                     << lit(",\"coordinates\":")
-                    << karma::string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = '[']]
+                    << string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
                     << coordinates
-                    << karma::string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']']]
+                    << string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
                     << lit('}')) | lit("null")
             ;
 
