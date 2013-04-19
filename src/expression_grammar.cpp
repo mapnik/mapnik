@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 // mapnik
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/expression_node.hpp>
@@ -142,7 +144,7 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
     multiplicative_expr = unary_expr [_val = _1]
         >> *(     '*' >> unary_expr [_val *= _1]
                   | '/' >> unary_expr [_val /= _1]
-                  | '%' >> unary_expr [_val %= _1]
+//                  | '%' >> unary_expr [_val %= _1] --> FIXME
                   |  regex_match_expr[_val = regex_match_(_val, _1)]
                   |  regex_replace_expr(_val) [_val = _1]
             )

@@ -22,7 +22,7 @@
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
     using namespace mapnik;
-    std::auto_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
     if (!reader1.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
@@ -30,7 +30,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     boost::shared_ptr<image_32> image_ptr1 = boost::make_shared<image_32>(reader1->width(),reader1->height());
     reader1->read(0,0,image_ptr1->data());
 
-    std::auto_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
     if (!reader2.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + src_fn);

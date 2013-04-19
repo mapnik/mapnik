@@ -22,9 +22,8 @@
 
 // TODO https://github.com/mapnik/mapnik/issues/1658
 #include <boost/version.hpp>
-#if BOOST_VERSION >= 105200
-#define BOOST_SPIRIT_USE_PHOENIX_V3
-#endif
+
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 // mapnik
 #include <mapnik/json/feature_collection_parser.hpp>
@@ -65,4 +64,3 @@ namespace mapnik { namespace json {
     template class feature_collection_parser<boost::spirit::multi_pass<std::istreambuf_iterator<char> > >;
 
 }}
-

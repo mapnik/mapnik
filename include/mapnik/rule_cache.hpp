@@ -41,9 +41,9 @@ class rule_cache
 public:
     typedef std::vector<rule const*> rule_ptrs;
     rule_cache()
-     : if_rules_(),
-       else_rules_(),
-       also_rules_() {}
+        : if_rules_(),
+          else_rules_(),
+          also_rules_() {}
 
     void add_rule(rule const& r)
     {
@@ -65,12 +65,12 @@ public:
     {
         return if_rules_;
     }
-    
+
     rule_ptrs const& get_else_rules() const
     {
         return else_rules_;
     }
-    
+
     rule_ptrs const& get_also_rules() const
     {
         return also_rules_;

@@ -12,7 +12,7 @@
 #if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
-#include <mapnik/util/geometry_to_svg.hpp>
+//#include <mapnik/util/geometry_to_svg.hpp>
 #endif
 
 #include <boost/detail/lightweight_test.hpp>
@@ -29,14 +29,14 @@ struct output_geometry_backend
     {
         mapnik::vertex2d vtx(mapnik::vertex2d::no_init);
         path.rewind(0);
-        std::auto_ptr<mapnik::geometry_type> geom_ptr(new mapnik::geometry_type(type_));
+        std::unique_ptr<mapnik::geometry_type> geom_ptr(new mapnik::geometry_type(type_));
 
         while ((vtx.cmd = path.vertex(&vtx.x, &vtx.y)) != mapnik::SEG_END)
         {
             //std::cerr << vtx.x << "," << vtx.y << "   cmd=" << vtx.cmd << std::endl;
             geom_ptr->push_vertex(vtx.x, vtx.y, (mapnik::CommandType)vtx.cmd);
         }
-        paths_.push_back(geom_ptr);
+        paths_.push_back(geom_ptr.release());
     }
     boost::ptr_vector<mapnik::geometry_type> &  paths_;
     mapnik::eGeomType type_;

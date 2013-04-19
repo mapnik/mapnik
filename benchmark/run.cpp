@@ -12,6 +12,7 @@
 #include <sstream>
 #include <cstdio>
 #include <set>
+#include <memory>
 
 // boost
 #include <boost/version.hpp>
@@ -92,7 +93,7 @@ void benchmark(T & test_runner, std::string const& name)
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
-    std::auto_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
     if (!reader1.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
@@ -100,7 +101,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     boost::shared_ptr<image_32> image_ptr1 = boost::make_shared<image_32>(reader1->width(),reader1->height());
     reader1->read(0,0,image_ptr1->data());
 
-    std::auto_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
     if (!reader2.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + src_fn);
@@ -162,7 +163,7 @@ struct test2
       im_()
     {
         std::string filename("./benchmark/data/multicolor.png");
-        std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename,"png"));
+        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename,"png"));
         if (!reader.get())
         {
             throw mapnik::image_reader_exception("Failed to load: " + filename);
@@ -410,8 +411,8 @@ struct test8
 #include <mapnik/rule_cache.hpp>
 
 #if BOOST_VERSION >= 105300
-#include <boost/container/vector.hpp>
-#include <boost/move/utility.hpp>
+//#include <boost/container/vector.hpp>
+//#include <boost/move/utility.hpp>
 
 class rule_cache_move
 {
@@ -593,13 +594,13 @@ struct test10
     void operator()()
     {
          for (unsigned i=0;i<iter_;++i) {
-             boost::ptr_vector<rule_cache_heap> rule_caches;
+             std::vector<std::unique_ptr<rule_cache_heap> > rule_caches;
              for (unsigned i=0;i<num_styles_;++i) {
-                 std::auto_ptr<rule_cache_heap> rc(new rule_cache_heap);
+                 std::unique_ptr<rule_cache_heap> rc(new rule_cache_heap);
                  for (unsigned i=0;i<num_rules_;++i) {
                      rc->add_rule(rules_[i]);
                  }
-                 rule_caches.push_back(rc);
+                 rule_caches.push_back(std::move(rc));
              }
          }
     }

@@ -25,6 +25,8 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/json/geojson_generator.hpp>
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #if BOOST_VERSION >= 104700
 
 #include <mapnik/json/feature_generator_grammar.hpp>
@@ -34,26 +36,28 @@
 namespace  mapnik { namespace json {
 
 feature_generator::feature_generator()
-    : grammar_(new feature_generator_grammar<sink_type>()) {}
+    : grammar_(0) {} // new feature_generator_grammar<sink_type>()) {}
 
 feature_generator::~feature_generator() {}
 
 bool feature_generator::generate(std::string & geojson, mapnik::feature_impl const& f)
 {
-    sink_type sink(geojson);
-    return karma::generate(sink, *grammar_,f);
+    //sink_type sink(geojson);
+    //return karma::generate(sink, *grammar_,f);
+    return false;
 }
 
 
 geometry_generator::geometry_generator()
-    : grammar_(new multi_geometry_generator_grammar<sink_type>()) {}
+    : grammar_(0) {} //new multi_geometry_generator_grammar<sink_type>()) {}
 
 geometry_generator::~geometry_generator() {}
 
 bool geometry_generator::generate(std::string & geojson, mapnik::geometry_container const& g)
 {
-    sink_type sink(geojson);
-    return karma::generate(sink, *grammar_,g);
+//sink_type sink(geojson);
+//  return karma::generate(sink, *grammar_,g);
+return false;
 }
 
 }}

@@ -192,7 +192,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             else
             {
                 // TODO - support reading images from string
-                std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(uri));
+                std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(uri));
                 if (reader.get())
                 {
                     unsigned width = reader->width();

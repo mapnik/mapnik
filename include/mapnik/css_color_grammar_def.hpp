@@ -23,6 +23,8 @@
 #ifndef MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
 #define MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 // boost
 #include <boost/version.hpp>
 

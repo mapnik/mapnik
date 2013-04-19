@@ -27,6 +27,7 @@
 #include <mapnik/expression_grammar.hpp>
 #include <mapnik/transform_expression.hpp>
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // spirit
 #include <boost/spirit/include/qi.hpp>
 

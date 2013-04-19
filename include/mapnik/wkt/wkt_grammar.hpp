@@ -23,6 +23,8 @@
 #ifndef MAPNIK_WKT_GRAMMAR_HPP
 #define MAPNIK_WKT_GRAMMAR_HPP
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #include <boost/assert.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 // spirit::qi

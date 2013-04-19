@@ -23,6 +23,8 @@
 #ifndef MAPNIK_UTIL_DASHARRAY_PARSER_HPP
 #define MAPNIK_UTIL_DASHARRAY_PARSER_HPP
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
@@ -44,10 +46,10 @@ bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharr
     using qi::lexeme;
 #endif
     using phoenix::push_back;
-    // SVG 
+    // SVG
     // dasharray ::= (length | percentage) (comma-wsp dasharray)?
     // no support for 'percentage' as viewport is unknown at load_map
-    // 
+    //
     bool r = phrase_parse(first, last,
                           (double_[push_back(phoenix::ref(dasharray), _1)] %
 #if BOOST_VERSION > 104200
@@ -57,10 +59,10 @@ bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharr
 #endif
                           | lit("none")),
                           qi::ascii::space);
-    
-    if (first != last) 
+
+    if (first != last)
         return false;
-    
+
     return r;
 }
 

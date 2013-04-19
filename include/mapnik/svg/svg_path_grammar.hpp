@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/svg/svg_path_commands.hpp>
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // spirit
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>

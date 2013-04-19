@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/path_expression.hpp>
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // spirit2
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_action.hpp>

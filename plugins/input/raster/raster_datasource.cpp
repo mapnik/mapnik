@@ -118,7 +118,7 @@ raster_datasource::raster_datasource(parameters const& params)
 
         try
         {
-            std::auto_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
+            std::unique_ptr<image_reader> reader(mapnik::get_image_reader(filename_, format_));
             if (reader.get())
             {
                 width_ = reader->width();

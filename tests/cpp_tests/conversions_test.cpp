@@ -1,3 +1,5 @@
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #include <boost/version.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/util/conversions.hpp>

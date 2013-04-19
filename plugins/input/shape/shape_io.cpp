@@ -97,7 +97,7 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
     int num_points = record.read_ndr_integer();
     if (num_parts == 1)
     {
-        std::auto_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
+        std::unique_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
         record.skip(4);
         double x = record.read_double();
         double y = record.read_double();
@@ -108,7 +108,7 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
             y = record.read_double();
             line->line_to(x, y);
         }
-        geom.push_back(line);
+        geom.push_back(line.release());
     }
     else
     {
@@ -121,7 +121,7 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
         int start, end;
         for (int k = 0; k < num_parts; ++k)
         {
-            std::auto_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
+            std::unique_ptr<geometry_type> line(new geometry_type(mapnik::LineString));
             start = parts[k];
             if (k == num_parts - 1)
             {
@@ -142,7 +142,7 @@ void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry
                 y = record.read_double();
                 line->line_to(x, y);
             }
-            geom.push_back(line);
+            geom.push_back(line.release());
         }
     }
 }
@@ -160,7 +160,7 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
 
     for (int k = 0; k < num_parts; ++k)
     {
-        std::auto_ptr<geometry_type> poly(new geometry_type(mapnik::Polygon));
+        std::unique_ptr<geometry_type> poly(new geometry_type(mapnik::Polygon));
         int start = parts[k];
         int end;
         if (k == num_parts - 1)
@@ -182,6 +182,6 @@ void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_c
             poly->line_to(x, y);
         }
         poly->close_path();
-        geom.push_back(poly);
+        geom.push_back(poly.release());
     }
 }

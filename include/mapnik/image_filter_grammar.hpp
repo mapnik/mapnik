@@ -23,6 +23,7 @@
 #ifndef MAPNIK_IMAGE_FILITER_GRAMMAR_HPP
 #define MAPNIK_IMAGE_FILITER_GRAMMAR_HPP
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>

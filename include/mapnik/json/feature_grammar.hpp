@@ -30,6 +30,7 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/value.hpp>
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // spirit::qi
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>

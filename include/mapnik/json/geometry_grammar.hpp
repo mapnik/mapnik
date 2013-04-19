@@ -27,6 +27,8 @@
 #include <mapnik/geometry.hpp>  // for geometry_type
 #include <mapnik/vertex.hpp>  // for CommandType
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 // spirit::qi
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>

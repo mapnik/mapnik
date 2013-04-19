@@ -28,6 +28,8 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/geometry_svg_generator.hpp>
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 // boost
 #include <boost/spirit/include/karma.hpp>
 

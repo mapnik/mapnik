@@ -23,6 +23,8 @@
 #ifndef MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 #define MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp> // for container stuff
@@ -41,7 +43,6 @@
 #include <boost/fusion/include/boost_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
-//#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 /*!
  * adapted to conform to the concepts

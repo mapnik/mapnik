@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 // mapnik
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #include <mapnik/json/geometry_parser.hpp>
 #include <mapnik/json/geometry_grammar.hpp>
 

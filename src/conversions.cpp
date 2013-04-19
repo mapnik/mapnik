@@ -26,6 +26,8 @@
 
 #include <cstring>
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 #include <boost/spirit/include/qi.hpp>
 
 #if _MSC_VER

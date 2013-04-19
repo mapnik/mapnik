@@ -151,7 +151,7 @@ boost::shared_ptr<image_32> open_from_file(std::string const& filename)
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-        std::auto_ptr<image_reader> reader(get_image_reader(filename,*type));
+        std::unique_ptr<image_reader> reader(get_image_reader(filename,*type));
         if (reader.get())
         {
 
@@ -166,7 +166,7 @@ boost::shared_ptr<image_32> open_from_file(std::string const& filename)
 
 boost::shared_ptr<image_32> fromstring(std::string const& str)
 {
-    std::auto_ptr<image_reader> reader(get_image_reader(str.c_str(),str.size()));
+    std::unique_ptr<image_reader> reader(get_image_reader(str.c_str(),str.size()));
     if (reader.get())
     {
         boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(reader->width(),reader->height());
@@ -182,15 +182,15 @@ boost::shared_ptr<image_32> frombuffer(PyObject * obj)
     Py_ssize_t buffer_len;
     if (PyObject_AsReadBuffer(obj, &buffer, &buffer_len) == 0)
     {
-        std::auto_ptr<image_reader> reader(get_image_reader(reinterpret_cast<char const*>(buffer),buffer_len));
+        std::unique_ptr<image_reader> reader(get_image_reader(reinterpret_cast<char const*>(buffer),buffer_len));
         if (reader.get())
         {
             boost::shared_ptr<image_32> image_ptr = boost::make_shared<image_32>(reader->width(),reader->height());
             reader->read(0,0,image_ptr->data());
             return image_ptr;
         }
-        throw mapnik::image_reader_exception("Failed to load image from buffer" );
     }
+    throw mapnik::image_reader_exception("Failed to load image from buffer" );
 }
 
 

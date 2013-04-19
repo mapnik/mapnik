@@ -23,6 +23,8 @@
 #ifndef MAPNIK_EXPRESSIONS_GRAMMAR_HPP
 #define MAPNIK_EXPRESSIONS_GRAMMAR_HPP
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 // mapnik
 #include <mapnik/value_types.hpp>
 #include <mapnik/unicode.hpp>

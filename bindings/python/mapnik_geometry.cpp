@@ -40,7 +40,7 @@
 #if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
-#include <mapnik/util/geometry_to_svg.hpp>
+//#include <mapnik/util/geometry_to_svg.hpp>
 #endif
 
 namespace {
@@ -229,7 +229,8 @@ std::string to_geojson( path_type const& geom)
 
 std::string to_svg( geometry_type const& geom)
 {
-#if BOOST_VERSION >= 104700
+
+#if 0 // BOOST_VERSION >= 104700
     std::string svg; // Use Python String directly ?
     bool result = mapnik::util::to_svg(svg,geom);
     if (!result)
@@ -280,7 +281,7 @@ void export_geometry()
 #endif
 
     using mapnik::geometry_type;
-    class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
+    class_<geometry_type, std::shared_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
         .def("envelope",&geometry_type::envelope)
         // .def("__str__",&geometry_type::to_string)
         .def("type",&geometry_type::type)

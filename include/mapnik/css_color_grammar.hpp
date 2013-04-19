@@ -23,6 +23,8 @@
 #ifndef MAPNIK_CSS_COLOR_GRAMMAR_HPP
 #define MAPNIK_CSS_COLOR_GRAMMAR_HPP
 
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+
 // mapnik
 #include <mapnik/color.hpp>
 
