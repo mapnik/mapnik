@@ -27,7 +27,7 @@
 #include <mapnik/palette.hpp>
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
-#include <mapnik/miniz_png.hpp>
+//#include <mapnik/miniz_png.hpp>
 #include <mapnik/image_data.hpp>
 
 // zlib
@@ -71,7 +71,8 @@ void save_as_png(T1 & file,
                 bool use_miniz = false)
 
 {
-    if (use_miniz)
+#if 0
+   if (use_miniz)
     {
         MiniZ::PNGWriter writer(compression,strategy);
         if (trans_mode == 0)
@@ -88,7 +89,7 @@ void save_as_png(T1 & file,
         writer.toStream(file);
         return;
     }
-
+#endif
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
@@ -262,6 +263,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
                  std::vector<unsigned> const&alpha,
                  bool use_miniz)
 {
+#if 0
     if (use_miniz)
     {
         MiniZ::PNGWriter writer(compression,strategy);
@@ -275,7 +277,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
         writer.toStream(file);
         return;
     }
-
+#endif
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
