@@ -1614,7 +1614,7 @@ if not preconfigured:
 
         if not env['SUNCC']:
             # Common flags for GCC.
-            gcc_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+            gcc_cxx_flags = '-Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
             if env['DEBUG']:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline')
             else:
