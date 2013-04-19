@@ -30,8 +30,10 @@
 #define MINIZ_NO_ARCHIVE_APIS
 #define MINIZ_NO_STDIO
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
-#include "miniz.c"
 
+extern "C" {
+#include "miniz.c"
+}
 // zlib
 #include <zlib.h>
 
@@ -142,7 +144,10 @@ void PNGWriter::finishChunk(size_t start)
     // Write CRC32 checksum. Don't include the 4-byte length, but /do/ include
     // the 4-byte chunk name.
     mz_uint32 crc = mz_crc32(MZ_CRC32_INIT, buffer->m_pBuf + start + 4, payloadLength + 4);
-    mz_uint8 checksum[] = { crc >> 24, crc >> 16, crc >> 8, crc };
+    mz_uint8 checksum[] = { static_cast<mz_uint8>(crc >> 24),
+                            static_cast<mz_uint8>(crc >> 16),
+                            static_cast<mz_uint8>(crc >> 8),
+                            static_cast<mz_uint8>(crc) };
     mz_bool status = tdefl_output_buffer_putter(checksum, 4, buffer);
     if (status != MZ_TRUE)
     {
@@ -362,4 +367,3 @@ template void PNGWriter::writeIDATStripAlpha<image_data_32>(image_data_32 const&
 template void PNGWriter::writeIDATStripAlpha<image_view<image_data_32> >(image_view<image_data_32> const& image);
 
 }}
-
