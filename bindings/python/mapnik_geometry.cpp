@@ -40,7 +40,7 @@
 #if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
-//#include <mapnik/util/geometry_to_svg.hpp>
+#include <mapnik/util/geometry_to_svg.hpp>
 #endif
 
 namespace {
@@ -230,7 +230,7 @@ std::string to_geojson( path_type const& geom)
 std::string to_svg( geometry_type const& geom)
 {
 
-#if 0 // BOOST_VERSION >= 104700
+#if BOOST_VERSION >= 104700
     std::string svg; // Use Python String directly ?
     bool result = mapnik::util::to_svg(svg,geom);
     if (!result)
