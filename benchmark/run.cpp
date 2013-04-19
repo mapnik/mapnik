@@ -410,14 +410,11 @@ struct test8
 
 #include <mapnik/rule_cache.hpp>
 
-#if BOOST_VERSION >= 105300
-//#include <boost/container/vector.hpp>
-//#include <boost/move/utility.hpp>
-
 class rule_cache_move
 {
 private:
-    BOOST_MOVABLE_BUT_NOT_COPYABLE(rule_cache_move)
+    rule_cache_move(rule_cache_move const& other) = delete; // no copy ctor
+    rule_cache_move& operator=(rule_cache_move const& other) = delete; // no assignment op
 public:
     typedef std::vector<rule const*> rule_ptrs;
     rule_cache_move()
@@ -425,13 +422,13 @@ public:
        else_rules_(),
        also_rules_() {}
 
-    rule_cache_move(BOOST_RV_REF(rule_cache_move) rhs) // move ctor
-        :  if_rules_(boost::move(rhs.if_rules_)),
-           else_rules_(boost::move(rhs.else_rules_)),
-           also_rules_(boost::move(rhs.also_rules_))
+    rule_cache_move(rule_cache_move && rhs) // move ctor
+        :  if_rules_(std::move(rhs.if_rules_)),
+           else_rules_(std::move(rhs.else_rules_)),
+           also_rules_(std::move(rhs.also_rules_))
     {}
 
-    rule_cache_move& operator=(BOOST_RV_REF(rule_cache_move) rhs) // move assign
+    rule_cache_move& operator=(rule_cache_move && rhs) // move assign
     {
         std::swap(if_rules_, rhs.if_rules_);
         std::swap(else_rules_,rhs.else_rules_);
@@ -491,9 +488,11 @@ struct test9
       threads_(threads),
       num_rules_(num_rules),
       num_styles_(num_styles),
-      rules_() {
+      rules_()
+    {
           mapnik::rule r("test");
-          for (unsigned i=0;i<num_rules_;++i) {
+          for (unsigned i=0;i<num_rules_;++i)
+          {
               rules_.push_back(r);
           }
       }
@@ -505,19 +504,19 @@ struct test9
     void operator()()
     {
          for (unsigned i=0;i<iter_;++i) {
-             boost::container::vector<rule_cache_move> rule_caches;
-             for (unsigned i=0;i<num_styles_;++i) {
+             std::vector<rule_cache_move> rule_caches;
+             for (unsigned i=0;i<num_styles_;++i)
+             {
                  rule_cache_move rc;
-                 for (unsigned i=0;i<num_rules_;++i) {
+                 for (unsigned i=0;i<num_rules_;++i)
+                 {
                      rc.add_rule(rules_[i]);
                  }
-                 rule_caches.push_back(boost::move(rc));
+                 rule_caches.push_back(std::move(rc));
              }
          }
     }
 };
-
-#endif
 
 class rule_cache_heap
 {
@@ -860,9 +859,9 @@ int main( int argc, char** argv)
         {
 #if BOOST_VERSION >= 105300
             test9 runner(1000,10,200,50);
-            benchmark(runner,"rule caching using boost::move");
+            benchmark(runner,"rule caching using move semantics");
 #else
-            std::clog << "not running: 'rule caching using boost::move'\n";
+            std::clog << "not running: 'rule caching using move semantics'\n";
 #endif
         }
 
