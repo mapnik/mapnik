@@ -170,12 +170,9 @@ namespace mapnik { namespace util {
                 ;
 
             svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit("d=\"") << lit('M')
-                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ] ])
+                          | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ].else_[_1 =""]])
                          << lit(' ') << coordinate << lit(' ') << coordinate) % lit(' ')
                 ;
-
-
-
         }
         // rules
         karma::rule<OutputIterator, geometry_type const& ()> svg;
