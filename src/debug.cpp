@@ -136,7 +136,7 @@ void logger::use_file(std::string const& filepath)
         else
         {
             std::stringstream s;
-            s << "cannot redirect log to file " << file_output_;
+            s << "cannot redirect log to file " << file_name_;
             throw std::runtime_error(s.str());
         }
     }
