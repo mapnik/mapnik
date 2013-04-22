@@ -21,7 +21,9 @@ for cpp_test in glob.glob('*_test.cpp'):
     name = cpp_test.replace('.cpp','-bin')
     source_files = [cpp_test]
     test_program = None
-    if 'agg_blend_src_over_test' in cpp_test:
+    # enable for faster compile while developing just this test
+    #if 'agg_blend_src_over_test' in cpp_test:
+    if False:
         # customization here for faster compile
         agg_env = Environment(ENV=os.environ)
         agg_env['CXX'] = env['CXX']

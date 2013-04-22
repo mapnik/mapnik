@@ -53,7 +53,7 @@ files = [
     {'name': "marker-on-line-spacing-eq-width-overlap", 'sizes':[(600,400)]},
     {'name': "marker_line_placement_on_points"},
     {'name': "marker-with-background-image", 'sizes':[(600,400),(400,600),(257,256)]},
-    {'name': "marker-with-background-image-and-hsla-transform", 'sizes':[(600,400),(400,600),(257,256)]},
+    #{'name': "marker-with-background-image-and-hsla-transform", 'sizes':[(600,400),(400,600),(257,256)]},
     {'name': "marker-on-hex-grid", 'sizes':[(600,400),(400,600),(257,256)]},
     {'name': "whole-centroid", 'sizes':[(600,400)],
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
@@ -159,7 +159,7 @@ class Reporting:
         print "\nVisual rendering: %s failed / %s passed" % (len(self.errors), self.passed)
         for idx, error in enumerate(self.errors):
             if error[0] == self.OTHER:
-                print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s" % error[3]
+                print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s" % error[2]
             elif error[0] == self.NOT_FOUND:
                 if self.generate:
                     print str(idx+1) + ") Generating reference image: '%s'" % error[2]

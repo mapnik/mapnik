@@ -40,7 +40,7 @@ public:
     {
         const char* what() const throw()
         {
-            return "uknown object type";
+            return "unknown object type";
         }
     };
     static product_type* on_unknown_type(const key_type&)

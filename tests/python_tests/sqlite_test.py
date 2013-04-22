@@ -379,6 +379,27 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         eq_(feat['OGC_FID'],2)
         eq_(feat['bigint'],922337203685477580)
 
+
+    @raises(StopIteration)
+    def test_null_id_field():
+        # form up an in-memory test db
+        wkb = '010100000000000000000000000000000000000000'
+        # note: the osm_id should be declared INTEGER PRIMARY KEY
+        # but in this case we intentionally do not make this a valid pkey
+        # otherwise sqlite would turn the null into a valid, serial id
+        ds = mapnik.SQLite(file=':memory:',
+            table='test1',
+            initdb='''
+                create table test1 (osm_id INTEGER,geometry BLOB);
+                insert into test1 values (null,x'%s');
+                ''' % wkb,
+            extent='-180,-60,180,60',
+            use_spatial_index=False,
+            key_field='osm_id'
+        )
+        fs = ds.featureset()
+        feat = fs.next() ## should throw since key_field is null: StopIteration: No more features.
+
 if __name__ == "__main__":
     setup()
     [eval(run)() for run in dir() if 'test_' in run]
