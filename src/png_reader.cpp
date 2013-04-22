@@ -110,7 +110,7 @@ void png_reader<T>::png_read_data(png_structp png_ptr, png_bytep data, png_size_
 {
     ifstream * fin = reinterpret_cast<ifstream*>(png_get_io_ptr(png_ptr));
     fin->read(reinterpret_cast<char*>(data), length);
-    if (fin->gcount() != length)
+    if (fin->gcount() != static_cast<std::streamsize>(length))
     {
         png_error(png_ptr, "Read Error");
     }
