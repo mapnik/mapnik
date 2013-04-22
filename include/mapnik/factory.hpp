@@ -47,7 +47,7 @@ private:
     product_map map_;
 public:
 
-    bool register_product(const key_type& key, product_creator creator)
+    bool register_product(key_type const& key, product_creator creator)
     {
         return map_.insert(typename product_map::value_type(key,creator)).second;
     }
@@ -57,7 +57,7 @@ public:
         return map_.erase(key)==1;
     }
 
-    product_type* create_object(const key_type& key, Args...args)
+    product_type* create_object(key_type const& key, Args...args)
     {
         typename product_map::const_iterator pos=map_.find(key);
         if (pos!=map_.end())
