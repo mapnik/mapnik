@@ -27,13 +27,16 @@
 #include <mapnik/image_data.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/noncopyable.hpp>
-
+#include <mapnik/factory.hpp>
+// boost
+#include <boost/optional.hpp>
 // stl
 #include <stdexcept>
 #include <string>
 
 namespace mapnik
 {
+
 class image_reader_exception : public std::exception
 {
 private:
@@ -60,8 +63,11 @@ struct MAPNIK_DECL image_reader : private mapnik::noncopyable
 };
 
 bool register_image_reader(std::string const& type,image_reader* (*)(std::string const&));
+bool register_image_reader(std::string const& type,image_reader* (*)(char const*, std::size_t));
+
 MAPNIK_DECL image_reader* get_image_reader(std::string const& file,std::string const& type);
 MAPNIK_DECL image_reader* get_image_reader(std::string const& file);
+MAPNIK_DECL image_reader* get_image_reader(char const* data, size_t size);
 
 }
 
