@@ -69,16 +69,14 @@ public:
 
 struct put_property
 {
-    template <typename T0,typename T1, typename T2>
-    struct result
-    {
-        typedef void type;
-    };
+
+    typedef void result_type;
+
     explicit put_property(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
     template <typename T0,typename T1, typename T2>
-    void operator() (T0 & feature, T1 const& key, T2 const& val) const
+    result_type operator() (T0 & feature, T1 const& key, T2 const& val) const
     {
         mapnik::value v = boost::apply_visitor(attribute_value_visitor(tr_),val); // TODO: optimize
         feature.put_new(key, v);
@@ -89,14 +87,10 @@ struct put_property
 
 struct extract_geometry
 {
-    template <typename T>
-    struct result
-    {
-        typedef boost::ptr_vector<mapnik::geometry_type>& type;
-    };
+    typedef  boost::ptr_vector<mapnik::geometry_type>& result_type;
 
     template <typename T>
-    boost::ptr_vector<mapnik::geometry_type>& operator() (T & feature) const
+    result_type operator() (T & feature) const
     {
         return feature.paths();
     }
@@ -104,8 +98,8 @@ struct extract_geometry
 
 template <typename Iterator, typename FeatureType>
 struct feature_grammar :
-    qi::grammar<Iterator, void(FeatureType&),
-                space_type>
+        qi::grammar<Iterator, void(FeatureType&),
+        space_type>
 {
     feature_grammar(mapnik::transcoder const& tr);
 

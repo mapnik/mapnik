@@ -41,14 +41,10 @@ using standard_wide::space_type;
 
 struct push_vertex
 {
-    template <typename T0,typename T1, typename T2, typename T3>
-    struct result
-    {
-        typedef void type;
-    };
+    typedef void result_type;
 
     template <typename T0,typename T1, typename T2, typename T3>
-    void operator() (T0 c, T1 path, T2 x, T3 y) const
+    result_type operator() (T0 c, T1 path, T2 x, T3 y) const
     {
         BOOST_ASSERT( path!=0 );
         path->push_vertex(x,y,c);
@@ -57,14 +53,10 @@ struct push_vertex
 
 struct close_path
 {
-    template <typename T>
-    struct result
-    {
-        typedef void type;
-    };
+    typedef void result_type;
 
     template <typename T>
-    void operator() (T path) const
+    result_type operator() (T path) const
     {
         BOOST_ASSERT( path!=0 );
         path->close_path();
@@ -73,12 +65,7 @@ struct close_path
 
 struct cleanup
 {
-    template <typename T0>
-    struct result
-    {
-        typedef void type;
-    };
-
+    typedef void result_type;
     template <typename T0>
     void operator() (T0 & path) const
     {
@@ -89,7 +76,7 @@ struct cleanup
 template <typename Iterator>
 struct geometry_grammar :
         qi::grammar<Iterator,qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& )
-                   , space_type>
+        , space_type>
 {
     geometry_grammar();
     qi::rule<Iterator, qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& ),space_type> geometry;

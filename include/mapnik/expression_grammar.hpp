@@ -47,11 +47,7 @@ using standard_wide::space_type;
 
 struct unicode_impl
 {
-    template <typename T>
-    struct result
-    {
-        typedef UnicodeString type;
-    };
+    typedef UnicodeString result_type;
 
     explicit unicode_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
@@ -66,34 +62,27 @@ struct unicode_impl
 
 struct regex_match_impl
 {
-    template <typename T0, typename T1>
-    struct result
-    {
-        typedef expr_node type;
-    };
+
+    typedef expr_node result_type;
 
     explicit regex_match_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
     template <typename T0,typename T1>
-    expr_node operator() (T0 & node, T1 const& pattern) const;
+    result_type operator() (T0 & node, T1 const& pattern) const;
 
     mapnik::transcoder const& tr_;
 };
 
 struct regex_replace_impl
 {
-    template <typename T0, typename T1, typename T2>
-    struct result
-    {
-        typedef expr_node type;
-    };
+    typedef expr_node result_type;
 
     explicit regex_replace_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
     template <typename T0,typename T1,typename T2>
-    expr_node operator() (T0 & node, T1 const& pattern, T2 const& format) const;
+    result_type operator() (T0 & node, T1 const& pattern, T2 const& format) const;
 
     mapnik::transcoder const& tr_;
 };

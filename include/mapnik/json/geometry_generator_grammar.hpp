@@ -60,10 +60,8 @@ namespace {
 
 struct get_type
 {
-    template <typename T>
-    struct result { typedef int type; };
-
-    int operator() (geometry_type const& geom) const
+    typedef int result_type;
+    result_type operator() (geometry_type const& geom) const
     {
         return static_cast<int>(geom.type());
     }
@@ -71,10 +69,8 @@ struct get_type
 
 struct get_first
 {
-    template <typename T>
-    struct result { typedef geometry_type::value_type const type; };
-
-    geometry_type::value_type const operator() (geometry_type const& geom) const
+    typedef geometry_type::value_type const result_type;
+    result_type operator() (geometry_type const& geom) const
     {
         geometry_type::value_type coord;
         boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
@@ -84,10 +80,8 @@ struct get_first
 
 struct multi_geometry_type
 {
-    template <typename T>
-    struct result { typedef boost::tuple<unsigned,bool> type; };
-
-    boost::tuple<unsigned,bool> operator() (geometry_container const& geom) const
+    typedef boost::tuple<unsigned,bool>  result_type;
+    result_type operator() (geometry_container const& geom) const
     {
         unsigned type = 0u;
         bool collection = false;
@@ -132,7 +126,7 @@ struct json_coordinate_policy : karma::real_policies<T>
 
     template <typename OutputIterator>
     static bool fraction_part(OutputIterator& sink, T n
-                       , unsigned adjprec, unsigned precision)
+                              , unsigned adjprec, unsigned precision)
     {
         if (n == 0) return true;
         return base_type::fraction_part(sink, n, adjprec, precision);

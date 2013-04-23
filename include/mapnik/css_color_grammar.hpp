@@ -23,10 +23,10 @@
 #ifndef MAPNIK_CSS_COLOR_GRAMMAR_HPP
 #define MAPNIK_CSS_COLOR_GRAMMAR_HPP
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 // mapnik
 #include <mapnik/color.hpp>
+
+#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 // spirit2
 #include <boost/spirit/include/qi.hpp>
@@ -99,13 +99,9 @@ inline int clip_int(int val)
 
 struct percent_conv_impl
 {
-    template <typename T>
-    struct result
-    {
-        typedef unsigned type;
-    };
+    typedef unsigned result_type;
 
-    unsigned operator() (double val) const
+    result_type operator() (double val) const
     {
         return clip_int<0,255>(int((255.0 * val)/100.0 + 0.5));
     }
@@ -113,13 +109,9 @@ struct percent_conv_impl
 
 struct alpha_conv_impl
 {
-    template <typename T>
-    struct result
-    {
-        typedef unsigned type;
-    };
+    typedef unsigned result_type;
 
-    unsigned operator() (double val) const
+    result_type operator() (double val) const
     {
         return clip_int<0,255>(int((255.0 * val) + 0.5));
     }
@@ -127,14 +119,10 @@ struct alpha_conv_impl
 
 struct hsl_conv_impl
 {
-    template<typename T0,typename T1, typename T2, typename T3>
-    struct result
-    {
-        typedef void type;
-    };
+    typedef void result_type;
 
     template <typename T0,typename T1, typename T2, typename T3>
-    void operator() (T0 & c, T1 h, T2 s, T3 l) const
+    result_type operator() (T0 & c, T1 h, T2 s, T3 l) const
     {
         double m1,m2;
         // normalize values

@@ -96,10 +96,8 @@ namespace mapnik { namespace util {
     template <typename Geometry>
     struct get_type
     {
-        template <typename T>
-        struct result { typedef int type; };
-
-        int operator() (Geometry const& geom) const
+        typedef int result_type;
+        result_type operator() (Geometry const& geom) const
         {
             return static_cast<int>(geom.type());
         }
@@ -109,11 +107,8 @@ namespace mapnik { namespace util {
     struct get_first
     {
         typedef T geometry_type;
-
-        template <typename U>
-        struct result { typedef typename geometry_type::value_type const type; };
-
-        typename geometry_type::value_type const operator() (geometry_type const& geom) const
+        typedef typename geometry_type::value_type const result_type;
+        result_type const operator() (geometry_type const& geom) const
         {
             typename geometry_type::value_type coord;
             geom.rewind(0);
