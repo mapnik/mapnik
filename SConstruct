@@ -1179,7 +1179,7 @@ if not preconfigured:
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
         env.AppendUnique(LIBPATH = os.path.realpath(lib_path))
     else:
-        env['SKIPPED_DEPS'].extend(['png'])
+        env['SKIPPED_DEPS'].extend(['webp'])
 
 
     if env['TIFF']:
