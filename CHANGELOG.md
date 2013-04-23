@@ -68,6 +68,8 @@ For a complete change history, see the git log.
   now the combined layer extents will be again respected: they will be clipped to the maximum-extent if possible
   and only when back-projecting fails for all layers will the maximum-extent be used as a fallback (#1473)
 
+- Compile time flag to allow input datasource plugins to be statically linked with the mapnik library (#249)
+
 ## Mapnik 2.1.0
 
 Released Aug 23, 2012

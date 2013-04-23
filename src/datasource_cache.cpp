@@ -38,6 +38,8 @@
 
 namespace mapnik {
 
+extern datasource_ptr create_static_datasource(parameters const& params);
+
 bool is_input_plugin(std::string const& filename)
 {
     return boost::algorithm::ends_with(filename,std::string(".input"));
@@ -62,13 +64,23 @@ datasource_ptr datasource_cache::create(parameters const& params)
                            "parameter 'type' is missing");
     }
 
+    datasource_ptr ds;
+
+#ifdef MAPNIK_STATIC_PLUGINS
+    // return if it's created, raise otherwise
+    ds = create_static_datasource(params);
+    if (ds)
+    {
+        return ds;
+    }
+#endif
+
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
 
-    datasource_ptr ds;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
-    if ( itr == plugins_.end() )
+    if (itr == plugins_.end())
     {
         std::string s("Could not create datasource for type: '");
         s += *type + "'";
@@ -83,7 +95,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
         throw config_error(s);
     }
 
-    if (!itr->second->valid())
+    if (! itr->second->valid())
     {
         throw std::runtime_error(std::string("Cannot load library: ") +
                                  itr->second->get_error());
@@ -95,13 +107,19 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #endif
         create_ds* create_datasource = reinterpret_cast<create_ds*>(itr->second->get_symbol("create"));
 
-    if (!create_datasource)
+    if (! create_datasource)
     {
         throw std::runtime_error(std::string("Cannot load symbols: ") +
                                  itr->second->get_error());
     }
 
+    ds = datasource_ptr(create_datasource(params), datasource_deleter());
+
 #ifdef MAPNIK_LOG
+    MAPNIK_LOG_DEBUG(datasource_cache)
+        << "datasource_cache: Datasource="
+        << ds << " type=" << type;
+
     MAPNIK_LOG_DEBUG(datasource_cache)
         << "datasource_cache: Size="
         << params.size();
@@ -115,12 +133,6 @@ datasource_ptr datasource_cache::create(parameters const& params)
     }
 #endif
 
-    ds = datasource_ptr(create_datasource(params), datasource_deleter());
-
-    MAPNIK_LOG_DEBUG(datasource_cache)
-        << "datasource_cache: Datasource="
-        << ds << " type=" << type;
-
     return ds;
 }
 
@@ -133,7 +145,7 @@ std::vector<std::string> datasource_cache::plugin_names()
 {
     std::vector<std::string> names;
     std::map<std::string,boost::shared_ptr<PluginInfo> >::const_iterator itr;
-    for (itr = plugins_.begin();itr!=plugins_.end();++itr)
+    for (itr = plugins_.begin(); itr != plugins_.end(); ++itr)
     {
         names.push_back(itr->first);
     }
@@ -145,6 +157,7 @@ void datasource_cache::register_datasources(std::string const& str)
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
+
     boost::filesystem::path path(str);
     // TODO - only push unique paths
     plugin_directories_.push_back(str);
@@ -152,24 +165,24 @@ void datasource_cache::register_datasources(std::string const& str)
 
     if (exists(path) && is_directory(path))
     {
-        for (boost::filesystem::directory_iterator itr(path);itr!=end_itr;++itr )
+        for (boost::filesystem::directory_iterator itr(path); itr != end_itr; ++itr )
         {
 
 #if (BOOST_FILESYSTEM_VERSION == 3)
-            if (!is_directory( *itr )  && is_input_plugin(itr->path().filename().string()))
+            if (! is_directory(*itr) && is_input_plugin(itr->path().filename().string()))
 #else // v2
-                if (!is_directory( *itr )  && is_input_plugin(itr->path().leaf()))
+            if (! is_directory(*itr) && is_input_plugin(itr->path().leaf()))
+#endif
+            {
+#if (BOOST_FILESYSTEM_VERSION == 3)
+                if (register_datasource(itr->path().string()))
+#else // v2
+                if (register_datasource(itr->string()))
 #endif
                 {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                    if (register_datasource(itr->path().string()))
-#else // v2
-                    if (register_datasource(itr->string()))
-#endif
-                    {
-                        registered_ = true;
-                    }
+                    registered_ = true;
                 }
+            }
         }
     }
 }
@@ -206,9 +219,9 @@ bool datasource_cache::register_datasource(std::string const& filename)
     }
     catch (std::exception const& ex)
     {
-            MAPNIK_LOG_ERROR(datasource_cache)
-                    << "Exception caught while loading plugin library: "
-                    << filename << " (" << ex.what() << ")";
+        MAPNIK_LOG_ERROR(datasource_cache)
+                << "Exception caught while loading plugin library: "
+                << filename << " (" << ex.what() << ")";
     }
     return success;
 }

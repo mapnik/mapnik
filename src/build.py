@@ -124,6 +124,7 @@ source = Split(
     box2d.cpp
     building_symbolizer.cpp
     datasource_cache.cpp
+    datasource_cache_static.cpp
     debug.cpp
     deepcopy.cpp
     expression_node.cpp
@@ -207,6 +208,28 @@ source = Split(
     """
     )
 
+if env['PLUGIN_LINKING'] == 'static':
+    lib_env.Append(CPPDEFINES = '-DMAPNIK_STATIC_PLUGINS')
+    for plugin in env['REQUESTED_PLUGINS']:
+        details = env['PLUGINS'][plugin]
+        if details['lib'] in env['LIBS'] or not details['lib']:
+            lib_env.Append(CPPDEFINES = '-DMAPNIK_STATIC_PLUGIN_%s' % plugin.upper())
+            plugin_env = SConscript('../plugins/input/%s/build.py' % plugin)
+            if plugin_env.has_key('SOURCES') and plugin_env['SOURCES']:
+                source += ['../plugins/input/%s/%s' % (plugin, src) for src in plugin_env['SOURCES']]
+            if plugin_env.has_key('CPPDEFINES') and plugin_env['CPPDEFINES']:
+                lib_env.AppendUnique(CPPDEFINES=plugin_env['CPPDEFINES'])
+            if plugin_env.has_key('CXXFLAGS') and plugin_env['CXXFLAGS']:
+                lib_env.AppendUnique(CXXFLAGS=plugin_env['CXXFLAGS'])
+            if plugin_env.has_key('LINKFLAGS') and plugin_env['LINKFLAGS']:
+                lib_env.AppendUnique(LINKFLAGS=plugin_env['LINKFLAGS'])
+            if plugin_env.has_key('CPPPATH') and plugin_env['CPPPATH']:
+                lib_env.AppendUnique(CPPPATH=copy(plugin_env['CPPPATH']))
+            if plugin_env.has_key('LIBS') and plugin_env['LIBS']:
+                lib_env.AppendUnique(LIBS=plugin_env['LIBS'])
+        else:
+            print("Notice: dependencies not met for plugin '%s', not building..." % plugin)
+            
 if env['HAS_CAIRO']:
     lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])
     lib_env.Append(LIBS=env['CAIRO_LINKFLAGS'])
