@@ -17,7 +17,7 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/feature_style_processor.hpp>
-#include <boost/foreach.hpp>
+
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
@@ -100,7 +100,7 @@ int main( int, char*[] )
         mapnik::projection map_proj(m.srs(),true);
         double scale_denom = mapnik::scale_denominator(req.scale(),map_proj.is_geographic());
         scale_denom *= scale_factor;
-        BOOST_FOREACH ( mapnik::layer const& lyr, m.layers() )
+        for (mapnik::layer const& lyr : m.layers() )
         {
             if (lyr.visible(scale_denom))
             {

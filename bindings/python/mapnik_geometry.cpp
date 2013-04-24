@@ -104,7 +104,7 @@ mapnik::box2d<double> envelope_impl(path_type & p)
 {
     mapnik::box2d<double> b;
     bool first = true;
-    BOOST_FOREACH(mapnik::geometry_type const& geom, p)
+    for (mapnik::geometry_type const& geom : p)
     {
         if (first)
         {

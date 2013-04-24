@@ -410,69 +410,6 @@ struct test8
 
 #include <mapnik/rule_cache.hpp>
 
-class rule_cache_move
-{
-private:
-    rule_cache_move(rule_cache_move const& other) = delete; // no copy ctor
-    rule_cache_move& operator=(rule_cache_move const& other) = delete; // no assignment op
-public:
-    typedef std::vector<rule const*> rule_ptrs;
-    rule_cache_move()
-     : if_rules_(),
-       else_rules_(),
-       also_rules_() {}
-
-    rule_cache_move(rule_cache_move && rhs) // move ctor
-        :  if_rules_(std::move(rhs.if_rules_)),
-           else_rules_(std::move(rhs.else_rules_)),
-           also_rules_(std::move(rhs.also_rules_))
-    {}
-
-    rule_cache_move& operator=(rule_cache_move && rhs) // move assign
-    {
-        std::swap(if_rules_, rhs.if_rules_);
-        std::swap(else_rules_,rhs.else_rules_);
-        std::swap(also_rules_, rhs.also_rules_);
-        return *this;
-   }
-
-    void add_rule(rule const& r)
-    {
-        if (r.has_else_filter())
-        {
-            else_rules_.push_back(&r);
-        }
-        else if (r.has_also_filter())
-        {
-            also_rules_.push_back(&r);
-        }
-        else
-        {
-            if_rules_.push_back(&r);
-        }
-    }
-
-    rule_ptrs const& get_if_rules() const
-    {
-        return if_rules_;
-    }
-
-    rule_ptrs const& get_else_rules() const
-    {
-        return else_rules_;
-    }
-
-    rule_ptrs const& get_also_rules() const
-    {
-        return also_rules_;
-    }
-
-private:
-    rule_ptrs if_rules_;
-    rule_ptrs else_rules_;
-    rule_ptrs also_rules_;
-};
-
 struct test9
 {
     unsigned iter_;
@@ -504,10 +441,10 @@ struct test9
     void operator()()
     {
          for (unsigned i=0;i<iter_;++i) {
-             std::vector<rule_cache_move> rule_caches;
+             std::vector<rule_cache> rule_caches;
              for (unsigned i=0;i<num_styles_;++i)
              {
-                 rule_cache_move rc;
+                 rule_cache rc;
                  for (unsigned i=0;i<num_rules_;++i)
                  {
                      rc.add_rule(rules_[i]);
@@ -516,52 +453,6 @@ struct test9
              }
          }
     }
-};
-
-class rule_cache_heap
-{
-public:
-    typedef std::vector<rule const*> rule_ptrs;
-    rule_cache_heap()
-     : if_rules_(),
-       else_rules_(),
-       also_rules_() {}
-
-    void add_rule(rule const& r)
-    {
-        if (r.has_else_filter())
-        {
-            else_rules_.push_back(&r);
-        }
-        else if (r.has_also_filter())
-        {
-            also_rules_.push_back(&r);
-        }
-        else
-        {
-            if_rules_.push_back(&r);
-        }
-    }
-
-    rule_ptrs const& get_if_rules() const
-    {
-        return if_rules_;
-    }
-
-    rule_ptrs const& get_else_rules() const
-    {
-        return else_rules_;
-    }
-
-    rule_ptrs const& get_also_rules() const
-    {
-        return also_rules_;
-    }
-
-private:
-    rule_ptrs if_rules_;
-    rule_ptrs else_rules_;
-    rule_ptrs also_rules_;
 };
 
 struct test10
@@ -593,9 +484,9 @@ struct test10
     void operator()()
     {
          for (unsigned i=0;i<iter_;++i) {
-             std::vector<std::unique_ptr<rule_cache_heap> > rule_caches;
+             std::vector<std::unique_ptr<rule_cache> > rule_caches;
              for (unsigned i=0;i<num_styles_;++i) {
-                 std::unique_ptr<rule_cache_heap> rc(new rule_cache_heap);
+                 std::unique_ptr<rule_cache> rc(new rule_cache);
                  for (unsigned i=0;i<num_rules_;++i) {
                      rc->add_rule(rules_[i]);
                  }
@@ -646,8 +537,9 @@ struct test11
         ps.line_to(extent_.maxx(), extent_.maxy());
         ps.line_to(extent_.maxx(), extent_.miny());
         ps.close_polygon();
-        for (unsigned i=0;i<iter_;++i) {
-            BOOST_FOREACH( geometry_type & geom, paths)
+        for (unsigned i=0;i<iter_;++i)
+        {
+            for (geometry_type & geom : paths)
             {
                 poly_clipper clipped(geom,ps,
                     agg::clipper_and,
@@ -697,7 +589,7 @@ struct test12
         }
         for (unsigned i=0;i<iter_;++i)
         {
-            BOOST_FOREACH( geometry_type & geom, paths)
+            for ( geometry_type & geom : paths)
             {
                 poly_clipper clipped(extent_, geom);
                 unsigned cmd;
@@ -732,7 +624,7 @@ struct test13
         unsigned long count = 0;
         for (unsigned i=0;i<iter_;++i)
         {
-            BOOST_FOREACH( std::string const& name, mapnik::freetype_engine::face_names())
+            for ( std::string const& name : mapnik::freetype_engine::face_names())
             {
                 mapnik::face_ptr f = engine.create_face(name);
                 if (f) ++count;

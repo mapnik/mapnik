@@ -23,7 +23,7 @@
 // boost
 #include <boost/python.hpp>
 #include <boost/scoped_array.hpp>
-#include <boost/foreach.hpp>
+
 
 // mapnik
 #include <mapnik/map.hpp>
@@ -240,7 +240,7 @@ void write_features(T const& grid_type,
 
     std::set<std::string> const& attributes = grid_type.property_names();
     typename T::feature_type::const_iterator feat_end = g_features.end();
-    BOOST_FOREACH ( std::string const& key_item, key_order )
+    for ( std::string const& key_item :key_order )
     {
         if (key_item.empty())
         {
@@ -256,7 +256,7 @@ void write_features(T const& grid_type,
         bool found = false;
         boost::python::dict feat;
         mapnik::feature_ptr feature = feat_itr->second;
-        BOOST_FOREACH ( std::string const& attr, attributes )
+        for ( std::string const& attr : attributes )
         {
             if (attr == "__id__")
             {
@@ -300,7 +300,7 @@ void grid_encode_utf(T const& grid_type,
 
     // convert key order to proper python list
     boost::python::list keys_a;
-    BOOST_FOREACH ( typename T::lookup_type const& key_id, key_order )
+    for ( typename T::lookup_type const& key_id : key_order )
     {
         keys_a.append(key_id);
     }

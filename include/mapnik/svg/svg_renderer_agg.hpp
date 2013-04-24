@@ -31,7 +31,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/foreach.hpp>
+
 
 // agg
 #include "agg_path_storage.h"
@@ -138,7 +138,7 @@ public:
         grad.get_control_points(x1,y1,x2,y2,radius);
 
         m_gradient_lut.remove_all();
-        BOOST_FOREACH ( mapnik::stop_pair const& st, grad.get_stop_array() )
+        for ( mapnik::stop_pair const& st : grad.get_stop_array() )
         {
             mapnik::color const& stop_color = st.second;
             unsigned r = stop_color.red();

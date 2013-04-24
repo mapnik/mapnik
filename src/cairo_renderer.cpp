@@ -332,7 +332,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for ( geometry_type & geom : feature.paths())
     {
         if (geom.size() > 2)
         {
@@ -495,7 +495,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for (geometry_type & geom : feature.paths())
     {
         if (geom.size() > 1)
         {
@@ -869,7 +869,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for ( geometry_type & geom : feature.paths())
     {
         if (geom.size() > 2)
         {

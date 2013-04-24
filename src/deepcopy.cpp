@@ -44,7 +44,7 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/foreach.hpp>
+
 
 
 namespace mapnik { namespace util {
@@ -98,12 +98,12 @@ namespace mapnik { namespace util {
 
         // fontsets
         typedef std::map<std::string,font_set> fontsets;
-        BOOST_FOREACH ( fontsets::value_type const& kv,map_in.fontsets())
+        for (fontsets::value_type const& kv : map_in.fontsets())
         {
             map_out.insert_fontset(kv.first,kv.second);
         }
 
-        BOOST_FOREACH ( layer const& lyr_in, map_in.layers())
+        for ( layer const& lyr_in : map_in.layers())
         {
             layer lyr_out(lyr_in);
             datasource_ptr ds_in = lyr_in.datasource();
@@ -124,7 +124,7 @@ namespace mapnik { namespace util {
         typedef style_cont::value_type value_type;
 
         style_cont const& styles = map_in.styles();
-        BOOST_FOREACH ( value_type const& kv, styles )
+        for ( value_type const& kv : styles )
         {
             feature_type_style const& style_in = kv.second;
             feature_type_style style_out(style_in,true); // deep copy

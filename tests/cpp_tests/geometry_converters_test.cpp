@@ -68,7 +68,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
         throw std::runtime_error("Failed to parse WKT");
     }
 
-    BOOST_FOREACH( geometry_type & geom, p)
+    for (geometry_type & geom : p)
     {
         converter.apply(geom);
     }
@@ -108,7 +108,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
         throw std::runtime_error("Failed to parse WKT");
     }
 
-    BOOST_FOREACH( geometry_type & geom, p)
+    for (geometry_type & geom : p)
     {
         converter.apply(geom);
     }

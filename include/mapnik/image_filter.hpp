@@ -32,7 +32,7 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/gil/gil_all.hpp>
 #include <boost/concept_check.hpp>
-#include <boost/foreach.hpp>
+
 
 // agg
 #include "agg_basics.h"
@@ -417,7 +417,7 @@ void apply_filter(Src & src, colorize_alpha const& op)
 
     double step = 1.0/(size-1);
     double offset = 0.0;
-    BOOST_FOREACH( mapnik::filter::color_stop const& stop, op)
+    for ( mapnik::filter::color_stop const& stop : op)
     {
         mapnik::color const& c = stop.color;
         double stop_offset = stop.offset;

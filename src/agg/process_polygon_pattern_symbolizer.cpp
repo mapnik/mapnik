@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // boost
-#include <boost/foreach.hpp>
+
 
 // mapnik
 #include <mapnik/feature.hpp>
@@ -157,7 +157,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for ( geometry_type & geom : feature.paths())
     {
         if (geom.size() > 2)
         {

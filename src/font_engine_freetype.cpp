@@ -280,7 +280,7 @@ font_face_set::size_type font_face_set::size() const
 
 glyph_ptr font_face_set::get_glyph(unsigned c) const
 {
-    BOOST_FOREACH ( face_ptr const& face, faces_)
+    for ( face_ptr const& face : faces_)
     {
         FT_UInt g = face->get_char(c);
         if (g) return boost::make_shared<font_glyph>(face, g);
@@ -387,7 +387,7 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 
 void font_face_set::set_pixel_sizes(unsigned size)
 {
-    BOOST_FOREACH ( face_ptr const& face, faces_)
+    for ( face_ptr const& face : faces_)
     {
         face->set_pixel_sizes(size);
     }
@@ -395,7 +395,7 @@ void font_face_set::set_pixel_sizes(unsigned size)
 
 void font_face_set::set_character_sizes(double size)
 {
-    BOOST_FOREACH ( face_ptr const& face, faces_)
+    for ( face_ptr const& face : faces_)
     {
         face->set_character_sizes(size);
     }

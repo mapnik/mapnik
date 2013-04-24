@@ -490,7 +490,7 @@ void apply_markers_multi(feature_impl & feature, Converter& converter, markers_s
           // TODO: consider using true area for polygon types
           double maxarea = 0;
           geometry_type* largest = 0;
-          BOOST_FOREACH(geometry_type & geom, feature.paths())
+          for (geometry_type & geom : feature.paths())
           {
               const box2d<double>& env = geom.envelope();
               double area = env.width() * env.height();
@@ -511,7 +511,7 @@ void apply_markers_multi(feature_impl & feature, Converter& converter, markers_s
           {
               MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
           }
-          BOOST_FOREACH(geometry_type & path, feature.paths())
+          for (geometry_type & path : feature.paths())
           {
             converter.apply(path);
           }

@@ -31,7 +31,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
-#include <boost/foreach.hpp>
+
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/geometries.hpp>
 #include <boost/geometry.hpp>
@@ -123,7 +123,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
 
     bool first = true;
     std::size_t count=0;
-    BOOST_FOREACH (mapnik::feature_ptr f, features_)
+    for (mapnik::feature_ptr f : features_)
     {
         mapnik::box2d<double> const& box = f->envelope();
         if (first)

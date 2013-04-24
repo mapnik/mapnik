@@ -36,7 +36,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/foreach.hpp>
+
 
 //stl
 #include <string>
@@ -501,7 +501,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     // check the placement of any additional envelopes
     if (!p.allow_overlap && !additional_boxes_.empty())
     {
-        BOOST_FOREACH(box2d<double> const& box, additional_boxes_)
+        for (box2d<double> const& box : additional_boxes_)
         {
             box2d<double> pt(box.minx() + current_placement->center.x,
                              box.miny() + current_placement->center.y,

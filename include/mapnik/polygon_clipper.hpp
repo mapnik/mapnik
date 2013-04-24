@@ -31,7 +31,7 @@
 #include <mapnik/geometry.hpp>
 
 // boost
-#include <boost/foreach.hpp>
+
 #include <boost/tuple/tuple.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
@@ -189,10 +189,10 @@ private:
             std::cerr << ex.what() << std::endl;
         }
 
-        BOOST_FOREACH(polygon_2d const& poly, clipped_polygons)
+        for (polygon_2d const& poly : clipped_polygons)
         {
             bool move_to = true;
-            BOOST_FOREACH(point_2d const& c, boost::geometry::exterior_ring(poly))
+            for (point_2d const& c : boost::geometry::exterior_ring(poly))
             {
                 if (move_to)
                 {
@@ -206,10 +206,10 @@ private:
             }
             output_.close_path();
             // interior rings
-            BOOST_FOREACH(polygon_2d::inner_container_type::value_type const& ring, boost::geometry::interior_rings(poly))
+            for (polygon_2d::inner_container_type::value_type const& ring : boost::geometry::interior_rings(poly))
             {
                 move_to = true;
-                BOOST_FOREACH(point_2d const& c, ring)
+                for (point_2d const& c : ring)
                 {
                     if (move_to)
                     {

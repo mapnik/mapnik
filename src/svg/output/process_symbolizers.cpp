@@ -36,7 +36,7 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     // process each symbolizer to collect its (path) information.
     // path information (attributes from line_ and polygon_ symbolizers)
     // is collected with the path_attributes_ data member.
-    BOOST_FOREACH(symbolizer const& sym, syms)
+    for (symbolizer const& sym : syms)
     {
         boost::apply_visitor(symbol_dispatch(*this, feature, prj_trans), sym);
     }
