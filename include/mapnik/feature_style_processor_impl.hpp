@@ -401,9 +401,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     double filt_factor = 1.0;
     directive_collector d_collector(filt_factor);
 
-    std::vector<std::unique_ptr<rule_cache> > rule_caches;
-    //boost::ptr_vector<rule_cache> rule_caches;
-
+    std::vector<rule_cache> rule_caches;
     // iterate through all named styles collecting active styles and attribute names
     BOOST_FOREACH(std::string const& style_name, style_names)
     {
@@ -419,12 +417,12 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
         std::vector<rule> const& rules = style->get_rules();
         bool active_rules = false;
-        std::unique_ptr<rule_cache> rc_ptr(new rule_cache);
+        rule_cache cache;
         for (auto const& r : rules)
         {
             if (r.active(scale_denom))
             {
-                rc_ptr->add_rule(r);
+                cache.add_rule(r);
                 active_rules = true;
                 if (ds->type() == datasource::Vector)
                 {
@@ -435,7 +433,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
         if (active_rules)
         {
-            rule_caches.push_back(std::move(rc_ptr));
+            rule_caches.push_back(std::move(cache));
             active_styles.push_back(&(*style));
         }
     }
@@ -507,7 +505,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         int i = 0;
                         BOOST_FOREACH (feature_type_style const* style, active_styles)
                         {
-                            render_style(lay, p, style, *rule_caches[i], style_names[i],
+                            render_style(lay, p, style, rule_caches[i], style_names[i],
                                          cache.features(q), prj_trans);
                             i++;
                         }
@@ -520,7 +518,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 int i = 0;
                 BOOST_FOREACH (feature_type_style const* style, active_styles)
                 {
-                    render_style(lay, p, style, *rule_caches[i], style_names[i],
+                    render_style(lay, p, style, rule_caches[i], style_names[i],
                                  cache.features(q), prj_trans);
                     i++;
                 }
@@ -541,7 +539,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             int i = 0;
             BOOST_FOREACH (feature_type_style const* style, active_styles)
             {
-                render_style(lay, p, style, *rule_caches[i], style_names[i],
+                render_style(lay, p, style, rule_caches[i], style_names[i],
                              cache.features(q), prj_trans);
                 i++;
             }
@@ -552,7 +550,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             int i = 0;
             BOOST_FOREACH (feature_type_style const* style, active_styles)
             {
-                render_style(lay, p, style, *rule_caches[i], style_names[i],
+                render_style(lay, p, style, rule_caches[i], style_names[i],
                              ds->features(q), prj_trans);
                 i++;
             }

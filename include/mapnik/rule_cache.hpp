@@ -27,9 +27,6 @@
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
 
-// boost
-#include <boost/foreach.hpp>
-
 // stl
 #include <vector>
 
@@ -38,12 +35,29 @@ namespace mapnik
 
 class rule_cache
 {
+private:
+    rule_cache(rule_cache const& other) = delete; // no copy ctor
+    rule_cache& operator=(rule_cache const& other) = delete; // no assignment op
 public:
     typedef std::vector<rule const*> rule_ptrs;
     rule_cache()
         : if_rules_(),
           else_rules_(),
           also_rules_() {}
+
+    rule_cache(rule_cache && rhs) // move ctor
+        :  if_rules_(std::move(rhs.if_rules_)),
+           else_rules_(std::move(rhs.else_rules_)),
+           also_rules_(std::move(rhs.also_rules_))
+    {}
+
+    rule_cache& operator=(rule_cache && rhs) // move assign
+    {
+        std::swap(if_rules_, rhs.if_rules_);
+        std::swap(else_rules_,rhs.else_rules_);
+        std::swap(also_rules_, rhs.also_rules_);
+        return *this;
+    }
 
     void add_rule(rule const& r)
     {
