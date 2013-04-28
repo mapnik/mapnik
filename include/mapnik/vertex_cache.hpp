@@ -103,6 +103,7 @@ public:
 
     pixel_position const& current_position() const { return current_position_; }
     double angle(double width=0.);
+    double linear_position() const { return position_; }
 
 
     /** Returns a parallel line in the specified distance. */

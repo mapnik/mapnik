@@ -300,12 +300,21 @@ bool placement_finder::find_line_placements(T & path, bool points)
 
         double spacing = get_spacing(pp.length(), points ? 0. : layout_.width());
 
-        // first label should be placed at half the spacing
-        pp.forward(spacing/2);
+        horizontal_alignment_e halign = info_->properties.halign;
+        if (halign == H_LEFT)
+        {
+            //Don't move
+        } else if (halign == H_MIDDLE || halign == H_AUTO)
+        {
+            pp.forward(spacing/2);
+        } else if (halign == H_RIGHT)
+        {
+            pp.forward(pp.length());
+        }
         path_move_dx(pp);
         do
         {
-            tolerance_iterator tolerance_offset(info_->properties.label_position_tolerance * scale_factor_, spacing);
+            tolerance_iterator tolerance_offset(info_->properties.label_position_tolerance * scale_factor_, spacing); //TODO: Handle halign
             while (tolerance_offset.next())
             {
                 vertex_cache::scoped_state state(pp);
@@ -369,7 +378,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         vertex_cache &off_pp = pp.get_offseted(offset, sign*layout_.width());
         vertex_cache::scoped_state off_state(off_pp); //TODO: Remove this when a clean implementation in vertex_cache::get_offseted was done
 
-        if (!off_pp.move(sign * jalign_offset((*line_itr)->width()))) return false;
+        if (!off_pp.move(sign * jalign_offset((*line_itr)->width())-alignment_offset().x)) return false;
 
         double last_cluster_angle = 999;
         signed current_cluster = -1;

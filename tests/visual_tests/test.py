@@ -80,6 +80,7 @@ text_tests = [
     {'name': "text-bug1820+0", 'sizes':[(600, 300)], 'bbox':default_text_box},
     {'name': "text-bug1820+1", 'sizes':[(600, 300)], 'bbox':default_text_box},
     {'name': "text-expressionformat-color", 'sizes':[(800, 100)], 'bbox':default_text_box},
+    {'name': "text-halign", 'sizes': [(800,800)], 'bbox':default_text_box},
     # Disabled by default as the required font isn't shipped with mapnik
     #{'name': "text-malayalam", 'sizes':[(800, 100)], 'bbox':default_text_box},
 ]
