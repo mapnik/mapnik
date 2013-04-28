@@ -169,7 +169,7 @@ struct MAPNIK_DECL text_symbolizer_properties
     /** distance between repeated labels on a single geometry */
     double label_spacing;
     /** distance the label can be moved on the line to fit, if 0 the default is used */
-    unsigned label_position_tolerance;
+    double label_position_tolerance;
     bool avoid_edges;
     double minimum_distance;
     double minimum_padding;

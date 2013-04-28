@@ -98,13 +98,13 @@ IMPLEMENT_ENUM(text_upright_e, text_upright_strings)
 
 text_symbolizer_properties::text_symbolizer_properties() :
     orientation(),
-    displacement(0,0),
+    displacement(0.,0.),
     label_placement(POINT_PLACEMENT),
     halign(H_AUTO),
     jalign(J_AUTO),
     valign(V_AUTO),
-    label_spacing(0),
-    label_position_tolerance(0),
+    label_spacing(0.),
+    label_position_tolerance(0.),
     avoid_edges(false),
     minimum_distance(0.0),
     minimum_padding(0.0),
@@ -113,8 +113,8 @@ text_symbolizer_properties::text_symbolizer_properties() :
     force_odd_labels(false),
     allow_overlap(false),
     largest_bbox_only(true),
-    text_ratio(0),
-    wrap_width(0),
+    text_ratio(0.),
+    wrap_width(0.),
     wrap_before(false),
     rotate_displacement(false),
     upright(UPRIGHT_AUTO),
@@ -156,7 +156,7 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (wrap_width_) wrap_width = *wrap_width_;
     optional<boolean> wrap_before_ = sym.get_opt_attr<boolean>("wrap-before");
     if (wrap_before_) wrap_before = *wrap_before_;
-    optional<unsigned> label_position_tolerance_ = sym.get_opt_attr<unsigned>("label-position-tolerance");
+    optional<double> label_position_tolerance_ = sym.get_opt_attr<double>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
     optional<double> spacing_ = sym.get_opt_attr<double>("spacing");
     if (spacing_) label_spacing = *spacing_;
