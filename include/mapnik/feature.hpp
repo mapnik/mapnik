@@ -230,23 +230,23 @@ public:
     {
         // TODO - cache this
         box2d<double> result;
-	bool first = true;
-	for (auto const& geom : geom_cont_)
-	{
-	  if (first)
-	    {
-	      first = false;
-	      box2d<double> box = geom.envelope();
-	      result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
-	    }
-	  else
-	    {
-	      result.expand_to_include(geom.envelope()); 
-	    }
-	}
+        bool first = true;
+        for (auto const& geom : geom_cont_)
+        {
+            if (first)
+            {
+                first = false;
+                box2d<double> box = geom.envelope();
+                result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
+            }
+            else
+            {
+                result.expand_to_include(geom.envelope());
+            }
+        }
         return result;
     }
-    
+
     raster_ptr const& get_raster() const
     {
         return raster_;
