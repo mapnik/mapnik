@@ -264,11 +264,16 @@ int main ( int argc , char** argv)
         image_32 buf(m.width(),m.height());
         agg_renderer<image_32> ren(m,buf);
         ren.apply();
-
+#ifdef HAVE_JPEG
         save_to_file(buf,"demo.jpg","jpeg");
+#endif
+#ifdef HAVE_PNG
         save_to_file(buf,"demo.png","png");
         save_to_file(buf,"demo256.png","png8");
+#endif
+#ifdef HAVE_TIFF
         save_to_file(buf,"demo.tif","tiff");
+#endif
 
         std::cout << "Three maps have been rendered using AGG in the current directory:\n"
             "- demo.jpg\n"
