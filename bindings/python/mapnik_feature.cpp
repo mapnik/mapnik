@@ -48,7 +48,7 @@ using mapnik::context_type;
 using mapnik::context_ptr;
 using mapnik::feature_kv_iterator;
 
-mapnik::geometry_type const& (mapnik::Feature::*get_geometry_by_const_ref)(unsigned) const = &mapnik::Feature::get_geometry;
+mapnik::geometry_type const& (mapnik::Feature::*get_geometry_by_const_ref)(std::size_t) const = &mapnik::Feature::get_geometry;
 boost::ptr_vector<mapnik::geometry_type> const& (mapnik::Feature::*get_paths_by_const_ref)() const = &mapnik::Feature::paths;
 
 void feature_add_geometries_from_wkb(Feature &feature, std::string wkb)
