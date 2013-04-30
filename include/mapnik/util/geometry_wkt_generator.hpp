@@ -42,9 +42,7 @@
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
-
-#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
-
+#include <boost/math/special_functions/trunc.hpp> // for vc++
 
 namespace boost { namespace spirit { namespace traits {
 
@@ -153,9 +151,8 @@ struct wkt_coordinate_policy : karma::real_policies<T>
     static unsigned precision(T n)
     {
         if (n == 0.0) return 0;
-        return 6;
-        //using namespace boost::spirit; // for traits
-        //return std::max(6u, static_cast<unsigned>(15 - boost::math::trunc(log10(traits::get_absolute_value(n)))));
+        using namespace boost::spirit;
+        return static_cast<unsigned>(14 - boost::math::trunc(std::log10(traits::get_absolute_value(n))));
     }
 
     template <typename OutputIterator>

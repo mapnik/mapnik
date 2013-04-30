@@ -26,18 +26,19 @@
 // mapnik
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
-
+#include <mapnik/noncopyable.hpp>
 // stl
 #include <vector>
 
 namespace mapnik
 {
 
-class rule_cache
+class rule_cache : private noncopyable
 {
 private:
-    rule_cache(rule_cache const& other) = delete; // no copy ctor
-    rule_cache& operator=(rule_cache const& other) = delete; // no assignment op
+    //latest MS compiler (VC++ 2012 november CTP) doesn't support deleting functions
+    //rule_cache(rule_cache const& other) = delete; // no copy ctor
+    //rule_cache& operator=(rule_cache const& other) = delete; // no assignment op
 public:
     typedef std::vector<rule const*> rule_ptrs;
     rule_cache()
