@@ -211,17 +211,17 @@ public:
         geom_cont_.push_back(geom);
     }
 
-    unsigned num_geometries() const
+    std::size_t num_geometries() const
     {
         return geom_cont_.size();
     }
 
-    geometry_type const& get_geometry(unsigned index) const
+    geometry_type const& get_geometry(std::size_t index) const
     {
         return geom_cont_[index];
     }
 
-    geometry_type& get_geometry(unsigned index)
+    geometry_type& get_geometry(std::size_t index)
     {
         return geom_cont_[index];
     }
@@ -230,22 +230,23 @@ public:
     {
         // TODO - cache this
         box2d<double> result;
-        for (unsigned i=0;i<num_geometries();++i)
-        {
-            geometry_type const& geom = get_geometry(i);
-            if (i==0)
-            {
-                box2d<double> box = geom.envelope();
-                result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
-            }
-            else
-            {
-                result.expand_to_include(geom.envelope());
-            }
-        }
+	bool first = true;
+	for (auto const& geom : geom_cont_)
+	{
+	  if (first)
+	    {
+	      first = false;
+	      box2d<double> box = geom.envelope();
+	      result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
+	    }
+	  else
+	    {
+	      result.expand_to_include(geom.envelope()); 
+	    }
+	}
         return result;
     }
-
+    
     raster_ptr const& get_raster() const
     {
         return raster_;
