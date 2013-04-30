@@ -51,7 +51,7 @@ public:
 public:
     processed_text(face_manager<freetype_engine> & font_manager, double scale_factor);
     void push_back(char_properties const& properties, UnicodeString const& text);
-    unsigned size() const { return expr_list_.size(); }
+    std::size_t size() const { return expr_list_.size(); }
     unsigned empty() const { return expr_list_.empty(); }
     void clear();
     typedef std::list<processed_expression> expression_list;
