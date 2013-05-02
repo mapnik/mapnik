@@ -160,7 +160,7 @@ bool parse_reader(svg_parser & parser, xmlTextReaderPtr reader)
     catch (std::exception const& ex)
     {
         xmlFreeTextReader(reader);
-        throw;
+        throw ex;
     }
     xmlFreeTextReader(reader);
     if (ret != 0)
@@ -835,8 +835,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
     }
 
 
-    stop_color.set_alpha(opacity*255);
-
+    stop_color.set_alpha(static_cast<uint8_t>(opacity * 255));
     parser.temporary_gradient_.second.add_stop(offset, stop_color);
 
     /*

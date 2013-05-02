@@ -175,8 +175,8 @@ template <typename FaceManagerT, typename DetectorT>
 void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
 {
     bool largest_box_only = false;
-    unsigned num_geom = feature_.num_geometries();
-    for (unsigned i=0; i<num_geom; ++i)
+    std::size_t num_geom = feature_.num_geometries();
+    for (std::size_t i = 0; i < num_geom; ++i)
     {
         geometry_type const& geom = feature_.get_geometry(i);
 

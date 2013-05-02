@@ -65,7 +65,7 @@ box2d<T>::box2d(const box2d &rhs)
   }*/
 
 template <typename T>
-box2d<T>::box2d(const box2d_type &rhs, const agg::trans_affine& tr)
+box2d<T>::box2d(box2d_type const& rhs, const agg::trans_affine& tr)
 {
     double x0 = rhs.minx_, y0 = rhs.miny_;
     double x1 = rhs.maxx_, y1 = rhs.miny_;
@@ -75,9 +75,10 @@ box2d<T>::box2d(const box2d_type &rhs, const agg::trans_affine& tr)
     tr.transform(&x1, &y1);
     tr.transform(&x2, &y2);
     tr.transform(&x3, &y3);
-    init(x0, y0, x2, y2);
-    expand_to_include(x1, y1);
-    expand_to_include(x3, y3);
+    init(static_cast<T>(x0), static_cast<T>(y0),
+	 static_cast<T>(x2), static_cast<T>(y2));
+    expand_to_include(static_cast<T>(x1), static_cast<T>(y1));
+    expand_to_include(static_cast<T>(x3), static_cast<T>(y3));
 }
 
 template <typename T>
@@ -511,9 +512,10 @@ box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
     tr.transform(&x1, &y1);
     tr.transform(&x2, &y2);
     tr.transform(&x3, &y3);
-    init(x0, y0, x2, y2);
-    expand_to_include(x1, y1);
-    expand_to_include(x3, y3);
+    init(static_cast<T>(x0), static_cast<T>(y0), 
+	 static_cast<T>(x2), static_cast<T>(y2));
+    expand_to_include(static_cast<T>(x1), static_cast<T>(y1));
+    expand_to_include(static_cast<T>(x3), static_cast<T>(y3));
     return *this;
 }
 

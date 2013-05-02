@@ -139,8 +139,7 @@ void PNGWriter::finishChunk(size_t start)
 {
     // Write chunk length at the beginning of the chunk.
     size_t payloadLength = buffer->m_size - start - 4 - 4;
-    writeUInt32BE(buffer->m_pBuf + start, payloadLength);
-
+    writeUInt32BE(buffer->m_pBuf + start, static_cast<mz_uint32>(payloadLength));
     // Write CRC32 checksum. Don't include the 4-byte length, but /do/ include
     // the 4-byte chunk name.
     mz_uint32 crc = mz_crc32(MZ_CRC32_INIT, buffer->m_pBuf + start + 4, payloadLength + 4);

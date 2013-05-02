@@ -286,7 +286,7 @@ void placement_finder<DetectorT>::find_line_breaks()
         //No linebreaks
         line_sizes_.push_back(std::make_pair(string_width_, string_height_));
     }
-    line_breaks_.push_back(info_.num_characters());
+    line_breaks_.push_back(static_cast<unsigned>(info_.num_characters()));
 }
 
 template <typename DetectorT>
