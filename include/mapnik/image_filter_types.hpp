@@ -27,7 +27,6 @@
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 // boost
-#include <boost/variant.hpp>
 #include <boost/variant/variant_fwd.hpp>
 // stl
 #include <vector>
