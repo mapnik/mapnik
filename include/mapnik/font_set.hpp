@@ -38,7 +38,7 @@ public:
     font_set(std::string const& name);
     font_set(font_set const& rhs);
     font_set& operator=(font_set const& rhs);
-    unsigned size() const;
+    std::size_t size() const;
     void set_name(std::string const& name);
     std::string const& get_name() const;
     void add_face_name(std::string);

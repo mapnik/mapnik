@@ -48,14 +48,14 @@ font_set& font_set::operator=(font_set const& other)
 
 font_set::~font_set() {}
 
-unsigned font_set::size() const
+std::size_t font_set::size() const
 {
     return face_names_.size();
 }
 
 void font_set::add_face_name(std::string face_name)
 {
-    face_names_.push_back(face_name);
+    face_names_.push_back(std::move(face_name));
 }
 
 void font_set::set_name(std::string const& name)
