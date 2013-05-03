@@ -28,11 +28,22 @@
 #include <stdexcept>
 
 // boost
-#include <boost/tokenizer.hpp>
+// fusion
+#include <boost/fusion/include/adapt_adt.hpp>
+// spirit
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/support_adapt_adt_attributes.hpp>
 
 // agg
 #include "agg_trans_affine.h"
+
+BOOST_FUSION_ADAPT_TPL_ADT(
+    (T),
+    (mapnik::box2d)(T),
+    (T, T, obj.minx(), obj.set_minx(val))
+    (T, T, obj.miny(), obj.set_miny(val))
+    (T, T, obj.maxx(), obj.set_maxx(val))
+    (T, T, obj.maxy(), obj.set_maxy(val)))
 
 namespace mapnik
 {
@@ -58,11 +69,6 @@ box2d<T>::box2d(const box2d &rhs)
       miny_(rhs.miny_),
       maxx_(rhs.maxx_),
       maxy_(rhs.maxy_) {}
-// copy rather than init so dfl ctor (0,0,-1,-1) is not modified
-// https://github.com/mapnik/mapnik/issues/749
-/*{
-  init(rhs.minx_,rhs.miny_,rhs.maxx_,rhs.maxy_);
-  }*/
 
 template <typename T>
 box2d<T>::box2d(box2d_type const& rhs, const agg::trans_affine& tr)
@@ -76,7 +82,7 @@ box2d<T>::box2d(box2d_type const& rhs, const agg::trans_affine& tr)
     tr.transform(&x2, &y2);
     tr.transform(&x3, &y3);
     init(static_cast<T>(x0), static_cast<T>(y0),
-	 static_cast<T>(x2), static_cast<T>(y2));
+         static_cast<T>(x2), static_cast<T>(y2));
     expand_to_include(static_cast<T>(x1), static_cast<T>(y1));
     expand_to_include(static_cast<T>(x3), static_cast<T>(y3));
 }
@@ -381,49 +387,19 @@ void box2d<T>::pad(T padding)
     maxy_ += padding;
 }
 
+
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
-bool box2d<T>::from_string(std::string const& s)
+inline bool box2d<T>::from_string(std::string const& str)
 {
-    unsigned i = 0;
-    double d[4];
-    bool success = false;
-    boost::char_separator<char> sep(", ");
-    boost::tokenizer<boost::char_separator<char> > tok(s, sep);
-    for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
-         beg != tok.end(); ++beg)
-    {
-        std::string item = mapnik::util::trim_copy(*beg);
-        // note: we intentionally do not use mapnik::util::conversions::string2double
-        // here to ensure that shapeindex can statically compile mapnik::box2d without
-        // needing to link to libmapnik
-        std::string::const_iterator str_beg = item.begin();
-        std::string::const_iterator str_end = item.end();
-        bool r = boost::spirit::qi::phrase_parse(str_beg,
-                                                 str_end,
-                                                 boost::spirit::qi::double_,
-                                                 boost::spirit::ascii::space,
-                                                 d[i]);
-        if (!(r && (str_beg == str_end)))
-        {
-            break;
-        }
-        if (i == 3)
-        {
-            success = true;
-            break;
-        }
-        ++i;
-    }
-
-    if (success)
-    {
-        init(static_cast<T>(d[0]),static_cast<T>(d[1]),static_cast<T>(d[2]),static_cast<T>(d[3]));
-    }
-
-    return success;
+    using boost::spirit::qi::double_;
+    using boost::spirit::ascii::space;
+    bool r = boost::spirit::qi::phrase_parse(str.begin(),
+                                             str.end(),
+                                             double_ >> ',' >> double_ >> ','
+                                             >> double_ >> ',' >> double_,
+                                             space,
+                                             *this);
+    return r;
 }
 
 template <typename T>
@@ -512,8 +488,8 @@ box2d<T>& box2d<T>::operator*=(agg::trans_affine const& tr)
     tr.transform(&x1, &y1);
     tr.transform(&x2, &y2);
     tr.transform(&x3, &y3);
-    init(static_cast<T>(x0), static_cast<T>(y0), 
-	 static_cast<T>(x2), static_cast<T>(y2));
+    init(static_cast<T>(x0), static_cast<T>(y0),
+         static_cast<T>(x2), static_cast<T>(y2));
     expand_to_include(static_cast<T>(x1), static_cast<T>(y1));
     expand_to_include(static_cast<T>(x3), static_cast<T>(y3));
     return *this;
