@@ -317,7 +317,7 @@ void box2d<T>::pad(T padding)
 
 
 template <typename T>
-inline bool box2d<T>::from_string(std::string const& str)
+bool box2d<T>::from_string(std::string const& str)
 {
     using boost::spirit::qi::lit;
     using boost::spirit::qi::double_;
