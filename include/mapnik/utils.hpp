@@ -81,12 +81,8 @@ public:
         static MaxAlign staticMemory;
         return new(&staticMemory) T;
     }
-#ifdef __SUNPRO_CC
-    // Sun C++ Compiler doesn't handle `volatile` keyword same as GCC.
-    static void destroy(T* obj)
-#else
+
     static void destroy(volatile T* obj)
-#endif
     {
         obj->~T();
     }
@@ -95,15 +91,7 @@ public:
 template <typename T,
           template <typename U> class CreatePolicy=CreateStatic> class singleton
 {
-#ifdef __SUNPRO_CC
-    /* Sun's C++ compiler will issue the following errors if CreatePolicy<T> is used:
-       Error: A class template name was expected instead of mapnik::CreatePolicy<mapnik::T>
-       Error: A "friend" declaration must specify a class or function.
-    */
-    friend class CreatePolicy;
-#else
     friend class CreatePolicy<T>;
-#endif
     static T* pInstance_;
     static bool destroyed_;
     singleton(const singleton &rhs);
