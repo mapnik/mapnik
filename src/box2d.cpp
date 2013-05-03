@@ -88,9 +88,6 @@ box2d<T>::box2d(box2d_type const& rhs, const agg::trans_affine& tr)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 bool box2d<T>::operator==(const box2d<T>& other) const
 {
     return minx_==other.minx_ &&
@@ -100,36 +97,24 @@ bool box2d<T>::operator==(const box2d<T>& other) const
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 T box2d<T>::minx() const
 {
     return minx_;
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 T box2d<T>::maxx() const
 {
     return maxx_;
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 T box2d<T>::miny() const
 {
     return miny_;
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 T box2d<T>::maxy() const
 {
     return maxy_;
@@ -160,27 +145,18 @@ void box2d<T>::set_maxy(T v)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 T box2d<T>::width() const
 {
     return maxx_-minx_;
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 T box2d<T>::height() const
 {
     return maxy_-miny_;
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::width(T w)
 {
     T cx=center().x;
@@ -189,9 +165,6 @@ void box2d<T>::width(T w)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::height(T h)
 {
     T cy=center().y;
@@ -200,9 +173,6 @@ void box2d<T>::height(T h)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 coord<T,2> box2d<T>::center() const
 {
     return coord<T,2>(static_cast<T>(0.5*(minx_+maxx_)),
@@ -210,18 +180,12 @@ coord<T,2> box2d<T>::center() const
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::expand_to_include(const coord<T,2>& c)
 {
     expand_to_include(c.x,c.y);
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::expand_to_include(T x,T y)
 {
     if (x<minx_) minx_=x;
@@ -240,27 +204,18 @@ void box2d<T>::expand_to_include(const box2d<T> &other)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 bool box2d<T>::contains(const coord<T,2> &c) const
 {
     return contains(c.x,c.y);
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 bool box2d<T>::contains(T x,T y) const
 {
     return x>=minx_ && x<=maxx_ && y>=miny_ && y<=maxy_;
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 bool box2d<T>::contains(const box2d<T> &other) const
 {
     return other.minx_>=minx_ &&
@@ -270,27 +225,18 @@ bool box2d<T>::contains(const box2d<T> &other) const
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 bool box2d<T>::intersects(const coord<T,2> &c) const
 {
     return intersects(c.x,c.y);
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 bool box2d<T>::intersects(T x,T y) const
 {
     return !(x>maxx_ || x<minx_ || y>maxy_ || y<miny_);
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 bool box2d<T>::intersects(const box2d<T> &other) const
 {
     return !(other.minx_>maxx_ || other.maxx_<minx_ ||
@@ -298,9 +244,6 @@ bool box2d<T>::intersects(const box2d<T> &other) const
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 box2d<T> box2d<T>::intersect(const box2d_type& other) const
 {
     if (intersects(other)) {
@@ -317,9 +260,6 @@ box2d<T> box2d<T>::intersect(const box2d_type& other) const
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::re_center(T cx,T cy)
 {
     T dx=cx-center().x;
@@ -331,18 +271,12 @@ void box2d<T>::re_center(T cx,T cy)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::re_center(const coord<T,2> &c)
 {
     re_center(c.x,c.y);
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::init(T x0,T y0,T x1,T y1)
 {
     if (x0<x1)
@@ -364,9 +298,6 @@ void box2d<T>::init(T x0,T y0,T x1,T y1)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::clip(const box2d_type& other)
 {
     minx_ = std::max(minx_,other.minx());
@@ -376,9 +307,6 @@ void box2d<T>::clip(const box2d_type& other)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 void box2d<T>::pad(T padding)
 {
     minx_ -= padding;
@@ -403,9 +331,6 @@ inline bool box2d<T>::from_string(std::string const& str)
 }
 
 template <typename T>
-#if !defined(__SUNPRO_CC)
-inline
-#endif
 bool box2d<T>::valid() const
 {
     return (minx_ <= maxx_ && miny_ <= maxy_) ;
