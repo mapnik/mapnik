@@ -58,20 +58,44 @@ box2d<T>::box2d(T minx,T miny,T maxx,T maxy)
 }
 
 template <typename T>
-box2d<T>::box2d(const coord<T,2> &c0,const coord<T,2> &c1)
+box2d<T>::box2d(coord<T,2> const& c0, coord<T,2> const& c1)
 {
     init(c0.x,c0.y,c1.x,c1.y);
 }
 
 template <typename T>
-box2d<T>::box2d(const box2d &rhs)
+box2d<T>::box2d(box2d_type const& rhs)
     : minx_(rhs.minx_),
       miny_(rhs.miny_),
       maxx_(rhs.maxx_),
       maxy_(rhs.maxy_) {}
 
+
 template <typename T>
-box2d<T>::box2d(box2d_type const& rhs, const agg::trans_affine& tr)
+box2d<T>::box2d(box2d_type && rhs)
+    : minx_(std::move(rhs.minx_)),
+      miny_(std::move(rhs.miny_)),
+      maxx_(std::move(rhs.maxx_)),
+      maxy_(std::move(rhs.maxy_)) {}
+
+template <typename T>
+box2d<T>& box2d<T>::operator=(box2d_type other)
+{
+    swap(other);
+    return *this;
+}
+
+template <typename T>
+void box2d<T>::swap(box2d_type & other)
+{
+    std::swap(minx_, other.minx_);
+    std::swap(miny_, other.miny_);
+    std::swap(maxx_, other.maxx_);
+    std::swap(maxy_, other.maxy_);
+}
+
+template <typename T>
+box2d<T>::box2d(box2d_type const& rhs, agg::trans_affine const& tr)
 {
     double x0 = rhs.minx_, y0 = rhs.miny_;
     double x1 = rhs.maxx_, y1 = rhs.miny_;
@@ -88,7 +112,7 @@ box2d<T>::box2d(box2d_type const& rhs, const agg::trans_affine& tr)
 }
 
 template <typename T>
-bool box2d<T>::operator==(const box2d<T>& other) const
+bool box2d<T>::operator==(box2d<T> const& other) const
 {
     return minx_==other.minx_ &&
         miny_==other.miny_ &&
@@ -180,7 +204,7 @@ coord<T,2> box2d<T>::center() const
 }
 
 template <typename T>
-void box2d<T>::expand_to_include(const coord<T,2>& c)
+void box2d<T>::expand_to_include(coord<T,2> const& c)
 {
     expand_to_include(c.x,c.y);
 }
@@ -195,7 +219,7 @@ void box2d<T>::expand_to_include(T x,T y)
 }
 
 template <typename T>
-void box2d<T>::expand_to_include(const box2d<T> &other)
+void box2d<T>::expand_to_include(box2d<T> const& other)
 {
     if (other.minx_<minx_) minx_=other.minx_;
     if (other.maxx_>maxx_) maxx_=other.maxx_;
@@ -204,7 +228,7 @@ void box2d<T>::expand_to_include(const box2d<T> &other)
 }
 
 template <typename T>
-bool box2d<T>::contains(const coord<T,2> &c) const
+bool box2d<T>::contains(coord<T,2> const& c) const
 {
     return contains(c.x,c.y);
 }
@@ -216,7 +240,7 @@ bool box2d<T>::contains(T x,T y) const
 }
 
 template <typename T>
-bool box2d<T>::contains(const box2d<T> &other) const
+bool box2d<T>::contains(box2d<T> const& other) const
 {
     return other.minx_>=minx_ &&
         other.maxx_<=maxx_ &&
@@ -225,7 +249,7 @@ bool box2d<T>::contains(const box2d<T> &other) const
 }
 
 template <typename T>
-bool box2d<T>::intersects(const coord<T,2> &c) const
+bool box2d<T>::intersects(coord<T,2> const& c) const
 {
     return intersects(c.x,c.y);
 }
@@ -237,14 +261,14 @@ bool box2d<T>::intersects(T x,T y) const
 }
 
 template <typename T>
-bool box2d<T>::intersects(const box2d<T> &other) const
+bool box2d<T>::intersects(box2d<T> const& other) const
 {
     return !(other.minx_>maxx_ || other.maxx_<minx_ ||
              other.miny_>maxy_ || other.maxy_<miny_);
 }
 
 template <typename T>
-box2d<T> box2d<T>::intersect(const box2d_type& other) const
+box2d<T> box2d<T>::intersect(box2d_type const& other) const
 {
     if (intersects(other)) {
         T x0=std::max(minx_,other.minx_);
@@ -271,7 +295,7 @@ void box2d<T>::re_center(T cx,T cy)
 }
 
 template <typename T>
-void box2d<T>::re_center(const coord<T,2> &c)
+void box2d<T>::re_center(coord<T,2> const& c)
 {
     re_center(c.x,c.y);
 }
@@ -298,7 +322,7 @@ void box2d<T>::init(T x0,T y0,T x1,T y1)
 }
 
 template <typename T>
-void box2d<T>::clip(const box2d_type& other)
+void box2d<T>::clip(box2d_type const& other)
 {
     minx_ = std::max(minx_,other.minx());
     miny_ = std::max(miny_,other.miny());
