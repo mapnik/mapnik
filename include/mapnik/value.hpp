@@ -792,8 +792,22 @@ public:
     value ()
         : base_(value_null()) {}
 
-    template <typename T> value(T _val_)
+    template <typename T> value(T const& _val_)
         : base_(_val_) {}
+
+    value (value const& other)
+        : base_(other.base_) {}
+
+    value( value && other)
+        :  base_(std::move(other.base_)) {}
+
+    value & operator=( value const& other)
+    {
+        if (this == &other)
+            return *this;
+        base_ = other.base_;
+        return *this;
+    }
 
     bool operator==(value const& other) const
     {

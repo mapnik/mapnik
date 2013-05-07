@@ -114,24 +114,24 @@ public:
     inline void set_id(mapnik::value_integer id) { id_ = id;}
 
     template <typename T>
-    void put(context_type::key_type const& key, T const& val)
+    inline void put(context_type::key_type const& key, T const& val)
     {
-        put(key,value(val));
+        put(key, std::move(value(val)));
     }
 
     template <typename T>
-    void put_new(context_type::key_type const& key, T const& val)
+    inline void put_new(context_type::key_type const& key, T const& val)
     {
-        put_new(key,value(val));
+        put_new(key,std::move(value(val)));
     }
 
-    void put(context_type::key_type const& key, value const& val)
+    inline void put(context_type::key_type const& key, value && val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end()
             && itr->second < data_.size())
         {
-            data_[itr->second] = val;
+            data_[itr->second] = std::move(val);
         }
         else
         {
@@ -139,28 +139,28 @@ public:
         }
     }
 
-    void put_new(context_type::key_type const& key, value const& val)
+    inline void put_new(context_type::key_type const& key, value && val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end()
             && itr->second < data_.size())
         {
-            data_[itr->second] = val;
+            data_[itr->second] = std::move(val);
         }
         else
         {
             cont_type::size_type index = ctx_->push(key);
             if (index == data_.size())
-                data_.push_back(val);
+                data_.push_back(std::move(val));
         }
     }
 
-    bool has_key(context_type::key_type const& key) const
+    inline bool has_key(context_type::key_type const& key) const
     {
         return (ctx_->mapping_.find(key) != ctx_->mapping_.end());
     }
 
-    value_type const& get(context_type::key_type const& key) const
+    inline value_type const& get(context_type::key_type const& key) const
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end())
@@ -169,59 +169,59 @@ public:
             return default_value;
     }
 
-    value_type const& get(std::size_t index) const
+    inline value_type const& get(std::size_t index) const
     {
         if (index < data_.size())
             return data_[index];
         return default_value;
     }
 
-    std::size_t size() const
+    inline std::size_t size() const
     {
         return data_.size();
     }
 
-    cont_type const& get_data() const
+    inline cont_type const& get_data() const
     {
         return data_;
     }
 
-    void set_data(cont_type const& data)
+    inline void set_data(cont_type const& data)
     {
         data_ = data;
     }
 
-    context_ptr context()
+    inline context_ptr context()
     {
         return ctx_;
     }
 
-    boost::ptr_vector<geometry_type> const& paths() const
+    inline boost::ptr_vector<geometry_type> const& paths() const
     {
         return geom_cont_;
     }
 
-    boost::ptr_vector<geometry_type> & paths()
+    inline boost::ptr_vector<geometry_type> & paths()
     {
         return geom_cont_;
     }
 
-    void add_geometry(geometry_type * geom)
+    inline void add_geometry(geometry_type * geom)
     {
         geom_cont_.push_back(geom);
     }
 
-    std::size_t num_geometries() const
+    inline std::size_t num_geometries() const
     {
         return geom_cont_.size();
     }
 
-    geometry_type const& get_geometry(std::size_t index) const
+    inline geometry_type const& get_geometry(std::size_t index) const
     {
         return geom_cont_[index];
     }
 
-    geometry_type& get_geometry(std::size_t index)
+    inline geometry_type& get_geometry(std::size_t index)
     {
         return geom_cont_[index];
     }
@@ -247,22 +247,22 @@ public:
         return result;
     }
 
-    raster_ptr const& get_raster() const
+    inline raster_ptr const& get_raster() const
     {
         return raster_;
     }
 
-    void set_raster(raster_ptr const& raster)
+    inline void set_raster(raster_ptr const& raster)
     {
         raster_ = raster;
     }
 
-    feature_kv_iterator begin() const
+    inline feature_kv_iterator begin() const
     {
         return feature_kv_iterator(*this,true);
     }
 
-    feature_kv_iterator end() const
+    inline feature_kv_iterator end() const
     {
         return feature_kv_iterator(*this);
     }
