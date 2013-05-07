@@ -62,6 +62,19 @@ struct MAPNIK_DECL image_reader : private mapnik::noncopyable
     virtual ~image_reader() {}
 };
 
+struct image_reader_guard
+{
+    image_reader_guard(image_reader * reader)
+        : r_(reader) {}
+
+    ~image_reader_guard()
+    {
+        if (r_) delete r_;
+    }
+    image_reader * r_;
+};
+
+
 bool register_image_reader(std::string const& type,image_reader* (*)(std::string const&));
 bool register_image_reader(std::string const& type,image_reader* (*)(char const*, std::size_t));
 

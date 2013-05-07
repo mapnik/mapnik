@@ -24,6 +24,7 @@
 #define MAPNIK_MARKER_CACHE_HPP
 
 // mapnik
+#include <mapnik/marker.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/config.hpp>
 #include <mapnik/noncopyable.hpp>
@@ -36,11 +37,6 @@
 namespace mapnik
 {
 
-class marker;
-
-typedef boost::shared_ptr<marker> marker_ptr;
-
-
 class MAPNIK_DECL marker_cache :
         public singleton <marker_cache, CreateUsingNew>,
         private mapnik::noncopyable
@@ -51,13 +47,17 @@ private:
     ~marker_cache();
     bool insert_marker(std::string const& key, marker_ptr path);
     boost::unordered_map<std::string,marker_ptr> marker_cache_;
-    bool insert_svg(std::string const& name, std::string const& svg_string);
-    boost::unordered_map<std::string,std::string> svg_cache_;
+    bool insert_source(std::string const& name, std::string const& svg_string);
+    boost::unordered_map<std::string,std::string> source_cache_;
 public:
     std::string known_svg_prefix_;
+    std::string known_image_prefix_;
     bool is_uri(std::string const& path);
+    bool is_svg_uri(std::string const& path);
+    bool is_image_uri(std::string const& path);
     boost::optional<marker_ptr> find(std::string const& key, bool update_cache = false);
     void clear();
+    unsigned size() const;
 };
 
 }

@@ -110,6 +110,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    marker.cpp
     request.cpp
     well_known_srs.cpp
     params.cpp

@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,33 +20,28 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_SVG_PARSER_HPP
-#define MAPNIK_SVG_PARSER_HPP
+#include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
 
-// mapnik
-#include <mapnik/svg/svg_converter.hpp>
-#include <mapnik/gradient.hpp>
-#include <mapnik/noncopyable.hpp>
+#include <mapnik/utils.hpp>
+#include <mapnik/marker_cache.hpp>
 
-// stl
-#include <map>
+void export_marker_cache()
+{
+    using mapnik::marker_cache;
+    using mapnik::singleton;
+    using mapnik::CreateUsingNew;
+    using namespace boost::python;
+    class_<singleton<marker_cache,CreateUsingNew>,boost::noncopyable>("Singleton",no_init)
+        .def("instance",&singleton<marker_cache,CreateUsingNew>::instance,
+             return_value_policy<reference_existing_object>())
+        .staticmethod("instance")
+        ;
 
-namespace  mapnik { namespace svg {
-
-    class svg_parser : private mapnik::noncopyable
-    {
-    public:
-        explicit svg_parser(svg_converter_type & path);
-        ~svg_parser();
-        void parse(std::string const& filename);
-        void parse_from_string(std::string const& svg);
-        svg_converter_type & path_;
-        bool is_defs_;
-        std::map<std::string, gradient> gradient_map_;
-        std::pair<std::string, gradient> temporary_gradient_;
-    };
-
-}}
-
-
-#endif // MAPNIK_SVG_PARSER_HPP
+    class_<marker_cache,bases<singleton<marker_cache,CreateUsingNew> >,
+        boost::noncopyable>("MarkerCache",no_init)
+        .def("clear",&marker_cache::clear)
+        .def("size",&marker_cache::size)
+        //.staticmethod("size")
+        ;
+}

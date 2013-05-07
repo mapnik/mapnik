@@ -63,6 +63,7 @@ void export_raster_symbolizer();
 void export_text_placement();
 void export_shield_symbolizer();
 void export_font_engine();
+void export_marker_cache();
 void export_projection();
 void export_proj_transform();
 void export_view_transform();
@@ -471,6 +472,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_text_placement();
     export_shield_symbolizer();
     export_font_engine();
+    export_marker_cache();
     export_projection();
     export_proj_transform();
     export_view_transform();
