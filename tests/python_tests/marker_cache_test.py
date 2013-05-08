@@ -5,6 +5,7 @@ import os
 from utilities import execution_path
 from nose.tools import *
 import mapnik
+import threading
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -100,6 +101,15 @@ def test_image_put_and_clear_marker_cache():
     eq_(cache.remove(image_file),False)
     eq_(image_file in cache.keys(),False)
     eq_(cache.size(),3)
+
+def test_threaded_reads_and_writes():
+    threads = []
+    for i in range(100):
+        t = threading.Thread(target=test_image_put_and_clear_marker_cache)
+        t.start()
+        threads.append(t)
+    for t in threads:
+        t.join()
 
 if __name__ == "__main__":
     setup()
