@@ -51,8 +51,8 @@ class marker;
 
 typedef boost::shared_ptr<marker> marker_ptr;
 
-marker_ptr read_svg_marker(std::string const& uri, bool from_string=false);
-marker_ptr read_bitmap_marker(std::string const& uri, bool from_string=false);
+mapnik::svg_path_ptr read_svg_marker(std::string const& uri, bool from_string=false);
+mapnik::image_ptr read_bitmap_marker(std::string const& uri, bool from_string=false);
 
 /**
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally

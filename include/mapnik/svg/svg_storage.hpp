@@ -25,18 +25,24 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/noncopyable.hpp>
 
 namespace mapnik {
 namespace svg {
 
 template <typename VertexSource ,typename AttributeSource>
-class svg_storage :  mapnik::noncopyable
+class svg_storage
 {
 public:
     svg_storage() :
       svg_width_(0),
       svg_height_(0) {}
+
+    svg_storage(svg_storage const& rhs)
+        : source_(rhs.source_),
+          attributes_(rhs.attributes_),
+          bounding_box_(rhs.bounding_box_),
+          svg_width_(rhs.svg_width_),
+          svg_height_(rhs.svg_height_) {}
 
     VertexSource & source() // FIXME!! make const
     {

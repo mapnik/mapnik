@@ -1060,11 +1060,11 @@ void svg_parser::parse(std::string const& filename)
     xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename.c_str());
     if (reader == NULL)
     {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to open '" << filename << "'";
+        throw std::runtime_error("Unable to open '" + filename + "'");
     }
     else if (!parse_reader(*this,reader))
     {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << filename << "'";
+        throw std::runtime_error("Unable to parse '" + filename + "'");
     }
 }
 
@@ -1074,11 +1074,11 @@ void svg_parser::parse_from_string(std::string const& svg)
         (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
     if (reader == NULL)
     {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
+        throw std::runtime_error("Unable to parse '" + svg + "'");
     }
     else if (!parse_reader(*this,reader))
     {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
+        throw std::runtime_error("Unable to parse '" + svg + "'");
     }
 }
 

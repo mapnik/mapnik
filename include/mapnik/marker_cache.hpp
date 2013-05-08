@@ -45,19 +45,23 @@ class MAPNIK_DECL marker_cache :
 private:
     marker_cache();
     ~marker_cache();
-    bool insert_marker(std::string const& key, marker_ptr path);
     boost::unordered_map<std::string,marker_ptr> marker_cache_;
-    bool insert_source(std::string const& name, std::string const& svg_string);
-    boost::unordered_map<std::string,std::string> source_cache_;
 public:
+    typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
+    typedef boost::unordered_map<std::string, marker_ptr>::size_type size_type;
+    bool insert_marker(std::string const& key, marker_ptr path);
     std::string known_svg_prefix_;
     std::string known_image_prefix_;
+    void init();
     bool is_uri(std::string const& path);
     bool is_svg_uri(std::string const& path);
     bool is_image_uri(std::string const& path);
-    boost::optional<marker_ptr> find(std::string const& key, bool update_cache = false);
+    boost::optional<marker_ptr> find(std::string const& uri, bool update_cache = false);
     void clear();
-    unsigned size() const;
+    bool remove(std::string const& uri);
+    size_type size() const { return marker_cache_.size(); }
+    iterator_type begin() const { return marker_cache_.begin(); }
+    iterator_type end() const { return marker_cache_.end(); }
 };
 
 }

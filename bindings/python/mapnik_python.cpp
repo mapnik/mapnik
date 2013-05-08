@@ -34,6 +34,7 @@ void export_envelope();
 void export_query();
 void export_geometry();
 void export_palette();
+void export_svg();
 void export_image();
 void export_image_view();
 void export_gamma_method();
@@ -448,6 +449,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_color();
     export_envelope();
     export_palette();
+    export_svg();
     export_image();
     export_image_view();
     export_gamma_method();

@@ -38,7 +38,7 @@
 namespace mapnik
 {
 
-marker_ptr read_svg_marker(std::string const& uri, bool from_string)
+mapnik::svg_path_ptr read_svg_marker(std::string const& uri, bool from_string)
 {
     using namespace mapnik::svg;
     svg_path_ptr marker_path(boost::make_shared<svg_storage_type>());
@@ -58,10 +58,10 @@ marker_ptr read_svg_marker(std::string const& uri, bool from_string)
     svg.bounding_rect(&lox, &loy, &hix, &hiy);
     marker_path->set_bounding_box(lox,loy,hix,hiy);
     marker_path->set_dimensions(svg.width(),svg.height());
-    return boost::make_shared<marker>(marker_path);
+    return marker_path;
 }
 
-marker_ptr read_bitmap_marker(std::string const& uri, bool from_string)
+mapnik::image_ptr read_bitmap_marker(std::string const& uri, bool from_string)
 {
     mapnik::image_reader * reader = NULL;
     mapnik::image_reader_guard guard(reader);
@@ -85,7 +85,7 @@ marker_ptr read_bitmap_marker(std::string const& uri, bool from_string)
         agg::pixfmt_rgba32 pixf(buffer);
         pixf.premultiply();
     }
-    return boost::make_shared<marker>(image);
+    return image;
 }
 
 

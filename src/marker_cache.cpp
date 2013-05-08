@@ -39,29 +39,35 @@ marker_cache::marker_cache()
     : known_svg_prefix_("shape://"),
       known_image_prefix_("image://")
 {
-    insert_source("shape://ellipse",
-               "<?xml version='1.0' standalone='no'?>"
-               "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-               "<ellipse rx='5' ry='5' fill='#0000FF' stroke='black' stroke-width='.5'/>"
-               "</svg>");
-    insert_source("shape://arrow",
-               "<?xml version='1.0' standalone='no'?>"
-               "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-               "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
-               "</svg>");
-    mapnik::image_data_32 im(1,1);
-    im.set(0xff000000);
-    insert_source("image://dot",save_to_string(im,"png"));
+    init();
 }
 
 marker_cache::~marker_cache() {}
+
+void marker_cache::init()
+{
+    std::string ellipse =
+               "<?xml version='1.0' standalone='no'?>"
+               "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
+               "<ellipse rx='5' ry='5' fill='#0000FF' stroke='black' stroke-width='.5'/>"
+               "</svg>";
+    marker_cache_.insert(std::make_pair("shape://ellipse",boost::make_shared<marker>(read_svg_marker(ellipse,true))));
+    std::string arrow =
+               "<?xml version='1.0' standalone='no'?>"
+               "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
+               "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
+               "</svg>";
+    marker_cache_.insert(std::make_pair("shape://arrow",boost::make_shared<marker>(read_svg_marker(arrow,true))));
+    mapnik::image_ptr image = boost::make_shared<mapnik::image_data_32>(1,1);
+    image->set(0xff000000);
+    marker_cache_.insert(std::make_pair("image://dot",boost::make_shared<marker>(image)));
+}
 
 void marker_cache::clear()
 {
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
-    typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
     iterator_type itr = marker_cache_.begin();
     while(itr != marker_cache_.end())
     {
@@ -76,9 +82,18 @@ void marker_cache::clear()
     }
 }
 
-unsigned marker_cache::size() const
+bool marker_cache::remove(std::string const& uri)
 {
-    return marker_cache_.size();
+#ifdef MAPNIK_THREADSAFE
+    mutex::scoped_lock lock(mutex_);
+#endif
+    iterator_type itr = marker_cache_.find(uri);
+    if (itr != marker_cache_.end())
+    {
+        marker_cache_.erase(itr);
+        return true;
+    }
+    return false;
 }
 
 bool marker_cache::is_uri(std::string const& uri)
@@ -94,17 +109,6 @@ bool marker_cache::is_svg_uri(std::string const& uri)
 bool marker_cache::is_image_uri(std::string const& uri)
 {
     return boost::algorithm::starts_with(uri,known_image_prefix_);
-}
-
-bool marker_cache::insert_source(std::string const& name, std::string const& source_string)
-{
-    typedef boost::unordered_map<std::string, std::string>::const_iterator iterator_type;
-    iterator_type itr = source_cache_.find(name);
-    if (itr == source_cache_.end())
-    {
-        return source_cache_.insert(std::make_pair(name,source_string)).second;
-    }
-    return false;
 }
 
 bool marker_cache::insert_marker(std::string const& uri, marker_ptr path)
@@ -126,7 +130,6 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
-    typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
     iterator_type itr = marker_cache_.find(uri);
     if (itr != marker_cache_.end())
     {
@@ -135,35 +138,15 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
     }
     try
     {
-        bool marker_is_uri = is_uri(uri);
-        bool marker_is_svg = is_svg(uri) || is_svg_uri(uri);
-        if (marker_is_uri)
+        if (boost::filesystem::exists(boost::filesystem::path(uri)))
         {
-            boost::unordered_map<std::string, std::string>::const_iterator mark_itr = source_cache_.find(uri);
-            if (mark_itr != source_cache_.end())
+            if (is_svg(uri))
             {
-                if (marker_is_svg)
-                {
-                    result.reset(read_svg_marker(mark_itr->second,marker_is_uri));
-                }
-                else
-                {
-                    result.reset(read_bitmap_marker(mark_itr->second,marker_is_uri));
-                }
+                result.reset(boost::make_shared<marker>(read_svg_marker(uri)));
             }
-        }
-        else
-        {
-            if (boost::filesystem::exists(boost::filesystem::path(uri)))
+            else
             {
-                if (marker_is_svg)
-                {
-                    result.reset(read_svg_marker(uri,marker_is_uri));
-                }
-                else
-                {
-                    result.reset(read_bitmap_marker(uri,marker_is_uri));
-                }
+                result.reset(boost::make_shared<marker>(read_bitmap_marker(uri)));
             }
         }
         if (result)
