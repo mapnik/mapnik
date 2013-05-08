@@ -86,9 +86,18 @@ struct optimize : boost::static_visitor< std::tuple<T,bool> >
             auto rv = boost::get<mapnik::value_type>(std::get<0>(right));
             return return_type(node_type(operation(lv,rv)),true);
         }
-        else
+
+        if (std::get<1>(right))
+        {
+            return return_type(node_type(binary_node<Tag>(std::get<0>(right),
+                                                          std::get<0>(left))), false);
+        }
+        if (std::get<1>(left))
+        {
             return return_type(node_type(binary_node<Tag>(std::get<0>(left),
-                                                          std::get<0>(right))),false);
+                                                          std::get<0>(right))), false);
+        }
+        return return_type(node_type(x),false);
     }
 
     template <typename Tag>
