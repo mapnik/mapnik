@@ -1609,7 +1609,7 @@ if not preconfigured:
             if env['DEBUG']:
                 env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline')
             else:
-                env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
+                env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -fvisibility-inlines-hidden -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
 
             if env['DEBUG_UNDEFINED']:
                 env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
@@ -1728,9 +1728,6 @@ if not HELP_REQUESTED:
     Export('env')
 
     plugin_base = env.Clone()
-    # for this to work you need:
-    # if __GNUC__ >= 4
-    # define MAPNIK_EXP __attribute__ ((visibility ("default")))
     #plugin_base.Append(CXXFLAGS='-fvisibility=hidden')
     #plugin_base.Append(CXXFLAGS='-fvisibility-inlines-hidden')
 
