@@ -47,7 +47,7 @@ struct MAPNIK_DECL Featureset : private mapnik::noncopyable
     virtual ~Featureset() {}
 };
 
-typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
+typedef boost::shared_ptr<Featureset> featureset_ptr;
 
 class MAPNIK_DECL datasource_exception : public std::exception
 {

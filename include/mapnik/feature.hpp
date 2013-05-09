@@ -87,8 +87,8 @@ private:
     map_type mapping_;
 };
 
-typedef MAPNIK_DECL context<std::map<std::string,std::size_t> > context_type;
-typedef MAPNIK_DECL boost::shared_ptr<context_type> context_ptr;
+typedef context<std::map<std::string,std::size_t> > context_type;
+typedef boost::shared_ptr<context_type> context_ptr;
 
 static const value default_value;
 
@@ -308,7 +308,7 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
 
 typedef feature_impl Feature;
 
-typedef MAPNIK_DECL boost::shared_ptr<Feature> feature_ptr;
+typedef boost::shared_ptr<Feature> feature_ptr;
 
 }
 
