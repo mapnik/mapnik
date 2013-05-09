@@ -786,7 +786,7 @@ class value
     friend const value operator%(value const&,value const&);
 
 public:
-    value ()
+    value () noexcept
         : base_(value_null()) {}
 
     template <typename T> value(T const& _val_)
