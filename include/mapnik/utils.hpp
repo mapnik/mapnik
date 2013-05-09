@@ -23,6 +23,8 @@
 #ifndef MAPNIK_UTILS_HPP
 #define MAPNIK_UTILS_HPP
 
+#include <mapnik/config.hpp>
+
 // boost
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
@@ -93,7 +95,7 @@ public:
 };
 
 template <typename T,
-          template <typename U> class CreatePolicy=CreateStatic> class singleton
+          template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_DECL singleton
 {
 #ifdef __SUNPRO_CC
     /* Sun's C++ compiler will issue the following errors if CreatePolicy<T> is used:
