@@ -22,6 +22,8 @@ def test_image_open_from_string():
     eq_(length,len(im2.tostring()))
     eq_(len(mapnik.Image.fromstring(im1.tostring('png')).tostring()),length)
     eq_(len(mapnik.Image.fromstring(im1.tostring('jpeg')).tostring()),length)
+    eq_(len(mapnik.Image.frombuffer(buffer(im1.tostring('png'))).tostring()),length)
+    eq_(len(mapnik.Image.frombuffer(buffer(im1.tostring('jpeg'))).tostring()),length)
     
     # TODO - https://github.com/mapnik/mapnik/issues/1831
     #eq_(len(mapnik.Image.fromstring(im1.tostring('tiff')).tostring()),length)
