@@ -58,9 +58,6 @@ void marker_cache::init()
                "<path fill='#0000FF' stroke='black' stroke-width='.5' d='m 31.698405,7.5302648 -8.910967,-6.0263712 0.594993,4.8210971 -18.9822542,0 0,2.4105482 18.9822542,0 -0.594993,4.8210971 z'/>"
                "</svg>";
     marker_cache_.insert(std::make_pair("shape://arrow",boost::make_shared<marker>(read_svg_marker(arrow,true))));
-    mapnik::image_ptr image = boost::make_shared<mapnik::image_data_32>(1,1);
-    image->set(0xff000000);
-    marker_cache_.insert(std::make_pair("image://dot",boost::make_shared<marker>(image)));
 }
 
 void marker_cache::clear()

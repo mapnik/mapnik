@@ -15,71 +15,71 @@ def setup():
 def test_svg_put_to_marker_cache():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
     svg_file = '../data/svg/octocat.svg'
     svg = mapnik.SVG.open(svg_file)
     cache.put(svg_file,svg)
-    eq_(cache.size(),4)
+    eq_(cache.size(),3)
     eq_(svg_file in cache.keys(),True)
 
 def test_svg_put_and_clear_marker_cache():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
     svg_file = '../data/svg/octocat.svg'
     svg = mapnik.SVG.open(svg_file)
     cache.put(svg_file,svg)
-    eq_(cache.size(),4)
+    eq_(cache.size(),3)
     eq_(svg_file in cache.keys(),True)
     cache.clear()
     eq_(svg_file in cache.keys(),False)
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
 
 def test_svg_put_and_remove_marker_cache():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
     svg_file = '../data/svg/octocat.svg'
     svg = mapnik.SVG.open(svg_file)
     cache.put(svg_file,svg)
-    eq_(cache.size(),4)
+    eq_(cache.size(),3)
     eq_(svg_file in cache.keys(),True)
     cache.remove(svg_file)
     eq_(svg_file in cache.keys(),False)
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
 
 def test_image_put_and_clear_marker_cache():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
     image_file = '../data/images/marker.png'
     image = mapnik.Image.open(image_file)
     cache.put(image_file,image)
-    eq_(cache.size(),4)
+    eq_(cache.size(),3)
     eq_(image_file in cache.keys(),True)
     cache.clear()
     eq_(image_file in cache.keys(),False)
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
 
 def test_image_put_and_clear_marker_cache():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
     image_file = '../data/images/marker.png'
     image = mapnik.Image.open(image_file)
     cache.put(image_file,image)
-    eq_(cache.size(),4)
+    eq_(cache.size(),3)
     eq_(image_file in cache.keys(),True)
     eq_(cache.remove(image_file),True)
     # removing twice should return False for no successful removal
     eq_(cache.remove(image_file),False)
     eq_(image_file in cache.keys(),False)
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
 
 def test_image_put_and_get_image_in_marker_cache():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
     image_file = '../data/images/marker.png'
     image = mapnik.Image.open(image_file)
     cache.put(image_file,image)
@@ -89,7 +89,7 @@ def test_image_put_and_get_image_in_marker_cache():
 def test_image_put_and_get_svg_in_marker_cache():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
     image_file = '../data/svg/rect.svg'
     image = mapnik.SVG.open(image_file)
     cache.put(image_file,image)
@@ -99,7 +99,7 @@ def test_image_put_and_get_svg_in_marker_cache():
 def test_marker_cache_override():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
-    eq_(cache.size(),3)
+    eq_(cache.size(),2)
     image_file = '../data/images/marker.png'
     image = mapnik.Image.open(image_file)
     cache.put(image_file,image)
