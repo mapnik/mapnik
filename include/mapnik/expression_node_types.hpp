@@ -24,23 +24,16 @@
 #define MAPNIK_EXPRESSION_NODE_TYPES_HPP
 
 // mapnik
-//#include <mapnik/value.hpp>
-//#include <mapnik/attribute.hpp>
+#include <mapnik/value_types.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/attribute.hpp>
 
 // boost
-#include <boost/variant/variant_fwd.hpp>
-
-namespace boost { template <typename T> class recursive_wrapper; }
+#include <boost/mpl/vector/vector30.hpp>
+#include <boost/variant.hpp>
 
 namespace mapnik
 {
-
-struct attribute;
-struct geometry_type_attribute;
-namespace value_adl_barrier {
-  class value;
-}
-using value_adl_barrier::value;
 
 namespace tags  {
 struct negate
@@ -174,8 +167,12 @@ struct regex_replace_node;
 
 typedef mapnik::value value_type;
 
-typedef boost::variant <
-value_type,
+typedef boost::mpl::vector24<
+value_null,
+value_bool,
+value_integer,
+value_double,
+value_unicode_string,
 attribute,
 geometry_type_attribute,
 boost::recursive_wrapper<unary_node<tags::negate> >,
@@ -195,7 +192,9 @@ boost::recursive_wrapper<binary_node<tags::logical_and> >,
 boost::recursive_wrapper<binary_node<tags::logical_or> >,
 boost::recursive_wrapper<regex_match_node>,
 boost::recursive_wrapper<regex_replace_node>
-> expr_node;
+>::type expr_types;
+
+typedef boost::make_recursive_variant_over<expr_types>::type expr_node;
 
 }
 
