@@ -49,7 +49,7 @@ private:
 public:
     typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
     typedef boost::unordered_map<std::string, marker_ptr>::size_type size_type;
-    bool insert_marker(std::string const& key, marker_ptr path);
+    bool insert_marker(std::string const& key, marker_ptr path, bool override=false);
     std::string known_svg_prefix_;
     std::string known_image_prefix_;
     void init();
@@ -57,6 +57,7 @@ public:
     bool is_svg_uri(std::string const& path);
     bool is_image_uri(std::string const& path);
     boost::optional<marker_ptr> find(std::string const& uri, bool update_cache = false);
+    iterator_type search(std::string const& uri) const { return marker_cache_.find(uri); }
     void clear();
     bool remove(std::string const& uri);
     size_type size() const { return marker_cache_.size(); }

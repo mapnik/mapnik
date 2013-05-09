@@ -57,6 +57,7 @@ private:
 public:
     image_32(int width,int height);
     image_32(image_32 const& rhs);
+    explicit image_32(image_data_32 const& rhs);
 #ifdef HAVE_CAIRO
     explicit image_32(cairo_surface_ptr const& surface);
 #endif

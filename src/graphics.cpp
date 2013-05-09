@@ -51,7 +51,13 @@ image_32::image_32(const image_32& rhs)
     :width_(rhs.width_),
      height_(rhs.height_),
      data_(rhs.data_),
-     painted_(rhs.painted_)  {}
+     painted_(rhs.painted_) {}
+
+image_32::image_32(const image_data_32& rhs)
+    :width_(rhs.width()),
+     height_(rhs.height()),
+     data_(rhs),
+     painted_(false) {}
 
 #ifdef HAVE_CAIRO
 image_32::image_32(cairo_surface_ptr const& surface)

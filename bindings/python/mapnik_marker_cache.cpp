@@ -32,16 +32,32 @@
 
 namespace {
 
-bool add_marker_from_image(mapnik::marker_cache & cache, std::string const& key, mapnik::image_32 const& im)
+bool add_marker_from_image(mapnik::marker_cache & cache, std::string const& uri, mapnik::image_32 const& im)
 {
     boost::optional<mapnik::image_ptr> imagep(boost::make_shared<mapnik::image_data_32>(im.data()));
-    return cache.insert_marker(key,boost::make_shared<mapnik::marker>(imagep));
+    return cache.insert_marker(uri,boost::make_shared<mapnik::marker>(imagep),true);
 }
 
-bool add_marker_from_svg(mapnik::marker_cache & cache, std::string const& key, mapnik::svg_storage_type const& svg)
+bool add_marker_from_svg(mapnik::marker_cache & cache, std::string const& uri, mapnik::svg_storage_type const& svg)
 {
     mapnik::svg_path_ptr marker_path(boost::make_shared<mapnik::svg_storage_type>(svg));
-    return cache.insert_marker(key,boost::make_shared<mapnik::marker>(marker_path));
+    return cache.insert_marker(uri,boost::make_shared<mapnik::marker>(marker_path),true);
+}
+
+boost::python::object get_marker(boost::shared_ptr<mapnik::marker_cache> const& cache, std::string const& uri)
+{
+    mapnik::marker_cache::iterator_type itr = cache->search(uri);
+    mapnik::marker_cache::iterator_type end = cache->end();
+    if (itr != end)
+    {
+        if (itr->second->is_bitmap())
+        {
+            mapnik::image_data_32 const& im = *itr->second->get_bitmap_data()->get();
+            return boost::python::object(boost::make_shared<mapnik::image_32>(im));
+        }
+        return boost::python::object(*(itr->second->get_vector_data()));
+    }
+    return boost::python::object();
 }
 
 boost::python::list get_keys(boost::shared_ptr<mapnik::marker_cache> const& cache)
@@ -77,6 +93,7 @@ void export_marker_cache()
         .def("size",&marker_cache::size)
         .def("put",&add_marker_from_image)
         .def("put",&add_marker_from_svg)
+        .def("get",&get_marker)
         .def("keys",&get_keys)
         ;
 }

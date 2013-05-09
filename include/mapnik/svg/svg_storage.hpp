@@ -29,11 +29,14 @@
 namespace mapnik {
 namespace svg {
 
-template <typename VertexSource ,typename AttributeSource>
+template <typename VertexSource,typename AttributeSource>
 class svg_storage
 {
 public:
     svg_storage() :
+      source_(),
+      attributes_(),
+      bounding_box_(),
       svg_width_(0),
       svg_height_(0) {}
 

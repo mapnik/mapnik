@@ -111,12 +111,25 @@ bool marker_cache::is_image_uri(std::string const& uri)
     return boost::algorithm::starts_with(uri,known_image_prefix_);
 }
 
-bool marker_cache::insert_marker(std::string const& uri, marker_ptr path)
+bool marker_cache::insert_marker(std::string const& uri, marker_ptr path, bool override)
 {
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
-    return marker_cache_.insert(std::make_pair(uri,path)).second;
+    if (!override)
+    {
+        return marker_cache_.insert(std::make_pair(uri,path)).second;
+    }
+    else
+    {
+        typedef boost::unordered_map<std::string, marker_ptr>::iterator non_const_iterator_type;
+        std::pair<non_const_iterator_type,bool> result = marker_cache_.insert(std::make_pair(uri,path));
+        if (!result.second)
+        {
+            result.first->second = path;
+        }
+        return result.second;
+    }
 }
 
 boost::optional<marker_ptr> marker_cache::find(std::string const& uri,

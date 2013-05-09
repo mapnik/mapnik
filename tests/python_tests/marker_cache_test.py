@@ -12,32 +12,6 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-def test_svg_loading_from_file():
-    svg_file = '../data/svg/octocat.svg'
-    svg = mapnik.SVG.open(svg_file)
-    # TODO - invalid numbers
-    eq_(svg.width(),0)
-    eq_(svg.height(),0)
-    expected = mapnik.Box2d(0.00700000000001,-4.339,378.46,332.606)
-    actual = svg.extent()
-    assert_almost_equal(expected.minx,actual.minx, places=7)
-    assert_almost_equal(expected.miny,actual.miny, places=7)
-    assert_almost_equal(expected.maxx,actual.maxx, places=7)
-    assert_almost_equal(expected.maxy,actual.maxy, places=7)
-
-def test_svg_loading_from_string():
-    svg_file = '../data/svg/octocat.svg'
-    svg = mapnik.SVG.fromstring(open(svg_file,'rb').read())
-    # TODO - invalid numbers
-    eq_(svg.width(),0)
-    eq_(svg.height(),0)
-    expected = mapnik.Box2d(0.00700000000001,-4.339,378.46,332.606)
-    actual = svg.extent()
-    assert_almost_equal(expected.minx,actual.minx, places=7)
-    assert_almost_equal(expected.miny,actual.miny, places=7)
-    assert_almost_equal(expected.maxx,actual.maxx, places=7)
-    assert_almost_equal(expected.maxy,actual.maxy, places=7)
-
 def test_svg_put_to_marker_cache():
     cache = mapnik.MarkerCache.instance()
     cache.clear()
@@ -101,6 +75,41 @@ def test_image_put_and_clear_marker_cache():
     eq_(cache.remove(image_file),False)
     eq_(image_file in cache.keys(),False)
     eq_(cache.size(),3)
+
+def test_image_put_and_get_image_in_marker_cache():
+    cache = mapnik.MarkerCache.instance()
+    cache.clear()
+    eq_(cache.size(),3)
+    image_file = '../data/images/marker.png'
+    image = mapnik.Image.open(image_file)
+    cache.put(image_file,image)
+    new_im = cache.get(image_file)
+    eq_(image.tostring(),new_im.tostring())
+
+def test_image_put_and_get_svg_in_marker_cache():
+    cache = mapnik.MarkerCache.instance()
+    cache.clear()
+    eq_(cache.size(),3)
+    image_file = '../data/svg/rect.svg'
+    image = mapnik.SVG.open(image_file)
+    cache.put(image_file,image)
+    new_im = cache.get(image_file)
+    eq_(image.width(),new_im.width())
+
+def test_marker_cache_override():
+    cache = mapnik.MarkerCache.instance()
+    cache.clear()
+    eq_(cache.size(),3)
+    image_file = '../data/images/marker.png'
+    image = mapnik.Image.open(image_file)
+    cache.put(image_file,image)
+    alt_im = mapnik.Image(4,4)
+    result = cache.put(image_file,alt_im)
+    # putting a item for which a key already exists should return False
+    eq_(result,False)
+    alt_im_copy = cache.get(image_file)
+    eq_(alt_im.tostring(),alt_im_copy.tostring())
+
 
 def test_threaded_reads_and_writes():
     threads = []
