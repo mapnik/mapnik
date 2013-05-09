@@ -96,8 +96,8 @@ struct expression_string : boost::static_visitor<void>
         str_ +=".match('";
 #if defined(BOOST_REGEX_HAS_ICU)
         std::string utf8;
-        UnicodeString ustr = UnicodeString::fromUTF32(x.pattern.str().data(), 
-						      static_cast<int32_t>(x.pattern.str().length()));
+        UnicodeString ustr = UnicodeString::fromUTF32(x.pattern.str().data(),
+                                                      static_cast<int32_t>(x.pattern.str().length()));
         to_utf8(ustr,utf8);
         str_ += utf8;
 #else
@@ -114,7 +114,7 @@ struct expression_string : boost::static_visitor<void>
 #if defined(BOOST_REGEX_HAS_ICU)
         std::string utf8;
         UnicodeString ustr = UnicodeString::fromUTF32(x.pattern.str().data(),
-						      static_cast<int32_t>(x.pattern.str().length()));
+                                                      static_cast<int32_t>(x.pattern.str().length()));
         to_utf8(ustr,utf8);
         str_ += utf8;
         str_ +="','";
