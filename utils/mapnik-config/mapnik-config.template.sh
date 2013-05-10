@@ -24,6 +24,7 @@ Known values for OPTION are:
   --dep-includes    include paths (-I) for Mapnik dependencies (new in 2.2.x)
   --cxxflags        c++ compiler flags and pre-processor defines (new in 2.2.x)
   --cflags          all include paths, compiler flags, and pre-processor defines (for back-compatibility)
+  --cxx        c++ compiler used to build mapnik (new in 2.2.x)
 EOF
 
     exit $1
@@ -111,6 +112,10 @@ while test $# -gt 0; do
 
     --cflags)
       echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_DEP_INCLUDES} ${CONFIG_MAPNIK_DEFINES} ${CONFIG_CXXFLAGS}
+      ;;
+
+    --cxx)
+      echo ${CONFIG_CXX}
       ;;
 
     *)

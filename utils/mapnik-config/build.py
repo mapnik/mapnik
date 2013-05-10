@@ -32,6 +32,7 @@ CONFIG_MAPNIK_LDFLAGS='%(ldflags)s'
 CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapnik/agg"
 CONFIG_DEP_INCLUDES='%(dep_includes)s'
 CONFIG_CXXFLAGS='%(cxxflags)s'
+CONFIG_CXX='%(cxx)s'
 
 '''
 
@@ -107,7 +108,8 @@ configuration = {
     "fonts": fontspath,
     "input_plugins": inputpluginspath,
     "defines":defines,
-    "cxxflags":cxxflags
+    "cxxflags":cxxflags,
+    "cxx":env['CXX']
 }
 
 ## if we are statically linking depedencies

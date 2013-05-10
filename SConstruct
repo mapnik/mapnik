@@ -35,6 +35,12 @@ except:
 LIBDIR_SCHEMA_DEFAULT='lib'
 severities = ['debug', 'warn', 'error', 'none']
 
+DEFAULT_CC = "gcc"
+DEFAULT_CXX = "g++"
+if sys.platform == 'darwin':
+    DEFAULT_CC = "clang"
+    DEFAULT_CXX = "clang++"
+
 py3 = None
 
 # local file to hold custom user configuration variables
@@ -168,7 +174,7 @@ def shortest_name(libs):
 
 def sort_paths(items,priority):
     """Sort paths such that compiling and linking will globally prefer custom or local libs
-    over system libraries by fixing up the order libs are passed to gcc and the linker.
+    over system libraries by fixing up the order libs are passed to the compiler and the linker.
 
     Ideally preference could be by-target instead of global, but our SCons implementation
     is not currently utilizing different SCons build env()'s as we should.
@@ -253,15 +259,15 @@ opts = Variables()
 
 opts.AddVariables(
     # Compiler options
-    ('CXX', 'The C++ compiler to use to compile mapnik (defaults to g++).', 'g++'),
-    ('CC', 'The C compiler used for configure checks of C libs (defaults to gcc).', 'gcc'),
+    ('CXX', 'The C++ compiler to use to compile mapnik', DEFAULT_CXX),
+    ('CC', 'The C compiler used for configure checks of C libs.', DEFAULT_CC),
     ('CUSTOM_CXXFLAGS', 'Custom C++ flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir>', ''),
     ('CUSTOM_DEFINES', 'Custom Compiler DEFINES, e.g. -DENABLE_THIS', ''),
     ('CUSTOM_CFLAGS', 'Custom C flags, e.g. -I<include dir> if you have headers in a nonstandard directory <include dir> (only used for configure checks)', ''),
     ('CUSTOM_LDFLAGS', 'Custom linker flags, e.g. -L<lib dir> if you have libraries in a nonstandard directory <lib dir>', ''),
     EnumVariable('LINKING', "Set library format for libmapnik",'shared', ['shared','static']),
     EnumVariable('RUNTIME_LINK', "Set preference for linking dependencies",'shared', ['shared','static']),
-    EnumVariable('OPTIMIZATION','Set g++ optimization level','3', ['0','1','2','3','4','s']),
+    EnumVariable('OPTIMIZATION','Set compiler optimization level','3', ['0','1','2','3','4','s']),
     # Note: setting DEBUG=True will override any custom OPTIMIZATION level
     BoolVariable('DEBUG', 'Compile a debug version of Mapnik', 'False'),
     BoolVariable('DEBUG_UNDEFINED', 'Compile a version of Mapnik using clang/llvm undefined behavior asserts', 'False'),
@@ -1588,11 +1594,11 @@ if not preconfigured:
 
         if not env['SUNCC']:
             # Common flags for GCC.
-            gcc_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+            common_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
             if env['DEBUG']:
-                env.Append(CXXFLAGS = gcc_cxx_flags + '-O0 -fno-inline')
+                env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
             else:
-                env.Append(CXXFLAGS = gcc_cxx_flags + '-O%s -fvisibility-inlines-hidden -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
+                env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fvisibility-inlines-hidden -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
 
             if env['DEBUG_UNDEFINED']:
                 env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
