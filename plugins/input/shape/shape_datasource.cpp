@@ -54,6 +54,7 @@ using mapnik::datasource_exception;
 using mapnik::filter_in_box;
 using mapnik::filter_at_point;
 using mapnik::attribute_descriptor;
+using mapnik::transcoder;
 
 shape_datasource::shape_datasource(const parameters &params)
     : datasource (params),
@@ -101,10 +102,13 @@ shape_datasource::shape_datasource(const parameters &params)
 
         boost::shared_ptr<shape_io> shape_ref = boost::make_shared<shape_io>(shape_name_);
         init(*shape_ref);
+        transcoder *tr_ = new transcoder(desc_.get_encoding());
         for (int i=0;i<shape_ref->dbf().num_fields();++i)
         {
             field_descriptor const& fd=shape_ref->dbf().descriptor(i);
-            std::string fld_name=fd.name_;
+            std::string fld_name;
+            UnicodeString ustr=tr_->transcode(fd.name_.c_str());
+            ustr.toUTF8String(fld_name);
             switch (fd.type_)
             {
             case 'C': // character
