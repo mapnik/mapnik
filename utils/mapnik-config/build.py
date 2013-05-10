@@ -9,16 +9,13 @@ Import('env')
 
 config_env = env.Clone()
 
-# TODO
-# major/minor versions
-# git rev-list --max-count=1 HEAD
-
 config_variables = '''#!/bin/sh
 
 ## variables
 
 CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
 
+CONFIG_MAPNIK_VERSION_STRING='%(version_string)s'
 CONFIG_MAPNIK_VERSION='%(version)s'
 CONFIG_GIT_REVISION='%(git_revision)s'
 CONFIG_GIT_DESCRIBE='%(git_describe)s'
@@ -99,7 +96,8 @@ lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
 configuration = {
     "git_revision": git_revision,
     "git_describe": git_describe,
-    "version": config_env['MAPNIK_VERSION_STRING'],
+    "version_string": config_env['MAPNIK_VERSION_STRING'],
+    "version": config_env['MAPNIK_VERSION'],
     "mapnik_libname": 'mapnik',
     "mapnik_libpath": lib_path,
     "ldflags": ldflags,

@@ -398,6 +398,7 @@ pickle_store = [# Scons internal variables
         'PLUGINS',
         'ABI_VERSION',
         'MAPNIK_VERSION_STRING',
+        'MAPNIK_VERSION',
         'PLATFORM',
         'BOOST_ABI',
         'BOOST_APPEND',
@@ -1535,8 +1536,10 @@ if not preconfigured:
             color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
             abi = abi_fallback
 
-        env['ABI_VERSION'] = abi.replace('-pre','').split('.')
+        abi_no_pre = abi.replace('-pre','').split('.')
+        env['ABI_VERSION'] = abi_no_pre
         env['MAPNIK_VERSION_STRING'] = abi
+        env['MAPNIK_VERSION'] = str(int(abi_no_pre[0])*100000+int(abi_no_pre[1])*100+int(abi_no_pre[2]))
 
         # Common DEFINES.
         env.Append(CPPDEFINES = '-D%s' % env['PLATFORM'].upper())

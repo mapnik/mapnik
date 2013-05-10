@@ -9,7 +9,8 @@ Usage: mapnik-config [OPTION]
 Known values for OPTION are:
 
   -h --help         display this help and exit
-  -v --version      version information
+  -v --version      version information (MAPNIK_VERSION_STRING)
+  --version-number  version number (MAPNIK_VERSION)
   --git-revision    git hash from "git rev-list --max-count=1 HEAD"
   --git-describe    git decribe output (new in 2.2.x)
   --fonts           default fonts directory
@@ -52,11 +53,15 @@ while test $# -gt 0; do
       ;;
 
     -v)
-      echo ${CONFIG_MAPNIK_VERSION}
+      echo ${CONFIG_MAPNIK_VERSION_STRING}
       ;;
 
     --version)
-      echo $CONFIG_MAPNIK_VERSION
+      echo ${CONFIG_MAPNIK_VERSION_STRING}
+      ;;
+
+    --version-number)
+      echo ${CONFIG_MAPNIK_VERSION}
       ;;
 
     --git-revision)
