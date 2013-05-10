@@ -9,7 +9,8 @@ Usage: mapnik-config [OPTION]
 Known values for OPTION are:
 
   -h --help         display this help and exit
-  -v --version      version information
+  -v --version      version information (MAPNIK_VERSION_STRING)
+  --version-number  version number (MAPNIK_VERSION)
   --git-revision    git hash from "git rev-list --max-count=1 HEAD"
   --git-describe    git decribe output (new in 2.2.x)
   --fonts           default fonts directory
@@ -24,6 +25,8 @@ Known values for OPTION are:
   --dep-includes    include paths (-I) for Mapnik dependencies (new in 2.2.x)
   --cxxflags        c++ compiler flags and pre-processor defines (new in 2.2.x)
   --cflags          all include paths, compiler flags, and pre-processor defines (for back-compatibility)
+  --cxx             c++ compiler used to build mapnik (new in 2.2.x)
+  --all-flags       all compile and link flags
 EOF
 
     exit $1
@@ -50,11 +53,15 @@ while test $# -gt 0; do
       ;;
 
     -v)
-      echo ${CONFIG_MAPNIK_VERSION}
+      echo ${CONFIG_MAPNIK_VERSION_STRING}
       ;;
 
     --version)
-      echo $CONFIG_MAPNIK_VERSION
+      echo ${CONFIG_MAPNIK_VERSION_STRING}
+      ;;
+
+    --version-number)
+      echo ${CONFIG_MAPNIK_VERSION}
       ;;
 
     --git-revision)
@@ -111,6 +118,14 @@ while test $# -gt 0; do
 
     --cflags)
       echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_DEP_INCLUDES} ${CONFIG_MAPNIK_DEFINES} ${CONFIG_CXXFLAGS}
+      ;;
+
+    --cxx)
+      echo ${CONFIG_CXX}
+      ;;
+
+    --all-flags)
+      echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_DEP_INCLUDES} ${CONFIG_MAPNIK_DEFINES} ${CONFIG_CXXFLAGS} -L${CONFIG_MAPNIK_LIBPATH} -l${CONFIG_MAPNIK_LIBNAME} ${CONFIG_MAPNIK_LDFLAGS} ${CONFIG_DEP_LIBS}
       ;;
 
     *)

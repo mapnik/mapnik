@@ -12,6 +12,39 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
+def test_tiff_round_trip():
+    filepath = '/tmp/mapnik-tiff-io.tiff'
+    im = mapnik.Image(255,267)
+    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.save(filepath,'tiff')
+    im2 = mapnik.Image.open(filepath)
+    eq_(im.width(),im2.width())
+    eq_(im.height(),im2.height())
+    eq_(len(im.tostring()),len(im2.tostring()))
+    eq_(len(im.tostring('tiff')),len(im2.tostring('tiff')))
+
+def test_jpeg_round_trip():
+    filepath = '/tmp/mapnik-jpeg-io.jpeg'
+    im = mapnik.Image(255,267)
+    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.save(filepath,'jpeg')
+    im2 = mapnik.Image.open(filepath)
+    eq_(im.width(),im2.width())
+    eq_(im.height(),im2.height())
+    eq_(len(im.tostring()),len(im2.tostring()))
+    eq_(len(im.tostring('jpeg')),len(im2.tostring('jpeg')))
+
+def test_png_round_trip():
+    filepath = '/tmp/mapnik-png-io.png'
+    im = mapnik.Image(255,267)
+    im.background = mapnik.Color('rgba(1,2,3,.5)')
+    im.save(filepath,'png')
+    im2 = mapnik.Image.open(filepath)
+    eq_(im.width(),im2.width())
+    eq_(im.height(),im2.height())
+    eq_(len(im.tostring()),len(im2.tostring()))
+    eq_(len(im.tostring('png')),len(im2.tostring('png')))
+    eq_(len(im.tostring('png8')),len(im2.tostring('png8')))
 
 def test_image_open_from_string():
     filepath = '../data/images/dummy.png'
