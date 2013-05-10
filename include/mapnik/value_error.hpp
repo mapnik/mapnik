@@ -23,12 +23,14 @@
 #ifndef MAPNIK_VALUE_ERROR_HPP
 #define MAPNIK_VALUE_ERROR_HPP
 
+#include <mapnik/config.hpp>
+
 #include <exception>
 #include <string>
 
 namespace mapnik {
 
-class value_error : public std::exception
+class MAPNIK_DECL value_error : public std::exception
 {
 public:
     value_error() :

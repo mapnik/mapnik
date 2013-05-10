@@ -23,6 +23,8 @@
 #ifndef MAPNIK_CONFIG_ERROR_HPP
 #define MAPNIK_CONFIG_ERROR_HPP
 
+#include <mapnik/config.hpp>
+
 #include <exception>
 #include <string>
 
@@ -30,7 +32,7 @@ namespace mapnik {
 
 class xml_node;
 
-class config_error : public std::exception
+class MAPNIK_DECL config_error : public std::exception
 {
 public:
     config_error(std::string const& what);

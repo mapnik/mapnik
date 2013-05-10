@@ -40,7 +40,7 @@ namespace mapnik { namespace json {
 template <typename Iterator, typename FeatureType> struct feature_collection_grammar;
 
 template <typename Iterator>
-class feature_collection_parser : private mapnik::noncopyable
+class MAPNIK_DECL feature_collection_parser : private mapnik::noncopyable
 {
     typedef Iterator iterator_type;
     typedef mapnik::feature_impl feature_type;

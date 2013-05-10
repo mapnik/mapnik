@@ -24,6 +24,7 @@
 #define MAPNIK_EXPRESSIONS_GRAMMAR_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
@@ -116,7 +117,7 @@ struct integer_parser
 };
 
 template <typename Iterator>
-struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
+struct MAPNIK_DECL expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 {
     typedef qi::rule<Iterator, expr_node(), space_type> rule_type;
 
