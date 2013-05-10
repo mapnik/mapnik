@@ -1712,8 +1712,8 @@ if not HELP_REQUESTED:
     Export('env')
 
     plugin_base = env.Clone()
-    #plugin_base.Append(CXXFLAGS='-fvisibility=hidden')
-    #plugin_base.Append(CXXFLAGS='-fvisibility-inlines-hidden')
+    if not env['DEBUG']:
+        plugin_base.Append(CXXFLAGS='-fvisibility=hidden')
 
     Export('plugin_base')
 
