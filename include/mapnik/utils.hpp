@@ -95,7 +95,7 @@ public:
 };
 
 template <typename T,
-          template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_DECL singleton
+          template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_EXP singleton
 {
 #ifdef __SUNPRO_CC
     /* Sun's C++ compiler will issue the following errors if CreatePolicy<T> is used:
