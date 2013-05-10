@@ -1089,7 +1089,7 @@ if not preconfigured:
     SOLARIS = env['PLATFORM'] == 'SunOS'
     env['SUNCC'] = SOLARIS and env['CXX'].startswith('CC')
 
-    # If the Sun Studio C++ compiler (`CC`) is used instead of GCC.
+    # If the Sun Studio C++ compiler (`CC`) is used instead of gcc.
     if env['SUNCC']:
         env['CC'] = 'cc'
         # To be compatible w/Boost everything needs to be compiled
@@ -1596,8 +1596,14 @@ if not preconfigured:
             env.Append(CPPDEFINES = ndebug_defines)
 
         if not env['SUNCC']:
-            # Common flags for GCC.
+
+            # Common flags for CXX compiler.
             common_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+
+            # https://github.com/mapnik/mapnik/issues/1835
+            if sys.platform == 'darwin' and 'g++' in env['CXX']:
+                common_cxx_flags += '-fpermissive '
+
             if env['DEBUG']:
                 env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
             else:
