@@ -143,7 +143,7 @@ static toff_t tiff_size_proc(thandle_t fd)
     out->seekp(0, std::ios::end);
     std::ios::pos_type len = out->tellp();
     out->seekp(pos);
-    return (toff_t)len;
+    return static_cast<toff_t>(len);
 }
 
 static tsize_t tiff_dummy_read_proc(thandle_t fd, tdata_t buf, tsize_t size)
@@ -167,7 +167,7 @@ void save_as_tiff(T1 & file, T2 const& image)
     const int height = image.height();
     const int scanline_size = sizeof(unsigned char) * width * 3;
 
-    TIFF* output = RealTIFFOpen("mapnik_tiff_stream",
+    TIFF* output = RealTIFFOpen("tiff_output_stream",
                                 "wm",
                                 (thandle_t)&file,
                                 tiff_dummy_read_proc,
