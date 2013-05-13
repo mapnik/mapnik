@@ -42,6 +42,10 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
     def test_shapefile_column_encoding():
         ds = mapnik.Shapefile(file='../data/shp/column_encoding', encoding='latin1')
         eq_(ds.fields(),['FIPS', 'REGIÓN'])
+        query = mapnik.Query(ds.envelope())
+        for fld in ds.fields():
+            query.add_property_name(fld)
+        fs = ds.features(query)
 
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
