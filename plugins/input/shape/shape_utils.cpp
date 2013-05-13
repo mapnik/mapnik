@@ -66,7 +66,10 @@ void setup_attributes(mapnik::context_ptr const& ctx,
             std::vector<std::string> list;
             for (int i = 0; i < shape.dbf().num_fields(); ++i)
             {
-                list.push_back(shape.dbf().descriptor(i).name_);
+                std::string fld_name;
+                UnicodeString ustr=tr_->transcode(shape.dbf().descriptor(i).name_.c_str());
+                ustr.toUTF8String(fld_name);
+                list.push_back(fld_name);
             }
             s += boost::algorithm::join(list, ",") + ".";
 

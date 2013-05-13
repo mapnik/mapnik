@@ -46,6 +46,15 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         for fld in ds.fields():
             query.add_property_name(fld)
         fs = ds.features(query)
+        feat = fs.next()
+        eq_(feat.id(),1)
+        eq_(feat['FIPS'],'SP')
+        eq_(feat['REGIÓN'],150)
+        # also check using different method
+        feat = ds.all_features()[0]
+        eq_(feat.id(),1)
+        eq_(feat['FIPS'],'SP')
+        eq_(feat['REGIÓN'],150)
 
     @raises(RuntimeError)
     def test_that_nonexistant_query_field_throws(**kwargs):
