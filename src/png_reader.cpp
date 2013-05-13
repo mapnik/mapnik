@@ -42,7 +42,7 @@ template <typename T>
 class png_reader : public image_reader
 {
     typedef T source_type;
-    typedef boost::iostreams::stream<source_type> ifstream;
+    typedef boost::iostreams::stream<source_type> input_stream;
 
     struct png_struct_guard
     {
@@ -61,14 +61,14 @@ class png_reader : public image_reader
 private:
 
     source_type source_;
-    ifstream stream_;
+    input_stream stream_;
     unsigned width_;
     unsigned height_;
     int bit_depth_;
     int color_type_;
 public:
     explicit png_reader(std::string const& file_name);
-    explicit png_reader(char const* data, std::size_t size);
+    png_reader(char const* data, std::size_t size);
     ~png_reader();
     unsigned width() const;
     unsigned height() const;
@@ -110,7 +110,7 @@ void user_warning_fn(png_structp png_ptr, png_const_charp warning_msg)
 template <typename T>
 void png_reader<T>::png_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-    ifstream * fin = reinterpret_cast<ifstream*>(png_get_io_ptr(png_ptr));
+    input_stream * fin = reinterpret_cast<input_stream*>(png_get_io_ptr(png_ptr));
     fin->read(reinterpret_cast<char*>(data), length);
     if (fin->gcount() != length)
     {
@@ -128,7 +128,7 @@ png_reader<T>::png_reader(std::string const& file_name)
       color_type_(0)
 {
 
-    if (!stream_) throw image_reader_exception("cannot open image file "+ file_name);
+    if (!stream_) throw image_reader_exception("PNG reader: cannot open file "+ file_name);
     init();
 }
 
