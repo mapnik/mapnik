@@ -79,10 +79,10 @@ static tsize_t tiff_read_proc(thandle_t fd, tdata_t buf, tsize_t size)
 {
     std::istream * in = reinterpret_cast<std::istream*>(fd);
     std::streamsize request_size = size;
-    if (static_cast<tmsize_t>(request_size) != size)
-        return static_cast<tmsize_t>(-1);
+    if (static_cast<tsize_t>(request_size) != size)
+        return static_cast<tsize_t>(-1);
     in->read(reinterpret_cast<char*>(buf), request_size);
-    return static_cast<tmsize_t>(in->gcount());
+    return static_cast<tsize_t>(in->gcount());
 }
 
 static tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
