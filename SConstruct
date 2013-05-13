@@ -1601,7 +1601,7 @@ if not preconfigured:
             common_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
             # https://github.com/mapnik/mapnik/issues/1835
-            if sys.platform == 'darwin' and 'g++' in env['CXX']:
+            if sys.platform == 'darwin' and env['CXX'] == 'g++':
                 common_cxx_flags += '-fpermissive '
 
             if env['DEBUG']:
