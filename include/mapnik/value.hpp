@@ -795,7 +795,7 @@ class value
     friend const value operator%(value const&,value const&);
 
 public:
-    value () noexcept
+    value () //noexcept -- comment out for VC++11
         : base_(value_null()) {}
 
     template <typename T> value(T const& _val_)
