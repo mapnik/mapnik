@@ -33,10 +33,12 @@
 
 // mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/feature_factory.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/json/feature_parser.hpp>
 #include <mapnik/json/geojson_generator.hpp>
 
 namespace {
@@ -60,6 +62,18 @@ void feature_add_geometries_from_wkt(Feature &feature, std::string wkt)
 {
     bool result = mapnik::from_wkt(wkt, feature.paths());
     if (!result) throw std::runtime_error("Failed to parse WKT");
+}
+
+mapnik::feature_ptr from_geojson_impl(std::string const& json, mapnik::context_ptr const& ctx)
+{
+    mapnik::transcoder tr("utf8");
+    mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+    mapnik::json::feature_parser<std::string::const_iterator> parser(tr);
+    if (!parser.parse(json.begin(), json.end(), *feature))
+    {
+        throw std::runtime_error("Failed to parse geojson feature");
+    }
+    return feature;
 }
 
 std::string feature_to_geojson(Feature const& feature)
@@ -231,5 +245,7 @@ void export_feature()
         .def("__len__", &Feature::size)
         .def("context",&Feature::context)
         .def("to_geojson",&feature_to_geojson)
+        .def("from_geojson",from_geojson_impl)
+        .staticmethod("from_geojson")
         ;
 }
