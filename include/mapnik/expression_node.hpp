@@ -138,27 +138,27 @@ inline expr_node& operator- (expr_node& expr)
     return expr = unary_node<tags::negate>(expr);
 }
 
-inline expr_node & operator += ( expr_node &left ,const expr_node &right)
+inline expr_node & operator += ( expr_node &left, expr_node const& right)
 {
     return left =  binary_node<tags::plus>(left,right);
 }
 
-inline expr_node & operator -= ( expr_node &left ,const expr_node &right)
+inline expr_node & operator -= ( expr_node &left, expr_node const& right)
 {
     return left =  binary_node<tags::minus>(left,right);
 }
 
-inline expr_node & operator *= ( expr_node &left ,const expr_node &right)
+inline expr_node & operator *= ( expr_node &left , expr_node const& right)
 {
     return left =  binary_node<tags::mult>(left,right);
 }
 
-inline expr_node & operator /= ( expr_node &left ,const expr_node &right)
+inline expr_node & operator /= ( expr_node &left , expr_node const& right)
 {
     return left =  binary_node<tags::div>(left,right);
 }
 
-inline expr_node & operator %= ( expr_node &left ,const expr_node &right)
+inline expr_node & operator %= ( expr_node &left , expr_node const& right)
 {
     return left = binary_node<tags::mod>(left,right);
 }
