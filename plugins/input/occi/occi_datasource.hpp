@@ -82,12 +82,11 @@ private:
     const std::string pixel_width_token_;
     const std::string pixel_height_token_;
     mapnik::layer_descriptor desc_;
+    ConnectionCreator<Connection> creator_;
     bool use_wkb_;
     mapnik::value_integer row_limit_;
     int row_prefetch_;
-    oracle::occi::StatelessConnectionPool* pool_;
-    oracle::occi::Connection* conn_;
-    bool use_connection_pool_;
+    bool persist_connection_;
     bool use_spatial_index_;
     bool estimate_extent_;
 };

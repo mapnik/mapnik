@@ -43,49 +43,22 @@ using mapnik::transcoder;
 using mapnik::datasource_exception;
 using mapnik::feature_factory;
 
-using oracle::occi::Connection;
-using oracle::occi::Statement;
-using oracle::occi::ResultSet;
-using oracle::occi::StatelessConnectionPool;
 using oracle::occi::MetaData;
 using oracle::occi::SQLException;
 using oracle::occi::Type;
 using oracle::occi::Number;
 using oracle::occi::Blob;
 
-occi_featureset::occi_featureset(StatelessConnectionPool* pool,
-                                 Connection* conn,
+occi_featureset::occi_featureset(boost::shared_ptr<ResultSet> rs,
                                  mapnik::context_ptr const& ctx,
-                                 std::string const& sqlstring,
                                  std::string const& encoding,
-                                 bool use_connection_pool,
-                                 bool use_wkb,
-                                 unsigned prefetch_rows)
-    : rs_(NULL),
+                                 bool use_wkb)
+    : rs_(rs),
       tr_(new transcoder(encoding)),
       feature_id_(1),
       ctx_(ctx),
       use_wkb_(use_wkb)
 {
-    if (use_connection_pool)
-    {
-        conn_.set_pool(pool);
-    }
-    else
-    {
-        conn_.set_connection(conn, false);
-    }
-
-    try
-    {
-        rs_ = conn_.execute_query(sqlstring, prefetch_rows);
-    }
-    catch (SQLException &ex)
-    {
-        MAPNIK_LOG_ERROR(occi) << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage();
-
-        rs_ = NULL;
-    }
 }
 
 occi_featureset::~occi_featureset()
@@ -94,25 +67,13 @@ occi_featureset::~occi_featureset()
 
 feature_ptr occi_featureset::next()
 {
-    while (rs_ != NULL && rs_->next() == oracle::occi::ResultSet::DATA_AVAILABLE)
+    while (rs_ != NULL && rs_->next())
     {
         feature_ptr feature(feature_factory::create(ctx_, feature_id_));
 
         if (use_wkb_)
         {
-            Blob blob = rs_->getBlob(1);
-            blob.open(oracle::occi::OCCI_LOB_READONLY);
-
-            unsigned int size = blob.length();
-            if (buffer_.size() < size)
-            {
-                buffer_.resize(size);
-            }
-
-            oracle::occi::Stream* instream = blob.getStream(1, 0);
-            instream->readBuffer(buffer_.data(), size);
-            blob.closeStream(instream);
-            blob.close();
+            unsigned int size = rs_->getBlob(1, buffer_);
 
             if (! geometry_utils::from_wkb(feature->paths(), buffer_.data(), size))
             {
@@ -132,22 +93,11 @@ feature_ptr occi_featureset::next()
             }
         }
 
-        std::vector<MetaData> listOfColumns = rs_->getColumnListMetaData();
-
-        for (unsigned int i = 1; i < listOfColumns.size(); ++i)
+        unsigned int numFields = rs_->getNumFields();
+        for (unsigned int i = 0; i < numFields; ++i)
         {
-            MetaData columnObj = listOfColumns[i];
-
-            std::string fld_name = columnObj.getString(MetaData::ATTR_NAME);
-            int type_oid = columnObj.getInt(MetaData::ATTR_DATA_TYPE);
-
-            /*
-              int type_code = columnObj.getInt(MetaData::ATTR_TYPECODE);
-              if (type_code == OCCI_TYPECODE_OBJECT)
-              {
-              continue;
-              }
-            */
+            std::string fld_name = rs_->getFieldName(i);
+            int type_oid = rs_->getTypeOID(i);
 
             switch (type_oid)
             {
@@ -192,7 +142,7 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCI_SQLT_TIMESTAMP:
             case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
             case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
-                feature->put(fld_name, (UnicodeString)tr_->transcode(rs_->getString(i + 1).c_str()));
+                feature->put(fld_name, (UnicodeString)tr_->transcode(rs_->getString(i + 1)));
                 break;
             case oracle::occi::OCCIINTERVALDS:
             case oracle::occi::OCCIINTERVALYM:
@@ -218,7 +168,7 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCI_SQLT_RSET:
                 {
                     MAPNIK_LOG_WARN(occi) << "occi_featureset: Unsupported datatype "
-                                          << occi_enums::resolve_datatype(type_oid)
+                                          << Environment::instance().resolve_datatype(type_oid)
                                           << " (type_oid=" << type_oid << ")";
                     break;
                 }
@@ -368,7 +318,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
     default:
     {
         MAPNIK_LOG_WARN(occi) << "occi_featureset: Unknown oracle enum "
-                              << occi_enums::resolve_gtype(geomtype)
+                              << Environment::instance().resolve_gtype(geomtype)
                               << "(gtype=" << gtype << ")";
     }
     break;

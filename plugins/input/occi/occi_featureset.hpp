@@ -41,14 +41,10 @@
 class occi_featureset : public mapnik::Featureset
 {
 public:
-    occi_featureset(oracle::occi::StatelessConnectionPool* pool,
-                    oracle::occi::Connection* conn,
+    occi_featureset(boost::shared_ptr<ResultSet> rs,
                     mapnik::context_ptr const& ctx,
-                    std::string const& sqlstring,
                     std::string const& encoding,
-                    bool use_connection_pool,
-                    bool use_wkb,
-                    unsigned prefetch_rows);
+                    bool use_wkb);
     virtual ~occi_featureset();
     mapnik::feature_ptr next();
 
@@ -68,8 +64,7 @@ private:
                              const int dimensions,
                              const bool is_point_geom);
 
-    occi_connection_ptr conn_;
-    oracle::occi::ResultSet* rs_;
+    boost::shared_ptr<ResultSet> rs_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     mapnik::value_integer feature_id_;
     mapnik::context_ptr ctx_;
