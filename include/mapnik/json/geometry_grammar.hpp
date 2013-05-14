@@ -84,6 +84,21 @@ struct cleanup
     }
 };
 
+struct where_message
+{
+    typedef std::string result_type;
+
+    template <typename Iterator>
+    std::string operator() (Iterator first, Iterator last, std::size_t size) const
+    {
+        std::string str(first, last);
+        if (str.length() > size)
+            return str.substr(0, size) + "..." ;
+        return str;
+    }
+};
+
+
 template <typename Iterator>
 struct geometry_grammar :
         qi::grammar<Iterator,qi::locals<int>, void(boost::ptr_vector<mapnik::geometry_type>& )
@@ -118,6 +133,7 @@ struct geometry_grammar :
     boost::phoenix::function<push_vertex> push_vertex_;
     boost::phoenix::function<close_path> close_path_;
     boost::phoenix::function<cleanup> cleanup_;
+    boost::phoenix::function<where_message> where_message_;
 };
 
 }}
