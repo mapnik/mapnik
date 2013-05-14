@@ -42,8 +42,6 @@
 #include <sstream>
 #include <iomanip>
 
-using boost::shared_ptr;
-
 using mapnik::datasource;
 using mapnik::parameters;
 using mapnik::query;
@@ -99,7 +97,7 @@ occi_datasource::occi_datasource(parameters const& params)
     }
     estimate_extent_ = *params.get<mapnik::boolean>("estimate_extent",false);
     use_spatial_index_ = *params.get<mapnik::boolean>("use_spatial_index",true);
-    persist_connection_ = *params.get<mapnik::boolean>("persist_connection",true);
+    persist_connection_ = *params.get<mapnik::boolean>("persist_connection",false);
 
     boost::optional<std::string> ext = params.get<std::string>("extent");
     if (ext) extent_initialized_ = extent_.from_string(*ext);
@@ -121,159 +119,162 @@ occi_datasource::occi_datasource(parameters const& params)
 
     if (pool)
     {
-        shared_ptr<Connection> conn = pool->borrowObject();
+        boost::shared_ptr<Connection> conn = pool->borrowObject();
         if (! conn) return;
 
-        // extract real table name
-        table_name_ = mapnik::sql_utils::table_from_sql(table_);
-
-        // get SRID and/or GEOMETRY_FIELD from metadata table only if we need to
-        if (! srid_initialized_ || geometry_field_ == "")
+        if (conn->isOK())
         {
+            // extract real table name
+            table_name_ = mapnik::sql_utils::table_from_sql(table_);
+
+            // get SRID and/or GEOMETRY_FIELD from metadata table only if we need to
+            if (! srid_initialized_ || geometry_field_ == "")
+            {
 #ifdef MAPNIK_STATS
-            mapnik::progress_timer __stats__(std::clog, "occi_datasource::get_srid_and_geometry_field");
+                mapnik::progress_timer __stats__(std::clog, "occi_datasource::get_srid_and_geometry_field");
 #endif
 
-            std::ostringstream s;
-            s << "SELECT srid, column_name FROM " << METADATA_TABLE << " WHERE";
-            s << " LOWER(table_name) = LOWER('" << table_name_ << "')";
+                std::ostringstream s;
+                s << "SELECT srid, column_name FROM " << METADATA_TABLE << " WHERE";
+                s << " LOWER(table_name) = LOWER('" << table_name_ << "')";
 
-            if (geometry_field_ != "")
-            {
-                s << " AND LOWER(column_name) = LOWER('" << geometry_field_ << "')";
-            }
-
-            MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
-
-            try
-            {
-                shared_ptr<ResultSet> rs = conn->execute_query(s.str());
-                if (rs && rs->next())
+                if (geometry_field_ != "")
                 {
-                    if (! srid_initialized_)
-                    {
-                        srid_ = rs->getInt(1);
-                        srid_initialized_ = true;
-                    }
-
-                    if (geometry_field_ == "")
-                    {
-                        geometry_field_ = rs->getString(2);
-                    }
-
-                    rs->close();
+                    s << " AND LOWER(column_name) = LOWER('" << geometry_field_ << "')";
                 }
-            }
-            catch (SQLException& ex)
-            {
-                throw datasource_exception("OCCI Plugin: " + ex.getMessage());
-            }
-        }
 
-        // get columns description
-        {
-#ifdef MAPNIK_STATS
-            mapnik::progress_timer __stats__(std::clog, "occi_datasource::get_column_description");
-#endif
+                MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 
-            std::ostringstream s;
-            s << "SELECT " << fields_ << " FROM (" << table_name_ << ") WHERE ROWNUM < 1";
-
-            MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
-
-            try
-            {
-                shared_ptr<ResultSet> rs = conn->execute_query(s.str());
-                if (rs)
+                try
                 {
-                    unsigned int numFields = rs->getNumFields();
-                    for (unsigned int i = 0; i < numFields; ++i)
+                    boost::shared_ptr<ResultSet> rs = conn->execute_query(s.str());
+                    if (rs && rs->next())
                     {
-                        std::string fld_name = rs->getFieldName(i);
-                        int type_oid = rs->getTypeOID(i);
-
-                        switch (type_oid)
+                        if (! srid_initialized_)
                         {
-                        case oracle::occi::OCCIBOOL:
-                            desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Boolean));
-                            break;
-                        case oracle::occi::OCCIINT:
-                        case oracle::occi::OCCIUNSIGNED_INT:
-                            desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
-                            break;
-                        case oracle::occi::OCCIFLOAT:
-                        case oracle::occi::OCCIBFLOAT:
-                        case oracle::occi::OCCIDOUBLE:
-                        case oracle::occi::OCCIBDOUBLE:
-                        case oracle::occi::OCCINUMBER:
-                        case oracle::occi::OCCI_SQLT_NUM:
-                            desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                            break;
-                        case oracle::occi::OCCICHAR:
-                        case oracle::occi::OCCISTRING:
-                        case oracle::occi::OCCI_SQLT_AFC:
-                        case oracle::occi::OCCI_SQLT_AVC:
-                        case oracle::occi::OCCI_SQLT_CHR:
-                        case oracle::occi::OCCI_SQLT_LNG:
-                        case oracle::occi::OCCI_SQLT_LVC:
-                        case oracle::occi::OCCI_SQLT_STR:
-                        case oracle::occi::OCCI_SQLT_VCS:
-                        case oracle::occi::OCCI_SQLT_VNU:
-                        case oracle::occi::OCCI_SQLT_VBI:
-                        case oracle::occi::OCCI_SQLT_VST:
-                        case oracle::occi::OCCIROWID:
-                        case oracle::occi::OCCI_SQLT_RDD:
-                        case oracle::occi::OCCI_SQLT_RID:
-                        case oracle::occi::OCCIDATE:
-                        case oracle::occi::OCCI_SQLT_DAT:
-                        case oracle::occi::OCCI_SQLT_DATE:
-                        case oracle::occi::OCCI_SQLT_TIME:
-                        case oracle::occi::OCCI_SQLT_TIME_TZ:
-                        case oracle::occi::OCCITIMESTAMP:
-                        case oracle::occi::OCCI_SQLT_TIMESTAMP:
-                        case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
-                        case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
-                            desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
-                            break;
-                        case oracle::occi::OCCIINTERVALDS:
-                        case oracle::occi::OCCIINTERVALYM:
-                        case oracle::occi::OCCI_SQLT_INTERVAL_YM:
-                        case oracle::occi::OCCI_SQLT_INTERVAL_DS:
-                        case oracle::occi::OCCIANYDATA:
-                        case oracle::occi::OCCIBLOB:
-                        case oracle::occi::OCCIBFILE:
-                        case oracle::occi::OCCIBYTES:
-                        case oracle::occi::OCCICLOB:
-                        case oracle::occi::OCCIVECTOR:
-                        case oracle::occi::OCCIMETADATA:
-                        case oracle::occi::OCCIPOBJECT:
-                        case oracle::occi::OCCIREF:
-                        case oracle::occi::OCCIREFANY:
-                        case oracle::occi::OCCISTREAM:
-                        case oracle::occi::OCCICURSOR:
-                        case oracle::occi::OCCI_SQLT_FILE:
-                        case oracle::occi::OCCI_SQLT_CFILE:
-                        case oracle::occi::OCCI_SQLT_REF:
-                        case oracle::occi::OCCI_SQLT_CLOB:
-                        case oracle::occi::OCCI_SQLT_BLOB:
-                        case oracle::occi::OCCI_SQLT_RSET:
-                            MAPNIK_LOG_WARN(occi) << "occi_datasource: Unsupported datatype "
-                                                  << Environment::instance().resolve_datatype(type_oid)
-                                                  << " (type_oid=" << type_oid << ")";
-                            break;
-                        default:
-                            MAPNIK_LOG_WARN(occi) << "occi_datasource: Unknown datatype "
-                                                  << "(type_oid=" << type_oid << ")";
-                            break;
+                            srid_ = rs->getInt(1);
+                            srid_initialized_ = true;
                         }
-                    }
 
-                    rs->close();
+                        if (geometry_field_ == "")
+                        {
+                            geometry_field_ = rs->getString(2);
+                        }
+
+                        rs->close();
+                    }
+                }
+                catch (SQLException& ex)
+                {
+                    throw datasource_exception("OCCI Plugin: " + ex.getMessage());
                 }
             }
-            catch (SQLException& ex)
+
+            // get columns description
             {
-                throw datasource_exception(ex.getMessage());
+#ifdef MAPNIK_STATS
+                mapnik::progress_timer __stats__(std::clog, "occi_datasource::get_column_description");
+#endif
+
+                std::ostringstream s;
+                s << "SELECT " << fields_ << " FROM (" << table_name_ << ") WHERE ROWNUM < 1";
+
+                MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
+
+                try
+                {
+                    boost::shared_ptr<ResultSet> rs = conn->execute_query(s.str());
+                    if (rs)
+                    {
+                        unsigned int numFields = rs->getNumFields();
+                        for (unsigned int i = 0; i < numFields; ++i)
+                        {
+                            std::string fld_name = rs->getFieldName(i);
+                            int type_oid = rs->getTypeOID(i);
+
+                            switch (type_oid)
+                            {
+                            case oracle::occi::OCCIBOOL:
+                                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Boolean));
+                                break;
+                            case oracle::occi::OCCIINT:
+                            case oracle::occi::OCCIUNSIGNED_INT:
+                                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Integer));
+                                break;
+                            case oracle::occi::OCCIFLOAT:
+                            case oracle::occi::OCCIBFLOAT:
+                            case oracle::occi::OCCIDOUBLE:
+                            case oracle::occi::OCCIBDOUBLE:
+                            case oracle::occi::OCCINUMBER:
+                            case oracle::occi::OCCI_SQLT_NUM:
+                                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                                break;
+                            case oracle::occi::OCCICHAR:
+                            case oracle::occi::OCCISTRING:
+                            case oracle::occi::OCCI_SQLT_AFC:
+                            case oracle::occi::OCCI_SQLT_AVC:
+                            case oracle::occi::OCCI_SQLT_CHR:
+                            case oracle::occi::OCCI_SQLT_LNG:
+                            case oracle::occi::OCCI_SQLT_LVC:
+                            case oracle::occi::OCCI_SQLT_STR:
+                            case oracle::occi::OCCI_SQLT_VCS:
+                            case oracle::occi::OCCI_SQLT_VNU:
+                            case oracle::occi::OCCI_SQLT_VBI:
+                            case oracle::occi::OCCI_SQLT_VST:
+                            case oracle::occi::OCCIROWID:
+                            case oracle::occi::OCCI_SQLT_RDD:
+                            case oracle::occi::OCCI_SQLT_RID:
+                            case oracle::occi::OCCIDATE:
+                            case oracle::occi::OCCI_SQLT_DAT:
+                            case oracle::occi::OCCI_SQLT_DATE:
+                            case oracle::occi::OCCI_SQLT_TIME:
+                            case oracle::occi::OCCI_SQLT_TIME_TZ:
+                            case oracle::occi::OCCITIMESTAMP:
+                            case oracle::occi::OCCI_SQLT_TIMESTAMP:
+                            case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
+                            case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
+                                desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::String));
+                                break;
+                            case oracle::occi::OCCIINTERVALDS:
+                            case oracle::occi::OCCIINTERVALYM:
+                            case oracle::occi::OCCI_SQLT_INTERVAL_YM:
+                            case oracle::occi::OCCI_SQLT_INTERVAL_DS:
+                            case oracle::occi::OCCIANYDATA:
+                            case oracle::occi::OCCIBLOB:
+                            case oracle::occi::OCCIBFILE:
+                            case oracle::occi::OCCIBYTES:
+                            case oracle::occi::OCCICLOB:
+                            case oracle::occi::OCCIVECTOR:
+                            case oracle::occi::OCCIMETADATA:
+                            case oracle::occi::OCCIPOBJECT:
+                            case oracle::occi::OCCIREF:
+                            case oracle::occi::OCCIREFANY:
+                            case oracle::occi::OCCISTREAM:
+                            case oracle::occi::OCCICURSOR:
+                            case oracle::occi::OCCI_SQLT_FILE:
+                            case oracle::occi::OCCI_SQLT_CFILE:
+                            case oracle::occi::OCCI_SQLT_REF:
+                            case oracle::occi::OCCI_SQLT_CLOB:
+                            case oracle::occi::OCCI_SQLT_BLOB:
+                            case oracle::occi::OCCI_SQLT_RSET:
+                                MAPNIK_LOG_WARN(occi) << "occi_datasource: Unsupported datatype "
+                                                      << Environment::instance().resolve_datatype(type_oid)
+                                                      << " (type_oid=" << type_oid << ")";
+                                break;
+                            default:
+                                MAPNIK_LOG_WARN(occi) << "occi_datasource: Unknown datatype "
+                                                      << "(type_oid=" << type_oid << ")";
+                                break;
+                            }
+                        }
+
+                        rs->close();
+                    }
+                }
+                catch (SQLException& ex)
+                {
+                    throw datasource_exception(ex.getMessage());
+                }
             }
         }
     }
@@ -283,11 +284,11 @@ occi_datasource::~occi_datasource()
 {
     if (! persist_connection_)
     {
-        shared_ptr< Pool<Connection,ConnectionCreator> > pool =
+        boost::shared_ptr< Pool<Connection,ConnectionCreator> > pool =
             ConnectionManager::instance().getPool(creator_.id());
         if (pool)
         {
-            shared_ptr<Connection> conn = pool->borrowObject();
+            boost::shared_ptr<Connection> conn = pool->borrowObject();
             if (conn)
             {
                 conn->close();
@@ -312,11 +313,11 @@ box2d<double> occi_datasource::envelope() const
 
     double lox = 0.0, loy = 0.0, hix = 0.0, hiy = 0.0;
 
-    shared_ptr< Pool<Connection,ConnectionCreator> > pool =
+    boost::shared_ptr< Pool<Connection,ConnectionCreator> > pool =
         ConnectionManager::instance().getPool(creator_.id());
     if (pool)
     {
-        shared_ptr<Connection> conn = pool->borrowObject();
+        boost::shared_ptr<Connection> conn = pool->borrowObject();
         if (conn)
         {
             if (estimate_extent_)
@@ -334,7 +335,7 @@ box2d<double> occi_datasource::envelope() const
 
                 try
                 {
-                    shared_ptr<ResultSet> rs = conn->execute_query(s.str());
+                    boost::shared_ptr<ResultSet> rs = conn->execute_query(s.str());
                     if (rs && rs->next())
                     {
                         lox = rs->getDouble(1);
@@ -371,7 +372,7 @@ box2d<double> occi_datasource::envelope() const
 
                 try
                 {
-                    shared_ptr<ResultSet> rs = conn->execute_query(s.str());
+                    boost::shared_ptr<ResultSet> rs = conn->execute_query(s.str());
                     if (rs)
                     {
                         if (rs->next())
@@ -469,11 +470,11 @@ featureset_ptr occi_datasource::features(query const& q) const
     mapnik::progress_timer __stats__(std::clog, "occi_datasource::features");
 #endif
 
-    shared_ptr< Pool<Connection,ConnectionCreator> > pool =
+    boost::shared_ptr< Pool<Connection,ConnectionCreator> > pool =
         ConnectionManager::instance().getPool(creator_.id());
     if (pool)
     {
-        shared_ptr<Connection> conn = pool->borrowObject();
+        boost::shared_ptr<Connection> conn = pool->borrowObject();
         if (conn)
         {
             box2d<double> const& box = q.get_bbox();
@@ -549,11 +550,11 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol)
     mapnik::progress_timer __stats__(std::clog, "occi_datasource::features_at_point");
 #endif
 
-    shared_ptr< Pool<Connection,ConnectionCreator> > pool =
+    boost::shared_ptr< Pool<Connection,ConnectionCreator> > pool =
         ConnectionManager::instance().getPool(creator_.id());
     if (pool)
     {
-        shared_ptr<Connection> conn = pool->borrowObject();
+        boost::shared_ptr<Connection> conn = pool->borrowObject();
         if (conn)
         {
             std::ostringstream s;
