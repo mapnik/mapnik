@@ -86,7 +86,11 @@ struct cleanup
 
 struct where_message
 {
-    typedef std::string result_type;
+    template <typename T0,typename T1,typename T2>
+    struct result
+    {
+        typedef std::string type;
+    };
 
     template <typename Iterator>
     std::string operator() (Iterator first, Iterator last, std::size_t size) const
