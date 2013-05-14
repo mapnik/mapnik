@@ -34,14 +34,12 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>
 
-// fwd declare
-namespace mapnik {
-  struct attribute;
-  struct geometry_type_attribute;
-}
-
 namespace mapnik
 {
+
+// fwd declare
+struct attribute;
+struct geometry_type_attribute;
 
 template <typename T0,typename T1>
 expr_node regex_match_impl::operator() (T0 & node, T1 const& pattern) const
@@ -144,7 +142,7 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
     multiplicative_expr = unary_expr [_val = _1]
         >> *(     '*' >> unary_expr [_val *= _1]
                   | '/' >> unary_expr [_val /= _1]
-//                  | '%' >> unary_expr [_val %= _1] --> FIXME
+                  | '%' >> unary_expr [_val %= construct<mapnik::expr_node>(_1)] //needed by clang++
                   |  regex_match_expr[_val = regex_match_(_val, _1)]
                   |  regex_replace_expr(_val) [_val = _1]
             )
