@@ -117,14 +117,16 @@ feature_ptr postgis_featureset::next()
             ++feature_id_;
         }
 
-        // parse geometry
+        if (rs_->isNull(0))
+            continue;
+
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
-        if (!geometry_utils::from_wkb(feature->paths(), data, size))
+        // parse geometry
+        if (geometry_utils::from_wkb(feature->paths(), data, size))
             continue;
 
         totalGeomSize_ += size;
-
         unsigned num_attrs = ctx_->size() + 1;
         for (; pos < num_attrs; ++pos)
         {
