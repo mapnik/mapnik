@@ -806,7 +806,7 @@ int main()
 
 def CheckCairoHasFreetype(context, silent=False):
     if not silent:
-        context.Message('Checking that Cairo was built with freetype font support ... ')
+        context.Message('Checking for cairo freetype font support ... ')
     context.env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
 
     ret = context.TryRun("""
@@ -827,7 +827,6 @@ int main()
         context.did_show_result=1
     context.Result(ret)
     for item in env['CAIRO_CPPPATHS']:
-        print 'removing %s' % item
         rm_path(item,'CPPPATH',context.env)
     return ret
 
