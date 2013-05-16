@@ -43,7 +43,7 @@ files = [
     # https://github.com/mapnik/mapnik/issues/1696
     # https://github.com/mapnik/mapnik/issues/1521
     # fails with clang++ on os x
-    #{'name': "lines-shield", 'sizes': sizes_few_square,'bbox':default_text_box},
+    {'name': "lines-shield", 'sizes': sizes_few_square,'bbox':default_text_box},
     {'name': "collision", 'sizes':[(600,400)]},
     {'name': "marker-svg-opacity"},
     {'name': "marker-multi-policy", 'sizes':[(600,400)]},
@@ -103,11 +103,10 @@ class Reporting:
     NOT_FOUND = 2
     OTHER = 3
     REPLACE = 4
-    def __init__(self, quiet, generate = False, overwrite_failures = False):
+    def __init__(self, quiet, overwrite_failures = False):
         self.quiet = quiet
         self.passed = 0
         self.failed = 0
-        self.generate = generate
         self.overwrite_failures = overwrite_failures
         self.errors = [ #(type, actual, expected, diff, message)
          ]
@@ -119,7 +118,7 @@ class Reporting:
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%u different pixels\x1b[0m)' % diff
 
-        if self.generate:
+        if self.overwrite_failures:
             self.errors.append((self.REPLACE, actual, expected, diff, None))
             contents = open(actual, 'r').read()
             open(expected, 'wb').write(contents)
@@ -139,10 +138,9 @@ class Reporting:
         if self.quiet:
             sys.stderr.write('\x1b[33m.\x1b[0m')
         else:
-            print '\x1b[33m?\x1b[0m (\x1b[34mReference file not found\x1b[0m)'
-        if self.generate:
-            contents = open(actual, 'r').read()
-            open(expected, 'wb').write(contents)
+            print '\x1b[33m?\x1b[0m (\x1b[34mReference file not found, creating\x1b[0m)'
+        contents = open(actual, 'r').read()
+        open(expected, 'wb').write(contents)
 
     def other_error(self, expected, message):
         self.failed += 1
@@ -152,7 +150,7 @@ class Reporting:
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % message
 
-    def summary(self, generate=False):
+    def summary(self):
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
             return 0
@@ -161,10 +159,7 @@ class Reporting:
             if error[0] == self.OTHER:
                 print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s" % error[2]
             elif error[0] == self.NOT_FOUND:
-                if self.generate:
-                    print str(idx+1) + ") Generating reference image: '%s'" % error[2]
-                else:
-                    print str(idx+1) + ")Could not verify %s: No reference image found!" % error[1]
+                print str(idx+1) + ") Generating reference image: '%s'" % error[2]
                 continue
             elif error[0] == self.DIFF:
                 print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % (error[3], error[1], error[2])
@@ -289,6 +284,6 @@ if __name__ == "__main__":
                                reporting)
             mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % config['name']))
 
-        sys.exit(reporting.summary(generate=True))
+        sys.exit(reporting.summary())
     else:
         print "OSM plugin required"
