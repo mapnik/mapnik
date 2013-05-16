@@ -72,16 +72,6 @@ void set_marker_type(mapnik::markers_symbolizer & symbolizer, std::string const&
 
 }
 
-
-// https://github.com/mapnik/mapnik/issues/1367
-PyObject* get_fill_opacity_impl(markers_symbolizer & sym)
-{
-    boost::optional<float> fill_opacity = sym.get_fill_opacity();
-    if (fill_opacity)
-        return ::PyFloat_FromDouble(*fill_opacity);
-    Py_RETURN_NONE;
-}
-
 void export_markers_symbolizer()
 {
     using namespace boost::python;
