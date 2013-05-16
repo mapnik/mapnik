@@ -30,7 +30,7 @@
 
 namespace mapnik {
 
-class MAPNIK_DECL value_error : public std::exception
+class value_error : public std::exception
 {
 public:
     value_error() :
