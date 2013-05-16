@@ -32,7 +32,7 @@ namespace mapnik {
 
 class xml_node;
 
-class MAPNIK_DECL config_error : public std::exception
+class config_error : public std::exception
 {
 public:
     config_error(std::string const& what);

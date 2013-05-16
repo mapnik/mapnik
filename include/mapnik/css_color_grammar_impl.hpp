@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
-#ifndef MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
-#define MAPNIK_CSS_COLOR_GRAMMAR_DEF_HPP
+// NOTE: This is an implementation header file and is only meant to be included
+//    from implementation files. It therefore doesn't have an include guard.
 
 // boost
 #include <boost/version.hpp>
@@ -98,7 +98,5 @@ css_color_grammar<Iterator>::css_color_grammar()
 }
 
 }
-
-#endif
 
 #endif

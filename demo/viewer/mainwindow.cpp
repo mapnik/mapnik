@@ -32,7 +32,10 @@
 #include <QSlider>
 #include <QComboBox>
 #include <QDoubleSpinBox>
-
+#include <QFileDialog>
+#include <QMenu>
+#include <QMenuBar>
+#include <QToolBar>
 // mapnik
 
 #ifndef Q_MOC_RUN // QT moc chokes on BOOST_JOIN
