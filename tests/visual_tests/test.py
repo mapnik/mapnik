@@ -19,8 +19,8 @@ defaults = {
     'sizes': [(500, 100)],
     'scales':[1.0,2.0],
     'agg': True,
-    'cairo': False,
-    'grid': False,
+    'cairo': True,
+    'grid': True,
 }
 
 sizes_many_in_big_range = [(800, 100), (600, 100), (400, 100),

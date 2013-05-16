@@ -117,7 +117,7 @@ struct integer_parser
 };
 
 template <typename Iterator>
-struct MAPNIK_DECL expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
+struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
 {
     typedef qi::rule<Iterator, expr_node(), space_type> rule_type;
 

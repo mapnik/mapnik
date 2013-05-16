@@ -117,14 +117,21 @@ feature_ptr postgis_featureset::next()
             ++feature_id_;
         }
 
+        // null geometry is not acceptable
+        if (rs_->isNull(0))
+        {
+            MAPNIK_LOG_WARN(postgis) << "postgis_featureset: null value encountered for geometry";
+            continue;
+        }
+
         // parse geometry
         int size = rs_->getFieldLength(0);
         const char *data = rs_->getValue(0);
+
         if (!geometry_utils::from_wkb(feature->paths(), data, size))
             continue;
 
         totalGeomSize_ += size;
-
         unsigned num_attrs = ctx_->size() + 1;
         for (; pos < num_attrs; ++pos)
         {

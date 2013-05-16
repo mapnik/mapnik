@@ -330,6 +330,7 @@ PathVariable.PathAccept),
 
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
     BoolVariable('CPP_TESTS', 'Compile the C++ tests', 'True'),
+    BoolVariable('BENCHMARK', 'Compile the C++ benchmark scripts', 'False'),
 
     # Variables for optional dependencies
     # Note: cairo and and pycairo are optional but configured automatically through pkg-config
@@ -1832,7 +1833,8 @@ if not HELP_REQUESTED:
         if env['SVG_RENDERER']:
             SConscript('tests/cpp_tests/svg_renderer_tests/build.py')
 
-    SConscript('benchmark/build.py')
+    if env['BENCHMARK']:
+        SConscript('benchmark/build.py')
 
     # install pkg-config script and mapnik-config script
     SConscript('utils/mapnik-config/build.py')
