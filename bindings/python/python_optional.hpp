@@ -22,7 +22,6 @@
 
 #include <boost/optional/optional.hpp>
 #include <boost/python.hpp>
-#include <boost/noncopyable.hpp>
 
 // boost::optional<T> to/from converter from John Wiegley
 
@@ -46,7 +45,7 @@ struct register_python_conversion
 };
 
 template <typename T>
-struct python_optional : public boost::noncopyable
+struct python_optional : public mapnik::noncopyable
 {
     struct optional_to_python
     {
@@ -74,7 +73,7 @@ struct python_optional : public boost::noncopyable
                     rvalue_from_python_stage1(source, converters);
                 return rvalue_from_python_stage2(source, data, converters);
             }
-            return NULL;
+            return 0;
         }
 
         static void construct(PyObject * source,
@@ -94,17 +93,66 @@ struct python_optional : public boost::noncopyable
         }
     };
 
-    explicit python_optional() {
+    explicit python_optional()
+    {
         register_python_conversion<boost::optional<T>,
             optional_to_python, optional_from_python>();
     }
 };
 
-/** This class works around a bug in boost python.
+// to/from boost::optional<float>
+template <>
+struct python_optional<float> : public mapnik::noncopyable
+{
+    struct optional_to_python
+    {
+        static PyObject * convert(const boost::optional<float>& value)
+        {
+            return (value ? PyFloat_FromDouble(*value) :
+                    boost::python::detail::none());
+        }
+    };
 
-    See http://osdir.com/ml/python.c++/2003-11/msg00158.html
-*/
-template <typename T, typename X1 = boost::python::detail::not_specified, typename X2 = boost::python::detail::not_specified, typename X3 = boost::python::detail::not_specified>
+    struct optional_from_python
+    {
+        static void * convertible(PyObject * source)
+        {
+            using namespace boost::python::converter;
+
+            if (source == Py_None || PyFloat_Check(source))
+                return source;
+            return 0;
+        }
+
+        static void construct(PyObject * source,
+                              boost::python::converter::rvalue_from_python_stage1_data * data)
+        {
+            using namespace boost::python::converter;
+            void * const storage = ((rvalue_from_python_storage<boost::optional<float> > *)
+                                    data)->storage.bytes;
+            if (source == Py_None)  // == None
+                new (storage) boost::optional<float>(); // A Boost uninitialized value
+            else
+                new (storage) boost::optional<float>(PyFloat_AsDouble(source));
+            data->convertible = storage;
+        }
+    };
+
+    explicit python_optional()
+    {
+        register_python_conversion<boost::optional<float>,
+            optional_to_python, optional_from_python>();
+    }
+};
+
+
+// This class works around a feature in boost python.
+// See http://osdir.com/ml/python.c++/2003-11/msg00158.html
+
+template <typename T,
+          typename X1 = boost::python::detail::not_specified,
+          typename X2 = boost::python::detail::not_specified,
+          typename X3 = boost::python::detail::not_specified>
 class class_with_converter : public boost::python::class_<T, X1, X2, X3>
 {
 public:

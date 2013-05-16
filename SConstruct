@@ -313,8 +313,8 @@ opts.AddVariables(
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
     PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
-    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc',
-PathVariable.PathAccept),
+    ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc', PathVariable.PathAccept),
+
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
     PathVariable('PNG_INCLUDES', 'Search path for libpng include files', '/usr/include', PathVariable.PathAccept),
     PathVariable('PNG_LIBS','Search path for libpng library files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
@@ -356,6 +356,9 @@ PathVariable.PathAccept),
     BoolVariable('ENABLE_LOG', 'Enable logging, which is enabled by default when building in *debug*', 'False'),
     BoolVariable('ENABLE_STATS', 'Enable global statistics during map processing', 'False'),
     ('DEFAULT_LOG_SEVERITY', 'The default severity of the logger (eg. ' + ', '.join(severities) + ')', 'error'),
+
+    # Plugin linking
+    EnumVariable('PLUGIN_LINKING', "Set plugin linking with libmapnik", 'shared', ['shared','static']),
 
     # Other variables
     BoolVariable('SHAPE_MEMORY_MAPPED_FILE', 'Utilize memory-mapped files in Shapefile Plugin (higher memory usage, better performance)', 'True'),
@@ -439,7 +442,7 @@ pickle_store = [# Scons internal variables
         'LIBMAPNIK_DEFINES',
         'LIBMAPNIK_CXXFLAGS',
         'CAIRO_LIBPATHS',
-        'CAIRO_LINKFLAGS',
+        'CAIRO_ALL_LIBS',
         'CAIRO_CPPPATHS',
         'SVG_RENDERER',
         'SQLITE_LINKFLAGS',
@@ -1039,11 +1042,12 @@ if not preconfigured:
     env['SKIPPED_DEPS'] = []
     env['HAS_CAIRO'] = False
     env['CAIRO_LIBPATHS'] = []
-    env['CAIRO_LINKFLAGS'] = []
+    env['CAIRO_ALL_LIBS'] = []
     env['CAIRO_CPPPATHS'] = []
     env['HAS_PYCAIRO'] = False
     env['HAS_LIBXML2'] = False
     env['LIBMAPNIK_LIBS'] = []
+    env['LIBMAPNIK_LINKFLAGS'] = []
     env['LIBMAPNIK_CPPATHS'] = []
     env['LIBMAPNIK_DEFINES'] = []
     env['LIBMAPNIK_CXXFLAGS'] = []
@@ -1401,9 +1405,9 @@ if not preconfigured:
                       #os.path.join(c_inc,'include/libpng'),
                     ]
                 )
-                env["CAIRO_LINKFLAGS"] = ['cairo']
+                env["CAIRO_ALL_LIBS"] = ['cairo']
                 if env['RUNTIME_LINK'] == 'static':
-                    env["CAIRO_LINKFLAGS"].extend(
+                    env["CAIRO_ALL_LIBS"].extend(
                         ['pixman-1','expat','fontconfig','iconv']
                     )
                 # todo - run actual checkLib?
@@ -1426,7 +1430,7 @@ if not preconfigured:
                     cairo_env.ParseConfig(cmd)
                     for lib in cairo_env['LIBS']:
                         if not lib in env['LIBS']:
-                            env["CAIRO_LINKFLAGS"].append(lib)
+                            env["CAIRO_ALL_LIBS"].append(lib)
                     for lpath in cairo_env['LIBPATH']:
                         if not lpath in env['LIBPATH']:
                             env["CAIRO_LIBPATHS"].append(lpath)
@@ -1794,7 +1798,8 @@ if not HELP_REQUESTED:
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS']:
-            SConscript('plugins/input/%s/build.py' % plugin)
+            if env['PLUGIN_LINKING'] == 'shared':
+                SConscript('plugins/input/%s/build.py' % plugin)
             if plugin == 'ogr': OGR_BUILT = True
             if plugin == 'gdal': GDAL_BUILT = True
             if plugin == 'ogr' or plugin == 'gdal':
@@ -1803,8 +1808,9 @@ if not HELP_REQUESTED:
             else:
                 env['LIBS'].remove(details['lib'])
         elif not details['lib']:
-            # build internal shape and raster plugins
-            SConscript('plugins/input/%s/build.py' % plugin)
+            if env['PLUGIN_LINKING'] == 'shared':
+                # build internal datasource input plugins
+                SConscript('plugins/input/%s/build.py' % plugin)
         else:
             color_print(1,"Notice: dependencies not met for plugin '%s', not building..." % plugin)
             # also clear out locally built target
@@ -1818,11 +1824,11 @@ if not HELP_REQUESTED:
     # installed plugins that we are no longer building
     if 'install' in COMMAND_LINE_TARGETS:
         for plugin in PLUGINS.keys():
-            if plugin not in env['REQUESTED_PLUGINS']:
-                plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'%s.input' % plugin)
-                if os.path.exists(plugin_path):
+            plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'%s.input' % plugin)
+            if os.path.exists(plugin_path):
+                if plugin not in env['REQUESTED_PLUGINS'] or env['PLUGIN_LINKING'] == 'static':
                     color_print(3,"Notice: removing out of date plugin: '%s'" % plugin_path)
-                    os.unlink(plugin_path)
+                os.unlink(plugin_path)
 
     # Build the c++ rundemo app if requested
     if env['DEMO']:

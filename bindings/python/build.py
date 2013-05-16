@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+# Copyright (C) 2013 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -177,7 +177,7 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
         py_env.Append(CPPPATH = env['CAIRO_CPPPATHS'])
         py_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
         if env['PLATFORM'] == 'Darwin':
-            py_env.Append(LIBS=env['CAIRO_LINKFLAGS'])
+            py_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
     
     if env['HAS_PYCAIRO']:
         py_env.ParseConfig('pkg-config --cflags pycairo')

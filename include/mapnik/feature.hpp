@@ -306,9 +306,10 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
     return out;
 }
 
+// TODO - remove at Mapnik 3.x
 typedef feature_impl Feature;
 
-typedef boost::shared_ptr<Feature> feature_ptr;
+typedef boost::shared_ptr<feature_impl> feature_ptr;
 
 }
 

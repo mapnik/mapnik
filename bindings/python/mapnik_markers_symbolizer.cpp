@@ -30,6 +30,8 @@
 #include <mapnik/parse_path.hpp>
 #include "mapnik_svg.hpp"
 #include "mapnik_enumeration.hpp"
+#include "python_optional.hpp"
+
 #include <mapnik/marker_cache.hpp> // for known_svg_prefix_
 
 using mapnik::markers_symbolizer;
@@ -119,7 +121,7 @@ void export_markers_symbolizer()
                       &markers_symbolizer::set_opacity,
                       "Set/get the overall opacity")
         .add_property("fill_opacity",
-                      &get_fill_opacity_impl,
+                      &markers_symbolizer::get_fill_opacity,
                       &markers_symbolizer::set_fill_opacity,
                       "Set/get the fill opacity")
         .add_property("ignore_placement",

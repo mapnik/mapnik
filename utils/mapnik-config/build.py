@@ -52,6 +52,7 @@ if config_env['HAS_CAIRO']:
     dep_includes += ''.join([' -I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
 
 ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
+ldflags += config_env['LIBMAPNIK_LINKFLAGS']
 
 dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 
