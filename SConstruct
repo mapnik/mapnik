@@ -799,6 +799,28 @@ int main()
     context.Result(ret)
     return ret
 
+def CheckCairoHasFreetype(context, silent=False):
+    if not silent:
+        context.Message('Checking that Cairo was built with freetype font support ... ')
+    ret = context.TryRun("""
+
+#include <cairo/features.h>
+
+int main()
+{
+    #ifdef CAIRO_HAS_FT_FONT
+    return 0;
+    #else
+    return 1;
+    #endif
+}
+
+""", '.cpp')[0]
+    if silent:
+        context.did_show_result=1
+    context.Result(ret)
+    return ret
+
 def GetBoostLibVersion(context):
     ret = context.TryRun("""
 
@@ -946,6 +968,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGVersion'       : CheckPKGVersion,
                'FindBoost'             : FindBoost,
                'CheckBoost'            : CheckBoost,
+               'CheckCairoHasFreetype' : CheckCairoHasFreetype,
                'GetBoostLibVersion'    : GetBoostLibVersion,
                'GetMapnikLibVersion'   : GetMapnikLibVersion,
                'parse_config'          : parse_config,
@@ -1410,6 +1433,11 @@ if not preconfigured:
 
     else:
         color_print(4,'Not building with cairo support, pass CAIRO=True to enable')
+
+    if not env['HOST'] and env['HAS_CAIRO']:
+        if not conf.CheckCairoHasFreetype():
+            env['SKIPPED_DEPS'].append('cairo')
+            env['HAS_CAIRO'] = False
 
     if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
         if not os.access(env['PYTHON'], os.X_OK):
