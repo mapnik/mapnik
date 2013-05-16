@@ -22,7 +22,6 @@
 
 #include <boost/optional/optional.hpp>
 #include <boost/python.hpp>
-#include <boost/noncopyable.hpp>
 
 // boost::optional<T> to/from converter from John Wiegley
 
@@ -46,7 +45,7 @@ struct register_python_conversion
 };
 
 template <typename T>
-struct python_optional : public boost::noncopyable
+struct python_optional : public mapnik::noncopyable
 {
     struct optional_to_python
     {
@@ -101,9 +100,9 @@ struct python_optional : public boost::noncopyable
     }
 };
 
-// to/from optional<float>
+// to/from boost::optional<float>
 template <>
-struct python_optional<float> : public boost::noncopyable
+struct python_optional<float> : public mapnik::noncopyable
 {
     struct optional_to_python
     {
