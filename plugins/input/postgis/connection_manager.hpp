@@ -101,8 +101,12 @@ private:
 class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
 {
 
-    friend class CreateStatic<ConnectionManager>;
+public:
     typedef Pool<Connection,ConnectionCreator> PoolType;
+
+private:
+    friend class CreateStatic<ConnectionManager>;
+
     typedef std::map<std::string,boost::shared_ptr<PoolType> > ContType;
     typedef boost::shared_ptr<Connection> HolderType;
     ContType pools_;

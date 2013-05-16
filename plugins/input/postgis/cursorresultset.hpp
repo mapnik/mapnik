@@ -28,56 +28,23 @@
 #include "connection.hpp"
 #include "resultset.hpp"
 
-class CursorResultSet : public IResultSet
+class CursorResultSet : public IResultSet, private mapnik::noncopyable
 {
 public:
     CursorResultSet(boost::shared_ptr<Connection> const &conn, std::string cursorName, int fetch_count)
         : conn_(conn),
           cursorName_(cursorName),
           fetch_size_(fetch_count),
-          is_closed_(false),
-          refCount_(new int(1))
+          is_closed_(false)
     {
         getNextResultSet();
     }
 
-    CursorResultSet(const CursorResultSet& rhs)
-        : conn_(rhs.conn_),
-          cursorName_(rhs.cursorName_),
-          rs_(rhs.rs_),
-          fetch_size_(rhs.fetch_size_),
-          is_closed_(rhs.is_closed_),
-          refCount_(rhs.refCount_)
-    {
-        (*refCount_)++;
-    }
-
     virtual ~CursorResultSet()
     {
-        if (--(*refCount_)==0)
-        {
-            close();
-            delete refCount_,refCount_=0;
-        }
+        close();
     }
 
-    CursorResultSet& operator=(const CursorResultSet& rhs)
-    {
-        if (this==&rhs) return *this;
-        if (--(refCount_)==0)
-        {
-            close();
-            delete refCount_,refCount_=0;
-        }
-        conn_=rhs.conn_;
-        cursorName_=rhs.cursorName_;
-        rs_=rhs.rs_;
-        refCount_=rhs.refCount_;
-        fetch_size_=rhs.fetch_size_;
-        is_closed_ = false;
-        (*refCount_)++;
-        return *this;
-    }
 
     virtual void close()
     {
@@ -92,6 +59,7 @@ public:
 
             conn_->execute(s.str());
             is_closed_ = true;
+            conn_.reset();
         }
     }
 
@@ -105,6 +73,7 @@ public:
         if (rs_->next()) {
             return true;
         } else if (rs_->size() == 0) {
+            close();
             return false;
         } else {
             getNextResultSet();
@@ -171,7 +140,8 @@ private:
     boost::shared_ptr<ResultSet> rs_;
     int fetch_size_;
     bool is_closed_;
-    int *refCount_;
+
+
 };
 
 #endif // POSTGIS_CURSORRESULTSET_HPP
