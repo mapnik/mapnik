@@ -19,7 +19,7 @@ defaults = {
     'sizes': [(500, 100)],
     'scales':[1.0,2.0],
     'agg': True,
-    'cairo': True,
+    'cairo': mapnik.has_cairo(),
     'grid': True,
 }
 
