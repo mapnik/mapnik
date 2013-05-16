@@ -623,6 +623,12 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             }
         }
 
+        optional<float> opacity = node.get_opt_attr<float>("opacity");
+        if (opacity)
+        {
+            lyr.set_opacity(* opacity);
+        }
+
         xml_node::const_iterator child = node.begin();
         xml_node::const_iterator end = node.end();
 

@@ -40,7 +40,8 @@ layer::layer(std::string const& name, std::string const& srs)
       clear_label_cache_(false),
       cache_features_(false),
       group_by_(""),
-      ds_() {}
+      ds_(),
+      opacity_(1.0f) {}
 
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
@@ -54,6 +55,7 @@ layer::layer(const layer& rhs)
       group_by_(rhs.group_by_),
       styles_(rhs.styles_),
       ds_(rhs.ds_),
+      opacity_(rhs.opacity_),
       buffer_size_(rhs.buffer_size_),
       maximum_extent_(rhs.maximum_extent_) {}
 
@@ -85,6 +87,7 @@ void layer::swap(layer& rhs)
     swap(ds_, rhs.ds_);
     swap(buffer_size_, rhs.buffer_size_);
     swap(maximum_extent_, rhs.maximum_extent_);
+    swap(opacity_, rhs.opacity_);
 }
 
 layer::~layer() {}
@@ -245,5 +248,16 @@ std::string const& layer::group_by() const
 {
     return group_by_;
 }
+
+void layer::set_opacity(float opacity)
+{
+    opacity_ = opacity;
+}
+
+float layer::get_opacity() const
+{
+    return opacity_;
+}
+
 
 }

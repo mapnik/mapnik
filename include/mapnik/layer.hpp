@@ -50,6 +50,7 @@ public:
     layer(layer const& l);
     layer& operator=(layer const& rhs);
     bool operator==(layer const& other) const;
+    ~layer();
 
     /*!
      * @brief Set the name of the layer.
@@ -197,7 +198,8 @@ public:
     void set_buffer_size(int size);
     boost::optional<int> const& buffer_size() const;
     void reset_buffer_size();
-    ~layer();
+    void set_opacity(float opacity);
+    float get_opacity() const;
 private:
     void swap(layer& other);
 
@@ -215,6 +217,7 @@ private:
     datasource_ptr ds_;
     boost::optional<int> buffer_size_;
     boost::optional<box2d<double> > maximum_extent_;
+    float opacity_;
 };
 }
 

@@ -70,8 +70,11 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
       internal_buffer_(),
+      internal_buffer2_(),
+      current_layer_buffer_(&pixmap),
       current_buffer_(&pixmap),
       style_level_compositing_(false),
+      layer_level_opacity_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
@@ -92,6 +95,8 @@ agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, doub
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
       internal_buffer_(),
+      internal_buffer2_(),
+      current_layer_buffer_(&pixmap),
       current_buffer_(&pixmap),
       style_level_compositing_(false),
       width_(pixmap_.width()),
@@ -115,6 +120,8 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
       internal_buffer_(),
+      internal_buffer2_(),
+      current_layer_buffer_(&pixmap),
       current_buffer_(&pixmap),
       style_level_compositing_(false),
       width_(pixmap_.width()),
@@ -216,11 +223,36 @@ void agg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> con
     {
         query_extent_.clip(*maximum_extent);
     }
+
+    // layer opacity
+    if (lay.get_opacity() < 1.0f)
+    {
+        layer_level_opacity_ = true;
+        if (!internal_buffer2_)
+        {
+            internal_buffer2_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height());
+        }
+        else
+        {
+            internal_buffer2_->set_background(color(0,0,0,0)); // fill with transparent colour
+        }
+        current_layer_buffer_ = internal_buffer2_.get();
+    }
+    else
+    {
+        layer_level_opacity_ = false;
+        current_layer_buffer_ = &pixmap_;
+    }
+
 }
 
 template <typename T>
-void agg_renderer<T>::end_layer_processing(layer const&)
+void agg_renderer<T>::end_layer_processing(layer const& lay)
 {
+    if (layer_level_opacity_)
+    {
+        composite(pixmap_.data(), current_layer_buffer_->data(), src_over, lay.get_opacity(), 0, 0, false);
+    }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End layer processing";
 }
 
@@ -251,7 +283,7 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
     }
     else
     {
-        current_buffer_ = &pixmap_;
+        current_buffer_ = current_layer_buffer_;
     }
 }
 

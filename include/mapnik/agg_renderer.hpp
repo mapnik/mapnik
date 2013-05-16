@@ -143,8 +143,11 @@ protected:
 private:
     buffer_type & pixmap_;
     boost::shared_ptr<buffer_type> internal_buffer_;
+    boost::shared_ptr<buffer_type> internal_buffer2_;
     mutable buffer_type * current_buffer_;
+    mutable buffer_type * current_layer_buffer_;
     mutable bool style_level_compositing_;
+    mutable bool layer_level_opacity_;
     unsigned width_;
     unsigned height_;
     double scale_factor_;
