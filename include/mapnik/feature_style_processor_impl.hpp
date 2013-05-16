@@ -606,7 +606,7 @@ void feature_style_processor<Processor>::render_style(
         BOOST_FOREACH(rule const* r, rc.get_if_rules() )
         {
             expression_ptr const& expr=r->get_filter();
-            value_type result = boost::apply_visitor(evaluate<Feature,value_type>(*feature),*expr);
+            value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(*feature),*expr);
             if (result.to_bool())
             {
 #if defined(RENDERING_STATS)
