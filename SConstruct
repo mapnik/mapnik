@@ -22,6 +22,7 @@ import sys
 import re
 import platform
 from glob import glob
+from copy import copy
 from subprocess import Popen, PIPE
 from SCons.SConf import SetCacheMode
 import pickle
@@ -171,6 +172,10 @@ def shortest_name(libs):
             name = lib
     return name
 
+def rm_path(item,set,_env):
+    for i in _env[set]:
+        if item in i:
+            _env[set].remove(i)
 
 def sort_paths(items,priority):
     """Sort paths such that compiling and linking will globally prefer custom or local libs
@@ -802,9 +807,11 @@ int main()
 def CheckCairoHasFreetype(context, silent=False):
     if not silent:
         context.Message('Checking that Cairo was built with freetype font support ... ')
+    context.env.AppendUnique(CPPPATH=copy(env['CAIRO_CPPPATHS']))
+
     ret = context.TryRun("""
 
-#include <cairo/features.h>
+#include <cairo-features.h>
 
 int main()
 {
@@ -819,6 +826,9 @@ int main()
     if silent:
         context.did_show_result=1
     context.Result(ret)
+    for item in env['CAIRO_CPPPATHS']:
+        print 'removing %s' % item
+        rm_path(item,'CPPPATH',context.env)
     return ret
 
 def GetBoostLibVersion(context):
@@ -1724,15 +1734,11 @@ if not HELP_REQUESTED:
         p = env['PATH_REMOVE']
         if p in env['ENV']['PATH']:
             env['ENV']['PATH'].replace(p,'')
-        def rm_path(set):
-            for i in env[set]:
-                if p in i:
-                    env[set].remove(i)
-        rm_path('LIBPATH')
-        rm_path('CPPPATH')
-        rm_path('CXXFLAGS')
-        rm_path('CAIRO_LIBPATHS')
-        rm_path('CAIRO_CPPPATHS')
+        rm_path(p,'LIBPATH',env)
+        rm_path(p,'CPPPATH',env)
+        rm_path(p,'CXXFLAGS',env)
+        rm_path(p,'CAIRO_LIBPATHS',env)
+        rm_path(p,'CAIRO_CPPPATHS',env)
 
     if env['PATH_REPLACE']:
         searches,replace = env['PATH_REPLACE'].split(':')
