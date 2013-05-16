@@ -23,6 +23,8 @@
 #include <boost/optional/optional.hpp>
 #include <boost/python.hpp>
 
+#include <mapnik/noncopyable.hpp>
+
 // boost::optional<T> to/from converter from John Wiegley
 
 template <typename T, typename TfromPy>
