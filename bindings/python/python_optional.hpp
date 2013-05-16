@@ -100,11 +100,13 @@ struct python_optional : public boost::noncopyable
     }
 };
 
-/** This class works around a bug in boost python.
+// This class works around a feature in boost python.
+// See http://osdir.com/ml/python.c++/2003-11/msg00158.html
 
-    See http://osdir.com/ml/python.c++/2003-11/msg00158.html
-*/
-template <typename T, typename X1 = boost::python::detail::not_specified, typename X2 = boost::python::detail::not_specified, typename X3 = boost::python::detail::not_specified>
+template <typename T,
+          typename X1 = boost::python::detail::not_specified,
+          typename X2 = boost::python::detail::not_specified,
+          typename X3 = boost::python::detail::not_specified>
 class class_with_converter : public boost::python::class_<T, X1, X2, X3>
 {
 public:
