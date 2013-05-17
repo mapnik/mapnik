@@ -102,7 +102,7 @@ struct python_optional : public mapnik::noncopyable
     }
 };
 
-// to/from boost::optional<float>
+// to/from boost::optional<bool>
 template <>
 struct python_optional<float> : public mapnik::noncopyable
 {
@@ -130,7 +130,7 @@ struct python_optional<float> : public mapnik::noncopyable
                               boost::python::converter::rvalue_from_python_stage1_data * data)
         {
             using namespace boost::python::converter;
-            void * const storage = ((rvalue_from_python_storage<boost::optional<float> > *)
+            void * const storage = ((rvalue_from_python_storage<boost::optional<bool> > *)
                                     data)->storage.bytes;
             if (source == Py_None)  // == None
                 new (storage) boost::optional<float>(); // A Boost uninitialized value
@@ -143,6 +143,56 @@ struct python_optional<float> : public mapnik::noncopyable
     explicit python_optional()
     {
         register_python_conversion<boost::optional<float>,
+            optional_to_python, optional_from_python>();
+    }
+};
+
+// to/from boost::optional<float>
+template <>
+struct python_optional<bool> : public mapnik::noncopyable
+{
+    struct optional_to_python
+    {
+        static PyObject * convert(const boost::optional<bool>& value)
+        {
+            if (value)
+            {
+                if (*value) Py_RETURN_TRUE;
+                else Py_RETURN_FALSE;
+            }
+            else return boost::python::detail::none();
+        }
+    };
+    struct optional_from_python
+    {
+        static void * convertible(PyObject * source)
+        {
+            using namespace boost::python::converter;
+
+            if (source == Py_None || PyBool_Check(source))
+                return source;
+            return 0;
+        }
+
+        static void construct(PyObject * source,
+                              boost::python::converter::rvalue_from_python_stage1_data * data)
+        {
+            using namespace boost::python::converter;
+            void * const storage = ((rvalue_from_python_storage<boost::optional<bool> > *)
+                                    data)->storage.bytes;
+            if (source == Py_None)  // == None
+                new (storage) boost::optional<bool>(); // A Boost uninitialized value
+            else
+            {
+                new (storage) boost::optional<bool>(source == Py_True ? true : false);
+            }
+            data->convertible = storage;
+        }
+    };
+
+    explicit python_optional()
+    {
+        register_python_conversion<boost::optional<bool>,
             optional_to_python, optional_from_python>();
     }
 };
