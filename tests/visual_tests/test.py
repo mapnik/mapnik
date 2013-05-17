@@ -18,7 +18,7 @@ visual_output_dir = "/tmp/mapnik-visual-images"
 defaults = {
     'sizes': [(500, 100)],
     'scales':[1.0,2.0],
-    'agg': True,
+    'agg': False,
     'cairo': mapnik.has_cairo(),
     'grid': True,
 }
@@ -150,10 +150,29 @@ class Reporting:
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % message
 
+    def make_html_item(self,error):
+        item = '''
+             <div class="expected">
+               <a href="%s">
+                 <img src="%s" width="100%s">
+               </a>
+             </div>
+              ''' % (error[2],error[2],'%')
+        item += '<div class="text">%s</div>' % (error[3])
+        item += '''
+             <div class="actual">
+               <a href="%s">
+                 <img src="%s" width="100%s">
+               </a>
+             </div>
+              ''' % (error[1],error[1],'%')
+        return (error[3],item)
+
     def summary(self):
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
             return 0
+        html_items = []
         print "\nVisual rendering: %s failed / %s passed" % (len(self.errors), self.passed)
         for idx, error in enumerate(self.errors):
             if error[0] == self.OTHER:
@@ -163,8 +182,17 @@ class Reporting:
                 continue
             elif error[0] == self.DIFF:
                 print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % (error[3], error[1], error[2])
+                html_items.append(self.make_html_item(error))
             elif error[0] == self.REPLACE:
                 print str(idx+1) + ") \x1b[31mreplaced reference with new version:\x1b[0m %s" % error[2]
+        if len(html_items):
+            html_template = open(os.path.join(dirname,'html_report_template.html'),'r').read()
+            name = 'visual-tests-comparison.html'
+            html_out = open(name,'w+')
+            html_items.sort(reverse=True)
+            html_body = ''.join([a[1] for a in html_items])
+            html_out.write(html_template.replace('{{RESULTS}}',html_body))
+            print 'View failures by opening %s' % name
         return 1
 
 def render_cairo(m, output, scale_factor):
