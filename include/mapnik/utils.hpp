@@ -88,9 +88,23 @@ public:
     }
 };
 
+#ifdef __GNUC__
+template <typename T,
+          template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_DECL singleton
+{
+#else
 template <typename T,
           template <typename U> class CreatePolicy=CreateStatic> class singleton
 {
+#endif
+
+#ifdef __SUNPRO_CC
+    /* Sun's C++ compiler will issue the following errors if CreatePolicy<T> is used:
+       Error: A class template name was expected instead of mapnik::CreatePolicy<mapnik::T>
+       Error: A "friend" declaration must specify a class or function.
+    */
+    friend class CreatePolicy;
+#else
     friend class CreatePolicy<T>;
     static T* pInstance_;
     static bool destroyed_;
