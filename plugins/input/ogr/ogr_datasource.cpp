@@ -82,7 +82,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     // initialize ogr formats
     OGRRegisterAll();
-    
+
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
     if (! file && ! string)
@@ -525,7 +525,7 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
 
         if (indexed_)
         {
-            filter_at_point filter(pt);
+            filter_at_point filter(pt, tol);
 
             return featureset_ptr(new ogr_index_featureset<filter_at_point> (ctx,
                                                                              *layer,
