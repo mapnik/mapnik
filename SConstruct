@@ -737,25 +737,23 @@ def FindBoost(context, prefixes, thread_flag):
     msg = str()
 
     if BOOST_LIB_DIR:
-        msg += '\n  *libs found: %s' % BOOST_LIB_DIR
+        msg += '\nFound boost libs: %s' % BOOST_LIB_DIR
         env['BOOST_LIBS'] = BOOST_LIB_DIR
     else:
         env['BOOST_LIBS'] = '/usr/' + env['LIBDIR_SCHEMA']
-        msg += '\n  *using default boost lib dir: %s' % env['BOOST_LIBS']
+        msg += '\nUsing default boost lib dir: %s' % env['BOOST_LIBS']
 
     if BOOST_INCLUDE_DIR:
-        msg += '\n  *headers found: %s' % BOOST_INCLUDE_DIR
+        msg += '\nFound boost headers: %s' % BOOST_INCLUDE_DIR
         env['BOOST_INCLUDES'] = BOOST_INCLUDE_DIR
     else:
         env['BOOST_INCLUDES'] = '/usr/include'
-        msg += '\n  *using default boost include dir: %s' % env['BOOST_INCLUDES']
+        msg += '\nUsing default boost include dir: %s' % env['BOOST_INCLUDES']
 
     if not env['BOOST_TOOLKIT'] and not env['BOOST_ABI'] and not env['BOOST_VERSION']:
         if BOOST_APPEND:
-            msg += '\n  *lib naming extension found: %s' % BOOST_APPEND
+            msg += '\nFound boost lib name extension: %s' % BOOST_APPEND
             env['BOOST_APPEND'] = BOOST_APPEND
-        else:
-            msg += '\n  *no lib naming extension found'
     else:
         # Creating BOOST_APPEND according to the Boost library naming order,
         # which goes <toolset>-<threading>-<abi>-<version>. See:
@@ -770,7 +768,7 @@ def FindBoost(context, prefixes, thread_flag):
         # Boost libraries.
         if len(append_params) > 1:
             env['BOOST_APPEND'] = '-'.join(append_params)
-        msg += '\n  *using boost lib naming: %s' % env['BOOST_APPEND']
+        msg += '\nFound boost lib name extension: %s' % env['BOOST_APPEND']
 
     env.AppendUnique(CPPPATH = os.path.realpath(env['BOOST_INCLUDES']))
     env.AppendUnique(LIBPATH = os.path.realpath(env['BOOST_LIBS']))
@@ -1221,7 +1219,7 @@ if not preconfigured:
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
-        conf.prioritize_paths(silent=False)
+        conf.prioritize_paths(silent=True)
 
     if not env['HOST']:
         for libname, headers, required, lang in LIBSHEADERS:
@@ -1270,7 +1268,7 @@ if not preconfigured:
 
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
-        conf.prioritize_paths()
+        conf.prioritize_paths(silent=True)
 
     if not env['HOST']:
         # if the user is not setting custom boost configuration
@@ -1679,7 +1677,7 @@ if not preconfigured:
 
         # if requested, sort LIBPATH and CPPPATH one last time before saving...
         if env['PRIORITIZE_LINKING']:
-            conf.prioritize_paths()
+            conf.prioritize_paths(silent=True)
 
         # finish config stage and pickle results
         env = conf.Finish()
