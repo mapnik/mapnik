@@ -23,6 +23,8 @@
 #ifndef MAPNIK_UTILS_HPP
 #define MAPNIK_UTILS_HPP
 
+#include <mapnik/config.hpp>
+
 // boost
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
@@ -91,106 +93,109 @@ public:
 };
 
 #ifdef __GNUC__
-    template <typename T,
-              template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_DECL singleton
-    {
+template <typename T,
+          template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_DECL singleton
+{
 #else
-    template <typename T,
-              template <typename U> class CreatePolicy=CreateStatic> class singleton
+
+
+template <typename T,
+          template <typename U> class CreatePolicy=CreateStatic> class singleton
+{
+#endif
+    friend class CreatePolicy<T>;
+    static T* pInstance_;
+    static bool destroyed_;
+    singleton(const singleton &rhs);
+    singleton& operator=(const singleton&);
+
+    static void onDeadReference()
     {
-#endif
-        friend class CreatePolicy<T>;
-        static T* pInstance_;
-        static bool destroyed_;
-        singleton(const singleton &rhs);
-        singleton& operator=(const singleton&);
+        throw std::runtime_error("dead reference!");
+    }
 
-        static void onDeadReference()
-        {
-            throw std::runtime_error("dead reference!");
-        }
+    static void DestroySingleton()
+    {
+        CreatePolicy<T>::destroy(pInstance_);
+        pInstance_ = 0;
+        destroyed_ = true;
+    }
 
-        static void DestroySingleton()
-        {
-            CreatePolicy<T>::destroy(pInstance_);
-            pInstance_ = 0;
-            destroyed_ = true;
-        }
-
-    protected:
+protected:
 #ifdef MAPNIK_THREADSAFE
-        static mutex mutex_;
+    static mutex mutex_;
 #endif
-        singleton() {}
-    public:
-        static T& instance()
+    singleton() {}
+public:
+    static T& instance()
+    {
+        if (! pInstance_)
         {
+#ifdef MAPNIK_THREADSAFE
+            mutex::scoped_lock lock(mutex_);
+#endif
             if (! pInstance_)
             {
-#ifdef MAPNIK_THREADSAFE
-                mutex::scoped_lock lock(mutex_);
-#endif
-                if (! pInstance_)
+                if (destroyed_)
                 {
-                    if (destroyed_)
-                    {
-                        destroyed_ = false;
-                        onDeadReference();
-                    }
-                    else
-                    {
-                        pInstance_ = CreatePolicy<T>::create();
+                    destroyed_ = false;
+                    onDeadReference();
+                }
+                else
+                {
+                    pInstance_ = CreatePolicy<T>::create();
 
-                        // register destruction
-                        std::atexit(&DestroySingleton);
-                    }
+                    // register destruction
+                    std::atexit(&DestroySingleton);
                 }
             }
-            return *pInstance_;
         }
-    };
+        return *pInstance_;
+    }
+};
+
 #ifdef MAPNIK_THREADSAFE
-    template <typename T,
-              template <typename U> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
+template <typename T,
+          template <typename U> class CreatePolicy> mutex singleton<T,CreatePolicy>::mutex_;
 #endif
 
-    template <typename T,
-              template <typename U> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
-    template <typename T,
-              template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
+template <typename T,
+          template <typename U> class CreatePolicy> T* singleton<T,CreatePolicy>::pInstance_=0;
+template <typename T,
+          template <typename U> class CreatePolicy> bool singleton<T,CreatePolicy>::destroyed_=false;
 
 
 #ifdef _WINDOWS
 
 #include <windows.h>
 
-    // UTF8 <--> UTF16 conversion routines
+// UTF8 <--> UTF16 conversion routines
 
-    std::string utf16_to_utf8(std::wstring const& wstr)
+std::string utf16_to_utf8(std::wstring const& wstr)
+{
+    std::string str;
+    int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, 0, 0, 0, 0);
+    if(size > 0)
     {
-        std::string str;
-        int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, 0, 0, 0, 0);
-        if(size > 0)
-        {
-            std::vector<char> buffer(size);
-            WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &buffer[0], size, 0, 0);
-            str.assign(buffer.begin(), buffer.end() - 1);
-        }
-        return str;
+        std::vector<char> buffer(size);
+        WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &buffer[0], size, 0, 0);
+        str.assign(buffer.begin(), buffer.end() - 1);
     }
+    return str;
+}
 
-    std::wstring utf8_to_utf16 (std::string const& str)
+std::wstring utf8_to_utf16 (std::string const& str)
+{
+    std::wstring wstr;
+    int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, 0, 0);
+    if (size > 0)
     {
-        std::wstring wstr;
-        int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, 0, 0);
-        if (size > 0)
-        {
-            std::vector<wchar_t> buffer(size);
-            MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &buffer[0], size);
-            wstr.assign(buffer.begin(), buffer.end() - 1);
-        }
-        return wstr;
+        std::vector<wchar_t> buffer(size);
+        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &buffer[0], size);
+        wstr.assign(buffer.begin(), buffer.end() - 1);
     }
+    return wstr;
+}
 
 #endif  // _WINDOWS
 
