@@ -4,6 +4,7 @@
 import mapnik
 mapnik.logger.set_severity(mapnik.severity_type.None)
 
+import shutil
 import sys
 import os.path
 from compare import compare, compare_grids
@@ -152,29 +153,29 @@ class Reporting:
         else:
             print '\x1b[31m✘\x1b[0m (\x1b[34m%s\x1b[0m)' % message
 
-    def make_html_item(self,error):
+    def make_html_item(self,actual,expected,diff):
         item = '''
              <div class="expected">
                <a href="%s">
                  <img src="%s" width="100%s">
                </a>
              </div>
-              ''' % (error[2],error[2],'%')
-        item += '<div class="text">%s</div>' % (error[3])
+              ''' % (expected,expected,'%')
+        item += '<div class="text">%s</div>' % (diff)
         item += '''
              <div class="actual">
                <a href="%s">
                  <img src="%s" width="100%s">
                </a>
              </div>
-              ''' % (error[1],error[1],'%')
-        return (error[3],item)
+              ''' % (actual,actual,'%')
+        return item
 
     def summary(self):
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
             return 0
-        html_items = []
+        sortable_errors = []
         print "\nVisual rendering: %s failed / %s passed" % (len(self.errors), self.passed)
         for idx, error in enumerate(self.errors):
             if error[0] == self.OTHER:
@@ -184,17 +185,32 @@ class Reporting:
                 continue
             elif error[0] == self.DIFF:
                 print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % (error[3], error[1], error[2])
-                html_items.append(self.make_html_item(error))
+                sortable_errors.append((error[3],error))
             elif error[0] == self.REPLACE:
                 print str(idx+1) + ") \x1b[31mreplaced reference with new version:\x1b[0m %s" % error[2]
-        if len(html_items):
+        if len(sortable_errors):
+            # drop failure results in folder
+            vdir = os.path.join(visual_output_dir,'visual-test-results')
+            if not os.path.exists(vdir):
+                os.makedirs(vdir)
             html_template = open(os.path.join(dirname,'html_report_template.html'),'r').read()
-            name = 'visual-tests-comparison.html'
-            html_out = open(name,'w+')
-            html_items.sort(reverse=True)
-            html_body = ''.join([a[1] for a in html_items])
+            name = 'comparison.html'
+            failures_realpath = os.path.join(vdir,name)
+            html_out = open(failures_realpath,'w+')
+            sortable_errors.sort(reverse=True)
+            html_body = ''
+            for item in sortable_errors:
+                # copy images into single directory
+                actual = item[1][1]
+                expected = item[1][2]
+                diff = item[0]
+                actual_new = os.path.join(vdir,os.path.basename(actual))
+                shutil.copy(actual,actual_new)
+                expected_new = os.path.join(vdir,os.path.basename(expected))
+                shutil.copy(expected,expected_new)
+                html_body += self.make_html_item(os.path.relpath(actual_new,vdir),os.path.relpath(expected_new,vdir),diff)
             html_out.write(html_template.replace('{{RESULTS}}',html_body))
-            print 'View failures by opening %s' % name
+            print 'View failures by opening %s' % failures_realpath
         return 1
 
 def render_cairo(m, output, scale_factor):
