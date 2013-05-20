@@ -48,14 +48,26 @@ namespace
 {
 //user-friendly wrapper that uses Python dictionary
 using namespace boost::python;
-boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
+boost::shared_ptr<mapnik::datasource> create_datasource(dict const& d)
 {
     mapnik::parameters params;
     boost::python::list keys=d.keys();
-    for (int i=0; i<len(keys); ++i)
+    for (int i=0; i < len(keys); ++i)
     {
         std::string key = extract<std::string>(keys[i]);
         object obj = d[key];
+        if (PyUnicode_Check(obj.ptr()))
+        {
+            PyObject* temp = PyUnicode_AsUTF8String(obj.ptr());
+            if (temp)
+            {
+                char* c_str = PyString_AsString(temp);
+                params[key] = std::string(c_str);
+                Py_DecRef(temp);
+            }
+            continue;
+        }
+
         extract<std::string> ex0(obj);
         extract<mapnik::value_integer> ex1(obj);
         extract<double> ex2(obj);
