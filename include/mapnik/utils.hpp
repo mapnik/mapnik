@@ -31,7 +31,6 @@
 #endif
 
 // stl
-#include <string>
 #include <stdexcept>
 #include <cstdlib>
 #include <limits>
@@ -177,35 +176,10 @@ template <typename T,
 
 #ifdef _WINDOWS
 
-#include <windows.h>
+// UTF8 <--> UTF16 conversion routines
 
-    // UTF8 <--> UTF16 conversion routines
-
-    std::string utf16_to_utf8(std::wstring const& wstr)
-    {
-        std::string str;
-        int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, 0, 0, 0, 0);
-        if(size > 0)
-        {
-            std::vector<char> buffer(size);
-            WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &buffer[0], size, 0, 0);
-            str.assign(buffer.begin(), buffer.end() - 1);
-        }
-        return str;
-    }
-
-    std::wstring utf8_to_utf16 (std::string const& str)
-    {
-        std::wstring wstr;
-        int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, 0, 0);
-        if (size > 0)
-        {
-            std::vector<wchar_t> buffer(size);
-            MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &buffer[0], size);
-            wstr.assign(buffer.begin(), buffer.end() - 1);
-        }
-        return wstr;
-    }
+MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
+MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
 
 #endif  // _WINDOWS
 
