@@ -35,10 +35,9 @@ for cpp_test in glob.glob('*_test.cpp'):
         agg_env['CPPPATH'] = ['#deps/agg/include',env['BOOST_INCLUDES']]
         test_program = agg_env.Program(name, source=source_files, LINKFLAGS=env['CUSTOM_LDFLAGS'])
     else:
-        VariantDir('build','../../plugins/input/csv/')
         test_env_local = test_env.Clone()
         if 'csv_parse' in cpp_test:
-            source_files += glob.glob('build' + '*.cpp')
+            source_files += glob.glob('../../plugins/input/csv/' + '*.cpp')
         test_program = test_env_local.Program(name, source=source_files, LINKFLAGS=env['CUSTOM_LDFLAGS'])
         Depends(test_program, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
     # build locally if installing
