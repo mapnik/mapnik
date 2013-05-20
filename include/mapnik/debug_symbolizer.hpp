@@ -25,6 +25,7 @@
 
 #include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/enumeration.hpp>
 
 namespace mapnik
 {

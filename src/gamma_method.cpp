@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/gamma_method.hpp>
+#include <mapnik/enumeration.hpp>
 
 namespace mapnik
 {

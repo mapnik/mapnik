@@ -22,6 +22,7 @@
 
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/rule.hpp>
+#include <mapnik/enumeration.hpp>
 
 // boost
 #include <boost/foreach.hpp>
