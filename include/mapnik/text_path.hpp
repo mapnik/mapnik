@@ -26,12 +26,12 @@
 // mapnik
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/noncopyable.hpp>
 
 //stl
 #include <vector>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 // uci
@@ -40,7 +40,7 @@
 namespace mapnik
 {
 
-class string_info : private boost::noncopyable
+class string_info : private mapnik::noncopyable
 {
 protected:
     typedef std::vector<char_info> characters_t;
@@ -99,7 +99,7 @@ public:
         return at(i);
     }
 
-    UnicodeString const&  get_string() const
+    UnicodeString const& get_string() const
     {
         return text_;
     }
@@ -110,10 +110,10 @@ public:
         return (text_.indexOf(break_char) >= 0);
     }
 
-    /** Resets object to initial state. */
-    void clear(void)
+    // Resets object to initial state.
+    void clear()
     {
-        text_ = "";
+        text_.remove();
         characters_.clear();
     }
 };
@@ -121,8 +121,8 @@ public:
 typedef char_info const * char_info_ptr;
 
 
-/** List of all characters and their positions and formats for a placement. */
-class text_path : boost::noncopyable
+// List of all characters and their positions and formats for a placement.
+class text_path : mapnik::noncopyable
 {
     struct character_node
     {
@@ -140,12 +140,12 @@ class text_path : boost::noncopyable
 
         ~character_node() {}
 
-        void vertex(char_info_ptr *c_, double *x_, double *y_, double *angle_) const
+        void vertex(char_info_ptr & c_, double & x_, double  & y_, double & angle_) const
         {
-            *c_ = c;
-            *x_ = pos.x;
-            *y_ = pos.y;
-            *angle_ = angle;
+            c_ = c;
+            x_ = pos.x;
+            y_ = pos.y;
+            angle_ = angle;
         }
     };
 
@@ -172,7 +172,7 @@ public:
     }
 
     /** Return node. Always returns a new node. Has no way to report that there are no more nodes. */
-    void vertex(char_info_ptr *c, double *x, double *y, double *angle) const
+    void vertex(char_info_ptr & c, double & x, double & y, double & angle) const
     {
         nodes_[itr_++].vertex(c, x, y, angle);
     }

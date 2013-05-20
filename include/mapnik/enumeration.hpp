@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/debug.hpp>
 
 // stl
 #include <vector>
@@ -45,7 +44,7 @@ public:
         what_( what )
     {
     }
-    virtual ~illegal_enum_value() throw() {};
+    virtual ~illegal_enum_value() throw() {}
 
     virtual const char * what() const throw()
     {
@@ -136,19 +135,19 @@ protected:
  * @endcode
  */
 
-template <class ENUM, int THE_MAX>
+template <typename ENUM, int THE_MAX>
 class MAPNIK_DECL enumeration {
 public:
     typedef ENUM native_type;
 
     enumeration()
-      :  value_() {}
+        :  value_() {}
 
     enumeration( ENUM v )
-      :  value_(v) {}
+        :  value_(v) {}
 
-    enumeration( const enumeration & other )
-      : value_(other.value_) {}
+    enumeration( enumeration const& other )
+        : value_(other.value_) {}
 
     /** Assignment operator for native enum values. */
     void operator=(ENUM v)
@@ -157,7 +156,7 @@ public:
     }
 
     /** Assignment operator. */
-    void operator=(const enumeration & other)
+    void operator=(enumeration const& other)
     {
         value_ = other.value_;
     }
@@ -172,11 +171,6 @@ public:
     {
         MAX = THE_MAX
     };
-
-    ENUM max() const
-    {
-        return THE_MAX;
-    }
 
     /** Converts @p str to an enum.
      * @throw illegal_enum_value @p str is not a legal identifier.
@@ -226,7 +220,7 @@ public:
         {
             from_string( word );
         }
-        catch (const illegal_enum_value &)
+        catch (illegal_enum_value const&)
         {
             is.setstate(std::ios::failbit);
         }
@@ -261,21 +255,17 @@ public:
         {
             if (our_strings_[i] == 0 )
             {
-                MAPNIK_LOG_ERROR(enumeration)
-                        << "### FATAL: Not enough strings for enum "
-                        << our_name_ << " defined in file '" << filename
-                        << "' at line " << line_no;
-                //std::exit(1);
+                std::cerr << "### FATAL: Not enough strings for enum "
+                          << our_name_ << " defined in file '" << filename
+                          << "' at line " << line_no;
             }
         }
         if ( std::string("") != our_strings_[THE_MAX])
         {
-            MAPNIK_LOG_ERROR(enumeration)
-                    << "### FATAL: The string array for enum " << our_name_
-                    << " defined in file '" << filename << "' at line " << line_no
-                    << " has too many items or is not terminated with an "
-                    << "empty string";
-            //std::exit(1);
+            std::cerr << "### FATAL: The string array for enum " << our_name_
+                      << " defined in file '" << filename << "' at line " << line_no
+                      << " has too many items or is not terminated with an "
+                      << "empty string";
         }
         return true;
     }
@@ -330,8 +320,14 @@ operator>>(std::istream & is, mapnik::enumeration<ENUM, THE_MAX> & e)
 /** Helper macro. Creates a typedef.
  * @relates mapnik::enumeration
  */
+#ifdef _MSC_VER
+#define DEFINE_ENUM( name, e)                   \
+    template enumeration<e, e ## _MAX>;         \
+    typedef enumeration<e, e ## _MAX> name
+#else
 #define DEFINE_ENUM( name, e)                   \
     typedef enumeration<e, e ## _MAX> name
+#endif
 
 /** Helper macro. Runs the verify_mapnik_enum() method during static initialization.
  * @relates mapnik::enumeration

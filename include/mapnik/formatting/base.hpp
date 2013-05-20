@@ -23,18 +23,14 @@
 #define FORMATTING_BASE_HPP
 
 // mapnik
-#include <mapnik/feature.hpp>
 #include <mapnik/expression.hpp>
 
-// stl
-#include <set>
-
 // boost
-#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ptree_fwd.hpp>
 
 namespace mapnik {
 
-typedef std::set<expression_ptr> expression_set;
+class feature_impl;
 class processed_text;
 class xml_node;
 struct char_properties;
@@ -44,13 +40,13 @@ namespace formatting {
 class node;
 typedef boost::shared_ptr<node> node_ptr;
 
-class node
+class MAPNIK_DECL node
 {
 public:
     virtual ~node() {}
     virtual void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(xml_node const& xml);
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const = 0;
+    virtual void apply(char_properties const& p, feature_impl const& feature, processed_text &output) const = 0;
     virtual void add_expressions(expression_set &output) const;
 };
 } //ns formatting

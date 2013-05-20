@@ -31,14 +31,16 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/request.hpp>
 #include <mapnik/rule.hpp> // for all symbolizers
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/cairo_context.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // cairo
-#include <cairomm/context.h>
-#include <cairomm/surface.h>
+#include <cairo.h>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
 
 // FIXME
@@ -53,27 +55,26 @@ namespace mapnik {
 
 class marker;
 
-class cairo_face;
-
-typedef boost::shared_ptr<cairo_face> cairo_face_ptr;
-
-class cairo_face_manager : private boost::noncopyable
-{
-public:
-    cairo_face_manager(boost::shared_ptr<freetype_engine> engine);
-    cairo_face_ptr get_face(face_ptr face);
-
-private:
-    typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
-    boost::shared_ptr<freetype_engine> font_engine_;
-    cairo_face_cache cache_;
-};
-
-class MAPNIK_DECL cairo_renderer_base : private boost::noncopyable
+class MAPNIK_DECL cairo_renderer_base : private mapnik::noncopyable
 {
 protected:
-    cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
-    cairo_renderer_base(Map const& m, Cairo::RefPtr<Cairo::Context> const& context, boost::shared_ptr<label_collision_detector4> detector, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    cairo_renderer_base(Map const& m,
+                        cairo_ptr const& cairo,
+                        double scale_factor=1.0,
+                        unsigned offset_x=0,
+                        unsigned offset_y=0);
+    cairo_renderer_base(Map const& m,
+                        request const& req,
+                        cairo_ptr const& cairo,
+                        double scale_factor=1.0,
+                        unsigned offset_x=0,
+                        unsigned offset_y=0);
+    cairo_renderer_base(Map const& m,
+                        cairo_ptr const& cairo,
+                        boost::shared_ptr<label_collision_detector4> detector,
+                        double scale_factor=1.0,
+                        unsigned offset_x=0,
+                        unsigned offset_y=0);
 public:
     ~cairo_renderer_base();
     void start_map_processing(Map const& map);
@@ -117,19 +118,26 @@ public:
     {
         // cairo renderer doesn't support processing of multiple symbolizers.
         return false;
-    };
+    }
     void painted(bool /*painted*/)
     {
         // nothing to do
     }
 
-    void render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & mtx, double opacity=1.0, bool recenter=true);
+    inline eAttributeCollectionPolicy attribute_collection_policy() const
+    {
+        return DEFAULT;
+    }
+
+    void render_marker(pixel_position const& pos,
+                       marker const& marker,
+                       agg::trans_affine const& mtx,
+                       double opacity=1.0,
+                       bool recenter=true);
     void render_box(box2d<double> const& b);
 protected:
-
-
     Map const& m_;
-    Cairo::RefPtr<Cairo::Context> context_;
+    cairo_context context_;
     unsigned width_;
     unsigned height_;
     double scale_factor_;
@@ -139,6 +147,7 @@ protected:
     cairo_face_manager face_manager_;
     boost::shared_ptr<label_collision_detector4> detector_;
     box2d<double> query_extent_;
+    void setup(Map const& m);
 };
 
 template <typename T>
@@ -147,8 +156,23 @@ class MAPNIK_DECL cairo_renderer : public feature_style_processor<cairo_renderer
 {
 public:
     typedef cairo_renderer_base processor_impl_type;
-    cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
-    cairo_renderer(Map const& m, Cairo::RefPtr<T> const& surface, boost::shared_ptr<label_collision_detector4> detector, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    cairo_renderer(Map const& m,
+                   T const& obj,
+                   double scale_factor=1.0,
+                   unsigned offset_x=0,
+                   unsigned offset_y=0);
+    cairo_renderer(Map const& m,
+                   request const& req,
+                   T const& obj,
+                   double scale_factor=1.0,
+                   unsigned offset_x=0,
+                   unsigned offset_y=0);
+    cairo_renderer(Map const& m,
+                   T const& obj,
+                   boost::shared_ptr<label_collision_detector4> detector,
+                   double scale_factor=1.0,
+                   unsigned offset_x=0,
+                   unsigned offset_y=0);
     void end_map_processing(Map const& map);
 };
 }

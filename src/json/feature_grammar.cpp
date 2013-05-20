@@ -38,7 +38,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
       put_property_(put_property(tr))
 {
     using qi::lit;
-    using qi::int_;
+    using qi::long_long;
     using qi::double_;
 #if BOOST_VERSION > 104200
     using qi::no_skip;
@@ -90,7 +90,7 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
 #else
     number = strict_double
 #endif
-        | int_
+        | int__
         | lit("true") [_val = true]
         | lit ("false") [_val = false]
         | lit("null")[_val = construct<value_null>()]
@@ -134,23 +134,26 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
 
     attribute_value %= number | string_  ;
 
+    feature.name("Feature");
+    properties.name("Properties");
+    attributes.name("Attributes");
 
     on_error<fail>
         (
             feature
             , std::clog
             << phoenix::val("Error! Expecting ")
-            << _4                               // what failed?
+            << _4 // what failed?
             << phoenix::val(" here: \"")
-            << construct<std::string>(_3, _2)   // iterators to error-pos, end
+            << where_message_(_3, _2, 16) // where? 16 is max chars to output
             << phoenix::val("\"")
             << std::endl
             );
 
 }
 
-template struct mapnik::json::feature_grammar<std::string::const_iterator,mapnik::Feature>;
-template struct mapnik::json::feature_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> >,mapnik::Feature>;
+template struct mapnik::json::feature_grammar<std::string::const_iterator,mapnik::feature_impl>;
+template struct mapnik::json::feature_grammar<boost::spirit::multi_pass<std::istreambuf_iterator<char> >,mapnik::feature_impl>;
 
 }}
 

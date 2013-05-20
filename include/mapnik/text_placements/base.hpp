@@ -37,7 +37,7 @@ class MAPNIK_DECL text_placements;
  * This placement has first to be tested by placement_finder to verify it
  * can actually be used.
  */
-class text_placement_info : boost::noncopyable
+class MAPNIK_DECL text_placement_info : mapnik::noncopyable
 {
 public:
     /** Constructor. Takes the parent text_placements object as a parameter
@@ -77,7 +77,7 @@ typedef boost::shared_ptr<text_placement_info> text_placement_info_ptr;
  * semantics. Basically this class just makes sure a pointer of the right
  * class is returned by the get_placement_info call.
  */
-class text_placements
+class MAPNIK_DECL text_placements
 {
 public:
     text_placements();

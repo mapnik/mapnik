@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/expression.hpp>
 

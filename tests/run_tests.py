@@ -4,8 +4,8 @@ import sys
 
 try:
     import nose
-except ImportError:
-    sys.stderr.write("Unable to run python tests: the third party 'nose' module is required\nTo install 'nose' do:\n\tsudo pip install nose (or on debian systems: apt-get install python-nose\n")
+except ImportError, e:
+    sys.stderr.write("Unable to run python tests: the third party 'nose' module is required\nTo install 'nose' do:\n\tsudo pip install nose (or on debian systems: apt-get install python-nose): %s\n" % e)
     sys.exit(1)
     
 from python_tests.utilities import TodoPlugin
@@ -72,8 +72,8 @@ def main():
         argv.append('-v')
         argv.append('-v')
 
-    dirname = os.path.dirname(sys.argv[0]) 
-    argv.extend(['-w', dirname+'/python_tests'])
+    dirname = os.path.dirname(sys.argv[0])
+    argv.extend(['-w', os.path.join(dirname,'python_tests')])
 
     if not nose.run(argv=argv, plugins=[TodoPlugin(), Doctest()]):
         sys.exit(1)

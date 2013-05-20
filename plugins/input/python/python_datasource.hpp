@@ -12,7 +12,7 @@ class python_datasource : public mapnik::datasource
 public:
     // constructor
     // arguments must not change
-    python_datasource(mapnik::parameters const& params, bool bind=true);
+    python_datasource(mapnik::parameters const& params);
 
     // destructor
     virtual ~python_datasource ();
@@ -41,15 +41,12 @@ public:
     // mandatory: return the layer descriptor
     mapnik::layer_descriptor get_descriptor() const;
 
-    // mandatory: will bind the datasource given params
-    void bind() const;
-
 private:
     static const char* name_;
-    mutable mapnik::layer_descriptor desc_;
+    mapnik::layer_descriptor desc_;
     const std::string factory_;
     std::map<std::string, std::string> kwargs_;
-    mutable boost::python::object datasource_;
+    boost::python::object datasource_;
 };
 
 

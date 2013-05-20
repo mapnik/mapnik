@@ -28,50 +28,27 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
 #include <mapnik/gradient.hpp>
-
-// boost
-#include <boost/utility.hpp>
-#include <libxml/xmlreader.h>
+#include <mapnik/noncopyable.hpp>
 
 // stl
 #include <map>
 
 namespace  mapnik { namespace svg {
 
-    class svg_parser : private boost::noncopyable
+    class svg_parser : private mapnik::noncopyable
     {
     public:
         explicit svg_parser(svg_converter_type & path);
         ~svg_parser();
         void parse(std::string const& filename);
         void parse_from_string(std::string const& svg);
-    private:
-        bool parse_reader(xmlTextReaderPtr reader);
-        void process_node(xmlTextReaderPtr reader);
-        void start_element(xmlTextReaderPtr reader);
-        void end_element(xmlTextReaderPtr reader);
-        void parse_path(xmlTextReaderPtr reader);
-        void parse_polygon(xmlTextReaderPtr reader);
-        void parse_polyline(xmlTextReaderPtr reader);
-        void parse_line(xmlTextReaderPtr reader);
-        void parse_rect(xmlTextReaderPtr reader);
-        void parse_circle(xmlTextReaderPtr reader);
-        void parse_ellipse(xmlTextReaderPtr reader);
-        void parse_linear_gradient(xmlTextReaderPtr reader);
-        void parse_radial_gradient(xmlTextReaderPtr reader);
-        bool parse_common_gradient(xmlTextReaderPtr reader);
-        void parse_gradient_stop(xmlTextReaderPtr reader);
-        void parse_pattern(xmlTextReaderPtr reader);
-        void parse_attr(xmlTextReaderPtr reader);
-        void parse_attr(const xmlChar * name, const xmlChar * value );
-    private:
         svg_converter_type & path_;
         bool is_defs_;
         std::map<std::string, gradient> gradient_map_;
         std::pair<std::string, gradient> temporary_gradient_;
     };
 
-    }}
+}}
 
 
 #endif // MAPNIK_SVG_PARSER_HPP

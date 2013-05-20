@@ -15,8 +15,8 @@
 #ifndef AGG_ARRAY_INCLUDED
 #define AGG_ARRAY_INCLUDED
 
-#include <stddef.h>
-#include <string.h>
+#include <cstddef>
+#include <cstring>
 #include "agg_basics.h"
 
 namespace agg

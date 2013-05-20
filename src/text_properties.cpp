@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 // mapnik
+#include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/processed_text.hpp>
 #include <mapnik/ptree_helpers.hpp>
@@ -30,6 +32,7 @@
 
 // boost
 #include <boost/make_shared.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik
 {
@@ -60,7 +63,7 @@ text_symbolizer_properties::text_symbolizer_properties() :
 
 }
 
-void text_symbolizer_properties::process(processed_text &output, Feature const& feature) const
+void text_symbolizer_properties::process(processed_text &output, feature_impl const& feature) const
 {
     output.clear();
     if (tree_) {

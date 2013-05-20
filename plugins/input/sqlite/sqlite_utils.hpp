@@ -26,8 +26,10 @@
 // stl
 #include <string>
 #include <vector>
+#include <algorithm>
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/geometry.hpp>
@@ -492,7 +494,23 @@ public:
                               std::string const& table
         )
     {
-        if (has_spatial_index)
+        if (! metadata.empty())
+        {
+            std::ostringstream s;
+            s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata;
+            s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table << "')";
+            boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+            if (rs->is_valid() && rs->step_next())
+            {
+                double xmin = rs->column_double(0);
+                double ymin = rs->column_double(1);
+                double xmax = rs->column_double(2);
+                double ymax = rs->column_double(3);
+                extent.init (xmin, ymin, xmax, ymax);
+                return true;
+            }
+        }
+        else if (has_spatial_index)
         {
             std::ostringstream s;
             s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM "
@@ -512,22 +530,7 @@ public:
                 }
             }
         }
-        else if (! metadata.empty())
-        {
-            std::ostringstream s;
-            s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata;
-            s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table << "')";
-            boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
-            if (rs->is_valid() && rs->step_next())
-            {
-                double xmin = rs->column_double(0);
-                double ymin = rs->column_double(1);
-                double xmax = rs->column_double(2);
-                double ymax = rs->column_double(3);
-                extent.init (xmin, ymin, xmax, ymax);
-                return true;
-            }
-        }
+
         else if (! key_field.empty())
         {
             std::ostringstream s;
@@ -554,7 +557,7 @@ public:
         }
         catch (std::exception const& ex)
         {
-            //std::clog << "no: " << ex.what() << "\n";
+            MAPNIK_LOG_DEBUG(sqlite) << "has_rtree returned:" <<  ex.what();
             return false;
         }
         return false;
@@ -607,9 +610,7 @@ public:
                     break;
 
                 default:
-#ifdef MAPNIK_DEBUG
-                    std::clog << "Sqlite Plugin: unknown type_oid=" << type_oid << std::endl;
-#endif
+                    MAPNIK_LOG_DEBUG(sqlite) << "detect_types_from_subquery: unknown type_oid=" << type_oid;
                     break;
                 }
             }
@@ -640,9 +641,8 @@ public:
             found_table = true;
             const char* fld_name = rs->column_text(1);
             std::string fld_type(rs->column_text(2));
-            int fld_pk = rs->column_integer(5);
-            boost::algorithm::to_lower(fld_type);
-
+            sqlite_int64 fld_pk = rs->column_integer64(5);
+            std::transform(fld_type.begin(), fld_type.end(), fld_type.begin(), ::tolower);
             // TODO - how to handle primary keys on multiple columns ?
             if (key_field.empty() && ! found_pk && fld_pk != 0)
             {
@@ -690,20 +690,22 @@ public:
                         desc.add_descriptor(mapnik::attribute_descriptor(fld_name, mapnik::String));
                     }
                 }
-#ifdef MAPNIK_DEBUG
                 else
                 {
                     // "Column Affinity" says default to "Numeric" but for now we pass..
                     //desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
 
-                    // TODO - this should not fail when we specify geometry_field in XML file
-
-                    std::clog << "Sqlite Plugin: column '"
-                              << std::string(fld_name)
-                              << "' unhandled due to unknown type: "
-                              << fld_type << std::endl;
-                }
+#ifdef MAPNIK_LOG
+                    // Do not fail when we specify geometry_field in XML file
+                    if (field.empty())
+                    {
+                        MAPNIK_LOG_DEBUG(sqlite) << "Column '"
+                                                 << std::string(fld_name)
+                                                 << "' unhandled due to unknown type: "
+                                                 << fld_type;
+                    }
 #endif
+                }
             }
         }
 

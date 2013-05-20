@@ -67,6 +67,10 @@ public:
     T miny() const;
     T maxx() const;
     T maxy() const;
+    void set_minx(T v);
+    void set_miny(T v);
+    void set_maxx(T v);
+    void set_maxy(T v);
     T width() const;
     T height() const;
     void width(T w);
@@ -87,6 +91,7 @@ public:
     void re_center(const coord<T,2>& c);
     void init(T x0,T y0,T x1,T y1);
     void clip(const box2d_type &other);
+    void pad(T padding);
     bool from_string(std::string const& s);
     bool valid() const;
 

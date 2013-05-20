@@ -1,3 +1,4 @@
+
 /*****************************************************************************
  *
  * This file is part of Mapnik (c++ mapping toolkit)
@@ -21,12 +22,14 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_pixfmt.hpp>
-#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/pixel_position.hpp>
+#include <mapnik/font_util.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -49,7 +52,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
 
     text_renderer<T> ren(pixmap_,
                          font_manager_,
-                         *(font_manager_.get_stroker()),
+                         sym.get_halo_rasterizer(),
                          sym.comp_op(),
                          scale_factor_);
 
@@ -77,7 +80,7 @@ void  grid_renderer<T>::process(shield_symbolizer const& sym,
                           sym.comp_op());
 
             ren.prepare_glyphs(placements[ii]);
-            ren.render_id(feature.id(), placements[ii].center, 2);
+            ren.render_id(feature.id(), placements[ii].center);
         }
     }
     if (placement_found)

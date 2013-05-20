@@ -1,4 +1,4 @@
-<Map srs="+init=epsg:4326" background-color="white">
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="white">
 
 <Style name="test">
   <Rule>
@@ -6,7 +6,7 @@
   </Rule>
 </Style>
 
-<Layer name="test" srs="+init=epsg:4326">
+<Layer name="test" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <StyleName>test</StyleName>
     <Datasource>
         <Parameter name="file">../../data/raster/river_wgs.tiff</Parameter>

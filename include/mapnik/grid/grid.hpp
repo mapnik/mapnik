@@ -25,7 +25,6 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/debug.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/grid/grid_view.hpp>
@@ -257,7 +256,7 @@ public:
 
 };
 
-typedef MAPNIK_DECL hit_grid<int> grid;
+typedef hit_grid<mapnik::value_integer> grid;
 
 }
 #endif //MAPNIK_GRID_HPP

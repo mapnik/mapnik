@@ -4,6 +4,7 @@
 #include <boost/make_shared.hpp>
 #include <iostream>
 #include <mapnik/projection.hpp>
+#include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/graphics.hpp>
@@ -37,6 +38,7 @@ int main( int, char*[] )
     mapnik::Map map(256,256);
     mapnik::rule r;
     r.set_filter(mapnik::parse_expression("[foo]='bar'"));
+    r.append(mapnik::markers_symbolizer());
     mapnik::feature_type_style style;
     style.add_rule(r);
     map.insert_style("style",style);
@@ -49,11 +51,6 @@ int main( int, char*[] )
             p["type"]="csv";
             p["inline"]="x,y\n0,0";
             mapnik::datasource_ptr ds = mapnik::datasource_cache::instance().create(p);
-            //mapnik::datasource_ptr ds = boost::make_shared<mapnik::memory_datasource>();
-            //mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
-            //mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx, 1));
-            //mapnik::memory_datasource *mem_ds = dynamic_cast<mapnik::memory_datasource *>(ds.get());
-            //mem_ds->push(feature);
             mapnik::layer l("layer");
             l.set_datasource(ds);
             l.add_style("style");
@@ -64,7 +61,7 @@ int main( int, char*[] )
             mapnik::agg_renderer<mapnik::image_32> ren(m,im);
             //std::clog << mapnik::save_map_to_string(m) << "\n";
             BOOST_TEST(true);
-            // should throw here
+            // should throw here with "CSV Plugin: no attribute 'foo'. Valid attributes are: x,y."
             ren.apply();
             BOOST_TEST(false);
         } catch (...) {
@@ -89,19 +86,19 @@ int main( int, char*[] )
     /*
     // not working, oddly segfaults valgrind
     try {
-        sqlite3_initialize();
-        // http://stackoverflow.com/questions/11107703/sqlite3-sigsegvs-with-valgrind
-        sqlite3_config(SQLITE_CONFIG_HEAP, malloc (1024*1024), 1024*1024, 64);
-        mapnik::datasource_cache::instance().register_datasource("./plugins/input/sqlite.input");
-        mapnik::parameters p;
-        p["type"]="sqlite";
-        p["file"]="tests/data/sqlite/world.sqlite";
-        p["table"]="world_merc";
-        mapnik::datasource_cache::instance().create(p);
-        sqlite3_shutdown();
-        BOOST_TEST(true);
+    sqlite3_initialize();
+    // http://stackoverflow.com/questions/11107703/sqlite3-sigsegvs-with-valgrind
+    sqlite3_config(SQLITE_CONFIG_HEAP, malloc (1024*1024), 1024*1024, 64);
+    mapnik::datasource_cache::instance().register_datasource("./plugins/input/sqlite.input");
+    mapnik::parameters p;
+    p["type"]="sqlite";
+    p["file"]="tests/data/sqlite/world.sqlite";
+    p["table"]="world_merc";
+    mapnik::datasource_cache::instance().create(p);
+    sqlite3_shutdown();
+    BOOST_TEST(true);
     } catch (...) {
-        BOOST_TEST(false);
+    BOOST_TEST(false);
     }
     */
 

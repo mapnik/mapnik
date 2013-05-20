@@ -151,6 +151,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             double lox,loy,hix,hiy;
             svg.bounding_rect(&lox, &loy, &hix, &hiy);
             marker_path->set_bounding_box(lox,loy,hix,hiy);
+            marker_path->set_dimensions(svg.width(),svg.height());
             marker_ptr mark(boost::make_shared<marker>(marker_path));
             result.reset(mark);
             if (update_cache)
@@ -180,6 +181,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
                 double lox,loy,hix,hiy;
                 svg.bounding_rect(&lox, &loy, &hix, &hiy);
                 marker_path->set_bounding_box(lox,loy,hix,hiy);
+                marker_path->set_dimensions(svg.width(),svg.height());
                 marker_ptr mark(boost::make_shared<marker>(marker_path));
                 result.reset(mark);
                 if (update_cache)
@@ -221,10 +223,6 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
     catch (std::exception const& ex)
     {
         MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading: '" << uri << "' (" << ex.what() << ")";
-    }
-    catch (...)
-    {
-        MAPNIK_LOG_ERROR(marker_cache) << "Exception caught while loading: '" << uri << "'";
     }
     return result;
 }

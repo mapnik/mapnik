@@ -21,16 +21,18 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/agg_pattern_source.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/parse_path.hpp>
 
 // agg
 #include "agg_basics.h"
@@ -47,12 +49,11 @@
 #include "agg_conv_clip_polyline.h"
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/foreach.hpp>
 
 namespace {
 
-class pattern_source : private boost::noncopyable
+class pattern_source : private mapnik::noncopyable
 {
 public:
     pattern_source(mapnik::image_data_32 const& pattern)
@@ -132,14 +133,11 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (sym.clip())
     {
         double padding = (double)(query_extent_.width()/pixmap_.width());
-        float half_stroke = (*mark)->width()/2.0;
+        double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
-        double x0 = query_extent_.minx();
-        double y0 = query_extent_.miny();
-        double x1 = query_extent_.maxx();
-        double y1 = query_extent_.maxy();
-        clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
+        padding *= scale_factor_;
+        clipping_extent.pad(padding);
     }
 
     typedef boost::mpl::vector<clip_line_tag,transform_tag,simplify_tag,smooth_tag> conv_types;

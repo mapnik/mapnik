@@ -24,10 +24,10 @@
 #include <boost/foreach.hpp>
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_pixfmt.hpp>
-#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/polygon_pattern_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
@@ -71,18 +71,18 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             converter.apply(geom);
         }
     }
-
-    typedef agg::renderer_base<mapnik::pixfmt_gray32> ren_base;
-    typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
+    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
+    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    mapnik::pixfmt_gray32 pixf(buf);
+    pixfmt_type pixf(buf);
 
-    ren_base renb(pixf);
-    renderer ren(renb);
+    grid_renderer_base_type renb(pixf);
+    renderer_type ren(renb);
 
     // render id
-    ren.color(mapnik::gray32(feature.id()));
+    ren.color(color_type(feature.id()));
     agg::scanline_bin sl;
     agg::render_scanlines(*ras_ptr, sl, ren);
 

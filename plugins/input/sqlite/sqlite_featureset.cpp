@@ -23,7 +23,6 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
@@ -38,7 +37,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
@@ -73,7 +71,14 @@ feature_ptr sqlite_featureset::next()
             return feature_ptr();
         }
 
-        feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer(1));
+        // null feature id is not acceptable
+        if (rs_->column_type(1) == SQLITE_NULL)
+        {
+            MAPNIK_LOG_ERROR(postgis) << "sqlite_featureset: null value encountered for key_field";
+            continue;
+        }
+
+        feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
         if (!geometry_utils::from_wkb(feature->paths(), data, size, format_))
             continue;
 
@@ -104,7 +109,7 @@ feature_ptr sqlite_featureset::next()
             {
             case SQLITE_INTEGER:
             {
-                feature->put(fld_name_str, rs_->column_integer(i));
+                feature->put<mapnik::value_integer>(fld_name_str, rs_->column_integer64(i));
                 break;
             }
 
@@ -117,15 +122,16 @@ feature_ptr sqlite_featureset::next()
             case SQLITE_TEXT:
             {
                 int text_col_size;
-                const char * data = rs_->column_text(i, text_col_size);
-                UnicodeString ustr = tr_->transcode(data, text_col_size);
+                const char * text_data = rs_->column_text(i, text_col_size);
+                UnicodeString ustr = tr_->transcode(text_data, text_col_size);
                 feature->put(fld_name_str, ustr);
                 break;
             }
 
             case SQLITE_NULL:
             {
-                feature->put(fld_name_str, mapnik::value_null());
+                // NOTE: we intentionally do not store null here
+                // since it is equivalent to the attribute not existing
                 break;
             }
 

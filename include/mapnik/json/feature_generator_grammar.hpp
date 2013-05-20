@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/value.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/json/geometry_generator_grammar.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
@@ -43,29 +44,29 @@
 namespace boost { namespace spirit { namespace traits {
 
 template <>
-struct is_container<mapnik::Feature const> : mpl::false_ {} ;
+struct is_container<mapnik::feature_impl const> : mpl::false_ {} ;
 
 template <>
-struct container_iterator<mapnik::Feature const>
+struct container_iterator<mapnik::feature_impl const>
 {
     typedef mapnik::feature_kv_iterator2 type;
 };
 
 template <>
-struct begin_container<mapnik::Feature const>
+struct begin_container<mapnik::feature_impl const>
 {
     static mapnik::feature_kv_iterator2
-    call (mapnik::Feature const& f)
+    call (mapnik::feature_impl const& f)
     {
         return mapnik::feature_kv_iterator2(mapnik::value_not_null(),f.begin(),f.end());
     }
 };
 
 template <>
-struct end_container<mapnik::Feature const>
+struct end_container<mapnik::feature_impl const>
 {
     static mapnik::feature_kv_iterator2
-    call (mapnik::Feature const& f)
+    call (mapnik::feature_impl const& f)
     {
         return mapnik::feature_kv_iterator2(mapnik::value_not_null(),f.end(),f.end());
     }
@@ -94,7 +95,7 @@ struct get_id
     template <typename T>
     struct result { typedef int type; };
 
-    int operator() (mapnik::Feature const& f) const
+    int operator() (mapnik::feature_impl const& f) const
     {
         return f.id();
     }
@@ -107,7 +108,7 @@ struct make_properties_range
     template <typename T>
     struct result { typedef properties_range_type type; };
 
-    properties_range_type operator() (mapnik::Feature const& f) const
+    properties_range_type operator() (mapnik::feature_impl const& f) const
     {
         return boost::make_iterator_range(f.begin(),f.end());
     }
@@ -173,7 +174,7 @@ struct escaped_string
 
 template <typename OutputIterator>
 struct feature_generator_grammar:
-        karma::grammar<OutputIterator, mapnik::Feature const&()>
+        karma::grammar<OutputIterator, mapnik::feature_impl const&()>
 {
     typedef boost::tuple<std::string, mapnik::value> pair_type;
     typedef make_properties_range::properties_range_type range_type;
@@ -186,7 +187,8 @@ struct feature_generator_grammar:
         using boost::spirit::karma::lit;
         using boost::spirit::karma::uint_;
         using boost::spirit::karma::bool_;
-        using boost::spirit::karma::int_;
+        //using boost::spirit::karma::int_;
+        //using boost::spirit::karma::long_long;
         using boost::spirit::karma::double_;
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
@@ -212,7 +214,7 @@ struct feature_generator_grammar:
             << value(phoenix::at_c<1>(_val))
             ;
 
-        value = (value_null_| bool_ | int_| double_ | ustring)[_1 = value_base_(_r1)]
+        value = (value_null_| bool_ | int__ | double_ | ustring)[_1 = value_base_(_r1)]
             ;
 
         value_null_ = string[_1 = "null"]
@@ -223,14 +225,15 @@ struct feature_generator_grammar:
     }
 
     // rules
-    karma::rule<OutputIterator, mapnik::Feature const&()> feature;
+    karma::rule<OutputIterator, mapnik::feature_impl const&()> feature;
     multi_geometry_generator_grammar<OutputIterator> geometry;
     escaped_string<OutputIterator> escaped_string_;
-    karma::rule<OutputIterator, mapnik::Feature const&()> properties;
+    karma::rule<OutputIterator, mapnik::feature_impl const&()> properties;
     karma::rule<OutputIterator, pair_type()> pair;
     karma::rule<OutputIterator, void(mapnik::value const&)> value;
     karma::rule<OutputIterator, mapnik::value_null()> value_null_;
     karma::rule<OutputIterator, UnicodeString()> ustring;
+    typename karma::int_generator<mapnik::value_integer,10, false> int__;
     // phoenix functions
     phoenix::function<get_id> id_;
     phoenix::function<value_base> value_base_;

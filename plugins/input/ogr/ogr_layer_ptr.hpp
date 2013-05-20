@@ -27,8 +27,6 @@
 #include <mapnik/debug.hpp>
 
 // stl
-#include <iostream>
-#include <fstream>
 #include <stdexcept>
 
 // ogr

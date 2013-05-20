@@ -22,8 +22,11 @@
 
 // mapnik
 #include <mapnik/formatting/list.hpp>
+#include <mapnik/feature.hpp>
+
 // boost
 #include <boost/foreach.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace mapnik {
 using boost::property_tree::ptree;
@@ -40,7 +43,7 @@ void list_node::to_xml(boost::property_tree::ptree & xml) const
 }
 
 
-void list_node::apply(char_properties const& p, Feature const& feature, processed_text &output) const
+void list_node::apply(char_properties const& p, feature_impl const& feature, processed_text &output) const
 {    
     BOOST_FOREACH(node_ptr const& node, children_)
     {

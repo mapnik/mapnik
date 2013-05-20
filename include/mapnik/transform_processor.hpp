@@ -25,19 +25,24 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
-#include <mapnik/feature.hpp>
+#endif
 #include <mapnik/value.hpp>
 #include <mapnik/transform_expression.hpp>
 #include <mapnik/expression_evaluator.hpp>
 
 // boost
 #include <boost/foreach.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
 
 // agg
 #include <agg_trans_affine.h>
 
 namespace mapnik {
+
+class feature_impl;
 
 template <typename Container> struct expression_attributes;
 
@@ -225,7 +230,7 @@ struct transform_processor
     }
 };
 
-typedef mapnik::transform_processor<Feature> transform_processor_type;
+typedef mapnik::transform_processor<feature_impl> transform_processor_type;
 
 } // namespace mapnik
 

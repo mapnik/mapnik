@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -16,7 +16,7 @@
 #ifndef AGG_GAMMA_FUNCTIONS_INCLUDED
 #define AGG_GAMMA_FUNCTIONS_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 namespace agg
@@ -40,6 +40,7 @@ namespace agg
 
         double operator() (double x) const
         {
+            if (x == 0.0) return 0.0;
             return pow(x, m_gamma);
         }
 
@@ -85,7 +86,11 @@ namespace agg
         {
             if(x < m_start) return 0.0;
             if(x > m_end) return 1.0;
-            return (x - m_start) / (m_end - m_start);
+            double delta = m_end - m_start;
+            // avoid nan from potential zero division
+            // https://github.com/mapnik/mapnik/issues/761
+            if (delta <= 0.0) return 0.0;
+            return (x - m_start) / delta;
         }
 
     private:
@@ -118,6 +123,3 @@ namespace agg
 }
 
 #endif
-
-
-

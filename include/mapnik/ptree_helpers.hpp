@@ -23,6 +23,9 @@
 #ifndef MAPNIK_PTREE_HELPERS_HPP
 #define MAPNIK_PTREE_HELPERS_HPP
 
+// stl
+#include <string>
+
 // boost
 #include <boost/property_tree/ptree.hpp>
 

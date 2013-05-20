@@ -25,11 +25,13 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/text_properties.hpp>
 //#include <mapnik/text_placements/base.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/label_collision_detector.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/noncopyable.hpp>
 
 
 // agg
@@ -54,10 +56,10 @@ typedef label_collision_detector4 DetectorType;
 
 
 template <typename DetectorT>
-class placement_finder : boost::noncopyable
+class placement_finder : mapnik::noncopyable
 {
 public:
-    placement_finder(Feature const& feature,
+    placement_finder(feature_impl const& feature,
                      text_placement_info const& placement_info,
                      string_info const& info,
                      DetectorT & detector,

@@ -24,11 +24,13 @@
 #define MAPNIK_MAP_HPP
 
 // mapnik
+#include <mapnik/color.hpp>
+#include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/feature_type_style.hpp>
-#include <mapnik/datasource.hpp>
+#include <mapnik/datasource.hpp>  // for featureset_ptr
 #include <mapnik/layer.hpp>
 #include <mapnik/params.hpp>
+#include <mapnik/well_known_srs.hpp>
 
 // boost
 #include <boost/optional/optional.hpp>
@@ -36,6 +38,7 @@
 namespace mapnik
 {
 
+class feature_type_style;
 class CoordTransform;
 
 class MAPNIK_DECL Map
@@ -103,20 +106,20 @@ public:
      *  @param height Initial map height.
      *  @param srs Initial map projection.
      */
-    Map(int width, int height, std::string const& srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+    Map(int width, int height, std::string const& srs=MAPNIK_LONGLAT_PROJ);
 
     /*! \brief Copy Constructur.
      *
      *  @param rhs Map to copy from.
      */
-    Map(const Map& rhs);
+    Map(Map const& rhs);
 
     /*! \brief Assignment operator
      *
      *  TODO: to be documented
      *
      */
-    Map& operator=(const Map& rhs);
+    Map& operator=(Map const& rhs);
 
     /*! \brief Get all styles
      * @return Const reference to styles
@@ -152,7 +155,7 @@ public:
      *  @param name The name of the style.
      *  @param style The style to insert.
      *  @return true If success.
-     *  @return false If no success.
+     *          false If no success.
      */
     bool insert_style(std::string const& name,feature_type_style const& style);
 
@@ -169,9 +172,9 @@ public:
 
     /*! \brief Insert a fontset into the map.
      *  @param name The name of the fontset.
-     *  @param style The fontset to insert.
+     *  @param fontset The fontset to insert.
      *  @return true If success.
-     *  @return false If failure.
+     *          false If failure.
      */
     bool insert_fontset(std::string const& name, font_set const& fontset);
 
@@ -198,13 +201,13 @@ public:
     /*! \brief Add a layer to the map.
      *  @param l The layer to add.
      */
-    void addLayer(const layer& l);
+    void addLayer(layer const& l);
 
     /*! \brief Get a layer.
      *  @param index layer number.
      *  @return Constant layer.
      */
-    const layer& getLayer(size_t index) const;
+    layer const& getLayer(size_t index) const;
 
     /*! \brief Get a layer.
      *  @param index layer number.
@@ -264,7 +267,7 @@ public:
     /*! \brief Set the map background color.
      *  @param c Background color.
      */
-    void set_background(const color& c);
+    void set_background(color const& c);
 
     /*! \brief Get the map background color
      *  @return Background color as boost::optional
@@ -273,7 +276,7 @@ public:
     boost::optional<color> const& background() const;
 
     /*! \brief Set the map background image filename.
-     *  @param c Background image filename.
+     *  @param image_filename Background image filename.
      */
     void set_background_image(std::string const& image_filename);
 
@@ -309,8 +312,8 @@ public:
      */
     std::string const& base_path() const;
 
-    /*! \brief Set the map base path where paths should be releative to.
-     *  @param srs Map base_path.
+    /*! \brief Set the map base path where paths should be relative to.
+     *  @param base Map base_path.
      */
     void set_base_path(std::string const& base);
 
@@ -324,7 +327,7 @@ public:
      *  Aspect is handled automatic if not fitting to width/height.
      *  @param box The bounding box where to zoom.
      */
-    void zoom_to_box(const box2d<double>& box);
+    void zoom_to_box(box2d<double> const& box);
 
     /*! \brief Zoom the map to show all data.
      */
@@ -337,7 +340,7 @@ public:
     /*! \brief Get current bounding box.
      *  @return The current bounding box.
      */
-    const box2d<double>& get_current_extent() const;
+    box2d<double> const& get_current_extent() const;
 
     /*! \brief Get current buffered bounding box.
      *  @return The current buffered bounding box.

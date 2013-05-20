@@ -22,13 +22,13 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/util/trim.hpp>
 
 // stl
 #include <stdexcept>
 
 // boost
 #include <boost/tokenizer.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 // agg
@@ -41,9 +41,9 @@ box2d<T>::box2d()
     :minx_(0),miny_(0),maxx_(-1),maxy_(-1) {}
 
 template <typename T>
-box2d<T>::box2d(T minx_,T miny_,T maxx_,T maxy_)
+box2d<T>::box2d(T minx,T miny,T maxx,T maxy)
 {
-    init(minx_,miny_,maxx_,maxy_);
+    init(minx,miny,maxx,maxy);
 }
 
 template <typename T>
@@ -126,6 +126,30 @@ inline
 T box2d<T>::maxy() const
 {
     return maxy_;
+}
+
+template<typename T>
+void box2d<T>::set_minx(T v)
+{
+    minx_ = v;
+}
+
+template<typename T>
+void box2d<T>::set_miny(T v)
+{
+    miny_ = v;
+}
+
+template<typename T>
+void box2d<T>::set_maxx(T v)
+{
+    maxx_ = v;
+}
+
+template<typename T>
+void box2d<T>::set_maxy(T v)
+{
+    maxy_ = v;
 }
 
 template <typename T>
@@ -344,6 +368,17 @@ void box2d<T>::clip(const box2d_type& other)
     maxy_ = std::min(maxy_,other.maxy());
 }
 
+template <typename T>
+#if !defined(__SUNPRO_CC)
+inline
+#endif
+void box2d<T>::pad(T padding)
+{
+    minx_ -= padding;
+    miny_ -= padding;
+    maxx_ += padding;
+    maxy_ += padding;
+}
 
 template <typename T>
 #if !defined(__SUNPRO_CC)
@@ -359,14 +394,17 @@ bool box2d<T>::from_string(std::string const& s)
     for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin();
          beg != tok.end(); ++beg)
     {
-        std::string item(*beg);
-        boost::trim(item);
+        std::string item = mapnik::util::trim_copy(*beg);
         // note: we intentionally do not use mapnik::util::conversions::string2double
         // here to ensure that shapeindex can statically compile mapnik::box2d without
         // needing to link to libmapnik
         std::string::const_iterator str_beg = item.begin();
         std::string::const_iterator str_end = item.end();
-        bool r = boost::spirit::qi::phrase_parse(str_beg,str_end,boost::spirit::qi::double_,boost::spirit::ascii::space,d[i]);
+        bool r = boost::spirit::qi::phrase_parse(str_beg,
+                                                 str_end,
+                                                 boost::spirit::qi::double_,
+                                                 boost::spirit::ascii::space,
+                                                 d[i]);
         if (!(r && (str_beg == str_end)))
         {
             break;

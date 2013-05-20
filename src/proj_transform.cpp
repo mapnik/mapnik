@@ -26,36 +26,55 @@
 #include <mapnik/coord.hpp>
 #include <mapnik/utils.hpp>
 
+#ifdef MAPNIK_USE_PROJ4
 // proj4
 #include <proj_api.h>
+#endif
 
 // stl
 #include <vector>
-
-static const float MAXEXTENT = 20037508.34;
-static const float M_PI_by2 = M_PI / 2;
-static const float D2R = M_PI / 180;
-static const float R2D = 180 / M_PI;
-static const float M_PIby360 = M_PI / 360;
-static const float MAXEXTENTby180 = MAXEXTENT/180;
 
 namespace mapnik {
 
 proj_transform::proj_transform(projection const& source,
                                projection const& dest)
     : source_(source),
-      dest_(dest)
+      dest_(dest),
+      is_source_longlat_(false),
+      is_dest_longlat_(false),
+      wgs84_to_merc_(false),
+      merc_to_wgs84_(false)
 {
-    is_source_longlat_ = source_.is_geographic();
-    is_dest_longlat_ = dest_.is_geographic();
     is_source_equal_dest_ = (source_ == dest_);
-    if (source.params() == "+init=epsg:3857" && dest.params() == "+init=epsg:4326")
+    if (!is_source_equal_dest_)
     {
-        wgs84_to_merc_ = true;
-    }
-    else
-    {
-        wgs84_to_merc_ = false;
+        is_source_longlat_ = source_.is_geographic();
+        is_dest_longlat_ = dest_.is_geographic();
+        boost::optional<well_known_srs_e> src_k = source.well_known();
+        boost::optional<well_known_srs_e> dest_k = dest.well_known();
+        bool known_trans = false;
+        if (src_k && dest_k)
+        {
+            if (*src_k == WGS_84 && *dest_k == G_MERC)
+            {
+                wgs84_to_merc_ = true;
+                known_trans = true;
+            }
+            else if (*src_k == G_MERC && *dest_k == WGS_84)
+            {
+                merc_to_wgs84_ = true;
+                known_trans = true;
+            }
+        }
+        if (!known_trans)
+        {
+#ifdef MAPNIK_USE_PROJ4
+            source_.init_proj4();
+            dest_.init_proj4();
+#else
+            throw std::runtime_error(std::string("Cannot initialize proj_transform for given projections without proj4 support (-DMAPNIK_USE_PROJ4): '") + source_.params() + "'->'" + dest_.params() + "'");
+#endif
+        }
     }
 }
 
@@ -63,7 +82,6 @@ bool proj_transform::equal() const
 {
     return is_source_equal_dest_;
 }
-
 
 bool proj_transform::forward (double & x, double & y , double & z) const
 {
@@ -76,20 +94,16 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
     if (is_source_equal_dest_)
         return true;
 
-    if (wgs84_to_merc_) {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i] = (x[i] / MAXEXTENT) * 180;
-            y[i] = (y[i] / MAXEXTENT) * 180;
-            y[i] = R2D * (2 * atan(exp(y[i] * D2R)) - M_PI_by2);
-            if (x[i] > 180) x[i] = 180;
-            if (x[i] < -180) x[i] = -180;
-            if (y[i] > 85.0511) y[i] = 85.0511;
-            if (y[i] < -85.0511) y[i] = -85.0511;
-        }
-        return true;
+    if (wgs84_to_merc_)
+    {
+        return lonlat2merc(x,y,point_count);
+    }
+    else if (merc_to_wgs84_)
+    {
+        return merc2lonlat(x,y,point_count);
     }
 
+#ifdef MAPNIK_USE_PROJ4
     if (is_source_longlat_)
     {
         int i;
@@ -99,16 +113,11 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
         }
     }
 
-    do {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-        mutex::scoped_lock lock(projection::mutex_);
-#endif
-        if (pj_transform( source_.proj_, dest_.proj_, point_count,
-                          0, x,y,z) != 0)
-        {
-            return false;
-        }
-    } while(false);
+    if (pj_transform( source_.proj_, dest_.proj_, point_count,
+                      0, x,y,z) != 0)
+    {
+        return false;
+    }
 
     if (is_dest_longlat_)
     {
@@ -118,7 +127,7 @@ bool proj_transform::forward (double * x, double * y , double * z, int point_cou
             y[i] *= RAD_TO_DEG;
         }
     }
-
+#endif
     return true;
 }
 
@@ -127,20 +136,16 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
     if (is_source_equal_dest_)
         return true;
 
-    if (wgs84_to_merc_) {
-        int i;
-        for(i=0; i<point_count; i++) {
-            x[i] = x[i] * MAXEXTENTby180;
-            y[i] = std::log(tan((90 + y[i]) * M_PIby360)) / D2R;
-            y[i] = y[i] * MAXEXTENTby180;
-            if (x[i] > MAXEXTENT) x[i] = MAXEXTENT;
-            if (x[i] < -MAXEXTENT) x[i] = -MAXEXTENT;
-            if (y[i] > MAXEXTENT) y[i] = MAXEXTENT;
-            if (y[i] < -MAXEXTENT) y[i] = -MAXEXTENT;
-        }
-        return true;
+    if (wgs84_to_merc_)
+    {
+        return merc2lonlat(x,y,point_count);
+    }
+    else if (merc_to_wgs84_)
+    {
+        return lonlat2merc(x,y,point_count);
     }
 
+#ifdef MAPNIK_USE_PROJ4
     if (is_dest_longlat_)
     {
         int i;
@@ -150,16 +155,10 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
         }
     }
 
+    if (pj_transform( dest_.proj_, source_.proj_, point_count,
+                      0, x,y,z) != 0)
     {
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-        mutex::scoped_lock lock(projection::mutex_);
-#endif
-
-        if (pj_transform( dest_.proj_, source_.proj_, point_count,
-                          0, x,y,z) != 0)
-        {
-            return false;
-        }
+        return false;
     }
 
     if (is_source_longlat_)
@@ -170,7 +169,7 @@ bool proj_transform::backward (double * x, double * y , double * z, int point_co
             y[i] *= RAD_TO_DEG;
         }
     }
-
+#endif
     return true;
 }
 
@@ -226,7 +225,7 @@ void envelope_points(std::vector< coord<double,2> > & coords, box2d<double>& env
     if (points <= 4) {
         steps = 0;
     } else {
-        steps = static_cast<int>(ceil((points - 4) / 4.0));
+        steps = static_cast<int>(std::ceil((points - 4) / 4.0));
     }
 
     steps += 1;

@@ -24,10 +24,7 @@
 #define MAPNIK_PATH_EXPRESSIONS_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/attribute.hpp>
-
-// boost
-#include <boost/variant.hpp>
+#include <mapnik/path_expression.hpp>
 
 // spirit2
 #include <boost/spirit/include/qi.hpp>
@@ -39,16 +36,13 @@
 
 namespace mapnik
 {
-	
+
 using namespace boost;
 namespace qi = boost::spirit::qi;
 namespace phoenix = boost::phoenix;
 namespace standard_wide =  boost::spirit::standard_wide;
 
 using standard_wide::space_type;
-
-typedef boost::variant<std::string, attribute> path_component;
-typedef std::vector<path_component> path_expression;
 
 template <typename Iterator>
 struct path_expression_grammar : qi::grammar<Iterator, std::vector<path_component>(), space_type>

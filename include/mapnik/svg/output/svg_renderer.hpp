@@ -24,13 +24,40 @@
 #define MAPNIK_SVG_RENDERER_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/map.hpp>
+#include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/svg/output/svg_generator.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/rule.hpp>              // for rule, symbolizers
+#include <mapnik/box2d.hpp>     // for box2d
+#include <mapnik/color.hpp>     // for color
+#include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/image_compositing.hpp>  // for composite_mode_e
+#include <mapnik/pixel_position.hpp>
+
+// boost
+#include <boost/variant/static_visitor.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 // stl
 #include <string>
+
+// fwd declaration to avoid depedence on agg headers
+namespace agg { struct trans_affine; }
+
+// fwd declarations to speed up compile
+namespace mapnik {
+  class Map;
+  class feature_impl;
+  class feature_type_style;
+  class label_collision_detector4;
+  class layer;
+  class marker;
+  class proj_transform;
+}
 
 namespace mapnik
 {
@@ -39,7 +66,7 @@ namespace mapnik
 // can target many other output destinations besides streams.
 template <typename OutputIterator>
 class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<OutputIterator> >,
-                                 private boost::noncopyable
+                                 private mapnik::noncopyable
 {
 public:
     typedef svg_renderer<OutputIterator> processor_impl_type;
@@ -101,6 +128,11 @@ public:
     void painted(bool painted)
     {
         // nothing to do
+    }
+
+    inline eAttributeCollectionPolicy attribute_collection_policy() const
+    {
+        return DEFAULT;
     }
 
     inline OutputIterator& get_output_iterator()

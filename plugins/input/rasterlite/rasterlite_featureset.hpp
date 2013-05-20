@@ -24,6 +24,8 @@
 #define RASTERLITE_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/feature.hpp>
+#include <mapnik/query.hpp>
 #include <mapnik/datasource.hpp>
 
 // boost

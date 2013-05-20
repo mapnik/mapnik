@@ -26,6 +26,7 @@
 #include <set>
 #include <vector>
 #include <boost/scoped_ptr.hpp>
+#include <mapnik/feature.hpp>
 #include "ogr_featureset.hpp"
 
 template <typename filterT>
@@ -49,6 +50,7 @@ private:
     std::vector<int>::iterator itr_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
+    OGREnvelope feature_envelope_;
 };
 
 #endif // OGR_INDEX_FEATURESET_HPP

@@ -23,6 +23,8 @@
 // boost
 #include <boost/python.hpp>
 #include <boost/variant.hpp>
+#include <boost/noncopyable.hpp>
+
 
 // mapnik
 #include <mapnik/feature.hpp>
@@ -32,8 +34,6 @@
 #include <mapnik/parse_path.hpp>
 #include <mapnik/value.hpp>
 
-
-using mapnik::Feature;
 using mapnik::expression_ptr;
 using mapnik::parse_expression;
 using mapnik::to_expression_string;
@@ -51,10 +51,15 @@ std::string expression_to_string_(mapnik::expr_node const& expr)
     return mapnik::to_expression_string(expr);
 }
 
-mapnik::value expression_evaluate_(mapnik::expr_node const& expr, mapnik::Feature const& f)
+mapnik::value expression_evaluate_(mapnik::expr_node const& expr, mapnik::feature_impl const& f)
 {
     // will be auto-converted to proper python type by `mapnik_value_to_python`
-    return boost::apply_visitor(mapnik::evaluate<mapnik::Feature,mapnik::value>(f),expr);
+    return boost::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value>(f),expr);
+}
+
+bool expression_evaluate_to_bool_(mapnik::expr_node const& expr, mapnik::feature_impl const& f)
+{
+    return boost::apply_visitor(mapnik::evaluate<mapnik::feature_impl,mapnik::value>(f),expr).to_bool();
 }
 
 // path expression
@@ -68,7 +73,7 @@ std::string path_to_string_(mapnik::path_expression const& expr)
     return mapnik::path_processor_type::to_string(expr);
 }
 
-std::string path_evaluate_(mapnik::path_expression const& expr, mapnik::Feature const& f)
+std::string path_evaluate_(mapnik::path_expression const& expr, mapnik::feature_impl const& f)
 {
     return mapnik::path_processor_type::evaluate(expr, f);
 }
@@ -80,6 +85,7 @@ void export_expression()
                                                   "TODO"
                                                   "",no_init)
         .def("evaluate", &expression_evaluate_)
+        .def("to_bool", &expression_evaluate_to_bool_)
         .def("__str__",&expression_to_string_);
     ;
 

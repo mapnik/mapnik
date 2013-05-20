@@ -26,11 +26,10 @@
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/version.hpp>
-#include <boost/unordered_map.hpp>
 #if BOOST_VERSION >= 104600
 #include <boost/range/algorithm.hpp>
 #endif
@@ -38,7 +37,6 @@
 
 // stl
 #include <vector>
-#include <iostream>
 #include <set>
 #include <algorithm>
 #include <cmath>
@@ -61,7 +59,7 @@ struct RGBAPolicy
 };
 
 template <typename T, typename InsertPolicy = RGBAPolicy >
-class hextree : private boost::noncopyable
+class hextree : private mapnik::noncopyable
 {
     struct node
     {
@@ -132,7 +130,6 @@ class hextree : private boost::noncopyable
     // index remaping of sorted_pal_ indexes to indexes of returned image palette
     std::vector<unsigned> pal_remap_;
     // rgba hashtable for quantization
-    typedef boost::unordered_map<rgba, int, rgba::hash_func> rgba_hash_table;
     mutable rgba_hash_table color_hashmap_;
     // gamma correction to prioritize dark colors (>1.0)
     double gamma_;
@@ -153,9 +150,16 @@ public:
           colors_(0),
           has_holes_(false),
           root_(new node()),
+#ifdef USE_DENSE_HASH_MAP
+          // TODO - test for any benefit to initializing at a larger size
+          color_hashmap_(),
+#endif
           trans_mode_(FULL_TRANSPARENCY)
     {
         setGamma(g);
+#ifdef USE_DENSE_HASH_MAP
+        color_hashmap_.set_empty_key(0);
+#endif
     }
 
     ~hextree()
@@ -238,9 +242,9 @@ public:
     }
 
     // return color index in returned earlier palette
-    int quantize(rgba const& c) const
+    int quantize(unsigned val) const
     {
-        byte a = preprocessAlpha(c.a);
+        byte a = preprocessAlpha(U2ALPHA(val));
         unsigned ind=0;
         if (a < InsertPolicy::MIN_ALPHA || colors_ == 0)
         {
@@ -251,9 +255,10 @@ public:
             return pal_remap_[has_holes_?1:0];
         }
 
-        rgba_hash_table::iterator it = color_hashmap_.find(c);
+        rgba_hash_table::iterator it = color_hashmap_.find(val);
         if (it == color_hashmap_.end())
         {
+            rgba c(val);
             int dr, dg, db, da;
             int dist, newdist;
 
@@ -313,7 +318,7 @@ public:
                 }
             }
             //put found index in hash map
-            color_hashmap_[c] = ind;
+            color_hashmap_[val] = ind;
         }
         else
         {

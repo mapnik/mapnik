@@ -23,15 +23,14 @@
 #ifdef HAVE_LIBXML2
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/xml_loader.hpp>
 #include <mapnik/xml_node.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/util/trim.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/algorithm/string/trim.hpp>
 
 // libxml
 #include <libxml/parser.h>
@@ -39,16 +38,11 @@
 #include <libxml/parserInternals.h>
 #include <libxml/xinclude.h>
 
-// stl
-#include <iostream>
-
-using namespace std;
-
 #define DEFAULT_OPTIONS (XML_PARSE_NOERROR | XML_PARSE_NOENT | XML_PARSE_NOBLANKS | XML_PARSE_DTDLOAD | XML_PARSE_NOCDATA)
 
 namespace mapnik
 {
-class libxml2_loader : boost::noncopyable
+class libxml2_loader : mapnik::noncopyable
 {
 public:
     libxml2_loader(const char *encoding = NULL, int options = DEFAULT_OPTIONS, const char *url = NULL) :
@@ -78,7 +72,7 @@ public:
         boost::filesystem::path path(filename);
         if (!boost::filesystem::exists(path))
         {
-            throw config_error(string("Could not load map file: File does not exist"), 0, filename);
+            throw config_error(std::string("Could not load map file: File does not exist"), 0, filename);
         }
 
         xmlDocPtr doc = xmlCtxtReadFile(ctx_, filename.c_str(), encoding_, options_);
@@ -88,21 +82,13 @@ public:
             xmlError * error = xmlCtxtGetLastError(ctx_);
             if (error)
             {
-                std::ostringstream os;
-                os << "XML document not well formed";
-                os << ": " << std::endl << error->message;
+                std::string msg("XML document not well formed:\n");
+                msg += error->message;
                 // remove CR
-                std::string msg = os.str().substr(0, os.str().size() - 1);
+                msg = msg.substr(0, msg.size() - 1);
                 throw config_error(msg, error->line, error->file);
             }
         }
-
-        /*
-          if ( ! ctx->valid )
-          {
-            MAPNIK_LOG_WARN(libxml2_loader) << "libxml2_loader: Failed to validate DTD.";
-          }
-        */
         load(doc, node);
     }
 
@@ -118,7 +104,7 @@ public:
         {
             boost::filesystem::path path(base_path);
             if (!boost::filesystem::exists(path)) {
-                throw config_error(string("Could not locate base_path '") +
+                throw config_error(std::string("Could not locate base_path '") +
                                    base_path + "': file or directory does not exist");
             }
         }
@@ -132,18 +118,18 @@ public:
     {
         if (!doc)
         {
+            std::string msg("XML document not well formed");
             xmlError * error = xmlCtxtGetLastError( ctx_ );
-            std::ostringstream os;
-            os << "XML document not well formed";
-            int line=0;
-            std::string file;
             if (error)
             {
-                os << ": " << std::endl << error->message;
-                line = error->line;
-                file = error->file;
+                msg += ":\n";
+                msg += error->message;
+                throw config_error(msg, error->line, error->file);
             }
-            throw config_error(os.str(), line, file);
+            else
+            {
+                throw config_error(msg);
+            }
         }
 
         int iXIncludeReturn = xmlXIncludeProcessFlags(doc, options_);
@@ -190,7 +176,7 @@ private:
             case XML_TEXT_NODE:
             {
                 std::string trimmed((const char*)cur_node->content);
-                boost::algorithm::trim(trimmed);
+                mapnik::util::trim(trimmed);
                 if (trimmed.empty()) break; //Don't add empty text nodes
                 node.add_child(trimmed, cur_node->line, true);
             }

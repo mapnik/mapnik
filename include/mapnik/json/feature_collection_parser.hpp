@@ -26,11 +26,12 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/feature.hpp>
-#include <mapnik/datasource.hpp>
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/unicode.hpp>
 
 // boost
 #include <boost/scoped_ptr.hpp>
-#include <boost/utility.hpp>
+
 // stl
 #include <vector>
 
@@ -39,10 +40,10 @@ namespace mapnik { namespace json {
 template <typename Iterator, typename FeatureType> struct feature_collection_grammar;
 
 template <typename Iterator>
-class feature_collection_parser : private boost::noncopyable
+class MAPNIK_DECL feature_collection_parser : private mapnik::noncopyable
 {
     typedef Iterator iterator_type;
-    typedef mapnik::Feature feature_type;
+    typedef mapnik::feature_impl feature_type;
 public:
     feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr);
     ~feature_collection_parser();

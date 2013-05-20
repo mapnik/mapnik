@@ -25,6 +25,7 @@
 
 #include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
+#include <mapnik/enumeration.hpp>
 
 namespace mapnik
 {
@@ -34,6 +35,7 @@ struct MAPNIK_DECL debug_symbolizer :
 {
     debug_symbolizer() : symbolizer_base() {}
 };
+
 }
 
 #endif // DEBUG_SYMBOLIZER_HPP

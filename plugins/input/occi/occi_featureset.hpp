@@ -24,6 +24,7 @@
 #define OCCI_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/unicode.hpp>
@@ -70,7 +71,7 @@ private:
     occi_connection_ptr conn_;
     oracle::occi::ResultSet* rs_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
-    mutable int feature_id_;
+    mapnik::value_integer feature_id_;
     mapnik::context_ptr ctx_;
     bool use_wkb_;
     std::vector<char> buffer_;

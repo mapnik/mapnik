@@ -22,7 +22,9 @@
 
 // boost
 #include <boost/foreach.hpp>
+
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/agg_helpers.hpp>
@@ -46,8 +48,12 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
 {
 
     ras_ptr->reset();
-    set_gamma_method(sym,ras_ptr);
-
+    if (sym.get_gamma() != gamma_ || sym.get_gamma_method() != gamma_method_)
+    {
+        set_gamma_method(sym, ras_ptr);
+        gamma_method_ = sym.get_gamma_method();
+        gamma_ = sym.get_gamma();
+    }
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 

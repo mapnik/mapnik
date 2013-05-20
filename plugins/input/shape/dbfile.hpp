@@ -23,9 +23,12 @@
 #ifndef DBFFILE_HPP
 #define DBFFILE_HPP
 
+// mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/unicode.hpp>
+
 // boost
-#include <boost/utility.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 
 // stl
@@ -33,9 +36,6 @@
 #include <string>
 #include <cassert>
 #include <fstream>
-
-using mapnik::transcoder;
-using mapnik::Feature;
 
 struct field_descriptor
 {
@@ -48,7 +48,7 @@ struct field_descriptor
 };
 
 
-class dbf_file : private boost::noncopyable
+class dbf_file : private mapnik::noncopyable
 {
 private:
     int num_records_;
@@ -71,7 +71,7 @@ public:
     field_descriptor const& descriptor(int col) const;
     void move_to(int index);
     std::string string_value(int col) const;
-    void add_attribute(int col, transcoder const& tr, Feature & f) const throw();
+    void add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const throw();
 private:
     void read_header();
     int read_short();

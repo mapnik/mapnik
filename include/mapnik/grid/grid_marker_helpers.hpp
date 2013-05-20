@@ -44,8 +44,8 @@ namespace mapnik {
 template <typename BufferType, typename Rasterizer, typename PixFmt, typename RendererBase, typename RendererType, typename Detector, typename PixMapType>
 struct raster_markers_rasterizer_dispatch_grid
 {
-    typedef mapnik::gray32 color_type;
     typedef typename RendererBase::pixfmt_type pixfmt_type;
+    typedef typename RendererBase::pixfmt_type::color_type color_type;
 
     raster_markers_rasterizer_dispatch_grid(BufferType & render_buffer,
                                        Rasterizer & ras,
@@ -78,11 +78,17 @@ struct raster_markers_rasterizer_dispatch_grid
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
         box2d<double> bbox_(0,0, src_.width(),src_.height());
-        if (placement_method != MARKER_LINE_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT ||
+            path.type() == Point)
         {
             double x = 0;
             double y = 0;
-            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            if (path.type() == LineString)
+            {
+                if (!label::middle_point(path, x, y))
+                    return;
+            }
+            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
                     return;
@@ -150,7 +156,7 @@ struct raster_markers_rasterizer_dispatch_grid
         ras_.line_to_d(p[4],p[5]);
         ras_.line_to_d(p[6],p[7]);
         RendererType ren(renb_);
-        ren.color(mapnik::gray32(feature_.id()));
+        ren.color(color_type(feature_.id()));
         agg::render_scanlines(ras_, sl_, ren);
     }
 
@@ -209,11 +215,17 @@ struct vector_markers_rasterizer_dispatch_grid
     void add_path(T & path)
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
-        if (placement_method != MARKER_LINE_PLACEMENT)
+        if (placement_method != MARKER_LINE_PLACEMENT ||
+            path.type() == Point)
         {
             double x = 0;
             double y = 0;
-            if (placement_method == MARKER_INTERIOR_PLACEMENT)
+            if (path.type() == LineString)
+            {
+                if (!label::middle_point(path, x, y))
+                    return;
+            }
+            else if (placement_method == MARKER_INTERIOR_PLACEMENT)
             {
                 if (!label::interior_position(path, x, y))
                     return;

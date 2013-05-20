@@ -45,16 +45,6 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         m.zoom_all()
         m.query_point(0,9999999999999999,9999999999999999)
 
-    # invalid coords for back projecting
-    @raises(RuntimeError)
-    def test_map_query_throw6():
-        m = mapnik.Map(256,256)
-        mapnik.load_map(m,'../data/good_maps/merc2wgs84_reprojection.xml')
-        wgs84_bounds = mapnik.Box2d(-180,-90,180,90)
-        m.maximum_extent = wgs84_bounds
-        m.zoom_all()
-        m.query_point(0,-180,-90)
-
     def test_map_query_works1():
         m = mapnik.Map(256,256)
         mapnik.load_map(m,'../data/good_maps/wgs842merc_reprojection.xml')

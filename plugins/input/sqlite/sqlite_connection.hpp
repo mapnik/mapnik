@@ -29,7 +29,6 @@
 // mapnik
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
-#include <mapnik/sql_utils.hpp>
 #include <mapnik/timer.hpp>
 
 // boost

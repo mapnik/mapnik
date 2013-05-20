@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
+
 #include <mapnik/datasource_cache.hpp>
 
 namespace  {
@@ -29,22 +31,14 @@ using namespace boost::python;
 
 boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
 {
-    bool bind=true;
     mapnik::parameters params;
     boost::python::list keys=d.keys();
     for (int i=0; i<len(keys); ++i)
     {
         std::string key = extract<std::string>(keys[i]);
         object obj = d[key];
-
-        if (key == "bind")
-        {
-            bind = extract<bool>(obj)();
-            continue;
-        }
-
         extract<std::string> ex0(obj);
-        extract<int> ex1(obj);
+        extract<mapnik::value_integer> ex1(obj);
         extract<double> ex2(obj);
 
         if (ex0.check())
@@ -61,7 +55,7 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
         }
     }
 
-    return mapnik::datasource_cache::instance().create(params, bind);
+    return mapnik::datasource_cache::instance().create(params);
 }
 
 void register_datasources(std::string const& path)

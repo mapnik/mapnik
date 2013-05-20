@@ -24,8 +24,11 @@
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/iterator.hpp>
+#include <boost/iterator/transform_iterator.hpp>
 
 // mapnik
+#include <mapnik/rule.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/projection.hpp>
@@ -111,6 +114,25 @@ void set_maximum_extent(mapnik::Map & m, boost::optional<mapnik::box2d<double> >
     }
 }
 
+struct extract_style
+{
+    typedef boost::python::tuple result_type;
+    result_type operator() (std::map<std::string, mapnik::feature_type_style>::value_type const& val) const
+    {
+        return boost::python::make_tuple(val.first,val.second);
+    }
+};
+
+typedef boost::transform_iterator<extract_style, Map::const_style_iterator> style_extract_iterator;
+typedef std::pair<style_extract_iterator,style_extract_iterator> style_range;
+
+style_range _styles_ (mapnik::Map const& m)
+{
+    return style_range(
+        boost::make_transform_iterator<extract_style>(m.begin_styles(), extract_style()),
+        boost::make_transform_iterator<extract_style>(m.end_styles(), extract_style()));
+}
+
 void export_map()
 {
     using namespace boost::python;
@@ -129,6 +151,11 @@ void export_map()
 
     class_<std::vector<layer> >("Layers")
         .def(vector_indexing_suite<std::vector<layer> >())
+        ;
+
+    class_<style_range>("StyleRange")
+        .def("__iter__",
+             boost::python::range(&style_range::first, &style_range::second))
         ;
 
     class_<Map>("Map","The map object.",init<int,int,optional<std::string const&> >(
@@ -213,6 +240,8 @@ void export_map()
              ">>> m.find_style('Style Name')\n"
              "<mapnik._mapnik.Style object at 0x654f0>\n"
             )
+
+        .add_property("styles", _styles_)
 
         .def("pan",&Map::pan,
              (arg("x"),arg("y")),
@@ -469,7 +498,7 @@ void export_map()
                       "'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' # The default srs if not initialized with custom srs\n"
                       ">>> # set to google mercator with Proj.4 literal\n"
                       "... \n"
-                      ">>> m.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'\n"
+                      ">>> m.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over'\n"
             )
 
         .add_property("width",

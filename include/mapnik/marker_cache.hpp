@@ -26,9 +26,9 @@
 // mapnik
 #include <mapnik/utils.hpp>
 #include <mapnik/config.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
@@ -43,7 +43,7 @@ typedef boost::shared_ptr<marker> marker_ptr;
 
 class MAPNIK_DECL marker_cache :
         public singleton <marker_cache, CreateUsingNew>,
-        private boost::noncopyable
+        private mapnik::noncopyable
 {
     friend class CreateUsingNew<marker_cache>;
 private:

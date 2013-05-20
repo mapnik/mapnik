@@ -27,26 +27,20 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/utils.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/char_info.hpp>
-#include <mapnik/pixel_position.hpp>
 #include <mapnik/image_compositing.hpp>
-
-// freetype2
-extern "C"
-{
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_GLYPH_H
-#include FT_STROKER_H
-}
+#include <mapnik/text_symbolizer.hpp>
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/foreach.hpp>
 #ifdef MAPNIK_THREADSAFE
@@ -57,21 +51,24 @@ extern "C"
 #include <string>
 #include <vector>
 #include <map>
-#include <iostream>
-#include <algorithm>
 
 // uci
 #include <unicode/unistr.h>
+
+struct FT_LibraryRec_;
 
 namespace mapnik
 {
 class font_face;
 class text_path;
 class string_info;
+struct char_properties;
+class stroker;
+struct glyph_t;
 
 typedef boost::shared_ptr<font_face> face_ptr;
 
-class MAPNIK_DECL font_glyph : private boost::noncopyable
+class MAPNIK_DECL font_glyph : private mapnik::noncopyable
 {
 public:
     font_glyph(face_ptr face, unsigned index)
@@ -93,147 +90,29 @@ private:
 
 typedef boost::shared_ptr<font_glyph> glyph_ptr;
 
-class font_face : boost::noncopyable
+
+
+class MAPNIK_DECL font_face_set : private mapnik::noncopyable
 {
 public:
-    font_face(FT_Face face)
-        : face_(face) {}
+    typedef std::vector<face_ptr> container_type;
+    typedef container_type::size_type size_type;
 
-    std::string  family_name() const
-    {
-        return std::string(face_->family_name);
-    }
-
-    std::string  style_name() const
-    {
-        return std::string(face_->style_name);
-    }
-
-    FT_GlyphSlot glyph() const
-    {
-        return face_->glyph;
-    }
-
-    FT_Face get_face() const
-    {
-        return face_;
-    }
-
-    unsigned get_char(unsigned c) const
-    {
-        return FT_Get_Char_Index(face_, c);
-    }
-
-    bool set_pixel_sizes(unsigned size)
-    {
-        if (! FT_Set_Pixel_Sizes( face_, 0, size ))
-            return true;
-        return false;
-    }
-
-    bool set_character_sizes(double size)
-    {
-        if ( !FT_Set_Char_Size(face_,0,(FT_F26Dot6)(size * (1<<6)),0,0))
-            return true;
-        return false;
-    }
-
-    ~font_face()
-    {
-        MAPNIK_LOG_DEBUG(font_engine_freetype) << "font_face: Clean up face \"" << family_name() << " " << style_name() << "\"";
-
-        FT_Done_Face(face_);
-    }
-
-private:
-    FT_Face face_;
-};
-
-class MAPNIK_DECL font_face_set : private boost::noncopyable
-{
-public:
     font_face_set(void)
         : faces_(),
         dimension_cache_() {}
 
-    void add(face_ptr face)
-    {
-        faces_.push_back(face);
-        dimension_cache_.clear(); //Make sure we don't use old cached data
-    }
-
-    unsigned size() const
-    {
-        return faces_.size();
-    }
-
-    glyph_ptr get_glyph(unsigned c) const
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            FT_UInt g = face->get_char(c);
-            if (g) return boost::make_shared<font_glyph>(face, g);
-        }
-
-        // Final fallback to empty square if nothing better in any font
-        return boost::make_shared<font_glyph>(*faces_.begin(), 0);
-    }
-
-    char_info character_dimensions(const unsigned c);
-
+    void add(face_ptr face);
+    size_type size() const;
+    glyph_ptr get_glyph(unsigned c) const;
+    char_info character_dimensions(unsigned c);
     void get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format);
-
-    void set_pixel_sizes(unsigned size)
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            face->set_pixel_sizes(size);
-        }
-    }
-
-    void set_character_sizes(double size)
-    {
-        BOOST_FOREACH ( face_ptr const& face, faces_)
-        {
-            face->set_character_sizes(size);
-        }
-    }
+    void set_pixel_sizes(unsigned size);
+    void set_character_sizes(double size);
 private:
-    std::vector<face_ptr> faces_;
+    container_type faces_;
     std::map<unsigned, char_info> dimension_cache_;
 };
-
-// FT_Stroker wrapper
-class stroker : boost::noncopyable
-{
-public:
-    explicit stroker(FT_Stroker s)
-        : s_(s) {}
-
-    void init(double radius)
-    {
-        FT_Stroker_Set(s_, (FT_Fixed) (radius * (1<<6)),
-                       FT_STROKER_LINECAP_ROUND,
-                       FT_STROKER_LINEJOIN_ROUND,
-                       0);
-    }
-
-    FT_Stroker const& get() const
-    {
-        return s_;
-    }
-
-    ~stroker()
-    {
-        MAPNIK_LOG_DEBUG(font_engine_freetype) << "stroker: Destroy stroker=" << s_;
-
-        FT_Stroker_Done(s_);
-    }
-private:
-    FT_Stroker s_;
-};
-
-
 
 typedef boost::shared_ptr<font_face_set> face_set_ptr;
 typedef boost::shared_ptr<stroker> stroker_ptr;
@@ -250,7 +129,7 @@ public:
     static bool register_font(std::string const& file_name);
 
     /*! \brief register a font file
-     *  @param file_name - path to a directory containing fonts or subdirectories.
+     *  @param dir - path to a directory containing fonts or subdirectories.
      *  @param recurse - default false, whether to search for fonts in sub directories.
      *  @return bool - true if at least one face was successfully registered.
      */
@@ -262,15 +141,16 @@ public:
     virtual ~freetype_engine();
     freetype_engine();
 private:
-    FT_Library library_;
+    FT_LibraryRec_ * library_;
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif
     static std::map<std::string,std::pair<int,std::string> > name2file_;
+    static std::map<std::string, std::string> memory_fonts_;
 };
 
 template <typename T>
-class MAPNIK_DECL face_manager : private boost::noncopyable
+class MAPNIK_DECL face_manager : private mapnik::noncopyable
 {
     typedef T font_engine_type;
     typedef std::map<std::string,face_ptr> face_ptr_cache_type;
@@ -314,9 +194,9 @@ public:
     {
         std::vector<std::string> const& names = fset.get_face_names();
         face_set_ptr face_set = boost::make_shared<font_face_set>();
-        for (std::vector<std::string>::const_iterator name = names.begin(); name != names.end(); ++name)
+        BOOST_FOREACH( std::string const& name, names)
         {
-            face_ptr face = get_face(*name);
+            face_ptr face = get_face(name);
             if (face)
             {
                 face_set->add(face);
@@ -325,7 +205,7 @@ public:
             else
             {
                 MAPNIK_LOG_DEBUG(font_engine_freetype)
-                        << "Failed to find face '" << *name
+                        << "Failed to find face '" << name
                         << "' in font set '" << fset.get_name() << "'\n";
             }
 #endif
@@ -345,7 +225,7 @@ public:
         }
     }
 
-    stroker_ptr get_stroker()
+    inline stroker_ptr get_stroker()
     {
         return stroker_;
     }
@@ -357,73 +237,25 @@ private:
 };
 
 template <typename T>
-struct text_renderer : private boost::noncopyable
+struct text_renderer : private mapnik::noncopyable
 {
-    struct glyph_t : boost::noncopyable
-    {
-        FT_Glyph image;
-        char_properties *properties;
-        glyph_t(FT_Glyph image_, char_properties *properties_)
-            : image(image_), properties(properties_) {}
-        ~glyph_t () { FT_Done_Glyph(image);}
-    };
 
     typedef boost::ptr_vector<glyph_t> glyphs_t;
     typedef T pixmap_type;
 
     text_renderer (pixmap_type & pixmap,
-                   face_manager<freetype_engine> &font_manager_,
-                   stroker & s,
+                   face_manager<freetype_engine> & font_manager,
+                   halo_rasterizer_e rasterizer,
                    composite_mode_e comp_op = src_over,
                    double scale_factor=1.0);
     box2d<double> prepare_glyphs(text_path const& path);
-    void render(pixel_position pos);
-    void render_id(int feature_id, pixel_position pos, double min_radius=1.0);
-
+    void render(pixel_position const& pos);
+    void render_id(mapnik::value_integer feature_id,
+                   pixel_position const& pos);
 private:
-    
-    void render_bitmap(FT_Bitmap *bitmap, unsigned rgba, int x, int y, double opacity)
-    {
-        int x_max=x+bitmap->width;
-        int y_max=y+bitmap->rows;
-        int i,p,j,q;
-
-        for (i=x,p=0;i<x_max;++i,++p)
-        {
-            for (j=y,q=0;j<y_max;++j,++q)
-            {
-                int gray=bitmap->buffer[q*bitmap->width+p];
-                if (gray)
-                {
-                    pixmap_.blendPixel2(i, j, rgba, gray, opacity);
-                }
-            }
-        }
-    }
-
-    void render_bitmap_id(FT_Bitmap *bitmap,int feature_id,int x,int y)
-    {
-        int x_max=x+bitmap->width;
-        int y_max=y+bitmap->rows;
-        int i,p,j,q;
-
-        for (i=x,p=0;i<x_max;++i,++p)
-        {
-            for (j=y,q=0;j<y_max;++j,++q)
-            {
-                int gray=bitmap->buffer[q*bitmap->width+p];
-                if (gray)
-                {
-                    pixmap_.setPixel(i,j,feature_id);
-                    //pixmap_.blendPixel2(i,j,rgba,gray,opacity_);
-                }
-            }
-        }
-    }
-
     pixmap_type & pixmap_;
-    face_manager<freetype_engine> &font_manager_;
-    stroker & stroker_;
+    face_manager<freetype_engine> & font_manager_;
+    halo_rasterizer_e rasterizer_;
     glyphs_t glyphs_;
     composite_mode_e comp_op_;
     double scale_factor_;

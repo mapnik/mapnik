@@ -25,22 +25,26 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/palette.hpp>
 
 #ifdef _MSC_VER
 #include <mapnik/graphics.hpp>
 #endif
 
 // boost
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/optional.hpp>
 
 // stl
 #include <string>
+#include <cmath>
 
 namespace mapnik {
 
+// fwd declares
 class Map;
+class rgba_palette;
+class image_32;
+
 class ImageWriterException : public std::exception
 {
 private:
@@ -58,6 +62,9 @@ public:
 };
 
 #if defined(HAVE_CAIRO)
+MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
+                                    std::string const& filename,
+                                    double scale_factor=1.0);
 MAPNIK_DECL void save_to_cairo_file(mapnik::Map const& map,
                                     std::string const& filename,
                                     std::string const& type,
@@ -188,7 +195,6 @@ void add_border(T & image)
 
 
 /////////// save_to_file ////////////////////////////////////////////////
-class image_32;
 
 MAPNIK_DECL void save_to_file(image_32 const& image,
                               std::string const& file);

@@ -37,13 +37,36 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <iostream>
 #include <string>
 #include <stdexcept>
 #include <vector>
+#include <cstring>
+
+// xml2
+#include <libxml/xmlreader.h>
+
 
 namespace mapnik { namespace svg {
 
+bool parse_reader(svg_parser & parser,xmlTextReaderPtr reader);
+void process_node(svg_parser & parser,xmlTextReaderPtr reader);
+void start_element(svg_parser & parser,xmlTextReaderPtr reader);
+void end_element(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_path(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_dimensions(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_polygon(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_polyline(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_line(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_rect(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_circle(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_ellipse(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_linear_gradient(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_radial_gradient(svg_parser & parser,xmlTextReaderPtr reader);
+bool parse_common_gradient(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_gradient_stop(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_pattern(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_attr(svg_parser & parser,xmlTextReaderPtr reader);
+void parse_attr(svg_parser & parser,const xmlChar * name, const xmlChar * value );
 
 typedef std::vector<std::pair<double, agg::rgba8> > color_lookup_type;
 
@@ -76,7 +99,7 @@ agg::rgba8 parse_color(const char* str)
     {
         c = mapnik::parse_color(str);
     }
-    catch (mapnik::config_error & ex)
+    catch (mapnik::config_error const& ex)
     {
         MAPNIK_LOG_ERROR(svg_parser) << ex.what();
     }
@@ -87,7 +110,7 @@ double parse_double(const char* str)
 {
     using namespace boost::spirit::qi;
     double val = 0.0;
-    parse(str, str+ strlen(str),double_,val);
+    parse(str, str + std::strlen(str),double_,val);
     return val;
 }
 
@@ -103,7 +126,7 @@ double parse_double_optional_percent(const char* str, bool &percent)
 
     double val = 0.0;
     char unit='\0';
-    parse(str, str+ strlen(str),double_[ref(val)=_1] >> *char_('%')[ref(unit)=_1]);
+    parse(str, str + std::strlen(str),double_[ref(val)=_1] >> *char_('%')[ref(unit)=_1]);
     if (unit =='%')
     {
         percent = true;
@@ -121,51 +144,16 @@ bool parse_style (const char* str, pairs_type & v)
     using namespace boost::spirit::qi;
     typedef boost::spirit::ascii::space_type skip_type;
     key_value_sequence_ordered<const char*, skip_type> kv_parser;
-    return phrase_parse(str, str + strlen(str), kv_parser, skip_type(), v);
+    return phrase_parse(str, str + std::strlen(str), kv_parser, skip_type(), v);
 }
 
-svg_parser::svg_parser(svg_converter<svg_path_adapter,
-                       agg::pod_bvector<mapnik::svg::path_attributes> > & path)
-    : path_(path),
-      is_defs_(false)
-{}
-
-svg_parser::~svg_parser() {}
-
-void svg_parser::parse(std::string const& filename)
-{
-    xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename.c_str());
-    if (reader == NULL)
-    {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to open '" << filename << "'";
-    }
-    else if (!parse_reader(reader))
-    {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << filename << "'";
-    }
-}
-
-void svg_parser::parse_from_string(std::string const& svg)
-{
-    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),svg.size(),NULL,NULL,
-        (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
-    if (reader == NULL)
-    {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
-    }
-    else if (!parse_reader(reader))
-    {
-        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
-    }
-}
-
-bool svg_parser::parse_reader(xmlTextReaderPtr reader)
+bool parse_reader(svg_parser & parser, xmlTextReaderPtr reader)
 {
     int ret = xmlTextReaderRead(reader);
     try {
         while (ret == 1)
         {
-            process_node(reader);
+            process_node(parser,reader);
             ret = xmlTextReaderRead(reader);
         }
     }
@@ -183,23 +171,8 @@ bool svg_parser::parse_reader(xmlTextReaderPtr reader)
     return true;
 }
 
-void svg_parser::process_node(xmlTextReaderPtr reader)
-{
-    int node_type = xmlTextReaderNodeType(reader);
-    switch (node_type)
-    {
-    case 1: //start element
-        start_element(reader);
-        break;
-    case 15:// end element
-        end_element(reader);
-        break;
-    default:
-        break;
-    }
-}
 
-void svg_parser::start_element(xmlTextReaderPtr reader)
+void start_element(svg_parser & parser, xmlTextReaderPtr reader)
 {
     const xmlChar *name;
     name = xmlTextReaderConstName(reader);
@@ -207,63 +180,67 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
     if (xmlStrEqual(name, BAD_CAST "defs"))
     {
         if (xmlTextReaderIsEmptyElement(reader) == 0)
-            is_defs_ = true;
+            parser.is_defs_ = true;
     }
     // the gradient tags *should* be in defs, but illustrator seems not to put them in there so
     // accept them anywhere
     else if (xmlStrEqual(name, BAD_CAST "linearGradient"))
     {
-        parse_linear_gradient(reader);
+        parse_linear_gradient(parser,reader);
     }
     else if (xmlStrEqual(name, BAD_CAST "radialGradient"))
     {
-        parse_radial_gradient(reader);
+        parse_radial_gradient(parser,reader);
     }
     else if (xmlStrEqual(name, BAD_CAST "stop"))
     {
-        parse_gradient_stop(reader);
+        parse_gradient_stop(parser,reader);
     }
-    if ( !is_defs_ )
+    if ( !parser.is_defs_ )
     {
 
         if (xmlStrEqual(name, BAD_CAST "g"))
         {
-            path_.push_attr();
-            parse_attr(reader);
+            parser.path_.push_attr();
+            parse_attr(parser,reader);
         }
         else
         {
-            path_.push_attr();
-            parse_attr(reader);
-            if (path_.display())
+            parser.path_.push_attr();
+            parse_attr(parser,reader);
+            if (parser.path_.display())
             {
                 if (xmlStrEqual(name, BAD_CAST "path"))
                 {
-                    parse_path(reader);
+                    parse_path(parser,reader);
                 }            
                 else if (xmlStrEqual(name, BAD_CAST "polygon") )
                 {
-                    parse_polygon(reader);
+                    parse_polygon(parser,reader);
                 }
                 else if (xmlStrEqual(name, BAD_CAST "polyline"))
                 {
-                    parse_polyline(reader);
+                    parse_polyline(parser,reader);
                 }
                 else if (xmlStrEqual(name, BAD_CAST "line"))
                 {
-                    parse_line(reader);
+                    parse_line(parser,reader);
                 }
                 else if (xmlStrEqual(name, BAD_CAST "rect"))
                 {    
-                    parse_rect(reader);
+                    parse_rect(parser,reader);
                 }
                 else if (xmlStrEqual(name, BAD_CAST "circle"))
                 {
-                    parse_circle(reader);
+                    parse_circle(parser,reader);
                 }
                 else if (xmlStrEqual(name, BAD_CAST "ellipse"))
                 {
-                    parse_ellipse(reader);
+                    parse_ellipse(parser,reader);
+                }
+                else if (xmlStrEqual(name, BAD_CAST "svg"))
+                {
+                    parse_dimensions(parser,reader);
                 }
 #ifdef MAPNIK_LOG
                 else if (!xmlStrEqual(name, BAD_CAST "svg"))
@@ -272,45 +249,61 @@ void svg_parser::start_element(xmlTextReaderPtr reader)
                 }
 #endif
             }
-            path_.pop_attr();
+            parser.path_.pop_attr();
         }
     }
 }
 
-void svg_parser::end_element(xmlTextReaderPtr reader)
+void end_element(svg_parser & parser, xmlTextReaderPtr reader)
 {
     const xmlChar *name;
     name = xmlTextReaderConstName(reader);
 
 
-    if (!is_defs_ && xmlStrEqual(name, BAD_CAST "g"))
+    if (!parser.is_defs_ && xmlStrEqual(name, BAD_CAST "g"))
     {
-        path_.pop_attr();
+        parser.path_.pop_attr();
     }
     else if (xmlStrEqual(name, BAD_CAST "defs"))
     {
-        is_defs_ = false;
+        parser.is_defs_ = false;
     }
     else if ((xmlStrEqual(name, BAD_CAST "linearGradient")) || (xmlStrEqual(name, BAD_CAST "radialGradient")))
     {
-        gradient_map_[temporary_gradient_.first] = temporary_gradient_.second;
+        parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
     }
 
 }
 
-void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
+void process_node(svg_parser & parser, xmlTextReaderPtr reader)
+{
+    int node_type = xmlTextReaderNodeType(reader);
+    switch (node_type)
+    {
+    case 1: //start element
+        start_element(parser,reader);
+        break;
+    case 15:// end element
+        end_element(parser,reader);
+        break;
+    default:
+        break;
+    }
+}
+
+void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value )
 {
     if (xmlStrEqual(name, BAD_CAST "transform"))
     {
         agg::trans_affine tr;
         mapnik::svg::parse_transform((const char*) value,tr);
-        path_.transform().premultiply(tr);
+        parser.path_.transform().premultiply(tr);
     }
     else if (xmlStrEqual(name, BAD_CAST "fill"))
     {
         if (xmlStrEqual(value, BAD_CAST "none"))
         {
-            path_.fill_none();
+            parser.path_.fill_none();
         }
         else if (boost::starts_with((const char*)value, "url(#"))
         {
@@ -318,9 +311,9 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
             std::string id = std::string((const char*)&value[5]);
             // get rid of the trailing )
             id.erase(id.end()-1);
-            if (gradient_map_.count(id) > 0)
+            if (parser.gradient_map_.count(id) > 0)
             {
-                path_.add_fill_gradient(gradient_map_[id]);
+                parser.path_.add_fill_gradient(parser.gradient_map_[id]);
             }
             else
             {
@@ -329,25 +322,25 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
         }
         else
         {
-            path_.fill(parse_color((const char*) value));
+            parser.path_.fill(parse_color((const char*) value));
         }
     }
     else if (xmlStrEqual(name, BAD_CAST "fill-opacity"))
     {
-        path_.fill_opacity(parse_double((const char*) value));
+        parser.path_.fill_opacity(parse_double((const char*) value));
     }
     else if (xmlStrEqual(name, BAD_CAST "fill-rule"))
     {
         if (xmlStrEqual(value, BAD_CAST "evenodd"))
         {
-            path_.even_odd(true);
+            parser.path_.even_odd(true);
         }
     }
     else if (xmlStrEqual(name, BAD_CAST "stroke"))
     {
         if (xmlStrEqual(value, BAD_CAST "none"))
         {
-            path_.stroke_none();
+            parser.path_.stroke_none();
         }
         else if (boost::starts_with((const char*)value, "url(#"))
         {
@@ -355,9 +348,9 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
             std::string id = std::string((const char*)&value[5]);
             // get rid of the trailing )
             id.erase(id.end()-1);
-            if (gradient_map_.count(id) > 0)
+            if (parser.gradient_map_.count(id) > 0)
             {
-                path_.add_stroke_gradient(gradient_map_[id]);
+                parser.path_.add_stroke_gradient(parser.gradient_map_[id]);
             }
             else
             {
@@ -366,62 +359,61 @@ void svg_parser::parse_attr(const xmlChar * name, const xmlChar * value )
         }
         else
         {
-            path_.stroke(parse_color((const char*) value));
+            parser.path_.stroke(parse_color((const char*) value));
         }
     }
     else if (xmlStrEqual(name, BAD_CAST "stroke-width"))
     {
-        path_.stroke_width(parse_double((const char*)value));
+        parser.path_.stroke_width(parse_double((const char*)value));
     }
     else if (xmlStrEqual(name, BAD_CAST "stroke-opacity"))
     {
-        path_.stroke_opacity(parse_double((const char*)value));
+        parser.path_.stroke_opacity(parse_double((const char*)value));
     }
     else if(xmlStrEqual(name,BAD_CAST "stroke-width"))
     {
-        path_.stroke_width(parse_double((const char*) value));
+        parser.path_.stroke_width(parse_double((const char*) value));
     }
     else if(xmlStrEqual(name,BAD_CAST "stroke-linecap"))
     {
         if(xmlStrEqual(value,BAD_CAST "butt"))
-            path_.line_cap(agg::butt_cap);
+            parser.path_.line_cap(agg::butt_cap);
         else if(xmlStrEqual(value,BAD_CAST "round"))
-            path_.line_cap(agg::round_cap);
+            parser.path_.line_cap(agg::round_cap);
         else if(xmlStrEqual(value,BAD_CAST "square"))
-            path_.line_cap(agg::square_cap);
+            parser.path_.line_cap(agg::square_cap);
     }
     else if(xmlStrEqual(name,BAD_CAST "stroke-linejoin"))
     {
         if(xmlStrEqual(value,BAD_CAST "miter"))
-            path_.line_join(agg::miter_join);
+            parser.path_.line_join(agg::miter_join);
         else if(xmlStrEqual(value,BAD_CAST "round"))
-            path_.line_join(agg::round_join);
+            parser.path_.line_join(agg::round_join);
         else if(xmlStrEqual(value,BAD_CAST "bevel"))
-            path_.line_join(agg::bevel_join);
+            parser.path_.line_join(agg::bevel_join);
     }
     else if(xmlStrEqual(name,BAD_CAST "stroke-miterlimit"))
     {
-        path_.miter_limit(parse_double((const char*)value));
+        parser.path_.miter_limit(parse_double((const char*)value));
     }
 
     else if(xmlStrEqual(name, BAD_CAST "opacity"))
     {
         double opacity = parse_double((const char*)value);
-        path_.stroke_opacity(opacity);
-        path_.fill_opacity(opacity);
+        parser.path_.opacity(opacity);
     }
     else if (xmlStrEqual(name, BAD_CAST "visibility"))
     {
-        path_.visibility(!xmlStrEqual(value, BAD_CAST "hidden"));
+        parser.path_.visibility(!xmlStrEqual(value, BAD_CAST "hidden"));
     }
     else if (xmlStrEqual(name, BAD_CAST "display") && xmlStrEqual(value, BAD_CAST "none"))
     {
-        path_.display(false);
+        parser.path_.display(false);
     }
 }
 
 
-void svg_parser::parse_attr(xmlTextReaderPtr reader)
+void parse_attr(svg_parser & parser, xmlTextReaderPtr reader)
 {
     const xmlChar *name, *value;
     
@@ -440,18 +432,40 @@ void svg_parser::parse_attr(xmlTextReaderPtr reader)
                 parse_style((const char*)value, vec);
                 BOOST_FOREACH(value_type kv , vec )
                 {
-                    parse_attr(BAD_CAST kv.first.c_str(),BAD_CAST kv.second.c_str());
+                    parse_attr(parser,BAD_CAST kv.first.c_str(),BAD_CAST kv.second.c_str());
                 }
             }
             else
             {
-                parse_attr(name,value);
+                parse_attr(parser,name,value);
             }
         } while(xmlTextReaderMoveToNextAttribute(reader) == 1);
     }
     xmlTextReaderMoveToElement(reader);
 }
-void svg_parser::parse_path(xmlTextReaderPtr reader)
+
+void parse_dimensions(svg_parser & parser, xmlTextReaderPtr reader)
+{
+    xmlChar *value;
+    double width = 0;
+    double height = 0;
+    value = xmlTextReaderGetAttribute(reader, BAD_CAST "width");
+    if (value)
+    {
+        width = parse_double((const char*)value);
+        xmlFree(value);
+    }
+    xmlChar *value2;
+    value2 = xmlTextReaderGetAttribute(reader, BAD_CAST "width");
+    if (value2)
+    {
+        height = parse_double((const char*)value2);
+        xmlFree(value2);
+    }
+    parser.path_.set_dimensions(width,height);
+
+}
+void parse_path(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
 
@@ -459,15 +473,15 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
     if (value)
     {
         // d="" (empty paths) are valid
-        if (strlen((const char*)value) < 1)
+        if (std::strlen((const char*)value) < 1)
         {
             xmlFree(value);
         }
         else
         {
-            path_.begin_path();
+            parser.path_.begin_path();
 
-            if (!mapnik::svg::parse_path((const char*) value, path_))
+            if (!mapnik::svg::parse_path((const char*) value, parser.path_))
             {
                 xmlFree(value);
                 xmlChar *id_value;
@@ -483,51 +497,51 @@ void svg_parser::parse_path(xmlTextReaderPtr reader)
                     throw std::runtime_error("unable to parse invalid svg <path>");
                 }
             }
-            path_.end_path();
+            parser.path_.end_path();
             xmlFree(value);
         }
     }
 }
 
-void svg_parser::parse_polygon(xmlTextReaderPtr reader)
+void parse_polygon(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "points");
     if (value)
     {
-        path_.begin_path();
-        if (!mapnik::svg::parse_points((const char*) value, path_))
+        parser.path_.begin_path();
+        if (!mapnik::svg::parse_points((const char*) value, parser.path_))
         {
             xmlFree(value);
             throw std::runtime_error("Failed to parse <polygon>");
         }
-        path_.close_subpath();
-        path_.end_path();
+        parser.path_.close_subpath();
+        parser.path_.end_path();
         xmlFree(value);
     }
 }
 
-void svg_parser::parse_polyline(xmlTextReaderPtr reader)
+void parse_polyline(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "points");
     if (value)
     {
-        path_.begin_path();
-        if (!mapnik::svg::parse_points((const char*) value, path_))
+        parser.path_.begin_path();
+        if (!mapnik::svg::parse_points((const char*) value, parser.path_))
         {
             xmlFree(value);
             throw std::runtime_error("Failed to parse <polygon>");
         }
 
-        path_.end_path();
+        parser.path_.end_path();
         xmlFree(value);
     }
 }
 
-void svg_parser::parse_line(xmlTextReaderPtr reader)
+void parse_line(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
     double x1 = 0.0;
@@ -563,14 +577,14 @@ void svg_parser::parse_line(xmlTextReaderPtr reader)
         xmlFree(value);
     }
     
-    path_.begin_path();
-    path_.move_to(x1, y1);
-    path_.line_to(x2, y2);
-    path_.end_path();
+    parser.path_.begin_path();
+    parser.path_.move_to(x1, y1);
+    parser.path_.line_to(x2, y2);
+    parser.path_.end_path();
 
 }
 
-void svg_parser::parse_circle(xmlTextReaderPtr reader)
+void parse_circle(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
     double cx = 0.0;
@@ -597,19 +611,19 @@ void svg_parser::parse_circle(xmlTextReaderPtr reader)
         xmlFree(value);
     }
     
-    path_.begin_path();
+    parser.path_.begin_path();
 
     if(r != 0.0)
     {
         if(r < 0.0) throw std::runtime_error("parse_circle: Invalid radius");
         agg::ellipse c(cx, cy, r, r);
-        path_.storage().concat_path(c);
+        parser.path_.storage().concat_path(c);
     }
 
-    path_.end_path();
+    parser.path_.end_path();
 }
 
-void svg_parser::parse_ellipse(xmlTextReaderPtr reader)
+void parse_ellipse(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
     double cx = 0.0;
@@ -645,21 +659,21 @@ void svg_parser::parse_ellipse(xmlTextReaderPtr reader)
         xmlFree(value);
     }
     
-    path_.begin_path();
+    parser.path_.begin_path();
 
     if(rx != 0.0 && ry != 0.0)
     {
         if(rx < 0.0) throw std::runtime_error("parse_ellipse: Invalid rx");
         if(ry < 0.0) throw std::runtime_error("parse_ellipse: Invalid ry");
         agg::ellipse c(cx, cy, rx, ry);
-        path_.storage().concat_path(c);
+        parser.path_.storage().concat_path(c);
     }
 
-    path_.end_path();
+    parser.path_.end_path();
 
 }
 
-void svg_parser::parse_rect(xmlTextReaderPtr reader)
+void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
     double x = 0.0;
@@ -727,24 +741,24 @@ void svg_parser::parse_rect(xmlTextReaderPtr reader)
         if(h < 0.0) throw std::runtime_error("parse_rect: Invalid height");
         if(rx < 0.0) throw std::runtime_error("parse_rect: Invalid rx");
         if(ry < 0.0) throw std::runtime_error("parse_rect: Invalid ry");
-        path_.begin_path();
+        parser.path_.begin_path();
         
         if(rounded)
         {
             agg::rounded_rect r;
             r.rect(x,y,x+w,y+h);
             r.radius(rx,ry);
-            path_.storage().concat_path(r);
+            parser.path_.storage().concat_path(r);
         }
         else
         {
-            path_.move_to(x,     y);
-            path_.line_to(x + w, y);
-            path_.line_to(x + w, y + h);
-            path_.line_to(x,     y + h);
-            path_.close_subpath();
+            parser.path_.move_to(x,     y);
+            parser.path_.line_to(x + w, y);
+            parser.path_.line_to(x + w, y + h);
+            parser.path_.line_to(x,     y + h);
+            parser.path_.close_subpath();
         }
-        path_.end_path();
+        parser.path_.end_path();
     }
 }
 
@@ -755,7 +769,7 @@ void svg_parser::parse_rect(xmlTextReaderPtr reader)
  offset="1"
  id="stop3763" />
 */
-void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
+void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
 
@@ -786,7 +800,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
                 {
                     stop_color = mapnik::parse_color(kv.second.c_str());
                 }
-                catch (mapnik::config_error & ex)
+                catch (mapnik::config_error const& ex)
                 {
                     MAPNIK_LOG_ERROR(svg_parser) << ex.what();
                 }
@@ -806,7 +820,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
         {
             stop_color = mapnik::parse_color((const char *) value);
         }
-        catch (mapnik::config_error & ex)
+        catch (mapnik::config_error const& ex)
         {
             MAPNIK_LOG_ERROR(svg_parser) << ex.what();
         }
@@ -823,7 +837,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
 
     stop_color.set_alpha(opacity*255);
 
-    temporary_gradient_.second.add_stop(offset, stop_color);
+    parser.temporary_gradient_.second.add_stop(offset, stop_color);
 
     /*
     MAPNIK_LOG_DEBUG(svg_parser) << "\tFound Stop: " << offset << " "
@@ -834,7 +848,7 @@ void svg_parser::parse_gradient_stop(xmlTextReaderPtr reader)
     */
 }
 
-bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
+bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 {
     xmlChar *value;
 
@@ -845,7 +859,7 @@ bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
         // start a new gradient
         gradient new_grad;
         id = std::string((const char *) value);
-        temporary_gradient_ = std::make_pair(id, new_grad);
+        parser.temporary_gradient_ = std::make_pair(id, new_grad);
         xmlFree(value);
     }
     else
@@ -861,9 +875,9 @@ bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
         if (value[0] == '#')
         {
             std::string linkid = (const char *) &value[1];
-            if (gradient_map_.count(linkid))
+            if (parser.gradient_map_.count(linkid))
             {
-                temporary_gradient_.second = gradient_map_[linkid];
+                parser.temporary_gradient_.second = parser.gradient_map_[linkid];
             }
             else
             {
@@ -878,11 +892,11 @@ bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
     {
         if (xmlStrEqual(value, BAD_CAST "userSpaceOnUse"))
         {
-            temporary_gradient_.second.set_units(USER_SPACE_ON_USE);
+            parser.temporary_gradient_.second.set_units(USER_SPACE_ON_USE);
         }
         else
         {
-            temporary_gradient_.second.set_units(OBJECT_BOUNDING_BOX);
+            parser.temporary_gradient_.second.set_units(OBJECT_BOUNDING_BOX);
         }
         xmlFree(value);
     }
@@ -892,7 +906,7 @@ bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
     {
         agg::trans_affine tr;
         mapnik::svg::parse_transform((const char*) value,tr);
-        temporary_gradient_.second.set_transform(tr);
+        parser.temporary_gradient_.second.set_transform(tr);
         xmlFree(value);
     }
 
@@ -911,9 +925,9 @@ bool svg_parser::parse_common_gradient(xmlTextReaderPtr reader)
  r="5.1999998"
  gradientUnits="userSpaceOnUse" />
 */
-void svg_parser::parse_radial_gradient(xmlTextReaderPtr reader)
+void parse_radial_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 {
-    if (!parse_common_gradient(reader))
+    if (!parse_common_gradient(parser,reader))
         return;
 
     xmlChar *value;
@@ -963,22 +977,22 @@ void svg_parser::parse_radial_gradient(xmlTextReaderPtr reader)
         xmlFree(value);
     }
     // this logic for detecting %'s will not support mixed coordinates.
-    if (has_percent && temporary_gradient_.second.get_units() == USER_SPACE_ON_USE)
+    if (has_percent && parser.temporary_gradient_.second.get_units() == USER_SPACE_ON_USE)
     {
-        temporary_gradient_.second.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
+        parser.temporary_gradient_.second.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
     }
 
-    temporary_gradient_.second.set_gradient_type(RADIAL);
-    temporary_gradient_.second.set_control_points(fx,fy,cx,cy,r);
+    parser.temporary_gradient_.second.set_gradient_type(RADIAL);
+    parser.temporary_gradient_.second.set_control_points(fx,fy,cx,cy,r);
     // add this here in case we have no end tag, will be replaced if we do
-    gradient_map_[temporary_gradient_.first] = temporary_gradient_.second;
+    parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
 
     //MAPNIK_LOG_DEBUG(svg_parser) << "Found Radial Gradient: " << " " << cx << " " << cy << " " << fx << " " << fy << " " << r;
 }
 
-void svg_parser::parse_linear_gradient(xmlTextReaderPtr reader)
+void parse_linear_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 {
-    if (!parse_common_gradient(reader))
+    if (!parse_common_gradient(parser,reader))
         return;
 
     xmlChar *value;
@@ -1016,22 +1030,57 @@ void svg_parser::parse_linear_gradient(xmlTextReaderPtr reader)
         xmlFree(value);
     }
     // this logic for detecting %'s will not support mixed coordinates.
-    if (has_percent && temporary_gradient_.second.get_units() == USER_SPACE_ON_USE)
+    if (has_percent && parser.temporary_gradient_.second.get_units() == USER_SPACE_ON_USE)
     {
-        temporary_gradient_.second.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
+        parser.temporary_gradient_.second.set_units(USER_SPACE_ON_USE_BOUNDING_BOX);
     }
 
-    temporary_gradient_.second.set_gradient_type(LINEAR);
-    temporary_gradient_.second.set_control_points(x1,y1,x2,y2);
+    parser.temporary_gradient_.second.set_gradient_type(LINEAR);
+    parser.temporary_gradient_.second.set_control_points(x1,y1,x2,y2);
     // add this here in case we have no end tag, will be replaced if we do
-    gradient_map_[temporary_gradient_.first] = temporary_gradient_.second;
+    parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
 
     //MAPNIK_LOG_DEBUG(svg_parser) << "Found Linear Gradient: " << "(" << x1 << " " << y1 << "),(" << x2 << " " << y2 << ")";
 }
 
-void svg_parser::parse_pattern(xmlTextReaderPtr reader)
+void parse_pattern(svg_parser & parser, xmlTextReaderPtr reader)
 {
     //const xmlChar *value;
 }
+
+svg_parser::svg_parser(svg_converter<svg_path_adapter,
+                       agg::pod_bvector<mapnik::svg::path_attributes> > & path)
+    : path_(path),
+      is_defs_(false) {}
+
+svg_parser::~svg_parser() {}
+
+void svg_parser::parse(std::string const& filename)
+{
+    xmlTextReaderPtr reader = xmlNewTextReaderFilename(filename.c_str());
+    if (reader == NULL)
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to open '" << filename << "'";
+    }
+    else if (!parse_reader(*this,reader))
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << filename << "'";
+    }
+}
+
+void svg_parser::parse_from_string(std::string const& svg)
+{
+    xmlTextReaderPtr reader = xmlReaderForMemory(svg.c_str(),svg.size(),NULL,NULL,
+        (XML_PARSE_NOBLANKS | XML_PARSE_NOCDATA | XML_PARSE_NOERROR | XML_PARSE_NOWARNING));
+    if (reader == NULL)
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
+    }
+    else if (!parse_reader(*this,reader))
+    {
+        MAPNIK_LOG_ERROR(svg_parser) << "Unable to parse '" << svg << "'";
+    }
+}
+
 
 }}

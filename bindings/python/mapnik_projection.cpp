@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/coord.hpp>
+#include <mapnik/box2d.hpp>
 #include <mapnik/projection.hpp>
 
 using mapnik::projection;
@@ -88,12 +89,9 @@ void export_projection ()
 {
     using namespace boost::python;
 
-    class_<projection>("Projection", "Represents a map projection.",init<optional<std::string const&> >(
+    class_<projection>("Projection", "Represents a map projection.",init<std::string const&>(
                            (arg("proj4_string")),
                            "Constructs a new projection from its PROJ.4 string representation.\n"
-                           "\n"
-                           "The parameterless version of this constructor is equivalent to\n"
-                           "   Projection('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')\n"
                            "\n"
                            "The constructor will throw a RuntimeError in case the projection\n"
                            "cannot be initialized.\n"

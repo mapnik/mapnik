@@ -24,14 +24,13 @@
 #define MAPNIK_SVG_RENDERER_AGG_HPP
 
 // mapnik
-#include <mapnik/debug.hpp>
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/foreach.hpp>
 
 // agg
@@ -100,7 +99,7 @@ private:
 };
 
 template <typename VertexSource, typename AttributeSource, typename ScanlineRenderer, typename PixelFormat>
-class svg_renderer_agg : boost::noncopyable
+class svg_renderer_agg : mapnik::noncopyable
 {
 public:
     typedef agg::conv_curve<VertexSource>            curved_type;
@@ -272,14 +271,14 @@ public:
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
 
-            rgba8 color;
+            typename PixelFormat::color_type color;
 
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
                 ras.reset();
 
                 // https://github.com/mapnik/mapnik/issues/1129
-                if(fabs(curved_trans_contour.width()) <= 1)
+                if(std::fabs(curved_trans_contour.width()) <= 1)
                 {
                     ras.add_path(curved_trans, attr.index);
                 }
@@ -291,13 +290,13 @@ public:
 
                 if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.fill_gradient, transform, attr.fill_opacity * opacity, symbol_bbox, path_bbox);
+                    render_gradient(ras, sl, ren, attr.fill_gradient, transform, attr.fill_opacity * attr.opacity * opacity, symbol_bbox, path_bbox);
                 }
                 else
                 {
                     ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
                     color = attr.fill_color;
-                    color.opacity(color.opacity() * attr.fill_opacity * opacity);
+                    color.opacity(color.opacity() * attr.fill_opacity * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
                     color.premultiply();
                     ren_s.color(color);
@@ -327,13 +326,13 @@ public:
 
                 if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform, attr.stroke_opacity * opacity, symbol_bbox, path_bbox);
+                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform, attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, path_bbox);
                 }
                 else
                 {
                     ras.filling_rule(fill_non_zero);
                     color = attr.stroke_color;
-                    color.opacity(color.opacity() * attr.stroke_opacity * opacity);
+                    color.opacity(color.opacity() * attr.stroke_opacity * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
                     color.premultiply();
                     ren_s.color(color);
@@ -380,13 +379,13 @@ public:
             curved_.approximation_scale(scl);
             curved_.angle_tolerance(0.0);
 
-            mapnik::gray32 color(feature_id);
+            typename PixelFormat::color_type color(feature_id);
 
             if (attr.fill_flag || attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
                 ras.reset();
 
-                if(fabs(curved_trans_contour.width()) <= 1)
+                if(std::fabs(curved_trans_contour.width()) <= 1)
                 {
                     ras.add_path(curved_trans, attr.index);
                 }

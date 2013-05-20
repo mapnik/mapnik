@@ -31,6 +31,7 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -52,7 +53,7 @@ using mapnik::coord2d;
 class shape_datasource : public datasource
 {
 public:
-    shape_datasource(const parameters &params, bool bind=true);
+    shape_datasource(const parameters &params);
     virtual ~shape_datasource();
     datasource::datasource_t type() const;
     static const char * name();
@@ -61,20 +62,19 @@ public:
     box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     layer_descriptor get_descriptor() const;
-    void bind() const;
 
 private:
-    void init(shape_io& shape) const;
+    void init(shape_io& shape);
 
     datasource::datasource_t type_;
     std::string shape_name_;
-    mutable boost::shared_ptr<shape_io> shape_;
-    mutable shape_io::shapeType shape_type_;
-    mutable long file_length_;
-    mutable box2d<double> extent_;
-    mutable bool indexed_;
+    boost::shared_ptr<shape_io> shape_;
+    shape_io::shapeType shape_type_;
+    long file_length_;
+    box2d<double> extent_;
+    bool indexed_;
     const int row_limit_;
-    mutable layer_descriptor desc_;
+    layer_descriptor desc_;
 };
 
 #endif //SHAPE_HPP

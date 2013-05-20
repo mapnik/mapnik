@@ -27,38 +27,47 @@
 #include <mapnik/config.hpp>
 #include <mapnik/feature_style_processor.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/label_collision_detector.hpp>
-#include <mapnik/map.hpp>
-#include <mapnik/rule.hpp> // for all symbolizers
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/rule.hpp>              // for rule, symbolizers
+#include <mapnik/box2d.hpp>     // for box2d
+#include <mapnik/color.hpp>     // for color
+#include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/image_compositing.hpp>  // for composite_mode_e
+#include <mapnik/pixel_position.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
-// FIXME
-// forward declare so that
-// apps using mapnik do not
-// need agg headers
-namespace agg {
-struct trans_affine;
+// fwd declaration to avoid depedence on agg headers
+namespace agg { struct trans_affine; }
+
+// fwd declarations to speed up compile
+namespace mapnik {
+  class Map;
+  class feature_impl;
+  class feature_type_style;
+  class label_collision_detector4;
+  class layer;
+  class marker;
+  class proj_transform;
+  struct grid_rasterizer;
+  class request;
 }
 
 namespace mapnik {
 
-class marker;
-
-struct grid_rasterizer;
-
 template <typename T>
 class MAPNIK_DECL grid_renderer : public feature_style_processor<grid_renderer<T> >,
-                                  private boost::noncopyable
+                                  private mapnik::noncopyable
 {
 
 public:
     typedef T buffer_type;
     typedef grid_renderer<T> processor_impl_type;
     grid_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    grid_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~grid_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
@@ -104,10 +113,14 @@ public:
     {
         // grid renderer doesn't support processing of multiple symbolizers.
         return false;
-    };
+    }
     void painted(bool painted)
     {
         pixmap_.painted(painted);
+    }
+    inline eAttributeCollectionPolicy attribute_collection_policy() const
+    {
+        return DEFAULT;
     }
 
 private:

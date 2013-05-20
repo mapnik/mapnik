@@ -22,10 +22,12 @@
 
 // boost
 #include <boost/python.hpp>
+#include <boost/variant.hpp>
 
 // mapnik
 //symbolizer typdef here rather than mapnik/symbolizer.hpp
 #include <mapnik/rule.hpp>
+#include <mapnik/symbolizer_hash.hpp>
 
 using mapnik::symbolizer;
 
@@ -44,74 +46,81 @@ using mapnik::markers_symbolizer;
 struct get_symbolizer_type : public boost::static_visitor<std::string>
 {
 public:
-    get_symbolizer_type() {}
-
-    std::string operator () ( const  point_symbolizer & /*sym*/ )
-    {
-        return "point";
-    }
-
-    std::string operator () ( const line_symbolizer & /*sym*/ )
-    {
-        return "line";
-    }
-
-    std::string operator () ( const line_pattern_symbolizer & /*sym*/ )
-    {
-        return "line_pattern";
-    }
-
-    std::string operator () ( const polygon_symbolizer & /*sym*/ )
-    {
-        return "polygon";
-    }
-
-    std::string operator () ( const polygon_pattern_symbolizer & /*sym*/ )
-    {
-        return "polygon_pattern";
-    }
-
-    std::string operator () ( const raster_symbolizer & /*sym*/ )
-    {
-        return "raster";
-    }
-
-    std::string operator () ( const shield_symbolizer & /*sym*/ )
-    {
-        return "shield";
-    }
-
-    std::string operator () ( const text_symbolizer & /*sym*/ )
-    {
-        return "text";
-    }
-
-    std::string operator () ( const building_symbolizer & /*sym*/ )
-    {
-        return "building";
-    }
-
-    std::string operator () ( const markers_symbolizer & /*sym*/ )
-    {
-        return "markers";
-    }
- 
-    template <typename Symbolizer>
-    std::string operator() ( Symbolizer const& sym)
+    std::string operator () (point_symbolizer const& sym) const
     {
         boost::ignore_unused_variable_warning(sym);
-        return "unknown";
+        return std::string("point");
+    }
+
+    std::string operator () ( line_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("line");
+    }
+
+    std::string operator () (line_pattern_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("line_pattern");
+    }
+
+    std::string operator () (polygon_symbolizer const& sym ) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("polygon");
+    }
+
+    std::string operator () (polygon_pattern_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("polygon_pattern");
+    }
+
+    std::string operator () (raster_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("raster");
+    }
+
+    std::string operator () (shield_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("shield");
+    }
+
+    std::string operator () (text_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("text");
+    }
+
+    std::string operator () (building_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("building");
+    }
+
+    std::string operator () (markers_symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("markers");
+    }
+
+    template <typename Symbolizer>
+    std::string operator() ( Symbolizer const& sym) const
+    {
+        boost::ignore_unused_variable_warning(sym);
+        return std::string("unknown");
     }
 };
 
-std::string get_symbol_type(const symbolizer& symbol)
+std::string get_symbol_type(symbolizer const& symbol)
 {
-    get_symbolizer_type serializer;
-    std::string type = boost::apply_visitor( serializer, symbol );
+    std::string type = boost::apply_visitor( get_symbolizer_type(), symbol);
     return type;
 }
 
-const point_symbolizer& point_( const symbolizer& symbol )
+const point_symbolizer& point_(symbolizer const& symbol )
 {
     return boost::get<point_symbolizer>(symbol);
 }
@@ -161,6 +170,20 @@ const markers_symbolizer& markers_( const symbolizer& symbol )
     return boost::get<markers_symbolizer>(symbol);
 }
 
+struct symbolizer_hash_visitor : public boost::static_visitor<std::size_t>
+{
+    template <typename T>
+    std::size_t operator() (T const& sym) const
+    {
+        return mapnik::symbolizer_hash::value(sym);
+    }
+};
+
+std::size_t hash_impl(symbolizer const& sym)
+{
+    return boost::apply_visitor(symbolizer_hash_visitor(), sym);
+}
+
 void export_symbolizer()
 {
     using namespace boost::python;
@@ -168,6 +191,8 @@ void export_symbolizer()
     class_<symbolizer>("Symbolizer",no_init)
 
         .def("type",get_symbol_type)
+
+        .def("__hash__",hash_impl)
 
         .def("point",point_,
              return_value_policy<copy_const_reference>())
@@ -200,4 +225,3 @@ void export_symbolizer()
              return_value_policy<copy_const_reference>())
         ;
 }
-

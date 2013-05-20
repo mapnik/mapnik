@@ -24,28 +24,34 @@
 #define MAPNIK_MEMORY_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/box2d.hpp>
+#include <mapnik/geometry.hpp>
+#include <mapnik/datasource.hpp>
 #include <mapnik/memory_datasource.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/raster.hpp>
 
-// boost
-#include <boost/utility.hpp>
+#include <deque>
 
 namespace mapnik {
 
 class memory_featureset : public Featureset
 {
 public:
-    memory_featureset(box2d<double> const& bbox, memory_datasource const& ds)
+    memory_featureset(box2d<double> const& bbox, memory_datasource const& ds, bool bbox_check = true)
         : bbox_(bbox),
           pos_(ds.features_.begin()),
           end_(ds.features_.end()),
-          type_(ds.type())
+          type_(ds.type()),
+          bbox_check_(bbox_check)
     {}
 
-    memory_featureset(box2d<double> const& bbox, std::vector<feature_ptr> const& features)
+    memory_featureset(box2d<double> const& bbox, std::deque<feature_ptr> const& features, bool bbox_check = true)
         : bbox_(bbox),
           pos_(features.begin()),
           end_(features.end()),
-          type_(datasource::Vector)
+          type_(datasource::Vector),
+          bbox_check_(bbox_check)
     {}
 
     virtual ~memory_featureset() {}
@@ -54,31 +60,43 @@ public:
     {
         while (pos_ != end_)
         {
-            if (type_ == datasource::Raster)
+            if (!bbox_check_)
             {
                 return *pos_++;
             }
             else
             {
-                for (unsigned i=0; i<(*pos_)->num_geometries();++i)
+                if (type_ == datasource::Raster)
                 {
-                    geometry_type & geom = (*pos_)->get_geometry(i);
-                    if (bbox_.intersects(geom.envelope()))
+                    raster_ptr const& source = (*pos_)->get_raster();
+                    if (source && bbox_.intersects(source->ext_))
                     {
                         return *pos_++;
                     }
                 }
+                else
+                {
+                    for (unsigned i=0; i<(*pos_)->num_geometries();++i)
+                    {
+                        geometry_type & geom = (*pos_)->get_geometry(i);
+                        if (bbox_.intersects(geom.envelope()))
+                        {
+                            return *pos_++;
+                        }
+                    }
+                }
+                ++pos_;
             }
-            ++pos_;
         }
         return feature_ptr();
     }
 
 private:
     box2d<double> bbox_;
-    std::vector<feature_ptr>::const_iterator pos_;
-    std::vector<feature_ptr>::const_iterator end_;
+    std::deque<feature_ptr>::const_iterator pos_;
+    std::deque<feature_ptr>::const_iterator end_;
     datasource::datasource_t type_;
+    bool bbox_check_;
 };
 }
 

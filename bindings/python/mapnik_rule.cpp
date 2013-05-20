@@ -34,7 +34,6 @@
 using mapnik::rule;
 using mapnik::expr_node;
 using mapnik::expression_ptr;
-using mapnik::Feature;
 using mapnik::point_symbolizer;
 using mapnik::line_symbolizer;
 using mapnik::line_pattern_symbolizer;
@@ -85,6 +84,7 @@ void export_rule()
         .def("active",&rule::active)
         .add_property("symbols",make_function
                       (&rule::get_symbolizers,return_value_policy<reference_existing_object>()))
+        .add_property("copy_symbols",make_function
+                      (&rule::get_symbolizers,return_value_policy<copy_const_reference>()))
         ;
 }
-

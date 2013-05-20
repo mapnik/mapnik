@@ -21,15 +21,19 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
 
 #include <mapnik/geom_util.hpp>
 #include <mapnik/point_symbolizer.hpp>
-#include <mapnik/expression_evaluator.hpp>
 #include <mapnik/marker.hpp>
 #include <mapnik/marker_cache.hpp>
+#include <mapnik/label_collision_detector.hpp>
+#include <mapnik/parse_path.hpp>
+#include <mapnik/pixel_position.hpp>
+
 
 // agg
 #include "agg_trans_affine.h"
@@ -68,7 +72,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
         evaluate_transform(tr, feature, sym.get_image_transform());
         agg::trans_affine_translation recenter(-center.x, -center.y);
         agg::trans_affine recenter_tr = recenter * tr;
-        box2d<double> label_ext = bbox * recenter_tr;
+        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_);
 
         for (unsigned i=0; i<feature.num_geometries(); ++i)
         {

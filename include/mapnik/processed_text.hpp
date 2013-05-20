@@ -24,13 +24,20 @@
 
 // mapnik
 #include <mapnik/text_properties.hpp>
-#include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text_path.hpp>
+#include <mapnik/noncopyable.hpp>
+
+// stl
+#include <list>
 
 namespace mapnik
 {
 
-class processed_text : boost::noncopyable
+// fwd declares
+class freetype_engine;
+template <typename T> class face_manager;
+
+class MAPNIK_DECL processed_text : mapnik::noncopyable
 {
 public:
     class processed_expression

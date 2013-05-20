@@ -22,6 +22,12 @@
 
 // mapnik
 #include <mapnik/grid/grid.hpp>
+#include <mapnik/debug.hpp>
+#include <mapnik/feature.hpp>
+#include <mapnik/value.hpp>
+
+// boost
+#include <boost/make_shared.hpp>
 
 namespace mapnik
 {
@@ -80,7 +86,7 @@ void hit_grid<T>::clear()
 template <typename T>
 void hit_grid<T>::add_feature(mapnik::feature_impl & feature)
 {
-    int feature_id = feature.id();
+    value_type feature_id = feature.id();
     // avoid adding duplicate features (e.g. in the case of both a line symbolizer and a polygon symbolizer)
     typename feature_key_type::const_iterator feature_pos = f_keys_.find(feature_id);
     if (feature_pos != f_keys_.end())
@@ -138,6 +144,6 @@ void hit_grid<T>::add_feature(mapnik::feature_impl & feature)
 }
 
 
-template class hit_grid<int>;
+template class hit_grid<mapnik::value_integer>;
 
 }

@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 #include <boost/python.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/attribute.hpp>
 #include <mapnik/building_symbolizer.hpp>
 
 using namespace mapnik;

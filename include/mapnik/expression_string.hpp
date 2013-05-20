@@ -25,10 +25,14 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/expression_node.hpp>
+#include <mapnik/expression_node_types.hpp>
+
+// boost
+#include <boost/shared_ptr.hpp>
 
 // stl
 #include <string>
+#include <stdexcept>
 
 namespace mapnik
 {

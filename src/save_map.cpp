@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/rule.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
@@ -34,7 +35,10 @@
 #include <mapnik/text_placements/dummy.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_scaling.hpp>
+#include <mapnik/image_filter.hpp>
 #include <mapnik/image_filter_types.hpp>
+#include <mapnik/parse_path.hpp>
+
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -97,6 +101,10 @@ public:
         if ( sym.get_rasterizer() != dfl.get_rasterizer() || explicit_defaults_ )
         {
             set_attr( sym_node, "rasterizer", sym.get_rasterizer() );
+        }
+        if ( sym.offset() != dfl.offset() || explicit_defaults_ )
+        {
+            set_attr( sym_node, "offset", sym.offset() );
         }
         serialize_symbolizer_base(sym_node, sym);
     }
@@ -246,6 +254,11 @@ public:
 
         add_font_attributes( sym_node, sym);
         serialize_symbolizer_base(sym_node, sym);
+        text_symbolizer dfl;
+        if (sym.get_halo_rasterizer() != dfl.get_halo_rasterizer() || explicit_defaults_)
+        {
+            set_attr(sym_node, "halo-rasterizer", sym.get_halo_rasterizer());
+        }
     }
 
     void operator () ( building_symbolizer const& sym )
@@ -368,7 +381,7 @@ private:
         }
         if (sym.simplify_tolerance() != dfl.simplify_tolerance() || explicit_defaults_)
         {
-            set_attr( node, "simplify-tolerance", sym.simplify_tolerance() );
+            set_attr( node, "simplify", sym.simplify_tolerance() );
         }
         if (sym.smooth() != dfl.smooth() || explicit_defaults_)
         {
@@ -660,12 +673,12 @@ public:
     serialize_type( boost::property_tree::ptree & node):
         node_(node) {}
 
-    void operator () ( int val ) const
+    void operator () ( mapnik::value_integer val ) const
     {
         node_.put("<xmlattr>.type", "int" );
     }
 
-    void operator () ( double val ) const
+    void operator () ( mapnik::value_double val ) const
     {
         node_.put("<xmlattr>.type", "float" );
     }
@@ -754,10 +767,10 @@ void serialize_layer( ptree & map_node, const layer & layer, bool explicit_defau
         set_attr( layer_node, "group-by", layer.group_by() );
     }
 
-    int buffer_size = layer.buffer_size();
+    boost::optional<int> const& buffer_size = layer.buffer_size();
     if ( buffer_size || explicit_defaults)
     {
-        set_attr( layer_node, "buffer-size", buffer_size );
+        set_attr( layer_node, "buffer-size", *buffer_size );
     }
 
     optional<box2d<double> > const& maximum_extent = layer.maximum_extent();

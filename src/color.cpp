@@ -47,17 +47,17 @@ std::string color::to_string() const
     if (alpha_ == 255)
     {
         ss << "rgb("
-           << red()   << ","
-           << green() << ","
-           << blue()  << ")";
+           << static_cast<unsigned>(red())   << ","
+           << static_cast<unsigned>(green()) << ","
+           << static_cast<unsigned>(blue())  << ")";
     }
     else
     {
         ss << "rgba("
-           << red()   << ","
-           << green() << ","
-           << blue()  << ","
-           << alpha()/255.0 << ")";
+           << static_cast<unsigned>(red())   << ","
+           << static_cast<unsigned>(green()) << ","
+           << static_cast<unsigned>(blue()) << ","
+           << alpha() / 255.0 << ")";
     }
     return ss.str();
 }
@@ -67,17 +67,17 @@ std::string color::to_hex_string() const
     if (alpha_ == 255 )
     {
         return (boost::format("#%1$02x%2$02x%3$02x")
-                % red()
-                % green()
-                % blue() ).str();
+                % static_cast<unsigned>(red())
+                % static_cast<unsigned>(green())
+                % static_cast<unsigned>(blue())).str();
     }
     else
     {
         return (boost::format("#%1$02x%2$02x%3$02x%4$02x")
-                % red()
-                % green()
-                % blue()
-                % alpha()).str();
+                % static_cast<unsigned>(red())
+                % static_cast<unsigned>(green())
+                % static_cast<unsigned>(blue())
+                % static_cast<unsigned>(alpha())).str();
     }
 }
 
@@ -101,4 +101,3 @@ void color::demultiply()
 }
 
 }
-

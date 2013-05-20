@@ -20,19 +20,21 @@
  *
  *****************************************************************************/
 // mapnik
+#include <mapnik/value_types.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/util/trim.hpp>
 
 #include "dbfile.hpp"
 
 // boost
-#include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/cstdint.hpp> // for int16_t and int32_t
 #include <mapnik/mapped_memory_cache.hpp>
+
 // stl
 #include <string>
-
 
 using mapnik::mapped_memory_cache;
 
@@ -55,7 +57,7 @@ dbf_file::dbf_file(std::string const& file_name)
 {
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name.c_str(),true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name,true);
     if (memory)
     {
         file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
@@ -123,7 +125,7 @@ const field_descriptor& dbf_file::descriptor(int col) const
 }
 
 
-void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f) const throw()
+void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feature_impl & f) const throw()
 {
     using namespace boost::spirit;
 
@@ -134,23 +136,34 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
         switch (fields_[col].type_)
         {
         case 'C':
-        case 'D'://todo handle date?
-        case 'M':
-        case 'L':
+        case 'D':
         {
             // FIXME - avoid constructing std::string on stack
             std::string str(record_+fields_[col].offset_,fields_[col].length_);
-            boost::trim(str);
+            mapnik::util::trim(str);
             f.put(name,tr.transcode(str.c_str()));
             break;
         }
-        case 'N':
-        case 'F':
+        case 'L':
         {
-
+            char ch = record_[fields_[col].offset_];
+            if ( ch == '1' || ch == 't' || ch == 'T' || ch == 'y' || ch == 'Y')
+            {
+                f.put(name,true);
+            }
+            else
+            {
+                // NOTE: null logical fields use '?'
+                f.put(name,false);
+            }
+            break;
+        }
+        case 'N':
+        {
             if (record_[fields_[col].offset_] == '*')
             {
-                f.put(name,0);
+                // NOTE: we intentionally do not store null here
+                // since it is equivalent to the attribute not existing
                 break;
             }
             if ( fields_[col].dec_>0 )
@@ -158,17 +171,15 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, Feature & f)
                 double val = 0.0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                bool r = qi::phrase_parse(itr,end,double_,ascii::space,val);
-                if (r && (itr == end))
+                if (qi::phrase_parse(itr,end,double_,ascii::space,val))
                     f.put(name,val);
             }
             else
             {
-                int val = 0;
+                mapnik::value_integer val = 0;
                 const char *itr = record_+fields_[col].offset_;
                 const char *end = itr + fields_[col].length_;
-                bool r = qi::phrase_parse(itr,end,int_,ascii::space,val);
-                if (r && (itr == end))
+                if (qi::phrase_parse(itr,end,int_,ascii::space,val))
                     f.put(name,val);
             }
             break;
@@ -198,7 +209,9 @@ void dbf_file::read_header()
             field_descriptor desc;
             desc.index_=i;
             file_.read(name,10);
-            desc.name_=boost::trim_left_copy(std::string(name));
+            desc.name_=name;
+            // TODO - when is this trim needed?
+            mapnik::util::trim(desc.name_);
             skip(1);
             desc.type_=file_.get();
             skip(4);

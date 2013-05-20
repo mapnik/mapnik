@@ -25,24 +25,32 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/parse_path.hpp>
+#include <mapnik/path_expression.hpp>
 #include <mapnik/image_compositing.hpp>
-#include <mapnik/transform_expression.hpp>
 #include <mapnik/simplify.hpp>
 
 // boost
-#include <boost/array.hpp>
 #include <boost/optional.hpp>
+
+// stl
+#include <vector>
+#include <string>
+
+namespace agg { struct trans_affine; }
 
 namespace mapnik
 {
 
+// fwd declares
+// TODO - move these transform declares to own header
+namespace detail { struct transform_node; }
+typedef std::vector<detail::transform_node>         transform_list;
+typedef boost::shared_ptr<transform_list>   transform_list_ptr;
 typedef transform_list_ptr transform_type;
+class feature_impl;
 
-MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr, Feature const& feature,
+MAPNIK_DECL void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,
                                     transform_type const& trans_expr);
-
-class Map;
 
 class MAPNIK_DECL symbolizer_base
 {
@@ -79,7 +87,7 @@ public:
     void set_filename(path_expression_ptr const& filename);
     void set_opacity(float opacity);
     float get_opacity() const;
-    void  set_image_transform(transform_type const& tr);
+    void set_image_transform(transform_type const& tr);
     transform_type const& get_image_transform() const;
     std::string get_image_transform_string() const;
 protected:

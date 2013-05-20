@@ -103,6 +103,35 @@ void set_maximum_extent(mapnik::layer & l, boost::optional<mapnik::box2d<double>
     }
 }
 
+void set_buffer_size(mapnik::layer & l, boost::optional<int> const& buffer_size)
+{
+    if (buffer_size)
+    {
+        l.set_buffer_size(*buffer_size);
+    }
+    else
+    {
+        l.reset_buffer_size();
+    }
+}
+
+PyObject * get_buffer_size(mapnik::layer & l)
+{
+    boost::optional<int> buffer_size = l.buffer_size();
+    if (buffer_size)
+    {
+#if PY_VERSION_HEX >= 0x03000000
+        return PyLong_FromLong(*buffer_size);
+#else
+        return PyInt_FromLong(*buffer_size);
+#endif
+    }
+    else
+    {
+        Py_RETURN_NONE;
+    }
+}
+
 void export_layer()
 {
     using namespace boost::python;
@@ -224,17 +253,18 @@ void export_layer()
             )
 
         .add_property("buffer_size",
-                      &layer::buffer_size,
-                      &layer::set_buffer_size,
+                      &get_buffer_size,
+                      &set_buffer_size,
                       "Get/Set the size of buffer around layer in pixels.\n"
                       "\n"
                       "Usage:\n"
-                      ">>> l.buffer_size\n"
-                      "0 # zero by default\n"
+                      ">>> print(l.buffer_size)\n"
+                      "None # None by default\n"
                       ">>> l.buffer_size = 2\n"
                       ">>> l.buffer_size\n"
                       "2\n"
             )
+
         .add_property("maximum_extent",make_function
                       (&layer::maximum_extent,return_value_policy<copy_const_reference>()),
                       &set_maximum_extent,
@@ -316,7 +346,7 @@ void export_layer()
                       "'+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' # The default srs if not initialized with custom srs\n"
                       ">>> # set to google mercator with Proj.4 literal\n"
                       "... \n"
-                      ">>> lyr.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over'\n"
+                      ">>> lyr.srs = '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over'\n"
             )
 
         .add_property("group_by",

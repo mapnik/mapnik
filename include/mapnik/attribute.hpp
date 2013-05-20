@@ -24,7 +24,7 @@
 #define MAPNIK_ATTRIBUTE_HPP
 
 // mapnik
-#include <mapnik/value.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/geometry.hpp>
 
 // stl
@@ -52,14 +52,14 @@ struct geometry_type_attribute
     template <typename V, typename F>
     V value(F const& f) const
     {
-        int type = 0;
+        mapnik::value_integer type = 0;
         geometry_container::const_iterator itr = f.paths().begin();
         geometry_container::const_iterator end = f.paths().end();
         for ( ; itr != end; ++itr)
         {
             if (type != 0 && itr->type() != type)
             {
-                return 4; // Collection
+                return value_integer(4); // Collection
             }
             type = itr->type();
         }

@@ -24,10 +24,11 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/expression_node_types.hpp>
 #include <mapnik/expression_grammar.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 // boost
-#include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
 
 namespace mapnik
@@ -37,7 +38,6 @@ expression_ptr parse_expression(std::string const& str, std::string const& encod
 {
     transcoder tr(encoding);
     expression_grammar<std::string::const_iterator> g(tr);
-
     return parse_expression(str, g);
 }
 
@@ -45,12 +45,10 @@ expression_ptr parse_expression(std::string const& str,
                                 mapnik::expression_grammar<std::string::const_iterator> const& g)
 {
     expr_node node;
-
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
-    
     bool r = boost::spirit::qi::phrase_parse(itr, end, g, boost::spirit::standard_wide::space, node);
-    if (r && itr==end)
+    if (r && itr == end)
     {
         return boost::make_shared<expr_node>(node);
     }

@@ -22,9 +22,10 @@
 
 // mapnik
 #include <mapnik/markers_symbolizer.hpp>
-
-// boost
-#include <boost/make_shared.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/parse_path.hpp>
+#include <mapnik/enumeration.hpp>
 
 namespace mapnik {
 

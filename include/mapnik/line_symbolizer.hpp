@@ -24,6 +24,8 @@
 #define MAPNIK_LINE_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/color.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/stroke.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/enumeration.hpp>

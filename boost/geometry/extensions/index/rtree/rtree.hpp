@@ -670,7 +670,7 @@ private:
         }
 
         index = 0;
-        for (typename std::vector<Box>::const_iterator it = boxes.begin();
+        for (it = boxes.begin();
              it != boxes.end(); ++it, index++)
         {
             if (geometry::get<min_corner, D>(*it) >= highest_low && index != lowest_high_index)

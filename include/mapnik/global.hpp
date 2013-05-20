@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,6 +29,7 @@
 
 // stl
 #include <cstring>
+#include <cmath>
 
 namespace mapnik
 {
@@ -155,14 +156,14 @@ inline void read_double_xdr(const char* data, double & val)
 
 #ifdef _WINDOWS
 // msvc doesn't have rint in <cmath>
-inline int rint( double val)
+inline int rint(double val)
 {
-    return int(floor(val + 0.5));
+    return int(std::floor(val + 0.5));
 }
 
-inline double round (double val)
+inline double round(double val)
 {
-    return floor(val);
+    return std::floor(val);
 }
 
 #define  _USE_MATH_DEFINES

@@ -12,56 +12,76 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-
 def test_simplest_render():
     m = mapnik.Map(256, 256)
-    i = mapnik.Image(m.width, m.height)
-
-    mapnik.render(m, i)
-
-    s = i.tostring()
-
+    im = mapnik.Image(m.width, m.height)
+    eq_(im.painted(),False)
+    eq_(im.is_solid(),True)
+    mapnik.render(m, im)
+    eq_(im.painted(),False)
+    eq_(im.is_solid(),True)
+    s = im.tostring()
     eq_(s, 256 * 256 * '\x00\x00\x00\x00')
 
 def test_render_image_to_string():
-    i = mapnik.Image(256, 256)
-
-    i.background = mapnik.Color('black')
-
-    s = i.tostring()
-
+    im = mapnik.Image(256, 256)
+    im.background = mapnik.Color('black')
+    eq_(im.painted(),False)
+    eq_(im.is_solid(),True)
+    s = im.tostring()
     eq_(s, 256 * 256 * '\x00\x00\x00\xff')
+    s = im.tostring('png')
 
-    s = i.tostring('png')
+def test_non_solid_image():
+    im = mapnik.Image(256, 256)
+    im.background = mapnik.Color('black')
+    eq_(im.painted(),False)
+    eq_(im.is_solid(),True)
+    # set one pixel to a different color
+    im.set_pixel(0,0,mapnik.Color('white'))
+    eq_(im.painted(),False)
+    eq_(im.is_solid(),False)
+
+def test_non_solid_image_view():
+    im = mapnik.Image(256, 256)
+    im.background = mapnik.Color('black')
+    view = im.view(0,0,256,256)
+    eq_(view.is_solid(),True)
+    # set one pixel to a different color
+    im.set_pixel(0,0,mapnik.Color('white'))
+    eq_(im.is_solid(),False)
+    # view, since it is the exact dimensions of the image
+    # should also be non-solid
+    eq_(view.is_solid(),False)
+    # but not a view that excludes the single diff pixel
+    view2 = im.view(1,1,256,256)
+    eq_(view2.is_solid(),True)
 
 def test_setting_alpha():
     w,h = 256,256
     im1 = mapnik.Image(w,h)
     # white, half transparent
     im1.background = mapnik.Color('rgba(255,255,255,.5)')
-
+    eq_(im1.painted(),False)
+    eq_(im1.is_solid(),True)
     # pure white
     im2 = mapnik.Image(w,h)
     im2.background = mapnik.Color('rgba(255,255,255,1)')
     im2.set_alpha(.5)
-
+    eq_(im2.painted(),False)
+    eq_(im2.is_solid(),True)
     eq_(len(im1.tostring()), len(im2.tostring()))
 
-
 def test_render_image_to_file():
-    i = mapnik.Image(256, 256)
-
-    i.background = mapnik.Color('black')
-
+    im = mapnik.Image(256, 256)
+    im.background = mapnik.Color('black')
     if mapnik.has_jpeg():
-        i.save('test.jpg')
-    i.save('test.png', 'png')
-
+        im.save('test.jpg')
+    im.save('test.png', 'png')
     if os.path.exists('test.jpg'):
         os.remove('test.jpg')
     else:
         return False
-
     if os.path.exists('test.png'):
         os.remove('test.png')
     else:
@@ -71,34 +91,32 @@ def get_paired_images(w,h,mapfile):
     tmp_map = 'tmp_map.xml'
     m = mapnik.Map(w,h)
     mapnik.load_map(m,mapfile)
-    i = mapnik.Image(w,h)
+    im = mapnik.Image(w,h)
     m.zoom_all()
-    mapnik.render(m,i)
+    mapnik.render(m,im)
     mapnik.save_map(m,tmp_map)
     m2 = mapnik.Map(w,h)
     mapnik.load_map(m2,tmp_map)
-    i2 = mapnik.Image(w,h)
+    im2 = mapnik.Image(w,h)
     m2.zoom_all()
-    mapnik.render(m2,i2)
+    mapnik.render(m2,im2)
     os.remove(tmp_map)
-    return i,i2    
+    return im,im2
 
 def test_render_from_serialization():
     try:
-        i,i2 = get_paired_images(100,100,'../data/good_maps/building_symbolizer.xml')
-        eq_(i.tostring(),i2.tostring())
+        im,im2 = get_paired_images(100,100,'../data/good_maps/building_symbolizer.xml')
+        eq_(im.tostring(),im2.tostring())
 
-        i,i2 = get_paired_images(100,100,'../data/good_maps/polygon_symbolizer.xml')
-        eq_(i.tostring(),i2.tostring())
+        im,im2 = get_paired_images(100,100,'../data/good_maps/polygon_symbolizer.xml')
+        eq_(im.tostring(),im2.tostring())
     except RuntimeError, e:
         # only test datasources that we have installed
         if not 'Could not create datasource' in str(e):
             raise RuntimeError(e)
 
 def test_render_points():
-
     if not mapnik.has_cairo(): return
-
     # create and populate point datasource (WGS84 lat-lon coordinates)
     ds = mapnik.MemoryDatasource()
     context = mapnik.Context()
@@ -120,7 +138,7 @@ def test_render_points():
     symb.allow_overlap = True
     r.symbols.append(symb)
     s.rules.append(r)
-    lyr = mapnik.Layer('Places','+proj=latlon +datum=WGS84')
+    lyr = mapnik.Layer('Places','+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     lyr.datasource = ds
     lyr.styles.append('places_labels')
     # latlon bounding box corners
@@ -128,17 +146,19 @@ def test_render_points():
     lr_lonlat = mapnik.Coord(143.40,-38.80)
     # render for different projections 
     projs = { 
-        'latlon': '+proj=latlon +datum=WGS84',
+        'google': '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over',
+        'latlon': '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs',
         'merc': '+proj=merc +datum=WGS84 +k=1.0 +units=m +over +no_defs',
-        'google': '+proj=merc +ellps=sphere +R=6378137 +a=6378137 +units=m',
         'utm': '+proj=utm +zone=54 +datum=WGS84'
         }
     for projdescr in projs.iterkeys():
         m = mapnik.Map(1000, 500, projs[projdescr])
         m.append_style('places_labels',s)
         m.layers.append(lyr)
-        p = mapnik.Projection(projs[projdescr])
-        m.zoom_to_box(p.forward(mapnik.Box2d(ul_lonlat,lr_lonlat)))
+        dest_proj = mapnik.Projection(projs[projdescr])
+        src_proj = mapnik.Projection('+init=epsg:4326')
+        tr = mapnik.ProjTransform(src_proj,dest_proj)
+        m.zoom_to_box(tr.forward(mapnik.Box2d(ul_lonlat,lr_lonlat)))
         # Render to SVG so that it can be checked how many points are there with string comparison
         svg_file = os.path.join(tempfile.gettempdir(), 'mapnik-render-points-%s.svg' % projdescr)
         mapnik.render_to_file(m, svg_file)
@@ -146,6 +166,29 @@ def test_render_points():
         svg = open(svg_file,'r').read()
         num_points_rendered = svg.count('<image ')
         eq_(num_points_present, num_points_rendered, "Not all points were rendered (%d instead of %d) at projection %s" % (num_points_rendered, num_points_present, projdescr)) 
+
+@raises(RuntimeError)
+def test_render_with_scale_factor_zero_throws():
+    m = mapnik.Map(256,256)
+    im = mapnik.Image(256, 256)
+    mapnik.render(m,im,0.0)
+
+def test_render_with_scale_factor():
+    m = mapnik.Map(256,256)
+    mapnik.load_map(m,'../data/good_maps/marker-text-line.xml')
+    m.zoom_all()
+    sizes = [.00001,.005,.1,.899,1,1.5,2,5,10,100]
+    for size in sizes:
+        im = mapnik.Image(256, 256)
+        mapnik.render(m,im,size)
+        expected_file = './images/support/marker-text-line-scale-factor-%s.png' % size
+        actual_file = '/tmp/' + os.path.basename(expected_file)
+        im.save(actual_file,'png8')
+        #im.save(expected_file,'png8')
+        # we save and re-open here so both png8 images are ready as full color png
+        actual = mapnik.Image.open(expected_file)
+        expected = mapnik.Image.open(expected_file)
+        eq_(actual.tostring(),expected.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
 
 if __name__ == "__main__":
     setup()

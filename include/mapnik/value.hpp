@@ -24,17 +24,22 @@
 #define MAPNIK_VALUE_HPP
 
 // mapnik
+#include <mapnik/value_types.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/util/conversions.hpp>
 
 // boost
-#include <boost/variant.hpp>
+#include <boost/variant/recursive_wrapper.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/variant.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/concept_check.hpp>
+#include <boost/functional/hash.hpp>
+#include "hash_variant.hpp"
 
 // stl
-#include <iostream>
 #include <string>
 #include <cmath>
 
@@ -47,10 +52,10 @@ namespace mapnik  {
 
 inline void to_utf8(UnicodeString const& input, std::string & target)
 {
-    if (input.length() == 0) return;
+    if (input.isEmpty()) return;
 
     const int BUF_SIZE = 256;
-    char  buf [BUF_SIZE];
+    char buf [BUF_SIZE];
     int len;
 
     UErrorCode err = U_ZERO_ERROR;
@@ -60,53 +65,15 @@ inline void to_utf8(UnicodeString const& input, std::string & target)
         boost::scoped_array<char> buf_ptr(new char [len+1]);
         err = U_ZERO_ERROR;
         u_strToUTF8(buf_ptr.get() , len + 1, &len, input.getBuffer(), input.length(), &err);
-        target.assign(buf_ptr.get() , len);
+        target.assign(buf_ptr.get() , static_cast<std::size_t>(len));
     }
     else
     {
-        target.assign(buf, len);
+        target.assign(buf, static_cast<std::size_t>(len));
     }
 }
 
-struct value_null
-{
-    template <typename T>
-    value_null operator+ (T const& other) const
-    {
-        boost::ignore_unused_variable_warning(other);
-        return *this;
-    }
-
-    template <typename T>
-    value_null operator- (T const& other) const
-    {
-        boost::ignore_unused_variable_warning(other);
-        return *this;
-    }
-
-    template <typename T>
-    value_null operator* (T const& other) const
-    {
-        boost::ignore_unused_variable_warning(other);
-        return *this;
-    }
-
-    template <typename T>
-    value_null operator/ (T const& other) const
-    {
-        boost::ignore_unused_variable_warning(other);
-        return *this;
-    }
-
-    template <typename T>
-    value_null operator% (T const& other) const
-    {
-        boost::ignore_unused_variable_warning(other);
-        return *this;
-    }
-};
-
-typedef boost::variant<value_null,bool,int,double,UnicodeString> value_base;
+typedef boost::variant<value_null,value_bool,value_integer,value_double,value_unicode_string> value_base;
 
 namespace impl {
 
@@ -125,18 +92,18 @@ struct equals
         return lhs == rhs;
     }
 
-    bool operator() (int lhs, double rhs) const
+    bool operator() (value_integer lhs, value_double rhs) const
     {
         return  lhs == rhs;
     }
 
-    bool operator() (double lhs, int rhs) const
+    bool operator() (value_double lhs, value_integer rhs) const
     {
         return  (lhs == rhs)? true : false ;
     }
 
-    bool operator() (UnicodeString const& lhs,
-                     UnicodeString const& rhs) const
+    bool operator() (value_unicode_string const& lhs,
+                     value_unicode_string const& rhs) const
     {
         return  (lhs == rhs) ? true: false;
     }
@@ -163,40 +130,39 @@ struct not_equals
         return lhs != rhs;
     }
 
-    bool operator() (int lhs, double rhs) const
+    bool operator() (value_integer lhs, value_double rhs) const
     {
         return  lhs != rhs;
     }
 
-    bool operator() (double lhs, int rhs) const
+    bool operator() (value_double lhs, value_integer rhs) const
     {
         return  lhs != rhs;
     }
 
-    bool operator() (UnicodeString const& lhs,
-                     UnicodeString const& rhs) const
+    bool operator() (value_unicode_string const& lhs,
+                     value_unicode_string const& rhs) const
     {
         return  (lhs != rhs)? true : false;
     }
 
     bool operator() (value_null, value_null) const
     {
-        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
         return false;
     }
 
     template <typename T>
     bool operator() (value_null, const T &) const
     {
-        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
-        return false;
+        // https://github.com/mapnik/mapnik/issues/1642
+        return true;
     }
 
     template <typename T>
     bool operator() (const T &, value_null) const
     {
-        // TODO - needs review - https://github.com/mapnik/mapnik/issues/794
-        return false;
+        // https://github.com/mapnik/mapnik/issues/1642
+        return true;
     }
 };
 
@@ -215,17 +181,17 @@ struct greater_than
         return lhs > rhs;
     }
 
-    bool operator() (int lhs, double rhs) const
+    bool operator() (value_integer lhs, value_double rhs) const
     {
         return  lhs > rhs;
     }
 
-    bool operator() (double lhs, int rhs) const
+    bool operator() (value_double lhs, value_integer rhs) const
     {
         return  lhs > rhs;
     }
 
-    bool operator() (UnicodeString const& lhs, UnicodeString const& rhs) const
+    bool operator() (value_unicode_string const& lhs, value_unicode_string const& rhs) const
     {
         return  (lhs > rhs) ? true : false ;
     }
@@ -251,17 +217,17 @@ struct greater_or_equal
         return lhs >= rhs;
     }
 
-    bool operator() (int lhs, double rhs) const
+    bool operator() (value_integer lhs, value_double rhs) const
     {
         return  lhs >= rhs;
     }
 
-    bool operator() (double lhs, int rhs) const
+    bool operator() (value_double lhs, value_integer rhs) const
     {
         return  lhs >= rhs;
     }
 
-    bool operator() (UnicodeString const& lhs, UnicodeString const& rhs) const
+    bool operator() (value_unicode_string const& lhs, value_unicode_string const& rhs) const
     {
         return ( lhs >= rhs ) ? true : false ;
     }
@@ -287,18 +253,18 @@ struct less_than
         return lhs < rhs;
     }
 
-    bool operator() (int lhs, double rhs) const
+    bool operator() (value_integer lhs, value_double rhs) const
     {
         return  lhs < rhs;
     }
 
-    bool operator() (double lhs, int rhs) const
+    bool operator() (value_double lhs, value_integer rhs) const
     {
         return  lhs < rhs;
     }
 
-    bool operator()(UnicodeString const& lhs,
-                    UnicodeString const& rhs ) const
+    bool operator()(value_unicode_string const& lhs,
+                    value_unicode_string const& rhs ) const
     {
         return (lhs < rhs) ? true : false ;
     }
@@ -324,18 +290,18 @@ struct less_or_equal
         return lhs <= rhs;
     }
 
-    bool operator() (int lhs, double rhs) const
+    bool operator() (value_integer lhs, value_double rhs) const
     {
         return  lhs <= rhs;
     }
 
-    bool operator() (double lhs, int rhs) const
+    bool operator() (value_double lhs, value_integer rhs) const
     {
         return  lhs <= rhs;
     }
 
-    bool operator()(UnicodeString const& lhs,
-                    UnicodeString const& rhs ) const
+    bool operator()(value_unicode_string const& lhs,
+                    value_unicode_string const& rhs ) const
     {
         return (lhs <= rhs) ? true : false ;
     }
@@ -350,6 +316,51 @@ template <typename V>
 struct add : public boost::static_visitor<V>
 {
     typedef V value_type;
+    value_type operator() (value_unicode_string const& lhs ,
+                           value_unicode_string const& rhs ) const
+    {
+        return lhs + rhs;
+    }
+
+    value_type operator() (value_double lhs, value_integer rhs) const
+    {
+        return lhs + rhs;
+    }
+
+    value_type operator() (value_integer lhs, value_double rhs) const
+    {
+        return lhs + rhs;
+    }
+
+    value_type operator() (value_unicode_string const& lhs, value_null rhs) const
+    {
+        boost::ignore_unused_variable_warning(rhs);
+        return lhs;
+    }
+
+    value_type operator() (value_null lhs, value_unicode_string const& rhs) const
+    {
+        boost::ignore_unused_variable_warning(lhs);
+        return rhs;
+    }
+
+    template <typename R>
+    value_type operator() (value_unicode_string const& lhs, R const& rhs) const
+    {
+        std::string val;
+        if (util::to_string(val,rhs))
+            return lhs + value_unicode_string(val.c_str());
+        return lhs;
+    }
+
+    template <typename L>
+    value_type operator() (L const& lhs , value_unicode_string const& rhs) const
+    {
+        std::string val;
+        if (util::to_string(val,lhs))
+            return value_unicode_string(val.c_str()) + rhs;
+        return rhs;
+    }
 
     template <typename T>
     value_type operator() (T lhs, T rhs) const
@@ -357,56 +368,15 @@ struct add : public boost::static_visitor<V>
         return lhs + rhs ;
     }
 
-    value_type operator() (UnicodeString const& lhs ,
-                           UnicodeString const& rhs ) const
-    {
-        return lhs + rhs;
-    }
-
-    value_type operator() (double lhs, int rhs) const
-    {
-        return lhs + rhs;
-    }
-
-    value_type operator() (int lhs, double rhs) const
-    {
-        return lhs + rhs;
-    }
-
-    value_type operator() (UnicodeString const& lhs, value_null rhs) const
-    {
-        boost::ignore_unused_variable_warning(rhs);
-        return lhs;
-    }
-
-    value_type operator() (value_null lhs, UnicodeString const& rhs) const
-    {
-        boost::ignore_unused_variable_warning(lhs);
-        return rhs;
-    }
-
-    template <typename R>
-    value_type operator() (UnicodeString const& lhs, R const& rhs) const
-    {
-        std::string val;
-        if (util::to_string(val,rhs))
-            return lhs + UnicodeString(val.c_str());
-        return lhs;
-    }
-
-    template <typename L>
-    value_type operator() (L const& lhs , UnicodeString const& rhs) const
-    {
-        std::string val;
-        if (util::to_string(val,lhs))
-            return UnicodeString(val.c_str()) + rhs;
-        return rhs;
-    }
-
     template <typename T1, typename T2>
     value_type operator() (T1 const& lhs, T2 const&) const
     {
         return lhs;
+    }
+
+    value_type operator() (value_bool lhs, value_bool rhs) const
+    {
+        return value_integer(lhs + rhs);
     }
 };
 
@@ -421,25 +391,30 @@ struct sub : public boost::static_visitor<V>
     }
 
     template <typename T>
-    value_type operator() (T  lhs, T rhs) const
+    value_type operator() (T lhs, T rhs) const
     {
         return lhs - rhs ;
     }
 
-    value_type operator() (UnicodeString const& lhs,
-                           UnicodeString const& ) const
+    value_type operator() (value_unicode_string const& lhs,
+                           value_unicode_string const& ) const
     {
         return lhs;
     }
 
-    value_type operator() (double lhs, int rhs) const
+    value_type operator() (value_double lhs, value_integer rhs) const
     {
         return lhs - rhs;
     }
 
-    value_type operator() (int lhs, double rhs) const
+    value_type operator() (value_integer lhs, value_double rhs) const
     {
         return lhs - rhs;
+    }
+
+    value_type operator() (value_bool lhs, value_bool rhs) const
+    {
+        return value_integer(lhs - rhs);
     }
 };
 
@@ -458,20 +433,27 @@ struct mult : public boost::static_visitor<V>
         return lhs * rhs;
     }
 
-    value_type operator() (UnicodeString const& lhs,
-                           UnicodeString const& ) const
+    value_type operator() (value_unicode_string const& lhs,
+                           value_unicode_string const& ) const
     {
         return lhs;
     }
 
-    value_type operator() (double lhs, int rhs) const
+    value_type operator() (value_double lhs, value_integer rhs) const
     {
         return lhs * rhs;
     }
 
-    value_type operator() (int lhs, double rhs) const
+    value_type operator() (value_integer lhs, value_double rhs) const
     {
         return lhs * rhs;
+    }
+
+    value_type operator() (value_bool lhs, value_bool rhs) const
+    {
+        boost::ignore_unused_variable_warning(lhs);
+        boost::ignore_unused_variable_warning(rhs);
+        return value_integer(0);
     }
 };
 
@@ -491,25 +473,25 @@ struct div: public boost::static_visitor<V>
         return lhs / rhs;
     }
 
-    value_type operator() (bool lhs, bool rhs ) const
+    value_type operator() (value_bool lhs, value_bool rhs ) const
     {
         boost::ignore_unused_variable_warning(lhs);
         boost::ignore_unused_variable_warning(rhs);
         return false;
     }
 
-    value_type operator() (UnicodeString const& lhs,
-                           UnicodeString const&) const
+    value_type operator() (value_unicode_string const& lhs,
+                           value_unicode_string const&) const
     {
         return lhs;
     }
 
-    value_type operator() (double lhs, int rhs) const
+    value_type operator() (value_double lhs, value_integer rhs) const
     {
         return lhs / rhs;
     }
 
-    value_type operator() (int lhs, double rhs) const
+    value_type operator() (value_integer lhs, value_double rhs) const
     {
         return lhs / rhs;
     }
@@ -531,31 +513,31 @@ struct mod: public boost::static_visitor<V>
         return lhs % rhs;
     }
 
-    value_type operator() (UnicodeString const& lhs,
-                           UnicodeString const&) const
+    value_type operator() (value_unicode_string const& lhs,
+                           value_unicode_string const&) const
     {
         return lhs;
     }
 
-    value_type operator() (bool lhs,
-                           bool rhs) const
+    value_type operator() (value_bool lhs,
+                           value_bool rhs) const
     {
         boost::ignore_unused_variable_warning(lhs);
         boost::ignore_unused_variable_warning(rhs);
         return false;
     }
 
-    value_type operator() (double lhs, int rhs) const
+    value_type operator() (value_double lhs, value_integer rhs) const
     {
-        return std::fmod(lhs, rhs);
+        return std::fmod(lhs, static_cast<value_double>(rhs));
     }
 
-    value_type operator() (int lhs, double rhs) const
+    value_type operator() (value_integer lhs, value_double rhs) const
     {
-        return std::fmod(lhs, rhs);
+        return std::fmod(static_cast<value_double>(lhs), rhs);
     }
 
-    value_type operator() (double lhs, double rhs) const
+    value_type operator() (value_double lhs, value_double rhs) const
     {
         return std::fmod(lhs, rhs);
     }
@@ -577,39 +559,38 @@ struct negate : public boost::static_visitor<V>
         return val;
     }
 
-    value_type operator() (bool val) const
+    value_type operator() (value_bool val) const
     {
-        return val ? -1 : 0;
+        return val ? value_integer(-1) : value_integer(0);
     }
 
-    value_type operator() (UnicodeString const& ustr) const
+    value_type operator() (value_unicode_string const& ustr) const
     {
-        UnicodeString inplace(ustr);
+        value_unicode_string inplace(ustr);
         return inplace.reverse();
     }
 };
 
-struct to_bool : public boost::static_visitor<bool>
+struct to_bool : public boost::static_visitor<value_bool>
 {
-    bool operator() (bool val) const
+    value_bool operator() (value_bool val) const
     {
         return val;
     }
 
-    bool operator() (UnicodeString const& ustr) const
+    value_bool operator() (value_unicode_string const& ustr) const
     {
-        boost::ignore_unused_variable_warning(ustr);
-        return true;
+        return !ustr.isEmpty();
     }
 
-    bool operator() (value_null const& val) const
+    value_bool operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
         return false;
     }
 
     template <typename T>
-    bool operator() (T val) const
+    value_bool operator() (T val) const
     {
         return val > 0 ? true : false;
     }
@@ -626,14 +607,14 @@ struct to_string : public boost::static_visitor<std::string>
     }
 
     // specializations
-    std::string operator() (UnicodeString const& val) const
+    std::string operator() (value_unicode_string const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
         return utf8;
     }
 
-    std::string operator() (double val) const
+    std::string operator() (value_double val) const
     {
         std::string str;
         util::to_string(str, val); // TODO set precision(16)
@@ -647,54 +628,61 @@ struct to_string : public boost::static_visitor<std::string>
     }
 };
 
-struct to_unicode : public boost::static_visitor<UnicodeString>
+struct to_unicode : public boost::static_visitor<value_unicode_string>
 {
 
     template <typename T>
-    UnicodeString operator() (T val) const
+    value_unicode_string operator() (T val) const
     {
         std::string str;
         util::to_string(str,val);
-        return UnicodeString(str.c_str());
+        return value_unicode_string(str.c_str());
     }
 
     // specializations
-    UnicodeString const& operator() (UnicodeString const& val) const
+    value_unicode_string const& operator() (value_unicode_string const& val) const
     {
         return val;
     }
 
-    UnicodeString operator() (double val) const
+    value_unicode_string operator() (value_double val) const
     {
         std::string str;
         util::to_string(str,val);
-        return UnicodeString(str.c_str());
+        return value_unicode_string(str.c_str());
     }
 
-    UnicodeString operator() (value_null const& val) const
+    value_unicode_string operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
-        return UnicodeString("");
+        return value_unicode_string("");
     }
 };
 
 struct to_expression_string : public boost::static_visitor<std::string>
 {
-    std::string operator() (UnicodeString const& val) const
+    std::string operator() (value_unicode_string const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
         return "'" + utf8 + "'";
     }
 
-    std::string operator() (double val) const
+    std::string operator() (value_integer val) const
+    {
+        std::string output;
+        util::to_string(output,val);
+        return output;
+    }
+
+    std::string operator() (value_double val) const
     {
         std::string output;
         util::to_string(output,val); // TODO precision(16)
         return output;
     }
 
-    std::string operator() (bool val) const
+    std::string operator() (value_bool val) const
     {
         return val ? "true":"false";
     }
@@ -704,79 +692,83 @@ struct to_expression_string : public boost::static_visitor<std::string>
         boost::ignore_unused_variable_warning(val);
         return "null";
     }
-
-    template <typename T>
-    std::string operator() (T val) const
-    {
-        std::stringstream ss;
-        ss << val;
-        return ss.str();
-    }
 };
 
-struct to_double : public boost::static_visitor<double>
+struct to_double : public boost::static_visitor<value_double>
 {
-    double operator() (int val) const
-    {
-        return static_cast<double>(val);
-    }
-
-    double operator() (double val) const
+    value_double operator() (value_double val) const
     {
         return val;
     }
 
-    double operator() (std::string const& val) const
+    value_double operator() (value_integer val) const
     {
-        double result;
+        return static_cast<value_double>(val);
+    }
+
+    value_double operator() (value_bool val) const
+    {
+        return static_cast<value_double>(val);
+    }
+
+    value_double operator() (std::string const& val) const
+    {
+        value_double result;
         if (util::string2double(val,result))
             return result;
         return 0;
     }
-    double operator() (UnicodeString const& val) const
+
+    value_double operator() (value_unicode_string const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
         return operator()(utf8);
     }
 
-    double operator() (value_null const& val) const
+    value_double operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
         return 0.0;
     }
 };
 
-struct to_int : public boost::static_visitor<double>
+struct to_int : public boost::static_visitor<value_integer>
 {
-    int operator() (int val) const
+    value_integer operator() (value_integer val) const
     {
         return val;
     }
 
-    int operator() (double val) const
+    value_integer operator() (value_double val) const
     {
-        return rint(val);
+        return static_cast<value_integer>(rint(val));
     }
 
-    int operator() (std::string const& val) const
+    value_integer operator() (value_bool val) const
     {
-        int result;
+        return static_cast<value_integer>(val);
+    }
+
+    value_integer operator() (std::string const& val) const
+    {
+        value_integer result;
         if (util::string2int(val,result))
             return result;
-        return 0;
+        return value_integer(0);
     }
-    int operator() (UnicodeString const& val) const
+
+    value_integer operator() (value_unicode_string const& val) const
     {
         std::string utf8;
         to_utf8(val,utf8);
         return operator()(utf8);
     }
 
-    int operator() (value_null const& val) const
+    value_integer operator() (value_null const& val) const
     {
         boost::ignore_unused_variable_warning(val);
-        return 0;
+        return value_integer(0);
     }
 };
 
@@ -842,7 +834,7 @@ public:
 
     bool is_null() const;
 
-    bool to_bool() const
+    value_bool to_bool() const
     {
         return boost::apply_visitor(impl::to_bool(),base_);
     }
@@ -857,21 +849,20 @@ public:
         return boost::apply_visitor(impl::to_string(),base_);
     }
 
-    UnicodeString to_unicode() const
+    value_unicode_string to_unicode() const
     {
         return boost::apply_visitor(impl::to_unicode(),base_);
     }
 
-    double to_double() const
+    value_double to_double() const
     {
         return boost::apply_visitor(impl::to_double(),base_);
     }
 
-    double to_int() const
+    value_integer to_int() const
     {
         return boost::apply_visitor(impl::to_int(),base_);
     }
-
 };
 
 inline const value operator+(value const& p1,value const& p2)
@@ -911,6 +902,10 @@ operator << (std::basic_ostream<charT,traits>& out,
 {
     out << v.to_string();
     return out;
+}
+
+inline std::size_t hash_value(const value& val) {
+    return hash_value(val.base());
 }
 
 } // namespace value_adl_barrier

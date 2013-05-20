@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2007 Artem Pavlenko, Jean-Francois Doyon
+# Copyright (C) 2013 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,50 +17,67 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# 
-
+#
 
 Import ('plugin_base')
 Import ('env')
 
-prefix = env['PREFIX']
+PLUGIN_NAME = 'ogr'
 
 plugin_env = plugin_base.Clone()
 
-ogr_src = Split(
+plugin_sources = Split(
   """
-      ogr_converter.cpp
-      ogr_datasource.cpp
-      ogr_featureset.cpp      
-      ogr_index_featureset.cpp
-  """
-        )
-
-plugin_env['LIBS'] = [env['PLUGINS']['ogr']['lib']]
+  %(PLUGIN_NAME)s_converter.cpp
+  %(PLUGIN_NAME)s_datasource.cpp
+  %(PLUGIN_NAME)s_featureset.cpp
+  %(PLUGIN_NAME)s_index_featureset.cpp
+  """ % locals()
+)
 
 # Link Library to Dependencies
-plugin_env['LIBS'].append('mapnik')
-plugin_env['LIBS'].append(env['ICU_LIB_NAME'])
-plugin_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
-plugin_env['LIBS'].append('boost_filesystem%s' % env['BOOST_APPEND'])
+libraries = [env['PLUGINS']['ogr']['lib']]
+libraries.append(env['ICU_LIB_NAME'])
+libraries.append('boost_system%s' % env['BOOST_APPEND'])
+libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
+
+cxxflags = []
 
 if env['RUNTIME_LINK'] == 'static':
     cmd = 'gdal-config --dep-libs'
     plugin_env.ParseConfig(cmd)
-    plugin_env['LIBS'].append('proj')
+    libraries.append('proj')
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
     if boost_version_from_header < 46:
         # avoid ubuntu issue with boost interprocess:
         # https://github.com/mapnik/mapnik/issues/1082
-        plugin_env.Append(CXXFLAGS = '-fpermissive')
+        cxxflags.Append('-fpermissive')
 
-input_plugin = plugin_env.SharedLibrary('../ogr', source=ogr_src, SHLIBPREFIX='', SHLIBSUFFIX='.input', LINKFLAGS=env['CUSTOM_LDFLAGS'])
+plugin_env.Append(CXXFLAGS=cxxflags)
 
-# if the plugin links to libmapnik ensure it is built first
-Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+if env['PLUGIN_LINKING'] == 'shared':
+    libraries.append('mapnik')
 
-if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], input_plugin)
-    env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+    TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
+                                      SHLIBPREFIX='',
+                                      SHLIBSUFFIX='.input',
+                                      source=plugin_sources,
+                                      LIBS=libraries,
+                                      LINKFLAGS=env['CUSTOM_LDFLAGS'])
+
+    # if the plugin links to libmapnik ensure it is built first
+    Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+
+    if 'uninstall' not in COMMAND_LINE_TARGETS:
+        env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], TARGET)
+        env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+
+plugin_obj = {
+  'CXXFLAGS': cxxflags,
+  'LIBS': libraries,
+  'SOURCES': plugin_sources,
+}
+
+Return('plugin_obj')

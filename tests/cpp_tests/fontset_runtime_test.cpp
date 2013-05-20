@@ -52,7 +52,7 @@ int main( int, char*[] )
     the_style.add_rule(the_rule);
     m.insert_style("style",the_style );
     m.zoom_to_box(mapnik::box2d<double>(-256,-256,
-                                256,256));
+                                        256,256));
     mapnik::image_32 buf(m.width(),m.height());
     mapnik::agg_renderer<mapnik::image_32> ren(m,buf);
     try {

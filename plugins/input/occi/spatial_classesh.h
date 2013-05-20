@@ -55,7 +55,7 @@ public:
 
    SDOPointType();
 
-   SDOPointType(void *ctxOCCI_) : oracle::occi::PObject (ctxOCCI_) { };
+   SDOPointType(void *ctxOCCI_) : oracle::occi::PObject (ctxOCCI_) { }
 
    static void *readSQL(void *ctxOCCI_);
 
@@ -130,7 +130,7 @@ public:
 
    SDOGeometry();
 
-   SDOGeometry(void *ctxOCCI_) : oracle::occi::PObject (ctxOCCI_) { };
+   SDOGeometry(void *ctxOCCI_) : oracle::occi::PObject (ctxOCCI_) { }
 
    static void *readSQL(void *ctxOCCI_);
 

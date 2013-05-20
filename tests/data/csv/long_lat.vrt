@@ -1,6 +1,6 @@
 <OGRVRTDataSource>
     <OGRVRTLayer name="long_lat">
-        <SrcDataSource>long_lat.csv</SrcDataSource>
+        <SrcDataSource relativeToVRT="1">long_lat.csv</SrcDataSource>
         <GeometryType>wkbPoint</GeometryType>
         <LayerSRS>WGS84</LayerSRS>
         <GeometryField encoding="PointFromColumns" x="long" y="lat"/>

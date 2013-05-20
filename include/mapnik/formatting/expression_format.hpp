@@ -26,13 +26,22 @@
 #include <mapnik/formatting/base.hpp>
 #include <mapnik/expression.hpp>
 
+// boost
+#include <boost/property_tree/ptree_fwd.hpp>
+
 namespace mapnik {
+
+class feature_impl;
+class processed_text;
+class xml_node;
+struct char_properties;
+
 namespace formatting {
-class expression_format: public node {
+class MAPNIK_DECL expression_format: public node {
 public:
     void to_xml(boost::property_tree::ptree &xml) const;
     static node_ptr from_xml(xml_node const& xml);
-    virtual void apply(char_properties const& p, Feature const& feature, processed_text &output) const;
+    virtual void apply(char_properties const& p, feature_impl const& feature, processed_text &output) const;
     virtual void add_expressions(expression_set &output) const;
 
     void set_child(node_ptr child);

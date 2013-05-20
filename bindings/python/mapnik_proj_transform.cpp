@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/proj_transform.hpp>
+#include <boost/noncopyable.hpp>
 
 // boost
 #include <boost/python.hpp>

@@ -5,10 +5,8 @@
 #include <string>
 #include <cassert>
 
-using std::endl;
-
 osm_item* osmparser::cur_item=NULL;
-long osmparser::curID=0;
+mapnik::value_integer osmparser::curID=0;
 bool osmparser::in_node=false, osmparser::in_way=false;
 osm_dataset* osmparser::components=NULL;
 std::string osmparser::error="";
@@ -66,8 +64,6 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
         assert(xid);
         way->id = atol((char*)xid);
         cur_item  =  way;
-        // Prevent ways with no name being assigned a name of "true"
-        cur_item->keyvals["name"] = "";
         xmlFree(xid);
     }
     else if (xmlStrEqual(name,BAD_CAST "nd"))

@@ -26,9 +26,7 @@
 // mapnik
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_path_storage.h"
@@ -46,7 +44,7 @@ namespace mapnik {
 namespace svg {
 
 template <typename VertexSource, typename AttributeSource>
-class svg_converter : boost::noncopyable
+class svg_converter : mapnik::noncopyable
 {
 public:
 
@@ -266,6 +264,7 @@ public:
     {
         cur_attr().fill_opacity = op;
     }
+
     void stroke_opacity(double op)
     {
         cur_attr().stroke_opacity = op;
@@ -273,8 +272,7 @@ public:
 
     void opacity(double op)
     {
-        cur_attr().stroke_opacity = op;
-        cur_attr().fill_opacity = op;
+        cur_attr().opacity = op;
     }
 
     void line_join(agg::line_join_e join)
@@ -310,6 +308,22 @@ public:
         agg::bounding_rect(trans, *this, 0, attributes_.size(), x1, y1, x2, y2);
     }
 
+    void set_dimensions(double w, double h)
+    {
+        svg_width_ = w;
+        svg_height_ = h;
+    }
+
+    double width()
+    {
+        return svg_width_;
+    }
+
+    double height()
+    {
+        return svg_height_;
+    }
+
     VertexSource & storage()
     {
         return source_;
@@ -335,6 +349,8 @@ private:
     AttributeSource & attributes_;
     AttributeSource  attr_stack_;
     agg::trans_affine transform_;
+    double svg_width_;
+    double svg_height_;
 };
 
 

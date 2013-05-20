@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/gradient.hpp>
-#include <iostream>
+#include <mapnik/enumeration.hpp>
 
 namespace mapnik
 {
@@ -35,6 +35,14 @@ static const char * gradient_strings[] = {
 
 IMPLEMENT_ENUM( gradient_e, gradient_strings )
 
+static const char * gradient_unit_strings[] = {
+    "user-space-on-use",
+    "user-space-on-use-bounding-box",
+    "object-bounding-box",
+    ""
+};
+
+IMPLEMENT_ENUM( gradient_unit_e, gradient_unit_strings )
 
 gradient::gradient()
 : gradient_type_(NO_GRADIENT),

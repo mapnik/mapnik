@@ -21,10 +21,10 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/grid/grid_rasterizer.hpp>
 #include <mapnik/grid/grid_renderer.hpp>
-#include <mapnik/grid/grid_pixfmt.hpp>
-#include <mapnik/grid/grid_pixel.hpp>
+#include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
 
@@ -46,15 +46,16 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
                                proj_transform const& prj_trans)
 {
     typedef coord_transform<CoordTransform,geometry_type> path_type;
-    typedef agg::renderer_base<mapnik::pixfmt_gray32> ren_base;
-    typedef agg::renderer_scanline_bin_solid<ren_base> renderer;
+    typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
+    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
+    typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
-    mapnik::pixfmt_gray32 pixf(buf);
+    pixfmt_type pixf(buf);
 
-    ren_base renb(pixf);
-    renderer ren(renb);
+    grid_renderer_base_type renb(pixf);
+    renderer_type ren(renb);
 
     ras_ptr->reset();
 
@@ -75,7 +76,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     }
 
     // render id
-    ren.color(mapnik::gray32(feature.id()));
+    ren.color(color_type(feature.id()));
     agg::render_scanlines(*ras_ptr, sl, ren);
 
     // add feature properties to grid cache

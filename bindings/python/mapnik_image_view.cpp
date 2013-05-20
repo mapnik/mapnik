@@ -20,22 +20,14 @@
  *
  *****************************************************************************/
 
-extern "C"
-{
-#include <png.h>
-}
 
 #include <boost/python.hpp>
+#include <mapnik/image_data.hpp>
+#include <mapnik/image_view.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/image_view.hpp>
-#include <mapnik/png_io.hpp>
 #include <sstream>
-
-// jpeg
-#if defined(HAVE_JPEG)
-#include <mapnik/jpeg_io.hpp>
-#endif
 
 using mapnik::image_data_32;
 using mapnik::image_view;
@@ -84,6 +76,27 @@ PyObject* view_tostring3(image_view<image_data_32> const & view, std::string con
         (s.data(),s.size());
 }
 
+bool is_solid(image_view<image_data_32> const& view)
+{
+    if (view.width() > 0 && view.height() > 0)
+    {
+        mapnik::image_view<image_data_32>::pixel_type const* first_row = view.getRow(0);
+        mapnik::image_view<image_data_32>::pixel_type const first_pixel = first_row[0];
+        for (unsigned y = 0; y < view.height(); ++y)
+        {
+            mapnik::image_view<image_data_32>::pixel_type const * row = view.getRow(y);
+            for (unsigned x = 0; x < view.width(); ++x)
+            {
+                if (first_pixel != row[x])
+                {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 void save_view1(image_view<image_data_32> const& view,
                 std::string const& filename)
 {
@@ -112,6 +125,7 @@ void export_image_view()
     class_<image_view<image_data_32> >("ImageView","A view into an image.",no_init)
         .def("width",&image_view<image_data_32>::width)
         .def("height",&image_view<image_data_32>::height)
+        .def("is_solid",&is_solid)
         .def("tostring",&view_tostring1)
         .def("tostring",&view_tostring2)
         .def("tostring",&view_tostring3)

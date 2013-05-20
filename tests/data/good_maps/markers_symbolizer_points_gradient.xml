@@ -1,4 +1,4 @@
-<Map srs="+init=epsg:4326" background-color="white" minimum-version="0.7.2">
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="white" minimum-version="0.7.2">
 
     <Style name="1">
         <Rule>
@@ -15,7 +15,7 @@
         </Rule>
     </Style>
     
-    <Layer name="point" srs="+init=epsg:4326">
+    <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>1</StyleName>
         <Datasource>
             <Parameter name="type">sqlite</Parameter>

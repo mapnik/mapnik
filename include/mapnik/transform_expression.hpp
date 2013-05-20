@@ -29,7 +29,7 @@
 // boost
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/variant.hpp>
+#include <boost/variant/variant.hpp>
 
 // fusion
 #include <boost/fusion/include/at.hpp>
@@ -71,7 +71,7 @@ struct translate_node
     translate_node(expr_node const& tx,
                    boost::optional<expr_node> const& ty)
         : tx_(tx)
-        , ty_(ty ? *ty : value_null()) {}
+        , ty_(ty ? expr_node(*ty) : value_null()) {}
 };
 
 struct scale_node
@@ -82,7 +82,7 @@ struct scale_node
     scale_node(expr_node const& sx,
                boost::optional<expr_node> const& sy)
         : sx_(sx)
-        , sy_(sy ? *sy : value_null()) {}
+        , sy_(sy ? expr_node(*sy) : value_null()) {}
 };
 
 struct rotate_node
@@ -104,8 +104,8 @@ struct rotate_node
                 boost::optional<expr_node> const& cx,
                 boost::optional<expr_node> const& cy)
         : angle_(angle)
-        , cx_(cx ? *cx : value_null())
-        , cy_(cy ? *cy : value_null()) {}
+        , cx_(cx ? expr_node(*cx) : value_null())
+        , cy_(cy ? expr_node(*cy) : value_null()) {}
 
     rotate_node(expr_node const& angle,
                 boost::optional<coords_type> const& center)

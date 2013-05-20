@@ -31,18 +31,20 @@
 #include <mapnik/box2d.hpp>
 #include <mapnik/coord.hpp>
 #include <mapnik/feature_layer_desc.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
 #include <boost/optional.hpp>
 
 // stl
 #include <vector>
+#include <deque>
 #include <string>
 
 class csv_datasource : public mapnik::datasource
 {
 public:
-    csv_datasource(mapnik::parameters const& params, bool bind=true);
+    csv_datasource(mapnik::parameters const& params);
     virtual ~csv_datasource ();
     mapnik::datasource::datasource_t type() const;
     static const char * name();
@@ -51,31 +53,29 @@ public:
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
     mapnik::layer_descriptor get_descriptor() const;
-    void bind() const;
 
     template <typename T>
     void parse_csv(T & stream,
                    std::string const& escape,
                    std::string const& separator,
-                   std::string const& quote) const;
+                   std::string const& quote);
 
 private:
-    mutable mapnik::layer_descriptor desc_;
-    mutable mapnik::box2d<double> extent_;
-    mutable std::string filename_;
-    mutable std::string inline_string_;
-    mutable unsigned file_length_;
-    mutable int row_limit_;
-    mutable std::vector<mapnik::feature_ptr> features_;
-    mutable std::string escape_;
-    mutable std::string separator_;
-    mutable std::string quote_;
-    mutable std::vector<std::string> headers_;
-    mutable std::string manual_headers_;
-    mutable bool strict_;
-    mutable bool quiet_;
-    mutable double filesize_max_;
-    mutable mapnik::context_ptr ctx_;
+    mapnik::layer_descriptor desc_;
+    mapnik::box2d<double> extent_;
+    std::string filename_;
+    std::string inline_string_;
+    unsigned file_length_;
+    mapnik::value_integer row_limit_;
+    std::deque<mapnik::feature_ptr> features_;
+    std::string escape_;
+    std::string separator_;
+    std::string quote_;
+    std::vector<std::string> headers_;
+    std::string manual_headers_;
+    bool strict_;
+    double filesize_max_;
+    mapnik::context_ptr ctx_;
 };
 
 #endif // MAPNIK_CSV_DATASOURCE_HPP

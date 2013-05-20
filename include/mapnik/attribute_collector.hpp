@@ -24,15 +24,35 @@
 #define MAPNIK_ATTRIBUTE_COLLECTOR_HPP
 
 // mapnik
-#include <mapnik/rule.hpp>
 #include <mapnik/transform_processor.hpp>
+#include <mapnik/noncopyable.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/symbolizer.hpp>  // for transform_list_ptr
+#include <mapnik/building_symbolizer.hpp>
+#include <mapnik/line_symbolizer.hpp>
+#include <mapnik/line_pattern_symbolizer.hpp>
+#include <mapnik/polygon_symbolizer.hpp>
+#include <mapnik/polygon_pattern_symbolizer.hpp>
+#include <mapnik/point_symbolizer.hpp>
+#include <mapnik/raster_symbolizer.hpp>
+#include <mapnik/shield_symbolizer.hpp>
+#include <mapnik/text_symbolizer.hpp>
+#include <mapnik/markers_symbolizer.hpp>
+#include <mapnik/rule.hpp> // for rule::symbolizers
+#include <mapnik/expression.hpp>  // for expression_ptr, etc
+#include <mapnik/expression_node_types.hpp>
+#include <mapnik/expression_node.hpp>
+#include <mapnik/parse_path.hpp>  // for path_processor_type
+#include <mapnik/path_expression.hpp>  // for path_expression_ptr
+#include <mapnik/text_placements/base.hpp>  // for text_placements
+
 // boost
-#include <boost/utility.hpp>
-#include <boost/variant.hpp>
 #include <boost/concept_check.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
+
 // stl
 #include <set>
-#include <iostream>
 
 namespace mapnik {
 
@@ -207,7 +227,7 @@ private:
 };
 
 
-class attribute_collector : public boost::noncopyable
+class attribute_collector : public mapnik::noncopyable
 {
 private:
     std::set<std::string>& names_;

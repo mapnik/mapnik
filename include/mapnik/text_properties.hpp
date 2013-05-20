@@ -24,6 +24,9 @@
 
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/value.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/expression.hpp>
@@ -34,7 +37,7 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ptree_fwd.hpp>
 
 namespace mapnik
 {
@@ -51,7 +54,7 @@ DEFINE_ENUM(text_transform_e, text_transform);
 
 typedef std::map<std::string, font_set> fontset_map;
 
-struct char_properties
+struct MAPNIK_DECL char_properties
 {
     char_properties();
     /** Construct object from XML. */
@@ -122,7 +125,7 @@ class processed_text;
 
 
 /** Contains all text symbolizer properties which are not directly related to text formatting. */
-struct text_symbolizer_properties
+struct MAPNIK_DECL text_symbolizer_properties
 {
     text_symbolizer_properties();
     /** Load all values from XML ptree. */
@@ -133,7 +136,7 @@ struct text_symbolizer_properties
     /** Takes a feature and produces formated text as output.
      * The output object has to be created by the caller and passed in for thread safety.
      */
-    void process(processed_text &output, Feature const& feature) const;
+    void process(processed_text &output, feature_impl const& feature) const;
     /** Automatically create processing instructions for a single expression. */
     void set_old_style_expression(expression_ptr expr);
     /** Sets new format tree. */

@@ -1,5 +1,5 @@
 <!DOCTYPE Map>
-<Map background-color="#b5d0d0" srs="+init=epsg:4326" minimum-version="0.7.2">
+<Map background-color="#b5d0d0" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" minimum-version="0.7.2">
     <Style name="1">
         <Rule>
             <ShieldSymbolizer file="../images/dummy.png" size="10" transform="scale(5) translate(15, 15) rotate(20) skewX(20) skewY(5)" dy="-5" dx="-5" opacity=".5" text-opacity=".3" face-name="DejaVu Sans Book" halo-radius="1" shield-dx="10" shield-dy="10" allow-overlap="true" avoid-edges="false">[label]</ShieldSymbolizer>
@@ -17,7 +17,7 @@
         </Rule>
     </Style>
 
-    <Layer name="line" srs="+init=epsg:4326">
+    <Layer name="line" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>2</StyleName>
         <Datasource>
             <Parameter name="file">../json/lines.json</Parameter>
@@ -26,7 +26,7 @@
         </Datasource>
     </Layer>
 
-    <Layer name="point" srs="+init=epsg:4326">
+    <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>1</StyleName>
         <Datasource>
             <Parameter name="file">../json/points.json</Parameter>

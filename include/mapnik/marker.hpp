@@ -29,12 +29,12 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/svg/svg_storage.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // agg
 #include "agg_path_storage.h"
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
@@ -55,7 +55,7 @@ typedef boost::shared_ptr<image_data_32> image_ptr;
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally
  * in the image caches and most of the render paths.
  */
-class marker: private boost::noncopyable
+class marker: private mapnik::noncopyable
 {
 public:
     marker()
@@ -100,17 +100,25 @@ public:
     inline double width() const
     {
         if (is_bitmap())
+        {
             return (*bitmap_data_)->width();
+        }
         else if (is_vector())
+        {
             return (*vector_data_)->bounding_box().width();
+        }
         return 0;
     }
     inline double height() const
     {
         if (is_bitmap())
+        {
             return (*bitmap_data_)->height();
+        }
         else if (is_vector())
+        {
             return (*vector_data_)->bounding_box().height();
+        }
         return 0;
     }
 

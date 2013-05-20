@@ -23,18 +23,24 @@
 #ifndef MAPNIK_CONFIG_ERROR_HPP
 #define MAPNIK_CONFIG_ERROR_HPP
 
-#include <iostream>
-#include <sstream>
+#include <mapnik/config.hpp>
+
+#include <exception>
+#include <string>
 
 namespace mapnik {
 
 class xml_node;
+
 class config_error : public std::exception
 {
 public:
     config_error(std::string const& what);
-    config_error(std::string const& what, xml_node const& node);
-    config_error(std::string const& what, unsigned line_number, std::string const& filename);
+    config_error(std::string const& what,
+                 xml_node const& node);
+    config_error(std::string const& what,
+                 unsigned line_number,
+                 std::string const& filename);
     virtual ~config_error() throw() {}
 
     virtual const char * what() const throw();

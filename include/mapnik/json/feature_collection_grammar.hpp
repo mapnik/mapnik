@@ -24,17 +24,13 @@
 #define MAPNIK_FEATURE_COLLECTION_GRAMMAR_HPP
 
 // mapnik
+#include <mapnik/unicode.hpp>
 #include <mapnik/json/feature_grammar.hpp>
+#include <mapnik/feature.hpp>
 
 // spirit::qi
-#include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/variant.hpp>
-
-// stl
-#include <iostream>
 
 namespace mapnik { namespace json {
 
@@ -91,7 +87,7 @@ struct feature_collection_grammar :
             > lit(']')
             ;
         
-        feature = eps[_a = construct<feature_ptr>(new_<feature_impl>(ctx_,generate_id_()))]
+        feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
             >> feature_g(*_a)[push_back(_r1,_a)]
             ;
         

@@ -23,7 +23,10 @@
 #ifndef MAPNIK_OFFSET_CONVERTER_HPP
 #define MAPNIK_OFFSET_CONVERTER_HPP
 
+#ifdef MAPNIK_LOG
 #include <mapnik/debug.hpp>
+#endif
+#include <mapnik/config.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/proj_transform.hpp>
@@ -31,11 +34,13 @@
 // boost
 #include <boost/math/constants/constants.hpp>
 
+// stl
+#include <cmath>
+
 namespace mapnik
 {
 
 const double pi = boost::math::constants::pi<double>();
-const double half_pi = pi/2.0;
 
 template <typename Geometry>
 struct MAPNIK_DECL offset_converter
@@ -211,8 +216,8 @@ private:
      */
     static void displace(vertex2d & v, double dx, double dy, double a)
     {
-        v.x += dx * cos(a) - dy * sin(a);
-        v.y += dx * sin(a) + dy * cos(a);
+        v.x += dx * std::cos(a) - dy * std::sin(a);
+        v.y += dx * std::sin(a) + dy * std::cos(a);
     }
 
     /**
@@ -220,8 +225,8 @@ private:
      */
     void displace(vertex2d & v, double a) const
     {
-        v.x += offset_ * sin(a);
-        v.y -= offset_ * cos(a);
+        v.x += offset_ * std::sin(a);
+        v.y -= offset_ * std::cos(a);
     }
 
     /**
@@ -229,16 +234,16 @@ private:
      */
     void displace(vertex2d & v, vertex2d const& u, double a) const
     {
-        v.x = u.x + offset_ * sin(a);
-        v.y = u.y - offset_ * cos(a);
+        v.x = u.x + offset_ * std::sin(a);
+        v.y = u.y - offset_ * std::cos(a);
         v.cmd = u.cmd;
     }
 
     void displace2(vertex2d & v, double a, double b) const
     {
-        double sa = offset_ * sin(a);
-        double ca = offset_ * cos(a);
-        double h = tan(0.5 * (b - a));
+        double sa = offset_ * std::sin(a);
+        double ca = offset_ * std::cos(a);
+        double h = std::tan(0.5 * (b - a));
         v.x = v.x + sa + h * ca;
         v.y = v.y - ca + h * sa;
     }
@@ -259,7 +264,7 @@ private:
             return status_ = process;
 
         double angle_a = 0;
-        double angle_b = atan2((v2.y - v1.y), (v2.x - v1.x));
+        double angle_b = std::atan2((v2.y - v1.y), (v2.x - v1.x));
         double joint_angle;
 
         // first vertex
@@ -271,15 +276,15 @@ private:
         // a fake vertex two offset-lengths before the first, and expect
         // intersection detection smoothes it out.
         pre_first_ = v1;
-        displace(pre_first_, -2 * fabs(offset_), 0, angle_b);
+        displace(pre_first_, -2 * std::fabs(offset_), 0, angle_b);
 
         while ((v1 = v2, v2.cmd = geom_.vertex(&v2.x, &v2.y)) != SEG_END)
         {
             angle_a = angle_b;
-            angle_b = atan2((v2.y - v1.y), (v2.x - v1.x));
+            angle_b = std::atan2((v2.y - v1.y), (v2.x - v1.x));
             joint_angle = explement_reflex_angle(angle_b - angle_a);
 
-            double half_turns = half_turn_segments_ * fabs(joint_angle);
+            double half_turns = half_turn_segments_ * std::fabs(joint_angle);
             int bulge_steps = 0;
 
             if (offset_ < 0.0)
@@ -287,7 +292,7 @@ private:
                 if (joint_angle > 0.0)
                     joint_angle = joint_angle - 2 * pi;
                 else
-                    bulge_steps = 1 + int(floor(half_turns / pi));
+                    bulge_steps = 1 + int(std::floor(half_turns / pi));
             }
             else
             {

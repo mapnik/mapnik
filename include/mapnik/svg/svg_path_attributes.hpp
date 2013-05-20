@@ -38,6 +38,7 @@ namespace svg {
 struct path_attributes
 {
     unsigned     index;
+    double       opacity;
     agg::rgba8   fill_color;
     double       fill_opacity;
     agg::rgba8   stroke_color;
@@ -58,6 +59,7 @@ struct path_attributes
     // Empty constructor
     path_attributes() :
         index(0),
+        opacity(1.0),
         fill_color(agg::rgba(0,0,0)),
         fill_opacity(1.0),
         stroke_color(agg::rgba(0,0,0)),
@@ -80,6 +82,7 @@ struct path_attributes
     // Copy constructor
     path_attributes(const path_attributes& attr)
         : index(attr.index),
+          opacity(attr.opacity),
           fill_color(attr.fill_color),
           fill_opacity(attr.fill_opacity),
           stroke_color(attr.stroke_color),
@@ -101,6 +104,7 @@ struct path_attributes
     // Copy constructor with new index value
     path_attributes(path_attributes const& attr, unsigned idx)
         : index(idx),
+          opacity(attr.opacity),
           fill_color(attr.fill_color),
           fill_opacity(attr.fill_opacity),
           stroke_color(attr.stroke_color),

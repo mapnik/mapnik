@@ -16,7 +16,7 @@
 #ifndef AGG_FONT_CACHE_MANAGER_INCLUDED
 #define AGG_FONT_CACHE_MANAGER_INCLUDED
 
-#include <string.h>
+#include <cstring>
 #include "agg_array.h"
 
 namespace agg

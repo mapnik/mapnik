@@ -27,8 +27,6 @@
 
 // stl
 #include <string>
-#include <iostream>
-
 
 namespace mapnik
 {
@@ -42,8 +40,7 @@ layer::layer(std::string const& name, std::string const& srs)
       clear_label_cache_(false),
       cache_features_(false),
       group_by_(""),
-      ds_(),
-      buffer_size_(0) {}
+      ds_() {}
 
 layer::layer(const layer& rhs)
     : name_(rhs.name_),
@@ -60,7 +57,7 @@ layer::layer(const layer& rhs)
       buffer_size_(rhs.buffer_size_),
       maximum_extent_(rhs.maximum_extent_) {}
 
-layer& layer::operator=(const layer& rhs)
+layer& layer::operator=(layer const& rhs)
 {
     layer tmp(rhs);
     swap(tmp);
@@ -72,21 +69,22 @@ bool layer::operator==(layer const& other) const
     return (this == &other);
 }
 
-void layer::swap(const layer& rhs)
+void layer::swap(layer& rhs)
 {
-    name_=rhs.name_;
-    srs_ = rhs.srs_;
-    min_zoom_=rhs.min_zoom_;
-    max_zoom_=rhs.max_zoom_;
-    active_=rhs.active_;
-    queryable_=rhs.queryable_;
-    clear_label_cache_ = rhs.clear_label_cache_;
-    cache_features_ = rhs.cache_features_;
-    group_by_ = rhs.group_by_;
-    styles_=rhs.styles_;
-    ds_=rhs.ds_;
-    buffer_size_ = rhs.buffer_size_;
-    maximum_extent_ = rhs.maximum_extent_;
+    using std::swap;
+    swap(name_, rhs.name_);
+    swap(srs_, rhs.srs_);
+    swap(min_zoom_, rhs.min_zoom_);
+    swap(max_zoom_, rhs.max_zoom_);
+    swap(active_, rhs.active_);
+    swap(queryable_, rhs.queryable_);
+    swap(clear_label_cache_, rhs.clear_label_cache_);
+    swap(cache_features_, rhs.cache_features_);
+    swap(group_by_,  rhs.group_by_);
+    swap(styles_, rhs.styles_);
+    swap(ds_, rhs.ds_);
+    swap(buffer_size_, rhs.buffer_size_);
+    swap(maximum_extent_, rhs.maximum_extent_);
 }
 
 layer::~layer() {}
@@ -198,13 +196,19 @@ void layer::reset_maximum_extent()
 
 void layer::set_buffer_size(int size)
 {
-    buffer_size_ = size;
+    buffer_size_.reset(size);
 }
 
-int layer::buffer_size() const
+boost::optional<int> const& layer::buffer_size() const
 {
     return buffer_size_;
 }
+
+void layer::reset_buffer_size()
+{
+    buffer_size_.reset();
+}
+
 
 box2d<double> layer::envelope() const
 {

@@ -24,8 +24,9 @@
 #define MAPNIK_LINE_PATTERN_SYMBOLIZER_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/symbolizer.hpp>
-//#include <boost/shared_ptr.hpp>
+#include <mapnik/path_expression.hpp>
 
 namespace mapnik
 {

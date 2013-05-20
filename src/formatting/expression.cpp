@@ -30,6 +30,9 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/xml_node.hpp>
 
+// boost
+#include <boost/property_tree/ptree.hpp>
+
 
 namespace mapnik {
 namespace formatting {
@@ -80,29 +83,29 @@ expression_ptr expression_format::get_expression(xml_node const& xml, std::strin
 }
 
 
-void expression_format::apply(char_properties const& p, const Feature &feature, processed_text &output) const
+void expression_format::apply(char_properties const& p, feature_impl const& feature, processed_text &output) const
 {
     char_properties new_properties = p;
     if (face_name) new_properties.face_name =
-                       boost::apply_visitor(evaluate<Feature,value_type>(feature), *face_name).to_string();
+                       boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *face_name).to_string();
     if (text_size) new_properties.text_size =
-                       boost::apply_visitor(evaluate<Feature,value_type>(feature), *text_size).to_double();
+                       boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *text_size).to_double();
     if (character_spacing) new_properties.character_spacing =
-                               boost::apply_visitor(evaluate<Feature,value_type>(feature), *character_spacing).to_double();
+                               boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *character_spacing).to_double();
     if (line_spacing) new_properties.line_spacing =
-                          boost::apply_visitor(evaluate<Feature,value_type>(feature), *line_spacing).to_double();
+                          boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *line_spacing).to_double();
     if (text_opacity) new_properties.text_opacity =
-                          boost::apply_visitor(evaluate<Feature,value_type>(feature), *text_opacity).to_double();
+                          boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *text_opacity).to_double();
     if (wrap_before) new_properties.wrap_before =
-                         boost::apply_visitor(evaluate<Feature,value_type>(feature), *wrap_before).to_bool();
+                         boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *wrap_before).to_bool();
     if (wrap_char) new_properties.wrap_char =
-                       boost::apply_visitor(evaluate<Feature,value_type>(feature), *character_spacing).to_unicode()[0];
+                       boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *character_spacing).to_unicode()[0];
 //    if (fill) new_properties.fill =
-//            boost::apply_visitor(evaluate<Feature,value_type>(feature), *fill).to_color();
+//            boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *fill).to_color();
 //    if (halo_fill) new_properties.halo_fill =
-//            boost::apply_visitor(evaluate<Feature,value_type>(feature), *halo_fill).to_color();
+//            boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *halo_fill).to_color();
     if (halo_radius) new_properties.halo_radius =
-                         boost::apply_visitor(evaluate<Feature,value_type>(feature), *halo_radius).to_double();
+                         boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *halo_radius).to_double();
 
     if (child_) {
         child_->apply(new_properties, feature, output);

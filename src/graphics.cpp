@@ -31,16 +31,13 @@
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
 
-// cairo
-#ifdef HAVE_CAIRO
-#include <cairomm/surface.h>
-#endif
-
 // boost
 #include <boost/scoped_array.hpp>
 
-// stl
-#include <iostream>
+// cairo
+#ifdef HAVE_CAIRO
+#include <mapnik/cairo_context.hpp>
+#endif
 
 namespace mapnik
 {
@@ -57,22 +54,22 @@ image_32::image_32(const image_32& rhs)
      painted_(rhs.painted_)  {}
 
 #ifdef HAVE_CAIRO
-image_32::image_32(Cairo::RefPtr<Cairo::ImageSurface> rhs)
-    :width_(rhs->get_width()),
-     height_(rhs->get_height()),
-     data_(rhs->get_width(),rhs->get_height())
+image_32::image_32(cairo_surface_ptr const& surface)
+    :width_(cairo_image_surface_get_width(&*surface)),
+     height_(cairo_image_surface_get_height(&*surface)),
+     data_(width_, height_)
 {
     painted_ = true;
-    if (rhs->get_format() != Cairo::FORMAT_ARGB32)
+    if ( cairo_image_surface_get_format(&*surface) != CAIRO_FORMAT_ARGB32)
     {
         MAPNIK_LOG_WARN(graphics) << "Unable to convert this Cairo format";
-        return; // throw exception ??
+        throw;
     }
 
-    int stride = rhs->get_stride() / 4;
+    int stride = cairo_image_surface_get_stride(&*surface) / 4;
 
     boost::scoped_array<unsigned int> out_row(new unsigned int[width_]);
-    const unsigned int *in_row = (const unsigned int *)rhs->get_data();
+    const unsigned int *in_row = (const unsigned int *)cairo_image_surface_get_data(&*surface);
 
     for (unsigned int row = 0; row < height_; row++, in_row += stride)
     {
@@ -145,42 +142,39 @@ void image_32::set_color_to_alpha(const color& c)
 
 void image_32::set_alpha(float opacity)
 {
+    for (unsigned int y = 0; y < height_; ++y)
     {
-        for (unsigned int y = 0; y < height_; ++y)
+        unsigned int* row_to =  data_.getRow(y);
+        for (unsigned int x = 0; x < width_; ++x)
         {
-            unsigned int* row_to =  data_.getRow(y);
-            for (unsigned int x = 0; x < width_; ++x)
-            {
-                unsigned rgba = row_to[x];
+            unsigned rgba = row_to[x];
 
 #ifdef MAPNIK_BIG_ENDIAN
-                unsigned a0 = (rgba & 0xff);
-                unsigned a1 = int( (rgba & 0xff) * opacity );
+            unsigned a0 = (rgba & 0xff);
+            unsigned a1 = int( (rgba & 0xff) * opacity );
 
-                if (a0 == a1) continue;
+            if (a0 == a1) continue;
 
-                unsigned r = (rgba >> 24) & 0xff;
-                unsigned g = (rgba >> 16 ) & 0xff;
-                unsigned b = (rgba >> 8) & 0xff;
+            unsigned r = (rgba >> 24) & 0xff;
+            unsigned g = (rgba >> 16 ) & 0xff;
+            unsigned b = (rgba >> 8) & 0xff;
 
-                row_to[x] = (a1) | (b << 8) |  (g << 16) | (r << 24) ;
+            row_to[x] = (a1) | (b << 8) |  (g << 16) | (r << 24) ;
 
 #else
-                unsigned a0 = (rgba >> 24) & 0xff;
-                unsigned a1 = int( ((rgba >> 24) & 0xff) * opacity );
-                //unsigned a1 = opacity;
-                if (a0 == a1) continue;
+            unsigned a0 = (rgba >> 24) & 0xff;
+            unsigned a1 = int( ((rgba >> 24) & 0xff) * opacity );
+            //unsigned a1 = opacity;
+            if (a0 == a1) continue;
 
-                unsigned r = rgba & 0xff;
-                unsigned g = (rgba >> 8 ) & 0xff;
-                unsigned b = (rgba >> 16) & 0xff;
+            unsigned r = rgba & 0xff;
+            unsigned g = (rgba >> 8 ) & 0xff;
+            unsigned b = (rgba >> 16) & 0xff;
 
-                row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
+            row_to[x] = (a1 << 24)| (b << 16) |  (g << 8) | (r) ;
 #endif
-            }
         }
     }
-
 }
 
 void image_32::set_background(const color& c)
@@ -214,7 +208,7 @@ void image_32::composite_pixel(unsigned op, int x,int y, unsigned c, unsigned co
     typedef color_type::value_type value_type;
     typedef agg::order_rgba order_type;
     typedef agg::comp_op_adaptor_rgba<color_type,order_type> blender_type;
-         
+
     if (checkBounds(x,y))
     {
         unsigned rgba = data_(x,y);
@@ -222,8 +216,8 @@ void image_32::composite_pixel(unsigned op, int x,int y, unsigned c, unsigned co
         unsigned cb = (c >> 16 ) & 0xff;
         unsigned cg = (c >> 8) & 0xff;
         unsigned cr = (c & 0xff);
-        blender_type::blend_pix(op, (value_type*)&rgba, cr, cg, cb, ca, cover); 
-        data_(x,y) = rgba; 
+        blender_type::blend_pix(op, (value_type*)&rgba, cr, cg, cb, ca, cover);
+        data_(x,y) = rgba;
     }
 }
 

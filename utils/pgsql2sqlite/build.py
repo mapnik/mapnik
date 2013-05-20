@@ -38,8 +38,8 @@ source = Split(
 program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
 
 if env['HAS_CAIRO']:
-    program_env.PrependUnique(CPPPATH=env['CAIROMM_CPPPATHS'])
-    program_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    program_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
+    program_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
 program_env.PrependUnique(CPPPATH=['#plugins/input/postgis'])
 

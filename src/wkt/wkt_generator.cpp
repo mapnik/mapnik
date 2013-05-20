@@ -26,6 +26,7 @@
 
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/geometry_wkt_generator.hpp>
+#include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/util/path_iterator.hpp>
 #include <mapnik/util/container_adapter.hpp>
 
@@ -62,6 +63,8 @@ wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
     using boost::spirit::karma::_1;
     using boost::spirit::karma::lit;
     using boost::spirit::karma::_a;
+    using boost::spirit::karma::_b;
+    using boost::spirit::karma::_c;
     using boost::spirit::karma::_r1;
     using boost::spirit::karma::eps;
     using boost::spirit::karma::string;
@@ -92,15 +95,20 @@ wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
     point_coord = &uint_ << coordinate << lit(' ') << coordinate
         ;
 
-    polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
+    polygon_coord %= ( &uint_(mapnik::SEG_MOVETO)
+                       << eps[_r1 += 1][_a  = _x(_val)][ _b = _y(_val)]
                        << string[ if_ (_r1 > 1) [_1 = "),("]
-                                  .else_[_1 = "("] ] | &uint_ << ",")
-        << coordinate
+                                  .else_[_1 = "("]]
+                       |
+                       &uint_(mapnik::SEG_LINETO)
+                       << lit(',') << eps[_a = _x(_val)][_b = _y(_val)]
+        )
+        << coordinate[_1 = _a]
         << lit(' ')
-        << coordinate
+        << coordinate[_1 = _b]
         ;
 
-    coords2 %= *polygon_coord(_a)
+    coords2 %= *polygon_coord(_a,_b,_c)
         ;
 
     coords = point_coord % lit(',')
@@ -144,6 +152,23 @@ wkt_multi_generator<OutputIterator, GeometryContainer>::wkt_multi_generator()
 template struct mapnik::util::wkt_generator<std::back_insert_iterator<std::string>, mapnik::geometry_type>;
 template struct mapnik::util::wkt_multi_generator<std::back_insert_iterator<std::string>, mapnik::geometry_container >;
 
+bool to_wkt(std::string & wkt, mapnik::geometry_type const& geom)
+{
+    typedef std::back_insert_iterator<std::string> sink_type;
+    sink_type sink(wkt);
+    wkt_generator<sink_type, mapnik::geometry_type> generator(true);
+    bool result = karma::generate(sink, generator, geom);
+    return result;
+}
+
+bool to_wkt(std::string & wkt, mapnik::geometry_container const& geom)
+{
+    typedef std::back_insert_iterator<std::string> sink_type;
+    sink_type sink(wkt);
+    wkt_multi_generator<sink_type, mapnik::geometry_container> generator;
+    bool result = karma::generate(sink, generator, geom);
+    return result;
+}
 
 }}
 

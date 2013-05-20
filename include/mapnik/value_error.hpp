@@ -23,8 +23,10 @@
 #ifndef MAPNIK_VALUE_ERROR_HPP
 #define MAPNIK_VALUE_ERROR_HPP
 
-#include <iostream>
-#include <sstream>
+#include <mapnik/config.hpp>
+
+#include <exception>
+#include <string>
 
 namespace mapnik {
 
@@ -39,7 +41,7 @@ public:
     {
     }
 
-    virtual ~value_error() throw() {};
+    virtual ~value_error() throw() {}
 
     virtual const char * what() const throw()
     {

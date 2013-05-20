@@ -24,13 +24,14 @@
 #define MAPNIK_SQLITE_PREPARED_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 
 // stl
 #include <string.h>
@@ -42,7 +43,7 @@ extern "C" {
 #include <sqlite3.h>
 }
 
-class prepared_index_statement : boost::noncopyable
+class prepared_index_statement : mapnik::noncopyable
 {
 
 public:
@@ -77,11 +78,13 @@ public:
             {
                 if (*(*ds_))
                 {
-                    std::cerr << "ERR:" << sqlite3_errmsg(*(*ds_)) << "\n";
+                    MAPNIK_LOG_ERROR(sqlite) << "~prepared_index_statement:"
+                                             << sqlite3_errmsg(*(*ds_));
                 }
                 else
                 {
-                    std::cerr << "SQLite Plugin: " << res << "\n";
+                    MAPNIK_LOG_ERROR(sqlite) << "~prepared_index_statement:"
+                                             << res;
                 }
             }
         }

@@ -20,11 +20,12 @@
 
 #include <QtGui>
 
+#define BOOST_CHRONO_HEADER_ONLY
+#include <boost/timer/timer.hpp>
 #include <boost/bind.hpp>
 
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
-#include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
@@ -37,7 +38,6 @@
 #ifdef HAVE_CAIRO
 // cairo
 #include <mapnik/cairo_renderer.hpp>
-#include <cairomm/surface.h>
 #endif
 
 #include "mapwidget.hpp"
@@ -160,7 +160,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
             QVector<QPair<QString,QString> > info;
 
             projection map_proj(map_->srs()); // map projection
-            double scale_denom = scale_denominator(*map_,map_proj.is_geographic());
+            double scale_denom = scale_denominator(map_->scale(),map_proj.is_geographic());
             CoordTransform t(map_->width(),map_->height(),map_->get_current_extent());
 
             for (unsigned index = 0; index <  map_->layer_count();++index)
@@ -503,7 +503,10 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
     try
     {
-        ren.apply();
+        {
+            boost::timer::auto_cpu_timer t;
+            ren.apply();
+        }
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
@@ -524,41 +527,7 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
 void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
-    unsigned width=map.width();
-    unsigned height=map.height();
-
-    mapnik::grid buf(width,height,"F_CODE", 1);
-    mapnik::grid_renderer<mapnik::grid> ren(map,buf,scaling_factor);
-
-    try
-    {
-        ren.apply();
-        int * imdata = static_cast<int*>(buf.raw_data());
-
-        QImage image(width,height,QImage::Format_RGB32);
-        for (unsigned i = 0 ; i < height ; ++i)
-        {
-            for (unsigned j = 0 ; j < width ; ++j)
-            {
-                image.setPixel(j,i,qRgb((uint8_t)(imdata[i*width+j]>>8),
-                                        (uint8_t)(imdata[i*width+j+1]>>8),
-                                        (uint8_t)(imdata[i*width+j+2]>>8)));
-            }
-        }
-        pix = QPixmap::fromImage(image);
-    }
-    catch (mapnik::config_error & ex)
-    {
-        std::cerr << ex.what() << std::endl;
-    }
-    catch (const std::exception & ex)
-    {
-        std::cerr << "exception: " << ex.what() << std::endl;
-    }
-    catch (...)
-    {
-        std::cerr << "Unknown exception caught!\n";
-    }
+    std::cerr << "Not supported" << std::endl;
 }
 
 
@@ -566,12 +535,10 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
 
 #ifdef HAVE_CAIRO
-    Cairo::RefPtr<Cairo::ImageSurface> image_surface =
-        Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, map.width(),map.height());
-
-    mapnik::cairo_renderer<Cairo::Surface> png_render(map, image_surface, scaling_factor);
-    png_render.apply();
-
+    mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
+                                            mapnik::cairo_surface_closer());
+    mapnik::cairo_renderer<mapnik::cairo_surface_ptr> renderer(map, image_surface, scaling_factor);
+    renderer.apply();
     image_32 buf(image_surface);
     QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());

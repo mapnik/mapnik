@@ -23,6 +23,9 @@
 #include <mapnik/map.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/rule.hpp>
+#include <mapnik/line_symbolizer.hpp>
+#include <mapnik/polygon_symbolizer.hpp>
+#include <mapnik/text_symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/datasource_cache.hpp>
@@ -31,12 +34,10 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/config_error.hpp>
 
 #if defined(HAVE_CAIRO)
-// cairo
 #include <mapnik/cairo_renderer.hpp>
-#include <cairomm/surface.h>
+#include <mapnik/cairo_context.hpp>
 #endif
 
 #include <iostream>
@@ -46,23 +47,28 @@ int main ( int argc , char** argv)
 {
     if (argc != 2)
     {
-        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local/lib/mapnik\n";
+        std::cout << "usage: ./rundemo <mapnik_install_dir>\nUsually /usr/local\n";
         std::cout << "Warning: ./rundemo looks for data in ../data/,\nTherefore must be run from within the demo/c++ folder.\n";
         return EXIT_SUCCESS;
     }
 
     using namespace mapnik;
+    const std::string srs_lcc="+proj=lcc +ellps=GRS80 +lat_0=49 +lon_0=-95 +lat+1=49 +lat_2=77 \
+                           +datum=NAD83 +units=m +no_defs";
+    const std::string srs_merc="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 \
+                           +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over";
+
     try {
         std::cout << " running demo ... \n";
         std::string mapnik_dir(argv[1]);
-        std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "/input/" << "\n";
-        datasource_cache::instance().register_datasources(mapnik_dir + "/input/");
-        std::cout << " looking for DejaVuSans font in... " << mapnik_dir << "/fonts/DejaVuSans.ttf" << "\n";
-        freetype_engine::register_font(mapnik_dir + "/fonts/DejaVuSans.ttf");
+        std::cout << " looking for 'shape.input' plugin in... " << mapnik_dir << "/lib/mapnik/input/" << "\n";
+        datasource_cache::instance().register_datasources(mapnik_dir + "/lib/mapnik/input/");
+        std::cout << " looking for DejaVuSans font in... " << mapnik_dir << "/lib/mapnik/fonts/DejaVuSans.ttf" << "\n";
+        freetype_engine::register_font(mapnik_dir + "/lib/mapnik/fonts/DejaVuSans.ttf");
 
         Map m(800,600);
         m.set_background(parse_color("white"));
-
+        m.set_srs(srs_merc);
         // create styles
 
         // Provinces (polygon)
@@ -184,6 +190,7 @@ int main ( int argc , char** argv)
             layer lyr("Provinces");
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("provinces");
+            lyr.set_srs(srs_lcc);
             m.addLayer(lyr);
         }
 
@@ -194,6 +201,7 @@ int main ( int argc , char** argv)
             p["file"]="../data/qcdrainage";
             layer lyr("Quebec Hydrography");
             lyr.set_datasource(datasource_cache::instance().create(p));
+            lyr.set_srs(srs_lcc);
             lyr.add_style("drainage");
             m.addLayer(lyr);
         }
@@ -202,9 +210,9 @@ int main ( int argc , char** argv)
             parameters p;
             p["type"]="shape";
             p["file"]="../data/ontdrainage";
-
             layer lyr("Ontario Hydrography");
             lyr.set_datasource(datasource_cache::instance().create(p));
+            lyr.set_srs(srs_lcc);
             lyr.add_style("drainage");
             m.addLayer(lyr);
         }
@@ -215,6 +223,7 @@ int main ( int argc , char** argv)
             p["type"]="shape";
             p["file"]="../data/boundaries_l";
             layer lyr("Provincial borders");
+            lyr.set_srs(srs_lcc);
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("provlines");
             m.addLayer(lyr);
@@ -226,6 +235,7 @@ int main ( int argc , char** argv)
             p["type"]="shape";
             p["file"]="../data/roads";
             layer lyr("Roads");
+            lyr.set_srs(srs_lcc);
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("smallroads");
             lyr.add_style("road-border");
@@ -242,13 +252,13 @@ int main ( int argc , char** argv)
             p["file"]="../data/popplaces";
             p["encoding"] = "latin1";
             layer lyr("Populated Places");
+            lyr.set_srs(srs_lcc);
             lyr.set_datasource(datasource_cache::instance().create(p));
             lyr.add_style("popplaces");
             m.addLayer(lyr);
         }
 
-        m.zoom_to_box(box2d<double>(1405120.04127408,-247003.813399447,
-                                    1706357.31328276,-25098.593149577));
+        m.zoom_to_box(box2d<double>(-8024477.28459,5445190.38849,-7381388.20071,5662941.44855));
 
         image_32 buf(m.width(),m.height());
         agg_renderer<image_32> ren(m,buf);
@@ -256,7 +266,7 @@ int main ( int argc , char** argv)
 
         save_to_file(buf,"demo.jpg","jpeg");
         save_to_file(buf,"demo.png","png");
-        save_to_file(buf,"demo256.png","png256");
+        save_to_file(buf,"demo256.png","png8");
         save_to_file(buf,"demo.tif","tiff");
 
         std::cout << "Three maps have been rendered using AGG in the current directory:\n"
@@ -267,24 +277,31 @@ int main ( int argc , char** argv)
             "Have a look!\n";
 
 #if defined(HAVE_CAIRO)
-        Cairo::RefPtr<Cairo::ImageSurface> image_surface;
+        // save to pdf/svg files
+        save_to_cairo_file(m,"cairo-demo.pdf");
+        save_to_cairo_file(m,"cairo-demo.svg");
 
-        image_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, m.width(),m.height());
-        cairo_renderer<Cairo::Surface> png_render(m, image_surface);
+        /* we could also do:
+
+           save_to_cairo_file(m,"cairo-demo.png");
+
+           but instead let's build up a surface for more flexibility
+        */
+
+        cairo_surface_ptr image_surface(
+            cairo_image_surface_create(CAIRO_FORMAT_ARGB32,m.width(),m.height()),
+            cairo_surface_closer());
+        double scale_factor = 1.0;
+        cairo_ptr image_context = (create_context(image_surface));
+        mapnik::cairo_renderer<cairo_ptr> png_render(m,image_context,scale_factor);
         png_render.apply();
-        image_surface->write_to_png("cairo-demo.png");
-
+        // we can now write to png with cairo functionality
+        cairo_surface_write_to_png(&*image_surface, "cairo-demo.png");
+        // but we can also benefit from quantization by converting
+        // to a mapnik image object and then saving that
         image_32 im(image_surface);
-        save_to_file(im, "cairo-demo256.png","png256");
-
-        Cairo::RefPtr<Cairo::Surface> surface;
-        surface = Cairo::PdfSurface::create("cairo-demo.pdf", m.width(),m.height());
-        cairo_renderer<Cairo::Surface> pdf_render(m, surface);
-        pdf_render.apply();
-
-        surface = Cairo::SvgSurface::create("cairo-demo.svg", m.width(),m.height());
-        cairo_renderer<Cairo::Surface> svg_render(m, surface);
-        svg_render.apply();
+        save_to_file(im, "cairo-demo256.png","png8");
+        cairo_surface_finish(&*image_surface);
 
         std::cout << "Three maps have been rendered using Cairo in the current directory:\n"
             "- cairo-demo.png\n"
@@ -294,11 +311,6 @@ int main ( int argc , char** argv)
             "Have a look!\n";
 #endif
 
-    }
-    catch ( const mapnik::config_error & ex )
-    {
-        std::cerr << "### Configuration error: " << ex.what() << std::endl;
-        return EXIT_FAILURE;
     }
     catch ( const std::exception & ex )
     {

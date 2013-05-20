@@ -24,20 +24,14 @@
 #define MAPNIK_PROJECTION_HPP
 
 // mapnik
-#include <mapnik/box2d.hpp>
-
-// proj4
-#include <proj_api.h>
+#include <mapnik/config.hpp>
+#include <mapnik/well_known_srs.hpp>
 
 // boost
-#if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-#include <boost/thread/mutex.hpp>
-#endif
-#include <boost/utility.hpp>
+#include <boost/optional.hpp>
 
 // stl
 #include <string>
-#include <iostream>
 #include <stdexcept>
 
 namespace mapnik {
@@ -53,7 +47,9 @@ class MAPNIK_DECL projection
 {
     friend class proj_transform;
 public:
-    explicit projection(std::string const& params = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+
+    projection(std::string const& params,
+                        bool defer_proj_init = false);
     projection(projection const& rhs);
     ~projection();
 
@@ -62,27 +58,32 @@ public:
     bool operator!=(const projection& other) const;
     bool is_initialized() const;
     bool is_geographic() const;
+    boost::optional<well_known_srs_e> well_known() const;
     std::string const& params() const;
-
-    void forward(double & x, double &y ) const;
+    void forward(double & x, double & y) const;
     void inverse(double & x,double & y) const;
-
     std::string expanded() const;
+    void init_proj4() const;
 
 private:
-    void init();
     void swap (projection& rhs);
 
 private:
     std::string params_;
-    projPJ proj_;
-    bool is_geographic_;
-#if PJ_VERSION >= 480
-    projCtx proj_ctx_;
-#elif defined(MAPNIK_THREADSAFE)
-    static boost::mutex mutex_;
-#endif
+    bool defer_proj_init_;
+    mutable bool is_geographic_;
+    mutable void * proj_;
+    mutable void * proj_ctx_;
 };
+
+template <typename charT, typename traits>
+std::basic_ostream<charT, traits> &
+operator << ( std::basic_ostream<charT, traits> & s, mapnik::projection const& p )
+{
+    s << "projection(\"" << p.params() << "\")";
+    return s;
+}
+
 
 }
 

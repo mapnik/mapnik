@@ -24,6 +24,7 @@
 #define MAPNIK_STROKE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/gamma_method.hpp>
 #include <mapnik/enumeration.hpp>
@@ -33,9 +34,7 @@
 
 namespace mapnik
 {
-using std::pair;
-using std::vector;
-typedef vector<pair<double,double> > dash_array;
+typedef std::vector<std::pair<double,double> > dash_array;
 
 // if you add new tokens, don't forget to add them to the corresponding
 // string array in the cpp file.

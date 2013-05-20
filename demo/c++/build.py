@@ -36,8 +36,8 @@ demo_env = env.Clone()
 demo_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
 
 if env['HAS_CAIRO']:
-    demo_env.PrependUnique(CPPPATH=env['CAIROMM_CPPPATHS'])
-    demo_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    demo_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
+    demo_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
 libraries =  copy(env['LIBMAPNIK_LIBS'])
 libraries.append('mapnik')

@@ -45,7 +45,7 @@ namespace mapnik {
 template <typename T>
 void grid2utf(T const& grid_type,
                      boost::python::list& l,
-                     std::vector<grid::lookup_type>& key_order)
+                     std::vector<typename T::lookup_type>& key_order)
 {
     typedef std::map< typename T::lookup_type, typename T::value_type> keys_type;
     typedef typename keys_type::const_iterator keys_iterator;

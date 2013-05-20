@@ -22,12 +22,13 @@
 
 //mapnik
 #include <mapnik/symbolizer.hpp>
-#include <mapnik/map.hpp>
+#include <mapnik/attribute.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/transform_processor.hpp>
 
 namespace mapnik {
 
-void evaluate_transform(agg::trans_affine& tr, Feature const& feature,
+void evaluate_transform(agg::trans_affine& tr, feature_impl const& feature,
                         transform_list_ptr const& trans_expr)
 {
     if (trans_expr)

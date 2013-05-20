@@ -23,7 +23,8 @@
 // mapnik
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_scaling.hpp>
-#include <mapnik/span_image_filter.hpp>
+// does not handle alpha correctly
+//#include <mapnik/span_image_filter.hpp>
 
 // boost
 #include <boost/assign/list_of.hpp>
@@ -257,11 +258,11 @@ template <typename Image>
 void scale_image_agg(Image & target,
                      Image const& source,
                      scaling_method_e scaling_method,
-                     double image_ratio,
+                     double image_ratio_x,
+                     double image_ratio_y,
                      double x_off_f,
                      double y_off_f,
-                     double filter_radius,
-                     double ratio)
+                     double filter_radius)
 {
     // "the image filters should work namely in the premultiplied color space"
     // http://old.nabble.com/Re:--AGG--Basic-image-transformations-p1110665.html
@@ -290,7 +291,7 @@ void scale_image_agg(Image & target,
 
     // create a scaling matrix
     agg::trans_affine img_mtx;
-    img_mtx /= agg::trans_affine_scaling(image_ratio * ratio, image_ratio * ratio);
+    img_mtx /= agg::trans_affine_scaling(image_ratio_x, image_ratio_y);
 
     // create a linear interpolator for our scaling matrix
     typedef agg::span_interpolator_linear<> interpolator_type;
@@ -352,20 +353,28 @@ void scale_image_agg(Image & target,
     // http://old.nabble.com/Re%3A-Newbie---texture-p5057255.html
 
     // high quality resampler
-    //typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
+    typedef agg::span_image_resample_rgba_affine<img_src_type> span_gen_type;
 
     // faster, lower quality
     //typedef agg::span_image_filter_rgba<img_src_type,interpolator_type> span_gen_type;
 
     // local, modified agg::span_image_resample_rgba_affine
-    // not convinced we need this
+    // dating back to when we were not handling alpha correctly
+    // and this file helped work around symptoms
     // https://github.com/mapnik/mapnik/issues/1489
-    typedef mapnik::span_image_resample_rgba_affine<img_src_type> span_gen_type;
+    //typedef mapnik::span_image_resample_rgba_affine<img_src_type> span_gen_type;
     span_gen_type sg(img_src, interpolator, filter);
     agg::render_scanlines_aa(ras, sl, rb_dst_pre, sa, sg);
 }
 
-template void scale_image_agg<image_data_32> (image_data_32& target,const image_data_32& source, scaling_method_e scaling_method, double scale_factor, double x_off_f, double y_off_f, double filter_radius, double ratio);
+template void scale_image_agg<image_data_32>(image_data_32& target,
+                                             const image_data_32& source,
+                                             scaling_method_e scaling_method,
+                                             double image_ratio_x,
+                                             double image_ratio_y,
+                                             double x_off_f,
+                                             double y_off_f,
+                                             double filter_radius);
 
 template void scale_image_bilinear_old<image_data_32> (image_data_32& target,const image_data_32& source, double x_off_f, double y_off_f);
 

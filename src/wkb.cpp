@@ -27,9 +27,9 @@
 #include <mapnik/coord_array.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/feature.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/format.hpp>
 
 namespace mapnik
@@ -37,7 +37,7 @@ namespace mapnik
 
 typedef coord_array<coord2d> CoordinateArray;
 
-struct wkb_reader : boost::noncopyable
+struct wkb_reader : mapnik::noncopyable
 {
 private:
     enum wkbByteOrder {
@@ -82,7 +82,8 @@ public:
         {
             if (size_ >= 44
                 && (unsigned char)(wkb_[0]) == (unsigned char)(0x00)
-                && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C))
+                && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C)
+                && (unsigned char)(wkb_[size_ - 1]) == (unsigned char)(0xFE))
             {
                 format_ = wkbSpatiaLite;
             }
@@ -353,14 +354,14 @@ private:
                     CoordinateArray ar(num_points);
                     read_coords(ar);
                     poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points - 1; ++j)
+                    for (int j = 1; j < num_points ; ++j)
                     {
                         poly->line_to(ar[j].x, ar[j].y);
                     }
-                    poly->close(ar[num_points-1].x, ar[num_points-1].y);
+                    poly->close_path();
                 }
             }
-            if (poly->size() > 2) // ignore if polygon has less than 3 vertices
+            if (poly->size() > 3) // ignore if polygon has less than (3 + close_path) vertices
                 paths.push_back(poly);
         }
     }
@@ -389,11 +390,11 @@ private:
                     CoordinateArray ar(num_points);
                     read_coords_xyz(ar);
                     poly->move_to(ar[0].x, ar[0].y);
-                    for (int j = 1; j < num_points - 1; ++j)
+                    for (int j = 1; j < num_points; ++j)
                     {
                         poly->line_to(ar[j].x, ar[j].y);
                     }
-                    poly->close(ar[num_points-1].x, ar[num_points-1].y);
+                    poly->close_path();
                 }
             }
             if (poly->size() > 2) // ignore if polygon has less than 3 vertices
@@ -441,7 +442,7 @@ private:
         case wkbMultiLineStringZ:    s << "MultiLineStringZ"; break;
         case wkbMultiPolygonZ:       s << "MultiPolygonZ"; break;
         case wkbGeometryCollectionZ: s << "GeometryCollectionZ"; break;
-        default:                     s << "wkbUknown(" << type << ")"; break;
+        default:                     s << "wkbUnknown(" << type << ")"; break;
         }
 
         return s.str();

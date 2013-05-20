@@ -28,12 +28,16 @@
 #include <mapnik/processed_text.hpp>
 #include <mapnik/xml_node.hpp>
 
+// boost
+#include <boost/property_tree/ptree.hpp>
+#include <boost/make_shared.hpp>
+
 namespace mapnik
 {
 namespace formatting
 {
-using boost::property_tree::ptree;
 
+using boost::property_tree::ptree;
 
 void text_node::to_xml(ptree &xml) const
 {
@@ -47,9 +51,9 @@ node_ptr text_node::from_xml(xml_node const& xml)
     return boost::make_shared<text_node>(xml.get_value<expression_ptr>());
 }
 
-void text_node::apply(char_properties const& p, Feature const& feature, processed_text &output) const
+void text_node::apply(char_properties const& p, feature_impl const& feature, processed_text &output) const
 {
-    UnicodeString text_str = boost::apply_visitor(evaluate<Feature,value_type>(feature), *text_).to_unicode();
+    UnicodeString text_str = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *text_).to_unicode();
     if (p.text_transform == UPPERCASE)
     {
         text_str = text_str.toUpper();

@@ -25,13 +25,39 @@
 
 // boost
 #include <boost/spirit/include/qi.hpp>
-
+#include <boost/fusion/include/adapt_struct.hpp>
+// mapnik
+#include <mapnik/css_color_grammar.hpp>
+#include <mapnik/image_filter.hpp>
 // stl
 #include <vector>
+
+BOOST_FUSION_ADAPT_STRUCT(
+    mapnik::filter::color_stop,
+    (mapnik::color, color )
+    (double, offset)
+)
 
 namespace mapnik {
 
 namespace qi = boost::spirit::qi;
+
+struct percent_offset_impl
+{
+    template <typename T>
+    struct result
+    {
+        typedef double type;
+    };
+
+    double operator() (double val) const
+    {
+        double result = std::abs(val/100.0);
+        if (result > 1.0) result = 1.0;
+        return result;
+    }
+};
+
 
 template <typename Iterator, typename ContType>
 struct image_filter_grammar :
@@ -39,8 +65,16 @@ struct image_filter_grammar :
 {
     image_filter_grammar();
     qi::rule<Iterator, ContType(), qi::ascii::space_type> start;
-    qi::rule<Iterator, ContType(), qi::locals<int,int>, qi::ascii::space_type> filter;
+    qi::rule<Iterator, ContType(), qi::ascii::space_type> filter;
+    qi::rule<Iterator, qi::locals<int,int>, void(ContType&), qi::ascii::space_type> agg_blur_filter;
+    //qi::rule<Iterator, qi::locals<double,double,double,double,double,double,double,double>,
+    //         void(ContType&), qi::ascii::space_type> hsla_filter;
+    qi::rule<Iterator, qi::locals<mapnik::filter::colorize_alpha, mapnik::filter::color_stop>, void(ContType&), qi::ascii::space_type> colorize_alpha_filter;
+    qi::rule<Iterator, qi::ascii::space_type> no_args;
     qi::uint_parser< unsigned, 10, 1, 3 > radius_;
+    css_color_grammar<Iterator> css_color_;
+    qi::rule<Iterator,void(mapnik::filter::color_stop &),qi::ascii::space_type> color_stop_offset;
+    phoenix::function<percent_offset_impl> percent_offset;
 };
 
 }

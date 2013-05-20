@@ -24,7 +24,7 @@
 #ifndef AGG_PIXFMT_GRAY_INCLUDED
 #define AGG_PIXFMT_GRAY_INCLUDED
 
-#include <string.h>
+#include <cstring>
 #include "agg_basics.h"
 #include "agg_color_gray.h"
 #include "agg_rendering_buffer.h"

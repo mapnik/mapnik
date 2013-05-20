@@ -25,18 +25,18 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
-
-// boost
-#include <boost/utility.hpp>
+#include <mapnik/noncopyable.hpp>
 
 namespace mapnik {
 namespace svg {
 
 template <typename VertexSource ,typename AttributeSource>
-class svg_storage :  boost::noncopyable
+class svg_storage :  mapnik::noncopyable
 {
 public:
-    svg_storage() {}
+    svg_storage() :
+      svg_width_(0),
+      svg_height_(0) {}
 
     VertexSource & source() // FIXME!! make const
     {
@@ -63,11 +63,29 @@ public:
         return bounding_box_;
     }
 
+    double width() const
+    {
+        return svg_width_;
+    }
+
+    double height() const
+    {
+        return svg_height_;
+    }
+
+    void set_dimensions(double w, double h)
+    {
+        svg_width_ = w;
+        svg_height_ = h;
+    }
+
 private:
 
     VertexSource source_;
     AttributeSource attributes_;
     box2d<double> bounding_box_;
+    double svg_width_;
+    double svg_height_;
 
 };
 

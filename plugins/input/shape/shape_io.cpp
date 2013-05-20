@@ -65,27 +65,11 @@ shape_io::shape_io(std::string const& shape_name, bool open_index)
 
 shape_io::~shape_io() {}
 
-void shape_io::move_to(int pos)
+void shape_io::move_to(std::streampos pos)
 {
     shp_.seek(pos);
     id_ = shp_.read_xdr_integer();
     reclength_ = shp_.read_xdr_integer();
-    type_ = static_cast<shape_io::shapeType>(shp_.read_ndr_integer());
-
-    if (type_ != shape_null && type_ != shape_point && type_ != shape_pointm && type_ != shape_pointz)
-    {
-        shp_.read_envelope(cur_extent_);
-    }
-}
-
-shape_io::shapeType shape_io::type() const
-{
-    return type_;
-}
-
-const box2d<double>& shape_io::current_extent() const
-{
-    return cur_extent_;
 }
 
 shape_file& shape_io::shp()
@@ -98,11 +82,17 @@ dbf_file& shape_io::dbf()
     return dbf_;
 }
 
-void shape_io::read_polyline(mapnik::geometry_container & geom)
+void shape_io::read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox)
 {
-    shape_file::record_type record(reclength_ * 2 - 36);
-    shp_.read_record(record);
+    double lox = record.read_double();
+    double loy = record.read_double();
+    double hix = record.read_double();
+    double hiy = record.read_double();
+    bbox.init(lox, loy, hix, hiy);
+}
 
+void shape_io::read_polyline( shape_file::record_type & record, mapnik::geometry_container & geom)
+{
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
     if (num_parts == 1)
@@ -155,30 +145,10 @@ void shape_io::read_polyline(mapnik::geometry_container & geom)
             geom.push_back(line);
         }
     }
-    // z-range
-    //double z0=record.read_double();
-    //double z1=record.read_double();
-    //for (int i=0;i<num_points;++i)
-    // {
-    //  double z=record.read_double();
-    // }
-
-    // m-range
-    //double m0=record.read_double();
-    //double m1=record.read_double();
-
-    //for (int i=0;i<num_points;++i)
-    //{
-    //   double m=record.read_double();
-    //}
-
 }
 
-void shape_io::read_polygon(mapnik::geometry_container & geom)
+void shape_io::read_polygon(shape_file::record_type & record, mapnik::geometry_container & geom)
 {
-    shape_file::record_type record(reclength_ * 2 - 36);
-    shp_.read_record(record);
-
     int num_parts = record.read_ndr_integer();
     int num_points = record.read_ndr_integer();
     std::vector<int> parts(num_parts);
@@ -205,33 +175,13 @@ void shape_io::read_polygon(mapnik::geometry_container & geom)
         double x = record.read_double();
         double y = record.read_double();
         poly->move_to(x, y);
-
-        for (int j=start+1;j<end-1;j++)
+        for (int j=start+1;j<end;j++)
         {
             x = record.read_double();
             y = record.read_double();
             poly->line_to(x, y);
         }
-        x = record.read_double();
-        y = record.read_double();
-        poly->close(x, y);
-
+        poly->close_path();
         geom.push_back(poly);
     }
-    // z-range
-    //double z0=record.read_double();
-    //double z1=record.read_double();
-    //for (int i=0;i<num_points;++i)
-    //{
-    //  double z=record.read_double();
-    //}
-
-    // m-range
-    //double m0=record.read_double();
-    //double m1=record.read_double();
-
-    //for (int i=0;i<num_points;++i)
-    //{
-    //   double m=record.read_double();
-    //}
 }

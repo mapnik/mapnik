@@ -23,6 +23,7 @@
 // boost
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
+#include <boost/noncopyable.hpp>
 
 // stl
 #include <sstream>
@@ -47,26 +48,29 @@ namespace
 {
 //user-friendly wrapper that uses Python dictionary
 using namespace boost::python;
-boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
+boost::shared_ptr<mapnik::datasource> create_datasource(dict const& d)
 {
-    bool bind=true;
     mapnik::parameters params;
     boost::python::list keys=d.keys();
-    for (int i=0; i<len(keys); ++i)
+    for (int i=0; i < len(keys); ++i)
     {
         std::string key = extract<std::string>(keys[i]);
         object obj = d[key];
-
-        if (key == "bind")
+        if (PyUnicode_Check(obj.ptr()))
         {
-            bind = extract<bool>(obj)();
+            PyObject* temp = PyUnicode_AsUTF8String(obj.ptr());
+            if (temp)
+            {
+                char* c_str = PyString_AsString(temp);
+                params[key] = std::string(c_str);
+                Py_DecRef(temp);
+            }
             continue;
         }
 
         extract<std::string> ex0(obj);
-        extract<int> ex1(obj);
+        extract<mapnik::value_integer> ex1(obj);
         extract<double> ex2(obj);
-
         if (ex0.check())
         {
             params[key] = ex0();
@@ -81,7 +85,7 @@ boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
         }
     }
 
-    return mapnik::datasource_cache::instance().create(params, bind);
+    return mapnik::datasource_cache::instance().create(params);
 }
 
 boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
@@ -146,6 +150,9 @@ boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
     return fld_types;
 }}
 
+mapnik::parameters const& (mapnik::datasource::*params_const)() const =  &mapnik::datasource::params;
+
+
 void export_datasource()
 {
     using namespace boost::python;
@@ -169,11 +176,10 @@ void export_datasource()
         .def("describe",&describe)
         .def("envelope",&datasource::envelope)
         .def("features",&datasource::features)
-        .def("bind",&datasource::bind)
         .def("fields",&fields)
         .def("field_types",&field_types)
         .def("features_at_point",&datasource::features_at_point, (arg("coord"),arg("tolerance")=0))
-        .def("params",&datasource::params,return_value_policy<copy_const_reference>(),
+        .def("params",make_function(params_const,return_value_policy<copy_const_reference>()),
              "The configuration parameters of the data source. "
              "These vary depending on the type of data source.")
         ;

@@ -27,7 +27,8 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/ctrans.hpp>
-#include <mapnik/span_image_filter.hpp>
+#include <mapnik/raster.hpp>
+#include <mapnik/proj_transform.hpp>
 
 // agg
 #include "agg_image_filters.h"
@@ -58,8 +59,8 @@ void reproject_and_scale_raster(raster & target, raster const& source,
     CoordTransform tt(target.data_.width(), target.data_.height(),
                       target.ext_, offset_x, offset_y);
     unsigned i, j;
-    unsigned mesh_nx = ceil(source.data_.width()/double(mesh_size) + 1);
-    unsigned mesh_ny = ceil(source.data_.height()/double(mesh_size) + 1);
+    unsigned mesh_nx = std::ceil(source.data_.width()/double(mesh_size) + 1);
+    unsigned mesh_ny = std::ceil(source.data_.height()/double(mesh_size) + 1);
 
     ImageData<double> xs(mesh_nx, mesh_ny);
     ImageData<double> ys(mesh_nx, mesh_ny);
@@ -186,7 +187,7 @@ void reproject_and_scale_raster(raster & target, raster const& source,
                     agg::render_scanlines_aa(rasterizer, scanline, rb_pre,
                                              sa, sg);
                 } else {
-                    typedef mapnik::span_image_resample_rgba_affine
+                    typedef agg::span_image_resample_rgba_affine
                         <img_accessor_type> span_gen_type;
                     span_gen_type sg(ia, interpolator, filter);
                     agg::render_scanlines_aa(rasterizer, scanline, rb_pre,

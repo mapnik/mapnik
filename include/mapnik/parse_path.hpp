@@ -25,122 +25,30 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/attribute.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/value.hpp>
-#include <mapnik/path_expression_grammar.hpp>
-
-// boost
-#include <boost/shared_ptr.hpp>
-#include <boost/variant.hpp>
-#include <boost/foreach.hpp>
+#include <mapnik/path_expression.hpp>
 
 // stl
 #include <string>
-#include <vector>
+#include <set>
 
 namespace mapnik {
 
-typedef boost::shared_ptr<path_expression> path_expression_ptr;
+// fwd declare to reduce compile time
+template <typename Iterator> struct path_expression_grammar;
+class feature_impl;
 
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str);
 MAPNIK_DECL path_expression_ptr parse_path(std::string const & str,
                                            path_expression_grammar<std::string::const_iterator> const& g);
 
-template <typename T>
-struct path_processor
+struct MAPNIK_DECL path_processor
 {
-    typedef T feature_type;
-    struct path_visitor_ : boost::static_visitor<void>
-    {
-        path_visitor_ (std::string & filename, feature_type const& f)
-            : filename_(filename),
-              feature_(f) {}
-
-        void operator() (std::string const& token) const
-        {
-            filename_ += token;
-        }
-
-        void operator() (attribute const& attr) const
-        {
-            // convert mapnik::value to std::string
-            value const& val = feature_.get(attr.name());
-            filename_ += val.to_string();
-        }
-
-        std::string & filename_;
-        feature_type const& feature_;
-    };
-
-    struct to_string_ : boost::static_visitor<void>
-    {
-        to_string_ (std::string & str)
-            : str_(str) {}
-
-        void operator() (std::string const& token) const
-        {
-            str_ += token;
-        }
-
-        void operator() (attribute const& attr) const
-        {
-            str_ += "[";
-            str_ += attr.name();
-            str_ += "]";
-        }
-
-        std::string & str_;
-    };
-
-    template <typename T1>
-    struct collect_ : boost::static_visitor<void>
-    {
-        collect_ (T1 & cont)
-            : cont_(cont) {}
-
-        void operator() (std::string const& token) const
-        {
-            boost::ignore_unused_variable_warning(token);
-        }
-
-        void operator() (attribute const& attr) const
-        {
-            cont_.insert(attr.name());
-        }
-
-        T1 & cont_;
-    };
-
-    static std::string evaluate(path_expression const& path,feature_type const& f)
-    {
-        std::string out;
-        path_visitor_ eval(out,f);
-        BOOST_FOREACH( mapnik::path_component const& token, path)
-            boost::apply_visitor(eval,token);
-        return out;
-    }
-
-    static std::string to_string(path_expression const& path)
-    {
-        std::string str;
-        to_string_ visitor(str);
-        BOOST_FOREACH( mapnik::path_component const& token, path)
-            boost::apply_visitor(visitor,token);
-        return str;
-    }
-
-    template <typename T2>
-    static void collect_attributes(path_expression const& path, T2 & names)
-    {
-        typedef T2 cont_type;
-        collect_<cont_type> visitor(names);
-        BOOST_FOREACH( mapnik::path_component const& token, path)
-            boost::apply_visitor(visitor,token);
-    }
+    static std::string evaluate(path_expression const& path, feature_impl const& f);
+    static std::string to_string(path_expression const& path);
+    static void collect_attributes(path_expression const& path, std::set<std::string>& names);
 };
 
-typedef mapnik::path_processor<Feature> path_processor_type;
+typedef mapnik::path_processor path_processor_type;
 
 }
 

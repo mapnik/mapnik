@@ -5,46 +5,66 @@ ifeq ($(UNAME), Darwin)
 else
 endif
 
+OS:=$(shell uname -s)
+
+ifeq ($(JOBS),)
+	JOBS:=1
+	ifeq ($(OS),Linux)
+		JOBS:=$(shell grep -c ^processor /proc/cpuinfo)
+	endif
+	ifeq ($(OS),Darwin)
+		JOBS:=$(shell sysctl -n hw.ncpu)
+	endif
+endif
+
 all: mapnik
 
 install:
-	@python scons/scons.py --config=cache --implicit-cache --max-drift=1 install
+	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 install
 
 mapnik:
-	@python scons/scons.py --config=cache --implicit-cache --max-drift=1
+	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1
 
 clean:
-	@python scons/scons.py -c --config=cache --implicit-cache --max-drift=1
+	@python scons/scons.py -j$(JOBS) -c --config=cache --implicit-cache --max-drift=1
 	@if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
+	@if test -e "config.log"; then rm  "config.log"; fi
+	@if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
+	@find ./ -name "*.pyc" -exec rm {} \;
+	@find ./ -name "*.os" -exec rm {} \;
+	@find ./ -name "*.o" -exec rm {} \;
+	@find ./ -name "*.pyc" -exec rm {} \;
+	@if test -e "bindings/python/mapnik/paths.py"; then rm "bindings/python/mapnik/paths.py"; fi
 
 distclean:
-	if test -e ".sconf_temp/"; then rm -r ".sconf_temp/"; fi
-	if test -e ".sconsign.dblite"; then rm ".sconsign.dblite"; fi
-	if test -e "config.cache"; then rm "config.cache"; fi
+	@if test -e "config.cache"; then rm "config.cache"; fi
 	if test -e "config.py"; then mv "config.py" "config.py.backup"; fi
 
 reset: distclean
 
+rebuild:
+	make uninstall && make clean && time make && make install
+
 uninstall:
-	python scons/scons.py --config=cache --implicit-cache --max-drift=1 uninstall
+	@python scons/scons.py -j$(JOBS) --config=cache --implicit-cache --max-drift=1 uninstall
 
 test:
-	@echo "*** Running visual tests..."
-	@python tests/visual_tests/test.py -q || true
-	@echo "*** Running C++ tests..."
-	@for FILE in tests/cpp_tests/*-bin; do \
-		$${FILE}; \
-	done
-	@echo "*** Running python tests..."
-	@python tests/run_tests.py -q
+	@ ./run_tests
 
 test-local:
-	@echo "*** boostrapping local test environment..."
-	export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	@echo "*** Boostrapping local test environment..."
+	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	export PATH=`pwd`/utils/mapnik-config/:${PATH} && \
 	export PYTHONPATH=`pwd`/bindings/python/:${PYTHONPATH} && \
 	export MAPNIK_FONT_DIRECTORY=`pwd`/fonts/dejavu-fonts-ttf-2.33/ttf/ && \
 	export MAPNIK_INPUT_PLUGINS_DIRECTORY=`pwd`/plugins/input/ && \
 	make test
+
+bench:
+	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	./benchmark/run
+
+check: test-local
 
 demo:
 	@echo "*** Running rundemo.cpp…"

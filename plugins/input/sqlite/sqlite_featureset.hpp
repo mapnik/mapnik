@@ -24,7 +24,7 @@
 #define MAPNIK_SQLITE_FEATURESET_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp>
+#include <mapnik/feature.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/wkb.hpp>
 
@@ -53,7 +53,7 @@ private:
     boost::shared_ptr<sqlite_resultset> rs_;
     mapnik::context_ptr ctx_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
-    mapnik::box2d<double> const& bbox_;
+    mapnik::box2d<double> bbox_;
     mapnik::wkbFormat format_;
     bool spatial_index_;
     bool using_subquery_;

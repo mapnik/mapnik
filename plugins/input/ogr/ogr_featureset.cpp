@@ -22,8 +22,8 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
@@ -38,7 +38,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
@@ -88,7 +87,7 @@ feature_ptr ogr_featureset::next()
     {
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1
-        const int feature_id = (poFeature->GetFID() + 1);
+        mapnik::value_integer feature_id = (poFeature->GetFID() + 1);
         feature_ptr feature(feature_factory::create(ctx_,feature_id));
 
         OGRGeometry* geom = poFeature->GetGeometryRef();
@@ -117,7 +116,7 @@ feature_ptr ogr_featureset::next()
             {
             case OFTInteger:
             {
-                feature->put( fld_name, poFeature->GetFieldAsInteger(i));
+                feature->put<mapnik::value_integer>( fld_name, poFeature->GetFieldAsInteger(i));
                 break;
             }
 

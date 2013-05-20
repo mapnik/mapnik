@@ -1,23 +1,25 @@
 #ifndef MAPNIK_SIMPLIFY_CONVERTER_HPP
 #define MAPNIK_SIMPLIFY_CONVERTER_HPP
 
-#include <mapnik/debug.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/simplify.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // STL
 #include <limits>
 #include <set>
 #include <vector>
 #include <deque>
+#include <cmath>
 // Boost
 #include <boost/optional.hpp>
 
 namespace mapnik
 {
 
-struct weighted_vertex : private boost::noncopyable
+struct weighted_vertex : private mapnik::noncopyable
 {
     vertex2d coord;
     double weight;
@@ -56,9 +58,9 @@ struct sleeve
 
     sleeve(vertex2d const& v0, vertex2d const& v1, double offset)
     {
-        double a = atan2((v1.y - v0.y), (v1.x - v0.x));
-        double dx = offset * cos(a);
-        double dy = offset * sin(a);
+        double a = std::atan2((v1.y - v0.y), (v1.x - v0.x));
+        double dx = offset * std::cos(a);
+        double dy = offset * std::sin(a);
         v[0].x = v0.x + dy;
         v[0].y = v0.y - dx;
         v[1].x = v0.x - dy;

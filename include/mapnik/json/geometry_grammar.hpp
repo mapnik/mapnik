@@ -24,23 +24,16 @@
 #define MAPNIK_GEOMETRY_GRAMMAR_HPP
 
 // mapnik
-#include <mapnik/geometry.hpp>
+#include <mapnik/geometry.hpp>  // for geometry_type
+#include <mapnik/vertex.hpp>  // for CommandType
 
 // spirit::qi
-#include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/variant.hpp>
-
-// stl
-#include <iostream>
+#include <boost/spirit/include/phoenix_function.hpp>
 
 namespace mapnik { namespace json {
 
 namespace qi = boost::spirit::qi;
-namespace phoenix = boost::phoenix;
-namespace fusion = boost::fusion;
 namespace standard_wide =  boost::spirit::standard_wide;
 using standard_wide::space_type;
 
@@ -72,7 +65,7 @@ struct close_path
     void operator() (T path) const
     {
         BOOST_ASSERT( path!=0 );
-        path->close();
+        path->close_path();
     }
 };
 
@@ -90,6 +83,25 @@ struct cleanup
         if (path) delete path, path=0;
     }
 };
+
+struct where_message
+{
+    template <typename T0,typename T1,typename T2>
+    struct result
+    {
+        typedef std::string type;
+    };
+
+    template <typename Iterator>
+    std::string operator() (Iterator first, Iterator last, std::size_t size) const
+    {
+        std::string str(first, last);
+        if (str.length() > size)
+            return str.substr(0, size) + "..." ;
+        return str;
+    }
+};
+
 
 template <typename Iterator>
 struct geometry_grammar :
@@ -125,6 +137,7 @@ struct geometry_grammar :
     boost::phoenix::function<push_vertex> push_vertex_;
     boost::phoenix::function<close_path> close_path_;
     boost::phoenix::function<cleanup> cleanup_;
+    boost::phoenix::function<where_message> where_message_;
 };
 
 }}

@@ -21,24 +21,26 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/label_collision_detector.hpp>
 
 namespace mapnik {
 
 void draw_rect(image_32 &pixmap, box2d<double> const& box)
 {
-    double x0 = box.minx();
-    double x1 = box.maxx();
-    double y0 = box.miny();
-    double y1 = box.maxy();
+    int x0 = static_cast<int>(box.minx());
+    int x1 = static_cast<int>(box.maxx());
+    int y0 = static_cast<int>(box.miny());
+    int y1 = static_cast<int>(box.maxy());
     unsigned color1 = 0xff0000ff;
-    for (double x=x0; x<x1; x++)
+    for (int x=x0; x<x1; x++)
     {
         pixmap.setPixel(x, y0, color1);
         pixmap.setPixel(x, y1, color1);
     }
-    for (double y=y0; y<y1; y++)
+    for (int y=y0; y<y1; y++)
     {
         pixmap.setPixel(x0, y, color1);
         pixmap.setPixel(x1, y, color1);

@@ -22,8 +22,6 @@
 
 #include "occi_types.hpp"
 
-oracle::occi::Environment* occi_environment::env_ = 0;
-
 std::string occi_enums::resolve_gtype(int gtype)
 {
     switch (gtype)
@@ -74,6 +72,7 @@ std::string occi_enums::resolve_datatype(int type_id)
     case oracle::occi::OCCI_SQLT_AVC:           return "OCCI_SQLT_AVC";
     case oracle::occi::OCCI_SQLT_CHR:           return "OCCI_SQLT_CHR";
     case oracle::occi::OCCI_SQLT_LVC:           return "OCCI_SQLT_LVC";
+    case oracle::occi::OCCI_SQLT_LNG:           return "OCCI_SQLT_LNG";
     case oracle::occi::OCCI_SQLT_STR:           return "OCCI_SQLT_STR";
     case oracle::occi::OCCI_SQLT_VCS:           return "OCCI_SQLT_VCS";
     case oracle::occi::OCCI_SQLT_VNU:           return "OCCI_SQLT_VNU";

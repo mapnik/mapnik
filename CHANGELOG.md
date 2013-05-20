@@ -8,6 +8,37 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added new mapnik-config options: `git-describe`, `defines`, `includes`, `dep-includes`, and `cxxflags` (#1443)
+
+- Added `text-halo-rasterizer` property. Set to `fast` for lower quality but faster
+  halo rendering (#1298)
+
+- Added ability to access style list from map by (name,obj) in python (#1725)
+
+- Added `is_solid` method to python mapnik.Image and mapnik.ImageView classes (#1728)
+
+- Changed scale_denominator C++ interface to take scale as first argument rather than map.
+
+- Added support for `background-image` in cairo_renderer (#1724)
+
+- Added Layer `buffer-size` that can be used to override Map `buffer-size` to avoid
+  over-fetching of data that does not need to be buffered as much as other layers.
+  Map level `buffer-size` will be default if layers do not set the option. Renamed a
+  previously undocumented parameter by the same name that impacted clipping extent and
+  was not needed (clipping padding should likely be a symbolizer level option) (#1566)
+
+- Fixed building symbolizer rendering to be fully sensitive to alpha (8b66128c892 / bc8ea1c5a7a)
+
+- Added 64 bit integer support in the grid_renderer (#1662)
+
+- `<Filter>[attr]</Filter>` now returns false if attr is an empty string (#1665)
+
+- Added 64 bit integer support in expressions and feature ids (#1661,#1662)
+
+- Added support for DBF `Logical` type: #1614
+
+- Added serialization of `line-offset` to save_map (#1562)
+
 - Enabled default input plugin directory and fonts path to be set inherited from environment settings in
   python bindings to make it easier to run tests locally (#1594). New environment settings are:
     - MAPNIK_INPUT_PLUGINS_DIRECTORY
@@ -36,6 +67,8 @@ For a complete change history, see the git log.
 - Fixed zoom_all behavior when Map maximum-extent is provided. Previously maximum-extent was used outright but
   now the combined layer extents will be again respected: they will be clipped to the maximum-extent if possible
   and only when back-projecting fails for all layers will the maximum-extent be used as a fallback (#1473)
+
+- Compile time flag called `PLUGIN_LINKING` to allow input datasource plugins to be statically linked with the mapnik library (#249)
 
 ## Mapnik 2.1.0
 
@@ -97,7 +130,7 @@ Released Aug 23, 2012
 - Improved logging/debugging system with release logs and file redirection (https://github.com/mapnik/mapnik/wiki/Runtime-Logging) (#937 and partially #986, #467)
 
 - GDAL: allow setting nodata value on the fly (will override value if nodata is set in data) (#1161)
- 
+
 - GDAL: respect nodata for paletted/colormapped images (#1160)
 
 - PostGIS: Added a new option called `autodetect_key_field` (by default false) that if true will
@@ -153,7 +186,7 @@ Released Aug 3, 2012
 
 - Fixed possible breakage registering plugins via python if a custom PREFIX or DESTDIR was used (e.g. macports/homebrew) (#1171)
 
-- Fixed memory leak in the case of proj >= 4.8 and a projection initialization error (#1173) 
+- Fixed memory leak in the case of proj >= 4.8 and a projection initialization error (#1173)
 
 
 ## Mapnik 2.0.1

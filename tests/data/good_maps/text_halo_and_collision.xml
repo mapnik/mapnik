@@ -1,4 +1,4 @@
-<Map srs="+init=epsg:4326" background-color="steelblue">
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-color="steelblue">
 <!-- test case for https://github.com/mapnik/mapnik/issues/1354 -->
 
     <Style name="labels">
@@ -15,7 +15,7 @@
     </Style>
 
 
-    <Layer name="points" srs="+init=epsg:4326">
+    <Layer name="points" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>labels</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
@@ -35,7 +35,7 @@ x,y
         </Rule>
     </Style>
 
-    <Layer name="frame" srs="+init=epsg:4326">
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>frame</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>

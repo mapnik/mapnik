@@ -25,80 +25,43 @@
 
 // mapnik
 #include <mapnik/config.hpp>
+#include <mapnik/value_types.hpp>
 
 // stl
 #include <string>
-// boost
-#include <boost/config/warning_disable.hpp>
-#include <boost/spirit/include/karma.hpp>
-
-// boost
-#include <boost/version.hpp>
-
-#if BOOST_VERSION >= 104500
-#include <boost/config/warning_disable.hpp>
-#include <boost/spirit/include/karma.hpp>
-#else
-#include <boost/lexical_cast.hpp>
-#endif
 
 namespace mapnik { namespace util {
 
-MAPNIK_DECL bool string2int(const char * value, int & result);
+/*
+Note: this file intentionally provides non-templated methods
+to avoid the compile time overhead given it is included
+by many other headers inside mapnik.
+*/
+
+MAPNIK_DECL bool string2bool(std::string const& value, bool & result);
+MAPNIK_DECL bool string2bool(const char * iter, const char * end, bool & result);
+
 MAPNIK_DECL bool string2int(std::string const& value, int & result);
+MAPNIK_DECL bool string2int(const char * iter, const char * end, int & result);
+
+#ifdef BIGINT
+MAPNIK_DECL bool string2int(std::string const& value, mapnik::value_integer & result);
+MAPNIK_DECL bool string2int(const char * iter, const char * end, mapnik::value_integer & result);
+#endif
 
 MAPNIK_DECL bool string2double(std::string const& value, double & result);
-MAPNIK_DECL bool string2double(const char * value, double & result);
+MAPNIK_DECL bool string2double(const char * iter, const char * end, double & result);
 
 MAPNIK_DECL bool string2float(std::string const& value, float & result);
-MAPNIK_DECL bool string2float(const char * value, float & result);
+MAPNIK_DECL bool string2float(const char * iter, const char * end, float & result);
 
-#if BOOST_VERSION >= 104500
-// generic
-template <typename T>
-bool to_string(std::string & str, T value)
-{
-  namespace karma = boost::spirit::karma;
-  std::back_insert_iterator<std::string> sink(str);
-  return karma::generate(sink, value);
-}
-
-template <typename T>
-struct double_policy : boost::spirit::karma::real_policies<T>
-{
-    typedef boost::spirit::karma::real_policies<T> base_type;
-    static int floatfield(T n) { return base_type::fmtflags::fixed; }
-    static unsigned precision(T n) { return 16 ;}
-};
-
-
-// specialisation for double
-template <>
-inline bool to_string(std::string & str, double value)
-{
-    namespace karma = boost::spirit::karma;
-    typedef boost::spirit::karma::real_generator<double, double_policy<double> > double_type;
-    std::back_insert_iterator<std::string> sink(str);
-    return karma::generate(sink, double_type(), value);
-}
-
-#else
-
-template <typename T>
-bool to_string(std::string & str, T value)
-{
-    try
-    {
-        str = boost::lexical_cast<T>(value);
-        return true;
-    }
-    catch (std::exception const& ex)
-    {
-        return false;
-    }
-}
-
+MAPNIK_DECL bool to_string(std::string & str, int value);
+#ifdef BIGINT
+MAPNIK_DECL bool to_string(std::string & str, mapnik::value_integer value);
 #endif
+MAPNIK_DECL bool to_string(std::string & str, unsigned value);
+MAPNIK_DECL bool to_string(std::string & str, bool value);
+MAPNIK_DECL bool to_string(std::string & str, double value);
 
 }}
 

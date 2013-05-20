@@ -200,10 +200,10 @@ inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 struct filter_in_box
 {
     box2d<double> box_;
-    explicit filter_in_box(const box2d<double>& box)
+    explicit filter_in_box(box2d<double> const& box)
         : box_(box) {}
 
-    bool pass(const box2d<double>& extent) const
+    bool pass(box2d<double> const& extent) const
     {
         return extent.intersects(box_);
     }
@@ -211,12 +211,16 @@ struct filter_in_box
 
 struct filter_at_point
 {
-    coord2d pt_;
-    explicit filter_at_point(const coord2d& pt)
-        : pt_(pt) {}
-    bool pass(const box2d<double>& extent) const
+    box2d<double> box_;
+    explicit filter_at_point(coord2d const& pt, double tol=0)
+        : box_(pt,pt)
     {
-        return extent.contains(pt_);
+        box_.pad(tol);
+    }
+
+    bool pass(box2d<double> const& extent) const
+    {
+        return extent.intersects(box_);
     }
 };
 
@@ -234,6 +238,7 @@ double path_length(PathType & path)
     double length = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         length += distance(x0,y0,x1,y1);
         x0 = x1;
         y0 = y1;
@@ -257,6 +262,7 @@ bool middle_point(PathType & path, double & x, double & y)
     double dist = 0.0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double seg_length = distance(x0, y0, x1, y1);
 
         if ( dist + seg_length >= mid_length)
@@ -296,6 +302,7 @@ bool centroid(PathType & path, double & x, double & y)
     unsigned count = 1;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double dx0 = x0 - start_x;
         double dy0 = y0 - start_y;
         double dx1 = x1 - start_x;
@@ -340,12 +347,10 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
   double start_x = x0;
   double start_y = y0;
 
-  bool empty = true;
-
   double atmp = 0.0;
   double xtmp = 0.0;
   double ytmp = 0.0;
-  unsigned count = 1;
+  unsigned count = 0;
 
   while (start!=end)
   {
@@ -353,10 +358,15 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
     if (command == SEG_END) continue;
-    empty = false;
+
+    if ( ! count++ ) {
+      start_x = x0;
+      start_y = y0;
+    }
 
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double dx0 = x0 - start_x;
         double dy0 = y0 - start_y;
         double dx1 = x1 - start_x;
@@ -369,9 +379,10 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
         y0 = y1;
         ++count;
     }
+
   }
 
-  if ( empty ) return false;
+  if (count == 0) return false;
 
   if (count <= 2) {
       x = (start_x + x0) * 0.5;
@@ -407,6 +418,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
     unsigned count = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         ++count;
         if (command == SEG_MOVETO)
         {
@@ -425,7 +437,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
 
     if (count == 0) // one vertex
     {
-        return distance(x, y, x0, y0) <= fabs(tol);
+        return distance(x, y, x0, y0) <= std::fabs(tol);
     }
     return inside;
 }
@@ -454,6 +466,8 @@ bool interior_position(PathType & path, double & x, double & y)
     double y1 = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE)
+            continue;
         if (command != SEG_MOVETO)
         {
             // if the segments overlap
@@ -491,9 +505,9 @@ bool interior_position(PathType & path, double & x, double & y)
     double max_width = 0;
     for (unsigned ii = 1; ii < intersections.size(); ++ii)
     {
-        double x1=intersections[ii];
-        double xc=(x0+x1)/2.0;
-        double width = std::fabs(x1-x0);
+        double xi=intersections[ii];
+        double xc=(x0+xi)/2.0;
+        double width = std::fabs(xi-x0);
         if (width > max_width && hit_test(path,xc,y,0))
         {
             x=xc;

@@ -24,14 +24,20 @@
 #define MAPNIK_PNG_IO_HPP
 
 // mapnik
-#include <mapnik/global.hpp>
 #include <mapnik/palette.hpp>
 #include <mapnik/octree.hpp>
 #include <mapnik/hextree.hpp>
 #include <mapnik/miniz_png.hpp>
 #include <mapnik/image_data.hpp>
+
 // zlib
-#include <zlib.h>
+#include <zlib.h>  // for Z_DEFAULT_COMPRESSION
+
+// boost
+#include <boost/scoped_array.hpp>
+
+// stl
+#include <cassert>
 
 extern "C"
 {
@@ -118,12 +124,12 @@ void save_as_png(T1 & file,
     png_set_IHDR(png_ptr, info_ptr,image.width(),image.height(),8,
                  (trans_mode == 0) ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
-    png_bytep row_pointers[image.height()];
+    boost::scoped_array<png_byte*> row_pointers(new png_bytep[image.height()]);
     for (unsigned int i = 0; i < image.height(); i++)
     {
         row_pointers[i] = (png_bytep)image.getRow(i);
     }
-    png_set_rows(png_ptr, info_ptr, (png_bytepp)&row_pointers);
+    png_set_rows(png_ptr, info_ptr, row_pointers.get());
     png_write_png(png_ptr, info_ptr, (trans_mode == 0) ? PNG_TRANSFORM_STRIP_FILLER_AFTER : PNG_TRANSFORM_IDENTITY, NULL);
     png_destroy_write_struct(&png_ptr, &info_ptr);
 }
@@ -152,14 +158,13 @@ void reduce_8(T const& in,
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            mapnik::rgb c(U2RED(val), U2GREEN(val), U2BLUE(val));
             byte index = 0;
             int idx = -1;
             for(int j=levels-1; j>0; j--)
             {
                 if (U2ALPHA(val)>=limits[j] && trees[j].colors()>0)
                 {
-                    index = idx = trees[j].quantize(c);
+                    index = idx = trees[j].quantize(val);
                     break;
                 }
             }
@@ -204,14 +209,13 @@ void reduce_4(T const& in,
         for (unsigned x = 0; x < width; ++x)
         {
             unsigned val = row[x];
-            mapnik::rgb c(U2RED(val), U2GREEN(val), U2BLUE(val));
             byte index = 0;
             int idx=-1;
             for(int j=levels-1; j>0; j--)
             {
                 if (U2ALPHA(val)>=limits[j] && trees[j].colors()>0)
                 {
-                    index = idx = trees[j].quantize(c);
+                    index = idx = trees[j].quantize(val);
                     break;
                 }
             }

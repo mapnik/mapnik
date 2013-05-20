@@ -25,14 +25,14 @@
 
 // mapnik
 #include <mapnik/config.hpp>
-#include <mapnik/transform_expression.hpp>
+#include <mapnik/symbolizer.hpp>  // for transform_list_ptr
 
 namespace mapnik {
 
 template <typename Iterator> struct transform_expression_grammar;
 
 typedef transform_expression_grammar<std::string::const_iterator>
-    transform_expression_grammar__string;
+    transform_expression_grammar_string;
 
 MAPNIK_DECL transform_list_ptr parse_transform(std::string const& str);
 
@@ -41,7 +41,7 @@ MAPNIK_DECL transform_list_ptr parse_transform(std::string const& str,
 
 MAPNIK_DECL bool parse_transform(transform_list& list,
                                  std::string const& str,
-                                 transform_expression_grammar__string const& g);
+                                 transform_expression_grammar_string const& g);
 
 } // namespace mapnik
 

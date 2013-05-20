@@ -25,14 +25,13 @@
 
 //mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/feature.hpp>
 
 // boost
 #include <boost/tuple/tuple.hpp>
 
 // stl
 #include <set>
-#include <limits>
+#include <string>
 
 namespace mapnik {
 

@@ -31,9 +31,9 @@
 #include <mapnik/global.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 
@@ -72,9 +72,9 @@ struct shape_record
     size_t size;
     mutable size_t pos;
 
-    explicit shape_record(size_t size)
-        : data(Tag::alloc(size)),
-          size(size),
+    explicit shape_record(size_t size_)
+        : data(Tag::alloc(size_)),
+          size(size_),
           pos(0)
     {}
 
@@ -130,7 +130,7 @@ struct shape_record
 
 using namespace boost::interprocess;
 
-class shape_file : boost::noncopyable
+class shape_file : mapnik::noncopyable
 {
 public:
 
@@ -155,7 +155,7 @@ public:
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         boost::optional<mapnik::mapped_region_ptr> memory =
-            mapnik::mapped_memory_cache::instance().find(file_name.c_str(),true);
+            mapnik::mapped_memory_cache::instance().find(file_name,true);
 
         if (memory)
         {

@@ -25,17 +25,16 @@
 
 // mapnik
 #include <mapnik/geometry.hpp>
-#include <mapnik/datasource.hpp>
+#include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "dbfile.hpp"
 #include "shapefile.hpp"
-#include "shp_index.hpp"
 
-struct shape_io : boost::noncopyable
+struct shape_io : mapnik::noncopyable
 {
 public:
     enum shapeType
@@ -72,11 +71,11 @@ public:
         return (index_ && index_->is_open());
     }
 
-    void move_to(int id);
-    shapeType type() const;
-    const box2d<double>& current_extent() const;
-    void read_polyline(mapnik::geometry_container & geom);
-    void read_polygon(mapnik::geometry_container & geom);
+    void move_to(std::streampos pos);
+    static void read_bbox(shape_file::record_type & record, mapnik::box2d<double> & bbox);
+    static void read_polyline(shape_file::record_type & record,mapnik::geometry_container & geom);
+    static void read_polygon(shape_file::record_type & record,mapnik::geometry_container & geom);
+
     shapeType type_;
     shape_file shp_;
     dbf_file   dbf_;

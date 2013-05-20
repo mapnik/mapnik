@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <mapnik/stroke.hpp>
+#include <mapnik/enumeration.hpp>
 
 namespace mapnik
 {

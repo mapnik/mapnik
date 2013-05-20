@@ -24,7 +24,7 @@
 #ifndef AGG_COLOR_RGBA_INCLUDED
 #define AGG_COLOR_RGBA_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 namespace agg

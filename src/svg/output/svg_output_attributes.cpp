@@ -33,7 +33,7 @@ namespace mapnik { namespace svg {
         fill_color_ = fill_color.to_hex_string();
     }
 
-    void path_output_attributes::set_fill_opacity(const double fill_opacity)
+    void path_output_attributes::set_fill_opacity(double fill_opacity)
     {
         fill_opacity_ = fill_opacity;
     }
@@ -43,17 +43,17 @@ namespace mapnik { namespace svg {
         stroke_color_ = stroke_color.to_hex_string();
     }
 
-    void path_output_attributes::set_stroke_opacity(const double stroke_opacity)
+    void path_output_attributes::set_stroke_opacity(double stroke_opacity)
     {
         stroke_opacity_ = stroke_opacity;
     }
 
-    void path_output_attributes::set_stroke_width(const double stroke_width)
+    void path_output_attributes::set_stroke_width(double stroke_width)
     {
         stroke_width_ = stroke_width;
     }
 
-    void path_output_attributes::set_stroke_linecap(const line_cap_e stroke_linecap)
+    void path_output_attributes::set_stroke_linecap(line_cap_e stroke_linecap)
     {
         switch(stroke_linecap)
         {
@@ -71,7 +71,7 @@ namespace mapnik { namespace svg {
         }
     }
 
-    void path_output_attributes::set_stroke_linejoin(const line_join_e stroke_linejoin)
+    void path_output_attributes::set_stroke_linejoin(line_join_e stroke_linejoin)
     {
         switch(stroke_linejoin)
         {
@@ -92,57 +92,57 @@ namespace mapnik { namespace svg {
         }
     }
 
-    void path_output_attributes::set_stroke_dasharray(const dash_array stroke_dasharray)
+    void path_output_attributes::set_stroke_dasharray(dash_array const& stroke_dasharray)
     {
         stroke_dasharray_ = stroke_dasharray;
     }
 
-    void path_output_attributes::set_stroke_dashoffset(const double stroke_dashoffset)
+    void path_output_attributes::set_stroke_dashoffset(double stroke_dashoffset)
     {
         stroke_dashoffset_ = stroke_dashoffset;
     }
 
-    const std::string path_output_attributes::fill_color() const
+    std::string const& path_output_attributes::fill_color() const
     {
         return fill_color_;
     }
 
-    const double path_output_attributes::fill_opacity() const
+    double path_output_attributes::fill_opacity() const
     {
         return fill_opacity_;
     }
 
-    const std::string path_output_attributes::stroke_color() const
+    std::string const& path_output_attributes::stroke_color() const
     {
         return stroke_color_;
     }
 
-    const double path_output_attributes::stroke_opacity() const
+    double path_output_attributes::stroke_opacity() const
     {
         return stroke_opacity_;
     }
 
-    const double path_output_attributes::stroke_width() const
+    double path_output_attributes::stroke_width() const
     {
         return stroke_width_;
     }
 
-    const std::string path_output_attributes::stroke_linecap() const
+    std::string const& path_output_attributes::stroke_linecap() const
     {
         return stroke_linecap_;
     }
 
-    const std::string path_output_attributes::stroke_linejoin() const
+    std::string const& path_output_attributes::stroke_linejoin() const
     {
         return stroke_linejoin_;
     }
 
-    const dash_array path_output_attributes::stroke_dasharray() const
+    dash_array const& path_output_attributes::stroke_dasharray() const
     {
         return stroke_dasharray_;
     }
 
-    const double path_output_attributes::stroke_dashoffset() const
+    double path_output_attributes::stroke_dashoffset() const
     {
         return stroke_dashoffset_;
     }
@@ -162,22 +162,22 @@ namespace mapnik { namespace svg {
 
     // rect_output_attributes
 
-    void rect_output_attributes::set_x(const int x)
+    void rect_output_attributes::set_x(int x)
     {
         x_ = x;
     }
 
-    void rect_output_attributes::set_y(const int y)
+    void rect_output_attributes::set_y(int y)
     {
         y_ = y;
     }
 
-    void rect_output_attributes::set_width(const unsigned width)
+    void rect_output_attributes::set_width(unsigned width)
     {
         width_ = width;
     }
 
-    void rect_output_attributes::set_height(const unsigned height)
+    void rect_output_attributes::set_height(unsigned height)
     {
         height_ = height;
     }
@@ -187,27 +187,27 @@ namespace mapnik { namespace svg {
         fill_color_ = fill_color.to_hex_string();
     }
 
-    const int rect_output_attributes::x() const
+    int rect_output_attributes::x() const
     {
         return x_;
     }
 
-    const int rect_output_attributes::y() const
+    int rect_output_attributes::y() const
     {
         return y_;
     }
 
-    const int rect_output_attributes::width() const
+    int rect_output_attributes::width() const
     {
         return width_;
     }
 
-    const int rect_output_attributes::height() const
+    int rect_output_attributes::height() const
     {
         return height_;
     }
 
-    const std::string rect_output_attributes::fill_color() const
+    std::string const& rect_output_attributes::fill_color() const
     {
         return fill_color_;
     }
@@ -233,24 +233,24 @@ namespace mapnik { namespace svg {
           svg_namespace_url_(SVG_NAMESPACE_URL)
     {}
 
-    root_output_attributes::root_output_attributes(const unsigned width, const unsigned height)
+    root_output_attributes::root_output_attributes(unsigned width, unsigned height)
         : width_(width),
           height_(height),
           svg_version_(SVG_VERSION),
           svg_namespace_url_(SVG_NAMESPACE_URL)
     {}
 
-    void root_output_attributes::set_width(const unsigned width)
+    void root_output_attributes::set_width(unsigned width)
     {
         width_ = width;
     }
 
-    void root_output_attributes::set_height(const unsigned height)
+    void root_output_attributes::set_height(unsigned height)
     {
         height_ = height;
     }
 
-    void root_output_attributes::set_svg_version(const double svg_version)
+    void root_output_attributes::set_svg_version(double svg_version)
     {
         svg_version_ = svg_version;
     }
@@ -260,22 +260,22 @@ namespace mapnik { namespace svg {
         svg_namespace_url_ = svg_namespace_url;
     }
 
-    const unsigned root_output_attributes::width() const
+    unsigned root_output_attributes::width() const
     {
         return width_;
     }
 
-    const unsigned root_output_attributes::height() const
+    unsigned root_output_attributes::height() const
     {
         return height_;
     }
 
-    const double root_output_attributes::svg_version() const
+    double root_output_attributes::svg_version() const
     {
         return svg_version_;
     }
 
-    const std::string root_output_attributes::svg_namespace_url() const
+    std::string const& root_output_attributes::svg_namespace_url() const
     {
         return svg_namespace_url_;
     }

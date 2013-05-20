@@ -21,9 +21,9 @@
  *****************************************************************************/
 
 // mapnik
+#include <mapnik/value_types.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/debug.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/feature.hpp>
@@ -43,7 +43,6 @@
 
 using mapnik::query;
 using mapnik::box2d;
-using mapnik::Feature;
 using mapnik::feature_ptr;
 using mapnik::geometry_utils;
 using mapnik::transcoder;
@@ -60,10 +59,11 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & 
       layerdef_(layer.GetLayerDefn()),
       filter_(filter),
       tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn())
+      fidcolumn_(layer_.GetFIDColumn()),
+      feature_envelope_()
 {
 
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file.c_str(),true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file, true);
     if (memory)
     {
         boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
@@ -99,12 +99,15 @@ feature_ptr ogr_index_featureset<filterT>::next()
 
         // ogr feature ids start at 0, so add one to stay
         // consistent with other mapnik datasources that start at 1
-        int feature_id = (poFeature->GetFID() + 1);
+        mapnik::value_integer feature_id = (poFeature->GetFID() + 1);
         feature_ptr feature(feature_factory::create(ctx_,feature_id));
 
         OGRGeometry* geom=poFeature->GetGeometryRef();
         if (geom && !geom->IsEmpty())
         {
+            geom->getEnvelope(&feature_envelope_);
+            if (!filter_.pass(mapnik::box2d<double>(feature_envelope_.MinX,feature_envelope_.MinY,
+                                            feature_envelope_.MaxX,feature_envelope_.MaxY))) continue;
             ogr_converter::convert_geometry (geom, feature);
         }
         else
@@ -126,7 +129,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
             {
             case OFTInteger:
             {
-                feature->put(fld_name,poFeature->GetFieldAsInteger (i));
+                feature->put<mapnik::value_integer>(fld_name,poFeature->GetFieldAsInteger (i));
                 break;
             }
 

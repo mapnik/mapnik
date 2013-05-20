@@ -26,10 +26,10 @@
 // mapnik
 #include <mapnik/vertex_vector.hpp>
 #include <mapnik/box2d.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace mapnik {
@@ -42,7 +42,7 @@ enum eGeomType {
 };
 
 template <typename T, template <typename> class Container=vertex_vector>
-class geometry : private::boost::noncopyable
+class geometry : private mapnik::noncopyable
 {
 public:
     typedef T coord_type;
@@ -91,10 +91,11 @@ public:
         double x = 0;
         double y = 0;
         rewind(0);
-        for (unsigned i=0;i<size();++i)
+        for (unsigned i=0; i < size(); ++i)
         {
-            vertex(&x,&y);
-            if (i==0)
+            unsigned cmd = vertex(&x,&y);
+            if (cmd == SEG_CLOSE) continue;
+            if (i == 0)
             {
                 result.init(x,y,x,y);
             }
@@ -121,17 +122,9 @@ public:
         push_vertex(x,y,SEG_MOVETO);
     }
 
-    void close(coord_type x, coord_type y)
+    void close_path()
     {
-        push_vertex(x,y,SEG_CLOSE);
-    }
-
-    void close()
-    {
-        if (cont_.size() > 3)
-        {
-            cont_.set_command(cont_.size() - 1, SEG_CLOSE);
-        }
+        push_vertex(0,0,SEG_CLOSE);
     }
 
     unsigned vertex(double* x, double* y) const

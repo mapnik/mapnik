@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import glob
+import sys
 from nose.tools import *
 from utilities import execution_path
 
@@ -17,7 +18,7 @@ def setup():
 if 'csv' in mapnik.DatasourceCache.plugin_names():
 
     def get_csv_ds(filename):
-        return mapnik.Datasource(type='csv',file=os.path.join('../data/csv/',filename),quiet=True)
+        return mapnik.Datasource(type='csv',file=os.path.join('../data/csv/',filename))
 
     def test_broken_files(visual=False):
         broken = glob.glob("../data/csv/fails/*.*")
@@ -30,7 +31,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
             throws = False
             if visual:
                 try:
-                    ds = mapnik.Datasource(type='csv',file=csv,strict=True,quiet=True)
+                    ds = mapnik.Datasource(type='csv',file=csv,strict=True)
                     print '\x1b[33mfailed\x1b[0m',csv
                 except Exception:
                     print '\x1b[1;32m✓ \x1b[0m', csv
@@ -42,7 +43,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         for csv in good_files:
             if visual:
                 try:
-                    ds = mapnik.Datasource(type='csv',file=csv,quiet=True)
+                    ds = mapnik.Datasource(type='csv',file=csv)
                     print '\x1b[1;32m✓ \x1b[0m', csv
                 except Exception:
                     print '\x1b[33mfailed\x1b[0m',csv
@@ -458,8 +459,7 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
 
     def test_that_feature_id_only_incremented_for_valid_rows(**kwargs):
         ds = mapnik.Datasource(type='csv',
-                               file=os.path.join('../data/csv/warns','feature_id_counting.csv'),
-                               quiet=True)
+                               file=os.path.join('../data/csv/warns','feature_id_counting.csv'))
         eq_(len(ds.fields()),3)
         eq_(ds.fields(),['x','y','id'])
         eq_(ds.field_types(),['int','int','int'])
@@ -481,7 +481,6 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
     def test_dynamically_defining_headers1(**kwargs):
         ds = mapnik.Datasource(type='csv',
                                file=os.path.join('../data/csv/fails','needs_headers_two_lines.csv'),
-                               quiet=True,
                                headers='x,y,name')
         eq_(len(ds.fields()),3)
         eq_(ds.fields(),['x','y','name'])
@@ -498,7 +497,6 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
     def test_dynamically_defining_headers2(**kwargs):
         ds = mapnik.Datasource(type='csv',
                                file=os.path.join('../data/csv/fails','needs_headers_one_line.csv'),
-                               quiet=True,
                                headers='x,y,name')
         eq_(len(ds.fields()),3)
         eq_(ds.fields(),['x','y','name'])
@@ -515,7 +513,6 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
     def test_dynamically_defining_headers3(**kwargs):
         ds = mapnik.Datasource(type='csv',
                                file=os.path.join('../data/csv/fails','needs_headers_one_line_no_newline.csv'),
-                               quiet=True,
                                headers='x,y,name')
         eq_(len(ds.fields()),3)
         eq_(ds.fields(),['x','y','name'])
@@ -528,6 +525,46 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         desc = ds.describe()
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
         eq_(len(ds.all_features()),1)
+
+    def test_that_64bit_int_fields_work(**kwargs):
+        ds = get_csv_ds('64bit_int.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','bigint'])
+        eq_(ds.field_types(),['int','int','int'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['bigint'],2147483648)
+        feat = fs.next()
+        eq_(feat['bigint'],sys.maxint)
+        eq_(feat['bigint'],9223372036854775807)
+        eq_(feat['bigint'],0x7FFFFFFFFFFFFFFF)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(len(ds.all_features()),2)
+
+    def test_various_number_types(**kwargs):
+        ds = get_csv_ds('number_types.csv')
+        eq_(len(ds.fields()),3)
+        eq_(ds.fields(),['x','y','floats'])
+        eq_(ds.field_types(),['int','int','float'])
+        fs = ds.featureset()
+        feat = fs.next()
+        eq_(feat['floats'],.0)
+        feat = fs.next()
+        eq_(feat['floats'],+.0)
+        feat = fs.next()
+        eq_(feat['floats'],1e-06)
+        feat = fs.next()
+        eq_(feat['floats'],-1e-06)
+        feat = fs.next()
+        eq_(feat['floats'],0.000001)
+        feat = fs.next()
+        eq_(feat['floats'],1.234e+16)
+        feat = fs.next()
+        eq_(feat['floats'],1.234e+16)
+        desc = ds.describe()
+        eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
+        eq_(len(ds.all_features()),8)
 
 if __name__ == "__main__":
     setup()

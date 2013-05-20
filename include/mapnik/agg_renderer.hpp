@@ -24,36 +24,42 @@
 #define MAPNIK_AGG_RENDERER_HPP
 
 // mapnik
-#include <mapnik/config.hpp>
+#include <mapnik/config.hpp>            // for MAPNIK_DECL
 #include <mapnik/feature_style_processor.hpp>
-#include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/label_collision_detector.hpp>
-#include <mapnik/map.hpp>
-#include <mapnik/rule.hpp> // for all symbolizers
+#include <mapnik/font_engine_freetype.hpp>  // for face_manager, etc
+#include <mapnik/noncopyable.hpp>       // for noncopyable
+#include <mapnik/rule.hpp>              // for rule, symbolizers
+#include <mapnik/box2d.hpp>     // for box2d
+#include <mapnik/color.hpp>     // for color
+#include <mapnik/ctrans.hpp>    // for CoordTransform
+#include <mapnik/image_compositing.hpp>  // for composite_mode_e
+#include <mapnik/pixel_position.hpp>
+#include <mapnik/request.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/optional.hpp>
 
-// FIXME
-// forward declare so that
-// apps using mapnik do not
-// need agg headers
-namespace agg {
-struct trans_affine;
+// fwd declaration to avoid depedence on agg headers
+namespace agg { struct trans_affine; }
+
+// fwd declarations to speed up compile
+namespace mapnik {
+  class Map;
+  class feature_impl;
+  class feature_type_style;
+  class label_collision_detector4;
+  class layer;
+  class marker;
+  class proj_transform;
+  struct rasterizer;
 }
 
 namespace mapnik {
 
-class marker;
-
-struct rasterizer;
-
 template <typename T>
 class MAPNIK_DECL agg_renderer : public feature_style_processor<agg_renderer<T> >,
-                                 private boost::noncopyable
+                                 private mapnik::noncopyable
 {
 
 public:
@@ -64,6 +70,8 @@ public:
     // create with external placement detector, possibly non-empty
     agg_renderer(Map const &m, T & pixmap, boost::shared_ptr<label_collision_detector4> detector,
                  double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    // pass in mapnik::request object to provide the mutable things per render
+    agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~agg_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
@@ -116,9 +124,13 @@ public:
     {
         // agg renderer doesn't support processing of multiple symbolizers.
         return false;
-    };
+    }
 
     void painted(bool painted);
+    inline eAttributeCollectionPolicy attribute_collection_policy() const
+    {
+        return DEFAULT;
+    }
 
 protected:
     template <typename R>
@@ -142,6 +154,8 @@ private:
     boost::shared_ptr<label_collision_detector4> detector_;
     boost::scoped_ptr<rasterizer> ras_ptr;
     box2d<double> query_extent_;
+    gamma_method_e gamma_method_;
+    double gamma_;
     void setup(Map const& m);
 };
 }
