@@ -338,7 +338,7 @@ public:
 #else
                     boost::filesystem::remove(index_db);
 #endif
-					}
+                 }
                 catch (...) {};
             }
             throw mapnik::datasource_exception(ex.what());
@@ -427,7 +427,7 @@ public:
 #endif
 
 #ifdef _WINDOWS
-		bool existed = boost::filesystem::exists(mapnik::utf8_to_utf16(index_db));
+        bool existed = boost::filesystem::exists(mapnik::utf8_to_utf16(index_db));
 #else
         bool existed = boost::filesystem::exists(index_db);;
 #endif

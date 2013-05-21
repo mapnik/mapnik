@@ -458,9 +458,9 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
             if (! child_path.has_root_directory() && ! child_path.has_root_name())
             {
 #ifdef _WINDOWS
-			    boost::filesystem::path absolute_path(mapnik::utf8_to_utf16(dataset_name_));
+                boost::filesystem::path absolute_path(mapnik::utf8_to_utf16(dataset_name_));
 #else
-			    boost::filesystem::path absolute_path(dataset_name_);
+                boost::filesystem::path absolute_path(dataset_name_);
 #endif
 
                 // support symlinks
