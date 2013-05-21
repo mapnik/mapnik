@@ -79,6 +79,7 @@ pretty_dep_names = {
     'pkg-config':'pkg-config tool | more info: http://pkg-config.freedesktop.org',
     'pg_config':'pg_config program | try setting PG_CONFIG SCons option',
     'xml2-config':'xml2-config program | try setting XML2_CONFIG SCons option',
+    'libxml2':'libxml2 library | try setting XML2_CONFIG SCons option to point to location of xml2-config program',
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
     'osm':'more info: https://github.com/mapnik/mapnik/wiki//OsmPlugin',
@@ -1171,6 +1172,8 @@ if not preconfigured:
     # https://github.com/mapnik/mapnik/issues/913
     if conf.parse_config('XML2_CONFIG',checks='--cflags'):
         env['HAS_LIBXML2'] = True
+    else:
+        env['MISSING_DEPS'].append('libxml2')
 
     LIBSHEADERS = [
         ['z', 'zlib.h', True,'C'],
