@@ -22,14 +22,18 @@ For a complete change history, see the git log.
 
 - Fixed postgres connection key to respect highest value of `max_size` and `initial_size` for any layer in map (#1599)
 
+- Fixed potential crash in wkb parsing when postgis returns null geometry (#1843)
+
 - Fixed blurry rendering of image and SVG icons (#1316)
 
 - Improved logging system (https://github.com/mapnik/mapnik/wiki/Logging)
 
 - Added support for reading images from in memory streams (#1805)
 
+- Optimized halo rendering. When halo radius is < 1 new method will be used automatically (#1781)
+
 - Added `text-halo-rasterizer` property. Set to `fast` for lower quality but faster
-  halo rendering (#1298)
+  halo rendering (#1298) which matched new default method when radius is < 1.
 
 - Added support in `shape`, `sqlite`, `geojson`, and `csv` plugin for handling non-latin characters in the paths to file-based resources (#1177)
 
@@ -45,11 +49,13 @@ For a complete change history, see the git log.
 
 - Faster rendering of rasters by reducing memory allocation of temporary buffers (#1516)
 
-- Fixed raster alignment when width != height and raster is being scaled (#1748)
+- Fixed raster alignment when width != height and raster is being scaled (#1748,#1622)
 
 - Added support for caching rasters for re-use during rendering when styling more than once per layer (#1543)
 
 - Improved compile speeds of the code - in some cases by up to 2x and removed need for freetype dependency when building code against mapnik (#1688, #1756)
+
+- Removed internal rule cache on `mapnik::Map` c++ object (#1723)
 
 - Improved the scaled rendering of various map features when using `scale_factor` > 1 (#1280,#1100,#1273,#1792,#1291,#1344,#1279,#1624,#1767,#1766)
 
