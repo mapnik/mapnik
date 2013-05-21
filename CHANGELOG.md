@@ -6,12 +6,92 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## Future
+## 2.2.0
 
-- Added new mapnik-config options: `git-describe`, `defines`, `includes`, `dep-includes`, and `cxxflags` (#1443)
+- Removed 3 depedencies without loosing any functionality: `ltdl`, `cairomm` and `libsigc++` (#1804,#806,#1681)
+
+- Added 64 bit integer support in expressions, feature ids, and the grid_renderer (#1661,#1662,#1662)
+
+- Added the ability to disable needing various depedencies: `proj4`, `libpng`, `libtiff`, `libjpeg`
+
+- Added faster reprojection support between `epsg:3857` and `epsg:4326` (#1705,#1703,#1579)
+
+- Fixed concurrency problem when using cursors in postgis plugin (#1823)
+
+- Fixed postgres connection pool leaks when using `persist_connection=false` (#1764)
+
+- Fixed postgres connection key to respect highest value of `max_size` and `initial_size` for any layer in map (#1599)
+
+- Fixed blurry rendering of image and SVG icons (#1316)
+
+- Improved logging system (https://github.com/mapnik/mapnik/wiki/Logging)
+
+- Added support for reading images from in memory streams (#1805)
 
 - Added `text-halo-rasterizer` property. Set to `fast` for lower quality but faster
   halo rendering (#1298)
+
+- Added support in `shape`, `sqlite`, `geojson`, and `csv` plugin for handling non-latin characters in the paths to file-based resources (#1177)
+
+- Fixed rendering of markers when their size is greater than the specified `spacing` value (#1487)
+
+- Fixed handling of alpha premultiplication in image scaling (#1489)
+
+- Optimized rendering when a style with no symbolizers is encountered (#1517)
+
+- Optimized string handling and type conversion by removing `boost::to_lower`, `boost::trim`, and `boost::lexical_cast` usage (#1687,#1687,#1633)
+
+- Optimized alpha preserving hextree method for quantization of png images (#1629)
+
+- Faster rendering of rasters by reducing memory allocation of temporary buffers (#1516)
+
+- Fixed raster alignment when width != height and raster is being scaled (#1748)
+
+- Added support for caching rasters for re-use during rendering when styling more than once per layer (#1543)
+
+- Improved compile speeds of the code - in some cases by up to 2x and removed need for freetype dependency when building code against mapnik (#1688, #1756)
+
+- Improved the scaled rendering of various map features when using `scale_factor` > 1 (#1280,#1100,#1273,#1792,#1291,#1344,#1279,#1624,#1767,#1766)
+
+- Added C++ api for overriding scale_denominator to enable rendering at fixed scale (#1582)
+
+- Added Layer `buffer-size` that can be used to override Map `buffer-size` to avoid
+  over-fetching of data that does not need to be buffered as much as other layers.
+  Map level `buffer-size` will be default if layers do not set the option. Renamed a
+  previously undocumented parameter by the same name that impacted clipping extent and
+  was not needed (clipping padding should likely be a symbolizer level option) (#1566)
+
+- Fixed potential file descriptor leaks in image readers when invalid images were encountered (#1783)
+
+- Fixed alpha handling in the `blur` and `invert` image filters (#1541)
+
+- Fixed error reporting in the python plugin (#1422)
+
+- Added the ability to run test without installing with `make test-local`
+
+- Reduced library binary size by adding support for `-fvisibility-inlines-hidden` and `-fvisibility=hidden` (#1826,#1832)
+
+- Added `mapnik::map_request` class, a special object to allow passing mutable map objects to renderer (#1737)
+
+- Added the ability to use `boost::hash` on `mapnik::value` types (#1729)
+
+- Removed obsolete `GEOS` plugin and unmaintained `kismet` plugin (#1809,#1833)
+
+- Added new `mapnik-config` flags: `--all-flags`, `--defines`, `--git-describe`, `--includes`, `--dep-includes`, `--cxxflags`, `--cxx`.
+
+- Added support for unicode strings as arguments in python bindings (#163)
+
+- Added DebugSymbolizer (#1366)
+
+- Optimized rendering overhead of using `gamma` property (#1174)
+
+- Fixed rendering artifacts when using `polygon-gamma` or `line-gamma` equal to 0 (#761,#1763)
+
+- Fixed and optimized the display of excessive precision of some float data in labels (#430,#1697)
+
+- Removed the `bind` option for datasources (#1654)
+
+- Added new mapnik-config options: `git-describe`, `defines`, `includes`, `dep-includes`, and `cxxflags` (#1443)
 
 - Added ability to access style list from map by (name,obj) in python (#1725)
 
@@ -21,19 +101,11 @@ For a complete change history, see the git log.
 
 - Added support for `background-image` in cairo_renderer (#1724)
 
-- Added Layer `buffer-size` that can be used to override Map `buffer-size` to avoid
-  over-fetching of data that does not need to be buffered as much as other layers.
-  Map level `buffer-size` will be default if layers do not set the option. Renamed a
-  previously undocumented parameter by the same name that impacted clipping extent and
-  was not needed (clipping padding should likely be a symbolizer level option) (#1566)
-
 - Fixed building symbolizer rendering to be fully sensitive to alpha (8b66128c892 / bc8ea1c5a7a)
-
-- Added 64 bit integer support in the grid_renderer (#1662)
 
 - `<Filter>[attr]</Filter>` now returns false if attr is an empty string (#1665)
 
-- Added 64 bit integer support in expressions and feature ids (#1661,#1662)
+- `<Filter>[attr]!=null</Filter>` now returns true if attr is not null (#1642)
 
 - Added support for DBF `Logical` type: #1614
 
@@ -52,8 +124,6 @@ For a complete change history, see the git log.
 
 - Fixed handling of transparency level option in Octree-based PNG encoding (#1556)
 
-- Faster rendering of rasters by reducing memory allocation of temporary buffers (#1516)
-
 - Added ability to pass a pre-created collision detector to the cairo renderer (#1444)
 
 - Tolerance parameter is now supported for querying datasources at a given point (#503/#1499)
@@ -69,6 +139,18 @@ For a complete change history, see the git log.
   and only when back-projecting fails for all layers will the maximum-extent be used as a fallback (#1473)
 
 - Compile time flag called `PLUGIN_LINKING` to allow input datasource plugins to be statically linked with the mapnik library (#249)
+
+- Fixed `dasharray` rendering in cairo backend (#1740)
+
+- Fixed handling of `opacity` in svg rendering (#1744)
+
+- Fixed uneven rendering of markers along lines (#1693)
+
+- Fixed handling (finally) of null shapes and partially corrupt shapefiles (#1630,#1621)
+
+- Added ability to re-use `mapnik::image_32` and `mapnik::grid` by exposing a `clear` method (#1571)
+
+- Added support for writing RGB (no A) png images by using the format string of `png:t=0` (#1559)
 
 ## Mapnik 2.1.0
 
