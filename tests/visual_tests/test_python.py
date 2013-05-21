@@ -85,7 +85,7 @@ formatnode.fill = mapnik.Color("green")
 format_trees = [
     ('TextNode', mapnik.FormattingText("[name]")),
     ('MyText', MyText()),
-    ('IfElse', IfElse("[nr] != '5'",
+    ('IfElse', IfElse("[nr] != 5",
                 mapnik.FormattingText("[name]"),
                 mapnik.FormattingText("'SPECIAL!'"))),
     ('Format', formatnode),

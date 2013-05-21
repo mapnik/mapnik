@@ -20,10 +20,10 @@ defaults = {
     'sizes': [(500, 100)],
     'scales':[1.0,2.0],
     'agg': True,
-    'cairo': True,
+    'cairo': False,
     # disabled for 2.2.x since cairo tests are unstable (springmeyer)
     #'cairo': mapnik.has_cairo(),
-    'grid': True
+    'grid': False
 }
 
 sizes_many_in_big_range = [(800, 100), (600, 100), (400, 100),

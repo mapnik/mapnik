@@ -5,14 +5,14 @@
     <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>My Style</StyleName>
         <Datasource>
-            <Parameter name="type">osm</Parameter>
-            <Parameter name="file">../data/points.osm</Parameter>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/points.csv</Parameter>
         </Datasource>
     </Layer>
 
     <Style name="My Style">
         <Rule>
-            <Filter>[nr] = '5'</Filter>
+            <Filter>[nr] = 5</Filter>
             <PointSymbolizer/>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dx="-30" dy="-30" justify-alignment="auto">'Text line 1&#10;line 2'</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" dx="0" dy="-30" justify-alignment="auto">'Text line 1&#10;line 2'</TextSymbolizer>
