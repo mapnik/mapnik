@@ -319,22 +319,19 @@ if __name__ == "__main__":
     if not os.path.exists(visual_output_dir):
         os.makedirs(visual_output_dir)
 
-    if 'osm' in mapnik.DatasourceCache.plugin_names():
-        reporting = Reporting(quiet, overwrite_failures)
-        for filename in files:
-            config = dict(defaults)
-            config.update(files[filename])
-            for size in config['sizes']:
-                for scale_factor in config['scales']:
-                    m = render(filename,
-                               config,
-                               size[0],
-                               size[1],
-                               config.get('bbox'),
-                               scale_factor,
-                               reporting)
-            mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
+    reporting = Reporting(quiet, overwrite_failures)
+    for filename in files:
+        config = dict(defaults)
+        config.update(files[filename])
+        for size in config['sizes']:
+            for scale_factor in config['scales']:
+                m = render(filename,
+                           config,
+                           size[0],
+                           size[1],
+                           config.get('bbox'),
+                           scale_factor,
+                           reporting)
+        mapnik.save_map(m, os.path.join(dirname, 'xml_output', "%s-out.xml" % filename))
 
-        sys.exit(reporting.summary())
-    else:
-        print "OSM plugin required"
+    sys.exit(reporting.summary())
