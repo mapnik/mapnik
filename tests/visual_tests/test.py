@@ -185,7 +185,8 @@ class Reporting:
                 continue
             elif error[0] == self.DIFF:
                 print str(idx+1) + ") \x1b[34m%s different pixels\x1b[0m:\n\t%s (\x1b[31mactual\x1b[0m)\n\t%s (\x1b[32mexpected\x1b[0m)" % (error[3], error[1], error[2])
-                sortable_errors.append((error[3],error))
+                if '.png' in error[1]: # ignore grids
+                    sortable_errors.append((error[3],error))
             elif error[0] == self.REPLACE:
                 print str(idx+1) + ") \x1b[31mreplaced reference with new version:\x1b[0m %s" % error[2]
         if len(sortable_errors):
