@@ -126,7 +126,9 @@ csv_datasource::csv_datasource(parameters const& params)
         std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
 #endif
         if (!in.is_open())
+        {
             throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
+        }
         parse_csv(in,escape_, separator_, quote_);
         in.close();
     }
@@ -864,7 +866,7 @@ void csv_datasource::parse_csv(T & stream,
             }
         }
     }
-    if (!feature_count > 0)
+    if (feature_count < 1)
     {
         MAPNIK_LOG_ERROR(csv) << "CSV Plugin: could not parse any lines of data";
     }
