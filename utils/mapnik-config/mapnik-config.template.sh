@@ -10,23 +10,23 @@ Known values for OPTION are:
 
   -h --help         display this help and exit
   -v --version      version information (MAPNIK_VERSION_STRING)
-  --version-number  version number (MAPNIK_VERSION)
+  --version-number  version number (MAPNIK_VERSION) (new in 2.2.0)
   --git-revision    git hash from "git rev-list --max-count=1 HEAD"
-  --git-describe    git decribe output (new in 2.2.x)
+  --git-describe    git decribe output (new in 2.2.0)
   --fonts           default fonts directory
   --input-plugins   default input plugins directory
-  --defines         pre-processor defines for Mapnik build (new in 2.2.x)
+  --defines         pre-processor defines for Mapnik build (new in 2.2.0)
   --prefix          Mapnik prefix [default $CONFIG_PREFIX]
   --lib-name        Mapnik library name
   --libs            library linking information
   --dep-libs        library linking information for Mapnik dependencies
   --ldflags         library paths (-L) information
-  --includes        include paths (-I) for Mapnik headers (new in 2.2.x)
-  --dep-includes    include paths (-I) for Mapnik dependencies (new in 2.2.x)
-  --cxxflags        c++ compiler flags and pre-processor defines (new in 2.2.x)
+  --includes        include paths (-I) for Mapnik headers (new in 2.2.0)
+  --dep-includes    include paths (-I) for Mapnik dependencies (new in 2.2.0)
+  --cxxflags        c++ compiler flags and pre-processor defines (new in 2.2.0)
   --cflags          all include paths, compiler flags, and pre-processor defines (for back-compatibility)
-  --cxx             c++ compiler used to build mapnik (new in 2.2.x)
-  --all-flags       all compile and link flags
+  --cxx             c++ compiler used to build mapnik (new in 2.2.0)
+  --all-flags       all compile and link flags (new in 2.2.0)
 EOF
 
     exit $1
