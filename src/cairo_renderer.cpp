@@ -669,6 +669,15 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
     if (marker)
     {
+        box2d<double> const& bbox = (*marker)->bounding_box();
+        coord2d center = bbox.center();
+
+        agg::trans_affine tr;
+        evaluate_transform(tr, feature, sym.get_image_transform());
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine recenter_tr = recenter * tr;
+        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_);
+
         for (unsigned i = 0; i < feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
@@ -689,15 +698,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
-
-            double dx = 0.5 * (*marker)->width();
-            double dy = 0.5 * (*marker)->height();
-            agg::trans_affine tr;
-            evaluate_transform(tr, feature, sym.get_image_transform());
-            box2d<double> label_ext (-dx, -dy, dx, dy);
-            label_ext *= tr;
-            label_ext *= agg::trans_affine_translation(x,y);
-            label_ext *= agg::trans_affine_scaling(scale_factor_);
+            label_ext.re_center(x,y);
             if (sym.get_allow_overlap() ||
                 detector_->has_placement(label_ext))
             {
