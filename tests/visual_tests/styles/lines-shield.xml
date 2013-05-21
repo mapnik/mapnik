@@ -12,6 +12,7 @@
 
     <Style name="My Style">
         <Rule>
+            <Filter>[mapnik::geometry_type]=linestring</Filter>
             <LineSymbolizer stroke-width="1" stroke="blue"/>
             <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="line" file="../../data/svg/crosshair16x16.svg" spacing="30">'X'</ShieldSymbolizer>
         </Rule>
