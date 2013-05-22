@@ -18,7 +18,7 @@ Summary: The 2.2.0 release is the fastest running and most stable release in the
 
 - Added 64 bit integer support in expressions, feature ids, and the grid_renderer (#1661,#1662,#1662)
 
-- Added the ability to disable needing various depedencies: `proj4`, `libpng`, `libtiff`, `libjpeg`
+- Added the ability to disable the need for various dependencies: `proj4`, `libpng`, `libtiff`, `libjpeg`
 
 - Added faster reprojection support between `epsg:3857` and `epsg:4326` (#1705,#1703,#1579)
 
