@@ -288,7 +288,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         if (boost::filesystem::exists(mapnik::utf8_to_utf16(index_db)))
 #else
         if (boost::filesystem::exists(index_db))
-#endif 
+#endif
         {
             dataset_->execute("attach database '" + index_db + "' as " + index_table_);
         }
@@ -639,9 +639,8 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
 
     if (dataset_)
     {
-        // TODO - need tolerance
-        mapnik::box2d<double> const e(pt.x, pt.y, pt.x, pt.y);
-
+        mapnik::box2d<double> e(pt.x, pt.y, pt.x, pt.y);
+        e.pad(tol);
         std::ostringstream s;
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
 
