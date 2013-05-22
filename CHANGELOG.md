@@ -16,7 +16,7 @@ For a complete change history, see the git log.
 
 - Added faster reprojection support between `epsg:3857` and `epsg:4326` (#1705,#1703,#1579)
 
-- Fixed concurrency problem when using cursors in postgis plugin (#1823)
+- Fixed concurrency problem when using cursors in postgis plugin (#1823,#1588)
 
 - Fixed postgres connection pool leaks when using `persist_connection=false` (#1764)
 
@@ -48,6 +48,8 @@ For a complete change history, see the git log.
 - Optimized alpha preserving hextree method for quantization of png images (#1629)
 
 - Faster rendering of rasters by reducing memory allocation of temporary buffers (#1516)
+
+- Fixed some raster reprojection artifacts (#1501)
 
 - Fixed raster alignment when width != height and raster is being scaled (#1748,#1622)
 
@@ -152,11 +154,15 @@ For a complete change history, see the git log.
 
 - Fixed uneven rendering of markers along lines (#1693)
 
+- Fixed handling of extra bytes in some shapefile fields (#1605)
+
 - Fixed handling (finally) of null shapes and partially corrupt shapefiles (#1630,#1621)
 
 - Added ability to re-use `mapnik::image_32` and `mapnik::grid` by exposing a `clear` method (#1571)
 
 - Added support for writing RGB (no A) png images by using the format string of `png:t=0` (#1559)
+
+- Added experimental support for geometry simplification at symbolizer level (#1385)
 
 ## Mapnik 2.1.0
 
