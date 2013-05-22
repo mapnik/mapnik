@@ -30,10 +30,25 @@
 namespace mapnik
 {
 
+enum debug_symbolizer_mode_enum {
+    DEBUG_SYM_MODE_COLLISION,
+    DEBUG_SYM_MODE_VERTEX,
+    debug_symbolizer_mode_enum_MAX
+};
+
+DEFINE_ENUM( debug_symbolizer_mode_e, debug_symbolizer_mode_enum );
+
 struct MAPNIK_DECL debug_symbolizer :
         public symbolizer_base
 {
-    debug_symbolizer() : symbolizer_base() {}
+    debug_symbolizer();
+    debug_symbolizer(debug_symbolizer const& rhs);
+    debug_symbolizer_mode_e get_mode() const;
+    void set_mode(debug_symbolizer_mode_e mode);
+
+private:
+    debug_symbolizer_mode_e mode_;
+
 };
 
 }
