@@ -109,7 +109,7 @@ PLUGINS = { # plugins with external dependencies
             'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'geojson': {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'python':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'python':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             }
 
 
