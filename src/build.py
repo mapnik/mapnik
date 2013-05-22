@@ -209,10 +209,11 @@ source = Split(
     )
 
 if env['PLUGIN_LINKING'] == 'static':
-    lib_env.Append(CPPDEFINES = '-DMAPNIK_STATIC_PLUGINS')
+    hit = False
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS'] or not details['lib']:
+            hit = True
             lib_env.Append(CPPDEFINES = '-DMAPNIK_STATIC_PLUGIN_%s' % plugin.upper())
             plugin_env = SConscript('../plugins/input/%s/build.py' % plugin)
             if plugin_env.has_key('SOURCES') and plugin_env['SOURCES']:
@@ -229,6 +230,8 @@ if env['PLUGIN_LINKING'] == 'static':
                 lib_env.AppendUnique(LIBS=plugin_env['LIBS'])
         else:
             print("Notice: dependencies not met for plugin '%s', not building..." % plugin)
+    if hit:
+        lib_env.Append(CPPDEFINES = '-DMAPNIK_STATIC_PLUGINS')
 
 if env['HAS_CAIRO']:
     lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])
