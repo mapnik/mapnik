@@ -3,11 +3,7 @@
 
 from nose.tools import *
 from utilities import execution_path
-from Queue import Queue
-import threading
-
 import os, mapnik
-import sqlite3
 
 def setup():
     # All of the paths used are relative, if we run the tests

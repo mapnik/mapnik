@@ -2,8 +2,10 @@
 # Mapnik viewer - Copyright (C) 2007 Artem Pavlenko
 ######################################################################
 TEMPLATE = app
+QT += core gui widgets
 QMAKE_CXX = clang++
 QMAKE_CXXFLAGS += $$system(mapnik-config --cxxflags)
+QMAKE_CXXFLAGS += $$system(mapnik-config --includes --dep-includes)
 QMAKE_LFLAGS += $$system(mapnik-config --libs)
 QMAKE_LFLAGS += $$system(mapnik-config --ldflags --dep-libs)
 QMAKE_LFLAGS += -lboost_timer

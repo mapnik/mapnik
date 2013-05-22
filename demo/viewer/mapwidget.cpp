@@ -26,7 +26,6 @@
 
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
-#include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/layer.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/scale_denominator.hpp>
@@ -528,42 +527,7 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
 void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
-    unsigned width=map.width();
-    unsigned height=map.height();
-
-    mapnik::grid buf(width,height,"F_CODE", 1);
-    mapnik::grid_renderer<mapnik::grid> ren(map,buf,scaling_factor);
-
-    try
-    {
-        ren.apply();
-        mapnik::value_integer * imdata = static_cast<mapnik::value_integer*>(buf.raw_data());
-
-        // Not sure how to display long long values ??
-        //QImage image(width,height,QImage::Format_RGB32);
-        //for (unsigned i = 0 ; i < height ; ++i)
-        //{
-        //     for (unsigned j = 0 ; j < width ; ++j)
-        //    {
-        //        image.setPixel(j,i,qRgb((uint8_t)(imdata[i*width+j]>>8),
-        //                                (uint8_t)(imdata[i*width+j+1]>>8),
-        //                                (uint8_t)(imdata[i*width+j+2]>>8)));
-        //    }
-        //}
-        //pix = QPixmap::fromImage(image);
-    }
-    catch (mapnik::config_error & ex)
-    {
-        std::cerr << ex.what() << std::endl;
-    }
-    catch (const std::exception & ex)
-    {
-        std::cerr << "exception: " << ex.what() << std::endl;
-    }
-    catch (...)
-    {
-        std::cerr << "Unknown exception caught!\n";
-    }
+    std::cerr << "Not supported" << std::endl;
 }
 
 

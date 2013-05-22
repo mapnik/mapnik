@@ -144,15 +144,20 @@ geometry_grammar<Iterator>::geometry_grammar()
     // points
     points = lit('[')[_a = SEG_MOVETO] > -(point (_a,_r1) % lit(',')[_a = SEG_LINETO]) > lit(']');
 
+    // give some rules names
+    geometry.name("Geometry");
+    geometry_collection.name("GeometryCollection");
+    geometry_dispatch.name("Geometry dispatch");
+    coordinates.name("Coordinates");
     // error handler
     on_error<fail>
         (
             geometry
             , std::clog
             << boost::phoenix::val("Error! Expecting ")
-            << _4                               // what failed?
+            << _4  // what failed?
             << boost::phoenix::val(" here: \"")
-            << construct<std::string>(_3, _2)   // iterators to error-pos, end
+            << where_message_(_3, _2, 16) // max 16 chars
             << boost::phoenix::val("\"")
             << std::endl
             );

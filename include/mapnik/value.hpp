@@ -40,8 +40,6 @@
 #include "hash_variant.hpp"
 
 // stl
-#include <iostream>
-#include <sstream>
 #include <string>
 #include <cmath>
 
@@ -670,6 +668,13 @@ struct to_expression_string : public boost::static_visitor<std::string>
         return "'" + utf8 + "'";
     }
 
+    std::string operator() (value_integer val) const
+    {
+        std::string output;
+        util::to_string(output,val);
+        return output;
+    }
+
     std::string operator() (value_double val) const
     {
         std::string output;
@@ -686,14 +691,6 @@ struct to_expression_string : public boost::static_visitor<std::string>
     {
         boost::ignore_unused_variable_warning(val);
         return "null";
-    }
-
-    template <typename T>
-    std::string operator() (T val) const
-    {
-        std::stringstream ss;
-        ss << val;
-        return ss.str();
     }
 };
 

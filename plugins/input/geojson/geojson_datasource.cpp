@@ -39,6 +39,7 @@
 
 // mapnik
 #include <mapnik/unicode.hpp>
+#include <mapnik/utils.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/box2d.hpp>
@@ -106,7 +107,11 @@ geojson_datasource::geojson_datasource(parameters const& params)
 
     typedef std::istreambuf_iterator<char> base_iterator_type;
 
-    std::ifstream is(file_.c_str());
+#if defined (_WINDOWS)
+    std::ifstream is(mapnik::utf8_to_utf16(file_),std::ios_base::in | std::ios_base::binary);
+#else
+    std::ifstream is(file_.c_str(),std::ios_base::in | std::ios_base::binary);
+#endif
     boost::spirit::multi_pass<base_iterator_type> begin =
         boost::spirit::make_default_multi_pass(base_iterator_type(is));
 

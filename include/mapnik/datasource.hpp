@@ -47,7 +47,7 @@ struct MAPNIK_DECL Featureset : private mapnik::noncopyable
     virtual ~Featureset() {}
 };
 
-typedef MAPNIK_DECL boost::shared_ptr<Featureset> featureset_ptr;
+typedef boost::shared_ptr<Featureset> featureset_ptr;
 
 class MAPNIK_DECL datasource_exception : public std::exception
 {
@@ -134,19 +134,23 @@ public:
 
 typedef boost::shared_ptr<datasource> datasource_ptr;
 
-#define DATASOURCE_PLUGIN(classname)                                    \
-    extern "C" MAPNIK_EXP const char * datasource_name()                \
-    {                                                                   \
-        return classname::name();                                       \
-    }                                                                   \
-    extern "C"  MAPNIK_EXP datasource* create(parameters const& params) \
-    {                                                                   \
-        return new classname(params);                                   \
-    }                                                                   \
-    extern "C" MAPNIK_EXP void destroy(datasource *ds)                  \
-    {                                                                   \
-        delete ds;                                                      \
-    }
+#ifdef MAPNIK_STATIC_PLUGINS
+    #define DATASOURCE_PLUGIN(classname)
+#else
+    #define DATASOURCE_PLUGIN(classname)                                    \
+        extern "C" MAPNIK_EXP const char * datasource_name()                \
+        {                                                                   \
+            return classname::name();                                       \
+        }                                                                   \
+        extern "C"  MAPNIK_EXP datasource* create(parameters const& params) \
+        {                                                                   \
+            return new classname(params);                                   \
+        }                                                                   \
+        extern "C" MAPNIK_EXP void destroy(datasource *ds)                  \
+        {                                                                   \
+            delete ds;                                                      \
+        }
+#endif
 
 }
 

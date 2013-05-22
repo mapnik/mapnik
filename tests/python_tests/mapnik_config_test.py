@@ -33,6 +33,7 @@ def test_mapnik_config_valid_opts():
       '--help',
       '-v',
       '--version',
+      '--version-number',
       '--git-revision',
       '--git-describe',
       '--fonts',
@@ -46,7 +47,9 @@ def test_mapnik_config_valid_opts():
       '--includes',
       '--dep-includes',
       '--cxxflags',
-      '--cflags'
+      '--cflags',
+      '--all-flags',
+      '--cxx'
     ]
     for item in valid_args:
         cmd = 'mapnik-config ' + item

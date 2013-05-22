@@ -1531,8 +1531,10 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
 void map_parser::parse_debug_symbolizer(rule & rule, xml_node const & sym)
 {
     debug_symbolizer symbol;
-
     parse_symbolizer_base(symbol, sym);
+    debug_symbolizer_mode_e mode =
+        sym.get_attr<debug_symbolizer_mode_e>("mode", DEBUG_SYM_MODE_COLLISION);
+    symbol.set_mode(mode);
     rule.append(symbol);
 }
 

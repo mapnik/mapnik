@@ -200,10 +200,10 @@ inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 struct filter_in_box
 {
     box2d<double> box_;
-    explicit filter_in_box(const box2d<double>& box)
+    explicit filter_in_box(box2d<double> const& box)
         : box_(box) {}
 
-    bool pass(const box2d<double>& extent) const
+    bool pass(box2d<double> const& extent) const
     {
         return extent.intersects(box_);
     }
@@ -211,23 +211,16 @@ struct filter_in_box
 
 struct filter_at_point
 {
-    coord2d pt_;
-    double tol_;
-    explicit filter_at_point(const coord2d& pt, double tol=0)
-        : pt_(pt),
-          tol_(tol) {}
-    bool pass(const box2d<double>& extent) const
+    box2d<double> box_;
+    explicit filter_at_point(coord2d const& pt, double tol=0)
+        : box_(pt,pt)
     {
-        if (tol_ == 0)
-        {
-            return extent.contains(pt_);
-        }
-        else
-        {
-            box2d<double> extent2 = extent;
-            extent2.pad(tol_);
-            return extent2.contains(pt_);
-        }
+        box_.pad(tol);
+    }
+
+    bool pass(box2d<double> const& extent) const
+    {
+        return extent.intersects(box_);
     }
 };
 

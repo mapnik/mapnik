@@ -132,7 +132,7 @@ double marker::width() const
     if (is_bitmap())
         return (*bitmap_data_)->width();
     else if (is_vector())
-        return (*vector_data_)->width();
+        return (*vector_data_)->bounding_box().width();
     return 0;
 }
 
