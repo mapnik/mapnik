@@ -497,7 +497,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
     def test_that_64bit_int_fields_work():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
-                            table='test8')
+                            table='test8',
+                            geometry_field='geom')
         eq_(len(ds.fields()),2)
         eq_(ds.fields(),['gid','int_field'])
         eq_(ds.field_types(),['int','int'])
