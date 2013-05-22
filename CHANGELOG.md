@@ -8,6 +8,12 @@ For a complete change history, see the git log.
 
 ## 2.2.0
 
+Released ---
+
+(Packaged from ---)
+
+Summary: The 2.2.0 release is the fastest running and most stable release in the history of Mapnik. The code line represents development in the master branch since the release of 2.1.0 in Aug 2012 and therefore includes nearly a year of bugfixes and low level optimizations. Shapefile and PostGIS datasources have benefited from numerous stability fixes, 64 bit integer support has been added to support OSM data, and many rendering fixes have landed for high quality output when using a rendering `scale_factor`. Many critical code paths have been optimized extensively include raster rendering, xml map loading, string to number conversion, vector reprojection when using `epsg:4326` and `epsg:3857`, `hextree` encoding, halo rendering, and rendering when using a custom `gamma`. Mapnik 2.2 also compiles faster than previous releases in the 2.x series and drops several uneeded and hard to install dependencies.
+
 - Removed 3 depedencies without loosing any functionality: `ltdl`, `cairomm` and `libsigc++` (#1804,#806,#1681)
 
 - Added 64 bit integer support in expressions, feature ids, and the grid_renderer (#1661,#1662,#1662)
@@ -45,7 +51,7 @@ For a complete change history, see the git log.
 
 - Optimized string handling and type conversion by removing `boost::to_lower`, `boost::trim`, and `boost::lexical_cast` usage (#1687,#1687,#1633)
 
-- Optimized alpha preserving hextree method for quantization of png images (#1629)
+- Optimized alpha preserving `hextree` method for quantization of png images (#1629)
 
 - Faster rendering of rasters by reducing memory allocation of temporary buffers (#1516)
 
@@ -75,7 +81,7 @@ For a complete change history, see the git log.
 
 - Fixed error reporting in the python plugin (#1422)
 
-- Added the ability to run test without installing with `make test-local`
+- Added the ability to run tests without installing with `make test-local`
 
 - Reduced library binary size by adding support for `-fvisibility-inlines-hidden` and `-fvisibility=hidden` (#1826,#1832)
 
@@ -83,23 +89,21 @@ For a complete change history, see the git log.
 
 - Added the ability to use `boost::hash` on `mapnik::value` types (#1729)
 
-- Removed obsolete `GEOS` plugin and unmaintained `kismet` plugin (#1809,#1833)
+- Removed obsolete `geos` plugin (functionality replaced by `csv` plugin) and unmaintained `kismet` plugin (#1809,#1833)
 
-- Added new `mapnik-config` flags: `--all-flags`, `--defines`, `--git-describe`, `--includes`, `--dep-includes`, `--cxxflags`, `--cxx`.
+- Added new `mapnik-config` flags: `--all-flags`, `--defines`, `--git-describe`, `--includes`, `--dep-includes`, `--cxxflags`, `--cxx` (#1443)
 
 - Added support for unicode strings as arguments in python bindings (#163)
 
-- Added DebugSymbolizer (#1366)
+- Added DebugSymbolizer which is able to render the otherwise invisible collision boxes (#1366)
 
-- Optimized rendering overhead of using `gamma` property (#1174)
+- Optimized rendering by reducing overhead of using `gamma` property (#1174)
 
 - Fixed rendering artifacts when using `polygon-gamma` or `line-gamma` equal to 0 (#761,#1763)
 
 - Fixed and optimized the display of excessive precision of some float data in labels (#430,#1697)
 
 - Removed the `bind` option for datasources (#1654)
-
-- Added new mapnik-config options: `git-describe`, `defines`, `includes`, `dep-includes`, and `cxxflags` (#1443)
 
 - Added ability to access style list from map by (name,obj) in python (#1725)
 
@@ -130,7 +134,7 @@ For a complete change history, see the git log.
 
 - Added support for setting zlib `Z_FIXED` strategy with format string: `png:z=fixed`
 
-- Fixed handling of transparency level option in Octree-based PNG encoding (#1556)
+- Fixed handling of transparency level option in `octree` png encoding (#1556)
 
 - Added ability to pass a pre-created collision detector to the cairo renderer (#1444)
 
@@ -311,7 +315,7 @@ Released April 10, 2012
 
 - Workaround for boost interprocess compile error with recent gcc versions (#950,#1001,#1082)
 
-- Fix possible memory corruption when using hextree mode for png color reduction (#1087)
+- Fix possible memory corruption when using `hextree` mode for png color reduction (#1087)
 
 - Fixed bug in shield line placement when dx/dy are used to shift the label relative to the placement point (Matt Amos) (#908)
 
@@ -491,14 +495,14 @@ Released March 23, 2010
 
 - PNG: fixed png256 for large images and some improvements to reduce color corruptions ([#522](https://github.com/mapnik/mapnik/issues/522))
 
-- PNG: Added new quantization method for indexed png format using hextree with full support for alpha
+- PNG: Added new quantization method for indexed png format using `hextree` with full support for alpha
   channel. Also new method has some optimizations for color gradients common when using elevation based
-  rasters. By default old method using octree is used. (r1680, r1683, [#477](https://github.com/mapnik/mapnik/issues/477))
+  rasters. By default old method using `octree` is used. (r1680, r1683, [#477](https://github.com/mapnik/mapnik/issues/477))
 
 - PNG: Added initial support for passing options to png writter like number of colors, transparency
   support, quantization method and possibly other in future using type parameter. For example
   "png8:c=128:t=1:m=h" limits palette to 128 colors, uses only binary transparency (0 - none,
-  1 - binary, 2 - full), and new method of quantization using hextree (h - hextree, o - octree).
+  1 - binary, 2 - full), and new method of quantization using `hextree` (h - `hextree`, o - `octree`).
   Existing type "png256" can be also written using "png8:c=256:m=o:t=2"  (r1680, r1683, [#477](https://github.com/mapnik/mapnik/issues/477))
 
 
