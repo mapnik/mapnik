@@ -209,9 +209,17 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
     return mapnik::featureset_ptr();
 }
 
-// FIXME
 mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
-    throw mapnik::datasource_exception("GeoJSON Plugin: features_at_point is not supported yet");
-    return mapnik::featureset_ptr();
+    mapnik::box2d<double> query_bbox(pt, pt);
+    query_bbox.pad(tol);
+    mapnik::query q(query_bbox);
+    std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
+    std::vector<mapnik::attribute_descriptor>::const_iterator itr = desc.begin();
+    std::vector<mapnik::attribute_descriptor>::const_iterator end = desc.end();
+    for ( ;itr!=end;++itr)
+    {
+        q.add_property_name(itr->get_name());
+    }
+    return features(q);
 }
