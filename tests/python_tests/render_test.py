@@ -173,22 +173,24 @@ def test_render_with_scale_factor_zero_throws():
     im = mapnik.Image(256, 256)
     mapnik.render(m,im,0.0)
 
-def test_render_with_scale_factor():
-    m = mapnik.Map(256,256)
-    mapnik.load_map(m,'../data/good_maps/marker-text-line.xml')
-    m.zoom_all()
-    sizes = [.00001,.005,.1,.899,1,1.5,2,5,10,100]
-    for size in sizes:
-        im = mapnik.Image(256, 256)
-        mapnik.render(m,im,size)
-        expected_file = './images/support/marker-text-line-scale-factor-%s.png' % size
-        actual_file = '/tmp/' + os.path.basename(expected_file)
-        im.save(actual_file,'png8')
-        #im.save(expected_file,'png8')
-        # we save and re-open here so both png8 images are ready as full color png
-        actual = mapnik.Image.open(expected_file)
-        expected = mapnik.Image.open(expected_file)
-        eq_(actual.tostring(),expected.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
+if 'shape' in mapnik.DatasourceCache.plugin_names():
+
+    def test_render_with_scale_factor():
+        m = mapnik.Map(256,256)
+        mapnik.load_map(m,'../data/good_maps/marker-text-line.xml')
+        m.zoom_all()
+        sizes = [.00001,.005,.1,.899,1,1.5,2,5,10,100]
+        for size in sizes:
+            im = mapnik.Image(256, 256)
+            mapnik.render(m,im,size)
+            expected_file = './images/support/marker-text-line-scale-factor-%s.png' % size
+            actual_file = '/tmp/' + os.path.basename(expected_file)
+            im.save(actual_file,'png8')
+            #im.save(expected_file,'png8')
+            # we save and re-open here so both png8 images are ready as full color png
+            actual = mapnik.Image.open(expected_file)
+            expected = mapnik.Image.open(expected_file)
+            eq_(actual.tostring(),expected.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
 
 if __name__ == "__main__":
     setup()

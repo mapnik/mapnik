@@ -174,6 +174,9 @@ class Reporting:
         return item
 
     def summary(self):
+        if self.passed == 0:
+            print '\nNOTICE: No valid visual tests were run'
+            return 0
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
             return 0
@@ -265,6 +268,8 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
         else:
             m.zoom_all()
     except Exception, e:
+        if 'Could not create datasource' in str(e):
+            return m
         reporting.other_error(filename, repr(e))
         return m
     
