@@ -141,7 +141,7 @@ double marker::height() const
     if (is_bitmap())
         return (*bitmap_data_)->height();
     else if (is_vector())
-        return (*vector_data_)->height();
+        return (*vector_data_)->bounding_box().height();
     return 0;
 }
 
