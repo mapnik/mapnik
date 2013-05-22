@@ -191,7 +191,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         return boost::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
     }
-    else if (width * height > (tile_size_ * tile_size_ << 2))
+    else if (width * height > static_cast<int>(tile_size_ * tile_size_ << 2))
     {
         MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Tiled policy";
 

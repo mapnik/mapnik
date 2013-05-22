@@ -109,7 +109,7 @@ PLUGINS = { # plugins with external dependencies
             'csv':     {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'raster':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
             'geojson': {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
-            'python':  {'default':True,'path':None,'inc':None,'lib':None,'lang':'C++'},
+            'python':  {'default':False,'path':None,'inc':None,'lib':None,'lang':'C++'},
             }
 
 
@@ -1574,7 +1574,7 @@ if not preconfigured:
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
         abi = conf.GetMapnikLibVersion()
-        abi_fallback = "2.2.0"
+        abi_fallback = "2.2.0-pre"
         if not abi:
             color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
             abi = abi_fallback
