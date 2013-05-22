@@ -243,7 +243,7 @@ renderers = [
     { 'name': 'cairo',
       'render': render_cairo,
       'compare': lambda actual, reference: compare(actual, reference, alpha=False),
-      'threshold': 1,
+      'threshold': 10,
       'filetype': 'png',
       'dir': 'images'
     },
