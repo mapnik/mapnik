@@ -1797,6 +1797,9 @@ if not HELP_REQUESTED:
     GDAL_BUILT = False
     OGR_BUILT = False
     for plugin in env['PLUGINS']:
+        if env['PLUGIN_LINKING'] == 'static' or plugin not in env['REQUESTED_PLUGINS']:
+            if os.path.exists('plugins/input/%s.input' % plugin):
+                os.unlink('plugins/input/%s.input' % plugin)
         if plugin in env['REQUESTED_PLUGINS']:
             details = env['PLUGINS'][plugin]
             if details['lib'] in env['LIBS']:
@@ -1817,8 +1820,6 @@ if not HELP_REQUESTED:
                 color_print(1,"Notice: dependencies not met for plugin '%s', not building..." % plugin)
                 if os.path.exists('plugins/input/%s.input' % plugin):
                     os.unlink('plugins/input/%s.input' % plugin)
-        elif os.path.exists('plugins/input/%s.input' % plugin):
-            os.unlink('plugins/input/%s.input' % plugin)
 
     create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'], False)
     create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
