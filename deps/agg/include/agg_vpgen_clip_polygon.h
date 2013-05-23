@@ -19,9 +19,7 @@
 #include "agg_basics.h"
 
 // https://github.com/mapnik/mapnik/issues/1860
-#ifdef __GNUC__
 #include <mapnik/config.hpp>
-#endif
 
 namespace agg
 {
