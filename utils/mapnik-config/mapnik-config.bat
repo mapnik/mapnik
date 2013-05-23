@@ -19,7 +19,7 @@ if /i "%1"=="/?" goto help
 if /i "%1"=="--prefix" echo %MAPNIK_PREFIX%
 if /i "%1"=="--libs" echo mapnik.lib
 @rem TODO - figure out how to avoid hardcoding these library names
-if /i "%1"=="--dep-libs" echo icuuc.lib icuin.lib libboost_system-vc100-mt-s-1_49.lib
+if /i "%1"=="--dep-libs" echo icuuc.lib icuin.lib cairo.lib libboost_system-vc100-mt-s-1_49.lib
 if /i "%1"=="--ldflags" echo %MAPNIK_LIBS%
 if /i "%1"=="--defines" echo _WINDOWS HAVE_JPEG HAVE_PNG HAVE_TIFF MAPNIK_USE_PROJ4 BOOST_REGEX_HAS_ICU MAPNIK_THREADSAFE BIGINT HAVE_LIBXML2 HAVE_CAIRO
 @rem /MD is multithreaded dynamic linking - http://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx

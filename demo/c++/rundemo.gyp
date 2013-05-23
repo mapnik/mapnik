@@ -1,5 +1,6 @@
 {
   'includes': [ 'common.gypi' ],
+  'default_configuration': 'Release',
   'targets': [
     {
       'target_name': 'rundemo',
@@ -34,9 +35,11 @@
                '<!@(mapnik-config --dep-includes)',
             ],
             'msvs_settings': {
-               'AdditionalLibraryDirectories': [
-                  '<!@(mapnik-config --ldflags)'
-               ],
+               'VCLinkerTool': {
+                 'AdditionalLibraryDirectories': [
+                    '<!@(mapnik-config --ldflags)'
+                 ]
+               }
             }
         }]
      ]

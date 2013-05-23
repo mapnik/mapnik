@@ -67,10 +67,15 @@ On OS X you can also create an xcode project:
 
 ### Windows
 
-First you need to build he visual studio files with gyp:
+First you need to build the visual studio solution with gyp:
 
     gyp rundemo.gyp --depth=. -f msvs -G msvs_version=2010
 
-Then you can compile the demo with `msbuild`:
+Then you can compile with `msbuild`:
 
-    msbuild build.sln
+    msbuild rundemo.sln /p:Configuration="Release" /p:Platform=Win32
+
+Then run it!
+
+    for /f %i in ('mapnik-config --prefix') do set MAPNIK_PREFIX=%%i
+    Release\rundemo.exe %MAPNIK_PREFIX%
