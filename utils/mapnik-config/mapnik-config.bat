@@ -4,8 +4,8 @@ set MAPNIK_VERSION=v2.2.0
 set MAPNIK_PREFIX=c:\\mapnik-%MAPNIK_VERSION%
 set MAPNIK_LIBS=%MAPNIK_PREFIX%\\lib
 set MAPNIK_INCLUDES=%MAPNIK_PREFIX%\\include
-set MAPNIK_INPUT_PLUGINS_DIRECTORY=%MAPNIK_PREFIX%\\input
-set MAPNIK_FONTS_DIRECTORY=%MAPNIK_PREFIX%\\fonts
+set MAPNIK_INPUT_PLUGINS_DIRECTORY=%MAPNIK_PREFIX%\\lib\\mapnik\\input
+set MAPNIK_FONTS_DIRECTORY=%MAPNIK_PREFIX%\\lib\\mapnik\\fonts
 
 if /i "%1"=="" goto help
 if /i "%1"=="help" goto help
