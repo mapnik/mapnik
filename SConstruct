@@ -1824,9 +1824,14 @@ if not HELP_REQUESTED:
     create_uninstall_target(env, env['MAPNIK_LIB_DIR_DEST'], False)
     create_uninstall_target(env, env['MAPNIK_INPUT_PLUGINS_DEST'] , False)
 
-    # before installing plugins, wipe out any previously
-    # installed plugins that we are no longer building
     if 'install' in COMMAND_LINE_TARGETS:
+        # if statically linking plugins still make sure
+        # to create the dynamic plugins directory
+        if env['PLUGIN_LINKING'] == 'static':
+            if not os.path.exists(env['MAPNIK_INPUT_PLUGINS_DEST']):
+                os.makedirs(env['MAPNIK_INPUT_PLUGINS_DEST'])
+        # before installing plugins, wipe out any previously
+        # installed plugins that we are no longer building
         for plugin in PLUGINS.keys():
             plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'%s.input' % plugin)
             if os.path.exists(plugin_path):
