@@ -472,7 +472,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def create_ds():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
                             table='test',
-                            max_size=20)
+                            max_size=20,
+                            geometry_field='geom')
         fs = ds.all_features()
 
     def test_threaded_create(NUM_THREADS=100):
