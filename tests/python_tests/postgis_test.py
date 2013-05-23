@@ -476,6 +476,10 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         fs = ds.all_features()
 
     def test_threaded_create(NUM_THREADS=100):
+        # run one to start before thread loop
+        # to ensure that a throw stops the test
+        # from running all threads
+        create_ds()
         for i in range(NUM_THREADS):
             t = threading.Thread(target=create_ds)
             t.start()
