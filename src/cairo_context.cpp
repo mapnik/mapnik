@@ -26,6 +26,8 @@
 #include <mapnik/text_path.hpp>
 #include <mapnik/font_set.hpp>
 
+#include <cairo-ft.h>
+
 #include <valarray>
 namespace mapnik {
 

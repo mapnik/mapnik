@@ -41,7 +41,6 @@
 
 // cairo
 #include <cairo.h>
-#include <cairo-ft.h>
 
 // stl
 #include <map>
