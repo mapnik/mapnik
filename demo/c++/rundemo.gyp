@@ -1,12 +1,5 @@
 {
   'includes': [ 'common.gypi' ],
-  'include_dirs': [
-     '<!@(mapnik-config --includes)',
-     '<!@(mapnik-config --dep-includes)',
-  ],
-  'defines': [
-     '<!@(mapnik-config --defines)',
-  ],
   'targets': [
     {
       'target_name': 'rundemo',
@@ -29,6 +22,17 @@
           }
         }],
         [ 'OS=="win"', {
+            'defines': [
+               '<!@(mapnik-config --defines)',
+            ],
+            'libraries': [
+                '<!@(mapnik-config --libs)',
+                 '<!@(mapnik-config --dep-libs)'
+            ],
+            'include_dirs': [
+               '<!@(mapnik-config --includes)',
+               '<!@(mapnik-config --dep-includes)',
+            ],
             'msvs_settings': {
                'AdditionalLibraryDirectories': [
                   '<!@(mapnik-config --ldflags)'

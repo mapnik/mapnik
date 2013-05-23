@@ -37,8 +37,14 @@ To install gyp, which is pure python do:
 
     svn checkout http://gyp.googlecode.com/svn/trunk/ gyp
     cd gyp
-    sudo python setup.py install
+    python setup.py install
 
+If you do not have svn installed you can grab gyp from:
+
+    https://github.com/TooTallNate/node-gyp/archive/master.zip
+    # unzip and extract the 'gyp' subfolder then do
+    cd gyp
+    python setup.py install
 
 ## Building the demo
 
