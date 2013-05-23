@@ -26,7 +26,7 @@ if /i "%1"=="--defines" echo _WINDOWS HAVE_JPEG HAVE_PNG HAVE_TIFF MAPNIK_USE_PR
 @rem /EHsc is to support c++ exceptions - http://msdn.microsoft.com/en-us/library/1deeycx5(v=vs.80).aspx
 @rem /GR is to support rtti (runtime type detection) - http://msdn.microsoft.com/en-us/library/we6hfdy0.aspx
 if /i "%1"=="--cxxflags" echo /MD /EHsc /GR
-if /i "%1"=="--includes" echo %MAPNIK_INCLUDES%
+if /i "%1"=="--includes" echo %MAPNIK_INCLUDES% %MAPNIK_INCLUDES%\\agg
 if /i "%1"=="--input-plugins" echo %MAPNIK_INPUT_PLUGINS_DIRECTORY%
 if /i "%1"=="--fonts" echo %MAPNIK_FONTS_DIRECTORY%
 goto exit
