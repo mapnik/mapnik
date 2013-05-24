@@ -1650,7 +1650,9 @@ if not preconfigured:
             if env['DEBUG']:
                 env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
             else:
-                env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fvisibility-inlines-hidden -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
+                # TODO - add back -fvisibility-inlines-hidden
+                # https://github.com/mapnik/mapnik/issues/1863
+                env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
 
             if env['DEBUG_UNDEFINED']:
                 env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
@@ -1765,8 +1767,6 @@ if not HELP_REQUESTED:
     Export('env')
 
     plugin_base = env.Clone()
-    if not env['DEBUG']:
-        plugin_base.Append(CXXFLAGS='-fvisibility=hidden')
 
     Export('plugin_base')
 
