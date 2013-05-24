@@ -258,14 +258,9 @@ void cairo_renderer_base::setup(Map const& map)
 void cairo_renderer_base::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Start map processing bbox=" << map.get_current_extent();
-
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
     box2d<double> bounds = t_.forward(t_.extent());
     context_.rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
     context_.clip();
-#else
-#warning building against cairo older that 1.6.0, map clipping is disabled
-#endif
 }
 
 template <>
