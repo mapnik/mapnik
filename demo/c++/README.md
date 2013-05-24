@@ -77,5 +77,5 @@ Then you can compile with `msbuild`:
 
 Then run it!
 
-    for /f %i in ('mapnik-config --prefix') do set MAPNIK_PREFIX=%%i
+    for /f %i in ('mapnik-config --prefix') do set MAPNIK_PREFIX=%i
     Release\rundemo.exe %MAPNIK_PREFIX%
