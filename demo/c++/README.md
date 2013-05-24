@@ -69,7 +69,7 @@ On OS X you can also create an xcode project:
 
 First you need to build the visual studio solution with gyp:
 
-    gyp rundemo.gyp --depth=. -f msvs -G msvs_version=2010
+    C:\Python27\python.exe c:\Python27\Scripts\gyp rundemo.gyp --depth=. -f msvs -G msvs_version=2010
 
 Then you can compile with `msbuild`:
 
