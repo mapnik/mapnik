@@ -9,6 +9,7 @@ namespace sys = boost::system;
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
 #include <vector>
+#include <algorithm>
 
 int main(int argc, char** argv)
 {

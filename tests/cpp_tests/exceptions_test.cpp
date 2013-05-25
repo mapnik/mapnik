@@ -20,6 +20,7 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/params.hpp>
 #include <vector>
+#include <algorithm>
 
 extern "C" {
 #include <sqlite3.h>

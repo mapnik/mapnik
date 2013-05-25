@@ -4,6 +4,7 @@
 #include "plugins/input/csv/csv_datasource.hpp"
 #include <mapnik/params.hpp>
 #include <vector>
+#include <algorithm>
 
 int main(int argc, char** argv)
 {

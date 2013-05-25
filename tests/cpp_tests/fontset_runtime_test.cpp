@@ -18,7 +18,7 @@
 #include <mapnik/color_factory.hpp>
 #include <mapnik/save_map.hpp>
 #include <vector>
-
+#include <algorithm>
 
 int main(int argc, char** argv)
 {
