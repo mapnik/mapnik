@@ -472,10 +472,15 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def create_ds():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
                             table='test',
-                            max_size=20)
+                            max_size=20,
+                            geometry_field='geom')
         fs = ds.all_features()
 
     def test_threaded_create(NUM_THREADS=100):
+        # run one to start before thread loop
+        # to ensure that a throw stops the test
+        # from running all threads
+        create_ds()
         for i in range(NUM_THREADS):
             t = threading.Thread(target=create_ds)
             t.start()
@@ -497,7 +502,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
     def test_that_64bit_int_fields_work():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
-                            table='test8')
+                            table='test8',
+                            geometry_field='geom')
         eq_(len(ds.fields()),2)
         eq_(ds.fields(),['gid','int_field'])
         eq_(ds.field_types(),['int','int'])

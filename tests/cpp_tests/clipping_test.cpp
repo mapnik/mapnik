@@ -76,8 +76,15 @@ void parse_geom(mapnik::geometry_type & geom,
     }
 }
 
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
     try {
         std::string filename("tests/cpp_tests/data/cases.txt");
         std::ifstream stream(filename.c_str(),std::ios_base::in | std::ios_base::binary);
@@ -111,7 +118,8 @@ int main( int, char*[] )
 
     if (!::boost::detail::test_errors())
     {
-        std::clog << "C++ clipping: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ clipping: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif

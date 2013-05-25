@@ -14,6 +14,10 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
+def test_debug_symbolizer():
+    s = mapnik.DebugSymbolizer()
+    eq_(s.mode,mapnik.debug_symbolizer_mode.collision)
+
 def test_raster_symbolizer():
     s = mapnik.RasterSymbolizer()
     eq_(s.comp_op,mapnik.CompositeOp.src_over) # note: mode is deprecated

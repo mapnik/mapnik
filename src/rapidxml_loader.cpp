@@ -79,8 +79,9 @@ public:
         try
         {
             // Parse using appropriate flags
-            const int f_tws = rapidxml::parse_normalize_whitespace
-                | rapidxml::parse_trim_whitespace;
+            // https://github.com/mapnik/mapnik/issues/1856
+            // const int f_tws = rapidxml::parse_normalize_whitespace;
+            const int f_tws = rapidxml::parse_trim_whitespace;
             rapidxml::xml_document<> doc;
             doc.parse<f_tws>(&v.front());
 
@@ -110,8 +111,10 @@ public:
 //            }
 //        }
 
-
-        load(buffer, node);
+        // https://github.com/mapnik/mapnik/issues/1857
+        std::stringstream s;
+        s << buffer;
+        load(s, node);
     }
 private:
     void populate_tree(rapidxml::xml_node<char> *cur_node, xml_node &node)
@@ -141,10 +144,7 @@ private:
         case rapidxml::node_data:
         case rapidxml::node_cdata:
         {
-            std::string trimmed(cur_node->value());
-            mapnik::util::trim(trimmed);
-            if (trimmed.empty()) break; //Don't add empty text nodes
-            node.add_child(trimmed, 0, true);
+            node.add_child(cur_node->value(), 0, true);
         }
         break;
         default:

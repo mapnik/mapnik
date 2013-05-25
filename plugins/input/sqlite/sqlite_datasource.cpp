@@ -90,7 +90,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     else
         dataset_name_ = *file;
 
+#ifdef _WINDOWS
+    if ((dataset_name_.compare(":memory:") != 0) && (!boost::filesystem::exists(mapnik::utf8_to_utf16(dataset_name_))))
+#else
     if ((dataset_name_.compare(":memory:") != 0) && (!boost::filesystem::exists(dataset_name_)))
+#endif
     {
         throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
     }
@@ -280,7 +284,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(use_spatial_index)");
 #endif
 
+#ifdef _WINDOWS
+        if (boost::filesystem::exists(mapnik::utf8_to_utf16(index_db)))
+#else
         if (boost::filesystem::exists(index_db))
+#endif
         {
             dataset_->execute("attach database '" + index_db + "' as " + index_table_);
         }
@@ -318,7 +326,11 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
                 {
                     //extent_initialized_ = true;
                     has_spatial_index_ = true;
+#ifdef _WINDOWS
+                    if (boost::filesystem::exists(mapnik::utf8_to_utf16(index_db)))
+#else
                     if (boost::filesystem::exists(index_db))
+#endif
                     {
                         dataset_->execute("attach database '" + index_db + "' as " + index_table_);
                     }
@@ -436,12 +448,20 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
         // Normalize the filename and make it relative to dataset_name_
         if (filename.compare(":memory:") != 0)
         {
+#ifdef _WINDOWS
+            boost::filesystem::path child_path(mapnik::utf8_to_utf16(filename));
+#else
             boost::filesystem::path child_path(filename);
+#endif
 
             // It is a relative path.  Fix it.
             if (! child_path.has_root_directory() && ! child_path.has_root_name())
             {
+#ifdef _WINDOWS
+                boost::filesystem::path absolute_path(mapnik::utf8_to_utf16(dataset_name_));
+#else
                 boost::filesystem::path absolute_path(dataset_name_);
+#endif
 
                 // support symlinks
                 if (boost::filesystem::is_symlink(absolute_path))
@@ -619,9 +639,8 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
 
     if (dataset_)
     {
-        // TODO - need tolerance
-        mapnik::box2d<double> const e(pt.x, pt.y, pt.x, pt.y);
-
+        mapnik::box2d<double> e(pt.x, pt.y, pt.x, pt.y);
+        e.pad(tol);
         std::ostringstream s;
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
 

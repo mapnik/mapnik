@@ -258,14 +258,9 @@ void cairo_renderer_base::setup(Map const& map)
 void cairo_renderer_base::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Start map processing bbox=" << map.get_current_extent();
-
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
     box2d<double> bounds = t_.forward(t_.extent());
     context_.rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
     context_.clip();
-#else
-#warning building against cairo older that 1.6.0, map clipping is disabled
-#endif
 }
 
 template <>
@@ -669,6 +664,15 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
     if (marker)
     {
+        box2d<double> const& bbox = (*marker)->bounding_box();
+        coord2d center = bbox.center();
+
+        agg::trans_affine tr;
+        evaluate_transform(tr, feature, sym.get_image_transform());
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine recenter_tr = recenter * tr;
+        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_);
+
         for (unsigned i = 0; i < feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
@@ -689,15 +693,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
-
-            double dx = 0.5 * (*marker)->width();
-            double dy = 0.5 * (*marker)->height();
-            agg::trans_affine tr;
-            evaluate_transform(tr, feature, sym.get_image_transform());
-            box2d<double> label_ext (-dx, -dy, dx, dy);
-            label_ext *= tr;
-            label_ext *= agg::trans_affine_translation(x,y);
-            label_ext *= agg::trans_affine_scaling(scale_factor_);
+            label_ext.re_center(x,y);
             if (sym.get_allow_overlap() ||
                 detector_->has_placement(label_ext))
             {

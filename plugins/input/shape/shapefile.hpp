@@ -29,6 +29,7 @@
 
 // mapnik
 #include <mapnik/global.hpp>
+#include <mapnik/utils.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 #include <mapnik/noncopyable.hpp>
@@ -149,6 +150,8 @@ public:
     shape_file(std::string  const& file_name) :
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         file_()
+#elif defined (_WINDOWS)
+        file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary)
 #else
         file_(file_name.c_str(), std::ios::in | std::ios::binary)
 #endif

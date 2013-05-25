@@ -30,7 +30,7 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
         # See SHAPE_ENCODING for overriding: http://gdal.org/ogr/drv_shapefile.html
         # So: failure for the NOM_FR field is expected for older gdal
         ds = mapnik.Ogr(file='../../demo/data/boundaries.shp',layer_by_index=0)
-        f = ds.features_at_point(ds.envelope().center()).features[0]
+        f = ds.features_at_point(ds.envelope().center(), 0.001).features[0]
         eq_(ds.geometry_type(),mapnik.DataGeometryType.Polygon)
 
         eq_(f['CGNS_FID'], u'6f733341ba2011d892e2080020a0f4c9')

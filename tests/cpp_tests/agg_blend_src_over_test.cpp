@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <vector>
 #include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rendering_buffer.h"
@@ -130,8 +131,15 @@ template<class ColorT, class Order> struct comp_op_rgba_src_over2
 
 }
 
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
     typedef agg::comp_op_rgba_src_over2<color, agg::order_rgba> source_over_old_agg;
     typedef agg::comp_op_rgba_src_over<color, agg::order_rgba> source_over;
 
@@ -194,7 +202,8 @@ int main( int, char*[] )
     */
 
     if (!::boost::detail::test_errors()) {
-        std::clog << "C++ AGG blending: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ AGG blending: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif

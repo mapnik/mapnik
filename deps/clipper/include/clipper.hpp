@@ -105,7 +105,7 @@ private:
 enum JoinType { jtSquare, jtRound, jtMiter };
 
 bool Orientation(const Polygon &poly);
-double Area(const Polygon &poly);
+MAPNIK_DECL double Area(const Polygon &poly);
 
 void OffsetPolygons(const Polygons &in_polys, Polygons &out_polys,
   double delta, JoinType jointype = jtSquare, double limit = 0, bool autoFix = true);

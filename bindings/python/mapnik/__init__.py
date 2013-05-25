@@ -558,24 +558,6 @@ def Osm(**keywords):
     keywords['type'] = 'osm'
     return CreateDatasource(keywords)
 
-def Geos(**keywords):
-    """Create a GEOS Vector Datasource.
-
-    Required keyword arguments:
-      wkt -- inline WKT text of the geometry
-
-    Optional keyword arguments:
-      extent -- manually specified data extent (comma delimited string, default None)
-
-    >>> from mapnik import Geos, Layer
-    >>> datasource = Geos(wkt='MULTIPOINT(100 100, 50 50, 0 0)')
-    >>> lyr = Layer('GEOS Layer from WKT string')
-    >>> lyr.datasource = datasource
-
-    """
-    keywords['type'] = 'geos'
-    return CreateDatasource(keywords)
-
 def Python(**keywords):
     """Create a Python Datasource.
 

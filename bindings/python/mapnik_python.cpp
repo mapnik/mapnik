@@ -62,6 +62,7 @@ void export_polygon_pattern_symbolizer();
 void export_raster_symbolizer();
 void export_text_placement();
 void export_shield_symbolizer();
+void export_debug_symbolizer();
 void export_font_engine();
 void export_projection();
 void export_proj_transform();
@@ -84,7 +85,6 @@ void export_logger();
 #include <mapnik/rule.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
@@ -333,11 +333,6 @@ double scale_denominator(mapnik::Map const &map, bool geographic)
 }
 
 // http://docs.python.org/c-api/exceptions.html#standard-exceptions
-void config_error_translator(mapnik::config_error const & ex)
-{
-    PyErr_SetString(PyExc_RuntimeError, ex.what());
-}
-
 void value_error_translator(mapnik::value_error const & ex)
 {
     PyErr_SetString(PyExc_ValueError, ex.what());
@@ -433,7 +428,6 @@ BOOST_PYTHON_MODULE(_mapnik)
 
     register_exception_translator<std::exception>(&standard_error_translator);
     register_exception_translator<std::out_of_range>(&out_of_range_error_translator);
-    register_exception_translator<mapnik::config_error>(&config_error_translator);
     register_exception_translator<mapnik::value_error>(&value_error_translator);
     register_exception_translator<std::runtime_error>(&runtime_error_translator);
     register_cairo();
@@ -470,6 +464,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_raster_symbolizer();
     export_text_placement();
     export_shield_symbolizer();
+    export_debug_symbolizer();
     export_font_engine();
     export_projection();
     export_proj_transform();

@@ -34,7 +34,6 @@
 using mapnik::rule;
 using mapnik::expr_node;
 using mapnik::expression_ptr;
-using mapnik::Feature;
 using mapnik::point_symbolizer;
 using mapnik::line_symbolizer;
 using mapnik::line_pattern_symbolizer;

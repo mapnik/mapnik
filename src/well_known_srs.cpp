@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/well_known_srs.hpp>
 #include <mapnik/util/trim.hpp>
+#include <mapnik/enumeration.hpp>
 
 // boost
 #include <boost/optional.hpp>

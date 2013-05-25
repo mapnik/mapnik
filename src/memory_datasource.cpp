@@ -90,9 +90,8 @@ featureset_ptr memory_datasource::features(const query& q) const
 featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
-
+    box.pad(tol);
     MAPNIK_LOG_DEBUG(memory_datasource) << "memory_datasource: Box=" << box << ", Point x=" << pt.x << ",y=" << pt.y;
-
     return boost::make_shared<memory_featureset>(box,*this);
 }
 
