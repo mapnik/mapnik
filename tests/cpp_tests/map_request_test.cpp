@@ -19,6 +19,7 @@
 #include <mapnik/feature_style_processor.hpp>
 #include <boost/foreach.hpp>
 #include <vector>
+#include <algorithm>
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {

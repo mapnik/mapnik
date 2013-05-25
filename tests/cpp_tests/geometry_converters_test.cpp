@@ -18,6 +18,7 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 struct output_geometry_backend
 {

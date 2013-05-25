@@ -8,6 +8,7 @@ namespace sys = boost::system;
 #include <iostream>
 #include <mapnik/font_engine_freetype.hpp>
 #include <vector>
+#include <algorithm>
 
 int main(int argc, char** argv)
 {

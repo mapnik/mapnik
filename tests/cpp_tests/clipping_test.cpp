@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 // agg
 #include "agg_conv_clip_polygon.h"

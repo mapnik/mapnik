@@ -6,6 +6,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <vector>
+#include <algorithm>
 
 
 int main(int argc, char** argv)
