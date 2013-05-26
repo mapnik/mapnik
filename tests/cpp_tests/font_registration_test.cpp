@@ -10,6 +10,8 @@ namespace sys = boost::system;
 #include <vector>
 #include <algorithm>
 
+#include "utils.hpp"
+
 int main(int argc, char** argv)
 {
     std::vector<std::string> args;
@@ -21,6 +23,9 @@ int main(int argc, char** argv)
 
     try
     {
+
+        BOOST_TEST(set_working_dir(args));
+
         std::string fontdir("fonts/");
 
         BOOST_TEST( fs::exists( fontdir ) );

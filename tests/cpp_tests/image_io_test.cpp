@@ -11,6 +11,8 @@ namespace sys = boost::system;
 #include <vector>
 #include <algorithm>
 
+#include "utils.hpp"
+
 int main(int argc, char** argv)
 {
     std::vector<std::string> args;
@@ -24,6 +26,8 @@ int main(int argc, char** argv)
     boost::optional<std::string> type;
     try
     {
+        BOOST_TEST(set_working_dir(args));
+
         should_throw = "./tests/cpp_tests/data/blank.jpg";
         BOOST_TEST( fs::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
