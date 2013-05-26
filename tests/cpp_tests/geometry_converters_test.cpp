@@ -20,6 +20,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "utils.hpp"
+
 struct output_geometry_backend
 {
     output_geometry_backend(boost::ptr_vector<mapnik::geometry_type> & paths, mapnik::eGeomType type)
@@ -132,6 +134,8 @@ int main(int argc, char** argv)
         args.push_back(argv[i]);
     }
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
+    BOOST_TEST(set_working_dir(args));
 
     // LineString/bbox clipping
     {

@@ -261,6 +261,12 @@ int main(int argc, char** argv)
         to_string(out,mapnik::value_integer(9223372036854775807));
         BOOST_TEST_EQ( out, "9223372036854775807" );
         out.clear();
+#else
+  #ifdef _MSC_VER
+    #pragma NOTE("BIGINT not defined so skipping large number conversion tests")
+  #else
+    #warning BIGINT not defined so skipping large number conversion tests
+  #endif
 #endif
         // bool
         to_string(out, true);

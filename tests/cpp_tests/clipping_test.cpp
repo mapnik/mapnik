@@ -21,6 +21,7 @@
 //#include "agg_path_storage.h"
 //#include "agg_conv_clipper.h"
 
+#include "utils.hpp"
 
 template <typename T>
 std::string dump_path(T & path)
@@ -87,6 +88,9 @@ int main(int argc, char** argv)
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
 
     try {
+
+        BOOST_TEST(set_working_dir(args));
+
         std::string filename("tests/cpp_tests/data/cases.txt");
         std::ifstream stream(filename.c_str(),std::ios_base::in | std::ios_base::binary);
         if (!stream.is_open())
