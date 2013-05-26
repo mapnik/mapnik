@@ -6,8 +6,15 @@
 #include <vector>
 #include <algorithm>
 
+#if defined(_MSC_VER)
+#include <cstdio>
+#endif
+
 int main(int argc, char** argv)
 {
+    #if defined(_MSC_VER)
+    unsigned int old = _set_output_format(_TWO_DIGIT_EXPONENT);
+    #endif
     std::vector<std::string> args;
     for (int i=1;i<argc;++i)
     {
