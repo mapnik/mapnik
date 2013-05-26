@@ -22,6 +22,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "utils.hpp"
+
 int main(int argc, char** argv)
 {
     std::vector<std::string> args;
@@ -32,6 +34,7 @@ int main(int argc, char** argv)
     bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
 
     try {
+        BOOST_TEST(set_working_dir(args));
         mapnik::projection srs("foo");
         // to avoid unused variable warning
         srs.params();
