@@ -21,6 +21,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "utils.hpp"
+
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
     using namespace mapnik;
@@ -70,6 +72,9 @@ int main(int argc, char** argv)
     std::string expected("./tests/cpp_tests/support/map-request-marker-text-line-expected.png");
     std::string expected_cairo("./tests/cpp_tests/support/map-request-marker-text-line-expected-cairo.png");
     try {
+
+        BOOST_TEST(set_working_dir(args));
+
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         mapnik::freetype_engine::register_fonts("./fonts", true );
         mapnik::Map m(256,256);
