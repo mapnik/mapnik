@@ -22,10 +22,6 @@
 #include <vector>
 #include <algorithm>
 
-extern "C" {
-#include <sqlite3.h>
-}
-
 int main(int argc, char** argv)
 {
     std::vector<std::string> args;
@@ -91,25 +87,6 @@ int main(int argc, char** argv)
             BOOST_TEST(true);
         }
     }
-
-    /*
-    // not working, oddly segfaults valgrind
-    try {
-    sqlite3_initialize();
-    // http://stackoverflow.com/questions/11107703/sqlite3-sigsegvs-with-valgrind
-    sqlite3_config(SQLITE_CONFIG_HEAP, malloc (1024*1024), 1024*1024, 64);
-    mapnik::datasource_cache::instance().register_datasource("./plugins/input/sqlite.input");
-    mapnik::parameters p;
-    p["type"]="sqlite";
-    p["file"]="tests/data/sqlite/world.sqlite";
-    p["table"]="world_merc";
-    mapnik::datasource_cache::instance().create(p);
-    sqlite3_shutdown();
-    BOOST_TEST(true);
-    } catch (...) {
-    BOOST_TEST(false);
-    }
-    */
 
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";

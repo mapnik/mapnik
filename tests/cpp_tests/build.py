@@ -12,7 +12,6 @@ if not env['CPP_TESTS']:
 else:
     test_env['LIBS'] = copy(env['LIBMAPNIK_LIBS'])
     test_env.AppendUnique(LIBS='mapnik')
-    test_env.AppendUnique(LIBS='sqlite3')
     test_env.AppendUnique(CXXFLAGS='-g')
     test_env['CXXFLAGS'] = copy(test_env['LIBMAPNIK_CXXFLAGS'])
     if test_env['HAS_CAIRO']:
