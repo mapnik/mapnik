@@ -286,8 +286,8 @@ truthyness = [
   [0.0,False,float],
   [123.123,True,float],
   [.1,True,float],
-  [False,False,int], # TODO - should become bool
-  [True,True,int], # TODO - should become bool
+  [False,False,int], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
+  [True,True,int], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
   [None,False,None],
   [2147483648,True,int],
   [922337203685477580,True,int]
@@ -357,7 +357,21 @@ def test_filtering_nulls_and_empty_strings():
     eq_(mapnik.Expression("[prop4] = ''").to_bool(f),False)
     eq_(mapnik.Expression("[prop4] != null or [prop4] != ''").to_bool(f),True)
     eq_(mapnik.Expression("[prop4] != null and [prop4] != ''").to_bool(f),False)
+    f["prop5"] = False
+    eq_(f["prop5"],False)
+    eq_(mapnik.Expression("[prop5]").to_bool(f),False)
+    eq_(mapnik.Expression("! [prop5]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop5] != null").to_bool(f),True)
+    eq_(mapnik.Expression("[prop5] = null").to_bool(f),False)
+    eq_(mapnik.Expression("[prop5] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop5] = ''").to_bool(f),False)
+    eq_(mapnik.Expression("[prop5] != null or [prop5] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop5] != null and [prop5] != ''").to_bool(f),True)
+    # note, we need to do [prop5] != 0 here instead of false due to this bug:
+    # https://github.com/mapnik/mapnik/issues/1873
+    eq_(mapnik.Expression("[prop5] != null and [prop5] != '' and [prop5] != 0").to_bool(f),False)
 
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    test_filtering_nulls_and_empty_strings()
+    #[eval(run)() for run in dir() if 'test_' in run]
