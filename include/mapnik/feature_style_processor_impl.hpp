@@ -160,35 +160,28 @@ void feature_style_processor<Processor>::apply(double scale_denom)
     Processor & p = static_cast<Processor&>(*this);
     p.start_map_processing(m_);
 
-    try
-    {
-        projection proj(m_.srs(),true);
-        if (scale_denom <= 0.0)
-            scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
-        scale_denom *= scale_factor_;
+    projection proj(m_.srs(),true);
+    if (scale_denom <= 0.0)
+        scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
+    scale_denom *= scale_factor_;
 
-        BOOST_FOREACH ( layer const& lyr, m_.layers() )
+    BOOST_FOREACH ( layer const& lyr, m_.layers() )
+    {
+        if (lyr.visible(scale_denom))
         {
-            if (lyr.visible(scale_denom))
-            {
-                std::set<std::string> names;
-                apply_to_layer(lyr,
-                               p,
-                               proj,
-                               m_.scale(),
-                               scale_denom,
-                               m_.width(),
-                               m_.height(),
-                               m_.get_current_extent(),
-                               m_.buffer_size(),
-                               names);
+            std::set<std::string> names;
+            apply_to_layer(lyr,
+                           p,
+                           proj,
+                           m_.scale(),
+                           scale_denom,
+                           m_.width(),
+                           m_.height(),
+                           m_.get_current_extent(),
+                           m_.buffer_size(),
+                           names);
 
-            }
         }
-    }
-    catch (proj_init_error const& ex)
-    {
-        MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
     }
 
     p.end_map_processing(m_);
@@ -207,30 +200,23 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr,
 {
     Processor & p = static_cast<Processor&>(*this);
     p.start_map_processing(m_);
-    try
-    {
-        projection proj(m_.srs(),true);
-        if (scale_denom <= 0.0)
-            scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
-        scale_denom *= scale_factor_;
+    projection proj(m_.srs(),true);
+    if (scale_denom <= 0.0)
+        scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
+    scale_denom *= scale_factor_;
 
-        if (lyr.visible(scale_denom))
-        {
-            apply_to_layer(lyr,
-                           p,
-                           proj,
-                           m_.scale(),
-                           scale_denom,
-                           m_.width(),
-                           m_.height(),
-                           m_.get_current_extent(),
-                           m_.buffer_size(),
-                           names);
-        }
-    }
-    catch (proj_init_error const& ex)
+    if (lyr.visible(scale_denom))
     {
-        MAPNIK_LOG_ERROR(feature_style_processor) << "feature_style_processor: proj_init_error=" << ex.what();
+        apply_to_layer(lyr,
+                       p,
+                       proj,
+                       m_.scale(),
+                       scale_denom,
+                       m_.width(),
+                       m_.height(),
+                       m_.get_current_extent(),
+                       m_.buffer_size(),
+                       names);
     }
     p.end_map_processing(m_);
 }

@@ -199,7 +199,17 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 map.set_background_image(ensure_relative_to_xml(image_filename));
             }
 
-            map.set_srs(map_node.get_attr("srs", map.srs()));
+            std::string srs = map_node.get_attr("srs", map.srs());
+            try
+            {
+                // create throwaway projection object here to ensure it is valid
+                projection proj(srs);
+            }
+            catch (proj_init_error const& ex)
+            {
+                throw mapnik::config_error(ex.what());
+            }
+            map.set_srs(srs);
 
             optional<unsigned> buffer_size = map_node.get_opt_attr<unsigned>("buffer-size");
             if (buffer_size)
@@ -543,9 +553,17 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
     {
         name = node.get_attr("name", std::string("Unnamed"));
 
-        // XXX if no projection is given inherit from map? [DS]
+        // If no projection is given inherit from map
         std::string srs = node.get_attr("srs", map.srs());
-
+        try
+        {
+            // create throwaway projection object here to ensure it is valid
+            projection proj(srs);
+        }
+        catch (proj_init_error const& ex)
+        {
+            throw mapnik::config_error(ex.what());
+        }
         layer lyr(name, srs);
 
         optional<boolean> status = node.get_opt_attr<boolean>("status");

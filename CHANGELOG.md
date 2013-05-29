@@ -32,6 +32,10 @@ Summary: The 2.2.0 release is the fastest running and most stable release in the
 
 - Fixed blurry rendering of image and SVG icons (#1316)
 
+- Added detection of invalid srs values when loading xml (#646)
+
+- Removed muffling of projection errors while rendering (#646)
+
 - Improved logging system (https://github.com/mapnik/mapnik/wiki/Logging)
 
 - Added support for reading images from in memory streams (#1805)
