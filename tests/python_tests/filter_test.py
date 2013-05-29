@@ -318,5 +318,46 @@ def test_expressions_for_thruthyness():
     eq_(expr.evaluate(f2),None)
     eq_(expr.to_bool(f2),False)
 
+def test_filtering_nulls_and_empty_strings():
+    context = mapnik.Context()
+    f = mapnik.Feature(context,0)
+    f["prop"] = u"hello"
+    eq_(f["prop"],u"hello")
+    eq_(mapnik.Expression("[prop]").to_bool(f),True)
+    eq_(mapnik.Expression("! [prop]").to_bool(f),False)
+    eq_(mapnik.Expression("[prop] != null").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] != null and [prop] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] != null or [prop] != ''").to_bool(f),True)
+    f["prop2"] = u""
+    eq_(f["prop2"],u"")
+    eq_(mapnik.Expression("[prop2]").to_bool(f),False)
+    eq_(mapnik.Expression("! [prop2]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop2] != null").to_bool(f),True)
+    eq_(mapnik.Expression("[prop2] != ''").to_bool(f),False)
+    eq_(mapnik.Expression("[prop2] = ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop2] != null or [prop2] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop2] != null and [prop2] != ''").to_bool(f),False)
+    f["prop3"] = None
+    eq_(f["prop3"],None)
+    eq_(mapnik.Expression("[prop3]").to_bool(f),False)
+    eq_(mapnik.Expression("! [prop3]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop3] != null").to_bool(f),False)
+    eq_(mapnik.Expression("[prop3] = null").to_bool(f),True)
+    eq_(mapnik.Expression("[prop3] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop3] = ''").to_bool(f),False)
+    eq_(mapnik.Expression("[prop3] != null or [prop3] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop3] != null and [prop3] != ''").to_bool(f),False)
+    # attr not existing should behave the same as prop3
+    eq_(mapnik.Expression("[prop4]").to_bool(f),False)
+    eq_(mapnik.Expression("! [prop4]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop4] != null").to_bool(f),False)
+    eq_(mapnik.Expression("[prop4] = null").to_bool(f),True)
+    eq_(mapnik.Expression("[prop4] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop4] = ''").to_bool(f),False)
+    eq_(mapnik.Expression("[prop4] != null or [prop4] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop4] != null and [prop4] != ''").to_bool(f),False)
+
+
 if __name__ == "__main__":
     [eval(run)() for run in dir() if 'test_' in run]
