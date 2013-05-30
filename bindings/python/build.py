@@ -179,7 +179,7 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
     if env['HAS_CAIRO']:
         py_env.Append(CPPPATH = env['CAIRO_CPPPATHS'])
         py_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
-        if env['PLATFORM'] == 'Darwin':
+        if env['PLATFORM'] == 'Darwin' and not env['PYTHON_DYNAMIC_LOOKUP']:
             py_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
     
     if env['HAS_PYCAIRO']:
