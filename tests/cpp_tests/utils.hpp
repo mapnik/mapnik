@@ -8,7 +8,7 @@ inline static bool set_working_dir(std::vector<std::string> args)
     std::vector<std::string>::iterator itr = std::find(args.begin(), args.end(), "-d");
     if (itr!=args.end())
     {
-        int dist = std::distance(args.begin(),itr);
+        unsigned dist = std::distance(args.begin(),itr);
         if (args.size() > dist+1)
         {
             std::string chdir = args.at(dist+1);
