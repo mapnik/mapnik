@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
+from utilities import run_all
 import mapnik
 
 if hasattr(mapnik,'Expression'):
@@ -373,5 +374,4 @@ def test_filtering_nulls_and_empty_strings():
 
 
 if __name__ == "__main__":
-    test_filtering_nulls_and_empty_strings()
-    #[eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))
