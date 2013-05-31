@@ -419,6 +419,18 @@ def test_falseyness_comparision():
     eq_(mapnik.Expression("[prop] = true").to_bool(f),False)
     eq_(mapnik.Expression("[prop] != true").to_bool(f),True)
 
+# https://github.com/mapnik/mapnik/issues/1806, fixed by https://github.com/mapnik/mapnik/issues/1872
+def test_truthyness_comparision():
+    context = mapnik.Context()
+    f = mapnik.Feature(context,0)
+    f["prop"] = 1
+    eq_(mapnik.Expression("[prop]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] = false").to_bool(f),False)
+    eq_(mapnik.Expression("not [prop] != false").to_bool(f),False)
+    eq_(mapnik.Expression("not [prop] = true").to_bool(f),False)
+    eq_(mapnik.Expression("[prop] = true").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] != true").to_bool(f),False)
+
 
 if __name__ == "__main__":
     run_all(eval(x) for x in dir() if x.startswith("test_"))
