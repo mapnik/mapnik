@@ -27,6 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/mapped_memory_cache.hpp>
 
 // boost
 #include <boost/interprocess/streams/bufferstream.hpp>
@@ -57,6 +58,7 @@ private:
     std::vector<field_descriptor> fields_;
 #ifdef SHAPE_MEMORY_MAPPED_FILE
     boost::interprocess::ibufferstream file_;
+    mapnik::mapped_region_ptr mapped_region_;
 #else
     std::ifstream file_;
 #endif
