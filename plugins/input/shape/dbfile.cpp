@@ -62,7 +62,12 @@ dbf_file::dbf_file(std::string const& file_name)
     boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name,true);
     if (memory)
     {
+        mapped_region_ = *memory;
         file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+    }
+    else
+    {
+        throw std::runtime_error("could not create file mapping for "+file_name);
     }
 #endif
     if (file_)

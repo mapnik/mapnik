@@ -138,6 +138,7 @@ public:
 #ifdef SHAPE_MEMORY_MAPPED_FILE
     typedef ibufferstream file_source_type;
     typedef shape_record<MappedRecordTag> record_type;
+    mapnik::mapped_region_ptr mapped_region_;
 #else
     typedef std::ifstream file_source_type;
     typedef shape_record<RecordTag> record_type;
@@ -162,7 +163,12 @@ public:
 
         if (memory)
         {
-            file_.buffer(static_cast<char*>((*memory)->get_address()), (*memory)->get_size());
+            mapped_region_ = *memory;
+            file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+        }
+        else
+        {
+            throw std::runtime_error("could not create file mapping for "+file_name);
         }
 #endif
     }
