@@ -42,7 +42,6 @@
 // stl
 #include <string>
 #include <cmath>
-
 // uci
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
@@ -80,26 +79,34 @@ namespace impl {
 struct equals
     : public boost::static_visitor<bool>
 {
-    template <typename T, typename U>
-    bool operator() (const T &, const U &) const
-    {
-        return false;
-    }
-
-    template <typename T>
-    bool operator() (T lhs, T rhs) const
-    {
-        return lhs == rhs;
-    }
-
     bool operator() (value_integer lhs, value_double rhs) const
+    {
+        return  lhs == rhs;
+    }
+
+    bool operator() (value_bool lhs, value_double rhs) const
     {
         return  lhs == rhs;
     }
 
     bool operator() (value_double lhs, value_integer rhs) const
     {
-        return  (lhs == rhs)? true : false ;
+        return  lhs == rhs;
+    }
+
+    bool operator() (value_bool lhs, value_integer rhs) const
+    {
+        return  lhs == rhs;
+    }
+
+    bool operator() (value_integer lhs, value_bool rhs) const
+    {
+        return  lhs == rhs;
+    }
+
+    bool operator() (value_double lhs, value_bool rhs) const
+    {
+        return  lhs == rhs;
     }
 
     bool operator() (value_unicode_string const& lhs,
@@ -112,6 +119,19 @@ struct equals
     {
         // this changed from false to true - https://github.com/mapnik/mapnik/issues/794
         return true;
+    }
+
+    template <typename T>
+    bool operator() (T lhs, T rhs) const
+    {
+        return lhs == rhs;
+    }
+
+    template <typename T, typename U>
+    bool operator() (T const& lhs, U const& rhs) const
+    {
+        //return equals_helper<T, U, typename boost::is_convertible<T,U>::value_type >::result(lhs,rhs);
+        return false;
     }
 };
 
