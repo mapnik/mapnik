@@ -179,6 +179,15 @@ struct not_equals
         return  (lhs != rhs)? true : false;
     }
 
+    // back compatibility shim to equate empty string with null for != test
+    // https://github.com/mapnik/mapnik/issues/1859
+    // TODO - consider removing entire specialization at Mapnik 3.x
+    bool operator() (value_null lhs,value_unicode_string const& rhs) const
+    {
+        if (rhs.isEmpty()) return false;
+        return true;
+    }
+
 };
 
 struct greater_than
