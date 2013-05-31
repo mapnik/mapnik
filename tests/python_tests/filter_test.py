@@ -216,7 +216,7 @@ def test_creation_of_bool():
     f["bool"] = True
     eq_(f["bool"],True)
     # TODO - will become int of 1 do to built in boost python conversion
-    # is this fixable?
+    # https://github.com/mapnik/mapnik/issues/1873
     eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],int),True)
     f["bool"] = False
     eq_(f["bool"],False)
@@ -228,6 +228,7 @@ def test_creation_of_bool():
     # test integer
     f["bool"] = 0
     eq_(f["bool"],0)
+    # https://github.com/mapnik/mapnik/issues/1873
     # ugh, boost_python's built into converter does not work right
     #eq_(isinstance(f["bool"],bool),False)
 
@@ -239,8 +240,8 @@ null_equality = [
   [0.0,False,float],
   [123.123,False,float],
   [.1,False,float],
-  [False,False,int], # TODO - should become bool
-  [True,False,int], # TODO - should become bool
+  [False,False,int], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
+  [True,False,int], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
   [None,True,None],
   [2147483648,False,int],
   [922337203685477580,False,int]
