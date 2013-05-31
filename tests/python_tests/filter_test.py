@@ -372,6 +372,18 @@ def test_filtering_nulls_and_empty_strings():
     # https://github.com/mapnik/mapnik/issues/1873
     eq_(mapnik.Expression("[prop5] != null and [prop5] != '' and [prop5] != 0").to_bool(f),False)
 
+# https://github.com/mapnik/mapnik/issues/1872
+def test_falseyness_comparision():
+    context = mapnik.Context()
+    f = mapnik.Feature(context,0)
+    f["prop"] = 0
+    eq_(mapnik.Expression("[prop]").to_bool(f),False)
+    eq_(mapnik.Expression("[prop] = false").to_bool(f),True)
+    eq_(mapnik.Expression("not [prop] != false").to_bool(f),True)
+    eq_(mapnik.Expression("not [prop] = true").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] = true").to_bool(f),False)
+    eq_(mapnik.Expression("[prop] != true").to_bool(f),True)
+
 
 if __name__ == "__main__":
     run_all(eval(x) for x in dir() if x.startswith("test_"))
