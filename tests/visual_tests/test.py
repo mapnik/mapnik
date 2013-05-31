@@ -24,6 +24,50 @@ defaults = {
     'grid': True
 }
 
+cairo_threshold = 10
+if 'Linux' == os.uname()[0]:
+    # we assume if linux then you are running packaged cairo
+    # which is older than the 1.12.14 version we used on OS X
+    # to generate the expected images, so we'll rachet back the threshold
+    # https://github.com/mapnik/mapnik/issues/1868
+    cairo_threshold = 120
+
+def render_cairo(m, output, scale_factor):
+    mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
+    # open and re-save as png8 to save space
+    new_im = mapnik.Image.open(output)
+    new_im.save(output, 'png8:m=h')
+
+def render_grid(m, output, scale_factor):
+    grid = mapnik.Grid(m.width, m.height)
+    mapnik.render_layer(m, grid, layer=0)
+    utf1 = grid.encode('utf', resolution=4)
+    open(output,'wb').write(json.dumps(utf1, indent=1))
+
+renderers = [
+    { 'name': 'agg',
+      'render': lambda m, output, scale_factor: mapnik.render_to_file(m, output, 'png8:m=h', scale_factor),
+      'compare': lambda actual, reference: compare(actual, reference, alpha=True),
+      'threshold': 0,
+      'filetype': 'png',
+      'dir': 'images'
+    },
+    { 'name': 'cairo',
+      'render': render_cairo,
+      'compare': lambda actual, reference: compare(actual, reference, alpha=False),
+      'threshold': cairo_threshold,
+      'filetype': 'png',
+      'dir': 'images'
+    },
+    { 'name': 'grid',
+      'render': render_grid,
+      'compare': lambda actual, reference: compare_grids(actual, reference, alpha=False),
+      'threshold': 0,
+      'filetype': 'json',
+      'dir': 'grids'
+    }
+]
+
 sizes_many_in_big_range = [(800, 100), (600, 100), (400, 100),
     (300, 100), (250, 100), (150, 100), (100, 100)]
 
@@ -216,44 +260,6 @@ class Reporting:
             html_out.write(html_template.replace('{{RESULTS}}',html_body))
             print 'View failures by opening %s' % failures_realpath
         return 1
-
-def render_cairo(m, output, scale_factor):
-    mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
-    # open and re-save as png8 to save space
-    new_im = mapnik.Image.open(output)
-    new_im.save(output, 'png8:m=h')
-
-def render_grid(m, output, scale_factor):
-    grid = mapnik.Grid(m.width, m.height)
-    mapnik.render_layer(m, grid, layer=0)
-    utf1 = grid.encode('utf', resolution=4)
-    open(output,'wb').write(json.dumps(utf1, indent=1))
-
-            
-renderers = [
-    { 'name': 'agg',
-      'render': lambda m, output, scale_factor: mapnik.render_to_file(m, output, 'png8:m=h', scale_factor),
-      'compare': lambda actual, reference: compare(actual, reference, alpha=True),
-      'threshold': 0,
-      'filetype': 'png',
-      'dir': 'images'
-    },
-    { 'name': 'cairo',
-      'render': render_cairo,
-      'compare': lambda actual, reference: compare(actual, reference, alpha=False),
-      'threshold': 10,
-      'filetype': 'png',
-      'dir': 'images'
-    },
-    { 'name': 'grid',
-      'render': render_grid,
-      'compare': lambda actual, reference: compare_grids(actual, reference, alpha=False),
-      'threshold': 0,
-      'filetype': 'json',
-      'dir': 'grids'
-    }
-]
-
 
 def render(filename,config, width, height, bbox, scale_factor, reporting):
     m = mapnik.Map(width, height)
