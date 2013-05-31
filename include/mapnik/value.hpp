@@ -130,7 +130,6 @@ struct equals
     template <typename T, typename U>
     bool operator() (T const& lhs, U const& rhs) const
     {
-        //return equals_helper<T, U, typename boost::is_convertible<T,U>::value_type >::result(lhs,rhs);
         return false;
     }
 };
@@ -155,7 +154,27 @@ struct not_equals
         return  lhs != rhs;
     }
 
+    bool operator() (value_bool lhs, value_double rhs) const
+    {
+        return  lhs != rhs;
+    }
+
     bool operator() (value_double lhs, value_integer rhs) const
+    {
+        return  lhs != rhs;
+    }
+
+    bool operator() (value_bool lhs, value_integer rhs) const
+    {
+        return  lhs != rhs;
+    }
+
+    bool operator() (value_integer lhs, value_bool rhs) const
+    {
+        return  lhs != rhs;
+    }
+
+    bool operator() (value_double lhs, value_bool rhs) const
     {
         return  lhs != rhs;
     }
