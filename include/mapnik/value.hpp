@@ -115,12 +115,6 @@ struct equals
         return  (lhs == rhs) ? true: false;
     }
 
-    bool operator() (value_null, value_null) const
-    {
-        // this changed from false to true - https://github.com/mapnik/mapnik/issues/794
-        return true;
-    }
-
     template <typename T>
     bool operator() (T lhs, T rhs) const
     {
@@ -185,24 +179,6 @@ struct not_equals
         return  (lhs != rhs)? true : false;
     }
 
-    bool operator() (value_null, value_null) const
-    {
-        return false;
-    }
-
-    template <typename T>
-    bool operator() (value_null, const T &) const
-    {
-        // https://github.com/mapnik/mapnik/issues/1642
-        return true;
-    }
-
-    template <typename T>
-    bool operator() (const T &, value_null) const
-    {
-        // https://github.com/mapnik/mapnik/issues/1642
-        return true;
-    }
 };
 
 struct greater_than

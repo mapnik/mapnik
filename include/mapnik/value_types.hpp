@@ -47,6 +47,16 @@ typedef bool value_bool;
 
 struct value_null
 {
+    bool operator==(value_null const& other) const
+    {
+        return true;
+    }
+
+    bool operator!=(value_null const& other) const
+    {
+        return false;
+    }
+
     template <typename T>
     value_null operator+ (T const& /*other*/) const
     {
