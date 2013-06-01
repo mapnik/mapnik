@@ -46,6 +46,7 @@
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/config_error.hpp>
+#include <mapnik/utils.hpp>
 #include <mapnik/util/dasharray_parser.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
@@ -1659,27 +1660,37 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> cons
     if (marker_cache::instance().is_uri(*opt_path))
         return *opt_path;
 
+#ifdef _WINDOWS
+    boost::filesystem::path native_path = mapnik::utf8_to_utf16(*opt_path);
+#endif
     if (relative_to_xml_)
     {
         boost::filesystem::path xml_path = filename_;
+#ifdef _WINDOWS
+        boost::filesystem::path rel_path = native_path;
+#else
         boost::filesystem::path rel_path = *opt_path;
+#endif
         if (!rel_path.has_root_path())
         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
-            // TODO - normalize is now deprecated, use make_preferred?
-            boost::filesystem::path full = boost::filesystem::absolute(xml_path.parent_path()/rel_path);
+            boost::filesystem::path full = boost::filesystem::absolute(xml_path.parent_path()/rel_path).make_preferred();
 #else // v2
             boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
 #endif
 
             MAPNIK_LOG_DEBUG(load_map) << "map_parser: Modifying relative paths to be relative to xml...";
-            MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Original base path=" << *opt_path;
+            MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Original base path=" << rel_path.string();
             MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Relative base path=" << full.string();
 
             return full.string();
         }
     }
+#ifdef _WINDOWS
+    return native_path.string();
+#else
     return *opt_path;
+#endif
 }
 
 void map_parser::ensure_exists(std::string const& file_path)

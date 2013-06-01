@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2013 Artem Pavlenko
+ * Copyright (C) 2011 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,6 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/global.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/geom_util.hpp>
@@ -77,28 +76,18 @@ shape_datasource::shape_datasource(const parameters &params)
         shape_name_ = *file;
 
     boost::algorithm::ireplace_last(shape_name_,".shp","");
-#ifdef _WINDOWS
-    if (!boost::filesystem::exists(mapnik::utf8_to_utf16(shape_name_) + L".shp"))
-#else
+
     if (!boost::filesystem::exists(shape_name_ + ".shp"))
-#endif
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
     }
-#ifdef _WINDOWS
-    if (boost::filesystem::is_directory(mapnik::utf8_to_utf16(shape_name_) + L".shp"))
-#else
+
     if (boost::filesystem::is_directory(shape_name_ + ".shp"))
-#endif
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
     }
 
-#ifdef _WINDOWS
-    if (!boost::filesystem::exists(mapnik::utf8_to_utf16(shape_name_) + L".dbf"))
-#else
     if (!boost::filesystem::exists(shape_name_ + ".dbf"))
-#endif
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".dbf' does not exist");
     }

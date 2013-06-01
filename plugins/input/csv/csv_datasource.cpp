@@ -30,7 +30,6 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/feature_factory.hpp>
@@ -120,11 +119,7 @@ csv_datasource::csv_datasource(parameters const& params)
     }
     else
     {
-#if defined (_WINDOWS)
-        std::ifstream in(mapnik::utf8_to_utf16(filename_),std::ios_base::in | std::ios_base::binary);
-#else
         std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
-#endif
         if (!in.is_open())
         {
             throw mapnik::datasource_exception("CSV Plugin: could not open: '" + filename_ + "'");
