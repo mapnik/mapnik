@@ -129,14 +129,14 @@ private:
 };
 
 //#include <mapnik/internal/dump_xml.hpp>
-void load_map(Map & map, std::string const& filename, bool strict)
+void load_map(Map & map, std::string const& filename, bool strict, std::string base_path)
 {
     // TODO - use xml encoding?
     xml_tree tree("utf8");
     tree.set_filename(filename);
     read_xml(filename, tree.root());
     map_parser parser(strict, filename);
-    parser.parse_map(map, tree.root(), "");
+    parser.parse_map(map, tree.root(), base_path);
     //dump_xml(tree.root());
 }
 
@@ -150,7 +150,7 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     }
     else
     {
-        read_xml_string(str, tree.root(), map.base_path()); // default to map base_path
+        read_xml_string(str, tree.root(), map.base_path()); // FIXME - this value is not fully known yet
     }
     map_parser parser(strict, base_path);
     parser.parse_map(map, tree.root(), base_path);
