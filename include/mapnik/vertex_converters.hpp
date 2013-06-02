@@ -39,6 +39,7 @@
 #include <boost/mpl/int.hpp>
 
 // fusion
+#include <boost/fusion/include/mpl.hpp>
 #include <boost/fusion/container/vector.hpp>
 #include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/make_vector.hpp>

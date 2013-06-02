@@ -91,7 +91,7 @@ datasource_ptr ds_generator(parameters const& params)
 }
 
 typedef datasource_ptr (*ds_generator_ptr)(parameters const& params);
-typedef boost::unordered::unordered_map<std::string, ds_generator_ptr> datasource_map;
+typedef boost::unordered_map<std::string, ds_generator_ptr> datasource_map;
 
 static datasource_map ds_map = boost::assign::map_list_of
     #if defined(MAPNIK_STATIC_PLUGIN_CSV)
