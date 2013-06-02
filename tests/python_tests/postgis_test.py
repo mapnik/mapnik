@@ -3,7 +3,7 @@
 from nose.tools import *
 import atexit
 import time
-from utilities import execution_path
+from utilities import execution_path, run_all
 from subprocess import Popen, PIPE
 import os, mapnik
 from Queue import Queue
@@ -658,4 +658,4 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))
