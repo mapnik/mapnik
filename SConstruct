@@ -62,14 +62,14 @@ DEFAULT_LINK_PRIORITY = ['internal','other','frameworks','user','system']
 
 
 pretty_dep_names = {
-    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki//OCCI',
+    'ociei':'Oracle database library | configure with OCCI_LIBS & OCCI_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/OCCI',
     'gdal':'GDAL C++ library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/GDAL',
-    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki//OGR',
+    'ogr':'OGR-enabled GDAL C++ Library | configured using gdal-config program | try setting GDAL_CONFIG SCons option | more info: https://github.com/mapnik/mapnik/wiki/OGR',
     'cairo':'Cairo C library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'pycairo':'Python bindings to Cairo library | configured using pkg-config | try setting PKG_CONFIG_PATH SCons option',
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
-    'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki//PostGIS',
-    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki//SQLite',
+    'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
+    'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
@@ -82,8 +82,8 @@ pretty_dep_names = {
     'libxml2':'libxml2 library | try setting XML2_CONFIG SCons option to point to location of xml2-config program',
     'gdal-config':'gdal-config program | try setting GDAL_CONFIG SCons option',
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
-    'osm':'more info: https://github.com/mapnik/mapnik/wiki//OsmPlugin',
-    'curl':'libcurl is required for the "osm" plugin - more info: https://github.com/mapnik/mapnik/wiki//OsmPlugin',
+    'osm':'more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
+    'curl':'libcurl is required for the "osm" plugin - more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
     'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
     'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
@@ -250,7 +250,7 @@ def pretty_dep(dep):
     if pretty:
         return '%s (%s)' % (dep,pretty)
     elif 'boost' in dep:
-        return '%s (%s)' % (dep,'more info see: https://github.com/mapnik/mapnik/wiki//MapnikInstallation & http://www.boost.org')
+        return '%s (%s)' % (dep,'more info see: https://github.com/mapnik/mapnik/wiki/Mapnik-Installation & http://www.boost.org')
     return dep
 
 
@@ -930,7 +930,7 @@ int main()
         return True
     return False
 
-def sqlite_has_rtree(context):
+def sqlite_has_rtree(context, silent=False):
     """ check an sqlite3 install has rtree support.
 
     PRAGMA compile_options;
@@ -967,7 +967,10 @@ int main()
 }
 
 """, '.c')
-    context.Message('Checking if SQLite supports RTREE... ')
+    if not silent:
+        context.Message('Checking if SQLite supports RTREE... ')
+    if silent:
+        context.did_show_result=1
     context.Result(ret[0])
     if ret[0]:
         return True
@@ -1280,7 +1283,7 @@ if not preconfigured:
             color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
             color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
             if not env['BOOST_VERSION']:
-                env['MISSING_DEPS'].append('boost version >=%s' % BOOST_MIN_VERSION)
+                env['MISSING_DEPS'].append('boost version >= %s' % BOOST_MIN_VERSION)
         else:
             color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
 
@@ -1303,6 +1306,9 @@ if not preconfigured:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
 
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
+
+    SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
+    CHECK_PKG_CONFIG = conf.CheckPKGConfig('0.15.0')
 
     if len(env['REQUESTED_PLUGINS']):
         color_print(4,'Checking for requested plugins dependencies...')
@@ -1341,7 +1347,7 @@ if not preconfigured:
                     # if statically linking, on linux we likely
                     # need to link sqlite to pthreads and dl
                     if env['RUNTIME_LINK'] == 'static':
-                        if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('sqlite3'):
+                        if CHECK_PKG_CONFIG and conf.CheckPKG('sqlite3'):
                             sqlite_env = env.Clone()
                             try:
                                 sqlite_env.ParseConfig('pkg-config --static --libs sqlite3')
@@ -1352,7 +1358,7 @@ if not preconfigured:
                             except OSError,e:
                                 pass
 
-                    if not conf.sqlite_has_rtree():
+                    if not SQLITE_HAS_RTREE:
                         env.Replace(**sqlite_backup)
                         if details['lib'] in env['LIBS']:
                             env['LIBS'].remove(details['lib'])
@@ -1375,7 +1381,7 @@ if not preconfigured:
             env.AppendUnique(LIBS='sqlite3')
             env.AppendUnique(CPPPATH = os.path.realpath(env['SQLITE_INCLUDES']))
             env.AppendUnique(LIBPATH = os.path.realpath(env['SQLITE_LIBS']))
-        if not conf.sqlite_has_rtree():
+        if not SQLITE_HAS_RTREE:
             env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
             env['PGSQL2SQLITE'] = False
 
@@ -1414,7 +1420,7 @@ if not preconfigured:
                 # todo - run actual checkLib?
                 env['HAS_CAIRO'] = True
         else:
-            if not conf.CheckPKGConfig('0.15.0'):
+            if not CHECK_PKG_CONFIG:
                 env['HAS_CAIRO'] = False
                 env['SKIPPED_DEPS'].append('pkg-config')
                 env['SKIPPED_DEPS'].append('cairo')
@@ -1526,7 +1532,7 @@ if not preconfigured:
                     env['MISSING_DEPS'].append('boost python')
 
             if env['CAIRO']:
-                if conf.CheckPKGConfig('0.15.0') and conf.CheckPKG('pycairo'):
+                if CHECK_PKG_CONFIG and conf.CheckPKG('pycairo'):
                     env['HAS_PYCAIRO'] = True
                 else:
                     env['SKIPPED_DEPS'].extend(['pycairo'])
@@ -1548,7 +1554,7 @@ if not preconfigured:
         color_print(4,"    $ sudo python scons/scons.py install")
         color_print(4,"\nTo view available path variables:\n    $ python scons/scons.py --help or -h")
         color_print(4,'\nTo view overall SCons help options:\n    $ python scons/scons.py --help-options or -H\n')
-        color_print(4,'More info: https://github.com/mapnik/mapnik/wiki//MapnikInstallation')
+        color_print(4,'More info: https://github.com/mapnik/mapnik/wiki/Mapnik-Installation')
         if not HELP_REQUESTED:
             Exit(1)
     else:
@@ -1568,7 +1574,7 @@ if not preconfigured:
           color_print(4,"Did not use user config file, no custom path variables will be saved...")
 
         if env['SKIPPED_DEPS']:
-            color_print(3,'\nNote: will build without these OPTIONAL dependencies:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['SKIPPED_DEPS']]))
+            color_print(4,'\nNote: will build without these OPTIONAL dependencies:\n   - %s' % '\n   - '.join([pretty_dep(dep) for dep in env['SKIPPED_DEPS']]))
             print
 
         # fetch the mapnik version header in order to set the
@@ -1836,7 +1842,7 @@ if not HELP_REQUESTED:
             plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'%s.input' % plugin)
             if os.path.exists(plugin_path):
                 if plugin not in env['REQUESTED_PLUGINS'] or env['PLUGIN_LINKING'] == 'static':
-                    color_print(3,"Notice: removing out of date plugin: '%s'" % plugin_path)
+                    color_print(4,"Notice: removing out of date plugin: '%s'" % plugin_path)
                     os.unlink(plugin_path)
 
     # Build the c++ rundemo app if requested
@@ -1896,7 +1902,7 @@ if not HELP_REQUESTED:
         if 'install' in COMMAND_LINE_TARGETS:
             plugin_path = os.path.join(env['MAPNIK_INPUT_PLUGINS_DEST'],'hello.input')
             if os.path.exists(plugin_path):
-                color_print(3,"Notice: removing out of date plugin: '%s'" % plugin_path)
+                color_print(4,"Notice: removing out of date plugin: '%s'" % plugin_path)
                 os.unlink(plugin_path)
         if os.path.exists('plugins/input/templates/hello.input'):
             os.unlink('plugins/input/templates/hello.input')
