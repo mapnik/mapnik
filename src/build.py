@@ -214,7 +214,10 @@ if env['PLUGIN_LINKING'] == 'static':
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS'] or not details['lib']:
             hit = True
-            lib_env.Append(CPPDEFINES = '-DMAPNIK_STATIC_PLUGIN_%s' % plugin.upper())
+            DEF = '-DMAPNIK_STATIC_PLUGIN_%s' % plugin.upper()
+            lib_env.Append(CPPDEFINES = DEF)
+            if DEF not in libmapnik_defines:
+                libmapnik_defines.append(DEF)
             plugin_env = SConscript('../plugins/input/%s/build.py' % plugin)
             if plugin_env.has_key('SOURCES') and plugin_env['SOURCES']:
                 source += ['../plugins/input/%s/%s' % (plugin, src) for src in plugin_env['SOURCES']]
@@ -232,6 +235,7 @@ if env['PLUGIN_LINKING'] == 'static':
             print("Notice: dependencies not met for plugin '%s', not building..." % plugin)
     if hit:
         lib_env.Append(CPPDEFINES = '-DMAPNIK_STATIC_PLUGINS')
+        libmapnik_defines.append('-DMAPNIK_STATIC_PLUGINS')
 
 if env['HAS_CAIRO']:
     lib_env.AppendUnique(LIBPATH=env['CAIRO_LIBPATHS'])
