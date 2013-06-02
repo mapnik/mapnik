@@ -74,17 +74,17 @@ if env['TIFF']:
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
 
-# libxml2 should be optional but is currently not
-# https://github.com/mapnik/mapnik/issues/913
 lib_env['LIBS'].append('xml2')
 
 if env['THREADING'] == 'multi':
     lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
 
+if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
+    lib_env['LIBS'].append('icui18n')
+
 if env['RUNTIME_LINK'] == 'static':
     if 'icuuc' in env['ICU_LIB_NAME']:
         lib_env['LIBS'].append('icudata')
-        lib_env['LIBS'].append('icui18n')
 else:
     lib_env['LIBS'].insert(0, 'agg')
 
@@ -213,24 +213,27 @@ if env['PLUGIN_LINKING'] == 'static':
     for plugin in env['REQUESTED_PLUGINS']:
         details = env['PLUGINS'][plugin]
         if details['lib'] in env['LIBS'] or not details['lib']:
-            hit = True
-            DEF = '-DMAPNIK_STATIC_PLUGIN_%s' % plugin.upper()
-            lib_env.Append(CPPDEFINES = DEF)
-            if DEF not in libmapnik_defines:
-                libmapnik_defines.append(DEF)
             plugin_env = SConscript('../plugins/input/%s/build.py' % plugin)
-            if plugin_env.has_key('SOURCES') and plugin_env['SOURCES']:
-                source += ['../plugins/input/%s/%s' % (plugin, src) for src in plugin_env['SOURCES']]
-            if plugin_env.has_key('CPPDEFINES') and plugin_env['CPPDEFINES']:
-                lib_env.AppendUnique(CPPDEFINES=plugin_env['CPPDEFINES'])
-            if plugin_env.has_key('CXXFLAGS') and plugin_env['CXXFLAGS']:
-                lib_env.AppendUnique(CXXFLAGS=plugin_env['CXXFLAGS'])
-            if plugin_env.has_key('LINKFLAGS') and plugin_env['LINKFLAGS']:
-                lib_env.AppendUnique(LINKFLAGS=plugin_env['LINKFLAGS'])
-            if plugin_env.has_key('CPPPATH') and plugin_env['CPPPATH']:
-                lib_env.AppendUnique(CPPPATH=copy(plugin_env['CPPPATH']))
-            if plugin_env.has_key('LIBS') and plugin_env['LIBS']:
-                lib_env.AppendUnique(LIBS=plugin_env['LIBS'])
+            if not plugin_env:
+                print("Notice: no 'plugin_env' variable found for plugin: '%s'" % plugin)
+            else:
+                hit = True
+                DEF = '-DMAPNIK_STATIC_PLUGIN_%s' % plugin.upper()
+                lib_env.Append(CPPDEFINES = DEF)
+                if DEF not in libmapnik_defines:
+                    libmapnik_defines.append(DEF)
+                if plugin_env.has_key('SOURCES') and plugin_env['SOURCES']:
+                    source += ['../plugins/input/%s/%s' % (plugin, src) for src in plugin_env['SOURCES']]
+                if plugin_env.has_key('CPPDEFINES') and plugin_env['CPPDEFINES']:
+                    lib_env.AppendUnique(CPPDEFINES=plugin_env['CPPDEFINES'])
+                if plugin_env.has_key('CXXFLAGS') and plugin_env['CXXFLAGS']:
+                    lib_env.AppendUnique(CXXFLAGS=plugin_env['CXXFLAGS'])
+                if plugin_env.has_key('LINKFLAGS') and plugin_env['LINKFLAGS']:
+                    lib_env.AppendUnique(LINKFLAGS=plugin_env['LINKFLAGS'])
+                if plugin_env.has_key('CPPPATH') and plugin_env['CPPPATH']:
+                    lib_env.AppendUnique(CPPPATH=copy(plugin_env['CPPPATH']))
+                if plugin_env.has_key('LIBS') and plugin_env['LIBS']:
+                    lib_env.AppendUnique(LIBS=plugin_env['LIBS'])
         else:
             print("Notice: dependencies not met for plugin '%s', not building..." % plugin)
     if hit:

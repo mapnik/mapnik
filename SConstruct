@@ -902,8 +902,7 @@ int main()
 
 def boost_regex_has_icu(context):
     if env['RUNTIME_LINK'] == 'static':
-        context.env.Append(LIBS='icui18n')
-        context.env.Append(LIBS='icudata')
+        context.env.AppendUnique(LIBS='icudata')
     ret = context.TryRun("""
 
 #include <boost/regex/icu.hpp>
@@ -1299,6 +1298,9 @@ if not preconfigured:
 
     if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
+        # we need libicui18n if using static boost libraries, so it is
+        # important to try this check with the library linked
+        env.AppendUnique(LIBS='icui18n')
         if conf.boost_regex_has_icu():
             # TODO - should avoid having this be globally defined...
             env.Append(CPPDEFINES = '-DBOOST_REGEX_HAS_ICU')
@@ -1307,7 +1309,7 @@ if not preconfigured:
 
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
-    SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
+    SQLITE_HAS_RTREE = None
     CHECK_PKG_CONFIG = conf.CheckPKGConfig('0.15.0')
 
     if len(env['REQUESTED_PLUGINS']):
@@ -1342,6 +1344,7 @@ if not preconfigured:
                     env.Replace(**backup)
                     env['SKIPPED_DEPS'].append(details['lib'])
                 if plugin == 'sqlite':
+                    SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                     sqlite_backup = env.Clone().Dictionary()
 
                     # if statically linking, on linux we likely
@@ -1358,6 +1361,8 @@ if not preconfigured:
                             except OSError,e:
                                 pass
 
+                    if SQLITE_HAS_RTREE is None:
+                        SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                     if not SQLITE_HAS_RTREE:
                         env.Replace(**sqlite_backup)
                         if details['lib'] in env['LIBS']:

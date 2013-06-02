@@ -19,44 +19,55 @@
 #
 #
 
-Import ('plugin_base')
 Import ('env')
 
-PLUGIN_NAME = 'csv'
+can_build = False
 
-plugin_env = plugin_base.Clone()
+if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
+    boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
+    if boost_version_from_header >= 47:
+        can_build = True
 
-plugin_sources = Split(
-  """
-  %(PLUGIN_NAME)s_datasource.cpp
-  """ % locals()
-)
+if not can_build:
+    print 'WARNING: skipping building the optional geojson datasource plugin which requires boost >= 1.47'
+else:
+    Import ('plugin_base')
 
-# Link Library to Dependencies
-libraries = []
-libraries.append('boost_system%s' % env['BOOST_APPEND'])
-libraries.append(env['ICU_LIB_NAME'])
+    PLUGIN_NAME = 'csv'
 
-if env['PLUGIN_LINKING'] == 'shared':
-    libraries.append('mapnik')
+    plugin_env = plugin_base.Clone()
 
-    TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
-                                      SHLIBPREFIX='',
-                                      SHLIBSUFFIX='.input',
-                                      source=plugin_sources,
-                                      LIBS=libraries,
-                                      LINKFLAGS=env.get('CUSTOM_LDFLAGS'))
+    plugin_sources = Split(
+      """
+      %(PLUGIN_NAME)s_datasource.cpp
+      """ % locals()
+    )
 
-    # if the plugin links to libmapnik ensure it is built first
-    Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+    # Link Library to Dependencies
+    libraries = []
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
+    libraries.append(env['ICU_LIB_NAME'])
 
-    if 'uninstall' not in COMMAND_LINE_TARGETS:
-        env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], TARGET)
-        env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+    if env['PLUGIN_LINKING'] == 'shared':
+        libraries.append('mapnik')
 
-plugin_obj = {
-  'LIBS': libraries,
-  'SOURCES': plugin_sources,
-}
+        TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
+                                          SHLIBPREFIX='',
+                                          SHLIBSUFFIX='.input',
+                                          source=plugin_sources,
+                                          LIBS=libraries,
+                                          LINKFLAGS=env.get('CUSTOM_LDFLAGS'))
 
-Return('plugin_obj')
+        # if the plugin links to libmapnik ensure it is built first
+        Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+
+        if 'uninstall' not in COMMAND_LINE_TARGETS:
+            env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], TARGET)
+            env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+
+    plugin_obj = {
+      'LIBS': libraries,
+      'SOURCES': plugin_sources,
+    }
+
+    Return('plugin_obj')
