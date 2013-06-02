@@ -34,6 +34,8 @@ Summary: The 2.2.0 release is primarily a performance and stability release. The
 
 - Added detection of invalid srs values when loading xml (#646)
 
+- Added support for specifying a base_path as a third, optional argument to load_xml
+
 - Removed muffling of projection errors while rendering (#646)
 
 - Improved logging system (https://github.com/mapnik/mapnik/wiki/Logging)
