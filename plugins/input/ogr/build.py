@@ -53,7 +53,7 @@ if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     if boost_version_from_header < 46:
         # avoid ubuntu issue with boost interprocess:
         # https://github.com/mapnik/mapnik/issues/1082
-        cxxflags.Append('-fpermissive')
+        cxxflags.append('-fpermissive')
 
 plugin_env.Append(CXXFLAGS=cxxflags)
 
