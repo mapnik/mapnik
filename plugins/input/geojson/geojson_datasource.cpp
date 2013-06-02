@@ -105,6 +105,12 @@ geojson_datasource::geojson_datasource(parameters const& params)
 {
     if (file_.empty()) throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
 
+    boost::optional<std::string> base = params.get<std::string>("base");
+    if (base)
+    {
+        file_ = *base + "/" + file_;
+    }
+
     typedef std::istreambuf_iterator<char> base_iterator_type;
 
 #if defined (_WINDOWS)
@@ -112,6 +118,11 @@ geojson_datasource::geojson_datasource(parameters const& params)
 #else
     std::ifstream is(file_.c_str(),std::ios_base::in | std::ios_base::binary);
 #endif
+    if (!is.is_open())
+    {
+        throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + file_ + "'");
+    }
+
     boost::spirit::multi_pass<base_iterator_type> begin =
         boost::spirit::make_default_multi_pass(base_iterator_type(is));
 
