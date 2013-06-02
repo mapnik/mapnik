@@ -35,9 +35,7 @@ def test_good_files():
             m = mapnik.Map(512, 512)
             strict = True
             mapnik.load_map(m, filename, strict)
-            # libxml2 is not smart about paths, and clips the last directory off
-            # of a path if it does not end in a trailing slash
-            base_path = os.path.dirname(filename) + '/'
+            base_path = os.path.dirname(filename)
             mapnik.load_map_from_string(m,open(filename,'rb').read(),strict,base_path)
         except RuntimeError, e:
             # only test datasources that we have installed

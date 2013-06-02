@@ -76,7 +76,8 @@ public:
         strict_(strict),
         filename_(filename),
         relative_to_xml_(true),
-        font_manager_(font_engine_)
+        font_manager_(font_engine_),
+        xml_base_path_()
     {}
 
     void parse_map(Map & map, xml_node const& sty, std::string const& base_path);
@@ -124,6 +125,7 @@ private:
     face_manager<freetype_engine> font_manager_;
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
+    std::string xml_base_path_;
 };
 
 //#include <mapnik/internal/dump_xml.hpp>
@@ -143,9 +145,13 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     // TODO - use xml encoding?
     xml_tree tree("utf8");
     if (!base_path.empty())
+    {
         read_xml_string(str, tree.root(), base_path); // accept base_path passed into function
+    }
     else
+    {
         read_xml_string(str, tree.root(), map.base_path()); // default to map base_path
+    }
     map_parser parser(strict, base_path);
     parser.parse_map(map, tree.root(), base_path);
 }
@@ -174,7 +180,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             {
                 map.set_base_path(*base_path_from_xml);
             }
-            else
+            else if (!filename_.empty())
             {
                 boost::filesystem::path xml_path(filename_);
                 // TODO - should we make this absolute?
@@ -186,6 +192,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
 
                 map.set_base_path(base);
             }
+            xml_base_path_ = map.base_path();
 
             optional<color> bgcolor = map_node.get_opt_attr<color>("background-color");
             if (bgcolor)
@@ -1659,17 +1666,16 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> cons
     if (marker_cache::instance().is_uri(*opt_path))
         return *opt_path;
 
-    if (relative_to_xml_)
+    if (!xml_base_path_.empty() && relative_to_xml_)
     {
-        boost::filesystem::path xml_path = filename_;
-        boost::filesystem::path rel_path = *opt_path;
+        boost::filesystem::path rel_path(*opt_path);
         if (!rel_path.has_root_path())
         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
             // TODO - normalize is now deprecated, use make_preferred?
-            boost::filesystem::path full = boost::filesystem::absolute(xml_path.parent_path()/rel_path);
+            boost::filesystem::path full = boost::filesystem::absolute(xml_base_path_/rel_path);
 #else // v2
-            boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
+            boost::filesystem::path full = boost::filesystem::complete(xml_base_path_/rel_path).normalize();
 #endif
 
             MAPNIK_LOG_DEBUG(load_map) << "map_parser: Modifying relative paths to be relative to xml...";
