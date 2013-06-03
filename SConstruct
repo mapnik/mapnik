@@ -1252,49 +1252,57 @@ if not preconfigured:
 
     conf.FindBoost(BOOST_SEARCH_PREFIXES,thread_flag)
 
-    env['BOOST_LIB_VERSION_FROM_HEADER'] = conf.GetBoostLibVersion()
-
-    # The other required boost headers.
-    BOOST_LIBSHEADERS = [
-        ['system', 'boost/system/system_error.hpp', True],
-        ['filesystem', 'boost/filesystem/operations.hpp', True],
-        ['regex', 'boost/regex.hpp', True],
-        ['program_options', 'boost/program_options.hpp', False]
-    ]
-
-    if env['THREADING'] == 'multi':
-        BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
-        # on solaris the configure checks for boost_thread
-        # require the -pthreads flag to be able to check for
-        # threading support, so we add as a global library instead
-        # of attaching to cxxflags after configure
-        if env['PLATFORM'] == 'SunOS':
-            env.Append(CXXFLAGS = '-pthreads')
-
-    # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
-    if env['PRIORITIZE_LINKING']:
-        conf.prioritize_paths(silent=True)
-
+    has_boost_devel = False
     if not env['HOST']:
-        # if the user is not setting custom boost configuration
-        # enforce boost version greater than or equal to BOOST_MIN_VERSION
-        if not conf.CheckBoost(BOOST_MIN_VERSION):
-            color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
-            color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
-            if not env['BOOST_VERSION']:
-                env['MISSING_DEPS'].append('boost version >= %s' % BOOST_MIN_VERSION)
+        if not conf.CheckHeader(header='boost/version.hpp',language='C++'):
+            env['MISSING_DEPS'].append('boost development headers')
         else:
-            color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
+            has_boost_devel = True
 
-    if not env['HOST']:
-        for count, libinfo in enumerate(BOOST_LIBSHEADERS):
-            if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
-                if libinfo[2]:
-                    color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
-                    env['MISSING_DEPS'].append('boost ' + libinfo[0])
-                else:
-                    color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
-                    env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
+    if has_boost_devel:
+        env['BOOST_LIB_VERSION_FROM_HEADER'] = conf.GetBoostLibVersion()
+
+        # The other required boost headers.
+        BOOST_LIBSHEADERS = [
+            ['system', 'boost/system/system_error.hpp', True],
+            ['filesystem', 'boost/filesystem/operations.hpp', True],
+            ['regex', 'boost/regex.hpp', True],
+            ['program_options', 'boost/program_options.hpp', False]
+        ]
+
+        if env['THREADING'] == 'multi':
+            BOOST_LIBSHEADERS.append(['thread', 'boost/thread/mutex.hpp', True])
+            # on solaris the configure checks for boost_thread
+            # require the -pthreads flag to be able to check for
+            # threading support, so we add as a global library instead
+            # of attaching to cxxflags after configure
+            if env['PLATFORM'] == 'SunOS':
+                env.Append(CXXFLAGS = '-pthreads')
+
+        # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
+        if env['PRIORITIZE_LINKING']:
+            conf.prioritize_paths(silent=True)
+
+        if not env['HOST']:
+            # if the user is not setting custom boost configuration
+            # enforce boost version greater than or equal to BOOST_MIN_VERSION
+            if not conf.CheckBoost(BOOST_MIN_VERSION):
+                color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
+                color_print(1,'Boost version %s or greater is required' % BOOST_MIN_VERSION)
+                if not env['BOOST_VERSION']:
+                    env['MISSING_DEPS'].append('boost version >= %s' % BOOST_MIN_VERSION)
+            else:
+                color_print(4,'Found boost lib version... %s' % env.get('BOOST_LIB_VERSION_FROM_HEADER') )
+
+        if not env['HOST']:
+            for count, libinfo in enumerate(BOOST_LIBSHEADERS):
+                if not conf.CheckLibWithHeader('boost_%s%s' % (libinfo[0],env['BOOST_APPEND']), libinfo[1], 'C++'):
+                    if libinfo[2]:
+                        color_print(1,'Could not find required header or shared library for boost %s' % libinfo[0])
+                        env['MISSING_DEPS'].append('boost ' + libinfo[0])
+                    else:
+                        color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
+                        env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
 
     if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
