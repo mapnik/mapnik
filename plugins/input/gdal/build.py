@@ -21,6 +21,7 @@
 
 Import ('plugin_base')
 Import ('env')
+from copy import copy
 
 PLUGIN_NAME = 'gdal'
 
@@ -33,18 +34,20 @@ plugin_sources = Split(
   """ % locals()
 )
 
-# Link Library to Dependencies
-libraries = [env['PLUGINS']['gdal']['lib']]
-libraries.append('boost_system%s' % env['BOOST_APPEND'])
-libraries.append(env['ICU_LIB_NAME'])
+plugin_env['LIBS'] = []
 
 if env['RUNTIME_LINK'] == 'static':
     cmd = 'gdal-config --dep-libs'
     plugin_env.ParseConfig(cmd)
-    libraries.append('proj')
+
+# Link Library to Dependencies
+plugin_env.Append(LIBS=env['PLUGINS']['gdal']['lib'])
+libraries = copy(plugin_env['LIBS'])
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append('mapnik')
+    libraries.append(env['ICU_LIB_NAME'])
+    libraries.append('boost_system%s' % env['BOOST_APPEND'])
 
     TARGET = plugin_env.SharedLibrary('../%s' % PLUGIN_NAME,
                                       SHLIBPREFIX='',
