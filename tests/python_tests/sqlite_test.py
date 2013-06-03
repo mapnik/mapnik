@@ -311,18 +311,26 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             table='(select * from empty where !intersects!)',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = None
+        try :
+            feature = fs.next()
+        except StopIteration:
+            pass
         eq_(feature,None)
 
-    def test_intersects_token1():
+    def test_intersects_token2():
         ds = mapnik.SQLite(file='../data/sqlite/empty.db',
             table='(select * from empty where "a"!="b" and !intersects!)',
             )
         fs = ds.featureset()
-        feature = fs.next()
+        feature = None
+        try :
+            feature = fs.next()
+        except StopIteration:
+            pass
         eq_(feature,None)
 
-    def test_intersects_token1():
+    def test_intersects_token3():
         ds = mapnik.SQLite(file='../data/sqlite/empty.db',
             table='(select * from empty where "a"!="b" and !intersects!)',
             )
@@ -380,8 +388,10 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
         eq_(feat['bigint'],922337203685477580)
 
 
-    @raises(StopIteration)
     def test_null_id_field():
+        # silence null key warning: https://github.com/mapnik/mapnik/issues/1889
+        default_logging_severity = mapnik.logger.get_severity()
+        mapnik.logger.set_severity(mapnik.severity_type.None)
         # form up an in-memory test db
         wkb = '010100000000000000000000000000000000000000'
         # note: the osm_id should be declared INTEGER PRIMARY KEY
@@ -398,7 +408,13 @@ if 'sqlite' in mapnik.DatasourceCache.plugin_names():
             key_field='osm_id'
         )
         fs = ds.featureset()
-        feat = fs.next() ## should throw since key_field is null: StopIteration: No more features.
+        feature = None
+        try :
+            feature = fs.next()
+        except StopIteration:
+            pass
+        eq_(feature,None)
+        mapnik.logger.set_severity(default_logging_severity)
 
 if __name__ == "__main__":
     setup()
