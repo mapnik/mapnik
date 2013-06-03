@@ -1534,7 +1534,7 @@ if not preconfigured:
         else:
             env['PYTHON_IS_64BIT'] = False
 
-        if 'python' in env['BINDINGS']:
+        if has_boost_devel and 'python' in env['BINDINGS']:
             if py3 and env['BOOST_PYTHON_LIB'] == 'boost_python':
                 env['BOOST_PYTHON_LIB'] = 'boost_python3%s' % env['BOOST_APPEND']
             elif env['BOOST_PYTHON_LIB'] == 'boost_python':
