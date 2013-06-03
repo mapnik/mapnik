@@ -11,6 +11,8 @@ def setup():
     os.chdir(execution_path('.'))
 
 def test_broken_files():
+    default_logging_severity = mapnik.logger.get_severity()
+    mapnik.logger.set_severity(mapnik.severity_type.None)
     broken_files = glob.glob("../data/broken_maps/*.xml")
     # Add a filename that doesn't exist 
     broken_files.append("../data/broken/does_not_exist.xml")
@@ -25,6 +27,7 @@ def test_broken_files():
         except RuntimeError:
             pass
     eq_(len(failures),0,'\n'+'\n'.join(failures))
+    mapnik.logger.set_severity(default_logging_severity)
 
 def test_good_files():
     good_files = glob.glob("../data/good_maps/*.xml")

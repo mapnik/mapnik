@@ -7,13 +7,18 @@ from nose.tools import *
 from utilities import execution_path
 
 import os, mapnik
-# make the tests silent since we intentially test error conditions that are noisy
-mapnik.logger.set_severity(mapnik.severity_type.None)
+
+default_logging_severity = mapnik.logger.get_severity()
 
 def setup():
+    # make the tests silent since we intentially test error conditions that are noisy
+    mapnik.logger.set_severity(mapnik.severity_type.None)
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
+
+def teardown():
+    mapnik.logger.set_severity(default_logging_severity)
 
 if 'csv' in mapnik.DatasourceCache.plugin_names():
 
