@@ -162,7 +162,7 @@ void png_reader<T>::init()
     int is_png=!png_sig_cmp(header,0,8);
     if (!is_png)
     {
-        throw image_reader_exception(" File or steam is not a png");
+        throw image_reader_exception("File or stream is not a png");
     }
     png_structp png_ptr = png_create_read_struct
         (PNG_LIBPNG_VER_STRING,0,0,0);
