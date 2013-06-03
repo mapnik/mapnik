@@ -1,19 +1,22 @@
 #ifndef MAPNIK_SIMPLIFY_CONVERTER_HPP
 #define MAPNIK_SIMPLIFY_CONVERTER_HPP
 
+// mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/vertex.hpp>
 #include <mapnik/simplify.hpp>
 #include <mapnik/noncopyable.hpp>
 
-// STL
+// stl
 #include <limits>
 #include <set>
 #include <vector>
 #include <deque>
 #include <cmath>
-// Boost
+#include <stdexcept>
+
+// boost
 #include <boost/optional.hpp>
 
 namespace mapnik

@@ -35,6 +35,9 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 
+// stl
+#include <stdexcept>
+
 namespace mapnik { namespace json {
 
 #if BOOST_VERSION >= 104700

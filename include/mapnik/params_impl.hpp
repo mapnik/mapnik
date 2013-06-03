@@ -35,8 +35,11 @@
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+
 // stl
 #include <string>
+#include <stdexcept>
+
 
 namespace mapnik { namespace detail {
 

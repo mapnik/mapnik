@@ -30,7 +30,6 @@
 #include <boost/python.hpp>
 #include <boost/noncopyable.hpp>
 
-
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
@@ -38,6 +37,9 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/json/geojson_generator.hpp>
+
+// stl
+#include <stdexcept>
 
 namespace {
 

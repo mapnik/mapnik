@@ -26,6 +26,8 @@
 // stl
 #include <cstring>
 #include <fstream>
+#include <stdexcept>
+
 
 // mapnik
 #include <mapnik/global.hpp>

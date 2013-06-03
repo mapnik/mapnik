@@ -12,6 +12,8 @@
 #include <sstream>
 #include <cstdio>
 #include <set>
+#include <stdexcept>
+
 
 // boost
 #include <boost/version.hpp>

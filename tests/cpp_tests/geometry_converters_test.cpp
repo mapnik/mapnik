@@ -18,6 +18,9 @@
 #include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/util/geometry_to_svg.hpp>
 
+// stl
+#include <stdexcept>
+
 struct output_geometry_backend
 {
     output_geometry_backend(boost::ptr_vector<mapnik::geometry_type> & paths, mapnik::eGeomType type)

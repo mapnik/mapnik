@@ -39,6 +39,7 @@
 // stl
 #include <sstream>
 #include <algorithm>
+#include <stdexcept>
 
 // icu
 #include <unicode/ubidi.h>

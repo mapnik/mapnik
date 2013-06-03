@@ -29,6 +29,9 @@
 // boost
 #include <boost/filesystem/convenience.hpp>
 
+// stl
+#include <stdexcept>
+
 #if (BOOST_FILESYSTEM_VERSION <= 2)
 #include <boost/scoped_array.hpp>
 

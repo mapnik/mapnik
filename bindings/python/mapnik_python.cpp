@@ -25,6 +25,9 @@
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/exception_translator.hpp>
 
+// stl
+#include <stdexcept>
+
 void register_cairo();
 void export_color();
 void export_coord();

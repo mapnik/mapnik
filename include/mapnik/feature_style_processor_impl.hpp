@@ -54,7 +54,7 @@
 
 // stl
 #include <vector>
-
+#include <stdexcept>
 
 #if defined(RENDERING_STATS)
 #include <mapnik/timer.hpp>

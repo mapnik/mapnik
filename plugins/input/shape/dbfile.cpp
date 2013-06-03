@@ -35,6 +35,7 @@
 
 // stl
 #include <string>
+#include <stdexcept>
 
 using mapnik::mapped_memory_cache;
 

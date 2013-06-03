@@ -9,7 +9,7 @@
 #include <boost/foreach.hpp>
 
 // stl
-#include <exception>
+#include <stdexcept>
 #include <iostream>
 #include <fstream>
 #include <vector>

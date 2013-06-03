@@ -36,6 +36,7 @@
 // stl
 #include <algorithm>
 #include <map>
+#include <stdexcept>
 
 namespace mapnik {
 
