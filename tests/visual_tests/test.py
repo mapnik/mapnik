@@ -226,7 +226,7 @@ class Reporting:
         print "\nVisual rendering: %s failed / %s passed" % (len(self.errors), self.passed)
         for idx, error in enumerate(self.errors):
             if error[0] == self.OTHER:
-                print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s" % error[2]
+                print str(idx+1) + ") \x1b[31mfailure to run test:\x1b[0m %s (\x1b[34m%s\x1b[0m)" % (error[2],error[4])
             elif error[0] == self.NOT_FOUND:
                 print str(idx+1) + ") Generating reference image: '%s'" % error[2]
                 continue
