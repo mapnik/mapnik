@@ -3,6 +3,7 @@
 import itertools
 import unittest
 from nose.tools import *
+from utilities import execution_path, run_all
 
 import mapnik
 from binascii import unhexlify
@@ -89,4 +90,4 @@ def test_feature_expression_evaluation_attr_with_spaces():
     eq_(expr.evaluate(f),True)
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

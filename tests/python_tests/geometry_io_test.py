@@ -2,7 +2,7 @@
 
 from nose.tools import *
 import os,sys
-from utilities import execution_path
+from utilities import execution_path, run_all
 from utilities import Todo
 import mapnik
 from binascii import unhexlify
@@ -226,4 +226,4 @@ def test_wkt_collection_flattening():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

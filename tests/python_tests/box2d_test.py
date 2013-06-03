@@ -3,8 +3,8 @@
 
 import os
 from nose.tools import *
+from utilities import execution_path, run_all
 import mapnik
-
 
 def test_coord_init():
     c = mapnik.Coord(100, 100)
@@ -174,4 +174,4 @@ def test_envelope_clipping():
     eq_(e1,e2)
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

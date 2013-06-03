@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from nose.tools import *
+from utilities import execution_path, run_all
 import mapnik
 
 def test_logger_init():
@@ -14,4 +15,4 @@ def test_logger_init():
     eq_(mapnik.logger.get_severity(),default)
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

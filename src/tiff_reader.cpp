@@ -23,9 +23,10 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/filesystem/operations.hpp>
+
 // iostreams
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/array.hpp>

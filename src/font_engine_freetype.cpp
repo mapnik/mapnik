@@ -29,7 +29,7 @@
 #include <mapnik/text_path.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/font_util.hpp>
-
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -144,12 +144,11 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
-    boost::filesystem::path path(dir);
-    if (!boost::filesystem::exists(path))
+    if (!mapnik::util::exists(dir))
     {
         return false;
     }
-    if (!boost::filesystem::is_directory(path))
+    if (!mapnik::util::is_directory(dir))
     {
         return mapnik::freetype_engine::register_font(dir);
     }

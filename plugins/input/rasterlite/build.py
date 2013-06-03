@@ -37,7 +37,6 @@ plugin_sources = Split(
 libraries = [env['PLUGINS']['rasterlite']['lib']]
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
-libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append('mapnik')

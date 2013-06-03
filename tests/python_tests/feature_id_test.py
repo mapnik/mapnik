@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-
-from utilities import execution_path, Todo
-
+from utilities import execution_path, run_all,Todo
 import os, sys, glob, mapnik
 import itertools
 
@@ -64,4 +62,4 @@ def test_feature_hit_count():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

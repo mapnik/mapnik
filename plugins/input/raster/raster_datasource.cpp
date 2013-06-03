@@ -21,10 +21,10 @@
  *****************************************************************************/
 
 // boost
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 // mapnik
+#include <mapnik/util/fs.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/image_util.hpp>
@@ -111,7 +111,7 @@ raster_datasource::raster_datasource(parameters const& params)
     }
     else
     {
-        if (! boost::filesystem::exists(filename_))
+        if (!mapnik::util::exists(filename_))
         {
             throw datasource_exception("Raster Plugin: " + filename_ + " does not exist");
         }

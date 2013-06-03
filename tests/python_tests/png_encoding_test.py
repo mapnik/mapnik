@@ -5,7 +5,7 @@ import sys
 import os, mapnik
 from timeit import Timer, time
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, run_all
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -136,4 +136,4 @@ def test_transparency_levels_aerial():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

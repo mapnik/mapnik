@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
+from utilities import execution_path, run_all
 from subprocess import Popen, PIPE, STDOUT
 import os
 
@@ -76,4 +77,4 @@ def test_mapnik_config_valid_and_invalid_option():
     eq_(process.returncode,0)
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

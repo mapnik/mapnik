@@ -1,13 +1,10 @@
 #include <boost/version.hpp>
-#include <boost/filesystem/convenience.hpp>
-namespace fs = boost::filesystem;
-using fs::path;
-namespace sys = boost::system;
 
 #include <boost/detail/lightweight_test.hpp>
 #include <iostream>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/util/fs.hpp>
 #include <vector>
 #include <algorithm>
 
@@ -29,7 +26,7 @@ int main(int argc, char** argv)
         BOOST_TEST(set_working_dir(args));
 
         should_throw = "./tests/cpp_tests/data/blank.jpg";
-        BOOST_TEST( fs::exists( should_throw ) );
+        BOOST_TEST( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         BOOST_TEST( type );
         try
@@ -43,7 +40,7 @@ int main(int argc, char** argv)
         }
 
         should_throw = "./tests/cpp_tests/data/blank.png";
-        BOOST_TEST( fs::exists( should_throw ) );
+        BOOST_TEST( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         BOOST_TEST( type );
         try
@@ -57,7 +54,7 @@ int main(int argc, char** argv)
         }
 
         should_throw = "./tests/cpp_tests/data/blank.tiff";
-        BOOST_TEST( fs::exists( should_throw ) );
+        BOOST_TEST( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         BOOST_TEST( type );
         try
@@ -71,7 +68,7 @@ int main(int argc, char** argv)
         }
 
         should_throw = "./tests/data/images/xcode-CgBI.png";
-        BOOST_TEST( fs::exists( should_throw ) );
+        BOOST_TEST( mapnik::util::exists( should_throw ) );
         type = mapnik::type_from_filename(should_throw);
         BOOST_TEST( type );
         try

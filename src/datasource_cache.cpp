@@ -26,6 +26,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/plugin.hpp>
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
@@ -164,21 +165,18 @@ void datasource_cache::register_datasources(std::string const& str)
 #ifdef MAPNIK_THREADSAFE
     mutex::scoped_lock lock(mutex_);
 #endif
-
-    boost::filesystem::path path(str);
     // TODO - only push unique paths
     plugin_directories_.push_back(str);
-    boost::filesystem::directory_iterator end_itr;
-
-    if (exists(path) && is_directory(path))
+    if (mapnik::util::exists(str) && mapnik::util::is_directory(str))
     {
-        for (boost::filesystem::directory_iterator itr(path); itr != end_itr; ++itr )
+        boost::filesystem::directory_iterator end_itr;
+        for (boost::filesystem::directory_iterator itr(str); itr != end_itr; ++itr )
         {
 
 #if (BOOST_FILESYSTEM_VERSION == 3)
-            if (! is_directory(*itr) && is_input_plugin(itr->path().filename().string()))
+            if (!boost::filesystem::is_directory(*itr) && is_input_plugin(itr->path().filename().string()))
 #else // v2
-            if (! is_directory(*itr) && is_input_plugin(itr->path().leaf()))
+            if (!boost::filesystem::is_directory(*itr) && is_input_plugin(itr->path().leaf()))
 #endif
             {
 #if (BOOST_FILESYSTEM_VERSION == 3)

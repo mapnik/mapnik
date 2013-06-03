@@ -1,6 +1,5 @@
 #include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
-#include <boost/filesystem/convenience.hpp>
 #include <boost/make_shared.hpp>
 #include <iostream>
 #include <mapnik/projection.hpp>
@@ -19,6 +18,7 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/params.hpp>
+#include <mapnik/util/fs.hpp>
 #include <vector>
 #include <algorithm>
 
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     map.insert_style("style",style);
 
     std::string csv_plugin("./plugins/input/csv.input");
-    if (boost::filesystem::exists(csv_plugin)) {
+    if (mapnik::util::exists(csv_plugin)) {
         try {
             mapnik::datasource_cache::instance().register_datasource(csv_plugin);
             mapnik::parameters p;
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
     }
 
     std::string shape_plugin("./plugins/input/shape.input");
-    if (boost::filesystem::exists(shape_plugin)) {
+    if (mapnik::util::exists(shape_plugin)) {
         try {
             mapnik::datasource_cache::instance().register_datasource(shape_plugin);
             mapnik::parameters p2;

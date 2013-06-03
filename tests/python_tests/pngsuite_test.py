@@ -3,7 +3,7 @@
 import os
 import mapnik
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, run_all
 
 datadir = '../data/pngsuite'
 
@@ -32,4 +32,4 @@ def test_broken_pngs():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

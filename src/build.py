@@ -109,6 +109,7 @@ else: # unix, non-macos
 
 source = Split(
     """
+    fs.cpp
     debug_symbolizer.cpp
     request.cpp
     well_known_srs.cpp

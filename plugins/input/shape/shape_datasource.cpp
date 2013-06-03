@@ -28,11 +28,11 @@
 #include <boost/version.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/util/fs.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/boolean.hpp>
@@ -77,32 +77,18 @@ shape_datasource::shape_datasource(const parameters &params)
         shape_name_ = *file;
 
     boost::algorithm::ireplace_last(shape_name_,".shp","");
-#ifdef _WINDOWS
-    if (!boost::filesystem::exists(mapnik::utf8_to_utf16(shape_name_) + L".shp"))
-#else
-    if (!boost::filesystem::exists(shape_name_ + ".shp"))
-#endif
+    if (!mapnik::util::exists(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
     }
-#ifdef _WINDOWS
-    if (boost::filesystem::is_directory(mapnik::utf8_to_utf16(shape_name_) + L".shp"))
-#else
-    if (boost::filesystem::is_directory(shape_name_ + ".shp"))
-#endif
+    if (mapnik::util::is_directory(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
     }
-
-#ifdef _WINDOWS
-    if (!boost::filesystem::exists(mapnik::utf8_to_utf16(shape_name_) + L".dbf"))
-#else
-    if (!boost::filesystem::exists(shape_name_ + ".dbf"))
-#endif
+    if (!mapnik::util::exists(shape_name_ + ".dbf"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".dbf' does not exist");
     }
-
 
     try
     {

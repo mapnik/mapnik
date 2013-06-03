@@ -51,6 +51,7 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -59,7 +60,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/filesystem/operations.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -182,15 +182,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             }
             else if (!filename_.empty())
             {
-                boost::filesystem::path xml_path(filename_);
-                // TODO - should we make this absolute?
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                std::string base = xml_path.parent_path().string();
-#else // v2
-                std::string base = xml_path.branch_path().string();
-#endif
-
-                map.set_base_path(base);
+                map.set_base_path(mapnik::util::dirname(filename_));
             }
             xml_base_path_ = map.base_path();
 
@@ -1668,21 +1660,10 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> cons
 
     if (!xml_base_path_.empty() && relative_to_xml_)
     {
-        boost::filesystem::path rel_path(*opt_path);
-        if (!rel_path.has_root_path())
+        std::string starting_path = *opt_path;
+        if (mapnik::util::is_relative(starting_path))
         {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            // TODO - normalize is now deprecated, use make_preferred?
-            boost::filesystem::path full = boost::filesystem::absolute(xml_base_path_/rel_path);
-#else // v2
-            boost::filesystem::path full = boost::filesystem::complete(xml_base_path_/rel_path).normalize();
-#endif
-
-            MAPNIK_LOG_DEBUG(load_map) << "map_parser: Modifying relative paths to be relative to xml...";
-            MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Original base path=" << *opt_path;
-            MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Relative base path=" << full.string();
-
-            return full.string();
+            return mapnik::util::make_absolute(starting_path,xml_base_path_);
         }
     }
     return *opt_path;
@@ -1695,7 +1676,7 @@ void map_parser::ensure_exists(std::string const& file_path)
     // validate that the filename exists if it is not a dynamic PathExpression
     if (!boost::algorithm::find_first(file_path,"[") && !boost::algorithm::find_first(file_path,"]"))
     {
-       if (!boost::filesystem::exists(file_path))
+       if (!mapnik::util::exists(file_path))
        {
            throw mapnik::config_error("file could not be found: '" + file_path + "'");
        }

@@ -35,13 +35,12 @@
 #include <mapnik/params.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/sql_utils.hpp>
-
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 
 // sqlite
 extern "C" {
@@ -236,11 +235,7 @@ public:
         int flags;
 #endif
 
-#ifdef _WINDOWS
-        bool existed = boost::filesystem::exists(mapnik::utf8_to_utf16(index_db));
-#else
-        bool existed = boost::filesystem::exists(index_db);
-#endif
+        bool existed = mapnik::util::exists(index_db);
         boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
 
         bool one_success = false;
@@ -333,11 +328,7 @@ public:
             {
                 try
                 {
-#ifdef _WINDOWS
-                    boost::filesystem::remove(mapnik::utf8_to_utf16(index_db));
-#else
-                    boost::filesystem::remove(index_db);
-#endif
+                    mapnik::util::remove(index_db);
                  }
                 catch (...) {};
             }
@@ -353,11 +344,7 @@ public:
         {
             try
             {
-#ifdef _WINDOWS
-                boost::filesystem::remove(mapnik::utf8_to_utf16(index_db));
-#else
-                boost::filesystem::remove(index_db);
-#endif
+                mapnik::util::remove(index_db);
             }
             catch (...) {};
         }
@@ -426,12 +413,7 @@ public:
         int flags;
 #endif
 
-#ifdef _WINDOWS
-        bool existed = boost::filesystem::exists(mapnik::utf8_to_utf16(index_db));
-#else
-        bool existed = boost::filesystem::exists(index_db);;
-#endif
-
+        bool existed = mapnik::util::exists(index_db);;
         
         boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
 
@@ -479,11 +461,7 @@ public:
             {
                 try
                 {
-#ifdef _WINDOWS
-                    boost::filesystem::remove(mapnik::utf8_to_utf16(index_db));
-#else
-                    boost::filesystem::remove(index_db);
-#endif
+                    mapnik::util::remove(index_db);
                 }
                 catch (...) {};
             }
@@ -499,11 +477,7 @@ public:
         {
             try
             {
-#ifdef _WINDOWS
-                boost::filesystem::remove(mapnik::utf8_to_utf16(index_db));
-#else
-                boost::filesystem::remove(index_db);
-#endif
+                mapnik::util::remove(index_db);
             }
             catch (...) {};
         }

@@ -1,5 +1,6 @@
 #encoding: utf8
 import mapnik
+from utilities import execution_path, run_all
 from nose.tools import *
 
 def test_add_feature():
@@ -30,4 +31,4 @@ def test_add_feature():
     eq_(len(retrieved), 0)
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

@@ -3,7 +3,7 @@
 
 import os
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, run_all
 from utilities import Todo
 import tempfile
 
@@ -565,4 +565,4 @@ def test_rule_init():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))
