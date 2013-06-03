@@ -47,9 +47,9 @@ class MAPNIK_DECL feature_collection_parser : private mapnik::noncopyable
 public:
     feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr);
     ~feature_collection_parser();
-    bool parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features);  
+    bool parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features);
 private:
-    boost::scoped_ptr<feature_collection_grammar<iterator_type,feature_type> > grammar_; 
+    boost::scoped_ptr<feature_collection_grammar<iterator_type,feature_type> > grammar_;
 };
 
 }}
