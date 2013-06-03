@@ -32,7 +32,7 @@ int main(int argc, char** argv)
         try
         {
             std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            BOOST_TEST( false );
+            if (reader.get()) BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
         try
         {
             std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            BOOST_TEST( false );
+            if (reader.get()) BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
         try
         {
             std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            BOOST_TEST( false );
+            if (reader.get()) BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
         try
         {
             std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            BOOST_TEST( false );
+            if (reader.get()) BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
