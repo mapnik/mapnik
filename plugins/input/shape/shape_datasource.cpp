@@ -202,22 +202,7 @@ void shape_datasource::init(shape_io& shape)
 #endif
 
     // check if we have an index file around
-
     indexed_ = shape.has_index();
-
-    //std::string index_name(shape_name_+".index");
-    //std::ifstream file(index_name.c_str(),std::ios::in | std::ios::binary);
-    //if (file)
-    //{
-    //    indexed_=true;
-    //    file.close();
-    //}
-    //else
-    //{
-    //    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: No .index file found for "
-    //                            << shape_name_ << ".shp, use the 'shapeindex' program to build an index for faster rendering";
-    //}
-
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Extent=" << extent_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: File length=" << file_length_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Shape type=" << shape_type_;

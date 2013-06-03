@@ -31,6 +31,7 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/timer.hpp>
+#include <mapnik/utils.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -253,7 +254,12 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     index_name_ = dataset_name_.substr(0, breakpoint) + ".ogrindex";
 
+#if defined (_WINDOWS)
+    std::ifstream index_file(mapnik::utf8_to_utf16(index_name_), std::ios::in | std::ios::binary);
+#else
     std::ifstream index_file(index_name_.c_str(), std::ios::in | std::ios::binary);
+#endif
+
     if (index_file)
     {
         indexed_ = true;
