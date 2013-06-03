@@ -2,7 +2,7 @@
 
 from nose.tools import *
 
-from utilities import execution_path, run_all, Todo
+from utilities import execution_path, run_all
 
 import os, sys, glob, mapnik
 

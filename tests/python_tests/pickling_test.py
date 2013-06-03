@@ -4,7 +4,6 @@
 import os
 from nose.tools import *
 from utilities import execution_path, run_all
-from utilities import Todo
 import tempfile
 
 import mapnik, pickle
