@@ -89,11 +89,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     else
         dataset_name_ = *file;
 
-#ifdef _WINDOWS
-    if ((dataset_name_.compare(":memory:") != 0) && (!mapnik::util::exists(mapnik::utf8_to_utf16(dataset_name_))))
-#else
     if ((dataset_name_.compare(":memory:") != 0) && (!mapnik::util::exists(dataset_name_)))
-#endif
     {
         throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
     }
