@@ -30,7 +30,6 @@
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/font_util.hpp>
 #include <mapnik/util/fs.hpp>
-#include <mapnik/utils.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -103,24 +102,7 @@ bool freetype_engine::register_font(std::string const& file_name)
     // see the FT_FaceRec in freetype.h
     for ( int i = 0; face == 0 || i < num_faces; i++ ) {
         // if face is null then this is the first face
-        try
-        {
-#ifdef _WINDOWS
-        std::ifstream is(mapnik::utf8_to_utf16(file_name), std::ios::binary);
-#else
-        std::ifstream is(file_name.c_str() , std::ios::binary);
-#endif
-        std::string buffer((std::istreambuf_iterator<char>(is)),
-                           std::istreambuf_iterator<char>());
-        if (buffer.size() <= 0)
-        {
-            break;
-        }
-        error = FT_New_Memory_Face (library,
-                                     (FT_Byte const*) buffer.c_str(),
-                                     buffer.size(),
-                                     i,
-                                     &face);
+        error = FT_New_Face (library,file_name.c_str(),i,&face);
         if (error)
         {
             break;
@@ -152,9 +134,6 @@ bool freetype_engine::register_font(std::string const& file_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
 
             MAPNIK_LOG_DEBUG(font_engine_freetype) << "freetype_engine: " << s.str();
-        }
-        } catch (std::exception const&) {
-            break;
         }
     }
     if (face)
@@ -255,11 +234,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
 #ifdef MAPNIK_THREADSAFE
             mutex::scoped_lock lock(mutex_);
 #endif
-#ifdef _WINDOWS
-            std::ifstream is(mapnik::utf8_to_utf16(itr->second.second), std::ios::binary);
-#else
             std::ifstream is(itr->second.second.c_str() , std::ios::binary);
-#endif
             std::string buffer((std::istreambuf_iterator<char>(is)),
                                std::istreambuf_iterator<char>());
             std::pair<std::map<std::string,std::string>::iterator,bool> result
