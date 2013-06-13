@@ -56,7 +56,7 @@ if 'ogr' in mapnik.DatasourceCache.plugin_names():
 
     # disabled because OGR prints an annoying error: ERROR 1: Invalid Point object. Missing 'coordinates' member.
     #def test_handling_of_null_features():
-    #    ds = mapnik.Ogr(file='../data/json/null_feature.json',layer_by_index=0)
+    #    ds = mapnik.Ogr(file='../data/json/null_feature.geojson',layer_by_index=0)
     #    fs = ds.all_features()
     #    eq_(len(fs),1)
 
