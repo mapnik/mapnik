@@ -28,7 +28,7 @@
     
         "properties": { "x": 2.5, "y": 2.5, "label": "2.5,2.5" },
         "geometry"  : { "type": "Point", "coordinates": [ 2.5, 2.5 ] }
-    },
+    }
     
 ]
 }

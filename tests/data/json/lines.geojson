@@ -13,7 +13,7 @@
     
         "properties": { "x": 2, "y": 0, "label": "V" },
         "geometry"  : { "type": "LineString", "coordinates": [ [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5] ] }
-    },
+    }
     
 ]
 }
