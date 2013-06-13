@@ -2,8 +2,6 @@
 
 "type": "FeatureCollection",
 
-/* comment */
-
 "features": [
 
     { "type": "Feature", 
