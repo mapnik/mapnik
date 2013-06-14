@@ -448,7 +448,8 @@ pickle_store = [# Scons internal variables
         'SVG_RENDERER',
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER',
-        'BIGINT'
+        'BIGINT',
+        'HOST'
         ]
 
 # Add all other user configurable options to pickle pickle_store
@@ -1259,7 +1260,8 @@ if not preconfigured:
             has_boost_devel = False
 
     if has_boost_devel:
-        env['BOOST_LIB_VERSION_FROM_HEADER'] = conf.GetBoostLibVersion()
+        if not env['HOST']:
+            env['BOOST_LIB_VERSION_FROM_HEADER'] = conf.GetBoostLibVersion()
 
         # The other required boost headers.
         BOOST_LIBSHEADERS = [
@@ -1303,7 +1305,7 @@ if not preconfigured:
                         color_print(4,'Could not find optional header or shared library for boost %s' % libinfo[0])
                         env['SKIPPED_DEPS'].append('boost ' + libinfo[0])
 
-    if env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
+    if not env['HOST'] and env['ICU_LIB_NAME'] not in env['MISSING_DEPS']:
         # http://lists.boost.org/Archives/boost/2009/03/150076.php
         # we need libicui18n if using static boost libraries, so it is
         # important to try this check with the library linked
@@ -1317,85 +1319,92 @@ if not preconfigured:
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
     SQLITE_HAS_RTREE = None
+    if env['HOST']:
+        SQLITE_HAS_RTREE = True
+
     CHECK_PKG_CONFIG = conf.CheckPKGConfig('0.15.0')
 
     if len(env['REQUESTED_PLUGINS']):
-        color_print(4,'Checking for requested plugins dependencies...')
-        for plugin in env['REQUESTED_PLUGINS']:
-            details = env['PLUGINS'][plugin]
-            if plugin == 'gdal':
-                if conf.parse_config('GDAL_CONFIG',checks='--libs'):
-                    conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                    libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
-                    if libname:
-                        details['lib'] = libname
-            elif plugin == 'postgis':
-                conf.parse_pg_config('PG_CONFIG')
-            elif plugin == 'ogr':
-                if conf.ogr_enabled():
-                    if not 'gdal' in env['REQUESTED_PLUGINS']:
-                        conf.parse_config('GDAL_CONFIG',checks='--libs')
+        if env['HOST']:
+            for plugin in env['REQUESTED_PLUGINS']:
+                details = env['PLUGINS'][plugin]
+                if details['lib']:
+                    env.AppendUnique(LIBS=details['lib'])
+        else:
+            color_print(4,'Checking for requested plugins dependencies...')
+            for plugin in env['REQUESTED_PLUGINS']:
+                details = env['PLUGINS'][plugin]
+                if plugin == 'gdal':
+                    if conf.parse_config('GDAL_CONFIG',checks='--libs'):
                         conf.parse_config('GDAL_CONFIG',checks='--cflags')
-                    libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
-                    if libname:
-                        details['lib'] = libname
-            elif details['path'] and details['lib'] and details['inc']:
-                backup = env.Clone().Dictionary()
-                # Note, the 'delete_existing' keyword makes sure that these paths are prepended
-                # to the beginning of the path list even if they already exist
-                incpath = env['%s_INCLUDES' % details['path']]
-                libpath = env['%s_LIBS' % details['path']]
-                env.PrependUnique(CPPPATH = os.path.realpath(incpath),delete_existing=True)
-                env.PrependUnique(LIBPATH = os.path.realpath(libpath),delete_existing=True)
-                if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
-                    env.Replace(**backup)
-                    env['SKIPPED_DEPS'].append(details['lib'])
-                if plugin == 'sqlite':
-                    SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
-                    sqlite_backup = env.Clone().Dictionary()
-
-                    # if statically linking, on linux we likely
-                    # need to link sqlite to pthreads and dl
-                    if env['RUNTIME_LINK'] == 'static':
-                        if CHECK_PKG_CONFIG and conf.CheckPKG('sqlite3'):
-                            sqlite_env = env.Clone()
-                            try:
-                                sqlite_env.ParseConfig('pkg-config --static --libs sqlite3')
-                                for lib in sqlite_env['LIBS']:
-                                    if not lib in env['LIBS']:
-                                        env["SQLITE_LINKFLAGS"].append(lib)
-                                        env.Append(LIBS=lib)
-                            except OSError,e:
-                                pass
-
-                    if SQLITE_HAS_RTREE is None:
+                        libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
+                        if libname:
+                            details['lib'] = libname
+                elif plugin == 'postgis':
+                    conf.parse_pg_config('PG_CONFIG')
+                elif plugin == 'ogr':
+                    if conf.ogr_enabled():
+                        if not 'gdal' in env['REQUESTED_PLUGINS']:
+                            conf.parse_config('GDAL_CONFIG',checks='--libs')
+                            conf.parse_config('GDAL_CONFIG',checks='--cflags')
+                        libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
+                        if libname:
+                            details['lib'] = libname
+                elif details['path'] and details['lib'] and details['inc']:
+                    backup = env.Clone().Dictionary()
+                    # Note, the 'delete_existing' keyword makes sure that these paths are prepended
+                    # to the beginning of the path list even if they already exist
+                    incpath = env['%s_INCLUDES' % details['path']]
+                    libpath = env['%s_LIBS' % details['path']]
+                    env.PrependUnique(CPPPATH = os.path.realpath(incpath),delete_existing=True)
+                    env.PrependUnique(LIBPATH = os.path.realpath(libpath),delete_existing=True)
+                    if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
+                        env.Replace(**backup)
+                        env['SKIPPED_DEPS'].append(details['lib'])
+                    if plugin == 'sqlite':
                         SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
-                    if not SQLITE_HAS_RTREE:
-                        env.Replace(**sqlite_backup)
-                        if details['lib'] in env['LIBS']:
-                            env['LIBS'].remove(details['lib'])
-                        env['SKIPPED_DEPS'].append('sqlite_rtree')
-                    else:
-                        env.Replace(**sqlite_backup)
+                        sqlite_backup = env.Clone().Dictionary()
+                        # if statically linking, on linux we likely
+                        # need to link sqlite to pthreads and dl
+                        if env['RUNTIME_LINK'] == 'static':
+                            if CHECK_PKG_CONFIG and conf.CheckPKG('sqlite3'):
+                                sqlite_env = env.Clone()
+                                try:
+                                    sqlite_env.ParseConfig('pkg-config --static --libs sqlite3')
+                                    for lib in sqlite_env['LIBS']:
+                                        if not lib in env['LIBS']:
+                                            env["SQLITE_LINKFLAGS"].append(lib)
+                                            env.Append(LIBS=lib)
+                                except OSError,e:
+                                    pass
+                        if SQLITE_HAS_RTREE is None:
+                            SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
+                        if not SQLITE_HAS_RTREE:
+                            env.Replace(**sqlite_backup)
+                            if details['lib'] in env['LIBS']:
+                                env['LIBS'].remove(details['lib'])
+                            env['SKIPPED_DEPS'].append('sqlite_rtree')
+                        else:
+                            env.Replace(**sqlite_backup)
+                elif details['lib'] and details['inc']:
+                    if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
+                        env['SKIPPED_DEPS'].append(details['lib'])
 
-            elif details['lib'] and details['inc']:
-                if not conf.CheckLibWithHeader(details['lib'], details['inc'], details['lang']):
-                    env['SKIPPED_DEPS'].append(details['lib'])
+            # re-append the local paths for mapnik sources to the beginning of the list
+            # to make sure they come before any plugins that were 'prepended'
+            env.PrependUnique(CPPPATH = '#include', delete_existing=True)
+            env.PrependUnique(CPPPATH = '#', delete_existing=True)
+            env.PrependUnique(LIBPATH = '#src', delete_existing=True)
 
-        # re-append the local paths for mapnik sources to the beginning of the list
-        # to make sure they come before any plugins that were 'prepended'
-        env.PrependUnique(CPPPATH = '#include', delete_existing=True)
-        env.PrependUnique(CPPPATH = '#', delete_existing=True)
-        env.PrependUnique(LIBPATH = '#src', delete_existing=True)
-
-    if env['PGSQL2SQLITE']:
-        if 'sqlite3' not in env['LIBS']:
-            env.AppendUnique(LIBS='sqlite3')
-            env.AppendUnique(CPPPATH = os.path.realpath(env['SQLITE_INCLUDES']))
-            env.AppendUnique(LIBPATH = os.path.realpath(env['SQLITE_LIBS']))
-        if not SQLITE_HAS_RTREE:
-            env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
-            env['PGSQL2SQLITE'] = False
+    if not env['HOST']:
+        if env['PGSQL2SQLITE']:
+            if 'sqlite3' not in env['LIBS']:
+                env.AppendUnique(LIBS='sqlite3')
+                env.AppendUnique(CPPPATH = os.path.realpath(env['SQLITE_INCLUDES']))
+                env.AppendUnique(LIBPATH = os.path.realpath(env['SQLITE_LIBS']))
+            if not SQLITE_HAS_RTREE:
+                env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
+                env['PGSQL2SQLITE'] = False
 
     # we rely on an internal, patched copy of agg with critical fixes
     # prepend to make sure we link locally
@@ -1591,10 +1600,13 @@ if not preconfigured:
 
         # fetch the mapnik version header in order to set the
         # ABI version used to build libmapnik.so on linux in src/build.py
-        abi = conf.GetMapnikLibVersion()
+        abi = None
         abi_fallback = "3.0.0-pre"
+        if not env['HOST']:
+            abi = conf.GetMapnikLibVersion()
         if not abi:
-            color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
+            if not env['HOST']:
+                color_print(1,'Problem encountered parsing mapnik version, falling back to %s' % abi_fallback)
             abi = abi_fallback
 
         abi_no_pre = abi.replace('-pre','').split('.')
@@ -1818,7 +1830,7 @@ if not HELP_REQUESTED:
         if env['PLUGIN_LINKING'] == 'static' or plugin not in env['REQUESTED_PLUGINS']:
             if os.path.exists('plugins/input/%s.input' % plugin):
                 os.unlink('plugins/input/%s.input' % plugin)
-        if plugin in env['REQUESTED_PLUGINS']:
+        elif plugin in env['REQUESTED_PLUGINS']:
             details = env['PLUGINS'][plugin]
             if details['lib'] in env['LIBS']:
                 if env['PLUGIN_LINKING'] == 'shared':
@@ -1858,26 +1870,25 @@ if not HELP_REQUESTED:
                     os.unlink(plugin_path)
 
     # Build the c++ rundemo app if requested
-    if env['DEMO']:
-        SConscript('demo/c++/build.py')
+    if not env['HOST']:
+        if env['DEMO']:
+            SConscript('demo/c++/build.py')
 
     # Build shapeindex and remove its dependency from the LIBS
-    if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
-        if env['SHAPEINDEX']:
-            SConscript('utils/shapeindex/build.py')
-
-        # Build the pgsql2psqlite app if requested
-        if env['PGSQL2SQLITE']:
-            SConscript('utils/pgsql2sqlite/build.py')
-
-        if env['SVG2PNG']:
-            SConscript('utils/svg2png/build.py')
-
-        # devtools not ready for public
-        #SConscript('utils/ogrindex/build.py')
-        env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
-    else :
-        color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' and other command line programs will not be available")
+    if not env['HOST']:
+        if 'boost_program_options%s' % env['BOOST_APPEND'] in env['LIBS']:
+            if env['SHAPEINDEX']:
+                SConscript('utils/shapeindex/build.py')
+            # Build the pgsql2psqlite app if requested
+            if env['PGSQL2SQLITE']:
+                SConscript('utils/pgsql2sqlite/build.py')
+            if env['SVG2PNG']:
+                SConscript('utils/svg2png/build.py')
+            # devtools not ready for public
+            #SConscript('utils/ogrindex/build.py')
+            env['LIBS'].remove('boost_program_options%s' % env['BOOST_APPEND'])
+        else :
+            color_print(1,"WARNING: Cannot find boost_program_options. 'shapeindex' and other command line programs will not be available")
 
     # Build the Python bindings
     if 'python' in env['BINDINGS']:
