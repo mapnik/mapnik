@@ -21,12 +21,11 @@
 
 Import ('env')
 
-can_build = False
-
+can_build = True
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
-    if boost_version_from_header >= 47:
-        can_build = True
+    if boost_version_from_header < 47:
+        can_build = False
 
 if not can_build:
     print 'WARNING: skipping building the optional geojson datasource plugin which requires boost >= 1.47'
