@@ -74,7 +74,11 @@ PluginInfo::~PluginInfo()
 
 void * PluginInfo::get_symbol(std::string const& sym_name) const
 {
+#if defined(__MINGW__)
     return (void*)dlsym(module_->dl, sym_name.c_str());
+#else
+    return static_cast<void *>(dlsym(module_->dl, sym_name.c_str()));
+#endif
 }
 
 std::string const& PluginInfo::name() const

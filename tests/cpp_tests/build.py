@@ -7,7 +7,7 @@ Import ('env')
 test_env = env.Clone()
 
 if not env['CPP_TESTS']:
-    for cpp_test_bin in glob.glob('*-bin'):
+    for cpp_test_bin in glob.glob('*-bin*'):
         os.unlink(cpp_test_bin)
 else:
     test_env['LIBS'] = [env['MAPNIK_NAME']]
@@ -39,7 +39,7 @@ else:
             test_program = agg_env.Program(name, source=source_files)
         else:
             test_env_local = test_env.Clone()
-            
+
             if 'csv_parse' in cpp_test:
                 test_env_local.VariantDir('build', '../../plugins/input/csv/', duplicate=0)
                 source_files += test_env_local.Glob('build/*.cpp')

@@ -717,11 +717,14 @@ def get_pkg_lib(context, config, lib):
     parsed = False
     if ret:
         try:
-            value = call(cmd,silent=True)
+            if mingwbuild:
+                value = call('%s %s/mingw/mingw-shell-adapter.py %s' % (env['PYTHON'],os.getcwd(),cmd))
+            else:     
+                value = call(cmd,silent=True)
             if ' ' in value:
                 parts = value.split(' ')
                 if len(parts) > 1:
-                    value = parts[1]
+                    value = parts[1]                
             libnames = re.findall(libpattern,value)
             if libnames:
                 libname = libnames[0]

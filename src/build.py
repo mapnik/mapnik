@@ -128,6 +128,9 @@ if env['RUNTIME_LINK'] != 'static':
 
 lib_env['LIBS'].append('z')
 
+if mingwbuild and env['LINKING'] == 'shared':
+    lib_env.Append(CXXFLAGS="-DMAPNIK_EXPORTS")
+
 if env['PLATFORM'] == 'Darwin':
     mapnik_libname = env.subst(env['MAPNIK_LIB_NAME'])
     if env['FULL_LIB_PATH']:
@@ -434,15 +437,13 @@ if env['PLATFORM'] == 'Darwin' or not env['ENABLE_SONAME']:
         env.Alias(target='install', source=result)
 
     env['create_uninstall_target'](env, os.path.join(target_path,env.subst(env['MAPNIK_LIB_NAME'])))
-elif env['PLATFORM'] == 'MinGW':
+elif mingwbuild:
     target_path = env['MAPNIK_LIB_BASE_DEST']
-
     if 'uninstall' not in COMMAND_LINE_TARGETS:
         if env['LINKING'] == 'static':
             mapnik_static = lib_env.StaticLibrary('mapnik', source)
             result_static = env.Install(target_path, mapnik_static)
         else:
-            lib_env.Append(CXXFLAGS="-DMAPNIK_EXPORTS")
             mapnik = lib_env.SharedLibrary('mapnik', source, LIBSUFFIX='.dll.a')
             result_dynamic = env.Install(target_path, mapnik)
             result_dynamic_to_bin = env.Install(os.path.realpath('/mingw/bin'), mapnik)

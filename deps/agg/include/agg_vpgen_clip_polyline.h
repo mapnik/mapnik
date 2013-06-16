@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -21,6 +21,12 @@
 // https://github.com/mapnik/mapnik/issues/1860
 #include <mapnik/config.hpp>
 
+#ifdef __MINGW__
+#  pragma push_macro("MAPNIK_DECL")
+#  undef MAPNIK_DECL
+#  define MAPNIK_DECL
+#endif
+
 namespace agg
 {
 
@@ -31,7 +37,7 @@ namespace agg
     class MAPNIK_DECL vpgen_clip_polyline
     {
     public:
-        vpgen_clip_polyline() : 
+        vpgen_clip_polyline() :
             m_clip_box(0, 0, 1, 1),
             m_x1(0),
             m_y1(0),
@@ -77,5 +83,8 @@ namespace agg
 
 }
 
+#ifdef __MINGW__
+#  pragma pop_macro("MAPNIK_DECL")
+#endif
 
 #endif
