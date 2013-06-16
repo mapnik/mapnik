@@ -41,6 +41,11 @@ namespace mapnik {
 
 class PluginInfo;
 
+#if defined __MINGW__
+class datasource_cache;
+template class MAPNIK_DECL singleton<datasource_cache, CreateStatic>;
+#endif
+
 class MAPNIK_DECL datasource_cache
     : public singleton<datasource_cache, CreateStatic>,
       private mapnik::noncopyable
@@ -59,6 +64,7 @@ private:
     bool registered_;
     std::set<std::string> plugin_directories_;
 };
+
 }
 
 #endif // MAPNIK_DATASOURCE_CACHE_HPP

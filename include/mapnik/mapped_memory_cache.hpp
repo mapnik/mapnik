@@ -37,7 +37,11 @@
 namespace mapnik
 {
 
-using mapped_region_ptr = std::shared_ptr<boost::interprocess::mapped_region>;
+#if defined __MINGW__
+struct mapped_memory_cache;
+template class MAPNIK_DECL singleton<mapped_memory_cache, CreateStatic>;
+#endif
+typedef std::shared_ptr<boost::interprocess::mapped_region> mapped_region_ptr;
 
 class MAPNIK_DECL mapped_memory_cache :
         public singleton<mapped_memory_cache, CreateStatic>,

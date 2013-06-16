@@ -25,7 +25,15 @@
 
 // Windows DLL support
 
-#ifdef _WINDOWS
+#if defined(__MINGW__)
+#  define MAPNIK_EXP __attribute__ ((dllexport))
+#  define MAPNIK_IMP __attribute__ ((dllimport))
+#  ifdef MAPNIK_EXPORTS
+#    define MAPNIK_DECL __attribute__ ((dllexport))
+#  else
+#    define MAPNIK_DECL __attribute__ ((dllimport))
+#  endif
+#elif defined(_WINDOWS)
 #  define MAPNIK_EXP __declspec (dllexport)
 #  define MAPNIK_IMP __declspec (dllimport)
 #  ifdef MAPNIK_EXPORTS

@@ -29,10 +29,11 @@ source = Split(
 libb_env = env.Clone()
 libb_env.Append(CPPPATH = '#tests/cpp_tests/singleton_test')
 libb_env.Append(LIBPATH = '#tests/cpp_tests/singleton_test')
+libb_env.Append(CXXFLAGS="-DHELPER_EXPORT")
 utils_b = libb_env.SharedLibrary('utils-b', source, LIBS=[filesystem,system,'utils-a'])
 
-libraries.append(utils_a)
-libraries.append(utils_b)
+libraries.append('utils-a')
+libraries.append('utils-b')
 
 test_env = env.Clone()
 test_env.Append(CPPPATH = '#tests/cpp_tests/singleton_test')

@@ -31,8 +31,14 @@
 #include <string>
 #include <map>
 
+#if defined __MINGW__
+namespace mapnik { namespace formatting { class registry; }}
+template class MAPNIK_DECL mapnik::singleton<mapnik::formatting::registry, mapnik::CreateStatic>;
+#endif
+
 namespace mapnik
 {
+
 namespace formatting
 {
 
@@ -51,5 +57,6 @@ private:
 };
 
 } //ns formatting
+
 } //ns mapnik
 #endif // FORMATTING_REGISTRY_HPP

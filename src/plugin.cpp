@@ -23,7 +23,7 @@
 #include <mapnik/plugin.hpp>
 #include <stdexcept>
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS) || defined(__MINGW__)
   #define NOMINMAX
   #include <windows.h>
   #define handle HMODULE
@@ -50,7 +50,7 @@ PluginInfo::PluginInfo(std::string const& filename,
       name_(),
       module_(new mapnik_lib_t)
       {
-#ifdef _WINDOWS
+#if defined(_WINDOWS) || defined(__MINGW__)
           if (module_) module_->dl = LoadLibraryA(filename.c_str());
 #else
           if (module_) module_->dl = dlopen(filename.c_str(),RTLD_LAZY);
@@ -74,7 +74,7 @@ PluginInfo::~PluginInfo()
 
 void * PluginInfo::get_symbol(std::string const& sym_name) const
 {
-    return static_cast<void *>(dlsym(module_->dl, sym_name.c_str()));
+    return (void*)dlsym(module_->dl, sym_name.c_str());
 }
 
 std::string const& PluginInfo::name() const
