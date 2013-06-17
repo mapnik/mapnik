@@ -166,7 +166,7 @@ void feature_style_processor<Processor>::apply(double scale_denom)
             scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
         scale_denom *= scale_factor_;
 
-        for ( layer const& lyr : m_.layers() )
+        for (auto const& lyr : m_.layers() )
         {
             if (lyr.visible(scale_denom))
             {
