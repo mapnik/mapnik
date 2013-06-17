@@ -82,6 +82,7 @@ text_tests = [
     {'name': "text-expressionformat-color", 'sizes':[(800, 100)], 'bbox':default_text_box},
     # Disabled by default as the required font isn't shipped with mapnik
     #{'name': "text-malayalam", 'sizes':[(800, 100)], 'bbox':default_text_box},
+    {'name': "text-bengali", 'sizes':[(800, 100)], 'bbox':default_text_box},
 ]
 
 tiff_tests = [
