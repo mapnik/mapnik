@@ -52,6 +52,7 @@
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/util/fs.hpp>
+#include <mapnik/image_filter_types.hpp>
 
 // boost
 #include <boost/optional.hpp>
