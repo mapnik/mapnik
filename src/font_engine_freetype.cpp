@@ -133,7 +133,7 @@ bool freetype_engine::register_font(std::string const& file_name)
             else if (face->style_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
 
-            MAPNIK_LOG_DEBUG(font_engine_freetype) << "freetype_engine: " << s.str();
+            MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
     }
     if (face)
@@ -153,39 +153,46 @@ bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
     {
         return mapnik::freetype_engine::register_font(dir);
     }
-    boost::filesystem::directory_iterator end_itr;
     bool success = false;
-    for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
+    try
     {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-        std::string file_name = itr->path().string();
-#else // v2
-        std::string file_name = itr->string();
-#endif
-        if (boost::filesystem::is_directory(*itr) && recurse)
+        boost::filesystem::directory_iterator end_itr;
+        for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
         {
-            if (register_fonts(file_name, true))
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+            std::string file_name = itr->path().string();
+    #else // v2
+            std::string file_name = itr->string();
+    #endif
+            if (boost::filesystem::is_directory(*itr) && recurse)
             {
-                success = true;
-            }
-        }
-        else
-        {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            std::string base_name = itr->path().filename().string();
-#else // v2
-            std::string base_name = itr->filename();
-#endif
-            if (!boost::algorithm::starts_with(base_name,".") &&
-                boost::filesystem::is_regular_file(file_name) &&
-                is_font_file(file_name))
-            {
-                if (mapnik::freetype_engine::register_font(file_name))
+                if (register_fonts(file_name, true))
                 {
                     success = true;
                 }
             }
+            else
+            {
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+                std::string base_name = itr->path().filename().string();
+    #else // v2
+                std::string base_name = itr->filename();
+    #endif
+                if (!boost::algorithm::starts_with(base_name,".") &&
+                    boost::filesystem::is_regular_file(file_name) &&
+                    is_font_file(file_name))
+                {
+                    if (mapnik::freetype_engine::register_font(file_name))
+                    {
+                        success = true;
+                    }
+                }
+            }
         }
+    }
+    catch (std::exception const& ex)
+    {
+        MAPNIK_LOG_ERROR(font_engine_freetype) << "register_fonts: " << ex.what();
     }
     return success;
 }
