@@ -29,8 +29,7 @@
 #include "agg_color_rgba.h"
 
 // boost
-#include <boost/format.hpp>
-
+#include <boost/spirit/include/karma.hpp>
 // stl
 #include <sstream>
 
@@ -64,21 +63,23 @@ std::string color::to_string() const
 
 std::string color::to_hex_string() const
 {
-    if (alpha_ == 255 )
-    {
-        return (boost::format("#%1$02x%2$02x%3$02x")
-                % static_cast<unsigned>(red())
-                % static_cast<unsigned>(green())
-                % static_cast<unsigned>(blue())).str();
-    }
-    else
-    {
-        return (boost::format("#%1$02x%2$02x%3$02x%4$02x")
-                % static_cast<unsigned>(red())
-                % static_cast<unsigned>(green())
-                % static_cast<unsigned>(blue())
-                % static_cast<unsigned>(alpha())).str();
-    }
+    namespace karma = boost::spirit::karma;
+    using boost::spirit::karma::_1;
+    using boost::spirit::karma::hex;
+    using boost::spirit::karma::eps;
+    using boost::spirit::karma::right_align;
+    std::string str;
+    std::back_insert_iterator<std::string> sink(str);
+    karma::generate(sink,
+                    // begin grammar
+                    '#'
+                    << right_align(2,'0')[hex[_1 = red()]]
+                    << right_align(2,'0')[hex[_1 = green()]]
+                    << right_align(2,'0')[hex[_1 = blue()]]
+                    << eps(alpha() < 255) <<  right_align(2,'0')[hex [_1 = alpha()]]
+                    // end grammar
+        );
+    return str;
 }
 
 void color::premultiply()
