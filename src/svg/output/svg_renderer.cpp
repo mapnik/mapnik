@@ -30,13 +30,24 @@
 
 namespace mapnik
 {
+
 template <typename T>
-svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, unsigned offset_x, unsigned offset_y) :
-    feature_style_processor<svg_renderer>(m),
+svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
+    feature_style_processor<svg_renderer>(m, scale_factor),
     output_iterator_(output_iterator),
     width_(m.width()),
     height_(m.height()),
     t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
+    generator_(output_iterator)
+{}
+
+template <typename T>
+svg_renderer<T>::svg_renderer(Map const& m, request const& req, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
+    feature_style_processor<svg_renderer>(m, scale_factor),
+    output_iterator_(output_iterator),
+    width_(req.width()),
+    height_(req.height()),
+    t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
     generator_(output_iterator)
 {}
 
