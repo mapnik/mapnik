@@ -58,7 +58,7 @@ std::string color::to_string() const
                     << color_generator[_1 = green()] << ','
                     << color_generator[_1 = blue()]
                     << string[ phoenix::if_(alpha()==255) [_1 = ')'].else_[_1 =',']]
-                    << eps(alpha()<255) << ',' << double_ [_1 = alpha()/255.0]
+                    << eps(alpha()<255) << double_ [_1 = alpha()/255.0]
                     << ')'
                     // end grammar
         );
