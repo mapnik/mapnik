@@ -92,6 +92,31 @@ private:
     unsigned values_tried_;
 };
 
+
+
+/*************************************************************************/
+
+
+
+// Output is centered around (0,0)
+static void rotated_box2d(box2d<double> &box, rotation const& rot, double width, double height)
+{
+    double new_width = width * rot.cos + height * rot.sin;
+    double new_height = width * rot.sin + height * rot.cos;
+    box.init(-new_width/2., -new_height/2., new_width/2., new_height/2.);
+}
+
+pixel_position pixel_position::rotate(rotation const& rot) const
+{
+    return pixel_position(x * rot.cos - y * rot.sin, x * rot.sin + y * rot.cos);
+}
+
+
+
+/*************************************************************************/
+
+
+
 placement_finder::placement_finder(Feature const& feature, DetectorType &detector, box2d<double> const& extent, text_placement_info_ptr placement_info, face_manager_freetype &font_manager, double scale_factor)
     : feature_(feature), detector_(detector), extent_(extent), layout_(font_manager, scale_factor), info_(placement_info), valid_(true), scale_factor_(scale_factor), placements_(), has_marker_(false), marker_(), marker_box_()
 {
@@ -128,11 +153,6 @@ bool placement_finder::next_position()
     return true;
 }
 
-const placements_list &placement_finder::placements() const
-{
-    return placements_;
-}
-
 void placement_finder::init_alignment()
 {
     text_symbolizer_properties const& p = info_->properties;
@@ -151,18 +171,22 @@ void placement_finder::init_alignment()
         }
     }
 
-    halign_ = p.halign;
-    if (halign_ == H_AUTO)
+    halign_point_ = p.halign;
+    halign_line_ = p.halign;
+    if (halign_point_ == H_AUTO)
     {
         if (p.displacement.x > 0.0)
         {
-            halign_ = H_RIGHT;
+            halign_point_ = H_RIGHT;
+            halign_line_ = H_LEFT;
         } else if (p.displacement.x < 0.0)
         {
-            halign_ = H_LEFT;
+            halign_point_ = H_LEFT;
+            halign_line_= H_RIGHT;
         } else
         {
-            halign_ = H_MIDDLE;
+            halign_point_ = H_MIDDLE;
+            halign_line_ = H_MIDDLE;
         }
     }
 
@@ -182,7 +206,7 @@ void placement_finder::init_alignment()
 }
 
 
-pixel_position placement_finder::alignment_offset() const
+pixel_position placement_finder::alignment_offset() const //TODO
 {
     pixel_position result(0,0);
     // if needed, adjust for desired vertical alignment
@@ -205,7 +229,7 @@ pixel_position placement_finder::alignment_offset() const
     return result;
 }
 
-double placement_finder::jalign_offset(double line_width) const
+double placement_finder::jalign_offset(double line_width) const //TODO
 {
     if (jalign_ == J_MIDDLE) return -(line_width / 2.0);
     if (jalign_ == J_LEFT)   return -(layout_.width() / 2.0);
@@ -213,32 +237,24 @@ double placement_finder::jalign_offset(double line_width) const
     return 0;
 }
 
-// Output is centered around (0,0)
-static void rotated_box2d(box2d<double> &box, rotation const& rot, double width, double height)
-{
-    double new_width = width * rot.cos + height * rot.sin;
-    double new_height = width * rot.sin + height * rot.cos;
-    box.init(-new_width/2., -new_height/2., new_width/2., new_height/2.);
-}
 
-pixel_position pixel_position::rotate(rotation const& rot) const
-{
-    return pixel_position(x * rot.cos - y * rot.sin, x * rot.sin + y * rot.cos);
-}
 
 
 bool placement_finder::find_point_placement(pixel_position pos)
 {
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
 
+    /* Find text origin. */
     pixel_position displacement = scale_factor_ * info_->properties.displacement + alignment_offset();
     if (info_->properties.rotate_displacement) displacement = displacement.rotate(!orientation_);
     glyphs->set_base_point(pos + displacement);
     box2d<double> bbox;
     rotated_box2d(bbox, orientation_, layout_.width(), layout_.height());
     bbox.re_center(glyphs->get_base_point().x, glyphs->get_base_point().y);
-    /* add_marker first checks for collision and then updates the detector.*/
+
+    /* For point placements it is faster to just check the bounding box. */
     if (collision(bbox)) return false;
+    /* add_marker first checks for collision and then updates the detector.*/
     if (has_marker_ && !add_marker(glyphs, pos)) return false;
     if (layout_.size()) detector_.insert(bbox, layout_.get_text());
 
@@ -279,7 +295,7 @@ bool placement_finder::find_point_placement(pixel_position pos)
 template <typename T>
 bool placement_finder::find_line_placements(T & path, bool points)
 {
-    if (!layout_.size()) return true;
+    if (!layout_.size()) return true; //TODO
     vertex_cache pp(path);
 
     bool success = false;

@@ -62,7 +62,7 @@ public:
     /** Try next position alternative from placement_info. */
     bool next_position();
 
-    placements_list const& placements() const;
+    placements_list const& placements() const { return placements_; }
 
     void set_marker(marker_info_ptr m, box2d<double> box, bool marker_unlocked, pixel_position const& marker_displacement);
 private:
@@ -95,7 +95,10 @@ private:
     bool valid_;
 
     vertical_alignment_e valign_;
-    horizontal_alignment_e halign_;
+    /** Horizontal alignment for point placements. */
+    horizontal_alignment_e halign_point_;
+    /** Horizontal alignment for line placements. */
+    horizontal_alignment_e halign_line_;
     justify_alignment_e jalign_;
     double scale_factor_;
 
