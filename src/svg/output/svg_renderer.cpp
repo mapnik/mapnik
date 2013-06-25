@@ -104,12 +104,14 @@ void svg_renderer<T>::end_map_processing(Map const& map)
 template <typename T>
 void svg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
+    generator_.generate_opening_group(lay.name());
     MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: Start layer processing=" << lay.name();
 }
 
 template <typename T>
 void svg_renderer<T>::end_layer_processing(layer const& lay)
 {
+    generator_.generate_closing_group();
     MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: End layer processing=" << lay.name();
 }
 
