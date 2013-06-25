@@ -151,9 +151,13 @@ private:
     OutputIterator& output_iterator_;
     const int width_;
     const int height_;
+    double scale_factor_;
     CoordTransform t_;
-    svg::svg_generator<OutputIterator> generator_;
     svg::path_output_attributes path_attributes_;
+    freetype_engine font_engine_;
+    face_manager<freetype_engine> font_manager_;
+    boost::shared_ptr<label_collision_detector4> detector_;
+    svg::svg_generator<OutputIterator> generator_;
     box2d<double> query_extent_;
     bool painted_;
 

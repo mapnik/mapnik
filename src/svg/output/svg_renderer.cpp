@@ -24,6 +24,9 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/label_collision_detector.hpp>
+#include <mapnik/feature_type_style.hpp>
+#include <mapnik/font_set.hpp>
 
 // stl
 #include <ostream>
@@ -37,8 +40,14 @@ svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, double scale_fa
     output_iterator_(output_iterator),
     width_(m.width()),
     height_(m.height()),
+    scale_factor_(scale_factor),
     t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
-    generator_(output_iterator)
+    font_engine_(),
+    font_manager_(font_engine_),
+    detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
+    generator_(output_iterator),
+    query_extent_(),
+    painted_(false)
 {}
 
 template <typename T>
@@ -47,8 +56,14 @@ svg_renderer<T>::svg_renderer(Map const& m, request const& req, T & output_itera
     output_iterator_(output_iterator),
     width_(req.width()),
     height_(req.height()),
+    scale_factor_(scale_factor),
     t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
-    generator_(output_iterator)
+    font_engine_(),
+    font_manager_(font_engine_),
+    detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
+    generator_(output_iterator),
+    query_extent_(),
+    painted_(false)
 {}
 
 template <typename T>
