@@ -29,6 +29,8 @@
 // stl
 #include <cassert>
 #include <cstring>
+#include <stdexcept>
+
 
 namespace mapnik
 {
@@ -37,11 +39,19 @@ template <class T> class ImageData
 public:
     typedef T pixel_type;
 
-    ImageData(unsigned width,unsigned height)
-        : width_(width),
-          height_(height),
-          pData_((width!=0 && height!=0)? static_cast<T*>(::operator new(sizeof(T)*width*height)):0)
+    ImageData(int width,int height)
+        : width_(static_cast<unsigned>(width)),
+          height_(static_cast<unsigned>(height))
     {
+        if (width < 0)
+        {
+            throw std::runtime_error("negative width not allowed for image_data");
+        }
+        if (height < 0)
+        {
+            throw std::runtime_error("negative height not allowed for image_data");
+        }
+        pData_ = (width!=0 && height!=0)? static_cast<T*>(::operator new(sizeof(T)*width*height)):0;
         if (pData_) std::memset(pData_,0,sizeof(T)*width_*height_);
     }
 

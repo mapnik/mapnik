@@ -12,6 +12,10 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
+@raises(RuntimeError)
+def test_negative_image_dimensions():
+    im = mapnik.Image(-40,40)
+
 def test_tiff_round_trip():
     filepath = '/tmp/mapnik-tiff-io.tiff'
     im = mapnik.Image(255,267)
