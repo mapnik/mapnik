@@ -550,7 +550,7 @@ try {
 
     p.end_layer_processing(lay);
 
-} catch (const std::exception& e) {
+} catch (std::exception const& e) {
     std::ostringstream m;
     m << lay.name() << ": " << e.what();
     throw std::runtime_error(m.str().c_str());
