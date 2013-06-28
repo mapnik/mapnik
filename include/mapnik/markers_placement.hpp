@@ -221,7 +221,6 @@ public:
             }
             if (!ignore_placement)
             {
-                std::clog << "Adding\n";
                 detector_.insert(box);
             }
             last_x = x;
