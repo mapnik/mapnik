@@ -1031,7 +1031,7 @@ struct markers_dispatch
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -1119,7 +1119,7 @@ struct markers_dispatch_2
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 coord2d center = bbox_.center();
                 agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
