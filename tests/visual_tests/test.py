@@ -92,6 +92,7 @@ files = {
     'collision': {'sizes':[(600,400)]},
     'shield-on-polygon': {'sizes':[(600,400)]},
     'shield-on-line-spacing-eq-width': {'sizes':[(600,400)]},
+    'geometry-transform-translate': {'sizes':[(200,200)]},
     'marker-svg-opacity':{},
     'marker-multi-policy': {'sizes':[(600,400)]},
     'marker-on-line': {'sizes':[(600,400)],
