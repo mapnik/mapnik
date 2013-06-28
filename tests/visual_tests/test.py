@@ -96,6 +96,8 @@ files = {
     'marker-multi-policy': {'sizes':[(600,400)]},
     'marker-on-line': {'sizes':[(600,400)],
         'bbox': mapnik.Box2d(-10, 0, 15, 20)},
+    'marker-on-line-and-line-placement': {'sizes':[(600,400)],
+        'bbox': mapnik.Box2d(-10, 0, 15, 20)},
     'marker-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'marker-on-line-spacing-eq-width-overlap': {'sizes':[(600,400)]},
     'marker_line_placement_on_points':{},
