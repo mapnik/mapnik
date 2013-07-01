@@ -14,7 +14,13 @@ def setup():
 def compare_map(xml):
     m = mapnik.Map(256, 256)
     absolute_base = os.path.abspath(os.path.dirname(xml))
-    mapnik.load_map(m, xml, False, absolute_base)
+    try:
+        mapnik.load_map(m, xml, False, absolute_base)
+    except RuntimeError, e:
+        # only test datasources that we have installed
+        if not 'Could not create datasource' in str(e):
+            raise RuntimeError(str(e))
+        return
     (handle, test_map) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-temp-map1-')
     os.close(handle)
     (handle, test_map2) = tempfile.mkstemp(suffix='.xml', prefix='mapnik-temp-map2-')
