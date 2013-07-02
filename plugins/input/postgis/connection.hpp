@@ -107,7 +107,8 @@ public:
 
         if (! result || (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
-            std::string err_msg = status();
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
             err_msg += "\nFull sql was: '";
             err_msg += sql;
             err_msg += "'\n";
