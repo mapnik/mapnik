@@ -54,6 +54,7 @@ private:
     boost::optional<color> background_;
     image_data_32 data_;
     bool painted_;
+    bool premultiplied_;
 public:
     image_32(int width,int height);
     image_32(image_32 const& rhs);
@@ -70,6 +71,11 @@ public:
     bool painted() const
     {
         return painted_;
+    }
+
+    bool premultiplied() const
+    {
+        return premultiplied_;
     }
 
     inline void clear()

@@ -12,6 +12,14 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
+def test_image_premultiply():
+    im = mapnik.Image(256,256)
+    eq_(im.premultiplied(),False)
+    im.premultiply()
+    eq_(im.premultiplied(),True)
+    im.demultiply()
+    eq_(im.premultiplied(),False)
+
 @raises(RuntimeError)
 def test_negative_image_dimensions():
     im = mapnik.Image(-40,40)

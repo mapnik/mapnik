@@ -6,6 +6,10 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
+## Future
+
+- Added `premultiplied` property on mapnik::image_32 / mapnik.Image to enable knowledge of premultiplied status of image buffer.
+
 ## 2.2.0
 
 Released June 3rd, 2013
