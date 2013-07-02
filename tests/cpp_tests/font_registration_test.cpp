@@ -1,9 +1,11 @@
-#include <boost/version.hpp>
-#include <mapnik/util/fs.hpp>
-
-#include <boost/detail/lightweight_test.hpp>
-#include <iostream>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/util/fs.hpp>
+#include <mapnik/debug.hpp>
+
+#include <boost/version.hpp>
+#include <boost/detail/lightweight_test.hpp>
+
+#include <iostream>
 #include <vector>
 #include <algorithm>
 
@@ -20,6 +22,8 @@ int main(int argc, char** argv)
 
     try
     {
+        mapnik::logger logger;
+        logger.set_severity(mapnik::logger::none);
 
         BOOST_TEST(set_working_dir(args));
 
