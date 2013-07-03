@@ -296,6 +296,10 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
                       << " FROM ("
                       << geometry_table_ << ")";
 
+#ifdef MAPNIK_STATS
+                mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(create_spatial_index)");
+#endif
+
                 boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
                 if (sqlite_utils::create_spatial_index(index_db,index_table_,rs))
                 {
@@ -323,6 +327,9 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
 
     if (! extent_initialized_)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(detect_extent)");
+#endif
         // TODO - clean this up - reducing arguments
         std::string query = populate_tokens(table_);
         if (!sqlite_utils::detect_extent(dataset_,

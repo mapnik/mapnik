@@ -500,6 +500,7 @@ public:
             std::ostringstream s;
             s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata;
             s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table << "')";
+            MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
             boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             if (rs->is_valid() && rs->step_next())
             {
@@ -516,7 +517,7 @@ public:
             std::ostringstream s;
             s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM "
               << index_table;
-
+            MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
             boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             if (rs->is_valid() && rs->step_next())
             {
@@ -537,6 +538,7 @@ public:
             std::ostringstream s;
             s << "SELECT " << geometry_field << "," << key_field
               << " FROM (" << table << ")";
+            MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
             boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             sqlite_utils::query_extent(rs,extent);
             return true;
