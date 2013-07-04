@@ -45,16 +45,15 @@ int main(int argc, char** argv)
         mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::Point);
         pt->move_to(128,128);
         feature->add_geometry(pt);
-        mapnik::datasource_ptr memory_ds = boost::make_shared<mapnik::memory_datasource>();
-        mapnik::memory_datasource *cache = dynamic_cast<mapnik::memory_datasource *>(memory_ds.get());
-        cache->push(feature);
+        boost::shared_ptr<mapnik::memory_datasource> ds = boost::make_shared<mapnik::memory_datasource>();
+        ds->push(feature);
         mapnik::Map m(256,256);
         mapnik::font_set fontset("fontset");
         // NOTE: this is a valid font, but will fail because none are registered
         fontset.add_face_name("DejaVu Sans Book");
         m.insert_fontset("fontset", fontset);
         mapnik::layer lyr("layer");
-        lyr.set_datasource(memory_ds);
+        lyr.set_datasource(ds);
         lyr.add_style("style");
         m.addLayer(lyr);
         mapnik::feature_type_style the_style;
