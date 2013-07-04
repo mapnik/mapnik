@@ -207,6 +207,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                                                         double scale_denom,
                                                         std::set<std::string>& names)
 {
+try {
     std::vector<std::string> const& style_names = lay.styles();
 
     unsigned int num_styles = style_names.size();
@@ -477,6 +478,15 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 #endif
 
     p.end_layer_processing(lay);
+
+} catch (std::exception const& e) {
+    // Include layer name in exception
+    // see https://github.com/mapnik/mapnik/issues/1924
+    std::ostringstream m;
+    m << lay.name() << ": " << e.what();
+    throw std::runtime_error(m.str().c_str());
+}
+
 }
 
 
