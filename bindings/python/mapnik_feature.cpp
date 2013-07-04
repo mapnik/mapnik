@@ -54,7 +54,8 @@ boost::ptr_vector<mapnik::geometry_type> const& (mapnik::feature_impl::*get_path
 
 void feature_add_geometries_from_wkb(mapnik::feature_impl &feature, std::string wkb)
 {
-    geometry_utils::from_wkb(feature.paths(), wkb.c_str(), wkb.size());
+    bool result = geometry_utils::from_wkb(feature.paths(), wkb.c_str(), wkb.size());
+    if (!result) throw std::runtime_error("Failed to parse WKB");
 }
 
 void feature_add_geometries_from_wkt(mapnik::feature_impl &feature, std::string wkt)

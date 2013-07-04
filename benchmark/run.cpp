@@ -900,7 +900,10 @@ int main( int argc, char** argv)
         }
 
         {
-            mapnik::freetype_engine::register_fonts("./fonts", true);
+            bool success = mapnik::freetype_engine::register_fonts("./fonts", true);
+            if (!success) {
+               std::clog << "warning, did not register any new fonts!\n";
+            }
             unsigned face_count = mapnik::freetype_engine::face_names().size();
             test13 runner(1000,10);
             benchmark(runner, (boost::format("font_engihe: created %ld faces in ") % (face_count * 1000 * 10)).str());
