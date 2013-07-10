@@ -540,7 +540,6 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         feat = fs.next()
         eq_(feat['bigint'],2147483648)
         feat = fs.next()
-        eq_(feat['bigint'],sys.maxint)
         eq_(feat['bigint'],9223372036854775807)
         eq_(feat['bigint'],0x7FFFFFFFFFFFFFFF)
         desc = ds.describe()

@@ -35,11 +35,7 @@ namespace boost { namespace python {
     {
         PyObject * operator() (mapnik::value_integer val) const
         {
-#if PY_VERSION_HEX >= 0x03000000
-            return ::PyLong_FromLong(val);
-#else
-            return ::PyInt_FromLong(val);
-#endif
+            return ::PyLong_FromLongLong(val);
         }
 
         PyObject * operator() (double val) const

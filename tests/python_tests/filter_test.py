@@ -217,14 +217,14 @@ def test_creation_of_bool():
     eq_(f["bool"],True)
     # TODO - will become int of 1 do to built in boost python conversion
     # https://github.com/mapnik/mapnik/issues/1873
-    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],int),True)
+    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],long),True)
     f["bool"] = False
     eq_(f["bool"],False)
-    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],int),True)
+    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],long),True)
     # test NoneType
     f["bool"] = None
     eq_(f["bool"],None)
-    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],int),False)
+    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],long),False)
     # test integer
     f["bool"] = 0
     eq_(f["bool"],0)
@@ -235,16 +235,16 @@ def test_creation_of_bool():
 null_equality = [
   ['hello',False,unicode],
   [u'',False,unicode],
-  [0,False,int],
-  [123,False,int],
+  [0,False,long],
+  [123,False,long],
   [0.0,False,float],
   [123.123,False,float],
   [.1,False,float],
-  [False,False,int], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
-  [True,False,int], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
+  [False,False,long], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
+  [True,False,long], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
   [None,True,None],
-  [2147483648,False,int],
-  [922337203685477580,False,int]
+  [2147483648,False,long],
+  [922337203685477580,False,long]
 ]
 
 def test_expressions_with_null_equality():
@@ -283,16 +283,16 @@ def test_expressions_with_null_equality2():
 truthyness = [
   [u'hello',True,unicode],
   [u'',False,unicode],
-  [0,False,int],
-  [123,True,int],
+  [0,False,long],
+  [123,True,long],
   [0.0,False,float],
   [123.123,True,float],
   [.1,True,float],
-  [False,False,int], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
-  [True,True,int], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
+  [False,False,long], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
+  [True,True,long], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
   [None,False,None],
-  [2147483648,True,int],
-  [922337203685477580,True,int]
+  [2147483648,True,long],
+  [922337203685477580,True,long]
 ]
 
 def test_expressions_for_thruthyness():
