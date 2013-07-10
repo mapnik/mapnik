@@ -85,15 +85,13 @@ files = {
     'lines-1': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-2': {'sizes': sizes_few_square,'bbox':default_text_box},
     'lines-3': {'sizes': sizes_few_square,'bbox':default_text_box},
-    # https://github.com/mapnik/mapnik/issues/1696
-    # https://github.com/mapnik/mapnik/issues/1521
-    # fails with clang++ on os x
     'lines-shield': {'sizes': sizes_few_square,'bbox':default_text_box},
     'collision': {'sizes':[(600,400)]},
     'shield-on-polygon': {'sizes':[(600,400)]},
     'shield-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'geometry-transform-translate': {'sizes':[(200,200)]},
     'marker-svg-opacity':{},
+    'marker-svg-opacity2':{},
     'marker-multi-policy': {'sizes':[(600,400)]},
     'marker-on-line': {'sizes':[(600,400)],
         'bbox': mapnik.Box2d(-10, 0, 15, 20)},
