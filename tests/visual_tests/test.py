@@ -92,6 +92,7 @@ files = {
     'geometry-transform-translate': {'sizes':[(200,200)]},
     'marker-svg-opacity':{},
     'marker-svg-opacity2':{},
+    'marker-svg-empty-g-element':{},
     'marker-multi-policy': {'sizes':[(600,400)]},
     'marker-on-line': {'sizes':[(600,400)],
         'bbox': mapnik.Box2d(-10, 0, 15, 20)},
