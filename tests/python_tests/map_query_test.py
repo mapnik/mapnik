@@ -63,7 +63,11 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         m.zoom_all()
         #mapnik.render_to_file(m,'works2.png')
         # validate that aspect_fix_mode modified the bbox reasonably
-        eq_(str(m.envelope()),str(mapnik.Box2d(-179.999999975,-167.951396161,179.999999975,192.048603789)))
+        e = m.envelope()
+        assert_almost_equal(e.minx, -179.999999975, places=7)
+        assert_almost_equal(e.miny, -167.951396161, places=7)
+        assert_almost_equal(e.maxx, 179.999999975, places=7)
+        assert_almost_equal(e.maxy, 192.048603789, places=7)
         fs = m.query_point(0,-98.9264, 38.1432) # somewhere in kansas
         feat = fs.next()
         eq_(feat.attributes['NAME'],u'United States')
@@ -86,7 +90,11 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
         # caution - will go square due to evil aspect_fix_mode backhandedness
         m.zoom_all()
         # validate that aspect_fix_mode modified the bbox reasonably
-        eq_(str(m.envelope()),str(mapnik.Box2d(-179.999999975,-167.951396161,179.999999975,192.048603789)))
+        e = m.envelope()
+        assert_almost_equal(e.minx, -179.999999975, places=7)
+        assert_almost_equal(e.miny, -167.951396161, places=7)
+        assert_almost_equal(e.maxx, 179.999999975, places=7)
+        assert_almost_equal(e.maxy, 192.048603789, places=7)
         fs = m.query_map_point(0,55,100) # somewhere in Canada
         feat = fs.next()
         eq_(feat.attributes['NAME'],u'Canada')
