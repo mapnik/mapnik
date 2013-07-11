@@ -219,10 +219,10 @@ pixel_position placement_finder::alignment_offset() const //TODO
     }
 
     // set horizontal position to middle of text
-    if (halign_ == H_LEFT)
+    if (halign_point_ == H_LEFT)
     {
         result.x = -0.5 * layout_.width();  // move center left by 1/2 the string width
-    } else if (halign_ == H_RIGHT)
+    } else if (halign_point_ == H_RIGHT)
     {
         result.x = 0.5 * layout_.width();  // move center right by 1/2 the string width
     }
