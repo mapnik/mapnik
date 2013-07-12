@@ -3,6 +3,7 @@
 from nose.tools import *
 import os,sys
 import mapnik
+from utilities import execution_path, run_all
 try:
     import json
 except ImportError:
@@ -99,4 +100,4 @@ def test_char_escaping():
         eq_(pyjson['properties']['name'],expected)
 
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

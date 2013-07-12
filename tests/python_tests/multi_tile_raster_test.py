@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, contains_word
-
+from utilities import execution_path, run_all, contains_word
 import os, mapnik
 
 def setup():
@@ -66,4 +65,4 @@ def test_multi_tile_policy():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path, contains_word, get_unique_colors
+from utilities import execution_path, run_all, contains_word, get_unique_colors
 
 import os, mapnik
 
@@ -195,4 +195,4 @@ def test_raster_warping_does_not_overclip_source():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

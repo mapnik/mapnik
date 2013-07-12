@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
+from utilities import run_all
 import mapnik
 
 if hasattr(mapnik,'Expression'):
@@ -215,33 +216,35 @@ def test_creation_of_bool():
     f["bool"] = True
     eq_(f["bool"],True)
     # TODO - will become int of 1 do to built in boost python conversion
-    # is this fixable?
-    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],int),True)
+    # https://github.com/mapnik/mapnik/issues/1873
+    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],long),True)
     f["bool"] = False
     eq_(f["bool"],False)
-    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],int),True)
+    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],long),True)
     # test NoneType
     f["bool"] = None
     eq_(f["bool"],None)
-    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],int),False)
+    eq_(isinstance(f["bool"],bool) or isinstance(f["bool"],long),False)
     # test integer
     f["bool"] = 0
     eq_(f["bool"],0)
+    # https://github.com/mapnik/mapnik/issues/1873
     # ugh, boost_python's built into converter does not work right
     #eq_(isinstance(f["bool"],bool),False)
 
 null_equality = [
   ['hello',False,unicode],
-  [0,False,int],
-  [123,False,int],
+  [u'',False,unicode],
+  [0,False,long],
+  [123,False,long],
   [0.0,False,float],
   [123.123,False,float],
   [.1,False,float],
-  [False,False,int], # TODO - should become bool
-  [True,False,int], # TODO - should become bool
+  [False,False,long], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
+  [True,False,long], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
   [None,True,None],
-  [2147483648,False,int],
-  [922337203685477580,False,int]
+  [2147483648,False,long],
+  [922337203685477580,False,long]
 ]
 
 def test_expressions_with_null_equality():
@@ -280,16 +283,16 @@ def test_expressions_with_null_equality2():
 truthyness = [
   [u'hello',True,unicode],
   [u'',False,unicode],
-  [0,False,int],
-  [123,True,int],
+  [0,False,long],
+  [123,True,long],
   [0.0,False,float],
   [123.123,True,float],
   [.1,True,float],
-  [False,False,int], # TODO - should become bool
-  [True,True,int], # TODO - should become bool
+  [False,False,long], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
+  [True,True,long], # TODO - should become bool: https://github.com/mapnik/mapnik/issues/1873
   [None,False,None],
-  [2147483648,True,int],
-  [922337203685477580,True,int]
+  [2147483648,True,long],
+  [922337203685477580,True,long]
 ]
 
 def test_expressions_for_thruthyness():
@@ -317,5 +320,117 @@ def test_expressions_for_thruthyness():
     eq_(expr.evaluate(f2),None)
     eq_(expr.to_bool(f2),False)
 
+# https://github.com/mapnik/mapnik/issues/1859
+def test_if_null_and_empty_string_are_equal():
+    context = mapnik.Context()
+    f = mapnik.Feature(context,0)
+    f["empty"] = u""
+    f["null"] = None
+    # ensure base assumptions are good
+    eq_(mapnik.Expression("[empty] = ''").to_bool(f),True)
+    eq_(mapnik.Expression("[null] = null").to_bool(f),True)
+    eq_(mapnik.Expression("[empty] != ''").to_bool(f),False)
+    eq_(mapnik.Expression("[null] != null").to_bool(f),False)
+    # now test expected behavior
+    eq_(mapnik.Expression("[null] = ''").to_bool(f),False)
+    eq_(mapnik.Expression("[empty] = null").to_bool(f),False)
+    eq_(mapnik.Expression("[empty] != null").to_bool(f),True)
+    # this one is the back compatibility shim
+    eq_(mapnik.Expression("[null] != ''").to_bool(f),False)
+
+def test_filtering_nulls_and_empty_strings():
+    context = mapnik.Context()
+    f = mapnik.Feature(context,0)
+    f["prop"] = u"hello"
+    eq_(f["prop"],u"hello")
+    eq_(mapnik.Expression("[prop]").to_bool(f),True)
+    eq_(mapnik.Expression("! [prop]").to_bool(f),False)
+    eq_(mapnik.Expression("[prop] != null").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] != null and [prop] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] != null or [prop] != ''").to_bool(f),True)
+    f["prop2"] = u""
+    eq_(f["prop2"],u"")
+    eq_(mapnik.Expression("[prop2]").to_bool(f),False)
+    eq_(mapnik.Expression("! [prop2]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop2] != null").to_bool(f),True)
+    eq_(mapnik.Expression("[prop2] != ''").to_bool(f),False)
+    eq_(mapnik.Expression("[prop2] = ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop2] != null or [prop2] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop2] != null and [prop2] != ''").to_bool(f),False)
+    f["prop3"] = None
+    eq_(f["prop3"],None)
+    eq_(mapnik.Expression("[prop3]").to_bool(f),False)
+    eq_(mapnik.Expression("! [prop3]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop3] != null").to_bool(f),False)
+    eq_(mapnik.Expression("[prop3] = null").to_bool(f),True)
+
+    # https://github.com/mapnik/mapnik/issues/1859
+    #eq_(mapnik.Expression("[prop3] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop3] != ''").to_bool(f),False)
+
+    eq_(mapnik.Expression("[prop3] = ''").to_bool(f),False)
+
+    # https://github.com/mapnik/mapnik/issues/1859
+    #eq_(mapnik.Expression("[prop3] != null or [prop3] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop3] != null or [prop3] != ''").to_bool(f),False)
+
+    eq_(mapnik.Expression("[prop3] != null and [prop3] != ''").to_bool(f),False)
+    # attr not existing should behave the same as prop3
+    eq_(mapnik.Expression("[prop4]").to_bool(f),False)
+    eq_(mapnik.Expression("! [prop4]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop4] != null").to_bool(f),False)
+    eq_(mapnik.Expression("[prop4] = null").to_bool(f),True)
+
+    # https://github.com/mapnik/mapnik/issues/1859
+    ##eq_(mapnik.Expression("[prop4] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop4] != ''").to_bool(f),False)
+
+    eq_(mapnik.Expression("[prop4] = ''").to_bool(f),False)
+
+    # https://github.com/mapnik/mapnik/issues/1859
+    ##eq_(mapnik.Expression("[prop4] != null or [prop4] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop4] != null or [prop4] != ''").to_bool(f),False)
+
+    eq_(mapnik.Expression("[prop4] != null and [prop4] != ''").to_bool(f),False)
+    f["prop5"] = False
+    eq_(f["prop5"],False)
+    eq_(mapnik.Expression("[prop5]").to_bool(f),False)
+    eq_(mapnik.Expression("! [prop5]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop5] != null").to_bool(f),True)
+    eq_(mapnik.Expression("[prop5] = null").to_bool(f),False)
+    eq_(mapnik.Expression("[prop5] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop5] = ''").to_bool(f),False)
+    eq_(mapnik.Expression("[prop5] != null or [prop5] != ''").to_bool(f),True)
+    eq_(mapnik.Expression("[prop5] != null and [prop5] != ''").to_bool(f),True)
+    # note, we need to do [prop5] != 0 here instead of false due to this bug:
+    # https://github.com/mapnik/mapnik/issues/1873
+    eq_(mapnik.Expression("[prop5] != null and [prop5] != '' and [prop5] != 0").to_bool(f),False)
+
+# https://github.com/mapnik/mapnik/issues/1872
+def test_falseyness_comparision():
+    context = mapnik.Context()
+    f = mapnik.Feature(context,0)
+    f["prop"] = 0
+    eq_(mapnik.Expression("[prop]").to_bool(f),False)
+    eq_(mapnik.Expression("[prop] = false").to_bool(f),True)
+    eq_(mapnik.Expression("not [prop] != false").to_bool(f),True)
+    eq_(mapnik.Expression("not [prop] = true").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] = true").to_bool(f),False)
+    eq_(mapnik.Expression("[prop] != true").to_bool(f),True)
+
+# https://github.com/mapnik/mapnik/issues/1806, fixed by https://github.com/mapnik/mapnik/issues/1872
+def test_truthyness_comparision():
+    context = mapnik.Context()
+    f = mapnik.Feature(context,0)
+    f["prop"] = 1
+    eq_(mapnik.Expression("[prop]").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] = false").to_bool(f),False)
+    eq_(mapnik.Expression("not [prop] != false").to_bool(f),False)
+    eq_(mapnik.Expression("not [prop] = true").to_bool(f),False)
+    eq_(mapnik.Expression("[prop] = true").to_bool(f),True)
+    eq_(mapnik.Expression("[prop] != true").to_bool(f),False)
+
+
 if __name__ == "__main__":
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

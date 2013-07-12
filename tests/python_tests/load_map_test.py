@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, run_all
 
 import os, sys, glob, mapnik
 
@@ -10,50 +10,42 @@ def setup():
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
 
-# We expect these files to not raise any
-# exceptions at all
-def assert_loads_successfully(file):
-    m = mapnik.Map(512, 512)
-
-    try:
-        strict = True
-        mapnik.load_map(m, file, strict)
-
-        # libxml2 is not smart about paths, and clips the last directory off
-        # of a path if it does not end in a trailing slash
-        base_path = os.path.dirname(file) + '/'
-        mapnik.load_map_from_string(m,open(file,'rb').read(),strict,base_path)
-    except RuntimeError, e:
-        # only test datasources that we have installed
-        if not 'Could not create datasource' in str(e):
-            raise RuntimeError(e)
-
-
-# We expect these files to raise a RuntimeError
-# and fail if there isn't one (or a different type
-# of exception)
-@raises(RuntimeError)
-def assert_raises_runtime_error(file):
-    m = mapnik.Map(512, 512)
-
-    strict = True
-    mapnik.load_map(m, file, strict)
-
 def test_broken_files():
+    default_logging_severity = mapnik.logger.get_severity()
+    mapnik.logger.set_severity(mapnik.severity_type.None)
     broken_files = glob.glob("../data/broken_maps/*.xml")
-
     # Add a filename that doesn't exist 
     broken_files.append("../data/broken/does_not_exist.xml")
 
-    for file in broken_files:
-        yield assert_raises_runtime_error, file
+    failures = [];
+    for filename in broken_files:
+        try:
+            m = mapnik.Map(512, 512)
+            strict = True
+            mapnik.load_map(m, filename, strict)
+            failures.append('Loading broken map (%s) did not raise RuntimeError!' % filename)
+        except RuntimeError:
+            pass
+    eq_(len(failures),0,'\n'+'\n'.join(failures))
+    mapnik.logger.set_severity(default_logging_severity)
 
 def test_good_files():
     good_files = glob.glob("../data/good_maps/*.xml")
 
-    for file in good_files:
-        yield assert_loads_successfully, file
+    failures = [];
+    for filename in good_files:
+        try:
+            m = mapnik.Map(512, 512)
+            strict = True
+            mapnik.load_map(m, filename, strict)
+            base_path = os.path.dirname(filename)
+            mapnik.load_map_from_string(m,open(filename,'rb').read(),strict,base_path)
+        except RuntimeError, e:
+            # only test datasources that we have installed
+            if not 'Could not create datasource' in str(e):
+                failures.append('Failed to load valid map (%s)!' % filename)
+    eq_(len(failures),0,'\n'+'\n'.join(failures))
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

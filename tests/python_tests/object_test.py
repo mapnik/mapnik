@@ -3,8 +3,7 @@
 
 import os
 from nose.tools import *
-from utilities import execution_path
-from utilities import Todo
+from utilities import execution_path, run_all
 import tempfile
 
 import mapnik
@@ -13,6 +12,10 @@ def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
     os.chdir(execution_path('.'))
+
+def test_debug_symbolizer():
+    s = mapnik.DebugSymbolizer()
+    eq_(s.mode,mapnik.debug_symbolizer_mode.collision)
 
 def test_raster_symbolizer():
     s = mapnik.RasterSymbolizer()
@@ -561,4 +564,4 @@ def test_rule_init():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))
