@@ -36,7 +36,6 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 
 #include "agg_rasterizer_scanline_aa.h"

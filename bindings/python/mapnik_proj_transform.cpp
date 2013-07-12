@@ -27,6 +27,10 @@
 // boost
 #include <boost/python.hpp>
 
+// stl
+#include <stdexcept>
+
+
 using mapnik::proj_transform;
 using mapnik::projection;
 

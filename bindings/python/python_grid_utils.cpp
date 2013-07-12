@@ -39,6 +39,9 @@
 #include "mapnik_value_converter.hpp"
 #include "python_grid_utils.hpp"
 
+// stl
+#include <stdexcept>
+
 namespace mapnik {
 
 

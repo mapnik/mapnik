@@ -68,7 +68,7 @@ check: test-local
 
 demo:
 	@echo "*** Running rundemo.cpp…"
-	cd demo/c++; ./rundemo `mapnik-config --prefix`/lib/mapnik
+	cd demo/c++; ./rundemo `mapnik-config --prefix`
 
 pep8:
 	# https://gist.github.com/1903033

@@ -65,10 +65,12 @@ Note: Python3k is supported, see: https://github.com/mapnik/mapnik/wiki/Python3k
 
 Optional dependencies:
 
- * Cairo - Graphics library for output formats like PDF, PS, and SVG
+ * Cairo >= 1.6.0 - Graphics library for output formats like PDF, PS, and SVG
     - pkg-config - Required for building with cairo support
     - pycairo - Python bindings for cairo
- * libpq - PostgreSQL libraries (For PostGIS plugin support)
+ * PostgreSQL (for PostGIS plugin support)
+    - libpq - PostreSQL libraries
+    - pg_config - PostgreSQL installation capabilities
  * libgdal - GDAL/OGR input (For gdal and ogr plugin support)
  * libsqlite3 - SQLite input (needs RTree support builtin) (sqlite plugin support)
  * libocci - Oracle input plugin support

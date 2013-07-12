@@ -31,6 +31,7 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
 #include <mapnik/timer.hpp>
+#include <mapnik/utils.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -82,7 +83,7 @@ void ogr_datasource::init(mapnik::parameters const& params)
 
     // initialize ogr formats
     OGRRegisterAll();
-    
+
     boost::optional<std::string> file = params.get<std::string>("file");
     boost::optional<std::string> string = params.get<std::string>("string");
     if (! file && ! string)
@@ -253,7 +254,12 @@ void ogr_datasource::init(mapnik::parameters const& params)
     }
     index_name_ = dataset_name_.substr(0, breakpoint) + ".ogrindex";
 
+#if defined (_WINDOWS)
+    std::ifstream index_file(mapnik::utf8_to_utf16(index_name_), std::ios::in | std::ios::binary);
+#else
     std::ifstream index_file(index_name_.c_str(), std::ios::in | std::ios::binary);
+#endif
+
     if (index_file)
     {
         indexed_ = true;
@@ -525,7 +531,7 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
 
         if (indexed_)
         {
-            filter_at_point filter(pt);
+            filter_at_point filter(pt, tol);
 
             return featureset_ptr(new ogr_index_featureset<filter_at_point> (ctx,
                                                                              *layer,
@@ -535,13 +541,11 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
         }
         else
         {
-            OGRPoint point;
-            point.setX (pt.x);
-            point.setY (pt.y);
-
+            mapnik::box2d<double> bbox(pt, pt);
+            bbox.pad(tol);
             return featureset_ptr(new ogr_featureset (ctx,
                                                       *layer,
-                                                      point,
+                                                      bbox,
                                                       desc_.get_encoding()));
         }
     }

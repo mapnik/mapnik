@@ -59,10 +59,11 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & 
       layerdef_(layer.GetLayerDefn()),
       filter_(filter),
       tr_(new transcoder(encoding)),
-      fidcolumn_(layer_.GetFIDColumn())
+      fidcolumn_(layer_.GetFIDColumn()),
+      feature_envelope_()
 {
 
-    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file.c_str(),true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file, true);
     if (memory)
     {
         boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
@@ -104,6 +105,9 @@ feature_ptr ogr_index_featureset<filterT>::next()
         OGRGeometry* geom=poFeature->GetGeometryRef();
         if (geom && !geom->IsEmpty())
         {
+            geom->getEnvelope(&feature_envelope_);
+            if (!filter_.pass(mapnik::box2d<double>(feature_envelope_.MinX,feature_envelope_.MinY,
+                                            feature_envelope_.MaxX,feature_envelope_.MaxY))) continue;
             ogr_converter::convert_geometry (geom, feature);
         }
         else

@@ -120,16 +120,13 @@ occi_datasource::occi_datasource(parameters const& params)
     {
         try
         {
-            Environment* env = occi_environment::get_environment();
-
-            pool_ = env->createStatelessConnectionPool(
+            pool_ = occi_environment::instance().create_pool(
                 *params.get<std::string>("user"),
                 *params.get<std::string>("password"),
                 *params.get<std::string>("host"),
                 *params.get<int>("max_size", 5),
                 *params.get<int>("initial_size", 1),
-                1,
-                StatelessConnectionPool::HOMOGENEOUS);
+                1);
         }
         catch (SQLException& ex)
         {
@@ -140,9 +137,7 @@ occi_datasource::occi_datasource(parameters const& params)
     {
         try
         {
-            Environment* env = occi_environment::get_environment();
-
-            conn_ = env->createConnection(
+            conn_ = occi_environment::instance().create_connection(
                 *params.get<std::string>("user"),
                 *params.get<std::string>("password"),
                 *params.get<std::string>("host"));
@@ -325,22 +320,18 @@ occi_datasource::occi_datasource(parameters const& params)
 
 occi_datasource::~occi_datasource()
 {
+    if (use_connection_pool_)
     {
-        Environment* env = occi_environment::get_environment();
-
-        if (use_connection_pool_)
+        if (pool_ != 0)
         {
-            if (pool_ != 0)
-            {
-                env->terminateStatelessConnectionPool(pool_, StatelessConnectionPool::SPD_FORCE);
-            }
+            occi_environment::instance().destroy_pool(pool_);
         }
-        else
+    }
+    else
+    {
+        if (conn_ != 0)
         {
-            if (conn_ != 0)
-            {
-                env->terminateConnection(conn_);
-            }
+            occi_environment::instance().destroy_connection(conn_);
         }
     }
 }

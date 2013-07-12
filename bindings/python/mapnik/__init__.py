@@ -335,6 +335,53 @@ def Shapefile(**keywords):
     keywords['type'] = 'shape'
     return CreateDatasource(keywords)
 
+def CSV(**keywords):
+    """Create a CSV Datasource.
+
+    Required keyword arguments:
+      file -- path to csv
+
+    Optional keyword arguments:
+      inline -- inline CSV string (if provided 'file' argument will be ignored and non-needed)
+      base -- path prefix (default None)
+      encoding -- file encoding (default 'utf-8')
+      row_limit -- integer limit of rows to return (default: 0)
+      strict -- throw an error if an invalid row is encountered
+      escape -- The escape character to use for parsing data
+      quote -- The quote character to use for parsing data
+      separator -- The separator character to use for parsing data
+      headers -- A comma separated list of header names that can be set to add headers to data that lacks them
+      filesize_max -- The maximum filesize in MB that will be accepted
+
+    >>> from mapnik import CSV
+    >>> csv = CSV(file='test.csv')
+
+    >>> from mapnik import CSV
+    >>> csv = CSV(inline='''wkt,Name\n"POINT (120.15 48.47)","Winthrop, WA"''')
+
+    For more information see https://github.com/mapnik/mapnik/wiki/CSV-Plugin
+
+    """
+    keywords['type'] = 'csv'
+    return CreateDatasource(keywords)
+
+def GeoJSON(**keywords):
+    """Create a GeoJSON Datasource.
+
+    Required keyword arguments:
+      file -- path to json
+
+    Optional keyword arguments:
+      encoding -- file encoding (default 'utf-8')
+      base -- path prefix (default None)
+
+    >>> from mapnik import GeoJSON
+    >>> geojson = GeoJSON(file='test.json')
+
+    """
+    keywords['type'] = 'geojson'
+    return CreateDatasource(keywords)
+
 def PostGIS(**keywords):
     """Create a PostGIS Datasource.
 
@@ -551,44 +598,6 @@ def Osm(**keywords):
     # note: parser only supports libxml2 so not exposing option
     # parser -- xml parser to use (default libxml2)
     keywords['type'] = 'osm'
-    return CreateDatasource(keywords)
-
-def Kismet(**keywords):
-    """Create a Kismet Datasource.
-
-    Required keyword arguments:
-      host -- kismet hostname
-      port -- kismet port
-
-    Optional keyword arguments:
-      encoding -- file encoding (default 'utf-8')
-      extent -- manually specified data extent (comma delimited string, default None)
-
-    >>> from mapnik import Kismet, Layer
-    >>> datasource = Kismet(host='localhost',port=2501,extent='-179,-85,179,85')
-    >>> lyr = Layer('Kismet Server Layer')
-    >>> lyr.datasource = datasource
-
-    """
-    keywords['type'] = 'kismet'
-    return CreateDatasource(keywords)
-
-def Geos(**keywords):
-    """Create a GEOS Vector Datasource.
-
-    Required keyword arguments:
-      wkt -- inline WKT text of the geometry
-
-    Optional keyword arguments:
-      extent -- manually specified data extent (comma delimited string, default None)
-
-    >>> from mapnik import Geos, Layer
-    >>> datasource = Geos(wkt='MULTIPOINT(100 100, 50 50, 0 0)')
-    >>> lyr = Layer('GEOS Layer from WKT string')
-    >>> lyr.datasource = datasource
-
-    """
-    keywords['type'] = 'geos'
     return CreateDatasource(keywords)
 
 def Python(**keywords):

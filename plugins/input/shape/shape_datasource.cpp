@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,12 +28,13 @@
 #include <boost/version.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/util/fs.hpp>
 #include <mapnik/global.hpp>
+#include <mapnik/utils.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/geom_util.hpp>
@@ -76,22 +77,18 @@ shape_datasource::shape_datasource(const parameters &params)
         shape_name_ = *file;
 
     boost::algorithm::ireplace_last(shape_name_,".shp","");
-
-    if (!boost::filesystem::exists(shape_name_ + ".shp"))
+    if (!mapnik::util::exists(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
     }
-
-    if (boost::filesystem::is_directory(shape_name_ + ".shp"))
+    if (mapnik::util::is_directory(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
     }
-
-    if (!boost::filesystem::exists(shape_name_ + ".dbf"))
+    if (!mapnik::util::exists(shape_name_ + ".dbf"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".dbf' does not exist");
     }
-
 
     try
     {
@@ -205,22 +202,7 @@ void shape_datasource::init(shape_io& shape)
 #endif
 
     // check if we have an index file around
-
     indexed_ = shape.has_index();
-
-    //std::string index_name(shape_name_+".index");
-    //std::ifstream file(index_name.c_str(),std::ios::in | std::ios::binary);
-    //if (file)
-    //{
-    //    indexed_=true;
-    //    file.close();
-    //}
-    //else
-    //{
-    //    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: No .index file found for "
-    //                            << shape_name_ << ".shp, use the 'shapeindex' program to build an index for faster rendering";
-    //}
-
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Extent=" << extent_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: File length=" << file_length_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Shape type=" << shape_type_;
