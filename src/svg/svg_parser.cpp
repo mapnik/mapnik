@@ -201,8 +201,11 @@ void start_element(svg_parser & parser, xmlTextReaderPtr reader)
 
         if (xmlStrEqual(name, BAD_CAST "g"))
         {
-            parser.path_.push_attr();
-            parse_attr(parser,reader);
+            if (xmlTextReaderIsEmptyElement(reader) == 0)
+            {
+                parser.path_.push_attr();
+                parse_attr(parser,reader);
+            }
         }
         else
         {

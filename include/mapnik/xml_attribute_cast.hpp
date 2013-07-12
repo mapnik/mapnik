@@ -30,11 +30,14 @@
 #include <mapnik/boolean.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/expression.hpp>
+
 // boost
 #include <boost/optional.hpp>
 #include <boost/format.hpp>
+
 // stl
 #include <string>
+#include <stdexcept>
 
 namespace mapnik { namespace detail {
 

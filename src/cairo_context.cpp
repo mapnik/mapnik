@@ -25,6 +25,8 @@
 #include <mapnik/text/text_properties.hpp>
 #include <mapnik/font_set.hpp>
 
+#include <cairo-ft.h>
+
 #include <valarray>
 namespace mapnik {
 
@@ -152,7 +154,6 @@ void cairo_context::set_operator(composite_mode_e comp_op)
         cairo_set_operator(cairo_.get(), CAIRO_OPERATOR_EXCLUSION);
         break;
 #else
-#warning building against cairo older that 1.10.0, some compositing options are disabled
     case multiply:
     case screen:
     case overlay:

@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp> // for featureset_ptr
+#include <mapnik/config.hpp>
 
 // stl
 #include <set>
@@ -48,7 +49,7 @@ enum eAttributeCollectionPolicy
 };
 
 template <typename Processor>
-class feature_style_processor
+class MAPNIK_DECL feature_style_processor
 {
     struct symbol_dispatch;
 public:

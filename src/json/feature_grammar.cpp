@@ -134,15 +134,18 @@ feature_grammar<Iterator,FeatureType>::feature_grammar(mapnik::transcoder const&
 
     attribute_value %= number | string_  ;
 
+    feature.name("Feature");
+    properties.name("Properties");
+    attributes.name("Attributes");
 
     on_error<fail>
         (
             feature
             , std::clog
             << phoenix::val("Error! Expecting ")
-            << _4                               // what failed?
+            << _4 // what failed?
             << phoenix::val(" here: \"")
-            << construct<std::string>(_3, _2)   // iterators to error-pos, end
+            << where_message_(_3, _2, 16) // where? 16 is max chars to output
             << phoenix::val("\"")
             << std::endl
             );

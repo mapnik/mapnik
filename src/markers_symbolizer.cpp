@@ -25,6 +25,7 @@
 #include <mapnik/value.hpp>
 #include <mapnik/attribute.hpp>
 #include <mapnik/parse_path.hpp>
+#include <mapnik/enumeration.hpp>
 
 namespace mapnik {
 

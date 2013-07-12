@@ -25,7 +25,11 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/text/face.hpp>
-
+#include <mapnik/text/renderer.hpp>
+#include <mapnik/util/fs.hpp>
+#include <mapnik/graphics.hpp>
+#include <mapnik/grid/grid.hpp>
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -34,6 +38,7 @@
 
 // stl
 #include <algorithm>
+#include <stdexcept>
 
 // freetype2
 extern "C"
@@ -110,11 +115,11 @@ bool freetype_engine::register_font(std::string const& file_name)
         if (face->family_name && face->style_name)
         {
             std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
-            // skip fonts with leading . in name
+            // skip fonts with leading . in the name
             if (!boost::algorithm::starts_with(name,"."))
             {
-                success = true;
                 name2file_.insert(std::make_pair(name, std::make_pair(i,file_name)));
+                success = true;
             }
         }
         else
@@ -128,7 +133,7 @@ bool freetype_engine::register_font(std::string const& file_name)
             else if (face->style_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
 
-            MAPNIK_LOG_DEBUG(font_engine_freetype) << "freetype_engine: " << s.str();
+            MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
     }
     if (face)
@@ -140,48 +145,54 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
-    boost::filesystem::path path(dir);
-    if (!boost::filesystem::exists(path))
+    if (!mapnik::util::exists(dir))
     {
         return false;
     }
-    if (!boost::filesystem::is_directory(path))
+    if (!mapnik::util::is_directory(dir))
     {
         return mapnik::freetype_engine::register_font(dir);
     }
-    boost::filesystem::directory_iterator end_itr;
     bool success = false;
-    for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
+    try
     {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-        std::string file_name = itr->path().string();
-#else // v2
-        std::string file_name = itr->string();
-#endif
-        if (boost::filesystem::is_directory(*itr) && recurse)
+        boost::filesystem::directory_iterator end_itr;
+        for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
         {
-            if (register_fonts(file_name, true))
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+            std::string file_name = itr->path().string();
+    #else // v2
+            std::string file_name = itr->string();
+    #endif
+            if (boost::filesystem::is_directory(*itr) && recurse)
             {
-                success = true;
-            }
-        }
-        else
-        {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            std::string base_name = itr->path().filename().string();
-#else // v2
-            std::string base_name = itr->filename();
-#endif
-            if (!boost::algorithm::starts_with(base_name,".") &&
-                     boost::filesystem::is_regular_file(file_name) &&
-                     is_font_file(file_name))
-            {
-                if (mapnik::freetype_engine::register_font(file_name))
+                if (register_fonts(file_name, true))
                 {
                     success = true;
                 }
             }
+            else
+            {
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+                std::string base_name = itr->path().filename().string();
+    #else // v2
+                std::string base_name = itr->filename();
+    #endif
+                if (!boost::algorithm::starts_with(base_name,".") &&
+                    boost::filesystem::is_regular_file(file_name) &&
+                    is_font_file(file_name))
+                {
+                    if (mapnik::freetype_engine::register_font(file_name))
+                    {
+                        success = true;
+                    }
+                }
+            }
         }
+    }
+    catch (std::exception const& ex)
+    {
+        MAPNIK_LOG_ERROR(font_engine_freetype) << "register_fonts: " << ex.what();
     }
     return success;
 }
@@ -206,18 +217,47 @@ std::map<std::string,std::pair<int,std::string> > const& freetype_engine::get_ma
 
 face_ptr freetype_engine::create_face(std::string const& family_name)
 {
-    std::map<std::string, std::pair<int,std::string> >::iterator itr;
+    std::map<std::string, std::pair<int,std::string> >::const_iterator itr;
     itr = name2file_.find(family_name);
     if (itr != name2file_.end())
     {
         FT_Face face;
-        FT_Error error = FT_New_Face (library_,
-                                      itr->second.second.c_str(),
-                                      itr->second.first,
-                                      &face);
-        if (!error)
+
+        std::map<std::string,std::string>::const_iterator mem_font_itr = memory_fonts_.find(itr->second.second);
+
+        if (mem_font_itr != memory_fonts_.end()) // memory font
         {
-            return boost::make_shared<font_face>(face);
+            FT_Error error = FT_New_Memory_Face(library_,
+                                                (FT_Byte const*) mem_font_itr->second.c_str(), //buffer
+                                                mem_font_itr->second.size(), // size
+                                                itr->second.first, // face index
+                                                &face);
+
+            if (!error) return boost::make_shared<font_face>(face);
+        }
+        else
+        {
+            // load font into memory
+#ifdef MAPNIK_THREADSAFE
+            mutex::scoped_lock lock(mutex_);
+#endif
+            std::ifstream is(itr->second.second.c_str() , std::ios::binary);
+            std::string buffer((std::istreambuf_iterator<char>(is)),
+                               std::istreambuf_iterator<char>());
+            std::pair<std::map<std::string,std::string>::iterator,bool> result
+                = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
+
+            FT_Error error = FT_New_Memory_Face (library_,
+                                                 (FT_Byte const*) result.first->second.c_str(),
+                                                 buffer.size(),
+                                                 itr->second.first,
+                                                 &face);
+            if (!error) return boost::make_shared<font_face>(face);
+            else
+            {
+                // we can't load font, erase it.
+                memory_fonts_.erase(result.first);
+            }
         }
     }
     return face_ptr();
@@ -252,6 +292,85 @@ face_ptr face_manager<T>::get_face(const std::string &name)
             face_ptr_cache_.insert(make_pair(name,face));
         }
         return face;
+    }
+}
+
+template <typename T>
+void render_halo(T & pixmap,
+                 FT_Bitmap *bitmap,
+                 unsigned rgba,
+                 int x1,
+                 int y1,
+                 double halo_radius,
+                 double opacity,
+                 composite_mode_e comp_op)
+{
+    int width = bitmap->width;
+    int height = bitmap->rows;
+    int x, y;
+    if (halo_radius < 1.0)
+    {
+        for (x=0; x < width; x++)
+        {
+            for (y=0; y < height; y++)
+            {
+                int gray = bitmap->buffer[y*bitmap->width+x];
+                if (gray)
+                {
+                    pixmap.composite_pixel(comp_op, x+x1-1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1,   y+y1-1, rgba, gray*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1+1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
+
+                    pixmap.composite_pixel(comp_op, x+x1-1, y+y1,   rgba, gray*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1,   y+y1,   rgba, gray, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1+1, y+y1,   rgba, gray*halo_radius, opacity);
+
+                    pixmap.composite_pixel(comp_op, x+x1-1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1,   y+y1+1, rgba, gray*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1+1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
+                }
+            }
+        }
+    } else {
+        for (x=0; x < width; x++)
+        {
+            for (y=0; y < height; y++)
+            {
+                int gray = bitmap->buffer[y*bitmap->width+x];
+                if (gray)
+                {
+                    for (int n=-halo_radius; n <=halo_radius; ++n)
+                        for (int m=-halo_radius; m <= halo_radius; ++m)
+                            pixmap.composite_pixel(comp_op, x+x1+m, y+y1+n, rgba, gray, opacity);
+                }
+            }
+        }
+    }
+}
+
+template <typename T>
+void render_halo_id(T & pixmap,
+                    FT_Bitmap *bitmap,
+                    mapnik::value_integer feature_id,
+                    int x1,
+                    int y1,
+                    int halo_radius)
+{
+    int width = bitmap->width;
+    int height = bitmap->rows;
+    int x, y;
+    for (x=0; x < width; x++)
+    {
+        for (y=0; y < height; y++)
+        {
+            int gray = bitmap->buffer[y*bitmap->width+x];
+            if (gray)
+            {
+                for (int n=-halo_radius; n <=halo_radius; ++n)
+                    for (int m=-halo_radius; m <= halo_radius; ++m)
+                        pixmap.setPixel(x+x1+m,y+y1+n,feature_id);
+            }
+        }
     }
 }
 
@@ -307,7 +426,7 @@ face_set_ptr face_manager<T>::get_face_set(const std::string &name, boost::optio
 boost::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
-
+std::map<std::string,std::string> freetype_engine::memory_fonts_;
 
 template class face_manager<freetype_engine>;
 

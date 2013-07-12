@@ -40,7 +40,7 @@ public:
     {
         const char* what() const throw()
         {
-            return "uknown object type";
+            return "unknown object type";
         }
     };
     static product_type* on_unknown_type(const key_type&)
@@ -83,7 +83,17 @@ public:
         {
             return (pos->second)(file);
         }
-        return factory_error_policy<key_type,product_type>::on_unknown_type(key);
+        return 0;
+    }
+
+    product_type* create_object(const key_type& key, char const* data, std::size_t size)
+    {
+        typename product_map::const_iterator pos=map_.find(key);
+        if (pos!=map_.end())
+        {
+            return (pos->second)(data, size);
+        }
+        return 0;
     }
 };
 }

@@ -400,12 +400,12 @@ void save_to_file(T const& image, std::string const& filename, rgba_palette cons
 
 #if defined(HAVE_CAIRO)
 // TODO - move to separate cairo_io.hpp
-void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, double scale_factor)
+void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, double scale_factor, double scale_denominator)
 {
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-        save_to_cairo_file(map,filename,*type,scale_factor);
+        save_to_cairo_file(map,filename,*type,scale_factor,scale_denominator);
     }
     else throw ImageWriterException("Could not write file to " + filename );
 }
@@ -413,7 +413,8 @@ void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, dou
 void save_to_cairo_file(mapnik::Map const& map,
                         std::string const& filename,
                         std::string const& type,
-                        double scale_factor)
+                        double scale_factor,
+                        double scale_denominator)
 {
     std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
     if (file)
@@ -467,7 +468,7 @@ void save_to_cairo_file(mapnik::Map const& map,
         */
 
         mapnik::cairo_renderer<cairo_ptr> ren(map, create_context(surface), scale_factor);
-        ren.apply();
+        ren.apply(scale_denominator);
 
         if (type == "ARGB32" || type == "RGB24")
         {

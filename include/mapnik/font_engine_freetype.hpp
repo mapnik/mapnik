@@ -86,6 +86,7 @@ private:
     static boost::mutex mutex_;
 #endif
     static std::map<std::string, std::pair<int,std::string> > name2file_;
+    static std::map<std::string, std::string> memory_fonts_;
 };
 
 template <typename T>

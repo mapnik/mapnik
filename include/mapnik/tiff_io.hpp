@@ -24,8 +24,7 @@
 #define MAPNIK_TIFF_IO_HPP
 
 #include <mapnik/global.hpp>
-
-#include <iostream>
+#include <mapnik/image_util.hpp>
 
 extern "C"
 {
@@ -45,37 +44,89 @@ namespace mapnik {
 
 static tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
 {
-    std::ostream* out = (std::ostream*)fd;
+    std::ostream* out = reinterpret_cast<std::ostream*>(fd);
+    std::ios::pos_type pos = out->tellp();
+    std::streamsize request_size = size;
+    if (static_cast<tsize_t>(request_size) != size)
+        return static_cast<tsize_t>(-1);
+    out->write(reinterpret_cast<const char*>(buf), size);
 
-    out->write((const char*)buf, size);
-
-    return size;
+    if( static_cast<std::streamsize>(pos) == -1 )
+    {
+        return size;
+    }
+    else
+    {
+        return static_cast<tsize_t>(out->tellp()-pos);
+    }
 }
 
 static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
 {
-    if (off == 0xFFFFFFFF)
-    {
-        return 0xFFFFFFFF;
-    }
+    std::ostream* out = reinterpret_cast<std::ostream*>(fd);
 
-    std::ostream* out = (std::ostream*)fd;
+    if( out->fail() )
+        return static_cast<toff_t>(-1);
+
+    if( static_cast<std::streamsize>(out->tellp()) == -1)
+        return static_cast< toff_t >( 0 );
 
     switch(whence)
     {
+    case SEEK_SET:
+        out->seekp(off, std::ios_base::beg);
+        break;
     case SEEK_CUR:
         out->seekp(off, std::ios_base::cur);
         break;
     case SEEK_END:
         out->seekp(off, std::ios_base::end);
         break;
-    case SEEK_SET:
-    default:
-        out->seekp(off, std::ios_base::beg);
-        break;
     }
+    // grow std::stringstream buffer (re: libtiff/tif_stream.cxx)
+    std::ios::pos_type pos = out->tellp();
+    // second check needed for clang (libcxx doesn't set failbit when seeking beyond the current buffer size
+    if( out->fail() || off != pos)
+    {
+        std::ios::iostate old_state;
+        std::ios::pos_type  origin;
+        old_state = out->rdstate();
+        // reset the fail bit or else tellp() won't work below
+        out->clear(out->rdstate() & ~std::ios::failbit);
+        switch( whence )
+        {
+        case SEEK_SET:
+        default:
+            origin = 0L;
+            break;
+        case SEEK_CUR:
+            origin = out->tellp();
+            break;
+        case SEEK_END:
+            out->seekp(0, std::ios::end);
+            origin = out->tellp();
+            break;
+        }
+        // restore original stream state
+        out->clear(old_state);
 
-    return (toff_t)out->tellp();
+        // only do something if desired seek position is valid
+        if( (static_cast<uint64_t>(origin) + off) > 0L)
+        {
+            uint64_t num_fill;
+            // clear the fail bit
+            out->clear(out->rdstate() & ~std::ios::failbit);
+            // extend the stream to the expected size
+            out->seekp(0, std::ios::end);
+            num_fill = (static_cast<uint64_t>(origin)) + off - out->tellp();
+            for( uint64_t i = 0; i < num_fill; ++i)
+                out->put('\0');
+
+            // retry the seek
+            out->seekp(static_cast<std::ios::off_type>(static_cast<uint64_t>(origin) + off), std::ios::beg);
+        }
+    }
+    return static_cast<toff_t>(out->tellp());
 }
 
 static int tiff_close_proc(thandle_t fd)
@@ -87,8 +138,12 @@ static int tiff_close_proc(thandle_t fd)
 
 static toff_t tiff_size_proc(thandle_t fd)
 {
-    std::ostream* out = (std::ostream*)fd;
-    return (toff_t)out->tellp();
+    std::ostream* out = reinterpret_cast<std::ostream*>(fd);
+    std::ios::pos_type pos = out->tellp();
+    out->seekp(0, std::ios::end);
+    std::ios::pos_type len = out->tellp();
+    out->seekp(pos);
+    return (toff_t)len;
 }
 
 static tsize_t tiff_dummy_read_proc(thandle_t fd, tdata_t buf, tsize_t size)
@@ -113,7 +168,7 @@ void save_as_tiff(T1 & file, T2 const& image)
     const int scanline_size = sizeof(unsigned char) * width * 3;
 
     TIFF* output = RealTIFFOpen("mapnik_tiff_stream",
-                                "w",
+                                "wm",
                                 (thandle_t)&file,
                                 tiff_dummy_read_proc,
                                 tiff_write_proc,
@@ -124,7 +179,7 @@ void save_as_tiff(T1 & file, T2 const& image)
                                 tiff_dummy_unmap_proc);
     if (! output)
     {
-        // throw ?
+        throw ImageWriterException("Could not write TIFF");
     }
 
     TIFFSetField(output, TIFFTAG_IMAGEWIDTH, width);

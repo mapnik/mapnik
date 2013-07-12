@@ -88,8 +88,8 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         |
         agg_blur_filter(_val)
         |
-        hsla_filter(_val)
-        |
+        //hsla_filter(_val)
+        //|
         colorize_alpha_filter(_val)
         ;
 
@@ -100,6 +100,7 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         [push_back(_r1,construct<mapnik::filter::agg_stack_blur>(_a,_b))]
         ;
 
+    /*
     hsla_filter = lit("hsla")
         >> lit('(')
         >> double_[_a = _1] >> lit('x') >> double_[_b = _1] >> lit(';')
@@ -108,6 +109,7 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         >> double_[_g = _1] >> lit('x') >> double_[_h = _1] >> lit(')')
         [push_back(_r1, construct<mapnik::filter::hsla>(_a,_b,_c,_d,_e,_f,_g,_h))]
         ;
+    */
 
     colorize_alpha_filter = lit("colorize-alpha")[_a = construct<mapnik::filter::colorize_alpha>()]
         >> lit('(')

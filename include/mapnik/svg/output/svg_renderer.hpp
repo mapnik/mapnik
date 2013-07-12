@@ -36,6 +36,7 @@
 #include <mapnik/ctrans.hpp>    // for CoordTransform
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/request.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
@@ -70,7 +71,8 @@ class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<Out
 {
 public:
     typedef svg_renderer<OutputIterator> processor_impl_type;
-    svg_renderer(Map const& m, OutputIterator& output_iterator, unsigned offset_x=0, unsigned offset_y=0);
+    svg_renderer(Map const& m, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    svg_renderer(Map const& m, request const& req, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~svg_renderer();
 
     void start_map_processing(Map const& map);
@@ -149,9 +151,13 @@ private:
     OutputIterator& output_iterator_;
     const int width_;
     const int height_;
+    double scale_factor_;
     CoordTransform t_;
-    svg::svg_generator<OutputIterator> generator_;
     svg::path_output_attributes path_attributes_;
+    freetype_engine font_engine_;
+    face_manager<freetype_engine> font_manager_;
+    boost::shared_ptr<label_collision_detector4> detector_;
+    svg::svg_generator<OutputIterator> generator_;
     box2d<double> query_extent_;
     bool painted_;
 

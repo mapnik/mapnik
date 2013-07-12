@@ -107,10 +107,10 @@ public:
      * \param x     Return value for x position
      * \param y     Return value for x position
      * \param angle Return value for rotation angle
-     * \param add_to_detector Add selected position to detector
+     * \param ignore_placement Whether to add selected position to detector
      * \return True if a place is found, false if none is found.
      */
-    bool get_point(double & x, double  & y, double & angle,  bool add_to_detector = true)
+    bool get_point(double & x, double  & y, double & angle,  bool ignore_placement)
     {
         if (done_)
         {
@@ -151,10 +151,9 @@ public:
             //Error for this marker is too large. Skip to the next position.
             if (std::fabs(error_) > max_err_allowed)
             {
-                if (error_ > spacing_)
+                while (error_ > spacing_)
                 {
-                    MAPNIK_LOG_WARN(markers_placement) << "Extremely large error (" << error_ << ") in markers_placement. Please file a bug report.";
-                    error_ = 0.0; //Avoid moving backwards
+                    error_ -= spacing_; //Avoid moving backwards
                 }
                 spacing_left_ += spacing_ - error_;
                 error_ = 0.0;
@@ -220,7 +219,10 @@ public:
                 set_spacing_left(spacing_left_ + spacing_ * max_error_ / 10.0); //Only moves forward
                 continue;
             }
-            if (add_to_detector) detector_.insert(box);
+            if (!ignore_placement)
+            {
+                detector_.insert(box);
+            }
             last_x = x;
             last_y = y;
             return true;

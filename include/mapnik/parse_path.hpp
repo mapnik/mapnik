@@ -48,7 +48,7 @@ struct MAPNIK_DECL path_processor
     static void collect_attributes(path_expression const& path, std::set<std::string>& names);
 };
 
-typedef MAPNIK_DECL mapnik::path_processor path_processor_type;
+typedef mapnik::path_processor path_processor_type;
 
 }
 

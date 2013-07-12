@@ -31,6 +31,7 @@
 #include <mapnik/svg/output/svg_output_grammars.hpp>
 #include <mapnik/svg/output/svg_output_attributes.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
 
 
 namespace mapnik { namespace svg {
@@ -57,6 +58,9 @@ namespace mapnik { namespace svg {
         void generate_opening_root(root_output_attributes const& root_attributes);
         void generate_closing_root();
         void generate_rect(rect_output_attributes const& rect_attributes);
+        void generate_opening_group(mapnik::value_integer val);
+        void generate_opening_group(std::string const& val);
+        void generate_closing_group();
         template <typename PathType>
         void generate_path(PathType const& path, path_output_attributes const& path_attributes)
         {

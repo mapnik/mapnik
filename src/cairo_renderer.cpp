@@ -257,14 +257,9 @@ void cairo_renderer_base::setup(Map const& map)
 void cairo_renderer_base::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Start map processing bbox=" << map.get_current_extent();
-
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
     box2d<double> bounds = t_.forward(t_.extent());
     context_.rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
     context_.clip();
-#else
-#warning building against cairo older that 1.6.0, map clipping is disabled
-#endif
 }
 
 template <>
@@ -572,14 +567,14 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
             }
             if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
-                cairo_gradient g(attr.fill_gradient,attr.fill_opacity*opacity);
+                cairo_gradient g(attr.fill_gradient,attr.fill_opacity * attr.opacity * opacity);
 
                 context.set_gradient(g,bbox);
                 context.fill();
             }
             else if(attr.fill_flag)
             {
-                double fill_opacity = attr.fill_opacity * opacity * attr.fill_color.opacity();
+                double fill_opacity = attr.fill_opacity * attr.opacity * opacity * attr.fill_color.opacity();
                 context.set_color(attr.fill_color.r/255.0,attr.fill_color.g/255.0,
                                   attr.fill_color.b/255.0, fill_opacity);
                 context.fill();
@@ -595,13 +590,13 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
                 context.set_line_cap(line_cap_enum(attr.line_cap));
                 context.set_line_join(line_join_enum(attr.line_join));
                 context.set_miter_limit(attr.miter_limit);
-                cairo_gradient g(attr.stroke_gradient,attr.fill_opacity*opacity);
+                cairo_gradient g(attr.stroke_gradient,attr.fill_opacity * attr.opacity * opacity);
                 context.set_gradient(g,bbox);
                 context.stroke();
             }
             else if (attr.stroke_flag)
             {
-                double stroke_opacity = attr.stroke_opacity * opacity * attr.stroke_color.opacity();
+                double stroke_opacity = attr.stroke_opacity * attr.opacity * opacity * attr.stroke_color.opacity();
                 context.set_color(attr.stroke_color.r/255.0,attr.stroke_color.g/255.0,
                                   attr.stroke_color.b/255.0, stroke_opacity);
                 context.set_line_width(attr.stroke_width);
@@ -668,6 +663,15 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
     if (marker)
     {
+        box2d<double> const& bbox = (*marker)->bounding_box();
+        coord2d center = bbox.center();
+
+        agg::trans_affine tr;
+        evaluate_transform(tr, feature, sym.get_image_transform());
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine recenter_tr = recenter * tr;
+        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_);
+
         for (unsigned i = 0; i < feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
@@ -688,15 +692,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
-
-            double dx = 0.5 * (*marker)->width();
-            double dy = 0.5 * (*marker)->height();
-            agg::trans_affine tr;
-            evaluate_transform(tr, feature, sym.get_image_transform());
-            box2d<double> label_ext (-dx, -dy, dx, dy);
-            label_ext *= tr;
-            label_ext *= agg::trans_affine_translation(x,y);
-            label_ext *= agg::trans_affine_scaling(scale_factor_);
+            label_ext.re_center(x,y);
             if (sym.get_allow_overlap() ||
                 detector_->has_placement(label_ext))
             {
@@ -1028,7 +1024,7 @@ struct markers_dispatch
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -1116,7 +1112,7 @@ struct markers_dispatch_2
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 coord2d center = bbox_.center();
                 agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
