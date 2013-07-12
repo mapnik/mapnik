@@ -18,6 +18,10 @@
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/feature_style_processor.hpp>
 #include <boost/foreach.hpp>
+#include <vector>
+#include <algorithm>
+
+#include "utils.hpp"
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
@@ -56,11 +60,23 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     return true;
 }
 
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+    // TODO - re-enable if we can control the freetype/cairo versions used
+    // https://github.com/mapnik/mapnik/issues/1868
+    /*
     std::string expected("./tests/cpp_tests/support/map-request-marker-text-line-expected.png");
     std::string expected_cairo("./tests/cpp_tests/support/map-request-marker-text-line-expected-cairo.png");
     try {
+
+        BOOST_TEST(set_working_dir(args));
+
         mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
         mapnik::freetype_engine::register_fonts("./fonts", true );
         mapnik::Map m(256,256);
@@ -141,8 +157,10 @@ int main( int, char*[] )
     } catch (std::exception const& ex) {
         std::clog << ex.what() << "\n";
     }
+    */
     if (!::boost::detail::test_errors()) {
-        std::clog << "C++ Map Request rendering hook: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ Map Request rendering hook: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif

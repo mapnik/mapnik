@@ -4,11 +4,18 @@
 #include <mapnik/value_types.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/boolean.hpp>
-
+#include <vector>
+#include <algorithm>
 #include <boost/variant.hpp>
 
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
 
     mapnik::parameters params;
 
@@ -73,7 +80,8 @@ int main( int, char*[] )
     //BOOST_TEST( (params.get<mapnik::value_null>("null")/* && *params.get<mapnik::value_null>("null") == mapnik::value_null()*/) );
 
     if (!::boost::detail::test_errors()) {
-        std::clog << "C++ parameters: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ parameters: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif
