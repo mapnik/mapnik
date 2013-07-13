@@ -6,8 +6,8 @@ digraph textrendering {
     Text [color=red]
     text_layout[shape=box]
     renderer [color=red]
-    
-    Text -> text_layout 
+
+    Text -> text_layout
     text_layout -> Freetype[dir=both]
     text_layout -> text_itemizer [dir=both]
     text_layout -> HarfBuzz [dir=both]
@@ -17,11 +17,9 @@ digraph textrendering {
     format_run -> char_properties
     format_run -> glyph_info
 
-
-
     text_layout -> placement_finder
     placement_finder -> glyph_positions
     glyph_positions -> renderer
-    
+
 //     { rank=same; text_layout HarfBuzz Freetype text_itemizer }
 }
