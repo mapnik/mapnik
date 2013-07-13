@@ -4,13 +4,13 @@
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
             <StyleName>My Style</StyleName>
             <Datasource>
-                <Parameter name="type">osm</Parameter>
-                <Parameter name="file">../data/points.osm</Parameter>
+                <Parameter name="type">csv</Parameter>
+                <Parameter name="file">../data/points.csv</Parameter>
             </Datasource>
     </Layer>
     <Style name="My Style">
         <Rule>
-            <Filter>[nr] = "6"</Filter>
+            <Filter>[nr] = 6</Filter>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-90" character-spacing="0.0">"Char spacing 0.0"</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-80" character-spacing="0.1">"Char spacing 0.1"</TextSymbolizer>
             <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-70" character-spacing="0.2">"Char spacing 0.2"</TextSymbolizer>

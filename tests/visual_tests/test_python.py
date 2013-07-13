@@ -71,7 +71,7 @@ m.append_style('Style', style)
 
 
 layer = mapnik.Layer('Layer')
-layer.datasource = mapnik.Osm(file=os.path.join(dirname,"data/points.osm"))
+layer.datasource = mapnik.Osm(file=os.path.join(dirname,"data/points.csv"))
 layer.styles.append('Style')
 m.layers.append(layer)
 
