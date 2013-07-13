@@ -6,8 +6,8 @@
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
         <StyleName>My Style</StyleName>
         <Datasource>
-            <Parameter name="type">osm</Parameter>
-            <Parameter name="file">../data/lines2.osm</Parameter>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/lines2.csv</Parameter>
         </Datasource>
     </Layer>
 
