@@ -9,6 +9,7 @@
   <Style name="text">
     <Rule>
       <TextSymbolizer spacing="10" size="14" halo-radius="2" face-name="DejaVu Sans Oblique" placement="line">'text'</TextSymbolizer>
+      <DebugSymbolizer />
     </Rule>
   </Style>
 
