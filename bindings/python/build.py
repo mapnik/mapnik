@@ -53,6 +53,9 @@ link_all_libs = env['LINKING'] == 'static' or env['RUNTIME_LINK'] == 'static' or
 if link_all_libs:
     py_env.AppendUnique(LIBS=env['LIBMAPNIK_LIBS'])
 
+if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
+    py_env.AppendUnique(LIBS='rt')
+
 # TODO - do solaris/fedora need direct linking too?
 if env['PLATFORM'] == 'Darwin':
     ##### Python linking on OS X is tricky ### 
