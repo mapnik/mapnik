@@ -39,8 +39,8 @@ if env['HAS_CAIRO']:
     demo_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
     demo_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
-libraries =  copy(env['LIBMAPNIK_LIBS'])
-libraries.append('mapnik')
+libraries = ['mapnik']
+libraries.extend(copy(env['LIBMAPNIK_LIBS']))
 
 rundemo = demo_env.Program('rundemo', source, LIBS=libraries, LINKFLAGS=env["CUSTOM_LDFLAGS"])
 

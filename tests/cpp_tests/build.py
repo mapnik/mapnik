@@ -10,8 +10,8 @@ if not env['CPP_TESTS']:
     for cpp_test_bin in glob.glob('*-bin'):
         os.unlink(cpp_test_bin)
 else:
-    test_env['LIBS'] = copy(env['LIBMAPNIK_LIBS'])
-    test_env.AppendUnique(LIBS='mapnik')
+    test_env['LIBS'] = ['mapnik']
+    test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
     test_env.AppendUnique(CXXFLAGS='-g')
     test_env['CXXFLAGS'] = copy(test_env['LIBMAPNIK_CXXFLAGS'])
     if test_env['HAS_CAIRO']:
