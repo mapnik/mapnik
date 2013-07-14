@@ -12,6 +12,8 @@ if not env['CPP_TESTS']:
 else:
     test_env['LIBS'] = ['mapnik']
     test_env.AppendUnique(LIBS=copy(env['LIBMAPNIK_LIBS']))
+    if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
+        test_env.AppendUnique(LIBS='dl')
     test_env.AppendUnique(CXXFLAGS='-g')
     test_env['CXXFLAGS'] = copy(test_env['LIBMAPNIK_CXXFLAGS'])
     if test_env['HAS_CAIRO']:

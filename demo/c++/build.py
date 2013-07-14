@@ -41,6 +41,8 @@ if env['HAS_CAIRO']:
 
 libraries = ['mapnik']
 libraries.extend(copy(env['LIBMAPNIK_LIBS']))
+if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
+    libraries.append('dl')
 
 rundemo = demo_env.Program('rundemo', source, LIBS=libraries, LINKFLAGS=env["CUSTOM_LDFLAGS"])
 
