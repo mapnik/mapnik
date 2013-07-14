@@ -39,7 +39,7 @@ if env['HAS_CAIRO']:
     program_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
     program_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
-libraries = ['mapnik',boost_program_options])
+libraries = ['mapnik',boost_program_options]
 libraries.extend(copy(env['LIBMAPNIK_LIBS']))
 boost_program_options = 'boost_program_options%s' % env['BOOST_APPEND']
 if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
