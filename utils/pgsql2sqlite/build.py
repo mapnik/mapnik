@@ -58,7 +58,12 @@ if env['SQLITE_LINKFLAGS']:
     linkflags.append(env['SQLITE_LINKFLAGS'])
 
 if env['RUNTIME_LINK'] == 'static':
-    libraries.extend(['ldap','pam','ssl','crypto','krb5'])
+    if env['PLATFORM'] == 'Darwin':
+        libraries.extend(['ldap', 'pam', 'ssl', 'crypto', 'krb5'])
+    else:
+        # TODO - parse back into libraries variable
+        program_env.ParseConfig('pg_config --libs')
+        libraries.append('dl')
 
 pgsql2sqlite = program_env.Program('pgsql2sqlite', source, LIBS=libraries, LINKFLAGS=linkflags)
 Depends(pgsql2sqlite, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))

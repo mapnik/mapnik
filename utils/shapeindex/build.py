@@ -42,6 +42,8 @@ boost_system = 'boost_system%s' % env['BOOST_APPEND']
 libraries =  ['mapnik', boost_program_options, boost_system]
 if env['RUNTIME_LINK'] == 'static':
     libraries.extend(copy(env['LIBMAPNIK_LIBS']))
+    if env['PLATFORM'] == 'Linux':
+        libraries.append('dl')
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
