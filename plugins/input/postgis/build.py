@@ -42,11 +42,13 @@ if env['THREADING'] == 'multi':
     libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
 if env['RUNTIME_LINK'] == 'static':
-    #cmd = 'pg_config --libs'
-    #plugin_env.ParseConfig(cmd)
     # pg_config does not seem to report correct deps of libpq
-    # so resort to hardcoding for now
-    libraries.extend(['ldap', 'pam', 'ssl', 'crypto', 'krb5'])
+    # on os x so resort to hardcoding for now
+    if env['PLATFORM'] == 'Darwin':
+        libraries.extend(['ldap', 'pam', 'ssl', 'crypto', 'krb5'])
+    else:
+        # TODO - parse back into libraries variable
+        plugin_env.ParseConfig('pg_config --libs')
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append('mapnik')
