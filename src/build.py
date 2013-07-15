@@ -251,6 +251,16 @@ if env['HAS_CAIRO']:
     source.insert(0,'cairo_renderer.cpp')
     source.insert(0,'cairo_context.cpp')
 
+if env['HAS_SKIA']:
+    lib_env.AppendUnique(LIBPATH=env['SKIA_LIBS'])
+    lib_env.Append(LIBS=['skia_core','skia_ports','skia_utils','skia_images',
+                         'skia_effects','skia_sfnt','skia_opts','skia_opts_ssse3','skia_skgpu'])
+    lib_env.Append(FRAMEWORKS = ['Cocoa'])
+    lib_env.Append(CPPDEFINES = '-DHAVE_SKIA')
+    libmapnik_defines.append('-DHAVE_SKIA')
+    source.insert(0,'skia/skia_renderer.cpp')
+
+
 if env['JPEG']:
     source += Split(
         """

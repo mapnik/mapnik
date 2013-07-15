@@ -36,12 +36,20 @@
 #include <mapnik/svg/output/svg_renderer.hpp>
 #endif
 
+#if defined(HAVE_SKIA)
+#include <mapnik/skia/skia_renderer.hpp>
+#endif
+
 namespace mapnik
 {
 
 #if defined(HAVE_CAIRO)
 template class feature_style_processor<cairo_renderer<cairo_ptr> >;
 template class feature_style_processor<cairo_renderer<cairo_surface_ptr> >;
+#endif
+
+#if defined(HAVE_SKIA)
+template class feature_style_processor<skia_renderer>;
 #endif
 
 #if defined(SVG_RENDERER)

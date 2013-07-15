@@ -51,6 +51,7 @@ public:
     {
         AGG,
         Cairo,
+        Skia,
         Grid
     };
 

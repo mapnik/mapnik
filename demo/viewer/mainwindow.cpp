@@ -387,6 +387,9 @@ void MainWindow::createToolBars()
 #ifdef HAVE_CAIRO
     renderer_selector_->addItem("Cairo");
 #endif
+#ifdef HAVE_SKIA
+    renderer_selector_->addItem("Skia");
+#endif
     renderer_selector_->addItem("Grid");
     fileToolBar->addWidget(renderer_selector_);
 

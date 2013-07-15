@@ -121,7 +121,10 @@
 
 namespace mapnik {  namespace filter { namespace detail {
 
-static const float blur_matrix[] = {0.1111f,0.1111f,0.1111f,0.1111f,0.1111f,0.1111f,0.1111f,0.1111f,0.1111f};
+static const float blur_matrix[] = {1/16.0f,2/16.0f,1/16.0f,
+                                    2/16.0f,4/16.0f,2/16.0f,
+                                    1/16.0f,2/16.0f,1/16.0f};
+
 static const float emboss_matrix[] = {-2,-1,0,-1,1,1,0,1,2};
 static const float sharpen_matrix[] = {0,-1,0,-1,5,-1,0,-1,0 };
 static const float edge_detect_matrix[] = {0,1,0,1,-4,1,0,1,0 };

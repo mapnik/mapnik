@@ -40,6 +40,13 @@
 #include <mapnik/cairo_renderer.hpp>
 #endif
 
+#ifdef HAVE_SKIA
+// skia
+#include <mapnik/skia/skia_renderer.hpp>
+#include <SkCanvas.h>
+#include <SkBitmap.h>
+#endif
+
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
 
@@ -525,6 +532,44 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 }
 
 
+void render_skia(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
+{
+    unsigned width=map.width();
+    unsigned height=map.height();
+
+    mapnik::image_32 buf(width,height);
+
+    SkBitmap bitmap;
+    bitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height);
+    bitmap.setPixels(buf.raw_data());
+    SkCanvas canvas(bitmap);
+
+    mapnik::skia_renderer ren(map,canvas,scaling_factor);
+
+    try
+    {
+        {
+            boost::timer::auto_cpu_timer t;
+            ren.apply();
+        }
+        QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
+        pix = QPixmap::fromImage(image.rgbSwapped());
+    }
+    catch (mapnik::config_error & ex)
+    {
+        std::cerr << "Skia:" << ex.what() << std::endl;
+    }
+    catch (const std::exception & ex)
+    {
+        std::cerr << "Skia:exception: " << ex.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Skia:Unknown exception caught!\n";
+    }
+}
+
+
 void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
     std::cerr << "Not supported" << std::endl;
@@ -535,6 +580,7 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
 
 #ifdef HAVE_CAIRO
+    boost::timer::auto_cpu_timer t;
     mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
                                             mapnik::cairo_surface_closer());
     mapnik::cairo_renderer<mapnik::cairo_surface_ptr> renderer(map, image_surface, scaling_factor);
@@ -550,6 +596,7 @@ void MapWidget::updateRenderer(QString const& txt)
     if (txt == "AGG") cur_renderer_ = AGG;
     else if (txt == "Cairo") cur_renderer_ = Cairo;
     else if (txt == "Grid") cur_renderer_ = Grid;
+    else if (txt == "Skia") cur_renderer_ = Skia;
     std::cerr << "Update renderer called" << std::endl;
     updateMap();
 }
@@ -575,6 +622,10 @@ void MapWidget::updateMap()
        else if (cur_renderer_ == Grid)
        {
            render_grid(*map_, scaling_factor_, pix_);
+       }
+       else if (cur_renderer_ == Skia)
+       {
+           render_skia(*map_, scaling_factor_, pix_);
        }
        else
        {

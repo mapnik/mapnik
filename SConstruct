@@ -344,6 +344,12 @@ opts.AddVariables(
     BoolVariable('CAIRO', 'Attempt to build with Cairo rendering support', 'True'),
     PathVariable('CAIRO_INCLUDES', 'Search path for cairo include files', '',PathVariable.PathAccept),
     PathVariable('CAIRO_LIBS', 'Search path for cairo library files','',PathVariable.PathAccept),
+
+    # Skia backend
+    BoolVariable('SKIA', 'Attempt to build with Skia rendering support', 'False'),
+    PathVariable('SKIA_INCLUDES', 'Search path for skia include files', '',PathVariable.PathAccept),
+    PathVariable('SKIA_LIBS', 'Search path for skia library files','',PathVariable.PathAccept),
+
     ('GDAL_CONFIG', 'The path to the gdal-config executable for finding gdal and ogr details.', 'gdal-config'),
     ('PG_CONFIG', 'The path to the pg_config executable.', 'pg_config'),
     PathVariable('OCCI_INCLUDES', 'Search path for OCCI include files', '/usr/lib/oracle/10.2.0.3/client/include', PathVariable.PathAccept),
@@ -423,6 +429,7 @@ pickle_store = [# Scons internal variables
         'HAS_CAIRO',
         'HAS_PYCAIRO',
         'HAS_LIBXML2',
+        'HAS_SKIA',
         'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
         'PKG_CONFIG_PATH',
@@ -1046,6 +1053,7 @@ if not preconfigured:
     env['CAIRO_LIBPATHS'] = []
     env['CAIRO_ALL_LIBS'] = []
     env['CAIRO_CPPPATHS'] = []
+    env['HAS_SKIA'] = False
     env['HAS_PYCAIRO'] = False
     env['HAS_LIBXML2'] = False
     env['LIBMAPNIK_LIBS'] = []
@@ -1479,6 +1487,17 @@ if not preconfigured:
         if not conf.CheckCairoHasFreetype():
             env['SKIPPED_DEPS'].append('cairo')
             env['HAS_CAIRO'] = False
+
+
+    if env['SKIA']:
+        if env['SKIA_LIBS'] or env['SKIA_INCLUDES']:
+            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/config'))
+            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/core'))
+            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/effects'))
+            env.AppendUnique(LIBPATH = os.path.realpath(env['SKIA_LIBS']))
+        env['HAS_SKIA'] = True
+    else:
+        color_print(4,'Not building with Skia support, pass SKIA=True to enable')
 
     if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
         if not os.access(env['PYTHON'], os.X_OK):
