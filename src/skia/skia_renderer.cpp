@@ -121,19 +121,6 @@ void skia_renderer::process(line_symbolizer const& sym,
      evaluate_transform(tr, feature, sym.get_transform());
 
      box2d<double> clipping_extent = query_extent_;
-     if (sym.clip())
-     {
-         //double padding = (double)(query_extent_.width()/width_);
-         //padding *= 4;
-         //if (fabs(sym.offset()) > 0)
-         //    padding *= fabs(sym.offset()) * 1.2;
-         //double x0 = query_extent_.minx();
-         //double y0 = query_extent_.miny();
-         //double x1 = query_extent_.maxx();
-         //double y1 = query_extent_.maxy();
-         //clipping_extent.init(x0 - padding, y0 - padding, x1 + padding , y1 + padding);
-     }
-
      SkPath path;
      skia_path_adapter adapter(path);
 
@@ -163,6 +150,39 @@ void skia_renderer::process(line_symbolizer const& sym,
      paint.setAntiAlias(true);
      paint.setARGB(col.alpha(), col.red(), col.green(), col.blue());
      paint.setStrokeWidth(stroke_.get_width() * scale_factor_);
+
+     switch (stroke_.get_line_join())
+     {
+     case MITER_JOIN:
+         paint.setStrokeJoin(SkPaint::kMiter_Join);
+         break;
+     case MITER_REVERT_JOIN:
+         break;
+     case ROUND_JOIN:
+         paint.setStrokeJoin(SkPaint::kRound_Join);
+         break;
+     case BEVEL_JOIN:
+         paint.setStrokeJoin(SkPaint::kBevel_Join);
+         break;
+     default:
+         break;
+     }
+
+     switch (stroke_.get_line_cap())
+     {
+     case BUTT_CAP:
+         paint.setStrokeCap(SkPaint::kButt_Cap);
+         break;
+     case SQUARE_CAP:
+         paint.setStrokeCap(SkPaint::kSquare_Cap);
+         break;
+     case ROUND_CAP:
+         paint.setStrokeCap(SkPaint::kRound_Cap);
+         break;
+     default:
+         break;
+     }
+
      if (stroke_.has_dash())
      {
          std::vector<SkScalar> dash;
@@ -172,7 +192,7 @@ void skia_renderer::process(line_symbolizer const& sym,
              dash.push_back(p.second * scale_factor_);
          }
 
-         SkDashPathEffect dash_effect(&dash[0], dash.size(), stroke_.dash_offset(), true);
+         SkDashPathEffect dash_effect(&dash[0], dash.size(), stroke_.dash_offset(), false);
          paint.setPathEffect(&dash_effect);
          canvas_.drawPath(path, paint);
      }
