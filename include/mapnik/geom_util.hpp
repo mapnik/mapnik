@@ -199,7 +199,7 @@ inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 // filters
 struct filter_in_box
 {
-    box2d<double> const& box_;
+    box2d<double> box_;
     explicit filter_in_box(box2d<double> const& box)
         : box_(box) {}
 
