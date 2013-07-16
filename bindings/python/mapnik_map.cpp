@@ -34,7 +34,8 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature_type_style.hpp>
-//#include <mapnik/util/deepcopy.hpp>
+#include <mapnik/scale_denominator.hpp>
+#include <mapnik/util/map_query.hpp>
 #include "mapnik_enumeration.hpp"
 
 using mapnik::color;
@@ -77,8 +78,7 @@ mapnik::featureset_ptr query_point(mapnik::Map const& m, int index, double x, do
         PyErr_SetString(PyExc_IndexError, "Please provide a layer index >= 0");
         boost::python::throw_error_already_set();
     }
-    unsigned idx = index;
-    return m.query_point(idx, x, y);
+    return mapnik::util::query_point(m, static_cast<unsigned>(index), x, y);
 }
 
 mapnik::featureset_ptr query_map_point(mapnik::Map const& m, int index, double x, double y)
@@ -87,8 +87,23 @@ mapnik::featureset_ptr query_map_point(mapnik::Map const& m, int index, double x
         PyErr_SetString(PyExc_IndexError, "Please provide a layer index >= 0");
         boost::python::throw_error_already_set();
     }
-    unsigned idx = index;
-    return m.query_map_point(idx, x, y);
+    return mapnik::util::query_map_point(m, static_cast<unsigned>(index), x, y);
+}
+
+void zoom_all(mapnik::Map & m)
+{
+    m.zoom_to_box(mapnik::util::get_extent(m));
+}
+
+mapnik::CoordTransform get_view_transform(mapnik::Map const& map)
+{
+    return mapnik::CoordTransform(map.width(),map.height(),map.get_current_extent());
+}
+
+double get_scale_denominator(mapnik::Map const& map)
+{
+    mapnik::projection map_proj(map.srs());
+    return mapnik::scale_denominator( map.scale(), map_proj.is_geographic());
 }
 
 // deepcopy
@@ -337,14 +352,14 @@ void export_map()
              ">>> m.scale()\n"
             )
 
-        .def("scale_denominator", &Map::scale_denominator,
+        .def("scale_denominator", get_scale_denominator,
              "Return the Map Scale Denominator.\n"
              "Usage:\n"
              "\n"
              ">>> m.scale_denominator()\n"
             )
 
-        .def("view_transform",&Map::view_transform,
+        .def("view_transform",get_view_transform,
              "Return the map ViewTransform object\n"
              "which is used internally to convert between\n"
              "geographic coordinates and screen coordinates.\n"
@@ -364,7 +379,7 @@ void export_map()
              ">>> m.zoom(0.25)\n"
             )
 
-        .def("zoom_all",&Map::zoom_all,
+        .def("zoom_all",&zoom_all,
              "Set the geographical extent of the map\n"
              "to the combined extents of all active layers.\n"
              "\n"

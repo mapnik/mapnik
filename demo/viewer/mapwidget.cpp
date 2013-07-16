@@ -34,6 +34,7 @@
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/image_util.hpp>
+#include <mapnik/util/map_query.hpp>
 
 #ifdef HAVE_CAIRO
 // cairo
@@ -176,7 +177,7 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
                projection layer_proj(layer.srs());
                mapnik::proj_transform prj_trans(map_proj,layer_proj);
                //std::auto_ptr<mapnik::memory_datasource> data(new mapnik::memory_datasource);
-               mapnik::featureset_ptr fs = map_->query_map_point(index,x,y);
+               mapnik::featureset_ptr fs = mapnik::util::query_map_point(map,index,x,y);
 
                if (fs)
                {
@@ -483,7 +484,7 @@ void MapWidget::export_to_file(unsigned ,unsigned ,std::string const&,std::strin
 {
    //image_32 image(width,height);
    //agg_renderer renderer(map,image);
-   //renderer.apply();
+   //renderer.apply(map.layers(),map.styles());
    //image.saveToFile(filename,type);
     std::cout << "Export to file .." << std::endl;
 }
@@ -505,7 +506,7 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     {
         {
             boost::timer::auto_cpu_timer t;
-            ren.apply();
+            ren.apply(map.layers(),map.styles());
         }
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
@@ -538,7 +539,7 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     mapnik::cairo_surface_ptr image_surface(cairo_image_surface_create(CAIRO_FORMAT_ARGB32,map.width(),map.height()),
                                             mapnik::cairo_surface_closer());
     mapnik::cairo_renderer<mapnik::cairo_surface_ptr> renderer(map, image_surface, scaling_factor);
-    renderer.apply();
+    renderer.apply(map.layers(),map.styles());
     image_32 buf(image_surface);
     QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());

@@ -468,7 +468,7 @@ void save_to_cairo_file(mapnik::Map const& map,
         */
 
         mapnik::cairo_renderer<cairo_ptr> ren(map, create_context(surface), scale_factor);
-        ren.apply(scale_denominator);
+        ren.apply(map.layers(),map.styles(),scale_denominator);
 
         if (type == "ARGB32" || type == "RGB24")
         {

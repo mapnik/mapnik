@@ -29,13 +29,8 @@
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/map.hpp>
-#include <mapnik/datasource.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
-#include <mapnik/ctrans.hpp>
-#include <mapnik/filter_featureset.hpp>
-#include <mapnik/hit_test_filter.hpp>
-#include <mapnik/scale_denominator.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
 
@@ -357,78 +352,6 @@ void Map::zoom(double factor)
     fixAspectRatio();
 }
 
-void Map::zoom_all()
-{
-    try
-    {
-        if (layers_.empty())
-        {
-            return;
-        }
-        projection proj0(srs_);
-        box2d<double> ext;
-        bool success = false;
-        bool first = true;
-        std::vector<layer>::const_iterator itr = layers_.begin();
-        std::vector<layer>::const_iterator end = layers_.end();
-        while (itr != end)
-        {
-            if (itr->active())
-            {
-                std::string const& layer_srs = itr->srs();
-                projection proj1(layer_srs);
-                proj_transform prj_trans(proj0,proj1);
-                box2d<double> layer_ext = itr->envelope();
-                if (prj_trans.backward(layer_ext, PROJ_ENVELOPE_POINTS))
-                {
-                    success = true;
-                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " original ext=" << itr->envelope();
-                    MAPNIK_LOG_DEBUG(map) << "map: Layer " << itr->name() << " transformed to map srs=" << layer_ext;
-                    if (first)
-                    {
-                        ext = layer_ext;
-                        first = false;
-                    }
-                    else
-                    {
-                        ext.expand_to_include(layer_ext);
-                    }
-                }
-            }
-            ++itr;
-        }
-        if (success)
-        {
-            if (maximum_extent_) {
-                ext.clip(*maximum_extent_);
-            }
-            zoom_to_box(ext);
-        }
-        else
-        {
-            if (maximum_extent_)
-            {
-                MAPNIK_LOG_ERROR(map) << "could not zoom to combined layer extents"
-                    << " so falling back to maximum-extent for zoom_all result";
-                zoom_to_box(*maximum_extent_);
-            }
-            else
-            {
-                std::ostringstream s;
-                s << "could not zoom to combined layer extents "
-                  << "using zoom_all because proj4 could not "
-                  << "back project any layer extents into the map srs "
-                  << "(set map 'maximum-extent' to override layer extents)";
-                throw std::runtime_error(s.str());
-            }
-        }
-    }
-    catch (proj_init_error const& ex)
-    {
-        throw mapnik::config_error(std::string("Projection error during map.zoom_all: ") + ex.what());
-    }
-}
-
 void Map::zoom_to_box(box2d<double> const& box)
 {
     current_extent_=box;
@@ -529,83 +452,6 @@ double Map::scale() const
         return current_extent_.width()/width_;
     return current_extent_.width();
 }
-
-double Map::scale_denominator() const
-{
-    projection map_proj(srs_);
-    return mapnik::scale_denominator( scale(), map_proj.is_geographic());
-}
-
-CoordTransform Map::view_transform() const
-{
-    return CoordTransform(width_,height_,current_extent_);
-}
-
-featureset_ptr Map::query_point(unsigned index, double x, double y) const
-{
-    if (!current_extent_.valid())
-    {
-        throw std::runtime_error("query_point: map extent is not intialized, you need to set a valid extent before querying");
-    }
-    if (!current_extent_.intersects(x,y))
-    {
-        throw std::runtime_error("query_point: x,y coords do not intersect map extent");
-    }
-    if (index < layers_.size())
-    {
-        mapnik::layer const& layer = layers_[index];
-        mapnik::datasource_ptr ds = layer.datasource();
-        if (ds)
-        {
-            mapnik::projection dest(srs_);
-            mapnik::projection source(layer.srs());
-            proj_transform prj_trans(source,dest);
-            double z = 0;
-            if (!prj_trans.equal() && !prj_trans.backward(x,y,z))
-            {
-                throw std::runtime_error("query_point: could not project x,y into layer srs");
-            }
-            // calculate default tolerance
-            mapnik::box2d<double> map_ex = current_extent_;
-            if (maximum_extent_)
-            {
-                map_ex.clip(*maximum_extent_);
-            }
-            if (!prj_trans.backward(map_ex,PROJ_ENVELOPE_POINTS))
-            {
-                std::ostringstream s;
-                s << "query_point: could not project map extent '" << map_ex
-                  << "' into layer srs for tolerance calculation";
-                throw std::runtime_error(s.str());
-            }
-            double tol = (map_ex.maxx() - map_ex.minx()) / width_ * 3;
-            featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y), tol);
-            MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
-            if (fs)
-            {
-                return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
-                                                                               hit_test_filter(x,y,tol));
-            }
-        }
-    }
-    else
-    {
-        std::ostringstream s;
-        s << "Invalid layer index passed to query_point: '" << index << "'";
-        if (!layers_.empty()) s << " for map with " << layers_.size() << " layers(s)";
-        else s << " (map has no layers)";
-        throw std::out_of_range(s.str());
-    }
-    return featureset_ptr();
-}
-
-featureset_ptr Map::query_map_point(unsigned index, double x, double y) const
-{
-    CoordTransform tr = view_transform();
-    tr.backward(&x,&y);
-    return query_point(index,x,y);
-}
-
 
 parameters const& Map::get_extra_parameters() const
 {

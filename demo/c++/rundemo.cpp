@@ -262,7 +262,7 @@ int main ( int argc , char** argv)
 
         image_32 buf(m.width(),m.height());
         agg_renderer<image_32> ren(m,buf);
-        ren.apply();
+        ren.apply(m.layers(),m.styles());
 
         save_to_file(buf,"demo.jpg","jpeg");
         save_to_file(buf,"demo.png","png");
@@ -294,7 +294,7 @@ int main ( int argc , char** argv)
         double scale_factor = 1.0;
         cairo_ptr image_context = (create_context(image_surface));
         mapnik::cairo_renderer<cairo_ptr> png_render(m,image_context,scale_factor);
-        png_render.apply();
+        png_render.apply(m.layers(),m.styles());
         // we can now write to png with cairo functionality
         cairo_surface_write_to_png(&*image_surface, "cairo-demo.png");
         // but we can also benefit from quantization by converting

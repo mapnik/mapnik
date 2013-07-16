@@ -392,7 +392,7 @@ void render_layer_for_grid(mapnik::Map const& map,
 
     mapnik::grid_renderer<mapnik::grid> ren(map,grid,1.0,0,0);
     mapnik::layer const& layer = layers[layer_idx];
-    ren.apply(layer,attributes);
+    ren.apply(layer,map.styles(),attributes);
 }
 
 /* old, original impl - to be removed after further testing
@@ -455,7 +455,7 @@ boost::python::dict render_grid(mapnik::Map const& map,
     {
         mapnik::grid_renderer<mapnik::grid> ren(map,grid,1.0,0,0);
         mapnik::layer const& layer = layers[layer_idx];
-        ren.apply(layer,attributes);
+        ren.apply(layer,map.styles(),attributes);
     }
     catch (...)
     {

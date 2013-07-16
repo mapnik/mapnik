@@ -59,18 +59,22 @@ public:
     /*!
      * \brief apply renderer to all map layers.
      */
-    void apply(double scale_denom_override=0.0);
+    void apply(std::vector<mapnik::layer> const& layers,
+               std::map<std::string,feature_type_style> const& styles,
+               double scale_denom_override=0.0);
 
     /*!
      * \brief apply renderer to a single layer, providing pre-populated set of query attribute names.
      */
     void apply(mapnik::layer const& lyr,
+               std::map<std::string,feature_type_style> const& styles,
                std::set<std::string>& names,
                double scale_denom_override=0.0);
     /*!
      * \brief render a layer given a projection and scale.
      */
     void apply_to_layer(layer const& lay,
+                        std::map<std::string,feature_type_style> const& styles,
                         Processor & p,
                         projection const& proj0,
                         double scale,
@@ -79,14 +83,14 @@ public:
                         unsigned height,
                         box2d<double> const& extent,
                         int buffer_size,
-                        std::set<std::string>& names);
+                        std::set<std::string>& names,
+                        boost::optional<box2d<double> > const& maximum_extent);
 
 private:
     /*!
      * \brief renders a featureset with the given styles.
      */
-    void render_style(layer const& lay,
-                      Processor & p,
+    void render_style(Processor & p,
                       feature_type_style const* style,
                       rule_cache const& rules,
                       std::string const& style_name,
