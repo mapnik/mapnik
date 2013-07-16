@@ -143,15 +143,15 @@ void skia_renderer::process(line_symbolizer const& sym,
          }
      }
 
-     stroke const& stroke_ = sym.get_stroke();
-     color const& col = stroke_.get_color();
+     stroke const& strk = sym.get_stroke();
+     color const& col = strk.get_color();
      SkPaint paint;
      paint.setStyle(SkPaint::kStroke_Style);
      paint.setAntiAlias(true);
-     paint.setARGB(col.alpha(), col.red(), col.green(), col.blue());
-     paint.setStrokeWidth(stroke_.get_width() * scale_factor_);
+     paint.setARGB(int(col.alpha() * strk.get_opacity()), col.red(), col.green(), col.blue());
+     paint.setStrokeWidth(strk.get_width() * scale_factor_);
 
-     switch (stroke_.get_line_join())
+     switch (strk.get_line_join())
      {
      case MITER_JOIN:
          paint.setStrokeJoin(SkPaint::kMiter_Join);
@@ -168,7 +168,7 @@ void skia_renderer::process(line_symbolizer const& sym,
          break;
      }
 
-     switch (stroke_.get_line_cap())
+     switch (strk.get_line_cap())
      {
      case BUTT_CAP:
          paint.setStrokeCap(SkPaint::kButt_Cap);
@@ -183,16 +183,16 @@ void skia_renderer::process(line_symbolizer const& sym,
          break;
      }
 
-     if (stroke_.has_dash())
+     if (strk.has_dash())
      {
          std::vector<SkScalar> dash;
-         for (auto p : stroke_.get_dash_array())
+         for (auto p : strk.get_dash_array())
          {
              dash.push_back(p.first * scale_factor_);
              dash.push_back(p.second * scale_factor_);
          }
 
-         SkDashPathEffect dash_effect(&dash[0], dash.size(), stroke_.dash_offset(), false);
+         SkDashPathEffect dash_effect(&dash[0], dash.size(), strk.dash_offset(), false);
          paint.setPathEffect(&dash_effect);
          canvas_.drawPath(path, paint);
      }
@@ -235,7 +235,7 @@ void skia_renderer::process(polygon_symbolizer const& sym,
     SkPaint paint;
     paint.setStyle(SkPaint::kFill_Style);
     paint.setAntiAlias(true);
-    paint.setARGB(fill.alpha(), fill.red(), fill.green(), fill.blue());
+    paint.setARGB(int(fill.alpha() * sym.get_opacity()), fill.red(), fill.green(), fill.blue());
     canvas_.drawPath(path, paint);
 }
 
