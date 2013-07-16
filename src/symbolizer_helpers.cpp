@@ -40,6 +40,42 @@
 namespace mapnik {
 
 template <typename FaceManagerT, typename DetectorT>
+text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(text_symbolizer const& sym,
+                           feature_impl const& feature,
+                           proj_transform const& prj_trans,
+                           unsigned width,
+                           unsigned height,
+                           double scale_factor,
+                           CoordTransform const& t,
+                           FaceManagerT &font_manager,
+                           DetectorT &detector,
+                           box2d<double> const& query_extent)
+        : sym_(sym),
+          feature_(feature),
+          prj_trans_(prj_trans),
+          t_(t),
+          font_manager_(font_manager),
+          detector_(detector),
+          dims_(0, 0, width, height),
+          query_extent_(query_extent),
+          text_(font_manager, scale_factor),
+          angle_(0.0),
+          placement_valid_(false),
+          points_on_line_(false),
+          finder_(0)
+    {
+        initialize_geometries();
+        if (!geometries_to_process_.size()) return;
+        placement_ = sym_.get_placement_options()->get_placement_info(scale_factor);
+        next_placement();
+        initialize_points();
+    }
+
+template <typename FaceManagerT, typename DetectorT>
+text_symbolizer_helper<FaceManagerT, DetectorT>::~text_symbolizer_helper()
+{}
+
+template <typename FaceManagerT, typename DetectorT>
 bool text_symbolizer_helper<FaceManagerT, DetectorT>::next()
 {
     if (!placement_valid_) return false;
@@ -283,7 +319,6 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         return false;
     }
     placement_->properties.process(text_, feature_);
-    info_ = &(text_.get_string_info());
     if (placement_->properties.orientation)
     {
         // https://github.com/mapnik/mapnik/issues/1352
@@ -295,10 +330,9 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         angle_ = 0.0;
     }
 
-
-    finder_ = boost::shared_ptr<placement_finder<DetectorT> >(new placement_finder<DetectorT>(feature_, *placement_, *info_, detector_, dims_));
-//    boost::make_shared<placement_finder<DetectorT> >(feature_, *placement_, *info_, detector_, dims_);
-
+    finder_.reset(new placement_finder<DetectorT>(feature_, *placement_,
+                                                  text_.get_string_info(),
+                                                  detector_, dims_));
     placement_valid_ = true;
     return true;
 }
@@ -470,4 +504,5 @@ agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_
 
 template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
 template class shield_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
+template class mapnik::placement_finder<mapnik::label_collision_detector4>;
 } //namespace

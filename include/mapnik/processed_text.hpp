@@ -40,11 +40,10 @@ template <typename T> class face_manager;
 class MAPNIK_DECL processed_text : mapnik::noncopyable
 {
 public:
-    class processed_expression
+    struct processed_expression
     {
-    public:
-        processed_expression(char_properties const& properties, UnicodeString const& text) :
-            p(properties), str(text) {}
+        processed_expression(char_properties const& properties, UnicodeString const& text)
+            : p(properties), str(text) {}
         char_properties p;
         UnicodeString str;
     };
@@ -57,7 +56,7 @@ public:
     typedef std::list<processed_expression> expression_list;
     expression_list::const_iterator begin() const;
     expression_list::const_iterator end() const;
-    string_info &get_string_info();
+    string_info const& get_string_info();
 private:
     expression_list expr_list_;
     face_manager<freetype_engine> &font_manager_;
