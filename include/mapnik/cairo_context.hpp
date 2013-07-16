@@ -78,19 +78,17 @@ void check_object_status_and_throw_exception(const T& object)
 class cairo_face : private mapnik::noncopyable
 {
 public:
-    cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face);
+    cairo_face(boost::shared_ptr<freetype_engine> const& engine, FT_Face face);
     ~cairo_face();
     cairo_font_face_t * face() const;
 private:
     class handle
     {
     public:
-        handle(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
-            : engine_(engine), face_(face) {}
-
+        handle(boost::shared_ptr<freetype_engine> const& engine)
+            : engine_(engine) {}
     private:
         boost::shared_ptr<freetype_engine> engine_;
-        face_ptr face_;
     };
 
     static void destroy(void *data)
@@ -100,20 +98,21 @@ private:
     }
 
 private:
-    face_ptr face_;
     cairo_font_face_t *c_face_;
 };
 
 typedef boost::shared_ptr<cairo_face> cairo_face_ptr;
 
+struct FT_FaceRec_;
+
 class cairo_face_manager : private mapnik::noncopyable
 {
 public:
     cairo_face_manager(boost::shared_ptr<freetype_engine> engine);
-    cairo_face_ptr get_face(face_ptr face);
+    cairo_face_ptr get_face(font_face const& face);
 
 private:
-    typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
+    typedef std::map<FT_FaceRec_*,cairo_face_ptr> cairo_face_cache;
     boost::shared_ptr<freetype_engine> font_engine_;
     cairo_face_cache cache_;
 };
@@ -310,7 +309,7 @@ public:
     void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
     void add_image(double x, double y, image_data_32 & data, double opacity = 1.0);
     void add_image(agg::trans_affine const& tr, image_data_32 & data, double opacity = 1.0);
-    void set_font_face(cairo_face_manager & manager, face_ptr face);
+    void set_font_face(cairo_face_manager & manager, font_face const& face);
     void set_font_matrix(cairo_matrix_t const& matrix);
     void set_matrix(cairo_matrix_t const& matrix);
     void transform(cairo_matrix_t const& matrix);

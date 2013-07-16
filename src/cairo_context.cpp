@@ -29,14 +29,34 @@
 #include <cairo-ft.h>
 
 #include <valarray>
+
 namespace mapnik {
 
-cairo_face::cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
-    : face_(face)
+cairo_face_manager::cairo_face_manager(boost::shared_ptr<freetype_engine> engine)
+    : font_engine_(engine) {}
+
+cairo_face_ptr cairo_face_manager::get_face(font_face const& face)
+{
+    cairo_face_cache::iterator itr = cache_.find((FT_FaceRec_ *const)face.get_face());
+    cairo_face_ptr entry;
+
+    if (itr != cache_.end())
+    {
+        entry = itr->second;
+    }
+    else
+    {
+        entry = boost::make_shared<cairo_face>(font_engine_, face.get_face());
+        cache_.insert(std::make_pair((FT_FaceRec_ *const)face.get_face(), entry));
+    }
+
+    return entry;
+}
+cairo_face::cairo_face(boost::shared_ptr<freetype_engine> const& engine, FT_Face face)
 {
     static cairo_user_data_key_t key;
-    c_face_ = cairo_ft_font_face_create_for_ft_face(face->get_face(), FT_LOAD_NO_HINTING);
-    cairo_font_face_set_user_data(c_face_, &key, new handle(engine, face), destroy);
+    c_face_ = cairo_ft_font_face_create_for_ft_face(face, FT_LOAD_NO_HINTING);
+    cairo_font_face_set_user_data(c_face_, &key, new handle(engine), destroy);
 }
 
 cairo_face::~cairo_face()
@@ -363,7 +383,7 @@ void cairo_context::add_image(agg::trans_affine const& tr, image_data_32 & data,
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::set_font_face(cairo_face_manager & manager, face_ptr face)
+void cairo_context::set_font_face(cairo_face_manager & manager, font_face const& face)
 {
     cairo_set_font_face(cairo_.get(), manager.get_face(face)->face());
 }
@@ -447,25 +467,21 @@ void cairo_context::add_text(text_path const& path,
         double text_size = c->format->text_size * scale_factor;
         faces->set_character_sizes(text_size);
 
-        glyph_ptr glyph = faces->get_glyph(c->c);
-
-        if (glyph)
-        {
-            cairo_matrix_t matrix;
-            matrix.xx = text_size * std::cos(angle);
-            matrix.xy = text_size * std::sin(angle);
-            matrix.yx = text_size * -std::sin(angle);
-            matrix.yy = text_size * std::cos(angle);
-            matrix.x0 = 0;
-            matrix.y0 = 0;
-            set_font_matrix(matrix);
-            set_font_face(manager, glyph->get_face());
-            glyph_path(glyph->get_index(), sx + x, sy - y);
-            set_line_width(2.0 * c->format->halo_radius * scale_factor);
-            set_line_join(ROUND_JOIN);
-            set_color(c->format->halo_fill);
-            stroke();
-        }
+        font_glyph glyph = faces->get_glyph(c->c);
+        cairo_matrix_t matrix;
+        matrix.xx = text_size * std::cos(angle);
+        matrix.xy = text_size * std::sin(angle);
+        matrix.yx = text_size * -std::sin(angle);
+        matrix.yy = text_size * std::cos(angle);
+        matrix.x0 = 0;
+        matrix.y0 = 0;
+        set_font_matrix(matrix);
+        set_font_face(manager, glyph.get_face());
+        glyph_path(glyph.get_index(), sx + x, sy - y);
+        set_line_width(2.0 * c->format->halo_radius * scale_factor);
+        set_line_join(ROUND_JOIN);
+        set_color(c->format->halo_fill);
+        stroke();
     }
 
     path.rewind();
@@ -481,22 +497,19 @@ void cairo_context::add_text(text_path const& path,
         double text_size = c->format->text_size * scale_factor;
         faces->set_character_sizes(text_size);
 
-        glyph_ptr glyph = faces->get_glyph(c->c);
+        font_glyph glyph = faces->get_glyph(c->c);
 
-        if (glyph)
-        {
-            cairo_matrix_t matrix;
-            matrix.xx = text_size * std::cos(angle);
-            matrix.xy = text_size * std::sin(angle);
-            matrix.yx = text_size * -std::sin(angle);
-            matrix.yy = text_size * std::cos(angle);
-            matrix.x0 = 0;
-            matrix.y0 = 0;
-            set_font_matrix(matrix);
-            set_font_face(manager, glyph->get_face());
-            set_color(c->format->fill);
-            show_glyph(glyph->get_index(), sx + x, sy - y);
-        }
+        cairo_matrix_t matrix;
+        matrix.xx = text_size * std::cos(angle);
+        matrix.xy = text_size * std::sin(angle);
+        matrix.yx = text_size * -std::sin(angle);
+        matrix.yy = text_size * std::cos(angle);
+        matrix.x0 = 0;
+        matrix.y0 = 0;
+        set_font_matrix(matrix);
+        set_font_face(manager, glyph.get_face());
+        set_color(c->format->fill);
+        show_glyph(glyph.get_index(), sx + x, sy - y);
     }
 
 }

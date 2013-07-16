@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/pixel_position.hpp>
-
+#include <mapnik/font_util.hpp>
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -68,13 +68,13 @@ struct glyph_t;
 
 typedef boost::shared_ptr<font_face> face_ptr;
 
-class MAPNIK_DECL font_glyph : private mapnik::noncopyable
+class MAPNIK_DECL font_glyph  //: private mapnik::noncopyable FIXME
 {
 public:
-    font_glyph(face_ptr face, unsigned index)
+    font_glyph(font_face const& face, unsigned index)
         : face_(face), index_(index) {}
 
-    face_ptr get_face() const
+    font_face const& get_face() const
     {
         return face_;
     }
@@ -84,12 +84,9 @@ public:
         return index_;
     }
 private:
-    face_ptr face_;
+    font_face const& face_;
     unsigned index_;
 };
-
-typedef boost::shared_ptr<font_glyph> glyph_ptr;
-
 
 
 class MAPNIK_DECL font_face_set : private mapnik::noncopyable
@@ -98,13 +95,13 @@ public:
     typedef std::vector<face_ptr> container_type;
     typedef container_type::size_type size_type;
 
-    font_face_set(void)
+    font_face_set()
         : faces_(),
         dimension_cache_() {}
 
     void add(face_ptr face);
     size_type size() const;
-    glyph_ptr get_glyph(unsigned c) const;
+    font_glyph get_glyph(unsigned c) const;
     char_info character_dimensions(unsigned c);
     void get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format);
     void set_pixel_sizes(unsigned size);

@@ -95,31 +95,6 @@ struct cairo_save_restore
     cairo_context & context_;
 };
 
-
-cairo_face_manager::cairo_face_manager(boost::shared_ptr<freetype_engine> engine)
-    : font_engine_(engine)
-{
-}
-
-cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
-{
-    cairo_face_cache::iterator itr = cache_.find(face);
-    cairo_face_ptr entry;
-
-    if (itr != cache_.end())
-    {
-        entry = itr->second;
-    }
-    else
-    {
-        entry = boost::make_shared<cairo_face>(font_engine_, face);
-        cache_.insert(std::make_pair(face, entry));
-    }
-
-    return entry;
-}
-
-
 cairo_renderer_base::cairo_renderer_base(Map const& m,
                                          cairo_ptr const& cairo,
                                          double scale_factor,

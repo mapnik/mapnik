@@ -285,16 +285,22 @@ font_face_set::size_type font_face_set::size() const
     return faces_.size();
 }
 
-glyph_ptr font_face_set::get_glyph(unsigned c) const
+font_glyph font_face_set::get_glyph(unsigned c) const
 {
+    FT_UInt g = 0;
+    font_face * cur_face = 0;
     BOOST_FOREACH ( face_ptr const& face, faces_)
     {
-        FT_UInt g = face->get_char(c);
-        if (g) return boost::make_shared<font_glyph>(face, g);
+        g = face->get_char(c);
+        if (g)
+        {
+            cur_face = face.get();
+            break;
+        }
     }
 
     // Final fallback to empty square if nothing better in any font
-    return boost::make_shared<font_glyph>(*faces_.begin(), 0);
+    return font_glyph(g > 0 ? * cur_face: *(*faces_.begin()), g);
 }
 
 char_info font_face_set::character_dimensions(unsigned int c)
@@ -317,8 +323,8 @@ char_info font_face_set::character_dimensions(unsigned int c)
     FT_BBox glyph_bbox;
     FT_Glyph image;
 
-    glyph_ptr glyph = get_glyph(c);
-    FT_Face face = glyph->get_face()->get_face();
+    font_glyph glyph = get_glyph(c);
+    FT_Face face = glyph.get_face().get_face();
 
     matrix.xx = (FT_Fixed)( 1 * 0x10000L );
     matrix.xy = (FT_Fixed)( 0 * 0x10000L );
@@ -327,7 +333,7 @@ char_info font_face_set::character_dimensions(unsigned int c)
 
     FT_Set_Transform(face, &matrix, &pen);
 
-    error = FT_Load_Glyph (face, glyph->get_index(), FT_LOAD_NO_HINTING);
+    error = FT_Load_Glyph (face, glyph.get_index(), FT_LOAD_NO_HINTING);
     if ( error )
         return char_info();
 
@@ -560,8 +566,8 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
         face_set_ptr faces = font_manager_.get_face_set(c->format->face_name, c->format->fontset);
         faces->set_character_sizes(c->format->text_size*scale_factor_);
 
-        glyph_ptr glyph = faces->get_glyph(unsigned(c->c));
-        FT_Face face = glyph->get_face()->get_face();
+        font_glyph glyph = faces->get_glyph(unsigned(c->c));
+        FT_Face face = glyph.get_face().get_face();
 
         matrix.xx = (FT_Fixed)( std::cos( angle ) * 0x10000L );
         matrix.xy = (FT_Fixed)(-std::sin( angle ) * 0x10000L );
@@ -570,7 +576,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
 
         FT_Set_Transform(face, &matrix, &pen);
 
-        error = FT_Load_Glyph(face, glyph->get_index(), FT_LOAD_NO_HINTING);
+        error = FT_Load_Glyph(face, glyph.get_index(), FT_LOAD_NO_HINTING);
         if ( error )
             continue;
 

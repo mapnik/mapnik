@@ -72,7 +72,8 @@ string_info const& processed_text::get_string_info()
                 {
                     if (!p.face_name.empty())
                     {
-                        throw config_error("Unable to find specified font face '" + p.face_name + "' in font set: '" + p.fontset->get_name() + "'");
+                        throw config_error("Unable to find specified font face '" + p.face_name
+                                           + "' in font set: '" + p.fontset->get_name() + "'");
                     }
                     else
                     {
