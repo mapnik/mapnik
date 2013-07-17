@@ -199,6 +199,11 @@ struct symbolizer_attributes : public boost::static_visitor<>
         {
             boost::apply_visitor(f_attr,*width_expr);
         }
+        path_expression_ptr const& filename_expr = sym.get_filename();
+        if (filename_expr)
+        {
+            path_processor_type::collect_attributes(*filename_expr,names_);
+        }
         collect_transform(sym.get_image_transform());
         collect_transform(sym.get_transform());
     }
