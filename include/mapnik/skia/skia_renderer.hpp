@@ -33,7 +33,8 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_style_processor.hpp>
-
+#include <mapnik/skia/skia_font_manager.hpp>
+#include <mapnik/label_collision_detector.hpp>
 // skia fwd decl
 class SkCanvas;
 
@@ -64,6 +65,10 @@ public:
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
 
+    void process(text_symbolizer const& sym,
+                 mapnik::feature_impl & feature,
+                 proj_transform const& prj_trans);
+
     void painted(bool painted) {};
 
     inline bool process(rule::symbolizers const& /*syms*/,
@@ -85,6 +90,8 @@ private:
     CoordTransform t_;
     double scale_factor_;
     box2d<double> query_extent_;
+    skia_font_manager font_manager_;
+    boost::shared_ptr<label_collision_detector4> detector_;
 };
 
 }

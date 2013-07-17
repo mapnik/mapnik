@@ -210,7 +210,7 @@ public:
         return face_set;
     }
 
-    face_set_ptr get_face_set(std::string const& name, boost::optional<font_set> fset)
+    face_set_ptr get_face_set(std::string const& name, boost::optional<font_set> fset) // FIXME : bad style !!
     {
         if (fset && fset->size() > 0)
         {

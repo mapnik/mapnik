@@ -26,16 +26,16 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/text_path.hpp>
 #include <mapnik/noncopyable.hpp>
-
+#include <mapnik/font_engine_freetype.hpp> //!!
+#include <mapnik/skia/skia_font_manager.hpp>
 // stl
 #include <list>
 
-namespace mapnik
-{
+namespace mapnik {
 
 // fwd declares
-class freetype_engine;
-template <typename T> class face_manager;
+//class freetype_engine;
+//template <typename T> class face_manager;
 
 class MAPNIK_DECL processed_text : mapnik::noncopyable
 {
@@ -48,7 +48,7 @@ public:
         UnicodeString str;
     };
 public:
-    processed_text(face_manager<freetype_engine> & font_manager, double scale_factor);
+    processed_text(double scale_factor);
     void push_back(char_properties const& properties, UnicodeString const& text);
     unsigned size() const { return expr_list_.size(); }
     unsigned empty() const { return expr_list_.empty(); }
@@ -56,10 +56,53 @@ public:
     typedef std::list<processed_expression> expression_list;
     expression_list::const_iterator begin() const;
     expression_list::const_iterator end() const;
-    string_info const& get_string_info();
+
+    template <typename T>
+    string_info const& get_string_info(T & font_manager)
+    {
+        info_.clear(); //if this function is called twice invalid results are returned, so clear string_info first
+        expression_list::iterator itr = expr_list_.begin();
+        expression_list::iterator end = expr_list_.end();
+        for (; itr != end; ++itr)
+        {
+            char_properties const& p = itr->p;
+            std::cerr << p.face_name << " : " << p.fontset << std::endl;
+            face_set_ptr faces = font_manager.get_face_set(p.face_name, p.fontset);
+            if (faces->size() > 0)
+            {
+                faces->set_character_sizes(p.text_size * scale_factor_); // ???
+                faces->get_string_info(info_, itr->str, &(itr->p));
+                info_.add_text(itr->str);
+            }
+        }
+        return info_;
+    }
+#if defined(HAVE_SKIA)
+    string_info const& get_string_info(skia_font_manager & manager)
+    {
+        info_.clear(); //if this function is called twice invalid results are returned, so clear string_info first
+        expression_list::iterator itr = expr_list_.begin();
+        expression_list::iterator end = expr_list_.end();
+        for (; itr != end; ++itr)
+        {
+            char_properties const& p = itr->p;
+            std::cerr << p.face_name << " : " << p.fontset << std::endl;
+            //face_set_ptr faces = font_manager.get_face_set(p.face_name, p.fontset);
+            //if (faces->size() > 0)
+            //{
+            //faces->set_character_sizes(p.text_size * scale_factor_); // ???
+                //   faces->get_string_info(info_, itr->str, &(itr->p));
+            //  info_.add_text(itr->str);
+            //}
+        }
+
+        return info_;
+    }
+#endif
+    //string_info const& get_string_info();
 private:
+
     expression_list expr_list_;
-    face_manager<freetype_engine> &font_manager_;
     double scale_factor_;
     string_info info_;
 };

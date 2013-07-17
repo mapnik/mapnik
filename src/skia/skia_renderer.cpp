@@ -24,7 +24,7 @@
 
 #include <mapnik/skia/skia_renderer.hpp>
 #include <mapnik/vertex_converters.hpp>
-
+#include <mapnik/symbolizer_helpers.hpp>
 // skia
 #include <SkCanvas.h>
 #include <SkPath.h>
@@ -74,7 +74,11 @@ skia_renderer::skia_renderer(Map const& map, SkCanvas & canvas, double scale_fac
       width_(map.width()),
       height_(map.height()),
       t_(map.width(), map.height(), map.get_current_extent()),
-      scale_factor_(scale_factor) {}
+      scale_factor_(scale_factor),
+      font_manager_(),
+      detector_(boost::make_shared<label_collision_detector4>(
+                    box2d<double>(-map.buffer_size(), -map.buffer_size(),
+                                  map.width() + map.buffer_size(), map.height() + map.buffer_size()))) {}
 
 skia_renderer::~skia_renderer() {}
 
@@ -237,6 +241,40 @@ void skia_renderer::process(polygon_symbolizer const& sym,
     paint.setAntiAlias(true);
     paint.setARGB(int(fill.alpha() * sym.get_opacity()), fill.red(), fill.green(), fill.blue());
     canvas_.drawPath(path, paint);
+}
+
+void skia_renderer::process(text_symbolizer const& sym,
+                            mapnik::feature_impl & feature,
+                            proj_transform const& prj_trans)
+{
+    text_symbolizer_helper<skia_font_manager,label_collision_detector4>
+        helper(sym, feature, prj_trans,
+               width_, height_,
+               scale_factor_,
+               t_, font_manager_, *detector_, query_extent_);
+
+    while (helper.next())
+    {
+        placements_type const& placements = helper.placements();
+
+        for (unsigned i = 0; i < placements.size(); ++i)
+        {
+            //std::cerr << placements[i].x << "," << placements[i].y << std::endl;
+            double sx = placements[i].center.x;
+            double sy = placements[i].center.y;
+
+            placements[i].rewind();
+
+            for (int j = 0; j < placements[i].num_nodes(); ++j)
+            {
+                char_info_ptr c;
+                double x, y, angle;
+                placements[i].vertex(c, x, y, angle);
+                std::cerr << c << " " <<  x << "," << y << " angle=" << angle << std::endl;
+                //context_.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
+            }
+        }
+    }
 }
 
 }

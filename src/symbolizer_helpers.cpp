@@ -58,7 +58,7 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(text_sym
           detector_(detector),
           dims_(0, 0, width, height),
           query_extent_(query_extent),
-          text_(font_manager, scale_factor),
+          text_(scale_factor),
           angle_(0.0),
           placement_valid_(false),
           points_on_line_(false),
@@ -331,7 +331,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
     }
 
     finder_.reset(new placement_finder<DetectorT>(feature_, *placement_,
-                                                  text_.get_string_info(),
+                                                  text_.get_string_info(font_manager_),
                                                   detector_, dims_));
     placement_valid_ = true;
     return true;
@@ -503,6 +503,7 @@ agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_
 }
 
 template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
+template class text_symbolizer_helper<skia_font_manager, label_collision_detector4>;
 template class shield_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
 template class mapnik::placement_finder<mapnik::label_collision_detector4>;
 } //namespace
