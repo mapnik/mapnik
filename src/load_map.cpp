@@ -1716,7 +1716,7 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
     xml_node::attribute_map const& attr = node.get_attributes();
     xml_node::attribute_map::const_iterator aitr = attr.begin();
     xml_node::attribute_map::const_iterator aend = attr.end();
-    for (;aitr!=aend; aitr++)
+    for (;aitr!=aend; ++aitr)
     {
         if (!aitr->second.processed)
         {
@@ -1727,7 +1727,7 @@ void map_parser::find_unused_nodes_recursive(xml_node const& node, std::string &
     }
     xml_node::const_iterator itr = node.begin();
     xml_node::const_iterator end = node.end();
-    for (; itr!=end; itr++)
+    for (; itr!=end; ++itr)
     {
         find_unused_nodes_recursive(*itr, error_message);
     }
