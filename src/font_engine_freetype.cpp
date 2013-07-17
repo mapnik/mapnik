@@ -291,8 +291,7 @@ font_glyph font_face_set::get_glyph(unsigned c) const
     font_face * cur_face = 0;
     BOOST_FOREACH ( face_ptr const& face, faces_)
     {
-        g = face->get_char(c);
-        if (g)
+        if (g = face->get_char(c))
         {
             cur_face = face.get();
             break;
@@ -300,7 +299,7 @@ font_glyph font_face_set::get_glyph(unsigned c) const
     }
 
     // Final fallback to empty square if nothing better in any font
-    return font_glyph(g > 0 ? * cur_face: *(*faces_.begin()), g);
+    return font_glyph(g > 0 ? *cur_face: *(*faces_.begin()), g);
 }
 
 char_info font_face_set::character_dimensions(unsigned int c)
