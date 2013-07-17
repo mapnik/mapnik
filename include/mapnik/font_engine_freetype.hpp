@@ -160,8 +160,7 @@ public:
 
     face_ptr get_face(std::string const& name)
     {
-        face_ptr_cache_type::iterator itr;
-        itr = face_ptr_cache_.find(name);
+        face_ptr_cache_type::iterator itr = face_ptr_cache_.find(name);
         if (itr != face_ptr_cache_.end())
         {
             return itr->second;
