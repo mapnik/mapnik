@@ -36,13 +36,10 @@ font_set::font_set(font_set const& rhs)
     : name_(rhs.name_),
       face_names_(rhs.face_names_) {}
 
-font_set& font_set::operator=(font_set const& other)
+font_set& font_set::operator=(font_set other)
 {
-    if (this == &other)
-        return *this;
-    name_ = other.name_;
-    face_names_ = other.face_names_;
-
+    std::swap(name_,other.name_);
+    std::swap(face_names_,other.face_names_);
     return *this;
 }
 

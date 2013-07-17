@@ -37,7 +37,7 @@ class MAPNIK_DECL font_set
 public:
     font_set(std::string const& name);
     font_set(font_set const& rhs);
-    font_set& operator=(font_set const& rhs);
+    font_set& operator=(font_set rhs);
     unsigned size() const;
     void set_name(std::string const& name);
     std::string const& get_name() const;
