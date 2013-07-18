@@ -147,6 +147,12 @@ files = {
     #'tiff-alpha-broken-assoc-alpha-raster': {'sizes':[(600,400)]},
     #'tiff-nodata-edge-raster': {'sizes':[(600,400)]},
     #'tiff-opaque-edge-raster': {'sizes':[(256,256)]},
+    'road-casings-grouped-rendering': {'sizes':[(600,600)],
+        'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
+    },
+    'road-casings-non-grouped-rendering': {'sizes':[(600,600)],
+        'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
+    }
     }
 
 class Reporting:
