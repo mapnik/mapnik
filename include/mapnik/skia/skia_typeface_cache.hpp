@@ -23,23 +23,32 @@
 
 #if defined(HAVE_SKIA)
 
-#ifndef MAPNIK_SKIA_FONT_MANAGER_HPP
-#define MAPNIK_SKIA_FONT_MANAGER_HPP
+#ifndef MAPNIK_SKIA_TYPEFACE_CACHE_HPP
+#define MAPNIK_SKIA_TYPEFACE_CACHE_HPP
 
 #include <iostream>
+
+class SkTypeface;
+
 namespace mapnik
 {
 
-class skia_font_manager
+class skia_typeface_cache
 {
 public:
-    void test() const
-    {
-        std::cerr << "skia_font_manager" << std::endl;
-    }
+    skia_typeface_cache();
+    ~skia_typeface_cache();
+    static bool register_font(std::string const& file_name);
+    static bool register_fonts(std::string const& dir, bool recurse = false);
+
+private:
+#ifdef MAPNIK_THREADSAFE
+    static boost::mutex mutex_;
+#endif
+    static std::map<std::string, SkTypeface*> typefaces_;
 };
 
 }
 
-#endif // MAPNIK_SKIA_FONT_MANAGER_HPP
+#endif // MAPNIK_SKIA_TYPEFACE_CACHE_HPP
 #endif // #if defined(HAVE_SKIA)

@@ -259,6 +259,7 @@ if env['HAS_SKIA']:
     lib_env.Append(CPPDEFINES = '-DHAVE_SKIA')
     libmapnik_defines.append('-DHAVE_SKIA')
     source.insert(0,'skia/skia_renderer.cpp')
+    source.insert(0,'skia/skia_typeface_cache.cpp')
 
 
 if env['JPEG']:
