@@ -30,6 +30,8 @@
 #include <mapnik/skia/skia_font_manager.hpp>
 // stl
 #include <list>
+// icu (temp)
+#include <unicode/schriter.h>
 
 namespace mapnik {
 
@@ -86,14 +88,25 @@ public:
         for (; itr != end; ++itr)
         {
             char_properties const& p = itr->p;
-            std::cerr << p.face_name << " : " << p.fontset << std::endl;
-            //face_set_ptr faces = font_manager.get_face_set(p.face_name, p.fontset);
-            //if (faces->size() > 0)
-            //{
-            //faces->set_character_sizes(p.text_size * scale_factor_); // ???
-                //   faces->get_string_info(info_, itr->str, &(itr->p));
-            //  info_.add_text(itr->str);
-            //}
+            if (p.fontset)
+            {
+                for (auto const& face_name : p.fontset->get_face_names())
+                {
+                    std::cerr << face_name << std::endl;
+                }
+            }
+
+            StringCharacterIterator iter(itr->str);
+            for (iter.setToStart(); iter.hasNext();)
+            {
+                UChar ch = iter.nextPostInc();
+                char_info char_dim(ch, 10, 12, 0, 12);
+                char_dim.format = &(itr->p);
+                char_dim.avg_height = 12;//avg_height;
+                info_.add_info(char_dim);
+            }
+            // char sizes ---> p.text_size * scale_factor_
+            info_.add_text(itr->str);
         }
 
         return info_;

@@ -259,10 +259,8 @@ void skia_renderer::process(text_symbolizer const& sym,
 
         for (unsigned i = 0; i < placements.size(); ++i)
         {
-            //std::cerr << placements[i].x << "," << placements[i].y << std::endl;
             double sx = placements[i].center.x;
             double sy = placements[i].center.y;
-
             placements[i].rewind();
 
             for (int j = 0; j < placements[i].num_nodes(); ++j)
@@ -270,8 +268,19 @@ void skia_renderer::process(text_symbolizer const& sym,
                 char_info_ptr c;
                 double x, y, angle;
                 placements[i].vertex(c, x, y, angle);
-                std::cerr << c << " " <<  x << "," << y << " angle=" << angle << std::endl;
-                //context_.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
+                SkPaint paint;
+                paint.setStyle(SkPaint::kFill_Style);
+                paint.setAntiAlias(true);
+                double text_size = c->format->text_size * scale_factor_;
+                paint.setTextSize((SkScalar)text_size);
+                color const& fill = c->format->fill; // !!
+                paint.setARGB(int(fill.alpha() * sym.get_text_opacity()), fill.red(), fill.green(), fill.blue());
+                SkPoint pt = SkPoint::Make(0,0);
+                canvas_.save();
+                canvas_.translate((SkScalar)(sx + x), (SkScalar)(sy - y));
+                canvas_.rotate(-(SkScalar)180 * (angle/M_PI));
+                canvas_.drawPosText(&(c->c),1, &pt, paint);
+                canvas_.restore();
             }
         }
     }

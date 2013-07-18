@@ -375,9 +375,11 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
 
     shaped.releaseBuffer(length);
 
-    if (U_SUCCESS(err)) {
+    if (U_SUCCESS(err))
+    {
         StringCharacterIterator iter(shaped);
-        for (iter.setToStart(); iter.hasNext();) {
+        for (iter.setToStart(); iter.hasNext();)
+        {
             UChar ch = iter.nextPostInc();
             char_info char_dim = character_dimensions(ch);
             char_dim.format = format;

@@ -24,6 +24,9 @@
 #include <QSettings>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#if defined(HAVE_SKIA)
+#include <mapnik/skia/skia_typeface_cache.hpp>
+#endif
 #include "mainwindow.hpp"
 
 // boost
@@ -54,6 +57,15 @@ int main( int argc, char **argv )
             QString font_dir = settings.value("dir").toString();
             freetype_engine::register_fonts(font_dir.toStdString());
         }
+
+#if defined(HAVE_SKIA)
+        for (int index=0; index < count; ++index)
+        {
+            settings.setArrayIndex(index);
+            QString font_dir = settings.value("dir").toString();
+            mapnik::skia_typeface_cache::register_fonts(font_dir.toStdString());
+        }
+#endif
         settings.endArray();
 
         QApplication app( argc, argv );

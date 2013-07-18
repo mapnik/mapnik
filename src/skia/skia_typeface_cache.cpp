@@ -28,6 +28,7 @@
 #endif
 
 #include <SkTypeface.h>
+//#include <SkFontHost.h>
 #include <SkAdvancedTypefaceMetrics.h>
 
 #include <mapnik/skia/skia_typeface_cache.hpp>
@@ -53,9 +54,11 @@ bool skia_typeface_cache::register_font(std::string const& file_name)
     if (typeface)
     {
         SkAdvancedTypefaceMetrics * metrics = typeface->getAdvancedTypefaceMetrics(SkAdvancedTypefaceMetrics::kNo_PerGlyphInfo);
-        std::cerr << metrics->fFontName.writable_str() << std::endl;
-        //typefaces_.insert(std::make_pair(
+        std::cerr << metrics->fFontName.c_str() << std::endl;
+        typefaces_.insert(std::make_pair(std::string(metrics->fFontName.c_str()),typeface));
+        return true;
     }
+    return false;
 }
 
 bool skia_typeface_cache::register_fonts(std::string const& dir, bool recurse)
