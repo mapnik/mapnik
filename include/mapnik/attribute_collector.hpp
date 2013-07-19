@@ -107,8 +107,11 @@ private:
 
 struct symbolizer_attributes : public boost::static_visitor<>
 {
-    symbolizer_attributes(std::set<std::string>& names)
-        : names_(names), f_attr(names) {}
+    symbolizer_attributes(std::set<std::string>& names,
+                          double & filter_factor)
+        : names_(names),
+          filter_factor_(filter_factor),
+          f_attr(names) {}
 
     template <typename T>
     void operator () (T const&) const {}
@@ -217,10 +220,15 @@ struct symbolizer_attributes : public boost::static_visitor<>
         }
         collect_transform(sym.get_transform());
     }
-    // TODO - support remaining syms
+
+    void operator () (raster_symbolizer const& sym)
+    {
+        filter_factor_ = sym.calculate_filter_factor();
+    }
 
 private:
     std::set<std::string>& names_;
+    double & filter_factor_;
     expression_attributes<std::set<std::string> > f_attr;
     void collect_transform(transform_list_ptr const& trans_expr)
     {
@@ -236,18 +244,20 @@ class attribute_collector : public mapnik::noncopyable
 {
 private:
     std::set<std::string>& names_;
+    double filter_factor_;
     expression_attributes<std::set<std::string> > f_attr;
 public:
 
     attribute_collector(std::set<std::string>& names)
-        : names_(names), f_attr(names) {}
-
+        : names_(names),
+          filter_factor_(1.0),
+          f_attr(names) {}
     template <typename RuleType>
     void operator() (RuleType const& r)
     {
         typename RuleType::symbolizers const& symbols = r.get_symbolizers();
         typename RuleType::symbolizers::const_iterator symIter=symbols.begin();
-        symbolizer_attributes s_attr(names_);
+        symbolizer_attributes s_attr(names_,filter_factor_);
         while (symIter != symbols.end())
         {
             boost::apply_visitor(s_attr,*symIter++);
@@ -256,22 +266,11 @@ public:
         expression_ptr const& expr = r.get_filter();
         boost::apply_visitor(f_attr,*expr);
     }
-};
 
-struct directive_collector : public boost::static_visitor<>
-{
-    directive_collector(double & filter_factor)
-        : filter_factor_(filter_factor) {}
-
-    template <typename T>
-    void operator () (T const&) const {}
-
-    void operator () (raster_symbolizer const& sym)
+    double get_filter_factor() const
     {
-        filter_factor_ = sym.calculate_filter_factor();
+        return filter_factor_;
     }
-private:
-    double & filter_factor_;
 };
 
 } // namespace mapnik

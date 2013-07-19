@@ -353,8 +353,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     query q(layer_ext,res,scale_denom,extent);
     std::vector<feature_type_style const*> active_styles;
     attribute_collector collector(names);
-    double filt_factor = 1.0;
-    directive_collector d_collector(filt_factor);
     boost::ptr_vector<rule_cache> rule_caches;
 
     // iterate through all named styles collecting active styles and attribute names
@@ -379,11 +377,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             {
                 rc->add_rule(r);
                 active_rules = true;
-                if (ds->type() == datasource::Vector)
-                {
-                    collector(r);
-                }
-                // TODO - in the future rasters should be able to be filtered.
+                collector(r);
             }
         }
         if (active_rules)
@@ -411,26 +405,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 q.add_property_name(name);
             }
         }
-
-        // Update filter_factor for all enabled raster layers.
-        BOOST_FOREACH (feature_type_style const* style, active_styles)
-        {
-            BOOST_FOREACH(rule const& r, style->get_rules())
-            {
-                if (r.active(scale_denom) &&
-                    ds->type() == datasource::Raster &&
-                    ds->params().get<double>("filter_factor",0.0) == 0.0)
-                {
-                    BOOST_FOREACH (rule::symbolizers::value_type sym,  r.get_symbolizers())
-                    {
-                        // if multiple raster symbolizers, last will be respected
-                        // should we warn or throw?
-                        boost::apply_visitor(d_collector,sym);
-                    }
-                    q.set_filter_factor(filt_factor);
-                }
-            }
-        }
+        q.set_filter_factor(collector.get_filter_factor());
 
         // Also query the group by attribute
         std::string const& group_by = lay.group_by();

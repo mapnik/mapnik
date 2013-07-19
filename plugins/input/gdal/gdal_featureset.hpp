@@ -49,7 +49,6 @@ public:
                     int nbands,
                     double dx,
                     double dy,
-                    double filter_factor,
                     boost::optional<double> const& nodata);
     virtual ~gdal_featureset();
     mapnik::feature_ptr next();
@@ -72,7 +71,6 @@ private:
     double dx_;
     double dy_;
     int nbands_;
-    double filter_factor_;
     boost::optional<double> nodata_value_;
     bool first_;
 };
