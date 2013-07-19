@@ -1338,6 +1338,8 @@ if not preconfigured:
                     env['SKIPPED_DEPS'].append(libname)
             else:
                 env.Append(CPPDEFINES = define)
+    else:
+        env.Append(CPPDEFINES = define)
 
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
