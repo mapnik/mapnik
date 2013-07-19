@@ -77,7 +77,6 @@ inline GDALDataset* gdal_datasource::open_dataset() const
 gdal_datasource::gdal_datasource(parameters const& params)
     : datasource(params),
       desc_(*params.get<std::string>("type"), "utf-8"),
-      filter_factor_(*params.get<double>("filter_factor", 0.0)),
       nodata_value_(params.get<double>("nodata"))
 {
     MAPNIK_LOG_DEBUG(gdal) << "gdal_datasource: Initializing...";
@@ -228,7 +227,6 @@ featureset_ptr gdal_datasource::features(query const& q) const
                                               nbands_,
                                               dx_,
                                               dy_,
-                                              filter_factor_,
                                               nodata_value_));
 }
 
@@ -250,6 +248,5 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol)
                                               nbands_,
                                               dx_,
                                               dy_,
-                                              filter_factor_,
                                               nodata_value_));
 }

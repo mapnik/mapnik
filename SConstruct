@@ -336,8 +336,6 @@ opts.AddVariables(
 
     # Variables affecting rendering back-ends
 
-    BoolVariable('RENDERING_STATS', 'Output rendering statistics during style processing', 'False'),
-
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
     BoolVariable('CPP_TESTS', 'Compile the C++ tests', 'True'),
     BoolVariable('BENCHMARK', 'Compile the C++ benchmark scripts', 'False'),

@@ -145,6 +145,7 @@ source = Split(
     transform_expression_grammar.cpp
     transform_expression.cpp
     feature_kv_iterator.cpp
+    feature_style_processor.cpp
     feature_type_style.cpp
     font_engine_freetype.cpp
     font_set.cpp
@@ -366,18 +367,6 @@ else:
         rapidxml_loader.cpp
         """
     )
-
-processor_cpp = 'feature_style_processor.cpp'
-
-if env['RENDERING_STATS']:
-    env3 = lib_env.Clone()
-    env3.Append(CPPDEFINES='-DRENDERING_STATS')
-    if env['LINKING'] == 'static':
-        source.insert(0,env3.StaticObject(processor_cpp))
-    else:
-        source.insert(0,env3.SharedObject(processor_cpp))
-else:
-    source.insert(0,processor_cpp);
 
 # clone the env one more time to isolate mapnik_lib_link_flag
 lib_env_final = lib_env.Clone()

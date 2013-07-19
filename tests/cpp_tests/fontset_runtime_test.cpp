@@ -67,7 +67,7 @@ int main(int argc, char** argv)
                                             256,256));
         mapnik::image_32 buf(m.width(),m.height());
         mapnik::agg_renderer<mapnik::image_32> ren(m,buf);
-        ren.apply();
+        ren.apply(m.layers(),m.styles());
     } catch (std::exception const& ex) {
         BOOST_TEST_EQ(std::string(ex.what()),std::string("No valid font face could be loaded for font set: 'fontset'"));
     }
