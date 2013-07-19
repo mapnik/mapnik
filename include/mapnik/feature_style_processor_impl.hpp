@@ -45,6 +45,7 @@
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
+#include <mapnik/util/featureset_buffer.hpp>
 
 // boost
 #include <boost/variant/apply_visitor.hpp>
@@ -255,7 +256,8 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
     // clip buffered extent by maximum extent, if supplied
     boost::optional<box2d<double> > const& maximum_extent = m_.maximum_extent();
-    if (maximum_extent) {
+    if (maximum_extent)
+    {
         buffered_query_ext.clip(*maximum_extent);
     }
 
@@ -431,24 +433,22 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         }
 
         // Also query the group by attribute
-        std::string group_by = lay.group_by();
-        if (group_by != "")
+        std::string const& group_by = lay.group_by();
+        if (!group_by.empty())
         {
             q.add_property_name(group_by);
         }
 
         bool cache_features = lay.cache_features() && active_styles.size() > 1;
 
-        // Render incrementally when the column that we group by
-        // changes value.
-        if (group_by != "")
+        // Render incrementally when the column that we group by changes value.
+        if (!group_by.empty())
         {
             featureset_ptr features = ds->features(q);
-            if (features) {
-                // Cache all features into the memory_datasource before rendering.
-                memory_datasource cache(ds->type(),false);
+            if (features)
+            {
+                boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
                 feature_ptr feature, prev;
-
                 while ((feature = features->next()))
                 {
                     if (prev && prev->get(group_by) != feature->get(group_by))
@@ -458,44 +458,49 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         int i = 0;
                         BOOST_FOREACH (feature_type_style const* style, active_styles)
                         {
+                            cache->prepare();
                             render_style(p, style, rule_caches[i], style_names[i],
-                                         cache.features(q), prj_trans);
+                                         cache, prj_trans);
                             i++;
                         }
-                        cache.clear();
+                        cache->clear();
                     }
-                    cache.push(feature);
+                    cache->push(feature);
                     prev = feature;
                 }
 
                 int i = 0;
                 BOOST_FOREACH (feature_type_style const* style, active_styles)
                 {
+                    cache->prepare();
                     render_style(p, style, rule_caches[i], style_names[i],
-                                 cache.features(q), prj_trans);
+                                 cache, prj_trans);
                     i++;
                 }
             }
         }
         else if (cache_features)
         {
-            memory_datasource cache(ds->type(),false);
             featureset_ptr features = ds->features(q);
-            if (features) {
+            boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
+            if (features)
+            {
                 // Cache all features into the memory_datasource before rendering.
                 feature_ptr feature;
                 while ((feature = features->next()))
                 {
-                    cache.push(feature);
+                    cache->push(feature);
                 }
             }
             int i = 0;
             BOOST_FOREACH (feature_type_style const* style, active_styles)
             {
+                cache->prepare();
                 render_style(p, style, rule_caches[i], style_names[i],
-                             cache.features(q), prj_trans);
+                             cache, prj_trans);
                 i++;
             }
+            cache->clear();
         }
         // We only have a single style and no grouping.
         else
