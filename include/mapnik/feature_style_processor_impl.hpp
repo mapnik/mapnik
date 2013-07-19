@@ -504,28 +504,23 @@ void feature_style_processor<Processor>::render_style(
         return;
     }
     feature_ptr feature;
+    bool was_painted = false;
     while ((feature = features->next()))
     {
         bool do_else = true;
         bool do_also = false;
-
         BOOST_FOREACH(rule const* r, rc.get_if_rules() )
         {
             expression_ptr const& expr=r->get_filter();
             value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(*feature),*expr);
             if (result.to_bool())
             {
-                p.painted(true);
-
+                was_painted = true;
                 do_else=false;
                 do_also=true;
                 rule::symbolizers const& symbols = r->get_symbolizers();
-
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
                 if(!p.process(symbols,*feature,prj_trans))
                 {
-
                     BOOST_FOREACH (symbolizer const& sym, symbols)
                     {
                         boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
@@ -543,11 +538,8 @@ void feature_style_processor<Processor>::render_style(
         {
             BOOST_FOREACH( rule const* r, rc.get_else_rules() )
             {
-                p.painted(true);
-
+                was_painted = true;
                 rule::symbolizers const& symbols = r->get_symbolizers();
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
                 if(!p.process(symbols,*feature,prj_trans))
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
@@ -561,11 +553,8 @@ void feature_style_processor<Processor>::render_style(
         {
             BOOST_FOREACH( rule const* r, rc.get_also_rules() )
             {
-                p.painted(true);
-
+                was_painted = true;
                 rule::symbolizers const& symbols = r->get_symbolizers();
-                // if the underlying renderer is not able to process the complete set of symbolizers,
-                // process one by one.
                 if(!p.process(symbols,*feature,prj_trans))
                 {
                     BOOST_FOREACH (symbolizer const& sym, symbols)
@@ -576,6 +565,7 @@ void feature_style_processor<Processor>::render_style(
             }
         }
     }
+    p.painted(was_painted);
     p.end_style_processing(*style);
 }
 
