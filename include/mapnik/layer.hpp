@@ -167,7 +167,7 @@ public:
     /*!
      * @param column Set the field rendering of this layer is grouped by.
      */
-    void set_group_by(std::string column);
+    void set_group_by(std::string const& column);
 
     /*!
      * @return The field rendering of this layer is grouped by.
