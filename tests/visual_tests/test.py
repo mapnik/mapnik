@@ -139,6 +139,7 @@ files = {
     'tiff-opaque-edge-gdal2': {'sizes':[(600,400),(969,793)]},
     'tiff-opaque-edge-raster2': {'sizes':[(600,400),(969,793)]},
     'tiff-resampling': {'sizes':[(600,400)]},
+    'gdal-filter-factor': {'sizes':[(600,400)]},
     # https://github.com/mapnik/mapnik/issues/1622
     'tiff-edge-alignment-gdal1': {'sizes':[(256,256),(255,257)],
         'bbox':mapnik.Box2d(-13267022.12540147,4618019.500877209,-13247454.246160466,4637587.380118214)
