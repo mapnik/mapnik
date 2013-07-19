@@ -40,6 +40,10 @@ extern "C"
 #include <mapnik/jpeg_io.hpp>
 #endif
 
+#if defined(HAVE_WEBP)
+#include <mapnik/webp_io.hpp>
+#endif
+
 #include <mapnik/image_util.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/graphics.hpp>
@@ -237,6 +241,73 @@ void handle_png_options(std::string const& type,
 }
 #endif
 
+
+#if defined(HAVE_WEBP)
+void handle_webp_options(std::string const& type,
+                        double & quality,
+                        int & method,
+                        int & lossless,
+                        int & image_hint
+                        )
+{
+    if (type == "webp")
+    {
+        return;
+    }
+    if (type.length() > 4){
+        boost::char_separator<char> sep(":");
+        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+        BOOST_FOREACH(std::string t, tokens)
+        {
+            if (boost::algorithm::starts_with(t, "quality="))
+            {
+                std::string val = t.substr(8);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2double(val,quality) || quality < 0.0 || quality > 100.0)
+                    {
+                        throw ImageWriterException("invalid webp quality: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "method="))
+            {
+                std::string val = t.substr(7);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,method) || method < 0 || method > 6)
+                    {
+                        throw ImageWriterException("invalid webp method: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "lossless="))
+            {
+                std::string val = t.substr(9);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,lossless) || lossless < 0 || lossless > 1)
+                    {
+                        throw ImageWriterException("invalid webp lossless: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "image_hint="))
+            {
+                std::string val = t.substr(11);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,image_hint) || image_hint < 0 || image_hint > 3)
+                    {
+                        throw ImageWriterException("invalid webp image_hint: '" + val + "'");
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
+
 template <typename T>
 void save_to_stream(T const& image,
                     std::ostream & stream,
@@ -369,6 +440,26 @@ void save_to_stream(T const& image,
             save_as_jpeg(stream, quality, image);
 #else
             throw ImageWriterException("jpeg output is not enabled in your build of Mapnik");
+#endif
+        }
+        else if (boost::algorithm::starts_with(t, "webp"))
+        {
+#if defined(HAVE_WEBP)
+            double quality = 90.0; // 0 lowest, 100 highest
+            int method = 3; // 0 if fastest, 6 slowest
+            int lossless = 0; // Lossless encoding (0=lossy(default), 1=lossless).
+            int image_hint = 3; // used when lossless=1
+            /*
+              WEBP_HINT_DEFAULT = 0,  // default preset.
+              WEBP_HINT_PICTURE,      // digital picture, like portrait, inner shot
+              WEBP_HINT_PHOTO,        // outdoor photograph, with natural lighting
+              WEBP_HINT_GRAPH,        // Discrete tone image (graph, map-tile etc).
+              WEBP_HINT_LAST
+            */
+            handle_webp_options(t,quality,method,lossless, image_hint);
+            save_as_webp(stream, static_cast<float>(quality), method, lossless, image_hint, image);
+#else
+            throw ImageWriterException("webp output is not enabled in your build of Mapnik");
 #endif
         }
         else throw ImageWriterException("unknown file type: " + type);

@@ -34,28 +34,6 @@ namespace mapnik {
 
 namespace filter {
 
-template <typename Out>
-struct to_string_visitor : boost::static_visitor<void>
-{
-    to_string_visitor(Out & out)
-    : out_(out) {}
-
-    template <typename T>
-    void operator () (T const& filter_tag)
-    {
-        out_ << filter_tag;
-    }
-
-    Out & out_;
-};
-
-inline std::ostream& operator<< (std::ostream& os, filter_type const& filter)
-{
-    to_string_visitor<std::ostream> visitor(os);
-    boost::apply_visitor(visitor, filter);
-    return os;
-}
-
 bool generate_image_filters(std::back_insert_iterator<std::string>& sink, std::vector<filter_type> const& filters)
 {
     using boost::spirit::karma::stream;

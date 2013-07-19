@@ -28,7 +28,6 @@
 #include <mapnik/color.hpp>
 // boost
 #include <boost/variant.hpp>
-#include <boost/variant/variant_fwd.hpp>
 // stl
 #include <vector>
 #include <ostream>
@@ -54,10 +53,9 @@ struct agg_stack_blur
     unsigned ry;
 };
 
-/*
-struct hsla
+struct scale_hsla
 {
-    hsla(double _h0, double _h1,
+    scale_hsla(double _h0, double _h1,
          double _s0, double _s1,
          double _l0, double _l1,
          double _a0, double _a1) :
@@ -81,14 +79,6 @@ struct hsla
         return (a0 == 0 &&
                 a1 == 1);
     }
-    std::string to_string() const {
-        std::ostringstream s;
-        s << h0 << "x" << h1 << ";"
-          << s0 << "x" << s1 << ";"
-          << l0 << "x" << l1 << ";"
-          << a0 << "x" << a1;
-        return s.str();
-    }
     double h0;
     double h1;
     double s0;
@@ -98,7 +88,6 @@ struct hsla
     double a0;
     double a1;
 };
-*/
 
 struct color_stop
 {
@@ -124,7 +113,7 @@ typedef boost::variant<filter::blur,
                        filter::x_gradient,
                        filter::y_gradient,
                        filter::invert,
-                       //filter::hsla,
+                       filter::scale_hsla,
                        filter::colorize_alpha> filter_type;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
@@ -145,16 +134,14 @@ inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
     return os;
 }
 
-/*
-inline std::ostream& operator<< (std::ostream& os, hsla const& filter)
+inline std::ostream& operator<< (std::ostream& os, scale_hsla const& filter)
 {
-    os << "hsla(" << filter.h0 << 'x' << filter.h1 << ':'
+    os << "hsla-transform(" << filter.h0 << 'x' << filter.h1 << ':'
                   << filter.s0 << 'x' << filter.s1 << ':'
                   << filter.l0 << 'x' << filter.l1 << ':'
                   << filter.a0 << 'x' << filter.a1 << ')';
     return os;
 }
-*/
 
 inline std::ostream& operator<< (std::ostream& os, emboss)
 {
@@ -198,7 +185,27 @@ inline std::ostream& operator<< (std::ostream& os, invert)
     return os;
 }
 
-inline std::ostream& operator<< (std::ostream& os, filter_type const& filter);
+template <typename Out>
+struct to_string_visitor : boost::static_visitor<void>
+{
+    to_string_visitor(Out & out)
+    : out_(out) {}
+
+    template <typename T>
+    void operator () (T const& filter_tag)
+    {
+        out_ << filter_tag;
+    }
+
+    Out & out_;
+};
+
+inline std::ostream& operator<< (std::ostream& os, filter_type const& filter)
+{
+    to_string_visitor<std::ostream> visitor(os);
+    boost::apply_visitor(visitor, filter);
+    return os;
+}
 
 MAPNIK_DECL bool generate_image_filters(std::back_insert_iterator<std::string> & sink, std::vector<filter_type> const& v);
 
