@@ -263,7 +263,7 @@ if env['HAS_SKIA']:
     libmapnik_defines.append('-DHAVE_SKIA')
     source.insert(0,'skia/skia_renderer.cpp')
     source.insert(0,'skia/skia_typeface_cache.cpp')
-
+    source.insert(0,'skia/skia_font_manager.cpp')
 
 if env['JPEG']:
     source += Split(

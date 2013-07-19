@@ -27,16 +27,23 @@
 #define MAPNIK_SKIA_FONT_MANAGER_HPP
 
 #include <iostream>
+#include <mapnik/unicode.hpp>
+
 namespace mapnik
 {
+
+class skia_typeface_cache;
 
 class skia_font_manager
 {
 public:
-    void test() const
-    {
-        std::cerr << "skia_font_manager" << std::endl;
-    }
+
+    skia_font_manager(skia_typeface_cache & cache)
+        : cache_(cache) {}
+
+    void test(std::string const&, UnicodeString & ustr);
+private:
+    skia_typeface_cache & cache_;
 };
 
 }

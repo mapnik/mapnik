@@ -26,7 +26,11 @@
 #ifndef MAPNIK_SKIA_TYPEFACE_CACHE_HPP
 #define MAPNIK_SKIA_TYPEFACE_CACHE_HPP
 
-#include <iostream>
+#ifdef MAPNIK_THREADSAFE
+#include <boost/thread/mutex.hpp>
+#endif
+
+#include <map>
 
 class SkTypeface;
 
@@ -36,16 +40,17 @@ namespace mapnik
 class skia_typeface_cache
 {
 public:
+    typedef std::map<std::string, SkTypeface*> cache_type;
     skia_typeface_cache();
     ~skia_typeface_cache();
     static bool register_font(std::string const& file_name);
     static bool register_fonts(std::string const& dir, bool recurse = false);
-
+    SkTypeface * create(std::string const& family_name);
 private:
 #ifdef MAPNIK_THREADSAFE
     static boost::mutex mutex_;
 #endif
-    static std::map<std::string, SkTypeface*> typefaces_;
+    static cache_type typefaces_;
 };
 
 }

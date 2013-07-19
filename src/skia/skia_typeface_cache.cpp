@@ -45,6 +45,17 @@ skia_typeface_cache::~skia_typeface_cache()
 {
 }
 
+
+SkTypeface * skia_typeface_cache::create(std::string const& family_name)
+{
+    cache_type::const_iterator itr = typefaces_.find(family_name);
+    if (itr != typefaces_.end())
+    {
+        return itr->second;
+    }
+    return 0;
+}
+
 bool skia_typeface_cache::register_font(std::string const& file_name)
 {
 #ifdef MAPNIK_THREADSAFE
@@ -117,6 +128,6 @@ bool skia_typeface_cache::register_fonts(std::string const& dir, bool recurse)
 #ifdef MAPNIK_THREADSAFE
 boost::mutex skia_typeface_cache::mutex_;
 #endif
-std::map<std::string, SkTypeface* > skia_typeface_cache::typefaces_;
+skia_typeface_cache::cache_type skia_typeface_cache::typefaces_;
 
 }

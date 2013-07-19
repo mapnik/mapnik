@@ -68,7 +68,6 @@ public:
         for (; itr != end; ++itr)
         {
             char_properties const& p = itr->p;
-            std::cerr << p.face_name << " : " << p.fontset << std::endl;
             face_set_ptr faces = font_manager.get_face_set(p.face_name, p.fontset);
             if (faces->size() > 0)
             {
@@ -90,19 +89,25 @@ public:
             char_properties const& p = itr->p;
             if (p.fontset)
             {
-                for (auto const& face_name : p.fontset->get_face_names())
+                for (auto face_name : p.fontset->get_face_names())
                 {
+                    face_name.erase(remove_if(face_name.begin(), face_name.end(), ::isspace), face_name.end());
+                    size_t pos = face_name.rfind("-");
+                    if (pos != std::string::npos)
+                    {
+                        face_name = face_name.substr(0,pos);
+                    }
                     std::cerr << face_name << std::endl;
+                    manager.test(face_name, itr->str);
                 }
             }
-
             StringCharacterIterator iter(itr->str);
             for (iter.setToStart(); iter.hasNext();)
             {
                 UChar ch = iter.nextPostInc();
-                char_info char_dim(ch, 10, 12, 0, 12);
+                char_info char_dim(ch, p.text_size * scale_factor_, p.text_size * scale_factor_, 0, p.text_size * scale_factor_);
                 char_dim.format = &(itr->p);
-                char_dim.avg_height = 12;//avg_height;
+                char_dim.avg_height = p.text_size * scale_factor_;
                 info_.add_info(char_dim);
             }
             // char sizes ---> p.text_size * scale_factor_
@@ -112,7 +117,7 @@ public:
         return info_;
     }
 #endif
-    //string_info const& get_string_info();
+
 private:
 
     expression_list expr_list_;

@@ -114,7 +114,7 @@ bool freetype_engine::register_font(std::string const& file_name)
         // http://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_FaceRec
         if (face->family_name && face->style_name)
         {
-            std::string name = std::string(face->family_name) + " " + std::string(face->style_name);
+            std::string name = std::string(face->family_name) + "-" + std::string(face->style_name);
             // skip fonts with leading . in the name
             if (!boost::algorithm::starts_with(name,"."))
             {
@@ -217,8 +217,7 @@ std::map<std::string,std::pair<int,std::string> > const& freetype_engine::get_ma
 
 face_ptr freetype_engine::create_face(std::string const& family_name)
 {
-    std::map<std::string, std::pair<int,std::string> >::const_iterator itr;
-    itr = name2file_.find(family_name);
+    std::map<std::string, std::pair<int,std::string> >::const_iterator itr = name2file_.find(family_name);
     if (itr != name2file_.end())
     {
         FT_Face face;
