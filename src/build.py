@@ -59,20 +59,26 @@ system = 'boost_system%s' % env['BOOST_APPEND']
 # clear out and re-set libs for this env
 lib_env['LIBS'] = ['freetype',env['ICU_LIB_NAME'],filesystem,system,regex]
 
-if env['PROJ']:
+if '-DMAPNIK_USE_PROJ4' in env['CPPDEFINES']:
    lib_env['LIBS'].append('proj')
 
-if env['PNG']:
+enabled_imaging_libraries = []
+
+if '-DHAVE_PNG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('png')
+   enabled_imaging_libraries.append('png_reader.cpp')
 
-if env['TIFF']:
+if '-DHAVE_TIFF' in env['CPPDEFINES']:
    lib_env['LIBS'].append('tiff')
+   enabled_imaging_libraries.append('tiff_reader.cpp')
 
-if env['WEBP']:
+if '-DHAVE_WEBP' in env['CPPDEFINES']:
    lib_env['LIBS'].append('webp')
+   enabled_imaging_libraries.append('webp_reader.cpp')
 
-if env['JPEG']:
+if '-DHAVE_JPEG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('jpeg')
+   enabled_imaging_libraries.append('jpeg_reader.cpp')
 
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
@@ -254,29 +260,8 @@ if env['HAS_CAIRO']:
     source.insert(0,'cairo_renderer.cpp')
     source.insert(0,'cairo_context.cpp')
 
-if env['JPEG']:
-    source += Split(
-        """
-        jpeg_reader.cpp
-        """)
-
-if env['TIFF']:
-    source += Split(
-        """
-        tiff_reader.cpp
-        """)
-
-if env['PNG']:
-    source += Split(
-        """
-        png_reader.cpp
-        """)
-
-if env['WEBP']:
-    source += Split(
-        """
-        webp_reader.cpp
-        """)
+for cpp in enabled_imaging_libraries:
+    source.append(cpp)
 
 # agg backend
 source += Split(
