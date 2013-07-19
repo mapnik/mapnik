@@ -73,7 +73,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         gamma_ = stroke_.get_gamma();
     }
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
 
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
