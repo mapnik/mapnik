@@ -88,6 +88,12 @@ public:
     {
         return data_.getRow(row + y_) + x_;
     }
+
+    inline char const* getBytes() const
+    {
+        return reinterpret_cast<char const*>(&data_);
+    }
+
     inline T& data()
     {
         return data_;
@@ -107,4 +113,3 @@ private:
 }
 
 #endif // MAPNIK_IMAGE_VIEW_HPP
-

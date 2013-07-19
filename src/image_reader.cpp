@@ -59,6 +59,14 @@ inline boost::optional<std::string> type_from_bytes(char const* data, size_t siz
         }
     }
 
+    if (size>=12)
+    {
+        if (data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F' &&
+            data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P')
+        {
+            return result_type("webp");
+        }
+    }
     return result_type();
 }
 
