@@ -76,7 +76,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
         }
     }
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
 
     color const& fill = sym.get_fill();
     unsigned r=fill.red();
