@@ -483,9 +483,8 @@ void apply_filter(Src & src, colorize_alpha const& op)
     }
 }
 
-/*
 template <typename Src>
-void apply_filter(Src & src, hsla const& transform)
+void apply_filter(Src & src, scale_hsla const& transform)
 {
     using namespace boost::gil;
     bool tinting = !transform.is_identity();
@@ -504,16 +503,24 @@ void apply_filter(Src & src, hsla const& transform)
                 uint8_t & g = get_color(src_it[x], green_t());
                 uint8_t & b = get_color(src_it[x], blue_t());
                 uint8_t & a = get_color(src_it[x], alpha_t());
-                double a2 = a/255.0;
+                double a2 = static_cast<double>(a)/255.0;
                 double a1 = a2;
+                bool alpha_modified = false;
                 if (set_alpha && a2 > 0.01)
                 {
                     a2 = transform.a0 + (a2 * (transform.a1 - transform.a0));
-                    a = static_cast<unsigned>(std::floor((a2 * 255.0) +.5));
-                    if (a > 255) a = 255;
-                    if (a < 0) a = 0;
+                    if (a2 <= 0)
+                    {
+                        a = 0;
+                    }
+                    else
+                    {
+                        a = static_cast<unsigned>(std::floor((a2 * 255.0) +.5));
+                        if (a > 255) a = 255;
+                    }
+                    alpha_modified = true;
                 }
-                if (tinting && a2 > 0.01)
+                if (tinting && a > 1)
                 {
                     double h;
                     double s;
@@ -534,12 +541,12 @@ void apply_filter(Src & src, hsla const& transform)
                     double h2 = transform.h0 + (h * (transform.h1 - transform.h0));
                     double s2 = transform.s0 + (s * (transform.s1 - transform.s0));
                     double l2 = transform.l0 + (l * (transform.l1 - transform.l0));
-                    if (h2 > 1) { std::clog << "h2: " << h2 << "\n"; h2 = 1; }
-                    else if (h2 < 0) { std::clog << "h2: " << h2 << "\n"; h2 = 0; }
-                    if (s2 > 1) { std::clog << "h2: " << h2 << "\n"; s2 = 1; }
-                    else if (s2 < 0) { std::clog << "s2: " << s2 << "\n"; s2 = 0; }
-                    if (l2 > 1) { std::clog << "h2: " << h2 << "\n"; l2 = 1; }
-                    else if (l2 < 0) { std::clog << "l2: " << l2 << "\n"; l2 = 0; }
+                    if (h2 > 1) { h2 = 1; }
+                    else if (h2 < 0) { h2 = 0; }
+                    if (s2 > 1) { s2 = 1; }
+                    else if (s2 < 0) { s2 = 0; }
+                    if (l2 > 1) { l2 = 1; }
+                    else if (l2 < 0) { l2 = 0; }
                     hsl2rgb(h2,s2,l2,r,g,b);
                     // premultiply
                     // we only work with premultiplied source,
@@ -548,7 +555,7 @@ void apply_filter(Src & src, hsla const& transform)
                     g *= a2;
                     b *= a2;
                 }
-                else
+                else if (alpha_modified)
                 {
                     // demultiply
                     if (a1 <= 0.0)
@@ -573,7 +580,6 @@ void apply_filter(Src & src, hsla const& transform)
         }
     }
 }
-*/
 
 template <typename Src>
 void apply_filter(Src & src, gray const& op)

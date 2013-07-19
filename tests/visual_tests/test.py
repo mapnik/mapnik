@@ -102,7 +102,7 @@ files = {
     'marker-on-line-spacing-eq-width-overlap': {'sizes':[(600,400)]},
     'marker_line_placement_on_points':{},
     'marker-with-background-image': {'sizes':[(600,400),(400,600),(257,256)]},
-    #'marker-with-background-image-and-hsla-transform': {'sizes':[(600,400),(400,600),(257,256)]},
+    'marker-with-background-image-and-hsla-transform': {'sizes':[(600,400),(400,600),(257,256)]},
     'marker-on-hex-grid': {'sizes':[(600,400),(400,600),(257,256)]},
     'whole-centroid': {'sizes':[(600,400)],
         'bbox': mapnik.Box2d(736908, 4390316, 2060771, 5942346)},
