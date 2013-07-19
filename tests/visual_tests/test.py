@@ -77,6 +77,13 @@ sizes_many_in_small_range = [(490, 100), (495, 100), (497, 100), (498, 100),
 
 default_text_box = mapnik.Box2d(-0.05, -0.01, 0.95, 0.01)
 
+merc_z1_bboxes = {
+  '0,0':mapnik.Box2d(-20037508.342,0,0,20037508.342), # upper left
+  '1,0':mapnik.Box2d(0,0,20037508.342,20037508.342), # upper right
+  '0,1':mapnik.Box2d(-20037508.342,-20037508.342,0,0), # lower left
+  '1,1':mapnik.Box2d(0,-20037508.342,20037508.342,0) # lower right
+}
+
 dirname = os.path.dirname(__file__)
 
 files = {
@@ -155,7 +162,11 @@ files = {
     },
     'road-casings-non-grouped-rendering': {'sizes':[(600,600)],
         'bbox':mapnik.Box2d(1477001.12245,6890242.37746,1480004.49012,6892244.62256)
-    }
+    },
+    'style-level-compositing-tiled-0,0':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['0,0']},
+    'style-level-compositing-tiled-1,0':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,0']},
+    'style-level-compositing-tiled-0,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['0,1']},
+    'style-level-compositing-tiled-1,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,1']}
     }
 
 class Reporting:
