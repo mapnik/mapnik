@@ -1182,14 +1182,15 @@ if not preconfigured:
     else:
         env['MISSING_DEPS'].append('libxml2')
 
-    LIBSHEADERS = [
+    REQUIRED_LIBSHEADERS = [
         ['z', 'zlib.h', True,'C'],
         [env['ICU_LIB_NAME'],'unicode/unistr.h',True,'C++'],
     ]
 
+    OPTIONAL_LIBSHEADERS = []
+
     if env['JPEG']:
-        env.Append(CPPDEFINES = '-DHAVE_JPEG')
-        LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], False,'C'])
+        OPTIONAL_LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], False,'C','-DHAVE_JPEG'])
         inc_path = env['%s_INCLUDES' % 'JPEG']
         lib_path = env['%s_LIBS' % 'JPEG']
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1198,8 +1199,7 @@ if not preconfigured:
         env['SKIPPED_DEPS'].extend(['jpeg'])
 
     if env['PROJ']:
-        env.Append(CPPDEFINES = '-DMAPNIK_USE_PROJ4')
-        LIBSHEADERS.append(['proj', 'proj_api.h', False,'C'])
+        OPTIONAL_LIBSHEADERS.append(['proj', 'proj_api.h', False,'C','-DMAPNIK_USE_PROJ4'])
         inc_path = env['%s_INCLUDES' % 'PROJ']
         lib_path = env['%s_LIBS' % 'PROJ']
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1208,8 +1208,7 @@ if not preconfigured:
         env['SKIPPED_DEPS'].extend(['proj'])
 
     if env['PNG']:
-        env.Append(CPPDEFINES = '-DHAVE_PNG')
-        LIBSHEADERS.append(['png', 'png.h', False,'C'])
+        OPTIONAL_LIBSHEADERS.append(['png', 'png.h', False,'C','-DHAVE_PNG'])
         inc_path = env['%s_INCLUDES' % 'PNG']
         lib_path = env['%s_LIBS' % 'PNG']
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1218,8 +1217,7 @@ if not preconfigured:
         env['SKIPPED_DEPS'].extend(['png'])
 
     if env['WEBP']:
-        env.Append(CPPDEFINES = '-DHAVE_WEBP')
-        LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C'])
+        OPTIONAL_LIBSHEADERS.append(['webp', 'webp/decode.h', False,'C','-DHAVE_WEBP'])
         inc_path = env['%s_INCLUDES' % 'WEBP']
         lib_path = env['%s_LIBS' % 'WEBP']
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1228,8 +1226,7 @@ if not preconfigured:
         env['SKIPPED_DEPS'].extend(['webp'])
 
     if env['TIFF']:
-        env.Append(CPPDEFINES = '-DHAVE_TIFF')
-        LIBSHEADERS.append(['tiff', 'tiff.h', False,'C'])
+        OPTIONAL_LIBSHEADERS.append(['tiff', 'tiff.h', False,'C','-DHAVE_TIFF'])
         inc_path = env['%s_INCLUDES' % 'TIFF']
         lib_path = env['%s_LIBS' % 'TIFF']
         env.AppendUnique(CPPPATH = os.path.realpath(inc_path))
@@ -1242,7 +1239,7 @@ if not preconfigured:
         conf.prioritize_paths(silent=True)
 
     if not env['HOST']:
-        for libname, headers, required, lang in LIBSHEADERS:
+        for libname, headers, required, lang in REQUIRED_LIBSHEADERS:
             if not conf.CheckLibWithHeader(libname, headers, lang):
                 if required:
                     color_print(1, 'Could not find required header or shared library for %s' % libname)
@@ -1329,6 +1326,18 @@ if not preconfigured:
             env.Append(CPPDEFINES = '-DBOOST_REGEX_HAS_ICU')
         else:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
+
+    if not env['HOST']:
+        for libname, headers, required, lang, define in OPTIONAL_LIBSHEADERS:
+            if not conf.CheckLibWithHeader(libname, headers, lang):
+                if required:
+                    color_print(1, 'Could not find required header or shared library for %s' % libname)
+                    env['MISSING_DEPS'].append(libname)
+                else:
+                    color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                    env['SKIPPED_DEPS'].append(libname)
+            else:
+                env.Append(CPPDEFINES = define)
 
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
