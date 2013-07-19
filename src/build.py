@@ -68,6 +68,9 @@ if env['PNG']:
 if env['TIFF']:
    lib_env['LIBS'].append('tiff')
 
+if env['WEBP']:
+   lib_env['LIBS'].append('webp')
+
 if env['JPEG']:
    lib_env['LIBS'].append('jpeg')
 
@@ -278,6 +281,12 @@ if env['PNG']:
     source += Split(
         """
         png_reader.cpp
+        """)
+
+if env['WEBP']:
+    source += Split(
+        """
+        webp_reader.cpp
         """)
 
 # agg backend

@@ -59,7 +59,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
     typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
     ras_ptr->reset();
     if (sym.get_gamma() != gamma_ || sym.get_gamma_method() != gamma_method_)
     {
@@ -135,8 +135,8 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             path_type path(t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
-        offset_x = unsigned(width_ - x0);
-        offset_y = unsigned(height_ - y0);
+        offset_x = unsigned(current_buffer_->width() - x0);
+        offset_y = unsigned(current_buffer_->height() - y0);
     }
 
     span_gen_type sg(img_src, offset_x, offset_y);

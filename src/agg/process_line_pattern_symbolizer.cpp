@@ -115,7 +115,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (!pat) return;
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
     pixfmt_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base ren_base(pixf);

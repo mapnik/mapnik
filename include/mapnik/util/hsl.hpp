@@ -36,7 +36,7 @@ static inline void rgb2hsl(unsigned char red, unsigned char green, unsigned char
     double min = std::min(r,std::min(g,b));
     double delta = max - min;
     double gamma = max + min;
-    h = s = l = gamma / 2.0;
+    h = 0.0, s = 0.0, l = gamma / 2.0;
     if (delta > 0.0) {
         s = l > 0.5 ? delta / (2.0 - gamma) : delta / gamma;
         if (max == r && max != g) h = (g - b) / delta + (g < b ? 6.0 : 0.0);
@@ -47,7 +47,6 @@ static inline void rgb2hsl(unsigned char red, unsigned char green, unsigned char
 }
 
 static inline double hueToRGB(double m1, double m2, double h) {
-    // poor mans fmod
     if(h < 0) h += 1;
     if(h > 1) h -= 1;
     if (h * 6 < 1) return m1 + (m2 - m1) * h * 6;
@@ -59,13 +58,13 @@ static inline double hueToRGB(double m1, double m2, double h) {
 static inline void hsl2rgb(double h, double s, double l,
              unsigned char & r, unsigned char & g, unsigned char & b) {
     if (!s) {
-        r = g = b = static_cast<unsigned char>(l * 255);
+        r = g = b = static_cast<unsigned char>(std::floor((l * 255.0)+.5));
     }
     double m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
     double m1 = l * 2 - m2;
-    r = static_cast<unsigned char>(hueToRGB(m1, m2, h + 0.33333) * 255);
-    g = static_cast<unsigned char>(hueToRGB(m1, m2, h) * 255);
-    b = static_cast<unsigned char>(hueToRGB(m1, m2, h - 0.33333) * 255);
+    r = static_cast<unsigned char>(std::floor((hueToRGB(m1, m2, h + 0.33333) * 255.0)+.5));
+    g = static_cast<unsigned char>(std::floor((hueToRGB(m1, m2, h) * 255.0)+.5));
+    b = static_cast<unsigned char>(std::floor((hueToRGB(m1, m2, h - 0.33333) * 255.0)+.5));
 }
 
 }
