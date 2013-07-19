@@ -140,7 +140,10 @@ files = {
         'bbox':mapnik.Box2d(-13267022.12540147,4598451.621636203,-13247454.246160466,4618019.500877209)
     },
     'tiff-reprojection-1': {'sizes':[(250,250)]},
-    'tiff-reprojection-2': {'sizes':[(250,250)]},
+
+    # disabled since fixing is not actionable: https://github.com/mapnik/mapnik/issues/1913
+    #'tiff-reprojection-2': {'sizes':[(250,250)]},
+
     # https://github.com/mapnik/mapnik/issues/1520
     # commented because these are not critical failures
     #'tiff-alpha-raster': {'sizes':[(600,400)]},
