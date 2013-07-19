@@ -434,8 +434,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         BOOST_FOREACH (feature_type_style const* style, active_styles)
                         {
                             cache->prepare();
-                            render_style(p, style, rule_caches[i], style_names[i],
-                                         cache, prj_trans);
+                            render_style(p, style, rule_caches[i], cache, prj_trans);
                             i++;
                         }
                         cache->clear();
@@ -448,8 +447,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 BOOST_FOREACH (feature_type_style const* style, active_styles)
                 {
                     cache->prepare();
-                    render_style(p, style, rule_caches[i], style_names[i],
-                                 cache, prj_trans);
+                    render_style(p, style, rule_caches[i], cache, prj_trans);
                     i++;
                 }
             }
@@ -471,8 +469,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             BOOST_FOREACH (feature_type_style const* style, active_styles)
             {
                 cache->prepare();
-                render_style(p, style, rule_caches[i], style_names[i],
-                             cache, prj_trans);
+                render_style(p, style, rule_caches[i], cache, prj_trans);
                 i++;
             }
             cache->clear();
@@ -483,8 +480,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             int i = 0;
             BOOST_FOREACH (feature_type_style const* style, active_styles)
             {
-                render_style(p, style, rule_caches[i], style_names[i],
-                             ds->features(q), prj_trans);
+                render_style(p, style, rule_caches[i], ds->features(q), prj_trans);
                 i++;
             }
         }
@@ -498,7 +494,6 @@ void feature_style_processor<Processor>::render_style(
     Processor & p,
     feature_type_style const* style,
     rule_cache const& rc,
-    std::string const& style_name,
     featureset_ptr features,
     proj_transform const& prj_trans)
 {
