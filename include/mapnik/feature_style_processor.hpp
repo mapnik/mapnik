@@ -85,11 +85,9 @@ private:
     /*!
      * \brief renders a featureset with the given styles.
      */
-    void render_style(layer const& lay,
-                      Processor & p,
+    void render_style(Processor & p,
                       feature_type_style const* style,
                       rule_cache const& rules,
-                      std::string const& style_name,
                       featureset_ptr features,
                       proj_transform const& prj_trans);
 

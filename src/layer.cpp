@@ -236,7 +236,7 @@ bool layer::cache_features() const
     return cache_features_;
 }
 
-void layer::set_group_by(std::string column)
+void layer::set_group_by(std::string const& column)
 {
     group_by_ = column;
 }
