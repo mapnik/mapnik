@@ -132,6 +132,11 @@ public:
         return DEFAULT;
     }
 
+    inline double scale_factor() const
+    {
+        return scale_factor_;
+    }
+
 protected:
     template <typename R>
     void debug_draw_box(R& buf, box2d<double> const& extent,

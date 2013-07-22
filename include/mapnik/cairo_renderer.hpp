@@ -129,6 +129,11 @@ public:
         return DEFAULT;
     }
 
+    inline double scale_factor() const
+    {
+        return scale_factor_;
+    }
+
     void render_marker(pixel_position const& pos,
                        marker const& marker,
                        agg::trans_affine const& mtx,
