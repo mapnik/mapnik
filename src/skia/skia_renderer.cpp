@@ -270,7 +270,7 @@ void skia_renderer::process(text_symbolizer const& sym,
             SkPaint paint;
             paint.setAntiAlias(true);
 
-            SkTypeface * typeface = typeface_cache_.create("ArialUnicodeMS");
+            SkTypeface * typeface = typeface_cache_.create("ArialUnicodeMS"); // FIXME
             if (typeface) paint.setTypeface(typeface);
             paint.setTextEncoding(SkPaint::kUTF32_TextEncoding);
 // halo

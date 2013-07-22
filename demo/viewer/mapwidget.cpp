@@ -584,11 +584,13 @@ void render_skia(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
 void render_skia_gpu(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
+
+    std::cerr << "SKIA GPU\n" ;
     unsigned width=map.width();
     unsigned height=map.height();
+    mapnik::image_32 buf(width,height);
 
-
-    GrContext* context = GetGrContextFactory()->get(GrContextFactory::kDebug_GLContextType);//kNative_GLContextType);
+    GrContext* context = GetGrContextFactory()->get(GrContextFactory::kNative_GLContextType);
     GrTextureDesc desc;
     desc.fConfig = kSkia8888_GrPixelConfig;
     desc.fFlags = kRenderTarget_GrTextureFlagBit;
@@ -598,21 +600,24 @@ void render_skia_gpu(mapnik::Map const& map, double scaling_factor, QPixmap & pi
     GrTexture* texture = context->createUncachedTexture(desc, 0, 0);
     if (texture)
     {
+        std::cerr << "texture: cache-size=" << context->getGpuTextureCacheBytes() << std::endl;
         SkGpuDevice * device = SkGpuDevice::Create(texture);
         if (device)
         {
+            std::cerr << "device\n" ;
             SkCanvas canvas(device);
             std::cerr << "render called\n" ;
             mapnik::skia_renderer ren(map,canvas,scaling_factor);
             ren.apply();
-            //QImage image(buf,width,height,QImage::Format_ARGB32);
-            //pix = QPixmap::fromImage(image.rgbSwapped());
+            QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
+            pix = QPixmap::fromImage(image.rgbSwapped());
 
           device->unref();
         }
         texture->unref();
     }
-    context->unref();
+    //context->flush();
+    //context->unref();
 }
 
 
@@ -643,6 +648,7 @@ void MapWidget::updateRenderer(QString const& txt)
     else if (txt == "Cairo") cur_renderer_ = Cairo;
     else if (txt == "Grid") cur_renderer_ = Grid;
     else if (txt == "Skia") cur_renderer_ = Skia;
+    else if (txt == "Skia-Gpu") cur_renderer_ = Skia_Gpu;
     std::cerr << "Update renderer called" << std::endl;
     updateMap();
 }
