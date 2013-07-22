@@ -22,6 +22,7 @@
 #define MAP_WIDGET_HPP
 
 #include <QWidget>
+#include <QGLWidget>
 #include <QImage>
 #include <QPixmap>
 #include <QPen>
@@ -35,7 +36,7 @@
 #include <mapnik/map.hpp>
 #endif
 
-class MapWidget : public QWidget
+class MapWidget : public QGLWidget
 {
     Q_OBJECT
 
@@ -49,9 +50,10 @@ public:
 
     enum eRenderer
     {
-        AGG,
+        AGG = 1,
         Cairo,
         Skia,
+        Skia_Gpu,
         Grid
     };
 

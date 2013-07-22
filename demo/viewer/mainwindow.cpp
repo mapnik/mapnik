@@ -389,6 +389,9 @@ void MainWindow::createToolBars()
 #endif
 #ifdef HAVE_SKIA
     renderer_selector_->addItem("Skia");
+//#ifdef SK_SUPPORT_GPU
+    renderer_selector_->addItem("Skia-Gpu");
+//#endif
 #endif
     renderer_selector_->addItem("Grid");
     fileToolBar->addWidget(renderer_selector_);

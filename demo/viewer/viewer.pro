@@ -3,12 +3,17 @@
 ######################################################################
 TEMPLATE = app
 QT += core gui widgets
+QT += opengl
+
 QMAKE_CXX = /opt/llvm/bin/clang++
 QMAKE_LINK = /opt/llvm/bin/clang++
 QMAKE_CXXFLAGS += $$system(mapnik-config --cxxflags --defines)
 QMAKE_CXXFLAGS += $$system(mapnik-config --includes --dep-includes)
 QMAKE_CXXFLAGS += "-I/Users/artem/Projects/skia/trunk/include/core"
 QMAKE_CXXFLAGS += "-I/Users/artem/Projects/skia/trunk/include/config"
+QMAKE_CXXFLAGS += "-I/Users/artem/Projects/skia/trunk/include/gpu"
+QMAKE_CXXFLAGS += "-I/Users/artem/Projects/skia/trunk/include/gpu/gl"
+QMAKE_CXXFLAGS += "-I/Users/artem/Projects/skia/trunk/include/utils"
 
 QMAKE_LFLAGS += $$system(mapnik-config --libs)
 QMAKE_LFLAGS += $$system(mapnik-config --ldflags --dep-libs)

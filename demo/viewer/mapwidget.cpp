@@ -45,10 +45,29 @@
 #include <mapnik/skia/skia_renderer.hpp>
 #include <SkCanvas.h>
 #include <SkBitmap.h>
+#include <SkGpuDevice.h>
+
+#if SK_SUPPORT_GPU
+#include <GrGLFunctions.h>
+#include <GrContextFactory.h>
+GrContextFactory gGrContextFactory;
 #endif
+
+GrContextFactory* GetGrContextFactory() {
+#if SK_SUPPORT_GPU
+    return &gGrContextFactory;
+#else
+    return NULL;
+#endif
+}
+#endif
+
+
 
 #include "mapwidget.hpp"
 #include "info_dialog.hpp"
+
+
 
 using mapnik::image_32;
 using mapnik::Map;
@@ -84,7 +103,7 @@ double scales [] = {279541132.014,
                     533.182395962};
 
 MapWidget::MapWidget(QWidget *parent)
-   : QWidget(parent),
+   : QGLWidget(parent),
      map_(),
      selected_(1),
      extent_(),
@@ -502,18 +521,15 @@ void MapWidget::set_scaling_factor(double scaling_factor)
 
 void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
+    boost::timer::auto_cpu_timer t;
     unsigned width=map.width();
     unsigned height=map.height();
 
     image_32 buf(width,height);
     mapnik::agg_renderer<image_32> ren(map,buf,scaling_factor);
-
     try
     {
-        {
-            boost::timer::auto_cpu_timer t;
-            ren.apply();
-        }
+        ren.apply();
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
@@ -543,15 +559,11 @@ void render_skia(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     bitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height);
     bitmap.setPixels(buf.raw_data());
     SkCanvas canvas(bitmap);
-
+    boost::timer::auto_cpu_timer t;
     mapnik::skia_renderer ren(map,canvas,scaling_factor);
-
     try
     {
-        {
-            boost::timer::auto_cpu_timer t;
-            ren.apply();
-        }
+        ren.apply();
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
     }
@@ -567,6 +579,40 @@ void render_skia(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     {
         std::cerr << "Skia:Unknown exception caught!\n";
     }
+}
+
+
+void render_skia_gpu(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
+{
+    unsigned width=map.width();
+    unsigned height=map.height();
+
+
+    GrContext* context = GetGrContextFactory()->get(GrContextFactory::kDebug_GLContextType);//kNative_GLContextType);
+    GrTextureDesc desc;
+    desc.fConfig = kSkia8888_GrPixelConfig;
+    desc.fFlags = kRenderTarget_GrTextureFlagBit;
+    desc.fWidth = width;
+    desc.fHeight = height;
+    desc.fSampleCnt = 0;
+    GrTexture* texture = context->createUncachedTexture(desc, 0, 0);
+    if (texture)
+    {
+        SkGpuDevice * device = SkGpuDevice::Create(texture);
+        if (device)
+        {
+            SkCanvas canvas(device);
+            std::cerr << "render called\n" ;
+            mapnik::skia_renderer ren(map,canvas,scaling_factor);
+            ren.apply();
+            //QImage image(buf,width,height,QImage::Format_ARGB32);
+            //pix = QPixmap::fromImage(image.rgbSwapped());
+
+          device->unref();
+        }
+        texture->unref();
+    }
+    context->unref();
 }
 
 
@@ -626,6 +672,10 @@ void MapWidget::updateMap()
        else if (cur_renderer_ == Skia)
        {
            render_skia(*map_, scaling_factor_, pix_);
+       }
+       else if (cur_renderer_ == Skia_Gpu)
+       {
+           render_skia_gpu(*map_, scaling_factor_, pix_);
        }
        else
        {
