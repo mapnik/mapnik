@@ -76,7 +76,9 @@ skia_renderer::skia_renderer(Map const& map, SkCanvas & canvas, double scale_fac
       t_(map.width(), map.height(), map.get_current_extent()),
       scale_factor_(scale_factor),
       typeface_cache_(),
-      font_manager_(typeface_cache_),
+      //font_manager_(typeface_cache_),
+      font_engine_(),
+      font_manager_(font_engine_),
       detector_(boost::make_shared<label_collision_detector4>(
                     box2d<double>(-map.buffer_size(), -map.buffer_size(),
                                   map.width() + map.buffer_size(), map.height() + map.buffer_size()))) {}
@@ -248,7 +250,8 @@ void skia_renderer::process(text_symbolizer const& sym,
                             mapnik::feature_impl & feature,
                             proj_transform const& prj_trans)
 {
-    text_symbolizer_helper<skia_font_manager,label_collision_detector4>
+    text_symbolizer_helper<face_manager<freetype_engine>,label_collision_detector4>
+        //text_symbolizer_helper<skia_font_manager,label_collision_detector4>
         helper(sym, feature, prj_trans,
                width_, height_,
                scale_factor_,
@@ -264,27 +267,35 @@ void skia_renderer::process(text_symbolizer const& sym,
             double sy = placements[i].center.y;
 
             placements[i].rewind();
+            SkPaint paint;
+            paint.setAntiAlias(true);
+
+            SkTypeface * typeface = typeface_cache_.create("ArialUnicodeMS");
+            if (typeface) paint.setTypeface(typeface);
+            paint.setTextEncoding(SkPaint::kUTF32_TextEncoding);
 // halo
+
             for (int j = 0; j < placements[i].num_nodes(); ++j)
             {
                 char_info_ptr c;
                 double x, y, angle;
                 placements[i].vertex(c, x, y, angle);
-                SkPaint paint;
-                paint.setStyle(SkPaint::kStroke_Style);
-                paint.setAntiAlias(true);
-                double text_size = c->format->text_size * scale_factor_;
-                paint.setTextSize((SkScalar)text_size);
-                paint.setStrokeWidth(2.0 * c->format->halo_radius * scale_factor_);
-                paint.setStrokeJoin(SkPaint::kRound_Join);
-                color const& halo_fill = c->format->halo_fill; // !!
-                paint.setARGB(int(halo_fill.alpha() * c->format->text_opacity), halo_fill.red(), halo_fill.green(), halo_fill.blue());
-                SkPoint pt = SkPoint::Make(0,0);
-                canvas_.save();
-                canvas_.translate((SkScalar)(sx + x), (SkScalar)(sy - y));
-                canvas_.rotate(-(SkScalar)180 * (angle/M_PI));
-                canvas_.drawPosText(&(c->c),1, &pt, paint);
-                canvas_.restore();
+                if (c->format->halo_radius > 0)
+                {
+                    paint.setStyle(SkPaint::kStroke_Style);
+                    double text_size = c->format->text_size * scale_factor_;
+                    paint.setTextSize((SkScalar)text_size);
+                    paint.setStrokeWidth(2.0 * c->format->halo_radius * scale_factor_);
+                    paint.setStrokeJoin(SkPaint::kRound_Join);
+                    color const& halo_fill = c->format->halo_fill; // !!
+                    paint.setARGB(int(halo_fill.alpha() * c->format->text_opacity), halo_fill.red(), halo_fill.green(), halo_fill.blue());
+                    SkPoint pt = SkPoint::Make(0,0);
+                    canvas_.save();
+                    canvas_.translate((SkScalar)(sx + x), (SkScalar)(sy - y));
+                    canvas_.rotate(-(SkScalar)180 * (angle/M_PI));
+                    canvas_.drawPosText(&(c->c),1, &pt, paint);
+                    canvas_.restore();
+                }
             }
 // text
             placements[i].rewind();
@@ -294,12 +305,10 @@ void skia_renderer::process(text_symbolizer const& sym,
                 char_info_ptr c;
                 double x, y, angle;
                 placements[i].vertex(c, x, y, angle);
-                SkPaint paint;
                 paint.setStyle(SkPaint::kFill_Style);
-                paint.setAntiAlias(true);
                 double text_size = c->format->text_size * scale_factor_;
                 paint.setTextSize((SkScalar)text_size);
-                color const& fill = c->format->fill; // !!
+                color const& fill = c->format->fill;
                 paint.setARGB(int(fill.alpha() * c->format->text_opacity), fill.red(), fill.green(), fill.blue());
                 SkPoint pt = SkPoint::Make(0,0);
                 canvas_.save();

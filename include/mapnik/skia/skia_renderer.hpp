@@ -37,6 +37,9 @@
 #include <mapnik/skia/skia_typeface_cache.hpp>
 #include <mapnik/label_collision_detector.hpp>
 
+//
+#include <mapnik/font_engine_freetype.hpp>
+
 // skia fwd decl
 class SkCanvas;
 
@@ -92,8 +95,10 @@ private:
     CoordTransform t_;
     double scale_factor_;
     box2d<double> query_extent_;
-    skia_font_manager font_manager_;
+//skia_font_manager font_manager_;
     skia_typeface_cache typeface_cache_;
+    freetype_engine font_engine_;
+    face_manager<freetype_engine> font_manager_;
     boost::shared_ptr<label_collision_detector4> detector_;
 };
 
