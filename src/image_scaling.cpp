@@ -33,6 +33,7 @@
 // agg
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_renderer_scanline.h"
 #include "agg_rendering_buffer.h"
