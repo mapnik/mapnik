@@ -582,7 +582,7 @@ void apply_filter(Src & src, scale_hsla const& transform)
 }
 
 template <typename Src>
-void apply_filter(Src & src, gray const& op)
+void apply_filter(Src & src, gray const& /*op*/)
 {
     using namespace boost::gil;
 
@@ -632,14 +632,14 @@ void x_gradient_impl(Src const& src_view, Dst const& dst_view)
 }
 
 template <typename Src>
-void apply_filter(Src & src, x_gradient const& op)
+void apply_filter(Src & src, x_gradient const& /*op*/)
 {
     double_buffer<Src> tb(src);
     x_gradient_impl(tb.src_view, tb.dst_view);
 }
 
 template <typename Src>
-void apply_filter(Src & src, y_gradient const& op)
+void apply_filter(Src & src, y_gradient const& /*op*/)
 {
     double_buffer<Src> tb(src);
     x_gradient_impl(rotated90ccw_view(tb.src_view),
@@ -647,7 +647,7 @@ void apply_filter(Src & src, y_gradient const& op)
 }
 
 template <typename Src>
-void apply_filter(Src & src, invert const& op)
+void apply_filter(Src & src, invert const& /*op*/)
 {
     using namespace boost::gil;
 
