@@ -36,6 +36,8 @@
 #include <mapnik/map.hpp>
 #endif
 
+struct GrGLInterface;
+
 class MapWidget : public QGLWidget
 {
     Q_OBJECT

@@ -46,10 +46,12 @@
 #include <SkCanvas.h>
 #include <SkBitmap.h>
 #include <SkGpuDevice.h>
-
+#include <gl/GrGLInterface.h>
 #if SK_SUPPORT_GPU
-#include <GrGLFunctions.h>
+#include <gl/GrGLFunctions.h>
 #include <GrContextFactory.h>
+#include "/Users/artem/Projects/skia/trunk/src/gpu/gl/GrGLDefines.h"
+#include "/Users/artem/Projects/skia/trunk/src/gpu/gl/GrGLUtil.h"
 GrContextFactory gGrContextFactory;
 #endif
 
@@ -123,6 +125,7 @@ MapWidget::MapWidget(QWidget *parent)
    pen_.setCapStyle(Qt::RoundCap);
    pen_.setJoinStyle(Qt::RoundJoin);
 }
+
 
 void MapWidget::setTool(eTool tool)
 {
@@ -550,6 +553,8 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
 void render_skia(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
+    boost::timer::auto_cpu_timer t;
+
     unsigned width=map.width();
     unsigned height=map.height();
 
@@ -559,7 +564,7 @@ void render_skia(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     bitmap.setConfig(SkBitmap::kARGB_8888_Config, width, height);
     bitmap.setPixels(buf.raw_data());
     SkCanvas canvas(bitmap);
-    boost::timer::auto_cpu_timer t;
+
     mapnik::skia_renderer ren(map,canvas,scaling_factor);
     try
     {
@@ -582,42 +587,35 @@ void render_skia(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 }
 
 
-void render_skia_gpu(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
+void render_skia_gpu(GrGLInterface const * cur_interface, mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
-
-    std::cerr << "SKIA GPU\n" ;
+    std::cerr << "SKIA GPU start " << cur_interface << std::endl ;
+    boost::timer::auto_cpu_timer t;
     unsigned width=map.width();
     unsigned height=map.height();
-    mapnik::image_32 buf(width,height);
 
-    GrContext* context = GetGrContextFactory()->get(GrContextFactory::kNative_GLContextType);
-    GrTextureDesc desc;
+    GrContext* context = GrContext::Create(kOpenGL_GrBackend, (GrBackendContext) cur_interface);
+    GrBackendRenderTargetDesc desc;
     desc.fConfig = kSkia8888_GrPixelConfig;
-    desc.fFlags = kRenderTarget_GrTextureFlagBit;
     desc.fWidth = width;
     desc.fHeight = height;
-    desc.fSampleCnt = 0;
-    GrTexture* texture = context->createUncachedTexture(desc, 0, 0);
-    if (texture)
-    {
-        std::cerr << "texture: cache-size=" << context->getGpuTextureCacheBytes() << std::endl;
-        SkGpuDevice * device = SkGpuDevice::Create(texture);
-        if (device)
-        {
-            std::cerr << "device\n" ;
-            SkCanvas canvas(device);
-            std::cerr << "render called\n" ;
-            mapnik::skia_renderer ren(map,canvas,scaling_factor);
-            ren.apply();
-            QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
-            pix = QPixmap::fromImage(image.rgbSwapped());
+    GR_GL_GetIntegerv(cur_interface, GR_GL_SAMPLES, &desc.fSampleCnt);
+    GR_GL_GetIntegerv(cur_interface, GR_GL_STENCIL_BITS, &desc.fStencilBits);
+    GrGLint buffer;
+    GR_GL_GetIntegerv(cur_interface, GR_GL_FRAMEBUFFER_BINDING, &buffer);
+    desc.fRenderTargetHandle = buffer;
+    desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
 
-          device->unref();
-        }
-        texture->unref();
-    }
-    //context->flush();
-    //context->unref();
+    GrRenderTarget* curRenderTarget = context->wrapBackendRenderTarget(desc);
+    SkGpuDevice device(context, curRenderTarget);
+    SkCanvas canvas(&device);
+
+
+    mapnik::skia_renderer ren(map,canvas,scaling_factor);
+    ren.apply();
+    context->resetContext();
+    context->flush();
+    std::cerr << "SKIA GPU Done" << std::endl;
 }
 
 
@@ -644,12 +642,19 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 
 void MapWidget::updateRenderer(QString const& txt)
 {
+    bool auto_swap = true;
+
     if (txt == "AGG") cur_renderer_ = AGG;
     else if (txt == "Cairo") cur_renderer_ = Cairo;
     else if (txt == "Grid") cur_renderer_ = Grid;
     else if (txt == "Skia") cur_renderer_ = Skia;
-    else if (txt == "Skia-Gpu") cur_renderer_ = Skia_Gpu;
+    else if (txt == "Skia-Gpu")
+    {
+        cur_renderer_ = Skia_Gpu;
+        auto_swap = false;
+    }
     std::cerr << "Update renderer called" << std::endl;
+    setAutoBufferSwap(auto_swap);
     updateMap();
 }
 
@@ -681,7 +686,9 @@ void MapWidget::updateMap()
        }
        else if (cur_renderer_ == Skia_Gpu)
        {
-           render_skia_gpu(*map_, scaling_factor_, pix_);
+           GrGLInterface const* cur_interface = GrGLCreateNativeInterface();
+           render_skia_gpu(cur_interface, *map_, scaling_factor_, pix_);
+           swapBuffers();
        }
        else
        {
