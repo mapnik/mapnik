@@ -36,8 +36,9 @@
 
 // agg
 #include "agg_basics.h"
-#include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
+#include "agg_rendering_buffer.h"
 #include "agg_rasterizer_outline.h"
 #include "agg_rasterizer_outline_aa.h"
 #include "agg_scanline_u.h"
@@ -90,7 +91,6 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 {
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pattern_filter_bilinear_rgba8 pattern_filter_type;
     typedef agg::line_image_pattern<pattern_filter_type> pattern_type;
