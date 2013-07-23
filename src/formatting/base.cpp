@@ -30,13 +30,15 @@
 // boost
 #include <boost/property_tree/ptree.hpp>
 
+// stl
+#include <stdexcept>
+
 namespace mapnik {
 namespace formatting {
 
-void node::to_xml(boost::property_tree::ptree &xml) const
+void node::to_xml(boost::property_tree::ptree & /*xml*/) const
 {
-    //TODO: Should this throw a config_error?
-    MAPNIK_LOG_ERROR(base) << "Trying to write unsupported node type to XML.";
+    throw std::runtime_error("Trying to write unsupported node type to XML");
 }
 
 node_ptr node::from_xml(xml_node const& xml)
@@ -62,7 +64,7 @@ node_ptr node::from_xml(xml_node const& xml)
     }
 }
 
-void node::add_expressions(expression_set &output) const
+void node::add_expressions(expression_set & /*output*/) const
 {
     //Do nothing by default
 }

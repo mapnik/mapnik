@@ -330,7 +330,7 @@ bool text_symbolizer_helper<FaceManagerT, DetectorT>::next_placement()
         angle_ = 0.0;
     }
 
-    finder_.reset(new placement_finder<DetectorT>(feature_, *placement_,
+    finder_.reset(new placement_finder<DetectorT>(*placement_,
                                                   text_.get_string_info(),
                                                   detector_, dims_));
     placement_valid_ = true;

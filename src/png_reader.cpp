@@ -96,12 +96,12 @@ const bool registered2 = register_image_reader("png", create_png_reader2);
 }
 
 
-void user_error_fn(png_structp png_ptr, png_const_charp error_msg)
+void user_error_fn(png_structp /*png_ptr*/, png_const_charp error_msg)
 {
     throw image_reader_exception(std::string("failed to read invalid png: '") + error_msg + "'");
 }
 
-void user_warning_fn(png_structp png_ptr, png_const_charp warning_msg)
+void user_warning_fn(png_structp /*png_ptr*/, png_const_charp warning_msg)
 {
     MAPNIK_LOG_DEBUG(png_reader) << "libpng warning: '" << warning_msg << "'";
 }

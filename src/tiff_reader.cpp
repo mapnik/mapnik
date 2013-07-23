@@ -61,7 +61,7 @@ static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
     return static_cast<toff_t>(in->tellg());
 }
 
-static int tiff_close_proc(thandle_t fd)
+static int tiff_close_proc(thandle_t /*fd*/)
 {
     return 0;
 }
@@ -86,16 +86,16 @@ static tsize_t tiff_read_proc(thandle_t fd, tdata_t buf, tsize_t size)
     return static_cast<tsize_t>(in->gcount());
 }
 
-static tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
+static tsize_t tiff_write_proc(thandle_t /*fd*/, tdata_t /*buf*/, tsize_t /*size*/)
 {
     return 0;
 }
 
-static void tiff_unmap_proc(thandle_t fd, tdata_t base, toff_t size)
+static void tiff_unmap_proc(thandle_t /*fd*/, tdata_t /*base*/, toff_t /*size*/)
 {
 }
 
-static int tiff_map_proc(thandle_t fd, tdata_t* pbase, toff_t* psize)
+static int tiff_map_proc(thandle_t /*fd*/, tdata_t* /*pbase*/, toff_t* /*psize*/)
 {
     return 0;
 }
