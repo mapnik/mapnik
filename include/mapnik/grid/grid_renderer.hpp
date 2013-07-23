@@ -122,6 +122,10 @@ public:
     {
         return DEFAULT;
     }
+    inline double scale_factor() const
+    {
+        return scale_factor_;
+    }
 
 private:
     buffer_type & pixmap_;

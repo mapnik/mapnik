@@ -137,6 +137,11 @@ public:
         return DEFAULT;
     }
 
+    inline double scale_factor() const
+    {
+        return scale_factor_;
+    }
+
     inline OutputIterator& get_output_iterator()
     {
         return output_iterator_;

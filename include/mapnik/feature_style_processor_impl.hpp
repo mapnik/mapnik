@@ -33,7 +33,6 @@
 #include <mapnik/query.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/datasource.hpp>
-#include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/layer.hpp>
@@ -41,7 +40,6 @@
 #include <mapnik/rule_cache.hpp>
 #include <mapnik/attribute_collector.hpp>
 #include <mapnik/expression_evaluator.hpp>
-#include <mapnik/utils.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/projection.hpp>
 #include <mapnik/proj_transform.hpp>
@@ -134,11 +132,10 @@ struct has_process
 
 template <typename Processor>
 feature_style_processor<Processor>::feature_style_processor(Map const& m, double scale_factor)
-    : m_(m),
-      scale_factor_(scale_factor)
+    : m_(m)
 {
     // https://github.com/mapnik/mapnik/issues/1100
-    if (scale_factor_ <= 0)
+    if (scale_factor <= 0)
     {
         throw std::runtime_error("scale_factor must be greater than 0.0");
     }
@@ -153,7 +150,7 @@ void feature_style_processor<Processor>::apply(double scale_denom)
     projection proj(m_.srs(),true);
     if (scale_denom <= 0.0)
         scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
-    scale_denom *= scale_factor_;
+    scale_denom *= p.scale_factor();
 
     BOOST_FOREACH ( layer const& lyr, m_.layers() )
     {
@@ -188,7 +185,7 @@ void feature_style_processor<Processor>::apply(mapnik::layer const& lyr,
     projection proj(m_.srs(),true);
     if (scale_denom <= 0.0)
         scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
-    scale_denom *= scale_factor_;
+    scale_denom *= p.scale_factor();
 
     if (lyr.visible(scale_denom))
     {
@@ -458,7 +455,6 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
             if (features)
             {
-                // Cache all features into the memory_datasource before rendering.
                 feature_ptr feature;
                 while ((feature = features->next()))
                 {
