@@ -76,9 +76,14 @@ public:
 
     void painted(bool painted) {};
 
-    inline bool process(rule::symbolizers const& /*syms*/,
-                        mapnik::feature_impl & /*feature*/,
-                        proj_transform const& /*prj_trans*/)
+    inline double scale_factor() const
+    {
+        return scale_factor_;
+    }
+
+    inline bool process(rule::symbolizers const& ,
+                        mapnik::feature_impl & ,
+                        proj_transform const& )
     {
         return false;
     }
