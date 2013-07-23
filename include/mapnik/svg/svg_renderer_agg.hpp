@@ -52,7 +52,6 @@
 #include "agg_gradient_lut.h"
 #include "agg_gamma_lut.h"
 #include "agg_span_interpolator_linear.h"
-#include "agg_pixfmt_rgba.h"
 
 namespace mapnik  {
 namespace svg {
@@ -341,8 +340,8 @@ public:
                    Renderer& ren,
                    int feature_id,
                    agg::trans_affine const& mtx,
-                   double opacity,
-                   box2d<double> const& symbol_bbox)
+                   double /*opacity*/,
+                   box2d<double> const& /*symbol_bbox*/)
 
     {
         using namespace agg;

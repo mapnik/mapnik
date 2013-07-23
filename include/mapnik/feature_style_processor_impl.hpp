@@ -49,7 +49,6 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/foreach.hpp>
-#include <boost/concept_check.hpp>
 
 // stl
 #include <vector>
@@ -74,11 +73,8 @@ template <> // No-op specialization
 struct process_impl<false>
 {
     template <typename T0, typename T1, typename T2, typename T3>
-    static void process(T0 & ren, T1 const& sym, T2 & f, T3 const& tr)
+    static void process(T0 & /*ren*/, T1 const& /*sym*/, T2 & /*f*/, T3 const& /*tr*/)
     {
-        boost::ignore_unused_variable_warning(ren);
-        boost::ignore_unused_variable_warning(f);
-        boost::ignore_unused_variable_warning(tr);
 #ifdef MAPNIK_DEBUG
         std::clog << "NO-OP ...\n";
 #endif

@@ -89,7 +89,7 @@ struct converter_traits
     typedef T0 geometry_type;
     typedef geometry_type conv_type;
     template <typename Args>
-    static void setup(geometry_type & geom, Args const& /*args*/)
+    static void setup(geometry_type & /*geom*/, Args const& /*args*/)
     {
         throw std::runtime_error("invalid call to setup");
     }
@@ -219,7 +219,7 @@ struct converter_traits<T,mapnik::close_poly_tag>
     typedef T geometry_type;
     typedef typename agg::conv_close_polygon<geometry_type> conv_type;
     template <typename Args>
-    static void setup(geometry_type & geom, Args const& /*args*/)
+    static void setup(geometry_type & /*geom*/, Args const& /*args*/)
     {
         // no-op
     }

@@ -57,8 +57,7 @@ template <typename DetectorT>
 class placement_finder : mapnik::noncopyable
 {
 public:
-    placement_finder(feature_impl const& feature,
-                     text_placement_info const& placement_info,
+    placement_finder(text_placement_info const& placement_info,
                      string_info const& info,
                      DetectorT & detector,
                      box2d<double> const& extent);

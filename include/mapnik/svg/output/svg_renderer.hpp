@@ -79,8 +79,8 @@ public:
     void end_map_processing(Map const& map);
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
-    void start_style_processing(feature_type_style const& st) {}
-    void end_style_processing(feature_type_style const& st) {}
+    void start_style_processing(feature_type_style const& /*st*/) {}
+    void end_style_processing(feature_type_style const& /*st*/) {}
 
     /*!
      * @brief Overloads that process each kind of symbolizer individually.
@@ -115,9 +115,9 @@ public:
     void process(markers_symbolizer const& sym,
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
-    void process(debug_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans) {}
+    void process(debug_symbolizer const& /*sym*/,
+                 mapnik::feature_impl & /*feature*/,
+                 proj_transform const& /*prj_trans*/) {}
 
     /*!
      * @brief Overload that process the whole set of symbolizers of a rule.
@@ -127,7 +127,7 @@ public:
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
 
-    void painted(bool painted)
+    void painted(bool /*painted*/)
     {
         // nothing to do
     }
