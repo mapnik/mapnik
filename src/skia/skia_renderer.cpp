@@ -30,15 +30,103 @@
 #include <SkPath.h>
 #include <SkPaint.h>
 #include <SkDashPathEffect.h>
-// agg
-//#include "agg_conv_clip_polyline.h"
-//#include "agg_conv_clip_polygon.h"
-//#include "agg_conv_smooth_poly1.h"
-//#include "agg_rendering_buffer.h"
-//#include "agg_pixfmt_rgba.h"
 #include "agg_trans_affine.h"
 
 namespace mapnik {
+
+
+void set_comp_op(SkPaint & paint, composite_mode_e comp_op)
+{
+    SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode;
+    switch (comp_op)
+    {
+    case clear:
+        mode = SkXfermode::kClear_Mode;
+        break;
+    case src:
+        mode = SkXfermode::kSrc_Mode;
+        break;
+    case dst:
+        mode = SkXfermode::kDst_Mode;
+        break;
+    case src_over:
+        mode = SkXfermode::kSrcOver_Mode;
+        break;
+    case dst_over:
+        mode = SkXfermode::kDstOver_Mode;
+        break;
+    case src_in:
+        mode = SkXfermode::kSrcIn_Mode;
+        break;
+    case dst_in:
+        mode = SkXfermode::kDstIn_Mode;
+        break;
+    case src_out:
+        mode = SkXfermode::kSrcOut_Mode;
+        break;
+    case dst_out:
+        mode = SkXfermode::kDstOut_Mode;
+        break;
+    case src_atop:
+        mode = SkXfermode::kSrcATop_Mode;
+        break;
+    case dst_atop:
+        mode = SkXfermode::kDstATop_Mode;
+        break;
+    case _xor:
+        mode = SkXfermode::kXor_Mode;
+        break;
+    case plus:
+        mode = SkXfermode::kPlus_Mode;
+        break;
+    case multiply:
+        mode = SkXfermode::kMultiply_Mode;
+        break;
+    case screen:
+        mode = SkXfermode::kScreen_Mode;
+        break;
+    case overlay:
+        mode = SkXfermode::kOverlay_Mode;
+        break;
+    case darken:
+        mode = SkXfermode::kDarken_Mode;
+        break;
+    case lighten:
+        mode = SkXfermode::kLighten_Mode;
+        break;
+    case color_dodge:
+        mode = SkXfermode::kColorDodge_Mode;
+        break;
+    case color_burn:
+        mode = SkXfermode::kColorBurn_Mode;
+        break;
+    case hard_light:
+        mode = SkXfermode::kHardLight_Mode;
+        break;
+    case soft_light:
+        mode = SkXfermode::kSoftLight_Mode;
+        break;
+    case difference:
+        mode = SkXfermode::kDifference_Mode;
+        break;
+    case exclusion:
+        mode = SkXfermode::kExclusion_Mode;
+        break;
+    case hue:
+        mode = SkXfermode::kHue_Mode;
+        break;
+    case saturation:
+        mode = SkXfermode::kSaturation_Mode;
+        break;
+    case _color:
+        mode = SkXfermode::kColor_Mode;
+        break;
+    default:
+        break;
+    }
+
+    paint.setXfermodeMode(mode);
+}
 
 struct skia_path_adapter : private mapnik::noncopyable
 {
@@ -52,15 +140,12 @@ struct skia_path_adapter : private mapnik::noncopyable
         path.rewind(0);
         while ((vtx.cmd = path.vertex(&vtx.x, &vtx.y)) != SEG_END)
         {
-            //std::cerr << vtx.x << "," << vtx.y << " cmd=" << vtx.cmd << std::endl;
             switch (vtx.cmd)
             {
             case SEG_MOVETO:
                 sk_path_.moveTo(vtx.x, vtx.y);
             case SEG_LINETO:
                 sk_path_.lineTo(vtx.x, vtx.y);
-                //case SEG_CLOSE:
-                //sk_path_.close();
             }
         }
     }
@@ -155,6 +240,7 @@ void skia_renderer::process(line_symbolizer const& sym,
      SkPaint paint;
      paint.setStyle(SkPaint::kStroke_Style);
      paint.setAntiAlias(true);
+     set_comp_op(paint, sym.comp_op());
      paint.setARGB(int(col.alpha() * strk.get_opacity()), col.red(), col.green(), col.blue());
      paint.setStrokeWidth(strk.get_width() * scale_factor_);
 
@@ -242,6 +328,7 @@ void skia_renderer::process(polygon_symbolizer const& sym,
     SkPaint paint;
     paint.setStyle(SkPaint::kFill_Style);
     paint.setAntiAlias(true);
+    set_comp_op(paint, sym.comp_op());
     paint.setARGB(int(fill.alpha() * sym.get_opacity()), fill.red(), fill.green(), fill.blue());
     canvas_.drawPath(path, paint);
 }
@@ -269,12 +356,12 @@ void skia_renderer::process(text_symbolizer const& sym,
             placements[i].rewind();
             SkPaint paint;
             paint.setAntiAlias(true);
-
+            set_comp_op(paint, sym.comp_op());
             SkTypeface * typeface = typeface_cache_.create("ArialUnicodeMS"); // FIXME
             if (typeface) paint.setTypeface(typeface);
             paint.setTextEncoding(SkPaint::kUTF32_TextEncoding);
-// halo
 
+            // halo
             for (int j = 0; j < placements[i].num_nodes(); ++j)
             {
                 char_info_ptr c;
@@ -287,7 +374,7 @@ void skia_renderer::process(text_symbolizer const& sym,
                     paint.setTextSize((SkScalar)text_size);
                     paint.setStrokeWidth(2.0 * c->format->halo_radius * scale_factor_);
                     paint.setStrokeJoin(SkPaint::kRound_Join);
-                    color const& halo_fill = c->format->halo_fill; // !!
+                    color const& halo_fill = c->format->halo_fill;
                     paint.setARGB(int(halo_fill.alpha() * c->format->text_opacity), halo_fill.red(), halo_fill.green(), halo_fill.blue());
                     SkPoint pt = SkPoint::Make(0,0);
                     canvas_.save();
@@ -297,9 +384,9 @@ void skia_renderer::process(text_symbolizer const& sym,
                     canvas_.restore();
                 }
             }
-// text
-            placements[i].rewind();
 
+            // text
+            placements[i].rewind();
             for (int j = 0; j < placements[i].num_nodes(); ++j)
             {
                 char_info_ptr c;
