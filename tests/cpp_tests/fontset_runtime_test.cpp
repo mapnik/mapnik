@@ -53,7 +53,7 @@ int main(int argc, char** argv)
         // NOTE: this is a valid font, but will fail because none are registered
         fontset.add_face_name("DejaVu Sans Book");
         m.insert_fontset("fontset", fontset);
-        mapnik::layer lyr("layer");
+        mapnik::layer lyr("myLayerName");
         lyr.set_datasource(memory_ds);
         lyr.add_style("style");
         m.addLayer(lyr);
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
         mapnik::agg_renderer<mapnik::image_32> ren(m,buf);
         ren.apply();
     } catch (std::exception const& ex) {
-        BOOST_TEST_EQ(std::string(ex.what()),std::string("No valid font face could be loaded for font set: 'fontset'"));
+        BOOST_TEST_EQ(std::string(ex.what()),std::string("myLayerName: No valid font face could be loaded for font set: 'fontset'"));
     }
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
