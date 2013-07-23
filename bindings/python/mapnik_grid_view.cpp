@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // boost
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
@@ -49,3 +51,5 @@ void export_grid_view()
             )
         ;
 }
+
+#endif

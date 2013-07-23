@@ -21,7 +21,7 @@ defaults = {
     'scales':[1.0,2.0],
     'agg': True,
     'cairo': mapnik.has_cairo(),
-    'grid': True
+    'grid': mapnik.has_grid_renderer()
 }
 
 cairo_threshold = 10

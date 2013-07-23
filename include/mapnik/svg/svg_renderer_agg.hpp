@@ -27,7 +27,11 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
+
+#if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_pixel.hpp>
+#endif
+
 #include <mapnik/noncopyable.hpp>
 
 // boost
@@ -334,6 +338,7 @@ public:
         }
     }
 
+#if defined(GRID_RENDERER)
     template <typename Rasterizer, typename Scanline, typename Renderer>
     void render_id(Rasterizer& ras,
                    Scanline& sl,
@@ -416,6 +421,7 @@ public:
             }
         }
     }
+#endif
 
 private:
 

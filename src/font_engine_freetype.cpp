@@ -25,7 +25,11 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
+
+#if defined(GRID_RENDERER)
 #include <mapnik/grid/grid.hpp>
+#endif
+
 #include <mapnik/text_path.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/font_util.hpp>
@@ -686,6 +690,7 @@ void text_renderer<T>::render(pixel_position const& pos)
     }
 }
 
+#if defined(GRID_RENDERER)
 template <typename T>
 void text_renderer<T>::render_id(mapnik::value_integer feature_id,
                                  pixel_position const& pos)
@@ -715,6 +720,7 @@ void text_renderer<T>::render_id(mapnik::value_integer feature_id,
         }
     }
 }
+#endif
 
 #ifdef MAPNIK_THREADSAFE
 boost::mutex freetype_engine::mutex_;
@@ -729,6 +735,7 @@ template text_renderer<image_32>::text_renderer(image_32&,
                                                 double);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path const&);
 template void text_renderer<image_32>::render(pixel_position const&);
+#if defined(GRID_RENDERER)
 template void text_renderer<grid>::render_id(mapnik::value_integer,
                                              pixel_position const&);
 template text_renderer<grid>::text_renderer(grid&,
@@ -736,4 +743,5 @@ template text_renderer<grid>::text_renderer(grid&,
                                             halo_rasterizer_e,
                                             composite_mode_e, double);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path const& );
+#endif
 }

@@ -45,18 +45,18 @@ def make_map():
     m.zoom_all()
     return m
 
-def test_clearing_grid_data():
-    g = mapnik.Grid(256,256)
-    utf = g.encode()
-    # make sure it equals itself
-    eq_(g.encode(),utf)
-    m = make_map()
-    mapnik.render_layer(m,g,layer=0,fields=['__id__','Name'])
-    eq_(g.encode()!=utf,True)
-    # clear grid, should now match original
-    g.clear()
-    eq_(g.encode(),utf)
-
+if mapnik.has_grid_renderer():
+    def test_clearing_grid_data():
+        g = mapnik.Grid(256,256)
+        utf = g.encode()
+        # make sure it equals itself
+        eq_(g.encode(),utf)
+        m = make_map()
+        mapnik.render_layer(m,g,layer=0,fields=['__id__','Name'])
+        eq_(g.encode()!=utf,True)
+        # clear grid, should now match original
+        g.clear()
+        eq_(g.encode(),utf)
 
 if __name__ == "__main__":
     setup()
