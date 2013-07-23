@@ -38,6 +38,7 @@
 // agg
 #include "agg_ellipse.h"
 #include "agg_basics.h"
+#include "agg_color_rgba.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
 #include "agg_rendering_buffer.h"
