@@ -97,7 +97,6 @@ private:
                       proj_transform const& prj_trans);
 
     Map const& m_;
-    double scale_factor_;
 };
 }
 
