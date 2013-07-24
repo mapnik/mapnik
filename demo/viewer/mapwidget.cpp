@@ -45,6 +45,9 @@
 #include <mapnik/skia/skia_renderer.hpp>
 #include <SkCanvas.h>
 #include <SkBitmap.h>
+#include <SkStream.h>
+#include <SkPDFDevice.h>
+#include <SkPDFDocument.h>
 #include <SkGpuDevice.h>
 #include <gl/GrGLInterface.h>
 #if SK_SUPPORT_GPU
@@ -624,6 +627,44 @@ void render_skia_gpu(GrGLInterface const * cur_interface, mapnik::Map const& map
     std::cerr << "SKIA GPU Done" << std::endl;
 }
 
+
+void MapWidget::export_skia_pdf(QString const& filename)
+{
+    unsigned width = map_->width();
+    unsigned height = map_->height();
+    SkISize pageSize = SkISize::Make(width,height);
+
+
+    SkPDFDevice dev(pageSize, pageSize, SkMatrix::I());
+    SkCanvas canvas(&dev);
+    mapnik::skia_renderer ren(*map_,canvas,scaling_factor_);
+    try
+    {
+        ren.apply();
+    }
+    catch (mapnik::config_error & ex)
+    {
+        std::cerr << "Skia:" << ex.what() << std::endl;
+    }
+    catch (const std::exception & ex)
+    {
+        std::cerr << "Skia:exception: " << ex.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Skia:Unknown exception caught!\n";
+    }
+
+    SkPDFDocument doc;
+    doc.appendPage(&dev);
+    std::cerr << filename.toStdString() << std::endl;
+    SkFILEWStream stream(filename.toStdString().c_str());
+    if (stream.isValid())
+    {
+        doc.emitPDF(&stream);
+    }
+    std::cerr << "Done" << std::endl;
+}
 
 void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {

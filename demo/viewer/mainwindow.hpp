@@ -54,6 +54,8 @@ public slots:
     void pan();
     void info();
     void export_as();
+    void export_as_skia_pdf();
+    void export_as_cairo_pdf();
     void open(QString const&  path = QString());
     void reload();
     void save();
@@ -96,11 +98,14 @@ private:
     QAction *panDownAct;
     QAction *reloadAct;
     QAction *layerInfo;
+    QAction *exportSkiaPdf;
+    QAction *exportCairoPdf;
     //toolbars
     QToolBar *fileToolBar;
     QToolBar *editToolBar;
     //menus
     QMenu *exportMenu;
+    QMenu *exportPdfMenu;
     QMenu *fileMenu;
     QMenu *helpMenu;
     //status bar

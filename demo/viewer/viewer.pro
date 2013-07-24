@@ -9,10 +9,14 @@ QMAKE_CXX = $$system(mapnik-config --cxx)
 QMAKE_LINK = $$system(mapnik-config --cxx)
 QMAKE_CXXFLAGS += $$system(mapnik-config --cxxflags --defines)
 QMAKE_CXXFLAGS += $$system(mapnik-config --includes --dep-includes)
+QMAKE_CXXFLAGS += "-I/Users/artem/Projects/skia/trunk/include/gpu"
+QMAKE_CXXFLAGS += "-I/Users/artem/Projects/skia/trunk/include/pdf"
 
 QMAKE_LFLAGS += $$system(mapnik-config --libs)
 QMAKE_LFLAGS += $$system(mapnik-config --ldflags --dep-libs)
 QMAKE_LFLAGS += -lboost_timer
+QMAKE_LFLAGS += -lskia_pdf
+QMAKE_LFLAGS += -lzlib
 QMAKE_LFLAGS += "-framework Cocoa"
 
 # Input
