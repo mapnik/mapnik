@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#if defined(HAVE_SKIA)
+#if defined(SKIA_RENDERER)
 
 #include <mapnik/skia/skia_renderer.hpp>
 #include <mapnik/vertex_converters.hpp>
@@ -410,4 +410,4 @@ void skia_renderer::process(text_symbolizer const& sym,
 
 }
 
-#endif // HAVE_SKIA
+#endif // SKIA_RENDERER

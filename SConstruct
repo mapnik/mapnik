@@ -70,6 +70,7 @@ pretty_dep_names = {
     'proj':'Proj.4 C Projections library | configure with PROJ_LIBS & PROJ_INCLUDES | more info: http://trac.osgeo.org/proj/',
     'pg':'Postgres C Library required for PostGIS plugin | configure with pg_config program | more info: https://github.com/mapnik/mapnik/wiki/PostGIS',
     'sqlite3':'SQLite3 C Library | configure with SQLITE_LIBS & SQLITE_INCLUDES | more info: https://github.com/mapnik/mapnik/wiki/SQLite',
+    'skia_core':'Skia rendering toolkit | configure with SKIA_LIBS & SKIA_INCLUDES',
     'jpeg':'JPEG C library | configure with JPEG_LIBS & JPEG_INCLUDES',
     'tiff':'TIFF C library | configure with TIFF_LIBS & TIFF_INCLUDES',
     'png':'PNG C library | configure with PNG_LIBS & PNG_INCLUDES',
@@ -432,7 +433,7 @@ pickle_store = [# Scons internal variables
         'HAS_CAIRO',
         'HAS_PYCAIRO',
         'HAS_LIBXML2',
-        'HAS_SKIA',
+        'SKIA_RENDERER',
         'PYTHON_IS_64BIT',
         'SAMPLE_INPUT_PLUGINS',
         'PKG_CONFIG_PATH',
@@ -1057,7 +1058,7 @@ if not preconfigured:
     env['CAIRO_LIBPATHS'] = []
     env['CAIRO_ALL_LIBS'] = []
     env['CAIRO_CPPPATHS'] = []
-    env['HAS_SKIA'] = False
+    env['SKIA_RENDERER'] = False
     env['HAS_PYCAIRO'] = False
     env['HAS_LIBXML2'] = False
     env['LIBMAPNIK_LIBS'] = []
@@ -1196,6 +1197,16 @@ if not preconfigured:
     ]
 
     OPTIONAL_LIBSHEADERS = []
+
+    if env['SKIA']:
+        OPTIONAL_LIBSHEADERS.append(['skia_core', ['SkCanvas.h'], False,'C++','-DSKIA_RENDERER'])
+        if env['SKIA_LIBS'] or env['SKIA_INCLUDES']:
+            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/config'))
+            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/core'))
+            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/effects'))
+            env.AppendUnique(LIBPATH = os.path.realpath(env['SKIA_LIBS']))
+    else:
+        env['SKIPPED_DEPS'].extend(['skia'])
 
     if env['JPEG']:
         OPTIONAL_LIBSHEADERS.append(['jpeg', ['stdio.h', 'jpeglib.h'], False,'C','-DHAVE_JPEG'])
@@ -1512,17 +1523,6 @@ if not preconfigured:
         if not conf.CheckCairoHasFreetype():
             env['SKIPPED_DEPS'].append('cairo')
             env['HAS_CAIRO'] = False
-
-
-    if env['SKIA']:
-        if env['SKIA_LIBS'] or env['SKIA_INCLUDES']:
-            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/config'))
-            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/core'))
-            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/effects'))
-            env.AppendUnique(LIBPATH = os.path.realpath(env['SKIA_LIBS']))
-        env['HAS_SKIA'] = True
-    else:
-        color_print(4,'Not building with Skia support, pass SKIA=True to enable')
 
     if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
         if not os.access(env['PYTHON'], os.X_OK):

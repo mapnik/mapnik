@@ -24,7 +24,7 @@
 #include <QSettings>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#if defined(HAVE_SKIA)
+#if defined(SKIA_RENDERER)
 #include <mapnik/skia/skia_typeface_cache.hpp>
 #endif
 #include "mainwindow.hpp"
@@ -58,7 +58,7 @@ int main( int argc, char **argv )
             freetype_engine::register_fonts(font_dir.toStdString());
         }
 
-#if defined(HAVE_SKIA)
+#if defined(SKIA_RENDERER)
         for (int index=0; index < count; ++index)
         {
             settings.setArrayIndex(index);

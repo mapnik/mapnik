@@ -78,7 +78,7 @@ public:
         }
         return info_;
     }
-#if defined(HAVE_SKIA)
+#if defined(SKIA_RENDERER)
     string_info const& get_string_info(skia_font_manager & manager)
     {
         info_.clear(); //if this function is called twice invalid results are returned, so clear string_info first

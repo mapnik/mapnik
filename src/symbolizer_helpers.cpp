@@ -34,6 +34,10 @@
 #include <mapnik/expression_evaluator.hpp>
 #include <mapnik/pixel_position.hpp>
 
+#if defined(SKIA_RENDERER)
+#include <mapnik/skia/skia_font_manager.hpp>
+#endif
+
 // agg
 #include "agg_conv_clip_polyline.h"
 
@@ -503,7 +507,7 @@ agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_
 }
 
 template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
-#if defined(HAS_SKIA)
+#if defined(SKIA_RENDERER)
 template class text_symbolizer_helper<skia_font_manager, label_collision_detector4>;
 #endif
 template class shield_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;

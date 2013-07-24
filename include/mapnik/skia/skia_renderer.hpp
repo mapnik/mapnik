@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#if defined(HAVE_SKIA)
+#if defined(SKIA_RENDERER)
 
 #ifndef MAPNIK_SKIA_RENDERER_HPP
 #define MAPNIK_SKIA_RENDERER_HPP
@@ -111,4 +111,4 @@ private:
 
 
 #endif //MAPNIK_SKIA_RENDERER_HPP
-#endif // HAVE_SKIA
+#endif // SKIA_RENDERER

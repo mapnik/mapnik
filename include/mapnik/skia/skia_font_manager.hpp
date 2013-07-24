@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 
-#if defined(HAVE_SKIA)
+#if defined(SKIA_RENDERER)
 
 #ifndef MAPNIK_SKIA_FONT_MANAGER_HPP
 #define MAPNIK_SKIA_FONT_MANAGER_HPP
@@ -49,4 +49,4 @@ private:
 }
 
 #endif // MAPNIK_SKIA_FONT_MANAGER_HPP
-#endif // #if defined(HAVE_SKIA)
+#endif // #if defined(SKIA_RENDERER)

@@ -397,6 +397,15 @@ bool has_grid_renderer()
 #endif
 }
 
+bool has_skia_renderer()
+{
+#if defined(SKIA_RENDERER)
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool has_jpeg()
 {
 #if defined(HAVE_JPEG)

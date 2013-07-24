@@ -40,7 +40,7 @@
 #include <mapnik/cairo_renderer.hpp>
 #endif
 
-#ifdef HAVE_SKIA
+#ifdef SKIA_RENDERER
 // skia
 #include <mapnik/skia/skia_renderer.hpp>
 #include <SkCanvas.h>

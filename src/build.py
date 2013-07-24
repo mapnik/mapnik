@@ -261,13 +261,13 @@ if env['HAS_CAIRO']:
     source.insert(0,'cairo_renderer.cpp')
     source.insert(0,'cairo_context.cpp')
 
-if env['HAS_SKIA']:
+if '-DSKIA_RENDERER' in env['CPPDEFINES']:
     lib_env.AppendUnique(LIBPATH=env['SKIA_LIBS'])
     lib_env.Append(LIBS=['skia_core','skia_ports','skia_utils','skia_images',
                          'skia_effects','skia_sfnt','skia_opts','skia_opts_ssse3','skia_skgpu'])
     lib_env.Append(FRAMEWORKS = ['Cocoa'])
-    lib_env.Append(CPPDEFINES = '-DHAVE_SKIA')
-    libmapnik_defines.append('-DHAVE_SKIA')
+    lib_env.Append(CPPDEFINES = '-DSKIA_RENDERER')
+    libmapnik_defines.append('-DSKIA_RENDERER')
     source.insert(0,'skia/skia_renderer.cpp')
     source.insert(0,'skia/skia_typeface_cache.cpp')
     source.insert(0,'skia/skia_font_manager.cpp')

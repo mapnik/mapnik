@@ -387,7 +387,7 @@ void MainWindow::createToolBars()
 #ifdef HAVE_CAIRO
     renderer_selector_->addItem("Cairo");
 #endif
-#ifdef HAVE_SKIA
+#ifdef SKIA_RENDERER
     renderer_selector_->addItem("Skia");
 //#ifdef SK_SUPPORT_GPU
     renderer_selector_->addItem("Skia-Gpu");

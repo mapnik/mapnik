@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 
-#if defined(HAVE_SKIA)
+#if defined(SKIA_RENDERER)
 
 #ifndef MAPNIK_SKIA_TYPEFACE_CACHE_HPP
 #define MAPNIK_SKIA_TYPEFACE_CACHE_HPP
@@ -56,4 +56,4 @@ private:
 }
 
 #endif // MAPNIK_SKIA_TYPEFACE_CACHE_HPP
-#endif // #if defined(HAVE_SKIA)
+#endif // #if defined(SKIA_RENDERER)
