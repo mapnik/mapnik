@@ -381,7 +381,7 @@ void skia_renderer::process(text_symbolizer const& sym,
                     canvas_.save();
                     canvas_.translate((SkScalar)(sx + x), (SkScalar)(sy - y));
                     canvas_.rotate(-(SkScalar)180 * (angle/M_PI));
-                    canvas_.drawPosText(&(c->c),1, &pt, paint);
+                    canvas_.drawPosText(&(c->c),4, &pt, paint);
                     canvas_.restore();
                 }
             }
@@ -403,7 +403,7 @@ void skia_renderer::process(text_symbolizer const& sym,
                 canvas_.save();
                 canvas_.translate((SkScalar)(sx + x), (SkScalar)(sy - y));
                 canvas_.rotate(-(SkScalar)180 * (angle/M_PI));
-                canvas_.drawPosText(&(c->c),1, &pt, paint);
+                canvas_.drawPosText(&(c->c),4, &pt, paint);
                 canvas_.restore();
             }
         }
