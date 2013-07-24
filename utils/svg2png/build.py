@@ -34,6 +34,7 @@ source = Split(
     )
 
 program_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
+program_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
 if env['HAS_CAIRO']:
     program_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])

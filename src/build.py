@@ -292,7 +292,7 @@ if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')
 
 # grid backend
-if env['GRID_RENDERER']: # svg backend
+if env['GRID_RENDERER']:
     source += Split(
         """
         grid/grid.cpp
