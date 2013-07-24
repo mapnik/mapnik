@@ -304,21 +304,24 @@ if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')
 
 # grid backend
-source += Split(
-    """
-    grid/grid.cpp
-    grid/grid_renderer.cpp
-    grid/process_building_symbolizer.cpp
-    grid/process_line_pattern_symbolizer.cpp
-    grid/process_line_symbolizer.cpp
-    grid/process_markers_symbolizer.cpp
-    grid/process_point_symbolizer.cpp
-    grid/process_polygon_pattern_symbolizer.cpp
-    grid/process_polygon_symbolizer.cpp
-    grid/process_raster_symbolizer.cpp
-    grid/process_shield_symbolizer.cpp
-    grid/process_text_symbolizer.cpp
-    """)
+if env['GRID_RENDERER']:
+    source += Split(
+        """
+        grid/grid.cpp
+        grid/grid_renderer.cpp
+        grid/process_building_symbolizer.cpp
+        grid/process_line_pattern_symbolizer.cpp
+        grid/process_line_symbolizer.cpp
+        grid/process_markers_symbolizer.cpp
+        grid/process_point_symbolizer.cpp
+        grid/process_polygon_pattern_symbolizer.cpp
+        grid/process_polygon_symbolizer.cpp
+        grid/process_raster_symbolizer.cpp
+        grid/process_shield_symbolizer.cpp
+        grid/process_text_symbolizer.cpp
+        """)
+    lib_env.Append(CPPDEFINES = '-DGRID_RENDERER')
+    libmapnik_defines.append('-DGRID_RENDERER')
 
 # https://github.com/mapnik/mapnik/issues/1438
 if env['SVG_RENDERER']: # svg backend

@@ -65,7 +65,6 @@ porting notes -->
 // agg
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
-#include "agg_pixfmt_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 
 // boost

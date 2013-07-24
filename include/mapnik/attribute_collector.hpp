@@ -47,7 +47,6 @@
 #include <mapnik/text_placements/base.hpp>  // for text_placements
 
 // boost
-#include <boost/concept_check.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
 
@@ -62,12 +61,11 @@ struct expression_attributes : boost::static_visitor<void>
     explicit expression_attributes(Container& names)
         : names_(names) {}
 
-    void operator() (value_type const& x) const
+    void operator() (value_type const& /*x*/) const
     {
-        boost::ignore_unused_variable_warning(x);
     }
 
-    void operator() (geometry_type_attribute const& type) const
+    void operator() (geometry_type_attribute const& /*type*/) const
     {
         // do nothing
     }

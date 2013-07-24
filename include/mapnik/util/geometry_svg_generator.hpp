@@ -76,7 +76,7 @@ template <>
 struct end_container<path_type const>
 {
     static mapnik::util::path_iterator<path_type>
-    call (path_type const& g)
+    call (path_type const& /*g*/)
     {
         return mapnik::util::path_iterator<path_type>();
     }

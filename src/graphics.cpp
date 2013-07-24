@@ -30,6 +30,7 @@
 // agg
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 
 // boost
 #include <boost/scoped_array.hpp>
@@ -202,7 +203,7 @@ void image_32::premultiply()
 void image_32::demultiply()
 {
     agg::rendering_buffer buffer(data_.getBytes(),width_,height_,width_ * 4);
-    agg::pixfmt_rgba32 pixf(buffer);
+    agg::pixfmt_rgba32_pre pixf(buffer);
     pixf.demultiply();
     premultiplied_ = false;
 }

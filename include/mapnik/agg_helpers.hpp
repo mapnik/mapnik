@@ -25,17 +25,12 @@
 
 // mapnik
 #include <mapnik/gamma_method.hpp>
-#include <mapnik/stroke.hpp>
+#include <mapnik/stroke.hpp>            // for line_cap_e, line_join_e, etc
+
 
 // agg 
-#include "agg_basics.h"
-#include "agg_gamma_functions.h"
-#include "agg_math_stroke.h"
-#include "agg_pixfmt_rgba.h"
-#include "agg_scanline_u.h"
-#include "agg_scanline_p.h"
-#include "agg_renderer_outline_aa.h"
-#include "agg_renderer_scanline.h"
+#include "agg_gamma_functions.h"        // for gamma_power, gamma_linear, etc
+#include "agg_math_stroke.h"            // for line_join_e::miter_join, etc
 #include "agg_rasterizer_outline_aa.h"
 
 namespace mapnik {

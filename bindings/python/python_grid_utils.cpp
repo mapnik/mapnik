@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(GRID_RENDERER)
+
 // boost
 #include <boost/python.hpp>
 #include <boost/scoped_array.hpp>
@@ -472,3 +474,5 @@ boost::python::dict render_grid(mapnik::Map const& map,
 }
 
 }
+
+#endif

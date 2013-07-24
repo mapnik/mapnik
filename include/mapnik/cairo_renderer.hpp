@@ -43,10 +43,6 @@
 // boost
 #include <boost/scoped_ptr.hpp>
 
-// FIXME
-// forward declare so that
-// apps using mapnik do not
-// need agg headers
 namespace agg {
 struct trans_affine;
 }

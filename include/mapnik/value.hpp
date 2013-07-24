@@ -122,7 +122,7 @@ struct equals
     }
 
     template <typename T, typename U>
-    bool operator() (T const& lhs, U const& rhs) const
+    bool operator() (T const& /*lhs*/, U const& /*rhs*/) const
     {
         return false;
     }
@@ -182,7 +182,7 @@ struct not_equals
     // back compatibility shim to equate empty string with null for != test
     // https://github.com/mapnik/mapnik/issues/1859
     // TODO - consider removing entire specialization at Mapnik 3.x
-    bool operator() (value_null lhs,value_unicode_string const& rhs) const
+    bool operator() (value_null /*lhs*/, value_unicode_string const& rhs) const
     {
         if (rhs.isEmpty()) return false;
         return true;

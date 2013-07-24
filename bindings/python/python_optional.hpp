@@ -228,7 +228,7 @@ public:
         : boost::python::class_<T, X1, X2, X3>(name, doc, i) { }
 
     template <class D>
-    self& def_readwrite_convert(char const* name, D const& d, char const* doc=0)
+    self& def_readwrite_convert(char const* name, D const& d, char const* /*doc*/=0)
     {
         this->add_property(name,
                            boost::python::make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),

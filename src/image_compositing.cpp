@@ -34,6 +34,7 @@
 #include "agg_scanline_u.h"
 #include "agg_renderer_scanline.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 
 namespace mapnik
 {

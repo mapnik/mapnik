@@ -791,8 +791,8 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    //typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+    //typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
     cairo_save_restore guard(context_);
     context_.set_operator(sym.comp_op());

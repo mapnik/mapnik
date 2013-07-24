@@ -1,5 +1,5 @@
 #include <mapnik/config_error.hpp>
-#include <mapnik/xml_tree.hpp>
+#include <mapnik/xml_node.hpp>
 #include <mapnik/util/conversions.hpp>
 
 namespace mapnik

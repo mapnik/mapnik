@@ -24,8 +24,11 @@
 #include <mapnik/feature_style_processor_impl.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/graphics.hpp>
+
+#if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid.hpp>
+#endif
 
 #if defined(HAVE_CAIRO)
 #include <cairo.h>
@@ -56,7 +59,10 @@ template class feature_style_processor<skia_renderer>;
 template class feature_style_processor<svg_renderer<std::ostream_iterator<char> > >;
 #endif
 
+#if defined(GRID_RENDERER)
 template class feature_style_processor<grid_renderer<grid> >;
+#endif
+
 template class feature_style_processor<agg_renderer<image_32> >;
 
 }

@@ -21,7 +21,7 @@ defaults = {
     'scales':[1.0,2.0],
     'agg': True,
     'cairo': mapnik.has_cairo(),
-    'grid': True
+    'grid': mapnik.has_grid_renderer()
 }
 
 cairo_threshold = 10
@@ -167,7 +167,8 @@ files = {
     'style-level-compositing-tiled-0,0':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['0,0']},
     'style-level-compositing-tiled-1,0':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,0']},
     'style-level-compositing-tiled-0,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['0,1']},
-    'style-level-compositing-tiled-1,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,1']}
+    'style-level-compositing-tiled-1,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,1']},
+    'marker-path-expression':{}
     }
 
 class Reporting:

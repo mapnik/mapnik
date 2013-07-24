@@ -45,6 +45,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 #include "agg_path_storage.h"
@@ -64,7 +65,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 {
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::rendering_buffer buf_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, buf_type> pixfmt_comp_type;
