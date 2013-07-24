@@ -375,7 +375,8 @@ void skia_renderer::process(text_symbolizer const& sym,
                     paint.setStrokeWidth(2.0 * c->format->halo_radius * scale_factor_);
                     paint.setStrokeJoin(SkPaint::kRound_Join);
                     color const& halo_fill = c->format->halo_fill;
-                    paint.setARGB(int(halo_fill.alpha() * c->format->text_opacity), halo_fill.red(), halo_fill.green(), halo_fill.blue());
+                    paint.setARGB(int(halo_fill.alpha() * c->format->text_opacity),
+                                  halo_fill.red(), halo_fill.green(), halo_fill.blue());
                     SkPoint pt = SkPoint::Make(0,0);
                     canvas_.save();
                     canvas_.translate((SkScalar)(sx + x), (SkScalar)(sy - y));
@@ -396,7 +397,8 @@ void skia_renderer::process(text_symbolizer const& sym,
                 double text_size = c->format->text_size * scale_factor_;
                 paint.setTextSize((SkScalar)text_size);
                 color const& fill = c->format->fill;
-                paint.setARGB(int(fill.alpha() * c->format->text_opacity), fill.red(), fill.green(), fill.blue());
+                paint.setARGB(int(fill.alpha() * c->format->text_opacity),
+                              fill.red(), fill.green(), fill.blue());
                 SkPoint pt = SkPoint::Make(0,0);
                 canvas_.save();
                 canvas_.translate((SkScalar)(sx + x), (SkScalar)(sy - y));
