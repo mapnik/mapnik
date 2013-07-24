@@ -50,8 +50,9 @@
 #if SK_SUPPORT_GPU
 #include <gl/GrGLFunctions.h>
 #include <GrContextFactory.h>
-#include "/Users/artem/Projects/skia/trunk/src/gpu/gl/GrGLDefines.h"
-#include "/Users/artem/Projects/skia/trunk/src/gpu/gl/GrGLUtil.h"
+//#include <gl/GrGLDefines.h>
+//#include <gl/GrGLUtil.h>
+#include <gl/GrGLExtensions.h>
 GrContextFactory gGrContextFactory;
 #endif
 
@@ -599,10 +600,15 @@ void render_skia_gpu(GrGLInterface const * cur_interface, mapnik::Map const& map
     desc.fConfig = kSkia8888_GrPixelConfig;
     desc.fWidth = width;
     desc.fHeight = height;
-    GR_GL_GetIntegerv(cur_interface, GR_GL_SAMPLES, &desc.fSampleCnt);
-    GR_GL_GetIntegerv(cur_interface, GR_GL_STENCIL_BITS, &desc.fStencilBits);
+    GrGLExtensions extensions;
+    GrGLBinding binding;
+    GrGLInterface interface;
+    interface.validate(binding);
+    extensions.init(binding, cur_interface);
+    //GR_GL_GetIntegerv(cur_interface, GR_GL_SAMPLES, &desc.fSampleCnt);
+    //GR_GL_GetIntegerv(cur_interface, GR_GL_STENCIL_BITS, &desc.fStencilBits);
     GrGLint buffer;
-    GR_GL_GetIntegerv(cur_interface, GR_GL_FRAMEBUFFER_BINDING, &buffer);
+    //GR_GL_GetIntegerv(cur_interface, GR_GL_FRAMEBUFFER_BINDING, &buffer);
     desc.fRenderTargetHandle = buffer;
     desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
 
