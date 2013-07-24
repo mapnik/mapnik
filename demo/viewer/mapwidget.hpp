@@ -90,6 +90,7 @@ public:
     void panUp();
     void panDown();
     void set_scaling_factor(double);
+    void export_skia_pdf(QString const& filename);
 public slots:
     void zoomToLevel(int level);
     void updateMap();
@@ -110,6 +111,7 @@ protected:
                         unsigned height,
                         std::string const& filename,
                         std::string const& type);
+
 };
 
 #endif // MAP_WIDGET_HPP

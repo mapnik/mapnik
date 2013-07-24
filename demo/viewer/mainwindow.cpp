@@ -263,6 +263,32 @@ void MainWindow::export_as()
     }
 }
 
+void MainWindow::export_as_skia_pdf()
+{
+    std::cerr << "Skia PDF" << std::endl;
+
+    QAction *action = qobject_cast<QAction *>(sender());
+    QByteArray fileFormat("pdf");
+    QString initialPath = QDir::currentPath() + "/map-skia." + fileFormat;
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Export As Skia PDF"),
+                                                    initialPath,
+                                                    tr("%1 Files (*.%2);;All Files (*)")
+                                                    .arg(QString(fileFormat.toUpper()))
+                                                    .arg(QString(fileFormat)));
+    if (!fileName.isEmpty())
+    {
+        std::cerr << "Skia PDF" << std::endl;
+        mapWidget_->export_skia_pdf(fileName);
+    }
+
+}
+
+void MainWindow::export_as_cairo_pdf()
+{
+    std::cerr << "Cairo PDF" << std::endl;
+}
+
 void MainWindow::print()
 {
 
@@ -335,6 +361,11 @@ void MainWindow::createActions()
         exportAsActs.append(action);
     }
 
+    exportSkiaPdf = new QAction("Skia",this);
+    connect(exportSkiaPdf, SIGNAL(triggered()), this, SLOT(export_as_skia_pdf()));
+    exportCairoPdf = new QAction("Cairo",this);
+    connect(exportCairoPdf, SIGNAL(triggered()), this, SLOT(export_as_cairo_pdf()));
+
     printAct = new QAction(QIcon(":/images/print.png"),tr("&Print ..."),this);
     printAct->setShortcut(tr("Ctrl+E"));
     connect(printAct, SIGNAL(triggered()), this, SLOT(print()));
@@ -353,10 +384,15 @@ void MainWindow::createMenus()
     foreach (QAction *action, exportAsActs)
         exportMenu->addAction(action);
 
+    exportPdfMenu = new QMenu(tr("&Export As PDF"), this);
+    exportPdfMenu->addAction(exportSkiaPdf);
+    exportPdfMenu->addAction(exportCairoPdf);
+
     fileMenu = new QMenu(tr("&File"),this);
     fileMenu->addAction(openAct);
     fileMenu->addAction(saveAct);
     fileMenu->addMenu(exportMenu);
+    fileMenu->addMenu(exportPdfMenu);
     fileMenu->addAction(printAct);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
