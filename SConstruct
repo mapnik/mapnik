@@ -1202,7 +1202,6 @@ if not preconfigured:
         OPTIONAL_LIBSHEADERS.append(['skia_core', ['SkCanvas.h'], False,'C++','-DSKIA_RENDERER'])
         if env['SKIA_LIBS'] or env['SKIA_INCLUDES']:
             env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/config'))
-            env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/gpu'))
             env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/utils'))
             env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/core'))
             env.AppendUnique(CPPPATH = os.path.realpath(env['SKIA_INCLUDES'] + '/effects'))
