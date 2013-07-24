@@ -46,12 +46,17 @@ static inline void rgb2hsl(unsigned char red, unsigned char green, unsigned char
     }
 }
 
-static inline double hueToRGB(double m1, double m2, double h) {
-    if(h < 0) h += 1;
-    if(h > 1) h -= 1;
-    if (h * 6 < 1) return m1 + (m2 - m1) * h * 6;
-    if (h * 2 < 1) return m2;
-    if (h * 3 < 2) return m1 + (m2 - m1) * (0.66666 - h) * 6;
+// http://www.w3.org/TR/css3-color/#hsl-color
+inline double hue_to_rgb( double m1, double m2, double h)
+{
+    if (h < 0.0) h = h + 1.0;
+    else if (h > 1) h = h - 1.0;
+    if (h * 6 < 1.0)
+        return m1 + (m2 - m1) * h * 6.0;
+    if (h * 2 < 1.0)
+        return m2;
+    if (h * 3 < 2.0)
+        return m1 + (m2 - m1)* (2.0/3.0 - h) * 6.0;
     return m1;
 }
 
@@ -62,9 +67,9 @@ static inline void hsl2rgb(double h, double s, double l,
     }
     double m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
     double m1 = l * 2 - m2;
-    r = static_cast<unsigned char>(std::floor((hueToRGB(m1, m2, h + 0.33333) * 255.0)+.5));
-    g = static_cast<unsigned char>(std::floor((hueToRGB(m1, m2, h) * 255.0)+.5));
-    b = static_cast<unsigned char>(std::floor((hueToRGB(m1, m2, h - 0.33333) * 255.0)+.5));
+    r = static_cast<unsigned char>(std::floor((hue_to_rgb(m1, m2, h + 1.0/3.0) * 255.0)+.5));
+    g = static_cast<unsigned char>(std::floor((hue_to_rgb(m1, m2, h) * 255.0)+.5));
+    b = static_cast<unsigned char>(std::floor((hue_to_rgb(m1, m2, h - 1.0/3.0) * 255.0)+.5));
 }
 
 }
