@@ -19,7 +19,7 @@
 
 
 // qt
-#include <QtWidgets/QApplication>
+#include <QApplication>
 #include <QStringList>
 #include <QSettings>
 #include <mapnik/datasource_cache.hpp>
