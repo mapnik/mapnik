@@ -4,13 +4,14 @@
 #include "osm.h"
 #include <string>
 #include <cassert>
+#include <mapnik/util/conversions.hpp>
 
 osm_item* osmparser::cur_item=NULL;
 mapnik::value_integer osmparser::curID=0;
 bool osmparser::in_node=false, osmparser::in_way=false;
 osm_dataset* osmparser::components=NULL;
 std::string osmparser::error="";
-std::map<long,osm_node*> osmparser::tmp_node_store=std::map<long,osm_node*>();
+std::map<mapnik::value_integer,osm_node*> osmparser::tmp_node_store=std::map<mapnik::value_integer,osm_node*>();
 
 void osmparser::processNode(xmlTextReaderPtr reader)
 {
@@ -48,7 +49,7 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
         assert(xid);
         node->lat=atof((char*)xlat);
         node->lon=atof((char*)xlon);
-        node->id = atol((char*)xid);
+        mapnik::util::string2int((char *)xid, node->id);
         cur_item = node;
         tmp_node_store[node->id] = node;
         xmlFree(xid);
@@ -62,7 +63,7 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
         osm_way *way=new osm_way;
         xid=xmlTextReaderGetAttribute(reader,BAD_CAST "id");
         assert(xid);
-        way->id = atol((char*)xid);
+        mapnik::util::string2int((char *)xid, way->id);
         cur_item  =  way;
         xmlFree(xid);
     }
@@ -70,7 +71,8 @@ void osmparser::startElement(xmlTextReaderPtr reader, const xmlChar *name)
     {
         xid=xmlTextReaderGetAttribute(reader,BAD_CAST "ref");
         assert(xid);
-        long ndid = atol((char*)xid);
+        mapnik::value_integer ndid;
+        mapnik::util::string2int((char *)xid, ndid);
         if(tmp_node_store.find(ndid)!=tmp_node_store.end())
         {
             (static_cast<osm_way*>(cur_item))->nodes.push_back

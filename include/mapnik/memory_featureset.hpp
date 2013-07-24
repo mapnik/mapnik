@@ -24,13 +24,14 @@
 #define MAPNIK_MEMORY_FEATURESET_HPP
 
 // mapnik
+#include <mapnik/box2d.hpp>
+#include <mapnik/geometry.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/memory_datasource.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/raster.hpp>
 
-// boost
-#include <boost/utility.hpp>
+#include <deque>
 
 namespace mapnik {
 

@@ -38,6 +38,7 @@
 // agg
 #include "agg_ellipse.h"
 #include "agg_basics.h"
+#include "agg_color_rgba.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
 #include "agg_rendering_buffer.h"
@@ -48,6 +49,7 @@
 #include "agg_image_accessors.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_span_image_filter_rgba.h"
+#include "agg_span_interpolator_linear.h"
 
 // boost
 #include <boost/optional.hpp>
@@ -69,7 +71,8 @@ struct vector_markers_rasterizer_dispatch
                                 agg::trans_affine const& marker_trans,
                                 markers_symbolizer const& sym,
                                 Detector & detector,
-                                double scale_factor)
+                                double scale_factor,
+                                bool snap_to_pixels)
         : buf_(render_buffer),
         pixf_(buf_),
         renb_(pixf_),
@@ -79,7 +82,8 @@ struct vector_markers_rasterizer_dispatch
         marker_trans_(marker_trans),
         sym_(sym),
         detector_(detector),
-        scale_factor_(scale_factor)
+        scale_factor_(scale_factor),
+        snap_to_pixels_(snap_to_pixels)
     {
         pixf_.comp_op(static_cast<agg::comp_op_e>(sym_.comp_op()));
     }
@@ -111,6 +115,13 @@ struct vector_markers_rasterizer_dispatch
             }
             agg::trans_affine matrix = marker_trans_;
             matrix.translate(x,y);
+            if (snap_to_pixels_)
+            {
+                // https://github.com/mapnik/mapnik/issues/1316
+                matrix.tx = std::floor(matrix.tx+.5);
+                matrix.ty = std::floor(matrix.ty+.5);
+            }
+            // TODO https://github.com/mapnik/mapnik/issues/1754
             box2d<double> transformed_bbox = bbox_ * matrix;
 
             if (sym_.get_allow_overlap() ||
@@ -132,7 +143,7 @@ struct vector_markers_rasterizer_dispatch
             double x = 0;
             double y = 0;
             double angle = 0;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -153,6 +164,7 @@ private:
     markers_symbolizer const& sym_;
     Detector & detector_;
     double scale_factor_;
+    bool snap_to_pixels_;
 };
 
 template <typename BufferType, typename Rasterizer, typename Detector>
@@ -171,7 +183,8 @@ struct raster_markers_rasterizer_dispatch
                                        agg::trans_affine const& marker_trans,
                                        markers_symbolizer const& sym,
                                        Detector & detector,
-                                       double scale_factor)
+                                       double scale_factor,
+                                       bool snap_to_pixels)
         : buf_(render_buffer),
         pixf_(buf_),
         renb_(pixf_),
@@ -180,7 +193,8 @@ struct raster_markers_rasterizer_dispatch
         marker_trans_(marker_trans),
         sym_(sym),
         detector_(detector),
-        scale_factor_(scale_factor)
+        scale_factor_(scale_factor),
+        snap_to_pixels_(snap_to_pixels)
     {
         pixf_.comp_op(static_cast<agg::comp_op_e>(sym_.comp_op()));
     }
@@ -232,7 +246,7 @@ struct raster_markers_rasterizer_dispatch
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle,sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -245,41 +259,66 @@ struct raster_markers_rasterizer_dispatch
     void render_raster_marker(agg::trans_affine const& marker_tr,
                               double opacity)
     {
+        typedef agg::pixfmt_rgba32_pre pixfmt_pre;
         double width  = src_.width();
         double height = src_.height();
-        double p[8];
-        p[0] = 0;     p[1] = 0;
-        p[2] = width; p[3] = 0;
-        p[4] = width; p[5] = height;
-        p[6] = 0;     p[7] = height;
-        marker_tr.transform(&p[0], &p[1]);
-        marker_tr.transform(&p[2], &p[3]);
-        marker_tr.transform(&p[4], &p[5]);
-        marker_tr.transform(&p[6], &p[7]);
-        ras_.move_to_d(p[0],p[1]);
-        ras_.line_to_d(p[2],p[3]);
-        ras_.line_to_d(p[4],p[5]);
-        ras_.line_to_d(p[6],p[7]);
-        agg::span_allocator<color_type> sa;
-        agg::image_filter_bilinear filter_kernel;
-        agg::image_filter_lut filter(filter_kernel, false);
-        agg::rendering_buffer marker_buf((unsigned char *)src_.getBytes(),
-                                         src_.width(),
-                                         src_.height(),
-                                         src_.width()*4);
-        agg::pixfmt_rgba32_pre pixf(marker_buf);
-        typedef agg::image_accessor_clone<agg::pixfmt_rgba32_pre> img_accessor_type;
-        typedef agg::span_interpolator_linear<agg::trans_affine> interpolator_type;
-        typedef agg::span_image_filter_rgba_2x2<img_accessor_type,
-                                                interpolator_type> span_gen_type;
-        typedef agg::renderer_scanline_aa_alpha<renderer_base,
-                agg::span_allocator<color_type>,
-                span_gen_type> renderer_type;
-        img_accessor_type ia(pixf);
-        interpolator_type interpolator(agg::trans_affine(p, 0, 0, width, height) );
-        span_gen_type sg(ia, interpolator, filter);
-        renderer_type rp(renb_,sa, sg, unsigned(opacity*255));
-        agg::render_scanlines(ras_, sl_, rp);
+        if (std::fabs(1.0 - scale_factor_) < 0.001
+            && (std::fabs(1.0 - marker_tr.sx) < agg::affine_epsilon)
+            && (std::fabs(0.0 - marker_tr.shy) < agg::affine_epsilon)
+            && (std::fabs(0.0 - marker_tr.shx) < agg::affine_epsilon)
+            && (std::fabs(1.0 - marker_tr.sy) < agg::affine_epsilon))
+        {
+            agg::rendering_buffer src_buffer((unsigned char *)src_.getBytes(),src_.width(),src_.height(),src_.width() * 4);
+            pixfmt_pre pixf_mask(src_buffer);
+            renb_.blend_from(pixf_mask,
+                             0,
+                             std::floor(marker_tr.tx + .5),
+                             std::floor(marker_tr.ty + .5),
+                             unsigned(255*sym_.get_opacity()));
+        }
+        else
+        {
+            typedef agg::image_accessor_clone<pixfmt_pre> img_accessor_type;
+            typedef agg::span_interpolator_linear<> interpolator_type;
+            //typedef agg::span_image_filter_rgba_2x2<img_accessor_type,interpolator_type> span_gen_type;
+            typedef agg::span_image_resample_rgba_affine<img_accessor_type> span_gen_type;
+            typedef agg::renderer_scanline_aa_alpha<renderer_base,
+                    agg::span_allocator<color_type>,
+                    span_gen_type> renderer_type;
+
+            double p[8];
+            p[0] = 0;     p[1] = 0;
+            p[2] = width; p[3] = 0;
+            p[4] = width; p[5] = height;
+            p[6] = 0;     p[7] = height;
+            marker_tr.transform(&p[0], &p[1]);
+            marker_tr.transform(&p[2], &p[3]);
+            marker_tr.transform(&p[4], &p[5]);
+            marker_tr.transform(&p[6], &p[7]);
+            agg::span_allocator<color_type> sa;
+            agg::image_filter_lut filter;
+            filter.calculate(agg::image_filter_bilinear(), true);
+            agg::rendering_buffer marker_buf((unsigned char *)src_.getBytes(),
+                                             src_.width(),
+                                             src_.height(),
+                                             src_.width()*4);
+            pixfmt_pre pixf(marker_buf);
+            img_accessor_type ia(pixf);
+            agg::trans_affine final_tr(p, 0, 0, width, height);
+            if (snap_to_pixels_)
+            {
+                final_tr.tx = std::floor(final_tr.tx+.5);
+                final_tr.ty = std::floor(final_tr.ty+.5);
+            }
+            interpolator_type interpolator(final_tr);
+            span_gen_type sg(ia, interpolator, filter);
+            renderer_type rp(renb_,sa, sg, unsigned(opacity*255));
+            ras_.move_to_d(p[0],p[1]);
+            ras_.line_to_d(p[2],p[3]);
+            ras_.line_to_d(p[4],p[5]);
+            ras_.line_to_d(p[6],p[7]);
+            agg::render_scanlines(ras_, sl_, rp);
+        }
     }
 
 private:
@@ -293,6 +332,7 @@ private:
     markers_symbolizer const& sym_;
     Detector & detector_;
     double scale_factor_;
+    bool snap_to_pixels_;
 };
 
 
@@ -327,6 +367,8 @@ void build_ellipse(T const& sym, mapnik::feature_impl const& feature, svg_storag
     styled_svg.pop_attr();
     double lox,loy,hix,hiy;
     styled_svg.bounding_rect(&lox, &loy, &hix, &hiy);
+    styled_svg.set_dimensions(width,height);
+    marker_ellipse.set_dimensions(width,height);
     marker_ellipse.set_bounding_box(lox,loy,hix,hiy);
 }
 
@@ -381,7 +423,11 @@ bool push_explicit_style(Attr const& src, Attr & dst, markers_symbolizer const& 
 }
 
 template <typename T>
-void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, mapnik::feature_impl const& feature, T const& sym)
+void setup_transform_scaling(agg::trans_affine & tr,
+                             double svg_width,
+                             double svg_height,
+                             mapnik::feature_impl const& feature,
+                             T const& sym)
 {
     double width = 0;
     double height = 0;
@@ -396,18 +442,18 @@ void setup_transform_scaling(agg::trans_affine & tr, box2d<double> const& bbox, 
 
     if (width > 0 && height > 0)
     {
-        double sx = width/bbox.width();
-        double sy = height/bbox.height();
+        double sx = width/svg_width;
+        double sy = height/svg_height;
         tr *= agg::trans_affine_scaling(sx,sy);
     }
     else if (width > 0)
     {
-        double sx = width/bbox.width();
+        double sx = width/svg_width;
         tr *= agg::trans_affine_scaling(sx);
     }
     else if (height > 0)
     {
-        double sy = height/bbox.height();
+        double sy = height/svg_height;
         tr *= agg::trans_affine_scaling(sy);
     }
 }

@@ -25,6 +25,9 @@
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/exception_translator.hpp>
 
+// stl
+#include <stdexcept>
+
 void register_cairo();
 void export_color();
 void export_coord();
@@ -38,8 +41,10 @@ void export_image();
 void export_image_view();
 void export_gamma_method();
 void export_scaling_method();
+#if defined(GRID_RENDERER)
 void export_grid();
 void export_grid_view();
+#endif
 void export_map();
 void export_python();
 void export_expression();
@@ -62,6 +67,7 @@ void export_polygon_pattern_symbolizer();
 void export_raster_symbolizer();
 void export_text_placement();
 void export_shield_symbolizer();
+void export_debug_symbolizer();
 void export_font_engine();
 void export_projection();
 void export_proj_transform();
@@ -84,12 +90,13 @@ void export_logger();
 #include <mapnik/rule.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/scale_denominator.hpp>
+#if defined(GRID_RENDERER)
 #include "python_grid_utils.hpp"
+#endif
 #include "mapnik_value_converter.hpp"
 #include "mapnik_threads.hpp"
 #include "python_optional.hpp"
@@ -333,17 +340,22 @@ double scale_denominator(mapnik::Map const &map, bool geographic)
 }
 
 // http://docs.python.org/c-api/exceptions.html#standard-exceptions
-void config_error_translator(mapnik::config_error const & ex)
-{
-    PyErr_SetString(PyExc_RuntimeError, ex.what());
-}
-
 void value_error_translator(mapnik::value_error const & ex)
 {
     PyErr_SetString(PyExc_ValueError, ex.what());
 }
 
 void runtime_error_translator(std::runtime_error const & ex)
+{
+    PyErr_SetString(PyExc_RuntimeError, ex.what());
+}
+
+void out_of_range_error_translator(std::out_of_range const & ex)
+{
+    PyErr_SetString(PyExc_IndexError, ex.what());
+}
+
+void standard_error_translator(std::exception const & ex)
 {
     PyErr_SetString(PyExc_RuntimeError, ex.what());
 }
@@ -358,10 +370,63 @@ std::string mapnik_version_string()
     return MAPNIK_VERSION_STRING;
 }
 
-// indicator for jpeg read/write support within libmapnik
+bool has_proj4()
+{
+#if defined(MAPNIK_USE_PROJ4)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool has_svg_renderer()
+{
+#if defined(SVG_RENDERER)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool has_grid_renderer()
+{
+#if defined(GRID_RENDERER)
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool has_jpeg()
 {
 #if defined(HAVE_JPEG)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool has_png()
+{
+#if defined(HAVE_PNG)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool has_tiff()
+{
+#if defined(HAVE_TIFF)
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool has_webp()
+{
+#if defined(HAVE_WEBP)
     return true;
 #else
     return false;
@@ -403,7 +468,7 @@ bool has_pycairo()
 }
 
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 3)
+BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_overloads, load_map, 2, 4)
 BOOST_PYTHON_FUNCTION_OVERLOADS(load_map_string_overloads, load_map_string, 2, 4)
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_overloads, save_map, 2, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_map_to_string_overloads, save_map_to_string, 1, 2)
@@ -419,9 +484,9 @@ BOOST_PYTHON_MODULE(_mapnik)
     using mapnik::load_map_string;
     using mapnik::save_map;
     using mapnik::save_map_to_string;
-    using mapnik::render_grid;
 
-    register_exception_translator<mapnik::config_error>(&config_error_translator);
+    register_exception_translator<std::exception>(&standard_error_translator);
+    register_exception_translator<std::out_of_range>(&out_of_range_error_translator);
     register_exception_translator<mapnik::value_error>(&value_error_translator);
     register_exception_translator<std::runtime_error>(&runtime_error_translator);
     register_cairo();
@@ -439,8 +504,10 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_image_view();
     export_gamma_method();
     export_scaling_method();
+#if defined(GRID_RENDERER)
     export_grid();
     export_grid_view();
+#endif
     export_expression();
     export_rule();
     export_style();
@@ -458,6 +525,7 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_raster_symbolizer();
     export_text_placement();
     export_shield_symbolizer();
+    export_debug_symbolizer();
     export_font_engine();
     export_projection();
     export_proj_transform();
@@ -477,7 +545,8 @@ BOOST_PYTHON_MODULE(_mapnik)
         ">>> clear_cache()\n"
         );
 
-    def("render_grid",&render_grid,
+#if defined(GRID_RENDERER)
+    def("render_grid",&mapnik::render_grid,
         ( arg("map"),
           arg("layer"),
           args("key")="__id__",
@@ -485,6 +554,7 @@ BOOST_PYTHON_MODULE(_mapnik)
           arg("fields")=boost::python::list()
             )
         );
+#endif
 
     def("render_to_file",&render_to_file1,
         "\n"
@@ -569,9 +639,11 @@ BOOST_PYTHON_MODULE(_mapnik)
         (arg("map"),arg("image"),args("layer"))
         );
 
+#if defined(GRID_RENDERER)
     def("render_layer", &mapnik::render_layer_for_grid,
         (arg("map"),arg("grid"),args("layer"),arg("fields")=boost::python::list())
         );
+#endif
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
     def("render",&render3,
@@ -729,7 +801,12 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("save_map_to_string", &save_map_to_string, save_map_to_string_overloads());
     def("mapnik_version", &mapnik_version,"Get the Mapnik version number");
     def("mapnik_version_string", &mapnik_version_string,"Get the Mapnik version string");
+    def("has_proj4", &has_proj4, "Get proj4 status");
     def("has_jpeg", &has_jpeg, "Get jpeg read/write support status");
+    def("has_png", &has_png, "Get png read/write support status");
+    def("has_tiff", &has_jpeg, "Get tiff read/write support status");
+    def("has_webp", &has_jpeg, "Get webp read/write support status");
+    def("has_grid_renderer", &has_grid_renderer, "Get grid_renderer status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
 

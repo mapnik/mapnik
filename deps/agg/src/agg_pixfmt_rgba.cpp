@@ -9,8 +9,8 @@ namespace agg
 
 template<class ColorT, class Order>
 void comp_op_rgba_hue<ColorT,Order>::blend_pix(value_type* p,
-                                     unsigned sr, unsigned sg, unsigned sb,
-                                     unsigned sa, unsigned cover)
+                                               unsigned sr, unsigned sg, unsigned sb,
+                                               unsigned sa, unsigned cover)
 {
     if (cover < 255)
     {
@@ -41,8 +41,8 @@ void comp_op_rgba_hue<ColorT,Order>::blend_pix(value_type* p,
 
 template<class ColorT, class Order>
 void comp_op_rgba_saturation<ColorT,Order>::blend_pix(value_type* p,
-                                     unsigned sr, unsigned sg, unsigned sb,
-                                     unsigned sa, unsigned cover)
+                                                      unsigned sr, unsigned sg, unsigned sb,
+                                                      unsigned sa, unsigned cover)
 {
     if (cover < 255)
     {
@@ -73,8 +73,8 @@ void comp_op_rgba_saturation<ColorT,Order>::blend_pix(value_type* p,
 
 template<class ColorT, class Order>
 void comp_op_rgba_color<ColorT,Order>::blend_pix(value_type* p,
-                                     unsigned sr, unsigned sg, unsigned sb,
-                                     unsigned sa, unsigned cover)
+                                                 unsigned sr, unsigned sg, unsigned sb,
+                                                 unsigned sa, unsigned cover)
 {
     if (cover < 255)
     {
@@ -106,8 +106,8 @@ void comp_op_rgba_color<ColorT,Order>::blend_pix(value_type* p,
 
 template<class ColorT, class Order>
 void comp_op_rgba_value<ColorT,Order>::blend_pix(value_type* p,
-                                     unsigned sr, unsigned sg, unsigned sb,
-                                     unsigned sa, unsigned cover)
+                                                 unsigned sr, unsigned sg, unsigned sb,
+                                                 unsigned sa, unsigned cover)
 {
     if (cover < 255)
     {

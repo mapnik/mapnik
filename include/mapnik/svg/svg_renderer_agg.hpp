@@ -27,7 +27,11 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
+
+#if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_pixel.hpp>
+#endif
+
 #include <mapnik/noncopyable.hpp>
 
 // boost
@@ -52,7 +56,6 @@
 #include "agg_gradient_lut.h"
 #include "agg_gamma_lut.h"
 #include "agg_span_interpolator_linear.h"
-#include "agg_pixfmt_rgba.h"
 
 namespace mapnik  {
 namespace svg {
@@ -119,11 +122,12 @@ public:
     void render_gradient(Rasterizer& ras,
                          Scanline& sl,
                          Renderer& ren,
-                         const gradient &grad,
+                         gradient const& grad,
                          agg::trans_affine const& mtx,
                          double opacity,
-                         const box2d<double> &symbol_bbox,
-                         const box2d<double> &path_bbox)
+                         box2d<double> const& symbol_bbox,
+                         curved_trans_type & curved_trans,
+                         unsigned path_id)
     {
         typedef agg::gamma_lut<agg::int8u, agg::int8u> gamma_lut_type;
         typedef agg::gradient_lut<agg::color_interpolator<agg::rgba8>, 1024> color_func_type;
@@ -165,16 +169,12 @@ public:
 
             if (grad.get_units() == OBJECT_BOUNDING_BOX)
             {
-                bx1=path_bbox.minx();
-                by1=path_bbox.miny();
-                bx2=path_bbox.maxx();
-                by2=path_bbox.maxy();
+                bounding_rect_single(curved_trans, path_id, &bx1, &by1, &bx2, &by2);
             }
 
             transform.translate(-bx1,-by1);
             transform.scale(1.0/(bx2-bx1),1.0/(by2-by1));
         }
-
 
         if (grad.get_gradient_type() == RADIAL)
         {
@@ -261,10 +261,6 @@ public:
 
             transform = attr.transform;
 
-            double bx1,by1,bx2,by2;
-            bounding_rect_single(curved_trans, attr.index, &bx1, &by1, &bx2, &by2);
-            box2d<double> path_bbox(bx1,by1,bx2,by2);
-
             transform *= mtx;
             double scl = transform.scale();
             //curved_.approximation_method(curve_inc);
@@ -290,13 +286,13 @@ public:
 
                 if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.fill_gradient, transform, attr.fill_opacity * opacity, symbol_bbox, path_bbox);
+                    render_gradient(ras, sl, ren, attr.fill_gradient, transform, attr.fill_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
                 }
                 else
                 {
                     ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
                     color = attr.fill_color;
-                    color.opacity(color.opacity() * attr.fill_opacity * opacity);
+                    color.opacity(color.opacity() * attr.fill_opacity * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
                     color.premultiply();
                     ren_s.color(color);
@@ -326,13 +322,13 @@ public:
 
                 if(attr.stroke_gradient.get_gradient_type() != NO_GRADIENT)
                 {
-                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform, attr.stroke_opacity * opacity, symbol_bbox, path_bbox);
+                    render_gradient(ras, sl, ren, attr.stroke_gradient, transform, attr.stroke_opacity * attr.opacity * opacity, symbol_bbox, curved_trans, attr.index);
                 }
                 else
                 {
                     ras.filling_rule(fill_non_zero);
                     color = attr.stroke_color;
-                    color.opacity(color.opacity() * attr.stroke_opacity * opacity);
+                    color.opacity(color.opacity() * attr.stroke_opacity * attr.opacity * opacity);
                     ScanlineRenderer ren_s(ren);
                     color.premultiply();
                     ren_s.color(color);
@@ -342,14 +338,15 @@ public:
         }
     }
 
+#if defined(GRID_RENDERER)
     template <typename Rasterizer, typename Scanline, typename Renderer>
     void render_id(Rasterizer& ras,
                    Scanline& sl,
                    Renderer& ren,
                    int feature_id,
                    agg::trans_affine const& mtx,
-                   double opacity,
-                   const box2d<double> &symbol_bbox)
+                   double /*opacity*/,
+                   box2d<double> const& /*symbol_bbox*/)
 
     {
         using namespace agg;
@@ -368,10 +365,6 @@ public:
                 continue;
 
             transform = attr.transform;
-
-            double bx1,by1,bx2,by2;
-            bounding_rect_single(curved_trans, attr.index, &bx1, &by1, &bx2, &by2);
-            box2d<double> path_bbox(bx1,by1,bx2,by2);
 
             transform *= mtx;
             double scl = transform.scale();
@@ -428,6 +421,7 @@ public:
             }
         }
     }
+#endif
 
 private:
 

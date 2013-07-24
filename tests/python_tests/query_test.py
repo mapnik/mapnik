@@ -4,7 +4,7 @@
 import os, mapnik
 
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, run_all
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -17,6 +17,10 @@ def test_query_init():
     r = query.resolution
     assert_almost_equal(r[0], 1.0, places=7)
     assert_almost_equal(r[1], 1.0, places=7)
+    # https://github.com/mapnik/mapnik/issues/1762
+    eq_(query.property_names,[])
+    query.add_property_name('migurski')
+    eq_(query.property_names,['migurski'])
 
 # Converting *from* tuples *to* resolutions is not yet supported
 @raises(TypeError)
@@ -30,4 +34,4 @@ def test_query_resolution():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

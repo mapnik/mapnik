@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-from nose.tools import *
-
 import os
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, run_all
 import mapnik
 
 def setup():
@@ -74,4 +72,4 @@ def test_adding_datasource_to_layer():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

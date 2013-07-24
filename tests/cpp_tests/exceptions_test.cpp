@@ -1,6 +1,5 @@
 #include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
-#include <boost/filesystem/convenience.hpp>
 #include <boost/make_shared.hpp>
 #include <iostream>
 #include <mapnik/projection.hpp>
@@ -19,14 +18,23 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/params.hpp>
+#include <mapnik/util/fs.hpp>
+#include <vector>
+#include <algorithm>
 
-extern "C" {
-#include <sqlite3.h>
-}
+#include "utils.hpp"
 
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
     try {
+        BOOST_TEST(set_working_dir(args));
         mapnik::projection srs("foo");
         // to avoid unused variable warning
         srs.params();
@@ -44,7 +52,7 @@ int main( int, char*[] )
     map.insert_style("style",style);
 
     std::string csv_plugin("./plugins/input/csv.input");
-    if (boost::filesystem::exists(csv_plugin)) {
+    if (mapnik::util::exists(csv_plugin)) {
         try {
             mapnik::datasource_cache::instance().register_datasource(csv_plugin);
             mapnik::parameters p;
@@ -70,7 +78,7 @@ int main( int, char*[] )
     }
 
     std::string shape_plugin("./plugins/input/shape.input");
-    if (boost::filesystem::exists(shape_plugin)) {
+    if (mapnik::util::exists(shape_plugin)) {
         try {
             mapnik::datasource_cache::instance().register_datasource(shape_plugin);
             mapnik::parameters p2;
@@ -83,27 +91,9 @@ int main( int, char*[] )
         }
     }
 
-    /*
-    // not working, oddly segfaults valgrind
-    try {
-        sqlite3_initialize();
-        // http://stackoverflow.com/questions/11107703/sqlite3-sigsegvs-with-valgrind
-        sqlite3_config(SQLITE_CONFIG_HEAP, malloc (1024*1024), 1024*1024, 64);
-        mapnik::datasource_cache::instance().register_datasource("./plugins/input/sqlite.input");
-        mapnik::parameters p;
-        p["type"]="sqlite";
-        p["file"]="tests/data/sqlite/world.sqlite";
-        p["table"]="world_merc";
-        mapnik::datasource_cache::instance().create(p);
-        sqlite3_shutdown();
-        BOOST_TEST(true);
-    } catch (...) {
-        BOOST_TEST(false);
-    }
-    */
-
     if (!::boost::detail::test_errors()) {
-        std::clog << "C++ exceptions: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ exceptions: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif

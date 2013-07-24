@@ -21,7 +21,7 @@
 #define AGG_ELLIPSE_INCLUDED
 
 #include "agg_basics.h"
-#include <math.h>
+#include <cmath>
 
 namespace agg
 {

@@ -38,7 +38,7 @@ public:
         : b_(false)  {}
     boolean(bool b)
         : b_(b) {}
-    explicit boolean(boolean const& b)
+    boolean(boolean const& b)
         : b_(b.b_) {}
 
     operator bool() const

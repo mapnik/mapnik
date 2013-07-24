@@ -20,7 +20,7 @@
 #ifndef AGG_ARC_INCLUDED
 #define AGG_ARC_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 namespace agg

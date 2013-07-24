@@ -24,10 +24,10 @@
 #include "rasterlite_featureset.hpp"
 
 // boost
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 // mapnik
+#include <mapnik/util/fs.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/boolean.hpp>
 #include <mapnik/geom_util.hpp>
@@ -91,12 +91,7 @@ rasterlite_datasource::rasterlite_datasource(parameters const& params)
     else
         dataset_name_ = *file;
 
-    this->init(params);
-}
-
-void rasterlite_datasource::init(mapnik::parameters const& params)
-{
-    if (!boost::filesystem::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
+    if (!mapnik::util::exists(dataset_name_)) throw datasource_exception(dataset_name_ + " does not exist");
 
     void *dataset = open_dataset();
 

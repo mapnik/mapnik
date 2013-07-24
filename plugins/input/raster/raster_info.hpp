@@ -47,7 +47,7 @@ public:
     inline unsigned height() const { return height_;}
 
 private:
-    void swap(raster_info& other) throw();
+    void swap(raster_info& other);
 
     std::string file_;
     std::string format_;

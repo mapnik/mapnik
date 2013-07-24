@@ -19,7 +19,7 @@
 #ifndef AGG_MATH_INCLUDED
 #define AGG_MATH_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 namespace agg

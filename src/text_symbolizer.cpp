@@ -34,6 +34,15 @@
 namespace mapnik
 {
 
+static const char * halo_rasterizer_strings[] = {
+    "full",
+    "fast",
+    ""
+};
+
+IMPLEMENT_ENUM( halo_rasterizer_e, halo_rasterizer_strings )
+
+
 static const char * label_placement_strings[] = {
     "point",
     "line",
@@ -92,7 +101,8 @@ IMPLEMENT_ENUM( text_transform_e, text_transform_strings )
 
 text_symbolizer::text_symbolizer(text_placements_ptr placements)
 : symbolizer_base(),
-    placement_options_(placements)
+    placement_options_(placements),
+    halo_rasterizer_(HALO_RASTERIZER_FULL)
 {
 
 }
@@ -101,7 +111,8 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
                                  float size, color const& fill,
                                  text_placements_ptr placements)
     : symbolizer_base(),
-      placement_options_(placements)
+      placement_options_(placements),
+      halo_rasterizer_(HALO_RASTERIZER_FULL)
 {
     set_name(name);
     set_face_name(face_name);
@@ -112,7 +123,8 @@ text_symbolizer::text_symbolizer(expression_ptr name, std::string const& face_na
 text_symbolizer::text_symbolizer(expression_ptr name, float size, color const& fill,
                                  text_placements_ptr placements)
     : symbolizer_base(),
-      placement_options_(placements)
+      placement_options_(placements),
+      halo_rasterizer_(HALO_RASTERIZER_FULL)
 {
     set_name(name);
     set_text_size(size);
@@ -121,7 +133,9 @@ text_symbolizer::text_symbolizer(expression_ptr name, float size, color const& f
 
 text_symbolizer::text_symbolizer(text_symbolizer const& rhs)
     : symbolizer_base(rhs),
-      placement_options_(rhs.placement_options_) /*TODO: Copy options! */
+      placement_options_(rhs.placement_options_),
+      halo_rasterizer_(rhs.halo_rasterizer_)
+      /*TODO: Copy options! */
 {
 }
 
@@ -130,9 +144,7 @@ text_symbolizer& text_symbolizer::operator=(text_symbolizer const& other)
     if (this == &other)
         return *this;
     placement_options_ = other.placement_options_; /*TODO: Copy options? */
-
-    MAPNIK_LOG_DEBUG(text_symbolizer) << "text_symbolizer: TODO - Metawriter (text_symbolizer::operator=)";
-
+    halo_rasterizer_ = other.halo_rasterizer_;
     return *this;
 }
 
@@ -336,6 +348,16 @@ void  text_symbolizer::set_halo_radius(double radius)
 double text_symbolizer::get_halo_radius() const
 {
     return placement_options_->defaults.format.halo_radius;
+}
+
+void text_symbolizer::set_halo_rasterizer(halo_rasterizer_e rasterizer_p)
+{
+    halo_rasterizer_ = rasterizer_p;
+}
+
+halo_rasterizer_e text_symbolizer::get_halo_rasterizer() const
+{
+    return halo_rasterizer_;
 }
 
 void  text_symbolizer::set_label_placement(label_placement_e label_p)

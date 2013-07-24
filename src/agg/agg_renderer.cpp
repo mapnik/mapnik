@@ -40,14 +40,14 @@
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/pixel_position.hpp>
 
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
-// agg
-#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_scanline_u.h"
 #include "agg_image_filters.h"
 #include "agg_trans_bilinear.h"
@@ -55,7 +55,6 @@
 #include "agg_image_accessors.h"
 #include "agg_span_image_filter_rgba.h"
 // boost
-#include <boost/utility.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
 
@@ -79,7 +78,32 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       font_engine_(),
       font_manager_(font_engine_),
       detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
-      ras_ptr(new rasterizer)
+      ras_ptr(new rasterizer),
+      query_extent_(),
+      gamma_method_(GAMMA_POWER),
+      gamma_(1.0)
+{
+    setup(m);
+}
+
+template <typename T>
+agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<agg_renderer>(m, scale_factor),
+      pixmap_(pixmap),
+      internal_buffer_(),
+      current_buffer_(&pixmap),
+      style_level_compositing_(false),
+      width_(pixmap_.width()),
+      height_(pixmap_.height()),
+      scale_factor_(scale_factor),
+      t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
+      font_engine_(),
+      font_manager_(font_engine_),
+      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
+      ras_ptr(new rasterizer),
+      query_extent_(),
+      gamma_method_(GAMMA_POWER),
+      gamma_(1.0)
 {
     setup(m);
 }
@@ -99,7 +123,10 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_
       font_engine_(),
       font_manager_(font_engine_),
       detector_(detector),
-      ras_ptr(new rasterizer)
+      ras_ptr(new rasterizer),
+      query_extent_(),
+      gamma_method_(GAMMA_POWER),
+      gamma_(1.0)
 {
     setup(m);
 }
@@ -165,7 +192,7 @@ void agg_renderer<T>::end_map_processing(Map const& )
 {
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
+    agg::pixfmt_rgba32_pre pixf(buf);
     pixf.demultiply();
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
@@ -251,13 +278,12 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
         {
             composite(pixmap_.data(),current_buffer_->data(), src_over, st.get_opacity(), 0, 0, false);
         }
-
-        // apply any 'direct' image filters
-        mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
-        BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.direct_image_filters())
-        {
-            boost::apply_visitor(visitor, filter_tag);
-        }
+    }
+    // apply any 'direct' image filters
+    mapnik::filter::filter_visitor<image_32> visitor(pixmap_);
+    BOOST_FOREACH(mapnik::filter::filter_type const& filter_tag, st.direct_image_filters())
+    {
+        boost::apply_visitor(visitor, filter_tag);
     }
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End processing style";
 }
@@ -271,7 +297,6 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
 {
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
@@ -279,7 +304,12 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
     typedef agg::pod_bvector<mapnik::svg::path_attributes> svg_attribute_type;
 
     ras_ptr->reset();
-    ras_ptr->gamma(agg::gamma_power());
+    if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+    {
+        ras_ptr->gamma(agg::gamma_power());
+        gamma_method_ = GAMMA_POWER;
+        gamma_ = 1.0;
+    }
     agg::scanline_u8 sl;
     agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
     pixfmt_comp_type pixf(buf);
@@ -312,11 +342,10 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
     {
         double width = (*marker.get_bitmap_data())->width();
         double height = (*marker.get_bitmap_data())->height();
-        double cx = 0.5 * width;
-        double cy = 0.5 * height;
-
         if (std::fabs(1.0 - scale_factor_) < 0.001 && tr.is_identity())
         {
+            double cx = 0.5 * width;
+            double cy = 0.5 * height;
             composite(current_buffer_->data(), **marker.get_bitmap_data(),
                       comp_op, opacity,
                       boost::math::iround(pos.x - cx),
@@ -396,7 +425,7 @@ template <typename T> template <typename R>
 void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::pixfmt_rgba32_pre pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 

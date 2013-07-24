@@ -47,6 +47,16 @@ typedef bool value_bool;
 
 struct value_null
 {
+    bool operator==(value_null const& /*other*/) const
+    {
+        return true;
+    }
+
+    bool operator!=(value_null const& /*other*/) const
+    {
+        return false;
+    }
+
     template <typename T>
     value_null operator+ (T const& /*other*/) const
     {
@@ -78,7 +88,11 @@ struct value_null
     }
 };
 
-inline std::ostream& operator<< (std::ostream & out,value_null const& v)
+inline std::size_t hash_value(const value_null& /*val*/) {
+    return 0;
+}
+
+inline std::ostream& operator<< (std::ostream & out,value_null const& /*v*/)
 {
     return out;
 }

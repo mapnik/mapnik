@@ -5,7 +5,7 @@ import os
 import math
 import mapnik
 import sys
-from utilities import execution_path
+from utilities import execution_path, run_all
 from nose.tools import *
 
 def setup():
@@ -16,7 +16,9 @@ def setup():
 class PointDatasource(mapnik.PythonDatasource):
     def __init__(self):
         super(PointDatasource, self).__init__(
-                envelope = mapnik.Box2d(0,-10,100,110)
+                geometry_type = mapnik.DataGeometryType.Point,
+                envelope = mapnik.Box2d(0,-10,100,110),
+                data_type = mapnik.DataType.Vector
         )
 
     def features(self, query):
@@ -74,7 +76,9 @@ class ConcentricCircles(object):
 class CirclesDatasource(mapnik.PythonDatasource):
     def __init__(self, centre_x=-20, centre_y=0, step=10):
         super(CirclesDatasource, self).__init__(
-                geometry_type=mapnik.DataGeometryType.Polygon
+                geometry_type = mapnik.DataGeometryType.Polygon,
+                envelope = mapnik.Box2d(-180, -90, 180, 90),
+                data_type = mapnik.DataType.Vector
         )
 
         # note that the plugin loader will set all arguments to strings and will not try to parse them
@@ -153,4 +157,4 @@ if 'python' in mapnik.DatasourceCache.plugin_names():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

@@ -39,12 +39,13 @@
 #include <mapnik/font_set.hpp>
 #include <mapnik/parse_path.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/request.hpp>
 #include <mapnik/svg/svg_converter.hpp>
 #include <mapnik/svg/svg_renderer_agg.hpp>
 #include <mapnik/svg/svg_path_adapter.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // boost
-#include <boost/utility.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 // agg
@@ -72,6 +73,24 @@ grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, u
 }
 
 template <typename T>
+grid_renderer<T>::grid_renderer(Map const& m, request const& req, T & pixmap, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<grid_renderer>(m, scale_factor),
+      pixmap_(pixmap),
+      width_(pixmap_.width()),
+      height_(pixmap_.height()),
+      scale_factor_(scale_factor),
+      // NOTE: can change this to m dims instead of pixmap_ if render-time
+      // resolution support is dropped from grid_renderer python interface
+      t_(pixmap_.width(),pixmap_.height(),req.extent(),offset_x,offset_y),
+      font_engine_(),
+      font_manager_(font_engine_),
+      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
+      ras_ptr(new grid_rasterizer)
+{
+    setup(m);
+}
+
+template <typename T>
 void grid_renderer<T>::setup(Map const& m)
 {
     MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: Scale=" << m.scale();
@@ -90,7 +109,7 @@ void grid_renderer<T>::start_map_processing(Map const& m)
 }
 
 template <typename T>
-void grid_renderer<T>::end_map_processing(Map const& m)
+void grid_renderer<T>::end_map_processing(Map const& /*m*/)
 {
     MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: End map processing";
 }
@@ -121,7 +140,7 @@ void grid_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity, composite_mode_e comp_op)
+void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity, composite_mode_e /*comp_op*/)
 {
     if (marker.is_vector())
     {
@@ -179,8 +198,11 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
             // TODO - remove support for step != or add support for agg scaling with opacity
             double ratio = (1.0/step);
             image_data_32 target(ratio * data.width(), ratio * data.height());
-            mapnik::scale_image_agg<image_data_32>(target,data, SCALING_NEAR,
-                                                   scale_factor_, 0.0, 0.0, 1.0, ratio);
+            mapnik::scale_image_agg<image_data_32>(target,
+                                                   data,
+                                                   SCALING_NEAR,
+                                                   ratio,
+                                                   ratio);
             pixmap_.set_rectangle(feature.id(), target,
                                   boost::math::iround(pos.x - cx),
                                   boost::math::iround(pos.y - cy));

@@ -18,6 +18,9 @@
 
 #include "agg_basics.h"
 
+// https://github.com/mapnik/mapnik/issues/1860
+#include <mapnik/config.hpp>
+
 namespace agg
 {
 
@@ -25,7 +28,8 @@ namespace agg
     //
     // See Implementation agg_vpgen_clip_polygon.cpp
     //
-    class vpgen_clip_polygon
+
+    class MAPNIK_DECL vpgen_clip_polygon
     {
     public:
         vpgen_clip_polygon() : 

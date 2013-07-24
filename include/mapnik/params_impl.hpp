@@ -35,8 +35,11 @@
 #include <boost/optional.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+
 // stl
 #include <string>
+#include <stdexcept>
+
 
 namespace mapnik { namespace detail {
 
@@ -44,7 +47,7 @@ namespace mapnik { namespace detail {
 template <typename T>
 struct extract_value
 {
-    static inline boost::optional<T> do_extract_from_string(std::string const& source)
+    static inline boost::optional<T> do_extract_from_string(std::string const& /*source*/)
     {
         std::string err_msg = (boost::format("No conversion from std::string to %s") % typeid(T).name()).str();
         throw std::runtime_error(err_msg);
@@ -148,16 +151,17 @@ struct value_extractor_visitor : public boost::static_visitor<>
     template <typename T1>
     void operator () (T1 val) const
     {
-        // TODO
         try
         {
             var_ = boost::lexical_cast<T>(val);
         }
-        catch (boost::bad_lexical_cast & ) {}
-        //std::string err_msg = (boost::format("No conversion from %s to %s")
-        //                       % typeid(T1).name()
-        //                       % typeid(T).name()).str();
-        //throw std::runtime_error(err_msg);
+        catch (boost::bad_lexical_cast const& )
+        {
+            std::string err_msg = (boost::format("Failed converting from %s to %s")
+                                   % typeid(T1).name()
+                                   % typeid(T).name()).str();
+            throw std::runtime_error(err_msg);
+        }
     }
 
 

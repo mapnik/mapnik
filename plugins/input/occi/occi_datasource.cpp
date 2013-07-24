@@ -61,6 +61,7 @@ using oracle::occi::SQLException;
 using oracle::occi::Type;
 using oracle::occi::StatelessConnectionPool;
 
+const double occi_datasource::FMAX = std::numeric_limits<double>::max();
 const std::string occi_datasource::METADATA_TABLE = "USER_SDO_GEOM_METADATA";
 
 DATASOURCE_PLUGIN(occi_datasource)
@@ -72,6 +73,10 @@ occi_datasource::occi_datasource(parameters const& params)
       geometry_field_(*params.get<std::string>("geometry_field", "")),
       srid_initialized_(false),
       extent_initialized_(false),
+      bbox_token_("!bbox!"),
+      scale_denom_token_("!scale_denominator!"),
+      pixel_width_token_("!pixel_width!"),
+      pixel_height_token_("!pixel_height!"),
       desc_(*params.get<std::string>("type"), *params.get<std::string>("encoding", "utf-8")),
       use_wkb_(*params.get<mapnik::boolean>("use_wkb", false)),
       row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
@@ -115,16 +120,13 @@ occi_datasource::occi_datasource(parameters const& params)
     {
         try
         {
-            Environment* env = occi_environment::get_environment();
-
-            pool_ = env->createStatelessConnectionPool(
+            pool_ = occi_environment::instance().create_pool(
                 *params.get<std::string>("user"),
                 *params.get<std::string>("password"),
                 *params.get<std::string>("host"),
                 *params.get<int>("max_size", 5),
                 *params.get<int>("initial_size", 1),
-                1,
-                StatelessConnectionPool::HOMOGENEOUS);
+                1);
         }
         catch (SQLException& ex)
         {
@@ -135,9 +137,7 @@ occi_datasource::occi_datasource(parameters const& params)
     {
         try
         {
-            Environment* env = occi_environment::get_environment();
-
-            conn_ = env->createConnection(
+            conn_ = occi_environment::instance().create_connection(
                 *params.get<std::string>("user"),
                 *params.get<std::string>("password"),
                 *params.get<std::string>("host"));
@@ -203,7 +203,7 @@ occi_datasource::occi_datasource(parameters const& params)
 #endif
 
         std::ostringstream s;
-        s << "SELECT " << fields_ << " FROM (" << table_name_ << ") WHERE rownum < 1";
+        s << "SELECT " << fields_ << " FROM (" << table_name_ << ") WHERE ROWNUM < 1";
 
         MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 
@@ -247,10 +247,10 @@ occi_datasource::occi_datasource(parameters const& params)
                     case oracle::occi::OCCIBFLOAT:
                     case oracle::occi::OCCIDOUBLE:
                     case oracle::occi::OCCIBDOUBLE:
-                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
-                        break;
                     case oracle::occi::OCCINUMBER:
                     case oracle::occi::OCCI_SQLT_NUM:
+                        desc_.add_descriptor(attribute_descriptor(fld_name,mapnik::Double));
+                        break;
                     case oracle::occi::OCCICHAR:
                     case oracle::occi::OCCISTRING:
                     case oracle::occi::OCCI_SQLT_AFC:
@@ -263,12 +263,12 @@ occi_datasource::occi_datasource(parameters const& params)
                     case oracle::occi::OCCI_SQLT_VNU:
                     case oracle::occi::OCCI_SQLT_VBI:
                     case oracle::occi::OCCI_SQLT_VST:
-                    case oracle::occi::OCCIDATE:
-                    case oracle::occi::OCCI_SQLT_DAT:
-                    case oracle::occi::OCCI_SQLT_DATE:
                     case oracle::occi::OCCIROWID:
                     case oracle::occi::OCCI_SQLT_RDD:
                     case oracle::occi::OCCI_SQLT_RID:
+                    case oracle::occi::OCCIDATE:
+                    case oracle::occi::OCCI_SQLT_DAT:
+                    case oracle::occi::OCCI_SQLT_DATE:
                     case oracle::occi::OCCI_SQLT_TIME:
                     case oracle::occi::OCCI_SQLT_TIME_TZ:
                     case oracle::occi::OCCITIMESTAMP:
@@ -320,22 +320,18 @@ occi_datasource::occi_datasource(parameters const& params)
 
 occi_datasource::~occi_datasource()
 {
+    if (use_connection_pool_)
     {
-        Environment* env = occi_environment::get_environment();
-
-        if (use_connection_pool_)
+        if (pool_ != 0)
         {
-            if (pool_ != 0)
-            {
-                env->terminateStatelessConnectionPool(pool_, StatelessConnectionPool::SPD_FORCE);
-            }
+            occi_environment::instance().destroy_pool(pool_);
         }
-        else
+    }
+    else
+    {
+        if (conn_ != 0)
         {
-            if (conn_ != 0)
-            {
-                env->terminateConnection(conn_);
-            }
+            occi_environment::instance().destroy_connection(conn_);
         }
     }
 }
@@ -458,6 +454,51 @@ layer_descriptor occi_datasource::get_descriptor() const
     return desc_;
 }
 
+std::string occi_datasource::sql_bbox(box2d<double> const& env) const
+{
+    std::ostringstream b;
+    b << std::setprecision(16);
+    b << "MDSYS.SDO_GEOMETRY(" << SDO_GTYPE_2DPOLYGON << "," << srid_ << ",NULL,";
+    b << " MDSYS.SDO_ELEM_INFO_ARRAY(1," << SDO_ETYPE_POLYGON << "," << SDO_INTERPRETATION_RECTANGLE << "),";
+    b << " MDSYS.SDO_ORDINATE_ARRAY(";
+    b << env.minx() << "," << env.miny() << ", ";
+    b << env.maxx() << "," << env.maxy() << "))";
+    return b.str();
+}
+
+std::string occi_datasource::populate_tokens(std::string const& sql, double scale_denom, box2d<double> const& env, double pixel_width, double pixel_height) const
+{
+    std::string populated_sql = sql;
+
+    if (boost::algorithm::icontains(populated_sql, scale_denom_token_))
+    {
+        std::ostringstream ss;
+        ss << scale_denom;
+        boost::algorithm::replace_all(populated_sql, scale_denom_token_, ss.str());
+    }
+
+    if (boost::algorithm::icontains(sql, pixel_width_token_))
+    {
+        std::ostringstream ss;
+        ss << pixel_width;
+        boost::algorithm::replace_all(populated_sql, pixel_width_token_, ss.str());
+    }
+
+    if (boost::algorithm::icontains(sql, pixel_height_token_))
+    {
+        std::ostringstream ss;
+        ss << pixel_height;
+        boost::algorithm::replace_all(populated_sql, pixel_height_token_, ss.str());
+    }
+
+    if (boost::algorithm::icontains(populated_sql, bbox_token_))
+    {
+        boost::algorithm::replace_all(populated_sql, bbox_token_, sql_bbox(env));
+    }
+
+    return populated_sql;
+}
+
 featureset_ptr occi_datasource::features(query const& q) const
 {
 #ifdef MAPNIK_STATS
@@ -465,6 +506,9 @@ featureset_ptr occi_datasource::features(query const& q) const
 #endif
 
     box2d<double> const& box = q.get_bbox();
+    const double px_gw = 1.0 / boost::get<0>(q.resolution());
+    const double px_gh = 1.0 / boost::get<1>(q.resolution());
+    const double scale_denom = q.scale_denominator();
 
     std::ostringstream s;
     s << "SELECT ";
@@ -486,20 +530,14 @@ featureset_ptr occi_datasource::features(query const& q) const
         ctx->push(*pos);
     }
 
-    s << " FROM ";
-
-    std::string query(table_);
+    std::string query = populate_tokens(table_, scale_denom, box, px_gw, px_gh);
 
     if (use_spatial_index_)
     {
         std::ostringstream spatial_sql;
-        spatial_sql << std::setprecision(16);
-        spatial_sql << " WHERE SDO_FILTER(" << geometry_field_ << ",";
-        spatial_sql << "  MDSYS.SDO_GEOMETRY(" << SDO_GTYPE_2DPOLYGON << "," << srid_ << ",NULL,";
-        spatial_sql << "  MDSYS.SDO_ELEM_INFO_ARRAY(1," << SDO_ETYPE_POLYGON << "," << SDO_INTERPRETATION_RECTANGLE << "),";
-        spatial_sql << "  MDSYS.SDO_ORDINATE_ARRAY(";
-        spatial_sql << box.minx() << "," << box.miny() << ", ";
-        spatial_sql << box.maxx() << "," << box.maxy() << ")), 'querytype=WINDOW') = 'TRUE'";
+        spatial_sql << " WHERE SDO_FILTER(";
+        spatial_sql << geometry_field_ << "," << sql_bbox(box);
+        spatial_sql << ", 'querytype = WINDOW') = 'TRUE'";
 
         if (boost::algorithm::ifind_first(query, "WHERE"))
         {
@@ -515,36 +553,23 @@ featureset_ptr occi_datasource::features(query const& q) const
         }
     }
 
+    s << " FROM " << query;
+
     if (row_limit_ > 0)
     {
-        std::ostringstream row_limit_string;
-        row_limit_string << "rownum < " << row_limit_;
-        if (boost::algorithm::ifind_first(query, "WHERE"))
-        {
-            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string.str() + " AND ");
-        }
-        else if (boost::algorithm::ifind_first(query, table_name_))
-        {
-            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string.str());
-        }
-        else
-        {
-            MAPNIK_LOG_WARN(occi) << "occi_datasource: Cannot determine where to add the row limit declaration";
-        }
+        s << " WHERE ROWNUM < " << row_limit_;
     }
-
-    s << query;
 
     MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 
     return boost::make_shared<occi_featureset>(pool_,
-                                               conn_,
-                                               ctx,
-                                               s.str(),
-                                               desc_.get_encoding(),
-                                               use_connection_pool_,
-                                               use_wkb_,
-                                               row_prefetch_);
+                                                conn_,
+                                                ctx,
+                                                s.str(),
+                                                desc_.get_encoding(),
+                                                use_connection_pool_,
+                                                use_wkb_,
+                                                row_prefetch_);
 }
 
 featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol) const
@@ -573,19 +598,15 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol)
         ++itr;
     }
 
-    s << " FROM ";
-
-    std::string query(table_);
+    box2d<double> box(pt.x - tol, pt.y - tol, pt.x + tol, pt.y + tol);
+    std::string query = populate_tokens(table_, FMAX, box, 0, 0);
 
     if (use_spatial_index_)
     {
         std::ostringstream spatial_sql;
-        spatial_sql << std::setprecision(16);
-        spatial_sql << " WHERE SDO_FILTER(" << geometry_field_ << ",";
-        spatial_sql << "  MDSYS.SDO_GEOMETRY(" << SDO_GTYPE_2DPOINT << "," << srid_ << ",NULL,";
-        spatial_sql << "  MDSYS.SDO_ELEM_INFO_ARRAY(1," << SDO_ETYPE_POINT << "," << SDO_INTERPRETATION_POINT << "),";
-        spatial_sql << "  MDSYS.SDO_ORDINATE_ARRAY(";
-        spatial_sql << pt.x << "," << pt.y << ")), 'querytype=WINDOW') = 'TRUE'";
+        spatial_sql << " WHERE SDO_FILTER(";
+        spatial_sql << geometry_field_ << "," << sql_bbox(box);
+        spatial_sql << ", 'querytype = WINDOW') = 'TRUE'";
 
         if (boost::algorithm::ifind_first(query, "WHERE"))
         {
@@ -601,34 +622,21 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol)
         }
     }
 
+    s << " FROM " << query;
+
     if (row_limit_ > 0)
     {
-        std::ostringstream row_limit_string;
-        row_limit_string << "rownum < " << row_limit_;
-        if (boost::algorithm::ifind_first(query, "WHERE"))
-        {
-            boost::algorithm::ireplace_first(query, "WHERE", row_limit_string.str() + " AND ");
-        }
-        else if (boost::algorithm::ifind_first(query, table_name_))
-        {
-            boost::algorithm::ireplace_first(query, table_name_, table_name_ + " " + row_limit_string.str());
-        }
-        else
-        {
-            MAPNIK_LOG_WARN(occi) << "occi_datasource: Cannot determine where to add the row limit declaration";
-        }
+        s << " WHERE ROWNUM < " << row_limit_;
     }
-
-    s << query;
 
     MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 
     return boost::make_shared<occi_featureset>(pool_,
-                                               conn_,
-                                               ctx,
-                                               s.str(),
-                                               desc_.get_encoding(),
-                                               use_connection_pool_,
-                                               use_wkb_,
-                                               row_prefetch_);
+                                                conn_,
+                                                ctx,
+                                                s.str(),
+                                                desc_.get_encoding(),
+                                                use_connection_pool_,
+                                                use_wkb_,
+                                                row_prefetch_);
 }

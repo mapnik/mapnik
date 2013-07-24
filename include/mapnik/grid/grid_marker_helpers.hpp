@@ -123,7 +123,7 @@ struct raster_markers_rasterizer_dispatch_grid
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -260,7 +260,7 @@ struct vector_markers_rasterizer_dispatch_grid
                                                      sym_.get_max_error(),
                                                      sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);

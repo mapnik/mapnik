@@ -36,7 +36,6 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 
 #include "agg_rasterizer_scanline_aa.h"
@@ -174,7 +173,7 @@ int main (int argc,char** argv)
                 agg::pod_bvector<mapnik::svg::path_attributes>,
                 renderer_solid,
                 agg::pixfmt_rgba32_pre > svg_renderer_this(svg_path,
-                                                             (*marker.get_vector_data())->attributes());
+                                                           (*marker.get_vector_data())->attributes());
 
             svg_renderer_this.render(ras_ptr, sl, renb, mtx, opacity, bbox);
 

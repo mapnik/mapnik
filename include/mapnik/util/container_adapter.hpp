@@ -55,7 +55,7 @@ template <>
 struct end_container<mapnik::geometry_type const>
 {
     static mapnik::util::path_iterator<mapnik::geometry_type>
-    call (mapnik::geometry_type const& g)
+    call (mapnik::geometry_type const& /*g*/)
     {
         return mapnik::util::path_iterator<mapnik::geometry_type>();
     }

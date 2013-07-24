@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: quadtree.hh 17 2005-03-08 23:58:43Z pavlenko $
 
 #ifndef QUADTREE_HPP
 #define QUADTREE_HPP

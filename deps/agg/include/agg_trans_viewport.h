@@ -21,7 +21,7 @@
 #ifndef AGG_TRANS_VIEWPORT_INCLUDED
 #define AGG_TRANS_VIEWPORT_INCLUDED
 
-#include <string.h>
+#include <cstring>
 #include "agg_trans_affine.h"
 
 

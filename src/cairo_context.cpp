@@ -21,8 +21,33 @@
  *****************************************************************************/
 
 #include <mapnik/cairo_context.hpp>
+#include <mapnik/font_util.hpp>
+#include <mapnik/text_properties.hpp>
+#include <mapnik/text_path.hpp>
+#include <mapnik/font_set.hpp>
 
+#include <cairo-ft.h>
+
+#include <valarray>
 namespace mapnik {
+
+cairo_face::cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
+    : face_(face)
+{
+    static cairo_user_data_key_t key;
+    c_face_ = cairo_ft_font_face_create_for_ft_face(face->get_face(), FT_LOAD_NO_HINTING);
+    cairo_font_face_set_user_data(c_face_, &key, new handle(engine, face), destroy);
+}
+
+cairo_face::~cairo_face()
+{
+    if (c_face_) cairo_font_face_destroy(c_face_);
+}
+
+cairo_font_face_t * cairo_face::face() const
+{
+    return c_face_;
+}
 
 cairo_context::cairo_context(cairo_ptr const& cairo)
     : cairo_(cairo)
@@ -130,7 +155,6 @@ void cairo_context::set_operator(composite_mode_e comp_op)
         cairo_set_operator(cairo_.get(), CAIRO_OPERATOR_EXCLUSION);
         break;
 #else
-#warning building against cairo older that 1.10.0, some compositing options are disabled
     case multiply:
     case screen:
     case overlay:
@@ -210,7 +234,7 @@ void cairo_context::set_dash(dash_array const &dashes, double scale_factor)
         d[index++] = itr->second * scale_factor;
     }
 
-    cairo_set_dash(cairo_.get() , &d[0], dashes.size(), 0/*offset*/);
+    cairo_set_dash(cairo_.get() , &d[0], d.size(), 0/*offset*/);
     check_object_status_and_throw_exception(*this);
 }
 
@@ -417,7 +441,7 @@ void cairo_context::add_text(text_path const& path,
         char_info_ptr c;
         double x, y, angle;
 
-        path.vertex(&c, &x, &y, &angle);
+        path.vertex(c, x, y, angle);
 
         face_set_ptr faces = font_manager.get_face_set(c->format->face_name, c->format->fontset);
         double text_size = c->format->text_size * scale_factor;
@@ -434,19 +458,46 @@ void cairo_context::add_text(text_path const& path,
             matrix.yy = text_size * std::cos(angle);
             matrix.x0 = 0;
             matrix.y0 = 0;
-
             set_font_matrix(matrix);
-
             set_font_face(manager, glyph->get_face());
-
             glyph_path(glyph->get_index(), sx + x, sy - y);
             set_line_width(2.0 * c->format->halo_radius * scale_factor);
             set_line_join(ROUND_JOIN);
             set_color(c->format->halo_fill);
             stroke();
+        }
+    }
+
+    path.rewind();
+
+    for (int iii = 0; iii < path.num_nodes(); iii++)
+    {
+        char_info_ptr c;
+        double x, y, angle;
+
+        path.vertex(c, x, y, angle);
+
+        face_set_ptr faces = font_manager.get_face_set(c->format->face_name, c->format->fontset);
+        double text_size = c->format->text_size * scale_factor;
+        faces->set_character_sizes(text_size);
+
+        glyph_ptr glyph = faces->get_glyph(c->c);
+
+        if (glyph)
+        {
+            cairo_matrix_t matrix;
+            matrix.xx = text_size * std::cos(angle);
+            matrix.xy = text_size * std::sin(angle);
+            matrix.yx = text_size * -std::sin(angle);
+            matrix.yy = text_size * std::cos(angle);
+            matrix.x0 = 0;
+            matrix.y0 = 0;
+            set_font_matrix(matrix);
+            set_font_face(manager, glyph->get_face());
             set_color(c->format->fill);
             show_glyph(glyph->get_index(), sx + x, sy - y);
         }
     }
+
 }
 }

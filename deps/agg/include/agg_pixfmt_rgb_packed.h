@@ -24,7 +24,7 @@
 #ifndef AGG_PIXFMT_RGB_PACKED_INCLUDED
 #define AGG_PIXFMT_RGB_PACKED_INCLUDED
 
-#include <string.h>
+#include <cstring>
 #include "agg_basics.h"
 #include "agg_color_rgba.h"
 #include "agg_rendering_buffer.h"

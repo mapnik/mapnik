@@ -182,9 +182,13 @@ std::string xml_node::xml_text = "<xmltext>";
 std::string const& xml_node::name() const
 {
     if (!is_text_)
+    {
         return name_;
+    }
     else
+    {
         return xml_text;
+    }
 }
 
 std::string const& xml_node::text() const
@@ -193,7 +197,8 @@ std::string const& xml_node::text() const
     {
         processed_ = true;
         return name_;
-    } else
+    }
+    else
     {
         throw config_error("text() called on non-text node", *this);
     }
@@ -336,7 +341,8 @@ std::string xml_node::get_text() const
         if (is_text_)
         {
             return name_;
-        } else
+        }
+        else
         {
             return "";
         }
@@ -394,10 +400,12 @@ compile_get_opt_attr(label_placement_e);
 compile_get_opt_attr(vertical_alignment_e);
 compile_get_opt_attr(horizontal_alignment_e);
 compile_get_opt_attr(justify_alignment_e);
+compile_get_opt_attr(halo_rasterizer_e);
 compile_get_opt_attr(expression_ptr);
 compile_get_attr(std::string);
 compile_get_attr(filter_mode_e);
 compile_get_attr(point_placement_e);
+compile_get_attr(debug_symbolizer_mode_e);
 compile_get_attr(marker_placement_e);
 compile_get_attr(marker_multi_policy_e);
 compile_get_attr(pattern_alignment_e);

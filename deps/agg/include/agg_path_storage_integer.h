@@ -16,7 +16,7 @@
 #ifndef AGG_PATH_STORAGE_INTEGER_INCLUDED
 #define AGG_PATH_STORAGE_INTEGER_INCLUDED
 
-#include <string.h>
+#include <cstring>
 #include "agg_array.h"
 
 namespace agg

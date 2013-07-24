@@ -212,7 +212,10 @@ void pgsql2sqlite(Connection conn,
 
     if ( rs->next())
     {
-        mapnik::util::string2int(rs->getValue("srid"),srid);
+        if (!mapnik::util::string2int(rs->getValue("srid"),srid))
+        {
+            std::clog << "could not convert srid to integer\n";
+        }
         geom_col = rs->getValue("f_geometry_column");
         geom_type = rs->getValue("type");
     }

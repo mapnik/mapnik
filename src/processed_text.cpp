@@ -55,7 +55,7 @@ void processed_text::clear()
 }
 
 
-string_info &processed_text::get_string_info()
+string_info const& processed_text::get_string_info()
 {
     info_.clear(); //if this function is called twice invalid results are returned, so clear string_info first
     expression_list::iterator itr = expr_list_.begin();

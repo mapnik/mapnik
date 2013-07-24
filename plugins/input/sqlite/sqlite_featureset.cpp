@@ -71,6 +71,13 @@ feature_ptr sqlite_featureset::next()
             return feature_ptr();
         }
 
+        // null feature id is not acceptable
+        if (rs_->column_type(1) == SQLITE_NULL)
+        {
+            MAPNIK_LOG_ERROR(postgis) << "sqlite_featureset: null value encountered for key_field";
+            continue;
+        }
+
         feature_ptr feature = feature_factory::create(ctx_,rs_->column_integer64(1));
         if (!geometry_utils::from_wkb(feature->paths(), data, size, format_))
             continue;
@@ -123,7 +130,8 @@ feature_ptr sqlite_featureset::next()
 
             case SQLITE_NULL:
             {
-                feature->put(fld_name_str, mapnik::value_null());
+                // NOTE: we intentionally do not store null here
+                // since it is equivalent to the attribute not existing
                 break;
             }
 

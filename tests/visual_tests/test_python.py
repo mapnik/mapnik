@@ -71,7 +71,7 @@ m.append_style('Style', style)
 
 
 layer = mapnik.Layer('Layer')
-layer.datasource = mapnik.Osm(file=os.path.join(dirname,"data/points.osm"))
+layer.datasource = mapnik.Datasource(**{file=os.path.join(dirname,"data/points.csv"))
 layer.styles.append('Style')
 m.layers.append(layer)
 
@@ -85,7 +85,7 @@ formatnode.fill = mapnik.Color("green")
 format_trees = [
     ('TextNode', mapnik.FormattingText("[name]")),
     ('MyText', MyText()),
-    ('IfElse', IfElse("[nr] != '5'",
+    ('IfElse', IfElse("[nr] != 5",
                 mapnik.FormattingText("[name]"),
                 mapnik.FormattingText("'SPECIAL!'"))),
     ('Format', formatnode),

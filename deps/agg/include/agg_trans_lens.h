@@ -16,7 +16,7 @@
 #ifndef AGG_WARP_MAGNIFIER_INCLUDED
 #define AGG_WARP_MAGNIFIER_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 

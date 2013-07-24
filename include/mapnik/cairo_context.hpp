@@ -25,35 +25,41 @@
 #define MAPNIK_CAIRO_CONTEXT_HPP
 
 // mapnik
+#include <mapnik/debug.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/color.hpp>
 #include <mapnik/stroke.hpp>
 #include <mapnik/image_data.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/font_set.hpp>
-#include <mapnik/text_path.hpp>
-#include <mapnik/text_properties.hpp>
 #include <mapnik/gradient.hpp>
+#include <mapnik/vertex.hpp>
+#include <mapnik/noncopyable.hpp>
+
 // boost
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+
 // cairo
 #include <cairo.h>
-#include <cairo-ft.h>
+
 // stl
-#include <valarray>
+#include <map>
+#include <vector>
+#include <stdexcept>
+
 // agg
 #include "agg_basics.h"
 
 namespace mapnik {
+
+class text_path;
 
 typedef cairo_status_t ErrorStatus;
 
 /// Throws the appropriate exception, if exceptions are enabled.
 inline void throw_exception(ErrorStatus status)
 {
-    throw std::runtime_error("cairo: fixme");
+    throw std::runtime_error(std::string("cairo: ") + cairo_status_to_string(status));
 }
 
 //We inline this because it is called so often.
@@ -64,7 +70,7 @@ inline void check_status_and_throw_exception(ErrorStatus status)
 }
 
 template<class T>
-void check_object_status_and_throw_exception(const T& object)
+void check_object_status_and_throw_exception(T const& object)
 {
     check_status_and_throw_exception(object.get_status());
 }
@@ -72,23 +78,9 @@ void check_object_status_and_throw_exception(const T& object)
 class cairo_face : private mapnik::noncopyable
 {
 public:
-    cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
-        : face_(face)
-    {
-        static cairo_user_data_key_t key;
-        c_face_ = cairo_ft_font_face_create_for_ft_face(face->get_face(), FT_LOAD_NO_HINTING);
-        cairo_font_face_set_user_data(c_face_, &key, new handle(engine, face), destroy);
-    }
-    ~cairo_face()
-    {
-        if (c_face_) cairo_font_face_destroy(c_face_);
-    }
-
-    cairo_font_face_t * face() const
-    {
-        return c_face_;
-    }
-
+    cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face);
+    ~cairo_face();
+    cairo_font_face_t * face() const;
 private:
     class handle
     {
@@ -315,7 +307,7 @@ public:
     void fill();
     void paint();
     void set_pattern(cairo_pattern const& pattern);
-    void set_gradient(cairo_gradient const& pattern, const box2d<double> &bbox);
+    void set_gradient(cairo_gradient const& pattern, box2d<double> const& bbox);
     void add_image(double x, double y, image_data_32 & data, double opacity = 1.0);
     void add_image(agg::trans_affine const& tr, image_data_32 & data, double opacity = 1.0);
     void set_font_face(cairo_face_manager & manager, face_ptr face);

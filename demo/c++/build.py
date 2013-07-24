@@ -34,13 +34,16 @@ demo_env = env.Clone()
 
 
 demo_env['CXXFLAGS'] = copy(env['LIBMAPNIK_CXXFLAGS'])
+demo_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
 
 if env['HAS_CAIRO']:
     demo_env.PrependUnique(CPPPATH=env['CAIRO_CPPPATHS'])
-    demo_env.Append(CXXFLAGS = '-DHAVE_CAIRO')
+    demo_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
 
-libraries =  copy(env['LIBMAPNIK_LIBS'])
-libraries.append('mapnik')
+libraries = ['mapnik']
+libraries.extend(copy(env['LIBMAPNIK_LIBS']))
+if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
+    libraries.append('dl')
 
 rundemo = demo_env.Program('rundemo', source, LIBS=libraries, LINKFLAGS=env["CUSTOM_LDFLAGS"])
 

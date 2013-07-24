@@ -40,7 +40,6 @@ program_env['LIBS'] = [env['PLUGINS']['ogr']['lib']]
 program_env['LIBS'].append('mapnik')
 program_env['LIBS'].append(env['ICU_LIB_NAME'])
 program_env['LIBS'].append('boost_system%s' % env['BOOST_APPEND'])
-program_env['LIBS'].append('boost_filesystem%s' % env['BOOST_APPEND'])
 program_env['LIBS'].append('boost_program_options%s' % env['BOOST_APPEND'])
 
 if env['RUNTIME_LINK'] == 'static':

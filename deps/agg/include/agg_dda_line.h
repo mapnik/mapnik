@@ -20,7 +20,7 @@
 #ifndef AGG_DDA_LINE_INCLUDED
 #define AGG_DDA_LINE_INCLUDED
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "agg_basics.h"
 
 namespace agg

@@ -1,20 +1,6 @@
 
 ## program below
 
-CONFIG_JSON="{
-  \"prefix\": \"${CONFIG_PREFIX}\",
-  \"mapnik_libname\": \"${CONFIG_MAPNIK_LIBNAME}\",
-  \"mapnik_include\": \"${CONFIG_MAPNIK_INCLUDE}\",
-  \"mapnik_lib\": \"${CONFIG_MAPNIK_LIB}\",
-  \"version\": \"${CONFIG_MAPNIK_VERSION}\",
-  \"ldflags\": \"${CONFIG_MAPNIK_LDFLAGS}\",
-  \"dep_libs\": \"${CONFIG_DEP_LIBS}\",
-  \"other_includes\": \"${CONFIG_OTHER_INCLUDES}\",
-  \"fonts\": \"${CONFIG_FONTS}\",
-  \"input_plugins\": \"${CONFIG_INPUT_PLUGINS}\",
-  \"git_revision\": \"${CONFIG_GIT_REVISION}\"
-}"
-
 usage()
 {
     cat <<EOF
@@ -22,22 +8,31 @@ Usage: mapnik-config [OPTION]
 
 Known values for OPTION are:
 
-  --prefix          display Mapnik prefix [default $CONFIG_PREFIX]
-  --prefix=DIR      change Mapnik prefix [default $CONFIG_PREFIX]
-  --libs            print library linking information
-  --dep-libs        print library linking information for Mapnik dependencies
-  --ldflags         print library paths (-L) information
-  --cflags          print pre-processor and compiler flags
-  --fonts           print default fonts directory
-  --input-plugins   print default input plugins directory
-  --json            print all config options as json object
-  --help            display this help and exit
-  -v --version      output version information
-  --git-revision    output git hash
+  -h --help         display this help and exit
+  -v --version      version information (MAPNIK_VERSION_STRING)
+  --version-number  version number (MAPNIK_VERSION) (new in 2.2.0)
+  --git-revision    git hash from "git rev-list --max-count=1 HEAD"
+  --git-describe    git decribe output (new in 2.2.0)
+  --fonts           default fonts directory
+  --input-plugins   default input plugins directory
+  --defines         pre-processor defines for Mapnik build (new in 2.2.0)
+  --prefix          Mapnik prefix [default $CONFIG_PREFIX]
+  --lib-name        Mapnik library name
+  --libs            library linking information
+  --dep-libs        library linking information for Mapnik dependencies
+  --ldflags         library paths (-L) information
+  --includes        include paths (-I) for Mapnik headers (new in 2.2.0)
+  --dep-includes    include paths (-I) for Mapnik dependencies (new in 2.2.0)
+  --cxxflags        c++ compiler flags and pre-processor defines (new in 2.2.0)
+  --cflags          all include paths, compiler flags, and pre-processor defines (for back-compatibility)
+  --cxx             c++ compiler used to build mapnik (new in 2.2.0)
+  --all-flags       all compile and link flags (new in 2.2.0)
 EOF
 
     exit $1
 }
+
+echoerr() { echo "$@" 1>&2; }
 
 if test $# -eq 0; then
     usage 1
@@ -45,40 +40,36 @@ fi
 
 while test $# -gt 0; do
     case "$1" in
-    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
-    *) optarg= ;;
     esac
 
     case "$1" in
 
-    --prefix=*)
-      prefix=$optarg
-      includedir=$CONFIG_PREFIX/include
-      CONFIG_MAPNIK_LIB=$CONFIG_PREFIX/lib
+    --help)
+      usage 0
       ;;
 
-    --prefix)
-      echo $CONFIG_PREFIX
+    -h)
+      usage 0
       ;;
 
     -v)
-      echo $CONFIG_MAPNIK_VERSION
+      echo ${CONFIG_MAPNIK_VERSION_STRING}
       ;;
 
     --version)
-      echo $CONFIG_MAPNIK_VERSION
+      echo ${CONFIG_MAPNIK_VERSION_STRING}
       ;;
 
-    --json)
-      echo $CONFIG_JSON
+    --version-number)
+      echo ${CONFIG_MAPNIK_VERSION}
       ;;
 
     --git-revision)
       echo ${CONFIG_GIT_REVISION}
       ;;
 
-    --help)
-      usage 0
+    --git-describe)
+      echo ${CONFIG_GIT_DESCRIBE}
       ;;
 
     --fonts)
@@ -89,30 +80,57 @@ while test $# -gt 0; do
       echo ${CONFIG_INPUT_PLUGINS}
       ;;
 
-    --cflags)
-      echo -I${CONFIG_MAPNIK_INCLUDE} -I${CONFIG_MAPNIK_AGG_INCLUDE} ${CONFIG_OTHER_INCLUDES}
+    --defines)
+      echo ${CONFIG_MAPNIK_DEFINES}
       ;;
 
-    --libs)
-      echo -L${CONFIG_MAPNIK_LIB} -l${CONFIG_MAPNIK_LIBNAME}
-      ;;
-
-    --ldflags)
-      echo ${CONFIG_MAPNIK_LDFLAGS}
+    --prefix)
+      echo ${CONFIG_PREFIX}
       ;;
 
     --lib-name)
       echo ${CONFIG_MAPNIK_LIBNAME}
       ;;
 
+    --libs)
+      echo -L${CONFIG_MAPNIK_LIBPATH} -l${CONFIG_MAPNIK_LIBNAME}
+      ;;
+
     --dep-libs)
       echo ${CONFIG_DEP_LIBS}
       ;;
 
+    --ldflags)
+      echo ${CONFIG_MAPNIK_LDFLAGS}
+      ;;
+
+    --includes)
+      echo -I${CONFIG_MAPNIK_INCLUDE}
+      ;;
+
+    --dep-includes)
+      echo ${CONFIG_DEP_INCLUDES}
+      ;;
+
+    --cxxflags)
+      echo ${CONFIG_CXXFLAGS}
+      ;;
+
+    --cflags)
+      echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_DEP_INCLUDES} ${CONFIG_MAPNIK_DEFINES} ${CONFIG_CXXFLAGS}
+      ;;
+
+    --cxx)
+      echo ${CONFIG_CXX}
+      ;;
+
+    --all-flags)
+      echo -I${CONFIG_MAPNIK_INCLUDE} ${CONFIG_DEP_INCLUDES} ${CONFIG_MAPNIK_DEFINES} ${CONFIG_CXXFLAGS} -L${CONFIG_MAPNIK_LIBPATH} -l${CONFIG_MAPNIK_LIBNAME} ${CONFIG_MAPNIK_LDFLAGS} ${CONFIG_DEP_LIBS}
+      ;;
+
     *)
-  # if no matches, return 'usage 1' meaning usage + 1 (error return type)
-  usage 1
-  exit 1
+  # push to stderr any invalid options
+  echo "unknown option $1" 1>&2;
   ;;
     esac
     shift

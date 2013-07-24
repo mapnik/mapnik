@@ -21,12 +21,13 @@
  *****************************************************************************/
 
 // boost
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 // mapnik
+#include <mapnik/util/fs.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/ctrans.hpp>
+#include <mapnik/image_util.hpp>
 #include <mapnik/image_reader.hpp>
 #include <mapnik/boolean.hpp>
 
@@ -46,9 +47,9 @@ using mapnik::image_reader;
 DATASOURCE_PLUGIN(raster_datasource)
 
 raster_datasource::raster_datasource(parameters const& params)
-    : datasource(params),
-      desc_(*params.get<std::string>("type"), "utf-8"),
-      extent_initialized_(false)
+: datasource(params),
+    desc_(*params.get<std::string>("type"), "utf-8"),
+    extent_initialized_(false)
 {
     MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Initializing...";
 
@@ -65,15 +66,16 @@ raster_datasource::raster_datasource(parameters const& params)
     tile_size_ = *params.get<int>("tile_size", 256);
     tile_stride_ = *params.get<int>("tile_stride", 1);
 
-    format_ = *params.get<std::string>("format","tiff");
+    boost::optional<std::string> format_from_filename = mapnik::type_from_filename(*file);
+    format_ = *params.get<std::string>("format",format_from_filename?(*format_from_filename) : "tiff");
 
     boost::optional<double> lox = params.get<double>("lox");
     boost::optional<double> loy = params.get<double>("loy");
     boost::optional<double> hix = params.get<double>("hix");
     boost::optional<double> hiy = params.get<double>("hiy");
-    
+
     boost::optional<std::string> ext = params.get<std::string>("extent");
-    
+
     if (lox && loy && hix && hiy)
     {
         extent_.init(*lox, *loy, *hix, *hiy);
@@ -88,7 +90,7 @@ raster_datasource::raster_datasource(parameters const& params)
     {
         throw datasource_exception("Raster Plugin: valid <extent> or <lox> <loy> <hix> <hiy> are required");
     }
-    
+
     if (multi_tiles_)
     {
         boost::optional<int> x_width = params.get<int>("x_width");
@@ -109,7 +111,7 @@ raster_datasource::raster_datasource(parameters const& params)
     }
     else
     {
-        if (! boost::filesystem::exists(filename_))
+        if (!mapnik::util::exists(filename_))
         {
             throw datasource_exception("Raster Plugin: " + filename_ + " does not exist");
         }
@@ -189,7 +191,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         return boost::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
     }
-    else if (width * height > (tile_size_ * tile_size_ << 2))
+    else if (width * height > static_cast<int>(tile_size_ * tile_size_ << 2))
     {
         MAPNIK_LOG_DEBUG(raster) << "raster_datasource: Tiled policy";
 

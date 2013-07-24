@@ -133,6 +133,7 @@ struct feature_grammar :
 
     phoenix::function<put_property> put_property_;
     phoenix::function<extract_geometry> extract_geometry_;
+    boost::phoenix::function<where_message> where_message_;
 
     geometry_grammar<Iterator> geometry_grammar_;
 };

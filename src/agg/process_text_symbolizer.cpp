@@ -26,6 +26,7 @@
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/symbolizer_helpers.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/font_util.hpp>
 
 namespace mapnik {
 
@@ -44,7 +45,7 @@ void agg_renderer<T>::process(text_symbolizer const& sym,
 
     text_renderer<T> ren(*current_buffer_,
                          font_manager_,
-                         *(font_manager_.get_stroker()),
+                         sym.get_halo_rasterizer(),
                          sym.comp_op(),
                          scale_factor_);
 

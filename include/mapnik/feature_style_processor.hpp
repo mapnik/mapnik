@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp> // for featureset_ptr
+#include <mapnik/config.hpp>
 
 // stl
 #include <set>
@@ -48,44 +49,49 @@ enum eAttributeCollectionPolicy
 };
 
 template <typename Processor>
-class feature_style_processor
+class MAPNIK_DECL feature_style_processor
 {
     struct symbol_dispatch;
 public:
-    explicit feature_style_processor(Map const& m, double scale_factor = 1.0);
+    explicit feature_style_processor(Map const& m,
+                                     double scale_factor = 1.0);
 
     /*!
      * \brief apply renderer to all map layers.
      */
-    void apply();
+    void apply(double scale_denom_override=0.0);
 
     /*!
      * \brief apply renderer to a single layer, providing pre-populated set of query attribute names.
      */
-    void apply(mapnik::layer const& lyr, std::set<std::string>& names);
+    void apply(mapnik::layer const& lyr,
+               std::set<std::string>& names,
+               double scale_denom_override=0.0);
     /*!
      * \brief render a layer given a projection and scale.
      */
     void apply_to_layer(layer const& lay,
                         Processor & p,
                         projection const& proj0,
+                        double scale,
                         double scale_denom,
+                        unsigned width,
+                        unsigned height,
+                        box2d<double> const& extent,
+                        int buffer_size,
                         std::set<std::string>& names);
 
 private:
     /*!
      * \brief renders a featureset with the given styles.
      */
-    void render_style(layer const& lay,
-                      Processor & p,
+    void render_style(Processor & p,
                       feature_type_style const* style,
                       rule_cache const& rules,
-                      std::string const& style_name,
                       featureset_ptr features,
                       proj_transform const& prj_trans);
 
     Map const& m_;
-    double scale_factor_;
 };
 }
 

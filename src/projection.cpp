@@ -26,12 +26,19 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/well_known_srs.hpp>
 
+// stl
+#include <stdexcept>
+
 #ifdef MAPNIK_USE_PROJ4
 // proj4
 #include <proj_api.h>
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
 #include <boost/thread/mutex.hpp>
+#ifdef _MSC_VER
+#pragma NOTE(mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8)
+#else
 #warning mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8
+#endif
 static boost::mutex mutex_;
 #endif
 
@@ -68,13 +75,16 @@ projection::projection(projection const& rhs)
       proj_(NULL),
       proj_ctx_(NULL)
 {
-    if (!rhs.defer_proj_init_) init_proj4();
+    if (!defer_proj_init_) init_proj4();
 }
 
 projection& projection::operator=(projection const& rhs)
 {
     projection tmp(rhs);
     swap(tmp);
+    proj_ctx_ = 0;
+    proj_ = 0;
+    if (!defer_proj_init_) init_proj4();
     return *this;
 }
 
@@ -210,6 +220,8 @@ std::string projection::expanded() const
 void projection::swap(projection& rhs)
 {
     std::swap(params_,rhs.params_);
+    std::swap(defer_proj_init_,rhs.defer_proj_init_);
+    std::swap(is_geographic_,rhs.is_geographic_);
 }
 
 }

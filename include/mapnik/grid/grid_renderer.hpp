@@ -53,6 +53,7 @@ namespace mapnik {
   class marker;
   class proj_transform;
   struct grid_rasterizer;
+  class request;
 }
 
 namespace mapnik {
@@ -66,13 +67,14 @@ public:
     typedef T buffer_type;
     typedef grid_renderer<T> processor_impl_type;
     grid_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    grid_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~grid_renderer();
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
-    void start_style_processing(feature_type_style const& st) {}
-    void end_style_processing(feature_type_style const& st) {}
+    void start_style_processing(feature_type_style const& /*st*/) {}
+    void end_style_processing(feature_type_style const& /*st*/) {}
     void render_marker(mapnik::feature_impl & feature, unsigned int step, pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity, composite_mode_e comp_op);
 
     void process(point_symbolizer const& sym,
@@ -119,6 +121,10 @@ public:
     inline eAttributeCollectionPolicy attribute_collection_policy() const
     {
         return DEFAULT;
+    }
+    inline double scale_factor() const
+    {
+        return scale_factor_;
     }
 
 private:

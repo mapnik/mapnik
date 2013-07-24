@@ -1,4 +1,4 @@
-<Map>
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
     <Style name="ellipse">
         <Rule>
             <MarkersSymbolizer

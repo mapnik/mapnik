@@ -43,6 +43,9 @@
 #include <mapnik/util/geometry_to_svg.hpp>
 #endif
 
+// stl
+#include <stdexcept>
+
 namespace {
 
 using mapnik::from_wkt;

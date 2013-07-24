@@ -2,8 +2,7 @@
 
 from nose.tools import *
 import os,sys
-from utilities import execution_path
-from utilities import Todo
+from utilities import execution_path, run_all
 import mapnik
 from binascii import unhexlify
 
@@ -195,16 +194,15 @@ def test_geometry_index_error2():
     f.geometries()[3]
 
 def test_wkt_rounding():
-    raise Todo("fixme or remove test")
     # currently fails because we use output precision of 6 - should we make configurable? https://github.com/mapnik/mapnik/issues/1009
     # if precision is set to 15 still fails due to very subtle rounding issues
-    wkt = "POLYGON((7.904185417583761 54.180426336712856,7.89918053477129 54.178168035931542,7.897715691021261 54.182318426556606,7.893565300396205 54.183111883587891,7.89039147227129 54.187567449994106,7.885874870708761 54.190680242962827,7.879893425396261 54.193915106244049,7.894541862896233 54.194647528119134,7.900645378521233 54.190680242962827,7.904185417583761 54.180426336712856))"
+    wkt = "POLYGON((7.904185 54.180426,7.89918 54.178168,7.897715 54.182318,7.893565 54.183111,7.890391 54.187567,7.885874 54.19068,7.879893 54.193915,7.894541 54.194647,7.900645 54.19068,7.904185 54.180426))"
     compare_wkt_from_wkt(wkt,1)
 
 def test_wkt_collection_flattening():
-    raise Todo("fixme or remove test")
+    wkt = 'GEOMETRYCOLLECTION(POLYGON((1 1,2 1,2 2,1 2,1 1)),POLYGON((40 40,20 45,45 30,40 40)),POLYGON((20 35,45 20,30 5,10 10,10 30,20 35),(30 20,20 25,20 15,30 20)),LINESTRING(2 3,3 4))'
     # currently fails as the MULTIPOLYGON inside will be returned as multiple polygons - not a huge deal - should we worry?
-    wkt = "GEOMETRYCOLLECTION(POLYGON((1 1,2 1,2 2,1 2,1 1)),MULTIPOLYGON(((40 40,20 45,45 30,40 40)),((20 35,45 20,30 5,10 10,10 30,20 35),(30 20,20 25,20 15,30 20))),LINESTRING(2 3,3 4))"
+    #wkt = "GEOMETRYCOLLECTION(POLYGON((1 1,2 1,2 2,1 2,1 1)),MULTIPOLYGON(((40 40,20 45,45 30,40 40)),((20 35,45 20,30 5,10 10,10 30,20 35),(30 20,20 25,20 15,30 20))),LINESTRING(2 3,3 4))"
     compare_wkt_from_wkt(wkt,4)
 
 # skip since this data is not checked into tests
@@ -226,4 +224,4 @@ def test_wkt_collection_flattening():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

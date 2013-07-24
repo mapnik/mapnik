@@ -27,6 +27,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/raster.hpp>
 #include <mapnik/raster_colorizer.hpp>
+#include <mapnik/enumeration.hpp>
 
 // stl
 #include <limits>

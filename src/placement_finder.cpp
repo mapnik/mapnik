@@ -34,7 +34,6 @@
 
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/foreach.hpp>
@@ -98,8 +97,7 @@ double get_total_distance(T & shape_path)
 }
 
 template <typename DetectorT>
-placement_finder<DetectorT>::placement_finder(feature_impl const& feature,
-                                              text_placement_info const& placement_info,
+placement_finder<DetectorT>::placement_finder(text_placement_info const& placement_info,
                                               string_info const& info,
                                               DetectorT & detector,
                                               box2d<double> const& extent)
@@ -919,7 +917,7 @@ bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const&
         double cwidth = ci.width + ci.format->character_spacing;
         char_info_ptr c;
         double x, y, angle;
-        current_placement->vertex(&c, &x, &y, &angle);
+        current_placement->vertex(c, x, y, angle);
         x = current_placement->center.x + x;
         y = current_placement->center.y - y;
 

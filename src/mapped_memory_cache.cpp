@@ -22,12 +22,12 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/util/fs.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 
 // boost
 #include <boost/assert.hpp>
 #include <boost/interprocess/file_mapping.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 namespace mapnik
@@ -63,8 +63,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         return result;
     }
 
-    boost::filesystem::path path(uri);
-    if (exists(path))
+    if (mapnik::util::exists(uri))
     {
         try
         {
@@ -79,9 +78,11 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
             }
             return result;
         }
-        catch (...)
+        catch (std::exception const& ex)
         {
-            MAPNIK_LOG_ERROR(mapped_memory_cache) << "Exception caught while loading mapping memory file: " << uri;
+            MAPNIK_LOG_ERROR(mapped_memory_cache)
+                << "Error loading mapped memory file: '"
+                << uri << "' (" << ex.what() << ")";
         }
     }
     /*

@@ -16,9 +16,9 @@
 #ifndef AGG_SPAN_GRADIENT_INCLUDED
 #define AGG_SPAN_GRADIENT_INCLUDED
 
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 #include "agg_basics.h"
 #include "agg_math.h"
 #include "agg_array.h"

@@ -30,6 +30,8 @@
 // stl
 #include <string>
 #include <sstream>
+#include <stdexcept>
+
 
 namespace mapnik
 {

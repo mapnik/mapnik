@@ -45,6 +45,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 #include "agg_path_storage.h"
@@ -64,7 +65,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 {
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::rendering_buffer buf_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, buf_type> pixfmt_comp_type;
@@ -74,13 +74,21 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
 
+    // https://github.com/mapnik/mapnik/issues/1316
+    bool snap_pixels = !mapnik::marker_cache::instance().is_uri(filename);
+
     if (!filename.empty())
     {
         boost::optional<marker_ptr> mark = mapnik::marker_cache::instance().find(filename, true);
         if (mark && *mark)
         {
             ras_ptr->reset();
-            ras_ptr->gamma(agg::gamma_power());
+            if (gamma_method_ != GAMMA_POWER || gamma_ != 1.0)
+            {
+                ras_ptr->gamma(agg::gamma_power());
+                gamma_method_ = GAMMA_POWER;
+                gamma_ = 1.0;
+            }
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
             agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
@@ -119,9 +127,16 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
                     agg::trans_affine marker_trans = recenter * tr;
-                    buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
-                    dispatch_type rasterizer_dispatch(render_buffer,svg_renderer,*ras_ptr,
-                                                      bbox, marker_trans, sym, *detector_, scale_factor_);
+                    buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
+                    dispatch_type rasterizer_dispatch(render_buffer,
+                                                      svg_renderer,
+                                                      *ras_ptr,
+                                                      bbox,
+                                                      marker_trans,
+                                                      sym,
+                                                      *detector_,
+                                                      scale_factor_,
+                                                      snap_pixels);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
@@ -142,7 +157,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 else
                 {
                     box2d<double> const& bbox = (*mark)->bounding_box();
-                    setup_transform_scaling(tr, bbox, feature, sym);
+                    setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, sym);
                     evaluate_transform(tr, feature, sym.get_image_transform());
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
@@ -152,9 +167,16 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
                     svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
-                    buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
-                    dispatch_type rasterizer_dispatch(render_buffer,svg_renderer,*ras_ptr,
-                                                      bbox, marker_trans, sym, *detector_, scale_factor_);
+                    buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
+                    dispatch_type rasterizer_dispatch(render_buffer,
+                                                      svg_renderer,
+                                                      *ras_ptr,
+                                                      bbox,
+                                                      marker_trans,
+                                                      sym,
+                                                      *detector_,
+                                                      scale_factor_,
+                                                      snap_pixels);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
                         converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
@@ -175,17 +197,23 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             }
             else // raster markers
             {
-                box2d<double> const& bbox = (*mark)->bounding_box();
-                setup_transform_scaling(tr, bbox, feature, sym);
+                setup_transform_scaling(tr, (*mark)->width(), (*mark)->height(), feature, sym);
                 evaluate_transform(tr, feature, sym.get_image_transform());
+                box2d<double> const& bbox = (*mark)->bounding_box();
                 coord2d center = bbox.center();
                 agg::trans_affine_translation recenter(-center.x, -center.y);
                 agg::trans_affine marker_trans = recenter * tr;
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
                 typedef raster_markers_rasterizer_dispatch<buf_type,rasterizer, detector_type> dispatch_type;
-                buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
-                dispatch_type rasterizer_dispatch(render_buffer,*ras_ptr, **marker,
-                                                  marker_trans, sym, *detector_, scale_factor_);
+                buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
+                dispatch_type rasterizer_dispatch(render_buffer,
+                                                  *ras_ptr,
+                                                  **marker,
+                                                  marker_trans,
+                                                  sym,
+                                                  *detector_,
+                                                  scale_factor_,
+                                                  true /*snap rasters no matter what*/);
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
                     converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);

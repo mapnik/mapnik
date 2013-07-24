@@ -58,7 +58,15 @@ public:
     mapnik::layer_descriptor get_descriptor() const;
 
 private:
+    std::string sql_bbox(mapnik::box2d<double> const& env) const;
+    std::string populate_tokens(std::string const& sql,
+                                double scale_denom,
+                                mapnik::box2d<double> const& env,
+                                double pixel_width,
+                                double pixel_height) const;
+
     static const std::string METADATA_TABLE;
+    static const double FMAX;
 
     mapnik::datasource::datasource_t type_;
     std::string table_;
@@ -69,6 +77,10 @@ private:
     bool srid_initialized_;
     mutable bool extent_initialized_;
     mutable mapnik::box2d<double> extent_;
+    const std::string bbox_token_;
+    const std::string scale_denom_token_;
+    const std::string pixel_width_token_;
+    const std::string pixel_height_token_;
     mapnik::layer_descriptor desc_;
     bool use_wkb_;
     mapnik::value_integer row_limit_;

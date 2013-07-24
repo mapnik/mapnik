@@ -36,7 +36,6 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/format.hpp>
 #include <boost/make_shared.hpp>
 
 // stl
@@ -53,7 +52,6 @@ const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using boost::shared_ptr;
-using mapnik::PoolGuard;
 using mapnik::attribute_descriptor;
 
 postgis_datasource::postgis_datasource(parameters const& params)
@@ -113,10 +111,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (conn && conn->isOK())
+        if (!conn) return;
+
+        if (conn->isOK())
         {
-            PoolGuard<shared_ptr<Connection>,
-                      shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
 
             desc_.set_encoding(conn->client_encoding());
 
@@ -178,7 +176,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
                             if (srid_c != NULL)
                             {
                                 int result = 0;
-                                if (mapnik::util::string2int(srid_c, result))
+                                const char * end = srid_c + std::strlen(srid_c);
+                                if (mapnik::util::string2int(srid_c, end, result))
                                 {
                                     srid_ = result;
                                 }
@@ -209,7 +208,8 @@ postgis_datasource::postgis_datasource(parameters const& params)
                         if (srid_c != NULL)
                         {
                             int result = 0;
-                            if (mapnik::util::string2int(srid_c, result))
+                            const char * end = srid_c + std::strlen(srid_c);
+                            if (mapnik::util::string2int(srid_c, end, result))
                             {
                                 srid_ = result;
                             }
@@ -412,7 +412,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
 
             rs->close();
 
-                }
+        }
     }
 }
 
@@ -598,8 +598,6 @@ featureset_ptr postgis_datasource::features(const query& q) const
         shared_ptr<Connection> conn = pool->borrowObject();
         if (conn && conn->isOK())
         {
-            PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn ,pool);
-
             if (geometryColumn_.empty())
             {
                 std::ostringstream s_error;
@@ -712,10 +710,10 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (conn && conn->isOK())
-        {
-            PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
+        if (!conn) return featureset_ptr();
 
+        if (conn->isOK())
+        {
             if (geometryColumn_.empty())
             {
                 std::ostringstream s_error;
@@ -798,10 +796,9 @@ boost::optional<box2d<double> > postgis_datasource::envelope() const
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (conn && conn->isOK())
+        if (!conn) return extent_;
+        if (conn->isOK())
         {
-            PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
-
             std::ostringstream s;
             if (geometryColumn_.empty())
             {
@@ -885,10 +882,9 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
     if (pool)
     {
         shared_ptr<Connection> conn = pool->borrowObject();
-        if (conn && conn->isOK())
+        if (!conn) return result;
+        if (conn->isOK())
         {
-            PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
-
             std::ostringstream s;
             std::string g_type;
             try

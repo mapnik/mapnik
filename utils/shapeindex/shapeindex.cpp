@@ -19,16 +19,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
-//$Id: shapeindex.cc 27 2005-03-30 21:45:40Z pavlenko $
 
 
 #include <iostream>
 #include <vector>
 #include <string>
-
+#include <mapnik/util/fs.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 #include "quadtree.hpp"
 #include "shapefile.hpp"
@@ -123,7 +121,7 @@ int main (int argc,char** argv)
         boost::algorithm::ireplace_last(shapename,".shp","");
         std::string shapename_full (shapename+".shp");
 
-        if (! boost::filesystem::exists (shapename_full))
+        if (! mapnik::util::exists (shapename_full))
         {
             clog << "error : file " << shapename_full << " does not exist" << endl;
             continue;

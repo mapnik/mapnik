@@ -27,12 +27,15 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/value.hpp>
-#include <mapnik/path_expression.hpp>
 
 // boost
 #include <boost/variant.hpp>
 #include <boost/foreach.hpp>
 #include <boost/make_shared.hpp>
+
+// stl
+#include <stdexcept>
+
 
 namespace mapnik {
 

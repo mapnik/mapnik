@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from nose.tools import *
-from utilities import execution_path
-
+from utilities import execution_path, run_all
 import os, mapnik
 
 def setup():
@@ -27,23 +26,25 @@ def test_reading_palettes():
     palette = mapnik.Palette('\xff\x00\xff\xff\xff\xff', 'rgb')
     eq_(palette.to_string(),expected_rgb);
 
-def test_render_with_palette():
-    m = mapnik.Map(600,400)
-    mapnik.load_map(m,'../data/good_maps/agg_poly_gamma_map.xml')
-    m.zoom_all()
-    im = mapnik.Image(m.width,m.height)
-    mapnik.render(m,im)
-    act = open('../data/palettes/palette256.act','rb')
-    palette = mapnik.Palette(act.read(),'act')
-    # test saving directly to filesystem
-    im.save('/tmp/mapnik-palette-test.png','png',palette)
-    # test saving to a string
-    open('/tmp/mapnik-palette-test2.png','wb').write(im.tostring('png',palette));
-    # compare the two methods
-    eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('/tmp/mapnik-palette-test2.png').tostring())
-    # compare to expected
-    eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('./images/support/mapnik-palette-test.png').tostring())
+if 'shape' in mapnik.DatasourceCache.plugin_names():
+
+    def test_render_with_palette():
+        m = mapnik.Map(600,400)
+        mapnik.load_map(m,'../data/good_maps/agg_poly_gamma_map.xml')
+        m.zoom_all()
+        im = mapnik.Image(m.width,m.height)
+        mapnik.render(m,im)
+        act = open('../data/palettes/palette256.act','rb')
+        palette = mapnik.Palette(act.read(),'act')
+        # test saving directly to filesystem
+        im.save('/tmp/mapnik-palette-test.png','png',palette)
+        # test saving to a string
+        open('/tmp/mapnik-palette-test2.png','wb').write(im.tostring('png',palette));
+        # compare the two methods
+        eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('/tmp/mapnik-palette-test2.png').tostring(),'%s not eq to %s' % ('/tmp/mapnik-palette-test.png','/tmp/mapnik-palette-test2.png'))
+        # compare to expected
+        eq_(mapnik.Image.open('/tmp/mapnik-palette-test.png').tostring(),mapnik.Image.open('./images/support/mapnik-palette-test.png').tostring(),'%s not eq to %s' % ('/tmp/mapnik-palette-test.png','./images/support/mapnik-palette-test.png'))
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

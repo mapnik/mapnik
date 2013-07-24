@@ -40,16 +40,16 @@ namespace mapnik { namespace json {
 template <typename Iterator, typename FeatureType> struct feature_collection_grammar;
 
 template <typename Iterator>
-class feature_collection_parser : private mapnik::noncopyable
+class MAPNIK_DECL feature_collection_parser : private mapnik::noncopyable
 {
     typedef Iterator iterator_type;
     typedef mapnik::feature_impl feature_type;
 public:
     feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr);
     ~feature_collection_parser();
-    bool parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features);  
+    bool parse(iterator_type first, iterator_type last, std::vector<mapnik::feature_ptr> & features);
 private:
-    boost::scoped_ptr<feature_collection_grammar<iterator_type,feature_type> > grammar_; 
+    boost::scoped_ptr<feature_collection_grammar<iterator_type,feature_type> > grammar_;
 };
 
 }}

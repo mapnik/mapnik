@@ -19,15 +19,15 @@
 
 
 // qt
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QStringList>
 #include <QSettings>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include "mainwindow.hpp"
+
 // boost
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 
 
 int main( int argc, char **argv )

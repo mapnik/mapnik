@@ -76,7 +76,7 @@ template <>
 struct end_container<path_type const>
 {
     static mapnik::util::path_iterator<path_type>
-    call (path_type const& g)
+    call (path_type const& /*g*/)
     {
         return mapnik::util::path_iterator<path_type>();
     }
@@ -126,7 +126,7 @@ namespace mapnik { namespace util {
     {
         typedef boost::spirit::karma::real_policies<T> base_type;
         static int floatfield(T n) { return base_type::fmtflags::fixed; }
-        static unsigned precision(T n) { return 6u ;}
+        static unsigned precision(T n) { return 4u ;}
     };
     }
 
@@ -161,14 +161,14 @@ namespace mapnik { namespace util {
                 ;
 
             linestring = &uint_(mapnik::LineString)[_1 = _type(_val)]
-                << svg_path << lit('\"')
+                << lit("d=\"") << svg_path << lit("\"")
                 ;
 
             polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
-                << svg_path << lit('\"')
+                << lit("d=\"") << svg_path << lit("\"")
                 ;
 
-            svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit("d=\"") << lit('M')
+            svg_path %= ((&uint_(mapnik::SEG_MOVETO) << lit('M')
                           | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ] ])
                          << lit(' ') << coordinate << lit(' ') << coordinate) % lit(' ')
                 ;

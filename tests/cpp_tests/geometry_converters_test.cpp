@@ -1,5 +1,11 @@
 #include <boost/version.hpp>
+#include <boost/detail/lightweight_test.hpp>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include "utils.hpp"
 
+#if BOOST_VERSION >= 104700
 #include <mapnik/layer.hpp>
 #include <mapnik/feature_type_style.hpp>
 #include <mapnik/debug.hpp>
@@ -8,15 +14,12 @@
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
 #include <mapnik/well_known_srs.hpp>
-
-#if BOOST_VERSION >= 104700
 #include <mapnik/util/geometry_to_wkb.hpp>
 #include <mapnik/util/geometry_to_wkt.hpp>
 #include <mapnik/util/geometry_to_svg.hpp>
-#endif
 
-#include <boost/detail/lightweight_test.hpp>
-#include <iostream>
+// stl
+#include <stdexcept>
 
 struct output_geometry_backend
 {
@@ -57,7 +60,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
 
     typedef boost::mpl::vector<clip_line_tag> conv_types;
     vertex_converter<box2d<double>, output_geometry_backend, line_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+        CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(bbox, backend, sym, t, prj_trans, tr, 1.0);
 
     converter.set<clip_line_tag>();
@@ -97,7 +100,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
 
     typedef boost::mpl::vector<clip_poly_tag> conv_types;
     vertex_converter<box2d<double>, output_geometry_backend, polygon_symbolizer,
-                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+        CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(bbox, backend, sym, t, prj_trans, tr, 1.0);
 
     converter.set<clip_poly_tag>();
@@ -121,9 +124,21 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
 
     return boost::optional<std::string>();
 }
+#endif
 
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
+    BOOST_TEST(set_working_dir(args));
+
+#if BOOST_VERSION >= 104700
+
     // LineString/bbox clipping
     {
         std::string wkt_in("LineString(0 0,200 200)");
@@ -154,17 +169,20 @@ int main( int, char*[] )
         BOOST_TEST(result);
         BOOST_TEST_EQ(*result, std::string("GeometryCollection EMPTY"));
     }
-#endif
     {
         std::string wkt_in("Polygon((0 0,100 200,200 0,0 0 ))");
         boost::optional<std::string> result = polygon_bbox_clipping(mapnik::box2d<double>(50,50,150,150),wkt_in);
         BOOST_TEST(result);
         BOOST_TEST_EQ(*result,std::string("Polygon((50 50,50 100,75 150,125 150,150 100,150 50,50 50))"));
     }
+#endif
+
+#endif
 
     if (!::boost::detail::test_errors())
     {
-        std::clog << "C++ geometry conversions: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ geometry conversions: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif

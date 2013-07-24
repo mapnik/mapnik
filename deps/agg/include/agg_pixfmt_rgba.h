@@ -25,8 +25,8 @@
 #ifndef AGG_PIXFMT_RGBA_INCLUDED
 #define AGG_PIXFMT_RGBA_INCLUDED
 
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 #include "agg_basics.h"
 #include "agg_color_rgba.h"
 #include "agg_rendering_buffer.h"
@@ -134,7 +134,7 @@ namespace agg
         static AGG_INLINE void blend_pix(value_type* p,
                                          unsigned cr, unsigned cg, unsigned cb,
                                          unsigned alpha,
-                                         unsigned cover=0)
+                                         unsigned /*cover*/=0)
         {
             calc_type r = p[Order::R];
             calc_type g = p[Order::G];

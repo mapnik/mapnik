@@ -19,7 +19,7 @@
 #ifndef AGG_SIMUL_EQ_INCLUDED
 #define AGG_SIMUL_EQ_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_basics.h"
 
 namespace agg

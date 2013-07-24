@@ -71,7 +71,7 @@ namespace mapnik { namespace wkt {
         void operator() (T path) const
         {
             BOOST_ASSERT( path!=0 );
-            path->set_close();
+            path->close_path();
         }
     };
 

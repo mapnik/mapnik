@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <vector>
+#include <algorithm>
 #include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_rendering_buffer.h"
@@ -37,9 +39,9 @@ color blend(color const& source, color const& dest, unsigned cover=255)
     buffer[2] = dest_pre.b;
     buffer[3] = dest_pre.a;
     // http://www.antigrain.com/doc/basic_renderers/basic_renderers.agdoc.html
-    agg::rendering_buffer rbuf(buffer, 
-                               size, 
-                               size, 
+    agg::rendering_buffer rbuf(buffer,
+                               size,
+                               size,
                                size * stride);
     color::value_type* psource = (color::value_type*)rbuf.row_ptr(0,0,1);
     blender::blend_pix(psource,source_pre.r,source_pre.g,source_pre.b,source_pre.a,cover);
@@ -78,7 +80,7 @@ color normal_blend(color const& source, color const& dest, unsigned cover=255)
     dest_buffer[3] = dest_pre.a;
     agg::rendering_buffer dest_rbuffer(dest_buffer,size,size,size * 4);
     agg::pixfmt_rgba32_pre pixf_dest(dest_rbuffer);
-    
+
     // renderer: blends source into destination
     renderer_type ren(pixf_dest);
     ren.blend_from(pixf_source,0,0,0,cover);
@@ -110,8 +112,8 @@ template<class ColorT, class Order> struct comp_op_rgba_src_over2
     //   Dca' = Sca + Dca.(1 - Sa)
     //   Da'  = Sa + Da - Sa.Da
     static void blend_pix(value_type* p,
-                                     unsigned sr, unsigned sg, unsigned sb,
-                                     unsigned sa, unsigned cover)
+                          unsigned sr, unsigned sg, unsigned sb,
+                          unsigned sa, unsigned cover)
     {
         if(cover < 255)
         {
@@ -130,18 +132,25 @@ template<class ColorT, class Order> struct comp_op_rgba_src_over2
 
 }
 
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
     typedef agg::comp_op_rgba_src_over2<color, agg::order_rgba> source_over_old_agg;
     typedef agg::comp_op_rgba_src_over<color, agg::order_rgba> source_over;
-    
+
     color white(255,255,255,255);
     color black(0,0,0,255);
 
     BOOST_TEST_EQ( to_string(blend<source_over>(white,white)), to_string(white) );
     BOOST_TEST_EQ( to_string(blend<source_over>(white,black)), to_string(white) );
     BOOST_TEST_EQ( to_string(blend<source_over>(black,white)), to_string(black) );
-    
+
     // https://github.com/mapnik/mapnik/issues/1452#issuecomment-8154646
     color near_white(254,254,254,254); // Source
     color near_trans(1,1,1,1); // Dest
@@ -153,26 +162,26 @@ int main( int, char*[] )
     // using normal_blend as expected, compare a variety of other colors
 
     {
-      color source(128,128,128,255);
-      color dest(128,128,128,255);
-      unsigned cover = 128;
-      std::string expected_str = to_string(normal_blend(source,dest,cover));
-      BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
-      BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
+        color source(128,128,128,255);
+        color dest(128,128,128,255);
+        unsigned cover = 128;
+        std::string expected_str = to_string(normal_blend(source,dest,cover));
+        BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
+        BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
     }
 
     {
-      color source(128,128,128,255);
-      color dest(128,128,128,255);
-      unsigned cover = 245;
-      std::string expected_str = to_string(normal_blend(source,dest,cover));
-      BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
-      BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
+        color source(128,128,128,255);
+        color dest(128,128,128,255);
+        unsigned cover = 245;
+        std::string expected_str = to_string(normal_blend(source,dest,cover));
+        BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
+        BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
     }
-    
+
     // commenting until I study these failures more (dane)
     /*
-    {
+      {
       // fails, why?
       color source(127,127,127,127);
       color   dest(127,127,127,127);
@@ -180,9 +189,9 @@ int main( int, char*[] )
       std::string expected_str = to_string(normal_blend(source,dest,cover));
       BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
       BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
-    }
+      }
 
-    {
+      {
       // fails, why?
       color source(128,128,128,128);
       color   dest(128,128,128,128);
@@ -190,11 +199,12 @@ int main( int, char*[] )
       std::string expected_str = to_string(normal_blend(source,dest,cover));
       BOOST_TEST_EQ( to_string(blend<source_over>(source,dest,cover)), expected_str );
       BOOST_TEST_EQ( to_string(blend<source_over_old_agg>(source,dest,cover)), expected_str );
-    }
+      }
     */
-    
+
     if (!::boost::detail::test_errors()) {
-        std::clog << "C++ AGG blending: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ AGG blending: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif

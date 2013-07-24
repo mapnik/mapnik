@@ -22,8 +22,6 @@
 
 #include "occi_types.hpp"
 
-oracle::occi::Environment* occi_environment::env_ = 0;
-
 std::string occi_enums::resolve_gtype(int gtype)
 {
     switch (gtype)

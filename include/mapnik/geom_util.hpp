@@ -200,10 +200,10 @@ inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 struct filter_in_box
 {
     box2d<double> box_;
-    explicit filter_in_box(const box2d<double>& box)
+    explicit filter_in_box(box2d<double> const& box)
         : box_(box) {}
 
-    bool pass(const box2d<double>& extent) const
+    bool pass(box2d<double> const& extent) const
     {
         return extent.intersects(box_);
     }
@@ -211,23 +211,16 @@ struct filter_in_box
 
 struct filter_at_point
 {
-    coord2d pt_;
-    double tol_;
-    explicit filter_at_point(const coord2d& pt, double tol=0)
-        : pt_(pt),
-          tol_(tol) {}
-    bool pass(const box2d<double>& extent) const
+    box2d<double> box_;
+    explicit filter_at_point(coord2d const& pt, double tol=0)
+        : box_(pt,pt)
     {
-        if (tol_ == 0)
-        {
-            return extent.contains(pt_);
-        }
-        else
-        {
-            box2d<double> extent2 = extent;
-            extent2.pad(tol_);
-            return extent2.contains(pt_);
-        }
+        box_.pad(tol);
+    }
+
+    bool pass(box2d<double> const& extent) const
+    {
+        return extent.intersects(box_);
     }
 };
 
@@ -245,6 +238,7 @@ double path_length(PathType & path)
     double length = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         length += distance(x0,y0,x1,y1);
         x0 = x1;
         y0 = y1;
@@ -268,6 +262,7 @@ bool middle_point(PathType & path, double & x, double & y)
     double dist = 0.0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double seg_length = distance(x0, y0, x1, y1);
 
         if ( dist + seg_length >= mid_length)
@@ -307,6 +302,7 @@ bool centroid(PathType & path, double & x, double & y)
     unsigned count = 1;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double dx0 = x0 - start_x;
         double dy0 = y0 - start_y;
         double dx1 = x1 - start_x;
@@ -370,6 +366,7 @@ bool centroid_geoms(Iter start, Iter end, double & x, double & y)
 
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         double dx0 = x0 - start_x;
         double dy0 = y0 - start_y;
         double dx1 = x1 - start_x;
@@ -421,6 +418,7 @@ bool hit_test(PathType & path, double x, double y, double tol)
     unsigned count = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE) continue;
         ++count;
         if (command == SEG_MOVETO)
         {
@@ -468,6 +466,8 @@ bool interior_position(PathType & path, double & x, double & y)
     double y1 = 0;
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
+        if (command == SEG_CLOSE)
+            continue;
         if (command != SEG_MOVETO)
         {
             // if the segments overlap

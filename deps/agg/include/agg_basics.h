@@ -16,7 +16,7 @@
 #ifndef AGG_BASICS_INCLUDED
 #define AGG_BASICS_INCLUDED
 
-#include <math.h>
+#include <cmath>
 #include "agg_config.h"
 
 //---------------------------------------------------------AGG_CUSTOM_ALLOCATOR

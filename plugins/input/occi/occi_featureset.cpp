@@ -61,7 +61,8 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
                                  bool use_connection_pool,
                                  bool use_wkb,
                                  unsigned prefetch_rows)
-    : tr_(new transcoder(encoding)),
+    : rs_(NULL),
+      tr_(new transcoder(encoding)),
       feature_id_(1),
       ctx_(ctx),
       use_wkb_(use_wkb)
@@ -82,6 +83,8 @@ occi_featureset::occi_featureset(StatelessConnectionPool* pool,
     catch (SQLException &ex)
     {
         MAPNIK_LOG_ERROR(occi) << "OCCI Plugin: error processing " << sqlstring << " : " << ex.getMessage();
+
+        rs_ = NULL;
     }
 }
 
@@ -91,28 +94,30 @@ occi_featureset::~occi_featureset()
 
 feature_ptr occi_featureset::next()
 {
-    if (rs_ && rs_->next())
+    while (rs_ != NULL && rs_->next() == oracle::occi::ResultSet::DATA_AVAILABLE)
     {
-        feature_ptr feature(feature_factory::create(ctx_,feature_id_));
-        ++feature_id_;
+        feature_ptr feature(feature_factory::create(ctx_, feature_id_));
 
         if (use_wkb_)
         {
             Blob blob = rs_->getBlob(1);
             blob.open(oracle::occi::OCCI_LOB_READONLY);
 
-            int size = blob.length();
+            unsigned int size = blob.length();
             if (buffer_.size() < size)
             {
                 buffer_.resize(size);
             }
 
-            oracle::occi::Stream* instream = blob.getStream(1,0);
+            oracle::occi::Stream* instream = blob.getStream(1, 0);
             instream->readBuffer(buffer_.data(), size);
             blob.closeStream(instream);
             blob.close();
 
-            geometry_utils::from_wkb(feature->paths(), buffer_.data(), size);
+            if (! geometry_utils::from_wkb(feature->paths(), buffer_.data(), size))
+            {
+                continue;
+            }
         }
         else
         {
@@ -120,6 +125,10 @@ feature_ptr occi_featureset::next()
             if (geom.get())
             {
                 convert_geometry(geom.get(), feature);
+            }
+            else
+            {
+                continue;
             }
         }
 
@@ -155,10 +164,10 @@ feature_ptr occi_featureset::next()
                 break;
             case oracle::occi::OCCIDOUBLE:
             case oracle::occi::OCCIBDOUBLE:
-                feature->put(fld_name, rs_->getDouble(i + 1));
-                break;
             case oracle::occi::OCCINUMBER:
             case oracle::occi::OCCI_SQLT_NUM:
+                feature->put(fld_name, rs_->getDouble(i + 1));
+                break;
             case oracle::occi::OCCICHAR:
             case oracle::occi::OCCISTRING:
             case oracle::occi::OCCI_SQLT_AFC:
@@ -221,6 +230,8 @@ feature_ptr occi_featureset::next()
                 }
             }
         }
+
+        ++feature_id_;
 
         return feature;
     }

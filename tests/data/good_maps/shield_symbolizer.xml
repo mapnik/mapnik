@@ -20,7 +20,7 @@
     <Layer name="line" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>2</StyleName>
         <Datasource>
-            <Parameter name="file">../json/lines.json</Parameter>
+            <Parameter name="file">../json/lines.geojson</Parameter>
             <Parameter name="layer_by_index">0</Parameter>
             <Parameter name="type">ogr</Parameter>
         </Datasource>
@@ -29,7 +29,7 @@
     <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>1</StyleName>
         <Datasource>
-            <Parameter name="file">../json/points.json</Parameter>
+            <Parameter name="file">../json/points.geojson</Parameter>
             <Parameter name="layer_by_index">0</Parameter>
             <Parameter name="type">ogr</Parameter>
         </Datasource>

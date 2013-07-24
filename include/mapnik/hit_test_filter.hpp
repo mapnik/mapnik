@@ -38,7 +38,7 @@ public:
           y_(y),
           tol_(tol) {}
 
-    bool pass(Feature & feature)
+    bool pass(feature_impl & feature)
     {
         BOOST_FOREACH(geometry_type & geom, feature.paths())
         {

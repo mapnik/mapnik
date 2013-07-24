@@ -33,6 +33,7 @@
 
 // stl
 #include <vector>
+#include <stdexcept>
 
 namespace mapnik {
 

@@ -36,6 +36,7 @@
 #include <mapnik/ctrans.hpp>    // for CoordTransform
 #include <mapnik/image_compositing.hpp>  // for composite_mode_e
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/request.hpp>
 
 // boost
 #include <boost/variant/static_visitor.hpp>
@@ -70,15 +71,16 @@ class MAPNIK_DECL svg_renderer : public feature_style_processor<svg_renderer<Out
 {
 public:
     typedef svg_renderer<OutputIterator> processor_impl_type;
-    svg_renderer(Map const& m, OutputIterator& output_iterator, unsigned offset_x=0, unsigned offset_y=0);
+    svg_renderer(Map const& m, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
+    svg_renderer(Map const& m, request const& req, OutputIterator& output_iterator, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     ~svg_renderer();
 
     void start_map_processing(Map const& map);
     void end_map_processing(Map const& map);
     void start_layer_processing(layer const& lay, box2d<double> const& query_extent);
     void end_layer_processing(layer const& lay);
-    void start_style_processing(feature_type_style const& st) {}
-    void end_style_processing(feature_type_style const& st) {}
+    void start_style_processing(feature_type_style const& /*st*/) {}
+    void end_style_processing(feature_type_style const& /*st*/) {}
 
     /*!
      * @brief Overloads that process each kind of symbolizer individually.
@@ -113,9 +115,9 @@ public:
     void process(markers_symbolizer const& sym,
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
-    void process(debug_symbolizer const& sym,
-                 mapnik::feature_impl & feature,
-                 proj_transform const& prj_trans) {}
+    void process(debug_symbolizer const& /*sym*/,
+                 mapnik::feature_impl & /*feature*/,
+                 proj_transform const& /*prj_trans*/) {}
 
     /*!
      * @brief Overload that process the whole set of symbolizers of a rule.
@@ -125,7 +127,7 @@ public:
                  mapnik::feature_impl & feature,
                  proj_transform const& prj_trans);
 
-    void painted(bool painted)
+    void painted(bool /*painted*/)
     {
         // nothing to do
     }
@@ -133,6 +135,11 @@ public:
     inline eAttributeCollectionPolicy attribute_collection_policy() const
     {
         return DEFAULT;
+    }
+
+    inline double scale_factor() const
+    {
+        return scale_factor_;
     }
 
     inline OutputIterator& get_output_iterator()
@@ -149,9 +156,13 @@ private:
     OutputIterator& output_iterator_;
     const int width_;
     const int height_;
+    double scale_factor_;
     CoordTransform t_;
-    svg::svg_generator<OutputIterator> generator_;
     svg::path_output_attributes path_attributes_;
+    freetype_engine font_engine_;
+    face_manager<freetype_engine> font_manager_;
+    boost::shared_ptr<label_collision_detector4> detector_;
+    svg::svg_generator<OutputIterator> generator_;
     box2d<double> query_extent_;
     bool painted_;
 

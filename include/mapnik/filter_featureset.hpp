@@ -35,7 +35,7 @@ class filter_featureset : public Featureset
     typedef T filter_type;
 
 public:
-    filter_featureset(featureset_ptr fs, filter_type const& filter)
+    filter_featureset(featureset_ptr const& fs, filter_type const& filter)
         : fs_(fs), filter_(filter) {}
 
     feature_ptr next()

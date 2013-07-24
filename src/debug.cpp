@@ -25,9 +25,10 @@
 
 // stl
 #include <ctime>
+#include <stdexcept>
 
 #ifndef MAPNIK_LOG_FORMAT
-#define MAPNIK_LOG_FORMAT "Mapnik LOG> %Y-%m-%d %H:%M:%S:"
+  #define MAPNIK_LOG_FORMAT  Mapnik LOG> %Y-%m-%d %H:%M:%S:
 #endif
 
 #ifndef MAPNIK_DEFAULT_LOG_SEVERITY

@@ -1,7 +1,7 @@
-  
+#
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+# Copyright (C) 2013 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,50 +17,69 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
-# 
-
+#
 
 Import ('plugin_base')
 Import ('env')
 
-prefix = env['PREFIX']
+PLUGIN_NAME = 'shape'
 
 plugin_env = plugin_base.Clone()
 
-shape_src = Split(
+plugin_sources = Split(
   """
-        dbfile.cpp
-        shape_datasource.cpp
-        shape_featureset.cpp
-        shape_index_featureset.cpp
-        shape_io.cpp
-        shape_utils.cpp
-  """
-        )
-
-libraries = []
+  %(PLUGIN_NAME)s_datasource.cpp
+  %(PLUGIN_NAME)s_featureset.cpp
+  %(PLUGIN_NAME)s_index_featureset.cpp
+  %(PLUGIN_NAME)s_io.cpp
+  %(PLUGIN_NAME)s_utils.cpp
+  dbfile.cpp
+  """ % locals()
+)
 
 # Link Library to Dependencies
-libraries.append('mapnik')
+libraries = []
 libraries.append(env['ICU_LIB_NAME'])
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
-libraries.append('boost_filesystem%s' % env['BOOST_APPEND'])
+
+cppdefines = []
+cxxflags = []
 
 if env['SHAPE_MEMORY_MAPPED_FILE']:
-    plugin_env.Append(CXXFLAGS = '-DSHAPE_MEMORY_MAPPED_FILE')
+    cppdefines.append('-DSHAPE_MEMORY_MAPPED_FILE')
 
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
     if boost_version_from_header < 46:
         # avoid ubuntu issue with boost interprocess:
         # https://github.com/mapnik/mapnik/issues/1082
-        plugin_env.Append(CXXFLAGS = '-fpermissive')
+        cxxflags.append('-fpermissive')
 
-input_plugin = plugin_env.SharedLibrary('../shape', SHLIBSUFFIX='.input', source=shape_src, SHLIBPREFIX='', LIBS = libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+plugin_env.Append(CXXFLAGS=cxxflags)
+plugin_env.Append(CPPDEFINES=cppdefines)
 
-# if the plugin links to libmapnik ensure it is built first
-Depends(input_plugin, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+if env['PLUGIN_LINKING'] == 'shared':
+    libraries.append('mapnik')
 
-if 'uninstall' not in COMMAND_LINE_TARGETS:
-    env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], input_plugin)
-    env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+    TARGET = plugin_env.SharedLibrary('../shape',
+                                      SHLIBSUFFIX='.input',
+                                      SHLIBPREFIX='',
+                                      source=plugin_sources,
+                                      LIBS=libraries,
+                                      LINKFLAGS=env['CUSTOM_LDFLAGS'])
+
+    # if the plugin links to libmapnik ensure it is built first
+    Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
+
+    if 'uninstall' not in COMMAND_LINE_TARGETS:
+        env.Install(env['MAPNIK_INPUT_PLUGINS_DEST'], TARGET)
+        env.Alias('install', env['MAPNIK_INPUT_PLUGINS_DEST'])
+
+plugin_obj = {
+  'LIBS': libraries,
+  'SOURCES': plugin_sources,
+  'CXXFLAGS': cxxflags,
+  'CPPDEFINES': cppdefines,
+}
+
+Return('plugin_obj')

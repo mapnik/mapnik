@@ -53,6 +53,7 @@
 #include <mapnik/vertex_converters.hpp>
 #include <mapnik/marker_helpers.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/pixel_position.hpp>
 
 // cairo
 #include <cairo.h>
@@ -141,6 +142,28 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
 }
 
 cairo_renderer_base::cairo_renderer_base(Map const& m,
+                                         request const& req,
+                                         cairo_ptr const& cairo,
+                                         double scale_factor,
+                                         unsigned offset_x,
+                                         unsigned offset_y)
+    : m_(m),
+      context_(cairo),
+      width_(req.width()),
+      height_(req.height()),
+      scale_factor_(scale_factor),
+      t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
+      font_engine_(boost::make_shared<freetype_engine>()),
+      font_manager_(*font_engine_),
+      face_manager_(font_engine_),
+      detector_(boost::make_shared<label_collision_detector4>(
+          box2d<double>(-req.buffer_size(), -req.buffer_size(),
+          req.width() + req.buffer_size(), req.height() + req.buffer_size())))
+{
+    setup(m);
+}
+
+cairo_renderer_base::cairo_renderer_base(Map const& m,
                                          cairo_ptr const& cairo,
                                          boost::shared_ptr<label_collision_detector4> detector,
                                          double scale_factor,
@@ -169,6 +192,16 @@ template <>
 cairo_renderer<cairo_surface_ptr>::cairo_renderer(Map const& m, cairo_surface_ptr const& surface, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m,scale_factor),
       cairo_renderer_base(m,create_context(surface),scale_factor,offset_x,offset_y) {}
+
+template <>
+cairo_renderer<cairo_ptr>::cairo_renderer(Map const& m, request const& req, cairo_ptr const& cairo, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<cairo_renderer>(m,scale_factor),
+      cairo_renderer_base(m,req,cairo,scale_factor,offset_x,offset_y) {}
+
+template <>
+cairo_renderer<cairo_surface_ptr>::cairo_renderer(Map const& m, request const& req, cairo_surface_ptr const& surface, double scale_factor, unsigned offset_x, unsigned offset_y)
+    : feature_style_processor<cairo_renderer>(m,scale_factor),
+      cairo_renderer_base(m,req, create_context(surface),scale_factor,offset_x,offset_y) {}
 
 template <>
 cairo_renderer<cairo_ptr>::cairo_renderer(Map const& m, cairo_ptr const& cairo, boost::shared_ptr<label_collision_detector4> detector, double scale_factor, unsigned offset_x, unsigned offset_y)
@@ -225,14 +258,9 @@ void cairo_renderer_base::setup(Map const& map)
 void cairo_renderer_base::start_map_processing(Map const& map)
 {
     MAPNIK_LOG_DEBUG(cairo_renderer) << "cairo_renderer_base: Start map processing bbox=" << map.get_current_extent();
-
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 6, 0)
     box2d<double> bounds = t_.forward(t_.extent());
     context_.rectangle(bounds.minx(), bounds.miny(), bounds.maxx(), bounds.maxy());
     context_.clip();
-#else
-#warning building against cairo older that 1.6.0, map clipping is disabled
-#endif
 }
 
 template <>
@@ -346,10 +374,14 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                 {
                     frame->move_to(x,y);
                 }
-                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
+                else if (cm == SEG_LINETO)
                 {
                     frame->line_to(x,y);
                     face_segments.push_back(segment_t(x0,y0,x,y));
+                }
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close_path();
                 }
                 x0 = x;
                 y0 = y;
@@ -385,10 +417,15 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
                     frame->move_to(x,y+height);
                     roof->move_to(x,y+height);
                 }
-                else if (cm == SEG_LINETO || cm == SEG_CLOSE)
+                else if (cm == SEG_LINETO)
                 {
                     frame->line_to(x,y+height);
                     roof->line_to(x,y+height);
+                }
+                else if (cm == SEG_CLOSE)
+                {
+                    frame->close_path();
+                    roof->close_path();
                 }
             }
 
@@ -439,6 +476,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
             padding *= half_stroke;
         if (std::fabs(sym.offset()) > 0)
             padding *= std::fabs(sym.offset()) * 1.2;
+        padding *= scale_factor_;
         clipping_extent.pad(padding);
     }
     vertex_converter<box2d<double>, cairo_context, line_symbolizer,
@@ -530,14 +568,14 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
             }
             if(attr.fill_gradient.get_gradient_type() != NO_GRADIENT)
             {
-                cairo_gradient g(attr.fill_gradient,attr.fill_opacity*opacity);
+                cairo_gradient g(attr.fill_gradient,attr.fill_opacity * attr.opacity * opacity);
 
                 context.set_gradient(g,bbox);
                 context.fill();
             }
             else if(attr.fill_flag)
             {
-                double fill_opacity = attr.fill_opacity * opacity * attr.fill_color.opacity();
+                double fill_opacity = attr.fill_opacity * attr.opacity * opacity * attr.fill_color.opacity();
                 context.set_color(attr.fill_color.r/255.0,attr.fill_color.g/255.0,
                                   attr.fill_color.b/255.0, fill_opacity);
                 context.fill();
@@ -553,13 +591,13 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
                 context.set_line_cap(line_cap_enum(attr.line_cap));
                 context.set_line_join(line_join_enum(attr.line_join));
                 context.set_miter_limit(attr.miter_limit);
-                cairo_gradient g(attr.stroke_gradient,attr.fill_opacity*opacity);
+                cairo_gradient g(attr.stroke_gradient,attr.fill_opacity * attr.opacity * opacity);
                 context.set_gradient(g,bbox);
                 context.stroke();
             }
             else if (attr.stroke_flag)
             {
-                double stroke_opacity = attr.stroke_opacity * opacity * attr.stroke_color.opacity();
+                double stroke_opacity = attr.stroke_opacity * attr.opacity * opacity * attr.stroke_color.opacity();
                 context.set_color(attr.stroke_color.r/255.0,attr.stroke_color.g/255.0,
                                   attr.stroke_color.b/255.0, stroke_opacity);
                 context.set_line_width(attr.stroke_width);
@@ -573,7 +611,11 @@ void render_vector_marker(cairo_context & context, pixel_position const& pos, ma
 }
 
 
-void cairo_renderer_base::render_marker(pixel_position const& pos, marker const& marker, const agg::trans_affine & tr, double opacity, bool recenter)
+void cairo_renderer_base::render_marker(pixel_position const& pos,
+                                        marker const& marker,
+                                        agg::trans_affine const& tr,
+                                        double opacity,
+                                        bool recenter)
 
 {
     cairo_save_restore guard(context_);
@@ -582,21 +624,24 @@ void cairo_renderer_base::render_marker(pixel_position const& pos, marker const&
         mapnik::svg_path_ptr vmarker = *marker.get_vector_data();
         if (vmarker)
         {
+            agg::trans_affine marker_tr = tr;
+            marker_tr *=agg::trans_affine_scaling(scale_factor_);
             agg::pod_bvector<svg::path_attributes> const & attributes = vmarker->attributes();
-            render_vector_marker(context_, pos, *vmarker, attributes, tr, opacity, recenter);
+            render_vector_marker(context_, pos, *vmarker, attributes, marker_tr, opacity, recenter);
         }
     }
     else if (marker.is_bitmap())
     {
-        agg::trans_affine matrix = tr;
         double width = (*marker.get_bitmap_data())->width();
         double height = (*marker.get_bitmap_data())->height();
         double cx = 0.5 * width;
         double cy = 0.5 * height;
-        matrix *= agg::trans_affine_translation(
-                     boost::math::iround(pos.x - cx),
-                     boost::math::iround(pos.y - cy));
-        context_.add_image(matrix, **marker.get_bitmap_data(), opacity);
+        agg::trans_affine marker_tr;
+        marker_tr *= agg::trans_affine_translation(-cx,-cy);
+        marker_tr *= tr;
+        marker_tr *= agg::trans_affine_scaling(scale_factor_);
+        marker_tr *= agg::trans_affine_translation(pos.x,pos.y);
+        context_.add_image(marker_tr, **marker.get_bitmap_data(), opacity);
     }
 }
 
@@ -619,6 +664,15 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
     if (marker)
     {
+        box2d<double> const& bbox = (*marker)->bounding_box();
+        coord2d center = bbox.center();
+
+        agg::trans_affine tr;
+        evaluate_transform(tr, feature, sym.get_image_transform());
+        agg::trans_affine_translation recenter(-center.x, -center.y);
+        agg::trans_affine recenter_tr = recenter * tr;
+        box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_);
+
         for (unsigned i = 0; i < feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
@@ -639,14 +693,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
 
             prj_trans.backward(x, y, z);
             t_.forward(&x, &y);
-
-            double dx = 0.5 * (*marker)->width();
-            double dy = 0.5 * (*marker)->height();
-            agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
-            evaluate_transform(tr, feature, sym.get_image_transform());
-            box2d<double> label_ext (-dx, -dy, dx, dy);
-            label_ext *= tr;
-            label_ext *= agg::trans_affine_translation(x,y);
+            label_ext.re_center(x,y);
             if (sym.get_allow_overlap() ||
                 detector_->has_placement(label_ext))
             {
@@ -681,15 +728,9 @@ void cairo_renderer_base::process(shield_symbolizer const& sym,
             pixel_position pos = helper.get_marker_position(placements[ii]);
             pos.x += 0.5 * helper.get_marker_width();
             pos.y += 0.5 * helper.get_marker_height();
-            double dx = 0.5 * helper.get_marker_width();
-            double dy = 0.5 * helper.get_marker_height();
-            agg::trans_affine marker_tr = agg::trans_affine_translation(-dx,-dy);
-            marker_tr *= agg::trans_affine_scaling(scale_factor_);
-            marker_tr *= agg::trans_affine_translation(dx,dy);
-            marker_tr *= helper.get_image_transform();
             render_marker(pos,
                           helper.get_marker(),
-                          marker_tr,
+                          helper.get_image_transform(),
                           sym.get_opacity());
 
             context_.add_text(placements[ii], face_manager_, font_manager_, scale_factor_);
@@ -775,8 +816,8 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
                                   mapnik::feature_impl & feature,
                                   proj_transform const& prj_trans)
 {
-    typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
-    typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
+    //typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
+    //typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
     cairo_save_restore guard(context_);
     context_.set_operator(sym.comp_op());
@@ -850,10 +891,10 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
         box2d<double> target_ext = box2d<double>(source->ext_);
         prj_trans.backward(target_ext, PROJ_ENVELOPE_POINTS);
         box2d<double> ext = t_.forward(target_ext);
-        int start_x = static_cast<int>(ext.minx());
-        int start_y = static_cast<int>(ext.miny());
-        int end_x = static_cast<int>(std::ceil(ext.maxx()));
-        int end_y = static_cast<int>(std::ceil(ext.maxy()));
+        int start_x = static_cast<int>(std::floor(ext.minx()+.5));
+        int start_y = static_cast<int>(std::floor(ext.miny()+.5));
+        int end_x = static_cast<int>(std::floor(ext.maxx()+.5));
+        int end_y = static_cast<int>(std::floor(ext.maxy()+.5));
         int raster_width = end_x - start_x;
         int raster_height = end_y - start_y;
         if (raster_width > 0 && raster_height > 0)
@@ -870,7 +911,10 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
             }
             if (premultiply_source)
             {
-                agg::rendering_buffer buffer(source->data_.getBytes(),source->data_.width(),source->data_.height(),source->data_.width() * 4);
+                agg::rendering_buffer buffer(source->data_.getBytes(),
+                                             source->data_.width(),
+                                             source->data_.height(),
+                                             source->data_.width() * 4);
                 agg::pixfmt_rgba32 pixf(buffer);
                 pixf.premultiply();
             }
@@ -888,14 +932,20 @@ void cairo_renderer_base::process(raster_symbolizer const& sym,
             {
                 if (scaling_method == SCALING_BILINEAR8)
                 {
-                    scale_image_bilinear8<image_data_32>(target.data_,source->data_, 0.0, 0.0);
-                } else
+                    scale_image_bilinear8<image_data_32>(target.data_,
+                                                         source->data_,
+                                                         0.0,
+                                                         0.0);
+                }
+                else
                 {
-                    double scaling_ratio = ext.width() / source->data_.width();
+                    double image_ratio_x = ext.width() / source->data_.width();
+                    double image_ratio_y = ext.height() / source->data_.height();
                     scale_image_agg<image_data_32>(target.data_,
                                                    source->data_,
                                                    scaling_method,
-                                                   scaling_ratio,
+                                                   image_ratio_x,
+                                                   image_ratio_y,
                                                    0.0,
                                                    0.0,
                                                    filter_radius);
@@ -981,7 +1031,7 @@ struct markers_dispatch
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 agg::trans_affine matrix = marker_trans_;
                 matrix.rotate(angle);
@@ -1069,7 +1119,7 @@ struct markers_dispatch_2
                                                                       sym_.get_max_error(),
                                                                       sym_.get_allow_overlap());
             double x, y, angle;
-            while (placement.get_point(x, y, angle))
+            while (placement.get_point(x, y, angle, sym_.get_ignore_placement()))
             {
                 coord2d center = bbox_.center();
                 agg::trans_affine matrix = agg::trans_affine_translation(-center.x, -center.y);
@@ -1112,7 +1162,7 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
             box2d<double> const& bbox = (*mark)->bounding_box();
-            setup_transform_scaling(tr, bbox, feature, sym);
+            setup_transform_scaling(tr, bbox.width(), bbox.height(), feature, sym);
             evaluate_transform(tr, feature, sym.get_image_transform());
 
             if ((*mark)->is_vector())

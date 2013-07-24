@@ -40,7 +40,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/color.hpp>
-#include <mapnik/feature.hpp>
 #include <mapnik/enumeration.hpp>
 
 // boost
@@ -51,6 +50,10 @@
 
 namespace mapnik
 {
+
+class feature_impl;
+class raster;
+
 
 //! \brief Enumerates the modes of interpolation
 enum colorizer_mode_enum
@@ -197,7 +200,7 @@ public:
     //!
     //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
     //! \param[in] f The feature used to find 'NODATA' information if available
-    void colorize(raster_ptr const& raster, Feature const& f) const;
+    void colorize(boost::shared_ptr<raster> const& raster, feature_impl const& f) const;
 
 
     //! \brief Perform the translation of input to output

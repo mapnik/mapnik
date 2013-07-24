@@ -32,7 +32,7 @@
 
 namespace mapnik
 {
-MAPNIK_DECL void load_map(Map & map, std::string const& filename, bool strict = false);
+MAPNIK_DECL void load_map(Map & map, std::string const& filename, bool strict = false, std::string base_path="");
 MAPNIK_DECL void load_map_string(Map & map, std::string const& str, bool strict = false, std::string base_path="");
 }
 
