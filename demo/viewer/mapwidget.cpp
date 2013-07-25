@@ -35,6 +35,10 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/image_util.hpp>
 
+#ifdef SVG_RENDERER
+#include <mapnik/svg/output/svg_renderer.hpp>
+#endif
+
 #ifdef HAVE_CAIRO
 // cairo
 #include <mapnik/cairo_renderer.hpp>
@@ -664,8 +668,6 @@ void MapWidget::export_skia_pdf(QString const& filename)
 }
 #endif
 
-
-
 void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
     std::cerr << "Not supported" << std::endl;
@@ -675,6 +677,7 @@ void render_grid(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 void MapWidget::export_cairo_pdf(QString const& filename)
 {
     save_to_cairo_file(*map_,filename.toStdString(),scaling_factor_);
+    std::cerr << "Done" << std::endl;
 }
 void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
 {
@@ -687,6 +690,30 @@ void render_cairo(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     QImage image((uchar*)buf.raw_data(),buf.width(),buf.height(),QImage::Format_ARGB32);
     pix = QPixmap::fromImage(image.rgbSwapped());
 
+}
+#endif
+
+
+#ifdef SVG_RENDERER
+void MapWidget::export_mapnik_svg(QString const& filename)
+{
+    boost::timer::auto_cpu_timer t;
+    std::ofstream output_stream(filename.toStdString().c_str());
+    if (output_stream)
+    {
+        std::ostream_iterator<char> output_itr(output_stream);
+        mapnik::svg_renderer<std::ostream_iterator<char> > ren(*map_, output_itr, scaling_factor_);
+        try
+        {
+            ren.apply();
+        }
+        catch (...)
+        {
+            std::cerr << "Exception caught." << std::endl;
+        }
+        output_stream.close();
+    }
+    std::cerr << "Done" << std::endl;
 }
 #endif
 

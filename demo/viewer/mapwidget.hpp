@@ -98,6 +98,10 @@ public:
     void export_cairo_pdf(QString const& filename);
 #endif
 
+#ifdef SVG_RENDERER
+    void export_mapnik_svg(QString const& filename);
+#endif
+
 public slots:
     void zoomToLevel(int level);
     void updateMap();

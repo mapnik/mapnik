@@ -267,7 +267,7 @@ void MainWindow::export_as()
 void MainWindow::export_as_skia_pdf()
 {
     QAction *action = qobject_cast<QAction *>(sender());
-    QByteArray fileFormat("pdf");
+    QByteArray fileFormat = action->data().toByteArray();
     QString initialPath = QDir::currentPath() + "/map-skia." + fileFormat;
 
     QString fileName = QFileDialog::getSaveFileName(this, tr("Export As Skia PDF"),
@@ -287,9 +287,8 @@ void MainWindow::export_as_skia_pdf()
 #ifdef HAVE_CAIRO
 void MainWindow::export_as_cairo_pdf()
 {
-
     QAction *action = qobject_cast<QAction *>(sender());
-    QByteArray fileFormat("pdf");
+    QByteArray fileFormat = action->data().toByteArray();
     QString initialPath = QDir::currentPath() + "/map-cairo." + fileFormat;
 
     QString fileName = QFileDialog::getSaveFileName(this, tr("Export As Cairo PDF"),
@@ -304,6 +303,29 @@ void MainWindow::export_as_cairo_pdf()
     }
 
 }
+#endif
+
+#ifdef SVG_RENDERER
+
+void MainWindow::export_as_mapnik_svg()
+{
+    QAction *action = qobject_cast<QAction *>(sender());
+    QByteArray fileFormat = action->data().toByteArray();
+    QString initialPath = QDir::currentPath() + "/map-mapnik." + fileFormat;
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Export As Mapnik SVG"),
+                                                    initialPath,
+                                                    tr("%1 Files (*.%2);;All Files (*)")
+                                                    .arg(QString(fileFormat.toUpper()))
+                                                    .arg(QString(fileFormat)));
+    if (!fileName.isEmpty())
+    {
+        std::cerr << "Mapnik SVG" << std::endl;
+        mapWidget_->export_mapnik_svg(fileName);
+    }
+
+}
+
 #endif
 
 void MainWindow::print()
@@ -378,13 +400,21 @@ void MainWindow::createActions()
         exportAsActs.append(action);
     }
 #ifdef SKIA_RENDERER
-    exportSkiaPdf = new QAction("Skia",this);
-    connect(exportSkiaPdf, SIGNAL(triggered()), this, SLOT(export_as_skia_pdf()));
+    exportSkiaPDF = new QAction("Skia",this);
+    exportSkiaPDF->setData(QByteArray("pdf"));
+    connect(exportSkiaPDF, SIGNAL(triggered()), this, SLOT(export_as_skia_pdf()));
 #endif
 
 #ifdef HAVE_CAIRO
-    exportCairoPdf = new QAction("Cairo",this);
-    connect(exportCairoPdf, SIGNAL(triggered()), this, SLOT(export_as_cairo_pdf()));
+    exportCairoPDF = new QAction("Cairo",this);
+    exportCairoPDF->setData(QByteArray("pdf"));
+    connect(exportCairoPDF, SIGNAL(triggered()), this, SLOT(export_as_cairo_pdf()));
+#endif
+
+#ifdef SVG_RENDERER
+    exportMapnikSVG = new QAction("Mapnik",this);
+    exportMapnikSVG->setData(QByteArray("svg"));
+    connect(exportMapnikSVG, SIGNAL(triggered()), this, SLOT(export_as_mapnik_svg()));
 #endif
 
     printAct = new QAction(QIcon(":/images/print.png"),tr("&Print ..."),this);
@@ -405,15 +435,19 @@ void MainWindow::createMenus()
     foreach (QAction *action, exportAsActs)
         exportMenu->addAction(action);
 
-    exportPdfMenu = new QMenu(tr("&Export As PDF"), this);
-    exportPdfMenu->addAction(exportSkiaPdf);
-    exportPdfMenu->addAction(exportCairoPdf);
+    exportPDFMenu = new QMenu(tr("&Export As PDF"), this);
+    exportPDFMenu->addAction(exportSkiaPDF);
+    exportPDFMenu->addAction(exportCairoPDF);
+
+    exportSVGMenu = new QMenu(tr("&Export As SVG"), this);
+    exportSVGMenu->addAction(exportMapnikSVG);
 
     fileMenu = new QMenu(tr("&File"),this);
     fileMenu->addAction(openAct);
     fileMenu->addAction(saveAct);
     fileMenu->addMenu(exportMenu);
-    fileMenu->addMenu(exportPdfMenu);
+    fileMenu->addMenu(exportPDFMenu);
+    fileMenu->addMenu(exportSVGMenu);
     fileMenu->addAction(printAct);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
