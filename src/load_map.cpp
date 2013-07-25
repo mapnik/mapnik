@@ -199,6 +199,26 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 map.set_background_image(ensure_relative_to_xml(image_filename));
             }
 
+            optional<std::string> comp_op_name = map_node.get_opt_attr<std::string>("background-image-comp-op");
+            if (comp_op_name)
+            {
+                optional<composite_mode_e> comp_op = comp_op_from_string(*comp_op_name);
+                if (comp_op)
+                {
+                    map.set_background_image_comp_op(*comp_op);
+                }
+                else
+                {
+                    throw config_error("failed to parse background-image-comp-op: '" + *comp_op_name + "'");
+                }
+            }
+    
+            optional<float> opacity = map_node.get_opt_attr<float>("background-image-opacity");
+            if (opacity)
+            {
+                map.set_background_image_opacity(*opacity);
+            }
+
             std::string srs = map_node.get_attr("srs", map.srs());
             try
             {

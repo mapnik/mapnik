@@ -412,6 +412,22 @@ void export_map()
                       ">>> m.background_image = '/path/to/image.png'\n"
             )
 
+        .add_property("background_image_comp_op",&Map::background_image_comp_op,
+                      &Map::set_background_image_comp_op,
+                      "The background image compositing operation.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.background_image_comp_op = mapnik.CompositeOp.src_over\n"
+            )
+
+        .add_property("background_image_opacity",&Map::background_image_opacity,
+                      &Map::set_background_image_opacity,
+                      "The background image opacity.\n"
+                      "\n"
+                      "Usage:\n"
+                      ">>> m.background_image_opacity = 1.0\n"
+            )
+
         .add_property("base",
                       make_function(&Map::base_path,return_value_policy<copy_const_reference>()),
                       &Map::set_base_path,

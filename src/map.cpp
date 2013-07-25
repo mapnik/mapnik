@@ -67,6 +67,8 @@ Map::Map()
     height_(400),
     srs_(MAPNIK_LONGLAT_PROJ),
     buffer_size_(0),
+    background_image_comp_op_(src_over),
+    background_image_opacity_(1.0),
     aspectFixMode_(GROW_BBOX),
     base_path_("") {}
 
@@ -75,6 +77,8 @@ Map::Map(int width,int height, std::string const& srs)
       height_(height),
       srs_(srs),
       buffer_size_(0),
+      background_image_comp_op_(src_over),
+      background_image_opacity_(1.0),
       aspectFixMode_(GROW_BBOX),
       base_path_("") {}
 
@@ -85,6 +89,8 @@ Map::Map(Map const& rhs)
       buffer_size_(rhs.buffer_size_),
       background_(rhs.background_),
       background_image_(rhs.background_image_),
+      background_image_comp_op_(rhs.background_image_comp_op_),
+      background_image_opacity_(rhs.background_image_opacity_),
       styles_(rhs.styles_),
       fontsets_(rhs.fontsets_),
       layers_(rhs.layers_),
@@ -105,6 +111,8 @@ Map& Map::operator=(Map const& rhs)
     buffer_size_ = rhs.buffer_size_;
     background_=rhs.background_;
     background_image_=rhs.background_image_;
+    background_image_comp_op_=rhs.background_image_comp_op_;
+    background_image_opacity_=rhs.background_image_opacity_;
     styles_=rhs.styles_;
     fontsets_ = rhs.fontsets_;
     layers_=rhs.layers_;
@@ -318,6 +326,26 @@ boost::optional<std::string> const& Map::background_image() const
 void Map::set_background_image(std::string const& image_filename)
 {
     background_image_ = image_filename;
+}
+
+composite_mode_e Map::background_image_comp_op() const
+{
+    return background_image_comp_op_;
+}
+
+void Map::set_background_image_comp_op(composite_mode_e comp_op)
+{
+    background_image_comp_op_ = comp_op;
+}
+
+float Map::background_image_opacity() const
+{
+    return background_image_opacity_;
+}
+
+void Map::set_background_image_opacity(float opacity)
+{
+    background_image_opacity_ = opacity;
 }
 
 void Map::set_maximum_extent(box2d<double> const& box)
