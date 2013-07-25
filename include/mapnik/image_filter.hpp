@@ -504,41 +504,46 @@ void apply_filter(Src & src, scale_hsla const& transform)
                 uint8_t & g = get_color(src_it[x], green_t());
                 uint8_t & b = get_color(src_it[x], blue_t());
                 uint8_t & a = get_color(src_it[x], alpha_t());
+                double r2 = static_cast<double>(r)/255.0;
+                double g2 = static_cast<double>(g)/255.0;
+                double b2 = static_cast<double>(b)/255.0;
                 double a2 = static_cast<double>(a)/255.0;
-                double a1 = a2;
-                bool alpha_modified = false;
-                if (set_alpha && a2 > 0.01)
+                // demultiply
+                if (a2 <= 0.0)
+                {
+                    r = g = b = 0;
+                    continue;
+                }
+                else
+                {
+                    r2 /= a2;
+                    g2 /= a2;
+                    b2 /= a2;
+                }
+                if (set_alpha)
                 {
                     a2 = transform.a0 + (a2 * (transform.a1 - transform.a0));
                     if (a2 <= 0)
                     {
-                        a = 0;
+                        r = g = b = a = 0;
+                        continue;
+                    }
+                    else if (a2 > 1)
+                    {
+                        a2 = 1;
+                        a = 255;
                     }
                     else
                     {
-                        a = static_cast<unsigned>(std::floor((a2 * 255.0) +.5));
-                        if (a > 255) a = 255;
+                        a = static_cast<uint8_t>(std::floor((a2 * 255.0) +.5));
                     }
-                    alpha_modified = true;
                 }
-                if (tinting && a > 1)
+                if (tinting)
                 {
                     double h;
                     double s;
                     double l;
-                    // demultiply
-                    if (a1 <= 0.0)
-                    {
-                        r = g = b = 0;
-                        continue;
-                    }
-                    else if (a1 < 1)
-                    {
-                        r /= a1;
-                        g /= a1;
-                        b /= a1;
-                    }
-                    rgb2hsl(r,g,b,h,s,l);
+                    rgb2hsl(r2,g2,b2,h,s,l);
                     double h2 = transform.h0 + (h * (transform.h1 - transform.h0));
                     double s2 = transform.s0 + (s * (transform.s1 - transform.s0));
                     double l2 = transform.l0 + (l * (transform.l1 - transform.l0));
@@ -548,35 +553,19 @@ void apply_filter(Src & src, scale_hsla const& transform)
                     else if (s2 < 0) { s2 = 0; }
                     if (l2 > 1) { l2 = 1; }
                     else if (l2 < 0) { l2 = 0; }
-                    hsl2rgb(h2,s2,l2,r,g,b);
-                    // premultiply
-                    // we only work with premultiplied source,
-                    // thus all color values must be <= alpha
-                    r *= a2;
-                    g *= a2;
-                    b *= a2;
+                    hsl2rgb(h2,s2,l2,r2,g2,b2);
                 }
-                else if (alpha_modified)
-                {
-                    // demultiply
-                    if (a1 <= 0.0)
-                    {
-                        r = g = b = 0;
-                        continue;
-                    }
-                    else if (a1 < 1)
-                    {
-                        r /= a1;
-                        g /= a1;
-                        b /= a1;
-                    }
-                    // premultiply
-                    // we only work with premultiplied source,
-                    // thus all color values must be <= alpha
-                    r *= a2;
-                    g *= a2;
-                    b *= a2;
-                }
+                // premultiply
+                r2 *= a2;
+                g2 *= a2;
+                b2 *= a2;
+                r = static_cast<uint8_t>(std::floor((r2*255.0)+.5));
+                g = static_cast<uint8_t>(std::floor((g2*255.0)+.5));
+                b = static_cast<uint8_t>(std::floor((b2*255.0)+.5));
+                // all color values must be <= alpha
+                if (r>a) r=a;
+                if (g>a) g=a;
+                if (b>a) b=a;
             }
         }
     }

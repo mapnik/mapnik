@@ -27,11 +27,8 @@
 
 namespace mapnik {
 
-static inline void rgb2hsl(unsigned char red, unsigned char green, unsigned char blue,
-             double & h, double & s, double & l) {
-    double r = red/255.0;
-    double g = green/255.0;
-    double b = blue/255.0;
+inline void rgb2hsl(double r, double g, double b,
+                    double & h, double & s, double & l) {
     double max = std::max(r,std::max(g,b));
     double min = std::min(r,std::min(g,b));
     double delta = max - min;
@@ -47,10 +44,10 @@ static inline void rgb2hsl(unsigned char red, unsigned char green, unsigned char
 }
 
 // http://www.w3.org/TR/css3-color/#hsl-color
-inline double hue_to_rgb( double m1, double m2, double h)
+inline double hue_to_rgb(double m1, double m2, double h)
 {
     if (h < 0.0) h = h + 1.0;
-    else if (h > 1) h = h - 1.0;
+    else if (h > 1.0) h = h - 1.0;
     if (h * 6 < 1.0)
         return m1 + (m2 - m1) * h * 6.0;
     if (h * 2 < 1.0)
@@ -60,16 +57,16 @@ inline double hue_to_rgb( double m1, double m2, double h)
     return m1;
 }
 
-static inline void hsl2rgb(double h, double s, double l,
-             unsigned char & r, unsigned char & g, unsigned char & b) {
+inline void hsl2rgb(double h, double s, double l,
+                    double & r, double & g, double & b) {
     if (!s) {
-        r = g = b = static_cast<unsigned char>(std::floor((l * 255.0)+.5));
+        r = g = b = l;
     }
-    double m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
-    double m1 = l * 2 - m2;
-    r = static_cast<unsigned char>(std::floor((hue_to_rgb(m1, m2, h + 1.0/3.0) * 255.0)+.5));
-    g = static_cast<unsigned char>(std::floor((hue_to_rgb(m1, m2, h) * 255.0)+.5));
-    b = static_cast<unsigned char>(std::floor((hue_to_rgb(m1, m2, h - 1.0/3.0) * 255.0)+.5));
+    double m2 = (l <= 0.5) ? l * (s + 1.0) : l + s - l * s;
+    double m1 = l * 2.0 - m2;
+    r = hue_to_rgb(m1, m2, h + 1.0/3.0);
+    g = hue_to_rgb(m1, m2, h);
+    b = hue_to_rgb(m1, m2, h - 1.0/3.0);
 }
 
 }
