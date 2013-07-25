@@ -41,7 +41,7 @@ class QDoubleSpinBox;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-    public:
+public:
     MainWindow();
     virtual ~MainWindow();
     void set_default_extent(double x0,double y0,double x1, double y1);

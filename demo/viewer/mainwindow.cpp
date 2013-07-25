@@ -263,10 +263,9 @@ void MainWindow::export_as()
     }
 }
 
+#ifdef SKIA_RENDERER
 void MainWindow::export_as_skia_pdf()
 {
-    std::cerr << "Skia PDF" << std::endl;
-
     QAction *action = qobject_cast<QAction *>(sender());
     QByteArray fileFormat("pdf");
     QString initialPath = QDir::currentPath() + "/map-skia." + fileFormat;
@@ -283,11 +282,29 @@ void MainWindow::export_as_skia_pdf()
     }
 
 }
+#endif
 
+#ifdef HAVE_CAIRO
 void MainWindow::export_as_cairo_pdf()
 {
-    std::cerr << "Cairo PDF" << std::endl;
+
+    QAction *action = qobject_cast<QAction *>(sender());
+    QByteArray fileFormat("pdf");
+    QString initialPath = QDir::currentPath() + "/map-cairo." + fileFormat;
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Export As Cairo PDF"),
+                                                    initialPath,
+                                                    tr("%1 Files (*.%2);;All Files (*)")
+                                                    .arg(QString(fileFormat.toUpper()))
+                                                    .arg(QString(fileFormat)));
+    if (!fileName.isEmpty())
+    {
+        std::cerr << "Cairo PDF" << std::endl;
+        mapWidget_->export_cairo_pdf(fileName);
+    }
+
 }
+#endif
 
 void MainWindow::print()
 {
@@ -360,11 +377,15 @@ void MainWindow::createActions()
         connect(action, SIGNAL(triggered()), this, SLOT(export_as()));
         exportAsActs.append(action);
     }
-
+#ifdef SKIA_RENDERER
     exportSkiaPdf = new QAction("Skia",this);
     connect(exportSkiaPdf, SIGNAL(triggered()), this, SLOT(export_as_skia_pdf()));
+#endif
+
+#ifdef HAVE_CAIRO
     exportCairoPdf = new QAction("Cairo",this);
     connect(exportCairoPdf, SIGNAL(triggered()), this, SLOT(export_as_cairo_pdf()));
+#endif
 
     printAct = new QAction(QIcon(":/images/print.png"),tr("&Print ..."),this);
     printAct->setShortcut(tr("Ctrl+E"));
@@ -425,9 +446,7 @@ void MainWindow::createToolBars()
 #endif
 #ifdef SKIA_RENDERER
     renderer_selector_->addItem("Skia");
-//#ifdef SK_SUPPORT_GPU
     renderer_selector_->addItem("Skia-Gpu");
-//#endif
 #endif
     renderer_selector_->addItem("Grid");
     fileToolBar->addWidget(renderer_selector_);

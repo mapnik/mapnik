@@ -90,7 +90,14 @@ public:
     void panUp();
     void panDown();
     void set_scaling_factor(double);
+#ifdef SKIA_RENDERER
     void export_skia_pdf(QString const& filename);
+#endif
+
+#ifdef HAVE_CAIRO
+    void export_cairo_pdf(QString const& filename);
+#endif
+
 public slots:
     void zoomToLevel(int level);
     void updateMap();
