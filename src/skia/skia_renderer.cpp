@@ -357,7 +357,7 @@ void skia_renderer::process(text_symbolizer const& sym,
             SkPaint paint;
             paint.setAntiAlias(true);
             set_comp_op(paint, sym.comp_op());
-            SkTypeface * typeface = typeface_cache_.create("ArialUnicodeMS"); // FIXME
+            SkTypeface * typeface = typeface_cache_.create("DejaVuSans"); // FIXME
             if (typeface) paint.setTypeface(typeface);
             paint.setTextEncoding(SkPaint::kUTF32_TextEncoding);
 
