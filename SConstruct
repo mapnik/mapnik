@@ -1327,19 +1327,19 @@ if not preconfigured:
         else:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
 
-    if not env['HOST']:
         for libname, headers, required, lang, define in OPTIONAL_LIBSHEADERS:
-            if not conf.CheckLibWithHeader(libname, headers, lang):
-                if required:
-                    color_print(1, 'Could not find required header or shared library for %s' % libname)
-                    env['MISSING_DEPS'].append(libname)
+            if not env['HOST']:
+                if not conf.CheckLibWithHeader(libname, headers, lang):
+                    if required:
+                        color_print(1, 'Could not find required header or shared library for %s' % libname)
+                        env['MISSING_DEPS'].append(libname)
+                    else:
+                        color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                        env['SKIPPED_DEPS'].append(libname)
                 else:
-                    color_print(4, 'Could not find optional header or shared library for %s' % libname)
-                    env['SKIPPED_DEPS'].append(libname)
+                    env.Append(CPPDEFINES = define)
             else:
                 env.Append(CPPDEFINES = define)
-    else:
-        env.Append(CPPDEFINES = define)
 
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
