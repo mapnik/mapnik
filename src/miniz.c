@@ -798,7 +798,7 @@ size_t tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void 
 void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, int num_chans, size_t *pLen_out);
 
 // Output stream interface. The compressor uses this interface to write compressed data. It'll typically be called TDEFL_OUT_BUF_SIZE at a time.
-typedef mz_bool (*tdefl_put_buf_func_ptr)(const void* pBuf, int len, void *pUser);
+typedef mz_bool (*tdefl_put_buf_func_ptr)(const void* pBuf, size_t len, void *pUser);
 
 // tdefl_compress_mem_to_output() compresses a block to an output stream. The above helpers use this function internally.
 mz_bool tdefl_compress_mem_to_output(const void *pBuf, size_t buf_len, tdefl_put_buf_func_ptr pPut_buf_func, void *pPut_buf_user, int flags);
@@ -2704,7 +2704,7 @@ struct tdefl_output_buffer
   mz_bool m_expandable;
 };
 
-static mz_bool tdefl_output_buffer_putter(const void *pBuf, int len, void *pUser)
+static mz_bool tdefl_output_buffer_putter(const void *pBuf, size_t len, void *pUser)
 {
   tdefl_output_buffer *p = (tdefl_output_buffer *)pUser;
   size_t new_size = p->m_size + len;
