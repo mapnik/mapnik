@@ -284,15 +284,10 @@ void skia_renderer::process(line_symbolizer const& sym,
              dash.push_back(p.first * scale_factor_);
              dash.push_back(p.second * scale_factor_);
          }
+         paint.setPathEffect(new SkDashPathEffect(&dash[0], dash.size(), strk.dash_offset(), false));
 
-         SkDashPathEffect dash_effect(&dash[0], dash.size(), strk.dash_offset(), false);
-         paint.setPathEffect(&dash_effect);
-         canvas_.drawPath(path, paint);
      }
-     else
-     {
-         canvas_.drawPath(path, paint);
-     }
+     canvas_.drawPath(path, paint);
 }
 
 void skia_renderer::process(polygon_symbolizer const& sym,
