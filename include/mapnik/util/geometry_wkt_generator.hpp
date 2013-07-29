@@ -40,7 +40,6 @@
 #include <boost/type_traits/remove_pointer.hpp>
 
 #include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
-//#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 namespace boost { namespace spirit { namespace traits {
 

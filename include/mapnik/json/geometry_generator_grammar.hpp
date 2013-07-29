@@ -39,10 +39,7 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
-#include <boost/math/special_functions/trunc.hpp> // trunc to avoid needing C++11
-
-
-//#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+#include <boost/math/special_functions/trunc.hpp> // for vc++
 
 namespace boost { namespace spirit { namespace traits {
 
@@ -61,6 +58,52 @@ namespace phoenix = boost::phoenix;
 
 namespace {
 
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+struct get_type
+{
+    typedef int result_type;
+    result_type operator() (geometry_type const& geom) const
+    {
+        return static_cast<int>(geom.type());
+    }
+};
+
+struct get_first
+{
+    typedef geometry_type::value_type const result_type;
+    result_type operator() (geometry_type const& geom) const
+    {
+        geometry_type::value_type coord;
+        boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+        return coord;
+    }
+};
+
+struct multi_geometry_type
+{
+    typedef boost::tuple<unsigned,bool>  result_type;
+    result_type operator() (geometry_container const& geom) const
+    {
+        unsigned type = 0u;
+        bool collection = false;
+
+        geometry_container::const_iterator itr = geom.begin();
+        geometry_container::const_iterator end = geom.end();
+
+        for ( ; itr != end; ++itr)
+        {
+            if (type != 0u && itr->type() != type)
+            {
+                collection = true;
+                break;
+            }
+            type = itr->type();
+        }
+        if (geom.size() > 1) type +=3;
+        return boost::tuple<unsigned,bool>(type, collection);
+    }
+};
+#else
 struct get_type
 {
     template <typename T>
@@ -111,6 +154,7 @@ struct multi_geometry_type
         return boost::tuple<unsigned,bool>(type, collection);
     }
 };
+#endif
 
 
 template <typename T>
@@ -123,7 +167,7 @@ struct json_coordinate_policy : karma::real_policies<T>
     {
         if (n == 0.0) return 0;
         using namespace boost::spirit;
-        return static_cast<unsigned>(15 - boost::math::trunc(log10(traits::get_absolute_value(n))));
+        return static_cast<unsigned>(14 - boost::math::trunc(log10(traits::get_absolute_value(n))));
     }
 
     template <typename OutputIterator>
@@ -135,7 +179,7 @@ struct json_coordinate_policy : karma::real_policies<T>
 
     template <typename OutputIterator>
     static bool fraction_part(OutputIterator& sink, T n
-                       , unsigned adjprec, unsigned precision)
+                              , unsigned adjprec, unsigned precision)
     {
         if (n == 0) return true;
         return base_type::fraction_part(sink, n, adjprec, precision);
@@ -187,7 +231,10 @@ struct geometry_generator_grammar :
 
         polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
                            << karma::string[ if_ (_r1 > 1) [_1 = "],["]
-                                      .else_[_1 = '[' ]] | &uint_ << lit(','))
+                                             .else_[_1 = '[' ]]
+                           |
+                           &uint_(mapnik::SEG_LINETO))
+            << lit(',')
             << lit('[') << coord_type
             << lit(',')
             << coord_type << lit(']')
@@ -258,9 +305,9 @@ struct multi_geometry_generator_grammar :
         geometry = (lit("{\"type\":")
                     << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = _multi_type(_val)]
                     << lit(",\"coordinates\":")
-                    << karma::string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = '[']]
+                    << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
                     << coordinates
-                    << karma::string[ if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']']]
+                    << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
                     << lit('}')) | lit("null")
             ;
 

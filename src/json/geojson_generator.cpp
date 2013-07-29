@@ -44,7 +44,6 @@ bool feature_generator::generate(std::string & geojson, mapnik::feature_impl con
     return karma::generate(sink, *grammar_,f);
 }
 
-
 geometry_generator::geometry_generator()
     : grammar_(new multi_geometry_generator_grammar<sink_type>()) {}
 

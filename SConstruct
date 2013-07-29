@@ -1347,19 +1347,19 @@ if not preconfigured:
         else:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
 
-    if not env['HOST']:
         for libname, headers, required, lang, define in OPTIONAL_LIBSHEADERS:
-            if not conf.CheckLibWithHeader(libname, headers, lang):
-                if required:
-                    color_print(1, 'Could not find required header or shared library for %s' % libname)
-                    env['MISSING_DEPS'].append(libname)
+            if not env['HOST']:
+                if not conf.CheckLibWithHeader(libname, headers, lang):
+                    if required:
+                        color_print(1, 'Could not find required header or shared library for %s' % libname)
+                        env['MISSING_DEPS'].append(libname)
+                    else:
+                        color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                        env['SKIPPED_DEPS'].append(libname)
                 else:
-                    color_print(4, 'Could not find optional header or shared library for %s' % libname)
-                    env['SKIPPED_DEPS'].append(libname)
+                    env.Append(CPPDEFINES = define)
             else:
                 env.Append(CPPDEFINES = define)
-    else:
-        env.Append(CPPDEFINES = define)
 
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
@@ -1676,6 +1676,14 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
+        # c++11 support / https://github.com/mapnik/mapnik/issues/1683
+        #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
+        if 'c++11' in env['CUSTOM_CXXFLAGS']:
+            env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
+            #  - workaround boost gil channel_algorithm.hpp narrowing error
+            if 'clang++' in env['CXX']:
+                env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
             if env['DEFAULT_LOG_SEVERITY'] not in severities:
@@ -1716,7 +1724,7 @@ if not preconfigured:
         if not env['SUNCC']:
 
             # Common flags for CXX compiler.
-            common_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+            common_cxx_flags = '-Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
             # https://github.com/mapnik/mapnik/issues/1835
             if sys.platform == 'darwin' and env['CXX'] == 'g++':
