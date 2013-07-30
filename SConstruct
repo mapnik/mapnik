@@ -615,6 +615,10 @@ def get_pkg_lib(context, config, lib):
     if ret:
         try:
             value = call(cmd,silent=True)
+            if ' ' in value:
+                parts = value.split(' ')
+                if len(parts) > 1:
+                    value = parts[1]
             libnames = re.findall(libpattern,value)
             if libnames:
                 libname = libnames[0]
@@ -1364,7 +1368,12 @@ if not preconfigured:
                         conf.parse_config('GDAL_CONFIG',checks='--cflags')
                         libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
                         if libname:
-                            details['lib'] = libname
+                            if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
+                                env['SKIPPED_DEPS'].append('gdal')
+                                if libname in env['LIBS']:
+                                     env['LIBS'].remove(libname)
+                            else:
+                                details['lib'] = libname
                 elif plugin == 'postgis':
                     conf.parse_pg_config('PG_CONFIG')
                 elif plugin == 'ogr':
@@ -1374,7 +1383,13 @@ if not preconfigured:
                             conf.parse_config('GDAL_CONFIG',checks='--cflags')
                         libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
                         if libname:
-                            details['lib'] = libname
+                            if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
+                                if 'gdal' not in env['SKIPPED_DEPS']:
+                                    env['SKIPPED_DEPS'].append('gdal')
+                                if libname in env['LIBS']:
+                                     env['LIBS'].remove(libname)
+                            else:
+                                details['lib'] = libname
                 elif details['path'] and details['lib'] and details['inc']:
                     backup = env.Clone().Dictionary()
                     # Note, the 'delete_existing' keyword makes sure that these paths are prepended
