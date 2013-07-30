@@ -1674,6 +1674,8 @@ if not preconfigured:
         if 'c++11' in env['CUSTOM_CXXFLAGS']:
             env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
             #  - workaround boost gil channel_algorithm.hpp narrowing error
+            # TODO - remove when building against >= 1.55
+            # https://github.com/mapnik/mapnik/issues/1970
             if 'clang++' in env['CXX']:
                 env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
 
