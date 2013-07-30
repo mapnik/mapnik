@@ -37,6 +37,7 @@
   - avoiding including miniz.c here requires fwd declaring the two structs below
   - being able to fwd declare requires removing typedef from struct declarations in miniz.c
   - being able to fwd declare also requires using pointers to structs
+  - if updated, need to apply c++11 fix: https://github.com/mapnik/mapnik/issues/1967
 */
 
 // TODO: try using #define MINIZ_HEADER_FILE_ONLY
