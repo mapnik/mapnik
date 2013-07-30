@@ -30,12 +30,15 @@
 #include <boost/python.hpp>
 #include <boost/noncopyable.hpp>
 
+
 // mapnik
 #include <mapnik/feature.hpp>
+#include <mapnik/feature_factory.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/json/feature_parser.hpp>
 #include <mapnik/json/geojson_generator.hpp>
 
 // stl
@@ -49,7 +52,7 @@ using mapnik::context_type;
 using mapnik::context_ptr;
 using mapnik::feature_kv_iterator;
 
-mapnik::geometry_type const& (mapnik::feature_impl::*get_geometry_by_const_ref)(unsigned) const = &mapnik::feature_impl::get_geometry;
+mapnik::geometry_type const& (mapnik::feature_impl::*get_geometry_by_const_ref)(std::size_t) const = &mapnik::feature_impl::get_geometry;
 boost::ptr_vector<mapnik::geometry_type> const& (mapnik::feature_impl::*get_paths_by_const_ref)() const = &mapnik::feature_impl::paths;
 
 void feature_add_geometries_from_wkb(mapnik::feature_impl &feature, std::string wkb)
@@ -62,6 +65,18 @@ void feature_add_geometries_from_wkt(mapnik::feature_impl &feature, std::string 
 {
     bool result = mapnik::from_wkt(wkt, feature.paths());
     if (!result) throw std::runtime_error("Failed to parse WKT");
+}
+
+mapnik::feature_ptr from_geojson_impl(std::string const& json, mapnik::context_ptr const& ctx)
+{
+    mapnik::transcoder tr("utf8");
+    mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
+    mapnik::json::feature_parser<std::string::const_iterator> parser(tr);
+    if (!parser.parse(json.begin(), json.end(), *feature))
+    {
+        throw std::runtime_error("Failed to parse geojson feature");
+    }
+    return feature;
 }
 
 std::string feature_to_geojson(mapnik::feature_impl const& feature)
@@ -232,5 +247,7 @@ void export_feature()
         .def("__len__", &mapnik::feature_impl::size)
         .def("context",&mapnik::feature_impl::context)
         .def("to_geojson",&feature_to_geojson)
+        .def("from_geojson",from_geojson_impl)
+        .staticmethod("from_geojson")
         ;
 }

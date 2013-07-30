@@ -6,6 +6,11 @@ from utilities import execution_path, run_all
 import mapnik
 from binascii import unhexlify
 
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
@@ -221,6 +226,17 @@ def test_wkt_collection_flattening():
 #            compare_wkb_from_wkt(wkt)
 #        except RuntimeError, e:
 #            raise RuntimeError('%s %s' % (e, wkt))
+
+def test_creating_feature_from_geojson():
+    json_feat = {
+      "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [-122,48]},
+      "properties": {"name": "value"}
+    }
+    ctx = mapnik.Context()
+    feat = mapnik.Feature.from_geojson(json.dumps(json_feat),ctx)
+    eq_(feat.id(),1)
+    eq_(feat['name'],u'value')
 
 if __name__ == "__main__":
     setup()

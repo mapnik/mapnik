@@ -86,7 +86,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
         height = result.to_double() * scale_factor_;
     }
 
-    for (unsigned i=0;i<feature.num_geometries();++i)
+    for (std::size_t i=0;i<feature.num_geometries();++i)
     {
         geometry_type const& geom = feature.get_geometry(i);
         if (geom.size() > 2)

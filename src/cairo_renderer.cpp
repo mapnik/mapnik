@@ -354,7 +354,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
         height = result.to_double() * scale_factor_;
     }
 
-    for (unsigned i = 0; i < feature.num_geometries(); ++i)
+    for (std::size_t i = 0; i < feature.num_geometries(); ++i)
     {
         geometry_type const& geom = feature.get_geometry(i);
 
@@ -673,7 +673,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
         agg::trans_affine recenter_tr = recenter * tr;
         box2d<double> label_ext = bbox * recenter_tr * agg::trans_affine_scaling(scale_factor_);
 
-        for (unsigned i = 0; i < feature.num_geometries(); ++i)
+        for (std::size_t i = 0; i < feature.num_geometries(); ++i)
         {
             geometry_type const& geom = feature.get_geometry(i);
             double x;
@@ -760,7 +760,7 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
     pattern.set_filter(CAIRO_FILTER_BILINEAR);
     context_.set_line_width(height * scale_factor_);
 
-    for (unsigned i = 0; i < feature.num_geometries(); ++i)
+    for (std::size_t i = 0; i < feature.num_geometries(); ++i)
     {
         geometry_type & geom = feature.get_geometry(i);
 
