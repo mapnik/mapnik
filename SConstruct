@@ -1402,7 +1402,6 @@ if not preconfigured:
                         env.Replace(**backup)
                         env['SKIPPED_DEPS'].append(details['lib'])
                     if plugin == 'sqlite':
-                        SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                         sqlite_backup = env.Clone().Dictionary()
                         # if statically linking, on linux we likely
                         # need to link sqlite to pthreads and dl
@@ -1417,8 +1416,7 @@ if not preconfigured:
                                             env.Append(LIBS=lib)
                                 except OSError,e:
                                     pass
-                        if SQLITE_HAS_RTREE is None:
-                            SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
+                        SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                         if not SQLITE_HAS_RTREE:
                             env.Replace(**sqlite_backup)
                             if details['lib'] in env['LIBS']:
