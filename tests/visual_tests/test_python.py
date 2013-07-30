@@ -104,6 +104,6 @@ for format_tree in format_trees:
     expected = os.path.join(dirname,"images", 'python-%s-reference.png' % format_tree[0])
     mapnik.render_to_file(m, actual, 'png8:m=h')
     diff = compare(actual,expected)
-    if diff > 1:
+    if diff > 0:
        print 'comparision failed between:\n  %s (actual)\n  %s (expected)' % (actual,expected)
 
