@@ -133,23 +133,24 @@ static datasource_map ds_map = boost::assign::map_list_of
 ;
 #endif
 
+#ifdef MAPNIK_STATIC_PLUGINS
 datasource_ptr create_static_datasource(parameters const& params)
 {
     datasource_ptr ds;
-
-#ifdef MAPNIK_STATIC_PLUGINS
     boost::optional<std::string> type = params.get<std::string>("type");
-
     datasource_map::iterator it = ds_map.find(*type);
-
     if (it != ds_map.end())
     {
         ds = it->second(params);
     }
-#endif
-
     return ds;
 }
+#else
+datasource_ptr create_static_datasource(parameters const& /*params*/)
+{
+    return datasource_ptr();
+}
+#endif
 
 std::vector<std::string> get_static_datasource_names()
 {

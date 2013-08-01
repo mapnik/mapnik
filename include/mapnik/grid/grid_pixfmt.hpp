@@ -40,7 +40,7 @@ template<class ColorT> struct blender_gray
     enum base_scale_e { base_shift = color_type::base_shift };
 
     static AGG_INLINE void blend_pix(value_type* p, unsigned cv,
-                                     unsigned alpha, unsigned cover=0)
+                                     unsigned alpha, unsigned /*cover*/=0)
     {
         *p = (value_type)((((cv - calc_type(*p)) * alpha) + (calc_type(*p) << base_shift)) >> base_shift);
     }
@@ -256,7 +256,7 @@ public:
     void blend_hline(int x, int y,
                      unsigned len,
                      const color_type& c,
-                     agg::int8u cover)
+                     agg::int8u /*cover*/)
     {
         value_type* p = (value_type*)
             m_rbuf->row_ptr(x, y, len) + x * Step + Offset;
@@ -588,7 +588,7 @@ public:
     void blend_from_color(const SrcPixelFormatRenderer& from,
                           const color_type& color,
                           int xdst, int ydst,
-                          int xsrc, int ysrc,
+                          int /*xsrc*/, int ysrc,
                           unsigned len,
                           agg::int8u cover)
     {
@@ -615,7 +615,7 @@ public:
     void blend_from_lut(const SrcPixelFormatRenderer& from,
                         const color_type* color_lut,
                         int xdst, int ydst,
-                        int xsrc, int ysrc,
+                        int /*xsrc*/, int ysrc,
                         unsigned len,
                         agg::int8u cover)
     {

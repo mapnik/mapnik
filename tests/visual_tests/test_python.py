@@ -2,9 +2,10 @@
 import mapnik
 import sys
 import os.path
-from compare import compare, summary
+from compare import compare
 
 dirname = os.path.dirname(__file__)
+visual_output_dir = "/tmp/mapnik-visual-images"
 
 class MyText(mapnik.FormattingNode):
     def __init__(self):
@@ -71,7 +72,7 @@ m.append_style('Style', style)
 
 
 layer = mapnik.Layer('Layer')
-layer.datasource = mapnik.Datasource(**{file=os.path.join(dirname,"data/points.csv"))
+layer.datasource = mapnik.Datasource(**{'type':'csv','file':os.path.join(dirname,"data/points.csv")})
 layer.styles.append('Style')
 m.layers.append(layer)
 
@@ -99,9 +100,10 @@ format_trees = [
 
 for format_tree in format_trees:
     text.placements.defaults.format_tree = format_tree[1]
-    mapnik.render_to_file(m, os.path.join(dirname,"images", 'python-%s.png' % format_tree[0]), 'png')
-    compare(os.path.join(dirname,"images", 'python-%s.png' % format_tree[0]),
-            os.path.join(dirname,"images", 'python-%s-reference.png' % format_tree[0])
-            )
+    actual = os.path.join(visual_output_dir, 'python-%s.png' % format_tree[0])
+    expected = os.path.join(dirname,"images", 'python-%s-reference.png' % format_tree[0])
+    mapnik.render_to_file(m, actual, 'png8:m=h')
+    diff = compare(actual,expected)
+    if diff > 0:
+       print 'comparision failed between:\n  %s (actual)\n  %s (expected)' % (actual,expected)
 
-summary()

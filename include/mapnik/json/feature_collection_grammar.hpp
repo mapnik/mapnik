@@ -42,14 +42,14 @@ using standard_wide::space_type;
 struct generate_id
 {
     typedef int result_type;
-    
+
     generate_id(int start)
         : id_(start) {}
-    
+
     int operator() () const
     {
         return id_++;
-    }    
+    }
     mutable int id_;
 };
 
@@ -76,7 +76,7 @@ struct feature_collection_grammar :
 
         feature_collection = lit('{') >> (type | features) % lit(",") >> lit('}')
             ;
-        
+
         type = lit("\"type\"") > lit(":") > lit("\"FeatureCollection\"")
             ;
 
@@ -86,29 +86,29 @@ struct feature_collection_grammar :
             > -(feature(_val) % lit(','))
             > lit(']')
             ;
-        
+
         feature = eps[_a = phoenix::construct<mapnik::feature_ptr>(new_<mapnik::feature_impl>(ctx_,generate_id_()))]
             >> feature_g(*_a)[push_back(_r1,_a)]
             ;
-        
+
         type.name("type");
         features.name("features");
         feature.name("feature");
         feature_g.name("feature-grammar");
-        
+
         qi::on_error<qi::fail>
             (
                 feature_collection
                 , std::clog
                 << phoenix::val("Error parsing GeoJSON ")
-                << qi::_4                       
+                << qi::_4
                 << phoenix::val(" here: \"")
-                << construct<std::string>(qi::_3, qi::_2) 
+                << construct<std::string>(qi::_3, qi::_2)
                 << phoenix::val("\"")
                 << std::endl
                 );
     }
-    
+
     context_ptr ctx_;
     qi::rule<Iterator, std::vector<feature_ptr>(), space_type> feature_collection; // START
     qi::rule<Iterator, space_type> type;

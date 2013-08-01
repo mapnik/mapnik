@@ -266,7 +266,7 @@ struct test5
         s.resize(s.capacity());
         while (true)
         {
-            size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%g", val_));
+            size_t n2 = static_cast<size_t>(snprintf(&s[0], s.size()+1, "%g", val));
             if (n2 <= s.size())
             {
                 s.resize(n2);

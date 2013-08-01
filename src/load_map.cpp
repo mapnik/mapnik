@@ -269,8 +269,6 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                     {
                         throw config_error(std::string("Invalid version string encountered: '")
                             + *beg + "' in '" + *min_version_string + "'");
-
-                        break;
                     }
                     if (i==2)
                     {

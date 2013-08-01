@@ -211,17 +211,17 @@ public:
         geom_cont_.push_back(geom);
     }
 
-    unsigned num_geometries() const
+    std::size_t num_geometries() const
     {
         return geom_cont_.size();
     }
 
-    geometry_type const& get_geometry(unsigned index) const
+    geometry_type const& get_geometry(std::size_t index) const
     {
         return geom_cont_[index];
     }
 
-    geometry_type& get_geometry(unsigned index)
+    geometry_type& get_geometry(std::size_t index)
     {
         return geom_cont_[index];
     }

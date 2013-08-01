@@ -29,6 +29,7 @@
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
 #include "agg_span_gradient.h"
+#include "agg_color_rgba.h"
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -64,7 +65,6 @@ void parse_linear_gradient(svg_parser & parser,xmlTextReaderPtr reader);
 void parse_radial_gradient(svg_parser & parser,xmlTextReaderPtr reader);
 bool parse_common_gradient(svg_parser & parser,xmlTextReaderPtr reader);
 void parse_gradient_stop(svg_parser & parser,xmlTextReaderPtr reader);
-void parse_pattern(svg_parser & parser,xmlTextReaderPtr reader);
 void parse_attr(svg_parser & parser,xmlTextReaderPtr reader);
 void parse_attr(svg_parser & parser,const xmlChar * name, const xmlChar * value );
 
@@ -1044,11 +1044,6 @@ void parse_linear_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     parser.gradient_map_[parser.temporary_gradient_.first] = parser.temporary_gradient_.second;
 
     //MAPNIK_LOG_DEBUG(svg_parser) << "Found Linear Gradient: " << "(" << x1 << " " << y1 << "),(" << x2 << " " << y2 << ")";
-}
-
-void parse_pattern(svg_parser & parser, xmlTextReaderPtr reader)
-{
-    //const xmlChar *value;
 }
 
 svg_parser::svg_parser(svg_converter<svg_path_adapter,

@@ -144,7 +144,7 @@ feature_ptr shape_index_featureset<filterT>::next()
             return feature_ptr();
         }
 
-        // FIXME
+        // FIXME: https://github.com/mapnik/mapnik/issues/1020
         feature->set_id(shape_.id_);
         if (attr_ids_.size())
         {

@@ -336,6 +336,7 @@ opts.AddVariables(
 
     # Variables affecting rendering back-ends
 
+    BoolVariable('GRID_RENDERER', 'build support for native grid renderer', 'True'),
     BoolVariable('SVG_RENDERER', 'build support for native svg renderer', 'False'),
     BoolVariable('CPP_TESTS', 'Compile the C++ tests', 'True'),
     BoolVariable('BENCHMARK', 'Compile the C++ benchmark scripts', 'False'),
@@ -447,6 +448,7 @@ pickle_store = [# Scons internal variables
         'CAIRO_LIBPATHS',
         'CAIRO_ALL_LIBS',
         'CAIRO_CPPPATHS',
+        'GRID_RENDERER',
         'SVG_RENDERER',
         'SQLITE_LINKFLAGS',
         'BOOST_LIB_VERSION_FROM_HEADER',
@@ -613,6 +615,10 @@ def get_pkg_lib(context, config, lib):
     if ret:
         try:
             value = call(cmd,silent=True)
+            if ' ' in value:
+                parts = value.split(' ')
+                if len(parts) > 1:
+                    value = parts[1]
             libnames = re.findall(libpattern,value)
             if libnames:
                 libname = libnames[0]
@@ -1325,19 +1331,19 @@ if not preconfigured:
         else:
             env['SKIPPED_DEPS'].append('boost_regex_icu')
 
-    if not env['HOST']:
         for libname, headers, required, lang, define in OPTIONAL_LIBSHEADERS:
-            if not conf.CheckLibWithHeader(libname, headers, lang):
-                if required:
-                    color_print(1, 'Could not find required header or shared library for %s' % libname)
-                    env['MISSING_DEPS'].append(libname)
+            if not env['HOST']:
+                if not conf.CheckLibWithHeader(libname, headers, lang):
+                    if required:
+                        color_print(1, 'Could not find required header or shared library for %s' % libname)
+                        env['MISSING_DEPS'].append(libname)
+                    else:
+                        color_print(4, 'Could not find optional header or shared library for %s' % libname)
+                        env['SKIPPED_DEPS'].append(libname)
                 else:
-                    color_print(4, 'Could not find optional header or shared library for %s' % libname)
-                    env['SKIPPED_DEPS'].append(libname)
+                    env.Append(CPPDEFINES = define)
             else:
                 env.Append(CPPDEFINES = define)
-    else:
-        env.Append(CPPDEFINES = define)
 
     env['REQUESTED_PLUGINS'] = [ driver.strip() for driver in Split(env['INPUT_PLUGINS'])]
 
@@ -1362,7 +1368,12 @@ if not preconfigured:
                         conf.parse_config('GDAL_CONFIG',checks='--cflags')
                         libname = conf.get_pkg_lib('GDAL_CONFIG','gdal')
                         if libname:
-                            details['lib'] = libname
+                            if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
+                                env['SKIPPED_DEPS'].append('gdal')
+                                if libname in env['LIBS']:
+                                     env['LIBS'].remove(libname)
+                            else:
+                                details['lib'] = libname
                 elif plugin == 'postgis':
                     conf.parse_pg_config('PG_CONFIG')
                 elif plugin == 'ogr':
@@ -1372,7 +1383,13 @@ if not preconfigured:
                             conf.parse_config('GDAL_CONFIG',checks='--cflags')
                         libname = conf.get_pkg_lib('GDAL_CONFIG','ogr')
                         if libname:
-                            details['lib'] = libname
+                            if not conf.CheckLibWithHeader(libname, details['inc'], details['lang']):
+                                if 'gdal' not in env['SKIPPED_DEPS']:
+                                    env['SKIPPED_DEPS'].append('gdal')
+                                if libname in env['LIBS']:
+                                     env['LIBS'].remove(libname)
+                            else:
+                                details['lib'] = libname
                 elif details['path'] and details['lib'] and details['inc']:
                     backup = env.Clone().Dictionary()
                     # Note, the 'delete_existing' keyword makes sure that these paths are prepended
@@ -1385,7 +1402,6 @@ if not preconfigured:
                         env.Replace(**backup)
                         env['SKIPPED_DEPS'].append(details['lib'])
                     if plugin == 'sqlite':
-                        SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                         sqlite_backup = env.Clone().Dictionary()
                         # if statically linking, on linux we likely
                         # need to link sqlite to pthreads and dl
@@ -1400,8 +1416,7 @@ if not preconfigured:
                                             env.Append(LIBS=lib)
                                 except OSError,e:
                                     pass
-                        if SQLITE_HAS_RTREE is None:
-                            SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
+                        SQLITE_HAS_RTREE = conf.sqlite_has_rtree()
                         if not SQLITE_HAS_RTREE:
                             env.Replace(**sqlite_backup)
                             if details['lib'] in env['LIBS']:
@@ -1654,6 +1669,16 @@ if not preconfigured:
         debug_defines = ['-DDEBUG', '-DMAPNIK_DEBUG']
         ndebug_defines = ['-DNDEBUG']
 
+        # c++11 support / https://github.com/mapnik/mapnik/issues/1683
+        #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
+        if 'c++11' in env['CUSTOM_CXXFLAGS']:
+            env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
+            #  - workaround boost gil channel_algorithm.hpp narrowing error
+            # TODO - remove when building against >= 1.55
+            # https://github.com/mapnik/mapnik/issues/1970
+            if 'clang++' in env['CXX']:
+                env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:
             if env['DEFAULT_LOG_SEVERITY'] not in severities:
@@ -1694,7 +1719,7 @@ if not preconfigured:
         if not env['SUNCC']:
 
             # Common flags for CXX compiler.
-            common_cxx_flags = '-ansi -Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+            common_cxx_flags = '-Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
             # https://github.com/mapnik/mapnik/issues/1835
             if sys.platform == 'darwin' and env['CXX'] == 'g++':

@@ -47,7 +47,7 @@ namespace mapnik { namespace detail {
 template <typename T>
 struct extract_value
 {
-    static inline boost::optional<T> do_extract_from_string(std::string const& source)
+    static inline boost::optional<T> do_extract_from_string(std::string const& /*source*/)
     {
         std::string err_msg = (boost::format("No conversion from std::string to %s") % typeid(T).name()).str();
         throw std::runtime_error(err_msg);

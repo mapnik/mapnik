@@ -46,6 +46,8 @@ target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.pa
 py_env = env.Clone()
 py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
 
+py_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
+
 py_env['LIBS'] = ['mapnik',env['BOOST_PYTHON_LIB']]
 
 link_all_libs = env['LINKING'] == 'static' or env['RUNTIME_LINK'] == 'static' or (env['PLATFORM'] == 'Darwin' and not env['PYTHON_DYNAMIC_LOOKUP'])

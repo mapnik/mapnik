@@ -8,6 +8,12 @@ For a complete change history, see the git log.
 
 ## Future
 
+- Added the ability to create a mapnik Feature from a geojson feature with `mapnik.Feature.from_geojson` in python.
+
+- Added to python bindings: `has_tiff`, `has_png`, `has_webp`, `has_proj4`, `has_svg_renderer`, and `has_grid_renderer`
+
+- Made it possible to disable compilation of `grid_renderer` with `./configure GRID_RENDERER=False` (#1962)
+
 - Added `webp` image encoding and decoding support (#1955)
 
 - Added `premultiplied` property on mapnik::image_32 / mapnik.Image to enable knowledge of premultiplied status of image buffer.

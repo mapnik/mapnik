@@ -34,10 +34,9 @@ namespace mapnik {
 struct symbolizer_hash
 {
     template <typename T>
-    static std::size_t value(T const& sym)
+    static std::size_t value(T const& /*sym*/)
     {
-        std::size_t seed = 0;
-        return seed;
+        return 0;
     }
     // specialisation for polygon_symbolizer
     static std::size_t value(polygon_symbolizer const& sym)

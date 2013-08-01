@@ -106,17 +106,6 @@ double get_scale_denominator(mapnik::Map const& map)
     return mapnik::scale_denominator( map.scale(), map_proj.is_geographic());
 }
 
-// deepcopy
-/*
-mapnik::Map map_deepcopy(mapnik::Map & m, boost::python::dict memo)
-{
-    // FIXME: ignore memo for now
-    mapnik::Map result;
-    mapnik::util::deepcopy(m, result);
-    return result;
-}
-*/
-
 void set_maximum_extent(mapnik::Map & m, boost::optional<mapnik::box2d<double> > const& box)
 {
     if (box)

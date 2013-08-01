@@ -27,7 +27,11 @@
 #include <mapnik/svg/svg_path_attributes.hpp>
 #include <mapnik/gradient.hpp>
 #include <mapnik/box2d.hpp>
+
+#if defined(GRID_RENDERER)
 #include <mapnik/grid/grid_pixel.hpp>
+#endif
+
 #include <mapnik/noncopyable.hpp>
 
 // boost
@@ -52,7 +56,6 @@
 #include "agg_gradient_lut.h"
 #include "agg_gamma_lut.h"
 #include "agg_span_interpolator_linear.h"
-#include "agg_pixfmt_rgba.h"
 
 namespace mapnik  {
 namespace svg {
@@ -335,14 +338,15 @@ public:
         }
     }
 
+#if defined(GRID_RENDERER)
     template <typename Rasterizer, typename Scanline, typename Renderer>
     void render_id(Rasterizer& ras,
                    Scanline& sl,
                    Renderer& ren,
                    int feature_id,
                    agg::trans_affine const& mtx,
-                   double opacity,
-                   box2d<double> const& symbol_bbox)
+                   double /*opacity*/,
+                   box2d<double> const& /*symbol_bbox*/)
 
     {
         using namespace agg;
@@ -417,6 +421,7 @@ public:
             }
         }
     }
+#endif
 
 private:
 

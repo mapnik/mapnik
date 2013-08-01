@@ -164,7 +164,7 @@ namespace mapnik {
         public:
             typedef std::basic_ostringstream<Ch, Tr, A> stream_buffer;
 
-            void operator()(const logger::severity_type& severity, const stream_buffer &s)
+            void operator()(const logger::severity_type& /*severity*/, const stream_buffer &s)
             {
 #ifdef MAPNIK_THREADSAFE
                 static boost::mutex mutex;
@@ -193,15 +193,19 @@ namespace mapnik {
 
             base_log() {}
 
+#ifdef MAPNIK_LOG
             base_log(const char* object_name)
             {
-#ifdef MAPNIK_LOG
                 if (object_name != NULL)
                 {
                     object_name_ = object_name;
                 }
-#endif
             }
+#else
+            base_log(const char* /*object_name*/)
+            {
+            }
+#endif
 
             ~base_log()
             {
@@ -214,13 +218,20 @@ namespace mapnik {
             }
 
             template<class T>
+#ifdef MAPNIK_LOG
             base_log &operator<<(const T &x)
             {
-#ifdef MAPNIK_LOG
+
                 streambuf_ << x;
-#endif
                 return *this;
             }
+#else
+            base_log &operator<<(const T& /*x*/)
+            {
+
+                return *this;
+            }
+#endif
 
         private:
 #ifdef MAPNIK_LOG

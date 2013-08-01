@@ -95,6 +95,8 @@ if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
 if env['RUNTIME_LINK'] == 'static':
     if 'icuuc' in env['ICU_LIB_NAME']:
         lib_env['LIBS'].append('icudata')
+    if env['PLATFORM'] == 'Linux':
+        lib_env['LIBS'].append('dl')
 else:
     lib_env['LIBS'].insert(0, 'agg')
 
@@ -199,6 +201,7 @@ source = Split(
     json/geometry_grammar.cpp
     json/geometry_parser.cpp
     json/feature_grammar.cpp
+    json/feature_parser.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
     processed_text.cpp
@@ -292,21 +295,24 @@ if env['RUNTIME_LINK'] == "static":
     source += glob.glob('../deps/agg/src/' + '*.cpp')
 
 # grid backend
-source += Split(
-    """
-    grid/grid.cpp
-    grid/grid_renderer.cpp
-    grid/process_building_symbolizer.cpp
-    grid/process_line_pattern_symbolizer.cpp
-    grid/process_line_symbolizer.cpp
-    grid/process_markers_symbolizer.cpp
-    grid/process_point_symbolizer.cpp
-    grid/process_polygon_pattern_symbolizer.cpp
-    grid/process_polygon_symbolizer.cpp
-    grid/process_raster_symbolizer.cpp
-    grid/process_shield_symbolizer.cpp
-    grid/process_text_symbolizer.cpp
-    """)
+if env['GRID_RENDERER']:
+    source += Split(
+        """
+        grid/grid.cpp
+        grid/grid_renderer.cpp
+        grid/process_building_symbolizer.cpp
+        grid/process_line_pattern_symbolizer.cpp
+        grid/process_line_symbolizer.cpp
+        grid/process_markers_symbolizer.cpp
+        grid/process_point_symbolizer.cpp
+        grid/process_polygon_pattern_symbolizer.cpp
+        grid/process_polygon_symbolizer.cpp
+        grid/process_raster_symbolizer.cpp
+        grid/process_shield_symbolizer.cpp
+        grid/process_text_symbolizer.cpp
+        """)
+    lib_env.Append(CPPDEFINES = '-DGRID_RENDERER')
+    libmapnik_defines.append('-DGRID_RENDERER')
 
 # https://github.com/mapnik/mapnik/issues/1438
 if env['SVG_RENDERER']: # svg backend
