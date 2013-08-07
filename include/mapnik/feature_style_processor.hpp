@@ -24,11 +24,15 @@
 #define MAPNIK_FEATURE_STYLE_PROCESSOR_HPP
 
 // mapnik
-#include <mapnik/datasource.hpp> // for featureset_ptr
 #include <mapnik/config.hpp>
+#include <mapnik/featureset.hpp>
+
+// boost
+#include <boost/optional.hpp>
 
 // stl
 #include <set>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -41,6 +45,7 @@ class projection;
 class proj_transform;
 class feature_type_style;
 class rule_cache;
+template <typename T> class box2d;
 
 enum eAttributeCollectionPolicy
 {
