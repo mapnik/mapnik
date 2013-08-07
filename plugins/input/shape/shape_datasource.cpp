@@ -105,15 +105,13 @@ shape_datasource::shape_datasource(const parameters &params)
             switch (fd.type_)
             {
             case 'C': // character
-            case 'D': // Date
-            case 'M': // Memo, a string
-            case '@': // timestamp
+            case 'D': // date
                 desc_.add_descriptor(attribute_descriptor(fld_name, String));
                 break;
             case 'L': // logical
                 desc_.add_descriptor(attribute_descriptor(fld_name, Boolean));
                 break;
-            case 'N':
+            case 'N': // numeric
             case 'O': // double
             case 'F': // float
             {
@@ -131,7 +129,11 @@ shape_datasource::shape_datasource(const parameters &params)
                 // I - long
                 // G - ole
                 // + - autoincrement
-                MAPNIK_LOG_WARN(shape) << "shape_datasource: Unknown type=" << fd.type_;
+                // @ - timestamp
+                // B - binary
+                // l - long
+                // M - memo
+                MAPNIK_LOG_ERROR(shape) << "shape_datasource: Unknown type=" << fd.type_;
                 break;
             }
         }

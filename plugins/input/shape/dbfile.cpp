@@ -141,6 +141,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
     {
         std::string const& name=fields_[col].name_;
 
+        // NOTE: ensure types handled here are matched in shape_datasource.cpp
         switch (fields_[col].type_)
         {
         case 'C':
@@ -166,8 +167,9 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
             }
             break;
         }
-        case 'N':
-        case 'F':
+        case 'N': // numeric
+        case 'O': // double
+        case 'F': // float
         {
 
             if (record_[fields_[col].offset_] == '*')
