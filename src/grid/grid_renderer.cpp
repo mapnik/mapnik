@@ -144,9 +144,7 @@ void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned in
 {
     if (marker.is_vector())
     {
-        typedef coord_transform<CoordTransform,geometry_type> path_type;
         typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-        typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
         typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
         agg::scanline_bin sl;
 
