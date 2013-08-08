@@ -83,7 +83,6 @@ void grid_renderer<T>::process(markers_symbolizer const& sym,
 {
     typedef grid_rendering_buffer buf_type;
     typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-    typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
     typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
     typedef label_collision_detector4 detector_type;
     typedef boost::mpl::vector<clip_line_tag,clip_poly_tag,transform_tag,smooth_tag> conv_types;
