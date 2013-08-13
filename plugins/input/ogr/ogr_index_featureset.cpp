@@ -30,12 +30,14 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
-#include <mapnik/mapped_memory_cache.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // boost
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+#include <mapnik/mapped_memory_cache.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
+#endif
 
 // ogr
 #include "ogr_index_featureset.hpp"
@@ -64,12 +66,21 @@ ogr_index_featureset<filterT>::ogr_index_featureset(mapnik::context_ptr const & 
       feature_envelope_()
 {
 
+#ifdef SHAPE_MEMORY_MAPPED_FILE
     boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(index_file, true);
     if (memory)
     {
         boost::interprocess::ibufferstream file(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
         ogr_index<filterT,boost::interprocess::ibufferstream >::query(filter,file,ids_);
     }
+#else
+  #if defined (WINDOWS)
+      std::ifstream file(mapnik::utf8_to_utf16(index_file), std::ios::in | std::ios::binary);
+  #else
+      std::ifstream file(index_file.c_str(), std::ios::in | std::ios::binary);
+  #endif
+      ogr_index<filterT,std::ifstream>::query(filter,file,ids_);
+#endif
 
     std::sort(ids_.begin(),ids_.end());
 
