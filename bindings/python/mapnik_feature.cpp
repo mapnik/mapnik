@@ -32,6 +32,7 @@
 
 
 // mapnik
+#include <mapnik/value_types.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
@@ -121,14 +122,14 @@ boost::python::dict attributes(mapnik::feature_impl const& f)
 
 } // end anonymous namespace
 
-struct UnicodeString_from_python_str
+struct unicode_string_from_python_str
 {
-    UnicodeString_from_python_str()
+    unicode_string_from_python_str()
     {
         boost::python::converter::registry::push_back(
             &convertible,
             &construct,
-            boost::python::type_id<UnicodeString>());
+            boost::python::type_id<mapnik::value_unicode_string>());
     }
 
     static void* convertible(PyObject* obj_ptr)
@@ -168,9 +169,9 @@ struct UnicodeString_from_python_str
         }
         if (value == 0) boost::python::throw_error_already_set();
         void* storage = (
-            (boost::python::converter::rvalue_from_python_storage<UnicodeString>*)
+            (boost::python::converter::rvalue_from_python_storage<mapnik::value_unicode_string>*)
             data)->storage.bytes;
-        new (storage) UnicodeString(value);
+        new (storage) mapnik::value_unicode_string(value);
         data->convertible = storage;
     }
 };
@@ -219,7 +220,7 @@ void export_feature()
     implicitly_convertible<mapnik::value_bool,mapnik::value>();
 
     // http://misspent.wordpress.com/2009/09/27/how-to-write-boost-python-converters/
-    UnicodeString_from_python_str();
+    unicode_string_from_python_str();
     value_null_from_python();
 
     class_<context_type,context_ptr,boost::noncopyable>

@@ -919,7 +919,7 @@ def boost_regex_has_icu(context):
 
 int main()
 {
-    UnicodeString ustr;
+    icu::UnicodeString ustr;
     try {
         boost::u32regex pattern = boost::make_u32regex(ustr);
     }

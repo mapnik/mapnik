@@ -27,15 +27,13 @@
 #include <mapnik/char_info.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
 
 //stl
 #include <vector>
 
 // boost
 #include <boost/shared_ptr.hpp>
-
-// uci
-#include <unicode/unistr.h>
 
 namespace mapnik
 {
@@ -45,10 +43,10 @@ class string_info : private mapnik::noncopyable
 protected:
     typedef std::vector<char_info> characters_t;
     characters_t characters_;
-    UnicodeString text_;
+    mapnik::value_unicode_string text_;
     bool is_rtl;
 public:
-    string_info(UnicodeString const& text)
+    string_info(mapnik::value_unicode_string const& text)
         : characters_(),
           text_(text),
           is_rtl(false)
@@ -69,7 +67,7 @@ public:
         characters_.push_back(info);
     }
 
-    void add_text(UnicodeString const& text)
+    void add_text(mapnik::value_unicode_string const& text)
     {
         text_ += text;
     }
@@ -99,13 +97,14 @@ public:
         return at(i);
     }
 
-    UnicodeString const& get_string() const
+    mapnik::value_unicode_string const& get_string() const
     {
         return text_;
     }
 
     bool has_line_breaks() const
     {
+        // uint16_t
         UChar break_char = '\n';
         return (text_.indexOf(break_char) >= 0);
     }

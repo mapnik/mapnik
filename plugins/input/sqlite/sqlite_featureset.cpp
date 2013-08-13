@@ -29,6 +29,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // ogr
@@ -123,8 +124,7 @@ feature_ptr sqlite_featureset::next()
             {
                 int text_col_size;
                 const char * text_data = rs_->column_text(i, text_col_size);
-                UnicodeString ustr = tr_->transcode(text_data, text_col_size);
-                feature->put(fld_name_str, ustr);
+                feature->put(fld_name_str, tr_->transcode(text_data, text_col_size));
                 break;
             }
 

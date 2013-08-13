@@ -42,14 +42,15 @@
 // stl
 #include <string>
 #include <cmath>
-// uci
+
+// icu
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
 
 
 namespace mapnik  {
 
-inline void to_utf8(UnicodeString const& input, std::string & target)
+inline void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
 {
     if (input.isEmpty()) return;
 

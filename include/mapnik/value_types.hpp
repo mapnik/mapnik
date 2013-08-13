@@ -42,7 +42,7 @@ typedef int value_integer;
 #endif
 
 typedef double value_double;
-typedef UnicodeString  value_unicode_string;
+typedef icu::UnicodeString  value_unicode_string;
 typedef bool value_bool;
 
 struct value_null

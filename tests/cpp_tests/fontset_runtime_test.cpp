@@ -17,6 +17,7 @@
 #include <mapnik/image_util.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/save_map.hpp>
+#include <mapnik/value_types.hpp>
 #include <vector>
 #include <algorithm>
 
@@ -40,7 +41,7 @@ int main(int argc, char** argv)
         ctx->push("name");
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
         mapnik::transcoder tr("utf-8");
-        UnicodeString ustr = tr.transcode("hello world!");
+        mapnik::value_unicode_string ustr = tr.transcode("hello world!");
         feature->put("name",ustr);
         mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::Point);
         pt->move_to(128,128);

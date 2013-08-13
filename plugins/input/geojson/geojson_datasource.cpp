@@ -42,6 +42,7 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
@@ -81,7 +82,7 @@ struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeTyp
         return mapnik::String;
     }
 
-    mapnik::eAttributeType operator() (UnicodeString const& /*val*/) const
+    mapnik::eAttributeType operator() (mapnik::value_unicode_string const& /*val*/) const
     {
         return mapnik::String;
     }

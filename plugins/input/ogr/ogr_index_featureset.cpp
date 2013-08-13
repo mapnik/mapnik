@@ -154,8 +154,7 @@ feature_ptr ogr_index_featureset<filterT>::next()
             case OFTString:
             case OFTWideString:     // deprecated !
             {
-                UnicodeString ustr = tr_->transcode(poFeature->GetFieldAsString (i));
-                feature->put(fld_name,ustr);
+                feature->put(fld_name,tr_->transcode(poFeature->GetFieldAsString (i)));
                 break;
             }
 

@@ -26,6 +26,7 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/text_path.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
 
 // stl
 #include <list>
@@ -42,14 +43,15 @@ class MAPNIK_DECL processed_text : mapnik::noncopyable
 public:
     struct processed_expression
     {
-        processed_expression(char_properties const& properties, UnicodeString const& text)
-            : p(properties), str(text) {}
+        processed_expression(char_properties const& properties, mapnik::value_unicode_string const& text)
+            : p(properties),
+              str(text) {}
         char_properties p;
-        UnicodeString str;
+        mapnik::value_unicode_string str;
     };
 public:
     processed_text(face_manager<freetype_engine> & font_manager, double scale_factor);
-    void push_back(char_properties const& properties, UnicodeString const& text);
+    void push_back(char_properties const& properties, mapnik::value_unicode_string const& text);
     unsigned size() const { return expr_list_.size(); }
     unsigned empty() const { return expr_list_.empty(); }
     void clear();

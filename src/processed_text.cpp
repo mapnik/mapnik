@@ -23,11 +23,12 @@
 #include <mapnik/processed_text.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/value_types.hpp>
 
 namespace mapnik
 {
 
-void processed_text::push_back(char_properties const& properties, UnicodeString const& text)
+void processed_text::push_back(char_properties const& properties, mapnik::value_unicode_string const& text)
 {
     expr_list_.push_back(processed_expression(properties, text));
 }

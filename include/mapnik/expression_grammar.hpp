@@ -49,13 +49,13 @@ struct unicode_impl
     template <typename T>
     struct result
     {
-        typedef UnicodeString type;
+        typedef mapnik::value_unicode_string type;
     };
 
     explicit unicode_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
-    UnicodeString operator()(std::string const& str) const
+    mapnik::value_unicode_string operator()(std::string const& str) const
     {
         return tr_.transcode(str.c_str());
     }

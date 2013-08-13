@@ -29,6 +29,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // ogr
@@ -192,7 +193,7 @@ feature_ptr occi_featureset::next()
             case oracle::occi::OCCI_SQLT_TIMESTAMP:
             case oracle::occi::OCCI_SQLT_TIMESTAMP_LTZ:
             case oracle::occi::OCCI_SQLT_TIMESTAMP_TZ:
-                feature->put(fld_name, (UnicodeString)tr_->transcode(rs_->getString(i + 1).c_str()));
+                feature->put(fld_name, static_cast<mapnik::value_unicode_string>(tr_->transcode(rs_->getString(i + 1).c_str())));
                 break;
             case oracle::occi::OCCIINTERVALDS:
             case oracle::occi::OCCIINTERVALYM:
