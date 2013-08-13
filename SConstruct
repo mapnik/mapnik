@@ -297,7 +297,7 @@ opts.AddVariables(
     ('PYTHON_PREFIX','Custom install path "prefix" for python bindings (default of no prefix)',''),
     ('DESTDIR', 'The root directory to install into. Useful mainly for binary package building', '/'),
     ('PATH', 'A custom path (or multiple paths divided by ":") to append to the $PATH env to prioritize usage of command line programs (if multiple are present on the system)', ''),
-    ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths', ''),
+    ('PATH_REMOVE', 'A path prefix to exclude from all known command and compile paths (create multiple excludes separated by :)', ''),
     ('PATH_REPLACE', 'Two path prefixes (divided with a :) to search/replace from all known command and compile paths', ''),
 
     # Boost variables
@@ -1815,14 +1815,14 @@ if not HELP_REQUESTED:
         env['ENV']['PATH'] = os.path.realpath(env['PATH']) + ':' + env['ENV']['PATH']
 
     if env['PATH_REMOVE']:
-        p = env['PATH_REMOVE']
-        if p in env['ENV']['PATH']:
-            env['ENV']['PATH'].replace(p,'')
-        rm_path(p,'LIBPATH',env)
-        rm_path(p,'CPPPATH',env)
-        rm_path(p,'CXXFLAGS',env)
-        rm_path(p,'CAIRO_LIBPATHS',env)
-        rm_path(p,'CAIRO_CPPPATHS',env)
+        for p in env['PATH_REMOVE'].split(':'):
+            if p in env['ENV']['PATH']:
+                env['ENV']['PATH'].replace(p,'')
+            rm_path(p,'LIBPATH',env)
+            rm_path(p,'CPPPATH',env)
+            rm_path(p,'CXXFLAGS',env)
+            rm_path(p,'CAIRO_LIBPATHS',env)
+            rm_path(p,'CAIRO_CPPPATHS',env)
 
     if env['PATH_REPLACE']:
         searches,replace = env['PATH_REPLACE'].split(':')
