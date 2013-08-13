@@ -376,7 +376,7 @@ void font_face_set::get_string_info(string_info & info, mapnik::value_unicode_st
     shaped.releaseBuffer(length);
 
     if (U_SUCCESS(err)) {
-        StringCharacterIterator iter(shaped);
+        icu::StringCharacterIterator iter(shaped);
         for (iter.setToStart(); iter.hasNext();) {
             UChar ch = iter.nextPostInc();
             char_info char_dim = character_dimensions(ch);
