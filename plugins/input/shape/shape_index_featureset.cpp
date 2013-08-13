@@ -29,7 +29,9 @@
 
 // boost
 #include <boost/algorithm/string.hpp>
+#ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <boost/interprocess/streams/bufferstream.hpp>
+#endif
 #include <boost/make_shared.hpp>
 
 #include "shape_index_featureset.hpp"

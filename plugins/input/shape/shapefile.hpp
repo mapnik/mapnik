@@ -34,6 +34,7 @@
 #include <mapnik/utils.hpp>
 #include <mapnik/box2d.hpp>
 #ifdef SHAPE_MEMORY_MAPPED_FILE
+#include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 #include <mapnik/noncopyable.hpp>

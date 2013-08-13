@@ -32,6 +32,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/cstdint.hpp> // for int16_t and int32_t
 #ifdef SHAPE_MEMORY_MAPPED_FILE
+#include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 

@@ -34,6 +34,7 @@
 #include <mapnik/feature_factory.hpp>
 
 // boost
+#include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/streams/bufferstream.hpp>
 
 // ogr
