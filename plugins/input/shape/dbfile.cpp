@@ -31,13 +31,13 @@
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/cstdint.hpp> // for int16_t and int32_t
+#ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
 
 // stl
 #include <string>
 #include <stdexcept>
-
-using mapnik::mapped_memory_cache;
 
 dbf_file::dbf_file()
     : num_records_(0),
@@ -60,7 +60,7 @@ dbf_file::dbf_file(std::string const& file_name)
 {
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name,true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(file_name,true);
     if (memory)
     {
         mapped_region_ = *memory;

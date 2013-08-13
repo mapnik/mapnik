@@ -27,7 +27,10 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/unicode.hpp>
+#ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
+
 
 // boost
 #include <boost/interprocess/streams/bufferstream.hpp>

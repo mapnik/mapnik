@@ -33,7 +33,9 @@
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/box2d.hpp>
+#ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
 #include <mapnik/noncopyable.hpp>
 
 // boost
