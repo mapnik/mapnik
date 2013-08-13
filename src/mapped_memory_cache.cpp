@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#if defined(SHAPE_MEMORY_MAPPED_FILE)
+
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/util/fs.hpp>
@@ -96,3 +98,5 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
 }
 
 }
+
+#endif
