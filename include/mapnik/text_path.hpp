@@ -69,7 +69,7 @@ public:
         characters_.push_back(info);
     }
 
-    void add_text(UnicodeString text)
+    void add_text(UnicodeString const& text)
     {
         text_ += text;
     }
