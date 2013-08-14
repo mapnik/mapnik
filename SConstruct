@@ -114,10 +114,17 @@ PLUGINS = { # plugins with external dependencies
             }
 
 
+def init_environment(env):
+    env.Decider('MD5-timestamp')
+    env.SourceCode(".", None)
+    if os.environ.get('RANLIB'):
+        env['RANLIB'] = os.environ['RANLIB']
+    if os.environ.get('AR'):
+        env['AR'] = os.environ['AR']
+
 #### SCons build options and initial setup ####
 env = Environment(ENV=os.environ)
-env.Decider('MD5-timestamp')
-env.SourceCode(".", None)
+init_environment(env)
 
 def color_print(color,text,newline=True):
     # 1 - red
@@ -1032,8 +1039,7 @@ if not preconfigured:
                     color_print(1,"SCons CONFIG not found: '%s'" % conf)
             # Recreate the base environment using modified `opts`
             env = Environment(ENV=os.environ,options=opts)
-            env.Decider('MD5-timestamp')
-            env.SourceCode(".", None)
+            init_environment(env)
             env['USE_CONFIG'] = True
     else:
         color_print(4,'SCons USE_CONFIG specified as false, will not inherit variables python config file...')
