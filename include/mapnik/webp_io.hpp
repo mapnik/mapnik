@@ -83,7 +83,7 @@ void save_as_webp(T1& file,
 
     // Add additional tuning
     if (method >= 0) config.method = method;
-    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 2
+    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
     config.lossless = !!lossless;
     config.image_hint = static_cast<WebPImageHint>(image_hint);
     #else
@@ -106,7 +106,7 @@ void save_as_webp(T1& file,
     }
     pic.width = image.width();
     pic.height = image.height();
-    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 2
+    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
     pic.use_argb = !!lossless;
     #endif
     int ok = 0;
@@ -120,7 +120,11 @@ void save_as_webp(T1& file,
     {
         int stride = sizeof(typename T2::pixel_type) * image.width();
         uint8_t const* bytes = reinterpret_cast<uint8_t const*>(image.getBytes());
+        #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
         ok = WebPPictureImportRGBX(&pic, bytes, stride);
+        #else
+        ok = WebPPictureImportRGBA(&pic, bytes, stride);
+        #endif
     }
 
     if (!ok)
