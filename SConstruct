@@ -926,7 +926,7 @@ def boost_regex_has_icu(context):
 
 int main()
 {
-    icu::UnicodeString ustr;
+    U_NAMESPACE_QUALIFIER UnicodeString ustr;
     try {
         boost::u32regex pattern = boost::make_u32regex(ustr);
     }
