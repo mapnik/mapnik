@@ -247,7 +247,8 @@ void handle_webp_options(std::string const& type,
                         double & quality,
                         int & method,
                         int & lossless,
-                        int & image_hint
+                        int & image_hint,
+                        bool & alpha
                         )
 {
     if (type == "webp")
@@ -300,6 +301,17 @@ void handle_webp_options(std::string const& type,
                     if (!mapnik::util::string2int(val,image_hint) || image_hint < 0 || image_hint > 3)
                     {
                         throw ImageWriterException("invalid webp image_hint: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "alpha="))
+            {
+                std::string val = t.substr(6);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2bool(val,alpha))
+                    {
+                        throw ImageWriterException("invalid webp alpha: '" + val + "'");
                     }
                 }
             }
@@ -449,6 +461,7 @@ void save_to_stream(T const& image,
             int method = 3; // 0 if fastest, 6 slowest
             int lossless = 0; // Lossless encoding (0=lossy(default), 1=lossless).
             int image_hint = 3; // used when lossless=1
+            bool alpha = true;
             /*
               WEBP_HINT_DEFAULT = 0,  // default preset.
               WEBP_HINT_PICTURE,      // digital picture, like portrait, inner shot
@@ -456,8 +469,8 @@ void save_to_stream(T const& image,
               WEBP_HINT_GRAPH,        // Discrete tone image (graph, map-tile etc).
               WEBP_HINT_LAST
             */
-            handle_webp_options(t,quality,method,lossless, image_hint);
-            save_as_webp(stream, static_cast<float>(quality), method, lossless, image_hint, image);
+            handle_webp_options(t,quality,method,lossless, image_hint, alpha);
+            save_as_webp(stream, static_cast<float>(quality), method, lossless, image_hint, alpha, image);
 #else
             throw ImageWriterException("webp output is not enabled in your build of Mapnik");
 #endif

@@ -18,7 +18,8 @@ if not os.path.exists(tmp_dir):
 
 opts = [
 'webp',
-'webp:q=64',
+'webp:quality=64',
+'webp:alpha=false'
 ]
 
 
@@ -44,28 +45,41 @@ def test_quality_threshold_invalid2():
 generate = False
 
 def test_expected_encodings():
-    im = mapnik.Image(256,256)
+    fails = []
     for opt in opts:
-        expected = gen_filepath('solid',opt)
-        actual = os.path.join(tmp_dir,os.path.basename(expected))
-        if generate or not os.path.exists(expected):
-            print 'generating expected image %s' % expected
-            im.save(expected,opt)
-        im.save(actual,opt)
-        eq_(mapnik.Image.open(actual).tostring(),
-            mapnik.Image.open(expected).tostring(),
-            '%s (actual) not == to %s (expected)' % (actual,expected))
-
-    for opt in opts:
+        im = mapnik.Image(256,256)
         expected = gen_filepath('blank',opt)
         actual = os.path.join(tmp_dir,os.path.basename(expected))
         if generate or not os.path.exists(expected):
             print 'generating expected image %s' % expected
             im.save(expected,opt)
         im.save(actual,opt)
-        eq_(mapnik.Image.open(actual).tostring(),
-            mapnik.Image.open(expected).tostring(),
-            '%s (actual) not == to %s (expected)' % (actual,expected))
+        if mapnik.Image.open(actual).tostring() != mapnik.Image.open(expected).tostring():
+            fails.append('%s (actual) not == to %s (expected)' % (actual,expected))
+
+    for opt in opts:
+        im = mapnik.Image(256,256)
+        im.background = mapnik.Color('green')
+        expected = gen_filepath('solid',opt)
+        actual = os.path.join(tmp_dir,os.path.basename(expected))
+        if generate or not os.path.exists(expected):
+            print 'generating expected image %s' % expected
+            im.save(expected,opt)
+        im.save(actual,opt)
+        if mapnik.Image.open(actual).tostring() != mapnik.Image.open(expected).tostring():
+            fails.append('%s (actual) not == to %s (expected)' % (actual,expected))
+
+    for opt in opts:
+        im = mapnik.Image.open('images/support/transparency/aerial_rgba.png')
+        expected = gen_filepath('aerial_rgba',opt)
+        actual = os.path.join(tmp_dir,os.path.basename(expected))
+        if generate or not os.path.exists(expected):
+            print 'generating expected image %s' % expected
+            im.save(expected,opt)
+        im.save(actual,opt)
+        if mapnik.Image.open(actual).tostring() != mapnik.Image.open(expected).tostring():
+            fails.append('%s (actual) not == to %s (expected)' % (actual,expected))
+    eq_(fails,[])
 
 def test_transparency_levels():
     # create partial transparency image
