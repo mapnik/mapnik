@@ -298,7 +298,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     case GCI_PaletteIndex:
                     {
                         grey = band;
-
+#ifdef MAPNIK_LOG
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found gray band, and colortable...";
 
                         GDALColorTable *color_table = band->GetColorTable();
@@ -317,6 +317,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                 MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Color entry RGB=" << ce->c1 << "," <<ce->c2 << "," << ce->c3;
                             }
                         }
+#endif
                         break;
                     }
                     case GCI_Undefined:
