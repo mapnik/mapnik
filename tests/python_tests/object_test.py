@@ -34,6 +34,7 @@ def test_line_pattern():
     eq_(s.filename, '../data/images/dummy.png')
     eq_(s.smooth,0.0)
     eq_(s.transform,'')
+    eq_(s.offset,0.0)
     eq_(s.comp_op,mapnik.CompositeOp.src_over)
     eq_(s.clip,True)
 

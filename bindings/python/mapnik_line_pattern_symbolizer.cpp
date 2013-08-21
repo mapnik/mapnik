@@ -62,6 +62,10 @@ void export_line_pattern_symbolizer()
         .add_property("filename",
                       &get_filename,
                       &set_filename)
+        .add_property("offset",
+                      &line_pattern_symbolizer::offset,
+                      &line_pattern_symbolizer::set_offset,
+                      "Set/get the offset")
         .add_property("comp_op",
                       &line_pattern_symbolizer::comp_op,
                       &line_pattern_symbolizer::set_comp_op,
