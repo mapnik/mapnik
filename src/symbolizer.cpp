@@ -132,6 +132,10 @@ double symbolizer_base::simplify_tolerance() const
 void symbolizer_base::set_smooth(double smooth)
 {
     smooth_value_ = smooth;
+    if (smooth != 0)
+    {
+        clip_ = false;
+    }
 }
 
 double symbolizer_base::smooth() const
