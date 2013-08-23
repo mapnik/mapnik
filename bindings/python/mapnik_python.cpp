@@ -804,8 +804,8 @@ BOOST_PYTHON_MODULE(_mapnik)
     def("has_proj4", &has_proj4, "Get proj4 status");
     def("has_jpeg", &has_jpeg, "Get jpeg read/write support status");
     def("has_png", &has_png, "Get png read/write support status");
-    def("has_tiff", &has_jpeg, "Get tiff read/write support status");
-    def("has_webp", &has_jpeg, "Get webp read/write support status");
+    def("has_tiff", &has_tiff, "Get tiff read/write support status");
+    def("has_webp", &has_webp, "Get webp read/write support status");
     def("has_grid_renderer", &has_grid_renderer, "Get grid_renderer status");
     def("has_cairo", &has_cairo, "Get cairo library status");
     def("has_pycairo", &has_pycairo, "Get pycairo module status");
