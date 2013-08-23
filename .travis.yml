@@ -1,6 +1,8 @@
 language: cpp
 
-compiler: clang
+compiler:
+ - clang
+ - gcc
 
 before_install:
  - echo 'yes' | sudo add-apt-repository ppa:mapnik/boost
