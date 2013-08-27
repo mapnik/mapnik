@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/line-offset.csv</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="My Style">
+        <Rule>
+            <LineSymbolizer stroke="#00FF00"/>
+        </Rule>
+        <Rule>
+            <Filter>[ref]=1 or [ref]=3</Filter>
+            <LinePatternSymbolizer file="../../data/pngsuite/linepattern.png"/>
+            <LinePatternSymbolizer offset="-5" file="../../data/pngsuite/linepattern1.png"/>
+        </Rule>
+        <Rule>
+            <Filter>[ref]=2 or [ref]=4</Filter>
+            <LinePatternSymbolizer file="../../data/pngsuite/linepattern.png"/>
+            <LinePatternSymbolizer offset="5" file="../../data/pngsuite/linepattern1.png"/>
+        </Rule>
+    </Style>
+
+</Map>
