@@ -131,6 +131,7 @@ files = {
     'rtl-point': {'sizes': [(200, 200)],'bbox':default_text_box},
     'jalign-auto': {'sizes': [(200, 200)],'bbox':default_text_box},
     'line-offset': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
+    'line-pattern-symbolizer': {'sizes':[(900, 250)],'bbox': mapnik.Box2d(-5.192, 50.189, -5.174, 50.195)},
     'tiff-alpha-gdal': {'sizes':[(600,400)]},
     'tiff-alpha-broken-assoc-alpha-gdal': {'sizes':[(600,400)]},
     'tiff-alpha-gradient-gdal': {'sizes':[(600,400)]},
