@@ -31,12 +31,14 @@
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/cstdint.hpp> // for int16_t and int32_t
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+#include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
 
 // stl
 #include <string>
-
-using mapnik::mapped_memory_cache;
+#include <stdexcept>
 
 dbf_file::dbf_file()
     : num_records_(0),
@@ -59,10 +61,15 @@ dbf_file::dbf_file(std::string const& file_name)
 {
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    boost::optional<mapnik::mapped_region_ptr> memory = mapped_memory_cache::instance().find(file_name,true);
+    boost::optional<mapnik::mapped_region_ptr> memory = mapnik::mapped_memory_cache::instance().find(file_name,true);
     if (memory)
     {
+        mapped_region_ = *memory;
         file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+    }
+    else
+    {
+        throw std::runtime_error("could not create file mapping for "+file_name);
     }
 #endif
     if (file_)
@@ -135,6 +142,7 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
     {
         std::string const& name=fields_[col].name_;
 
+        // NOTE: ensure types handled here are matched in shape_datasource.cpp
         switch (fields_[col].type_)
         {
         case 'C':
@@ -160,8 +168,11 @@ void dbf_file::add_attribute(int col, mapnik::transcoder const& tr, mapnik::feat
             }
             break;
         }
-        case 'N':
+        case 'N': // numeric
+        case 'O': // double
+        case 'F': // float
         {
+
             if (record_[fields_[col].offset_] == '*')
             {
                 // NOTE: we intentionally do not store null here

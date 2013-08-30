@@ -5,10 +5,19 @@
 #include <mapnik/wkb.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <vector>
+#include <algorithm>
 
 
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
     unsigned char sp_valid_blob[] = {
         0x0, 0x1, 0xBC, 0xB, 0x0, 0x0, 0x1F, 0x12, 0xDB, 0xCF, 0xC3, 0xA2, 0x41, 0x41, 0x9D, 0x74, 0xB0, 0x31, 0xE6, 0x34, 0x53, 0x41, 0xDB,
         0x1B, 0xB6, 0x7C, 0xD9, 0xA2, 0x41, 0x41, 0x67, 0xA7, 0xB6, 0xF, 0xF6, 0x34, 0x53, 0x41, 0x7C, 0x6, 0x0, 0x0, 0x0, 0x1, 0x0, 0x0,
@@ -107,7 +116,8 @@ int main( int, char*[] )
     }
 
     if (!::boost::detail::test_errors()) {
-        //std::clog << "C++ CSV parse: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ CSV parse: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif

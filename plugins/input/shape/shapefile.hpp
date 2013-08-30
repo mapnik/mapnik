@@ -26,12 +26,17 @@
 // stl
 #include <cstring>
 #include <fstream>
+#include <stdexcept>
+
 
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/box2d.hpp>
+#ifdef SHAPE_MEMORY_MAPPED_FILE
+#include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+#endif
 #include <mapnik/noncopyable.hpp>
 
 // boost
@@ -138,6 +143,7 @@ public:
 #ifdef SHAPE_MEMORY_MAPPED_FILE
     typedef ibufferstream file_source_type;
     typedef shape_record<MappedRecordTag> record_type;
+    mapnik::mapped_region_ptr mapped_region_;
 #else
     typedef std::ifstream file_source_type;
     typedef shape_record<RecordTag> record_type;
@@ -151,7 +157,7 @@ public:
 #ifdef SHAPE_MEMORY_MAPPED_FILE
         file_()
 #elif defined (_WINDOWS)
-	file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary)
+        file_(mapnik::utf8_to_utf16(file_name), std::ios::in | std::ios::binary)
 #else
         file_(file_name.c_str(), std::ios::in | std::ios::binary)
 #endif
@@ -162,7 +168,12 @@ public:
 
         if (memory)
         {
-            file_.buffer(static_cast<char*>((*memory)->get_address()), (*memory)->get_size());
+            mapped_region_ = *memory;
+            file_.buffer(static_cast<char*>((*memory)->get_address()),(*memory)->get_size());
+        }
+        else
+        {
+            throw std::runtime_error("could not create file mapping for "+file_name);
         }
 #endif
     }

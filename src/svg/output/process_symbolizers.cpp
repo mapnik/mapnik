@@ -25,6 +25,28 @@
 
 namespace mapnik {
 
+struct symbol_type_dispatch : public boost::static_visitor<bool>
+{
+    template <typename Symbolizer>
+    bool operator()(Symbolizer const& sym) const
+    {
+        return false;
+    }
+    bool operator()(line_symbolizer const& sym) const
+    {
+        return true;
+    }
+    bool operator()(polygon_symbolizer const& sym) const
+    {
+        return true;
+    }
+};
+
+bool is_path_based(symbolizer const& sym)
+{
+    return boost::apply_visitor(symbol_type_dispatch(), sym);
+}
+
 template <typename OutputIterator>
 bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
                                            mapnik::feature_impl & feature,
@@ -33,29 +55,35 @@ bool svg_renderer<OutputIterator>::process(rule::symbolizers const& syms,
     // svg renderer supports processing of multiple symbolizers.
     typedef coord_transform<CoordTransform, geometry_type> path_type;
 
+    bool process_path = false;
     // process each symbolizer to collect its (path) information.
     // path information (attributes from line_ and polygon_ symbolizers)
     // is collected with the path_attributes_ data member.
     for (symbolizer const& sym : syms)
     {
+        if (is_path_based(sym))
+        {
+            process_path = true;
+        }
         boost::apply_visitor(symbol_dispatch(*this, feature, prj_trans), sym);
     }
 
-    // generate path output for each geometry of the current feature.
-    for(unsigned i=0; i<feature.num_geometries(); ++i)
+    if (process_path)
     {
-        geometry_type & geom = feature.get_geometry(i);
-        if(geom.size() > 0)
+        // generate path output for each geometry of the current feature.
+        for(std::size_t i=0; i<feature.num_geometries(); ++i)
         {
-            path_type path(t_, geom, prj_trans);
-            generator_.generate_path(path, path_attributes_);
+            geometry_type & geom = feature.get_geometry(i);
+            if(geom.size() > 0)
+            {
+                path_type path(t_, geom, prj_trans);
+                generator_.generate_path(path, path_attributes_);
+            }
         }
+        // set the previously collected values back to their defaults
+        // for the feature that will be processed next.
+        path_attributes_.reset();
     }
-
-    // set the previously collected values back to their defaults
-    // for the feature that will be processed next.
-    path_attributes_.reset();
-
     return true;
 }
 

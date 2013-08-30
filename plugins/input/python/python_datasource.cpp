@@ -122,15 +122,43 @@ mapnik::datasource::datasource_t python_datasource::type() const
 
 mapnik::box2d<double> python_datasource::envelope() const
 {
+    mapnik::box2d<double> box;
     try
     {
         ensure_gil lock;
-        return boost::python::extract<mapnik::box2d<double> >(datasource_.attr("envelope"));
+        if (!PyObject_HasAttrString(datasource_.ptr(), "envelope"))
+        {
+            throw mapnik::datasource_exception("Python: could not access envelope property");
+        }
+        else
+        {
+            boost::python::object py_envelope = datasource_.attr("envelope");
+            if (py_envelope.ptr() == boost::python::object().ptr())
+            {
+                throw mapnik::datasource_exception("Python: could not access envelope property");
+            }
+            else
+            {
+                boost::python::extract<double> ex(py_envelope.attr("minx"));
+                if (!ex.check()) throw mapnik::datasource_exception("Python: could not convert envelope.minx");
+                box.set_minx(ex());
+                boost::python::extract<double> ex1(py_envelope.attr("miny"));
+                if (!ex1.check()) throw mapnik::datasource_exception("Python: could not convert envelope.miny");
+                box.set_miny(ex1());
+                boost::python::extract<double> ex2(py_envelope.attr("maxx"));
+                if (!ex2.check()) throw mapnik::datasource_exception("Python: could not convert envelope.maxx");
+                box.set_maxx(ex2());
+                boost::python::extract<double> ex3(py_envelope.attr("maxy"));
+                if (!ex3.check()) throw mapnik::datasource_exception("Python: could not convert envelope.maxy");
+                box.set_maxy(ex3());
+            }
+        }
     }
     catch ( boost::python::error_already_set )
     {
         throw mapnik::datasource_exception(extractException());
     }
+    return box;
 }
 
 boost::optional<mapnik::datasource::geometry_t> python_datasource::get_geometry_type() const

@@ -25,6 +25,7 @@
 
 // stl
 #include <ctime>
+#include <stdexcept>
 
 #ifndef MAPNIK_LOG_FORMAT
   #define MAPNIK_LOG_FORMAT  Mapnik LOG> %Y-%m-%d %H:%M:%S:

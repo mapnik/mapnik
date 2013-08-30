@@ -25,11 +25,16 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
+#include <mapnik/value_types.hpp>
+
+#if defined(GRID_RENDERER)
 #include <mapnik/grid/grid.hpp>
+#endif
+
 #include <mapnik/text_path.hpp>
 #include <mapnik/pixel_position.hpp>
 #include <mapnik/font_util.hpp>
-
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
@@ -39,6 +44,7 @@
 // stl
 #include <sstream>
 #include <algorithm>
+#include <stdexcept>
 
 // icu
 #include <unicode/ubidi.h>
@@ -132,7 +138,7 @@ bool freetype_engine::register_font(std::string const& file_name)
             else if (face->style_name)
                 s << "which reports a style name of '" << std::string(face->style_name) << "' and lacks a family name";
 
-            MAPNIK_LOG_DEBUG(font_engine_freetype) << "freetype_engine: " << s.str();
+            MAPNIK_LOG_ERROR(font_engine_freetype) << "register_font: " << s.str();
         }
     }
     if (face)
@@ -144,48 +150,54 @@ bool freetype_engine::register_font(std::string const& file_name)
 
 bool freetype_engine::register_fonts(std::string const& dir, bool recurse)
 {
-    boost::filesystem::path path(dir);
-    if (!boost::filesystem::exists(path))
+    if (!mapnik::util::exists(dir))
     {
         return false;
     }
-    if (!boost::filesystem::is_directory(path))
+    if (!mapnik::util::is_directory(dir))
     {
         return mapnik::freetype_engine::register_font(dir);
     }
-    boost::filesystem::directory_iterator end_itr;
     bool success = false;
-    for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
+    try
     {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-        std::string file_name = itr->path().string();
-#else // v2
-        std::string file_name = itr->string();
-#endif
-        if (boost::filesystem::is_directory(*itr) && recurse)
+        boost::filesystem::directory_iterator end_itr;
+        for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
         {
-            if (register_fonts(file_name, true))
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+            std::string file_name = itr->path().string();
+    #else // v2
+            std::string file_name = itr->string();
+    #endif
+            if (boost::filesystem::is_directory(*itr) && recurse)
             {
-                success = true;
-            }
-        }
-        else
-        {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            std::string base_name = itr->path().filename().string();
-#else // v2
-            std::string base_name = itr->filename();
-#endif
-            if (!boost::algorithm::starts_with(base_name,".") &&
-                boost::filesystem::is_regular_file(file_name) &&
-                is_font_file(file_name))
-            {
-                if (mapnik::freetype_engine::register_font(file_name))
+                if (register_fonts(file_name, true))
                 {
                     success = true;
                 }
             }
+            else
+            {
+    #if (BOOST_FILESYSTEM_VERSION == 3)
+                std::string base_name = itr->path().filename().string();
+    #else // v2
+                std::string base_name = itr->filename();
+    #endif
+                if (!boost::algorithm::starts_with(base_name,".") &&
+                    boost::filesystem::is_regular_file(file_name) &&
+                    is_font_file(file_name))
+                {
+                    if (mapnik::freetype_engine::register_font(file_name))
+                    {
+                        success = true;
+                    }
+                }
+            }
         }
+    }
+    catch (std::exception const& ex)
+    {
+        MAPNIK_LOG_ERROR(font_engine_freetype) << "register_fonts: " << ex.what();
     }
     return success;
 }
@@ -339,12 +351,12 @@ char_info font_face_set::character_dimensions(unsigned int c)
 }
 
 
-void font_face_set::get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format)
+void font_face_set::get_string_info(string_info & info, mapnik::value_unicode_string const& ustr, char_properties *format)
 {
     double avg_height = character_dimensions('X').height();
     UErrorCode err = U_ZERO_ERROR;
-    UnicodeString reordered;
-    UnicodeString shaped;
+    mapnik::value_unicode_string reordered;
+    mapnik::value_unicode_string shaped;
 
     int32_t length = ustr.length();
 
@@ -364,7 +376,7 @@ void font_face_set::get_string_info(string_info & info, UnicodeString const& ust
     shaped.releaseBuffer(length);
 
     if (U_SUCCESS(err)) {
-        StringCharacterIterator iter(shaped);
+        U_NAMESPACE_QUALIFIER StringCharacterIterator iter(shaped);
         for (iter.setToStart(); iter.hasNext();) {
             UChar ch = iter.nextPostInc();
             char_info char_dim = character_dimensions(ch);
@@ -434,23 +446,48 @@ void render_halo(T & pixmap,
                  unsigned rgba,
                  int x1,
                  int y1,
-                 int halo_radius,
+                 double halo_radius,
                  double opacity,
                  composite_mode_e comp_op)
 {
     int width = bitmap->width;
     int height = bitmap->rows;
     int x, y;
-    for (x=0; x < width; x++)
+    if (halo_radius < 1.0)
     {
-        for (y=0; y < height; y++)
+        for (x=0; x < width; x++)
         {
-            int gray = bitmap->buffer[y*bitmap->width+x];
-            if (gray)
+            for (y=0; y < height; y++)
             {
-                for (int n=-halo_radius; n <=halo_radius; ++n)
-                    for (int m=-halo_radius; m <= halo_radius; ++m)
-                        pixmap.composite_pixel(comp_op, x+x1+m, y+y1+n, rgba, gray, opacity);
+                int gray = bitmap->buffer[y*bitmap->width+x];
+                if (gray)
+                {
+                    pixmap.composite_pixel(comp_op, x+x1-1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1,   y+y1-1, rgba, gray*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1+1, y+y1-1, rgba, gray*halo_radius*halo_radius, opacity);
+
+                    pixmap.composite_pixel(comp_op, x+x1-1, y+y1,   rgba, gray*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1,   y+y1,   rgba, gray, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1+1, y+y1,   rgba, gray*halo_radius, opacity);
+
+                    pixmap.composite_pixel(comp_op, x+x1-1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1,   y+y1+1, rgba, gray*halo_radius, opacity);
+                    pixmap.composite_pixel(comp_op, x+x1+1, y+y1+1, rgba, gray*halo_radius*halo_radius, opacity);
+                }
+            }
+        }
+    } else {
+        for (x=0; x < width; x++)
+        {
+            for (y=0; y < height; y++)
+            {
+                int gray = bitmap->buffer[y*bitmap->width+x];
+                if (gray)
+                {
+                    for (int n=-halo_radius; n <=halo_radius; ++n)
+                        for (int m=-halo_radius; m <= halo_radius; ++m)
+                            pixmap.composite_pixel(comp_op, x+x1+m, y+y1+n, rgba, gray, opacity);
+                }
             }
         }
     }
@@ -654,6 +691,7 @@ void text_renderer<T>::render(pixel_position const& pos)
     }
 }
 
+#if defined(GRID_RENDERER)
 template <typename T>
 void text_renderer<T>::render_id(mapnik::value_integer feature_id,
                                  pixel_position const& pos)
@@ -683,6 +721,7 @@ void text_renderer<T>::render_id(mapnik::value_integer feature_id,
         }
     }
 }
+#endif
 
 #ifdef MAPNIK_THREADSAFE
 boost::mutex freetype_engine::mutex_;
@@ -697,6 +736,7 @@ template text_renderer<image_32>::text_renderer(image_32&,
                                                 double);
 template box2d<double>text_renderer<image_32>::prepare_glyphs(text_path const&);
 template void text_renderer<image_32>::render(pixel_position const&);
+#if defined(GRID_RENDERER)
 template void text_renderer<grid>::render_id(mapnik::value_integer,
                                              pixel_position const&);
 template text_renderer<grid>::text_renderer(grid&,
@@ -704,4 +744,5 @@ template text_renderer<grid>::text_renderer(grid&,
                                             halo_rasterizer_e,
                                             composite_mode_e, double);
 template box2d<double>text_renderer<grid>::prepare_glyphs(text_path const& );
+#endif
 }

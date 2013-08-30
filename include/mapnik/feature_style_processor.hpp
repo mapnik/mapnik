@@ -25,6 +25,7 @@
 
 // mapnik
 #include <mapnik/datasource.hpp> // for featureset_ptr
+#include <mapnik/config.hpp>
 
 // stl
 #include <set>
@@ -48,7 +49,7 @@ enum eAttributeCollectionPolicy
 };
 
 template <typename Processor>
-class feature_style_processor
+class MAPNIK_DECL feature_style_processor
 {
     struct symbol_dispatch;
 public:
@@ -84,16 +85,13 @@ private:
     /*!
      * \brief renders a featureset with the given styles.
      */
-    void render_style(layer const& lay,
-                      Processor & p,
+    void render_style(Processor & p,
                       feature_type_style const* style,
                       rule_cache const& rules,
-                      std::string const& style_name,
                       featureset_ptr features,
                       proj_transform const& prj_trans);
 
     Map const& m_;
-    double scale_factor_;
 };
 }
 

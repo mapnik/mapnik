@@ -39,8 +39,10 @@
 
 // mapnik
 #include <mapnik/unicode.hpp>
+#include <mapnik/utils.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
@@ -80,7 +82,7 @@ struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeTyp
         return mapnik::String;
     }
 
-    mapnik::eAttributeType operator() (UnicodeString const& /*val*/) const
+    mapnik::eAttributeType operator() (mapnik::value_unicode_string const& /*val*/) const
     {
         return mapnik::String;
     }
@@ -104,9 +106,24 @@ geojson_datasource::geojson_datasource(parameters const& params)
 {
     if (file_.empty()) throw mapnik::datasource_exception("GeoJSON Plugin: missing <file> parameter");
 
+    boost::optional<std::string> base = params.get<std::string>("base");
+    if (base)
+    {
+        file_ = *base + "/" + file_;
+    }
+
     typedef std::istreambuf_iterator<char> base_iterator_type;
 
-    std::ifstream is(file_.c_str());
+#if defined (_WINDOWS)
+    std::ifstream is(mapnik::utf8_to_utf16(file_),std::ios_base::in | std::ios_base::binary);
+#else
+    std::ifstream is(file_.c_str(),std::ios_base::in | std::ios_base::binary);
+#endif
+    if (!is.is_open())
+    {
+        throw mapnik::datasource_exception("GeoJSON Plugin: could not open: '" + file_ + "'");
+    }
+
     boost::spirit::multi_pass<base_iterator_type> begin =
         boost::spirit::make_default_multi_pass(base_iterator_type(is));
 
@@ -204,9 +221,17 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
     return mapnik::featureset_ptr();
 }
 
-// FIXME
 mapnik::featureset_ptr geojson_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const
 {
-    throw mapnik::datasource_exception("GeoJSON Plugin: features_at_point is not supported yet");
-    return mapnik::featureset_ptr();
+    mapnik::box2d<double> query_bbox(pt, pt);
+    query_bbox.pad(tol);
+    mapnik::query q(query_bbox);
+    std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
+    std::vector<mapnik::attribute_descriptor>::const_iterator itr = desc.begin();
+    std::vector<mapnik::attribute_descriptor>::const_iterator end = desc.end();
+    for ( ;itr!=end;++itr)
+    {
+        q.add_property_name(itr->get_name());
+    }
+    return features(q);
 }

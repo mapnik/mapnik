@@ -177,7 +177,7 @@ void jpeg_reader<T>::skip(j_decompress_ptr cinfo, long count)
 }
 
 template <typename T>
-void jpeg_reader<T>::term (j_decompress_ptr cinfo)
+void jpeg_reader<T>::term (j_decompress_ptr /*cinfo*/)
 {
 // no-op
 }
@@ -202,15 +202,16 @@ void jpeg_reader<T>::attach_stream (j_decompress_ptr cinfo, input_stream* in)
 }
 
 template <typename T>
-void jpeg_reader<T>::on_error(j_common_ptr cinfo)
+void jpeg_reader<T>::on_error(j_common_ptr /*cinfo*/)
 {
-    throw image_reader_exception("JPEG Reader: libjpeg could not read image");
 }
 
 template <typename T>
 void jpeg_reader<T>::on_error_message(j_common_ptr cinfo)
 {
-    // used to supress jpeg from printing to stderr
+    char buffer[JMSG_LENGTH_MAX];
+    (*cinfo->err->format_message)(cinfo, buffer);
+    throw image_reader_exception(std::string("JPEG Reader: libjpeg could not read image: ") + buffer);
 }
 
 template <typename T>

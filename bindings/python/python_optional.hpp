@@ -22,7 +22,8 @@
 
 #include <boost/optional/optional.hpp>
 #include <boost/python.hpp>
-#include <boost/noncopyable.hpp>
+
+#include <mapnik/noncopyable.hpp>
 
 // boost::optional<T> to/from converter from John Wiegley
 
@@ -46,7 +47,7 @@ struct register_python_conversion
 };
 
 template <typename T>
-struct python_optional : public boost::noncopyable
+struct python_optional : public mapnik::noncopyable
 {
     struct optional_to_python
     {
@@ -74,7 +75,7 @@ struct python_optional : public boost::noncopyable
                     rvalue_from_python_stage1(source, converters);
                 return rvalue_from_python_stage2(source, data, converters);
             }
-            return NULL;
+            return 0;
         }
 
         static void construct(PyObject * source,
@@ -94,7 +95,8 @@ struct python_optional : public boost::noncopyable
         }
     };
 
-    explicit python_optional() {
+    explicit python_optional()
+    {
         register_python_conversion<boost::optional<T>,
             optional_to_python, optional_from_python>();
     }
@@ -199,7 +201,11 @@ struct python_optional<bool> : public mapnik::noncopyable
 // This class works around a feature in boost python.
 // See http://osdir.com/ml/python.c++/2003-11/msg00158.html
 
-template <typename T, typename X1 = boost::python::detail::not_specified, typename X2 = boost::python::detail::not_specified, typename X3 = boost::python::detail::not_specified>
+
+template <typename T,
+          typename X1 = boost::python::detail::not_specified,
+          typename X2 = boost::python::detail::not_specified,
+          typename X3 = boost::python::detail::not_specified>
 class class_with_converter : public boost::python::class_<T, X1, X2, X3>
 {
 public:
@@ -223,7 +229,7 @@ public:
         : boost::python::class_<T, X1, X2, X3>(name, doc, i) { }
 
     template <class D>
-    self& def_readwrite_convert(char const* name, D const& d, char const* doc=0)
+    self& def_readwrite_convert(char const* name, D const& d, char const* /*doc*/=0)
     {
         this->add_property(name,
                            boost::python::make_getter(d, boost::python::return_value_policy<boost::python::return_by_value>()),

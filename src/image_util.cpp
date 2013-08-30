@@ -241,6 +241,85 @@ void handle_png_options(std::string const& type,
 }
 #endif
 
+
+#if defined(HAVE_WEBP)
+void handle_webp_options(std::string const& type,
+                        double & quality,
+                        int & method,
+                        int & lossless,
+                        int & image_hint,
+                        bool & alpha
+                        )
+{
+    if (type == "webp")
+    {
+        return;
+    }
+    if (type.length() > 4){
+        boost::char_separator<char> sep(":");
+        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+        for (auto const& t : tokens)
+        {
+            if (boost::algorithm::starts_with(t, "quality="))
+            {
+                std::string val = t.substr(8);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2double(val,quality) || quality < 0.0 || quality > 100.0)
+                    {
+                        throw ImageWriterException("invalid webp quality: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "method="))
+            {
+                std::string val = t.substr(7);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,method) || method < 0 || method > 6)
+                    {
+                        throw ImageWriterException("invalid webp method: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "lossless="))
+            {
+                std::string val = t.substr(9);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,lossless) || lossless < 0 || lossless > 1)
+                    {
+                        throw ImageWriterException("invalid webp lossless: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "image_hint="))
+            {
+                std::string val = t.substr(11);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,image_hint) || image_hint < 0 || image_hint > 3)
+                    {
+                        throw ImageWriterException("invalid webp image_hint: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "alpha="))
+            {
+                std::string val = t.substr(6);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2bool(val,alpha))
+                    {
+                        throw ImageWriterException("invalid webp alpha: '" + val + "'");
+                    }
+                }
+            }
+        }
+    }
+}
+#endif
+
 template <typename T>
 void save_to_stream(T const& image,
                     std::ostream & stream,
@@ -378,17 +457,20 @@ void save_to_stream(T const& image,
         else if (boost::algorithm::starts_with(t, "webp"))
         {
 #if defined(HAVE_WEBP)
-            int quality = 100;
-            std::string val = t.substr(4);
-            if (!val.empty())
-            {
-                if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
-                {
-                    throw ImageWriterException("invalid webp quality: '" + val + "'");
-                }
-            }
-            int compression = 0;
-            save_as_webp(stream, quality, compression, image);
+            double quality = 90.0; // 0 lowest, 100 highest
+            int method = 3; // 0 if fastest, 6 slowest
+            int lossless = 0; // Lossless encoding (0=lossy(default), 1=lossless).
+            int image_hint = 3; // used when lossless=1
+            bool alpha = true;
+            /*
+              WEBP_HINT_DEFAULT = 0,  // default preset.
+              WEBP_HINT_PICTURE,      // digital picture, like portrait, inner shot
+              WEBP_HINT_PHOTO,        // outdoor photograph, with natural lighting
+              WEBP_HINT_GRAPH,        // Discrete tone image (graph, map-tile etc).
+              WEBP_HINT_LAST
+            */
+            handle_webp_options(t,quality,method,lossless, image_hint, alpha);
+            save_as_webp(stream, static_cast<float>(quality), method, lossless, image_hint, alpha, image);
 #else
             throw ImageWriterException("webp output is not enabled in your build of Mapnik");
 #endif
@@ -422,12 +504,12 @@ void save_to_file(T const& image, std::string const& filename, rgba_palette cons
 
 #if defined(HAVE_CAIRO)
 // TODO - move to separate cairo_io.hpp
-void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, double scale_factor)
+void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, double scale_factor, double scale_denominator)
 {
     boost::optional<std::string> type = type_from_filename(filename);
     if (type)
     {
-        save_to_cairo_file(map,filename,*type,scale_factor);
+        save_to_cairo_file(map,filename,*type,scale_factor,scale_denominator);
     }
     else throw ImageWriterException("Could not write file to " + filename );
 }
@@ -435,7 +517,8 @@ void save_to_cairo_file(mapnik::Map const& map, std::string const& filename, dou
 void save_to_cairo_file(mapnik::Map const& map,
                         std::string const& filename,
                         std::string const& type,
-                        double scale_factor)
+                        double scale_factor,
+                        double scale_denominator)
 {
     std::ofstream file (filename.c_str(), std::ios::out|std::ios::trunc|std::ios::binary);
     if (file)
@@ -489,7 +572,7 @@ void save_to_cairo_file(mapnik::Map const& map,
         */
 
         mapnik::cairo_renderer<cairo_ptr> ren(map, create_context(surface), scale_factor);
-        ren.apply();
+        ren.apply(scale_denominator);
 
         if (type == "ARGB32" || type == "RGB24")
         {

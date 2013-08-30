@@ -272,6 +272,7 @@ void export_image()
            arg("mode")=mapnik::src_over,
            arg("opacity")=1.0f
          ))
+        .def("premultiplied",&image_32::premultiplied)
         .def("premultiply",&image_32::premultiply)
         .def("demultiply",&image_32::demultiply)
         .def("set_pixel",&set_pixel)

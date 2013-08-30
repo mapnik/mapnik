@@ -51,6 +51,8 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/util/fs.hpp>
+#include <mapnik/image_filter_types.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -59,7 +61,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/filesystem/operations.hpp>
 
 // agg
 #include "agg_trans_affine.h"
@@ -76,7 +77,8 @@ public:
         strict_(strict),
         filename_(filename),
         relative_to_xml_(true),
-        font_manager_(font_engine_)
+        font_manager_(font_engine_),
+        xml_base_path_()
     {}
 
     void parse_map(Map & map, xml_node const& sty, std::string const& base_path);
@@ -124,17 +126,18 @@ private:
     face_manager<freetype_engine> font_manager_;
     std::map<std::string,std::string> file_sources_;
     std::map<std::string,font_set> fontsets_;
+    std::string xml_base_path_;
 };
 
 //#include <mapnik/internal/dump_xml.hpp>
-void load_map(Map & map, std::string const& filename, bool strict)
+void load_map(Map & map, std::string const& filename, bool strict, std::string base_path)
 {
     // TODO - use xml encoding?
     xml_tree tree("utf8");
     tree.set_filename(filename);
     read_xml(filename, tree.root());
     map_parser parser(strict, filename);
-    parser.parse_map(map, tree.root(), "");
+    parser.parse_map(map, tree.root(), base_path);
     //dump_xml(tree.root());
 }
 
@@ -143,9 +146,13 @@ void load_map_string(Map & map, std::string const& str, bool strict, std::string
     // TODO - use xml encoding?
     xml_tree tree("utf8");
     if (!base_path.empty())
+    {
         read_xml_string(str, tree.root(), base_path); // accept base_path passed into function
+    }
     else
-        read_xml_string(str, tree.root(), map.base_path()); // default to map base_path
+    {
+        read_xml_string(str, tree.root(), map.base_path()); // FIXME - this value is not fully known yet
+    }
     map_parser parser(strict, base_path);
     parser.parse_map(map, tree.root(), base_path);
 }
@@ -174,18 +181,11 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
             {
                 map.set_base_path(*base_path_from_xml);
             }
-            else
+            else if (!filename_.empty())
             {
-                boost::filesystem::path xml_path(filename_);
-                // TODO - should we make this absolute?
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                std::string base = xml_path.parent_path().string();
-#else // v2
-                std::string base = xml_path.branch_path().string();
-#endif
-
-                map.set_base_path(base);
+                map.set_base_path(mapnik::util::dirname(filename_));
             }
+            xml_base_path_ = map.base_path();
 
             optional<color> bgcolor = map_node.get_opt_attr<color>("background-color");
             if (bgcolor)
@@ -199,7 +199,17 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 map.set_background_image(ensure_relative_to_xml(image_filename));
             }
 
-            map.set_srs(map_node.get_attr("srs", map.srs()));
+            std::string srs = map_node.get_attr("srs", map.srs());
+            try
+            {
+                // create throwaway projection object here to ensure it is valid
+                projection proj(srs);
+            }
+            catch (proj_init_error const& ex)
+            {
+                throw mapnik::config_error(ex.what());
+            }
+            map.set_srs(srs);
 
             optional<unsigned> buffer_size = map_node.get_opt_attr<unsigned>("buffer-size");
             if (buffer_size)
@@ -259,8 +269,6 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                     {
                         throw config_error(std::string("Invalid version string encountered: '")
                             + *beg + "' in '" + *min_version_string + "'");
-
-                        break;
                     }
                     if (i==2)
                     {
@@ -543,9 +551,17 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
     {
         name = node.get_attr("name", std::string("Unnamed"));
 
-        // XXX if no projection is given inherit from map? [DS]
+        // If no projection is given inherit from map
         std::string srs = node.get_attr("srs", map.srs());
-
+        try
+        {
+            // create throwaway projection object here to ensure it is valid
+            projection proj(srs);
+        }
+        catch (proj_init_error const& ex)
+        {
+            throw mapnik::config_error(ex.what());
+        }
         layer lyr(name, srs);
 
         optional<boolean> status = node.get_opt_attr<boolean>("status");
@@ -1076,6 +1092,10 @@ void map_parser::parse_line_pattern_symbolizer(rule & rule, xml_node const & sym
         ensure_exists(file);
         line_pattern_symbolizer symbol( parse_path(file, sym.get_tree().path_expr_grammar) );
 
+        // offset value
+        optional<double> offset = sym.get_opt_attr<double>("offset");
+        if (offset) symbol.set_offset(*offset);
+
         parse_symbolizer_base(symbol, sym);
         rule.append(symbol);
     }
@@ -1531,8 +1551,10 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
 void map_parser::parse_debug_symbolizer(rule & rule, xml_node const & sym)
 {
     debug_symbolizer symbol;
-
     parse_symbolizer_base(symbol, sym);
+    debug_symbolizer_mode_e mode =
+        sym.get_attr<debug_symbolizer_mode_e>("mode", DEBUG_SYM_MODE_COLLISION);
+    symbol.set_mode(mode);
     rule.append(symbol);
 }
 
@@ -1639,24 +1661,12 @@ std::string map_parser::ensure_relative_to_xml(boost::optional<std::string> cons
     if (marker_cache::instance().is_uri(*opt_path))
         return *opt_path;
 
-    if (relative_to_xml_)
+    if (!xml_base_path_.empty() && relative_to_xml_)
     {
-        boost::filesystem::path xml_path = filename_;
-        boost::filesystem::path rel_path = *opt_path;
-        if (!rel_path.has_root_path())
+        std::string starting_path = *opt_path;
+        if (mapnik::util::is_relative(starting_path))
         {
-#if (BOOST_FILESYSTEM_VERSION == 3)
-            // TODO - normalize is now deprecated, use make_preferred?
-            boost::filesystem::path full = boost::filesystem::absolute(xml_path.parent_path()/rel_path);
-#else // v2
-            boost::filesystem::path full = boost::filesystem::complete(xml_path.branch_path()/rel_path).normalize();
-#endif
-
-            MAPNIK_LOG_DEBUG(load_map) << "map_parser: Modifying relative paths to be relative to xml...";
-            MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Original base path=" << *opt_path;
-            MAPNIK_LOG_DEBUG(load_map) << "map_parser: -- Relative base path=" << full.string();
-
-            return full.string();
+            return mapnik::util::make_absolute(starting_path,xml_base_path_);
         }
     }
     return *opt_path;
@@ -1669,7 +1679,7 @@ void map_parser::ensure_exists(std::string const& file_path)
     // validate that the filename exists if it is not a dynamic PathExpression
     if (!boost::algorithm::find_first(file_path,"[") && !boost::algorithm::find_first(file_path,"]"))
     {
-       if (!boost::filesystem::exists(file_path))
+       if (!mapnik::util::exists(file_path))
        {
            throw mapnik::config_error("file could not be found: '" + file_path + "'");
        }

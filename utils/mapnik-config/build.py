@@ -9,16 +9,13 @@ Import('env')
 
 config_env = env.Clone()
 
-# TODO
-# major/minor versions
-# git rev-list --max-count=1 HEAD
-
 config_variables = '''#!/bin/sh
 
 ## variables
 
 CONFIG_PREFIX="$( cd "$( dirname $( dirname "$0" ))" && pwd )"
 
+CONFIG_MAPNIK_VERSION_STRING='%(version_string)s'
 CONFIG_MAPNIK_VERSION='%(version)s'
 CONFIG_GIT_REVISION='%(git_revision)s'
 CONFIG_GIT_DESCRIBE='%(git_describe)s'
@@ -32,6 +29,7 @@ CONFIG_MAPNIK_LDFLAGS='%(ldflags)s'
 CONFIG_MAPNIK_INCLUDE="${CONFIG_PREFIX}/include -I${CONFIG_PREFIX}/include/mapnik/agg"
 CONFIG_DEP_INCLUDES='%(dep_includes)s'
 CONFIG_CXXFLAGS='%(cxxflags)s'
+CONFIG_CXX='%(cxx)s'
 
 '''
 
@@ -54,6 +52,7 @@ if config_env['HAS_CAIRO']:
     dep_includes += ''.join([' -I%s' % i for i in env['CAIRO_CPPPATHS'] if not i.startswith('#')])
 
 ldflags = config_env['CUSTOM_LDFLAGS'] + ''.join([' -L%s' % i for i in config_env['LIBPATH'] if not i.startswith('#')])
+ldflags += config_env['LIBMAPNIK_LINKFLAGS']
 
 dep_libs = ''.join([' -l%s' % i for i in env['LIBMAPNIK_LIBS']])
 
@@ -98,7 +97,8 @@ lib_path = "${CONFIG_PREFIX}/" + config_env['LIBDIR_SCHEMA']
 configuration = {
     "git_revision": git_revision,
     "git_describe": git_describe,
-    "version": config_env['MAPNIK_VERSION_STRING'],
+    "version_string": config_env['MAPNIK_VERSION_STRING'],
+    "version": config_env['MAPNIK_VERSION'],
     "mapnik_libname": 'mapnik',
     "mapnik_libpath": lib_path,
     "ldflags": ldflags,
@@ -107,7 +107,8 @@ configuration = {
     "fonts": fontspath,
     "input_plugins": inputpluginspath,
     "defines":defines,
-    "cxxflags":cxxflags
+    "cxxflags":cxxflags,
+    "cxx":env['CXX']
 }
 
 ## if we are statically linking depedencies

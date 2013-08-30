@@ -1,0 +1,22 @@
+<Map>
+<Style name="line" filter-mode="first" >
+  <Rule>
+    <LineSymbolizer stroke="#000000" />
+  </Rule>
+</Style>
+<Style name="point-placement" filter-mode="first" >
+  <Rule>
+    <MarkersSymbolizer allow-overlap="false" ignore-placement="true" placement="line" marker-type="ellipse" fill="blue" />
+    <DebugSymbolizer  />
+  </Rule>
+</Style>
+<Layer name="carto_tests">
+    <StyleName>line</StyleName>
+    <StyleName>point-placement</StyleName>
+    <Datasource>
+       <Parameter name="type">csv</Parameter>
+       <Parameter name="file">../data/marker-on-line.csv</Parameter>
+       <Parameter name="separator">|</Parameter>
+    </Datasource>
+  </Layer>
+</Map>

@@ -22,6 +22,7 @@
 
 // mapnik
 #include <mapnik/polygon_pattern_symbolizer.hpp>
+#include <mapnik/enumeration.hpp>
 
 namespace mapnik
 {

@@ -62,7 +62,7 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
     // TODO - actually handle image dimensions
     int stroke_width = 2;
 
-    for (unsigned i=0;i<feature.num_geometries();++i)
+    for (std::size_t i=0;i<feature.num_geometries();++i)
     {
         geometry_type & geom = feature.get_geometry(i);
         if (geom.size() > 1)

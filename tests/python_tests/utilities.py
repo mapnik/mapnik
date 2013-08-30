@@ -74,7 +74,8 @@ def run_all(iterable):
             sys.stderr.write("  Traceback:\n")
             for mline in traceback.format_tb(exc_tb):
                 for line in mline.rstrip().split("\n"):
-                    sys.stderr.write("  " + line + "\n")
+                    if not 'utilities.py' in line and not 'trivial.py' in line and not line.strip() == 'test()':
+                        sys.stderr.write("  " + line + "\n")
         sys.stderr.flush()
     return failed
 

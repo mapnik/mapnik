@@ -33,13 +33,12 @@
 #include <mapnik/timer.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/util/trim.hpp>
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/scoped_array.hpp>
 
 using mapnik::box2d;
 using mapnik::coord2d;
@@ -90,7 +89,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     else
         dataset_name_ = *file;
 
-    if ((dataset_name_.compare(":memory:") != 0) && (!boost::filesystem::exists(dataset_name_)))
+    if ((dataset_name_.compare(":memory:") != 0) && (!mapnik::util::exists(dataset_name_)))
     {
         throw datasource_exception("Sqlite Plugin: " + dataset_name_ + " does not exist");
     }
@@ -280,7 +279,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
         mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(use_spatial_index)");
 #endif
 
-        if (boost::filesystem::exists(index_db))
+        if (mapnik::util::exists(index_db))
         {
             dataset_->execute("attach database '" + index_db + "' as " + index_table_);
         }
@@ -297,28 +296,16 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
                       << " FROM ("
                       << geometry_table_ << ")";
 
-                /*
-                  std::vector<sqlite_utils::rtree_type> rtree_list;
-                  {
-                  boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
-                  sqlite_utils::build_tree(rs,rtree_list);
-                  }
-                  if (sqlite_utils::create_spatial_index2(index_db,index_table_,rtree_list))
-                  {
-                  //extent_initialized_ = true;
-                  has_spatial_index_ = true;
-                  if (boost::filesystem::exists(index_db))
-                  {
-                  dataset_->execute("attach database '" + index_db + "' as " + index_table_);
-                  }
-                  }
-                */
+#ifdef MAPNIK_STATS
+                mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(create_spatial_index)");
+#endif
+
                 boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
                 if (sqlite_utils::create_spatial_index(index_db,index_table_,rs))
                 {
                     //extent_initialized_ = true;
                     has_spatial_index_ = true;
-                    if (boost::filesystem::exists(index_db))
+                    if (mapnik::util::exists(index_db))
                     {
                         dataset_->execute("attach database '" + index_db + "' as " + index_table_);
                     }
@@ -340,6 +327,9 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
 
     if (! extent_initialized_)
     {
+#ifdef MAPNIK_STATS
+        mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(detect_extent)");
+#endif
         // TODO - clean this up - reducing arguments
         std::string query = populate_tokens(table_);
         if (!sqlite_utils::detect_extent(dataset_,
@@ -379,38 +369,6 @@ sqlite_datasource::~sqlite_datasource()
 {
 }
 
-#if (BOOST_FILESYSTEM_VERSION <= 2)
-namespace boost {
-namespace filesystem {
-path read_symlink(const path& p)
-{
-    path symlink_path;
-
-#ifdef BOOST_POSIX_API
-    for (std::size_t path_max = 64;; path_max *= 2)// loop 'til buffer is large enough
-    {
-        boost::scoped_array<char> buf(new char[path_max]);
-        ssize_t result;
-        if ((result=::readlink(p.string().c_str(), buf.get(), path_max))== -1)
-        {
-            throw std::runtime_error("could not read symlink");
-        }
-        else
-        {
-            if(result != static_cast<ssize_t>(path_max))
-            {
-                symlink_path.assign(buf.get(), buf.get() + result);
-                break;
-            }
-        }
-    }
-#endif
-    return symlink_path;
-}
-}
-}
-#endif
-
 void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
 {
     boost::char_separator<char> sep(",");
@@ -432,29 +390,10 @@ void sqlite_datasource::parse_attachdb(std::string const& attachdb) const
         // Break out the dbname and the filename
         std::string dbname = mapnik::util::trim_copy(spec.substr(0, atpos));
         std::string filename = mapnik::util::trim_copy(spec.substr(atpos + 1));
-
         // Normalize the filename and make it relative to dataset_name_
-        if (filename.compare(":memory:") != 0)
+        if (filename.compare(":memory:") != 0 && mapnik::util::is_relative(filename))
         {
-            boost::filesystem::path child_path(filename);
-
-            // It is a relative path.  Fix it.
-            if (! child_path.has_root_directory() && ! child_path.has_root_name())
-            {
-                boost::filesystem::path absolute_path(dataset_name_);
-
-                // support symlinks
-                if (boost::filesystem::is_symlink(absolute_path))
-                {
-                    absolute_path = boost::filesystem::read_symlink(absolute_path);
-                }
-
-#if (BOOST_FILESYSTEM_VERSION == 3)
-                filename = boost::filesystem::absolute(absolute_path.parent_path() / filename).string();
-#else
-                filename = boost::filesystem::complete(absolute_path.branch_path() / filename).normalize().string();
-#endif
-            }
+            filename = mapnik::util::make_relative(filename,dataset_name_);
         }
 
         // And add an init_statement_
@@ -619,9 +558,8 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
 
     if (dataset_)
     {
-        // TODO - need tolerance
-        mapnik::box2d<double> const e(pt.x, pt.y, pt.x, pt.y);
-
+        mapnik::box2d<double> e(pt.x, pt.y, pt.x, pt.y);
+        e.pad(tol);
         std::ostringstream s;
         mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
 

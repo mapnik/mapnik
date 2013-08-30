@@ -1,6 +1,7 @@
 // mapnik
 #include <mapnik/feature_factory.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/value_types.hpp>
 
 // boost
 #include <boost/make_shared.hpp>
@@ -32,7 +33,7 @@ mapnik::feature_ptr hello_featureset::next()
         ++feature_id_;
 
         // create an attribute pair of key:value
-        UnicodeString ustr = tr_->transcode("hello world!");
+        mapnik::value_unicode_string ustr = tr_->transcode("hello world!");
         feature->put(attribute,ustr);
 
         // we need a geometry to display so just for fun here

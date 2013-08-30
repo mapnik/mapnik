@@ -52,9 +52,6 @@
 #include <vector>
 #include <map>
 
-// uci
-#include <unicode/unistr.h>
-
 struct FT_LibraryRec_;
 
 namespace mapnik
@@ -106,7 +103,7 @@ public:
     size_type size() const;
     glyph_ptr get_glyph(unsigned c) const;
     char_info character_dimensions(unsigned c);
-    void get_string_info(string_info & info, UnicodeString const& ustr, char_properties *format);
+    void get_string_info(string_info & info, mapnik::value_unicode_string const& ustr, char_properties *format);
     void set_pixel_sizes(unsigned size);
     void set_character_sizes(double size);
 private:

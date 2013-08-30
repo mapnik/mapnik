@@ -36,7 +36,6 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/format.hpp>
 #include <boost/make_shared.hpp>
 
 // stl
@@ -53,7 +52,6 @@ const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
 using boost::shared_ptr;
-using mapnik::PoolGuard;
 using mapnik::attribute_descriptor;
 
 postgis_datasource::postgis_datasource(parameters const& params)
@@ -115,8 +113,6 @@ postgis_datasource::postgis_datasource(parameters const& params)
         shared_ptr<Connection> conn = pool->borrowObject();
         if (!conn) return;
 
-        PoolGuard<shared_ptr<Connection>,
-                  shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
         if (conn->isOK())
         {
 
@@ -431,7 +427,6 @@ postgis_datasource::~postgis_datasource()
             if (conn)
             {
                 conn->close();
-                pool->returnObject(conn);
             }
         }
     }
@@ -603,8 +598,6 @@ featureset_ptr postgis_datasource::features(const query& q) const
         shared_ptr<Connection> conn = pool->borrowObject();
         if (conn && conn->isOK())
         {
-            PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn ,pool);
-
             if (geometryColumn_.empty())
             {
                 std::ostringstream s_error;
@@ -696,7 +689,6 @@ featureset_ptr postgis_datasource::features(const query& q) const
             if (conn)
             {
                 err_msg += conn->status();
-                pool->returnObject(conn);
             }
             else
             {
@@ -719,7 +711,6 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
     {
         shared_ptr<Connection> conn = pool->borrowObject();
         if (!conn) return featureset_ptr();
-        PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
 
         if (conn->isOK())
         {
@@ -804,7 +795,6 @@ box2d<double> postgis_datasource::envelope() const
     {
         shared_ptr<Connection> conn = pool->borrowObject();
         if (!conn) return extent_;
-        PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
         if (conn->isOK())
         {
             std::ostringstream s;
@@ -896,7 +886,6 @@ boost::optional<mapnik::datasource::geometry_t> postgis_datasource::get_geometry
     {
         shared_ptr<Connection> conn = pool->borrowObject();
         if (!conn) return result;
-        PoolGuard<shared_ptr<Connection>, shared_ptr< Pool<Connection,ConnectionCreator> > > guard(conn, pool);
         if (conn->isOK())
         {
             std::ostringstream s;

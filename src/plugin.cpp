@@ -73,7 +73,7 @@ PluginInfo::~PluginInfo()
 
 void * PluginInfo::get_symbol(std::string const& sym_name) const
 {
-    return dlsym(module_->dl, sym_name.c_str());
+    return static_cast<void *>(dlsym(module_->dl, sym_name.c_str()));
 }
 
 std::string const& PluginInfo::name() const

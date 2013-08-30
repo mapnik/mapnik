@@ -25,7 +25,7 @@
 
 #if BOOST_VERSION >= 104500
 
-#include <mapnik/css_color_grammar_def.hpp>
+#include <mapnik/css_color_grammar_impl.hpp>
 
 namespace mapnik
 {

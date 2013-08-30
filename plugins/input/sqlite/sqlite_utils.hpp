@@ -30,17 +30,17 @@
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/utils.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/sql_utils.hpp>
-
+#include <mapnik/util/fs.hpp>
 
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 
 // sqlite
 extern "C" {
@@ -235,7 +235,7 @@ public:
         int flags;
 #endif
 
-        bool existed = boost::filesystem::exists(index_db);
+        bool existed = mapnik::util::exists(index_db);
         boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
 
         bool one_success = false;
@@ -328,8 +328,8 @@ public:
             {
                 try
                 {
-                    boost::filesystem::remove(index_db);
-                }
+                    mapnik::util::remove(index_db);
+                 }
                 catch (...) {};
             }
             throw mapnik::datasource_exception(ex.what());
@@ -344,7 +344,7 @@ public:
         {
             try
             {
-                boost::filesystem::remove(index_db);
+                mapnik::util::remove(index_db);
             }
             catch (...) {};
         }
@@ -413,7 +413,8 @@ public:
         int flags;
 #endif
 
-        bool existed = boost::filesystem::exists(index_db);
+        bool existed = mapnik::util::exists(index_db);;
+        
         boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
 
         bool one_success = false;
@@ -460,7 +461,7 @@ public:
             {
                 try
                 {
-                    boost::filesystem::remove(index_db);
+                    mapnik::util::remove(index_db);
                 }
                 catch (...) {};
             }
@@ -476,7 +477,7 @@ public:
         {
             try
             {
-                boost::filesystem::remove(index_db);
+                mapnik::util::remove(index_db);
             }
             catch (...) {};
         }
@@ -499,6 +500,7 @@ public:
             std::ostringstream s;
             s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata;
             s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table << "')";
+            MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
             boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             if (rs->is_valid() && rs->step_next())
             {
@@ -515,7 +517,7 @@ public:
             std::ostringstream s;
             s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM "
               << index_table;
-
+            MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
             boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             if (rs->is_valid() && rs->step_next())
             {
@@ -536,6 +538,7 @@ public:
             std::ostringstream s;
             s << "SELECT " << geometry_field << "," << key_field
               << " FROM (" << table << ")";
+            MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
             boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             sqlite_utils::query_extent(rs,extent);
             return true;

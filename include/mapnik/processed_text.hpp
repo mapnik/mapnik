@@ -26,6 +26,7 @@
 #include <mapnik/text_properties.hpp>
 #include <mapnik/text_path.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/value_types.hpp>
 
 // stl
 #include <list>
@@ -40,24 +41,24 @@ template <typename T> class face_manager;
 class MAPNIK_DECL processed_text : mapnik::noncopyable
 {
 public:
-    class processed_expression
+    struct processed_expression
     {
-    public:
-        processed_expression(char_properties const& properties, UnicodeString const& text) :
-            p(properties), str(text) {}
+        processed_expression(char_properties const& properties, mapnik::value_unicode_string const& text)
+            : p(properties),
+              str(text) {}
         char_properties p;
-        UnicodeString str;
+        mapnik::value_unicode_string str;
     };
 public:
     processed_text(face_manager<freetype_engine> & font_manager, double scale_factor);
-    void push_back(char_properties const& properties, UnicodeString const& text);
+    void push_back(char_properties const& properties, mapnik::value_unicode_string const& text);
     std::size_t size() const { return expr_list_.size(); }
     unsigned empty() const { return expr_list_.empty(); }
     void clear();
     typedef std::list<processed_expression> expression_list;
     expression_list::const_iterator begin() const;
     expression_list::const_iterator end() const;
-    string_info &get_string_info();
+    string_info const& get_string_info();
 private:
     expression_list expr_list_;
     face_manager<freetype_engine> &font_manager_;

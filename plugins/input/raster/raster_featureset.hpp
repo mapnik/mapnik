@@ -35,7 +35,6 @@
 
 // boost
 #include <boost/utility.hpp>
-#include <boost/format.hpp>
 
 class single_file_policy
 {

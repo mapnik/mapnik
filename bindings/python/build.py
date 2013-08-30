@@ -1,7 +1,7 @@
 #
 # This file is part of Mapnik (c++ mapping toolkit)
 #
-# Copyright (C) 2006 Artem Pavlenko, Jean-Francois Doyon
+# Copyright (C) 2013 Artem Pavlenko
 #
 # Mapnik is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -43,20 +43,23 @@ prefix = env['PREFIX']
 target_path = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik')
 target_path_deprecated = os.path.normpath(env['PYTHON_INSTALL_LOCATION'] + os.path.sep + 'mapnik2')
 
-libraries = ['mapnik',env['BOOST_PYTHON_LIB']]
+py_env = env.Clone()
+py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
+
+py_env.Append(CPPDEFINES = env['LIBMAPNIK_DEFINES'])
+
+py_env['LIBS'] = ['mapnik',env['BOOST_PYTHON_LIB']]
+
+link_all_libs = env['LINKING'] == 'static' or env['RUNTIME_LINK'] == 'static' or (env['PLATFORM'] == 'Darwin' and not env['PYTHON_DYNAMIC_LOOKUP'])
+
+if link_all_libs:
+    py_env.AppendUnique(LIBS=env['LIBMAPNIK_LIBS'])
+
+if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
+    py_env.AppendUnique(LIBS='rt')
 
 # TODO - do solaris/fedora need direct linking too?
 if env['PLATFORM'] == 'Darwin':
-    if not env['PYTHON_DYNAMIC_LOOKUP']:
-        if env['PNG']:
-            libraries.append('png')
-        if env['JPEG']:
-            libraries.append('jpeg')
-        libraries.append(env['ICU_LIB_NAME'])
-        libraries.append('boost_regex%s' % env['BOOST_APPEND'])
-        if env['THREADING'] == 'multi':
-            libraries.append('boost_thread%s' % env['BOOST_APPEND'])
-
     ##### Python linking on OS X is tricky ### 
     # Confounding problems are:
     # 1) likelyhood of multiple python installs of the same major.minor version
@@ -96,7 +99,6 @@ if env['PLATFORM'] == 'Darwin':
             else:
                 # should we fall back to -lpython here?
                 python_link_flag = '-F/ -framework Python'
-            
     # if we are not linking to a framework then use the *nix standard approach
     else:
         # TODO - do we need to pass -L/?
@@ -147,9 +149,6 @@ except: pass
 # install the shared object beside the module directory
 sources = glob.glob('*.cpp')
 
-py_env = env.Clone()
-py_env.Append(CPPPATH = env['PYTHON_INCLUDES'])
-
 if 'install' in COMMAND_LINE_TARGETS:
     # install the core mapnik python files, including '__init__.py'
     init_files = glob.glob('mapnik/*.py')
@@ -176,15 +175,15 @@ if 'uninstall' not in COMMAND_LINE_TARGETS:
     if env['HAS_CAIRO']:
         py_env.Append(CPPPATH = env['CAIRO_CPPPATHS'])
         py_env.Append(CPPDEFINES = '-DHAVE_CAIRO')
-        if env['PLATFORM'] == 'Darwin':
-            py_env.Append(LIBS=env['CAIRO_LINKFLAGS'])
+        if link_all_libs:
+            py_env.Append(LIBS=env['CAIRO_ALL_LIBS'])
     
     if env['HAS_PYCAIRO']:
         py_env.ParseConfig('pkg-config --cflags pycairo')
         py_env.Append(CPPDEFINES = '-DHAVE_PYCAIRO')
 
-libraries.append('boost_thread%s' % env['BOOST_APPEND'])
-_mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LIBS=libraries, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
+py_env.AppendUnique(LIBS = 'boost_thread%s' % env['BOOST_APPEND'])
+_mapnik = py_env.LoadableModule('mapnik/_mapnik', sources, LDMODULEPREFIX='', LDMODULESUFFIX='.so',LINKFLAGS=linkflags)
 
 Depends(_mapnik, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 

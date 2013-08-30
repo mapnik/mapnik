@@ -33,6 +33,10 @@
 
 #include <boost/make_shared.hpp>
 
+// stl
+#include <stdexcept>
+
+
 namespace mapnik {
 
 path_expression_ptr parse_path(std::string const& str)

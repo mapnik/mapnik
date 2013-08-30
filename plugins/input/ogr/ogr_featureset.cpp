@@ -30,6 +30,7 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/wkb.hpp>
 #include <mapnik/unicode.hpp>
+#include <mapnik/value_types.hpp>
 #include <mapnik/feature_factory.hpp>
 
 // ogr
@@ -129,8 +130,7 @@ feature_ptr ogr_featureset::next()
             case OFTString:
             case OFTWideString:     // deprecated !
             {
-                UnicodeString ustr = tr_->transcode(poFeature->GetFieldAsString(i));
-                feature->put( fld_name, ustr);
+                feature->put( fld_name, tr_->transcode(poFeature->GetFieldAsString(i)));
                 break;
             }
 

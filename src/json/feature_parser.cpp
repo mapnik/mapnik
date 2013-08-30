@@ -22,8 +22,6 @@
 
 #include <boost/version.hpp>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 // mapnik
 #include <mapnik/json/feature_parser.hpp>
 #include <mapnik/json/feature_grammar.hpp>

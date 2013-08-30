@@ -28,11 +28,11 @@
 #include <boost/version.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/debug.hpp>
+#include <mapnik/util/fs.hpp>
 #include <mapnik/global.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/boolean.hpp>
@@ -77,32 +77,19 @@ shape_datasource::shape_datasource(const parameters &params)
         shape_name_ = *file;
 
     boost::algorithm::ireplace_last(shape_name_,".shp","");
-#ifdef _WINDOWS
-    if (!boost::filesystem::exists(mapnik::utf8_to_utf16(shape_name_) + L".shp"))
-#else
-    if (!boost::filesystem::exists(shape_name_ + ".shp"))
-#endif
+
+    if (!mapnik::util::exists(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
     }
-#ifdef _WINDOWS
-    if (boost::filesystem::is_directory(mapnik::utf8_to_utf16(shape_name_) + L".shp"))
-#else
-    if (boost::filesystem::is_directory(shape_name_ + ".shp"))
-#endif
+    if (mapnik::util::is_directory(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' appears to be a directory not a file");
     }
-
-#ifdef _WINDOWS
-    if (!boost::filesystem::exists(mapnik::utf8_to_utf16(shape_name_) + L".dbf"))
-#else
-    if (!boost::filesystem::exists(shape_name_ + ".dbf"))
-#endif
+    if (!mapnik::util::exists(shape_name_ + ".dbf"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".dbf' does not exist");
     }
-
 
     try
     {
@@ -119,15 +106,13 @@ shape_datasource::shape_datasource(const parameters &params)
             switch (fd.type_)
             {
             case 'C': // character
-            case 'D': // Date
-            case 'M': // Memo, a string
-            case '@': // timestamp
+            case 'D': // date
                 desc_.add_descriptor(attribute_descriptor(fld_name, String));
                 break;
             case 'L': // logical
                 desc_.add_descriptor(attribute_descriptor(fld_name, Boolean));
                 break;
-            case 'N':
+            case 'N': // numeric
             case 'O': // double
             case 'F': // float
             {
@@ -145,7 +130,11 @@ shape_datasource::shape_datasource(const parameters &params)
                 // I - long
                 // G - ole
                 // + - autoincrement
-                MAPNIK_LOG_WARN(shape) << "shape_datasource: Unknown type=" << fd.type_;
+                // @ - timestamp
+                // B - binary
+                // l - long
+                // M - memo
+                MAPNIK_LOG_ERROR(shape) << "shape_datasource: Unknown type=" << fd.type_;
                 break;
             }
         }
@@ -216,22 +205,7 @@ void shape_datasource::init(shape_io& shape)
 #endif
 
     // check if we have an index file around
-
     indexed_ = shape.has_index();
-
-    //std::string index_name(shape_name_+".index");
-    //std::ifstream file(index_name.c_str(),std::ios::in | std::ios::binary);
-    //if (file)
-    //{
-    //    indexed_=true;
-    //    file.close();
-    //}
-    //else
-    //{
-    //    MAPNIK_LOG_DEBUG(shape) << "shape_datasource: No .index file found for "
-    //                            << shape_name_ << ".shp, use the 'shapeindex' program to build an index for faster rendering";
-    //}
-
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Extent=" << extent_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: File length=" << file_length_;
     MAPNIK_LOG_DEBUG(shape) << "shape_datasource: Shape type=" << shape_type_;

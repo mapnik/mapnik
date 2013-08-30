@@ -28,7 +28,6 @@
 
 // miniz
 #define MINIZ_NO_ARCHIVE_APIS
-#define MINIZ_NO_STDIO
 #define MINIZ_NO_ZLIB_COMPATIBLE_NAMES
 
 extern "C" {

@@ -26,12 +26,19 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/well_known_srs.hpp>
 
+// stl
+#include <stdexcept>
+
 #ifdef MAPNIK_USE_PROJ4
 // proj4
 #include <proj_api.h>
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
 #include <boost/thread/mutex.hpp>
+#ifdef _MSC_VER
+#pragma NOTE(mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8)
+#else
 #warning mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8
+#endif
 static boost::mutex mutex_;
 #endif
 

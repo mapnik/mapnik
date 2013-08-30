@@ -43,10 +43,6 @@
 // boost
 #include <boost/scoped_ptr.hpp>
 
-// FIXME
-// forward declare so that
-// apps using mapnik do not
-// need agg headers
 namespace agg {
 struct trans_affine;
 }
@@ -127,6 +123,11 @@ public:
     inline eAttributeCollectionPolicy attribute_collection_policy() const
     {
         return DEFAULT;
+    }
+
+    inline double scale_factor() const
+    {
+        return scale_factor_;
     }
 
     void render_marker(pixel_position const& pos,

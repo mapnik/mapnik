@@ -3,10 +3,18 @@
 #include <iostream>
 #include <mapnik/geometry.hpp>
 #include <mapnik/geom_util.hpp>
+#include <vector>
+#include <algorithm>
 
-
-int main( int, char*[] )
+int main(int argc, char** argv)
 {
+    std::vector<std::string> args;
+    for (int i=1;i<argc;++i)
+    {
+        args.push_back(argv[i]);
+    }
+    bool quiet = std::find(args.begin(), args.end(), "-q")!=args.end();
+
     // reused these for simplicity
     double x,y;
 
@@ -35,7 +43,8 @@ int main( int, char*[] )
     // MULTIPOLYGON(((-52 40,-60 32,-68 40,-60 48,-52 40)),((-60 50,-80 30,-100 49.9999999999999,-80.0000000000001 70,-60 50)),((-52 60,-60 52,-68 60,-60 68,-52 60)))
 
     if (!::boost::detail::test_errors()) {
-        std::clog << "C++ label algorithms: \x1b[1;32m✓ \x1b[0m\n";
+        if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
+        else std::clog << "C++ label algorithms: \x1b[1;32m✓ \x1b[0m\n";
 #if BOOST_VERSION >= 104600
         ::boost::detail::report_errors_remind().called_report_errors_function = true;
 #endif

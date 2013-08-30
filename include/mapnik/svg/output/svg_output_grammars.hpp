@@ -172,7 +172,8 @@ struct svg_root_attributes_grammar : karma::grammar<OutputIterator, mapnik::svg:
             lit("width=") << confix('"', '"')[int_ << lit("px")]
                           << lit(" height=") << confix('"', '"')[int_ << lit("px")]
                           << " version=" << confix('"', '"')[double_]
-                          << " xmlns=" << confix('"', '"')[string];
+                          << " xmlns=" << confix('"', '"')[string]
+                          << lit(" xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"");
     }
 
     karma::rule<OutputIterator, mapnik::svg::root_output_attributes()> svg_root_attributes;

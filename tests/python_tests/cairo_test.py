@@ -3,7 +3,7 @@
 import os
 import mapnik
 from nose.tools import *
-from utilities import execution_path
+from utilities import execution_path, run_all
 
 def setup():
     # All of the paths used are relative, if we run the tests
@@ -60,4 +60,4 @@ if mapnik.has_pycairo() and 'sqlite' in mapnik.DatasourceCache.plugin_names():
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

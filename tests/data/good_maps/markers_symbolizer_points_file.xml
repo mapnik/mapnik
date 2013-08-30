@@ -14,20 +14,4 @@
             <Parameter name="table">point</Parameter>
         </Datasource>
     </Layer>
-<!--
-  <Style name="meta_point_bboxs">
-    <Rule>
-          <LineSymbolizer stroke="green" stroke-width=".5"/>
-    </Rule>
-  </Style>
-
-  <Layer name="points" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
-    <StyleName>meta_point_bboxs</StyleName>
-    <Datasource>
-      <Parameter name="type">ogr</Parameter>
-      <Parameter name="layer">OGRGeoJSON</Parameter>
-      <Parameter name="file">../../../markers.json</Parameter>
-    </Datasource>
-  </Layer>  
--->
 </Map>

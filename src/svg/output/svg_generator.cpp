@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/svg/output/svg_generator.hpp>
 #include <mapnik/geometry.hpp>
+#include <mapnik/util/conversions.hpp>
 
 // boost
 #include <boost/spirit/include/karma.hpp>
@@ -63,6 +64,40 @@ namespace mapnik { namespace svg {
     {
         rect_attributes_grammar attributes_grammar;
         karma::generate(output_iterator_, lit("<rect ") << attributes_grammar << lit("/>\n"), rect_attributes);
+    }
+
+    template <typename OutputIterator>
+    void svg_generator<OutputIterator>::generate_opening_group(mapnik::value_integer val)
+    {
+        std::string string_val;
+        mapnik::util::to_string(string_val,val);
+        karma::generate(output_iterator_, lit("<g id=\"")
+                                            << lit(string_val)
+                                            << lit("\"")
+                                            << lit(" inkscape:groupmode=\"layer\"")
+                                            << lit(" inkscape:label=\"")
+                                            << lit(string_val)
+                                            << lit("\"")
+                                            << lit("\n"));
+    }
+
+    template <typename OutputIterator>
+    void svg_generator<OutputIterator>::generate_opening_group(std::string const& val)
+    {
+        karma::generate(output_iterator_, lit("<g id=\"")
+                                            << lit(val)
+                                            << lit("\"")
+                                            << lit(" inkscape:groupmode=\"layer\"")
+                                            << lit(" inkscape:label=\"")
+                                            << lit(val)
+                                            << lit("\"")
+                                            << lit(">\n"));
+    }
+
+    template <typename OutputIterator>
+    void svg_generator<OutputIterator>::generate_closing_group()
+    {
+        karma::generate(output_iterator_, lit("</g>\n"));
     }
 
     template class svg_generator<std::ostream_iterator<char> >;

@@ -1,6 +1,9 @@
 <Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" background-image="../../data/images/checker.jpg">
 
-    <Style name="ellipse" image-filters="hsla(0x.5;.5x1;0x.5;0x1)">
+    <Style name="ellipse"
+      direct-image-filters="scale-hsla(0,1,0,1,0,1,0,.5)"
+      image-filters="scale-hsla(.1,.9,.5,1,.5,1,.2,1)"
+      >
         <Rule>
             <MarkersSymbolizer
               width="240"

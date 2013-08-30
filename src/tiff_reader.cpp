@@ -23,9 +23,10 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/image_reader.hpp>
+
 // boost
 #include <boost/shared_ptr.hpp>
-#include <boost/filesystem/operations.hpp>
+
 // iostreams
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/array.hpp>
@@ -36,10 +37,7 @@ extern "C"
 #include <tiffio.h>
 }
 
-namespace mapnik
-{
-
-namespace impl {
+namespace mapnik { namespace impl {
 
 static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
 {
@@ -60,7 +58,7 @@ static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
     return static_cast<toff_t>(in->tellg());
 }
 
-static int tiff_close_proc(thandle_t fd)
+static int tiff_close_proc(thandle_t)
 {
     return 0;
 }
@@ -79,22 +77,22 @@ static tsize_t tiff_read_proc(thandle_t fd, tdata_t buf, tsize_t size)
 {
     std::istream * in = reinterpret_cast<std::istream*>(fd);
     std::streamsize request_size = size;
-    if (static_cast<tmsize_t>(request_size) != size)
-        return static_cast<tmsize_t>(-1);
+    if (static_cast<tsize_t>(request_size) != size)
+        return static_cast<tsize_t>(-1);
     in->read(reinterpret_cast<char*>(buf), request_size);
-    return static_cast<tmsize_t>(in->gcount());
+    return static_cast<tsize_t>(in->gcount());
 }
 
-static tsize_t tiff_write_proc(thandle_t fd, tdata_t buf, tsize_t size)
+static tsize_t tiff_write_proc(thandle_t , tdata_t , tsize_t)
 {
     return 0;
 }
 
-static void tiff_unmap_proc(thandle_t fd, tdata_t base, toff_t size)
+static void tiff_unmap_proc(thandle_t, tdata_t, toff_t)
 {
 }
 
-static int tiff_map_proc(thandle_t fd, tdata_t* pbase, toff_t* psize)
+static int tiff_map_proc(thandle_t, tdata_t* , toff_t*)
 {
     return 0;
 }
@@ -151,7 +149,7 @@ private:
     void read_stripped(unsigned x,unsigned y,image_data_32& image);
     void read_tiled(unsigned x,unsigned y,image_data_32& image);
     TIFF* open(std::istream & input);
-    static void on_error(const char* /*module*/, const char* fmt, va_list argptr);
+    static void on_error(const char* , const char* fmt, va_list argptr);
 };
 
 namespace
@@ -206,7 +204,7 @@ tiff_reader<T>::tiff_reader(char const* data, std::size_t size)
 }
 
 template <typename T>
-void tiff_reader<T>::on_error(const char* /*module*/, const char* fmt, va_list argptr)
+void tiff_reader<T>::on_error(const char* , const char* fmt, va_list argptr)
 {
   char msg[10240];
   vsprintf(msg, fmt, argptr);
@@ -302,7 +300,7 @@ void tiff_reader<T>::read(unsigned x,unsigned y,image_data_32& image)
 }
 
 template <typename T>
-void tiff_reader<T>::read_generic(unsigned /*x*/,unsigned /*y*/,image_data_32& /*image*/)
+void tiff_reader<T>::read_generic(unsigned, unsigned, image_data_32&)
 {
     TIFF* tif = open(stream_);
     if (tif)

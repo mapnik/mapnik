@@ -33,10 +33,8 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/noncopyable.hpp>
 
-
 // agg
 #include "agg_conv_clip_polyline.h"
-
 
 // stl
 #include <queue>
@@ -59,27 +57,26 @@ template <typename DetectorT>
 class placement_finder : mapnik::noncopyable
 {
 public:
-    placement_finder(feature_impl const& feature,
-                     text_placement_info const& placement_info,
+    placement_finder(text_placement_info const& placement_info,
                      string_info const& info,
                      DetectorT & detector,
                      box2d<double> const& extent);
 
-    /** Try place a single label at the given point. */
+    // Try place a single label at the given point. */
     void find_point_placement(double pos_x, double pos_y, double angle=0.0);
 
-    /** Iterate over the given path, placing point labels with respect to label_spacing. */
+    // Iterate over the given path, placing point labels with respect to label_spacing. */
     template <typename T>
     void find_point_placements(T & path);
 
-    /** Iterate over the given path, placing line-following labels with respect to label_spacing. */
+    // Iterate over the given path, placing line-following labels with respect to label_spacing. */
     template <typename T>
     void find_line_placements(T & path);
 
-    /** Add placements to detector. */
+    // Add placements to detector. */
     void update_detector();
 
-    /** Remove old placements. */
+    // Remove old placements. */
     void clear_placements();
 
     inline placements_type const& get_results() { return placements_; }
@@ -134,17 +131,14 @@ private:
     string_info const& info_;
     text_symbolizer_properties const& p;
     text_placement_info const& pi;
-    /** Length of the longest line after linebreaks.
-     * Before find_line_breaks() this is the total length of the string.
-     */
+    // Length of the longest line after linebreaks.
+    // Before find_line_breaks() this is the total length of the string.
     double string_width_;
-    /** Height of the string after linebreaks.
-     * Before find_line_breaks() this is the total length of the string.
-     */
+    // Height of the string after linebreaks.
+    // Before find_line_breaks() this is the total length of the string.
     double string_height_;
-    /** Height of the tallest font in the first line not including line spacing.
-     * Used to determine the correct offset for the first line.
-     */
+    // Height of the tallest font in the first line not including line spacing.
+    // Used to determine the correct offset for the first line.
     double first_line_space_;
     vertical_alignment_e valign_;
     horizontal_alignment_e halign_;
@@ -152,18 +146,17 @@ private:
     std::vector<unsigned> line_breaks_;
     std::vector<std::pair<double, double> > line_sizes_;
     std::queue< box2d<double> > envelopes_;
-    /** Used to return all placements found. */
+    // Used to return all placements found. */
     placements_type placements_;
-    /** Bounding box of all texts placed. */
+    // Bounding box of all texts placed. */
     box2d<double> extents_;
-    /** Collect a bounding box of all texts placed. */
+    // Collect a bounding box of all texts placed. */
     bool collect_extents_;
 
-    /** Additional boxes to take into account when finding placement.
-     * Used for finding line placements where multiple placements are returned.
-     * Boxes are relative to starting point of current placement.
-     * Only used for point placements!
-     */
+    // Additional boxes to take into account when finding placement.
+    // Used for finding line placements where multiple placements are returned.
+    // Boxes are relative to starting point of current placement.
+    // Only used for point placements!
     std::vector<box2d<double> > additional_boxes_;
 };
 }

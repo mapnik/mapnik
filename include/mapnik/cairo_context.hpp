@@ -41,7 +41,6 @@
 
 // cairo
 #include <cairo.h>
-#include <cairo-ft.h>
 
 // stl
 #include <map>
@@ -60,7 +59,7 @@ typedef cairo_status_t ErrorStatus;
 /// Throws the appropriate exception, if exceptions are enabled.
 inline void throw_exception(ErrorStatus status)
 {
-    throw std::runtime_error("cairo: fixme");
+    throw std::runtime_error(std::string("cairo: ") + cairo_status_to_string(status));
 }
 
 //We inline this because it is called so often.
@@ -71,7 +70,7 @@ inline void check_status_and_throw_exception(ErrorStatus status)
 }
 
 template<class T>
-void check_object_status_and_throw_exception(const T& object)
+void check_object_status_and_throw_exception(T const& object)
 {
     check_status_and_throw_exception(object.get_status());
 }

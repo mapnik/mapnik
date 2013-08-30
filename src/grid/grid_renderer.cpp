@@ -109,7 +109,7 @@ void grid_renderer<T>::start_map_processing(Map const& m)
 }
 
 template <typename T>
-void grid_renderer<T>::end_map_processing(Map const& m)
+void grid_renderer<T>::end_map_processing(Map const& /*m*/)
 {
     MAPNIK_LOG_DEBUG(grid_renderer) << "grid_renderer: End map processing";
 }
@@ -140,13 +140,11 @@ void grid_renderer<T>::end_layer_processing(layer const&)
 }
 
 template <typename T>
-void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity, composite_mode_e comp_op)
+void grid_renderer<T>::render_marker(mapnik::feature_impl & feature, unsigned int step, pixel_position const& pos, marker const& marker, agg::trans_affine const& tr, double opacity, composite_mode_e /*comp_op*/)
 {
     if (marker.is_vector())
     {
-        typedef coord_transform<CoordTransform,geometry_type> path_type;
         typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
-        typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
         typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
         agg::scanline_bin sl;
 

@@ -134,7 +134,7 @@ namespace agg
         static AGG_INLINE void blend_pix(value_type* p,
                                          unsigned cr, unsigned cg, unsigned cb,
                                          unsigned alpha,
-                                         unsigned cover=0)
+                                         unsigned /*cover*/=0)
         {
             calc_type r = p[Order::R];
             calc_type g = p[Order::G];

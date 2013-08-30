@@ -23,12 +23,18 @@
 #ifndef MAPNIK_WEBP_IO_HPP
 #define MAPNIK_WEBP_IO_HPP
 
+// mapnik
+#include <mapnik/util/conversions.hpp>
+
+// webp
 #include <webp/encode.h>
 
-#include <ostream>
-#include <sstream>
+// stl
 #include <stdexcept>
+#include <string>
 
+// boost
+#include <boost/scoped_array.hpp>
 
 namespace mapnik {
 
@@ -40,26 +46,34 @@ int webp_stream_write(const uint8_t* data, size_t data_size, const WebPPicture* 
     return true;
 }
 
-std::string webp_encoding_error(WebPEncodingError error) {
-    std::ostringstream os;
+std::string webp_encoding_error(WebPEncodingError error)
+{
+    std::string os;
     switch (error) {
-        case VP8_ENC_ERROR_OUT_OF_MEMORY: os << "memory error allocating objects"; break;
-        case VP8_ENC_ERROR_BITSTREAM_OUT_OF_MEMORY: os << "memory error while flushing bits"; break;
-        case VP8_ENC_ERROR_NULL_PARAMETER: os << "a pointer parameter is NULL"; break;
-        case VP8_ENC_ERROR_INVALID_CONFIGURATION: os << "configuration is invalid"; break;
-        case VP8_ENC_ERROR_BAD_DIMENSION: os << "picture has invalid width/height"; break;
-        case VP8_ENC_ERROR_PARTITION0_OVERFLOW: os << "partition is bigger than 512k"; break;
-        case VP8_ENC_ERROR_PARTITION_OVERFLOW: os << "partition is bigger than 16M"; break;
-        case VP8_ENC_ERROR_BAD_WRITE: os << "error while flushing bytes"; break;
-        case VP8_ENC_ERROR_FILE_TOO_BIG: os << "file is bigger than 4G"; break;
-        default: os << "unknown error (" << error << ")"; break;
+        case VP8_ENC_ERROR_OUT_OF_MEMORY: os = "memory error allocating objects"; break;
+        case VP8_ENC_ERROR_BITSTREAM_OUT_OF_MEMORY: os = "memory error while flushing bits"; break;
+        case VP8_ENC_ERROR_NULL_PARAMETER: os = "a pointer parameter is NULL"; break;
+        case VP8_ENC_ERROR_INVALID_CONFIGURATION: os = "configuration is invalid"; break;
+        case VP8_ENC_ERROR_BAD_DIMENSION: os = "picture has invalid width/height"; break;
+        case VP8_ENC_ERROR_PARTITION0_OVERFLOW: os = "partition is bigger than 512k"; break;
+        case VP8_ENC_ERROR_PARTITION_OVERFLOW: os = "partition is bigger than 16M"; break;
+        case VP8_ENC_ERROR_BAD_WRITE: os = "error while flushing bytes"; break;
+        case VP8_ENC_ERROR_FILE_TOO_BIG: os = "file is bigger than 4G"; break;
+        default:
+            mapnik::util::to_string(os,error);
+            os = "unknown error (" + os + ")"; break;
     }
-    os << " during encoding";
-    return os.str();
+    return os;
 }
 
 template <typename T1, typename T2>
-void save_as_webp(T1& file, int quality, int compression, T2 const& image)
+void save_as_webp(T1& file,
+                  float quality,
+                  int method,
+                  int lossless,
+                  int image_hint,
+                  bool alpha,
+                  T2 const& image)
 {
     WebPConfig config;
     if (!WebPConfigPreset(&config, WEBP_PRESET_DEFAULT, quality))
@@ -68,7 +82,18 @@ void save_as_webp(T1& file, int quality, int compression, T2 const& image)
     }
 
     // Add additional tuning
-    if (compression >= 0) config.method = compression;
+
+    if (method >= 0) config.method = method;
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
+    config.lossless = !!lossless;
+    config.image_hint = static_cast<WebPImageHint>(image_hint);
+#else
+#ifdef _MSC_VER
+#pragma NOTE(compiling against webp that does not support lossless flag)
+#else
+#warning "compiling against webp that does not support lossless flag"
+#endif
+#endif
 
     bool valid = WebPValidateConfig(&config);
     if (!valid) {
@@ -82,14 +107,31 @@ void save_as_webp(T1& file, int quality, int compression, T2 const& image)
     }
     pic.width = image.width();
     pic.height = image.height();
-    if (!WebPPictureAlloc(&pic))
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
+    pic.use_argb = !!lossless;
+#endif
+    int ok = 0;
+    if (alpha)
     {
-        throw std::runtime_error("memory error");
+        int stride = sizeof(typename T2::pixel_type) * image.width();
+        uint8_t const* bytes = reinterpret_cast<uint8_t const*>(image.getBytes());
+        ok = WebPPictureImportRGBA(&pic, bytes, stride);
+    }
+    else
+    {
+        int stride = sizeof(typename T2::pixel_type) * image.width();
+        uint8_t const* bytes = reinterpret_cast<uint8_t const*>(image.getBytes());
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
+        ok = WebPPictureImportRGBX(&pic, bytes, stride);
+#else
+        ok = WebPPictureImportRGBA(&pic, bytes, stride);
+#endif
     }
 
-    int stride = sizeof(typename T2::pixel_type) * image.width();
-    uint8_t const* bytes = reinterpret_cast<uint8_t const*>(image.getBytes());
-    int ok = WebPPictureImportRGBA(&pic, bytes, stride);
+    if (!ok)
+    {
+        throw std::runtime_error(webp_encoding_error(pic.error_code));
+    }
 
     pic.writer = webp_stream_write<T1>;
     pic.custom_ptr = &file;

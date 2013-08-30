@@ -24,20 +24,46 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/svg/output/svg_renderer.hpp>
 #include <mapnik/map.hpp>
+#include <mapnik/label_collision_detector.hpp>
+#include <mapnik/feature_type_style.hpp>
+#include <mapnik/font_set.hpp>
 
 // stl
 #include <ostream>
 
 namespace mapnik
 {
+
 template <typename T>
-svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, unsigned offset_x, unsigned offset_y) :
-    feature_style_processor<svg_renderer>(m),
+svg_renderer<T>::svg_renderer(Map const& m, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
+    feature_style_processor<svg_renderer>(m, scale_factor),
     output_iterator_(output_iterator),
     width_(m.width()),
     height_(m.height()),
+    scale_factor_(scale_factor),
     t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
-    generator_(output_iterator)
+    font_engine_(),
+    font_manager_(font_engine_),
+    detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
+    generator_(output_iterator),
+    query_extent_(),
+    painted_(false)
+{}
+
+template <typename T>
+svg_renderer<T>::svg_renderer(Map const& m, request const& req, T & output_iterator, double scale_factor, unsigned offset_x, unsigned offset_y) :
+    feature_style_processor<svg_renderer>(m, scale_factor),
+    output_iterator_(output_iterator),
+    width_(req.width()),
+    height_(req.height()),
+    scale_factor_(scale_factor),
+    t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
+    font_engine_(),
+    font_manager_(font_engine_),
+    detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
+    generator_(output_iterator),
+    query_extent_(),
+    painted_(false)
 {}
 
 template <typename T>
@@ -78,12 +104,14 @@ void svg_renderer<T>::end_map_processing(Map const& map)
 template <typename T>
 void svg_renderer<T>::start_layer_processing(layer const& lay, box2d<double> const& query_extent)
 {
+    generator_.generate_opening_group(lay.name());
     MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: Start layer processing=" << lay.name();
 }
 
 template <typename T>
 void svg_renderer<T>::end_layer_processing(layer const& lay)
 {
+    generator_.generate_closing_group();
     MAPNIK_LOG_DEBUG(svg_renderer) << "svg_renderer: End layer processing=" << lay.name();
 }
 

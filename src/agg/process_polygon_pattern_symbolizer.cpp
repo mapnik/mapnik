@@ -40,6 +40,7 @@
 #include "agg_basics.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 // for polygon_pattern_symbolizer
@@ -59,7 +60,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef agg::conv_clip_polygon<geometry_type> clipped_geometry_type;
     typedef coord_transform<CoordTransform,clipped_geometry_type> path_type;
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
     ras_ptr->reset();
     if (sym.get_gamma() != gamma_ || sym.get_gamma_method() != gamma_method_)
     {
@@ -93,13 +94,12 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
 
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_type;
 
     typedef agg::wrap_mode_repeat wrap_x_type;
     typedef agg::wrap_mode_repeat wrap_y_type;
-    typedef agg::image_accessor_wrap<agg::pixfmt_rgba32,
+    typedef agg::image_accessor_wrap<agg::pixfmt_rgba32_pre,
                                      wrap_x_type,
                                      wrap_y_type> img_source_type;
 
@@ -117,7 +117,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     unsigned w=(*pat)->width();
     unsigned h=(*pat)->height();
     agg::rendering_buffer pattern_rbuf((agg::int8u*)(*pat)->getBytes(),w,h,w*4);
-    agg::pixfmt_rgba32 pixf_pattern(pattern_rbuf);
+    agg::pixfmt_rgba32_pre pixf_pattern(pattern_rbuf);
     img_source_type img_src(pixf_pattern);
 
     pattern_alignment_e align = sym.get_alignment();
@@ -135,8 +135,8 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
             path_type path(t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
-        offset_x = unsigned(width_ - x0);
-        offset_y = unsigned(height_ - y0);
+        offset_x = unsigned(current_buffer_->width() - x0);
+        offset_y = unsigned(current_buffer_->height() - y0);
     }
 
     span_gen_type sg(img_src, offset_x, offset_y);

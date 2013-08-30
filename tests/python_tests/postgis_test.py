@@ -3,7 +3,7 @@
 from nose.tools import *
 import atexit
 import time
-from utilities import execution_path
+from utilities import execution_path, run_all
 from subprocess import Popen, PIPE
 import os, mapnik
 from Queue import Queue
@@ -472,10 +472,15 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     def create_ds():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
                             table='test',
-                            max_size=20)
+                            max_size=20,
+                            geometry_field='geom')
         fs = ds.all_features()
 
     def test_threaded_create(NUM_THREADS=100):
+        # run one to start before thread loop
+        # to ensure that a throw stops the test
+        # from running all threads
+        create_ds()
         for i in range(NUM_THREADS):
             t = threading.Thread(target=create_ds)
             t.start()
@@ -497,7 +502,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
     def test_that_64bit_int_fields_work():
         ds = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,
-                            table='test8')
+                            table='test8',
+                            geometry_field='geom')
         eq_(len(ds.fields()),2)
         eq_(ds.fields(),['gid','int_field'])
         eq_(ds.field_types(),['int','int'])
@@ -568,7 +574,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[name] = true").evaluate(feat),False)
         eq_(mapnik.Expression("[name] = false").evaluate(feat),False)
         eq_(mapnik.Expression("[name] != 'name'").evaluate(feat),True)
-        eq_(mapnik.Expression("[name] != ''").evaluate(feat),True)
+        # https://github.com/mapnik/mapnik/issues/1859
+        eq_(mapnik.Expression("[name] != ''").evaluate(feat),False)
         eq_(mapnik.Expression("[name] != null").evaluate(feat),False)
         eq_(mapnik.Expression("[name] != true").evaluate(feat),True)
         eq_(mapnik.Expression("[name] != false").evaluate(feat),True)
@@ -614,7 +621,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         eq_(mapnik.Expression("[bool_field] = true").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] = false").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != 'name'").evaluate(feat),True)  # in 2.1.x used to be False
-        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),True)  # in 2.1.x used to be False
+        # https://github.com/mapnik/mapnik/issues/1859
+        eq_(mapnik.Expression("[bool_field] != ''").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != null").evaluate(feat),False)
         eq_(mapnik.Expression("[bool_field] != true").evaluate(feat),True) # in 2.1.x used to be False
         eq_(mapnik.Expression("[bool_field] != false").evaluate(feat),True) # in 2.1.x used to be False
@@ -652,4 +660,4 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
 
 if __name__ == "__main__":
     setup()
-    [eval(run)() for run in dir() if 'test_' in run]
+    run_all(eval(x) for x in dir() if x.startswith("test_"))

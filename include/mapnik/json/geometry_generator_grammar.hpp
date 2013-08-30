@@ -59,6 +59,7 @@ namespace phoenix = boost::phoenix;
 
 namespace {
 
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
 struct get_type
 {
     typedef int result_type;
@@ -103,6 +104,52 @@ struct multi_geometry_type
         return boost::tuple<unsigned,bool>(type, collection);
     }
 };
+#else
+struct get_type
+{
+    typedef int result_type;
+    result_type operator() (geometry_type const& geom) const
+    {
+        return static_cast<int>(geom.type());
+    }
+};
+
+struct get_first
+{
+    typedef geometry_type::value_type const result_type;
+    result_type operator() (geometry_type const& geom) const
+    {
+        geometry_type::value_type coord;
+        boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+        return coord;
+    }
+};
+
+struct multi_geometry_type
+{
+    typedef boost::tuple<unsigned,bool>  result_type;
+    result_type operator() (geometry_container const& geom) const
+    {
+        unsigned type = 0u;
+        bool collection = false;
+
+        geometry_container::const_iterator itr = geom.begin();
+        geometry_container::const_iterator end = geom.end();
+
+        for ( ; itr != end; ++itr)
+        {
+            if (type != 0u && itr->type() != type)
+            {
+                collection = true;
+                break;
+            }
+            type = itr->type();
+        }
+        if (geom.size() > 1) type +=3;
+        return boost::tuple<unsigned,bool>(type, collection);
+    }
+};
+#endif
 
 
 template <typename T>

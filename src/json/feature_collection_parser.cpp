@@ -22,7 +22,11 @@
 
 #include <boost/version.hpp>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
+#if BOOST_VERSION >= 105200
+#ifndef BOOST_SPIRIT_USE_PHOENIX_V3
+#define BOOST_SPIRIT_USE_PHOENIX_V3
+#endif
+#endif
 
 // mapnik
 #include <mapnik/json/feature_collection_parser.hpp>
@@ -32,6 +36,9 @@
 #include <boost/version.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
+
+// stl
+#include <stdexcept>
 
 namespace mapnik { namespace json {
 

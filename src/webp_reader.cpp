@@ -102,6 +102,7 @@ private:
         }
         WebPDecoderConfig & config_;
     };
+
     std::unique_ptr<buffer_policy_type> buffer_;
     size_t size_;
     unsigned width_;
@@ -163,12 +164,14 @@ webp_reader<T>::webp_reader(std::string const& filename)
     std::streampos end = file.tellg();
     std::size_t file_size = end - beg;
     file.seekg (0, std::ios::beg);
+
     std::unique_ptr<buffer_policy_type> buffer(new buffer_policy_type(file_size));
     file.read(reinterpret_cast<char*>(buffer->data()), buffer->size());
     if (!file)
     {
         throw image_reader_exception("WEBP: Failed to read:" + filename);
     }
+
     buffer_ = std::move(buffer);
     init();
 }

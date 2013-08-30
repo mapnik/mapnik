@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -86,7 +86,8 @@ static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
     // grow std::stringstream buffer (re: libtiff/tif_stream.cxx)
     std::ios::pos_type pos = out->tellp();
     // second check needed for clang (libcxx doesn't set failbit when seeking beyond the current buffer size
-    if( out->fail() || off != pos)
+
+    if( out->fail() || static_cast<std::streamoff>(off) != pos)
     {
         std::ios::iostate old_state;
         std::ios::pos_type  origin;
@@ -146,16 +147,16 @@ static toff_t tiff_size_proc(thandle_t fd)
     return static_cast<toff_t>(len);
 }
 
-static tsize_t tiff_dummy_read_proc(thandle_t fd, tdata_t buf, tsize_t size)
+static tsize_t tiff_dummy_read_proc(thandle_t , tdata_t , tsize_t)
 {
     return 0;
 }
 
-static void tiff_dummy_unmap_proc(thandle_t fd, tdata_t base, toff_t size)
+static void tiff_dummy_unmap_proc(thandle_t , tdata_t , toff_t)
 {
 }
 
-static int tiff_dummy_map_proc(thandle_t fd, tdata_t* pbase, toff_t* psize)
+static int tiff_dummy_map_proc(thandle_t , tdata_t*, toff_t* )
 {
     return 0;
 }
@@ -167,7 +168,8 @@ void save_as_tiff(T1 & file, T2 const& image)
     const int height = image.height();
     const int scanline_size = sizeof(unsigned char) * width * 3;
 
-    TIFF* output = RealTIFFOpen("tiff_output_stream",
+
+    TIFF* output = RealTIFFOpen("mapnik_tiff_stream",
                                 "wm",
                                 (thandle_t)&file,
                                 tiff_dummy_read_proc,
@@ -193,17 +195,16 @@ void save_as_tiff(T1 & file, T2 const& image)
 
     // TODO - handle palette images
     // std::vector<mapnik::rgb> const& palette
-    /*
-      unsigned short r[256], g[256], b[256];
-      for (int i = 0; i < (1 << 24); ++i)
-      {
-      r[i] = (unsigned short)palette[i * 3 + 0] << 8;
-      g[i] = (unsigned short)palette[i * 3 + 1] << 8;
-      b[i] = (unsigned short)palette[i * 3 + 2] << 8;
-      }
-      TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE);
-      TIFFSetField(output, TIFFTAG_COLORMAP, r, g, b);
-    */
+
+    //  unsigned short r[256], g[256], b[256];
+    //  for (int i = 0; i < (1 << 24); ++i)
+    //  {
+    //  r[i] = (unsigned short)palette[i * 3 + 0] << 8;
+    //  g[i] = (unsigned short)palette[i * 3 + 1] << 8;
+    //  b[i] = (unsigned short)palette[i * 3 + 2] << 8;
+    //  }
+    //  TIFFSetField(output, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE);
+    //  TIFFSetField(output, TIFFTAG_COLORMAP, r, g, b);
 
 #ifdef HAVE_GEOTIFF
     GTIF* geotiff = GTIFNew(output);
@@ -264,6 +265,5 @@ void save_as_tiff(T1 & file, T2 const& image)
 }
 
 }
-
 
 #endif // MAPNIK_TIFF_IO_HPP

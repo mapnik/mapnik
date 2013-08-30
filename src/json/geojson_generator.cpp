@@ -63,7 +63,7 @@ bool geometry_generator::generate(std::string & geojson, mapnik::geometry_contai
 
 #include <string>
 #include <sstream>
-#include <exception>
+#include <stdexcept>
 
 namespace  mapnik { namespace json {
 

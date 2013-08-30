@@ -34,7 +34,6 @@
 #include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/config_error.hpp>
 
 #if defined(HAVE_CAIRO)
 #include <mapnik/cairo_renderer.hpp>
@@ -317,11 +316,6 @@ int main ( int argc , char** argv)
             "Have a look!\n";
 #endif
 
-    }
-    catch ( const mapnik::config_error & ex )
-    {
-        std::cerr << "### Configuration error: " << ex.what() << std::endl;
-        return EXIT_FAILURE;
     }
     catch ( const std::exception & ex )
     {

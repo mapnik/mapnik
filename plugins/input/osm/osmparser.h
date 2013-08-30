@@ -46,7 +46,7 @@ private:
     static bool in_node, in_way;
     static osm_dataset* components;
     static std::string error;
-    static std::map<long, osm_node*> tmp_node_store;
+    static std::map<mapnik::value_integer, osm_node*> tmp_node_store;
 
     static int do_parse(xmlTextReaderPtr);
 };

@@ -36,8 +36,9 @@
 
 // agg
 #include "agg_basics.h"
-#include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
+#include "agg_rendering_buffer.h"
 #include "agg_rasterizer_outline.h"
 #include "agg_rasterizer_outline_aa.h"
 #include "agg_scanline_u.h"
@@ -90,7 +91,6 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 {
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color, order> blender_type;
     typedef agg::pattern_filter_bilinear_rgba8 pattern_filter_type;
     typedef agg::line_image_pattern<pattern_filter_type> pattern_type;
@@ -115,7 +115,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     if (!pat) return;
 
-    agg::rendering_buffer buf(current_buffer_->raw_data(),width_,height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);
     pixfmt_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(sym.comp_op()));
     renderer_base ren_base(pixf);
@@ -136,11 +136,13 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
         double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
+        if (fabs(sym.offset()) > 0)
+            padding *= fabs(sym.offset()) * 1.2;
         padding *= scale_factor_;
         clipping_extent.pad(padding);
     }
 
-    typedef boost::mpl::vector<clip_line_tag,transform_tag,simplify_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(clipping_extent,ras,sym,t_,prj_trans,tr,scale_factor_);
@@ -148,6 +150,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+    if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     for (geometry_type & geom : feature.paths())

@@ -45,6 +45,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_u.h"
 #include "agg_path_storage.h"
@@ -64,7 +65,6 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 {
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type; // comp blender
     typedef agg::rendering_buffer buf_type;
     typedef agg::pixfmt_custom_blend_rgba<blender_type, buf_type> pixfmt_comp_type;
@@ -127,7 +127,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     coord2d center = bbox.center();
                     agg::trans_affine_translation recenter(-center.x, -center.y);
                     agg::trans_affine marker_trans = recenter * tr;
-                    buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
+                    buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
                     dispatch_type rasterizer_dispatch(render_buffer,
                                                       svg_renderer,
                                                       *ras_ptr,
@@ -167,7 +167,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                     svg_attribute_type attributes;
                     bool result = push_explicit_style( (*stock_vector_marker)->attributes(), attributes, sym);
                     svg_renderer_type svg_renderer(svg_path, result ? attributes : (*stock_vector_marker)->attributes());
-                    buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
+                    buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
                     dispatch_type rasterizer_dispatch(render_buffer,
                                                       svg_renderer,
                                                       *ras_ptr,
@@ -205,7 +205,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 agg::trans_affine marker_trans = recenter * tr;
                 boost::optional<mapnik::image_ptr> marker = (*mark)->get_bitmap_data();
                 typedef raster_markers_rasterizer_dispatch<buf_type,rasterizer, detector_type> dispatch_type;
-                buf_type render_buffer(current_buffer_->raw_data(), width_, height_, width_ * 4);
+                buf_type render_buffer(current_buffer_->raw_data(), current_buffer_->width(), current_buffer_->height(), current_buffer_->width() * 4);
                 dispatch_type rasterizer_dispatch(render_buffer,
                                                   *ras_ptr,
                                                   **marker,

@@ -42,6 +42,9 @@
 // boost
 #include <boost/make_shared.hpp>
 
+// stl
+#include <stdexcept>
+
 namespace mapnik
 {
 

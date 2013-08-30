@@ -45,10 +45,9 @@
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/image_filter.hpp>
 #include <mapnik/image_util.hpp>
-// agg
-#define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgba.h"
+#include "agg_color_rgba.h"
 #include "agg_scanline_u.h"
 #include "agg_image_filters.h"
 #include "agg_trans_bilinear.h"
@@ -193,7 +192,7 @@ void agg_renderer<T>::end_map_processing(Map const& )
 {
 
     agg::rendering_buffer buf(pixmap_.raw_data(),width_,height_, width_ * 4);
-    agg::pixfmt_rgba32 pixf(buf);
+    agg::pixfmt_rgba32_pre pixf(buf);
     pixf.demultiply();
     MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: End map processing";
 }
@@ -298,7 +297,6 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
 {
     typedef agg::rgba8 color_type;
     typedef agg::order_rgba order_type;
-    typedef agg::pixel32_type pixel_type;
     typedef agg::comp_op_adaptor_rgba<color_type, order_type> blender_type; // comp blender
     typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
@@ -427,7 +425,7 @@ template <typename T> template <typename R>
 void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    typedef agg::pixfmt_rgba32 pixfmt;
+    typedef agg::pixfmt_rgba32_pre pixfmt;
     typedef agg::renderer_base<pixfmt> renderer_base;
     typedef agg::renderer_scanline_aa_solid<renderer_base> renderer_type;
 

@@ -26,6 +26,7 @@
 #define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/unicode.hpp>
 #include <mapnik/expression_node.hpp>
@@ -47,12 +48,12 @@ using standard_wide::space_type;
 
 struct unicode_impl
 {
-    typedef UnicodeString result_type;
+    typedef mapnik::value_unicode_string result_type;
 
     explicit unicode_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
-    UnicodeString operator()(std::string const& str) const
+    result_type operator()(std::string const& str) const
     {
         return tr_.transcode(str.c_str());
     }
@@ -62,7 +63,6 @@ struct unicode_impl
 
 struct regex_match_impl
 {
-
     typedef expr_node result_type;
 
     explicit regex_match_impl(mapnik::transcoder const& tr)
