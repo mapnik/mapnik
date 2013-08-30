@@ -75,8 +75,8 @@ int main(int argc, char** argv)
         BOOST_TEST( type );
         try
         {
-            std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
-            if (reader.get()) BOOST_TEST( false );
+            std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(should_throw,*type));
+            BOOST_TEST( false );
         }
         catch (std::exception const&)
         {
