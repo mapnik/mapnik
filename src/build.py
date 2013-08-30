@@ -118,6 +118,7 @@ else: # unix, non-macos
             mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
     else: # Linux and others
         mapnik_lib_link_flag += ' -Wl,-rpath-link,. -Wl,-soname,%s' % mapnik_libname
+        lib_env['LIBS'].append('dl')
 
 source = Split(
     """
