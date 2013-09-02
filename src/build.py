@@ -95,8 +95,6 @@ if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
 if env['RUNTIME_LINK'] == 'static':
     if 'icuuc' in env['ICU_LIB_NAME']:
         lib_env['LIBS'].append('icudata')
-    if env['PLATFORM'] == 'Linux':
-        lib_env['LIBS'].append('dl')
 else:
     lib_env['LIBS'].insert(0, 'agg')
 
@@ -117,6 +115,7 @@ else: # unix, non-macos
         else:
             mapnik_lib_link_flag += ' -Wl,-h,%s' %  mapnik_libname
     else: # Linux and others
+        lib_env['LIBS'].append('dl')
         mapnik_lib_link_flag += ' -Wl,-rpath-link,. -Wl,-soname,%s' % mapnik_libname
 
 source = Split(
