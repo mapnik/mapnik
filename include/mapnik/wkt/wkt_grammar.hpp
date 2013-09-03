@@ -97,7 +97,7 @@ struct wkt_grammar : qi::grammar<Iterator,  boost::ptr_vector<mapnik::geometry_t
             ;
 
         // <point tagged text> ::= point <point text>
-        point_tagged_text = no_case[lit("POINT")] [ _a = new_<geometry_type>(Point) ]
+        point_tagged_text = no_case[lit("POINT")] [ _a = new_<geometry_type>(geometry_type::types::Point) ]
             >> ( point_text(_a) [push_back(_val,_a)]
                  | eps[cleanup_(_a)][_pass = false])
             ;
@@ -108,7 +108,7 @@ struct wkt_grammar : qi::grammar<Iterator,  boost::ptr_vector<mapnik::geometry_t
             ;
 
         // <linestring tagged text> ::= linestring <linestring text>
-        linestring_tagged_text = no_case[lit("LINESTRING")] [ _a = new_<geometry_type>(LineString) ]
+        linestring_tagged_text = no_case[lit("LINESTRING")] [ _a = new_<geometry_type>(geometry_type::types::LineString) ]
             >> (linestring_text(_a)[push_back(_val,_a)]
                 | eps[cleanup_(_a)][_pass = false])
             ;
@@ -118,7 +118,7 @@ struct wkt_grammar : qi::grammar<Iterator,  boost::ptr_vector<mapnik::geometry_t
             ;
 
         // <polygon tagged text> ::= polygon <polygon text>
-        polygon_tagged_text = no_case[lit("POLYGON")] [ _a = new_<geometry_type>(Polygon) ]
+        polygon_tagged_text = no_case[lit("POLYGON")] [ _a = new_<geometry_type>(geometry_type::types::Polygon) ]
             >> ( polygon_text(_a)[push_back(_val,_a)]
                  | eps[cleanup_(_a)][_pass = false])
             ;
@@ -134,7 +134,7 @@ struct wkt_grammar : qi::grammar<Iterator,  boost::ptr_vector<mapnik::geometry_t
 
         // <multipoint text> ::= <empty set> | <left paren> <point text> {<comma> <point text>}* <right paren>
         multipoint_text = (lit('(')
-                           >> ((eps[_a = new_<geometry_type>(Point)]
+                           >> ((eps[_a = new_<geometry_type>(geometry_type::types::Point)]
                                 >> (point_text(_a) | empty_set) [push_back(_val,_a)]
                                 | eps[cleanup_(_a)][_pass = false]) % lit(','))
                            >> lit(')')) | empty_set
@@ -146,7 +146,7 @@ struct wkt_grammar : qi::grammar<Iterator,  boost::ptr_vector<mapnik::geometry_t
 
         // <multilinestring text> ::= <empty set> | <left paren> <linestring text> {<comma> <linestring text>}* <right paren>
         multilinestring_text = (lit('(')
-                                >> ((eps[_a = new_<geometry_type>(LineString)]
+                                >> ((eps[_a = new_<geometry_type>(geometry_type::types::LineString)]
                                      >> ( points(_a)[push_back(_val,_a)]
                                           | eps[cleanup_(_a)][_pass = false]))
                                     % lit(','))
@@ -159,7 +159,7 @@ struct wkt_grammar : qi::grammar<Iterator,  boost::ptr_vector<mapnik::geometry_t
         // <multipolygon text> ::= <empty set> | <left paren> <polygon text> {<comma> <polygon text>}* <right paren>
 
         multipolygon_text = (lit('(')
-                             >> ((eps[_a = new_<geometry_type>(Polygon)]
+                             >> ((eps[_a = new_<geometry_type>(geometry_type::types::Polygon)]
                                   >> ( polygon_text(_a)[push_back(_val,_a)]
                                        | eps[cleanup_(_a)][_pass = false]))
                                  % lit(','))

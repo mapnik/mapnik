@@ -101,7 +101,7 @@ feature_ptr shape_index_featureset<filterT>::next()
         {
             double x = record.read_double();
             double y = record.read_double();
-            std::unique_ptr<geometry_type> point(new geometry_type(mapnik::Point));
+            std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
             point->move_to(x, y);
             feature->paths().push_back(point.release());
             break;
@@ -117,7 +117,7 @@ feature_ptr shape_index_featureset<filterT>::next()
             {
                 double x = record.read_double();
                 double y = record.read_double();
-                std::unique_ptr<geometry_type> point(new geometry_type(mapnik::Point));
+                std::unique_ptr<geometry_type> point(new geometry_type(mapnik::geometry_type::types::Point));
                 point->move_to(x, y);
                 feature->paths().push_back(point.release());
             }

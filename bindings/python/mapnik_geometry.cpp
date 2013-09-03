@@ -270,10 +270,10 @@ void export_geometry()
 {
     using namespace boost::python;
 
-    enum_<mapnik::eGeomType>("GeometryType")
-        .value("Point",mapnik::Point)
-        .value("LineString",mapnik::LineString)
-        .value("Polygon",mapnik::Polygon)
+    enum_<mapnik::geometry_type::types>("GeometryType")
+        .value("Point",mapnik::geometry_type::types::Point)
+        .value("LineString",mapnik::geometry_type::types::LineString)
+        .value("Polygon",mapnik::geometry_type::types::Polygon)
         ;
 
 #if BOOST_VERSION >= 104700

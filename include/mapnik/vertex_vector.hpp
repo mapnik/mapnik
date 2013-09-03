@@ -55,12 +55,12 @@ public:
     // required for iterators support
     typedef boost::tuple<unsigned,coord_type,coord_type> value_type;
     typedef std::size_t size_type;
-
+    typedef std::uint8_t command_size;
 private:
     unsigned num_blocks_;
     unsigned max_blocks_;
     coord_type** vertices_;
-    unsigned char** commands_;
+    command_size** commands_;
     size_type pos_;
 
 public:
@@ -90,7 +90,7 @@ public:
         return pos_;
     }
 
-    void push_back (coord_type x,coord_type y,unsigned command)
+    void push_back (coord_type x,coord_type y,command_size command)
     {
         unsigned block = pos_ >> block_shift;
         if (block >= num_blocks_)
@@ -98,9 +98,9 @@ public:
             allocate_block(block);
         }
         coord_type* vertex = vertices_[block] + ((pos_ & block_mask) << 1);
-        unsigned char* cmd= commands_[block] + (pos_ & block_mask);
+        command_size* cmd= commands_[block] + (pos_ & block_mask);
 
-        *cmd = static_cast<unsigned char>(command);
+        *cmd = static_cast<command_size>(command);
         *vertex++ = x;
         *vertex   = y;
         ++pos_;
@@ -130,11 +130,11 @@ private:
         {
             coord_type** new_vertices =
                 static_cast<coord_type**>(::operator new (sizeof(coord_type*)*((max_blocks_ + grow_by) * 2)));
-            unsigned char** new_commands = (unsigned char**)(new_vertices + max_blocks_ + grow_by);
+            command_size** new_commands = (command_size**)(new_vertices + max_blocks_ + grow_by);
             if (vertices_)
             {
                 std::memcpy(new_vertices,vertices_,max_blocks_ * sizeof(coord_type*));
-                std::memcpy(new_commands,commands_,max_blocks_ * sizeof(unsigned char*));
+                std::memcpy(new_commands,commands_,max_blocks_ * sizeof(command_size*));
                 ::operator delete(vertices_);
             }
             vertices_ = new_vertices;
@@ -144,7 +144,7 @@ private:
         vertices_[block] = static_cast<coord_type*>
             (::operator new(sizeof(coord_type)*(block_size * 2 + block_size / (sizeof(coord_type)))));
 
-        commands_[block] = (unsigned char*)(vertices_[block] + block_size*2);
+        commands_[block] = (command_size*)(vertices_[block] + block_size*2);
         ++num_blocks_;
     }
 };

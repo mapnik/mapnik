@@ -143,7 +143,7 @@ wkb_buffer_ptr to_point_wkb( GeometryType const& g, wkbByteOrder byte_order)
     wkb_buffer_ptr wkb(new wkb_buffer(size));
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::Point);
+    int type = static_cast<int>(mapnik::geometry_type::types::Point);
     write(ss,type,4,byte_order);
     double x = 0;
     double y = 0;
@@ -163,7 +163,7 @@ wkb_buffer_ptr to_line_string_wkb( GeometryType const& g, wkbByteOrder byte_orde
     wkb_buffer_ptr wkb(new wkb_buffer(size));
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::LineString);
+    int type = static_cast<int>(mapnik::geometry_type::types::LineString);
     write(ss,type,4,byte_order);
     write(ss,num_points,4,byte_order);
     double x = 0;
@@ -211,7 +211,7 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
     wkb_buffer_ptr wkb(new wkb_buffer(size));
     wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
-    int type = static_cast<int>(mapnik::Polygon);
+    int type = static_cast<int>(mapnik::geometry_type::types::Polygon);
     write(ss,type,4,byte_order);
     write(ss,num_rings,4,byte_order);
 
@@ -237,13 +237,13 @@ wkb_buffer_ptr to_wkb(GeometryType const& g, wkbByteOrder byte_order )
 
     switch (g.type())
     {
-    case mapnik::Point:
+    case mapnik::geometry_type::types::Point:
         wkb = to_point_wkb(g, byte_order);
         break;
-    case mapnik::LineString:
+    case mapnik::geometry_type::types::LineString:
         wkb = to_line_string_wkb(g, byte_order);
         break;
-    case mapnik::Polygon:
+    case mapnik::geometry_type::types::Polygon:
         wkb = to_polygon_wkb(g, byte_order);
         break;
     default:
