@@ -831,6 +831,19 @@ void serialize_map(ptree & pt, Map const & map, bool explicit_defaults)
         set_attr( map_node, "background-image", *image_filename );
     }
 
+    composite_mode_e comp_op = map.background_image_comp_op();
+    if (comp_op != src_over || explicit_defaults)
+    {
+        set_attr(map_node, "background-image-comp-op", *comp_op_to_string(comp_op));
+    }
+
+    double opacity = map.background_image_opacity();
+    if (opacity != 1.0 || explicit_defaults)
+    {
+        set_attr(map_node, "background-image-opacity", opacity);
+    }
+
+
     int buffer_size = map.buffer_size();
     if ( buffer_size || explicit_defaults)
     {

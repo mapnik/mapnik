@@ -1,0 +1,54 @@
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+  background-color="green"
+  background-image-opacity=".8"
+  background-image-comp-op="screen"
+  background-image="../data/pattern.png">
+
+    <Style name="ellipse">
+        <Rule>
+            <MarkersSymbolizer
+              width="240"
+              height="240"
+              fill="steelblue"
+              fill-opacity=".2"
+              stroke="yellow"
+              stroke-width="16"
+              stroke-opacity=".3"
+            />
+        </Rule>
+    </Style>
+
+    <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>ellipse</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+2.5,2.5
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- points to frame data view -->
+
+    <Style name="frame">
+        <Rule>
+            <PointSymbolizer />
+        </Rule>
+    </Style>
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+0,0
+5,0
+0,5
+5,5
+            </Parameter>
+        </Datasource>
+    </Layer>
+    
+</Map>
