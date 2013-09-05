@@ -28,9 +28,11 @@ Summary: TODO
 
 - Fixed various 32bit test failures
 
+- Fixed compile against icu when by using `U_NAMESPACE_QUALIFIER`
+
 - Fixed missing support for using PathExpression in `marker-file` (#1952)
 
-- Added support for line offsets in PatternSymbolizers (#1991)
+- Added support for `line-pattern-offset` (#1991)
 
 - Added support for building on Android (tested with `android-ndk-r9`)
 
