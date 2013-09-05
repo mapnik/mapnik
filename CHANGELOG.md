@@ -14,6 +14,12 @@ Released ...
 
 Summary: TODO
 
+- Added Map level `background-image-comp-op` to control the compositing operation used to blend the 
+`background-image` onto the `background-color`. Has no meaning if `background-color` or `background-image`
+are not set. (#1966)
+
+- Added Map level `background-image-opacity` to dynamically set the opacity of the `background-image` (#1966)
+
 - Removed `RENDERING_STATS` compile option since it should be replaced with a better solution (#1956)
 
 - Added support to experimental `svg_renderer` for grouping layers for inkscape and illustrator (#1917)
