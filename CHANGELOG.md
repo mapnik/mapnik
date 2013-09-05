@@ -6,7 +6,37 @@ Developers: Please commit along with changes.
 
 For a complete change history, see the git log.
 
-## Future
+## 2.3.0
+
+Released ...
+
+(Packaged from ...)
+
+Summary: TODO
+
+- Optimized SVG loading by improving color parsing speed (#1918)
+
+- Fixed startup problem when fonts cannot be read due to lacking permissions (#1919)
+
+- Fixed bad behavior when negative image dimensions are requested (#1927)
+
+- Fixed handling of `marker-ignore-placement:true` when `marker-placement:line` (#1931)
+
+- Fixed handling of svg `opacity` in Cairo renderer (#1943)
+
+- Fixed handling of SVG files which contain empty `<g>` (#1944)
+
+- Fixed various 32bit test failures
+
+- Fixed missing support for using PathExpression in `marker-file` (#1952)
+
+- Added support for line offsets in PatternSymbolizers (#1991)
+
+- Added support for building on Android (tested with `android-ndk-r9`)
+
+- Added support for compiling with both -ansi (aka -std=c++98) and -std=c++11
+
+- Added support for compiling and linking on OS X against libc++
 
 - Fixed regression in handling `F` type dbf fields, introduced in v2.2.0.
 
@@ -16,9 +46,9 @@ For a complete change history, see the git log.
 
 - Made it possible to disable compilation of `grid_renderer` with `./configure GRID_RENDERER=False` (#1962)
 
-- Added `webp` image encoding and decoding support (#1955)
-
 - Added `premultiplied` property on mapnik::image_32 / mapnik.Image to enable knowledge of premultiplied status of image buffer.
+
+- Added `webp` image encoding and decoding support (#1955)
 
 - Added `scale-hsla` image-filter that allows scaling colors in HSL color space. RGB is converted to HSL (hue-saturation-lightness) and then each value (and the original alpha value) is stretched based on the specified scaling values. An example syntax is `scale-hsla(0,1,0,1,0,1,0,1)` which means no change because the full range will be kept (0 for lowest, 1 for highest). Other examples are: 1) `scale-hsla(0,0,0,1,0,1,0,1)` which would force all colors to be red in hue in the same way `scale-hsla(1,1,0,1,0,1,0,1)` would, 2) `scale-hsla(0,1,1,1,0,1,0,1)` which would cause all colors to become fully saturated, 3) `scale-hsla(0,1,1,1,0,1,.5,1)` which would force no colors to be any more transparent than half, and 4) `scale-hsla(0,1,1,1,0,1,0,.5)` which would force all colors to be at least half transparent. (#1954)
 
