@@ -14,6 +14,12 @@ Released ...
 
 Summary: TODO
 
+- Removed `RENDERING_STATS` compile option since it should be replaced with a better solution (#1956)
+
+- Added support to experimental `svg_renderer` for grouping layers for inkscape and illustrator (#1917)
+
+- Fixed compile of python bindings against Python 3.x
+
 - Optimized SVG loading by improving color parsing speed (#1918)
 
 - Fixed startup problem when fonts cannot be read due to lacking permissions (#1919)
