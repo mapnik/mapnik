@@ -336,6 +336,9 @@ def test_map_init():
     eq_(m.srs, '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
     eq_(m.base, '')
     eq_(m.maximum_extent, None)
+    eq_(m.background_image, None)
+    eq_(m.background_image_comp_op, mapnik.CompositeOp.src_over)
+    eq_(m.background_image_opacity, 1.0)
 
     m = mapnik.Map(256, 256, '+proj=latlong')
     eq_(m.srs, '+proj=latlong')

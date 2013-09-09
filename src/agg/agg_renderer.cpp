@@ -162,13 +162,13 @@ void agg_renderer<T>::setup(Map const &m)
             if ( w > 0 && h > 0)
             {
                 // repeat background-image both vertically and horizontally
-                unsigned x_steps = unsigned(std::ceil(width_/double(w)));
-                unsigned y_steps = unsigned(std::ceil(height_/double(h)));
+                unsigned x_steps = static_cast<unsigned>(std::ceil(width_/double(w)));
+                unsigned y_steps = static_cast<unsigned>(std::ceil(height_/double(h)));
                 for (unsigned x=0;x<x_steps;++x)
                 {
                     for (unsigned y=0;y<y_steps;++y)
                     {
-                        composite(pixmap_.data(),*bg_image, src_over, 1.0f, x*w, y*h, false);
+                        composite(pixmap_.data(),*bg_image, m.background_image_comp_op(), m.background_image_opacity(), x*w, y*h, false);
                     }
                 }
             }

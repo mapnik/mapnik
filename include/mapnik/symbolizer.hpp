@@ -30,7 +30,7 @@
 #include <mapnik/simplify.hpp>
 
 // boost
-#include <boost/optional.hpp>
+#include <boost/shared_ptr.hpp>
 
 // stl
 #include <vector>

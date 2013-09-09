@@ -25,15 +25,17 @@
 
 // mapnik
 #include <mapnik/color.hpp>
+#include <mapnik/config.hpp>
 #include <mapnik/font_set.hpp>
 #include <mapnik/enumeration.hpp>
 #include <mapnik/datasource.hpp>  // for featureset_ptr
 #include <mapnik/layer.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/well_known_srs.hpp>
+#include <mapnik/image_compositing.hpp>
 
 // boost
-#include <boost/optional/optional.hpp>
+#include <boost/optional.hpp>
 
 namespace mapnik
 {
@@ -76,6 +78,8 @@ private:
     int buffer_size_;
     boost::optional<color> background_;
     boost::optional<std::string> background_image_;
+    composite_mode_e background_image_comp_op_;
+    float background_image_opacity_;
     std::map<std::string,feature_type_style> styles_;
     std::map<std::string,font_set> fontsets_;
     std::vector<layer> layers_;
@@ -286,10 +290,30 @@ public:
      */
     boost::optional<std::string> const& background_image() const;
 
+    /*! \brief Set the compositing operation uses to blend the background image into the background color.
+     *  @param comp_op compositing operation.
+     */
+    void set_background_image_comp_op(composite_mode_e comp_op);
+
+    /*! \brief Get the map background image compositing operation
+     *  @return Background image compositing operation as composite_mode_e
+     *  object
+     */
+    composite_mode_e background_image_comp_op() const;
+
+    /*! \brief Set the map background image opacity.
+     *  @param opacity Background image opacity.
+     */
+    void set_background_image_opacity(float opacity);
+
+    /*! \brief Get the map background image opacity
+     *  @return opacity value as float
+     */
+    float background_image_opacity() const;
+
     /*! \brief Set buffer size
      *  @param buffer_size Buffer size in pixels.
      */
-
     void set_buffer_size(int buffer_size);
 
     /*! \brief Get the map buffer size

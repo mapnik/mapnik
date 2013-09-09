@@ -87,6 +87,8 @@ namespace mapnik { namespace util {
         {
             map_out.set_background_image(*background_image);
         }
+        map_out.set_background_image_comp_op(map_in.background_image_comp_op());
+        map_out.set_background_image_opacity(map_in.background_image_opacity());
         // maximum extent
         boost::optional<box2d<double> > max_extent = map_in.maximum_extent();
         if (max_extent)
