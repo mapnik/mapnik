@@ -39,6 +39,29 @@ class ensure_gil
         PyGILState_STATE gil_state_;
 };
 
+std::string extractException()
+{
+  using namespace boost::python;
+
+  PyObject *exc,*val,*tb;
+  PyErr_Fetch(&exc,&val,&tb);
+  PyErr_NormalizeException(&exc,&val,&tb);
+  handle<> hexc(exc),hval(allow_null(val)),htb(allow_null(tb));
+  if(!hval)
+  {
+    return extract<std::string>(str(hexc));
+  }
+  else
+  {
+    object traceback(import("traceback"));
+    object format_exception(traceback.attr("format_exception"));
+    object formatted_list(format_exception(hexc,hval,htb));
+    object formatted(str("").join(formatted_list));
+    return extract<std::string>(formatted);
+  }
+}
+
+
 } // end anonymous namespace
 
 namespace mapnik {
@@ -70,7 +93,7 @@ datasource::datasource_t python_datasource::type() const
     }
     catch ( boost::python::error_already_set )
     {
-        //throw datasource_exception(extractException());
+         throw datasource_exception(extractException());
     }
 
 }
@@ -111,7 +134,7 @@ box2d<double> python_datasource::envelope() const
     }
     catch ( boost::python::error_already_set )
     {
-        //throw datasource_exception(extractException());
+        throw datasource_exception(extractException());
     }
     return box;
 }
@@ -139,7 +162,7 @@ boost::optional<datasource::geometry_t> python_datasource::get_geometry_type() c
     }
     catch ( boost::python::error_already_set )
     {
-        //throw datasource_exception(extractException());
+        throw datasource_exception(extractException());
     }
 }
 
@@ -164,7 +187,7 @@ featureset_ptr python_datasource::features(query const& q) const
     }
     catch ( boost::python::error_already_set )
     {
-        //throw datasource_exception(extractException());
+        throw datasource_exception(extractException());
     }
 }
 
@@ -185,7 +208,7 @@ featureset_ptr python_datasource::features_at_point(coord2d const& pt, double to
     }
     catch ( boost::python::error_already_set )
     {
-        //throw datasource_exception(extractException());
+        throw datasource_exception(extractException());
     }
 
 }
@@ -214,6 +237,7 @@ feature_ptr python_featureset::next()
 
     return *(begin_++);
 }
+
 
 } // end namespace mapnik
 
