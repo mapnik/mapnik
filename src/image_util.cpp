@@ -206,7 +206,7 @@ void handle_png_options(std::string const& type,
             }
             else if (boost::algorithm::starts_with(t, "s="))
             {
-                std::string const& s = t.substr(2);
+                std::string s = t.substr(2);
                 if (s == "default")
                 {
                     *strategy = Z_DEFAULT_STRATEGY;
@@ -441,7 +441,7 @@ void save_to_stream(T const& image,
         {
 #if defined(HAVE_JPEG)
             int quality = 85;
-            std::string const& val = t.substr(4);
+            std::string val = t.substr(4);
             if (!val.empty())
             {
                 if (!mapnik::util::string2int(val,quality) || quality < 0 || quality > 100)
