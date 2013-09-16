@@ -108,7 +108,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
         if(max_async_connections_ > pool_max_size_)
         {
             std::ostringstream err;
-            err << "PostGIS Plugin: Error: 'max_async_connections_ must be > pool_max_size_\n";
+            err << "PostGIS Plugin: Error: 'max_async_connections_ must be <= pool_max_size_\n";
             throw mapnik::datasource_exception(err.str());
         }
 
