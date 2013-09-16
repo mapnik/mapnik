@@ -23,7 +23,7 @@
 
 struct output_geometry_backend
 {
-    output_geometry_backend(boost::ptr_vector<mapnik::geometry_type> & paths, mapnik::eGeomType type)
+    output_geometry_backend(boost::ptr_vector<mapnik::geometry_type> & paths, mapnik::geometry_type::types type)
         : paths_(paths),
           type_(type) {}
 
@@ -42,7 +42,7 @@ struct output_geometry_backend
         paths_.push_back(geom_ptr.release());
     }
     boost::ptr_vector<mapnik::geometry_type> &  paths_;
-    mapnik::eGeomType type_;
+    mapnik::geometry_type::types type_;
 };
 
 boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox,
@@ -56,7 +56,7 @@ boost::optional<std::string> linestring_bbox_clipping(mapnik::box2d<double> bbox
     line_symbolizer sym;
     CoordTransform t(bbox.width(),bbox.height(), bbox);
     boost::ptr_vector<mapnik::geometry_type> output_paths;
-    output_geometry_backend backend(output_paths, mapnik::LineString);
+    output_geometry_backend backend(output_paths, mapnik::geometry_type::types::LineString);
 
     typedef boost::mpl::vector<clip_line_tag> conv_types;
     vertex_converter<box2d<double>, output_geometry_backend, line_symbolizer,
@@ -96,7 +96,7 @@ boost::optional<std::string> polygon_bbox_clipping(mapnik::box2d<double> bbox,
     polygon_symbolizer sym;
     CoordTransform t(bbox.width(),bbox.height(), bbox);
     boost::ptr_vector<mapnik::geometry_type> output_paths;
-    output_geometry_backend backend(output_paths, mapnik::Polygon);
+    output_geometry_backend backend(output_paths, mapnik::geometry_type::types::Polygon);
 
     typedef boost::mpl::vector<clip_poly_tag> conv_types;
     vertex_converter<box2d<double>, output_geometry_backend, polygon_symbolizer,

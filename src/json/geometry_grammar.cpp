@@ -107,16 +107,16 @@ geometry_grammar<Iterator>::geometry_grammar()
         | (eps(_r2 == 6) > multipolygon_coordinates(_r1))
         ;
 
-    point_coordinates =  eps[ _a = new_<geometry_type>(Point) ]
+    point_coordinates =  eps[ _a = new_<geometry_type>(geometry_type::types::Point) ]
         > ( point(SEG_MOVETO,_a) [push_back(_r1,_a)] | eps[cleanup_(_a)][_pass = false] )
         ;
 
-    linestring_coordinates = eps[ _a = new_<geometry_type>(LineString)]
+    linestring_coordinates = eps[ _a = new_<geometry_type>(geometry_type::types::LineString)]
         > -(points(_a) [push_back(_r1,_a)]
            | eps[cleanup_(_a)][_pass = false])
         ;
 
-    polygon_coordinates = eps[ _a = new_<geometry_type>(Polygon) ]
+    polygon_coordinates = eps[ _a = new_<geometry_type>(geometry_type::types::Polygon) ]
         > ((lit('[')
             > -(points(_a)[close_path_(_a)] % lit(','))
             > lit(']')) [push_back(_r1,_a)]

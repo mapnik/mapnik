@@ -202,17 +202,17 @@ struct geometry_generator_grammar :
         coordinates =  point | linestring | polygon
             ;
 
-        point = &uint_(mapnik::Point)[_1 = _type(_val)]
+        point = &uint_(mapnik::geometry_type::types::Point)[_1 = _type(_val)]
             << point_coord [_1 = _first(_val)]
             ;
 
-        linestring = &uint_(mapnik::LineString)[_1 = _type(_val)]
+        linestring = &uint_(mapnik::geometry_type::types::LineString)[_1 = _type(_val)]
             << lit('[')
             << coords
             << lit(']')
             ;
 
-        polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
+        polygon = &uint_(mapnik::geometry_type::types::Polygon)[_1 = _type(_val)]
             << lit('[')
             << coords2
             << lit("]]")
@@ -280,12 +280,12 @@ struct multi_geometry_generator_grammar :
         using boost::spirit::karma::string;
 
         geometry_types.add
-            (mapnik::Point,"\"Point\"")
-            (mapnik::LineString,"\"LineString\"")
-            (mapnik::Polygon,"\"Polygon\"")
-            (mapnik::Point + 3,"\"MultiPoint\"")
-            (mapnik::LineString + 3,"\"MultiLineString\"")
-            (mapnik::Polygon + 3,"\"MultiPolygon\"")
+            (mapnik::geometry_type::types::Point,"\"Point\"")
+            (mapnik::geometry_type::types::LineString,"\"LineString\"")
+            (mapnik::geometry_type::types::Polygon,"\"Polygon\"")
+            (mapnik::geometry_type::types::Point + 3,"\"MultiPoint\"")
+            (mapnik::geometry_type::types::LineString + 3,"\"MultiLineString\"")
+            (mapnik::geometry_type::types::Polygon + 3,"\"MultiPolygon\"")
             ;
 
         start %= ( eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)]
