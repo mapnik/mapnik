@@ -240,22 +240,3 @@ feature_ptr python_featureset::next()
 
 
 } // end namespace mapnik
-
-namespace {
-boost::shared_ptr<mapnik::datasource> create_python_datasource(boost::python::object ds)
-{
-    return mapnik::datasource_ptr(new mapnik::python_datasource(ds));
-}
-
-} // end anonymous namespace
-
-void export_python_datasource()
-{
-    using namespace boost::python;
-
-    class_<mapnik::python_datasource,boost::shared_ptr<mapnik::python_datasource>,
-        boost::noncopyable>("PythonDatasource",
-            "This class represents a python datasource", no_init);
-		
-		def("Python", &create_python_datasource);
-}

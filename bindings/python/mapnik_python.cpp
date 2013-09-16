@@ -75,7 +75,6 @@ void export_view_transform();
 void export_raster_colorizer();
 void export_label_collision_detector();
 void export_logger();
-void export_python_datasource();
 
 #include <mapnik/version.hpp>
 #include <mapnik/value_error.hpp>
@@ -536,7 +535,6 @@ BOOST_PYTHON_MODULE(_mapnik)
     export_raster_colorizer();
     export_label_collision_detector();
     export_logger();
-		export_python_datasource();
 
     def("clear_cache", &clear_cache,
         "\n"
