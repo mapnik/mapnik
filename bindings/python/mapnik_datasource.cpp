@@ -209,7 +209,7 @@ void export_datasource()
         .def("num_features",&memory_datasource::size)
         ;
 
-    class_<mapnik::python_datasource, bases<datasource>, //boost::shared_ptr<mapnik::python_datasource>,
+    class_<mapnik::python_datasource, bases<datasource>,
         boost::noncopyable>("PythonDatasource",
             "This class represents a python datasource", no_init)
         ;
