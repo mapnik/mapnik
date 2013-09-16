@@ -88,7 +88,6 @@ void save_as_png(T1 & file,
         writer.toStream(file);
         return;
     }
-
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
@@ -275,7 +274,6 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
         writer.toStream(file);
         return;
     }
-
     png_voidp error_ptr=0;
     png_structp png_ptr=png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 error_ptr,0, 0);
@@ -316,7 +314,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
                  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
 
     png_color* pal = const_cast<png_color*>(reinterpret_cast<const png_color*>(&palette[0]));
-    png_set_PLTE(png_ptr, info_ptr, pal, palette.size());
+    png_set_PLTE(png_ptr, info_ptr, pal, static_cast<unsigned>(palette.size()));
 
     // make transparent lowest indexes, so tRNS is small
     if (alpha.size()>0)
@@ -531,15 +529,12 @@ void save_as_png8_oct(T1 & file,
                 leftovers = 0;
             }
             std::vector<rgb> pal;
-            trees[j].setOffset(palette.size());
+            trees[j].setOffset( static_cast<unsigned>(palette.size()));
             trees[j].create_palette(pal);
             assert(pal.size() <= max_colors);
-            leftovers = cols[j]-pal.size();
-            cols[j] = pal.size();
-            for(unsigned i=0; i<pal.size(); i++)
-            {
-                palette.push_back(pal[i]);
-            }
+            leftovers = cols[j] - static_cast<unsigned>(pal.size());
+            cols[j] = static_cast<unsigned>(pal.size());
+            palette.insert(palette.begin(), pal.begin(), pal.end());
             assert(palette.size() <= 256);
         }
     }

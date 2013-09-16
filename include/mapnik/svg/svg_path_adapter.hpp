@@ -919,7 +919,7 @@ public:
         return vertices_.size() ? vertices_[vertices_.size() - 1].y : 0.0;
     }
 
-    unsigned total_vertices() const
+    std::size_t total_vertices() const
     {
         return vertices_.size();
     }

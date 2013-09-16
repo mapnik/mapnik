@@ -36,6 +36,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/foreach.hpp>
+
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <string>
@@ -160,7 +161,7 @@ bool parse_reader(svg_parser & parser, xmlTextReaderPtr reader)
     catch (std::exception const& ex)
     {
         xmlFreeTextReader(reader);
-        throw;
+        throw ex;
     }
     xmlFreeTextReader(reader);
     if (ret != 0)
@@ -216,7 +217,7 @@ void start_element(svg_parser & parser, xmlTextReaderPtr reader)
                 if (xmlStrEqual(name, BAD_CAST "path"))
                 {
                     parse_path(parser,reader);
-                }            
+                }
                 else if (xmlStrEqual(name, BAD_CAST "polygon") )
                 {
                     parse_polygon(parser,reader);
@@ -230,7 +231,7 @@ void start_element(svg_parser & parser, xmlTextReaderPtr reader)
                     parse_line(parser,reader);
                 }
                 else if (xmlStrEqual(name, BAD_CAST "rect"))
-                {    
+                {
                     parse_rect(parser,reader);
                 }
                 else if (xmlStrEqual(name, BAD_CAST "circle"))
@@ -419,7 +420,7 @@ void parse_attr(svg_parser & parser, const xmlChar * name, const xmlChar * value
 void parse_attr(svg_parser & parser, xmlTextReaderPtr reader)
 {
     const xmlChar *name, *value;
-    
+
     if (xmlTextReaderMoveToFirstAttribute(reader) == 1)
     {
         do
@@ -553,33 +554,33 @@ void parse_line(svg_parser & parser, xmlTextReaderPtr reader)
     double y2 = 0.0;
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x1");
-    if (value) 
+    if (value)
     {
         x1 = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y1");
-    if (value) 
+    if (value)
     {
         y1 = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x2");
-    if (value) 
+    if (value)
     {
         x2 = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y2");
-    if (value) 
+    if (value)
     {
         y2 = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     parser.path_.begin_path();
     parser.path_.move_to(x1, y1);
     parser.path_.line_to(x2, y2);
@@ -594,26 +595,26 @@ void parse_circle(svg_parser & parser, xmlTextReaderPtr reader)
     double cy = 0.0;
     double r = 0.0;
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cx");
-    if (value) 
+    if (value)
     {
         cx = parse_double((const char*)value);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cy");
-    if (value) 
+    if (value)
     {
         cy = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "r");
-    if (value) 
+    if (value)
     {
         r = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     parser.path_.begin_path();
 
     if(r != 0.0)
@@ -635,33 +636,33 @@ void parse_ellipse(svg_parser & parser, xmlTextReaderPtr reader)
     double ry = 0.0;
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cx");
-    if (value) 
+    if (value)
     {
         cx = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cy");
-    if (value) 
+    if (value)
     {
         cy = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "rx");
-    if (value) 
+    if (value)
     {
         rx = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "ry");
-    if (value) 
+    if (value)
     {
         ry = parse_double((const char*)value);
         xmlFree(value);
     }
-    
+
     parser.path_.begin_path();
 
     if(rx != 0.0 && ry != 0.0)
@@ -745,7 +746,7 @@ void parse_rect(svg_parser & parser, xmlTextReaderPtr reader)
         if(rx < 0.0) throw std::runtime_error("parse_rect: Invalid rx");
         if(ry < 0.0) throw std::runtime_error("parse_rect: Invalid ry");
         parser.path_.begin_path();
-        
+
         if(rounded)
         {
             agg::rounded_rect r;
@@ -781,7 +782,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
     double opacity = 1.0;
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "offset");
-    if (value) 
+    if (value)
     {
         offset = parse_double((const char*)value);
         xmlFree(value);
@@ -838,8 +839,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
     }
 
 
-    stop_color.set_alpha(opacity*255);
-
+    stop_color.set_alpha(static_cast<uint8_t>(opacity * 255));
     parser.temporary_gradient_.second.add_stop(offset, stop_color);
 
     /*
@@ -873,7 +873,7 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 
     // check if we should inherit from another tag
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "xlink:href");
-    if (value) 
+    if (value)
     {
         if (value[0] == '#')
         {
@@ -889,7 +889,7 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
         }
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "gradientUnits");
     if (value)
     {
@@ -903,7 +903,7 @@ bool parse_common_gradient(svg_parser & parser, xmlTextReaderPtr reader)
         }
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "gradientTransform");
     if (value)
     {
@@ -942,14 +942,14 @@ void parse_radial_gradient(svg_parser & parser, xmlTextReaderPtr reader)
     bool has_percent=true;
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cx");
-    if (value) 
+    if (value)
     {
         cx = parse_double_optional_percent((const char*)value, has_percent);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "cy");
-    if (value) 
+    if (value)
     {
         cy = parse_double_optional_percent((const char*)value, has_percent);
         xmlFree(value);
@@ -1006,28 +1006,28 @@ void parse_linear_gradient(svg_parser & parser, xmlTextReaderPtr reader)
 
     bool has_percent=true;
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x1");
-    if (value) 
+    if (value)
     {
         x1 = parse_double_optional_percent((const char*)value, has_percent);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "x2");
-    if (value) 
+    if (value)
     {
         x2 = parse_double_optional_percent((const char*)value, has_percent);
         xmlFree(value);
     }
 
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y1");
-    if (value) 
+    if (value)
     {
         y1 = parse_double_optional_percent((const char*)value, has_percent);
         xmlFree(value);
     }
-    
+
     value = xmlTextReaderGetAttribute(reader, BAD_CAST "y2");
-    if (value) 
+    if (value)
     {
         y2 = parse_double_optional_percent((const char*)value, has_percent);
         xmlFree(value);

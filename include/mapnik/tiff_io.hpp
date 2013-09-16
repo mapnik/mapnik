@@ -86,6 +86,7 @@ static toff_t tiff_seek_proc(thandle_t fd, toff_t off, int whence)
     // grow std::stringstream buffer (re: libtiff/tif_stream.cxx)
     std::ios::pos_type pos = out->tellp();
     // second check needed for clang (libcxx doesn't set failbit when seeking beyond the current buffer size
+
     if( out->fail() || static_cast<std::streamoff>(off) != pos)
     {
         std::ios::iostate old_state;
@@ -143,7 +144,7 @@ static toff_t tiff_size_proc(thandle_t fd)
     out->seekp(0, std::ios::end);
     std::ios::pos_type len = out->tellp();
     out->seekp(pos);
-    return (toff_t)len;
+    return static_cast<toff_t>(len);
 }
 
 static tsize_t tiff_dummy_read_proc(thandle_t , tdata_t , tsize_t)
@@ -166,6 +167,7 @@ void save_as_tiff(T1 & file, T2 const& image)
     const int width = image.width();
     const int height = image.height();
     const int scanline_size = sizeof(unsigned char) * width * 3;
+
 
     TIFF* output = RealTIFFOpen("mapnik_tiff_stream",
                                 "wm",
@@ -263,6 +265,5 @@ void save_as_tiff(T1 & file, T2 const& image)
 }
 
 }
-
 
 #endif // MAPNIK_TIFF_IO_HPP
