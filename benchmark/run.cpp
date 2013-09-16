@@ -549,7 +549,7 @@ struct test11
                 clipped.rewind(0);
                 unsigned cmd;
                 double x,y;
-                while ((cmd = geom.vertex(&x, &y)) != SEG_END) {}
+                while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {}
             }
         }
     }
@@ -594,7 +594,7 @@ struct test12
                 poly_clipper clipped(extent_, geom);
                 unsigned cmd;
                 double x,y;
-                while ((cmd = geom.vertex(&x, &y)) != SEG_END) {}
+                while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {}
             }
         }
     }
