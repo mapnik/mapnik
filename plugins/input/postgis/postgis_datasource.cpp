@@ -629,18 +629,27 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
 processor_context_ptr postgis_datasource::get_context(feature_style_context_map & ctx) const
 {
     std::string ds_name(name());
-
-    if (! asynchronous_request_)
+    if (!asynchronous_request_)
         return  processor_context_ptr();
 
-    if (!ctx.count(ds_name))
+    auto itr = ctx.find(ds_name);
+    if (itr != ctx.end())
     {
-        processor_context_ptr pgis_ctx = boost::make_shared<postgis_processor_context>();
-        ctx[ds_name] = pgis_ctx;
-        return ctx[ds_name];
+        return itr->second;
     }
     else
-        return ctx[ds_name];
+    {
+        return ctx.insert(std::make_pair(ds_name,boost::make_shared<postgis_processor_context>())).first->second;
+    }
+
+    //if (!ctx.count(ds_name))
+    // {
+    //   processor_context_ptr pgis_ctx = boost::make_shared<postgis_processor_context>();
+    //   ctx[ds_name] = pgis_ctx;
+    //   return ctx[ds_name];
+    // }
+    //else
+    //   return ctx[ds_name];
 }
 
 featureset_ptr postgis_datasource::features(const query& q) const
