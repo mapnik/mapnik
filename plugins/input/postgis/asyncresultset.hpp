@@ -33,12 +33,12 @@
 class postgis_processor_context;
 typedef boost::shared_ptr<postgis_processor_context> postgis_processor_context_ptr;
 
-class AsyncResultSet : public IResultSet, private boost::noncopyable
+class AsyncResultSet : public IResultSet, private mapnik::noncopyable
 {
 public:
     AsyncResultSet(postgis_processor_context_ptr const& ctx,
                      boost::shared_ptr< Pool<Connection,ConnectionCreator> > const& pool,
-                     boost::shared_ptr<Connection> const &conn, const std::string& sql )
+                     boost::shared_ptr<Connection> const& conn, std::string const& sql )
         : ctx_(ctx),
           pool_(pool),
           conn_(conn),
@@ -83,11 +83,11 @@ public:
                 rs_ = conn_->getAsyncResult();
             }
             else
-            {                
+            {
                 throw mapnik::datasource_exception("invalid connection in AsyncResultSet::next");
             }
         }
-        
+
         next_res = rs_->next();
         if (!next_res)
         {
@@ -172,7 +172,8 @@ private:
 class postgis_processor_context : public mapnik::IProcessorContext
 {
 public:
-    postgis_processor_context():num_async_requests_(0) {}
+    postgis_processor_context()
+        : num_async_requests_(0) {}
     ~postgis_processor_context() {}
 
     void add_request(boost::shared_ptr<AsyncResultSet> const& req)
@@ -194,8 +195,8 @@ public:
     int num_async_requests_;
 
 private:
-    typedef std::queue<boost::shared_ptr<AsyncResultSet> > asynch_queue;
-    asynch_queue q_;
+    typedef std::queue<boost::shared_ptr<AsyncResultSet> > async_queue;
+    async_queue q_;
 
 };
 

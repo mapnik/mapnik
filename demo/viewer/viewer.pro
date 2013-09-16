@@ -3,7 +3,8 @@
 ######################################################################
 TEMPLATE = app
 QT += core gui widgets
-QMAKE_CXX = clang++
+QMAKE_CXX = $$system(mapnik-config --cxx)
+QMAKE_LINK = $$system(mapnik-config --cxx)
 QMAKE_CXXFLAGS += $$system(mapnik-config --cxxflags)
 QMAKE_CXXFLAGS += $$system(mapnik-config --includes --dep-includes)
 QMAKE_LFLAGS += $$system(mapnik-config --libs)
