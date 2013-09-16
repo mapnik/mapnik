@@ -38,6 +38,8 @@
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/memory_datasource.hpp>
 
+#include "python_datasource.hpp"
+
 
 using mapnik::datasource;
 using mapnik::memory_datasource;
@@ -152,7 +154,15 @@ boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
         }
     }
     return fld_types;
-}}
+}
+
+boost::shared_ptr<mapnik::datasource> create_python_datasource(boost::python::object ds)
+{
+    return mapnik::datasource_ptr(new mapnik::python_datasource(ds));
+}
+
+} // end anonymous namespace
+
 
 mapnik::parameters const& (mapnik::datasource::*params_const)() const =  &mapnik::datasource::params;
 
@@ -198,4 +208,12 @@ void export_datasource()
              ">>> ms.add_feature(Feature(1))\n")
         .def("num_features",&memory_datasource::size)
         ;
+
+    class_<mapnik::python_datasource, bases<datasource>,
+        boost::noncopyable>("PythonDatasource",
+            "This class represents a python datasource", no_init)
+        ;
+        
+    def("Python", &create_python_datasource);
+
 }

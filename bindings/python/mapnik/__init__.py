@@ -605,17 +605,6 @@ def Osm(**keywords):
     keywords['type'] = 'osm'
     return CreateDatasource(keywords)
 
-def Python(**keywords):
-    """Create a Python Datasource.
-
-    >>> from mapnik import Python, PythonDatasource
-    >>> datasource = Python('PythonDataSource')
-    >>> lyr = Layer('Python datasource')
-    >>> lyr.datasource = datasource
-    """
-    keywords['type'] = 'python'
-    return CreateDatasource(keywords)
-
 class PythonDatasource(object):
     """A base class for a Python data source.
 
