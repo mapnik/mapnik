@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Optimized expression evaluation of text by avoiding extra copy (1dd1275)
+
 - Added Map level `background-image-comp-op` to control the compositing operation used to blend the 
 `background-image` onto the `background-color`. Has no meaning if `background-color` or `background-image`
 are not set. (#1966)
