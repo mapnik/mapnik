@@ -542,10 +542,10 @@ struct test11
             for (geometry_type & geom : paths)
             {
                 poly_clipper clipped(geom,ps,
-                    agg::clipper_and,
-                    agg::clipper_non_zero,
-                    agg::clipper_non_zero,
-                    1);
+                                     agg::clipper_and,
+                                     agg::clipper_non_zero,
+                                     agg::clipper_non_zero,
+                                     1);
                 clipped.rewind(0);
                 unsigned cmd;
                 double x,y;
@@ -762,6 +762,13 @@ int main( int argc, char** argv)
             benchmark(runner,"rule caching using heap allocation");
         }
 
+        // polygon/rect clipping
+        // IN : POLYGON ((155 203, 233 454, 315 340, 421 446, 463 324, 559 466, 665 253, 528 178, 394 229, 329 138, 212 134, 183 228, 200 264, 155 203),(313 190, 440 256, 470 248, 510 305, 533 237, 613 263, 553 397, 455 262, 405 378, 343 287, 249 334, 229 191, 313 190))
+        // RECT : POLYGON ((181 106, 181 470, 631 470, 631 106, 181 106))
+        // OUT (expected)
+        // POLYGON ((181 286.6666666666667, 233 454, 315 340, 421 446, 463 324, 559 466, 631 321.3207547169811, 631 234.38686131386862, 528 178, 394 229, 329 138, 212 134, 183 228, 200 264, 181 238.24444444444444, 181 286.6666666666667),(313 190, 440 256, 470 248, 510 305, 533 237, 613 263, 553 397, 455 262, 405 378, 343 287, 249 334, 229 191, 313 190))
+
+        mapnik::box2d<double> clipping_box(181,106,631,470);
         {
             std::string filename_("benchmark/data/polygon.wkt");
             std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
@@ -769,23 +776,19 @@ int main( int argc, char** argv)
                 throw std::runtime_error("could not open: '" + filename_ + "'");
             std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
                        (std::istreambuf_iterator<char>()) );
-            mapnik::box2d<double> clipping_box(0,0,40,40);
-
-            test11 runner(100000,10,wkt_in,clipping_box);
+            test11 runner(10000,10,wkt_in,clipping_box);
             benchmark(runner,"clipping polygon with agg_conv_clipper");
         }
 
         {
-
             std::string filename_("benchmark/data/polygon.wkt");
             std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
             if (!in.is_open())
                 throw std::runtime_error("could not open: '" + filename_ + "'");
             std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
                        (std::istreambuf_iterator<char>()) );
-            mapnik::box2d<double> clipping_box(0,0,40,40);
 
-            test12 runner(100000,10,wkt_in,clipping_box);
+            test12 runner(10000,10,wkt_in,clipping_box);
             benchmark(runner,"clipping polygon with mapnik::polygon_clipper");
         }
 
