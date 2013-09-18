@@ -35,7 +35,6 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <string>

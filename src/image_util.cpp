@@ -206,7 +206,7 @@ void handle_png_options(std::string const& type,
             }
             else if (boost::algorithm::starts_with(t, "s="))
             {
-                std::string const& s = t.substr(2);
+                std::string s = t.substr(2);
                 if (s == "default")
                 {
                     *strategy = Z_DEFAULT_STRATEGY;

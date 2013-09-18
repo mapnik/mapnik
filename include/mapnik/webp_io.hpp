@@ -49,7 +49,8 @@ int webp_stream_write(const uint8_t* data, size_t data_size, const WebPPicture* 
 std::string webp_encoding_error(WebPEncodingError error)
 {
     std::string os;
-    switch (error) {
+    switch (error)
+    {
         case VP8_ENC_ERROR_OUT_OF_MEMORY: os = "memory error allocating objects"; break;
         case VP8_ENC_ERROR_BITSTREAM_OUT_OF_MEMORY: os = "memory error while flushing bits"; break;
         case VP8_ENC_ERROR_NULL_PARAMETER: os = "a pointer parameter is NULL"; break;
@@ -88,15 +89,16 @@ void save_as_webp(T1& file,
     config.lossless = !!lossless;
     config.image_hint = static_cast<WebPImageHint>(image_hint);
 #else
-#ifdef _MSC_VER
-#pragma NOTE(compiling against webp that does not support lossless flag)
-#else
-#warning "compiling against webp that does not support lossless flag"
-#endif
+    #ifdef _MSC_VER
+    #pragma NOTE(compiling against webp that does not support lossless flag)
+    #else
+    #warning "compiling against webp that does not support lossless flag"
+    #endif
 #endif
 
     bool valid = WebPValidateConfig(&config);
-    if (!valid) {
+    if (!valid)
+    {
         throw std::runtime_error("Invalid configuration");
     }
 

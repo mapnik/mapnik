@@ -41,7 +41,7 @@ public:
     std::size_t size() const;
     void set_name(std::string const& name);
     std::string const& get_name() const;
-    void add_face_name(std::string);
+    void add_face_name(std::string const& face_name);
     std::vector<std::string> const& get_face_names() const;
     ~font_set();
 private:

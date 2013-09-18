@@ -59,10 +59,10 @@ bool parse_dasharray(Iterator first, Iterator last, std::vector<double>& dasharr
 #endif
                           | lit("none")),
                           qi::ascii::space);
-
     if (first != last)
+    {
         return false;
-
+    }
     return r;
 }
 

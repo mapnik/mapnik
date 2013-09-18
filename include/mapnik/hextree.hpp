@@ -354,8 +354,8 @@ public:
         for (unsigned i=0; i<sorted_pal_.size(); ++i)
         {
             if (sorted_pal_[i].a<255)
-	      {
-          	pal_remap_[i] = static_cast<unsigned>(palette.size());
+            {
+                pal_remap_[i] = static_cast<unsigned>(palette.size());
                 palette.push_back(sorted_pal_[i]);
             }
         }
@@ -363,7 +363,7 @@ public:
         {
             if (sorted_pal_[i].a==255)
             {
-	        pal_remap_[i] = static_cast<unsigned>(palette.size());
+                pal_remap_[i] = static_cast<unsigned>(palette.size());
                 palette.push_back(sorted_pal_[i]);
             }
         }
