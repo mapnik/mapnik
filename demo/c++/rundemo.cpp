@@ -263,18 +263,27 @@ int main ( int argc , char** argv)
         image_32 buf(m.width(),m.height());
         agg_renderer<image_32> ren(m,buf);
         ren.apply();
-
+        std::string msg("These maps have been rendered using AGG in the current directory:\n");
+#ifdef HAVE_JPEG
         save_to_file(buf,"demo.jpg","jpeg");
+        msg += "- demo.jpg\n";
+#endif
+#ifdef HAVE_PNG
         save_to_file(buf,"demo.png","png");
         save_to_file(buf,"demo256.png","png8");
+        msg += "- demo.png\n";
+        msg += "- demo256.png\n";
+#endif
+#ifdef HAVE_TIFF
         save_to_file(buf,"demo.tif","tiff");
-
-        std::cout << "Three maps have been rendered using AGG in the current directory:\n"
-            "- demo.jpg\n"
-            "- demo.png\n"
-            "- demo256.png\n"
-            "- demo.tif\n"
-            "Have a look!\n";
+        msg += "- demo.tif\n";
+#endif
+#ifdef HAVE_WEBP
+        save_to_file(buf,"demo.webp","webp");
+        msg += "- demo.webp\n";
+#endif
+        msg += "Have a look!\n";
+        std::cout << msg;
 
 #if defined(HAVE_CAIRO)
         // save to pdf/svg files
