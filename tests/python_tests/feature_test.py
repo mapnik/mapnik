@@ -12,6 +12,12 @@ def test_default_constructor():
     f = mapnik.Feature(mapnik.Context(),1)
     eq_(f is not None,True)
 
+def test_feature_geo_interface():
+    ctx = mapnik.Context()
+    feat = mapnik.Feature(ctx,1)
+    feat.add_geometries_from_wkt('Point (0 0)')
+    eq_(feat.__geo_interface__['geometry'],{u'type': u'Point', u'coordinates': [0, 0]})
+
 def test_python_extended_constructor():
     context = mapnik.Context()
     context.push('foo')
