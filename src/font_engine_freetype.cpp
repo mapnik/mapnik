@@ -660,7 +660,7 @@ void text_renderer<T>::render(pixel_position const& pos)
                                 itr->properties->halo_fill.rgba(),
                                 bit->left,
                                 height - bit->top,
-                                static_cast<int>(halo_radius),
+                                halo_radius,
                                 itr->properties->text_opacity,
                                 comp_op_);
                 }
