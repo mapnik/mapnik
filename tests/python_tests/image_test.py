@@ -7,6 +7,7 @@ from timeit import Timer, time
 from nose.tools import *
 from utilities import execution_path, run_all
 
+
 def setup():
     # All of the paths used are relative, if we run the tests
     # from another directory we need to chdir()
@@ -71,7 +72,7 @@ def test_image_open_from_string():
     eq_(len(mapnik.Image.fromstring(im1.tostring('jpeg')).tostring()),length)
     eq_(len(mapnik.Image.frombuffer(buffer(im1.tostring('png'))).tostring()),length)
     eq_(len(mapnik.Image.frombuffer(buffer(im1.tostring('jpeg'))).tostring()),length)
-    
+
     # TODO - https://github.com/mapnik/mapnik/issues/1831
     eq_(len(mapnik.Image.fromstring(im1.tostring('tiff')).tostring()),length)
     eq_(len(mapnik.Image.frombuffer(buffer(im1.tostring('tiff'))).tostring()),length)

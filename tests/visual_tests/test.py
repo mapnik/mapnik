@@ -185,7 +185,7 @@ class Reporting:
         self.overwrite_failures = overwrite_failures
         self.errors = [ #(type, actual, expected, diff, message)
          ]
-        
+
     def result_fail(self, actual, expected, diff):
         self.failed += 1
         if self.quiet:
@@ -199,7 +199,7 @@ class Reporting:
             open(expected, 'wb').write(contents)
         else:
             self.errors.append((self.DIFF, actual, expected, diff, None))
-            
+
     def result_pass(self, actual, expected, diff):
         self.passed += 1
         if self.quiet:
@@ -304,7 +304,7 @@ def render(filename,config, width, height, bbox, scale_factor, reporting):
             return m
         reporting.other_error(filename, repr(e))
         return m
-    
+
     for renderer in renderers:
         # TODO - grid renderer does not support scale_factor yet via python
         if renderer['name'] == 'grid' and scale_factor != 1.0:
