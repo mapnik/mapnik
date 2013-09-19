@@ -46,8 +46,8 @@ private:
     };
 
     const char* wkb_;
-    unsigned size_;
-    unsigned pos_;
+    std::size_t size_;
+    std::size_t pos_;
     wkbByteOrder byteOrder_;
     bool needSwap_;
     wkbFormat format_;
@@ -455,7 +455,7 @@ bool geometry_utils::from_wkb(boost::ptr_vector<geometry_type>& paths,
                                unsigned size,
                                wkbFormat format)
 {
-    unsigned geom_count = paths.size();
+    std::size_t geom_count = paths.size();
     wkb_reader reader(wkb, size, format);
     reader.read(paths);
     if (paths.size() > geom_count)
