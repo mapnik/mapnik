@@ -71,7 +71,7 @@ public:
         wkbGeometryCollectionZ=1007
     };
 
-    wkb_reader(const char* wkb, unsigned size, wkbFormat format)
+    wkb_reader(const char* wkb, std::size_t size, wkbFormat format)
         : wkb_(wkb),
           size_(size),
           pos_(0),
@@ -81,9 +81,9 @@ public:
         if (format_ == wkbAuto)
         {
             if (size_ >= 44
-                && (unsigned char)(wkb_[0]) == (unsigned char)(0x00)
-                && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C)
-                && (unsigned char)(wkb_[size_ - 1]) == (unsigned char)(0xFE))
+                && static_cast<unsigned char>(wkb_[0]) == static_cast<unsigned char>(0x00)
+                && static_cast<unsigned char>(wkb_[38]) == static_cast<unsigned char>(0x7C)
+                && static_cast<unsigned char>(wkb_[size_ - 1]) == static_cast<unsigned char>(0xFE))
             {
                 format_ = wkbSpatiaLite;
             }
