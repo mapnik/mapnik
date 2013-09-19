@@ -70,7 +70,6 @@ box2d<T>::box2d(box2d_type const& rhs)
       maxx_(rhs.maxx_),
       maxy_(rhs.maxy_) {}
 
-
 template <typename T>
 box2d<T>::box2d(box2d_type && rhs)
     : minx_(std::move(rhs.minx_)),
