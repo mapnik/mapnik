@@ -57,12 +57,14 @@ private:
     T miny_;
     T maxx_;
     T maxy_;
+    void swap(box2d_type & rhs);
 public:
     box2d();
     box2d(T minx,T miny,T maxx,T maxy);
-    box2d(const coord<T,2>& c0,const coord<T,2>& c1);
-    box2d(const box2d_type& rhs);
-    box2d(const box2d_type& rhs, const agg::trans_affine& tr);
+    box2d(coord<T,2> const& c0, coord<T,2> const& c1);
+    box2d(box2d_type const& rhs);
+    box2d(box2d_type const& rhs, agg::trans_affine const& tr);
+    box2d_type& operator=(box2d_type other);
     T minx() const;
     T miny() const;
     T maxx() const;
@@ -77,22 +79,22 @@ public:
     void height(T h);
     coord<T,2> center() const;
     void expand_to_include(T x,T y);
-    void expand_to_include(const coord<T,2>& c);
-    void expand_to_include(const box2d_type& other);
-    bool contains(const coord<T,2> &c) const;
+    void expand_to_include(coord<T,2> const& c);
+    void expand_to_include(box2d_type const& other);
+    bool contains(coord<T,2> const& c) const;
     bool contains(T x,T y) const;
-    bool contains(const box2d_type &other) const;
-    bool intersects(const coord<T,2> &c) const;
+    bool contains(box2d_type const& other) const;
+    bool intersects(coord<T,2> const& c) const;
     bool intersects(T x,T y) const;
-    bool intersects(const box2d_type &other) const;
-    box2d_type intersect(const box2d_type& other) const;
-    bool operator==(const box2d_type &other) const;
+    bool intersects(box2d_type const& other) const;
+    box2d_type intersect(box2d_type const& other) const;
+    bool operator==(box2d_type const& other) const;
     void re_center(T cx,T cy);
-    void re_center(const coord<T,2>& c);
+    void re_center(coord<T,2> const& c);
     void init(T x0,T y0,T x1,T y1);
-    void clip(const box2d_type &other);
+    void clip(box2d_type const& other);
     void pad(T padding);
-    bool from_string(std::string const& s);
+    bool from_string(std::string const& str);
     bool valid() const;
 
     // define some operators
