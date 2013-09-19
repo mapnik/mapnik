@@ -814,8 +814,31 @@ public:
     value ()
         : base_(value_null()) {}
 
-    template <typename T> value(T _val_)
-        : base_(_val_) {}
+    value(value_integer val)
+        : base_(val) {}
+
+    value(value_double val)
+        : base_(val) {}
+
+    value(value_bool val)
+        : base_(val) {}
+
+    value(value_null val)
+        : base_(val) {}
+
+    value(value_unicode_string const& val)
+        : base_(val) {}
+
+    value (value const& other)
+        : base_(other.base_) {}
+
+    value & operator=( value const& other)
+    {
+        if (this == &other)
+            return *this;
+        base_ = other.base_;
+        return *this;
+    }
 
     bool operator==(value const& other) const
     {
