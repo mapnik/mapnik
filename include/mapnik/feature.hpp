@@ -235,7 +235,6 @@ public:
         {
             if (first)
             {
-                first = false;
                 box2d<double> box = geom.envelope();
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
                 first = false;

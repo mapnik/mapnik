@@ -80,9 +80,6 @@ if '-DHAVE_JPEG' in env['CPPDEFINES']:
    lib_env['LIBS'].append('jpeg')
    enabled_imaging_libraries.append('jpeg_reader.cpp')
 
-if env['WEBP']:
-   lib_env['LIBS'].append('webp')
-
 if len(env['EXTRA_FREETYPE_LIBS']):
     lib_env['LIBS'].extend(copy(env['EXTRA_FREETYPE_LIBS']))
 
@@ -268,13 +265,6 @@ if env['HAS_CAIRO']:
 
 for cpp in enabled_imaging_libraries:
     source.append(cpp)
-
-if env['WEBP']:
-    source += Split(
-        """
-        webp_reader.cpp
-        """)
-
 
 # agg backend
 source += Split(

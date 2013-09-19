@@ -106,8 +106,10 @@ struct multi_geometry_type
 #else
 struct get_type
 {
-    typedef int result_type;
-    result_type operator() (geometry_type const& geom) const
+    template <typename T>
+    struct result { typedef int type; };
+
+    int operator() (geometry_type const& geom) const
     {
         return static_cast<int>(geom.type());
     }
@@ -115,8 +117,10 @@ struct get_type
 
 struct get_first
 {
-    typedef geometry_type::value_type const result_type;
-    result_type operator() (geometry_type const& geom) const
+    template <typename T>
+    struct result { typedef geometry_type::value_type const type; };
+
+    geometry_type::value_type const operator() (geometry_type const& geom) const
     {
         geometry_type::value_type coord;
         boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
@@ -126,8 +130,10 @@ struct get_first
 
 struct multi_geometry_type
 {
-    typedef boost::tuple<unsigned,bool>  result_type;
-    result_type operator() (geometry_container const& geom) const
+    template <typename T>
+    struct result { typedef boost::tuple<unsigned,bool> type; };
+
+    boost::tuple<unsigned,bool> operator() (geometry_container const& geom) const
     {
         unsigned type = 0u;
         bool collection = false;
@@ -276,7 +282,6 @@ struct multi_geometry_generator_grammar :
         using boost::spirit::karma::_1;
         using boost::spirit::karma::_a;
         using boost::spirit::karma::_r1;
-        using boost::spirit::karma::string;
 
         geometry_types.add
             (mapnik::geometry_type::types::Point,"\"Point\"")
@@ -300,9 +305,9 @@ struct multi_geometry_generator_grammar :
         geometry = (lit("{\"type\":")
                     << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = _multi_type(_val)]
                     << lit(",\"coordinates\":")
-                    << string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
+                    << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
                     << coordinates
-                    << string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
+                    << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
                     << lit('}')) | lit("null")
             ;
 

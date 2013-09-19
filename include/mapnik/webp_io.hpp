@@ -36,6 +36,7 @@
 // boost
 #include <boost/scoped_array.hpp>
 
+
 namespace mapnik {
 
 template <typename T>
@@ -83,7 +84,6 @@ void save_as_webp(T1& file,
     }
 
     // Add additional tuning
-
     if (method >= 0) config.method = method;
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
     config.lossless = !!lossless;

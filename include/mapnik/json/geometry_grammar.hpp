@@ -88,10 +88,14 @@ struct where_message
 #else
 struct push_vertex
 {
-    typedef void result_type;
+    template <typename T0,typename T1, typename T2, typename T3>
+    struct result
+    {
+        typedef void type;
+    };
 
     template <typename T0,typename T1, typename T2, typename T3>
-    result_type operator() (T0 c, T1 path, T2 x, T3 y) const
+    void operator() (T0 c, T1 path, T2 x, T3 y) const
     {
         BOOST_ASSERT( path!=0 );
         path->push_vertex(x,y,c);
@@ -100,10 +104,14 @@ struct push_vertex
 
 struct close_path
 {
-    typedef void result_type;
+    template <typename T>
+    struct result
+    {
+        typedef void type;
+    };
 
     template <typename T>
-    result_type operator() (T path) const
+    void operator() (T path) const
     {
         BOOST_ASSERT( path!=0 );
         path->close_path();
@@ -112,7 +120,12 @@ struct close_path
 
 struct cleanup
 {
-    typedef void result_type;
+    template <typename T0>
+    struct result
+    {
+        typedef void type;
+    };
+
     template <typename T0>
     void operator() (T0 & path) const
     {
@@ -122,8 +135,11 @@ struct cleanup
 
 struct where_message
 {
-
-    typedef std::string result_type;
+    template <typename T0,typename T1,typename T2>
+    struct result
+    {
+        typedef std::string type;
+    };
 
     template <typename Iterator>
     std::string operator() (Iterator first, Iterator last, std::size_t size) const
@@ -134,8 +150,8 @@ struct where_message
         return str;
     }
 };
+#endif
 
-#endif // PHOENIX_V3
 
 template <typename Iterator>
 struct geometry_grammar :

@@ -46,12 +46,16 @@ using standard_wide::space_type;
 
 struct unicode_impl
 {
-    typedef mapnik::value_unicode_string result_type;
+    template <typename T>
+    struct result
+    {
+        typedef mapnik::value_unicode_string type;
+    };
 
     explicit unicode_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
-    result_type operator()(std::string const& str) const
+    mapnik::value_unicode_string operator()(std::string const& str) const
     {
         return tr_.transcode(str.c_str());
     }
@@ -61,26 +65,43 @@ struct unicode_impl
 
 struct regex_match_impl
 {
-    typedef expr_node result_type;
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T>
+#else
+    template <typename T0, typename T1>
+#endif
+    struct result
+    {
+        typedef expr_node type;
+    };
 
     explicit regex_match_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
     template <typename T0,typename T1>
-    result_type operator() (T0 & node, T1 const& pattern) const;
+    expr_node operator() (T0 & node, T1 const& pattern) const;
 
     mapnik::transcoder const& tr_;
 };
 
 struct regex_replace_impl
 {
-    typedef expr_node result_type;
+
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template <typename T>
+#else
+    template <typename T0, typename T1, typename T2>
+#endif
+    struct result
+    {
+        typedef expr_node type;
+    };
 
     explicit regex_replace_impl(mapnik::transcoder const& tr)
         : tr_(tr) {}
 
     template <typename T0,typename T1,typename T2>
-    result_type operator() (T0 & node, T1 const& pattern, T2 const& format) const;
+    expr_node operator() (T0 & node, T1 const& pattern, T2 const& format) const;
 
     mapnik::transcoder const& tr_;
 };

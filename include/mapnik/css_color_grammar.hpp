@@ -80,9 +80,13 @@ inline int clip_int(int val)
 
 struct percent_conv_impl
 {
-    typedef unsigned result_type;
+    template <typename T>
+    struct result
+    {
+        typedef unsigned type;
+    };
 
-    result_type operator() (double val) const
+    unsigned operator() (double val) const
     {
         return clip_int<0,255>(int((255.0 * val)/100.0 + 0.5));
     }
@@ -90,9 +94,13 @@ struct percent_conv_impl
 
 struct alpha_conv_impl
 {
-    typedef unsigned result_type;
+    template <typename T>
+    struct result
+    {
+        typedef unsigned type;
+    };
 
-    result_type operator() (double val) const
+    unsigned operator() (double val) const
     {
         return clip_int<0,255>(int((255.0 * val) + 0.5));
     }
@@ -100,10 +108,18 @@ struct alpha_conv_impl
 
 struct hsl_conv_impl
 {
-    typedef void result_type;
+#ifdef BOOST_SPIRIT_USE_PHOENIX_V3
+    template<typename T>
+#else
+    template<typename T0,typename T1, typename T2, typename T3>
+#endif
+    struct result
+    {
+        typedef void type;
+    };
 
     template <typename T0,typename T1, typename T2, typename T3>
-    result_type operator() (T0 & c, T1 h, T2 s, T3 l) const
+    void operator() (T0 & c, T1 h, T2 s, T3 l) const
     {
         double m1,m2;
         // normalize values

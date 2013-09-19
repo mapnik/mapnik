@@ -164,11 +164,6 @@ protected:
 MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
 MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
 
-// UTF8 <--> UTF16 conversion routines
-
-MAPNIK_DECL std::string utf16_to_utf8(std::wstring const& wstr);
-MAPNIK_DECL std::wstring utf8_to_utf16(std::string const& str);
-
 #endif  // _WINDOWS
 
 }

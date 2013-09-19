@@ -77,7 +77,6 @@ shape_datasource::shape_datasource(const parameters &params)
         shape_name_ = *file;
 
     boost::algorithm::ireplace_last(shape_name_,".shp","");
-
     if (!mapnik::util::exists(shape_name_ + ".shp"))
     {
         throw datasource_exception("Shape Plugin: shapefile '" + shape_name_ + ".shp' does not exist");
