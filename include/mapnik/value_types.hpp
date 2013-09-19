@@ -27,7 +27,7 @@
 #include <unicode/unistr.h>  // for UnicodeString
 
 // boost
-//#include <boost/cstdint.hpp>
+#include <boost/concept_check.hpp>
 
 // stl
 #include <iosfwd> // for ostream
@@ -47,53 +47,63 @@ typedef bool value_bool;
 
 struct value_null
 {
-    bool operator==(value_null const& /*other*/) const
+    bool operator==(value_null const& other) const
     {
+        boost::ignore_unused_variable_warning(other);
         return true;
     }
 
-    bool operator!=(value_null const& /*other*/) const
+    bool operator!=(value_null const& other) const
     {
+        boost::ignore_unused_variable_warning(other);
         return false;
     }
 
     template <typename T>
-    value_null operator+ (T const& /*other*/) const
+    value_null operator+ (T const& other) const
     {
+        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 
     template <typename T>
-    value_null operator- (T const& /*other*/) const
+    value_null operator- (T const& other) const
     {
+        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 
     template <typename T>
-    value_null operator* (T const& /*other*/) const
+    value_null operator* (T const& other) const
     {
+        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 
     template <typename T>
-    value_null operator/ (T const& /*other*/) const
+    value_null operator/ (T const& other) const
     {
+        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 
     template <typename T>
-    value_null operator% (T const& /*other*/) const
+    value_null operator% (T const& other) const
     {
+        boost::ignore_unused_variable_warning(other);
         return *this;
     }
 };
 
-inline std::size_t hash_value(const value_null& /*val*/) {
+inline std::size_t hash_value(const value_null& val)
+{
+    boost::ignore_unused_variable_warning(val);
     return 0;
 }
 
-inline std::ostream& operator<< (std::ostream & out,value_null const& /*v*/)
+inline std::ostream& operator<< (std::ostream & out,value_null const& v)
 {
+    boost::ignore_unused_variable_warning(v);
     return out;
 }
 
