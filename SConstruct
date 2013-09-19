@@ -1723,7 +1723,6 @@ if not preconfigured:
             env.Append(CPPDEFINES = ndebug_defines)
 
         if not env['SUNCC']:
-
             # Common flags for CXX compiler.
             common_cxx_flags = '-Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
@@ -1737,7 +1736,6 @@ if not preconfigured:
                 # TODO - add back -fvisibility-inlines-hidden
                 # https://github.com/mapnik/mapnik/issues/1863
                 env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
-
             if env['DEBUG_UNDEFINED']:
                 env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
