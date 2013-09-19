@@ -253,7 +253,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                 = memory_fonts_.insert(std::make_pair(itr->second.second, buffer));
 
             FT_Error error = FT_New_Memory_Face (library_,
-						 reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
+                                                 reinterpret_cast<FT_Byte const*>(result.first->second.c_str()),
                                                  static_cast<FT_Long>(buffer.size()),
                                                  itr->second.first,
                                                  &face);
