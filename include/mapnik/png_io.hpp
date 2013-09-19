@@ -71,7 +71,7 @@ void save_as_png(T1 & file,
                 bool use_miniz = false)
 
 {
-   if (use_miniz)
+    if (use_miniz)
     {
         MiniZ::PNGWriter writer(compression,strategy);
         if (trans_mode == 0)
@@ -315,6 +315,7 @@ void save_as_png(T & file, std::vector<mapnik::rgb> const& palette,
 
     png_color* pal = const_cast<png_color*>(reinterpret_cast<const png_color*>(&palette[0]));
     png_set_PLTE(png_ptr, info_ptr, pal, static_cast<unsigned>(palette.size()));
+
     // make transparent lowest indexes, so tRNS is small
     if (alpha.size()>0)
     {

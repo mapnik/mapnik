@@ -789,7 +789,7 @@ size_t tdefl_compress_mem_to_mem(void *pOut_buf, size_t out_buf_len, const void 
 
 // Compresses an image to a compressed PNG file in memory.
 // On entry:
-//  pImage, w, h, and num_chans describe the image to compress. num_chans may be 1, 2, 3, or 4.
+//  pImage, w, h, and num_chans describe the image to compress. num_chans may be 1, 2, 3, or 4. 
 //  The image pitch in bytes per scanline will be w*num_chans. The leftmost pixel on the top scanline is stored first in memory.
 // On return:
 //  Function returns a pointer to the compressed data, or NULL on failure.
@@ -2778,8 +2778,8 @@ void *tdefl_write_image_to_png_file_in_memory(const void *pImage, int w, int h, 
   *pLen_out = out_buf.m_size-41;
   {
     mz_uint8 pnghdr[41]={0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a,0x00,0x00,0x00,0x0d,0x49,0x48,0x44,0x52,
-                         0,0,(mz_uint8)(w>>8),(mz_uint8)w,0,0,(mz_uint8)(h>>8),(mz_uint8)h,8, (mz_uint8)"\0\0\04\02\06"[num_chans],0,0,0,0,0,0,0,
-                         (mz_uint8)(*pLen_out>>24),(mz_uint8)(*pLen_out>>16),(mz_uint8)(*pLen_out>>8),(mz_uint8)*pLen_out,0x49,0x44,0x41,0x54};
+      0,0,(mz_uint8)(w>>8),(mz_uint8)w,0,0,(mz_uint8)(h>>8),(mz_uint8)h,8, (mz_uint8)"\0\0\04\02\06"[num_chans],0,0,0,0,0,0,0,
+      (mz_uint8)(*pLen_out>>24),(mz_uint8)(*pLen_out>>16),(mz_uint8)(*pLen_out>>8),(mz_uint8)*pLen_out,0x49,0x44,0x41,0x54};
     c=(mz_uint32)mz_crc32(MZ_CRC32_INIT,pnghdr+12,17); for (i=0; i<4; ++i, c<<=8) ((mz_uint8*)(pnghdr+29))[i]=(mz_uint8)(c>>24);
     memcpy(out_buf.m_pBuf, pnghdr, 41);
   }

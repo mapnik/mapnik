@@ -23,6 +23,7 @@
 #ifndef MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 #define MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 
+
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp> // for container stuff
@@ -118,8 +119,10 @@ namespace mapnik { namespace util {
     template <typename Geometry>
     struct get_type
     {
-        typedef int result_type;
-        result_type operator() (Geometry const& geom) const
+        template <typename T>
+        struct result { typedef int type; };
+
+        int operator() (Geometry const& geom) const
         {
             return static_cast<int>(geom.type());
         }
@@ -129,8 +132,11 @@ namespace mapnik { namespace util {
     struct get_first
     {
         typedef T geometry_type;
-        typedef typename geometry_type::value_type const result_type;
-        result_type const operator() (geometry_type const& geom) const
+
+        template <typename U>
+        struct result { typedef typename geometry_type::value_type const type; };
+
+        typename geometry_type::value_type operator() (geometry_type const& geom) const
         {
             typename geometry_type::value_type coord;
             geom.rewind(0);
@@ -191,6 +197,9 @@ namespace mapnik { namespace util {
                           | &uint_(mapnik::SEG_LINETO) [_a +=1] << karma::string [if_(_a == 1) [_1 = "L" ].else_[_1 =""]])
                          << lit(' ') << coordinate << lit(' ') << coordinate) % lit(' ')
                 ;
+
+
+
         }
         // rules
         karma::rule<OutputIterator, geometry_type const& ()> svg;

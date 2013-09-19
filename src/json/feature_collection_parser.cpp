@@ -20,8 +20,8 @@
  *
  *****************************************************************************/
 
+// TODO https://github.com/mapnik/mapnik/issues/1658
 #include <boost/version.hpp>
-
 #if BOOST_VERSION >= 105200
 #ifndef BOOST_SPIRIT_USE_PHOENIX_V3
 #define BOOST_SPIRIT_USE_PHOENIX_V3

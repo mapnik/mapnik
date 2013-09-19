@@ -201,7 +201,6 @@ struct python_optional<bool> : public mapnik::noncopyable
 // This class works around a feature in boost python.
 // See http://osdir.com/ml/python.c++/2003-11/msg00158.html
 
-
 template <typename T,
           typename X1 = boost::python::detail::not_specified,
           typename X2 = boost::python::detail::not_specified,
