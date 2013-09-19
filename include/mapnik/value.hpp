@@ -824,14 +824,23 @@ public:
     value () noexcept //-- comment out for VC++11
         : base_(value_null()) {}
 
-    template <typename T> value(T const& _val_)
-        : base_(_val_) {}
+    value(value_integer val)
+        : base_(val) {}
+
+    value(value_double val)
+        : base_(val) {}
+
+    value(value_bool val)
+        : base_(val) {}
+
+    value(value_null val)
+        : base_(val) {}
+
+    value(value_unicode_string const& val)
+        : base_(val) {}
 
     value (value const& other)
         : base_(other.base_) {}
-
-    value( value && other) noexcept
-        :  base_(std::move(other.base_)) {}
 
     value & operator=( value const& other)
     {
@@ -840,6 +849,9 @@ public:
         base_ = other.base_;
         return *this;
     }
+
+    value( value && other) noexcept
+        :  base_(std::move(other.base_)) {}
 
     bool operator==(value const& other) const
     {

@@ -107,7 +107,7 @@ feature_ptr postgis_featureset::next()
             // TODO - extend feature class to know
             // that its id is also an attribute to avoid
             // this duplication
-            feature->put<mapnik::value_integer>(name,std::move(val));
+            feature->put<mapnik::value_integer>(name,val);
             ++pos;
         }
         else
