@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Optimized mapnik.Path.to_wkb
+
 - Python: added `__geo_interface__` to mapnik.Feature and mapnik.Path (#2009)
 
 - Python: Exposed optimized WKTReader for parsing WKT into geometry paths (6bfbb53)
