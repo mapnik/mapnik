@@ -23,14 +23,10 @@
 #ifndef MAPNIK_GEOMETRY_WKT_GENERATOR_HPP
 #define MAPNIK_GEOMETRY_WKT_GENERATOR_HPP
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/vertex.hpp>    // for CommandType::SEG_MOVETO
-
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 // boost
 #include <boost/tuple/tuple.hpp>

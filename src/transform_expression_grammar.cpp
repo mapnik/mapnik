@@ -20,7 +20,6 @@
  *
  *****************************************************************************/
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // mapnik
 #include <mapnik/transform_expression_grammar.hpp>
 

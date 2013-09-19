@@ -23,7 +23,6 @@
 #ifndef MAPNIK_JSON_GEOMETRY_GENERATOR_GRAMMAR_HPP
 #define MAPNIK_JSON_GEOMETRY_GENERATOR_GRAMMAR_HPP
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp>

@@ -23,8 +23,6 @@
 #ifndef MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 #define MAPNIK_GEOMETRY_SVG_GENERATOR_HPP
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 // mapnik
 #include <mapnik/global.hpp>
 #include <mapnik/geometry.hpp> // for container stuff

@@ -27,7 +27,6 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/json/feature_grammar.hpp>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
 // boost
 #include <boost/spirit/include/support_multi_pass.hpp>
 

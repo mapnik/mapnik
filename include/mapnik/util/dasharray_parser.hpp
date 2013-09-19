@@ -23,8 +23,6 @@
 #ifndef MAPNIK_UTIL_DASHARRAY_PARSER_HPP
 #define MAPNIK_UTIL_DASHARRAY_PARSER_HPP
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>

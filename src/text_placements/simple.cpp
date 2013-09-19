@@ -26,8 +26,6 @@
 #include <mapnik/ptree_helpers.hpp>
 #include <mapnik/xml_node.hpp>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 // boost
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>

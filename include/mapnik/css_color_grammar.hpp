@@ -27,8 +27,6 @@
 #include <mapnik/color.hpp>
 #include <mapnik/util/hsl.hpp>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 // spirit2
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_action.hpp>

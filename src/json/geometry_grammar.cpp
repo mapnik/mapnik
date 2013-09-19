@@ -26,8 +26,6 @@
 // mapnik
 #include <mapnik/json/geometry_grammar.hpp>
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 // boost
 #include <boost/spirit/include/support_multi_pass.hpp>
 #include <boost/spirit/include/phoenix_object.hpp>

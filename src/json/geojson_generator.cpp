@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-
 // boost
 #include <boost/version.hpp>
 #include <mapnik/feature.hpp>
