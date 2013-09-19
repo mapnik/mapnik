@@ -717,7 +717,7 @@ void text_renderer<T>::render_id(mapnik::value_integer feature_id,
                            feature_id,
                            bit->left,
                            height - bit->top,
-                           itr->properties->halo_radius);
+                           static_cast<int>(itr->properties->halo_radius));
         }
     }
 }
