@@ -29,8 +29,7 @@
 #include <mapnik/config_error.hpp>
 
 // boost
-#include <boost/variant.hpp>
-
+#include <boost/variant/variant.hpp>
 // stl
 #include <vector>
 #include <ostream>
