@@ -64,6 +64,7 @@ Mapnik Python bindings depend on:
 
  * Python 2.5-2.7 or >= 3.2 
  * Boost python
+ * simplejson module if using <= 2.5
 
 Note: Python 3.x is supported, see: https://github.com/mapnik/mapnik/wiki/Python3k
 

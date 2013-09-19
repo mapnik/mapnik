@@ -80,7 +80,7 @@ if mapnik.has_webp():
             im.save(actual,opt)
             if mapnik.Image.open(actual).tostring() != mapnik.Image.open(expected).tostring():
                 fails.append('%s (actual) not == to %s (expected)' % (actual,expected))
-        eq_(fails,[])
+        eq_(fails,[],'\n'+'\n'.join(fails))
 
     def test_transparency_levels():
         # create partial transparency image

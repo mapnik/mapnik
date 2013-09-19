@@ -67,21 +67,21 @@ public:
     context()
         : mapping_() {}
 
-    size_type push(key_type const& name)
+    inline size_type push(key_type const& name)
     {
         size_type index = mapping_.size();
         mapping_.insert(std::make_pair(name, index));
         return index;
     }
 
-    void add(key_type const& name, size_type index)
+    inline void add(key_type const& name, size_type index)
     {
         mapping_.insert(std::make_pair(name, index));
     }
 
-    size_type size() const { return mapping_.size(); }
-    const_iterator begin() const { return mapping_.begin();}
-    const_iterator end() const { return mapping_.end();}
+    inline size_type size() const { return mapping_.size(); }
+    inline const_iterator begin() const { return mapping_.begin();}
+    inline const_iterator end() const { return mapping_.end();}
 
 private:
     map_type mapping_;
@@ -226,7 +226,7 @@ public:
         return geom_cont_[index];
     }
 
-    box2d<double> envelope() const
+    inline box2d<double> envelope() const
     {
         // TODO - cache this
         box2d<double> result;
@@ -238,6 +238,7 @@ public:
                 first = false;
                 box2d<double> box = geom.envelope();
                 result.init(box.minx(),box.miny(),box.maxx(),box.maxy());
+                first = false;
             }
             else
             {
