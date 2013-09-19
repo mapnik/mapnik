@@ -61,7 +61,6 @@ boost::shared_ptr<mapnik::datasource> create_datasource(dict const& d)
             PyObject* temp = PyUnicode_AsUTF8String(obj.ptr());
             if (temp)
             {
-
 #if PY_VERSION_HEX >= 0x03000000
                 char* c_str = PyBytes_AsString(temp);
 #else

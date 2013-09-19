@@ -408,95 +408,6 @@ struct test8
     }
 };
 
-#include <mapnik/rule_cache.hpp>
-
-struct test9
-{
-    unsigned iter_;
-    unsigned threads_;
-    unsigned num_rules_;
-    unsigned num_styles_;
-    std::vector<rule> rules_;
-    explicit test9(unsigned iterations,
-                   unsigned threads,
-                   unsigned num_rules,
-                   unsigned num_styles) :
-      iter_(iterations),
-      threads_(threads),
-      num_rules_(num_rules),
-      num_styles_(num_styles),
-      rules_()
-    {
-          mapnik::rule r("test");
-          for (unsigned i=0;i<num_rules_;++i)
-          {
-              rules_.push_back(r);
-          }
-      }
-
-    bool validate()
-    {
-        return true;
-    }
-    void operator()()
-    {
-         for (unsigned i=0;i<iter_;++i) {
-             std::vector<rule_cache> rule_caches;
-             for (unsigned i=0;i<num_styles_;++i)
-             {
-                 rule_cache rc;
-                 for (unsigned i=0;i<num_rules_;++i)
-                 {
-                     rc.add_rule(rules_[i]);
-                 }
-                 rule_caches.push_back(std::move(rc));
-             }
-         }
-    }
-};
-
-struct test10
-{
-    unsigned iter_;
-    unsigned threads_;
-    unsigned num_rules_;
-    unsigned num_styles_;
-    std::vector<rule> rules_;
-    explicit test10(unsigned iterations,
-                   unsigned threads,
-                   unsigned num_rules,
-                   unsigned num_styles) :
-      iter_(iterations),
-      threads_(threads),
-      num_rules_(num_rules),
-      num_styles_(num_styles),
-      rules_() {
-          mapnik::rule r("test");
-          for (unsigned i=0;i<num_rules_;++i) {
-              rules_.push_back(r);
-          }
-      }
-
-    bool validate()
-    {
-        return true;
-    }
-    void operator()()
-    {
-         for (unsigned i=0;i<iter_;++i) {
-             std::vector<std::unique_ptr<rule_cache> > rule_caches;
-             for (unsigned i=0;i<num_styles_;++i) {
-                 std::unique_ptr<rule_cache> rc(new rule_cache);
-                 for (unsigned i=0;i<num_rules_;++i) {
-                     rc->add_rule(rules_[i]);
-                 }
-                 rule_caches.push_back(std::move(rc));
-             }
-         }
-    }
-};
-
-
 #include <mapnik/wkt/wkt_factory.hpp>
 #include "agg_conv_clipper.h"
 #include "agg_path_storage.h"
@@ -748,19 +659,8 @@ int main( int argc, char** argv)
             benchmark(runner,"expression parsing by re-using grammar");
         }
 
-        {
-#if BOOST_VERSION >= 105300
-            test9 runner(1000,10,200,50);
-            benchmark(runner,"rule caching using move semantics");
-#else
-            std::clog << "not running: 'rule caching using move semantics'\n";
-#endif
-        }
-
-        {
-            test10 runner(1000,10,200,50);
-            benchmark(runner,"rule caching using heap allocation");
-        }
+        // TODO - consider bring back rule cache benchmarks after c++11 is in master
+        // previously test 9/10
 
         // polygon/rect clipping
         // IN : POLYGON ((155 203, 233 454, 315 340, 421 446, 463 324, 559 466, 665 253, 528 178, 394 229, 329 138, 212 134, 183 228, 200 264, 155 203),(313 190, 440 256, 470 248, 510 305, 533 237, 613 263, 553 397, 455 262, 405 378, 343 287, 249 334, 229 191, 313 190))
