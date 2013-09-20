@@ -17,16 +17,16 @@
 #include <mapnik/image_reader.hpp>
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/feature_style_processor.hpp>
+
 #include <boost/foreach.hpp>
 #include <vector>
 #include <algorithm>
-
 #include "utils.hpp"
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
     using namespace mapnik;
-    std::auto_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
     if (!reader1.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
@@ -34,7 +34,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     boost::shared_ptr<image_32> image_ptr1 = boost::make_shared<image_32>(reader1->width(),reader1->height());
     reader1->read(0,0,image_ptr1->data());
 
-    std::auto_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
     if (!reader2.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + src_fn);
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
         mapnik::projection map_proj(m.srs(),true);
         double scale_denom = mapnik::scale_denominator(req.scale(),map_proj.is_geographic());
         scale_denom *= scale_factor;
-        BOOST_FOREACH ( mapnik::layer const& lyr, m.layers() )
+        for (mapnik::layer const& lyr : m.layers() )
         {
             if (lyr.visible(scale_denom))
             {

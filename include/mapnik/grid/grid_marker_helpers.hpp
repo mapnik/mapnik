@@ -79,11 +79,11 @@ struct raster_markers_rasterizer_dispatch_grid
         marker_placement_e placement_method = sym_.get_marker_placement();
         box2d<double> bbox_(0,0, src_.width(),src_.height());
         if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == Point)
+            path.type() == geometry_type::types::Point)
         {
             double x = 0;
             double y = 0;
-            if (path.type() == LineString)
+            if (path.type() == geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
                     return;
@@ -216,11 +216,11 @@ struct vector_markers_rasterizer_dispatch_grid
     {
         marker_placement_e placement_method = sym_.get_marker_placement();
         if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == Point)
+            path.type() == geometry_type::types::Point)
         {
             double x = 0;
             double y = 0;
-            if (path.type() == LineString)
+            if (path.type() == geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
                     return;
@@ -294,4 +294,3 @@ private:
 
 }
 #endif
-

@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 // boost
-#include <boost/foreach.hpp>
+
 
 // mapnik
 #include <mapnik/feature.hpp>
@@ -69,7 +69,7 @@ void grid_renderer<T>::process(polygon_symbolizer const& sym,
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for ( geometry_type & geom : feature.paths())
     {
         if (geom.size() > 2)
         {
@@ -98,4 +98,3 @@ template void grid_renderer<grid>::process(polygon_symbolizer const&,
                                            proj_transform const&);
 
 }
-

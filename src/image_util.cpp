@@ -68,7 +68,7 @@ extern "C"
 #endif
 
 // boost
-#include <boost/foreach.hpp>
+
 #include <boost/tokenizer.hpp>
 
 // stl
@@ -149,7 +149,7 @@ void handle_png_options(std::string const& type,
     if (type.length() > 6){
         boost::char_separator<char> sep(":");
         boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        BOOST_FOREACH(std::string t, tokens)
+        for (std::string const& t : tokens)
         {
             if (t == "png" || t == "png24" || t == "png32")
             {
@@ -258,7 +258,7 @@ void handle_webp_options(std::string const& type,
     if (type.length() > 4){
         boost::char_separator<char> sep(":");
         boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        BOOST_FOREACH(std::string t, tokens)
+        for (auto const& t : tokens)
         {
             if (boost::algorithm::starts_with(t, "quality="))
             {

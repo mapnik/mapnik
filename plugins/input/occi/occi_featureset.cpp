@@ -377,7 +377,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
 }
 
 void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
-                                        const mapnik::eGeomType& geom_type,
+                                        const mapnik::geometry::types& geom_type,
                                         const std::vector<Number>& elem_info,
                                         const std::vector<Number>& ordinates,
                                         const int dimensions,
@@ -404,7 +404,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                 int next_interp = elem_info[i + 2];
                 bool is_linear_element = true;
                 bool is_unknown_etype = false;
-                mapnik::eGeomType gtype = mapnik::Point;
+                mapnik::geometry::types gtype = mapnik::Point;
 
                 switch (etype)
                 {

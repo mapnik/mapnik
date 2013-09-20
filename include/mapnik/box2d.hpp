@@ -64,6 +64,7 @@ public:
     box2d(coord<T,2> const& c0, coord<T,2> const& c1);
     box2d(box2d_type const& rhs);
     box2d(box2d_type const& rhs, agg::trans_affine const& tr);
+    box2d(box2d_type&& rhs);
     box2d_type& operator=(box2d_type other);
     T minx() const;
     T miny() const;

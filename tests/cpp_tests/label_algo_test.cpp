@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     double x,y;
 
     // single point
-    mapnik::geometry_type pt(mapnik::Point);
+    mapnik::geometry_type pt(mapnik::geometry_type::types::Point);
     pt.move_to(10,10);
     BOOST_TEST( mapnik::label::centroid(pt, x, y) );
     BOOST_TEST( x == 10 );
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     BOOST_TEST_EQ( y, 15 );
 
     // line with two verticies
-    mapnik::geometry_type line(mapnik::LineString);
+    mapnik::geometry_type line(mapnik::geometry_type::types::LineString);
     line.move_to(0,0);
     line.move_to(50,50);
     BOOST_TEST( mapnik::label::centroid(line, x, y) );

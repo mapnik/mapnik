@@ -36,7 +36,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/foreach.hpp>
+
 
 //stl
 #include <string>
@@ -285,7 +285,7 @@ void placement_finder<DetectorT>::find_line_breaks()
         //No linebreaks
         line_sizes_.push_back(std::make_pair(string_width_, string_height_));
     }
-    line_breaks_.push_back(info_.num_characters());
+    line_breaks_.push_back(static_cast<unsigned>(info_.num_characters()));
 }
 
 template <typename DetectorT>
@@ -386,7 +386,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     double sina = std::sin(rad);
 
     double x, y;
-    std::auto_ptr<text_path> current_placement(new text_path(label_x, label_y));
+    std::unique_ptr<text_path> current_placement(new text_path(label_x, label_y));
 
     adjust_position(current_placement.get());
 
@@ -500,7 +500,7 @@ void placement_finder<DetectorT>::find_point_placement(double label_x,
     // check the placement of any additional envelopes
     if (!p.allow_overlap && !additional_boxes_.empty())
     {
-        BOOST_FOREACH(box2d<double> const& box, additional_boxes_)
+        for (box2d<double> const& box : additional_boxes_)
         {
             box2d<double> pt(box.minx() + current_placement->center.x,
                              box.miny() + current_placement->center.y,
@@ -639,10 +639,10 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
                     {
                         //Record details for the start of the string placement
                         int orientation = 0;
-                        std::auto_ptr<text_path> current_placement = get_placement_offset(path_positions, path_distances, orientation, index, segment_length - (distance - target_distance) + (diff*dir));
+                        std::unique_ptr<text_path> current_placement = get_placement_offset(path_positions, path_distances, orientation, index, segment_length - (distance - target_distance) + (diff*dir));
 
                         //We were unable to place here
-                        if (current_placement.get() == NULL)
+                        if (current_placement.get() == nullptr)
                             continue;
 
                         //Apply displacement
@@ -709,7 +709,7 @@ void placement_finder<DetectorT>::find_line_placements(PathT & shape_path)
 }
 
 template <typename DetectorT>
-std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::vector<vertex2d> const& path_positions,
+std::unique_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::vector<vertex2d> const& path_positions,
                                                                            std::vector<double> const& path_distances,
                                                                            int & orientation,
                                                                            std::size_t index,
@@ -722,7 +722,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         distance += path_distances[index];
     }
     if (index <= 1 && distance < 0) //We've gone off the start, fail out
-        return std::auto_ptr<text_path>(NULL);
+        return std::unique_ptr<text_path>(nullptr);
 
     //Same thing, checking if we go off the end
     while (index < path_distances.size() && distance > path_distances[index])
@@ -731,7 +731,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         index++;
     }
     if (index >= path_distances.size())
-        return std::auto_ptr<text_path>(NULL);
+        return std::unique_ptr<text_path>(nullptr);
 
     //Keep track of the initial index,distance incase we need to re-call get_placement_offset
     const std::size_t initial_index = index;
@@ -749,10 +749,10 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
     double segment_length = path_distances[index];
     if (segment_length == 0) {
         // Not allowed to place across on 0 length segments or discontinuities
-        return std::auto_ptr<text_path>(NULL);
+        return std::unique_ptr<text_path>(nullptr);
     }
 
-    std::auto_ptr<text_path> current_placement(
+    std::unique_ptr<text_path> current_placement(
         new text_path((old_x + dx*distance/segment_length),
                       (old_y + dy*distance/segment_length)
             )
@@ -777,7 +777,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         //Coordinates this character will start at
         if (segment_length == 0) {
             // Not allowed to place across on 0 length segments or discontinuities
-            return std::auto_ptr<text_path>(NULL);
+            return std::unique_ptr<text_path>(nullptr);
         }
         double start_x = old_x + dx*distance/segment_length;
         double start_y = old_y + dy*distance/segment_length;
@@ -805,7 +805,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
                 if (index >= path_positions.size()) //Bail out if we run off the end of the shape
                 {
                     //MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Out of space";
-                    return std::auto_ptr<text_path>(NULL);
+                    return std::unique_ptr<text_path>(nullptr);
                 }
                 new_x = path_positions[index].x;
                 new_y = path_positions[index].y;
@@ -842,7 +842,7 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
             std::fabs(angle_delta) > p.max_char_angle_delta)
         {
             //MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Too Bendy!";
-            return std::auto_ptr<text_path>(NULL);
+            return std::unique_ptr<text_path>(nullptr);
         }
 
         double render_angle = angle;
@@ -896,15 +896,15 @@ std::auto_ptr<text_path> placement_finder<DetectorT>::get_placement_offset(std::
         {
             //Otherwise we have failed to find a placement
             //MAPNIK_LOG_ERROR(placement_finder) << "FAIL: Double upside-down!";
-            return std::auto_ptr<text_path>(NULL);
+            return std::unique_ptr<text_path>(nullptr);
         }
     }
 
-    return current_placement;
+    return std::move(current_placement);
 }
 
 template <typename DetectorT>
-bool placement_finder<DetectorT>::test_placement(std::auto_ptr<text_path> const& current_placement,
+bool placement_finder<DetectorT>::test_placement(std::unique_ptr<text_path> const& current_placement,
                                                  int orientation)
 {
     //Create and test envelopes

@@ -142,8 +142,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
-                        eGeomType type = feature.paths()[0].type();
-                        if (type == Polygon)
+                        geometry_type::types type = feature.paths()[0].type();
+                        if (type == geometry_type::types::Polygon)
                             converter.template set<clip_poly_tag>();
                         // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
                         //else if (type == LineString)
@@ -182,8 +182,8 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                         converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
-                        eGeomType type = feature.paths()[0].type();
-                        if (type == Polygon)
+                        geometry_type::types type = feature.paths()[0].type();
+                        if (type == geometry_type::types::Polygon)
                             converter.template set<clip_poly_tag>();
                         // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
                         //else if (type == LineString)
@@ -220,13 +220,13 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
 
                 if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                 {
-                    eGeomType type = feature.paths()[0].type();
-                    if (type == Polygon)
+                    geometry_type::types type = feature.paths()[0].type();
+                    if (type == geometry_type::types::Polygon)
                         converter.template set<clip_poly_tag>();
                     // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
-                    //else if (type == LineString)
+                    //else if (type == geometry_type::types::LineString)
                     //    converter.template set<clip_line_tag>();
-                    // don't clip if type==Point
+                    // don't clip if type==geometry_type::types::Point
                 }
                 converter.template set<transform_tag>(); //always transform
                 if (sym.smooth() > 0.0) converter.template set<smooth_tag>(); // optional smooth converter

@@ -93,7 +93,7 @@ void benchmark(T & test_runner, std::string const& name)
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
 {
-    std::auto_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader1(mapnik::get_image_reader(dest_fn,"png"));
     if (!reader1.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
@@ -101,7 +101,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     boost::shared_ptr<image_32> image_ptr1 = boost::make_shared<image_32>(reader1->width(),reader1->height());
     reader1->read(0,0,image_ptr1->data());
 
-    std::auto_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
+    std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
     if (!reader2.get())
     {
         throw mapnik::image_reader_exception("Failed to load: " + src_fn);
@@ -163,7 +163,7 @@ struct test2
       im_()
     {
         std::string filename("./benchmark/data/multicolor.png");
-        std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename,"png"));
+        std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(filename,"png"));
         if (!reader.get())
         {
             throw mapnik::image_reader_exception("Failed to load: " + filename);
@@ -450,7 +450,7 @@ struct test11
         ps.close_polygon();
         for (unsigned i=0;i<iter_;++i)
         {
-            BOOST_FOREACH (geometry_type & geom , paths)
+            for (geometry_type & geom : paths)
             {
                 poly_clipper clipped(geom,ps,
                                      agg::clipper_and,
@@ -500,7 +500,7 @@ struct test12
         }
         for (unsigned i=0;i<iter_;++i)
         {
-            BOOST_FOREACH ( geometry_type & geom , paths)
+            for ( geometry_type & geom : paths)
             {
                 poly_clipper clipped(extent_, geom);
                 unsigned cmd;
@@ -535,7 +535,7 @@ struct test13
         unsigned long count = 0;
         for (unsigned i=0;i<iter_;++i)
         {
-            BOOST_FOREACH( std::string const& name , mapnik::freetype_engine::face_names())
+            for ( std::string const& name : mapnik::freetype_engine::face_names())
             {
                 mapnik::face_ptr f = engine.create_face(name);
                 if (f) ++count;

@@ -210,7 +210,7 @@ public:
 
         units_ = grad.get_units();
 
-        BOOST_FOREACH ( mapnik::stop_pair const& st, grad.get_stop_array() )
+        for ( mapnik::stop_pair const& st : grad.get_stop_array() )
         {
             mapnik::color const& stop_color = st.second;
             double r= static_cast<double> (stop_color.red())/255.0;

@@ -71,7 +71,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
 
         try
         {
-            std::auto_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
+            std::unique_ptr<image_reader> reader(mapnik::get_image_reader(curIter_->file(),curIter_->format()));
 
             MAPNIK_LOG_DEBUG(raster) << "raster_featureset: Reader=" << curIter_->format() << "," << curIter_->file()
                                      << ",size(" << curIter_->width() << "," << curIter_->height() << ")";
