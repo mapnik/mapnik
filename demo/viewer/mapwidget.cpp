@@ -21,7 +21,8 @@
 #include <QtGui>
 
 #define BOOST_CHRONO_HEADER_ONLY
-#include <boost/timer/timer.hpp>
+#include <boost/chrono/process_cpu_clocks.hpp>
+#include <boost/chrono.hpp>
 #include <boost/bind.hpp>
 
 #include <mapnik/agg_renderer.hpp>
@@ -504,8 +505,10 @@ void render_agg(mapnik::Map const& map, double scaling_factor, QPixmap & pix)
     try
     {
         {
-            boost::timer::auto_cpu_timer t;
+            boost::chrono::process_cpu_clock::time_point start = boost::chrono::process_cpu_clock::now();
             ren.apply();
+            boost::chrono::process_cpu_clock::duration elapsed = boost::chrono::process_cpu_clock::now() - start;
+            std::clog << "rendering took: " << boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed) << "\n";
         }
         QImage image((uchar*)buf.raw_data(),width,height,QImage::Format_ARGB32);
         pix = QPixmap::fromImage(image.rgbSwapped());
