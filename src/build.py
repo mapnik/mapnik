@@ -335,10 +335,6 @@ if env['SVG_RENDERER']: # svg backend
     lib_env.Append(CPPDEFINES = '-DSVG_RENDERER')
     libmapnik_defines.append('-DSVG_RENDERER')
 
-if env['SHAPE_MEMORY_MAPPED_FILE']:
-    lib_env.Append(CPPDEFINES = '-DSHAPE_MEMORY_MAPPED_FILE')
-    libmapnik_defines.append('-DSHAPE_MEMORY_MAPPED_FILE')
-
 if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
     boost_version_from_header = int(env['BOOST_LIB_VERSION_FROM_HEADER'].split('_')[1])
     if boost_version_from_header < 46:
