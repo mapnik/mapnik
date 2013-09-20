@@ -55,7 +55,7 @@ public:
     };
 
 private:
-    boost::shared_ptr<mapnik::Map> map_;
+    std::shared_ptr<mapnik::Map> map_;
     int selected_;
     QPixmap pix_;
     mapnik::box2d<double> extent_;
@@ -73,9 +73,9 @@ private:
 public:
     MapWidget(QWidget *parent=0);
     void setTool(eTool tool);
-    boost::shared_ptr<mapnik::Map> getMap();
+    std::shared_ptr<mapnik::Map> getMap();
     inline QPixmap const& pixmap() const { return pix_;}
-    void setMap(boost::shared_ptr<mapnik::Map> map);
+    void setMap(std::shared_ptr<mapnik::Map> map);
     void defaultView();
     void zoomToBox(mapnik::box2d<double> const& box);
     void zoomIn();

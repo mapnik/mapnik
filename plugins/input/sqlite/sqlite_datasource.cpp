@@ -139,7 +139,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     }
 
     // now actually create the connection and start executing setup sql
-    dataset_ = boost::make_shared<sqlite_connection>(dataset_name_);
+    dataset_ = std::make_shared<sqlite_connection>(dataset_name_);
 
     boost::optional<int> table_by_index = params.get<int>("table_by_index");
 
@@ -300,7 +300,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
                 mapnik::progress_timer __stats2__(std::clog, "sqlite_datasource::init(create_spatial_index)");
 #endif
 
-                boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
+                std::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(query.str());
                 if (sqlite_utils::create_spatial_index(index_db,index_table_,rs))
                 {
                     //extent_initialized_ = true;
@@ -437,7 +437,7 @@ boost::optional<mapnik::datasource::geometry_t> sqlite_datasource::get_geometry_
         {
             s << " LIMIT 5";
         }
-        boost::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
+        std::shared_ptr<sqlite_resultset> rs = dataset_->execute_query(s.str());
         int multi_type = 0;
         while (rs->is_valid() && rs->step_next())
         {
@@ -483,7 +483,7 @@ featureset_ptr sqlite_datasource::features(query const& q) const
         mapnik::box2d<double> const& e = q.get_bbox();
 
         std::ostringstream s;
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
         s << "SELECT " << geometry_field_;
         if (!key_field_.empty())
@@ -536,9 +536,9 @@ featureset_ptr sqlite_datasource::features(query const& q) const
 
         MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
 
-        boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+        std::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
-        return boost::make_shared<sqlite_featureset>(rs,
+        return std::make_shared<sqlite_featureset>(rs,
                                                      ctx,
                                                      desc_.get_encoding(),
                                                      e,
@@ -561,7 +561,7 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
         mapnik::box2d<double> e(pt.x, pt.y, pt.x, pt.y);
         e.pad(tol);
         std::ostringstream s;
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
         s << "SELECT " << geometry_field_;
         if (!key_field_.empty())
@@ -617,9 +617,9 @@ featureset_ptr sqlite_datasource::features_at_point(coord2d const& pt, double to
 
         MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: " << s.str();
 
-        boost::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
+        std::shared_ptr<sqlite_resultset> rs(dataset_->execute_query(s.str()));
 
-        return boost::make_shared<sqlite_featureset>(rs,
+        return std::make_shared<sqlite_featureset>(rs,
                                                      ctx,
                                                      desc_.get_encoding(),
                                                      e,

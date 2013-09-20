@@ -167,7 +167,7 @@ void pgsql2sqlite(Connection conn,
     namespace sqlite = mapnik::sqlite;
     sqlite::database db(output_filename);
 
-    boost::shared_ptr<ResultSet> rs = conn->executeQuery("select * from (" + query + ") as query limit 0;");
+    std::shared_ptr<ResultSet> rs = conn->executeQuery("select * from (" + query + ") as query limit 0;");
     int count = rs->getNumFields();
 
     std::ostringstream select_sql;
@@ -234,7 +234,7 @@ void pgsql2sqlite(Connection conn,
     cursor_sql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << select_sql_str << " FOR READ ONLY";
     conn->execute(cursor_sql.str());
 
-    boost::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
+    std::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
 
     unsigned num_fields = cursor->getNumFields();
 

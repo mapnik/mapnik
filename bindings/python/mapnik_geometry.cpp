@@ -79,25 +79,25 @@ void add_geojson_impl(path_type& p, std::string const& json)
         throw std::runtime_error("Failed to parse geojson geometry");
 }
 
-boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
+std::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
 {
-    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    std::shared_ptr<path_type> paths = std::make_shared<path_type>();
     if (!mapnik::from_wkt(wkt, *paths))
         throw std::runtime_error("Failed to parse WKT");
     return paths;
 }
 
-boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
+std::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
 {
-    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    std::shared_ptr<path_type> paths = std::make_shared<path_type>();
     if (!mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size()))
         throw std::runtime_error("Failed to parse WKB");
     return paths;
 }
 
-boost::shared_ptr<path_type> from_geojson_impl(std::string const& json)
+std::shared_ptr<path_type> from_geojson_impl(std::string const& json)
 {
-    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    std::shared_ptr<path_type> paths = std::make_shared<path_type>();
     if (! mapnik::json::from_geojson(json, *paths))
         throw std::runtime_error("Failed to parse geojson geometry");
     return paths;
@@ -294,7 +294,7 @@ void export_geometry()
         // TODO add other geometry_type methods
         ;
 
-    class_<path_type, boost::shared_ptr<path_type>, boost::noncopyable>("Path")
+    class_<path_type, std::shared_ptr<path_type>, boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
         .def("__len__", &path_type::size)
         .def("envelope",envelope_impl)

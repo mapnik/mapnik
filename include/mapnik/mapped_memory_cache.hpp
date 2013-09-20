@@ -37,7 +37,7 @@
 namespace mapnik
 {
 
-typedef boost::shared_ptr<boost::interprocess::mapped_region> mapped_region_ptr;
+typedef std::shared_ptr<boost::interprocess::mapped_region> mapped_region_ptr;
 
 class MAPNIK_DECL mapped_memory_cache :
         public singleton<mapped_memory_cache, CreateStatic>,

@@ -68,7 +68,7 @@ private:
     bool extent_initialized_;
     mapnik::datasource::datasource_t type_;
     std::string dataset_name_;
-    boost::shared_ptr<sqlite_connection> dataset_;
+    std::shared_ptr<sqlite_connection> dataset_;
     std::string table_;
     std::string fields_;
     std::string metadata_;

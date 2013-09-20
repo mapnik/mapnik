@@ -83,7 +83,7 @@ datasource::datasource_t memory_datasource::type() const
 
 featureset_ptr memory_datasource::features(const query& q) const
 {
-    return boost::make_shared<memory_featureset>(q.get_bbox(),*this,bbox_check_);
+    return std::make_shared<memory_featureset>(q.get_bbox(),*this,bbox_check_);
 }
 
 
@@ -92,7 +92,7 @@ featureset_ptr memory_datasource::features_at_point(coord2d const& pt, double to
     box2d<double> box = box2d<double>(pt.x, pt.y, pt.x, pt.y);
     box.pad(tol);
     MAPNIK_LOG_DEBUG(memory_datasource) << "memory_datasource: Box=" << box << ", Point x=" << pt.x << ",y=" << pt.y;
-    return boost::make_shared<memory_featureset>(box,*this);
+    return std::make_shared<memory_featureset>(box,*this);
 }
 
 void memory_datasource::set_envelope(box2d<double> const& box)

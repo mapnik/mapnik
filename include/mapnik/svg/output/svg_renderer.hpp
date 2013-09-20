@@ -161,7 +161,7 @@ private:
     svg::path_output_attributes path_attributes_;
     freetype_engine font_engine_;
     face_manager<freetype_engine> font_manager_;
-    boost::shared_ptr<label_collision_detector4> detector_;
+    std::shared_ptr<label_collision_detector4> detector_;
     svg::svg_generator<OutputIterator> generator_;
     box2d<double> query_extent_;
     bool painted_;

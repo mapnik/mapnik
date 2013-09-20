@@ -49,11 +49,11 @@ public:
     std::string plugin_directories();
     void register_datasources(std::string const& path);
     bool register_datasource(std::string const& path);
-    boost::shared_ptr<datasource> create(parameters const& params);
+    std::shared_ptr<datasource> create(parameters const& params);
 private:
     datasource_cache();
     ~datasource_cache();
-    std::map<std::string,boost::shared_ptr<PluginInfo> > plugins_;
+    std::map<std::string,std::shared_ptr<PluginInfo> > plugins_;
     bool registered_;
     std::vector<std::string> plugin_directories_;
 };

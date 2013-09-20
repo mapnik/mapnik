@@ -54,7 +54,7 @@ public:
     typedef boost::geometry::model::d2::point_xy<double> point_type;
     typedef boost::geometry::model::box<point_type> box_type;
     typedef boost::geometry::index::rtree<box_type,std::size_t> spatial_index_type;
-    
+
     // constructor
     geojson_datasource(mapnik::parameters const& params);
     virtual ~geojson_datasource ();
@@ -71,7 +71,7 @@ private:
     mapnik::layer_descriptor desc_;
     std::string file_;
     mapnik::box2d<double> extent_;
-    boost::shared_ptr<mapnik::transcoder> tr_;
+    std::shared_ptr<mapnik::transcoder> tr_;
     std::vector<mapnik::feature_ptr> features_;
     spatial_index_type tree_;
     mutable std::deque<std::size_t> index_array_;

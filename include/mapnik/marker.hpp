@@ -49,8 +49,8 @@ namespace mapnik
 
 typedef agg::pod_bvector<mapnik::svg::path_attributes> attr_storage;
 typedef mapnik::svg::svg_storage<mapnik::svg::svg_path_storage,attr_storage> svg_storage_type;
-typedef boost::shared_ptr<svg_storage_type> svg_path_ptr;
-typedef boost::shared_ptr<image_data_32> image_ptr;
+typedef std::shared_ptr<svg_storage_type> svg_path_ptr;
+typedef std::shared_ptr<image_data_32> image_ptr;
 /**
  * A class to hold either vector or bitmap marker data. This allows these to be treated equally
  * in the image caches and most of the render paths.
@@ -61,7 +61,7 @@ public:
     marker()
     {
         // create default OGC 4x4 black pixel
-        bitmap_data_ = boost::optional<mapnik::image_ptr>(boost::make_shared<image_data_32>(4,4));
+        bitmap_data_ = boost::optional<mapnik::image_ptr>(std::make_shared<image_data_32>(4,4));
         (*bitmap_data_)->set(0xff000000);
     }
 

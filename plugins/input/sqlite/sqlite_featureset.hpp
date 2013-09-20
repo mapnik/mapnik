@@ -39,7 +39,7 @@
 class sqlite_featureset : public mapnik::Featureset
 {
 public:
-    sqlite_featureset(boost::shared_ptr<sqlite_resultset> rs,
+    sqlite_featureset(std::shared_ptr<sqlite_resultset> rs,
                       mapnik::context_ptr const& ctx,
                       std::string const& encoding,
                       mapnik::box2d<double> const& bbox,
@@ -50,7 +50,7 @@ public:
     mapnik::feature_ptr next();
 
 private:
-    boost::shared_ptr<sqlite_resultset> rs_;
+    std::shared_ptr<sqlite_resultset> rs_;
     mapnik::context_ptr ctx_;
     boost::scoped_ptr<mapnik::transcoder> tr_;
     mapnik::box2d<double> bbox_;

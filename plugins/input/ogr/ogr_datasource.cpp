@@ -478,7 +478,7 @@ featureset_ptr ogr_datasource::features(query const& q) const
 
         std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
         // feature context (schema)
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
         std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();
@@ -521,7 +521,7 @@ featureset_ptr ogr_datasource::features_at_point(coord2d const& pt, double tol) 
     {
         std::vector<attribute_descriptor> const& desc_ar = desc_.get_descriptors();
         // feature context (schema)
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
 
         std::vector<attribute_descriptor>::const_iterator itr = desc_ar.begin();
         std::vector<attribute_descriptor>::const_iterator end = desc_ar.end();

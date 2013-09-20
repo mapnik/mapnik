@@ -49,7 +49,7 @@ void text_node::to_xml(ptree &xml) const
 
 node_ptr text_node::from_xml(xml_node const& xml)
 {
-    return boost::make_shared<text_node>(xml.get_value<expression_ptr>());
+    return std::make_shared<text_node>(xml.get_value<expression_ptr>());
 }
 
 void text_node::apply(char_properties const& p, feature_impl const& feature, processed_text &output) const

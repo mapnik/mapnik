@@ -189,7 +189,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         tiled_multi_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_, tile_stride_);
 
-        return boost::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
+        return std::make_shared<raster_featureset<tiled_multi_file_policy> >(policy, extent_, q);
     }
     else if (width * height > static_cast<int>(tile_size_ * tile_size_ << 2))
     {
@@ -197,7 +197,7 @@ featureset_ptr raster_datasource::features(query const& q) const
 
         tiled_file_policy policy(filename_, format_, tile_size_, extent_, q.get_bbox(), width_, height_);
 
-        return boost::make_shared<raster_featureset<tiled_file_policy> >(policy, extent_, q);
+        return std::make_shared<raster_featureset<tiled_file_policy> >(policy, extent_, q);
     }
     else
     {
@@ -206,7 +206,7 @@ featureset_ptr raster_datasource::features(query const& q) const
         raster_info info(filename_, format_, extent_, width_, height_);
         single_file_policy policy(info);
 
-        return boost::make_shared<raster_featureset<single_file_policy> >(policy, extent_, q);
+        return std::make_shared<raster_featureset<single_file_policy> >(policy, extent_, q);
     }
 }
 

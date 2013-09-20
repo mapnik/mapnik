@@ -34,7 +34,7 @@ class StyleModel : public QAbstractItemModel
 {
       Q_OBJECT
   public:
-      StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent=0);
+      StyleModel(std::shared_ptr<mapnik::Map> map, QObject * parent=0);
       ~StyleModel();
       // interface
       QModelIndex index  (int row, int col, QModelIndex const& parent = QModelIndex()) const;
@@ -43,7 +43,7 @@ class StyleModel : public QAbstractItemModel
       int columnCount( QModelIndex const& parent = QModelIndex()) const;
       QVariant  data(const QModelIndex & index, int role = Qt::DisplayRole) const;
    private:
-      //boost::shared_ptr<mapnik::Map> map_;
+      //std::shared_ptr<mapnik::Map> map_;
       boost::scoped_ptr<node> root_;
 };
 

@@ -153,7 +153,7 @@ public:
 };
 
 typedef geometry<double,vertex_vector> geometry_type;
-typedef boost::shared_ptr<geometry_type> geometry_ptr;
+typedef std::shared_ptr<geometry_type> geometry_ptr;
 typedef boost::ptr_vector<geometry_type> geometry_container;
 
 }

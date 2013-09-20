@@ -68,7 +68,7 @@ public:
     // create with default, empty placement detector
     agg_renderer(Map const& m, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // create with external placement detector, possibly non-empty
-    agg_renderer(Map const &m, T & pixmap, boost::shared_ptr<label_collision_detector4> detector,
+    agg_renderer(Map const &m, T & pixmap, std::shared_ptr<label_collision_detector4> detector,
                  double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
     // pass in mapnik::request object to provide the mutable things per render
     agg_renderer(Map const& m, request const& req, T & pixmap, double scale_factor=1.0, unsigned offset_x=0, unsigned offset_y=0);
@@ -147,7 +147,7 @@ protected:
 
 private:
     buffer_type & pixmap_;
-    boost::shared_ptr<buffer_type> internal_buffer_;
+    std::shared_ptr<buffer_type> internal_buffer_;
     mutable buffer_type * current_buffer_;
     mutable bool style_level_compositing_;
     unsigned width_;
@@ -156,7 +156,7 @@ private:
     CoordTransform t_;
     freetype_engine font_engine_;
     face_manager<freetype_engine> font_manager_;
-    boost::shared_ptr<label_collision_detector4> detector_;
+    std::shared_ptr<label_collision_detector4> detector_;
     boost::scoped_ptr<rasterizer> ras_ptr;
     box2d<double> query_extent_;
     gamma_method_e gamma_method_;

@@ -107,7 +107,7 @@ rule::rule()
       min_scale_(0),
       max_scale_(std::numeric_limits<double>::infinity()),
       syms_(),
-      filter_(boost::make_shared<mapnik::expr_node>(true)),
+      filter_(std::make_shared<mapnik::expr_node>(true)),
       else_filter_(false),
       also_filter_(false) {}
 
@@ -118,7 +118,7 @@ rule::rule(std::string const& name,
       min_scale_(min_scale_denominator),
       max_scale_(max_scale_denominator),
       syms_(),
-      filter_(boost::make_shared<mapnik::expr_node>(true)),
+      filter_(std::make_shared<mapnik::expr_node>(true)),
       else_filter_(false),
       also_filter_(false)  {}
 

@@ -45,7 +45,7 @@ namespace mapnik
 // TODO - move these transform declares to own header
 namespace detail { struct transform_node; }
 typedef std::vector<detail::transform_node>         transform_list;
-typedef boost::shared_ptr<transform_list>   transform_list_ptr;
+typedef std::shared_ptr<transform_list>   transform_list_ptr;
 typedef transform_list_ptr transform_type;
 class feature_impl;
 

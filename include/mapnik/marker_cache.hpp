@@ -38,7 +38,7 @@ namespace mapnik
 
 class marker;
 
-typedef boost::shared_ptr<marker> marker_ptr;
+typedef std::shared_ptr<marker> marker_ptr;
 
 
 class MAPNIK_DECL marker_cache :

@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 
         // create a renderable map with a fontset and a text symbolizer
         // and do not register any fonts, to ensure the error thrown is reasonable
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
         ctx->push("name");
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx,1));
         mapnik::transcoder tr("utf-8");
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
         mapnik::geometry_type * pt = new mapnik::geometry_type(mapnik::geometry_type::types::Point);
         pt->move_to(128,128);
         feature->add_geometry(pt);
-        boost::shared_ptr<mapnik::memory_datasource> ds = boost::make_shared<mapnik::memory_datasource>();
+        std::shared_ptr<mapnik::memory_datasource> ds = std::make_shared<mapnik::memory_datasource>();
         ds->push(feature);
         mapnik::Map m(256,256);
         mapnik::font_set fontset("fontset");

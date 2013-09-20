@@ -34,9 +34,9 @@ namespace  impl {
 
 typedef boost::ptr_vector<mapnik::geometry_type> path_type;
 
-boost::shared_ptr<path_type> from_wkt(mapnik::wkt_parser & p, std::string const& wkt)
+std::shared_ptr<path_type> from_wkt(mapnik::wkt_parser & p, std::string const& wkt)
 {
-    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    std::shared_ptr<path_type> paths = std::make_shared<path_type>();
     if (!p.parse(wkt, *paths))
         throw std::runtime_error("Failed to parse WKT");
     return paths;

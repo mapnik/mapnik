@@ -138,7 +138,7 @@ void render(const mapnik::Map& map,
 void render_with_detector(
     const mapnik::Map &map,
     mapnik::image_32 &image,
-    boost::shared_ptr<mapnik::label_collision_detector4> detector,
+    std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)
@@ -213,7 +213,7 @@ void render6(const mapnik::Map& map, PycairoContext* py_context)
 void render_with_detector2(
     const mapnik::Map& map,
     PycairoContext* py_context,
-    boost::shared_ptr<mapnik::label_collision_detector4> detector)
+    std::shared_ptr<mapnik::label_collision_detector4> detector)
 {
     python_unblock_auto_block b;
     mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
@@ -224,7 +224,7 @@ void render_with_detector2(
 void render_with_detector3(
     const mapnik::Map& map,
     PycairoContext* py_context,
-    boost::shared_ptr<mapnik::label_collision_detector4> detector,
+    std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)
@@ -238,7 +238,7 @@ void render_with_detector3(
 void render_with_detector4(
     const mapnik::Map& map,
     PycairoSurface* py_surface,
-    boost::shared_ptr<mapnik::label_collision_detector4> detector)
+    std::shared_ptr<mapnik::label_collision_detector4> detector)
 {
     python_unblock_auto_block b;
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
@@ -249,7 +249,7 @@ void render_with_detector4(
 void render_with_detector5(
     const mapnik::Map& map,
     PycairoSurface* py_surface,
-    boost::shared_ptr<mapnik::label_collision_detector4> detector,
+    std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
     unsigned offset_x = 0u,
     unsigned offset_y = 0u)

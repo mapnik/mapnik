@@ -45,7 +45,7 @@ namespace mapnik
 template <typename T,template <typename> class Creator>
 class Pool : private mapnik::noncopyable
 {
-    typedef boost::shared_ptr<T> HolderType;
+    typedef std::shared_ptr<T> HolderType;
     typedef std::deque<HolderType> ContType;
 
     Creator<T> creator_;

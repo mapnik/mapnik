@@ -414,7 +414,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
             featureset_ptr features = ds->features(q);
             if (features)
             {
-                boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
+                std::shared_ptr<featureset_buffer> cache = std::make_shared<featureset_buffer>();
                 feature_ptr feature, prev;
                 while ((feature = features->next()))
                 {
@@ -447,7 +447,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         else if (cache_features)
         {
             featureset_ptr features = ds->features(q);
-            boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
+            std::shared_ptr<featureset_buffer> cache = std::make_shared<featureset_buffer>();
             if (features)
             {
                 feature_ptr feature;

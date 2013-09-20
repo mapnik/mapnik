@@ -38,7 +38,7 @@ struct char_properties;
 namespace formatting {
 
 class node;
-typedef boost::shared_ptr<node> node_ptr;
+typedef std::shared_ptr<node> node_ptr;
 
 class MAPNIK_DECL node
 {

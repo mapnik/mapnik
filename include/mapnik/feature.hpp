@@ -48,7 +48,7 @@ namespace mapnik {
 class raster;
 class feature_impl;
 
-typedef boost::shared_ptr<raster> raster_ptr;
+typedef std::shared_ptr<raster> raster_ptr;
 
 template <typename T>
 class context : private mapnik::noncopyable
@@ -88,7 +88,7 @@ private:
 };
 
 typedef context<std::map<std::string,std::size_t> > context_type;
-typedef boost::shared_ptr<context_type> context_ptr;
+typedef std::shared_ptr<context_type> context_ptr;
 
 static const value default_value;
 
@@ -310,7 +310,7 @@ inline std::ostream& operator<< (std::ostream & out,feature_impl const& f)
 // TODO - remove at Mapnik 3.x
 typedef feature_impl Feature;
 
-typedef boost::shared_ptr<feature_impl> feature_ptr;
+typedef std::shared_ptr<feature_impl> feature_ptr;
 
 }
 

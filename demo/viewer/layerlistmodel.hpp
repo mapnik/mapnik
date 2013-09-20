@@ -34,7 +34,7 @@ class LayerListModel : public QAbstractListModel
 {
    Q_OBJECT
    public:
-      LayerListModel(boost::shared_ptr<mapnik::Map> map, QObject * parent = 0);
+      LayerListModel(std::shared_ptr<mapnik::Map> map, QObject * parent = 0);
       int rowCount(const QModelIndex &parent = QModelIndex()) const;
       QVariant data(const QModelIndex &index, int role) const;
       QVariant headerData(int section, Qt::Orientation orientation,
@@ -45,7 +45,7 @@ class LayerListModel : public QAbstractListModel
       boost::optional<mapnik::layer&> map_layer(int i);
 
    private:
-      boost::shared_ptr<mapnik::Map> map_;
+      std::shared_ptr<mapnik::Map> map_;
 };
 
 #endif //LAYER_LIST_MODEL_HPP

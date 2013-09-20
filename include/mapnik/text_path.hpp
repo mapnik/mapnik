@@ -195,7 +195,7 @@ public:
     }
 };
 
-typedef boost::shared_ptr<text_path> text_path_ptr;
+typedef std::shared_ptr<text_path> text_path_ptr;
 }
 
 #endif // MAPNIK_TEXT_PATH_HPP

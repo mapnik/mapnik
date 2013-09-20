@@ -50,7 +50,7 @@ using mapnik::geometry_utils;
 using mapnik::feature_factory;
 using mapnik::context_ptr;
 
-postgis_featureset::postgis_featureset(boost::shared_ptr<IResultSet> const& rs,
+postgis_featureset::postgis_featureset(std::shared_ptr<IResultSet> const& rs,
                                        context_ptr const& ctx,
                                        std::string const& encoding,
                                        bool key_field)

@@ -103,8 +103,8 @@ class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
 
     friend class CreateStatic<ConnectionManager>;
     typedef Pool<Connection,ConnectionCreator> PoolType;
-    typedef std::map<std::string,boost::shared_ptr<PoolType> > ContType;
-    typedef boost::shared_ptr<Connection> HolderType;
+    typedef std::map<std::string,std::shared_ptr<PoolType> > ContType;
+    typedef std::shared_ptr<Connection> HolderType;
     ContType pools_;
 
 public:
@@ -122,20 +122,20 @@ public:
         {
             return pools_.insert(
                 std::make_pair(creator.id(),
-                               boost::make_shared<PoolType>(creator,initialSize,maxSize))).second;
+                               std::make_shared<PoolType>(creator,initialSize,maxSize))).second;
         }
         return false;
 
     }
 
-    boost::shared_ptr<PoolType> getPool(std::string const& key)
+    std::shared_ptr<PoolType> getPool(std::string const& key)
     {
         ContType::const_iterator itr=pools_.find(key);
         if (itr!=pools_.end())
         {
             return itr->second;
         }
-        static const boost::shared_ptr<PoolType> emptyPool;
+        static const std::shared_ptr<PoolType> emptyPool;
         return emptyPool;
     }
 

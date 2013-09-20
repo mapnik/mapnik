@@ -33,7 +33,7 @@ class rtree_leaf : public rtree_node<Box, Value>
 public:
 
     /// container type for the leaves
-    typedef boost::shared_ptr<rtree_node<Box, Value> > node_pointer;
+    typedef std::shared_ptr<rtree_node<Box, Value> > node_pointer;
     typedef std::vector<std::pair<Box, Value> > leaf_map;
 
     /**
@@ -250,4 +250,3 @@ private:
 }}} // namespace boost::geometry::index
 
 #endif // BOOST_GEOMETRY_EXTENSIONS_INDEX_RTREE_RTREE_LEAF_HPP
-

@@ -31,7 +31,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     {
         throw mapnik::image_reader_exception("Failed to load: " + dest_fn);
     }
-    boost::shared_ptr<image_32> image_ptr1 = boost::make_shared<image_32>(reader1->width(),reader1->height());
+    std::shared_ptr<image_32> image_ptr1 = std::make_shared<image_32>(reader1->width(),reader1->height());
     reader1->read(0,0,image_ptr1->data());
 
     std::unique_ptr<mapnik::image_reader> reader2(mapnik::get_image_reader(src_fn,"png"));
@@ -39,7 +39,7 @@ bool compare_images(std::string const& src_fn,std::string const& dest_fn)
     {
         throw mapnik::image_reader_exception("Failed to load: " + src_fn);
     }
-    boost::shared_ptr<image_32> image_ptr2 = boost::make_shared<image_32>(reader2->width(),reader2->height());
+    std::shared_ptr<image_32> image_ptr2 = std::make_shared<image_32>(reader2->width(),reader2->height());
     reader2->read(0,0,image_ptr2->data());
 
     image_data_32 const& dest = image_ptr1->data();

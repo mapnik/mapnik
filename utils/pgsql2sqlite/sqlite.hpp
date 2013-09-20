@@ -52,7 +52,7 @@ namespace mapnik {  namespace sqlite {
             }
         };
 
-        typedef boost::shared_ptr<sqlite3> sqlite_db;
+        typedef std::shared_ptr<sqlite3> sqlite_db;
         sqlite_db db_;
 
     public:
@@ -186,4 +186,3 @@ namespace mapnik {  namespace sqlite {
     };
     }
 }
-

@@ -32,8 +32,8 @@ class rtree
 {
 public:
 
-    typedef boost::shared_ptr<rtree_node<Box, Value> > node_pointer;
-    typedef boost::shared_ptr<rtree_leaf<Box, Value> > leaf_pointer;
+    typedef std::shared_ptr<rtree_node<Box, Value> > node_pointer;
+    typedef std::shared_ptr<rtree_leaf<Box, Value> > leaf_pointer;
 
     /**
      * \brief Creates a rtree with 'maximum' elements per node and 'minimum'.
@@ -771,4 +771,3 @@ private:
 }}} // namespace boost::geometry::index
 
 #endif // BOOST_GEOMETRY_EXTENSIONS_INDEX_RTREE_RTREE_HPP
-

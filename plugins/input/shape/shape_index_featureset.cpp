@@ -49,7 +49,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
                                                         std::string const& shape_name,
                                                         int row_limit)
     : filter_(filter),
-      ctx_(boost::make_shared<mapnik::context_type>()),
+      ctx_(std::make_shared<mapnik::context_type>()),
       shape_(shape),
       tr_(new mapnik::transcoder(encoding)),
       row_limit_(row_limit),
@@ -59,7 +59,7 @@ shape_index_featureset<filterT>::shape_index_featureset(filterT const& filter,
     shape_.shp().skip(100);
     setup_attributes(ctx_, attribute_names, shape_name, shape_,attr_ids_);
 
-    boost::shared_ptr<shape_file> index = shape_.index();
+    std::shared_ptr<shape_file> index = shape_.index();
     if (index)
     {
 #ifdef SHAPE_MEMORY_MAPPED_FILE
