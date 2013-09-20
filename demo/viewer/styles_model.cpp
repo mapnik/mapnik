@@ -263,8 +263,7 @@ public:
     QString name() const
     {
         mapnik::expression_ptr filter = rule_.get_filter();
-
-        return QString("FIXME");//mapnik::to_expression_string((*filter)).c_str());
+        return QString(mapnik::to_expression_string(*filter).c_str());
     }
 
     QIcon icon() const
