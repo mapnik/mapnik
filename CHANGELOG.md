@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Fixed alpha handling bug with `comp-op:dst-over` (#1995)
+
 - Fixed alpha handling bug with building-fill-opacity (#2011)
 
 - Optimized mapnik.Path.to_wkb
