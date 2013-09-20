@@ -632,7 +632,7 @@ processor_context_ptr postgis_datasource::get_context(feature_style_context_map 
     if (!asynchronous_request_)
         return  processor_context_ptr();
 
-    auto itr = ctx.find(ds_name);
+    feature_style_context_map::const_iterator itr = ctx.find(ds_name);
     if (itr != ctx.end())
     {
         return itr->second;
@@ -641,15 +641,6 @@ processor_context_ptr postgis_datasource::get_context(feature_style_context_map 
     {
         return ctx.insert(std::make_pair(ds_name,boost::make_shared<postgis_processor_context>())).first->second;
     }
-
-    //if (!ctx.count(ds_name))
-    // {
-    //   processor_context_ptr pgis_ctx = boost::make_shared<postgis_processor_context>();
-    //   ctx[ds_name] = pgis_ctx;
-    //   return ctx[ds_name];
-    // }
-    //else
-    //   return ctx[ds_name];
 }
 
 featureset_ptr postgis_datasource::features(const query& q) const
