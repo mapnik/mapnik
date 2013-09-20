@@ -363,7 +363,7 @@ namespace agg
             p[Order::R] = (value_type)(p[Order::R] + ((sr * d1a + base_mask) >> base_shift));
             p[Order::G] = (value_type)(p[Order::G] + ((sg * d1a + base_mask) >> base_shift));
             p[Order::B] = (value_type)(p[Order::B] + ((sb * d1a + base_mask) >> base_shift));
-            p[Order::A] = (value_type)(sa + p[Order::A] - ((sa * p[Order::A] + base_mask) >> base_shift));
+            p[Order::A] = (value_type)(p[Order::A] + ((sa * d1a + base_mask) >> base_shift));
         }
     };
 
