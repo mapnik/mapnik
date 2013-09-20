@@ -37,7 +37,7 @@
 // boost
 #include <boost/optional.hpp>
 #include <memory>
-#include <boost/scoped_ptr.hpp>
+
 
 // stl
 #include <vector>

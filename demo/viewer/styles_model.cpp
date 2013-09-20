@@ -26,7 +26,7 @@
 
 // boost
 #include <boost/concept_check.hpp>
-#include <boost/scoped_ptr.hpp>
+
 // qt
 #include <QList>
 #include <QIcon>
@@ -114,7 +114,7 @@ public:
     }
 
 private:
-    boost::scoped_ptr<node_base> impl_;
+    const std::unique_ptr<node_base> impl_;
     QList<node*> children_;
     node * parent_;
 };

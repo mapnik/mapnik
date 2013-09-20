@@ -40,7 +40,7 @@
 
 // boost
 #include <boost/variant/static_visitor.hpp>
-#include <boost/scoped_ptr.hpp>
+
 #include <memory>
 
 // stl

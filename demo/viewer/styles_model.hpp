@@ -27,7 +27,7 @@
 #include <mapnik/map.hpp>
 #endif
 
-#include <boost/scoped_ptr.hpp>
+
 
 class node;
 class StyleModel : public QAbstractItemModel
@@ -44,7 +44,7 @@ class StyleModel : public QAbstractItemModel
       QVariant  data(const QModelIndex & index, int role = Qt::DisplayRole) const;
    private:
       //std::shared_ptr<mapnik::Map> map_;
-      boost::scoped_ptr<node> root_;
+      const std::unique_ptr<node> root_;
 };
 
 #endif // STYLE_MODEL_HPP

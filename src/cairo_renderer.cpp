@@ -360,8 +360,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
 
         if (geom.size() > 2)
         {
-            boost::scoped_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
-            boost::scoped_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
+            const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
+            const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
             std::deque<segment_t> face_segments;
             double x0 = 0;
             double y0 = 0;
@@ -392,7 +392,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             std::deque<segment_t>::const_iterator end=face_segments.end();
             for (; itr != end; ++itr)
             {
-                boost::scoped_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
+                const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
                 faces->move_to(itr->get<0>(), itr->get<1>());
                 faces->line_to(itr->get<2>(), itr->get<3>());
                 faces->line_to(itr->get<2>(), itr->get<3>() + height);

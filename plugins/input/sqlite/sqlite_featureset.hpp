@@ -29,7 +29,7 @@
 #include <mapnik/wkb.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 #include <memory>
 
 // sqlite
@@ -52,7 +52,7 @@ public:
 private:
     std::shared_ptr<sqlite_resultset> rs_;
     mapnik::context_ptr ctx_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     mapnik::box2d<double> bbox_;
     mapnik::wkbFormat format_;
     bool spatial_index_;

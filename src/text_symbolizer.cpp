@@ -28,7 +28,7 @@
 
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 
 namespace mapnik

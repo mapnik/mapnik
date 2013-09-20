@@ -33,7 +33,7 @@
 #if BOOST_VERSION >= 104600
 #include <boost/range/algorithm.hpp>
 #endif
-#include <boost/scoped_ptr.hpp>
+
 
 // stl
 #include <vector>
@@ -124,7 +124,7 @@ class hextree : private mapnik::noncopyable
     unsigned colors_;
     // flag indicating existance of invisible pixels (a < InsertPolicy::MIN_ALPHA)
     bool has_holes_;
-    boost::scoped_ptr<node> root_;
+    const std::unique_ptr<node> root_;
     // working palette for quantization, sorted on mean(r,g,b,a) for easier searching NN
     std::vector<rgba> sorted_pal_;
     // index remaping of sorted_pal_ indexes to indexes of returned image palette

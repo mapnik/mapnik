@@ -30,7 +30,7 @@
 #include <mapnik/unicode.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 #include <memory>
 
 // oci
@@ -70,7 +70,7 @@ private:
 
     occi_connection_ptr conn_;
     oracle::occi::ResultSet* rs_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     mapnik::value_integer feature_id_;
     mapnik::context_ptr ctx_;
     bool use_wkb_;

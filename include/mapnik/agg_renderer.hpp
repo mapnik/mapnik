@@ -37,7 +37,7 @@
 #include <mapnik/request.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 #include <memory>
 
 // fwd declaration to avoid depedence on agg headers
@@ -157,7 +157,7 @@ private:
     freetype_engine font_engine_;
     face_manager<freetype_engine> font_manager_;
     std::shared_ptr<label_collision_detector4> detector_;
-    boost::scoped_ptr<rasterizer> ras_ptr;
+    const std::unique_ptr<rasterizer> ras_ptr;
     box2d<double> query_extent_;
     gamma_method_e gamma_method_;
     double gamma_;

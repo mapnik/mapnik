@@ -31,7 +31,7 @@
 
 // boost
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/scoped_ptr.hpp>
+
 #include <boost/version.hpp>
 
 // stl
@@ -50,7 +50,7 @@ public:
     wkt_parser();
     bool parse(std::string const& wkt, boost::ptr_vector<geometry_type> & paths);
 private:
-    boost::scoped_ptr<mapnik::wkt::wkt_collection_grammar<iterator_type> > grammar_;
+    const std::unique_ptr<mapnik::wkt::wkt_collection_grammar<iterator_type> > grammar_;
 };
 
 #endif

@@ -29,7 +29,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
-#include <boost/scoped_ptr.hpp>
+
 
 #ifndef Q_MOC_RUN
 #include <mapnik/map.hpp>

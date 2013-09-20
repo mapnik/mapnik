@@ -30,7 +30,7 @@
 #include <mapnik/unicode.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 using mapnik::Featureset;
 using mapnik::box2d;
@@ -53,7 +53,7 @@ public:
 private:
     std::shared_ptr<IResultSet> rs_;
     context_ptr ctx_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     unsigned totalGeomSize_;
     mapnik::value_integer feature_id_;
     bool key_field_;

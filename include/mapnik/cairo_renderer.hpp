@@ -41,7 +41,7 @@
 #include <cairo.h>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 namespace agg {
 struct trans_affine;

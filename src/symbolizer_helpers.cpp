@@ -62,7 +62,7 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(text_sym
           angle_(0.0),
           placement_valid_(false),
           points_on_line_(false),
-          finder_(0)
+          finder_()
     {
         initialize_geometries();
         if (!geometries_to_process_.size()) return;
