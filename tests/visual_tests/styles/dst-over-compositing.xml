@@ -1,0 +1,19 @@
+<Map 
+  background-color="#808080"
+  srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+
+    <Style name="My Style" comp-op="src-over">
+        <Rule>
+            <LineSymbolizer stroke-width="30" stroke="rgba(255,255,255,1)" stroke-linecap="round" stroke-linejoin="round" comp-op="dst-over" />
+        </Rule>
+    </Style>
+
+    <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/crossing-lines.csv</Parameter>
+        </Datasource>
+    </Layer>
+
+</Map>
