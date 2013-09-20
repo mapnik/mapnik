@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Fixed alpha handling bug with building-fill-opacity (#2011)
+
 - Optimized mapnik.Path.to_wkb
 
 - Python: added `__geo_interface__` to mapnik.Feature and mapnik.Path (#2009)
