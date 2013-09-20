@@ -48,7 +48,7 @@
 // boost
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
-#include <boost/foreach.hpp>
+#include <boost/concept_check.hpp>
 
 // stl
 #include <vector>
@@ -148,7 +148,7 @@ void feature_style_processor<Processor>::apply(double scale_denom)
         scale_denom = mapnik::scale_denominator(m_.scale(),proj.is_geographic());
     scale_denom *= p.scale_factor();
 
-    BOOST_FOREACH ( layer const& lyr, m_.layers() )
+    for (auto const& lyr : m_.layers() )
     {
         if (lyr.visible(scale_denom))
         {
@@ -292,7 +292,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     {
         // check for styles needing compositing operations applied
         // https://github.com/mapnik/mapnik/issues/1477
-        BOOST_FOREACH(std::string const& style_name, style_names)
+        for (std::string const& style_name : style_names)
         {
             boost::optional<feature_type_style const&> style=m_.find_style(style_name);
             if (!style)
@@ -346,10 +346,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
     query q(layer_ext,res,scale_denom,extent);
     std::vector<feature_type_style const*> active_styles;
     attribute_collector collector(names);
-    boost::ptr_vector<rule_cache> rule_caches;
-
+    std::vector<rule_cache> rule_caches;
     // iterate through all named styles collecting active styles and attribute names
-    BOOST_FOREACH(std::string const& style_name, style_names)
+    for (std::string const& style_name : style_names)
     {
         boost::optional<feature_type_style const&> style=m_.find_style(style_name);
         if (!style)
@@ -363,19 +362,19 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
 
         std::vector<rule> const& rules = style->get_rules();
         bool active_rules = false;
-        std::auto_ptr<rule_cache> rc(new rule_cache);
-        BOOST_FOREACH(rule const& r, rules)
+        rule_cache cache;
+        for (auto const& r : rules)
         {
             if (r.active(scale_denom))
             {
-                rc->add_rule(r);
+                cache.add_rule(r);
                 active_rules = true;
                 collector(r);
             }
         }
         if (active_rules)
         {
-            rule_caches.push_back(rc);
+            rule_caches.push_back(std::move(cache));
             active_styles.push_back(&(*style));
         }
     }
@@ -386,14 +385,14 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         if (p.attribute_collection_policy() == COLLECT_ALL)
         {
             layer_descriptor lay_desc = ds->get_descriptor();
-            BOOST_FOREACH(attribute_descriptor const& desc, lay_desc.get_descriptors())
+            for (attribute_descriptor const& desc : lay_desc.get_descriptors())
             {
                 q.add_property_name(desc.get_name());
             }
         }
         else
         {
-            BOOST_FOREACH(std::string const& name, names)
+            for (std::string const& name : names)
             {
                 q.add_property_name(name);
             }
@@ -424,7 +423,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                         // We're at a value boundary, so render what we have
                         // up to this point.
                         int i = 0;
-                        BOOST_FOREACH (feature_type_style const* style, active_styles)
+                        for (feature_type_style const* style : active_styles)
                         {
                             cache->prepare();
                             render_style(p, style, rule_caches[i], cache, prj_trans);
@@ -437,7 +436,7 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 }
 
                 int i = 0;
-                BOOST_FOREACH (feature_type_style const* style, active_styles)
+                for (feature_type_style const* style : active_styles)
                 {
                     cache->prepare();
                     render_style(p, style, rule_caches[i], cache, prj_trans);
@@ -458,11 +457,10 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
                 }
             }
             int i = 0;
-            BOOST_FOREACH (feature_type_style const* style, active_styles)
+            for (feature_type_style const* style : active_styles)
             {
                 cache->prepare();
-                render_style(p, style, rule_caches[i], cache, prj_trans);
-                i++;
+                render_style(p, style, rule_caches[i++], cache, prj_trans);
             }
             cache->clear();
         }
@@ -470,10 +468,9 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay, Proces
         else
         {
             int i = 0;
-            BOOST_FOREACH (feature_type_style const* style, active_styles)
+            for (feature_type_style const* style : active_styles)
             {
-                render_style(p, style, rule_caches[i], ds->features(q), prj_trans);
-                i++;
+                render_style(p, style, rule_caches[i++], ds->features(q), prj_trans);
             }
         }
     }
@@ -501,7 +498,7 @@ void feature_style_processor<Processor>::render_style(
     {
         bool do_else = true;
         bool do_also = false;
-        BOOST_FOREACH(rule const* r, rc.get_if_rules() )
+        for (rule const* r : rc.get_if_rules() )
         {
             expression_ptr const& expr=r->get_filter();
             value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(*feature),*expr);
@@ -513,7 +510,7 @@ void feature_style_processor<Processor>::render_style(
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 if(!p.process(symbols,*feature,prj_trans))
                 {
-                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                    for (symbolizer const& sym : symbols)
                     {
                         boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }
@@ -528,13 +525,13 @@ void feature_style_processor<Processor>::render_style(
         }
         if (do_else)
         {
-            BOOST_FOREACH( rule const* r, rc.get_else_rules() )
+            for (rule const* r : rc.get_else_rules() )
             {
                 was_painted = true;
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 if(!p.process(symbols,*feature,prj_trans))
                 {
-                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                    for (symbolizer const& sym : symbols)
                     {
                         boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }
@@ -543,13 +540,13 @@ void feature_style_processor<Processor>::render_style(
         }
         if (do_also)
         {
-            BOOST_FOREACH( rule const* r, rc.get_also_rules() )
+            for ( rule const* r : rc.get_also_rules() )
             {
                 was_painted = true;
                 rule::symbolizers const& symbols = r->get_symbolizers();
                 if(!p.process(symbols,*feature,prj_trans))
                 {
-                    BOOST_FOREACH (symbolizer const& sym, symbols)
+                    for (symbolizer const& sym : symbols)
                     {
                         boost::apply_visitor(symbol_dispatch(p,*feature,prj_trans),sym);
                     }

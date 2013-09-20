@@ -55,7 +55,7 @@ public:
     // required for iterators support
     typedef boost::tuple<unsigned,coord_type,coord_type> value_type;
     typedef std::size_t size_type;
-    typedef unsigned char command_size;
+    typedef std::uint8_t command_size;
 private:
     unsigned num_blocks_;
     unsigned max_blocks_;

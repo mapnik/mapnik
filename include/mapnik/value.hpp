@@ -47,6 +47,15 @@
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
 
+namespace boost {
+
+  template <>
+  struct has_nothrow_copy<mapnik::value_unicode_string>
+    : mpl::true_
+  {
+  };
+
+}
 
 namespace mapnik  {
 
@@ -183,8 +192,9 @@ struct not_equals
     // back compatibility shim to equate empty string with null for != test
     // https://github.com/mapnik/mapnik/issues/1859
     // TODO - consider removing entire specialization at Mapnik 3.x
-    bool operator() (value_null /*lhs*/, value_unicode_string const& rhs) const
+    bool operator() (value_null lhs, value_unicode_string const& rhs) const
     {
+        boost::ignore_unused_variable_warning(lhs);
         if (rhs.isEmpty()) return false;
         return true;
     }
@@ -811,7 +821,7 @@ class value
     friend const value operator%(value const&,value const&);
 
 public:
-    value ()
+    value () noexcept //-- comment out for VC++11
         : base_(value_null()) {}
 
     value(value_integer val)
@@ -839,6 +849,9 @@ public:
         base_ = other.base_;
         return *this;
     }
+
+    value( value && other) noexcept
+        :  base_(std::move(other.base_)) {}
 
     bool operator==(value const& other) const
     {

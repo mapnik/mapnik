@@ -327,7 +327,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for ( geometry_type & geom : feature.paths())
     {
         if (geom.size() > 2)
         {
@@ -360,8 +360,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
 
         if (geom.size() > 2)
         {
-            boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
-            boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
+            boost::scoped_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
+            boost::scoped_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
             std::deque<segment_t> face_segments;
             double x0 = 0;
             double y0 = 0;
@@ -392,7 +392,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             std::deque<segment_t>::const_iterator end=face_segments.end();
             for (; itr != end; ++itr)
             {
-                boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
+                boost::scoped_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
                 faces->move_to(itr->get<0>(), itr->get<1>());
                 faces->line_to(itr->get<2>(), itr->get<3>());
                 faces->line_to(itr->get<2>(), itr->get<3>() + height);
@@ -490,7 +490,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for (geometry_type & geom : feature.paths())
     {
         if (geom.size() > 1)
         {
@@ -865,7 +865,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for ( geometry_type & geom : feature.paths())
     {
         if (geom.size() > 2)
         {
@@ -987,11 +987,11 @@ struct markers_dispatch
         marker_placement_e placement_method = sym_.get_marker_placement();
 
         if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == Point)
+            path.type() == geometry_type::types::Point)
         {
             double x = 0;
             double y = 0;
-            if (path.type() == LineString)
+            if (path.type() == geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
                     return;
@@ -1076,11 +1076,11 @@ struct markers_dispatch_2
         marker_placement_e placement_method = sym_.get_marker_placement();
 
         if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == Point)
+            path.type() == geometry_type::types::Point)
         {
             double x = 0;
             double y = 0;
-            if (path.type() == LineString)
+            if (path.type() == geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
                     return;
@@ -1200,13 +1200,13 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
-                        eGeomType type = feature.paths()[0].type();
-                        if (type == Polygon)
+                        geometry_type::types type = feature.paths()[0].type();
+                        if (type == geometry_type::types::Polygon)
                             converter.set<clip_poly_tag>();
                         // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
-                        //else if (type == LineString)
+                        //else if (type == geometry_type::types::LineString)
                         //    converter.template set<clip_line_tag>();
-                        // don't clip if type==Point
+                        // don't clip if type==geometry_type::types::Point
                     }
                     converter.set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
@@ -1225,13 +1225,13 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
-                        eGeomType type = feature.paths()[0].type();
-                        if (type == Polygon)
+                        geometry_type::types type = feature.paths()[0].type();
+                        if (type == geometry_type::types::Polygon)
                             converter.set<clip_poly_tag>();
                         // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
-                        //else if (type == LineString)
+                        //else if (type == geometry_type::types::LineString)
                         //    converter.template set<clip_line_tag>();
-                        // don't clip if type==Point
+                        // don't clip if type==geometry_type::types::Point
                     }
                     converter.set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
@@ -1255,13 +1255,13 @@ void cairo_renderer_base::process(markers_symbolizer const& sym,
 
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
-                        eGeomType type = feature.paths()[0].type();
-                        if (type == Polygon)
+                        geometry_type::types type = feature.paths()[0].type();
+                        if (type == geometry_type::types::Polygon)
                             converter.set<clip_poly_tag>();
                         // line clipping disabled due to https://github.com/mapnik/mapnik/issues/1426
-                        //else if (type == LineString)
+                        //else if (type == geometry_type::types::LineString)
                         //    converter.template set<clip_line_tag>();
-                        // don't clip if type==Point
+                        // don't clip if type==geometry_type::types::Point
                     }
                     converter.set<transform_tag>(); //always transform
                     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter

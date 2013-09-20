@@ -42,7 +42,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/foreach.hpp>
+
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif
@@ -191,7 +191,7 @@ public:
     {
         std::vector<std::string> const& names = fset.get_face_names();
         face_set_ptr face_set = boost::make_shared<font_face_set>();
-        BOOST_FOREACH( std::string const& name, names)
+        for ( std::string const& name : names)
         {
             face_ptr face = get_face(name);
             if (face)

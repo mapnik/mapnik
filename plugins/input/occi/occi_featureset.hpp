@@ -55,7 +55,7 @@ public:
 private:
     void convert_geometry (SDOGeometry* geom, mapnik::feature_ptr feature);
     void convert_ordinates (mapnik::feature_ptr feature,
-                            const mapnik::eGeomType& geom_type,
+                            const mapnik::geometry::types& geom_type,
                             const std::vector<oracle::occi::Number>& elem_info,
                             const std::vector<oracle::occi::Number>& ordinates,
                             const int dimensions,

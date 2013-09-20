@@ -116,22 +116,22 @@ public:
     template <typename T>
     inline void put(context_type::key_type const& key, T const& val)
     {
-        put(key,value(val));
+        put(key, std::move(value(val)));
     }
 
     template <typename T>
     inline void put_new(context_type::key_type const& key, T const& val)
     {
-        put_new(key,value(val));
+        put_new(key,std::move(value(val)));
     }
 
-    inline void put(context_type::key_type const& key, value const& val)
+    inline void put(context_type::key_type const& key, value && val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end()
             && itr->second < data_.size())
         {
-            data_[itr->second] = val;
+            data_[itr->second] = std::move(val);
         }
         else
         {
@@ -139,19 +139,19 @@ public:
         }
     }
 
-    inline void put_new(context_type::key_type const& key, value const& val)
+    inline void put_new(context_type::key_type const& key, value && val)
     {
         context_type::map_type::const_iterator itr = ctx_->mapping_.find(key);
         if (itr != ctx_->mapping_.end()
             && itr->second < data_.size())
         {
-            data_[itr->second] = val;
+            data_[itr->second] = std::move(val);
         }
         else
         {
             cont_type::size_type index = ctx_->push(key);
             if (index == data_.size())
-                data_.push_back(val);
+                data_.push_back(std::move(val));
         }
     }
 
@@ -231,9 +231,8 @@ public:
         // TODO - cache this
         box2d<double> result;
         bool first = true;
-        for (unsigned i=0;i<num_geometries();++i)
+        for (auto const& geom : geom_cont_)
         {
-            geometry_type const& geom = get_geometry(i);
             if (first)
             {
                 box2d<double> box = geom.envelope();

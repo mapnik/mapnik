@@ -175,7 +175,7 @@ namespace mapnik { namespace util {
             svg = point | linestring | polygon
                 ;
 
-            point = &uint_(mapnik::Point)[_1 = _type(_val)]
+            point = &uint_(mapnik::geometry_type::types::Point)[_1 = _type(_val)]
                 << svg_point [_1 = _first(_val)]
                 ;
 
@@ -185,11 +185,11 @@ namespace mapnik { namespace util {
                 << lit('\"')
                 ;
 
-            linestring = &uint_(mapnik::LineString)[_1 = _type(_val)]
+            linestring = &uint_(mapnik::geometry_type::types::LineString)[_1 = _type(_val)]
                 << lit("d=\"") << svg_path << lit("\"")
                 ;
 
-            polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
+            polygon = &uint_(mapnik::geometry_type::types::Polygon)[_1 = _type(_val)]
                 << lit("d=\"") << svg_path << lit("\"")
                 ;
 

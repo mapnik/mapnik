@@ -22,7 +22,7 @@
 
 // boost
 #include <boost/python.hpp>
-#include <boost/foreach.hpp>
+
 
 // mapnik
 #include <mapnik/query.hpp>
@@ -55,7 +55,7 @@ struct names_to_list
     static PyObject* convert(std::set<std::string> const& names)
     {
         boost::python::list l;
-        BOOST_FOREACH( std::string const& name, names )
+        for ( std::string const& name : names )
         {
             l.append(name);
         }
@@ -86,6 +86,3 @@ void export_query()
                                                       return_value_policy<copy_const_reference>()) )
         .def("add_property_name", &query::add_property_name);
 }
-
-
-

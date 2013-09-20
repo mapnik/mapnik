@@ -107,7 +107,7 @@ mapnik::box2d<double> envelope_impl(path_type & p)
 {
     mapnik::box2d<double> b;
     bool first = true;
-    BOOST_FOREACH(mapnik::geometry_type const& geom, p)
+    for (mapnik::geometry_type const& geom : p)
     {
         if (first)
         {
@@ -232,6 +232,7 @@ std::string to_geojson( path_type const& geom)
 
 std::string to_svg( geometry_type const& geom)
 {
+
 #if BOOST_VERSION >= 104700
     std::string svg; // Use Python String directly ?
     bool result = mapnik::util::to_svg(svg,geom);
@@ -269,10 +270,10 @@ void export_geometry()
 {
     using namespace boost::python;
 
-    enum_<mapnik::eGeomType>("GeometryType")
-        .value("Point",mapnik::Point)
-        .value("LineString",mapnik::LineString)
-        .value("Polygon",mapnik::Polygon)
+    enum_<mapnik::geometry_type::types>("GeometryType")
+        .value("Point",mapnik::geometry_type::types::Point)
+        .value("LineString",mapnik::geometry_type::types::LineString)
+        .value("Polygon",mapnik::geometry_type::types::Polygon)
         ;
 
 #if BOOST_VERSION >= 104700
@@ -283,7 +284,7 @@ void export_geometry()
 #endif
 
     using mapnik::geometry_type;
-    class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
+    class_<geometry_type, std::shared_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
         .def("envelope",&geometry_type::envelope)
         // .def("__str__",&geometry_type::to_string)
         .def("type",&geometry_type::type)

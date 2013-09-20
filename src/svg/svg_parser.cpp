@@ -35,8 +35,6 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/fusion/include/std_pair.hpp>
-#include <boost/foreach.hpp>
-
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <string>
@@ -434,7 +432,7 @@ void parse_attr(svg_parser & parser, xmlTextReaderPtr reader)
                 typedef cont_type::value_type value_type;
                 cont_type vec;
                 parse_style((const char*)value, vec);
-                BOOST_FOREACH(value_type kv , vec )
+                for (value_type kv : vec )
                 {
                     parse_attr(parser,BAD_CAST kv.first.c_str(),BAD_CAST kv.second.c_str());
                 }
@@ -796,7 +794,7 @@ void parse_gradient_stop(svg_parser & parser, xmlTextReaderPtr reader)
         cont_type vec;
         parse_style((const char*)value, vec);
 
-        BOOST_FOREACH(value_type kv , vec )
+        for (value_type kv : vec )
         {
             if (kv.first == "stop-color")
             {
