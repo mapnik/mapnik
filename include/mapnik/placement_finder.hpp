@@ -102,7 +102,7 @@ private:
     //             RETURN: 1/-1 depending which way up the string ends up being.
     std::auto_ptr<text_path> get_placement_offset(std::vector<vertex2d> const& path_positions,
                                                   std::vector<double> const& path_distances,
-                                                  int & orientation, unsigned index, double distance);
+                                                  int & orientation, std::size_t index, double distance);
 
     ///Tests whether the given text_path be placed without a collision
     // Returns true if it can
@@ -143,7 +143,7 @@ private:
     vertical_alignment_e valign_;
     horizontal_alignment_e halign_;
     justify_alignment_e jalign_;
-    std::vector<unsigned> line_breaks_;
+    std::vector<std::size_t> line_breaks_;
     std::vector<std::pair<double, double> > line_sizes_;
     std::queue< box2d<double> > envelopes_;
     // Used to return all placements found. */
