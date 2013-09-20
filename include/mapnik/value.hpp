@@ -47,16 +47,6 @@
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
 
-namespace boost {
-
-  template <>
-  struct has_nothrow_copy<mapnik::value_unicode_string>
-    : mpl::true_
-  {
-  };
-
-}
-
 namespace mapnik  {
 
 inline void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
