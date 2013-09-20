@@ -34,7 +34,7 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/variant.hpp>
-#include <boost/scoped_array.hpp>
+
 #include <boost/concept_check.hpp>
 #include <boost/functional/hash.hpp>
 #include "hash_variant.hpp"
@@ -61,7 +61,7 @@ inline void to_utf8(mapnik::value_unicode_string const& input, std::string & tar
     u_strToUTF8(buf, BUF_SIZE, &len, input.getBuffer(), input.length(), &err);
     if (err == U_BUFFER_OVERFLOW_ERROR || err == U_STRING_NOT_TERMINATED_WARNING )
     {
-        boost::scoped_array<char> buf_ptr(new char [len+1]);
+        const std::unique_ptr<char[]> buf_ptr(new char [len+1]);
         err = U_ZERO_ERROR;
         u_strToUTF8(buf_ptr.get() , len + 1, &len, input.getBuffer(), input.length(), &err);
         target.assign(buf_ptr.get() , static_cast<std::size_t>(len));

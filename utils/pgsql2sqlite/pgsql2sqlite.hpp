@@ -35,13 +35,12 @@
 
 // boost
 #include <boost/cstdint.hpp>
-#include <boost/scoped_array.hpp>
-#include <memory>
 #include <boost/algorithm/string.hpp>
 
 //stl
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 static std::string numeric2string(const char* buf)
 {
@@ -50,7 +49,7 @@ static std::string numeric2string(const char* buf)
     boost::int16_t sign    = int2net(buf+4);
     boost::int16_t dscale  = int2net(buf+6);
 
-    boost::scoped_array<boost::int16_t> digits(new boost::int16_t[ndigits]);
+    const std::unique_ptr<boost::int16_t[]> digits(new boost::int16_t[ndigits]);
     for (int n=0; n < ndigits ;++n)
     {
         digits[n] = int2net(buf+8+n*2);

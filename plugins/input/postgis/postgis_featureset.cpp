@@ -34,7 +34,7 @@
 #include <mapnik/util/conversions.hpp>
 #include <mapnik/util/trim.hpp>
 #include <mapnik/global.hpp> // for int2net
-#include <boost/scoped_array.hpp>
+
 
 
 // boost
@@ -238,7 +238,7 @@ std::string numeric2string(const char* buf)
     boost::int16_t sign    = int2net(buf+4);
     boost::int16_t dscale  = int2net(buf+6);
 
-    boost::scoped_array<boost::int16_t> digits(new boost::int16_t[ndigits]);
+    const std::unique_ptr<boost::int16_t[]> digits(new boost::int16_t[ndigits]);
     for (int n=0; n < ndigits ;++n)
     {
         digits[n] = int2net(buf+8+n*2);
