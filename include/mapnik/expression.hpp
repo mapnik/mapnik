@@ -28,7 +28,7 @@
 #include <mapnik/expression_node_types.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <string>

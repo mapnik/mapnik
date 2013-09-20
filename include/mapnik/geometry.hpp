@@ -29,7 +29,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 namespace mapnik {

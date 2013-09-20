@@ -17,7 +17,7 @@
 #include <vector>
 
 #include <boost/concept_check.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <boost/geometry/algorithms/area.hpp>
 

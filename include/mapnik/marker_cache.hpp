@@ -30,7 +30,7 @@
 
 // boost
 #include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/optional.hpp>
 
 namespace mapnik

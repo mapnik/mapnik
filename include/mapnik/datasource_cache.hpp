@@ -30,7 +30,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <map>

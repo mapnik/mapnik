@@ -16,7 +16,7 @@
 
 // boost
 #include <boost/version.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/make_shared.hpp>
 #include <boost/bind.hpp>
 

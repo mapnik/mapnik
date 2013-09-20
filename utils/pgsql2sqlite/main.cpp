@@ -28,7 +28,7 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/program_options.hpp>
 
 //stl

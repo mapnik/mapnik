@@ -36,7 +36,7 @@
 // boost
 #include <boost/cstdint.hpp>
 #include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/algorithm/string.hpp>
 
 //stl

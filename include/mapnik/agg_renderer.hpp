@@ -38,7 +38,7 @@
 
 // boost
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // fwd declaration to avoid depedence on agg headers
 namespace agg { struct trans_affine; }

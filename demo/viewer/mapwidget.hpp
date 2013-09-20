@@ -28,7 +28,7 @@
 #include <QItemSelection>
 #include <iostream>
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/scoped_ptr.hpp>
 
 #ifndef Q_MOC_RUN

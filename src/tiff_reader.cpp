@@ -25,7 +25,7 @@
 #include <mapnik/image_reader.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // iostreams
 #include <boost/iostreams/device/file.hpp>

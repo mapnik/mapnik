@@ -30,7 +30,7 @@
 
 // boost
 #include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/optional.hpp>
 #include <boost/interprocess/interprocess_fwd.hpp>
 

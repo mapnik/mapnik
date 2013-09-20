@@ -33,7 +33,7 @@
 #include "agg_path_length.h"
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/tuple/tuple.hpp>
 

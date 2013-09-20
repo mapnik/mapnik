@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <boost/geometry/algorithms/area.hpp>
 #include <boost/geometry/algorithms/assign.hpp>

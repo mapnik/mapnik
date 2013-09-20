@@ -35,7 +35,7 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/algorithms/area.hpp>

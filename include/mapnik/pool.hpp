@@ -29,7 +29,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #ifdef MAPNIK_THREADSAFE
 #include <boost/thread/mutex.hpp>
 #endif

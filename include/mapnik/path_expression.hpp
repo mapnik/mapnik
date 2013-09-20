@@ -25,7 +25,7 @@
 
 // boost
 #include <boost/variant/variant_fwd.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <string>

@@ -29,7 +29,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "dbfile.hpp"
 #include "shapefile.hpp"

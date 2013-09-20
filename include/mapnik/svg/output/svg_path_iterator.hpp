@@ -30,7 +30,7 @@
 // boost
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/make_shared.hpp>
 
 namespace mapnik {

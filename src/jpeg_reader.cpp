@@ -31,7 +31,7 @@ extern "C"
 }
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/scoped_array.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/array.hpp>

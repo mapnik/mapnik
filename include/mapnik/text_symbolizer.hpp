@@ -31,7 +31,7 @@
 #include <mapnik/text_placements/dummy.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/make_shared.hpp>
 
 // stl

@@ -31,7 +31,7 @@
 
 // boost
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // oci
 #include "occi_types.hpp"
