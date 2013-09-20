@@ -172,6 +172,7 @@ files = {
     'marker-path-expression':{},
     'map-background-image-compositing':{'sizes':[(512,512)]},
     'building-symbolizer-opacity':{'sizes':[(512,512)]},
+    'line-pattern-symbolizer-opacity':{'sizes':[(512,512)]}
     }
 
 class Reporting:
