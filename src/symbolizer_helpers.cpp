@@ -505,5 +505,4 @@ agg::trans_affine const& shield_symbolizer_helper<FaceManagerT, DetectorT>::get_
 
 template class text_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
 template class shield_symbolizer_helper<face_manager<freetype_engine>, label_collision_detector4>;
-template class mapnik::placement_finder<mapnik::label_collision_detector4>;
 } //namespace
