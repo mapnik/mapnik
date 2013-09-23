@@ -3,7 +3,7 @@
 from nose.tools import *
 import sys
 import time
-from utilities import execution_path
+from utilities import execution_path, run_all
 from subprocess import Popen, PIPE
 import os, mapnik
 
@@ -88,15 +88,15 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
     postgis_setup()
 
     def test_psql_error_should_not_break_connection_pool():
-        # Bad request, will trig an error when returning result
+        # Bad request, will trigger an error when returning result
         ds_bad = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table="""(SELECT geom as geom,label::int from public.test1) as failure_table""",
-                            max_async_connection=5,geometry_field='geom',srid=4326,trace=False)
+                            max_async_connection=5,geometry_field='geom',srid=4326)
 
         # Good request 
         ds_good = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table="test1",
-                            max_async_connection=5,geometry_field='geom',srid=4326,trace=False)
+                            max_async_connection=5,geometry_field='geom',srid=4326)
 
-        # This will/should trig a PSQL error
+        # This will/should trigger a PSQL error
         failed = False
         try:
             fs = ds_bad.featureset()
@@ -110,9 +110,7 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         # Should be ok
         fs = ds_good.featureset()
         for feature in fs:
-            pass        
-
-
+            pass
 
 if __name__ == "__main__":
     setup()
