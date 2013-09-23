@@ -263,7 +263,6 @@ public:
     QString name() const
     {
         mapnik::expression_ptr filter = rule_.get_filter();
-
         return QString(mapnik::to_expression_string(*filter).c_str());
     }
 

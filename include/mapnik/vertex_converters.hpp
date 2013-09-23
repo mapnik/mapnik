@@ -44,7 +44,6 @@
 #include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/include/make_vector.hpp>
 
-#include <boost/foreach.hpp>
 #include <boost/array.hpp>
 
 // mapnik

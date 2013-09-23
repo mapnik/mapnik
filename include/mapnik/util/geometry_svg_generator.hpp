@@ -42,11 +42,11 @@
 #include <boost/fusion/include/boost_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
-/*!
- * adapted to conform to the concepts
- * required by Karma to be recognized as a container of
- * attributes for output generation.
- */
+
+// adapted to conform to the concepts
+// required by Karma to be recognized as a container of
+// attributes for output generation.
+
 namespace boost { namespace spirit { namespace traits {
 
 // TODO - this needs to be made generic to any path type

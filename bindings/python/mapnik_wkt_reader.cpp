@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko, Jean-Francois Doyon
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,56 +20,36 @@
  *
  *****************************************************************************/
 
-//mapnik
-#include <mapnik/font_set.hpp>
+// boost
+#include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/make_shared.hpp>
+// mapnik
+#include <mapnik/geometry.hpp>
+#include <mapnik/wkt/wkt_factory.hpp>
 
-//stl
-#include <string>
+namespace  impl {
 
-namespace mapnik
+typedef boost::ptr_vector<mapnik::geometry_type> path_type;
+
+boost::shared_ptr<path_type> from_wkt(mapnik::wkt_parser & p, std::string const& wkt)
 {
-
-font_set::font_set(std::string const& name)
-    : name_(name) {}
-
-font_set::font_set(font_set const& rhs)
-    : name_(rhs.name_),
-      face_names_(rhs.face_names_) {}
-
-font_set& font_set::operator=(font_set const& other)
-{
-    if (this == &other)
-        return *this;
-    name_ = other.name_;
-    face_names_ = other.face_names_;
-
-    return *this;
+    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    if (!p.parse(wkt, *paths))
+        throw std::runtime_error("Failed to parse WKT");
+    return paths;
 }
 
-font_set::~font_set() {}
-
-std::size_t font_set::size() const
-{
-    return face_names_.size();
 }
 
-void font_set::add_face_name(std::string const& face_name)
+void export_wkt_reader()
 {
-    face_names_.push_back(face_name);
-}
+    using mapnik::wkt_parser;
+    using namespace boost::python;
 
-void font_set::set_name(std::string const& name)
-{
-    name_ = name;
-}
-
-std::string const& font_set::get_name() const
-{
-    return name_;
-}
-
-std::vector<std::string> const& font_set::get_face_names() const
-{
-    return face_names_;
-}
+    class_<wkt_parser, boost::noncopyable>("WKTReader",init<>())
+        .def("read",&impl::from_wkt)
+        ;
 }

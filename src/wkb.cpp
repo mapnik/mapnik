@@ -46,8 +46,8 @@ private:
     };
 
     const char* wkb_;
-    unsigned size_;
-    unsigned pos_;
+    std::size_t size_;
+    std::size_t pos_;
     wkbByteOrder byteOrder_;
     bool needSwap_;
     wkbFormat format_;
@@ -71,7 +71,7 @@ public:
         wkbGeometryCollectionZ=1007
     };
 
-    wkb_reader(const char* wkb, unsigned size, wkbFormat format)
+    wkb_reader(const char* wkb, std::size_t size, wkbFormat format)
         : wkb_(wkb),
           size_(size),
           pos_(0),
@@ -81,9 +81,9 @@ public:
         if (format_ == wkbAuto)
         {
             if (size_ >= 44
-                && (unsigned char)(wkb_[0]) == (unsigned char)(0x00)
-                && (unsigned char)(wkb_[38]) == (unsigned char)(0x7C)
-                && (unsigned char)(wkb_[size_ - 1]) == (unsigned char)(0xFE))
+                && static_cast<unsigned char>(wkb_[0]) == static_cast<unsigned char>(0x00)
+                && static_cast<unsigned char>(wkb_[38]) == static_cast<unsigned char>(0x7C)
+                && static_cast<unsigned char>(wkb_[size_ - 1]) == static_cast<unsigned char>(0xFE))
             {
                 format_ = wkbSpatiaLite;
             }
@@ -455,7 +455,7 @@ bool geometry_utils::from_wkb(boost::ptr_vector<geometry_type>& paths,
                                unsigned size,
                                wkbFormat format)
 {
-    unsigned geom_count = paths.size();
+    std::size_t geom_count = paths.size();
     wkb_reader reader(wkb, size, format);
     reader.read(paths);
     if (paths.size() > geom_count)

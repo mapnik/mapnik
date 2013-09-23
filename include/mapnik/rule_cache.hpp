@@ -26,6 +26,7 @@
 // mapnik
 #include <mapnik/rule.hpp>
 #include <mapnik/feature_type_style.hpp>
+#include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/foreach.hpp>
@@ -36,7 +37,7 @@
 namespace mapnik
 {
 
-class rule_cache
+class rule_cache : private noncopyable
 {
 public:
     typedef std::vector<rule const*> rule_ptrs;

@@ -43,6 +43,10 @@ import itertools
 import os
 import sys
 import warnings
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 def bootstrap_env():
     """
@@ -254,6 +258,12 @@ class _Projection(Projection,_injector):
           Coord.inverse(self, projection).
         """
         return inverse_(obj,self)
+
+class _Feature(Feature,_injector):
+    __geo_interface__ = property(lambda self: json.loads(self.to_geojson()))
+
+class _Path(Path,_injector):
+    __geo_interface__ = property(lambda self: json.loads(self.to_geojson()))
 
 class _Datasource(Datasource,_injector):
 

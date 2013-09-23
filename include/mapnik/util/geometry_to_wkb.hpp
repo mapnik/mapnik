@@ -30,7 +30,6 @@
 // boost
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/interprocess/streams/bufferstream.hpp>
 #include <boost/foreach.hpp>
 
 // stl
@@ -72,6 +71,29 @@ inline void reverse_bytes(char size, char *address)
         *first = x;
     }
 }
+
+struct wkb_stream
+{
+    wkb_stream(char * buffer, std::size_t size)
+        : buffer_(buffer),
+          size_(size),
+          pos_(0) {}
+
+    void write(char const* data, std::size_t size)
+    {
+        std::memcpy(buffer_ + pos_, data, size);
+        pos_ += size;
+    }
+
+    bool good()
+    {
+        return (pos_ <= size_) ? true : false;
+    }
+
+    char * buffer_;
+    std::streamsize size_;
+    std::streamsize pos_;
+};
 
 template <typename S, typename T>
 inline void write (S & stream, T val, std::size_t size, wkbByteOrder byte_order)
@@ -123,7 +145,7 @@ wkb_buffer_ptr to_point_wkb( GeometryType const& g, wkbByteOrder byte_order)
     assert(g.size() == 1);
     std::size_t size = 1 + 4 + 8*2 ; // byteOrder + wkbType + Point
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
-    boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
+    wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::Point);
     write(ss,type,4,byte_order);
@@ -143,7 +165,7 @@ wkb_buffer_ptr to_line_string_wkb( GeometryType const& g, wkbByteOrder byte_orde
     assert(num_points > 1);
     std::size_t size = 1 + 4 + 4 + 8*2*num_points ; // byteOrder + wkbType + numPoints + Point*numPoints
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
-    boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
+    wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::LineString);
     write(ss,type,4,byte_order);
@@ -191,8 +213,7 @@ wkb_buffer_ptr to_polygon_wkb( GeometryType const& g, wkbByteOrder byte_order)
     }
     unsigned num_rings = rings.size();
     wkb_buffer_ptr wkb = boost::make_shared<wkb_buffer>(size);
-    boost::interprocess::bufferstream ss(wkb->buffer(), wkb->size(), std::ios::out | std::ios::binary);
-
+    wkb_stream ss(wkb->buffer(), wkb->size());
     ss.write(reinterpret_cast<char*>(&byte_order),1);
     int type = static_cast<int>(mapnik::Polygon);
     write(ss,type,4,byte_order);
@@ -264,7 +285,7 @@ wkb_buffer_ptr to_wkb(geometry_container const& paths, wkbByteOrder byte_order )
         }
 
         wkb_buffer_ptr multi_wkb = boost::make_shared<wkb_buffer>(multi_size);
-        boost::interprocess::bufferstream ss(multi_wkb->buffer(), multi_wkb->size(), std::ios::out | std::ios::binary);
+        wkb_stream ss(multi_wkb->buffer(), multi_wkb->size());
         ss.write(reinterpret_cast<char*>(&byte_order),1);
         multi_type = collection ? 7 : multi_type + 3;
         write(ss,multi_type, 4, byte_order);

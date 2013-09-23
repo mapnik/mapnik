@@ -29,7 +29,9 @@
 #include <mapnik/config_error.hpp>
 
 // boost
-#include <boost/variant.hpp>
+#include <boost/variant/variant.hpp>
+#include <boost/variant/static_visitor.hpp>
+#include <boost/variant/apply_visitor.hpp>
 
 // stl
 #include <vector>

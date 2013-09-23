@@ -14,6 +14,18 @@ Released ...
 
 Summary: TODO
 
+- Fixed alpha handling bug with `comp-op:dst-over` (#1995)
+
+- Fixed alpha handling bug with building-fill-opacity (#2011)
+
+- Optimized mapnik.Path.to_wkb
+
+- Python: added `__geo_interface__` to mapnik.Feature and mapnik.Path (#2009)
+
+- Python: Exposed optimized WKTReader for parsing WKT into geometry paths (6bfbb53)
+
+- Optimized expression evaluation of text by avoiding extra copy (1dd1275)
+
 - Added Map level `background-image-comp-op` to control the compositing operation used to blend the 
 `background-image` onto the `background-color`. Has no meaning if `background-color` or `background-image`
 are not set. (#1966)

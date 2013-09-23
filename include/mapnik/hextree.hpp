@@ -351,19 +351,19 @@ public:
         pal_remap_.resize(sorted_pal_.size());
         palette.clear();
         palette.reserve(sorted_pal_.size());
-        for (unsigned i=0; i<sorted_pal_.size(); i++)
+        for (unsigned i=0; i<sorted_pal_.size(); ++i)
         {
             if (sorted_pal_[i].a<255)
             {
-                pal_remap_[i] = palette.size();
+                pal_remap_[i] = static_cast<unsigned>(palette.size());
                 palette.push_back(sorted_pal_[i]);
             }
         }
-        for (unsigned i=0; i<sorted_pal_.size(); i++)
+        for (unsigned i=0; i<sorted_pal_.size(); ++i)
         {
             if (sorted_pal_[i].a==255)
             {
-                pal_remap_[i] = palette.size();
+                pal_remap_[i] = static_cast<unsigned>(palette.size());
                 palette.push_back(sorted_pal_[i]);
             }
         }

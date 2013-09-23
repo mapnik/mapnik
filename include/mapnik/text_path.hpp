@@ -72,7 +72,7 @@ public:
         text_ += text;
     }
 
-    unsigned num_characters() const
+    std::size_t num_characters() const
     {
         return characters_.size();
     }
@@ -87,12 +87,12 @@ public:
         return is_rtl;
     }
 
-    char_info const& at(unsigned i) const
+    char_info const& at(std::size_t i) const
     {
         return characters_[i];
     }
 
-    char_info const& operator[](unsigned i) const
+    char_info const& operator[](std::size_t i) const
     {
         return at(i);
     }
@@ -183,7 +183,7 @@ public:
     }
 
     /** Number of nodes. */
-    int num_nodes() const
+    std::size_t num_nodes() const
     {
         return nodes_.size();
     }
