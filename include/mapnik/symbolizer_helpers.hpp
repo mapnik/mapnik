@@ -28,6 +28,7 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/marker_cache.hpp>
 #include <mapnik/processed_text.hpp>
+#include <mapnik/text_path.hpp>
 
 //boost
 #include <boost/scoped_ptr.hpp>
@@ -47,10 +48,7 @@ namespace mapnik {
 
 namespace mapnik {
 
-typedef boost::ptr_vector<text_path> placements_type;
-template <typename DetectorT> class placement_finder;
-
-/** Helper object that does all the TextSymbolizer placment finding
+/** Helper object that does all the TextSymbolizer placement finding
  * work except actually rendering the object. */
 template <typename FaceManagerT, typename DetectorT>
 class text_symbolizer_helper
