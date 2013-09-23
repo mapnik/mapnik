@@ -248,7 +248,7 @@ void pgsql2sqlite(Connection conn,
 
     std::string output_table_insert_sql = "insert into " + output_table_name + " values (?";
 
-    context_ptr ctx = boost::make_shared<context_type>();
+    context_ptr ctx = std::make_shared<context_type>();
 
     for ( unsigned pos = 0; pos < num_fields ; ++pos)
     {
