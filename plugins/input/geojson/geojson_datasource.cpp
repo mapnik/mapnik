@@ -130,7 +130,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
     boost::spirit::multi_pass<base_iterator_type> end =
         boost::spirit::make_default_multi_pass(base_iterator_type());
 
-    mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     mapnik::json::feature_collection_parser<boost::spirit::multi_pass<base_iterator_type> > p(ctx,*tr_);
     bool result = p.parse(begin,end, features_);
     if (!result)
@@ -215,7 +215,7 @@ mapnik::featureset_ptr geojson_datasource::features(mapnik::query const& q) cons
     {
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
         index_array_ = tree_.find(box);
-        return boost::make_shared<geojson_featureset>(features_, index_array_.begin(), index_array_.end());
+        return std::make_shared<geojson_featureset>(features_, index_array_.begin(), index_array_.end());
     }
     // otherwise return an empty featureset pointer
     return mapnik::featureset_ptr();

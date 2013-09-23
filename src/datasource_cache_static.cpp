@@ -87,7 +87,7 @@ namespace mapnik {
 template<typename T>
 datasource_ptr ds_generator(parameters const& params)
 {
-    return boost::make_shared<T>(params);
+    return std::make_shared<T>(params);
 }
 
 typedef datasource_ptr (*ds_generator_ptr)(parameters const& params);

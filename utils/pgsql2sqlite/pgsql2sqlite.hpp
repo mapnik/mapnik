@@ -35,13 +35,12 @@
 
 // boost
 #include <boost/cstdint.hpp>
-#include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 
 //stl
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 static std::string numeric2string(const char* buf)
 {
@@ -50,7 +49,7 @@ static std::string numeric2string(const char* buf)
     boost::int16_t sign    = int2net(buf+4);
     boost::int16_t dscale  = int2net(buf+6);
 
-    boost::scoped_array<boost::int16_t> digits(new boost::int16_t[ndigits]);
+    const std::unique_ptr<boost::int16_t[]> digits(new boost::int16_t[ndigits]);
     for (int n=0; n < ndigits ;++n)
     {
         digits[n] = int2net(buf+8+n*2);
@@ -167,7 +166,7 @@ void pgsql2sqlite(Connection conn,
     namespace sqlite = mapnik::sqlite;
     sqlite::database db(output_filename);
 
-    boost::shared_ptr<ResultSet> rs = conn->executeQuery("select * from (" + query + ") as query limit 0;");
+    std::shared_ptr<ResultSet> rs = conn->executeQuery("select * from (" + query + ") as query limit 0;");
     int count = rs->getNumFields();
 
     std::ostringstream select_sql;
@@ -234,7 +233,7 @@ void pgsql2sqlite(Connection conn,
     cursor_sql << "DECLARE " << cursor_name << " BINARY INSENSITIVE NO SCROLL CURSOR WITH HOLD FOR " << select_sql_str << " FOR READ ONLY";
     conn->execute(cursor_sql.str());
 
-    boost::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
+    std::shared_ptr<CursorResultSet> cursor(new CursorResultSet(conn,cursor_name,10000));
 
     unsigned num_fields = cursor->getNumFields();
 

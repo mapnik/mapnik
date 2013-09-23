@@ -29,7 +29,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "dbfile.hpp"
 #include "shapefile.hpp"
@@ -61,7 +61,7 @@ public:
     shape_file& shp();
     dbf_file& dbf();
 
-    inline boost::shared_ptr<shape_file>& index()
+    inline std::shared_ptr<shape_file>& index()
     {
         return index_;
     }
@@ -79,7 +79,7 @@ public:
     shapeType type_;
     shape_file shp_;
     dbf_file   dbf_;
-    boost::shared_ptr<shape_file> index_;
+    std::shared_ptr<shape_file> index_;
     unsigned reclength_;
     unsigned id_;
     box2d<double> cur_extent_;

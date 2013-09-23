@@ -96,7 +96,7 @@ struct cairo_save_restore
 };
 
 
-cairo_face_manager::cairo_face_manager(boost::shared_ptr<freetype_engine> engine)
+cairo_face_manager::cairo_face_manager(std::shared_ptr<freetype_engine> engine)
     : font_engine_(engine)
 {
 }
@@ -112,7 +112,7 @@ cairo_face_ptr cairo_face_manager::get_face(face_ptr face)
     }
     else
     {
-        entry = boost::make_shared<cairo_face>(font_engine_, face);
+        entry = std::make_shared<cairo_face>(font_engine_, face);
         cache_.insert(std::make_pair(face, entry));
     }
 
@@ -131,10 +131,10 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
       height_(m.height()),
       scale_factor_(scale_factor),
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
-      font_engine_(boost::make_shared<freetype_engine>()),
+      font_engine_(std::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_),
-      detector_(boost::make_shared<label_collision_detector4>(
+      detector_(std::make_shared<label_collision_detector4>(
           box2d<double>(-m.buffer_size(), -m.buffer_size(),
           m.width() + m.buffer_size(), m.height() + m.buffer_size())))
 {
@@ -153,10 +153,10 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
       height_(req.height()),
       scale_factor_(scale_factor),
       t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
-      font_engine_(boost::make_shared<freetype_engine>()),
+      font_engine_(std::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_),
-      detector_(boost::make_shared<label_collision_detector4>(
+      detector_(std::make_shared<label_collision_detector4>(
           box2d<double>(-req.buffer_size(), -req.buffer_size(),
           req.width() + req.buffer_size(), req.height() + req.buffer_size())))
 {
@@ -165,7 +165,7 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
 
 cairo_renderer_base::cairo_renderer_base(Map const& m,
                                          cairo_ptr const& cairo,
-                                         boost::shared_ptr<label_collision_detector4> detector,
+                                         std::shared_ptr<label_collision_detector4> detector,
                                          double scale_factor,
                                          unsigned offset_x,
                                          unsigned offset_y)
@@ -175,7 +175,7 @@ cairo_renderer_base::cairo_renderer_base(Map const& m,
       height_(m.height()),
       scale_factor_(scale_factor),
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
-      font_engine_(boost::make_shared<freetype_engine>()),
+      font_engine_(std::make_shared<freetype_engine>()),
       font_manager_(*font_engine_),
       face_manager_(font_engine_),
       detector_(detector)
@@ -204,12 +204,12 @@ cairo_renderer<cairo_surface_ptr>::cairo_renderer(Map const& m, request const& r
       cairo_renderer_base(m,req, create_context(surface),scale_factor,offset_x,offset_y) {}
 
 template <>
-cairo_renderer<cairo_ptr>::cairo_renderer(Map const& m, cairo_ptr const& cairo, boost::shared_ptr<label_collision_detector4> detector, double scale_factor, unsigned offset_x, unsigned offset_y)
+cairo_renderer<cairo_ptr>::cairo_renderer(Map const& m, cairo_ptr const& cairo, std::shared_ptr<label_collision_detector4> detector, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m,scale_factor),
       cairo_renderer_base(m,cairo,detector,scale_factor,offset_x,offset_y) {}
 
 template <>
-cairo_renderer<cairo_surface_ptr>::cairo_renderer(Map const& m, cairo_surface_ptr const& surface, boost::shared_ptr<label_collision_detector4> detector, double scale_factor, unsigned offset_x, unsigned offset_y)
+cairo_renderer<cairo_surface_ptr>::cairo_renderer(Map const& m, cairo_surface_ptr const& surface, std::shared_ptr<label_collision_detector4> detector, double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<cairo_renderer>(m,scale_factor),
       cairo_renderer_base(m,create_context(surface),detector,scale_factor,offset_x,offset_y) {}
 
@@ -360,8 +360,8 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
 
         if (geom.size() > 2)
         {
-            boost::scoped_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
-            boost::scoped_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
+            const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
+            const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
             std::deque<segment_t> face_segments;
             double x0 = 0;
             double y0 = 0;
@@ -392,7 +392,7 @@ void cairo_renderer_base::process(building_symbolizer const& sym,
             std::deque<segment_t>::const_iterator end=face_segments.end();
             for (; itr != end; ++itr)
             {
-                boost::scoped_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
+                const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
                 faces->move_to(itr->get<0>(), itr->get<1>());
                 faces->line_to(itr->get<2>(), itr->get<3>());
                 faces->line_to(itr->get<2>(), itr->get<3>() + height);
@@ -658,7 +658,7 @@ void cairo_renderer_base::process(point_symbolizer const& sym,
     }
     else
     {
-        marker.reset(boost::make_shared<mapnik::marker>());
+        marker.reset(std::make_shared<mapnik::marker>());
     }
 
 

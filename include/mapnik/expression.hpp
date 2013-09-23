@@ -28,7 +28,7 @@
 #include <mapnik/expression_node_types.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <string>
@@ -39,7 +39,7 @@ namespace mapnik
 
 // fwd declare to reduce compile time
 template <typename Iterator> struct expression_grammar;
-typedef boost::shared_ptr<expr_node> expression_ptr;
+typedef std::shared_ptr<expr_node> expression_ptr;
 typedef std::set<expression_ptr> expression_set;
 
 

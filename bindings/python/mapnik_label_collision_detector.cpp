@@ -35,27 +35,26 @@
 using mapnik::label_collision_detector4;
 using mapnik::box2d;
 using mapnik::Map;
-using boost::make_shared;
 
 namespace
 {
 
-boost::shared_ptr<label_collision_detector4>
+std::shared_ptr<label_collision_detector4>
 create_label_collision_detector_from_extent(box2d<double> const &extent)
 {
-    return make_shared<label_collision_detector4>(extent);
+    return std::make_shared<label_collision_detector4>(extent);
 }
 
-boost::shared_ptr<label_collision_detector4>
+std::shared_ptr<label_collision_detector4>
 create_label_collision_detector_from_map(Map const &m)
 {
     double buffer = m.buffer_size();
     box2d<double> extent(-buffer, -buffer, m.width() + buffer, m.height() + buffer);
-    return make_shared<label_collision_detector4>(extent);
+    return std::make_shared<label_collision_detector4>(extent);
 }
 
 boost::python::list
-make_label_boxes(boost::shared_ptr<label_collision_detector4> det)
+make_label_boxes(std::shared_ptr<label_collision_detector4> det)
 {
     boost::python::list boxes;
 
@@ -77,7 +76,7 @@ void export_label_collision_detector()
     // for overload resolution
     void (label_collision_detector4::*insert_box)(box2d<double> const &) = &label_collision_detector4::insert;
 
-    class_<label_collision_detector4, boost::shared_ptr<label_collision_detector4>, boost::noncopyable>
+    class_<label_collision_detector4, std::shared_ptr<label_collision_detector4>, boost::noncopyable>
         ("LabelCollisionDetector",
          "Object to detect collisions between labels, used in the rendering process.",
          no_init)

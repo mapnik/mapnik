@@ -606,12 +606,12 @@ void MapWidget::updateMap()
    }
 }
 
-boost::shared_ptr<Map> MapWidget::getMap()
+std::shared_ptr<Map> MapWidget::getMap()
 {
    return map_;
 }
 
-void MapWidget::setMap(boost::shared_ptr<Map> map)
+void MapWidget::setMap(std::shared_ptr<Map> map)
 {
    map_ = map;
 }

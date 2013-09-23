@@ -212,7 +212,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                     throw config_error("failed to parse background-image-comp-op: '" + *comp_op_name + "'");
                 }
             }
-    
+
             optional<float> opacity = map_node.get_opt_attr<float>("background-image-opacity");
             if (opacity)
             {
@@ -730,7 +730,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
                 //now we are ready to create datasource
                 try
                 {
-                    boost::shared_ptr<datasource> ds =
+                    std::shared_ptr<datasource> ds =
                         datasource_cache::instance().create(params);
                     lyr.set_datasource(ds);
                 }
@@ -875,7 +875,7 @@ void map_parser::parse_symbolizer_base(symbolizer_base &sym, xml_node const &pt)
     optional<std::string> geometry_transform_wkt = pt.get_opt_attr<std::string>("geometry-transform");
     if (geometry_transform_wkt)
     {
-        mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+        mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
         if (!mapnik::parse_transform(*tl, *geometry_transform_wkt, pt.get_tree().transform_expr_grammar))
         {
             std::string ss("Could not parse transform from '");
@@ -958,7 +958,7 @@ void map_parser::parse_point_symbolizer(rule & rule, xml_node const & sym)
             optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
             if (image_transform_wkt)
             {
-                mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+                mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
                 if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
                 {
                     throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
@@ -1036,7 +1036,7 @@ void map_parser::parse_markers_symbolizer(rule & rule, xml_node const& sym)
         optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)
         {
-            mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+            mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
             if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
             {
                 throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
@@ -1188,7 +1188,7 @@ void map_parser::parse_text_symbolizer(rule & rule, xml_node const& sym)
         if (placement_type) {
             placement_finder = placements::registry::instance().from_xml(*placement_type, sym, fontsets_);
         } else {
-            placement_finder = boost::make_shared<text_placements_dummy>();
+            placement_finder = std::make_shared<text_placements_dummy>();
             placement_finder->defaults.from_xml(sym, fontsets_);
         }
         if (strict_ &&
@@ -1220,7 +1220,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         if (placement_type) {
             placement_finder = placements::registry::instance().from_xml(*placement_type, sym, fontsets_);
         } else {
-            placement_finder = boost::make_shared<text_placements_dummy>();
+            placement_finder = std::make_shared<text_placements_dummy>();
         }
         placement_finder->defaults.from_xml(sym, fontsets_);
         if (strict_ &&
@@ -1234,7 +1234,7 @@ void map_parser::parse_shield_symbolizer(rule & rule, xml_node const& sym)
         optional<std::string> image_transform_wkt = sym.get_opt_attr<std::string>("transform");
         if (image_transform_wkt)
         {
-            mapnik::transform_list_ptr tl = boost::make_shared<mapnik::transform_list>();
+            mapnik::transform_list_ptr tl = std::make_shared<mapnik::transform_list>();
             if (!mapnik::parse_transform(*tl, *image_transform_wkt, sym.get_tree().transform_expr_grammar))
             {
                 throw mapnik::config_error("Failed to parse transform: '" + *image_transform_wkt + "'");
@@ -1544,7 +1544,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
             if (cssIter->is("RasterColorizer"))
             {
                 found_colorizer = true;
-                raster_colorizer_ptr colorizer = boost::make_shared<raster_colorizer>();
+                raster_colorizer_ptr colorizer = std::make_shared<raster_colorizer>();
                 raster_sym.set_colorizer(colorizer);
                 if (parse_raster_colorizer(colorizer, *cssIter))
                     raster_sym.set_colorizer(colorizer);
@@ -1554,7 +1554,7 @@ void map_parser::parse_raster_symbolizer(rule & rule, xml_node const & sym)
         // look for properties one level up
         if (!found_colorizer)
         {
-            raster_colorizer_ptr colorizer = boost::make_shared<raster_colorizer>();
+            raster_colorizer_ptr colorizer = std::make_shared<raster_colorizer>();
             if (parse_raster_colorizer(colorizer, sym))
                 raster_sym.set_colorizer(colorizer);
         }

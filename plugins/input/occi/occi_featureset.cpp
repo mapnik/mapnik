@@ -122,7 +122,7 @@ feature_ptr occi_featureset::next()
         }
         else
         {
-            boost::scoped_ptr<SDOGeometry> geom(dynamic_cast<SDOGeometry*>(rs_->getObject(1)));
+            const std::unique_ptr<SDOGeometry> geom(dynamic_cast<SDOGeometry*>(rs_->getObject(1)));
             if (geom.get())
             {
                 convert_geometry(geom.get(), feature);

@@ -30,7 +30,7 @@
 #include <mapnik/geom_util.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 // ogr
 #include <ogrsf_frmts.h>
@@ -54,7 +54,7 @@ private:
     mapnik::context_ptr ctx_;
     OGRLayer& layer_;
     OGRFeatureDefn* layerdef_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     const char* fidcolumn_;
     mutable int count_;
 };

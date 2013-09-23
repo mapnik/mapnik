@@ -39,7 +39,7 @@
 #include <mapnik/pixel_position.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/make_shared.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -63,7 +63,7 @@ struct char_properties;
 class stroker;
 struct glyph_t;
 
-typedef boost::shared_ptr<font_face> face_ptr;
+typedef std::shared_ptr<font_face> face_ptr;
 
 class MAPNIK_DECL font_glyph : private mapnik::noncopyable
 {
@@ -85,7 +85,7 @@ private:
     unsigned index_;
 };
 
-typedef boost::shared_ptr<font_glyph> glyph_ptr;
+typedef std::shared_ptr<font_glyph> glyph_ptr;
 
 
 
@@ -111,8 +111,8 @@ private:
     std::map<unsigned, char_info> dimension_cache_;
 };
 
-typedef boost::shared_ptr<font_face_set> face_set_ptr;
-typedef boost::shared_ptr<stroker> stroker_ptr;
+typedef std::shared_ptr<font_face_set> face_set_ptr;
+typedef std::shared_ptr<stroker> stroker_ptr;
 
 class MAPNIK_DECL freetype_engine
 {
@@ -179,7 +179,7 @@ public:
 
     face_set_ptr get_face_set(std::string const& name)
     {
-        face_set_ptr face_set = boost::make_shared<font_face_set>();
+        face_set_ptr face_set = std::make_shared<font_face_set>();
         if (face_ptr face = get_face(name))
         {
             face_set->add(face);
@@ -190,7 +190,7 @@ public:
     face_set_ptr get_face_set(font_set const& fset)
     {
         std::vector<std::string> const& names = fset.get_face_names();
-        face_set_ptr face_set = boost::make_shared<font_face_set>();
+        face_set_ptr face_set = std::make_shared<font_face_set>();
         for ( std::string const& name : names)
         {
             face_ptr face = get_face(name);

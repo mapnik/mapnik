@@ -202,7 +202,7 @@ mapnik::featureset_ptr python_datasource::features(mapnik::query const& q) const
             {
                 return mapnik::featureset_ptr();
             }
-            return boost::make_shared<python_featureset>(features);
+            return std::make_shared<python_featureset>(features);
         }
         // otherwise return an empty featureset pointer
         return mapnik::featureset_ptr();
@@ -226,7 +226,7 @@ mapnik::featureset_ptr python_datasource::features_at_point(mapnik::coord2d cons
             return mapnik::featureset_ptr();
         }
         // otherwise, return a feature set which can iterate over the iterator
-        return boost::make_shared<python_featureset>(features);
+        return std::make_shared<python_featureset>(features);
     }
     catch ( boost::python::error_already_set )
     {

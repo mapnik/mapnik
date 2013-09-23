@@ -105,7 +105,7 @@ bool text_placement_info_simple::next_position_only()
 text_placement_info_ptr text_placements_simple::get_placement_info(
     double scale_factor) const
 {
-    return boost::make_shared<text_placement_info_simple>(this, scale_factor);
+    return std::make_shared<text_placement_info_simple>(this, scale_factor);
 }
 
 /** Position string: [POS][SIZE]
@@ -173,7 +173,7 @@ std::string text_placements_simple::get_positions()
 
 text_placements_ptr text_placements_simple::from_xml(xml_node const &xml, fontset_map const & fontsets)
 {
-    text_placements_ptr ptr = boost::make_shared<text_placements_simple>(
+    text_placements_ptr ptr = std::make_shared<text_placements_simple>(
         xml.get_attr<std::string>("placements", "X"));
     ptr->defaults.from_xml(xml, fontsets);
     return ptr;

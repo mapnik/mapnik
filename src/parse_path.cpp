@@ -55,7 +55,7 @@ path_expression_ptr parse_path(std::string const& str,
     bool r = qi::phrase_parse(itr, end, g, boost::spirit::standard_wide::space, path);
     if (r  && itr == end)
     {
-        return boost::make_shared<path_expression>(path); //path;
+        return std::make_shared<path_expression>(path); //path;
     }
     else
     {

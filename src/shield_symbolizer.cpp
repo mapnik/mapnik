@@ -26,7 +26,7 @@
 #include <mapnik/image_reader.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 namespace mapnik
 {

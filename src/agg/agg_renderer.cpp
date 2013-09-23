@@ -77,7 +77,7 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
+      detector_(std::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
       ras_ptr(new rasterizer),
       query_extent_(),
       gamma_method_(GAMMA_POWER),
@@ -99,7 +99,7 @@ agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, doub
       t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
+      detector_(std::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
       ras_ptr(new rasterizer),
       query_extent_(),
       gamma_method_(GAMMA_POWER),
@@ -109,7 +109,7 @@ agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, doub
 }
 
 template <typename T>
-agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, boost::shared_ptr<label_collision_detector4> detector,
+agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, std::shared_ptr<label_collision_detector4> detector,
                               double scale_factor, unsigned offset_x, unsigned offset_y)
     : feature_style_processor<agg_renderer>(m, scale_factor),
       pixmap_(pixmap),
@@ -240,7 +240,7 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
     {
         if (!internal_buffer_)
         {
-            internal_buffer_ = boost::make_shared<buffer_type>(pixmap_.width(),pixmap_.height());
+            internal_buffer_ = std::make_shared<buffer_type>(pixmap_.width(),pixmap_.height());
         }
         else
         {

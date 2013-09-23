@@ -523,7 +523,7 @@ featureset_ptr occi_datasource::features(query const& q) const
     std::set<std::string> const& props = q.property_names();
     std::set<std::string>::const_iterator pos = props.begin();
     std::set<std::string>::const_iterator end = props.end();
-    mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     for (; pos != end; ++pos)
     {
         s << ", " << *pos;
@@ -562,7 +562,7 @@ featureset_ptr occi_datasource::features(query const& q) const
 
     MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 
-    return boost::make_shared<occi_featureset>(pool_,
+    return std::make_shared<occi_featureset>(pool_,
                                                 conn_,
                                                 ctx,
                                                 s.str(),
@@ -590,7 +590,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol)
     }
     std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
     std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
-    mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+    mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
     while (itr != end)
     {
         s << ", " << itr->get_name();
@@ -631,7 +631,7 @@ featureset_ptr occi_datasource::features_at_point(coord2d const& pt, double tol)
 
     MAPNIK_LOG_DEBUG(occi) << "occi_datasource: " << s.str();
 
-    return boost::make_shared<occi_featureset>(pool_,
+    return std::make_shared<occi_featureset>(pool_,
                                                 conn_,
                                                 ctx,
                                                 s.str(),

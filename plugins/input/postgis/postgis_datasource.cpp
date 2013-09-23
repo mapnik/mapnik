@@ -51,7 +51,7 @@ const double postgis_datasource::FMAX = std::numeric_limits<double>::max();
 const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
-using boost::shared_ptr;
+using std::shared_ptr;
 using mapnik::attribute_descriptor;
 
 postgis_datasource::postgis_datasource(parameters const& params)
@@ -557,7 +557,7 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
 }
 
 
-boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> const &conn, std::string const& sql) const
+std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Connection> const &conn, std::string const& sql) const
 {
     if (cursor_fetch_size_ > 0)
     {
@@ -573,7 +573,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
             throw mapnik::datasource_exception("Postgis Plugin: error creating cursor for data select." );
         }
 
-        return boost::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
+        return std::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
 
     }
     else
@@ -643,7 +643,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
 
             s << ") AS geom";
 
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+            mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             std::set<std::string> const& props = q.property_names();
             std::set<std::string>::const_iterator pos = props.begin();
             std::set<std::string>::const_iterator end = props.end();
@@ -680,8 +680,8 @@ featureset_ptr postgis_datasource::features(const query& q) const
                 s << " LIMIT " << row_limit_;
             }
 
-            boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+            std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
+            return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
         else
         {
@@ -739,7 +739,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             std::ostringstream s;
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+            mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
 
@@ -775,8 +775,8 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
                 s << " LIMIT " << row_limit_;
             }
 
-            boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
-            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+            std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str());
+            return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
     }
 

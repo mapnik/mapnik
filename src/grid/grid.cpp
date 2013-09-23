@@ -47,7 +47,7 @@ hit_grid<T>::hit_grid(int width, int height, std::string const& key, unsigned in
       names_(),
       f_keys_(),
       features_(),
-      ctx_(boost::make_shared<mapnik::context_type>())
+      ctx_(std::make_shared<mapnik::context_type>())
       {
           f_keys_[base_mask] = "";
           data_.set(base_mask);
@@ -80,7 +80,7 @@ void hit_grid<T>::clear()
     names_.clear();
     f_keys_[base_mask] = "";
     data_.set(base_mask);
-    ctx_ = boost::make_shared<mapnik::context_type>();
+    ctx_ = std::make_shared<mapnik::context_type>();
 }
 
 template <typename T>

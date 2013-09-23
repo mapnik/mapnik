@@ -34,7 +34,7 @@
 #include <string>
 
 // boost
-#include <boost/scoped_array.hpp>
+
 
 
 namespace mapnik {

@@ -238,7 +238,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                                                 itr->second.first, // face index
                                                 &face);
 
-            if (!error) return boost::make_shared<font_face>(face);
+            if (!error) return std::make_shared<font_face>(face);
         }
         else
         {
@@ -257,7 +257,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                                                  static_cast<FT_Long>(buffer.size()),
                                                  itr->second.first,
                                                  &face);
-            if (!error) return boost::make_shared<font_face>(face);
+            if (!error) return std::make_shared<font_face>(face);
             else
             {
                 // we can't load font, erase it.
@@ -274,7 +274,7 @@ stroker_ptr freetype_engine::create_stroker()
     FT_Error error = FT_Stroker_New(library_, &s);
     if (!error)
     {
-        return boost::make_shared<stroker>(s);
+        return std::make_shared<stroker>(s);
     }
     return stroker_ptr();
 }
@@ -295,11 +295,11 @@ glyph_ptr font_face_set::get_glyph(unsigned c) const
     for ( face_ptr const& face : faces_)
     {
         FT_UInt g = face->get_char(c);
-        if (g) return boost::make_shared<font_glyph>(face, g);
+        if (g) return std::make_shared<font_glyph>(face, g);
     }
 
     // Final fallback to empty square if nothing better in any font
-    return boost::make_shared<font_glyph>(*faces_.begin(), 0);
+    return std::make_shared<font_glyph>(*faces_.begin(), 0);
 }
 
 char_info font_face_set::character_dimensions(unsigned int c)

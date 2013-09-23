@@ -217,7 +217,7 @@ featureset_ptr gdal_datasource::features(query const& q) const
 
     gdal_query gq = q;
 
-    // TODO - move to boost::make_shared, but must reduce # of args to <= 9
+    // TODO - move to std::make_shared, but must reduce # of args to <= 9
     return featureset_ptr(new gdal_featureset(*open_dataset(),
                                               band_,
                                               gq,
@@ -238,7 +238,7 @@ featureset_ptr gdal_datasource::features_at_point(coord2d const& pt, double tol)
 
     gdal_query gq = pt;
 
-    // TODO - move to boost::make_shared, but must reduce # of args to <= 9
+    // TODO - move to std::make_shared, but must reduce # of args to <= 9
     return featureset_ptr(new gdal_featureset(*open_dataset(),
                                               band_,
                                               gq,

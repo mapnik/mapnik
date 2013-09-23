@@ -134,7 +134,7 @@ featureset_ptr osm_datasource::features(const query& q) const
     filter_in_box filter(q.get_bbox());
     // so we need to filter osm features by bbox here...
 
-    return boost::make_shared<osm_featureset<filter_in_box> >(filter,
+    return std::make_shared<osm_featureset<filter_in_box> >(filter,
                                                               osm_data_,
                                                               q.property_names(),
                                                               desc_.get_encoding());
@@ -155,7 +155,7 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt, double tol) 
         ++itr;
     }
 
-    return boost::make_shared<osm_featureset<filter_at_point> >(filter,
+    return std::make_shared<osm_featureset<filter_at_point> >(filter,
                                                                 osm_data_,
                                                                 names,
                                                                 desc_.get_encoding());

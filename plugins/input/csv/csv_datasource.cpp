@@ -73,7 +73,7 @@ csv_datasource::csv_datasource(parameters const& params)
       manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
       strict_(*params.get<mapnik::boolean>("strict", false)),
       filesize_max_(*params.get<double>("filesize_max", 20.0)),  // MB
-      ctx_(boost::make_shared<mapnik::context_type>())
+      ctx_(std::make_shared<mapnik::context_type>())
 {
     /* TODO:
        general:
@@ -938,7 +938,7 @@ mapnik::featureset_ptr csv_datasource::features(mapnik::query const& q) const
         }
         ++pos;
     }
-    return boost::make_shared<mapnik::memory_featureset>(q.get_bbox(),features_);
+    return std::make_shared<mapnik::memory_featureset>(q.get_bbox(),features_);
 }
 
 mapnik::featureset_ptr csv_datasource::features_at_point(mapnik::coord2d const& pt, double tol) const

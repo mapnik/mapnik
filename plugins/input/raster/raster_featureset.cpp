@@ -49,7 +49,7 @@ raster_featureset<LookupPolicy>::raster_featureset(LookupPolicy const& policy,
                                                    query const& q)
     : policy_(policy),
       feature_id_(1),
-      ctx_(boost::make_shared<mapnik::context_type>()),
+      ctx_(std::make_shared<mapnik::context_type>()),
       extent_(extent),
       bbox_(q.get_bbox()),
       curIter_(policy_.begin()),
@@ -114,7 +114,7 @@ feature_ptr raster_featureset<LookupPolicy>::next()
                                                             rem.maxy() + y_off + height);
                         intersect = t.backward(feature_raster_extent);
 
-                        mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(intersect, width, height);
+                        mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, width, height);
                         reader->read(x_off, y_off, raster->data_);
                         raster->premultiplied_alpha_ = reader->premultiplied_alpha();
                         feature->set_raster(raster);

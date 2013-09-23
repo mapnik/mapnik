@@ -41,7 +41,7 @@
 #include <cairo.h>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 namespace agg {
 struct trans_affine;
@@ -67,7 +67,7 @@ protected:
                         unsigned offset_y=0);
     cairo_renderer_base(Map const& m,
                         cairo_ptr const& cairo,
-                        boost::shared_ptr<label_collision_detector4> detector,
+                        std::shared_ptr<label_collision_detector4> detector,
                         double scale_factor=1.0,
                         unsigned offset_x=0,
                         unsigned offset_y=0);
@@ -143,10 +143,10 @@ protected:
     unsigned height_;
     double scale_factor_;
     CoordTransform t_;
-    boost::shared_ptr<freetype_engine> font_engine_;
+    std::shared_ptr<freetype_engine> font_engine_;
     face_manager<freetype_engine> font_manager_;
     cairo_face_manager face_manager_;
-    boost::shared_ptr<label_collision_detector4> detector_;
+    std::shared_ptr<label_collision_detector4> detector_;
     box2d<double> query_extent_;
     void setup(Map const& m);
 };
@@ -170,7 +170,7 @@ public:
                    unsigned offset_y=0);
     cairo_renderer(Map const& m,
                    T const& obj,
-                   boost::shared_ptr<label_collision_detector4> detector,
+                   std::shared_ptr<label_collision_detector4> detector,
                    double scale_factor=1.0,
                    unsigned offset_x=0,
                    unsigned offset_y=0);

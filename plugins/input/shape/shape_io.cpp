@@ -53,7 +53,7 @@ shape_io::shape_io(std::string const& shape_name, bool open_index)
     {
         try
         {
-            index_= boost::make_shared<shape_file>(shape_name + INDEX);
+            index_= std::make_shared<shape_file>(shape_name + INDEX);
         }
         catch (...)
         {

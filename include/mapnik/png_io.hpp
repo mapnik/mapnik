@@ -34,7 +34,7 @@
 #include <zlib.h>  // for Z_DEFAULT_COMPRESSION
 
 // boost
-#include <boost/scoped_array.hpp>
+
 
 // stl
 #include <cassert>
@@ -123,7 +123,7 @@ void save_as_png(T1 & file,
     png_set_IHDR(png_ptr, info_ptr,image.width(),image.height(),8,
                  (trans_mode == 0) ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,PNG_INTERLACE_NONE,
                  PNG_COMPRESSION_TYPE_DEFAULT,PNG_FILTER_TYPE_DEFAULT);
-    boost::scoped_array<png_byte*> row_pointers(new png_bytep[image.height()]);
+    const std::unique_ptr<png_bytep[]> row_pointers(new png_bytep[image.height()]);
     for (unsigned int i = 0; i < image.height(); i++)
     {
         row_pointers[i] = (png_bytep)image.getRow(i);

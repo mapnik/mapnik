@@ -60,7 +60,7 @@ void agg_renderer<T>::process(point_symbolizer const& sym,
     }
     else
     {
-        marker.reset(boost::make_shared<mapnik::marker>());
+        marker.reset(std::make_shared<mapnik::marker>());
     }
 
     if (marker)
