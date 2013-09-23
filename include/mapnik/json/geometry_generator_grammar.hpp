@@ -143,7 +143,7 @@ struct multi_geometry_type
 
         for ( ; itr != end; ++itr)
         {
-            if (type != 0u && itr->type() != type)
+            if (type != 0u && static_cast<unsigned>(itr->type()) != type)
             {
                 collection = true;
                 break;
