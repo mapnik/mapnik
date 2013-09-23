@@ -168,7 +168,10 @@ public:
     bool has_else_filter() const;
     void set_also(bool also_filter);
     bool has_also_filter() const;
-    bool active(double scale) const;
+    inline bool active(double scale) const
+    {
+        return ( scale >= min_scale_ - 1e-6 && scale < max_scale_ + 1e-6 && !syms_.empty());
+    }
 
 private:
 

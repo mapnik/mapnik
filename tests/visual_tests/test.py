@@ -170,7 +170,10 @@ files = {
     'style-level-compositing-tiled-0,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['0,1']},
     'style-level-compositing-tiled-1,1':{'sizes':[(512,512)],'bbox':merc_z1_bboxes['1,1']},
     'marker-path-expression':{},
-    'map-background-image-compositing':{'sizes':[(512,512)]}
+    'map-background-image-compositing':{'sizes':[(512,512)]},
+    'building-symbolizer-opacity':{'sizes':[(512,512)]},
+    'line-pattern-symbolizer-opacity':{'sizes':[(512,512)]},
+    'dst-over-compositing':{'sizes':[(512,512)]},
     }
 
 class Reporting:

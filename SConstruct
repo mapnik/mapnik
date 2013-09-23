@@ -1152,6 +1152,9 @@ if not preconfigured:
         if env['THREADING'] == 'multi':
             env.Append(CXXFLAGS = '-mt')
 
+    if env['SHAPE_MEMORY_MAPPED_FILE']:
+        env.Append(CPPDEFINES = '-DSHAPE_MEMORY_MAPPED_FILE')
+
     # allow for mac osx /usr/lib/libicucore.dylib compatibility
     # requires custom supplied headers since Apple does not include them
     # details: http://lists.apple.com/archives/xcode-users/2005/Jun/msg00633.html
