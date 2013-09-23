@@ -70,9 +70,7 @@ public:
         if (! closed_)
         {
             PQfinish(conn_);
-
             MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: postgresql connection closed - " << conn_;
-
             closed_ = true;
         }
     }
@@ -107,7 +105,8 @@ public:
 
         if (! result || (PQresultStatus(result) != PGRES_TUPLES_OK))
         {
-            std::string err_msg = status();
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
             err_msg += "\nin executeQuery Full sql was: '";
             err_msg += sql;
             err_msg += "'\n";
@@ -115,7 +114,6 @@ public:
             {
                 PQclear(result);
             }
-
             throw mapnik::datasource_exception(err_msg);
         }
 
@@ -147,64 +145,53 @@ public:
         {
             result = PQsendQuery(conn_, sql.c_str());
         }
-
         if (result != 1)
         {
-
-            std::string err_msg = status();
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
             err_msg += "\nin executeAsyncQuery Full sql was: '";
             err_msg += sql;
             err_msg += "'\n";
-
             clearAsyncResult(PQgetResult(conn_));
             close();
-
             throw mapnik::datasource_exception(err_msg);
         }
-
         return result;
     }
 
 
     boost::shared_ptr<ResultSet> getNextAsyncResult()
     {
-       PGresult *result = PQgetResult(conn_);
-       if( result && (PQresultStatus(result) != PGRES_TUPLES_OK))
-       {
-           std::string err_msg = status();
-           err_msg += "\nin getNextAsyncResult";
-
-           clearAsyncResult(result);
-           // We need to be guarded against losing the connection
-           // (i.e db restart), we invalidate the full connection
-           close();
-
-           throw mapnik::datasource_exception(err_msg);
-       }
-
+        PGresult *result = PQgetResult(conn_);
+        if( result && (PQresultStatus(result) != PGRES_TUPLES_OK))
+        {
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
+            err_msg += "\nin getNextAsyncResult";
+            clearAsyncResult(result);
+            // We need to guarde against losing the connection
+            // (i.e db restart) so here we invalidate the full connection
+            close();
+            throw mapnik::datasource_exception(err_msg);
+        }
        return boost::make_shared<ResultSet>(result);
     }
 
     boost::shared_ptr<ResultSet> getAsyncResult()
     {
-       PGresult *result = PQgetResult(conn_);
-
-       if ( !result || (PQresultStatus(result) != PGRES_TUPLES_OK))
-       {
-
-           std::string err_msg = status();
-           err_msg += "\nin getAsyncResult Full sql was: '";
-
-           clearAsyncResult(result);
-           // We need to be guarded against losing the connection
-           // (i.e db restart), we invalidate the full connection
-           close();
-
-           throw mapnik::datasource_exception(err_msg);
-
-       }
-
-       return boost::make_shared<ResultSet>(result);
+        PGresult *result = PQgetResult(conn_);
+        if ( !result || (PQresultStatus(result) != PGRES_TUPLES_OK))
+        {
+            std::string err_msg = "Postgis Plugin: ";
+            err_msg += status();
+            err_msg += "\nin getAsyncResult";
+            clearAsyncResult(result);
+            // We need to be guarded against losing the connection
+            // (i.e db restart), we invalidate the full connection
+            close();
+            throw mapnik::datasource_exception(err_msg);
+        }
+        return boost::make_shared<ResultSet>(result);
     }
 
     std::string client_encoding() const
@@ -222,9 +209,7 @@ public:
         if (! closed_)
         {
             PQfinish(conn_);
-
             MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: datasource closed, also closing connection - " << conn_;
-
             closed_ = true;
         }
     }
