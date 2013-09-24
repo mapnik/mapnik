@@ -23,6 +23,8 @@
 #include "connection_manager.hpp"
 #include "postgis_datasource.hpp"
 #include "postgis_featureset.hpp"
+#include "asyncresultset.hpp"
+
 
 // mapnik
 #include <mapnik/debug.hpp>
@@ -67,25 +69,25 @@ postgis_datasource::postgis_datasource(parameters const& params)
       srid_(*params.get<int>("srid", 0)),
       extent_initialized_(false),
       simplify_geometries_(false),
-    desc_(*params.get<std::string>("type"), "utf-8"),
-    creator_(params.get<std::string>("host"),
+      desc_(*params.get<std::string>("type"), "utf-8"),
+      creator_(params.get<std::string>("host"),
              params.get<std::string>("port"),
              params.get<std::string>("dbname"),
              params.get<std::string>("user"),
              params.get<std::string>("password"),
              params.get<std::string>("connect_timeout", "4")),
-    bbox_token_("!bbox!"),
-    scale_denom_token_("!scale_denominator!"),
-    pixel_width_token_("!pixel_width!"),
-    pixel_height_token_("!pixel_height!"),
-    pool_max_size_(*params_.get<int>("max_size", 5)),
-    persist_connection_(*params.get<mapnik::boolean>("persist_connection", true)),
-    extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
-    max_async_connections_(*params_.get<int>("max_async_connection", 1)),
-    asynchronous_request_(false),
-// params below are for testing purposes only (will likely be removed at any time)
-    intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
-    intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
+      bbox_token_("!bbox!"),
+      scale_denom_token_("!scale_denominator!"),
+      pixel_width_token_("!pixel_width!"),
+      pixel_height_token_("!pixel_height!"),
+      pool_max_size_(*params_.get<int>("max_size", 10)),
+      persist_connection_(*params.get<mapnik::boolean>("persist_connection", true)),
+      extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
+      max_async_connections_(*params_.get<int>("max_async_connection", 1)),
+      asynchronous_request_(false),
+      // params below are for testing purposes only and may be removed at any time
+      intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
+      intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::init");
@@ -108,10 +110,10 @@ postgis_datasource::postgis_datasource(parameters const& params)
         if(max_async_connections_ > pool_max_size_)
         {
             std::ostringstream err;
-            err << "PostGIS Plugin: Error: 'max_async_connections_ must be <= pool_max_size_\n";
+            err << "PostGIS Plugin: Error: 'max_async_connections (";
+                << max_async_connections_ << ") must be <= max_size(" << pool_max_size_ << ")";
             throw mapnik::datasource_exception(err.str());
         }
-
         asynchronous_request_ = true;
     }
 

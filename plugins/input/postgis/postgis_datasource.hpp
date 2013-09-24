@@ -46,7 +46,6 @@
 #include "connection_manager.hpp"
 #include "resultset.hpp"
 #include "cursorresultset.hpp"
-#include "asyncresultset.hpp"
 
 using mapnik::transcoder;
 using mapnik::datasource;
