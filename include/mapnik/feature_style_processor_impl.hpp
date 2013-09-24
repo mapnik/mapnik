@@ -130,8 +130,8 @@ struct has_process
 // Store material for layer rendering in a two step process
 struct layer_rendering_material {
         layer const& lay_;
-        projection     proj0_;
-        projection     proj1_;
+        projection const& proj0_;
+        projection proj1_;
         box2d<double> layer_ext2_;
         std::vector<feature_type_style const*> active_styles_;
         std::vector<featureset_ptr> featureset_ptr_list_;
