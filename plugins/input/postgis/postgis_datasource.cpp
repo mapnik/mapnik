@@ -110,7 +110,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
         if(max_async_connections_ > pool_max_size_)
         {
             std::ostringstream err;
-            err << "PostGIS Plugin: Error: 'max_async_connections (";
+            err << "PostGIS Plugin: Error: 'max_async_connections ("
                 << max_async_connections_ << ") must be <= max_size(" << pool_max_size_ << ")";
             throw mapnik::datasource_exception(err.str());
         }
@@ -630,10 +630,12 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
 
 processor_context_ptr postgis_datasource::get_context(feature_style_context_map & ctx) const
 {
-    std::string ds_name(name());
     if (!asynchronous_request_)
-        return  processor_context_ptr();
+    {
+        return processor_context_ptr();
+    }
 
+    std::string ds_name(name());
     feature_style_context_map::const_iterator itr = ctx.find(ds_name);
     if (itr != ctx.end())
     {
@@ -645,10 +647,10 @@ processor_context_ptr postgis_datasource::get_context(feature_style_context_map 
     }
 }
 
-featureset_ptr postgis_datasource::features(const query& q) const
+featureset_ptr postgis_datasource::features(query const& q) const
 {
     // if the driver is in asynchronous mode, return the appropriate fetaures
-    if ( asynchronous_request_ )
+    if (asynchronous_request_ )
     {
         return features_with_context(q,boost::make_shared<postgis_processor_context>());
     }
@@ -658,7 +660,7 @@ featureset_ptr postgis_datasource::features(const query& q) const
     }
 }
 
-featureset_ptr postgis_datasource::features_with_context(const query& q,processor_context_ptr proc_ctx) const
+featureset_ptr postgis_datasource::features_with_context(query const& q,processor_context_ptr proc_ctx) const
 {
 
 #ifdef MAPNIK_STATS

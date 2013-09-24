@@ -69,8 +69,8 @@ public:
     mapnik::datasource::datasource_t type() const;
     static const char * name();
     processor_context_ptr get_context(feature_style_context_map &) const;
-    featureset_ptr features_with_context(const query& q, processor_context_ptr ctx= processor_context_ptr()) const;
-    featureset_ptr features(const query& q) const;
+    featureset_ptr features_with_context(query const& q, processor_context_ptr ctx= processor_context_ptr()) const;
+    featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;
     boost::optional<mapnik::datasource::geometry_t> get_geometry_type() const;
@@ -113,10 +113,8 @@ private:
     bool estimate_extent_;
     int max_async_connections_;
     bool asynchronous_request_;
-    // params below are for testing purposes only (will likely be removed at any time)
     int intersect_min_scale_;
     int intersect_max_scale_;
-
 };
 
 #endif // POSTGIS_DATASOURCE_HPP
