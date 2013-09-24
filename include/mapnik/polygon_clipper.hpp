@@ -166,7 +166,7 @@ private:
                     continue;
                 }
                 prev_x = x;
-                prev_x = y;
+                prev_y = y;
                 if (ring_count == 1)
                 {
                     append(subject_poly, make<point_2d>(x,y));
