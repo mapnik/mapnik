@@ -312,7 +312,6 @@ char_info font_face_set::character_dimensions(unsigned int c)
         return itr->second;
     }
 
-    FT_Matrix matrix;
     FT_Vector pen;
     FT_Error  error;
 
@@ -325,12 +324,7 @@ char_info font_face_set::character_dimensions(unsigned int c)
     glyph_ptr glyph = get_glyph(c);
     FT_Face face = glyph->get_face()->get_face();
 
-    matrix.xx = (FT_Fixed)( 1 * 0x10000L );
-    matrix.xy = (FT_Fixed)( 0 * 0x10000L );
-    matrix.yx = (FT_Fixed)( 0 * 0x10000L );
-    matrix.yy = (FT_Fixed)( 1 * 0x10000L );
-
-    FT_Set_Transform(face, &matrix, &pen);
+    FT_Set_Transform(face, 0, &pen);
 
     error = FT_Load_Glyph (face, glyph->get_index(), FT_LOAD_NO_HINTING);
     if ( error )
