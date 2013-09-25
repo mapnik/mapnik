@@ -26,7 +26,7 @@
       <StyleName>ramped</StyleName>
       <Datasource>
           <!-- get stats on this file with gdalinfo ../raster/dataraster.tif -stats -->
-          <Parameter name="file">../raster/dataraster.tif</Parameter>
+          <Parameter name="file">../../data/raster/dataraster.tif</Parameter>
           <Parameter name="type">gdal</Parameter>
           <Parameter name="band">1</Parameter>
       </Datasource>

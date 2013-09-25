@@ -177,6 +177,8 @@ files = {
     'tiff_colortable':{'sizes':[(256,256)]},
     'tiff_colortable_custom_nodata':{'sizes':[(256,256)]},
     'vrt_colortable':{'sizes':[(256,256)]},
+    'raster_colorizer':{'sizes':[(512,512)]},
+    'raster_symbolizer':{'sizes':[(512,512)]},
     }
 
 class Reporting:
