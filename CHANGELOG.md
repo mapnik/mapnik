@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Added Async support to PostGIS plugin - https://github.com/mapnik/mapnik/wiki/PostGIS-Async
+
 - Fixed alpha handling bug with `comp-op:dst-over` (#1995)
 
 - Fixed alpha handling bug with building-fill-opacity (#2011)
