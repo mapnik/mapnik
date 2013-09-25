@@ -206,7 +206,7 @@ public:
     //!
     //! \param[in] value Input value
     //! \return color associated with the value
-    color get_color(float value) const;
+    unsigned get_color(float value) const;
 
 
     //! \brief Set the epsilon value for exact mode

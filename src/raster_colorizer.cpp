@@ -138,7 +138,7 @@ void raster_colorizer::colorize(raster_ptr const& raster, feature_impl const& f)
         }
         else
         {
-            imageData[i] = get_color(value).rgba();
+            imageData[i] = get_color(value);
         }
     }
 }
@@ -148,14 +148,14 @@ inline unsigned interpolate(unsigned start, unsigned end, float fraction)
     return static_cast<unsigned>(fraction * ((float)end - (float)start) + start);
 }
 
-color raster_colorizer::get_color(float value) const
+unsigned raster_colorizer::get_color(float value) const
 {
     int stopCount = stops_.size();
 
     //use default color if no stops
     if(stopCount == 0)
     {
-        return default_color_;
+        return default_color_.rgba();
     }
 
     //1 - Find the stop that the value is in
@@ -278,7 +278,7 @@ color raster_colorizer::get_color(float value) const
       MAPNIK_LOG_DEBUG(raster_colorizer) << "\toutputColor: " << outputColor.to_string();
     */
 
-    return outputColor;
+    return outputColor.rgba();
 }
 
 
