@@ -176,6 +176,7 @@ files = {
     'dst-over-compositing':{'sizes':[(512,512)]},
     'tiff_colortable':{'sizes':[(256,256)]},
     'tiff_colortable_custom_nodata':{'sizes':[(256,256)]},
+    'vrt_colortable':{'sizes':[(256,256)]},
     }
 
 class Reporting:
