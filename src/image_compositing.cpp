@@ -75,7 +75,6 @@ static const comp_op_lookup_type comp_lookup = boost::assign::list_of<comp_op_lo
     (saturation,"saturation")
     (_color,"color")
     (_value,"value")
-    //(colorize_alpha,"colorize-alpha")
     ;
 
 boost::optional<composite_mode_e> comp_op_from_string(std::string const& name)
