@@ -108,6 +108,8 @@ gdal_datasource::gdal_datasource(parameters const& params)
     nbands_ = dataset->GetRasterCount();
     width_ = dataset->GetRasterXSize();
     height_ = dataset->GetRasterYSize();
+    desc_.add_descriptor(mapnik::attribute_descriptor("nodata", mapnik::Integer));
+    desc_.add_descriptor(mapnik::attribute_descriptor("value", mapnik::Double,false,8));
 
     double tr[6];
     bool bbox_override = false;

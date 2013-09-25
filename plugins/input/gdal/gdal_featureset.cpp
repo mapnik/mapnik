@@ -76,7 +76,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       first_(true)
 {
     ctx_->push("value");
-    ctx_->push("NODATA");
+    ctx_->push("nodata");
 }
 
 gdal_featureset::~gdal_featureset()
@@ -115,7 +115,8 @@ feature_ptr gdal_featureset::next()
 feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 {
     feature_ptr feature = feature_factory::create(ctx_,1);
-
+    int raster_has_nodata = 0;
+    double raster_nodata = 0;
     GDALRasterBand * red = 0;
     GDALRasterBand * green = 0;
     GDALRasterBand * blue = 0;
@@ -229,91 +230,60 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 {
                     throw datasource_exception((boost::format("GDAL Plugin: '%d' is an invalid band, dataset only has '%d' bands\n") % band_ % nbands_).str());
                 }
-
                 float* imageData = (float*)image.getBytes();
                 GDALRasterBand * band = dataset_.GetRasterBand(band_);
-                int hasNoData(0);
-                double nodata(0);
-                if (nodata_value_)
-                {
-                    hasNoData = 1;
-                    nodata = *nodata_value_;
-                }
-                else
-                {
-                    nodata = band->GetNoDataValue(&hasNoData);
-                }
+                raster_nodata = band->GetNoDataValue(&raster_has_nodata);
                 band->RasterIO(GF_Read, x_off, y_off, width, height,
                                imageData, image.width(), image.height(),
                                GDT_Float32, 0, 0);
-
-                if (hasNoData)
-                {
-                    feature->put("NODATA",nodata);
-                }
             }
             else // working with all bands
             {
                 for (int i = 0; i < nbands_; ++i)
                 {
                     GDALRasterBand * band = dataset_.GetRasterBand(i + 1);
-
 #ifdef MAPNIK_LOG
                     get_overview_meta(band);
 #endif
-
                     GDALColorInterp color_interp = band->GetColorInterpretation();
                     switch (color_interp)
                     {
                     case GCI_RedBand:
                         red = band;
-
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found red band";
-
                         break;
                     case GCI_GreenBand:
                         green = band;
-
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found green band";
-
                         break;
                     case GCI_BlueBand:
                         blue = band;
-
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found blue band";
-
                         break;
                     case GCI_AlphaBand:
                         alpha = band;
-
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found alpha band";
-
                         break;
                     case GCI_GrayIndex:
                         grey = band;
-
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found gray band";
-
                         break;
                     case GCI_PaletteIndex:
                     {
                         grey = band;
 #ifdef MAPNIK_LOG
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found gray band, and colortable...";
-
                         GDALColorTable *color_table = band->GetColorTable();
 
                         if (color_table)
                         {
                             int count = color_table->GetColorEntryCount();
-
                             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Color Table count=" << count;
 
                             for (int j = 0; j < count; j++)
                             {
                                 const GDALColorEntry *ce = color_table->GetColorEntry (j);
                                 if (! ce) continue;
-
                                 MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Color entry RGB=" << ce->c1 << "," <<ce->c2 << "," << ce->c3;
                             }
                         }
@@ -322,50 +292,33 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                     }
                     case GCI_Undefined:
                         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Found undefined band (assumming gray band)";
-
                         grey = band;
                         break;
                     default:
                         MAPNIK_LOG_WARN(gdal) << "gdal_featureset: Band type unknown!";
-
                         break;
                     }
                 }
-
                 if (red && green && blue)
                 {
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Processing rgb bands...";
-
-                    int hasNoData = 0;
-                    double nodata = 0.0;
-                    if (nodata_value_)
-                    {
-                        hasNoData = 1;
-                        nodata = *nodata_value_;
-                    }
-                    else
-                    {
-                        nodata = red->GetNoDataValue(&hasNoData);
-                    }
-                    if (hasNoData)
-                    {
-                        feature->put("NODATA",nodata);
-                    }
+                    raster_nodata = red->GetNoDataValue(&raster_has_nodata);
                     GDALColorTable *color_table = red->GetColorTable();
-
-                    if (! alpha && hasNoData && ! color_table)
+                    if (!alpha && raster_has_nodata && !color_table)
                     {
-                        // first read the data in and create an alpha channel from the nodata values
+                        // read the data in and create an alpha channel from the nodata values
+                        // NOTE: we intentionally ignore user supplied nodata value since it only
+                        // works for grayscale images or a single band (as a double)
+                        // TODO - we assume here the nodata value for the red band applies to all band
+                        // but that may not always be the case: http://trac.osgeo.org/gdal/ticket/2734
                         float* imageData = (float*)image.getBytes();
                         red->RasterIO(GF_Read, x_off, y_off, width, height,
                                       imageData, image.width(), image.height(),
                                       GDT_Float32, 0, 0);
-
                         int len = image.width() * image.height();
-
                         for (int i = 0; i < len; ++i)
                         {
-                            if (nodata == imageData[i])
+                            if (std::fabs(raster_nodata - imageData[i]) < 1e-12)
                             {
                                 *reinterpret_cast<unsigned *>(&imageData[i]) = 0;
                             }
@@ -374,9 +327,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                                 *reinterpret_cast<unsigned *>(&imageData[i]) = 0xFFFFFFFF;
                             }
                         }
-
                     }
-
                     red->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 0,
                                   image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                     green->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 1,
@@ -387,46 +338,31 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 else if (grey)
                 {
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Processing gray band...";
-
-                    int hasNoData(0);
-                    double nodata(0);
-                    if (nodata_value_)
-                    {
-                        hasNoData = 1;
-                        nodata = *nodata_value_;
-                    }
-                    else
-                    {
-                        nodata = grey->GetNoDataValue(&hasNoData);
-                    }
+                    raster_nodata = grey->GetNoDataValue(&raster_has_nodata);
                     GDALColorTable* color_table = grey->GetColorTable();
-
-                    if (hasNoData && ! color_table)
+                    bool has_nodata = nodata_value_ || raster_has_nodata;
+                    if (!color_table && has_nodata)
                     {
-                        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: No data value for layer=" << nodata;
-
-                        feature->put("NODATA",nodata);
+                        double apply_nodata = nodata_value_ ? *nodata_value_ : raster_nodata;
+                        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: applying nodata value for layer=" << apply_nodata;
                         // first read the data in and create an alpha channel from the nodata values
                         float* imageData = (float*)image.getBytes();
                         grey->RasterIO(GF_Read, x_off, y_off, width, height,
                                        imageData, image.width(), image.height(),
                                        GDT_Float32, 0, 0);
-
                         int len = image.width() * image.height();
-
                         for (int i = 0; i < len; ++i)
                         {
-                            if (nodata == imageData[i])
+                            if (std::fabs(apply_nodata - imageData[i]) < 1e-12)
                             {
                                 *reinterpret_cast<unsigned *>(&imageData[i]) = 0;
                             }
                             else
                             {
-                                *reinterpret_cast<unsigned *> (&imageData[i]) = 0xFFFFFFFF;
+                                *reinterpret_cast<unsigned *>(&imageData[i]) = 0xFFFFFFFF;
                             }
                         }
                     }
-
                     grey->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 0,
                                    image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                     grey->RasterIO(GF_Read,x_off, y_off, width, height, image.getBytes() + 1,
@@ -436,38 +372,23 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
                     if (color_table)
                     {
-                        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Loading colour table...";
-
-                        unsigned nodata_value = static_cast<unsigned>(std::floor(nodata+.5)); // FIXME: is it realy unsigned ?
-                        if (hasNoData)
-                        {
-                            feature->put("NODATA",static_cast<mapnik::value_integer>(nodata_value));
-                        }
+                        MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Loading color table...";
                         for (unsigned y = 0; y < image.height(); ++y)
                         {
                             unsigned int* row = image.getRow(y);
                             for (unsigned x = 0; x < image.width(); ++x)
                             {
                                 unsigned value = row[x] & 0xff;
-                                if (hasNoData && (value == nodata_value))
+                                const GDALColorEntry *ce = color_table->GetColorEntry(value);
+                                if (ce)
                                 {
-                                    // make no data fully alpha
-                                    row[x] = 0;
+                                    row[x] = (ce->c4 << 24)| (ce->c3 << 16) |  (ce->c2 << 8) | (ce->c1) ;
                                 }
                                 else
                                 {
-                                    const GDALColorEntry *ce = color_table->GetColorEntry(value);
-                                    if (ce)
-                                    {
-                                        // TODO - big endian support
-                                        row[x] = (ce->c4 << 24)| (ce->c3 << 16) |  (ce->c2 << 8) | (ce->c1) ;
-                                    }
-                                    else
-                                    {
-                                        // make lacking color entry fully alpha
-                                        // note - gdal_translate makes black
-                                        row[x] = 0;
-                                    }
+                                    // make lacking color entry fully alpha
+                                    // note - gdal_translate makes black
+                                    row[x] = 0;
                                 }
                             }
                         }
@@ -476,10 +397,27 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
                 if (alpha)
                 {
                     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: processing alpha band...";
-
+                    if (raster_has_nodata)
+                    {
+                        MAPNIK_LOG_ERROR(gdal) << "warning: alpha channel being used instead of nodata value";
+                    }
                     alpha->RasterIO(GF_Read, x_off, y_off, width, height, image.getBytes() + 3,
                                     image.width(), image.height(), GDT_Byte, 4, 4 * image.width());
                 }
+            }
+            // set nodata value to be used in raster colorizer
+            if (nodata_value_)
+            {
+                raster->set_nodata(*nodata_value_);
+            }
+            else
+            {
+                raster->set_nodata(raster_nodata);
+            }
+            // report actual/original source nodata in feature attributes
+            if (raster_has_nodata)
+            {
+                feature->put("nodata",raster_nodata);
             }
             return feature;
         }
@@ -514,12 +452,12 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: x=" << x << " y=" << y;
 
             GDALRasterBand* band = dataset_.GetRasterBand(band_);
-            int hasNoData;
-            double nodata = band->GetNoDataValue(&hasNoData);
+            int raster_has_nodata;
+            double nodata = band->GetNoDataValue(&raster_has_nodata);
             double value;
             band->RasterIO(GF_Read, x, y, 1, 1, &value, 1, 1, GDT_Float64, 0, 0);
 
-            if (! hasNoData || value != nodata)
+            if (! raster_has_nodata || value != nodata)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
