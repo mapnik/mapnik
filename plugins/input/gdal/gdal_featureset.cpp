@@ -75,7 +75,6 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
       nodata_value_(nodata),
       first_(true)
 {
-    ctx_->push("value");
     ctx_->push("nodata");
 }
 
@@ -456,7 +455,6 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             double nodata = band->GetNoDataValue(&raster_has_nodata);
             double value;
             band->RasterIO(GF_Read, x, y, 1, 1, &value, 1, 1, GDT_Float64, 0, 0);
-
             if (! raster_has_nodata || value != nodata)
             {
                 // construct feature
@@ -464,7 +462,11 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
                 geometry_type * point = new geometry_type(mapnik::Point);
                 point->move_to(pt.x, pt.y);
                 feature->add_geometry(point);
-                feature->put("value",value);
+                feature->put_new("value",value);
+                if (raster_has_nodata)
+                {
+                    feature->put_new("nodata",nodata);
+                }
                 return feature;
             }
         }
