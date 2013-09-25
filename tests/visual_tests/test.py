@@ -174,6 +174,8 @@ files = {
     'building-symbolizer-opacity':{'sizes':[(512,512)]},
     'line-pattern-symbolizer-opacity':{'sizes':[(512,512)]},
     'dst-over-compositing':{'sizes':[(512,512)]},
+    'tiff_colortable':{'sizes':[(256,256)]},
+    'tiff_colortable_custom_nodata':{'sizes':[(256,256)]},
     }
 
 class Reporting:
