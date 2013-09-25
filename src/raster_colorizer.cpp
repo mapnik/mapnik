@@ -127,25 +127,19 @@ void raster_colorizer::colorize(raster_ptr const& raster, feature_impl const& f)
     unsigned *imageData = raster->data_.getData();
 
     int len = raster->data_.width() * raster->data_.height();
-
-    bool hasNoData = false;
-    float noDataValue = 0;
-
-    //std::map<std::string,value>::const_iterator fi = Props.find("NODATA");
-    if (f.has_key("NODATA"))
-    {
-        hasNoData = true;
-        noDataValue = static_cast<float>(f.get("NODATA").to_double());
-    }
-
+    boost::optional<double> const& nodata = raster->nodata();
     for (int i=0; i<len; ++i)
     {
         // the GDAL plugin reads single bands as floats
         float value = *reinterpret_cast<float *> (&imageData[i]);
-        if (hasNoData && noDataValue == value)
-            imageData[i] = color(0,0,0,0).rgba();
+        if (nodata && (std::fabs(value - *nodata) < epsilon_))
+        {
+            imageData[i] = 0;
+        }
         else
+        {
             imageData[i] = get_color(value).rgba();
+        }
     }
 }
 
