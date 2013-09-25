@@ -30,6 +30,7 @@
 #include <mapnik/query.hpp>
 #include <mapnik/feature_layer_desc.hpp>
 #include <mapnik/noncopyable.hpp>
+#include <mapnik/feature_style_processor_context.hpp>
 
 // boost
 #include <memory>
@@ -109,6 +110,13 @@ public:
      * @return The type of the datasource (Vector or Raster)
      */
     virtual datasource_t type() const = 0;
+
+    virtual processor_context_ptr get_context(feature_style_context_map&) const { return processor_context_ptr(); }
+    virtual featureset_ptr features_with_context(const query& q,processor_context_ptr ctx= processor_context_ptr()) const
+    {
+        // default implementation without context use features method
+        return features(q);
+    }
     virtual featureset_ptr features(query const& q) const = 0;
     virtual featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const = 0;
     virtual box2d<double> envelope() const = 0;

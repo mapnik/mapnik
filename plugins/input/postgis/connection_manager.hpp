@@ -31,12 +31,12 @@
 
 // boost
 #include <memory>
-#include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 
 // stl
 #include <string>
 #include <sstream>
+#include <memory>
 
 using mapnik::Pool;
 using mapnik::singleton;
@@ -101,8 +101,12 @@ private:
 class ConnectionManager : public singleton <ConnectionManager,CreateStatic>
 {
 
-    friend class CreateStatic<ConnectionManager>;
+public:
     typedef Pool<Connection,ConnectionCreator> PoolType;
+
+private:
+    friend class CreateStatic<ConnectionManager>;
+
     typedef std::map<std::string,std::shared_ptr<PoolType> > ContType;
     typedef std::shared_ptr<Connection> HolderType;
     ContType pools_;

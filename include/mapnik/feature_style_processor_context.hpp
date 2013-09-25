@@ -2,7 +2,7 @@
  *
  * This file is part of Mapnik (c++ mapping toolkit)
  *
- * Copyright (C) 2011 Artem Pavlenko
+ * Copyright (C) 2013 Artem Pavlenko
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,40 +20,25 @@
  *
  *****************************************************************************/
 
-#ifndef POSTGIS_FEATURESET_HPP
-#define POSTGIS_FEATURESET_HPP
+#ifndef FEATURE_STYLE_PROCESSOR_CONTEXT_HPP
+#define FEATURE_STYLE_PROCESSOR_CONTEXT_HPP
 
-// mapnik
-#include <mapnik/box2d.hpp>
-#include <mapnik/datasource.hpp>
-#include <mapnik/feature.hpp>
-#include <mapnik/unicode.hpp>
+// stl
+#include <map>
+#include <string>
+#include <memory>
 
-using mapnik::Featureset;
-using mapnik::box2d;
-using mapnik::feature_ptr;
-using mapnik::transcoder;
-using mapnik::context_ptr;
+namespace mapnik {
 
-class IResultSet;
 
-class postgis_featureset : public mapnik::Featureset
-{
+class IProcessorContext {
 public:
-    postgis_featureset(std::shared_ptr<IResultSet> const& rs,
-                       context_ptr const& ctx,
-                       std::string const& encoding,
-                       bool key_field = false);
-    feature_ptr next();
-    ~postgis_featureset();
-
-private:
-    std::shared_ptr<IResultSet> rs_;
-    context_ptr ctx_;
-    const std::unique_ptr<mapnik::transcoder> tr_;
-    unsigned totalGeomSize_;
-    mapnik::value_integer feature_id_;
-    bool key_field_;
+    virtual ~IProcessorContext() {}
 };
 
-#endif // POSTGIS_FEATURESET_HPP
+typedef std::shared_ptr<IProcessorContext> processor_context_ptr;
+typedef std::map<std::string, processor_context_ptr > feature_style_context_map;
+
+}
+
+#endif // FEATURE_STYLE_PROCESSOR_CONTEXT_HPP

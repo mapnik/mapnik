@@ -34,6 +34,7 @@
 
 // boost
 #include <memory>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace mapnik
 {
@@ -196,6 +197,7 @@ public:
 };
 
 typedef std::shared_ptr<text_path> text_path_ptr;
+typedef boost::ptr_vector<text_path> placements_type;
 }
 
 #endif // MAPNIK_TEXT_PATH_HPP

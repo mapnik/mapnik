@@ -143,7 +143,7 @@ struct multi_geometry_type
 
         for ( ; itr != end; ++itr)
         {
-            if (type != 0u && itr->type() != type)
+            if (type != 0u && static_cast<unsigned>(itr->type()) != type)
             {
                 collection = true;
                 break;
@@ -233,8 +233,8 @@ struct geometry_generator_grammar :
                            << karma::string[ if_ (_r1 > 1) [_1 = "],["]
                                              .else_[_1 = '[' ]]
                            |
-                           &uint_(mapnik::SEG_LINETO))
-            << lit(',')
+                           &uint_(mapnik::SEG_LINETO)
+            << lit(','))
             << lit('[') << coord_type
             << lit(',')
             << coord_type << lit(']')

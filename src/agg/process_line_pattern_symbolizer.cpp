@@ -60,18 +60,18 @@ public:
     pattern_source(mapnik::image_data_32 const& pattern)
         : pattern_(pattern) {}
 
-    unsigned int width() const
+    inline unsigned int width() const
     {
         return pattern_.width();
     }
-    unsigned int height() const
+    inline unsigned int height() const
     {
         return pattern_.height();
     }
-    agg::rgba8 pixel(int x, int y) const
+    inline agg::rgba8 pixel(int x, int y) const
     {
         unsigned c = pattern_(x,y);
-        return agg::rgba8(c & 0xff,
+        return agg::rgba8_pre(c & 0xff,
                           (c >> 8) & 0xff,
                           (c >> 16) & 0xff,
                           (c >> 24) & 0xff);
@@ -107,12 +107,10 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (!(*mark)->is_bitmap())
     {
         MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
-
         return;
     }
 
     boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
-
     if (!pat) return;
 
     agg::rendering_buffer buf(current_buffer_->raw_data(),current_buffer_->width(),current_buffer_->height(), current_buffer_->width() * 4);

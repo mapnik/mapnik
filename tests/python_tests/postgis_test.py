@@ -152,6 +152,18 @@ INSERT INTO test10(gid, bool_field, geom) values (2, FALSE, ST_MakePoint(1,1));
 INSERT INTO test10(gid, bool_field, geom) values (3, null, ST_MakePoint(1,1));
 '''
 
+insert_table_11 = """
+CREATE TABLE test11(gid serial PRIMARY KEY, label varchar(40), geom geometry);
+INSERT INTO test11(label,geom) values ('label_1',GeomFromEWKT('SRID=4326;POINT(0 0)'));
+INSERT INTO test11(label,geom) values ('label_2',GeomFromEWKT('SRID=4326;POINT(-2 2)'));
+INSERT INTO test11(label,geom) values ('label_3',GeomFromEWKT('SRID=4326;MULTIPOINT(2 1,1 2)'));
+INSERT INTO test11(label,geom) values ('label_4',GeomFromEWKT('SRID=4326;LINESTRING(0 0,1 1,1 2)'));
+INSERT INTO test11(label,geom) values ('label_5',GeomFromEWKT('SRID=4326;MULTILINESTRING((1 0,0 1,3 2),(3 2,5 4))'));
+INSERT INTO test11(label,geom) values ('label_6',GeomFromEWKT('SRID=4326;POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))'));
+INSERT INTO test11(label,geom) values ('label_7',GeomFromEWKT('SRID=4326;MULTIPOLYGON(((1 1,3 1,3 3,1 3,1 1),(1 1,2 1,2 2,1 2,1 1)), ((-1 -1,-1 -2,-2 -2,-2 -1,-1 -1)))'));
+INSERT INTO test11(label,geom) values ('label_8',GeomFromEWKT('SRID=4326;GEOMETRYCOLLECTION(POLYGON((1 1, 2 1, 2 2, 1 2,1 1)),POINT(2 3),LINESTRING(2 3,3 4))'));
+"""
+
 
 def postgis_setup():
     call('dropdb %s' % MAPNIK_TEST_DBNAME,silent=True)
@@ -169,6 +181,7 @@ def postgis_setup():
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_8),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_9),silent=False)
     call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_10),silent=False)
+    call('''psql -q %s -c "%s"''' % (MAPNIK_TEST_DBNAME,insert_table_11),silent=False)
 
 def postgis_takedown():
     pass
@@ -475,16 +488,20 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                             max_size=20,
                             geometry_field='geom')
         fs = ds.all_features()
+        eq_(len(fs),8)
 
     def test_threaded_create(NUM_THREADS=100):
         # run one to start before thread loop
         # to ensure that a throw stops the test
         # from running all threads
         create_ds()
+        runs = 0
         for i in range(NUM_THREADS):
             t = threading.Thread(target=create_ds)
             t.start()
             t.join()
+            runs +=1
+        eq_(runs,NUM_THREADS)
 
     def create_ds_and_error():
         try:
@@ -492,7 +509,8 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
                                 table='asdfasdfasdfasdfasdf',
                                 max_size=20)
             fs = ds.all_features()
-        except: pass
+        except Exception, e:
+            eq_('in executeQuery' in str(e),True)
 
     def test_threaded_create2(NUM_THREADS=10):
         for i in range(NUM_THREADS):
@@ -655,6 +673,33 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
         ds = mapnik.Datasource(**opts)
         fs = ds.featureset()
         feat = fs.next() ## should throw since key_field is null: StopIteration: No more features.
+
+    def test_psql_error_should_not_break_connection_pool():
+        # Bad request, will trigger an error when returning result
+        ds_bad = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table="""(SELECT geom as geom,label::int from test11) as failure_table""",
+                            max_async_connection=5,geometry_field='geom',srid=4326)
+
+        # Good request
+        ds_good = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table="test",
+                            max_async_connection=5,geometry_field='geom',srid=4326)
+
+        # This will/should trigger a PSQL error
+        failed = False
+        try:
+            fs = ds_bad.featureset()
+            for feature in fs:
+                pass
+        except RuntimeError:
+            failed = True
+
+        eq_(failed,True)
+
+        # Should be ok
+        fs = ds_good.featureset()
+        count = 0
+        for feature in fs:
+            count += 1
+        eq_(count,8)
 
     atexit.register(postgis_takedown)
 

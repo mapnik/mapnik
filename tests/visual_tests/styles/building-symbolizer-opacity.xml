@@ -1,0 +1,21 @@
+<Map srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" 
+  background-color="green"
+  background-image="../../data/images/checker.jpg"
+  background-image-opacity=".5"
+  background-image-comp-op="soft-light"
+  >
+    <Style name="ellipse">
+        <Rule>
+            <BuildingSymbolizer fill="white" fill-opacity=".5" />
+        </Rule>
+    </Style>
+
+    <Layer name="layer" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>ellipse</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/marker-multi-policy.csv</Parameter>
+        </Datasource>
+    </Layer>
+    
+</Map>

@@ -455,7 +455,7 @@ void agg_renderer<T>::debug_draw_box(R& buf, box2d<double> const& box,
     // render the outline
     ras_ptr->reset();
     ras_ptr->add_path(sbox);
-    ren.color(agg::rgba8(0x33, 0x33, 0xff, 0xcc)); // blue is fine
+    ren.color(agg::rgba8_pre(0x33, 0x33, 0xff, 0xcc)); // blue is fine
     agg::render_scanlines(*ras_ptr, sl_line, ren);
 }
 

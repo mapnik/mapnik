@@ -132,7 +132,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
 
                 path_type faces_path (t_,*faces,prj_trans);
                 ras_ptr->add_path(faces_path);
-                ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
+                ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
                 agg::render_scanlines(*ras_ptr, sl, ren);
                 ras_ptr->reset();
                 //
@@ -166,13 +166,13 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             agg::conv_stroke<path_type> stroke(path);
             stroke.width(scale_factor_);
             ras_ptr->add_path(stroke);
-            ren.color(agg::rgba8(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
+            ren.color(agg::rgba8_pre(int(r*0.8), int(g*0.8), int(b*0.8), int(a * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
             ras_ptr->reset();
 
             path_type roof_path (t_,*roof,prj_trans);
             ras_ptr->add_path(roof_path);
-            ren.color(agg::rgba8(r, g, b, int(a * sym.get_opacity())));
+            ren.color(agg::rgba8_pre(r, g, b, int(a * sym.get_opacity())));
             agg::render_scanlines(*ras_ptr, sl, ren);
 
         }

@@ -35,14 +35,13 @@
 #include <mapnik/util/trim.hpp>
 #include <mapnik/global.hpp> // for int2net
 
-
-
 // boost
 #include <boost/cstdint.hpp> // for boost::int16_t
 
 // stl
 #include <sstream>
 #include <string>
+#include <memory>
 
 using mapnik::geometry_type;
 using mapnik::byte;
