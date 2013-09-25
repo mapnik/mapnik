@@ -31,6 +31,7 @@ def test_broken_files():
 
 def test_good_files():
     good_files = glob.glob("../data/good_maps/*.xml")
+    good_files.extend(glob.glob("../visual_tests/styles/*.xml"))
 
     failures = [];
     for filename in good_files:
