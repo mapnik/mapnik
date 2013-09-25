@@ -48,7 +48,7 @@ rasterlite_featureset::rasterlite_featureset(void* dataset,
     : dataset_(dataset),
       gquery_(q),
       first_(true),
-      ctx_(boost::make_shared<mapnik::context_type>())
+      ctx_(std::make_shared<mapnik::context_type>())
 {
     rasterliteSetBackgroundColor(dataset_, 255, 0, 255);
     rasterliteSetTransparentColor(dataset_, 255, 0, 255);
@@ -129,7 +129,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
         {
             if (size > 0)
             {
-                mapnik::raster_ptr rasterp = boost::make_shared<mapnik::raster>(intersect, width, height);
+                mapnik::raster_ptr rasterp = std::make_shared<mapnik::raster>(intersect, width, height);
                 mapnik::image_data_32 & image = rasterp->data_;
                 image.set(0xffffffff);
 

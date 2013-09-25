@@ -26,11 +26,6 @@
 #include <mapnik/enumeration.hpp>
 #include <mapnik/formatting/text.hpp>
 
-
-// boost
-#include <boost/scoped_ptr.hpp>
-
-
 namespace mapnik
 {
 

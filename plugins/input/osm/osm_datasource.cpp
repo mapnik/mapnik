@@ -99,14 +99,13 @@ osm_datasource::osm_datasource(const parameters& params)
 
     // Add the attributes to the datasource descriptor - assume they are
     // all of type String
-    for (std::set<std::string>::iterator i = keys.begin(); i != keys.end(); i++)
+    for (auto const& key : keys)
     {
-        desc_.add_descriptor(attribute_descriptor(*i, tagtypes.get_type(*i)));
+        desc_.add_descriptor(attribute_descriptor(key, tagtypes.get_type(key)));
     }
-
     // Get the bounds of the data and set extent_ accordingly
     bounds b = osm_data_->get_bounds();
-    extent_ =  box2d<double>(b.w, b.s, b.e, b.n);
+    extent_ = box2d<double>(b.w,b.s,b.e,b.n);
 }
 
 osm_datasource::~osm_datasource()
@@ -135,7 +134,7 @@ featureset_ptr osm_datasource::features(const query& q) const
     filter_in_box filter(q.get_bbox());
     // so we need to filter osm features by bbox here...
 
-    return boost::make_shared<osm_featureset<filter_in_box> >(filter,
+    return std::make_shared<osm_featureset<filter_in_box> >(filter,
                                                               osm_data_,
                                                               q.property_names(),
                                                               desc_.get_encoding());
@@ -156,7 +155,7 @@ featureset_ptr osm_datasource::features_at_point(coord2d const& pt, double tol) 
         ++itr;
     }
 
-    return boost::make_shared<osm_featureset<filter_at_point> >(filter,
+    return std::make_shared<osm_featureset<filter_at_point> >(filter,
                                                                 osm_data_,
                                                                 names,
                                                                 desc_.get_encoding());

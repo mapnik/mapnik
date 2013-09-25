@@ -238,7 +238,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                                                 itr->second.first, // face index
                                                 &face);
 
-            if (!error) return boost::make_shared<font_face>(face);
+            if (!error) return std::make_shared<font_face>(face);
         }
         else
         {
@@ -257,7 +257,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
                                                  static_cast<FT_Long>(buffer.size()),
                                                  itr->second.first,
                                                  &face);
-            if (!error) return boost::make_shared<font_face>(face);
+            if (!error) return std::make_shared<font_face>(face);
             else
             {
                 // we can't load font, erase it.
@@ -274,7 +274,7 @@ stroker_ptr freetype_engine::create_stroker()
     FT_Error error = FT_Stroker_New(library_, &s);
     if (!error)
     {
-        return boost::make_shared<stroker>(s);
+        return std::make_shared<stroker>(s);
     }
     return stroker_ptr();
 }
@@ -292,14 +292,14 @@ font_face_set::size_type font_face_set::size() const
 
 glyph_ptr font_face_set::get_glyph(unsigned c) const
 {
-    BOOST_FOREACH ( face_ptr const& face, faces_)
+    for ( face_ptr const& face : faces_)
     {
         FT_UInt g = face->get_char(c);
-        if (g) return boost::make_shared<font_glyph>(face, g);
+        if (g) return std::make_shared<font_glyph>(face, g);
     }
 
     // Final fallback to empty square if nothing better in any font
-    return boost::make_shared<font_glyph>(*faces_.begin(), 0);
+    return std::make_shared<font_glyph>(*faces_.begin(), 0);
 }
 
 char_info font_face_set::character_dimensions(unsigned int c)
@@ -312,7 +312,6 @@ char_info font_face_set::character_dimensions(unsigned int c)
         return itr->second;
     }
 
-    FT_Matrix matrix;
     FT_Vector pen;
     FT_Error  error;
 
@@ -325,12 +324,7 @@ char_info font_face_set::character_dimensions(unsigned int c)
     glyph_ptr glyph = get_glyph(c);
     FT_Face face = glyph->get_face()->get_face();
 
-    matrix.xx = (FT_Fixed)( 1 * 0x10000L );
-    matrix.xy = (FT_Fixed)( 0 * 0x10000L );
-    matrix.yx = (FT_Fixed)( 0 * 0x10000L );
-    matrix.yy = (FT_Fixed)( 1 * 0x10000L );
-
-    FT_Set_Transform(face, &matrix, &pen);
+    FT_Set_Transform(face, 0, &pen);
 
     error = FT_Load_Glyph (face, glyph->get_index(), FT_LOAD_NO_HINTING);
     if ( error )
@@ -399,7 +393,7 @@ void font_face_set::get_string_info(string_info & info, mapnik::value_unicode_st
 
 void font_face_set::set_pixel_sizes(unsigned size)
 {
-    BOOST_FOREACH ( face_ptr const& face, faces_)
+    for ( face_ptr const& face : faces_)
     {
         face->set_pixel_sizes(size);
     }
@@ -407,7 +401,7 @@ void font_face_set::set_pixel_sizes(unsigned size)
 
 void font_face_set::set_character_sizes(double size)
 {
-    BOOST_FOREACH ( face_ptr const& face, faces_)
+    for ( face_ptr const& face : faces_)
     {
         face->set_character_sizes(size);
     }

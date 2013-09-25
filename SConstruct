@@ -38,9 +38,13 @@ severities = ['debug', 'warn', 'error', 'none']
 
 DEFAULT_CC = "gcc"
 DEFAULT_CXX = "g++"
+DEFAULT_CXX11_CXXFLAGS = " -std=c++11"
+DEFAULT_CXX11_LINKFLAGS = ""
 if sys.platform == 'darwin':
     DEFAULT_CC = "clang"
     DEFAULT_CXX = "clang++"
+    DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
+    DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
 
 py3 = None
 
@@ -1126,8 +1130,10 @@ if not preconfigured:
 
     # set any custom cxxflags and ldflags to come first
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
+    env.Append(CUSTOM_CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
+    env.Append(CUSTOM_LDFLAGS = DEFAULT_CXX11_LINKFLAGS)
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits
@@ -1680,13 +1686,12 @@ if not preconfigured:
 
         # c++11 support / https://github.com/mapnik/mapnik/issues/1683
         #  - upgrade to PHOENIX_V3 since that is needed for c++11 compile
-        if 'c++11' in env['CUSTOM_CXXFLAGS']:
-            env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
-            #  - workaround boost gil channel_algorithm.hpp narrowing error
-            # TODO - remove when building against >= 1.55
-            # https://github.com/mapnik/mapnik/issues/1970
-            if 'clang++' in env['CXX']:
-                env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
+        env.Append(CPPDEFINES = '-DBOOST_SPIRIT_USE_PHOENIX_V3=1')
+        #  - workaround boost gil channel_algorithm.hpp narrowing error
+        # TODO - remove when building against >= 1.55
+        # https://github.com/mapnik/mapnik/issues/1970
+        if 'clang++' in env['CXX']:
+            env.Append(CXXFLAGS = '-Wno-c++11-narrowing')
 
         # Enable logging in debug mode (always) and release mode (when specified)
         if env['DEFAULT_LOG_SEVERITY']:

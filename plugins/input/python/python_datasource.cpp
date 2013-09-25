@@ -7,7 +7,7 @@
 #include <vector>
 
 // boost
-#include <boost/foreach.hpp>
+
 #include <boost/make_shared.hpp>
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
@@ -26,7 +26,7 @@ python_datasource::python_datasource(parameters const& params)
     factory_(*params.get<std::string>("factory", ""))
 {
     // extract any remaining parameters as keyword args for the factory
-    BOOST_FOREACH(const mapnik::parameters::value_type& kv, params)
+    for (const mapnik::parameters::value_type& kv : params)
     {
         if((kv.first != "type") && (kv.first != "factory"))
         {
@@ -73,7 +73,7 @@ python_datasource::python_datasource(parameters const& params)
         // prepare the arguments
         boost::python::dict kwargs;
         typedef std::map<std::string, std::string>::value_type kv_type;
-        BOOST_FOREACH(const kv_type& kv, kwargs_)
+        for (kv_type const& kv : kwargs_)
         {
             kwargs[boost::python::str(kv.first)] = boost::python::str(kv.second);
         }
@@ -202,7 +202,7 @@ mapnik::featureset_ptr python_datasource::features(mapnik::query const& q) const
             {
                 return mapnik::featureset_ptr();
             }
-            return boost::make_shared<python_featureset>(features);
+            return std::make_shared<python_featureset>(features);
         }
         // otherwise return an empty featureset pointer
         return mapnik::featureset_ptr();
@@ -226,7 +226,7 @@ mapnik::featureset_ptr python_datasource::features_at_point(mapnik::coord2d cons
             return mapnik::featureset_ptr();
         }
         // otherwise, return a feature set which can iterate over the iterator
-        return boost::make_shared<python_featureset>(features);
+        return std::make_shared<python_featureset>(features);
     }
     catch ( boost::python::error_already_set )
     {

@@ -237,7 +237,7 @@ void text_symbolizer_properties::add_expressions(expression_set &output) const
 
 void text_symbolizer_properties::set_old_style_expression(expression_ptr expr)
 {
-    tree_ = boost::make_shared<formatting::text_node>(expr);
+    tree_ = std::make_shared<formatting::text_node>(expr);
 }
 
 char_properties::char_properties() :

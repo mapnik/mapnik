@@ -62,7 +62,7 @@ text_symbolizer_helper<FaceManagerT, DetectorT>::text_symbolizer_helper(text_sym
           angle_(0.0),
           placement_valid_(false),
           points_on_line_(false),
-          finder_(0)
+          finder_()
     {
         initialize_geometries();
         if (!geometries_to_process_.size()) return;
@@ -219,8 +219,8 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_geometries()
 
         // don't bother with empty geometries
         if (geom.size() == 0) continue;
-        eGeomType type = geom.type();
-        if (type == Polygon)
+        geometry_type::types type = geom.type();
+        if (type == geometry_type::types::Polygon)
         {
             largest_box_only = sym_.largest_bbox_only();
             if (sym_.get_minimum_path_length() > 0)
@@ -284,7 +284,7 @@ void text_symbolizer_helper<FaceManagerT, DetectorT>::initialize_points()
             // https://github.com/mapnik/mapnik/issues/1423
             bool success = false;
             // https://github.com/mapnik/mapnik/issues/1350
-            if (geom.type() == LineString)
+            if (geom.type() == geometry_type::types::LineString)
             {
                 success = label::middle_point(geom, label_x,label_y);
             }

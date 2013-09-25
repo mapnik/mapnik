@@ -64,7 +64,7 @@ text_symbolizer_properties & text_placements_list::get(unsigned i)
 
 text_placement_info_ptr text_placements_list::get_placement_info(double scale_factor) const
 {
-    return boost::make_shared<text_placement_info_list>(this, scale_factor);
+    return std::make_shared<text_placement_info_list>(this, scale_factor);
 }
 
 text_placements_list::text_placements_list() : text_placements(), list_(0)
@@ -109,4 +109,3 @@ text_placements_ptr text_placements_list::from_xml(xml_node const &xml, fontset_
 }
 
 } //ns mapnik
-

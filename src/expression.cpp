@@ -50,7 +50,7 @@ expression_ptr parse_expression(std::string const& str,
     bool r = boost::spirit::qi::phrase_parse(itr, end, g, boost::spirit::standard_wide::space, node);
     if (r && itr == end)
     {
-        return boost::make_shared<expr_node>(node);
+        return std::make_shared<expr_node>(node);
     }
     else
     {

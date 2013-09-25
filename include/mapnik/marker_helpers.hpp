@@ -94,11 +94,11 @@ struct vector_markers_rasterizer_dispatch
         marker_placement_e placement_method = sym_.get_marker_placement();
 
         if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == Point)
+            path.type() == mapnik::geometry_type::types::Point)
         {
             double x = 0;
             double y = 0;
-            if (path.type() == LineString)
+            if (path.type() == mapnik::geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
                     return;
@@ -206,11 +206,11 @@ struct raster_markers_rasterizer_dispatch
         box2d<double> bbox_(0,0, src_.width(),src_.height());
 
         if (placement_method != MARKER_LINE_PLACEMENT ||
-            path.type() == Point)
+            path.type() == mapnik::geometry_type::types::Point)
         {
             double x = 0;
             double y = 0;
-            if (path.type() == LineString)
+            if (path.type() == mapnik::geometry_type::types::LineString)
             {
                 if (!label::middle_point(path, x, y))
                     return;
@@ -477,7 +477,7 @@ void apply_markers_multi(feature_impl & feature, Converter& converter, markers_s
           double x, y;
           if (label::centroid_geoms(feature.paths().begin(), feature.paths().end(), x, y))
           {
-              geometry_type pt(Point);
+              geometry_type pt(geometry_type::types::Point);
               pt.move_to(x, y);
               // unset any clipping since we're now dealing with a point
               converter.template unset<clip_poly_tag>();
@@ -491,7 +491,7 @@ void apply_markers_multi(feature_impl & feature, Converter& converter, markers_s
           // TODO: consider using true area for polygon types
           double maxarea = 0;
           geometry_type* largest = 0;
-          BOOST_FOREACH(geometry_type & geom, feature.paths())
+          for (geometry_type & geom : feature.paths())
           {
               const box2d<double>& env = geom.envelope();
               double area = env.width() * env.height();
@@ -512,7 +512,7 @@ void apply_markers_multi(feature_impl & feature, Converter& converter, markers_s
           {
               MAPNIK_LOG_WARN(marker_symbolizer) << "marker_multi_policy != 'each' has no effect with marker_placement != 'point'";
           }
-          BOOST_FOREACH(geometry_type & path, feature.paths())
+          for (geometry_type & path : feature.paths())
           {
             converter.apply(path);
           }

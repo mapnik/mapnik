@@ -35,7 +35,7 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <vector>
@@ -68,7 +68,7 @@ private:
 
     datasource::datasource_t type_;
     std::string shape_name_;
-    boost::shared_ptr<shape_io> shape_;
+    std::shared_ptr<shape_io> shape_;
     shape_io::shapeType shape_type_;
     long file_length_;
     box2d<double> extent_;

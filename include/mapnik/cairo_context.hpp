@@ -37,7 +37,7 @@
 #include <mapnik/noncopyable.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // cairo
 #include <cairo.h>
@@ -78,18 +78,18 @@ void check_object_status_and_throw_exception(T const& object)
 class cairo_face : private mapnik::noncopyable
 {
 public:
-    cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face);
+    cairo_face(std::shared_ptr<freetype_engine> const& engine, face_ptr const& face);
     ~cairo_face();
     cairo_font_face_t * face() const;
 private:
     class handle
     {
     public:
-        handle(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
+        handle(std::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
             : engine_(engine), face_(face) {}
 
     private:
-        boost::shared_ptr<freetype_engine> engine_;
+        std::shared_ptr<freetype_engine> engine_;
         face_ptr face_;
     };
 
@@ -104,17 +104,17 @@ private:
     cairo_font_face_t *c_face_;
 };
 
-typedef boost::shared_ptr<cairo_face> cairo_face_ptr;
+typedef std::shared_ptr<cairo_face> cairo_face_ptr;
 
 class cairo_face_manager : private mapnik::noncopyable
 {
 public:
-    cairo_face_manager(boost::shared_ptr<freetype_engine> engine);
+    cairo_face_manager(std::shared_ptr<freetype_engine> engine);
     cairo_face_ptr get_face(face_ptr face);
 
 private:
     typedef std::map<face_ptr,cairo_face_ptr> cairo_face_cache;
-    boost::shared_ptr<freetype_engine> font_engine_;
+    std::shared_ptr<freetype_engine> font_engine_;
     cairo_face_cache cache_;
 };
 
@@ -210,7 +210,7 @@ public:
 
         units_ = grad.get_units();
 
-        BOOST_FOREACH ( mapnik::stop_pair const& st, grad.get_stop_array() )
+        for ( mapnik::stop_pair const& st : grad.get_stop_array() )
         {
             mapnik::color const& stop_color = st.second;
             double r= static_cast<double> (stop_color.red())/255.0;
@@ -268,8 +268,8 @@ struct cairo_surface_closer
     }
 };
 
-typedef boost::shared_ptr<cairo_t> cairo_ptr;
-typedef boost::shared_ptr<cairo_surface_t> cairo_surface_ptr;
+typedef std::shared_ptr<cairo_t> cairo_ptr;
+typedef std::shared_ptr<cairo_surface_t> cairo_surface_ptr;
 
 inline cairo_ptr create_context(cairo_surface_ptr const& surface)
 {

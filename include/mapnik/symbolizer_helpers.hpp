@@ -31,7 +31,7 @@
 #include <mapnik/text_path.hpp>
 
 //boost
-#include <boost/scoped_ptr.hpp>
+
 
 // agg
 #include "agg_trans_affine.h"
@@ -110,7 +110,7 @@ protected:
     bool points_on_line_;
 
     text_placement_info_ptr placement_;
-    boost::scoped_ptr<placement_finder<DetectorT> > finder_;
+    std::unique_ptr<placement_finder<DetectorT> > finder_;
 };
 
 template <typename FaceManagerT, typename DetectorT>

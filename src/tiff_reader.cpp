@@ -25,7 +25,7 @@
 #include <mapnik/image_reader.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // iostreams
 #include <boost/iostreams/device/file.hpp>
@@ -102,7 +102,7 @@ static int tiff_map_proc(thandle_t, tdata_t* , toff_t*)
 template <typename T>
 class tiff_reader : public image_reader
 {
-    typedef boost::shared_ptr<TIFF> tiff_ptr;
+    typedef std::shared_ptr<TIFF> tiff_ptr;
     typedef T source_type;
     typedef boost::iostreams::stream<source_type> input_stream;
 

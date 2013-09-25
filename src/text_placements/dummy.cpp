@@ -35,7 +35,7 @@ bool text_placement_info_dummy::next()
 text_placement_info_ptr text_placements_dummy::get_placement_info(
     double scale_factor) const
 {
-    return boost::make_shared<text_placement_info_dummy>(this, scale_factor);
+    return std::make_shared<text_placement_info_dummy>(this, scale_factor);
 }
 
 } //ns mapnik

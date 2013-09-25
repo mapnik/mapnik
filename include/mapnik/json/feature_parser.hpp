@@ -30,7 +30,7 @@
 #include <mapnik/unicode.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 // stl
 #include <vector>
@@ -49,7 +49,7 @@ public:
     ~feature_parser();
     bool parse(iterator_type first, iterator_type last, mapnik::feature_impl & f);
 private:
-    boost::scoped_ptr<feature_grammar<iterator_type,feature_type> > grammar_;
+    const std::unique_ptr<feature_grammar<iterator_type,feature_type> > grammar_;
 };
 
 }}

@@ -66,7 +66,7 @@ grid_renderer<T>::grid_renderer(Map const& m, T & pixmap, double scale_factor, u
       t_(pixmap_.width(),pixmap_.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
+      detector_(std::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
       ras_ptr(new grid_rasterizer)
 {
     setup(m);
@@ -84,7 +84,7 @@ grid_renderer<T>::grid_renderer(Map const& m, request const& req, T & pixmap, do
       t_(pixmap_.width(),pixmap_.height(),req.extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
-      detector_(boost::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
+      detector_(std::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
       ras_ptr(new grid_rasterizer)
 {
     setup(m);

@@ -65,7 +65,7 @@ inline mapnik::feature_ptr next(mapnik::featureset_ptr const& itr)
 void export_featureset()
 {
     using namespace boost::python;
-    class_<mapnik::Featureset,boost::shared_ptr<mapnik::Featureset>,
+    class_<mapnik::Featureset,std::shared_ptr<mapnik::Featureset>,
         boost::noncopyable>("Featureset",no_init)
         .def("__iter__",pass_through)
         .def("next",next)

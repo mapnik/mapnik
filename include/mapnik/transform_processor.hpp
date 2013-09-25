@@ -33,10 +33,10 @@
 #include <mapnik/expression_evaluator.hpp>
 
 // boost
-#include <boost/foreach.hpp>
+
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
-
+#include <boost/range/adaptor/reversed.hpp>
 // agg
 #include <agg_trans_affine.h>
 
@@ -190,7 +190,7 @@ struct transform_processor
     {
         attribute_collector<Container> collect(names);
 
-        BOOST_FOREACH (transform_node const& node, list)
+        for (transform_node const& node : list)
         {
             boost::apply_visitor(collect, *node);
         }
@@ -205,7 +205,7 @@ struct transform_processor
         MAPNIK_LOG_DEBUG(transform) << "transform: begin with " << to_string(matrix_node(tr));
         #endif
 
-        BOOST_REVERSE_FOREACH (transform_node const& node, list)
+        for (transform_node const& node : boost::adaptors::reverse(list))
         {
             boost::apply_visitor(eval, *node);
             #ifdef MAPNIK_LOG

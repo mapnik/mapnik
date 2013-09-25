@@ -38,7 +38,7 @@
 #include "agg_conv_dash.h"
 
 // boost
-#include <boost/foreach.hpp>
+
 
 // stl
 #include <string>
@@ -96,7 +96,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
     if (stroke_.has_dash()) converter.set<dash_tag>();
     converter.set<stroke_tag>(); //always stroke
 
-    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    for ( geometry_type & geom : feature.paths())
     {
         if (geom.size() > 1)
         {
@@ -119,4 +119,3 @@ template void grid_renderer<grid>::process(line_symbolizer const&,
                                            proj_transform const&);
 
 }
-

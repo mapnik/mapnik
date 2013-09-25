@@ -31,14 +31,13 @@ extern "C"
 }
 
 // boost
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_array.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
 
 // std
 #include <cstdio>
+#include <memory>
 
 namespace mapnik
 {
@@ -280,7 +279,7 @@ void jpeg_reader<T>::read(unsigned x0, unsigned y0, image_data_32& image)
     unsigned w = std::min(unsigned(image.width()),width_ - x0);
     unsigned h = std::min(unsigned(image.height()),height_ - y0);
 
-    boost::scoped_array<unsigned int> out_row(new unsigned int[w]);
+    const std::unique_ptr<unsigned int[]> out_row(new unsigned int[w]);
     unsigned row = 0;
     while (cinfo.output_scanline < cinfo.output_height)
     {

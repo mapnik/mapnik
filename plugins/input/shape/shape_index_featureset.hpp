@@ -34,7 +34,7 @@
 #include <mapnik/value_types.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 #include <boost/utility.hpp>
 
 #include "shape_datasource.hpp"
@@ -62,7 +62,7 @@ private:
     filterT filter_;
     context_ptr ctx_;
     shape_io & shape_;
-    boost::scoped_ptr<mapnik::transcoder> tr_;
+    const std::unique_ptr<mapnik::transcoder> tr_;
     std::vector<std::streampos> offsets_;
     std::vector<std::streampos>::iterator itr_;
     std::vector<int> attr_ids_;

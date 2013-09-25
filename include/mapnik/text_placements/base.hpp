@@ -70,7 +70,7 @@ public:
     double get_actual_minimum_padding() const { return scale_factor * properties.minimum_padding; }
 };
 
-typedef boost::shared_ptr<text_placement_info> text_placement_info_ptr;
+typedef std::shared_ptr<text_placement_info> text_placement_info_ptr;
 
 /** This object handles the management of all TextSymbolizer properties. It can
  * be used as a base class for own objects which implement new processing
@@ -108,7 +108,7 @@ public:
 };
 
 /** Pointer to object of class text_placements */
-typedef boost::shared_ptr<text_placements> text_placements_ptr;
+typedef std::shared_ptr<text_placements> text_placements_ptr;
 
 } //ns mapnik
 

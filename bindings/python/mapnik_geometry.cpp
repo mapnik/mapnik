@@ -79,25 +79,25 @@ void add_geojson_impl(path_type& p, std::string const& json)
         throw std::runtime_error("Failed to parse geojson geometry");
 }
 
-boost::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
+std::shared_ptr<path_type> from_wkt_impl(std::string const& wkt)
 {
-    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    std::shared_ptr<path_type> paths = std::make_shared<path_type>();
     if (!mapnik::from_wkt(wkt, *paths))
         throw std::runtime_error("Failed to parse WKT");
     return paths;
 }
 
-boost::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
+std::shared_ptr<path_type> from_wkb_impl(std::string const& wkb)
 {
-    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    std::shared_ptr<path_type> paths = std::make_shared<path_type>();
     if (!mapnik::geometry_utils::from_wkb(*paths, wkb.c_str(), wkb.size()))
         throw std::runtime_error("Failed to parse WKB");
     return paths;
 }
 
-boost::shared_ptr<path_type> from_geojson_impl(std::string const& json)
+std::shared_ptr<path_type> from_geojson_impl(std::string const& json)
 {
-    boost::shared_ptr<path_type> paths = boost::make_shared<path_type>();
+    std::shared_ptr<path_type> paths = std::make_shared<path_type>();
     if (! mapnik::json::from_geojson(json, *paths))
         throw std::runtime_error("Failed to parse geojson geometry");
     return paths;
@@ -107,7 +107,7 @@ mapnik::box2d<double> envelope_impl(path_type & p)
 {
     mapnik::box2d<double> b;
     bool first = true;
-    BOOST_FOREACH(mapnik::geometry_type const& geom, p)
+    for (mapnik::geometry_type const& geom : p)
     {
         if (first)
         {
@@ -232,6 +232,7 @@ std::string to_geojson( path_type const& geom)
 
 std::string to_svg( geometry_type const& geom)
 {
+
 #if BOOST_VERSION >= 104700
     std::string svg; // Use Python String directly ?
     bool result = mapnik::util::to_svg(svg,geom);
@@ -269,10 +270,10 @@ void export_geometry()
 {
     using namespace boost::python;
 
-    enum_<mapnik::eGeomType>("GeometryType")
-        .value("Point",mapnik::Point)
-        .value("LineString",mapnik::LineString)
-        .value("Polygon",mapnik::Polygon)
+    enum_<mapnik::geometry_type::types>("GeometryType")
+        .value("Point",mapnik::geometry_type::types::Point)
+        .value("LineString",mapnik::geometry_type::types::LineString)
+        .value("Polygon",mapnik::geometry_type::types::Polygon)
         ;
 
 #if BOOST_VERSION >= 104700
@@ -283,7 +284,7 @@ void export_geometry()
 #endif
 
     using mapnik::geometry_type;
-    class_<geometry_type, std::auto_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
+    class_<geometry_type, std::shared_ptr<geometry_type>, boost::noncopyable>("Geometry2d",no_init)
         .def("envelope",&geometry_type::envelope)
         // .def("__str__",&geometry_type::to_string)
         .def("type",&geometry_type::type)
@@ -293,7 +294,7 @@ void export_geometry()
         // TODO add other geometry_type methods
         ;
 
-    class_<path_type, boost::shared_ptr<path_type>, boost::noncopyable>("Path")
+    class_<path_type, std::shared_ptr<path_type>, boost::noncopyable>("Path")
         .def("__getitem__", getitem_impl,return_value_policy<reference_existing_object>())
         .def("__len__", &path_type::size)
         .def("envelope",envelope_impl)

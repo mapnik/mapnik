@@ -6,7 +6,7 @@
 // boost
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
+
 
 // stl
 #include <stdexcept>
@@ -54,7 +54,7 @@ void parse_geom(mapnik::geometry_type & geom,
                 std::string const& geom_string) {
     std::vector<std::string> vertices;
     boost::split(vertices, geom_string, boost::is_any_of(","));
-    BOOST_FOREACH(std::string const& vert, vertices)
+    for (std::string const& vert : vertices)
     {
         std::vector<std::string> commands;
         boost::split(commands, vert, boost::is_any_of(" "));

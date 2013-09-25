@@ -31,7 +31,7 @@
 #include <valarray>
 namespace mapnik {
 
-cairo_face::cairo_face(boost::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
+cairo_face::cairo_face(std::shared_ptr<freetype_engine> const& engine, face_ptr const& face)
     : face_(face)
 {
     static cairo_user_data_key_t key;

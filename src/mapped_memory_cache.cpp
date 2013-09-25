@@ -71,7 +71,7 @@ boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& 
         try
         {
             boost::interprocess::file_mapping mapping(uri.c_str(),boost::interprocess::read_only);
-            mapped_region_ptr region(boost::make_shared<boost::interprocess::mapped_region>(mapping,boost::interprocess::read_only));
+            mapped_region_ptr region(std::make_shared<boost::interprocess::mapped_region>(mapping,boost::interprocess::read_only));
 
             result.reset(region);
 

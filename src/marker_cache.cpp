@@ -141,7 +141,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             }
             std::string known_svg_string = mark_itr->second;
             using namespace mapnik::svg;
-            svg_path_ptr marker_path(boost::make_shared<svg_storage_type>());
+            svg_path_ptr marker_path(std::make_shared<svg_storage_type>());
             vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
             svg_path_adapter svg_path(stl_storage);
             svg_converter_type svg(svg_path, marker_path->attributes());
@@ -152,7 +152,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             svg.bounding_rect(&lox, &loy, &hix, &hiy);
             marker_path->set_bounding_box(lox,loy,hix,hiy);
             marker_path->set_dimensions(svg.width(),svg.height());
-            marker_ptr mark(boost::make_shared<marker>(marker_path));
+            marker_ptr mark(std::make_shared<marker>(marker_path));
             result.reset(mark);
             if (update_cache)
             {
@@ -170,7 +170,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             if (is_svg(uri))
             {
                 using namespace mapnik::svg;
-                svg_path_ptr marker_path(boost::make_shared<svg_storage_type>());
+                svg_path_ptr marker_path(std::make_shared<svg_storage_type>());
                 vertex_stl_adapter<svg_path_storage> stl_storage(marker_path->source());
                 svg_path_adapter svg_path(stl_storage);
                 svg_converter_type svg(svg_path, marker_path->attributes());
@@ -181,7 +181,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
                 svg.bounding_rect(&lox, &loy, &hix, &hiy);
                 marker_path->set_bounding_box(lox,loy,hix,hiy);
                 marker_path->set_dimensions(svg.width(),svg.height());
-                marker_ptr mark(boost::make_shared<marker>(marker_path));
+                marker_ptr mark(std::make_shared<marker>(marker_path));
                 result.reset(mark);
                 if (update_cache)
                 {
@@ -191,13 +191,13 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
             else
             {
                 // TODO - support reading images from string
-                std::auto_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(uri));
+                std::unique_ptr<mapnik::image_reader> reader(mapnik::get_image_reader(uri));
                 if (reader.get())
                 {
                     unsigned width = reader->width();
                     unsigned height = reader->height();
                     BOOST_ASSERT(width > 0 && height > 0);
-                    mapnik::image_ptr image(boost::make_shared<mapnik::image_data_32>(width,height));
+                    mapnik::image_ptr image(std::make_shared<mapnik::image_data_32>(width,height));
                     reader->read(0,0,*image);
                     if (!reader->premultiplied_alpha())
                     {
@@ -205,7 +205,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
                         agg::pixfmt_rgba32 pixf(buffer);
                         pixf.premultiply();
                     }
-                    marker_ptr mark(boost::make_shared<marker>(image));
+                    marker_ptr mark(std::make_shared<marker>(image));
                     result.reset(mark);
                     if (update_cache)
                     {

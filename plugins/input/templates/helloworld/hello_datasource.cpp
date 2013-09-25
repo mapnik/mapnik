@@ -62,7 +62,7 @@ mapnik::featureset_ptr hello_datasource::features(mapnik::query const& q) const
     // if the query box intersects our world extent then query for features
     if (extent_.intersects(q.get_bbox()))
     {
-        return boost::make_shared<hello_featureset>(q.get_bbox(),desc_.get_encoding());
+        return std::make_shared<hello_featureset>(q.get_bbox(),desc_.get_encoding());
     }
 
     // otherwise return an empty featureset pointer

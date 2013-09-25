@@ -50,7 +50,7 @@
 #include "agg_conv_clip_polyline.h"
 
 // boost
-#include <boost/foreach.hpp>
+
 
 namespace {
 
@@ -151,7 +151,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
-    BOOST_FOREACH(geometry_type & geom, feature.paths())
+    for (geometry_type & geom : feature.paths())
     {
         if (geom.size() > 1)
         {
