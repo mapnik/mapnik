@@ -75,7 +75,6 @@ enum composite_mode_e
     saturation,
     _color,
     _value
-    //colorize_alpha
 };
 
 MAPNIK_DECL boost::optional<composite_mode_e> comp_op_from_string(std::string const& name);
