@@ -27,9 +27,6 @@
 #include <boost/type_traits/is_same.hpp>
 
 // mpl
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/push_back.hpp>
-#include <boost/mpl/set.hpp>
 #include <boost/mpl/begin_end.hpp>
 #include <boost/mpl/distance.hpp>
 #include <boost/mpl/deref.hpp>
@@ -39,15 +36,13 @@
 #include <boost/mpl/int.hpp>
 
 // fusion
-#include <boost/fusion/include/mpl.hpp>
-#include <boost/fusion/container/vector.hpp>
 #include <boost/fusion/include/at_c.hpp>
-#include <boost/fusion/include/make_vector.hpp>
-
+#include <boost/fusion/container/vector.hpp>
 #include <boost/array.hpp>
 
 // mapnik
 #include <mapnik/agg_helpers.hpp>
+#include <mapnik/ctrans.hpp>
 #include <mapnik/offset_converter.hpp>
 #include <mapnik/simplify_converter.hpp>
 #include <mapnik/noncopyable.hpp>
@@ -60,7 +55,6 @@
 #include "agg_conv_stroke.h"
 #include "agg_conv_dash.h"
 #include "agg_conv_transform.h"
-#include "agg_path_storage.h"
 
 // stl
 #include <stdexcept>
