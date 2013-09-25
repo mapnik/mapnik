@@ -203,6 +203,13 @@ inline std::ostream& operator<< (std::ostream& os, invert)
     return os;
 }
 
+inline std::ostream& operator<< (std::ostream& os, colorize_alpha const& filter)
+{
+    os << "colorize-alpha(TODO)";
+    return os;
+}
+
+
 template <typename Out>
 struct to_string_visitor : boost::static_visitor<void>
 {
