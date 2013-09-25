@@ -41,7 +41,7 @@ struct symbolizer_hash
     // specialisation for polygon_symbolizer
     static std::size_t value(polygon_symbolizer const& sym)
     {
-        std::size_t seed = Polygon;
+        std::size_t seed = geometry_type::types::Polygon;
         boost::hash_combine(seed, sym.get_fill().rgba());
         boost::hash_combine(seed, sym.get_opacity());
         return seed;
@@ -50,7 +50,7 @@ struct symbolizer_hash
     // specialisation for line_symbolizer
     static std::size_t value(line_symbolizer const& sym)
     {
-        std::size_t seed = LineString;
+        std::size_t seed = geometry_type::types::LineString;
         boost::hash_combine(seed, sym.get_stroke().get_color().rgba());
         boost::hash_combine(seed, sym.get_stroke().get_width());
         boost::hash_combine(seed, sym.get_stroke().get_opacity());

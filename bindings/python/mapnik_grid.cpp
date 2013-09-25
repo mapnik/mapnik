@@ -55,7 +55,7 @@ mapnik::grid::value_type get_pixel(mapnik::grid const& grid, int x, int y)
 
 void export_grid()
 {
-    class_<mapnik::grid,boost::shared_ptr<mapnik::grid> >(
+    class_<mapnik::grid,std::shared_ptr<mapnik::grid> >(
         "Grid",
         "This class represents a feature hitgrid.",
         init<int,int,std::string,unsigned>(

@@ -30,7 +30,7 @@
 // boost
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/make_shared.hpp>
 
 namespace mapnik {
@@ -74,7 +74,7 @@ public:
     path_iterator(Container const& path)
         : path_iterator::iterator_adaptor_(0),
           path_(path),
-          first_value_(boost::make_shared<Value>(0,0,0))
+          first_value_(std::make_shared<Value>(0,0,0))
     {}
 
     /*!
@@ -91,7 +91,7 @@ public:
     explicit path_iterator(Value* first_element, Container const& path)
         : path_iterator::iterator_adaptor_(first_element),
           path_(path),
-          first_value_(boost::make_shared<Value>(0,0,0))
+          first_value_(std::make_shared<Value>(0,0,0))
     {
         this->increment();
     }
@@ -165,7 +165,7 @@ private:
     }
 
     Container const& path_;
-    boost::shared_ptr<Value> first_value_;
+    std::shared_ptr<Value> first_value_;
 };
 
 /*!

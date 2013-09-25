@@ -38,7 +38,7 @@
 #include <mapnik/util/fs.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -146,7 +146,7 @@ public:
         return false;
     }
 
-    static void get_tables(boost::shared_ptr<sqlite_connection> ds,
+    static void get_tables(std::shared_ptr<sqlite_connection> ds,
                            std::vector<std::string> & tables)
     {
         std::ostringstream sql;
@@ -165,7 +165,7 @@ public:
         const int rc = sqlite3_prepare_v2 (*(*ds), sql.str().c_str(), -1, &stmt, 0);
         if (rc == SQLITE_OK)
         {
-            boost::shared_ptr<sqlite_resultset> rs = boost::make_shared<sqlite_resultset>(stmt);
+            std::shared_ptr<sqlite_resultset> rs = std::make_shared<sqlite_resultset>(stmt);
             while (rs->is_valid() && rs->step_next())
             {
                 const int type_oid = rs->column_type(0);
@@ -181,7 +181,7 @@ public:
         }
     }
 
-    static void query_extent(boost::shared_ptr<sqlite_resultset> rs,
+    static void query_extent(std::shared_ptr<sqlite_resultset> rs,
                              mapnik::box2d<double>& extent)
     {
 
@@ -218,7 +218,7 @@ public:
 
     static bool create_spatial_index(std::string const& index_db,
                                      std::string const& index_table,
-                                     boost::shared_ptr<sqlite_resultset> rs)
+                                     std::shared_ptr<sqlite_resultset> rs)
     {
         /* TODO
            - speedups
@@ -236,7 +236,7 @@ public:
 #endif
 
         bool existed = mapnik::util::exists(index_db);
-        boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
+        std::shared_ptr<sqlite_connection> ds = std::make_shared<sqlite_connection>(index_db,flags);
 
         bool one_success = false;
         try
@@ -356,7 +356,7 @@ public:
         mapnik::box2d<double> bbox;
     } rtree_type;
 
-    static void build_tree(boost::shared_ptr<sqlite_resultset> rs,
+    static void build_tree(std::shared_ptr<sqlite_resultset> rs,
                            std::vector<sqlite_utils::rtree_type> & rtree_list)
     {
 
@@ -414,8 +414,8 @@ public:
 #endif
 
         bool existed = mapnik::util::exists(index_db);;
-        
-        boost::shared_ptr<sqlite_connection> ds = boost::make_shared<sqlite_connection>(index_db,flags);
+
+        std::shared_ptr<sqlite_connection> ds = std::make_shared<sqlite_connection>(index_db,flags);
 
         bool one_success = false;
         try
@@ -484,7 +484,7 @@ public:
         return false;
     }
 
-    static bool detect_extent(boost::shared_ptr<sqlite_connection> ds,
+    static bool detect_extent(std::shared_ptr<sqlite_connection> ds,
                               bool has_spatial_index,
                               mapnik::box2d<double> & extent,
                               std::string const& index_table,
@@ -501,7 +501,7 @@ public:
             s << "SELECT xmin, ymin, xmax, ymax FROM " << metadata;
             s << " WHERE LOWER(f_table_name) = LOWER('" << geometry_table << "')";
             MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
-            boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+            std::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             if (rs->is_valid() && rs->step_next())
             {
                 double xmin = rs->column_double(0);
@@ -518,7 +518,7 @@ public:
             s << "SELECT MIN(xmin), MIN(ymin), MAX(xmax), MAX(ymax) FROM "
               << index_table;
             MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
-            boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+            std::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             if (rs->is_valid() && rs->step_next())
             {
                 if (! rs->column_isnull(0))
@@ -539,20 +539,20 @@ public:
             s << "SELECT " << geometry_field << "," << key_field
               << " FROM (" << table << ")";
             MAPNIK_LOG_DEBUG(sqlite) << "sqlite_datasource: executing: '" << s.str() << "'";
-            boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+            std::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
             sqlite_utils::query_extent(rs,extent);
             return true;
         }
         return false;
     }
 
-    static bool has_rtree(std::string const& index_table,boost::shared_ptr<sqlite_connection> ds)
+    static bool has_rtree(std::string const& index_table,std::shared_ptr<sqlite_connection> ds)
     {
         try
         {
             std::ostringstream s;
             s << "SELECT pkid,xmin,xmax,ymin,ymax FROM " << index_table << " LIMIT 1";
-            boost::shared_ptr<sqlite_resultset> rs = ds->execute_query(s.str());
+            std::shared_ptr<sqlite_resultset> rs = ds->execute_query(s.str());
             if (rs->is_valid() && rs->step_next())
             {
                 return true;
@@ -569,10 +569,10 @@ public:
     static bool detect_types_from_subquery(std::string const& query,
                                            std::string & geometry_field,
                                            mapnik::layer_descriptor & desc,
-                                           boost::shared_ptr<sqlite_connection> ds)
+                                           std::shared_ptr<sqlite_connection> ds)
     {
         bool found = false;
-        boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(query));
+        std::shared_ptr<sqlite_resultset> rs(ds->execute_query(query));
         if (rs->is_valid() && rs->step_next())
         {
             for (int i = 0; i < rs->column_count(); ++i)
@@ -627,7 +627,7 @@ public:
                            std::string & field,
                            std::string & table,
                            mapnik::layer_descriptor & desc,
-                           boost::shared_ptr<sqlite_connection> ds)
+                           std::shared_ptr<sqlite_connection> ds)
     {
 
         // http://www.sqlite.org/pragma.html#pragma_table_info
@@ -636,7 +636,7 @@ public:
         // if the subquery-based type detection failed
         std::ostringstream s;
         s << "PRAGMA table_info(" << table << ")";
-        boost::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
+        std::shared_ptr<sqlite_resultset> rs(ds->execute_query(s.str()));
         bool found_table = false;
         bool found_pk = false;
         while (rs->is_valid() && rs->step_next())

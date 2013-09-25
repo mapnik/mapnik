@@ -12,7 +12,7 @@ hello_featureset::hello_featureset(mapnik::box2d<double> const& box, std::string
     : box_(box),
       feature_id_(1),
       tr_(new mapnik::transcoder(encoding)),
-      ctx_(boost::make_shared<mapnik::context_type>()) { }
+      ctx_(std::make_shared<mapnik::context_type>()) { }
 
 hello_featureset::~hello_featureset() { }
 
@@ -69,4 +69,3 @@ mapnik::feature_ptr hello_featureset::next()
     // otherwise return an empty feature
     return mapnik::feature_ptr();
 }
-

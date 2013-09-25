@@ -25,7 +25,7 @@
 
 // boost
 #include <boost/variant/variant_fwd.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <string>
@@ -38,7 +38,7 @@ struct attribute;
 
 typedef boost::variant<std::string, attribute> path_component;
 typedef std::vector<path_component> path_expression;
-typedef boost::shared_ptr<path_expression> path_expression_ptr;
+typedef std::shared_ptr<path_expression> path_expression_ptr;
 
 }
 

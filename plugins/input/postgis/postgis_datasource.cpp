@@ -38,9 +38,9 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/make_shared.hpp>
 
 // stl
+#include <memory>
 #include <string>
 #include <algorithm>
 #include <set>
@@ -53,7 +53,7 @@ const double postgis_datasource::FMAX = std::numeric_limits<double>::max();
 const std::string postgis_datasource::GEOMETRY_COLUMNS = "geometry_columns";
 const std::string postgis_datasource::SPATIAL_REF_SYS = "spatial_ref_system";
 
-using boost::shared_ptr;
+using std::shared_ptr;
 using mapnik::attribute_descriptor;
 
 postgis_datasource::postgis_datasource(parameters const& params)
@@ -579,7 +579,7 @@ std::string postgis_datasource::populate_tokens(std::string const& sql, double s
 }
 
 
-boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
+std::shared_ptr<IResultSet> postgis_datasource::get_resultset(std::shared_ptr<Connection> &conn, std::string const& sql, CnxPool_ptr const& pool, processor_context_ptr ctx) const
 {
 
     if (!ctx)
@@ -599,7 +599,7 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
                 throw mapnik::datasource_exception("Postgis Plugin: error creating cursor for data select." );
             }
 
-            return boost::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
+            return std::make_shared<CursorResultSet>(conn, cursor_name, cursor_fetch_size_);
 
         }
         else
@@ -611,17 +611,17 @@ boost::shared_ptr<IResultSet> postgis_datasource::get_resultset(boost::shared_pt
     else
     {   // asynchronous requests
 
-        boost::shared_ptr<postgis_processor_context> pgis_ctxt = boost::static_pointer_cast<postgis_processor_context>(ctx);
+        std::shared_ptr<postgis_processor_context> pgis_ctxt = std::static_pointer_cast<postgis_processor_context>(ctx);
         if (conn)
         {
             // lauch async req & create asyncresult with conn
             conn->executeAsyncQuery(sql, 1);
-            return boost::make_shared<AsyncResultSet>(pgis_ctxt, pool, conn, sql);
+            return std::make_shared<AsyncResultSet>(pgis_ctxt, pool, conn, sql);
         }
         else
         {
             // create asyncresult  with  null connection
-            boost::shared_ptr<AsyncResultSet> res = boost::make_shared<AsyncResultSet>(pgis_ctxt, pool,  conn, sql);
+            std::shared_ptr<AsyncResultSet> res = std::make_shared<AsyncResultSet>(pgis_ctxt, pool,  conn, sql);
             pgis_ctxt->add_request(res);
             return res;
         }
@@ -643,7 +643,7 @@ processor_context_ptr postgis_datasource::get_context(feature_style_context_map 
     }
     else
     {
-        return ctx.insert(std::make_pair(ds_name,boost::make_shared<postgis_processor_context>())).first->second;
+        return ctx.insert(std::make_pair(ds_name,std::make_shared<postgis_processor_context>())).first->second;
     }
 }
 
@@ -652,7 +652,7 @@ featureset_ptr postgis_datasource::features(query const& q) const
     // if the driver is in asynchronous mode, return the appropriate fetaures
     if (asynchronous_request_ )
     {
-        return features_with_context(q,boost::make_shared<postgis_processor_context>());
+        return features_with_context(q,std::make_shared<postgis_processor_context>());
     }
     else
     {
@@ -680,7 +680,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
         if ( asynchronous_request_ )
         {
             // limit use to num_async_request_ => if reached don't borrow the last connexion object
-            boost::shared_ptr<postgis_processor_context> pgis_ctxt = boost::static_pointer_cast<postgis_processor_context>(proc_ctx);
+            std::shared_ptr<postgis_processor_context> pgis_ctxt = std::static_pointer_cast<postgis_processor_context>(proc_ctx);
             if ( pgis_ctxt->num_async_requests_ < max_async_connections_ )
             {
                 conn = pool->borrowObject();
@@ -743,7 +743,7 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
         s << ") AS geom";
 
-        mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+        mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
         std::set<std::string> const& props = q.property_names();
         std::set<std::string>::const_iterator pos = props.begin();
         std::set<std::string>::const_iterator end = props.end();
@@ -780,8 +780,8 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
             s << " LIMIT " << row_limit_;
         }
 
-        boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
-        return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+        std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool, proc_ctx);
+        return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
 
     }
 
@@ -827,7 +827,7 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
             std::ostringstream s;
             s << "SELECT ST_AsBinary(\"" << geometryColumn_ << "\") AS geom";
 
-            mapnik::context_ptr ctx = boost::make_shared<mapnik::context_type>();
+            mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
             std::vector<attribute_descriptor>::const_iterator itr = desc_.get_descriptors().begin();
             std::vector<attribute_descriptor>::const_iterator end = desc_.get_descriptors().end();
 
@@ -863,8 +863,8 @@ featureset_ptr postgis_datasource::features_at_point(coord2d const& pt, double t
                 s << " LIMIT " << row_limit_;
             }
 
-            boost::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
-            return boost::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
+            std::shared_ptr<IResultSet> rs = get_resultset(conn, s.str(), pool);
+            return std::make_shared<postgis_featureset>(rs, ctx, desc_.get_encoding(), !key_field_.empty());
         }
     }
 

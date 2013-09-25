@@ -228,7 +228,7 @@ void export_feature()
         .def("push", &context_type::push)
         ;
 
-    class_<mapnik::feature_impl,boost::shared_ptr<mapnik::feature_impl>,
+    class_<mapnik::feature_impl,std::shared_ptr<mapnik::feature_impl>,
         boost::noncopyable>("Feature",init<context_ptr,mapnik::value_integer>("Default ctor."))
         .def("id",&mapnik::feature_impl::id)
         .def("__str__",&mapnik::feature_impl::to_string)

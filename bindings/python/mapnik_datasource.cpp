@@ -48,7 +48,7 @@ namespace
 {
 //user-friendly wrapper that uses Python dictionary
 using namespace boost::python;
-boost::shared_ptr<mapnik::datasource> create_datasource(dict const& d)
+std::shared_ptr<mapnik::datasource> create_datasource(dict const& d)
 {
     mapnik::parameters params;
     boost::python::list keys=d.keys();
@@ -92,7 +92,7 @@ boost::shared_ptr<mapnik::datasource> create_datasource(dict const& d)
     return mapnik::datasource_cache::instance().create(params);
 }
 
-boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
+boost::python::dict describe(std::shared_ptr<mapnik::datasource> const& ds)
 {
     boost::python::dict description;
     mapnik::layer_descriptor ld = ds->get_descriptor();
@@ -103,7 +103,7 @@ boost::python::dict describe(boost::shared_ptr<mapnik::datasource> const& ds)
     return description;
 }
 
-boost::python::list fields(boost::shared_ptr<mapnik::datasource> const& ds)
+boost::python::list fields(std::shared_ptr<mapnik::datasource> const& ds)
 {
     boost::python::list flds;
     if (ds)
@@ -119,7 +119,7 @@ boost::python::list fields(boost::shared_ptr<mapnik::datasource> const& ds)
     }
     return flds;
 }
-boost::python::list field_types(boost::shared_ptr<mapnik::datasource> const& ds)
+boost::python::list field_types(std::shared_ptr<mapnik::datasource> const& ds)
 {
     boost::python::list fld_types;
     if (ds)
@@ -173,7 +173,7 @@ void export_datasource()
         .value("Collection",mapnik::datasource::Collection)
         ;
 
-    class_<datasource,boost::shared_ptr<datasource>,
+    class_<datasource,std::shared_ptr<datasource>,
         boost::noncopyable>("Datasource",no_init)
         .def("type",&datasource::type)
         .def("geometry_type",&datasource::get_geometry_type)

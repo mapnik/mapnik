@@ -26,7 +26,7 @@
 
 // boost
 #include <boost/concept_check.hpp>
-#include <boost/scoped_ptr.hpp>
+
 // qt
 #include <QList>
 #include <QIcon>
@@ -114,7 +114,7 @@ public:
     }
 
 private:
-    boost::scoped_ptr<node_base> impl_;
+    const std::unique_ptr<node_base> impl_;
     QList<node*> children_;
     node * parent_;
 };
@@ -199,7 +199,7 @@ struct symbolizer_icon : public boost::static_visitor<QIcon>
     {
         // FIXME!
         /*
-          boost::shared_ptr<mapnik::image_data_32> symbol = sym.get_image();
+          std::shared_ptr<mapnik::image_data_32> symbol = sym.get_image();
           if (symbol)
           {
           QImage image(symbol->getBytes(),
@@ -303,7 +303,7 @@ private:
 class map_node
 {
 public:
-    explicit map_node(boost::shared_ptr<mapnik::Map> map)
+    explicit map_node(std::shared_ptr<mapnik::Map> map)
     : map_(map)  {}
     ~map_node() {}
 
@@ -318,10 +318,10 @@ public:
     }
 
 private:
-    boost::shared_ptr<mapnik::Map> map_;
+    std::shared_ptr<mapnik::Map> map_;
 };
 
-StyleModel::StyleModel(boost::shared_ptr<mapnik::Map> map, QObject * parent)
+StyleModel::StyleModel(std::shared_ptr<mapnik::Map> map, QObject * parent)
     : QAbstractItemModel(parent),
       root_(new node(map_node(map)))
 {

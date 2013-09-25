@@ -31,7 +31,7 @@
 #include <mapnik/expression.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
+
 
 // stl
 #include <deque>
@@ -91,8 +91,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
         geometry_type const& geom = feature.get_geometry(i);
         if (geom.size() > 2)
         {
-            boost::scoped_ptr<geometry_type> frame(new geometry_type(LineString));
-            boost::scoped_ptr<geometry_type> roof(new geometry_type(Polygon));
+            const std::unique_ptr<geometry_type> frame(new geometry_type(geometry_type::types::LineString));
+            const std::unique_ptr<geometry_type> roof(new geometry_type(geometry_type::types::Polygon));
             std::deque<segment_t> face_segments;
             double x0 = 0;
             double y0 = 0;
@@ -124,7 +124,7 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
 
             for (; itr!=end; ++itr)
             {
-                boost::scoped_ptr<geometry_type> faces(new geometry_type(Polygon));
+                const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
                 faces->move_to(itr->get<0>(),itr->get<1>());
                 faces->line_to(itr->get<2>(),itr->get<3>());
                 faces->line_to(itr->get<2>(),itr->get<3>() + height);

@@ -29,16 +29,17 @@
 #include "connection_manager.hpp"
 #include "resultset.hpp"
 #include <queue>
+#include <memory>
 
 class postgis_processor_context;
-typedef boost::shared_ptr<postgis_processor_context> postgis_processor_context_ptr;
+typedef std::shared_ptr<postgis_processor_context> postgis_processor_context_ptr;
 
 class AsyncResultSet : public IResultSet, private mapnik::noncopyable
 {
 public:
     AsyncResultSet(postgis_processor_context_ptr const& ctx,
-                     boost::shared_ptr< Pool<Connection,ConnectionCreator> > const& pool,
-                     boost::shared_ptr<Connection> const& conn, std::string const& sql )
+                     std::shared_ptr< Pool<Connection,ConnectionCreator> > const& pool,
+                     std::shared_ptr<Connection> const& conn, std::string const& sql )
         : ctx_(ctx),
           pool_(pool),
           conn_(conn),
@@ -145,10 +146,10 @@ public:
 
 private:
     postgis_processor_context_ptr ctx_;
-    boost::shared_ptr< Pool<Connection,ConnectionCreator> > pool_;
-    boost::shared_ptr<Connection> conn_;
+    std::shared_ptr< Pool<Connection,ConnectionCreator> > pool_;
+    std::shared_ptr<Connection> conn_;
     std::string sql_;
-    boost::shared_ptr<ResultSet> rs_;
+    std::shared_ptr<ResultSet> rs_;
     bool is_closed_;
 
     void prepare()
@@ -176,14 +177,14 @@ public:
         : num_async_requests_(0) {}
     ~postgis_processor_context() {}
 
-    void add_request(boost::shared_ptr<AsyncResultSet> const& req)
+    void add_request(std::shared_ptr<AsyncResultSet> const& req)
     {
         q_.push(req);
     }
 
-    boost::shared_ptr<AsyncResultSet> pop_next_request()
+    std::shared_ptr<AsyncResultSet> pop_next_request()
     {
-        boost::shared_ptr<AsyncResultSet> r;
+        std::shared_ptr<AsyncResultSet> r;
         if (!q_.empty())
         {
             r = q_.front();
@@ -195,7 +196,7 @@ public:
     int num_async_requests_;
 
 private:
-    typedef std::queue<boost::shared_ptr<AsyncResultSet> > async_queue;
+    typedef std::queue<std::shared_ptr<AsyncResultSet> > async_queue;
     async_queue q_;
 
 };
@@ -203,7 +204,7 @@ private:
 inline void AsyncResultSet::prepare_next()
 {
     // ensure cnx pool has unused cnx
-    boost::shared_ptr<AsyncResultSet> next = ctx_->pop_next_request();
+    std::shared_ptr<AsyncResultSet> next = ctx_->pop_next_request();
     if (next)
     {
         next->prepare();

@@ -29,11 +29,13 @@ extern "C"
 #include <png.h>
 }
 // boost
-#include <boost/scoped_array.hpp>
 // iostreams
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/stream.hpp>
+
+// stl
+#include <memory>
 
 namespace mapnik
 {
@@ -265,7 +267,7 @@ void png_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
         png_read_update_info(png_ptr, info_ptr);
         // we can read whole image at once
         // alloc row pointers
-        boost::scoped_array<png_byte*> rows(new png_bytep[height_]);
+        const std::unique_ptr<png_bytep[]> rows(new png_bytep[height_]);
         for (unsigned i=0; i<height_; ++i)
             rows[i] = (png_bytep)image.getRow(i);
         png_read_image(png_ptr, rows.get());
@@ -276,7 +278,7 @@ void png_reader<T>::read(unsigned x0, unsigned y0,image_data_32& image)
         unsigned w=std::min(unsigned(image.width()),width_ - x0);
         unsigned h=std::min(unsigned(image.height()),height_ - y0);
         unsigned rowbytes=png_get_rowbytes(png_ptr, info_ptr);
-        boost::scoped_array<png_byte> row(new png_byte[rowbytes]);
+        const std::unique_ptr<png_byte[]> row(new png_byte[rowbytes]);
         //START read image rows
         for (unsigned i = 0;i < height_; ++i)
         {

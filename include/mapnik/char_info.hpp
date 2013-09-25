@@ -23,7 +23,7 @@
 #ifndef MAPNIK_CHAR_INFO_HPP
 #define MAPNIK_CHAR_INFO_HPP
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace mapnik {
 struct char_properties;

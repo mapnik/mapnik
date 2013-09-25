@@ -432,17 +432,17 @@ void export_text_placement()
         ;
 
     class_<TextPlacementsWrap,
-        boost::shared_ptr<TextPlacementsWrap>,
+        std::shared_ptr<TextPlacementsWrap>,
         boost::noncopyable>
         ("TextPlacements")
         .def_readwrite("defaults", &text_placements::defaults)
         .def("get_placement_info", pure_virtual(&text_placements::get_placement_info))
         /* TODO: add_expressions() */
         ;
-    register_ptr_to_python<boost::shared_ptr<text_placements> >();
+    register_ptr_to_python<std::shared_ptr<text_placements> >();
 
     class_<TextPlacementInfoWrap,
-        boost::shared_ptr<TextPlacementInfoWrap>,
+        std::shared_ptr<TextPlacementInfoWrap>,
         boost::noncopyable>
         ("TextPlacementInfo",
          init<text_placements const*, double>())
@@ -453,11 +453,11 @@ void export_text_placement()
         .def_readwrite("properties", &text_placement_info::properties)
         .def_readwrite("scale_factor", &text_placement_info::scale_factor)
         ;
-    register_ptr_to_python<boost::shared_ptr<text_placement_info> >();
+    register_ptr_to_python<std::shared_ptr<text_placement_info> >();
 
 
     class_<processed_text,
-        boost::shared_ptr<processed_text>,
+        std::shared_ptr<processed_text>,
         boost::noncopyable>
         ("ProcessedText", no_init)
         .def("push_back", &processed_text::push_back)
@@ -466,7 +466,7 @@ void export_text_placement()
 
 
     class_<expression_set,
-        boost::shared_ptr<expression_set>,
+        std::shared_ptr<expression_set>,
         boost::noncopyable>
         ("ExpressionSet")
         .def("insert", &insert_expression);
@@ -475,7 +475,7 @@ void export_text_placement()
 
     //TODO: Python namespace
     class_<NodeWrap,
-        boost::shared_ptr<NodeWrap>,
+        std::shared_ptr<NodeWrap>,
         boost::noncopyable>
         ("FormattingNode")
         .def("apply", pure_virtual(&formatting::node::apply))
@@ -483,11 +483,11 @@ void export_text_placement()
              &formatting::node::add_expressions,
              &NodeWrap::default_add_expressions)
         ;
-    register_ptr_to_python<boost::shared_ptr<formatting::node> >();
+    register_ptr_to_python<std::shared_ptr<formatting::node> >();
 
 
     class_<TextNodeWrap,
-        boost::shared_ptr<TextNodeWrap>,
+        std::shared_ptr<TextNodeWrap>,
         bases<formatting::node>,
         boost::noncopyable>
         ("FormattingText", init<expression_ptr>())
@@ -497,11 +497,11 @@ void export_text_placement()
                       &formatting::text_node::get_text,
                       &formatting::text_node::set_text)
         ;
-    register_ptr_to_python<boost::shared_ptr<formatting::text_node> >();
+    register_ptr_to_python<std::shared_ptr<formatting::text_node> >();
 
 
     class_with_converter<FormatNodeWrap,
-        boost::shared_ptr<FormatNodeWrap>,
+        std::shared_ptr<FormatNodeWrap>,
         bases<formatting::node>,
         boost::noncopyable>
         ("FormattingFormat")
@@ -522,10 +522,10 @@ void export_text_placement()
                       &formatting::format_node::get_child,
                       &formatting::format_node::set_child)
         ;
-    register_ptr_to_python<boost::shared_ptr<formatting::format_node> >();
+    register_ptr_to_python<std::shared_ptr<formatting::format_node> >();
 
     class_<ListNodeWrap,
-        boost::shared_ptr<ListNodeWrap>,
+        std::shared_ptr<ListNodeWrap>,
         bases<formatting::node>,
         boost::noncopyable>
         ("FormattingList", init<>())
@@ -538,10 +538,10 @@ void export_text_placement()
         .def("append", &ListNodeWrap::append)
         ;
 
-    register_ptr_to_python<boost::shared_ptr<formatting::list_node> >();
+    register_ptr_to_python<std::shared_ptr<formatting::list_node> >();
 
     class_<ExprFormatWrap,
-        boost::shared_ptr<ExprFormatWrap>,
+        std::shared_ptr<ExprFormatWrap>,
         bases<formatting::node>,
         boost::noncopyable>
         ("FormattingExpressionFormat")
@@ -561,7 +561,7 @@ void export_text_placement()
                       &formatting::expression_format::get_child,
                       &formatting::expression_format::set_child)
         ;
-    register_ptr_to_python<boost::shared_ptr<formatting::expression_format> >();
+    register_ptr_to_python<std::shared_ptr<formatting::expression_format> >();
 
     //TODO: registry
 }

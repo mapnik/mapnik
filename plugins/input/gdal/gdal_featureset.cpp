@@ -63,7 +63,7 @@ gdal_featureset::gdal_featureset(GDALDataset& dataset,
                                  double dy,
                                  boost::optional<double> const& nodata)
     : dataset_(dataset),
-      ctx_(boost::make_shared<mapnik::context_type>()),
+      ctx_(std::make_shared<mapnik::context_type>()),
       band_(band),
       gquery_(q),
       raster_extent_(extent),
@@ -215,7 +215,7 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
         if (im_width > 0 && im_height > 0)
         {
-            mapnik::raster_ptr raster = boost::make_shared<mapnik::raster>(intersect, im_width, im_height);
+            mapnik::raster_ptr raster = std::make_shared<mapnik::raster>(intersect, im_width, im_height);
             feature->set_raster(raster);
             mapnik::image_data_32 & image = raster->data_;
             image.set(0xffffffff);
@@ -523,7 +523,7 @@ feature_ptr gdal_featureset::get_feature_at_point(mapnik::coord2d const& pt)
             {
                 // construct feature
                 feature_ptr feature = feature_factory::create(ctx_,1);
-                geometry_type * point = new geometry_type(mapnik::Point);
+                geometry_type * point = new geometry_type(mapnik::geometry_type::types::Point);
                 point->move_to(pt.x, pt.y);
                 feature->add_geometry(point);
                 feature->put("value",value);

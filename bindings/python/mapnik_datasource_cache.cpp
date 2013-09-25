@@ -29,7 +29,7 @@ namespace  {
 
 using namespace boost::python;
 
-boost::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
+std::shared_ptr<mapnik::datasource> create_datasource(const dict& d)
 {
     mapnik::parameters params;
     boost::python::list keys=d.keys();

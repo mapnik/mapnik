@@ -43,7 +43,7 @@
 #include <mapnik/enumeration.hpp>
 
 // boost
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // stl
 #include <vector>
@@ -200,7 +200,7 @@ public:
     //!
     //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
     //! \param[in] f The feature used to find 'NODATA' information if available
-    void colorize(boost::shared_ptr<raster> const& raster, feature_impl const& f) const;
+    void colorize(std::shared_ptr<raster> const& raster, feature_impl const& f) const;
 
 
     //! \brief Perform the translation of input to output
@@ -227,7 +227,7 @@ private:
 };
 
 
-typedef boost::shared_ptr<raster_colorizer> raster_colorizer_ptr;
+typedef std::shared_ptr<raster_colorizer> raster_colorizer_ptr;
 
 
 } // mapnik namespace

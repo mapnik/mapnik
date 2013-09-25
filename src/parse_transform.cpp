@@ -36,7 +36,7 @@ transform_list_ptr parse_transform(std::string const& str)
 
 transform_list_ptr parse_transform(std::string const& str, std::string const& encoding)
 {
-    transform_list_ptr tl = boost::make_shared<transform_list>();
+    transform_list_ptr tl = std::make_shared<transform_list>();
     transcoder tc(encoding);
     expression_grammar<std::string::const_iterator> ge(tc);
     transform_expression_grammar_string gte(ge);

@@ -27,7 +27,7 @@
 
 using mapnik::Map;
 
-LayerListModel::LayerListModel(boost::shared_ptr<Map> map,QObject *parent)
+LayerListModel::LayerListModel(std::shared_ptr<Map> map,QObject *parent)
     : QAbstractListModel(parent),
       map_(map) {}
 
@@ -117,8 +117,3 @@ boost::optional<mapnik::layer&> LayerListModel::map_layer(int i)
    }
    return boost::optional<mapnik::layer&>();
 }
-
-
-
-
-

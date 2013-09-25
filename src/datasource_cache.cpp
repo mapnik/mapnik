@@ -82,7 +82,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
     mutex::scoped_lock lock(mutex_);
 #endif
 
-    std::map<std::string,boost::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
+    std::map<std::string,std::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
     if (itr == plugins_.end())
     {
         std::string s("Could not create datasource for type: '");
@@ -152,7 +152,7 @@ std::vector<std::string> datasource_cache::plugin_names()
     names = get_static_datasource_names();
 #endif
 
-    std::map<std::string,boost::shared_ptr<PluginInfo> >::const_iterator itr;
+    std::map<std::string,std::shared_ptr<PluginInfo> >::const_iterator itr;
     for (itr = plugins_.begin(); itr != plugins_.end(); ++itr)
     {
         names.push_back(itr->first);
@@ -198,7 +198,7 @@ bool datasource_cache::register_datasource(std::string const& filename)
     bool success = false;
     try
     {
-        boost::shared_ptr<PluginInfo> plugin = boost::make_shared<PluginInfo>(filename,"datasource_name");
+        std::shared_ptr<PluginInfo> plugin = std::make_shared<PluginInfo>(filename,"datasource_name");
         if (plugin->valid())
         {
             if (plugin->name().empty())

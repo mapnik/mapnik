@@ -30,7 +30,7 @@
 
 // boost
 #include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/optional.hpp>
 
 namespace mapnik
@@ -38,7 +38,7 @@ namespace mapnik
 
 class marker;
 
-typedef boost::shared_ptr<marker> marker_ptr;
+typedef std::shared_ptr<marker> marker_ptr;
 
 
 class MAPNIK_DECL marker_cache :

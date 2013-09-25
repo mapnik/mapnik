@@ -611,7 +611,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
             MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
             if (fs)
             {
-                return boost::make_shared<filter_featureset<hit_test_filter> >(fs,
+                return std::make_shared<filter_featureset<hit_test_filter> >(fs,
                                                                                hit_test_filter(x,y,tol));
             }
         }

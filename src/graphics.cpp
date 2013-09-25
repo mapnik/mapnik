@@ -33,7 +33,7 @@
 #include "agg_color_rgba.h"
 
 // boost
-#include <boost/scoped_array.hpp>
+
 
 // cairo
 #ifdef HAVE_CAIRO
@@ -72,7 +72,7 @@ image_32::image_32(cairo_surface_ptr const& surface)
 
     int stride = cairo_image_surface_get_stride(&*surface) / 4;
 
-    boost::scoped_array<unsigned int> out_row(new unsigned int[width_]);
+    const std::unique_ptr<unsigned int[]> out_row(new unsigned int[width_]);
     const unsigned int *in_row = (const unsigned int *)cairo_image_surface_get_data(&*surface);
 
     for (unsigned int row = 0; row < height_; row++, in_row += stride)

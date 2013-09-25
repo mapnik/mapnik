@@ -28,7 +28,7 @@
 
 // boost
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/variant/variant.hpp>
 
 // fusion
@@ -193,7 +193,7 @@ inline void clear(transform_node& val)
 
 typedef detail::transform_node              transform_node;
 typedef std::vector<transform_node>         transform_list;
-typedef boost::shared_ptr<transform_list>   transform_list_ptr;
+typedef std::shared_ptr<transform_list>   transform_list_ptr;
 
 MAPNIK_DECL std::string to_expression_string(transform_node const& node);
 MAPNIK_DECL std::string to_expression_string(transform_list const& list);

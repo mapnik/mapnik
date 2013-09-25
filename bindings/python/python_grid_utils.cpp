@@ -24,8 +24,6 @@
 
 // boost
 #include <boost/python.hpp>
-#include <boost/scoped_array.hpp>
-#include <boost/foreach.hpp>
 
 // mapnik
 #include <mapnik/map.hpp>
@@ -67,7 +65,7 @@ void grid2utf(T const& grid_type,
     for (unsigned y = 0; y < data.height(); ++y)
     {
         boost::uint16_t idx = 0;
-        boost::scoped_array<Py_UNICODE> line(new Py_UNICODE[array_size]);
+        const std::unique_ptr<Py_UNICODE[]> line(new Py_UNICODE[array_size]);
         typename T::value_type const* row = data.getRow(y);
         for (unsigned x = 0; x < data.width(); ++x)
         {
@@ -130,7 +128,7 @@ void grid2utf(T const& grid_type,
     for (unsigned y = 0; y < grid_type.height(); y=y+resolution)
     {
         boost::uint16_t idx = 0;
-        boost::scoped_array<Py_UNICODE> line(new Py_UNICODE[array_size]);
+        const std::unique_ptr<Py_UNICODE[]> line(new Py_UNICODE[array_size]);
         mapnik::grid::value_type const* row = grid_type.getRow(y);
         for (unsigned x = 0; x < grid_type.width(); x=x+resolution)
         {
@@ -197,7 +195,7 @@ void grid2utf2(T const& grid_type,
     for (unsigned y = 0; y < target.height(); ++y)
     {
         uint16_t idx = 0;
-        boost::scoped_array<Py_UNICODE> line(new Py_UNICODE[array_size]);
+        const std::unique_ptr<Py_UNICODE[]> line(new Py_UNICODE[array_size]);
         mapnik::grid::value_type * row = target.getRow(y);
         unsigned x;
         for (x = 0; x < target.width(); ++x)
@@ -245,7 +243,7 @@ void write_features(T const& grid_type,
 
     std::set<std::string> const& attributes = grid_type.property_names();
     typename T::feature_type::const_iterator feat_end = g_features.end();
-    BOOST_FOREACH ( std::string const& key_item, key_order )
+    for ( std::string const& key_item :key_order )
     {
         if (key_item.empty())
         {
@@ -261,7 +259,7 @@ void write_features(T const& grid_type,
         bool found = false;
         boost::python::dict feat;
         mapnik::feature_ptr feature = feat_itr->second;
-        BOOST_FOREACH ( std::string const& attr, attributes )
+        for ( std::string const& attr : attributes )
         {
             if (attr == "__id__")
             {
@@ -305,7 +303,7 @@ void grid_encode_utf(T const& grid_type,
 
     // convert key order to proper python list
     boost::python::list keys_a;
-    BOOST_FOREACH ( typename T::lookup_type const& key_id, key_order )
+    for ( typename T::lookup_type const& key_id : key_order )
     {
         keys_a.append(key_id);
     }

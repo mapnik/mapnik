@@ -96,7 +96,7 @@ shape_datasource::shape_datasource(const parameters &params)
         mapnik::progress_timer __stats2__(std::clog, "shape_datasource::init(get_column_description)");
 #endif
 
-        boost::shared_ptr<shape_io> shape_ref = boost::make_shared<shape_io>(shape_name_);
+        std::shared_ptr<shape_io> shape_ref = std::make_shared<shape_io>(shape_name_);
         init(*shape_ref);
         for (int i=0;i<shape_ref->dbf().num_fields();++i)
         {
@@ -237,7 +237,7 @@ featureset_ptr shape_datasource::features(const query& q) const
     if (indexed_)
     {
         shape_->shp().seek(0);
-        // TODO - use boost::make_shared - #760
+        // TODO - use std::make_shared - #760
         return featureset_ptr
             (new shape_index_featureset<filter_in_box>(filter,
                                                        *shape_,
@@ -248,7 +248,7 @@ featureset_ptr shape_datasource::features(const query& q) const
     }
     else
     {
-        return boost::make_shared<shape_featureset<filter_in_box> >(filter,
+        return std::make_shared<shape_featureset<filter_in_box> >(filter,
                                                                     shape_name_,
                                                                     q.property_names(),
                                                                     desc_.get_encoding(),
@@ -279,7 +279,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     if (indexed_)
     {
         shape_->shp().seek(0);
-        // TODO - use boost::make_shared - #760
+        // TODO - use std::make_shared - #760
         return featureset_ptr
             (new shape_index_featureset<filter_at_point>(filter,
                                                          *shape_,
@@ -290,7 +290,7 @@ featureset_ptr shape_datasource::features_at_point(coord2d const& pt, double tol
     }
     else
     {
-        return boost::make_shared<shape_featureset<filter_at_point> >(filter,
+        return std::make_shared<shape_featureset<filter_at_point> >(filter,
                                                                       shape_name_,
                                                                       names,
                                                                       desc_.get_encoding(),

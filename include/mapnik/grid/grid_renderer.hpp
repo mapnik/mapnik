@@ -37,8 +37,8 @@
 #include <mapnik/pixel_position.hpp>
 
 // boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+
+#include <memory>
 
 // fwd declaration to avoid depedence on agg headers
 namespace agg { struct trans_affine; }
@@ -135,8 +135,8 @@ private:
     CoordTransform t_;
     freetype_engine font_engine_;
     face_manager<freetype_engine> font_manager_;
-    boost::shared_ptr<label_collision_detector4> detector_;
-    boost::scoped_ptr<grid_rasterizer> ras_ptr;
+    std::shared_ptr<label_collision_detector4> detector_;
+    const std::unique_ptr<grid_rasterizer> ras_ptr;
     box2d<double> query_extent_;
     void setup(Map const& m);
 };

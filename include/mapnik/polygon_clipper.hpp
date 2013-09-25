@@ -28,10 +28,11 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/geometry.hpp>
 
 // boost
-#include <boost/foreach.hpp>
+
 #include <boost/tuple/tuple.hpp>
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
@@ -101,7 +102,7 @@ struct polygon_clipper
 
     }
 
-    polygon_clipper( box2d<double> const& clip_box,Geometry & geom)
+    polygon_clipper(box2d<double> const& clip_box, Geometry & geom)
         : clip_box_(clip_box),
           geom_(geom)
     {
@@ -166,7 +167,7 @@ private:
                     continue;
                 }
                 prev_x = x;
-                prev_x = y;
+                prev_y = y;
                 if (ring_count == 1)
                 {
                     append(subject_poly, make<point_2d>(x,y));
@@ -179,7 +180,13 @@ private:
         }
 
         polygon_list clipped_polygons;
-
+#ifdef MAPNIK_LOG
+        double area = boost::geometry::area(subject_poly);
+        if (area < 0)
+        {
+            MAPNIK_LOG_ERROR(polygon_clipper) << "negative area detected for polygon indicating incorrect winding order";
+        }
+#endif
         try
         {
             boost::geometry::intersection(clip_box_, subject_poly, clipped_polygons);
@@ -189,10 +196,10 @@ private:
             std::cerr << ex.what() << std::endl;
         }
 
-        BOOST_FOREACH(polygon_2d const& poly, clipped_polygons)
+        for (polygon_2d const& poly : clipped_polygons)
         {
             bool move_to = true;
-            BOOST_FOREACH(point_2d const& c, boost::geometry::exterior_ring(poly))
+            for (point_2d const& c : boost::geometry::exterior_ring(poly))
             {
                 if (move_to)
                 {
@@ -206,10 +213,10 @@ private:
             }
             output_.close_path();
             // interior rings
-            BOOST_FOREACH(polygon_2d::inner_container_type::value_type const& ring, boost::geometry::interior_rings(poly))
+            for (polygon_2d::inner_container_type::value_type const& ring : boost::geometry::interior_rings(poly))
             {
                 move_to = true;
-                BOOST_FOREACH(point_2d const& c, ring)
+                for (point_2d const& c : ring)
                 {
                     if (move_to)
                     {

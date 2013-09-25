@@ -182,12 +182,11 @@ layer_descriptor rasterlite_datasource::get_descriptor() const
 featureset_ptr rasterlite_datasource::features(query const& q) const
 {
     rasterlite_query gq = q;
-    return boost::make_shared<rasterlite_featureset>(open_dataset(), gq);
+    return std::make_shared<rasterlite_featureset>(open_dataset(), gq);
 }
 
 featureset_ptr rasterlite_datasource::features_at_point(coord2d const& pt, double tol) const
 {
     rasterlite_query gq = pt;
-    return boost::make_shared<rasterlite_featureset>(open_dataset(), gq);
+    return std::make_shared<rasterlite_featureset>(open_dataset(), gq);
 }
-

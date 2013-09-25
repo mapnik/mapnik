@@ -72,20 +72,20 @@ wkt_generator<OutputIterator, Geometry>::wkt_generator(bool single)
     wkt = point | linestring | polygon
         ;
 
-    point = &uint_(mapnik::Point)[_1 = _type(_val)]
+    point = &uint_(mapnik::geometry_type::types::Point)[_1 = _type(_val)]
         << string[ phoenix::if_ (single) [_1 = "Point("]
                    .else_[_1 = "("]]
         << point_coord [_1 = _first(_val)] << lit(')')
         ;
 
-    linestring = &uint_(mapnik::LineString)[_1 = _type(_val)]
+    linestring = &uint_(mapnik::geometry_type::types::LineString)[_1 = _type(_val)]
         << string[ phoenix::if_ (single) [_1 = "LineString("]
                    .else_[_1 = "("]]
         << coords
         << lit(')')
         ;
 
-    polygon = &uint_(mapnik::Polygon)[_1 = _type(_val)]
+    polygon = &uint_(mapnik::geometry_type::types::Polygon)[_1 = _type(_val)]
         << string[ phoenix::if_ (single) [_1 = "Polygon("]
                    .else_[_1 = "("]]
         << coords2
@@ -126,9 +126,9 @@ wkt_multi_generator<OutputIterator, GeometryContainer>::wkt_multi_generator()
     using boost::spirit::karma::_a;
 
     geometry_types.add
-        (mapnik::Point,"Point")
-        (mapnik::LineString,"LineString")
-        (mapnik::Polygon,"Polygon")
+        (mapnik::geometry_type::types::Point,"Point")
+        (mapnik::geometry_type::types::LineString,"LineString")
+        (mapnik::geometry_type::types::Polygon,"Polygon")
         ;
 
     wkt =  eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)]

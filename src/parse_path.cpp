@@ -30,7 +30,7 @@
 
 // boost
 #include <boost/variant.hpp>
-#include <boost/foreach.hpp>
+
 #include <boost/make_shared.hpp>
 
 // stl
@@ -48,14 +48,14 @@ path_expression_ptr parse_path(std::string const& str)
 path_expression_ptr parse_path(std::string const& str,
                                path_expression_grammar<std::string::const_iterator> const& g)
 {
-    path_expression path;  
-    
+    path_expression path;
+
     std::string::const_iterator itr = str.begin();
     std::string::const_iterator end = str.end();
     bool r = qi::phrase_parse(itr, end, g, boost::spirit::standard_wide::space, path);
     if (r  && itr == end)
     {
-        return boost::make_shared<path_expression>(path); //path;
+        return std::make_shared<path_expression>(path); //path;
     }
     else
     {
@@ -129,7 +129,7 @@ std::string path_processor::evaluate(path_expression const& path,feature_impl co
 {
     std::string out;
     path_processor_detail::path_visitor_ eval(out,f);
-    BOOST_FOREACH( mapnik::path_component const& token, path)
+    for ( mapnik::path_component const& token : path)
         boost::apply_visitor(eval,token);
     return out;
 }
@@ -138,7 +138,7 @@ std::string path_processor::to_string(path_expression const& path)
 {
     std::string str;
     path_processor_detail::to_string_ visitor(str);
-    BOOST_FOREACH( mapnik::path_component const& token, path)
+    for ( mapnik::path_component const& token : path)
         boost::apply_visitor(visitor,token);
     return str;
 }
@@ -146,7 +146,7 @@ std::string path_processor::to_string(path_expression const& path)
 void path_processor::collect_attributes(path_expression const& path, std::set<std::string>& names)
 {
     path_processor_detail::collect_ visitor(names);
-    BOOST_FOREACH( mapnik::path_component const& token, path)
+    for ( mapnik::path_component const& token : path)
         boost::apply_visitor(visitor,token);
 }
 
