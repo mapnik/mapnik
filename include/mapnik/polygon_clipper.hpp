@@ -28,6 +28,7 @@
 
 // mapnik
 #include <mapnik/box2d.hpp>
+#include <mapnik/debug.hpp>
 #include <mapnik/geometry.hpp>
 
 // boost
@@ -101,7 +102,7 @@ struct polygon_clipper
 
     }
 
-    polygon_clipper( box2d<double> const& clip_box,Geometry & geom)
+    polygon_clipper(box2d<double> const& clip_box, Geometry & geom)
         : clip_box_(clip_box),
           geom_(geom)
     {
@@ -179,7 +180,13 @@ private:
         }
 
         polygon_list clipped_polygons;
-
+#ifdef MAPNIK_LOG
+        double area = boost::geometry::area(subject_poly);
+        if (area < 0)
+        {
+            MAPNIK_LOG_ERROR(polygon_clipper) << "negative area detected for polygon indicating incorrect winding order";
+        }
+#endif
         try
         {
             boost::geometry::intersection(clip_box_, subject_poly, clipped_polygons);
