@@ -47,6 +47,9 @@ def test_compare_map():
     for m in glob.glob("../data/good_maps/*.xml"):
         compare_map(m)
 
+    for m in glob.glob("../visual_tests/styles/*.xml"):
+        compare_map(m)
+
 if __name__ == "__main__":
     setup()
     run_all(eval(x) for x in dir() if x.startswith("test_"))
