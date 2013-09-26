@@ -90,7 +90,7 @@ def test_dataraster_query_point():
 
 def test_load_save_map():
     map = mapnik.Map(256,256)
-    in_map = "../data/good_maps/raster_symbolizer.xml"
+    in_map = "../visual_tests/styles/raster_symbolizer.xml"
     try:
         mapnik.load_map(map, in_map)
 

@@ -199,7 +199,6 @@ public:
     //! \brief Colorize a raster
     //!
     //! \param[in, out] raster A raster stored in float32 single channel format, which gets colorized in place.
-    //! \param[in] f The feature used to find 'NODATA' information if available
     void colorize(std::shared_ptr<raster> const& raster, feature_impl const& f) const;
 
 
@@ -207,7 +206,7 @@ public:
     //!
     //! \param[in] value Input value
     //! \return color associated with the value
-    color get_color(float value) const;
+    unsigned get_color(float value) const;
 
 
     //! \brief Set the epsilon value for exact mode

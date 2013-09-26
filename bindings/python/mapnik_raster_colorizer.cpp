@@ -60,6 +60,15 @@ void add_stop5(raster_colorizer_ptr &rc, float v, colorizer_mode_enum m, color c
     colorizer_stop stop(v, m, c);
     rc->add_stop(stop);
 }
+mapnik::color get_color(raster_colorizer_ptr &rc, float value) {
+    unsigned rgba = rc->get_color(value);
+    unsigned r = (rgba & 0xff);
+    unsigned g = (rgba >> 8 ) & 0xff;
+    unsigned b = (rgba >> 16) & 0xff;
+    unsigned a = (rgba >> 24) & 0xff;
+    return mapnik::color(r,g,b,a);
+}
+
 colorizer_stops const& get_stops(raster_colorizer_ptr & rc)
 {
     return rc->get_stops();
@@ -142,7 +151,7 @@ void export_raster_colorizer()
              ">>> colorizer = mapnik.RasterColorizer(mapnik.COLORIZER_LINEAR, default_color)\n"
              ">>> colorizer.add_stop(100, mapnik.COLORIZER_DISCRETE, mapnik.Color(\"#112233\"))\n"
             )
-        .def("get_color", &raster_colorizer::get_color,
+        .def("get_color", get_color,
              "Get the color assigned to a certain value in raster data.\n"
              "\n"
              "Usage:\n"
