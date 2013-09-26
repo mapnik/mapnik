@@ -59,6 +59,13 @@ struct agg_stack_blur
     unsigned ry;
 };
 
+struct color_to_alpha
+{
+    color_to_alpha(mapnik::color const& c)
+        : color(c) {}
+    mapnik::color color;
+};
+
 struct scale_hsla
 {
     scale_hsla(double _h0, double _h1,
@@ -132,7 +139,8 @@ typedef boost::variant<filter::blur,
                        filter::y_gradient,
                        filter::invert,
                        filter::scale_hsla,
-                       filter::colorize_alpha> filter_type;
+                       filter::colorize_alpha,
+                       filter::color_to_alpha> filter_type;
 
 inline std::ostream& operator<< (std::ostream& os, blur)
 {
@@ -149,6 +157,12 @@ inline std::ostream& operator<< (std::ostream& os, gray)
 inline std::ostream& operator<< (std::ostream& os, agg_stack_blur const& filter)
 {
     os << "agg-stack-blur(" << filter.rx << ',' << filter.ry << ')';
+    return os;
+}
+
+inline std::ostream& operator<< (std::ostream& os, color_to_alpha const& filter)
+{
+    os << "color-to-alpha(" << filter.color << ')';
     return os;
 }
 

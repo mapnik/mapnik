@@ -1,0 +1,27 @@
+<Map background-color="white" srs="+init=epsg:32630" minimum-version="0.7.2">
+
+  <Style name="DISCRETE RAINBOW" image-filters="color-to-alpha(black)">
+    <Rule>
+      <RasterSymbolizer>
+        <RasterColorizer default-mode="discrete" default-color="white">
+            <stop color="red" value="0"/>
+            <stop color="orange" value="5"/>
+            <stop color="yellow" value="10"/>
+            <stop color="green" value="15"/>
+            <stop color="blue" value="20"/>
+            <stop color="indigo" value="25"/>
+        </RasterColorizer>
+      </RasterSymbolizer>
+    </Rule>
+  </Style>
+
+  <Layer name="dataraster" srs="+init=epsg:32630">
+      <StyleName>DISCRETE RAINBOW</StyleName>
+      <Datasource>
+          <Parameter name="file">../../data/raster/dataraster.tif</Parameter>
+          <Parameter name="type">gdal</Parameter>
+          <Parameter name="band">1</Parameter>
+      </Datasource>
+  </Layer>
+
+</Map>

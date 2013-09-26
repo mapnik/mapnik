@@ -406,6 +406,77 @@ void apply_filter(Src & src, agg_stack_blur const& op)
     agg::stack_blur_rgba32(pixf,op.rx,op.ry);
 }
 
+inline double channel_delta(double source, double match)
+{
+    if (source > match) return (source - match) / (1.0 - match);
+    if (source < match) return (match - source) / match;
+    return (source - match);
+}
+
+inline uint8_t apply_alpha_shift(double source, double match, double alpha)
+{
+    source = (((source - match) / alpha) + match) * alpha;
+    return static_cast<uint8_t>(std::floor((source*255.0)+.5));
+}
+
+template <typename Src>
+void apply_filter(Src & src, color_to_alpha const& op)
+{
+    using namespace boost::gil;
+    rgba8_view_t src_view = rgba8_view(src);
+    double cr = static_cast<double>(op.color.red())/255.0;
+    double cg = static_cast<double>(op.color.green())/255.0;
+    double cb = static_cast<double>(op.color.blue())/255.0;
+    for (int y=0; y<src_view.height(); ++y)
+    {
+        rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+        for (int x=0; x<src_view.width(); ++x)
+        {
+            uint8_t & r = get_color(src_it[x], red_t());
+            uint8_t & g = get_color(src_it[x], green_t());
+            uint8_t & b = get_color(src_it[x], blue_t());
+            uint8_t & a = get_color(src_it[x], alpha_t());
+            double sr = static_cast<double>(r)/255.0;
+            double sg = static_cast<double>(g)/255.0;
+            double sb = static_cast<double>(b)/255.0;
+            double sa = static_cast<double>(a)/255.0;
+            // demultiply
+            if (sa <= 0.0)
+            {
+                r = g = b = 0;
+                continue;
+            }
+            else
+            {
+                sr /= sa;
+                sg /= sa;
+                sb /= sa;
+            }
+            // get that maximum color difference
+            double xa = std::max(channel_delta(sr,cr),std::max(channel_delta(sg,cg),channel_delta(sb,cb)));
+            if (xa > 0)
+            {
+                // apply difference to each channel, returning premultiplied
+                // TODO - experiment with difference in hsl color space
+                r = apply_alpha_shift(sr,cr,xa);
+                g = apply_alpha_shift(sg,cg,xa);
+                b = apply_alpha_shift(sb,cb,xa);
+                // combine new alpha with original
+                xa *= sa;
+                a = static_cast<uint8_t>(std::floor((xa*255.0)+.5));
+                // all color values must be <= alpha
+                if (r>a) r=a;
+                if (g>a) g=a;
+                if (b>a) b=a;
+            }
+            else
+            {
+                r = g = b = a = 0;
+            }
+        }
+    }
+}
+
 template <typename Src>
 void apply_filter(Src & src, colorize_alpha const& op)
 {

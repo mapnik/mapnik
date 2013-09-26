@@ -91,6 +91,8 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         scale_hsla_filter(_val)
         |
         colorize_alpha_filter(_val)
+        |
+        color_to_alpha_filter(_val)
         ;
 
     agg_blur_filter = lit("agg-stack-blur")[_a = 1, _b = 1]
@@ -122,6 +124,14 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         |
         double_[at_c<1>(_r1) = _1]
         ;
+
+    color_to_alpha_filter = lit("color-to-alpha")
+        >> lit('(')
+        >> css_color_[_a = _1]
+        >> lit(')')
+        [push_back(_r1,construct<mapnik::filter::color_to_alpha>(_a))]
+        ;
+
     no_args = -(lit('(') >> lit(')'));
 }
 
