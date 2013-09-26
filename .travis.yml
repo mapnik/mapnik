@@ -11,7 +11,7 @@ before_install:
 
 script:
  - ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS='' CPP_TESTS=False CAIRO=False FAST=True && JOBS=2 make
- - for FILE in tests/cpp_tests/*-bin; do $FILE || true; done
+ - for FILE in tests/cpp_tests/*-bin; do $FILE || true; done;
 
 branches:
   only:

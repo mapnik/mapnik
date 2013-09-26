@@ -42,6 +42,7 @@
 // stl
 #include <string>
 #include <cmath>
+#include <memory>
 
 // icu
 #include <unicode/unistr.h>
