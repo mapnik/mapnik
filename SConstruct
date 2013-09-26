@@ -43,8 +43,6 @@ DEFAULT_CXX11_LINKFLAGS = ""
 if sys.platform == 'darwin':
     DEFAULT_CC = "clang"
     DEFAULT_CXX = "clang++"
-    DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
-    DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
 
 py3 = None
 
@@ -1129,6 +1127,9 @@ if not preconfigured:
     env['LIBPATH'] = ['#src']
 
     # set any custom cxxflags and ldflags to come first
+    if sys.platform == 'darwin' and not env['HOST']:
+        DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
+        DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
     env.Append(CUSTOM_CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
