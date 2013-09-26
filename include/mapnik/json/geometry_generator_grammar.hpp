@@ -39,7 +39,7 @@
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
 #include <boost/fusion/include/boost_tuple.hpp>
-#include <boost/math/special_functions/trunc.hpp> // for vc++
+#include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunct
 
 namespace boost { namespace spirit { namespace traits {
 
