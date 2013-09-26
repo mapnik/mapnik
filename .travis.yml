@@ -11,7 +11,7 @@ before_install:
 
 script:
  - ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS='' CPP_TESTS=True CAIRO=False FAST=True && JOBS=2 make || cat config.log
- - for FILE in tests/cpp_tests/*-bin; do $FILE || true; done;
+ - export LD_LIBRARY_PATH=`pwd`/src; for FILE in tests/cpp_tests/*-bin; do $FILE || true; done;
 
 branches:
   only:
