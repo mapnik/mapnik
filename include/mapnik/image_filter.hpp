@@ -506,8 +506,7 @@ void apply_filter(Src & src, colorize_alpha const& op)
             }
         }
     }
-    else
-    if (size > 1)
+    else if (size > 1)
     {
         // interpolate multiple stops
         agg::gradient_lut<agg::color_interpolator<agg::rgba8> > grad_lut;
