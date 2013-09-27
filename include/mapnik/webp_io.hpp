@@ -74,18 +74,14 @@ inline int import_image_data(T2 const& image,
                              bool alpha)
 {
     // Reason for copy: https://github.com/mapnik/mapnik/issues/2024
-    // TODO - figure out way to pass view pixels directly to webp importer
     image_data_32 im(image.width(),image.height());
+    int stride = sizeof(typename T2::pixel_type) * im.width();
     for (unsigned y = 0; y < image.height(); ++y)
     {
         typename T2::pixel_type const * row_from = image.getRow(y);
         image_data_32::pixel_type * row_to = im.getRow(y);
-        for (unsigned x = 0; x < image.width(); ++x)
-        {
-            row_to[x] = row_from[x];
-        }
+        std::memcpy(row_to,row_from,stride);
     }
-    int stride = sizeof(typename T2::pixel_type) * im.width();
     if (alpha)
     {
         return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
