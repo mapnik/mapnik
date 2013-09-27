@@ -15,6 +15,7 @@ script:
 branches:
   only:
     - master
+    - 2.3.x
 
 notifications:
   irc:
