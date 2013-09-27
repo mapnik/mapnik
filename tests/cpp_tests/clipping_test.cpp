@@ -7,6 +7,7 @@
 #include <boost/detail/lightweight_test.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
+#include <boost/version.hpp>
 
 // stl
 #include <stdexcept>
