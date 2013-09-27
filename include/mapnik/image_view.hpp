@@ -89,11 +89,10 @@ public:
         return data_.getRow(row + y_) + x_;
     }
 
-    inline char const* getBytes() const
+    inline const unsigned char* getBytes() const
     {
-        return reinterpret_cast<char const*>(&data_);
+        return data_.getBytes();
     }
-
     inline T& data()
     {
         return data_;

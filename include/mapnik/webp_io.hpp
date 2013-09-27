@@ -116,17 +116,15 @@ void save_as_webp(T1& file,
     if (alpha)
     {
         int stride = sizeof(typename T2::pixel_type) * image.width();
-        uint8_t const* bytes = reinterpret_cast<uint8_t const*>(image.getBytes());
-        ok = WebPPictureImportRGBA(&pic, bytes, stride);
+        ok = WebPPictureImportRGBA(&pic, image.getBytes(), stride);
     }
     else
     {
         int stride = sizeof(typename T2::pixel_type) * image.width();
-        uint8_t const* bytes = reinterpret_cast<uint8_t const*>(image.getBytes());
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-        ok = WebPPictureImportRGBX(&pic, bytes, stride);
+        ok = WebPPictureImportRGBX(&pic, image.getBytes(), stride);
 #else
-        ok = WebPPictureImportRGBA(&pic, bytes, stride);
+        ok = WebPPictureImportRGBA(&pic, image.getBytes(), stride);
 #endif
     }
 
