@@ -8,7 +8,7 @@
     </Rule>
   </Style>
 
-  <Style name="style" image-filters="colorize-alpha(blue 99%,blue)">
+  <Style name="style" image-filters="colorize-alpha(blue 100%,blue)">
     <Rule>
       <PointSymbolizer  file="../../data/images/marker.png" allow-overlap="true"   />
     </Rule>
