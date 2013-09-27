@@ -98,6 +98,13 @@ Summary: The 2.2.0 release is primarily a performance and stability release. The
 
 - Added faster reprojection support between `epsg:3857` and `epsg:4326` (#1705,#1703,#1579)
 
+- Added `colorize-alpha` image filter that applies user provided color gradients based on level of alpha.
+  Accepts one or more colors separated by commas. Each color can be paired with an `offset` value separated
+  by a space that is either `0-100%` or `0.0-1.0`. An `offset` of `0` is implied and the default. A simple example
+  of colorizing alpha into a "rainbow" is `colorize-alpha(blue,cyan,lightgreen, yellow, orange, red)`. An example of
+  using offsets and the variety of supported color encodings is to produce a ramp which sharp contrast between `blue`
+  and `cyan` is `colorize-alpha(blue 30%, cyan, yellow 0.7 , rgb(0%,80%,0%) 90%)` (#1371).
+
 - Fixed concurrency problem when using cursors in postgis plugin (#1823,#1588)
 
 - Fixed postgres connection pool leaks when using `persist_connection=false` (#1764)
