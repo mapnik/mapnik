@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Added single color argument support to `colorize-alpha` to allow colorizing alpha with one color.
+
 - Added `color-to-alpha` `image-filter` to allow for applying alpha in proportion to color similiarity (#2023)
 
 - Added Async support to PostGIS plugin - https://github.com/mapnik/mapnik/wiki/PostGIS-Async

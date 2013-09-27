@@ -482,6 +482,31 @@ void apply_filter(Src & src, colorize_alpha const& op)
 {
     using namespace boost::gil;
     std::size_t size = op.size();
+    if (op.size() == 1)
+    {
+        // no interpolation if only one stop
+        mapnik::filter::color_stop const& stop = op[0];
+        mapnik::color const& c = stop.color;
+        rgba8_view_t src_view = rgba8_view(src);
+        for (int y=0; y<src_view.height(); ++y)
+        {
+            rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+            for (int x=0; x<src_view.width(); ++x)
+            {
+                uint8_t & r = get_color(src_it[x], red_t());
+                uint8_t & g = get_color(src_it[x], green_t());
+                uint8_t & b = get_color(src_it[x], blue_t());
+                uint8_t & a = get_color(src_it[x], alpha_t());
+                if ( a > 0)
+                {
+                    r = (c.red() * a + 255) >> 8;
+                    g = (c.green() * a + 255) >> 8;
+                    b = (c.blue() * a + 255) >> 8;
+                }
+            }
+        }
+    }
+    else
     if (size > 1)
     {
         // interpolate multiple stops
