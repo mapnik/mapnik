@@ -67,7 +67,13 @@ if mapnik.has_webp():
                 print 'generating expected image %s' % expected
                 im.save(expected,opt)
             im.save(actual,opt)
-            if mapnik.Image.open(actual).tostring() != mapnik.Image.open(expected).tostring():
+            try:
+                expected_bytes = mapnik.Image.open(expected).tostring()
+            except RuntimeError:
+                # this will happen if libweb is old, since it cannot open images created by more recent webp
+                print 'warning, cannot open webp expected image (your libwebp is likely too old)'
+                continue
+            if mapnik.Image.open(actual).tostring() != expected_bytes:
                 fails.append('%s (actual) not == to %s (expected)' % (actual,expected))
 
         for opt in opts:
@@ -78,7 +84,13 @@ if mapnik.has_webp():
                 print 'generating expected image %s' % expected
                 im.save(expected,opt)
             im.save(actual,opt)
-            if mapnik.Image.open(actual).tostring() != mapnik.Image.open(expected).tostring():
+            try:
+                expected_bytes = mapnik.Image.open(expected).tostring()
+            except RuntimeError:
+                # this will happen if libweb is old, since it cannot open images created by more recent webp
+                print 'warning, cannot open webp expected image (your libwebp is likely too old)'
+                continue
+            if mapnik.Image.open(actual).tostring() != expected_bytes:
                 fails.append('%s (actual) not == to %s (expected)' % (actual,expected))
         eq_(fails,[],'\n'+'\n'.join(fails))
 
@@ -105,7 +117,13 @@ if mapnik.has_webp():
         im.save(t0,format)
         im_in = mapnik.Image.open(t0)
         t0_len = len(im_in.tostring(format))
-        eq_(t0_len,len(mapnik.Image.open(expected).tostring(format)))
+        try:
+            expected_bytes = mapnik.Image.open(expected).tostring(format)
+        except RuntimeError:
+            # this will happen if libweb is old, since it cannot open images created by more recent webp
+            print 'warning, cannot open webp expected image (your libwebp is likely too old)'
+            return
+        eq_(t0_len,len(expected_bytes))
 
 
 if __name__ == "__main__":
