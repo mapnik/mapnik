@@ -75,6 +75,7 @@ struct image_filter_grammar :
     css_color_grammar<Iterator> css_color_;
     qi::rule<Iterator,void(mapnik::filter::color_stop &),qi::ascii::space_type> color_stop_offset;
     phoenix::function<percent_offset_impl> percent_offset;
+    qi::rule<Iterator, qi::locals<color>, void(ContType&), qi::ascii::space_type> color_to_alpha_filter;
 };
 
 }

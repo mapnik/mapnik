@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Added `color-to-alpha` `image-filter` to allow for applying alpha in proportion to color similiarity (#2023)
+
 - Added Async support to PostGIS plugin - https://github.com/mapnik/mapnik/wiki/PostGIS-Async
 
 - Fixed alpha handling bug with `comp-op:dst-over` (#1995)
@@ -307,9 +309,9 @@ Released Aug 23, 2012
 
 - Improved logging/debugging system with release logs and file redirection (https://github.com/mapnik/mapnik/wiki/Runtime-Logging) (#937 and partially #986, #467)
 
-- GDAL: allow setting nodata value on the fly (will override value if nodata is set in data) (#1161)
+- GDAL: allow setting `nodata` value on the fly (will override value if `nodata` is set in data) (#1161)
 
-- GDAL: respect nodata for paletted/colormapped images (#1160)
+- GDAL: respect `nodata` for paletted/colormapped images (#1160)
 
 - PostGIS: Added a new option called `autodetect_key_field` (by default false) that if true will
   trigger autodetection of the table primary key allowing for feature.id() to represent
@@ -446,7 +448,7 @@ Released September 26, 2011
   cannot possibly be projected into the map srs or the user wishes to control map bounds without
   modifying the extents of each layer.
 
-- Support for NODATA values with grey and rgb images in GDAL plugin (#727)
+- Support for `nodata` values with grey and rgb images in GDAL plugin (#727)
 
 - Print warning if invalid XML property names are used (#110)
 

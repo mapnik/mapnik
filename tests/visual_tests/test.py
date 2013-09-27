@@ -179,6 +179,11 @@ files = {
     'vrt_colortable':{'sizes':[(256,256)]},
     'raster_colorizer':{'sizes':[(512,512)]},
     'raster_symbolizer':{'sizes':[(512,512)]},
+    'raster-color-to-alpha1':{'sizes':[(512,512)]},
+    'raster-color-to-alpha2':{'sizes':[(512,512)]},
+    'raster-color-to-alpha3':{'sizes':[(512,512)]},
+    'raster-color-to-alpha4':{'sizes':[(512,512)]},
+    'raster-color-to-alpha5':{'sizes':[(512,512)]}
     }
 
 class Reporting:

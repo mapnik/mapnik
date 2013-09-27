@@ -68,6 +68,58 @@ std::string webp_encoding_error(WebPEncodingError error)
     return os;
 }
 
+template <typename T2>
+inline int import_image_data(T2 const& image,
+                             WebPPicture & pic,
+                             bool alpha)
+{
+    // Reason for copy: https://github.com/mapnik/mapnik/issues/2024
+    // TODO - figure out way to pass view pixels directly to webp importer
+    image_data_32 im(image.width(),image.height());
+    for (unsigned y = 0; y < image.height(); ++y)
+    {
+        typename T2::pixel_type const * row_from = image.getRow(y);
+        image_data_32::pixel_type * row_to = im.getRow(y);
+        for (unsigned x = 0; x < image.width(); ++x)
+        {
+            row_to[x] = row_from[x];
+        }
+    }
+    int stride = sizeof(typename T2::pixel_type) * im.width();
+    if (alpha)
+    {
+        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+    }
+    else
+    {
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
+        return WebPPictureImportRGBX(&pic, im.getBytes(), stride);
+#else
+        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+#endif
+    }
+}
+
+template <>
+inline int import_image_data(image_data_32 const& im,
+                             WebPPicture & pic,
+                             bool alpha)
+{
+    int stride = sizeof(image_data_32::pixel_type) * im.width();
+    if (alpha)
+    {
+        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+    }
+    else
+    {
+#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
+        return WebPPictureImportRGBX(&pic, im.getBytes(), stride);
+#else
+        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+#endif
+    }
+}
+
 template <typename T1, typename T2>
 void save_as_webp(T1& file,
                   float quality,
@@ -109,27 +161,40 @@ void save_as_webp(T1& file,
     }
     pic.width = image.width();
     pic.height = image.height();
+    int ok = 0;
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
     pic.use_argb = !!lossless;
-#endif
-    int ok = 0;
-    if (alpha)
+    // lossless fast track
+    if (pic.use_argb)
     {
-        int stride = sizeof(typename T2::pixel_type) * image.width();
-        uint8_t const* bytes = reinterpret_cast<uint8_t const*>(image.getBytes());
-        ok = WebPPictureImportRGBA(&pic, bytes, stride);
+        pic.colorspace = static_cast<WebPEncCSP>(pic.colorspace | WEBP_CSP_ALPHA_BIT);
+        if (WebPPictureAlloc(&pic)) {
+            ok = 1;
+            const int width = pic.width;
+            const int height = pic.height;
+            for (int y = 0; y < height; ++y) {
+                typename T2::pixel_type const * row = image.getRow(y);
+                for (int x = 0; x < width; ++x) {
+                    const unsigned rgba = row[x];
+                    unsigned a = (rgba >> 24) & 0xff;
+                    unsigned r = rgba & 0xff;
+                    unsigned g = (rgba >> 8 ) & 0xff;
+                    unsigned b = (rgba >> 16) & 0xff;
+                    const uint32_t argb = (a << 24) | (r << 16) | (g << 8) | (b);
+                    pic.argb[x + y * pic.argb_stride] = argb;
+                }
+            }
+        }
     }
     else
     {
-        int stride = sizeof(typename T2::pixel_type) * image.width();
-        uint8_t const* bytes = reinterpret_cast<uint8_t const*>(image.getBytes());
-#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-        ok = WebPPictureImportRGBX(&pic, bytes, stride);
-#else
-        ok = WebPPictureImportRGBA(&pic, bytes, stride);
-#endif
+        // different approach for lossy since ImportYUVAFromRGBA is needed
+        // to prepare WebPPicture and working with view pixels is not viable
+        ok = import_image_data(image,pic,alpha);
     }
-
+#else
+    ok = import_image_data(image,pic,alpha);
+#endif
     if (!ok)
     {
         throw std::runtime_error(webp_encoding_error(pic.error_code));
