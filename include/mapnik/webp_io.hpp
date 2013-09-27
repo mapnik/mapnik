@@ -78,7 +78,6 @@ inline int import_image_data(T2 const& image,
     if (data.width() == image.width() &&
         data.height() == image.height())
     {
-        std::clog << "opt\n";
         if (alpha)
         {
             return WebPPictureImportRGBA(&pic, data.getBytes(), stride);
@@ -95,7 +94,6 @@ inline int import_image_data(T2 const& image,
     else
     {
         // need to copy: https://github.com/mapnik/mapnik/issues/2024
-        std::clog << "copy\n";
         image_data_32 im(image.width(),image.height());
         for (unsigned y = 0; y < image.height(); ++y)
         {
