@@ -140,7 +140,7 @@ geojson_datasource::geojson_datasource(parameters const& params)
 
     bool first = true;
     std::size_t count=0;
-    for (mapnik::feature_ptr f : features_)
+    for (mapnik::feature_ptr const& f : features_)
     {
         mapnik::box2d<double> const& box = f->envelope();
         if (first)
