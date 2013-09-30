@@ -28,7 +28,7 @@
 #include <boost/spirit/include/phoenix.hpp>
 //
 #include <mapnik/value.hpp>
-#include <mapnik/topology.hpp>
+#include <mapnik/json/topology.hpp>
 //
 #include <string>
 

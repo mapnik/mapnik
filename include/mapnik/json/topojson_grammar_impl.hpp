@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include <mapnik/topojson_grammar.hpp>
+#include <mapnik/json/topojson_grammar.hpp>
 
 namespace mapnik { namespace topojson {
 
