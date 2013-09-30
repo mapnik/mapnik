@@ -22,15 +22,6 @@
 
 #include <mapnik/topojson_grammar.hpp>
 
-//#define BOOST_SPIRIT_USE_PHOENIX_V3 1
-//#include <boost/spirit/include/qi.hpp>
-//#include <boost/spirit/include/phoenix.hpp>
-//
-//#include <mapnik/value.hpp>
-//#include <mapnik/topology.hpp>
-//
-//#include <string>
-
 namespace mapnik { namespace topojson {
 
 namespace qi = boost::spirit::qi;
