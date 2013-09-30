@@ -74,14 +74,14 @@ struct feature_collection_grammar :
         using phoenix::new_;
         using phoenix::val;
 
-        feature_collection = lit('{') >> (type | features) % lit(",") >> lit('}')
+        feature_collection = lit('{') >> (type | features) % lit(',') >> lit('}')
             ;
 
-        type = lit("\"type\"") > lit(":") > lit("\"FeatureCollection\"")
+        type = lit("\"type\"") > lit(':') > lit("\"FeatureCollection\"")
             ;
 
         features = lit("\"features\"")
-            > lit(":")
+            > lit(':')
             > lit('[')
             > -(feature(_val) % lit(','))
             > lit(']')
@@ -104,7 +104,7 @@ struct feature_collection_grammar :
                 << qi::_4
                 << phoenix::val(" here: \"")
                 << construct<std::string>(qi::_3, qi::_2)
-                << phoenix::val("\"")
+                << phoenix::val('\"')
                 << std::endl
                 );
     }
