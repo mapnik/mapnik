@@ -481,75 +481,103 @@ template <typename Src>
 void apply_filter(Src & src, colorize_alpha const& op)
 {
     using namespace boost::gil;
-
-    agg::gradient_lut<agg::color_interpolator<agg::rgba8> > grad_lut;
-    grad_lut.remove_all();
     std::size_t size = op.size();
-    if (size < 2) return;
-
-    double step = 1.0/(size-1);
-    double offset = 0.0;
-    for ( mapnik::filter::color_stop const& stop : op)
+    if (op.size() == 1)
     {
+        // no interpolation if only one stop
+        mapnik::filter::color_stop const& stop = op[0];
         mapnik::color const& c = stop.color;
-        double stop_offset = stop.offset;
-        if (stop_offset == 0)
+        rgba8_view_t src_view = rgba8_view(src);
+        for (int y=0; y<src_view.height(); ++y)
         {
-            stop_offset = offset;
-        }
-        grad_lut.add_color(stop_offset, agg::rgba(c.red()/256.0,
-                                                  c.green()/256.0,
-                                                  c.blue()/256.0,
-                                                  c.alpha()/256.0));
-        offset += step;
-    }
-    grad_lut.build_lut();
-
-    rgba8_view_t src_view = rgba8_view(src);
-    for (int y=0; y<src_view.height(); ++y)
-    {
-        rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
-        for (int x=0; x<src_view.width(); ++x)
-        {
-            uint8_t & r = get_color(src_it[x], red_t());
-            uint8_t & g = get_color(src_it[x], green_t());
-            uint8_t & b = get_color(src_it[x], blue_t());
-            uint8_t & a = get_color(src_it[x], alpha_t());
-            if ( a > 0)
+            rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+            for (int x=0; x<src_view.width(); ++x)
             {
-                agg::rgba8 c = grad_lut[a];
-                r = (c.r * a + 255) >> 8;
-                g = (c.g * a + 255) >> 8;
-                b = (c.b * a + 255) >> 8;
-#if 0
-                // rainbow
-                r = 0;
-                g = 0;
-                b = 0;
-                if (a < 64)
+                uint8_t & r = get_color(src_it[x], red_t());
+                uint8_t & g = get_color(src_it[x], green_t());
+                uint8_t & b = get_color(src_it[x], blue_t());
+                uint8_t & a = get_color(src_it[x], alpha_t());
+                if ( a > 0)
                 {
-                    g = a * 4;
-                    b = 255;
+                    r = (c.red() * a + 255) >> 8;
+                    g = (c.green() * a + 255) >> 8;
+                    b = (c.blue() * a + 255) >> 8;
                 }
-                else if (a >= 64 && a < 128)
+            }
+        }
+    }
+    else if (size > 1)
+    {
+        // interpolate multiple stops
+        agg::gradient_lut<agg::color_interpolator<agg::rgba8> > grad_lut;
+        double step = 1.0/(size-1);
+        double offset = 0.0;
+        for ( mapnik::filter::color_stop const& stop : op)
+        {
+            mapnik::color const& c = stop.color;
+            double stop_offset = stop.offset;
+            if (stop_offset == 0)
+            {
+                stop_offset = offset;
+            }
+            grad_lut.add_color(stop_offset, agg::rgba(c.red()/256.0,
+                                                      c.green()/256.0,
+                                                      c.blue()/256.0,
+                                                      c.alpha()/256.0));
+            offset += step;
+        }
+        if (grad_lut.build_lut())
+        {
+            rgba8_view_t src_view = rgba8_view(src);
+            for (int y=0; y<src_view.height(); ++y)
+            {
+                rgba8_view_t::x_iterator src_it = src_view.row_begin(y);
+                for (int x=0; x<src_view.width(); ++x)
                 {
-                    g = 255;
-                    b = 255 - ((a - 64) * 4);
+                    uint8_t & r = get_color(src_it[x], red_t());
+                    uint8_t & g = get_color(src_it[x], green_t());
+                    uint8_t & b = get_color(src_it[x], blue_t());
+                    uint8_t & a = get_color(src_it[x], alpha_t());
+                    if ( a > 0)
+                    {
+                        agg::rgba8 c = grad_lut[a];
+                        r = (c.r * a + 255) >> 8;
+                        g = (c.g * a + 255) >> 8;
+                        b = (c.b * a + 255) >> 8;
+                        if (r>a) r=a;
+                        if (g>a) g=a;
+                        if (b>a) b=a;
+        #if 0
+                        // rainbow
+                        r = 0;
+                        g = 0;
+                        b = 0;
+                        if (a < 64)
+                        {
+                            g = a * 4;
+                            b = 255;
+                        }
+                        else if (a >= 64 && a < 128)
+                        {
+                            g = 255;
+                            b = 255 - ((a - 64) * 4);
+                        }
+                        else if (a >= 128 && a < 192)
+                        {
+                            r = (a - 128) * 4;
+                            g = 255;
+                        }
+                        else // >= 192
+                        {
+                            r = 255;
+                            g = 255 - ((a - 192) * 4);
+                        }
+                        r = (r * a + 255) >> 8;
+                        g = (g * a + 255) >> 8;
+                        b = (b * a + 255) >> 8;
+        #endif
+                    }
                 }
-                else if (a >= 128 && a < 192)
-                {
-                    r = (a - 128) * 4;
-                    g = 255;
-                }
-                else // >= 192
-                {
-                    r = 255;
-                    g = 255 - ((a - 192) * 4);
-                }
-                r = (r * a + 255) >> 8;
-                g = (g * a + 255) >> 8;
-                b = (b * a + 255) >> 8;
-#endif
             }
         }
     }

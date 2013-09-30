@@ -151,87 +151,88 @@ public:
             unsigned a = stop_color.alpha();
             m_gradient_lut.add_color(st.first, agg::rgba8_pre(r, g, b, int(a * opacity)));
         }
-        m_gradient_lut.build_lut();
-
-        agg::trans_affine transform = mtx;
-        transform.invert();
-        agg::trans_affine tr;
-        tr = grad.get_transform();
-        tr.invert();
-        transform *= tr;
-
-        if (grad.get_units() != USER_SPACE_ON_USE)
+        if (m_gradient_lut.build_lut())
         {
-            double bx1=symbol_bbox.minx();
-            double by1=symbol_bbox.miny();
-            double bx2=symbol_bbox.maxx();
-            double by2=symbol_bbox.maxy();
+            agg::trans_affine transform = mtx;
+            transform.invert();
+            agg::trans_affine tr;
+            tr = grad.get_transform();
+            tr.invert();
+            transform *= tr;
 
-            if (grad.get_units() == OBJECT_BOUNDING_BOX)
+            if (grad.get_units() != USER_SPACE_ON_USE)
             {
-                bounding_rect_single(curved_trans, path_id, &bx1, &by1, &bx2, &by2);
+                double bx1=symbol_bbox.minx();
+                double by1=symbol_bbox.miny();
+                double bx2=symbol_bbox.maxx();
+                double by2=symbol_bbox.maxy();
+
+                if (grad.get_units() == OBJECT_BOUNDING_BOX)
+                {
+                    bounding_rect_single(curved_trans, path_id, &bx1, &by1, &bx2, &by2);
+                }
+
+                transform.translate(-bx1,-by1);
+                transform.scale(1.0/(bx2-bx1),1.0/(by2-by1));
             }
 
-            transform.translate(-bx1,-by1);
-            transform.scale(1.0/(bx2-bx1),1.0/(by2-by1));
-        }
+            if (grad.get_gradient_type() == RADIAL)
+            {
+                typedef agg::gradient_radial_focus gradient_adaptor_type;
+                typedef agg::span_gradient<agg::rgba8,
+                    interpolator_type,
+                    gradient_adaptor_type,
+                    color_func_type> span_gradient_type;
 
-        if (grad.get_gradient_type() == RADIAL)
-        {
-            typedef agg::gradient_radial_focus gradient_adaptor_type;
-            typedef agg::span_gradient<agg::rgba8,
-                interpolator_type,
-                gradient_adaptor_type,
-                color_func_type> span_gradient_type;
+                // the agg radial gradient assumes it is centred on 0
+                transform.translate(-x2,-y2);
 
-            // the agg radial gradient assumes it is centred on 0
-            transform.translate(-x2,-y2);
+                // scale everything up since agg turns things into integers a bit too soon
+                int scaleup=255;
+                radius*=scaleup;
+                x1*=scaleup;
+                y1*=scaleup;
+                x2*=scaleup;
+                y2*=scaleup;
 
-            // scale everything up since agg turns things into integers a bit too soon
-            int scaleup=255;
-            radius*=scaleup;
-            x1*=scaleup;
-            y1*=scaleup;
-            x2*=scaleup;
-            y2*=scaleup;
+                transform.scale(scaleup,scaleup);
+                interpolator_type     span_interpolator(transform);
+                gradient_adaptor_type gradient_adaptor(radius,(x1-x2),(y1-y2));
 
-            transform.scale(scaleup,scaleup);
-            interpolator_type     span_interpolator(transform);
-            gradient_adaptor_type gradient_adaptor(radius,(x1-x2),(y1-y2));
+                span_gradient_type    span_gradient(span_interpolator,
+                                                    gradient_adaptor,
+                                                    m_gradient_lut,
+                                                    0, radius);
 
-            span_gradient_type    span_gradient(span_interpolator,
-                                                gradient_adaptor,
-                                                m_gradient_lut,
-                                                0, radius);
+                render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
+            }
+            else
+            {
+                typedef linear_gradient_from_segment gradient_adaptor_type;
+                typedef agg::span_gradient<agg::rgba8,
+                    interpolator_type,
+                    gradient_adaptor_type,
+                    color_func_type> span_gradient_type;
 
-            render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
-        }
-        else
-        {
-            typedef linear_gradient_from_segment gradient_adaptor_type;
-            typedef agg::span_gradient<agg::rgba8,
-                interpolator_type,
-                gradient_adaptor_type,
-                color_func_type> span_gradient_type;
+                // scale everything up since agg turns things into integers a bit too soon
+                int scaleup=255;
+                x1*=scaleup;
+                y1*=scaleup;
+                x2*=scaleup;
+                y2*=scaleup;
 
-            // scale everything up since agg turns things into integers a bit too soon
-            int scaleup=255;
-            x1*=scaleup;
-            y1*=scaleup;
-            x2*=scaleup;
-            y2*=scaleup;
+                transform.scale(scaleup,scaleup);
 
-            transform.scale(scaleup,scaleup);
+                interpolator_type     span_interpolator(transform);
+                gradient_adaptor_type gradient_adaptor(x1,y1,x2,y2);
 
-            interpolator_type     span_interpolator(transform);
-            gradient_adaptor_type gradient_adaptor(x1,y1,x2,y2);
+                span_gradient_type    span_gradient(span_interpolator,
+                                                    gradient_adaptor,
+                                                    m_gradient_lut,
+                                                    0, scaleup);
 
-            span_gradient_type    span_gradient(span_interpolator,
-                                                gradient_adaptor,
-                                                m_gradient_lut,
-                                                0, scaleup);
-
-            render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
+                render_scanlines_aa(ras, sl, ren, m_alloc, span_gradient);
+            }
         }
     }
 

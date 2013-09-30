@@ -73,30 +73,46 @@ inline int import_image_data(T2 const& image,
                              WebPPicture & pic,
                              bool alpha)
 {
-    // Reason for copy: https://github.com/mapnik/mapnik/issues/2024
-    // TODO - figure out way to pass view pixels directly to webp importer
-    image_data_32 im(image.width(),image.height());
-    for (unsigned y = 0; y < image.height(); ++y)
+    ImageData<typename T2::pixel_type> const& data = image.data();
+    int stride = sizeof(typename T2::pixel_type) * image.width();
+    if (data.width() == image.width() &&
+        data.height() == image.height())
     {
-        typename T2::pixel_type const * row_from = image.getRow(y);
-        image_data_32::pixel_type * row_to = im.getRow(y);
-        for (unsigned x = 0; x < image.width(); ++x)
+        if (alpha)
         {
-            row_to[x] = row_from[x];
+            return WebPPictureImportRGBA(&pic, data.getBytes(), stride);
         }
-    }
-    int stride = sizeof(typename T2::pixel_type) * im.width();
-    if (alpha)
-    {
-        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+        else
+        {
+    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
+            return WebPPictureImportRGBX(&pic, data.getBytes(), stride);
+    #else
+            return WebPPictureImportRGBA(&pic, data.getBytes(), stride);
+    #endif
+        }
     }
     else
     {
-#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-        return WebPPictureImportRGBX(&pic, im.getBytes(), stride);
-#else
-        return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
-#endif
+        // need to copy: https://github.com/mapnik/mapnik/issues/2024
+        image_data_32 im(image.width(),image.height());
+        for (unsigned y = 0; y < image.height(); ++y)
+        {
+            typename T2::pixel_type const * row_from = image.getRow(y);
+            image_data_32::pixel_type * row_to = im.getRow(y);
+            std::memcpy(row_to,row_from,stride);
+        }
+        if (alpha)
+        {
+            return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+        }
+        else
+        {
+    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
+            return WebPPictureImportRGBX(&pic, im.getBytes(), stride);
+    #else
+            return WebPPictureImportRGBA(&pic, im.getBytes(), stride);
+    #endif
+        }
     }
 }
 

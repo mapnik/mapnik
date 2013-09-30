@@ -115,8 +115,8 @@ image_filter_grammar<Iterator,ContType>::image_filter_grammar()
         >> lit('(')
         >> (css_color_[at_c<0>(_b) = _1, at_c<1>(_b) = 0]
             >> -color_stop_offset(_b)) [push_back(_a,_b)]
-        >> +(lit(',') >> css_color_[at_c<0>(_b) =_1,at_c<1>(_b) = 0]
-             >> -color_stop_offset(_b))[push_back(_a,_b)]
+        >> -(+(lit(',') >> css_color_[at_c<0>(_b) =_1,at_c<1>(_b) = 0]
+             >> -color_stop_offset(_b))[push_back(_a,_b)])
         >> lit(')') [push_back(_r1,_a)]
         ;
 

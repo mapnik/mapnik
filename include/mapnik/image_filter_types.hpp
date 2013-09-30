@@ -32,6 +32,7 @@
 #include <boost/variant/variant.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
+#include <boost/foreach.hpp>
 
 // stl
 #include <vector>
@@ -168,10 +169,11 @@ inline std::ostream& operator<< (std::ostream& os, color_to_alpha const& filter)
 
 inline std::ostream& operator<< (std::ostream& os, scale_hsla const& filter)
 {
-    os << "hsla-transform(" << filter.h0 << 'x' << filter.h1 << ':'
-                  << filter.s0 << 'x' << filter.s1 << ':'
-                  << filter.l0 << 'x' << filter.l1 << ':'
-                  << filter.a0 << 'x' << filter.a1 << ')';
+    os << "scale-hsla("
+                  << filter.h0 << ',' << filter.h1 << ','
+                  << filter.s0 << ',' << filter.s1 << ','
+                  << filter.l0 << ',' << filter.l1 << ','
+                  << filter.a0 << ',' << filter.a1 << ')';
     return os;
 }
 
@@ -219,7 +221,19 @@ inline std::ostream& operator<< (std::ostream& os, invert)
 
 inline std::ostream& operator<< (std::ostream& os, colorize_alpha const& filter)
 {
-    os << "colorize-alpha(TODO)";
+    os << "colorize-alpha(";
+    bool first = true;
+    BOOST_FOREACH( mapnik::filter::color_stop const& stop, filter)
+    {
+        if (!first) os << ",";
+        else first = false;
+        os << stop.color;
+        if (stop.offset > 0)
+        {
+            os << " " << stop.offset;
+        }
+    }
+    os << ')';
     return os;
 }
 

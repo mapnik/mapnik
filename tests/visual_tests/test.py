@@ -183,7 +183,10 @@ files = {
     'raster-color-to-alpha2':{'sizes':[(512,512)]},
     'raster-color-to-alpha3':{'sizes':[(512,512)]},
     'raster-color-to-alpha4':{'sizes':[(512,512)]},
-    'raster-color-to-alpha5':{'sizes':[(512,512)]}
+    'raster-color-to-alpha5':{'sizes':[(512,512)]},
+    'colorize-alpha1':{'sizes':[(512,512)]},
+    'colorize-alpha2':{'sizes':[(512,512)]},
+    'colorize-alpha3':{'sizes':[(512,512)]}
     }
 
 class Reporting:
