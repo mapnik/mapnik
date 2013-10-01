@@ -120,7 +120,7 @@ struct bounding_box_visitor : public boost::static_visitor<box2d<double> >
     }
 
 private:
-    topology topo_;
+    topology const& topo_;
 };
 
 }}

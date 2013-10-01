@@ -45,6 +45,8 @@ mapnik::feature_ptr topojson_featureset::next()
         std::size_t index = *index_itr_++;
         if ( index < topo_.geometries.size())
         {
+            mapnik::topojson::geometry const& geom = topo_.geometries[index];
+
             return mapnik::feature_ptr(); // TODO
         }
     }
