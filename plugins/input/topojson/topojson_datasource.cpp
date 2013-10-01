@@ -41,14 +41,13 @@
 #include <mapnik/unicode.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/feature.hpp>
-//#include <mapnik/feature_kv_iterator.hpp>
 #include <mapnik/value_types.hpp>
 #include <mapnik/box2d.hpp>
 #include <mapnik/debug.hpp>
 #include <mapnik/proj_transform.hpp>
 #include <mapnik/projection.hpp>
-//#include <mapnik/util/geometry_to_ds_type.hpp>
 #include <mapnik/json/topojson_grammar.hpp>
+#include <mapnik/json/topojson_utils.hpp>
 
 using mapnik::datasource;
 using mapnik::parameters;
@@ -100,7 +99,15 @@ topojson_datasource::topojson_datasource(parameters const& params)
         throw mapnik::datasource_exception("topojson_datasource: Failed parse TopoJSON file '" + file_ + "'");
     }
 
-    //  tree_.insert(box_type(point_type(box.minx(),box.miny()),point_type(box.maxx(),box.maxy())), count++);
+    std::size_t count = 0;
+    for (auto const& geom : topo_.geometries)
+    {
+        mapnik::box2d<double> bbox = boost::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
+        if (bbox.valid())
+        {
+            tree_.insert(box_type(point_type(bbox.minx(),bbox.miny()),point_type(bbox.maxx(),bbox.maxy())), count++);
+        }
+    }
 }
 
 topojson_datasource::~topojson_datasource() { }
