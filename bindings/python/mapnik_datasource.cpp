@@ -190,7 +190,9 @@ void export_datasource()
 
     def("CreateDatasource",&create_datasource);
 
-    class_<memory_datasource, bases<datasource>, boost::noncopyable>("MemoryDatasource", init<>())
+    class_<memory_datasource,
+           bases<datasource>, std::shared_ptr<memory_datasource>,
+           boost::noncopyable>("MemoryDatasource", init<>())
         .def("add_feature",&memory_datasource::push,
              "Adds a Feature:\n"
              ">>> ms = MemoryDatasource()\n"
@@ -198,4 +200,6 @@ void export_datasource()
              ">>> ms.add_feature(Feature(1))\n")
         .def("num_features",&memory_datasource::size)
         ;
+
+    implicitly_convertible<std::shared_ptr<memory_datasource>,std::shared_ptr<datasource> >();
 }
