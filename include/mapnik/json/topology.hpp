@@ -98,10 +98,10 @@ struct arc
 
 struct transform
 {
-    double scale_x = 1.0;
-    double scale_y = 1.0;
-    double translate_x = 0.0;
-    double translate_y = 0.0;
+    double scale_x;
+    double scale_y;
+    double translate_x;
+    double translate_y;
 };
 
 struct bounding_box
@@ -116,7 +116,7 @@ struct topology
 {
     std::vector<geometry> geometries;
     std::vector<arc> arcs;
-    transform tr;
+    boost::optional<transform> tr;
     boost::optional<bounding_box> bbox;
 };
 
@@ -189,7 +189,7 @@ BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::topology,
     (std::vector<mapnik::topojson::geometry>, geometries)
     (std::vector<mapnik::topojson::arc>, arcs)
-    (mapnik::topojson::transform, tr)
+    (boost::optional<mapnik::topojson::transform>, tr)
     (boost::optional<mapnik::topojson::bounding_box>, bbox)
    )
 
