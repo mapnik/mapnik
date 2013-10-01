@@ -539,7 +539,7 @@ box2d<double> text_renderer<T>::prepare_glyphs(text_path const& path)
     bbox.xMin = bbox.yMin = 32000;  // Initialize these so we can tell if we
     bbox.xMax = bbox.yMax = -32000; // properly grew the bbox later
 
-    for (int i = 0; i < path.num_nodes(); ++i)
+    for (std::size_t i = 0; i < path.num_nodes(); ++i)
     {
         char_info_ptr c;
         double x, y, angle;

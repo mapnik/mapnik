@@ -436,7 +436,7 @@ void cairo_context::add_text(text_path const& path,
 
     path.rewind();
 
-    for (int iii = 0; iii < path.num_nodes(); iii++)
+    for (std::size_t iii = 0; iii < path.num_nodes(); ++iii)
     {
         char_info_ptr c;
         double x, y, angle;
@@ -470,7 +470,7 @@ void cairo_context::add_text(text_path const& path,
 
     path.rewind();
 
-    for (int iii = 0; iii < path.num_nodes(); iii++)
+    for (std::size_t iii = 0; iii < path.num_nodes(); ++iii)
     {
         char_info_ptr c;
         double x, y, angle;
