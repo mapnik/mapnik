@@ -24,6 +24,7 @@
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/version.hpp>
 
 // stl
 #include <sstream>
