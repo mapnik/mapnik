@@ -1449,6 +1449,9 @@ if not preconfigured:
                 env.AppendUnique(LIBS='sqlite3')
                 env.AppendUnique(CPPPATH = os.path.realpath(env['SQLITE_INCLUDES']))
                 env.AppendUnique(LIBPATH = os.path.realpath(env['SQLITE_LIBS']))
+            if 'pq' not in env['LIBS']:
+                if not conf.parse_pg_config('PG_CONFIG'):
+                    env['PGSQL2SQLITE'] = False
             if not SQLITE_HAS_RTREE:
                 env['SKIPPED_DEPS'].append('pgsql2sqlite_rtree')
                 env['PGSQL2SQLITE'] = False
