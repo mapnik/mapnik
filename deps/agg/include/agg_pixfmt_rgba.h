@@ -686,9 +686,9 @@ namespace agg
             }
             if(sa)
             {
-                calc_type dr = p[Order::R] - sr;
-                calc_type dg = p[Order::G] - sg;
-                calc_type db = p[Order::B] - sb;
+                calc_type dr = (sr > p[Order::R]) ? 0 : p[Order::R] - sr;
+                calc_type dg = (sg > p[Order::G]) ? 0 : p[Order::G] - sg;
+                calc_type db = (sb > p[Order::B]) ? 0 : p[Order::B] - sb;
                 p[Order::R] = (dr > base_mask) ? 0 : dr;
                 p[Order::G] = (dg > base_mask) ? 0 : dg;
                 p[Order::B] = (db > base_mask) ? 0 : db;
