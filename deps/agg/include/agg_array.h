@@ -516,10 +516,11 @@ namespace agg
         if(m_num_blocks)
         {
             T** blk = m_blocks + m_num_blocks - 1;
-            while(m_num_blocks--)
+            while(m_num_blocks > 0)
             {
                 pod_allocator<T>::deallocate(*blk, block_size);
                 --blk;
+                --m_num_blocks;
             }
         }
         pod_allocator<T*>::deallocate(m_blocks, m_max_blocks);

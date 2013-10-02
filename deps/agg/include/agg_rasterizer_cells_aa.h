@@ -131,10 +131,11 @@ namespace agg
         if(m_num_blocks)
         {
             cell_type** ptr = m_cells + m_num_blocks - 1;
-            while(m_num_blocks--)
+            while(m_num_blocks > 0)
             {
                 pod_allocator<cell_type>::deallocate(*ptr, cell_block_size);
                 ptr--;
+                --m_num_blocks;
             }
             pod_allocator<cell_type*>::deallocate(m_cells, m_max_blocks);
         }
@@ -663,23 +664,26 @@ namespace agg
         cell_type*  cell_ptr;
         unsigned nb = m_num_cells >> cell_block_shift;
         unsigned i;
-        while(nb--)
+        while(nb > 0)
         {
             cell_ptr = *block_ptr++;
             i = cell_block_size;
-            while(i--) 
+            while(i > 0)
             {
                 m_sorted_y[cell_ptr->y - m_min_y].start++;
                 ++cell_ptr;
+                --i;
             }
+            --nb;
         }
 
         cell_ptr = *block_ptr++;
         i = m_num_cells & cell_block_mask;
-        while(i--) 
+        while(i > 0)
         {
             m_sorted_y[cell_ptr->y - m_min_y].start++;
             ++cell_ptr;
+            --i;
         }
 
         // Convert the Y-histogram into the array of starting indexes
@@ -694,27 +698,30 @@ namespace agg
         // Fill the cell pointer array sorted by Y
         block_ptr = m_cells;
         nb = m_num_cells >> cell_block_shift;
-        while(nb--)
+        while(nb > 0)
         {
             cell_ptr = *block_ptr++;
             i = cell_block_size;
-            while(i--) 
+            while(i > 0)
             {
                 sorted_y& curr_y = m_sorted_y[cell_ptr->y - m_min_y];
                 m_sorted_cells[curr_y.start + curr_y.num] = cell_ptr;
                 ++curr_y.num;
                 ++cell_ptr;
+                --i;
             }
+            --nb;
         }
         
         cell_ptr = *block_ptr++;
         i = m_num_cells & cell_block_mask;
-        while(i--) 
+        while(i > 0)
         {
             sorted_y& curr_y = m_sorted_y[cell_ptr->y - m_min_y];
             m_sorted_cells[curr_y.start + curr_y.num] = cell_ptr;
             ++curr_y.num;
             ++cell_ptr;
+            --i;
         }
 
         // Finally arrange the X-arrays
