@@ -895,9 +895,9 @@ namespace agg
                 if(fg[3] < 0) fg[3] = 0;
 
                 if(fg[order_type::A] > base_mask)         fg[order_type::A] = base_mask;
-                if(fg[order_type::R] > fg[order_type::R]) fg[order_type::R] = fg[order_type::R];
-                if(fg[order_type::G] > fg[order_type::G]) fg[order_type::G] = fg[order_type::G];
-                if(fg[order_type::B] > fg[order_type::B]) fg[order_type::B] = fg[order_type::B];
+                if(fg[order_type::R] > fg[order_type::A]) fg[order_type::R] = fg[order_type::A];
+                if(fg[order_type::G] > fg[order_type::A]) fg[order_type::G] = fg[order_type::A];
+                if(fg[order_type::B] > fg[order_type::A]) fg[order_type::B] = fg[order_type::A];
 
                 span->r = (value_type)fg[order_type::R];
                 span->g = (value_type)fg[order_type::G];
