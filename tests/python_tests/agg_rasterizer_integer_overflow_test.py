@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from nose.tools import *
 from utilities import run_all
 import mapnik
