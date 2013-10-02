@@ -408,10 +408,88 @@ struct test8
     }
 };
 
+#include "agg_conv_clip_polygon.h"
 #include <mapnik/wkt/wkt_factory.hpp>
+#include <mapnik/util/geometry_to_wkt.hpp>
+#include <mapnik/geometry.hpp>
+
+#include "agg_conv_clip_polygon.h"
+
+struct test11a
+{
+    unsigned iter_;
+    unsigned threads_;
+    std::string wkt_in_;
+    mapnik::box2d<double> extent_;
+    typedef agg::conv_clip_polygon<mapnik::geometry_type> conv_clip;
+    test11a(unsigned iterations,
+           unsigned threads,
+           std::string wkt_in,
+           mapnik::box2d<double> const& extent)
+        : iter_(iterations),
+          threads_(threads),
+          wkt_in_(wkt_in),
+          extent_(extent) {
+
+    }
+
+    bool validate()
+    {
+        std::string expected_wkt("Polygon((181 286.666667,233 454,315 340,421 446,463 324,559 466,631 321.320755,631 234.386861,528 178,394 229,329 138,212 134,183 228,200 264,181 238.244444),(313 190,440 256,470 248,510 305,533 237,613 263,553 397,455 262,405 378,343 287,249 334,229 191,313 190,313 190))");
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        BOOST_FOREACH (geometry_type & geom , paths)
+        {
+            conv_clip clipped(geom);
+            clipped.clip_box(
+                        extent_.minx(),
+                        extent_.miny(),
+                        extent_.maxx(),
+                        extent_.maxy());
+            unsigned cmd;
+            double x,y;
+            mapnik::geometry_type geom2(mapnik::Polygon);
+            while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
+                geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
+            }
+            std::string wkt;
+            bool result = mapnik::util::to_wkt(wkt,geom2);
+            if (result) {
+                return (wkt == expected_wkt);
+            }
+        }
+        return false;
+    }
+    void operator()()
+    {
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        for (unsigned i=0;i<iter_;++i)
+        {
+            BOOST_FOREACH (geometry_type & geom , paths)
+            {
+                conv_clip clipped(geom);
+                clipped.clip_box(
+                            extent_.minx(),
+                            extent_.miny(),
+                            extent_.maxx(),
+                            extent_.maxy());
+                unsigned cmd;
+                double x,y;
+                while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {}
+            }
+        }
+    }
+};
+
 #include "agg_conv_clipper.h"
 #include "agg_path_storage.h"
-#include <mapnik/geometry.hpp>
 
 struct test11
 {
@@ -433,7 +511,39 @@ struct test11
 
     bool validate()
     {
-        return true;
+        std::string expected_wkt("Polygon((212 134,329 138,394 229,528 178,631 234.4,631 321.3,559 466,463 324,421 446,315 340,233 454,181 286.7,181 238.2,200 264,183 228),(313 190,229 191,249 334,343 287,405 378,455 262,553 397,613 263,533 237,510 305,470 248,440 256))");
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        agg::path_storage ps;
+        ps.move_to(extent_.minx(), extent_.miny());
+        ps.line_to(extent_.minx(), extent_.maxy());
+        ps.line_to(extent_.maxx(), extent_.maxy());
+        ps.line_to(extent_.maxx(), extent_.miny());
+        ps.close_polygon();
+        BOOST_FOREACH (geometry_type & geom , paths)
+        {
+            poly_clipper clipped(geom,ps,
+                                 agg::clipper_and,
+                                 agg::clipper_non_zero,
+                                 agg::clipper_non_zero,
+                                 1);
+            clipped.rewind(0);
+            unsigned cmd;
+            double x,y;
+            mapnik::geometry_type geom2(mapnik::Polygon);
+            while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
+                geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
+            }
+            std::string wkt;
+            bool result = mapnik::util::to_wkt(wkt,geom2);
+            if (result) {
+                return (wkt == expected_wkt);
+            }
+        }
+        return false;
     }
     void operator()()
     {
@@ -473,7 +583,6 @@ struct test12
     unsigned iter_;
     unsigned threads_;
     std::string wkt_in_;
-
     mapnik::box2d<double> extent_;
     typedef mapnik::polygon_clipper<mapnik::geometry_type> poly_clipper;
     test12(unsigned iterations,
@@ -489,7 +598,28 @@ struct test12
 
     bool validate()
     {
-        return true;
+        std::string expected_wkt("Polygon((181 286.666667,233 454,315 340,421 446,463 324,559 466,631 321.320755,631 234.386861,528 178,394 229,329 138,212 134,183 228,200 264,181 238.244444,181 286.666667),(313 190,440 256,470 248,510 305,533 237,613 263,553 397,455 262,405 378,343 287,249 334,229 191,313 190))");
+        boost::ptr_vector<geometry_type> paths;
+        if (!mapnik::from_wkt(wkt_in_, paths))
+        {
+            throw std::runtime_error("Failed to parse WKT");
+        }
+        BOOST_FOREACH ( geometry_type & geom , paths)
+        {
+            poly_clipper clipped(extent_, geom);
+            unsigned cmd;
+            double x,y;
+            mapnik::geometry_type geom2(mapnik::Polygon);
+            while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
+                geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
+            }
+            std::string wkt;
+            bool result = mapnik::util::to_wkt(wkt,geom2);
+            if (result) {
+                return (wkt == expected_wkt);
+            }
+        }
+        return false;
     }
     void operator()()
     {
@@ -669,6 +799,18 @@ int main( int argc, char** argv)
         // POLYGON ((181 286.6666666666667, 233 454, 315 340, 421 446, 463 324, 559 466, 631 321.3207547169811, 631 234.38686131386862, 528 178, 394 229, 329 138, 212 134, 183 228, 200 264, 181 238.24444444444444, 181 286.6666666666667),(313 190, 440 256, 470 248, 510 305, 533 237, 613 263, 553 397, 455 262, 405 378, 343 287, 249 334, 229 191, 313 190))
 
         mapnik::box2d<double> clipping_box(181,106,631,470);
+
+        {
+            std::string filename_("benchmark/data/polygon.wkt");
+            std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
+            if (!in.is_open())
+                throw std::runtime_error("could not open: '" + filename_ + "'");
+            std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
+                       (std::istreambuf_iterator<char>()) );
+            test11a runner(10000,10,wkt_in,clipping_box);
+            benchmark(runner,"clipping polygon with conv_clip_polygon");
+        }
+
         {
             std::string filename_("benchmark/data/polygon.wkt");
             std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
@@ -680,6 +822,7 @@ int main( int argc, char** argv)
             benchmark(runner,"clipping polygon with agg_conv_clipper");
         }
 
+
         {
             std::string filename_("benchmark/data/polygon.wkt");
             std::ifstream in(filename_.c_str(),std::ios_base::in | std::ios_base::binary);
@@ -687,7 +830,6 @@ int main( int argc, char** argv)
                 throw std::runtime_error("could not open: '" + filename_ + "'");
             std::string wkt_in( (std::istreambuf_iterator<char>(in) ),
                        (std::istreambuf_iterator<char>()) );
-
             test12 runner(10000,10,wkt_in,clipping_box);
             benchmark(runner,"clipping polygon with mapnik::polygon_clipper");
         }
@@ -699,8 +841,9 @@ int main( int argc, char** argv)
             }
             unsigned face_count = mapnik::freetype_engine::face_names().size();
             test13 runner(1000,10);
-            benchmark(runner, (boost::format("font_engihe: created %ld faces in ") % (face_count * 1000 * 10)).str());
+            benchmark(runner, (boost::format("font_engine: created %ld faces in ") % (face_count * 1000 * 10)).str());
         }
+
         std::cout << "...benchmark done\n";
         return 0;
     }
