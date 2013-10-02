@@ -674,6 +674,53 @@ struct test13
     }
 };
 
+#include <mapnik/map.hpp>
+#include <mapnik/load_map.hpp>
+#include <mapnik/agg_renderer.hpp>
+#include <mapnik/datasource_cache.hpp>
+
+struct test14
+{
+    unsigned iter_;
+    unsigned threads_;
+    std::string xml_;
+    mapnik::box2d<double> extent_;
+    test14(unsigned iterations,
+           unsigned threads,
+           std::string const& xml,
+           mapnik::box2d<double> const& extent)
+        : iter_(iterations),
+          threads_(threads),
+          xml_(xml),
+          extent_(extent)
+    {}
+
+    bool validate()
+    {
+        mapnik::Map m(256,256);
+        mapnik::load_map(m,xml_);
+        m.zoom_to_box(extent_);
+        mapnik::image_32 im(m.width(),m.height());
+        mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+        ren.apply();
+        //mapnik::save_to_file(im,"test.png");
+        return true;
+    }
+
+    void operator()()
+    {
+        mapnik::Map m(256,256);
+        mapnik::load_map(m,xml_);
+        m.zoom_to_box(extent_);
+        for (unsigned i=0;i<iter_;++i)
+        {
+            mapnik::image_32 im(m.width(),m.height());
+            mapnik::agg_renderer<mapnik::image_32> ren(m,im);
+            ren.apply();
+        }
+    }
+};
+
 int main( int argc, char** argv)
 {
     if (argc > 0) {
@@ -689,6 +736,7 @@ int main( int argc, char** argv)
             }
         }
     }
+    mapnik::datasource_cache::instance().register_datasources("./plugins/input/");
     try
     {
         std::cout << "starting benchmark…\n";
@@ -842,6 +890,35 @@ int main( int argc, char** argv)
             unsigned face_count = mapnik::freetype_engine::face_names().size();
             test13 runner(1000,10);
             benchmark(runner, (boost::format("font_engine: created %ld faces in ") % (face_count * 1000 * 10)).str());
+        }
+
+        {
+            test14 runner(500,10,
+                          "benchmark/data/polygon_rendering_clip.xml",
+                          mapnik::box2d<double>(-20037508.3428,-8317435.0606,20037508.3428,18399242.7298));
+            benchmark(runner, "rendering polygon with clipping at full extent");
+        }
+
+        {
+            test14 runner(500,10,
+                          "benchmark/data/polygon_rendering_no_clip.xml",
+                          mapnik::box2d<double>(-20037508.3428,-8317435.0606,20037508.3428,18399242.7298));
+            benchmark(runner, "rendering polygon without clipping at full extent");
+        }
+
+        {
+            // note: bbox below is for 16/10491/22911.png
+            test14 runner(500,10,
+                          "benchmark/data/polygon_rendering_clip.xml",
+                          mapnik::box2d<double>(-13622912.929097254,6026906.8062295765,-13621689.93664469,6028129.79868214));
+            benchmark(runner, "rendering polygon with clipping at z16 extent");
+        }
+
+        {
+            test14 runner(500,10,
+                          "benchmark/data/polygon_rendering_no_clip.xml",
+                          mapnik::box2d<double>(-13622912.929097254,6026906.8062295765,-13621689.93664469,6028129.79868214));
+            benchmark(runner, "rendering polygon without clipping at z16 extent");
         }
 
         std::cout << "...benchmark done\n";
