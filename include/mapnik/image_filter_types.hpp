@@ -32,7 +32,6 @@
 #include <boost/variant/variant.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
-#include <boost/foreach.hpp>
 
 // stl
 #include <vector>
@@ -223,7 +222,7 @@ inline std::ostream& operator<< (std::ostream& os, colorize_alpha const& filter)
 {
     os << "colorize-alpha(";
     bool first = true;
-    BOOST_FOREACH( mapnik::filter::color_stop const& stop, filter)
+    for ( mapnik::filter::color_stop const& stop : filter)
     {
         if (!first) os << ",";
         else first = false;

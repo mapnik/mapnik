@@ -49,7 +49,6 @@
 // boost
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
-#include <boost/foreach.hpp>
 
 // stl
 #include <vector>
@@ -521,7 +520,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
 {
    std::vector<feature_type_style const*> & active_styles = mat.active_styles_;
    std::vector<featureset_ptr> & featureset_ptr_list = mat.featureset_ptr_list_;
-   if (featureset_ptr_list.empty()) 
+   if (featureset_ptr_list.empty())
     {
         // The datasource wasn't querried because of early return
         // but we have to apply compositing operations on styles
@@ -530,10 +529,10 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
             p.start_style_processing(*style);
             p.end_style_processing(*style);
         }
-        
+
         return;
     }
-    
+
     p.start_layer_processing(mat.lay_, mat.layer_ext2_);
 
     layer const& lay = mat.lay_;
