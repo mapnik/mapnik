@@ -22,6 +22,7 @@ def test_that_coordinates_do_not_overflow_and_polygon_is_rendered():
   lyr.datasource = ds
   lyr.styles.append('style')
   m = mapnik.Map(256,256)
+  m.background_color = mapnik.Color('black')
   m.append_style('style',s)
   m.layers.append(lyr)
   # 17/20864/45265.png
