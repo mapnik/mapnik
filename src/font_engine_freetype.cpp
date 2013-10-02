@@ -614,7 +614,7 @@ void text_renderer<T>::render(pixel_position const& pos)
 {
     FT_Error  error;
     FT_Vector start;
-    unsigned height = pixmap_.height();
+    int height = pixmap_.height();
 
     start.x =  static_cast<FT_Pos>(pos.x * (1 << 6));
     start.y =  static_cast<FT_Pos>((height - pos.y) * (1 << 6));
