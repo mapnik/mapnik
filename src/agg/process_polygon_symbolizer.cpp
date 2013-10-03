@@ -62,7 +62,7 @@ void agg_renderer<T>::process(polygon_symbolizer const& sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clipping_extent(),*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
     if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform

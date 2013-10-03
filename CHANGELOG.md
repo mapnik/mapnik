@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Added support for more seamless blurring by rendering to a larger internal image to avoid edge effects (#1478)
+
 - Fixed rendering of large shapes at high zoom levels, which might dissapear due to integer overflow. This
   bug was previously fixable when geometries were clipped, but would, until now, re-appear if clipping was turned
   off for a symbolizer (#2000)

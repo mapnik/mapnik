@@ -91,6 +91,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     boost::optional<image_ptr> pat = (*marker)->get_bitmap_data();
 
     if (!pat) return;
+    box2d<double> clip_box = clipping_extent();
 
     typedef agg::rgba8 color;
     typedef agg::order_rgba order;
@@ -131,7 +132,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         if (feature.num_geometries() > 0)
         {
             clipped_geometry_type clipped(feature.get_geometry(0));
-            clipped.clip_box(query_extent_.minx(),query_extent_.miny(),query_extent_.maxx(),query_extent_.maxy());
+            clipped.clip_box(clip_box.minx(),clip_box.miny(),clip_box.maxx(),clip_box.maxy());
             path_type path(t_,clipped,prj_trans);
             path.vertex(&x0,&y0);
         }
@@ -150,7 +151,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
     typedef boost::mpl::vector<clip_poly_tag,transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer, polygon_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(query_extent_,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clip_box,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
     if (prj_trans.equal() && sym.clip()) converter.set<clip_poly_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform

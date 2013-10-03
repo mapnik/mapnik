@@ -92,7 +92,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    box2d<double> clipping_extent = query_extent_;
+    box2d<double> clip_box = clipping_extent();
     if (sym.clip())
     {
         double padding = (double)(query_extent_.width()/pixmap_.width());
@@ -102,7 +102,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         if (std::fabs(sym.offset()) > 0)
             padding *= std::fabs(sym.offset()) * 1.2;
         padding *= scale_factor_;
-        clipping_extent.pad(padding);
+        clip_box.pad(padding);
         // debugging
         //box2d<double> inverse = query_extent_;
         //inverse.pad(-padding);
@@ -121,7 +121,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
 
         vertex_converter<box2d<double>, rasterizer_type, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(clipping_extent,ras,sym,t_,prj_trans,tr,scale_factor_);
+            converter(clip_box,ras,sym,t_,prj_trans,tr,scale_factor_);
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
         if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
@@ -141,7 +141,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
     {
         vertex_converter<box2d<double>, rasterizer, line_symbolizer,
                          CoordTransform, proj_transform, agg::trans_affine, conv_types>
-            converter(clipping_extent,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
+            converter(clip_box,*ras_ptr,sym,t_,prj_trans,tr,scale_factor_);
 
         if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
         converter.set<transform_tag>(); // always transform
