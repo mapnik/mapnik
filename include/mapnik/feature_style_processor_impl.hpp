@@ -301,16 +301,16 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     unsigned int num_styles = style_names.size();
     if (! num_styles)
     {
-        MAPNIK_LOG_DEBUG(feature_style_processor) << "feature_style_processor: No style for layer=" << lay.name();
-
+        MAPNIK_LOG_DEBUG(feature_style_processor)
+          << "feature_style_processor: No style for layer=" << lay.name();
         return;
     }
 
     mapnik::datasource_ptr ds = lay.datasource();
     if (! ds)
     {
-        MAPNIK_LOG_DEBUG(feature_style_processor) << "feature_style_processor: No datasource for layer=" << lay.name();
-
+        MAPNIK_LOG_DEBUG(feature_style_processor)
+          << "feature_style_processor: No datasource for layer=" << lay.name();
         return;
     }
 
@@ -428,12 +428,6 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
 
     p.start_layer_processing(lay, layer_ext2);
 
-    double qw = query_ext.width()>0 ? query_ext.width() : 1;
-    double qh = query_ext.height()>0 ? query_ext.height() : 1;
-    query::resolution_type res(width/qw,
-                               height/qh);
-
-    query q(layer_ext,res,scale_denom,extent);
     boost::ptr_vector<rule_cache> & rule_caches = mat.rule_caches_;
     attribute_collector collector(names);
 
@@ -470,44 +464,52 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
 
     // Don't even try to do more work if there are no active styles.
-    if (active_styles.size() > 0)
+    if (active_styles.empty())
     {
-        if (p.attribute_collection_policy() == COLLECT_ALL)
-        {
-            layer_descriptor lay_desc = ds->get_descriptor();
-            BOOST_FOREACH(attribute_descriptor const& desc, lay_desc.get_descriptors())
-            {
-                q.add_property_name(desc.get_name());
-            }
-        }
-        else
-        {
-            BOOST_FOREACH(std::string const& name, names)
-            {
-                q.add_property_name(name);
-            }
-        }
-        q.set_filter_factor(collector.get_filter_factor());
+        return;
+    }
 
-        // Also query the group by attribute
-        std::string const& group_by = lay.group_by();
-        if (!group_by.empty())
+    double qw = query_ext.width()>0 ? query_ext.width() : 1;
+    double qh = query_ext.height()>0 ? query_ext.height() : 1;
+    query::resolution_type res(width/qw,
+                               height/qh);
+
+    query q(layer_ext,res,scale_denom,extent);
+
+    if (p.attribute_collection_policy() == COLLECT_ALL)
+    {
+        layer_descriptor lay_desc = ds->get_descriptor();
+        BOOST_FOREACH(attribute_descriptor const& desc, lay_desc.get_descriptors())
         {
-            q.add_property_name(group_by);
+            q.add_property_name(desc.get_name());
         }
+    }
+    else
+    {
+        BOOST_FOREACH(std::string const& name, names)
+        {
+            q.add_property_name(name);
+        }
+    }
+    q.set_filter_factor(collector.get_filter_factor());
+
+    // Also query the group by attribute
+    std::string const& group_by = lay.group_by();
+    if (!group_by.empty())
+    {
+        q.add_property_name(group_by);
     }
 
     bool cache_features = lay.cache_features() && active_styles.size() > 1;
-    std::string group_by = lay.group_by();
 
     std::vector<featureset_ptr> & featureset_ptr_list = mat.featureset_ptr_list_;
-    if ( (group_by != "") || cache_features)
+    if (!group_by.empty() || cache_features)
     {
         featureset_ptr_list.push_back(ds->features_with_context(q,current_ctx));
     }
     else
     {
-        for(size_t i = 0 ; i < active_styles.size(); i++)
+        for(size_t i = 0; i < active_styles.size(); ++i)
         {
             featureset_ptr_list.push_back(ds->features_with_context(q,current_ctx));
         }
@@ -516,13 +518,14 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
 
 
 template <typename Processor>
-void feature_style_processor<Processor>::render_material(layer_rendering_material & mat, Processor & p )
+void feature_style_processor<Processor>::render_material(layer_rendering_material & mat,
+                                                         Processor & p )
 {
     std::vector<feature_type_style const*> & active_styles = mat.active_styles_;
     std::vector<featureset_ptr> & featureset_ptr_list = mat.featureset_ptr_list_;
     if (featureset_ptr_list.empty())
     {
-        // The datasource wasn't querried because of early return
+        // The datasource wasn't queried because of early return
         // but we have to apply compositing operations on styles
         BOOST_FOREACH (feature_type_style const* style, active_styles)
         {
@@ -545,12 +548,12 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     datasource_ptr ds = lay.datasource();
     std::string group_by = lay.group_by();
 
-    // Render incrementally when the column that we group by
-    // changes value.
-    if (group_by != "")
+    // Render incrementally when the column that we group by changes value.
+    if (!group_by.empty())
     {
         featureset_ptr features = *featureset_ptr_list.begin();
-        if (features) {
+        if (features)
+        {
             // Cache all features into the memory_datasource before rendering.
             boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
             feature_ptr feature, prev;
@@ -570,7 +573,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
                                      rule_caches[i],
                                      cache,
                                      prj_trans);
-                        i++;
+                        ++i;
                     }
                     cache->clear();
                 }
@@ -583,7 +586,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
             {
                 cache->prepare();
                 render_style(p, style, rule_caches[i], cache, prj_trans);
-                i++;
+                ++i;
             }
             cache->clear();
         }
@@ -592,7 +595,8 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     {
         boost::shared_ptr<featureset_buffer> cache = boost::make_shared<featureset_buffer>();
         featureset_ptr features = *featureset_ptr_list.begin();
-        if (features) {
+        if (features)
+        {
             // Cache all features into the memory_datasource before rendering.
             feature_ptr feature;
             while ((feature = features->next()))
@@ -608,7 +612,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
             render_style(p, style,
                          rule_caches[i],
                          cache, prj_trans);
-            i++;
+            ++i;
         }
     }
     // We only have a single style and no grouping.
@@ -623,10 +627,9 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
                          rule_caches[i],
                          features,
                          prj_trans);
-            i++;
+            ++i;
         }
     }
-
     p.end_layer_processing(mat.lay_);
 }
 
@@ -652,7 +655,7 @@ void feature_style_processor<Processor>::render_style(
         bool do_also = false;
         BOOST_FOREACH(rule const* r, rc.get_if_rules() )
         {
-            expression_ptr const& expr=r->get_filter();
+            expression_ptr const& expr = r->get_filter();
             value_type result = boost::apply_visitor(evaluate<feature_impl,value_type>(*feature),*expr);
             if (result.to_bool())
             {
