@@ -451,7 +451,7 @@ struct test11a
                         extent_.maxy());
             unsigned cmd;
             double x,y;
-            mapnik::geometry_type geom2(mapnik::Polygon);
+            mapnik::geometry_type geom2(mapnik::geometry_type::types::Polygon);
             while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
                 geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
             }
@@ -533,7 +533,7 @@ struct test11
             clipped.rewind(0);
             unsigned cmd;
             double x,y;
-            mapnik::geometry_type geom2(mapnik::Polygon);
+            mapnik::geometry_type geom2(mapnik::geometry_type::types::Polygon);
             while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
                 geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
             }
@@ -609,7 +609,7 @@ struct test12
             poly_clipper clipped(extent_, geom);
             unsigned cmd;
             double x,y;
-            mapnik::geometry_type geom2(mapnik::Polygon);
+            mapnik::geometry_type geom2(mapnik::geometry_type::types::Polygon);
             while ((cmd = clipped.vertex(&x, &y)) != SEG_END) {
                 geom2.push_vertex(x,y,(mapnik::CommandType)cmd);
             }
