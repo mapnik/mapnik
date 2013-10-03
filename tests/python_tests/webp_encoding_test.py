@@ -18,9 +18,9 @@ if mapnik.has_webp():
        os.makedirs(tmp_dir)
 
     opts = [
-	    'webp',
-	    'webp:quality=64',
-	    'webp:alpha=false'
+        'webp',
+        'webp:quality=64',
+        'webp:alpha=false'
     ]
 
 

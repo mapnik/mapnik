@@ -98,16 +98,16 @@ private:
      * \brief prepare features for rendering asynchronously.
      */
     void prepare_layer(layer_rendering_material & mat,
-    				   feature_style_context_map & ctx_map,
-    				   Processor & p,
-    				   projection const& proj0,
-    				   double scale,
-    				   double scale_denom,
-    				   unsigned width,
-    				   unsigned height,
-    				   box2d<double> const& extent,
-    				   int buffer_size,
-    				   std::set<std::string>& names);
+                       feature_style_context_map & ctx_map,
+                       Processor & p,
+                       projection const& proj0,
+                       double scale,
+                       double scale_denom,
+                       unsigned width,
+                       unsigned height,
+                       box2d<double> const& extent,
+                       int buffer_size,
+                       std::set<std::string>& names);
 
     /*!
      * \brief render features list queued when they are available.
