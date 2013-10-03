@@ -134,8 +134,8 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
         double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
-        if (fabs(sym.offset()) > 0)
-            padding *= fabs(sym.offset()) * 1.2;
+        if (std::fabs(sym.offset()) > 0)
+            padding *= std::fabs(sym.offset()) * 1.2;
         padding *= scale_factor_;
         clipping_extent.pad(padding);
     }
@@ -148,7 +148,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     BOOST_FOREACH(geometry_type & geom, feature.paths())
