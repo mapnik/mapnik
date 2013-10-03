@@ -144,8 +144,13 @@ topojson_grammar<Iterator>::topojson_grammar()
 
     properties = lit("\"properties\"")
         >> lit(':')
-        >> object
+        >> (( lit('{') >> attributes >> lit('}')) | object)
         ;
+
+    attributes = (string_ >> lit(':') >> attribute_value) % lit(',')
+        ;
+
+    attribute_value %= number | string_  ;
 
     arcs = lit("\"arcs\"") >> lit(':')
                            >> lit('[') >> -( arc % lit(',')) >> lit(']') ;

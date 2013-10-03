@@ -67,7 +67,8 @@ private:
     qi::int_parser<mapnik::value_integer,10,1,-1> int__;
     qi::rule<Iterator,std::string(), space_type> string_;
     qi::rule<Iterator,space_type> key_value;
-    qi::rule<Iterator,space_type> number;
+    qi::rule<Iterator,space_type, boost::variant<value_null,bool,
+                                     value_integer,value_double>()> number;
     qi::rule<Iterator,space_type> object;
     qi::rule<Iterator,space_type> array;
     qi::rule<Iterator,space_type> pairs;
@@ -88,7 +89,9 @@ private:
     qi::rule<Iterator, space_type, std::vector<index_type>()> ring;
 
     // properties
-    qi::rule<Iterator,space_type, mapnik::topojson::properties()> properties;
+    qi::rule<Iterator, space_type, mapnik::topojson::properties()> properties;
+    qi::rule<Iterator, space_type, mapnik::topojson::properties()> attributes;
+    qi::rule<Iterator, space_type, mapnik::topojson::value()> attribute_value;
 
     // error
     boost::phoenix::function<where_message> where_message_;

@@ -28,8 +28,8 @@
 #include <boost/variant.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/spirit/include/support_utree.hpp>
 #include <boost/optional.hpp>
+#include <mapnik/feature.hpp>
 
 namespace mapnik { namespace topojson {
 
@@ -41,7 +41,9 @@ struct coordinate
     double y;
 };
 
-typedef boost::spirit::utree properties;
+typedef boost::variant<value_null,bool,value_integer,value_double,std::string> value;
+typedef std::tuple<std::string, value > property;
+typedef std::vector<property> properties;
 
 struct point
 {

@@ -98,6 +98,14 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
             poly_ptr->close_path();
         }
         feature->paths().push_back(poly_ptr.release());
+
+        if (poly.props)
+        {
+            for (auto const& p : *poly.props)
+            {
+                feature->put_new(std::get<0>(p), mapnik::value(1LL)/*std::get<1>(p)*/);
+            }
+        }
         return feature;
     }
 
