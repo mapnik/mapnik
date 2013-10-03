@@ -14,6 +14,10 @@ Released ...
 
 Summary: TODO
 
+- Fixed rendering of large shapes at high zoom levels, which might dissapear due to integer overflow. This
+  bug was previously fixable when geometries were clipped, but would, until now, re-appear if clipping was turned
+  off for a symbolizer (#2000)
+
 - Added single color argument support to `colorize-alpha` to allow colorizing alpha with one color.
 
 - Added `color-to-alpha` `image-filter` to allow for applying alpha in proportion to color similiarity (#2023)
