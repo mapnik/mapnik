@@ -186,7 +186,8 @@ files = {
     'raster-color-to-alpha5':{'sizes':[(512,512)]},
     'colorize-alpha1':{'sizes':[(512,512)]},
     'colorize-alpha2':{'sizes':[(512,512)]},
-    'colorize-alpha3':{'sizes':[(512,512)]}
+    'colorize-alpha3':{'sizes':[(512,512)]},
+    'image-filters-galore':{'sizes':[(512,512)]},
     }
 
 class Reporting:
