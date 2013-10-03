@@ -64,7 +64,6 @@ void assign_properties(mapnik::feature_impl & feature, T const& geom, mapnik::tr
     {
         for (auto const& p : *geom.props)
         {
-            //mapnik::value v = boost::apply_visitor(attribute_value_visitor(tr),std::get<1>(p));
             feature.put_new(std::get<0>(p), boost::apply_visitor(attribute_value_visitor(tr),std::get<1>(p)));
         }
     }

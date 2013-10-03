@@ -75,8 +75,7 @@ struct put_property
     template <typename T0,typename T1, typename T2>
     result_type operator() (T0 & feature, T1 const& key, T2 const& val) const
     {
-        mapnik::value v = boost::apply_visitor(attribute_value_visitor(tr_),val); // TODO: optimize
-        feature.put_new(key, v);
+        feature.put_new(key, boost::apply_visitor(attribute_value_visitor(tr_),val));
     }
     mapnik::transcoder const& tr_;
 };
