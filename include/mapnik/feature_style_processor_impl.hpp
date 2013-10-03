@@ -48,7 +48,6 @@
 // boost
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
-#include <boost/foreach.hpp>
 
 // stl
 #include <vector>
@@ -531,7 +530,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
         }
         return;
     }
-    
+
     p.start_layer_processing(mat.lay_, mat.layer_ext2_);
 
     layer const& lay = mat.lay_;

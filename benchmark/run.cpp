@@ -441,7 +441,7 @@ struct test11a
         {
             throw std::runtime_error("Failed to parse WKT");
         }
-        BOOST_FOREACH (geometry_type & geom , paths)
+        for (geometry_type & geom : paths)
         {
             conv_clip clipped(geom);
             clipped.clip_box(
@@ -472,7 +472,7 @@ struct test11a
         }
         for (unsigned i=0;i<iter_;++i)
         {
-            BOOST_FOREACH (geometry_type & geom , paths)
+            for (geometry_type & geom : paths)
             {
                 conv_clip clipped(geom);
                 clipped.clip_box(
@@ -523,7 +523,7 @@ struct test11
         ps.line_to(extent_.maxx(), extent_.maxy());
         ps.line_to(extent_.maxx(), extent_.miny());
         ps.close_polygon();
-        BOOST_FOREACH (geometry_type & geom , paths)
+        for (geometry_type & geom : paths)
         {
             poly_clipper clipped(geom,ps,
                                  agg::clipper_and,
@@ -604,7 +604,7 @@ struct test12
         {
             throw std::runtime_error("Failed to parse WKT");
         }
-        BOOST_FOREACH ( geometry_type & geom , paths)
+        for ( geometry_type & geom : paths)
         {
             poly_clipper clipped(extent_, geom);
             unsigned cmd;

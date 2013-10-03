@@ -18,7 +18,6 @@
 #include <mapnik/scale_denominator.hpp>
 #include <mapnik/feature_style_processor.hpp>
 
-#include <boost/foreach.hpp>
 #include <vector>
 #include <algorithm>
 #include "utils.hpp"

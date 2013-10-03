@@ -55,7 +55,7 @@ using mapnik::parameters;
 DATASOURCE_PLUGIN(topojson_datasource)
 
 topojson_datasource::topojson_datasource(parameters const& params)
-: datasource(params),
+  : datasource(params),
     type_(datasource::Vector),
     desc_(*params.get<std::string>("type"),
           *params.get<std::string>("encoding","utf-8")),
@@ -90,8 +90,6 @@ topojson_datasource::topojson_datasource(parameters const& params)
     boost::spirit::multi_pass<base_iterator_type> end =
         boost::spirit::make_default_multi_pass(base_iterator_type());
 
-    //mapnik::context_ptr ctx = std::make_shared<mapnik::context_type>();
-
     mapnik::topojson::topojson_grammar<boost::spirit::multi_pass<base_iterator_type> > g;
     bool result = boost::spirit::qi::phrase_parse(begin, end, g, boost::spirit::standard_wide::space, topo_);
     if (!result)
@@ -105,16 +103,19 @@ topojson_datasource::topojson_datasource(parameters const& params)
         mapnik::box2d<double> bbox = boost::apply_visitor(mapnik::topojson::bounding_box_visitor(topo_), geom);
         if (bbox.valid())
         {
+            if (count == 0) extent_ = bbox;
+            else extent_.expand_to_include(bbox);
             tree_.insert(box_type(point_type(bbox.minx(),bbox.miny()),point_type(bbox.maxx(),bbox.maxy())), count++);
         }
     }
+    std::cerr << extent_ << std::endl;
 }
 
 topojson_datasource::~topojson_datasource() { }
 
 const char * topojson_datasource::name()
 {
-    return "geojson";
+    return "topojson";
 }
 
 boost::optional<mapnik::datasource::geometry_t> topojson_datasource::get_geometry_type() const

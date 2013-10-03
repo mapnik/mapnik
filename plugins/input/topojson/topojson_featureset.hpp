@@ -39,10 +39,12 @@ public:
     mapnik::feature_ptr next();
 
 private:
+    mapnik::context_ptr ctx_;
     mapnik::box2d<double> box_;
     mapnik::topojson::topology const& topo_;
     std::deque<std::size_t>::const_iterator index_itr_;
     std::deque<std::size_t>::const_iterator index_end_;
+    std::size_t feature_id_;
 };
 
 #endif // TOPOJSON_FEATURESET_HPP
