@@ -36,22 +36,99 @@
 
 namespace mapnik { namespace topojson {
 
+struct attribute_value_visitor
+    :  boost::static_visitor<mapnik::value>
+{
+public:
+    attribute_value_visitor(mapnik::transcoder const& tr)
+        : tr_(tr) {}
+
+    mapnik::value operator()(std::string const& val) const
+    {
+        return mapnik::value(tr_.transcode(val.c_str()));
+    }
+
+    template <typename T>
+    mapnik::value operator()(T const& val) const
+    {
+        return mapnik::value(val);
+    }
+
+    mapnik::transcoder const& tr_;
+};
+
+template <typename T>
+void assign_properties(mapnik::feature_impl & feature, T const& geom, mapnik::transcoder const& tr)
+{
+    if ( geom.props)
+    {
+        for (auto const& p : *geom.props)
+        {
+            //mapnik::value v = boost::apply_visitor(attribute_value_visitor(tr),std::get<1>(p));
+            feature.put_new(std::get<0>(p), boost::apply_visitor(attribute_value_visitor(tr),std::get<1>(p)));
+        }
+    }
+}
+
 template <typename Context>
 struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
 {
-    feature_generator(Context & ctx, topology const& topo, std::size_t feature_id)
+    feature_generator(Context & ctx,  mapnik::transcoder const& tr, topology const& topo, std::size_t feature_id)
         : ctx_(ctx),
+          tr_(tr),
           topo_(topo),
           feature_id_(feature_id) {}
 
     feature_ptr operator() (point const& pt) const
     {
-        return feature_ptr();
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
+        std::unique_ptr<geometry_type> point_ptr(new geometry_type(geometry_type::types::Point));
+
+        double x = pt.coord.x;
+        double y = pt.coord.y;
+        if (topo_.tr)
+        {
+            x =  x * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+            y =  y * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+        }
+
+        point_ptr->move_to(x,y);
+        feature->paths().push_back(point_ptr.release());
+        assign_properties(*feature, pt, tr_);
+        return feature;
     }
 
     feature_ptr operator() (linestring const& line) const
     {
-        return feature_ptr();
+        mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
+        std::unique_ptr<geometry_type> line_ptr(new geometry_type(geometry_type::types::LineString));
+
+        double px = 0, py = 0;
+        index_type arc_index = line.ring;
+        bool first = true;
+        for (auto pt : topo_.arcs[arc_index].coordinates)
+        {
+            double x = pt.x;
+            double y = pt.y;
+            if (topo_.tr)
+            {
+                x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
+                y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+            }
+            if (first)
+            {
+                first = false;
+                line_ptr->move_to(x,y);
+            }
+            else
+            {
+                line_ptr->line_to(x,y);
+            }
+        }
+
+        feature->paths().push_back(line_ptr.release());
+        assign_properties(*feature, line, tr_);
+        return feature;
     }
 
     feature_ptr operator() (polygon const& poly) const
@@ -97,15 +174,9 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
             }
             poly_ptr->close_path();
         }
-        feature->paths().push_back(poly_ptr.release());
 
-        if (poly.props)
-        {
-            for (auto const& p : *poly.props)
-            {
-                feature->put_new(std::get<0>(p), mapnik::value(1LL)/*std::get<1>(p)*/); // TODO
-            }
-        }
+        feature->paths().push_back(poly_ptr.release());
+        assign_properties(*feature, poly, tr_);
         return feature;
     }
 
@@ -116,6 +187,7 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
     }
 
     Context & ctx_;
+    mapnik::transcoder const& tr_;
     topology const& topo_;
     std::size_t feature_id_;
 };
@@ -123,10 +195,12 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
 }}
 
 topojson_featureset::topojson_featureset(mapnik::topojson::topology const& topo,
-                                       std::deque<std::size_t>::const_iterator index_itr,
-                                       std::deque<std::size_t>::const_iterator index_end)
+                                         mapnik::transcoder const& tr,
+                                         std::deque<std::size_t>::const_iterator index_itr,
+                                         std::deque<std::size_t>::const_iterator index_end)
     : ctx_(std::make_shared<mapnik::context_type>()),
       topo_(topo),
+      tr_(tr),
       index_itr_(index_itr),
       index_end_(index_end),
       feature_id_ (0) {}
@@ -142,7 +216,7 @@ mapnik::feature_ptr topojson_featureset::next()
         {
             mapnik::topojson::geometry const& geom = topo_.geometries[index];
             mapnik::feature_ptr feature = boost::apply_visitor(
-                mapnik::topojson::feature_generator<mapnik::context_ptr>(ctx_, topo_, feature_id_++),
+                mapnik::topojson::feature_generator<mapnik::context_ptr>(ctx_, tr_, topo_, feature_id_++),
                 geom);
             return feature;
         }

@@ -108,7 +108,6 @@ topojson_datasource::topojson_datasource(parameters const& params)
             tree_.insert(box_type(point_type(bbox.minx(),bbox.miny()),point_type(bbox.maxx(),bbox.maxy())), count++);
         }
     }
-    std::cerr << extent_ << std::endl;
 }
 
 topojson_datasource::~topojson_datasource() { }
@@ -147,7 +146,7 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
     {
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
         index_array_ = tree_.find(box);
-        return std::make_shared<topojson_featureset>(topo_, index_array_.begin(), index_array_.end());
+        return std::make_shared<topojson_featureset>(topo_, *tr_, index_array_.begin(), index_array_.end());
     }
     // otherwise return an empty featureset pointer
     return mapnik::featureset_ptr();
