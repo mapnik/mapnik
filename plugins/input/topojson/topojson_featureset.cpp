@@ -103,7 +103,7 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
         {
             for (auto const& p : *poly.props)
             {
-                feature->put_new(std::get<0>(p), mapnik::value(1LL)/*std::get<1>(p)*/);
+                feature->put_new(std::get<0>(p), mapnik::value(1LL)/*std::get<1>(p)*/); // TODO
             }
         }
         return feature;
