@@ -128,7 +128,7 @@ private:
 
 public:
     CoordTransform(int width, int height, const box2d<double>& extent,
-                   double offset_x = 0, double offset_y = 0)
+                   double offset_x = 0.0, double offset_y = 0.0)
         : width_(width),
           height_(height),
           extent_(extent),
@@ -141,6 +141,16 @@ public:
             sx_ = static_cast<double>(width_) / extent_.width();
         if (extent_.height() > 0)
             sy_ = static_cast<double>(height_) / extent_.height();
+    }
+
+    inline double offset_x() const
+    {
+        return offset_x_;
+    }
+
+    inline double offset_y() const
+    {
+        return offset_y_;
     }
 
     inline int width() const
