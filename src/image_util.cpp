@@ -129,114 +129,117 @@ void save_to_file(T const& image,
 }
 
 #if defined(HAVE_PNG)
+
 void handle_png_options(std::string const& type,
-                        int * colors,
-                        int * compression,
-                        int * strategy,
-                        int * trans_mode,
-                        double * gamma,
-                        bool * use_octree,
-                        bool * use_miniz)
+                        png_options & opts)
 {
-    if (type == "png" || type == "png24" || type == "png32")
+    if (type == "png" || type == "png8" || type == "png256")
     {
-        // Shortcut when the user didn't specify any flags after the colon.
-        // Paletted images specify "png8 or png256".
-        *colors = -1;
+        // stick with defaults
         return;
     }
-    // TODO - convert to spirit parser
-    if (type.length() > 6){
-        boost::char_separator<char> sep(":");
-        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        BOOST_FOREACH(std::string t, tokens)
+    else if (type == "png24" || type == "png32")
+    {
+        opts.paletted = false;
+        return;
+    }
+    boost::char_separator<char> sep(":");
+    boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+    bool set_colors = false;
+    bool set_gamma = false;
+    BOOST_FOREACH(std::string const& t, tokens)
+    {
+        if (t == "png24" || t == "png32")
         {
-            if (t == "png" || t == "png24" || t == "png32")
+            opts.paletted = false;
+        }
+        else if (t == "m=o")
+        {
+            opts.use_hextree = false;
+        }
+        else if (t == "e=miniz")
+        {
+            opts.use_miniz = true;
+        }
+        else if (boost::algorithm::starts_with(t, "c="))
+        {
+            set_colors = true;
+            if (!mapnik::util::string2int(t.substr(2),opts.colors) || opts.colors < 1 || opts.colors > 256)
             {
-                *colors = -1;
-            }
-            else if (t == "m=h")
-            {
-                *use_octree = false;
-            }
-            else if (t == "m=o")
-            {
-                *use_octree = true;
-            }
-            else if (t == "e=miniz")
-            {
-                *use_miniz = true;
-            }
-            else if (boost::algorithm::starts_with(t, "c="))
-            {
-                if (*colors < 0)
-                    throw ImageWriterException("invalid color parameter: unavailable for true color images");
-
-                if (!mapnik::util::string2int(t.substr(2),*colors) || *colors < 1 || *colors > 256)
-                    throw ImageWriterException("invalid color parameter: " + t.substr(2));
-            }
-            else if (boost::algorithm::starts_with(t, "t="))
-            {
-                if (!mapnik::util::string2int(t.substr(2),*trans_mode) || *trans_mode < 0 || *trans_mode > 2)
-                    throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
-            }
-            else if (boost::algorithm::starts_with(t, "g="))
-            {
-                if (*colors < 0)
-                    throw ImageWriterException("invalid gamma parameter: unavailable for true color images");
-                if (!mapnik::util::string2double(t.substr(2),*gamma) || *gamma < 0)
-                {
-                    throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
-                }
-            }
-            else if (boost::algorithm::starts_with(t, "z="))
-            {
-                /*
-                  #define Z_NO_COMPRESSION         0
-                  #define Z_BEST_SPEED             1
-                  #define Z_BEST_COMPRESSION       9
-                  #define Z_DEFAULT_COMPRESSION  (-1)
-                */
-                if (!mapnik::util::string2int(t.substr(2),*compression)
-                    || *compression < Z_DEFAULT_COMPRESSION
-                    || *compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
-                {
-                    throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
-                }
-            }
-            else if (boost::algorithm::starts_with(t, "s="))
-            {
-                std::string s = t.substr(2);
-                if (s == "default")
-                {
-                    *strategy = Z_DEFAULT_STRATEGY;
-                }
-                else if (s == "filtered")
-                {
-                    *strategy = Z_FILTERED;
-                }
-                else if (s == "huff")
-                {
-                    *strategy = Z_HUFFMAN_ONLY;
-                }
-                else if (s == "rle")
-                {
-                    *strategy = Z_RLE;
-                }
-                else if (s == "fixed")
-                {
-                    *strategy = Z_FIXED;
-                }
-                else
-                {
-                    throw ImageWriterException("invalid compression strategy parameter: " + s);
-                }
+                throw ImageWriterException("invalid color parameter: " + t.substr(2));
             }
         }
-        if ((*use_miniz == false) && *compression > Z_BEST_COMPRESSION)
+        else if (boost::algorithm::starts_with(t, "t="))
         {
-            throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
+            if (!mapnik::util::string2int(t.substr(2),opts.trans_mode) || opts.trans_mode < 0 || opts.trans_mode > 2)
+            {
+                throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
+            }
         }
+        else if (boost::algorithm::starts_with(t, "g="))
+        {
+            set_gamma = true;
+            if (!mapnik::util::string2double(t.substr(2),opts.gamma) || opts.gamma < 0)
+            {
+                throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
+            }
+        }
+        else if (boost::algorithm::starts_with(t, "z="))
+        {
+            /*
+              #define Z_NO_COMPRESSION         0
+              #define Z_BEST_SPEED             1
+              #define Z_BEST_COMPRESSION       9
+              #define Z_DEFAULT_COMPRESSION  (-1)
+            */
+            if (!mapnik::util::string2int(t.substr(2),opts.compression)
+                || opts.compression < Z_DEFAULT_COMPRESSION
+                || opts.compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
+            {
+                throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
+            }
+        }
+        else if (boost::algorithm::starts_with(t, "s="))
+        {
+            std::string s = t.substr(2);
+            if (s == "default")
+            {
+                opts.strategy = Z_DEFAULT_STRATEGY;
+            }
+            else if (s == "filtered")
+            {
+                opts.strategy = Z_FILTERED;
+            }
+            else if (s == "huff")
+            {
+                opts.strategy = Z_HUFFMAN_ONLY;
+            }
+            else if (s == "rle")
+            {
+                opts.strategy = Z_RLE;
+            }
+            else if (s == "fixed")
+            {
+                opts.strategy = Z_FIXED;
+            }
+            else
+            {
+                throw ImageWriterException("invalid compression strategy parameter: " + s);
+            }
+        }
+    }
+    // validation
+    if (!opts.paletted && set_colors)
+    {
+        throw ImageWriterException("invalid color parameter: unavailable for true color (non-paletted) images");
+    }
+    if (!opts.paletted && set_gamma)
+    {
+        throw ImageWriterException("invalid gamma parameter: unavailable for true color (non-paletted) images");
+    }
+    if ((opts.use_miniz == false) && opts.compression > Z_BEST_COMPRESSION)
+    {
+        throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
     }
 }
 #endif
@@ -258,7 +261,7 @@ void handle_webp_options(std::string const& type,
     if (type.length() > 4){
         boost::char_separator<char> sep(":");
         boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        BOOST_FOREACH(std::string t, tokens)
+        BOOST_FOREACH(std::string const& t, tokens)
         {
             if (boost::algorithm::starts_with(t, "quality="))
             {
@@ -333,38 +336,15 @@ void save_to_stream(T const& image,
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
 #if defined(HAVE_PNG)
-            int colors  = 256;
-            int compression = Z_DEFAULT_COMPRESSION;
-            int strategy = Z_DEFAULT_STRATEGY;
-            int trans_mode = -1;
-            double gamma = -1;
-            bool use_octree = true;
-            bool use_miniz = false;
-
-            handle_png_options(t,
-                               &colors,
-                               &compression,
-                               &strategy,
-                               &trans_mode,
-                               &gamma,
-                               &use_octree,
-                               &use_miniz);
-
             if (palette.valid())
             {
-                save_as_png8_pal(stream, image, palette, compression, strategy, use_miniz);
-            }
-            else if (colors < 0)
-            {
-                save_as_png(stream, image, compression, strategy, trans_mode, use_miniz);
-            }
-            else if (use_octree)
-            {
-                save_as_png8_oct(stream, image, colors, compression, strategy, trans_mode, use_miniz);
+                png_options opts;
+                handle_png_options(t,opts);
+                save_as_png8_pal(stream, image, palette, opts);
             }
             else
             {
-                save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma, use_miniz);
+                save_to_stream(image,stream,type);
             }
 #else
             throw ImageWriterException("png output is not enabled in your build of Mapnik");
@@ -396,34 +376,22 @@ void save_to_stream(T const& image,
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
 #if defined(HAVE_PNG)
-            int colors  = 256;
-            int compression = Z_DEFAULT_COMPRESSION; // usually mapped to z=6 in zlib
-            int strategy = Z_DEFAULT_STRATEGY;
-            int trans_mode = -1;
-            double gamma = -1;
-            bool use_octree = true;
-            bool use_miniz = false;
-
-            handle_png_options(t,
-                               &colors,
-                               &compression,
-                               &strategy,
-                               &trans_mode,
-                               &gamma,
-                               &use_octree,
-                               &use_miniz);
-
-            if (colors < 0)
+            png_options opts;
+            handle_png_options(t,opts);
+            if (opts.paletted)
             {
-                save_as_png(stream, image, compression, strategy, trans_mode, use_miniz);
-            }
-            else if (use_octree)
-            {
-                save_as_png8_oct(stream, image, colors, compression, strategy, trans_mode, use_miniz);
+                if (opts.use_hextree)
+                {
+                    save_as_png8_hex(stream, image, opts);
+                }
+                else
+                {
+                    save_as_png8_oct(stream, image, opts);
+                }
             }
             else
             {
-                save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma, use_miniz);
+                save_as_png(stream, image, opts);
             }
 #else
             throw ImageWriterException("png output is not enabled in your build of Mapnik");

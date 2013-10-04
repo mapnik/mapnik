@@ -14,6 +14,9 @@ Released ...
 
 Summary: TODO
 
+- Default PNG encoding method when `png` is supplied is now `png8:m=h`, so paletted png using hextree color quantization.
+  Use `png32` now for full color png.
+
 - Added support for more seamless blurring by rendering to a larger internal image to avoid edge effects (#1478)
 
 - Fixed rendering of large shapes at high zoom levels, which might dissapear due to integer overflow. This
