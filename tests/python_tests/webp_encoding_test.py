@@ -20,7 +20,22 @@ if mapnik.has_webp():
     opts = [
         'webp',
         'webp:quality=64',
-        'webp:alpha=false'
+        'webp:alpha=false',
+        'webp:partitions=3',
+        'webp:preprocessing=1',
+        'webp:partition_limit=50',
+        'webp:pass=10',
+        'webp:alpha_quality=50',
+        'webp:alpha_filtering=2',
+        'webp:alpha_compression=0',
+        'webp:autofilter=0',
+        'webp:filter_type=1:autofilter=1',
+        'webp:filter_sharpness=4',
+        'webp:filter_strength=50',
+        'webp:sns_strength=50',
+        'webp:segments=3',
+        'webp:target_PSNR=.5',
+        'webp:target_size=100'
     ]
 
 

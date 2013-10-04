@@ -149,13 +149,21 @@ void handle_png_options(std::string const& type,
     bool set_gamma = false;
     BOOST_FOREACH(std::string const& t, tokens)
     {
-        if (t == "png24" || t == "png32")
+        if (t == "png" || t == "png8")
+        {
+            opts.paletted = true;
+        }
+        else if (t == "png24" || t == "png32")
         {
             opts.paletted = false;
         }
         else if (t == "m=o")
         {
             opts.use_hextree = false;
+        }
+        else if (t == "m=h")
+        {
+            opts.use_hextree = true;
         }
         else if (t == "e=miniz")
         {
@@ -227,6 +235,10 @@ void handle_png_options(std::string const& type,
                 throw ImageWriterException("invalid compression strategy parameter: " + s);
             }
         }
+        else
+        {
+            throw ImageWriterException("unhandled png option: " + t);
+        }
     }
     // validation
     if (!opts.paletted && set_colors)
@@ -258,7 +270,11 @@ void handle_webp_options(std::string const& type,
         boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
         BOOST_FOREACH(std::string const& t, tokens)
         {
-            if (boost::algorithm::starts_with(t, "quality="))
+            if (t == "webp")
+            {
+                continue;
+            }
+            else if (boost::algorithm::starts_with(t, "quality="))
             {
                 std::string val = t.substr(8);
                 if (!val.empty())
@@ -324,6 +340,177 @@ void handle_webp_options(std::string const& type,
                         throw ImageWriterException("invalid webp alpha: '" + val + "'");
                     }
                 }
+            }
+            else if (boost::algorithm::starts_with(t, "target_size="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.target_size))
+                    {
+                        throw ImageWriterException("invalid webp target_size: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "target_psnr="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    double psnr = 0;
+                    if (!mapnik::util::string2double(val,psnr))
+                    {
+                        throw ImageWriterException("invalid webp target_psnr: '" + val + "'");
+                    }
+                    config.target_PSNR = psnr;
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "segments="))
+            {
+                std::string val = t.substr(9);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.segments))
+                    {
+                        throw ImageWriterException("invalid webp segments: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "sns_strength="))
+            {
+                std::string val = t.substr(13);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.sns_strength))
+                    {
+                        throw ImageWriterException("invalid webp sns_strength: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "filter_strength="))
+            {
+                std::string val = t.substr(16);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.filter_strength))
+                    {
+                        throw ImageWriterException("invalid webp filter_strength: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "filter_sharpness="))
+            {
+                std::string val = t.substr(17);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.filter_sharpness))
+                    {
+                        throw ImageWriterException("invalid webp filter_sharpness: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "filter_type="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.filter_type))
+                    {
+                        throw ImageWriterException("invalid webp filter_type: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "autofilter="))
+            {
+                std::string val = t.substr(11);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.autofilter))
+                    {
+                        throw ImageWriterException("invalid webp autofilter: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "alpha_compression="))
+            {
+                std::string val = t.substr(18);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.alpha_compression))
+                    {
+                        throw ImageWriterException("invalid webp alpha_compression: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "alpha_filtering="))
+            {
+                std::string val = t.substr(16);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.alpha_filtering))
+                    {
+                        throw ImageWriterException("invalid webp alpha_filtering: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "alpha_quality="))
+            {
+                std::string val = t.substr(14);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.alpha_quality))
+                    {
+                        throw ImageWriterException("invalid webp alpha_quality: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "pass="))
+            {
+                std::string val = t.substr(5);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.pass))
+                    {
+                        throw ImageWriterException("invalid webp pass: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "preprocessing="))
+            {
+                std::string val = t.substr(14);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.preprocessing))
+                    {
+                        throw ImageWriterException("invalid webp preprocessing: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "partitions="))
+            {
+                std::string val = t.substr(11);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.partitions))
+                    {
+                        throw ImageWriterException("invalid webp partitions: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "partition_limit="))
+            {
+                std::string val = t.substr(16);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.partition_limit))
+                    {
+                        throw ImageWriterException("invalid webp partition_limit: '" + val + "'");
+                    }
+                }
+            }
+            else
+            {
+                throw ImageWriterException("unhandled webp option: " + t);
             }
         }
     }
