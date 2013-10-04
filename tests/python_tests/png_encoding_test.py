@@ -127,12 +127,18 @@ if mapnik.has_png():
     def test_transparency_levels_aerial():
         im = mapnik.Image.open('../data/images/12_654_1580.png')
         im_in = mapnik.Image.open('./images/support/transparency/aerial_rgba.png')
-        eq_(len(im.tostring('png')),len(im_in.tostring('png')))
+        eq_(len(im.tostring('png8')),len(im_in.tostring('png8')))
+        eq_(len(im.tostring('png32')),len(im_in.tostring('png32')))
 
         im_in = mapnik.Image.open('./images/support/transparency/aerial_rgb.png')
-        eq_(len(im.tostring('png')),len(im_in.tostring('png')))
-        eq_(len(im.tostring('png:t=0')),len(im_in.tostring('png:t=0')))
-        eq_(len(im.tostring('png:t=0')) == len(im_in.tostring('png')), False)
+        eq_(len(im.tostring('png32')),len(im_in.tostring('png32')))
+        eq_(len(im.tostring('png32:t=0')),len(im_in.tostring('png32:t=0')))
+        eq_(len(im.tostring('png32:t=0')) == len(im_in.tostring('png32')), False)
+        eq_(len(im.tostring('png8')),len(im_in.tostring('png8')))
+        eq_(len(im.tostring('png8:t=0')),len(im_in.tostring('png8:t=0')))
+        # unlike png32 paletted images without alpha will look the same even if no alpha is forced
+        eq_(len(im.tostring('png8:t=0')) == len(im_in.tostring('png8')), True)
+        eq_(len(im.tostring('png8:t=0:m=o')) == len(im_in.tostring('png8:m=o')), True)
 
 if __name__ == "__main__":
     setup()
