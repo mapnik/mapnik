@@ -39,6 +39,27 @@
 
 namespace mapnik {
 
+struct webp_options {
+    double quality; // 0 lowest, 100 highest
+    int method; // 0 if fastest, 6 slowest
+    int lossless; // Lossless encoding (0=lossy(default), 1=lossless).
+    int image_hint; // used when lossless=1
+    /*
+      WEBP_HINT_DEFAULT = 0,  // default preset.
+      WEBP_HINT_PICTURE,      // digital picture, like portrait, inner shot
+      WEBP_HINT_PHOTO,        // outdoor photograph, with natural lighting
+      WEBP_HINT_GRAPH,        // Discrete tone image (graph, map-tile etc).
+      WEBP_HINT_LAST
+    */
+    bool alpha;
+    webp_options() :
+        quality(90.0),
+        method(3),
+        lossless(0),
+        image_hint(3),
+        alpha(true) {}
+};
+
 template <typename T>
 int webp_stream_write(const uint8_t* data, size_t data_size, const WebPPicture* picture)
 {
@@ -138,24 +159,20 @@ inline int import_image_data(image_data_32 const& im,
 
 template <typename T1, typename T2>
 void save_as_webp(T1& file,
-                  float quality,
-                  int method,
-                  int lossless,
-                  int image_hint,
-                  bool alpha,
-                  T2 const& image)
+                  T2 const& image,
+                  webp_options const& opts)
 {
     WebPConfig config;
-    if (!WebPConfigPreset(&config, WEBP_PRESET_DEFAULT, quality))
+    if (!WebPConfigPreset(&config, WEBP_PRESET_DEFAULT, static_cast<float>(opts.quality)))
     {
         throw std::runtime_error("version mismatch");
     }
 
     // Add additional tuning
-    if (method >= 0) config.method = method;
+    if (opts.method >= 0) config.method = opts.method;
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-    config.lossless = !!lossless;
-    config.image_hint = static_cast<WebPImageHint>(image_hint);
+    config.lossless = !!opts.lossless;
+    config.image_hint = static_cast<WebPImageHint>(opts.image_hint);
 #else
     #ifdef _MSC_VER
     #pragma NOTE(compiling against webp that does not support lossless flag)
@@ -179,7 +196,7 @@ void save_as_webp(T1& file,
     pic.height = image.height();
     int ok = 0;
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-    pic.use_argb = !!lossless;
+    pic.use_argb = !!opts.lossless;
     // lossless fast track
     if (pic.use_argb)
     {
@@ -206,10 +223,10 @@ void save_as_webp(T1& file,
     {
         // different approach for lossy since ImportYUVAFromRGBA is needed
         // to prepare WebPPicture and working with view pixels is not viable
-        ok = import_image_data(image,pic,alpha);
+        ok = import_image_data(image,pic,opts.alpha);
     }
 #else
-    ok = import_image_data(image,pic,alpha);
+    ok = import_image_data(image,pic,opts.alpha);
 #endif
     if (!ok)
     {
@@ -218,14 +235,12 @@ void save_as_webp(T1& file,
 
     pic.writer = webp_stream_write<T1>;
     pic.custom_ptr = &file;
-
     ok = WebPEncode(&config, &pic);
     WebPPictureFree(&pic);
     if (!ok)
     {
         throw std::runtime_error(webp_encoding_error(pic.error_code));
     }
-
     file.flush();
 }
 }
