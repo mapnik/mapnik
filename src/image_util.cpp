@@ -244,10 +244,10 @@ void handle_png_options(std::string const& type,
 }
 #endif
 
-
 #if defined(HAVE_WEBP)
 void handle_webp_options(std::string const& type,
-                        webp_options & opts)
+                        WebPConfig & config,
+                        bool & alpha)
 {
     if (type == "webp")
     {
@@ -263,10 +263,12 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(8);
                 if (!val.empty())
                 {
-                    if (!mapnik::util::string2double(val,opts.quality) || opts.quality < 0.0 || opts.quality > 100.0)
+                    double quality = 90;
+                    if (!mapnik::util::string2double(val,quality) || quality < 0.0 || quality > 100.0)
                     {
                         throw ImageWriterException("invalid webp quality: '" + val + "'");
                     }
+                    config.quality = static_cast<float>(quality);
                 }
             }
             else if (boost::algorithm::starts_with(t, "method="))
@@ -274,18 +276,19 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(7);
                 if (!val.empty())
                 {
-                    if (!mapnik::util::string2int(val,opts.method) || opts.method < 0 || opts.method > 6)
+                    if (!mapnik::util::string2int(val,config.method) || config.method < 0 || config.method > 6)
                     {
                         throw ImageWriterException("invalid webp method: '" + val + "'");
                     }
                 }
             }
+        #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
             else if (boost::algorithm::starts_with(t, "lossless="))
             {
                 std::string val = t.substr(9);
                 if (!val.empty())
                 {
-                    if (!mapnik::util::string2int(val,opts.lossless) || opts.lossless < 0 || opts.lossless > 1)
+                    if (!mapnik::util::string2int(val,config.lossless) || config.lossless < 0 || config.lossless > 1)
                     {
                         throw ImageWriterException("invalid webp lossless: '" + val + "'");
                     }
@@ -296,18 +299,27 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(11);
                 if (!val.empty())
                 {
-                    if (!mapnik::util::string2int(val,opts.image_hint) || opts.image_hint < 0 || opts.image_hint > 3)
+                    int image_hint = 0;
+                    if (!mapnik::util::string2int(val,image_hint) || image_hint < 0 || image_hint > 3)
                     {
                         throw ImageWriterException("invalid webp image_hint: '" + val + "'");
                     }
+                    config.image_hint = static_cast<WebPImageHint>(image_hint);
                 }
             }
+        #else
+                #ifdef _MSC_VER
+                #pragma NOTE(compiling against webp that does not support the image_hint and lossless flags)
+                #else
+                #warning "compiling against webp that does not support the image_hint and lossless flags"
+                #endif
+        #endif
             else if (boost::algorithm::starts_with(t, "alpha="))
             {
                 std::string val = t.substr(6);
                 if (!val.empty())
                 {
-                    if (!mapnik::util::string2bool(val,opts.alpha))
+                    if (!mapnik::util::string2bool(val,alpha))
                     {
                         throw ImageWriterException("invalid webp alpha: '" + val + "'");
                     }
@@ -420,9 +432,23 @@ void save_to_stream(T const& image,
         else if (boost::algorithm::starts_with(t, "webp"))
         {
 #if defined(HAVE_WEBP)
-            webp_options opts;
-            handle_webp_options(t,opts);
-            save_as_webp(stream, image, opts);
+            WebPConfig config;
+            if (!WebPConfigPreset(&config, WEBP_PRESET_DEFAULT, 90))
+            {
+                throw std::runtime_error("version mismatch");
+            }
+            /*
+              WEBP_HINT_DEFAULT = 0,  // default preset.
+              WEBP_HINT_PICTURE,      // digital picture, like portrait, inner shot
+              WEBP_HINT_PHOTO,        // outdoor photograph, with natural lighting
+              WEBP_HINT_GRAPH,        // Discrete tone image (graph, map-tile etc).
+              WEBP_HINT_LAST
+            */
+            config.image_hint = WEBP_HINT_GRAPH;
+            config.method = 3;
+            bool alpha = true;
+            handle_webp_options(t,config,alpha);
+            save_as_webp(stream,image,config,alpha);
 #else
             throw ImageWriterException("webp output is not enabled in your build of Mapnik");
 #endif
