@@ -298,16 +298,24 @@ void handle_webp_options(std::string const& type,
                     }
                 }
             }
-        #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
             else if (boost::algorithm::starts_with(t, "lossless="))
             {
                 std::string val = t.substr(9);
                 if (!val.empty())
                 {
+                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
                     if (!mapnik::util::string2int(val,config.lossless) || config.lossless < 0 || config.lossless > 1)
                     {
                         throw ImageWriterException("invalid webp lossless: '" + val + "'");
                     }
+                    #else
+                        #ifdef _MSC_VER
+                          #pragma NOTE(compiling against webp that does not support the lossless flag)
+                        #else
+                          #warning "compiling against webp that does not support the lossless flag"
+                        #endif
+                    throw ImageWriterException("your webp version does not support the lossless option");
+                    #endif
                 }
             }
             else if (boost::algorithm::starts_with(t, "image_hint="))
@@ -315,21 +323,23 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(11);
                 if (!val.empty())
                 {
+                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
                     int image_hint = 0;
                     if (!mapnik::util::string2int(val,image_hint) || image_hint < 0 || image_hint > 3)
                     {
                         throw ImageWriterException("invalid webp image_hint: '" + val + "'");
                     }
                     config.image_hint = static_cast<WebPImageHint>(image_hint);
+                    #else
+                        #ifdef _MSC_VER
+                          #pragma NOTE(compiling against webp that does not support the image_hint flag)
+                        #else
+                          #warning "compiling against webp that does not support the image_hint flag"
+                        #endif
+                    throw ImageWriterException("your webp version does not support the image_hint option");
+                    #endif
                 }
             }
-        #else
-                #ifdef _MSC_VER
-                #pragma NOTE(compiling against webp that does not support the image_hint and lossless flags)
-                #else
-                #warning "compiling against webp that does not support the image_hint and lossless flags"
-                #endif
-        #endif
             else if (boost::algorithm::starts_with(t, "alpha="))
             {
                 std::string val = t.substr(6);
@@ -447,10 +457,19 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(16);
                 if (!val.empty())
                 {
+                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
                     if (!mapnik::util::string2int(val,config.alpha_filtering))
                     {
                         throw ImageWriterException("invalid webp alpha_filtering: '" + val + "'");
                     }
+                    #else
+                        #ifdef _MSC_VER
+                          #pragma NOTE(compiling against webp that does not support the alpha_filtering flag)
+                        #else
+                          #warning "compiling against webp that does not support the alpha_filtering flag"
+                        #endif
+                    throw ImageWriterException("your webp version does not support the alpha_filtering option");
+                    #endif
                 }
             }
             else if (boost::algorithm::starts_with(t, "alpha_quality="))
@@ -458,10 +477,19 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(14);
                 if (!val.empty())
                 {
+                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
                     if (!mapnik::util::string2int(val,config.alpha_quality))
                     {
                         throw ImageWriterException("invalid webp alpha_quality: '" + val + "'");
                     }
+                    #else
+                        #ifdef _MSC_VER
+                          #pragma NOTE(compiling against webp that does not support the alpha_quality flag)
+                        #else
+                          #warning "compiling against webp that does not support the alpha_quality flag"
+                        #endif
+                    throw ImageWriterException("your webp version does not support the alpha_quality option");
+                    #endif
                 }
             }
             else if (boost::algorithm::starts_with(t, "pass="))
