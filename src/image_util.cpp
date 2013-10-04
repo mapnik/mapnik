@@ -620,19 +620,12 @@ void save_to_stream(T const& image,
         {
 #if defined(HAVE_WEBP)
             WebPConfig config;
-            if (!WebPConfigPreset(&config, WEBP_PRESET_DEFAULT, 90))
+            // Default values set here will be lossless=0 and quality=75 (as least as of webp v0.3.1)
+            if (!WebPConfigInit(&config))
             {
                 throw std::runtime_error("version mismatch");
             }
-            /*
-              WEBP_HINT_DEFAULT = 0,  // default preset.
-              WEBP_HINT_PICTURE,      // digital picture, like portrait, inner shot
-              WEBP_HINT_PHOTO,        // outdoor photograph, with natural lighting
-              WEBP_HINT_GRAPH,        // Discrete tone image (graph, map-tile etc).
-              WEBP_HINT_LAST
-            */
-            config.image_hint = WEBP_HINT_GRAPH;
-            config.method = 3;
+            // see for more details: https://github.com/mapnik/mapnik/wiki/Image-IO#webp-output-options
             bool alpha = true;
             handle_webp_options(t,config,alpha);
             save_as_webp(stream,image,config,alpha);

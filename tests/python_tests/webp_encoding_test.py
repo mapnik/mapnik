@@ -19,6 +19,8 @@ if mapnik.has_webp():
 
     opts = [
         'webp',
+        'webp:method=0',
+        'webp:method=6',
         'webp:quality=64',
         'webp:alpha=false',
         'webp:partitions=3',
@@ -113,6 +115,7 @@ if mapnik.has_webp():
                 continue
             if mapnik.Image.open(actual).tostring() != expected_bytes:
                 fails.append('%s (actual) not == to %s (expected)' % (actual,expected))
+        # disabled to avoid failures on ubuntu when using old webp packages
         #eq_(fails,[],'\n'+'\n'.join(fails))
 
     def test_transparency_levels():
@@ -128,7 +131,7 @@ if mapnik.has_webp():
             for x in range(im.width()/2,im.width()):
                 im.set_pixel(x,y,c3)
 
-        t0 = tmp_dir + 'white0.webp'
+        t0 = tmp_dir + 'white0-actual.webp'
 
         # octree
         format = 'webp'
@@ -144,6 +147,7 @@ if mapnik.has_webp():
             # this will happen if libweb is old, since it cannot open images created by more recent webp
             print 'warning, cannot open webp expected image (your libwebp is likely too old)'
             return
+        # disabled to avoid failures on ubuntu when using old webp packages
         #eq_(t0_len,len(expected_bytes))
 
 
