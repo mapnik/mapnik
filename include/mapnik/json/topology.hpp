@@ -77,7 +77,7 @@ struct polygon
 
 struct multi_polygon
 {
-    std::vector<polygon> polygons;//FIXME
+    std::vector<std::vector<std::vector<index_type> > > polygons;
     boost::optional<properties> props;
 };
 
@@ -183,7 +183,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     mapnik::topojson::multi_polygon,
-    (std::vector<mapnik::topojson::polygon>, polygons)
+    (std::vector<std::vector<std::vector<mapnik::topojson::index_type> > >, polygons)
     (boost::optional<mapnik::topojson::properties>, props)
     )
 

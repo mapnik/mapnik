@@ -84,8 +84,11 @@ private:
     qi::rule<Iterator, space_type, mapnik::topojson::bounding_box()> bbox;
     qi::rule<Iterator, space_type, mapnik::topojson::geometry()> geometry;
     qi::rule<Iterator, space_type, mapnik::topojson::point()> point;
+    qi::rule<Iterator, space_type, mapnik::topojson::multi_point()> multi_point;
     qi::rule<Iterator, space_type, mapnik::topojson::linestring()> linestring;
+    qi::rule<Iterator, space_type, mapnik::topojson::multi_linestring()> multi_linestring;
     qi::rule<Iterator, space_type, mapnik::topojson::polygon()> polygon;
+    qi::rule<Iterator, space_type, mapnik::topojson::multi_polygon()> multi_polygon;
     qi::rule<Iterator, space_type, std::vector<index_type>()> ring;
 
     // properties

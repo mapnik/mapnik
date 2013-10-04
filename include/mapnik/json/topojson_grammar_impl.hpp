@@ -118,12 +118,26 @@ topojson_grammar<Iterator>::topojson_grammar()
                                  >> lit(']') >> lit('}') >> lit('}')
         ;
 
-    geometry = point | linestring | polygon | omit[object]
+    geometry =
+        point |
+        linestring |
+        polygon |
+        multi_point |
+        multi_linestring |
+        multi_polygon |
+        omit[object]
         ;
 
     point = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"Point\"")
         >> ((lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinate) ^ (lit(',') >> properties))
+        >> lit('}')
+        ;
+
+    multi_point = lit('{')
+        >> lit("\"type\"") >> lit(':') >> lit("\"MultiPoint\"")
+        >> ((lit(',') >> lit("\"coordinates\"") >> lit(':')
+             >> lit('[') >> -(coordinate % lit(',')) >> lit(']')) ^ (lit(',') >> properties))
         >> lit('}')
         ;
 
@@ -133,11 +147,30 @@ topojson_grammar<Iterator>::topojson_grammar()
         >> lit('}')
         ;
 
+    multi_linestring = lit('{')
+        >> lit("\"type\"") >> lit(':') >> lit("\"MultiLineString\"")
+        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[')
+             >> -((lit('[') >> int_ >> lit(']')) % lit(',')) >> lit(']')) ^ (lit(',') >> properties))
+        >> lit('}')
+        ;
+
     polygon = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"Polygon\"")
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[') >> -(ring % lit(',')) >> lit(']')) ^ (lit(',') >> properties))
+        >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
+             >> lit('[') >> -(ring % lit(',')) >> lit(']'))
+            ^ (lit(',') >> properties))
         >> lit('}')
             ;
+
+    multi_polygon = lit('{')
+        >> lit("\"type\"") >> lit(':') >> lit("\"MultiPolygon\"")
+        >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
+             >> lit('[')
+             >> -((lit('[') >> -(ring % lit(',')) >> lit(']')) % lit(','))
+             >> lit(']')) ^ (lit(',') >> properties))
+            >> lit('}')
+        ;
+
 
     ring = lit('[') >> -(int_ % lit(',')) >> lit(']')
         ;
@@ -168,8 +201,10 @@ topojson_grammar<Iterator>::topojson_grammar()
     coordinate.name("coordinate");
 
     point.name("point");
+    multi_point.name("multi_point");
     linestring.name("linestring");
     polygon.name("polygon");
+    multi_polygon.name("multi_polygon");
 
     on_error<fail>
         (
