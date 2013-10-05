@@ -129,127 +129,137 @@ void save_to_file(T const& image,
 }
 
 #if defined(HAVE_PNG)
+
 void handle_png_options(std::string const& type,
-                        int * colors,
-                        int * compression,
-                        int * strategy,
-                        int * trans_mode,
-                        double * gamma,
-                        bool * use_octree,
-                        bool * use_miniz)
+                        png_options & opts)
 {
-    if (type == "png" || type == "png24" || type == "png32")
+    if (type == "png" || type == "png8" || type == "png256")
     {
-        // Shortcut when the user didn't specify any flags after the colon.
-        // Paletted images specify "png8 or png256".
-        *colors = -1;
+        // stick with defaults
         return;
     }
-    // TODO - convert to spirit parser
-    if (type.length() > 6){
-        boost::char_separator<char> sep(":");
-        boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
-        for (std::string const& t : tokens)
+    else if (type == "png24" || type == "png32")
+    {
+        opts.paletted = false;
+        return;
+    }
+    boost::char_separator<char> sep(":");
+    boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
+    bool set_colors = false;
+    bool set_gamma = false;
+    for (std::string const& t : tokens)
+    {
+        if (t == "png" || t == "png8")
         {
-            if (t == "png" || t == "png24" || t == "png32")
+            opts.paletted = true;
+        }
+        else if (t == "png24" || t == "png32")
+        {
+            opts.paletted = false;
+        }
+        else if (t == "m=o")
+        {
+            opts.use_hextree = false;
+        }
+        else if (t == "m=h")
+        {
+            opts.use_hextree = true;
+        }
+        else if (t == "e=miniz")
+        {
+            opts.use_miniz = true;
+        }
+        else if (boost::algorithm::starts_with(t, "c="))
+        {
+            set_colors = true;
+            if (!mapnik::util::string2int(t.substr(2),opts.colors) || opts.colors < 1 || opts.colors > 256)
             {
-                *colors = -1;
-            }
-            else if (t == "m=h")
-            {
-                *use_octree = false;
-            }
-            else if (t == "m=o")
-            {
-                *use_octree = true;
-            }
-            else if (t == "e=miniz")
-            {
-                *use_miniz = true;
-            }
-            else if (boost::algorithm::starts_with(t, "c="))
-            {
-                if (*colors < 0)
-                    throw ImageWriterException("invalid color parameter: unavailable for true color images");
-
-                if (!mapnik::util::string2int(t.substr(2),*colors) || *colors < 1 || *colors > 256)
-                    throw ImageWriterException("invalid color parameter: " + t.substr(2));
-            }
-            else if (boost::algorithm::starts_with(t, "t="))
-            {
-                if (!mapnik::util::string2int(t.substr(2),*trans_mode) || *trans_mode < 0 || *trans_mode > 2)
-                    throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
-            }
-            else if (boost::algorithm::starts_with(t, "g="))
-            {
-                if (*colors < 0)
-                    throw ImageWriterException("invalid gamma parameter: unavailable for true color images");
-                if (!mapnik::util::string2double(t.substr(2),*gamma) || *gamma < 0)
-                {
-                    throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
-                }
-            }
-            else if (boost::algorithm::starts_with(t, "z="))
-            {
-                /*
-                  #define Z_NO_COMPRESSION         0
-                  #define Z_BEST_SPEED             1
-                  #define Z_BEST_COMPRESSION       9
-                  #define Z_DEFAULT_COMPRESSION  (-1)
-                */
-                if (!mapnik::util::string2int(t.substr(2),*compression)
-                    || *compression < Z_DEFAULT_COMPRESSION
-                    || *compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
-                {
-                    throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
-                }
-            }
-            else if (boost::algorithm::starts_with(t, "s="))
-            {
-                std::string s = t.substr(2);
-                if (s == "default")
-                {
-                    *strategy = Z_DEFAULT_STRATEGY;
-                }
-                else if (s == "filtered")
-                {
-                    *strategy = Z_FILTERED;
-                }
-                else if (s == "huff")
-                {
-                    *strategy = Z_HUFFMAN_ONLY;
-                }
-                else if (s == "rle")
-                {
-                    *strategy = Z_RLE;
-                }
-                else if (s == "fixed")
-                {
-                    *strategy = Z_FIXED;
-                }
-                else
-                {
-                    throw ImageWriterException("invalid compression strategy parameter: " + s);
-                }
+                throw ImageWriterException("invalid color parameter: " + t.substr(2));
             }
         }
-        if ((*use_miniz == false) && *compression > Z_BEST_COMPRESSION)
+        else if (boost::algorithm::starts_with(t, "t="))
         {
-            throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
+            if (!mapnik::util::string2int(t.substr(2),opts.trans_mode) || opts.trans_mode < 0 || opts.trans_mode > 2)
+            {
+                throw ImageWriterException("invalid trans_mode parameter: " + t.substr(2));
+            }
         }
+        else if (boost::algorithm::starts_with(t, "g="))
+        {
+            set_gamma = true;
+            if (!mapnik::util::string2double(t.substr(2),opts.gamma) || opts.gamma < 0)
+            {
+                throw ImageWriterException("invalid gamma parameter: " + t.substr(2));
+            }
+        }
+        else if (boost::algorithm::starts_with(t, "z="))
+        {
+            /*
+              #define Z_NO_COMPRESSION         0
+              #define Z_BEST_SPEED             1
+              #define Z_BEST_COMPRESSION       9
+              #define Z_DEFAULT_COMPRESSION  (-1)
+            */
+            if (!mapnik::util::string2int(t.substr(2),opts.compression)
+                || opts.compression < Z_DEFAULT_COMPRESSION
+                || opts.compression > 10) // use 10 here rather than Z_BEST_COMPRESSION (9) to allow for MZ_UBER_COMPRESSION
+            {
+                throw ImageWriterException("invalid compression parameter: " + t.substr(2) + " (only -1 through 10 are valid)");
+            }
+        }
+        else if (boost::algorithm::starts_with(t, "s="))
+        {
+            std::string s = t.substr(2);
+            if (s == "default")
+            {
+                opts.strategy = Z_DEFAULT_STRATEGY;
+            }
+            else if (s == "filtered")
+            {
+                opts.strategy = Z_FILTERED;
+            }
+            else if (s == "huff")
+            {
+                opts.strategy = Z_HUFFMAN_ONLY;
+            }
+            else if (s == "rle")
+            {
+                opts.strategy = Z_RLE;
+            }
+            else if (s == "fixed")
+            {
+                opts.strategy = Z_FIXED;
+            }
+            else
+            {
+                throw ImageWriterException("invalid compression strategy parameter: " + s);
+            }
+        }
+        else
+        {
+            throw ImageWriterException("unhandled png option: " + t);
+        }
+    }
+    // validation
+    if (!opts.paletted && set_colors)
+    {
+        throw ImageWriterException("invalid color parameter: unavailable for true color (non-paletted) images");
+    }
+    if (!opts.paletted && set_gamma)
+    {
+        throw ImageWriterException("invalid gamma parameter: unavailable for true color (non-paletted) images");
+    }
+    if ((opts.use_miniz == false) && opts.compression > Z_BEST_COMPRESSION)
+    {
+        throw ImageWriterException("invalid compression value: (only -1 through 9 are valid)");
     }
 }
 #endif
 
-
 #if defined(HAVE_WEBP)
 void handle_webp_options(std::string const& type,
-                        double & quality,
-                        int & method,
-                        int & lossless,
-                        int & image_hint,
-                        bool & alpha
-                        )
+                        WebPConfig & config,
+                        bool & alpha)
 {
     if (type == "webp")
     {
@@ -260,15 +270,21 @@ void handle_webp_options(std::string const& type,
         boost::tokenizer< boost::char_separator<char> > tokens(type, sep);
         for (auto const& t : tokens)
         {
-            if (boost::algorithm::starts_with(t, "quality="))
+            if (t == "webp")
+            {
+                continue;
+            }
+            else if (boost::algorithm::starts_with(t, "quality="))
             {
                 std::string val = t.substr(8);
                 if (!val.empty())
                 {
+                    double quality = 90;
                     if (!mapnik::util::string2double(val,quality) || quality < 0.0 || quality > 100.0)
                     {
                         throw ImageWriterException("invalid webp quality: '" + val + "'");
                     }
+                    config.quality = static_cast<float>(quality);
                 }
             }
             else if (boost::algorithm::starts_with(t, "method="))
@@ -276,7 +292,7 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(7);
                 if (!val.empty())
                 {
-                    if (!mapnik::util::string2int(val,method) || method < 0 || method > 6)
+                    if (!mapnik::util::string2int(val,config.method) || config.method < 0 || config.method > 6)
                     {
                         throw ImageWriterException("invalid webp method: '" + val + "'");
                     }
@@ -287,10 +303,19 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(9);
                 if (!val.empty())
                 {
-                    if (!mapnik::util::string2int(val,lossless) || lossless < 0 || lossless > 1)
+                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
+                    if (!mapnik::util::string2int(val,config.lossless) || config.lossless < 0 || config.lossless > 1)
                     {
                         throw ImageWriterException("invalid webp lossless: '" + val + "'");
                     }
+                    #else
+                        #ifdef _MSC_VER
+                          #pragma NOTE(compiling against webp that does not support the lossless flag)
+                        #else
+                          #warning "compiling against webp that does not support the lossless flag"
+                        #endif
+                    throw ImageWriterException("your webp version does not support the lossless option");
+                    #endif
                 }
             }
             else if (boost::algorithm::starts_with(t, "image_hint="))
@@ -298,10 +323,21 @@ void handle_webp_options(std::string const& type,
                 std::string val = t.substr(11);
                 if (!val.empty())
                 {
+                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
+                    int image_hint = 0;
                     if (!mapnik::util::string2int(val,image_hint) || image_hint < 0 || image_hint > 3)
                     {
                         throw ImageWriterException("invalid webp image_hint: '" + val + "'");
                     }
+                    config.image_hint = static_cast<WebPImageHint>(image_hint);
+                    #else
+                        #ifdef _MSC_VER
+                          #pragma NOTE(compiling against webp that does not support the image_hint flag)
+                        #else
+                          #warning "compiling against webp that does not support the image_hint flag"
+                        #endif
+                    throw ImageWriterException("your webp version does not support the image_hint option");
+                    #endif
                 }
             }
             else if (boost::algorithm::starts_with(t, "alpha="))
@@ -314,6 +350,195 @@ void handle_webp_options(std::string const& type,
                         throw ImageWriterException("invalid webp alpha: '" + val + "'");
                     }
                 }
+            }
+            else if (boost::algorithm::starts_with(t, "target_size="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.target_size))
+                    {
+                        throw ImageWriterException("invalid webp target_size: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "target_psnr="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    double psnr = 0;
+                    if (!mapnik::util::string2double(val,psnr))
+                    {
+                        throw ImageWriterException("invalid webp target_psnr: '" + val + "'");
+                    }
+                    config.target_PSNR = psnr;
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "segments="))
+            {
+                std::string val = t.substr(9);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.segments))
+                    {
+                        throw ImageWriterException("invalid webp segments: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "sns_strength="))
+            {
+                std::string val = t.substr(13);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.sns_strength))
+                    {
+                        throw ImageWriterException("invalid webp sns_strength: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "filter_strength="))
+            {
+                std::string val = t.substr(16);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.filter_strength))
+                    {
+                        throw ImageWriterException("invalid webp filter_strength: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "filter_sharpness="))
+            {
+                std::string val = t.substr(17);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.filter_sharpness))
+                    {
+                        throw ImageWriterException("invalid webp filter_sharpness: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "filter_type="))
+            {
+                std::string val = t.substr(12);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.filter_type))
+                    {
+                        throw ImageWriterException("invalid webp filter_type: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "autofilter="))
+            {
+                std::string val = t.substr(11);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.autofilter))
+                    {
+                        throw ImageWriterException("invalid webp autofilter: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "alpha_compression="))
+            {
+                std::string val = t.substr(18);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.alpha_compression))
+                    {
+                        throw ImageWriterException("invalid webp alpha_compression: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "alpha_filtering="))
+            {
+                std::string val = t.substr(16);
+                if (!val.empty())
+                {
+                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
+                    if (!mapnik::util::string2int(val,config.alpha_filtering))
+                    {
+                        throw ImageWriterException("invalid webp alpha_filtering: '" + val + "'");
+                    }
+                    #else
+                        #ifdef _MSC_VER
+                          #pragma NOTE(compiling against webp that does not support the alpha_filtering flag)
+                        #else
+                          #warning "compiling against webp that does not support the alpha_filtering flag"
+                        #endif
+                    throw ImageWriterException("your webp version does not support the alpha_filtering option");
+                    #endif
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "alpha_quality="))
+            {
+                std::string val = t.substr(14);
+                if (!val.empty())
+                {
+                    #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1 // >= v0.1.99 / 0x0100
+                    if (!mapnik::util::string2int(val,config.alpha_quality))
+                    {
+                        throw ImageWriterException("invalid webp alpha_quality: '" + val + "'");
+                    }
+                    #else
+                        #ifdef _MSC_VER
+                          #pragma NOTE(compiling against webp that does not support the alpha_quality flag)
+                        #else
+                          #warning "compiling against webp that does not support the alpha_quality flag"
+                        #endif
+                    throw ImageWriterException("your webp version does not support the alpha_quality option");
+                    #endif
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "pass="))
+            {
+                std::string val = t.substr(5);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.pass))
+                    {
+                        throw ImageWriterException("invalid webp pass: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "preprocessing="))
+            {
+                std::string val = t.substr(14);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.preprocessing))
+                    {
+                        throw ImageWriterException("invalid webp preprocessing: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "partitions="))
+            {
+                std::string val = t.substr(11);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.partitions))
+                    {
+                        throw ImageWriterException("invalid webp partitions: '" + val + "'");
+                    }
+                }
+            }
+            else if (boost::algorithm::starts_with(t, "partition_limit="))
+            {
+                std::string val = t.substr(16);
+                if (!val.empty())
+                {
+                    if (!mapnik::util::string2int(val,config.partition_limit))
+                    {
+                        throw ImageWriterException("invalid webp partition_limit: '" + val + "'");
+                    }
+                }
+            }
+            else
+            {
+                throw ImageWriterException("unhandled webp option: " + t);
             }
         }
     }
@@ -333,38 +558,15 @@ void save_to_stream(T const& image,
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
 #if defined(HAVE_PNG)
-            int colors  = 256;
-            int compression = Z_DEFAULT_COMPRESSION;
-            int strategy = Z_DEFAULT_STRATEGY;
-            int trans_mode = -1;
-            double gamma = -1;
-            bool use_octree = true;
-            bool use_miniz = false;
-
-            handle_png_options(t,
-                               &colors,
-                               &compression,
-                               &strategy,
-                               &trans_mode,
-                               &gamma,
-                               &use_octree,
-                               &use_miniz);
-
             if (palette.valid())
             {
-                save_as_png8_pal(stream, image, palette, compression, strategy, use_miniz);
-            }
-            else if (colors < 0)
-            {
-                save_as_png(stream, image, compression, strategy, trans_mode, use_miniz);
-            }
-            else if (use_octree)
-            {
-                save_as_png8_oct(stream, image, colors, compression, strategy, trans_mode, use_miniz);
+                png_options opts;
+                handle_png_options(t,opts);
+                save_as_png8_pal(stream, image, palette, opts);
             }
             else
             {
-                save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma, use_miniz);
+                save_to_stream(image,stream,type);
             }
 #else
             throw ImageWriterException("png output is not enabled in your build of Mapnik");
@@ -396,34 +598,22 @@ void save_to_stream(T const& image,
         if (t == "png" || boost::algorithm::starts_with(t, "png"))
         {
 #if defined(HAVE_PNG)
-            int colors  = 256;
-            int compression = Z_DEFAULT_COMPRESSION; // usually mapped to z=6 in zlib
-            int strategy = Z_DEFAULT_STRATEGY;
-            int trans_mode = -1;
-            double gamma = -1;
-            bool use_octree = true;
-            bool use_miniz = false;
-
-            handle_png_options(t,
-                               &colors,
-                               &compression,
-                               &strategy,
-                               &trans_mode,
-                               &gamma,
-                               &use_octree,
-                               &use_miniz);
-
-            if (colors < 0)
+            png_options opts;
+            handle_png_options(t,opts);
+            if (opts.paletted)
             {
-                save_as_png(stream, image, compression, strategy, trans_mode, use_miniz);
-            }
-            else if (use_octree)
-            {
-                save_as_png8_oct(stream, image, colors, compression, strategy, trans_mode, use_miniz);
+                if (opts.use_hextree)
+                {
+                    save_as_png8_hex(stream, image, opts);
+                }
+                else
+                {
+                    save_as_png8_oct(stream, image, opts);
+                }
             }
             else
             {
-                save_as_png8_hex(stream, image, colors, compression, strategy, trans_mode, gamma, use_miniz);
+                save_as_png(stream, image, opts);
             }
 #else
             throw ImageWriterException("png output is not enabled in your build of Mapnik");
@@ -457,20 +647,16 @@ void save_to_stream(T const& image,
         else if (boost::algorithm::starts_with(t, "webp"))
         {
 #if defined(HAVE_WEBP)
-            double quality = 90.0; // 0 lowest, 100 highest
-            int method = 3; // 0 if fastest, 6 slowest
-            int lossless = 0; // Lossless encoding (0=lossy(default), 1=lossless).
-            int image_hint = 3; // used when lossless=1
+            WebPConfig config;
+            // Default values set here will be lossless=0 and quality=75 (as least as of webp v0.3.1)
+            if (!WebPConfigInit(&config))
+            {
+                throw std::runtime_error("version mismatch");
+            }
+            // see for more details: https://github.com/mapnik/mapnik/wiki/Image-IO#webp-output-options
             bool alpha = true;
-            /*
-              WEBP_HINT_DEFAULT = 0,  // default preset.
-              WEBP_HINT_PICTURE,      // digital picture, like portrait, inner shot
-              WEBP_HINT_PHOTO,        // outdoor photograph, with natural lighting
-              WEBP_HINT_GRAPH,        // Discrete tone image (graph, map-tile etc).
-              WEBP_HINT_LAST
-            */
-            handle_webp_options(t,quality,method,lossless, image_hint, alpha);
-            save_as_webp(stream, static_cast<float>(quality), method, lossless, image_hint, alpha, image);
+            handle_webp_options(t,config,alpha);
+            save_as_webp(stream,image,config,alpha);
 #else
             throw ImageWriterException("webp output is not enabled in your build of Mapnik");
 #endif

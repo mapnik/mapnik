@@ -775,6 +775,21 @@ struct filter_visitor : boost::static_visitor<void>
     Src & src_;
 };
 
+struct filter_radius_visitor : boost::static_visitor<void>
+{
+    int & radius_;
+    filter_radius_visitor(int & radius)
+        : radius_(radius) {}
+    template <typename T>
+    void operator () (T const& /*filter*/) {}
+
+    void operator () (agg_stack_blur const& op)
+    {
+        if (op.rx > radius_) radius_ = op.rx;
+        if (op.ry > radius_) radius_ = op.ry;
+    }
+};
+
 }}
 
 #endif // MAPNIK_IMAGE_FILTER_HPP

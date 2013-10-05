@@ -123,17 +123,19 @@ private:
     box2d<double> extent_;
     double offset_x_;
     double offset_y_;
+    int offset_;
     double sx_;
     double sy_;
 
 public:
     CoordTransform(int width, int height, const box2d<double>& extent,
-                   double offset_x = 0, double offset_y = 0)
+                   double offset_x = 0.0, double offset_y = 0.0)
         : width_(width),
           height_(height),
           extent_(extent),
           offset_x_(offset_x),
           offset_y_(offset_y),
+          offset_(0),
           sx_(1.0),
           sy_(1.0)
     {
@@ -141,6 +143,26 @@ public:
             sx_ = static_cast<double>(width_) / extent_.width();
         if (extent_.height() > 0)
             sy_ = static_cast<double>(height_) / extent_.height();
+    }
+
+    inline int offset() const
+    {
+        return offset_;
+    }
+
+    inline void set_offset(int offset)
+    {
+        offset_ = offset;
+    }
+
+    inline double offset_x() const
+    {
+        return offset_x_;
+    }
+
+    inline double offset_y() const
+    {
+        return offset_y_;
     }
 
     inline int width() const
@@ -165,14 +187,14 @@ public:
 
     inline void forward(double *x, double *y) const
     {
-        *x = (*x - extent_.minx()) * sx_ - offset_x_;
-        *y = (extent_.maxy() - *y) * sy_ - offset_y_;
+        *x = (*x - extent_.minx()) * sx_ - (offset_x_ - offset_);
+        *y = (extent_.maxy() - *y) * sy_ - (offset_y_ - offset_);
     }
 
     inline void backward(double *x, double *y) const
     {
-        *x = extent_.minx() + (*x + offset_x_) / sx_;
-        *y = extent_.maxy() - (*y + offset_y_) / sy_;
+        *x = extent_.minx() + (*x + (offset_x_ - offset_)) / sx_;
+        *y = extent_.maxy() - (*y + (offset_y_ - offset_)) / sy_;
     }
 
     inline coord2d& forward(coord2d& c) const

@@ -45,7 +45,7 @@ void  agg_renderer<T>::process(shield_symbolizer const& sym,
             width_, height_,
             scale_factor_,
             t_, font_manager_, *detector_,
-            query_extent_);
+            clipping_extent());
 
     text_renderer<T> ren(*current_buffer_,
                          font_manager_,

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map[]>
+<Map background-color="#b8dee6" buffer-size="256" maximum-extent="-20037508.34,-20037508.34,20037508.34,20037508.34">
+
+  <Style name="countries-over" filter-mode="first">
+    <Rule>
+      <PolygonSymbolizer fill="rgba(255, 255, 255, 0.65)" />
+    </Rule>
+  </Style>
+  <Style name="countries" filter-mode="first" image-filters="agg-stack-blur(15,15)">
+    <Rule>
+      <PolygonSymbolizer fill="#ffffff" gamma="0" />
+    </Rule>
+  </Style>
+  <Style name="countries-outline" filter-mode="first" image-filters="agg-stack-blur(200,200)">
+    <Rule>
+      <LineSymbolizer stroke="#000000" stroke-width="20" stroke-linejoin="round" />
+    </Rule>
+  </Style>
+  <Layer name="world"
+    >
+      <StyleName>countries-outline</StyleName>
+      <StyleName>countries</StyleName>
+      <StyleName>countries-over</StyleName>
+      <Datasource>
+          <Parameter name="file">../../data/shp/ne_110m_admin_0_countries.shp</Parameter>
+          <Parameter name="type">shape</Parameter>
+      </Datasource>
+  </Layer>
+
+</Map>

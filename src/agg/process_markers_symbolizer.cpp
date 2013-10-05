@@ -139,7 +139,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                       snap_pixels);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(clipping_extent(), rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -179,7 +179,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                       snap_pixels);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(clipping_extent(), rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -216,7 +216,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                   true /*snap rasters no matter what*/);
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(query_extent_, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                    converter(clipping_extent(), rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
 
                 if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                 {

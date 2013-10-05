@@ -70,11 +70,11 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, double scale_factor, uns
       pixmap_(pixmap),
       internal_buffer_(),
       current_buffer_(&pixmap),
+      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
-      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
       detector_(std::make_shared<label_collision_detector4>(box2d<double>(-m.buffer_size(), -m.buffer_size(), m.width() + m.buffer_size() ,m.height() + m.buffer_size()))),
@@ -92,11 +92,11 @@ agg_renderer<T>::agg_renderer(Map const& m, request const& req, T & pixmap, doub
       pixmap_(pixmap),
       internal_buffer_(),
       current_buffer_(&pixmap),
+      t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
       style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
-      t_(req.width(),req.height(),req.extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
       detector_(std::make_shared<label_collision_detector4>(box2d<double>(-req.buffer_size(), -req.buffer_size(), req.width() + req.buffer_size() ,req.height() + req.buffer_size()))),
@@ -115,11 +115,11 @@ agg_renderer<T>::agg_renderer(Map const& m, T & pixmap, std::shared_ptr<label_co
       pixmap_(pixmap),
       internal_buffer_(),
       current_buffer_(&pixmap),
+      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       style_level_compositing_(false),
       width_(pixmap_.width()),
       height_(pixmap_.height()),
       scale_factor_(scale_factor),
-      t_(m.width(),m.height(),m.get_current_extent(),offset_x,offset_y),
       font_engine_(),
       font_manager_(font_engine_),
       detector_(detector),
@@ -238,9 +238,27 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
 
     if (style_level_compositing_)
     {
-        if (!internal_buffer_)
+        int radius = 0;
+        mapnik::filter::filter_radius_visitor visitor(radius);
+        for (mapnik::filter::filter_type const& filter_tag : st.image_filters())
         {
-            internal_buffer_ = std::make_shared<buffer_type>(pixmap_.width(),pixmap_.height());
+            boost::apply_visitor(visitor, filter_tag);
+        }
+        if (radius > t_.offset())
+        {
+            t_.set_offset(radius);
+        }
+        int offset = t_.offset();
+        unsigned target_width = width_;
+        unsigned target_height = height_;
+        target_width = width_ + (offset * 2);
+        target_height = height_ + (offset * 2);
+        ras_ptr->clip_box(-int(offset*2),-int(offset*2),target_width,target_height);
+        if (!internal_buffer_ ||
+           (internal_buffer_->width() < target_width ||
+            internal_buffer_->height() < target_height))
+        {
+            internal_buffer_ = std::make_shared<buffer_type>(target_width,target_height);
         }
         else
         {
@@ -250,6 +268,8 @@ void agg_renderer<T>::start_style_processing(feature_type_style const& st)
     }
     else
     {
+        t_.set_offset(0);
+        ras_ptr->clip_box(0,0,width_,height_);
         current_buffer_ = &pixmap_;
     }
 }
@@ -269,14 +289,19 @@ void agg_renderer<T>::end_style_processing(feature_type_style const& st)
                 boost::apply_visitor(visitor, filter_tag);
             }
         }
-
         if (st.comp_op())
         {
-            composite(pixmap_.data(),current_buffer_->data(), *st.comp_op(), st.get_opacity(), 0, 0, false);
+            composite(pixmap_.data(), current_buffer_->data(),
+                      *st.comp_op(), st.get_opacity(),
+                      -t_.offset(),
+                      -t_.offset(), false);
         }
         else if (blend_from || st.get_opacity() < 1)
         {
-            composite(pixmap_.data(),current_buffer_->data(), src_over, st.get_opacity(), 0, 0, false);
+            composite(pixmap_.data(), current_buffer_->data(),
+                      src_over, st.get_opacity(),
+                      -t_.offset(),
+                      -t_.offset(), false);
         }
     }
     // apply any 'direct' image filters

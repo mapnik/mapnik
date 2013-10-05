@@ -138,32 +138,10 @@ inline int import_image_data(image_data_32 const& im,
 
 template <typename T1, typename T2>
 void save_as_webp(T1& file,
-                  float quality,
-                  int method,
-                  int lossless,
-                  int image_hint,
-                  bool alpha,
-                  T2 const& image)
+                  T2 const& image,
+                  WebPConfig const& config,
+                  bool alpha)
 {
-    WebPConfig config;
-    if (!WebPConfigPreset(&config, WEBP_PRESET_DEFAULT, quality))
-    {
-        throw std::runtime_error("version mismatch");
-    }
-
-    // Add additional tuning
-    if (method >= 0) config.method = method;
-#if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-    config.lossless = !!lossless;
-    config.image_hint = static_cast<WebPImageHint>(image_hint);
-#else
-    #ifdef _MSC_VER
-    #pragma NOTE(compiling against webp that does not support lossless flag)
-    #else
-    #warning "compiling against webp that does not support lossless flag"
-    #endif
-#endif
-
     bool valid = WebPValidateConfig(&config);
     if (!valid)
     {
@@ -179,7 +157,7 @@ void save_as_webp(T1& file,
     pic.height = image.height();
     int ok = 0;
 #if (WEBP_ENCODER_ABI_VERSION >> 8) >= 1
-    pic.use_argb = !!lossless;
+    pic.use_argb = !!config.lossless;
     // lossless fast track
     if (pic.use_argb)
     {
@@ -218,14 +196,12 @@ void save_as_webp(T1& file,
 
     pic.writer = webp_stream_write<T1>;
     pic.custom_ptr = &file;
-
     ok = WebPEncode(&config, &pic);
     WebPPictureFree(&pic);
     if (!ok)
     {
         throw std::runtime_error(webp_encoding_error(pic.error_code));
     }
-
     file.flush();
 }
 }

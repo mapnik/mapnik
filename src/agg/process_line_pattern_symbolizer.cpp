@@ -127,28 +127,28 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     agg::trans_affine tr;
     evaluate_transform(tr, feature, sym.get_transform());
 
-    box2d<double> clipping_extent = query_extent_;
+    box2d<double> clip_box = clipping_extent();
     if (sym.clip())
     {
         double padding = (double)(query_extent_.width()/pixmap_.width());
         double half_stroke = (*mark)->width()/2.0;
         if (half_stroke > 1)
             padding *= half_stroke;
-        if (fabs(sym.offset()) > 0)
-            padding *= fabs(sym.offset()) * 1.2;
+        if (std::fabs(sym.offset()) > 0)
+            padding *= std::fabs(sym.offset()) * 1.2;
         padding *= scale_factor_;
-        clipping_extent.pad(padding);
+        clip_box.pad(padding);
     }
 
     typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-        converter(clipping_extent,ras,sym,t_,prj_trans,tr,scale_factor_);
+        converter(clip_box,ras,sym,t_,prj_trans,tr,scale_factor_);
 
     if (sym.clip()) converter.set<clip_line_tag>(); //optional clip (default: true)
     converter.set<transform_tag>(); //always transform
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
-    if (fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     for (geometry_type & geom : feature.paths())
