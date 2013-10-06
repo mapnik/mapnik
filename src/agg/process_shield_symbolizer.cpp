@@ -26,6 +26,8 @@
 #include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/text/renderer.hpp>
 
+#include <boost/foreach.hpp>
+
 namespace mapnik {
 
 template <typename T>
