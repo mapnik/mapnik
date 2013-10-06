@@ -785,8 +785,8 @@ struct filter_radius_visitor : boost::static_visitor<void>
 
     void operator () (agg_stack_blur const& op)
     {
-        if (op.rx > radius_) radius_ = op.rx;
-        if (op.ry > radius_) radius_ = op.ry;
+        if (static_cast<int>(op.rx) > radius_) radius_ = static_cast<int>(op.rx);
+        if (static_cast<int>(op.ry) > radius_) radius_ = static_cast<int>(op.ry);
     }
 };
 
