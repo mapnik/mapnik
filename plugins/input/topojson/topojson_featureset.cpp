@@ -194,7 +194,7 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
         std::unique_ptr<geometry_type> poly_ptr(new geometry_type(geometry_type::types::Polygon));
-
+        std::vector<mapnik::topojson::coordinate> processed_coords;
         for (auto const& ring : poly.rings)
         {
             bool first = true;
@@ -204,7 +204,8 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                 bool reversed = index < 0;
                 index_type arc_index = reversed ? std::abs(index) - 1 : index;
                 auto const& coords = topo_.arcs[arc_index].coordinates;
-                std::deque<mapnik::topojson::coordinate> processed_coords;
+                processed_coords.clear();
+                processed_coords.reserve(coords.size());
                 for (auto const& pt : coords )
                 {
                     double x = pt.x;
@@ -215,20 +216,31 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                         x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                         y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
                     }
-                    if (reversed)
-                        processed_coords.emplace_front(coordinate{x,y});
-                    else
-                        processed_coords.emplace_back(coordinate{x,y});
+                    processed_coords.emplace_back(coordinate{x,y});
                 }
-
-                for (auto const& c : processed_coords)
+                if (reversed)
                 {
-                    if (first)
+                    for (auto const& c : boost::adaptors::reverse(processed_coords))
                     {
-                        first = false;
-                        poly_ptr->move_to(c.x,c.y);
+                        if (first)
+                        {
+                            first = false;
+                            poly_ptr->move_to(c.x,c.y);
+                        }
+                        else poly_ptr->line_to(c.x,c.y);
                     }
-                    else poly_ptr->line_to(c.x,c.y);
+                }
+                else
+                {
+                    for (auto const& c : processed_coords)
+                    {
+                        if (first)
+                        {
+                            first = false;
+                            poly_ptr->move_to(c.x,c.y);
+                        }
+                        else poly_ptr->line_to(c.x,c.y);
+                    }
                 }
             }
             poly_ptr->close_path();
@@ -242,7 +254,7 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
     feature_ptr operator() (multi_polygon const& multi_poly) const
     {
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
-
+        std::vector<mapnik::topojson::coordinate> processed_coords;
         for (auto const& poly : multi_poly.polygons)
         {
             std::unique_ptr<geometry_type> poly_ptr(new geometry_type(geometry_type::types::Polygon));
@@ -255,7 +267,8 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                     bool reversed = index < 0;
                     index_type arc_index = reversed ? std::abs(index) - 1 : index;
                     auto const& coords = topo_.arcs[arc_index].coordinates;
-                    std::deque<mapnik::topojson::coordinate> processed_coords;
+                    processed_coords.clear();
+                    processed_coords.reserve(coords.size());
                     for (auto const& pt : coords )
                     {
                         double x = pt.x;
@@ -266,20 +279,32 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                             x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
                             y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
                         }
-                        if (reversed)
-                            processed_coords.emplace_front(coordinate{x,y});
-                        else
-                            processed_coords.emplace_back(coordinate{x,y});
+                        processed_coords.emplace_back(coordinate{x,y});
                     }
 
-                    for (auto const& c : processed_coords)
+                    if (reversed)
                     {
-                        if (first)
+                        for (auto const& c : boost::adaptors::reverse(processed_coords))
                         {
-                            first = false;
-                            poly_ptr->move_to(c.x,c.y);
+                            if (first)
+                            {
+                                first = false;
+                                poly_ptr->move_to(c.x,c.y);
+                            }
+                            else poly_ptr->line_to(c.x,c.y);
                         }
-                        else poly_ptr->line_to(c.x,c.y);
+                    }
+                    else
+                    {
+                        for (auto const& c : processed_coords)
+                        {
+                            if (first)
+                            {
+                                first = false;
+                                poly_ptr->move_to(c.x,c.y);
+                            }
+                            else poly_ptr->line_to(c.x,c.y);
+                        }
                     }
                 }
                 poly_ptr->close_path();
