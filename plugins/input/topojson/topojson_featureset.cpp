@@ -163,8 +163,8 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
 
             double px = 0, py = 0;
             bool first = true;
-            bool reversed = index < 0;
-            index_type arc_index = reversed ? std::abs(index) - 1 : index;
+            bool reverse = index < 0;
+            index_type arc_index = reverse ? std::abs(index) - 1 : index;
             for (auto pt : topo_.arcs[arc_index].coordinates)
             {
                 double x = pt.x;
@@ -202,8 +202,8 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
             for (auto const& index : ring)
             {
                 double px = 0, py = 0;
-                bool reversed = index < 0;
-                index_type arc_index = reversed ? std::abs(index) - 1 : index;
+                bool reverse = index < 0;
+                index_type arc_index = reverse ? std::abs(index) - 1 : index;
                 auto const& coords = topo_.arcs[arc_index].coordinates;
                 processed_coords.clear();
                 processed_coords.reserve(coords.size());
@@ -223,9 +223,9 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
 
                 using namespace boost::adaptors;
 
-                if (reversed)
+                if (reverse)
                 {
-                    for (auto const& c : reverse(processed_coords) | sliced(0,processed_coords.size()-1))
+                    for (auto const& c : processed_coords | reversed | sliced(0,processed_coords.size()-1))
                     {
                         if (first)
                         {
@@ -269,8 +269,8 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                 for (auto const& index : ring)
                 {
                     double px = 0, py = 0;
-                    bool reversed = index < 0;
-                    index_type arc_index = reversed ? std::abs(index) - 1 : index;
+                    bool reverse = index < 0;
+                    index_type arc_index = reverse ? std::abs(index) - 1 : index;
                     auto const& coords = topo_.arcs[arc_index].coordinates;
                     processed_coords.clear();
                     processed_coords.reserve(coords.size());
@@ -287,9 +287,11 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                         processed_coords.emplace_back(coordinate{x,y});
                     }
 
-                    if (reversed)
+                    using namespace boost::adaptors;
+
+                    if (reverse)
                     {
-                        for (auto const& c : boost::adaptors::reverse(processed_coords))
+                        for (auto const& c : (processed_coords | reversed | sliced(0,processed_coords.size() - 1)))
                         {
                             if (first)
                             {
@@ -301,7 +303,7 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                     }
                     else
                     {
-                        for (auto const& c : processed_coords)
+                        for (auto const& c : processed_coords | sliced(0,processed_coords.size() - 1))
                         {
                             if (first)
                             {
