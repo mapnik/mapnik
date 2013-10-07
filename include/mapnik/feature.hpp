@@ -38,7 +38,7 @@
 
 // stl
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <ostream>                      // for basic_ostream, operator<<, etc
 #include <sstream>                      // for basic_stringstream
 #include <stdexcept>                    // for out_of_range
@@ -87,7 +87,7 @@ private:
     map_type mapping_;
 };
 
-typedef context<std::map<std::string,std::size_t> > context_type;
+typedef context<std::unordered_map<std::string,std::size_t> > context_type;
 typedef std::shared_ptr<context_type> context_ptr;
 
 static const value default_value;
