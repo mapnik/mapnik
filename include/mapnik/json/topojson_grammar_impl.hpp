@@ -111,11 +111,13 @@ topojson_grammar<Iterator>::topojson_grammar()
                            >> lit(']')
         ;
 
-    objects = lit("\"objects\"") >> lit(':') >> lit('{')
-                                 >> omit[string_] >> lit(':') >> lit('{')
-                                 >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"") >> lit(',')
-                                 >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry % lit(','))
-                                 >> lit(']') >> lit('}') >> lit('}')
+    objects = lit("\"objects\"")
+        >> lit(':')
+        >> lit('{')
+        >> -((omit[string_]
+              >> lit(':')
+              >>  geometry_collection) % lit(','))
+        >> lit('}')
         ;
 
     geometry =
@@ -128,29 +130,39 @@ topojson_grammar<Iterator>::topojson_grammar()
         omit[object]
         ;
 
+    geometry_collection =  lit('{')
+               >> lit("\"type\"") >> lit(':') >> lit("\"GeometryCollection\"") >> lit(',')
+               >> lit("\"geometries\"") >> lit(':') >> lit('[') >> -(geometry % lit(','))
+               >> lit(']')
+               >> lit('}')
+        ;
     point = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"Point\"")
-        >> ((lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinate) ^ (lit(',') >> properties))
+        >> ((lit(',') >> lit("\"coordinates\"") >> lit(':') >> coordinate)
+            ^ (lit(',') >> properties) /*^ (lit(',') >> omit[id])*/)
         >> lit('}')
         ;
 
     multi_point = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"MultiPoint\"")
         >> ((lit(',') >> lit("\"coordinates\"") >> lit(':')
-             >> lit('[') >> -(coordinate % lit(',')) >> lit(']')) ^ (lit(',') >> properties))
+             >> lit('[') >> -(coordinate % lit(',')) >> lit(']'))
+            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
         >> lit('}')
         ;
 
     linestring = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"LineString\"")
-        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[') >> int_ >> lit(']')) ^ (lit(',') >> properties))
+        >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[') >> int_ >> lit(']'))
+            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
         >> lit('}')
         ;
 
     multi_linestring = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"MultiLineString\"")
         >> ((lit(',') >> lit("\"arcs\"") >> lit(':') >> lit('[')
-             >> -((lit('[') >> int_ >> lit(']')) % lit(',')) >> lit(']')) ^ (lit(',') >> properties))
+             >> -((lit('[') >> int_ >> lit(']')) % lit(',')) >> lit(']'))
+            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
         >> lit('}')
         ;
 
@@ -158,19 +170,21 @@ topojson_grammar<Iterator>::topojson_grammar()
         >> lit("\"type\"") >> lit(':') >> lit("\"Polygon\"")
         >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
              >> lit('[') >> -(ring % lit(',')) >> lit(']'))
-            ^ (lit(',') >> properties))
+            ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
         >> lit('}')
-            ;
+        ;
 
     multi_polygon = lit('{')
         >> lit("\"type\"") >> lit(':') >> lit("\"MultiPolygon\"")
         >> ((lit(',') >> lit("\"arcs\"") >> lit(':')
              >> lit('[')
              >> -((lit('[') >> -(ring % lit(',')) >> lit(']')) % lit(','))
-             >> lit(']')) ^ (lit(',') >> properties))
-            >> lit('}')
+             >> lit(']')) ^ (lit(',') >> properties) ^ (lit(',') >> omit[id]))
+        >> lit('}')
         ;
 
+    id = lit("\"id\"") >> lit(':') >> omit[value]
+        ;
 
     ring = lit('[') >> -(int_ % lit(',')) >> lit(']')
         ;
@@ -205,6 +219,7 @@ topojson_grammar<Iterator>::topojson_grammar()
     linestring.name("linestring");
     polygon.name("polygon");
     multi_polygon.name("multi_polygon");
+    geometry_collection.name("geometry_collection");
 
     on_error<fail>
         (
