@@ -31,7 +31,7 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/range/adaptor/reversed.hpp>
-
+#include <boost/range/adaptor/sliced.hpp>
 #include "topojson_featureset.hpp"
 
 namespace mapnik { namespace topojson {
@@ -195,6 +195,7 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
         mapnik::feature_ptr feature(mapnik::feature_factory::create(ctx_,feature_id_));
         std::unique_ptr<geometry_type> poly_ptr(new geometry_type(geometry_type::types::Polygon));
         std::vector<mapnik::topojson::coordinate> processed_coords;
+
         for (auto const& ring : poly.rings)
         {
             bool first = true;
@@ -213,14 +214,18 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
 
                     if (topo_.tr)
                     {
-                        x =  (px += x) * (*topo_.tr).scale_x + (*topo_.tr).translate_x;
-                        y =  (py += y) * (*topo_.tr).scale_y + (*topo_.tr).translate_y;
+                        transform const& tr = *topo_.tr;
+                        x =  (px += x) * tr.scale_x + tr.translate_x;
+                        y =  (py += y) * tr.scale_y + tr.translate_y;
                     }
                     processed_coords.emplace_back(coordinate{x,y});
                 }
+
+                using namespace boost::adaptors;
+
                 if (reversed)
                 {
-                    for (auto const& c : boost::adaptors::reverse(processed_coords))
+                    for (auto const& c : reverse(processed_coords) | sliced(0,processed_coords.size()-1))
                     {
                         if (first)
                         {
@@ -232,7 +237,7 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                 }
                 else
                 {
-                    for (auto const& c : processed_coords)
+                    for (auto const& c : processed_coords | sliced(0,processed_coords.size()-1))
                     {
                         if (first)
                         {
