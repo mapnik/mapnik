@@ -63,16 +63,16 @@ raster_datasource::raster_datasource(parameters const& params)
         filename_ = *file;
 
     multi_tiles_ = *params.get<mapnik::boolean>("multi", false);
-    tile_size_ = *params.get<int>("tile_size", 256);
-    tile_stride_ = *params.get<int>("tile_stride", 1);
+    tile_size_ = *params.get<mapnik::value_integer>("tile_size", 256);
+    tile_stride_ = *params.get<mapnik::value_integer>("tile_stride", 1);
 
     boost::optional<std::string> format_from_filename = mapnik::type_from_filename(*file);
     format_ = *params.get<std::string>("format",format_from_filename?(*format_from_filename) : "tiff");
 
-    boost::optional<double> lox = params.get<double>("lox");
-    boost::optional<double> loy = params.get<double>("loy");
-    boost::optional<double> hix = params.get<double>("hix");
-    boost::optional<double> hiy = params.get<double>("hiy");
+    boost::optional<mapnik::value_double> lox = params.get<mapnik::value_double>("lox");
+    boost::optional<mapnik::value_double> loy = params.get<mapnik::value_double>("loy");
+    boost::optional<mapnik::value_double> hix = params.get<mapnik::value_double>("hix");
+    boost::optional<mapnik::value_double> hiy = params.get<mapnik::value_double>("hiy");
 
     boost::optional<std::string> ext = params.get<std::string>("extent");
 
@@ -93,8 +93,8 @@ raster_datasource::raster_datasource(parameters const& params)
 
     if (multi_tiles_)
     {
-        boost::optional<int> x_width = params.get<int>("x_width");
-        boost::optional<int> y_width = params.get<int>("y_width");
+        boost::optional<mapnik::value_integer> x_width = params.get<mapnik::value_integer>("x_width");
+        boost::optional<mapnik::value_integer> y_width = params.get<mapnik::value_integer>("y_width");
 
         if (! x_width)
         {

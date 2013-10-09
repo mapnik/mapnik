@@ -141,7 +141,7 @@ sqlite_datasource::sqlite_datasource(parameters const& params)
     // now actually create the connection and start executing setup sql
     dataset_ = std::make_shared<sqlite_connection>(dataset_name_);
 
-    boost::optional<int> table_by_index = params.get<int>("table_by_index");
+    boost::optional<mapnik::value_integer> table_by_index = params.get<mapnik::value_integer>("table_by_index");
 
     int passed_parameters = 0;
     passed_parameters += params.get<std::string>("table") ? 1 : 0;

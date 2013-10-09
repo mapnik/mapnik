@@ -67,20 +67,6 @@ struct extract_value<mapnik::boolean>
 };
 
 template <>
-struct extract_value<int>
-{
-    static inline boost::optional<int> do_extract_from_string(std::string const& source)
-    {
-        mapnik::value_integer result;
-        if (mapnik::util::string2int(source, result))
-            return boost::optional<int>(result);
-        return boost::optional<int>();
-    }
-};
-
-#ifdef BIGINT
-
-template <>
 struct extract_value<mapnik::value_integer>
 {
     static inline boost::optional<mapnik::value_integer> do_extract_from_string(std::string const& source)
@@ -91,8 +77,6 @@ struct extract_value<mapnik::value_integer>
         return boost::optional<mapnik::value_integer>();
     }
 };
-
-#endif
 
 template <>
 struct extract_value<mapnik::value_double>
@@ -149,7 +133,7 @@ struct value_extractor_visitor : public boost::static_visitor<>
     }
 
     template <typename T1>
-    void operator () (T1 val) const
+    void operator () (T1 const& val) const
     {
         try
         {
@@ -163,7 +147,6 @@ struct value_extractor_visitor : public boost::static_visitor<>
             throw std::runtime_error(err_msg);
         }
     }
-
 
     boost::optional<T> & var_;
 };

@@ -64,9 +64,9 @@ postgis_datasource::postgis_datasource(parameters const& params)
       geometry_field_(*params.get<std::string>("geometry_field", "")),
       key_field_(*params.get<std::string>("key_field", "")),
       cursor_fetch_size_(*params.get<mapnik::value_integer>("cursor_size", 0)),
-      row_limit_(*params.get<int>("row_limit", 0)),
+      row_limit_(*params.get<mapnik::value_integer>("row_limit", 0)),
       type_(datasource::Vector),
-      srid_(*params.get<int>("srid", 0)),
+      srid_(*params.get<mapnik::value_integer>("srid", 0)),
       extent_initialized_(false),
       simplify_geometries_(false),
       desc_(*params.get<std::string>("type"), "utf-8"),
@@ -80,14 +80,14 @@ postgis_datasource::postgis_datasource(parameters const& params)
       scale_denom_token_("!scale_denominator!"),
       pixel_width_token_("!pixel_width!"),
       pixel_height_token_("!pixel_height!"),
-      pool_max_size_(*params_.get<int>("max_size", 10)),
+      pool_max_size_(*params_.get<mapnik::value_integer>("max_size", 10)),
       persist_connection_(*params.get<mapnik::boolean>("persist_connection", true)),
       extent_from_subquery_(*params.get<mapnik::boolean>("extent_from_subquery", false)),
-      max_async_connections_(*params_.get<int>("max_async_connection", 1)),
+      max_async_connections_(*params_.get<mapnik::value_integer>("max_async_connection", 1)),
       asynchronous_request_(false),
       // params below are for testing purposes only and may be removed at any time
-      intersect_min_scale_(*params.get<int>("intersect_min_scale", 0)),
-      intersect_max_scale_(*params.get<int>("intersect_max_scale", 0))
+    intersect_min_scale_(*params.get<mapnik::value_integer>("intersect_min_scale", 0)),
+    intersect_max_scale_(*params.get<mapnik::value_integer>("intersect_max_scale", 0))
 {
 #ifdef MAPNIK_STATS
     mapnik::progress_timer __stats__(std::clog, "postgis_datasource::init");
@@ -117,7 +117,7 @@ postgis_datasource::postgis_datasource(parameters const& params)
         asynchronous_request_ = true;
     }
 
-    boost::optional<int> initial_size = params.get<int>("initial_size", 1);
+    boost::optional<mapnik::value_integer> initial_size = params.get<mapnik::value_integer>("initial_size", 1);
     boost::optional<mapnik::boolean> autodetect_key_field = params.get<mapnik::boolean>("autodetect_key_field", false);
     boost::optional<mapnik::boolean> estimate_extent = params.get<mapnik::boolean>("estimate_extent", false);
     estimate_extent_ = estimate_extent && *estimate_extent;

@@ -26,7 +26,6 @@
 // mapnik
 #include <mapnik/config.hpp>
 #include <mapnik/value_types.hpp>
-
 // boost
 #include <boost/variant/variant.hpp>
 #include <boost/optional.hpp>
@@ -69,24 +68,16 @@ boost::optional<value_double> parameters::get(std::string const& key,
                                   value_double const& default_opt_value) const;
 
 template MAPNIK_DECL
-boost::optional<int> parameters::get(std::string const& key) const;
-template MAPNIK_DECL
-boost::optional<int> parameters::get(std::string const& key,
-                         int const& default_opt_value) const;
-#ifdef BIGINT
-template MAPNIK_DECL
 boost::optional<value_integer> parameters::get(std::string const& key) const;
 template MAPNIK_DECL
 boost::optional<value_integer> parameters::get(std::string const& key,
                                    value_integer const& default_opt_value) const;
-#endif
 
 template MAPNIK_DECL
-boost::optional<mapnik::boolean> parameters::get(std::string const& key) const;
+boost::optional<boolean> parameters::get(std::string const& key) const;
 template MAPNIK_DECL
-boost::optional<mapnik::boolean> parameters::get(std::string const& key,
-                                     mapnik::boolean const& default_opt_value) const;
-
+boost::optional<boolean> parameters::get(std::string const& key,
+                                         boolean const& default_opt_value) const;
 #endif
 
 }

@@ -42,8 +42,8 @@ int main(int argc, char** argv)
     BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
 
     // false
-    //params["bool"] = false;
-    //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false) );
+    params["bool"] = mapnik::value_integer(false);
+    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false) );
 
     params["bool"] = "false";
     BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false) );
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
     // value_null
     params["null"] = mapnik::value_null();
-    //BOOST_TEST( (params.get<mapnik::value_null>("null")/* && *params.get<mapnik::value_null>("null") == mapnik::value_null()*/) );
+    BOOST_TEST( (params.get<mapnik::value_null>("null") && *params.get<mapnik::value_null>("null") == mapnik::value_null()) );
 
     if (!::boost::detail::test_errors()) {
         if (quiet) std::clog << "\x1b[1;32m.\x1b[0m";
