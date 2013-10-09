@@ -106,6 +106,12 @@ inline std::ostream& operator<< (std::ostream & out,value_null const& v)
     boost::ignore_unused_variable_warning(v);
     return out;
 }
+inline std::istream& operator>> ( std::istream & s, value_null & null )
+{
+    boost::ignore_unused_variable_warning(null);
+    return s;
+}
+
 
 } // namespace mapnik
 
