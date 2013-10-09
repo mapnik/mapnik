@@ -20,17 +20,17 @@ int main(int argc, char** argv)
     mapnik::parameters params;
 
     // true
-    //params["bool"] = true;
-    //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    params["bool"] = mapnik::value_integer(true);
+    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
 
     params["bool"] = "true";
     BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
 
-    //params["bool"] = 1;
-    //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    params["bool"] = mapnik::value_integer(1);
+    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
 
-    //params["bool"] = "1";
-    //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
+    params["bool"] = "1";
+    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
 
     params["bool"] = "True";
     BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == true));
@@ -48,11 +48,11 @@ int main(int argc, char** argv)
     params["bool"] = "false";
     BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false) );
 
-    //params["bool"] = 0;
-    //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
+    params["bool"] = mapnik::value_integer(0);
+    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
 
-    //params["bool"] = "0";
-    //BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
+    params["bool"] = "0";
+    BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
 
     params["bool"] = "False";
     BOOST_TEST( (params.get<mapnik::boolean>("bool") && *params.get<mapnik::boolean>("bool") == false));
