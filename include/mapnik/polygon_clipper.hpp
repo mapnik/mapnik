@@ -95,22 +95,33 @@ struct polygon_clipper
     typedef model::polygon<mapnik::coord2d> polygon_2d;
     typedef std::deque<polygon_2d> polygon_list;
 
+    enum
+    {
+        clip = 1,
+        no_clip = 2,
+        ignore = 3
+
+    } state_;
+
     polygon_clipper(Geometry & geom)
-        : clip_box_(),
+        : state_(clip),
+          clip_box_(),
           geom_(geom)
     {
 
     }
 
     polygon_clipper(box2d<double> const& clip_box, Geometry & geom)
-        : clip_box_(clip_box),
-          geom_(geom)
+        :state_(clip),
+         clip_box_(clip_box),
+         geom_(geom),
     {
         init();
     }
 
     void set_clip_box(box2d<double> const& clip_box)
     {
+        state_ = clip;
         clip_box_ = clip_box;
         init();
     }
@@ -122,18 +133,42 @@ struct polygon_clipper
 
     void rewind(unsigned path_id)
     {
-        output_.rewind(path_id);
+        if (state_ == clip) output_.rewind(path_id);
+        else geom_.rewind(path_id);
     }
 
     unsigned vertex (double * x, double * y)
     {
-        return output_.vertex(x,y);
+        switch (state_)
+        {
+        case clip:
+            return output_.vertex(x,y);
+        case no_clip:
+            return geom_.vertex(x,y);
+        case ignore:
+            return SEG_END;
+        }
     }
 
 private:
 
     void init()
     {
+        geom_.rewind(0);
+        box2d<double> bbox = geom_.envelope();
+        if (clip_box_.contains(bbox))
+        {
+            // shortcut to original geometry (no-clipping)
+            state_ = no_clip;
+            return;
+        }
+        else if (!clip_box_.intersects(bbox))
+        {
+            // polygon is outside of clipping box
+            state_ = ignore;
+            return;
+        }
+
         polygon_2d subject_poly;
         double x,y;
         double prev_x, prev_y;
