@@ -114,7 +114,7 @@ struct polygon_clipper
     polygon_clipper(box2d<double> const& clip_box, Geometry & geom)
         :state_(clip),
          clip_box_(clip_box),
-         geom_(geom),
+         geom_(geom)
     {
         init();
     }
