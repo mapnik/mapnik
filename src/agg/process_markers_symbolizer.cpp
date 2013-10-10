@@ -70,7 +70,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
     typedef agg::pixfmt_custom_blend_rgba<blender_type, buf_type> pixfmt_comp_type;
     typedef agg::renderer_base<pixfmt_comp_type> renderer_base;
     typedef label_collision_detector4 detector_type;
-    typedef boost::mpl::vector<clip_line_tag,clip_poly_tag,transform_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_poly_tag,transform_tag,smooth_tag> conv_types;
 
     std::string filename = path_processor_type::evaluate(*sym.get_filename(), feature);
 
