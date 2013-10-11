@@ -38,8 +38,8 @@ libraries = ['pq']
 libraries.append('boost_system%s' % env['BOOST_APPEND'])
 libraries.append(env['ICU_LIB_NAME'])
 
-if env['THREADING'] == 'multi':
-    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
+#if env['THREADING'] == 'multi':
+#    libraries.append('boost_thread%s' % env['BOOST_APPEND'])
 
 if env['RUNTIME_LINK'] == 'static':
     # pg_config does not seem to report correct deps of libpq
