@@ -50,25 +50,40 @@ public:
 
     typedef std::vector<glyph_info> glyph_vector;
     typedef glyph_vector::const_iterator const_iterator;
+    /** Get glyph vector. */
     glyph_vector const& get_glyphs() const { return glyphs_; }
+    /** Append glyph. */
     void add_glyph(glyph_info const& glyph, double scale_factor_);
 
+    /** Preallocate memory. */
     void reserve(glyph_vector::size_type length);
+    /** Iterator to first glyph. */
     const_iterator begin() const;
+    /** Iterator beyond last glyph. */
     const_iterator end() const;
 
+    /** Width of all glyphs including character spacing. */
     double width() const { return width_; }
+    /** Real line height. For first line: max_char_height(), for all others: line_height(). */
     double height() const;
 
+    /** Height of the tallest glyph in this line. */
     double max_char_height() const { return max_char_height_; }
+    /** Called for each font/style to update the maximum height of this line. */
     void update_max_char_height(double max_char_height);
+    /** Line height including line spacing. */
     double line_height() const { return line_height_; }
 
+    /** Is this object is the first line of a multi-line text?
+      * Used to exclude linespacing from first line's height. */
     void set_first_line(bool first_line);
 
+    /** Index of first UTF-16 char. */
     unsigned get_first_char() const;
+    /** Index of last UTF-16 char. */
     unsigned get_last_char() const;
 
+    /** Number of glyphs. */
     unsigned size() const;
 private:
     glyph_vector glyphs_;
@@ -88,20 +103,34 @@ public:
     typedef std::vector<text_line_ptr> line_vector;
     typedef line_vector::const_iterator const_iterator;
     text_layout(face_manager_freetype & font_manager, double scale_factor);
+
+    /** Adds a new text part. Call this function repeatedly to build the complete text. */
     void add_text(UnicodeString const& str, char_properties_ptr format);
+
+    /** Returns the complete text stored in this layout.*/
     UnicodeString const& get_text() const;
 
+    /** Processes the text into a list of glyphs, performing RTL/LTR handling, shaping and line breaking. */
     void layout(double wrap_width, unsigned text_ratio, bool wrap_before);
 
+    /** Clear all data stored in this object. The object's state is the same as directly after construction. */
     void clear();
+    /** Height of all lines together (in pixels). */
     double height() const;
+    /** Width of the longest line (in pixels). */
     double width() const;
 
+    /** Return line iterator. */
     const_iterator begin() const;
+    /** Iterator pointing to the place after the last line. */
     const_iterator end() const;
+    /** Number of lines.*/
     unsigned size() const;
 
+    /** Width of a certain glyph cluster (in pixels). */
     double cluster_width(unsigned cluster) const;
+
+    /** Returns the number of glyphs so memory can be preallocated. */
     unsigned glyphs_count() const;
 
 private:
