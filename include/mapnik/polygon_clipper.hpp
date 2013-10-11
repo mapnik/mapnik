@@ -197,8 +197,11 @@ private:
             {
                 if (std::abs(x - prev_x) < 1e-12 && std::abs(y - prev_y) < 1e-12)
                 {
-                    std::cerr << std::setprecision(12) << "coincident vertices:(" << prev_x << ","
-                              <<  prev_y << ") , (" << x << "," << y <<  ")" << std::endl;
+#ifdef MAPNIK_LOG
+                    MAPNIK_LOG_WARN(polygon_clipper)
+                        << std::setprecision(12) << "coincident vertices:(" << prev_x << ","
+                        <<  prev_y << ") , (" << x << "," << y <<  ")";
+#endif
                     continue;
                 }
                 prev_x = x;
