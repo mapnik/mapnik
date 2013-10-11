@@ -39,7 +39,7 @@
 #else
 #warning mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8
 #endif
-static boost::mutex mutex_;
+static std::mutex mutex_;
 #endif
 
 #endif
@@ -113,7 +113,7 @@ void projection::init_proj4() const
         }
 #else
         #if defined(MAPNIK_THREADSAFE)
-        mutex::scoped_lock lock(mutex_);
+        mapnik::scoped_lock lock(mutex_);
         #endif
         proj_ = pj_init_plus(params_.c_str());
         if (!proj_) throw proj_init_error(params_);
@@ -151,7 +151,7 @@ void projection::forward(double & x, double &y ) const
         throw std::runtime_error("projection::forward not supported unless proj4 is initialized");
     }
     #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
     #endif
     projUV p;
     p.u = x * DEG_TO_RAD;
@@ -178,7 +178,7 @@ void projection::inverse(double & x,double & y) const
     }
 
     #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
     #endif
     if (is_geographic_)
     {
@@ -200,7 +200,7 @@ projection::~projection()
 {
 #ifdef MAPNIK_USE_PROJ4
     #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-        mutex::scoped_lock lock(mutex_);
+        mapnik::scoped_lock lock(mutex_);
     #endif
         if (proj_) pj_free(proj_);
     #if PJ_VERSION >= 480

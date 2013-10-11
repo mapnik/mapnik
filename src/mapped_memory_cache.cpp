@@ -39,7 +39,7 @@ namespace mapnik
 void mapped_memory_cache::clear()
 {
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
     return cache_.clear();
 }
@@ -47,7 +47,7 @@ void mapped_memory_cache::clear()
 bool mapped_memory_cache::insert(std::string const& uri, mapped_region_ptr mem)
 {
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
     return cache_.insert(std::make_pair(uri,mem)).second;
 }
@@ -55,7 +55,7 @@ bool mapped_memory_cache::insert(std::string const& uri, mapped_region_ptr mem)
 boost::optional<mapped_region_ptr> mapped_memory_cache::find(std::string const& uri, bool update_cache)
 {
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
     typedef boost::unordered_map<std::string, mapped_region_ptr>::const_iterator iterator_type;
     boost::optional<mapped_region_ptr> result;

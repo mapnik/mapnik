@@ -140,7 +140,7 @@ public:
 private:
     FT_LibraryRec_ * library_;
 #ifdef MAPNIK_THREADSAFE
-    static boost::mutex mutex_;
+    static std::mutex mutex_;
 #endif
     static std::map<std::string,std::pair<int,std::string> > name2file_;
     static std::map<std::string, std::string> memory_fonts_;

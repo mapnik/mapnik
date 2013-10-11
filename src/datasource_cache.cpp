@@ -79,7 +79,7 @@ datasource_ptr datasource_cache::create(parameters const& params)
 #endif
 
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
 
     std::map<std::string,std::shared_ptr<PluginInfo> >::iterator itr=plugins_.find(*type);
@@ -164,7 +164,7 @@ std::vector<std::string> datasource_cache::plugin_names()
 void datasource_cache::register_datasources(std::string const& str)
 {
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
     // TODO - only push unique paths
     plugin_directories_.push_back(str);

@@ -65,7 +65,7 @@ marker_cache::~marker_cache() {}
 void marker_cache::clear()
 {
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
     typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
     iterator_type itr = marker_cache_.begin();
@@ -102,7 +102,7 @@ bool marker_cache::insert_svg(std::string const& name, std::string const& svg_st
 bool marker_cache::insert_marker(std::string const& uri, marker_ptr path)
 {
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
     return marker_cache_.insert(std::make_pair(uri,path)).second;
 }
@@ -118,7 +118,7 @@ boost::optional<marker_ptr> marker_cache::find(std::string const& uri,
     }
 
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
     typedef boost::unordered_map<std::string, marker_ptr>::const_iterator iterator_type;
     iterator_type itr = marker_cache_.find(uri);

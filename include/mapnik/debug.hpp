@@ -72,7 +72,7 @@ namespace mapnik {
         static void set_severity(const severity_type& severity_level)
         {
 #ifdef MAPNIK_THREADSAFE
-            boost::mutex::scoped_lock lock(severity_mutex_);
+            mapnik::scoped_lock lock(severity_mutex_);
 #endif
 
             severity_level_ = severity_level;
@@ -96,7 +96,7 @@ namespace mapnik {
                                         const severity_type& security_level)
         {
 #ifdef MAPNIK_THREADSAFE
-            boost::mutex::scoped_lock lock(severity_mutex_);
+            mapnik::scoped_lock lock(severity_mutex_);
 #endif
             if (! object_name.empty())
             {
@@ -107,7 +107,7 @@ namespace mapnik {
         static void clear_object_severity()
         {
 #ifdef MAPNIK_THREADSAFE
-            boost::mutex::scoped_lock lock(severity_mutex_);
+            mapnik::scoped_lock lock(severity_mutex_);
 #endif
 
             object_severity_level_.clear();
@@ -122,7 +122,7 @@ namespace mapnik {
         static void set_format(std::string const& format)
         {
 #ifdef MAPNIK_THREADSAFE
-            boost::mutex::scoped_lock lock(format_mutex_);
+            mapnik::scoped_lock lock(format_mutex_);
 #endif
             format_ = format;
         }
@@ -147,8 +147,8 @@ namespace mapnik {
         static std::streambuf* saved_buf_;
 
 #ifdef MAPNIK_THREADSAFE
-        static boost::mutex severity_mutex_;
-        static boost::mutex format_mutex_;
+        static std::mutex severity_mutex_;
+        static std::mutex format_mutex_;
 #endif
     };
 
@@ -167,8 +167,8 @@ namespace mapnik {
             void operator()(const logger::severity_type& /*severity*/, const stream_buffer &s)
             {
 #ifdef MAPNIK_THREADSAFE
-                static boost::mutex mutex;
-                boost::mutex::scoped_lock lock(mutex);
+                static std::mutex mutex;
+                mapnik::scoped_lock lock(mutex);
 #endif
                 std::clog << logger::str() << " " << s.str() << std::endl;
             }

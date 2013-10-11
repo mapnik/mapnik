@@ -27,7 +27,7 @@
 
 // boost
 #ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 #endif
 
 // stl
@@ -42,7 +42,7 @@ namespace mapnik
 {
 
 #ifdef MAPNIK_THREADSAFE
-using boost::mutex;
+using std::mutex;
 #endif
 
 template <typename T>
@@ -124,7 +124,7 @@ protected:
             if (! pInstance_)
             {
 #ifdef MAPNIK_THREADSAFE
-                mutex::scoped_lock lock(mutex_);
+                mapnik::scoped_lock lock(mutex_);
 #endif
                 if (! pInstance_)
                 {

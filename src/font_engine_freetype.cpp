@@ -90,7 +90,7 @@ bool freetype_engine::is_font_file(std::string const& file_name)
 bool freetype_engine::register_font(std::string const& file_name)
 {
 #ifdef MAPNIK_THREADSAFE
-    mutex::scoped_lock lock(mutex_);
+    mapnik::scoped_lock lock(mutex_);
 #endif
     FT_Library library = 0;
     FT_Error error = FT_Init_FreeType(&library);
@@ -244,7 +244,7 @@ face_ptr freetype_engine::create_face(std::string const& family_name)
         {
             // load font into memory
 #ifdef MAPNIK_THREADSAFE
-            mutex::scoped_lock lock(mutex_);
+            mapnik::scoped_lock lock(mutex_);
 #endif
             std::ifstream is(itr->second.second.c_str() , std::ios::binary);
             std::string buffer((std::istreambuf_iterator<char>(is)),
@@ -718,7 +718,7 @@ void text_renderer<T>::render_id(mapnik::value_integer feature_id,
 #endif
 
 #ifdef MAPNIK_THREADSAFE
-boost::mutex freetype_engine::mutex_;
+std::mutex freetype_engine::mutex_;
 #endif
 std::map<std::string,std::pair<int,std::string> > freetype_engine::name2file_;
 std::map<std::string,std::string> freetype_engine::memory_fonts_;

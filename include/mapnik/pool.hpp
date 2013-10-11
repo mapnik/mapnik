@@ -53,7 +53,7 @@ class Pool : private mapnik::noncopyable
     unsigned maxSize_;
     ContType pool_;
 #ifdef MAPNIK_THREADSAFE
-    mutable boost::mutex mutex_;
+    mutable std::mutex mutex_;
 #endif
 public:
 
@@ -73,7 +73,7 @@ public:
     HolderType borrowObject()
     {
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
+        mapnik::scoped_lock lock(mutex_);
 #endif
 
         typename ContType::iterator itr=pool_.begin();
@@ -114,7 +114,7 @@ public:
     unsigned size() const
     {
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
+        mapnik::scoped_lock lock(mutex_);
 #endif
         return pool_.size();
     }
@@ -122,7 +122,7 @@ public:
     unsigned max_size() const
     {
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
+        mapnik::scoped_lock lock(mutex_);
 #endif
         return maxSize_;
     }
@@ -130,7 +130,7 @@ public:
     void set_max_size(unsigned size)
     {
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
+        mapnik::scoped_lock lock(mutex_);
 #endif
         maxSize_ = std::max(maxSize_,size);
     }
@@ -138,7 +138,7 @@ public:
     unsigned initial_size() const
     {
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
+        mapnik::scoped_lock lock(mutex_);
 #endif
         return initialSize_;
     }
@@ -146,7 +146,7 @@ public:
     void set_initial_size(unsigned size)
     {
 #ifdef MAPNIK_THREADSAFE
-        mutex::scoped_lock lock(mutex_);
+        mapnik::scoped_lock lock(mutex_);
 #endif
         if (size > initialSize_)
         {

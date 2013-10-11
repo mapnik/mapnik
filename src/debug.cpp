@@ -44,8 +44,8 @@ namespace mapnik {
 // mutexes
 
 #ifdef MAPNIK_THREADSAFE
-boost::mutex logger::severity_mutex_;
-boost::mutex logger::format_mutex_;
+std::mutex logger::severity_mutex_;
+std::mutex logger::format_mutex_;
 #endif
 
 
