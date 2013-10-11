@@ -23,6 +23,7 @@
 // mapnik
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_factory.hpp>
+#include <mapnik/json/topology.hpp>
 // stl
 #include <string>
 #include <vector>
@@ -32,7 +33,16 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/range/adaptor/sliced.hpp>
+// boost.geometry
+#include <boost/geometry.hpp>
+#include <boost/geometry/algorithms/simplify.hpp>
+#include <boost/geometry/geometries/register/point.hpp>
+#include <boost/geometry/geometries/register/linestring.hpp>
+
 #include "topojson_featureset.hpp"
+
+BOOST_GEOMETRY_REGISTER_POINT_2D(mapnik::topojson::coordinate, double, boost::geometry::cs::cartesian, x, y)
+BOOST_GEOMETRY_REGISTER_LINESTRING(std::vector<mapnik::topojson::coordinate>)
 
 namespace mapnik { namespace topojson {
 
@@ -221,11 +231,16 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                     processed_coords.emplace_back(coordinate{x,y});
                 }
 
+
+                // simplify
+                std::vector<mapnik::topojson::coordinate> simplified(processed_coords.size());
+                boost::geometry::simplify(processed_coords, simplified, 2);
+
                 using namespace boost::adaptors;
 
                 if (reverse)
                 {
-                    for (auto const& c : processed_coords | reversed | sliced(0,processed_coords.size()-1))
+                    for (auto const& c : simplified | reversed | sliced(0, simplified.size()-1))
                     {
                         if (first)
                         {
@@ -237,7 +252,7 @@ struct feature_generator : public boost::static_visitor<mapnik::feature_ptr>
                 }
                 else
                 {
-                    for (auto const& c : processed_coords | sliced(0,processed_coords.size()-1))
+                    for (auto const& c : simplified | sliced(0, simplified.size()-1))
                     {
                         if (first)
                         {
