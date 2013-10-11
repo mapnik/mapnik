@@ -13,17 +13,18 @@
 #include <cstdio>
 #include <set>
 #include <stdexcept>
+#include <thread>
+#include <vector>
+#include <memory>
 
 // boost
 #include <boost/version.hpp>
-#include <memory>
-#include <boost/make_shared.hpp>
 #include <boost/bind.hpp>
 
 #define BOOST_CHRONO_HEADER_ONLY
 #include <boost/chrono/process_cpu_clocks.hpp>
 #include <boost/chrono.hpp>
-#include <boost/thread/thread.hpp>
+//#include <boost/thread/thread.hpp>
 
 using namespace boost::chrono;
 using namespace mapnik;
@@ -62,14 +63,15 @@ void benchmark(T & test_runner, std::string const& name)
                 dur elapsed;
                 if (test_runner.threads_ > 0)
                 {
-                    boost::thread_group tg;
+                    typedef std::vector<std::unique_ptr<std::thread> > thread_group;
+                    typedef thread_group::value_type value_type;
+                    thread_group tg;
                     for (unsigned i=0;i<test_runner.threads_;++i)
                     {
-                        tg.create_thread(test_runner);
-                        //tg.create_thread(boost::bind(&T::operator(),&test_runner));
+                        tg.emplace_back(new std::thread(test_runner));
                     }
                     start = process_cpu_clock::now();
-                    tg.join_all();
+                    std::for_each(tg.begin(), tg.end(), [](value_type & t) {if (t->joinable()) t->join();});
                     elapsed = process_cpu_clock::now() - start;
                 }
                 else

@@ -86,8 +86,8 @@ if len(env['EXTRA_FREETYPE_LIBS']):
 lib_env['LIBS'].append('xml2')
 lib_env['LIBS'].append('z')
 
-if env['THREADING'] == 'multi':
-    lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
+#if env['THREADING'] == 'multi':
+#    lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
 
 if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
     lib_env['LIBS'].append('icui18n')

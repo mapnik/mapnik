@@ -9,16 +9,22 @@
 using namespace boost::chrono;
 using namespace mapnik;
 
-void threaded_benchmark(void test(),std::string const& name, unsigned threads) {
+void threaded_benchmark(void test(),std::string const& name, unsigned num_threads) {
   using namespace boost::chrono;
   typedef process_cpu_clock clock_type;
   process_real_cpu_clock::time_point start = process_real_cpu_clock::now();
-  boost::thread_group threads;
-  for (unsigned i=0;i<threads;++i)
+  //boost::thread_group threads;
+  typedef std::vector<std::unique_ptr<std::thread> > thread_group;
+  typedef thread_group::value_type value_type;
+  thread_group threads;
+  // create threads
+  for (unsigned i=0; i<num_threads; ++i)
   {
-      threads.create_thread(test);
+      threads.emplace_back(new std::thread(test));
   }
-  threads.join_all();
+  // join all
+  std::for_each(threads.begin(), threads.end(), [](value_type & t) {if (t->joinable()) t->join();});
+
   clock_type::duration elapsed = process_real_cpu_clock::now() - start;
   std::clog << boost::chrono::duration_cast<milliseconds>(elapsed)
             << " (" << boost::chrono::duration_cast<seconds>(elapsed) << ")"
