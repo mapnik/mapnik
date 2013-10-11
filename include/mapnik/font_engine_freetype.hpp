@@ -44,7 +44,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
+#include <thread>
 #endif
 
 // stl

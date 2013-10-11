@@ -33,7 +33,7 @@
 // proj4
 #include <proj_api.h>
 #if defined(MAPNIK_THREADSAFE) && PJ_VERSION < 480
-#include <boost/thread/mutex.hpp>
+#include <thread>
 #ifdef _MSC_VER
 #pragma NOTE(mapnik is building against < proj 4.8, reprojection will be faster if you use >= 4.8)
 #else

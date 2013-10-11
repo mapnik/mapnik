@@ -31,7 +31,7 @@
 // boost
 #include <memory>
 #ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
+#include <thread>
 #endif
 
 // stl

@@ -31,7 +31,7 @@
 // boost
 #include <boost/unordered_map.hpp>
 #ifdef MAPNIK_THREADSAFE
-#include <boost/thread/mutex.hpp>
+#include <thread>
 #endif
 
 // std
