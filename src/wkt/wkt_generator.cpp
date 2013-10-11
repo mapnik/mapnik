@@ -33,7 +33,7 @@
 namespace mapnik { namespace util {
 
 template <typename T>
-boost::tuple<unsigned,bool> detail::multi_geometry_type<T>::operator() (T const& geom) const
+std::tuple<unsigned,bool> detail::multi_geometry_type<T>::operator() (T const& geom) const
 {
     typedef T geometry_container;
     unsigned type = 0u;
@@ -51,7 +51,7 @@ boost::tuple<unsigned,bool> detail::multi_geometry_type<T>::operator() (T const&
         }
         type = itr->type();
     }
-    return boost::tuple<unsigned,bool>(type, collection);
+    return std::tuple<unsigned,bool>(type, collection);
 }
 
 template <typename OutputIterator, typename Geometry>

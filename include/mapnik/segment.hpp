@@ -28,12 +28,12 @@
 namespace mapnik
 {
 
-typedef boost::tuple<double,double,double,double> segment_t;
+typedef std::tuple<double,double,double,double> segment_t;
 
 static bool y_order(segment_t const& first,segment_t const& second)
 {
-    double miny0 = std::min(first.get<1>(),first.get<3>());
-    double miny1 = std::min(second.get<1>(),second.get<3>());
+    double miny0 = std::min(std::get<1>(first), std::get<3>(first));
+    double miny1 = std::min(std::get<1>(second), std::get<3>(second));
     return miny0 > miny1;
 }
 

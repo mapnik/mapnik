@@ -39,7 +39,7 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
-#include <boost/fusion/include/boost_tuple.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 
 
@@ -111,7 +111,7 @@ namespace mapnik { namespace util {
         {
             typename geometry_type::value_type coord;
             geom.rewind(0);
-            boost::get<0>(coord) = geom.vertex(&boost::get<1>(coord),&boost::get<2>(coord));
+            std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
             return coord;
         }
     };
@@ -140,7 +140,7 @@ namespace mapnik { namespace util {
         {
             typename geometry_type::value_type coord;
             geom.rewind(0);
-            boost::get<0>(coord) = geom.vertex(&boost::get<1>(coord),&boost::get<2>(coord));
+            std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
             return coord;
         }
     };

@@ -42,7 +42,7 @@ namespace mapnik { namespace svg {
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/fusion/include/struct.hpp>
-#include <boost/fusion/include/boost_tuple.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 
 /*!
  * mapnik::svg::path_output_attributes is adapted as a fusion sequence

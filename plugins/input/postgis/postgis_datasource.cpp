@@ -722,8 +722,8 @@ featureset_ptr postgis_datasource::features_with_context(query const& q,processo
 
         std::ostringstream s;
 
-        const double px_gw = 1.0 / boost::get<0>(q.resolution());
-        const double px_gh = 1.0 / boost::get<1>(q.resolution());
+        const double px_gw = 1.0 / std::get<0>(q.resolution());
+        const double px_gh = 1.0 / std::get<1>(q.resolution());
 
         s << "SELECT ST_AsBinary(";
 

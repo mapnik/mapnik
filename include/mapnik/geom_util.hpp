@@ -93,21 +93,21 @@ template <typename Iter>
 inline bool point_inside_path(double x,double y,Iter start,Iter end)
 {
     bool inside=false;
-    double x0=boost::get<0>(*start);
-    double y0=boost::get<1>(*start);
+    double x0=std::get<0>(*start);
+    double y0=std::get<1>(*start);
 
     double x1 = 0;
     double y1 = 0;
     while (++start!=end)
     {
-        if ( boost::get<2>(*start) == SEG_MOVETO)
+        if ( std::get<2>(*start) == SEG_MOVETO)
         {
-            x0 = boost::get<0>(*start);
-            y0 = boost::get<1>(*start);
+            x0 = std::get<0>(*start);
+            y0 = std::get<1>(*start);
             continue;
         }
-        x1=boost::get<0>(*start);
-        y1=boost::get<1>(*start);
+        x1=std::get<0>(*start);
+        y1=std::get<1>(*start);
 
         if ((((y1 <= y) && (y < y0)) ||
              ((y0 <= y) && (y < y1))) &&
@@ -172,20 +172,20 @@ inline double point_to_segment_distance(double x, double y,
 template <typename Iter>
 inline bool point_on_path(double x,double y,Iter start,Iter end, double tol)
 {
-    double x0=boost::get<0>(*start);
-    double y0=boost::get<1>(*start);
+    double x0=std::get<0>(*start);
+    double y0=std::get<1>(*start);
     double x1 = 0;
     double y1 = 0;
     while (++start != end)
     {
-        if ( boost::get<2>(*start) == SEG_MOVETO)
+        if ( std::get<2>(*start) == SEG_MOVETO)
         {
-            x0 = boost::get<0>(*start);
-            y0 = boost::get<1>(*start);
+            x0 = std::get<0>(*start);
+            y0 = std::get<1>(*start);
             continue;
         }
-        x1=boost::get<0>(*start);
-        y1=boost::get<1>(*start);
+        x1=std::get<0>(*start);
+        y1=std::get<1>(*start);
 
         double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
         if (distance < tol)

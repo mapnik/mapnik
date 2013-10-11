@@ -38,7 +38,7 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
-#include <boost/fusion/include/boost_tuple.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunct
 
 namespace boost { namespace spirit { namespace traits {
@@ -74,14 +74,14 @@ struct get_first
     result_type operator() (geometry_type const& geom) const
     {
         geometry_type::value_type coord;
-        boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+        std::get<0>(coord) = geom.vertex(0,&std::get<1>(coord),&std::get<2>(coord));
         return coord;
     }
 };
 
 struct multi_geometry_type
 {
-    typedef boost::tuple<unsigned,bool>  result_type;
+    typedef std::tuple<unsigned,bool>  result_type;
     result_type operator() (geometry_container const& geom) const
     {
         unsigned type = 0u;
@@ -100,7 +100,7 @@ struct multi_geometry_type
             type = itr->type();
         }
         if (geom.size() > 1) type +=3;
-        return boost::tuple<unsigned,bool>(type, collection);
+        return std::tuple<unsigned,bool>(type, collection);
     }
 };
 #else
@@ -123,7 +123,7 @@ struct get_first
     geometry_type::value_type const operator() (geometry_type const& geom) const
     {
         geometry_type::value_type coord;
-        boost::get<0>(coord) = geom.vertex(0,&boost::get<1>(coord),&boost::get<2>(coord));
+        std::get<0>(coord) = geom.vertex(0,&std::get<1>(coord),&std::get<2>(coord));
         return coord;
     }
 };
@@ -131,9 +131,9 @@ struct get_first
 struct multi_geometry_type
 {
     template <typename T>
-    struct result { typedef boost::tuple<unsigned,bool> type; };
+    struct result { typedef std::tuple<unsigned,bool> type; };
 
-    boost::tuple<unsigned,bool> operator() (geometry_container const& geom) const
+    std::tuple<unsigned,bool> operator() (geometry_container const& geom) const
     {
         unsigned type = 0u;
         bool collection = false;
@@ -151,7 +151,7 @@ struct multi_geometry_type
             type = itr->type();
         }
         if (geom.size() > 1) type +=3;
-        return boost::tuple<unsigned,bool>(type, collection);
+        return std::tuple<unsigned,bool>(type, collection);
     }
 };
 #endif
@@ -269,7 +269,7 @@ struct geometry_generator_grammar :
 
 template <typename OutputIterator>
 struct multi_geometry_generator_grammar :
-        karma::grammar<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >,
+        karma::grammar<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
                        geometry_container const& ()>
 {
 
@@ -323,11 +323,11 @@ struct multi_geometry_generator_grammar :
 
     }
     // rules
-    karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >,
+    karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
                 geometry_container const&()> start;
-    karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >,
+    karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
                 geometry_container const&()> geometry_collection;
-    karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >,
+    karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >,
                 geometry_container const&()> geometry;
     karma::rule<OutputIterator, karma::locals<unsigned>,
                 geometry_type const&()> geometry2;

@@ -38,7 +38,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/fusion/include/boost_tuple.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/include/at.hpp>
 #include <boost/fusion/include/cons.hpp>
 
@@ -177,7 +177,7 @@ template <typename OutputIterator>
 struct feature_generator_grammar:
         karma::grammar<OutputIterator, mapnik::feature_impl const&()>
 {
-    typedef boost::tuple<std::string, mapnik::value> pair_type;
+    typedef std::tuple<std::string, mapnik::value> pair_type;
     typedef make_properties_range::properties_range_type range_type;
 
     feature_generator_grammar()

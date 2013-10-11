@@ -38,7 +38,7 @@ namespace mapnik {
 class query
 {
 public:
-    typedef boost::tuple<double,double> resolution_type;
+    typedef std::tuple<double,double> resolution_type;
 
     query(box2d<double> const& bbox,
           resolution_type const& resolution,

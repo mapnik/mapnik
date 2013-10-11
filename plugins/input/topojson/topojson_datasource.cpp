@@ -140,6 +140,9 @@ mapnik::layer_descriptor topojson_datasource::get_descriptor() const
 
 mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) const
 {
+    std::cerr << "Resolution=" << std::get<0>(q.resolution())
+              << "," << std::get<1>(q.resolution())
+              << " scale_denominator=" << q.scale_denominator() << std::endl;
     // if the query box intersects our world extent then query for features
     mapnik::box2d<double> const& b = q.get_bbox();
     if (extent_.intersects(b))
@@ -157,12 +160,9 @@ mapnik::featureset_ptr topojson_datasource::features_at_point(mapnik::coord2d co
     mapnik::box2d<double> query_bbox(pt, pt);
     query_bbox.pad(tol);
     mapnik::query q(query_bbox);
-    std::vector<mapnik::attribute_descriptor> const& desc = desc_.get_descriptors();
-    std::vector<mapnik::attribute_descriptor>::const_iterator itr = desc.begin();
-    std::vector<mapnik::attribute_descriptor>::const_iterator end = desc.end();
-    for ( ;itr!=end;++itr)
+    for (auto const& attr_info : desc_.get_descriptors())
     {
-        q.add_property_name(itr->get_name());
+        q.add_property_name(attr_info.get_name());
     }
     return features(q);
 }

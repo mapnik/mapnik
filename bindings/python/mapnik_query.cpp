@@ -40,7 +40,7 @@ struct resolution_to_tuple
 {
     static PyObject* convert(query::resolution_type const& x)
     {
-        python::object tuple(python::make_tuple(x.get<0>(), x.get<1>()));
+        python::object tuple(python::make_tuple(std::get<0>(x), std::get<1>(x)));
         return python::incref(tuple.ptr());
     }
 

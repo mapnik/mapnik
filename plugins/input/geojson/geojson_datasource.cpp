@@ -151,8 +151,8 @@ geojson_datasource::geojson_datasource(parameters const& params)
             mapnik::feature_kv_iterator f_end = f->end();
             for ( ;f_itr!=f_end; ++f_itr)
             {
-                desc_.add_descriptor(mapnik::attribute_descriptor(boost::get<0>(*f_itr),
-                    boost::apply_visitor(attr_value_converter(),boost::get<1>(*f_itr).base())));
+                desc_.add_descriptor(mapnik::attribute_descriptor(std::get<0>(*f_itr),
+                    boost::apply_visitor(attr_value_converter(),std::get<1>(*f_itr).base())));
             }
         }
         else

@@ -190,8 +190,8 @@ void MapWidget::mousePressEvent(QMouseEvent* e)
 
                       for ( ;itr!=end; ++itr)
                       {
-                          info.push_back(QPair<QString,QString>(QString(boost::get<0>(*itr).c_str()),
-                                                                boost::get<1>(*itr).to_string().c_str()));
+                          info.push_back(QPair<QString,QString>(QString(std::get<0>(*itr).c_str()),
+                                                                std::get<1>(*itr).to_string().c_str()));
                       }
 
                       typedef mapnik::coord_transform<mapnik::CoordTransform,mapnik::geometry_type> path_type;

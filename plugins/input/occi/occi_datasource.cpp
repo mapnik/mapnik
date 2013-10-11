@@ -506,8 +506,8 @@ featureset_ptr occi_datasource::features(query const& q) const
 #endif
 
     box2d<double> const& box = q.get_bbox();
-    const double px_gw = 1.0 / boost::get<0>(q.resolution());
-    const double px_gh = 1.0 / boost::get<1>(q.resolution());
+    const double px_gw = 1.0 / std::get<0>(q.resolution());
+    const double px_gh = 1.0 / std::get<1>(q.resolution());
     const double scale_denom = q.scale_denominator();
 
     std::ostringstream s;

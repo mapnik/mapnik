@@ -36,7 +36,7 @@
 #include <boost/spirit/include/phoenix_fusion.hpp>
 #include <boost/spirit/include/phoenix_function.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
-#include <boost/fusion/include/boost_tuple.hpp>
+#include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/type_traits/remove_pointer.hpp>
 #include <boost/math/special_functions/trunc.hpp> // for vc++ and android whose c++11 libs lack std::trunct
 
@@ -81,7 +81,7 @@ struct get_first
     {
         typename geometry_type::value_type coord;
         geom.rewind(0);
-        boost::get<0>(coord) = geom.vertex(&boost::get<1>(coord),&boost::get<2>(coord));
+        std::get<0>(coord) = geom.vertex(&std::get<1>(coord),&std::get<2>(coord));
         return coord;
     }
 };
@@ -109,7 +109,7 @@ struct get_x
 
     double operator() (value_type const& val) const
     {
-        return boost::get<1>(val);
+        return std::get<1>(val);
     }
 };
 
@@ -123,7 +123,7 @@ struct get_y
 
     double operator() (value_type const& val) const
     {
-        return boost::get<2>(val);
+        return std::get<2>(val);
     }
 };
 
@@ -133,9 +133,9 @@ struct multi_geometry_type
     typedef T geometry_container;
 
     template <typename U>
-    struct result { typedef boost::tuple<unsigned,bool> type; };
+    struct result { typedef std::tuple<unsigned,bool> type; };
 
-    boost::tuple<unsigned,bool> operator() (geometry_container const& geom) const;
+    std::tuple<unsigned,bool> operator() (geometry_container const& geom) const;
 };
 
 
@@ -200,14 +200,14 @@ struct wkt_generator :
 
 template <typename OutputIterator, typename GeometryContainer>
 struct wkt_multi_generator :
-        karma::grammar<OutputIterator, karma::locals< boost::tuple<unsigned,bool> >, GeometryContainer const& ()>
+        karma::grammar<OutputIterator, karma::locals< std::tuple<unsigned,bool> >, GeometryContainer const& ()>
 {
     typedef GeometryContainer geometry_contaner;
     typedef boost::remove_pointer<typename geometry_container::value_type>::type geometry_type;
 
     wkt_multi_generator();
     // rules
-    karma::rule<OutputIterator, karma::locals<boost::tuple<unsigned,bool> >, GeometryContainer const& ()> wkt;
+    karma::rule<OutputIterator, karma::locals<std::tuple<unsigned,bool> >, GeometryContainer const& ()> wkt;
     karma::rule<OutputIterator, GeometryContainer const& ()> geometry;
     karma::rule<OutputIterator, geometry_type const& ()> single_geometry;
     karma::rule<OutputIterator, GeometryContainer const& ()> multi_geometry;

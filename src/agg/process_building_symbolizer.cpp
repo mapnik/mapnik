@@ -119,16 +119,13 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
             }
 
             std::sort(face_segments.begin(),face_segments.end(), y_order);
-            std::deque<segment_t>::const_iterator itr=face_segments.begin();
-            std::deque<segment_t>::const_iterator end=face_segments.end();
-
-            for (; itr!=end; ++itr)
+            for (auto const& seg : face_segments)
             {
                 const std::unique_ptr<geometry_type> faces(new geometry_type(geometry_type::types::Polygon));
-                faces->move_to(itr->get<0>(),itr->get<1>());
-                faces->line_to(itr->get<2>(),itr->get<3>());
-                faces->line_to(itr->get<2>(),itr->get<3>() + height);
-                faces->line_to(itr->get<0>(),itr->get<1>() + height);
+                faces->move_to(std::get<0>(seg),std::get<1>(seg));
+                faces->line_to(std::get<2>(seg),std::get<3>(seg));
+                faces->line_to(std::get<2>(seg),std::get<3>(seg) + height);
+                faces->line_to(std::get<0>(seg),std::get<1>(seg) + height);
 
                 path_type faces_path (t_,*faces,prj_trans);
                 ras_ptr->add_path(faces_path);
@@ -136,8 +133,8 @@ void agg_renderer<T>::process(building_symbolizer const& sym,
                 agg::render_scanlines(*ras_ptr, sl, ren);
                 ras_ptr->reset();
                 //
-                frame->move_to(itr->get<0>(),itr->get<1>());
-                frame->line_to(itr->get<0>(),itr->get<1>()+height);
+                frame->move_to(std::get<0>(seg),std::get<1>(seg));
+                frame->line_to(std::get<0>(seg),std::get<1>(seg)+height);
 
             }
 

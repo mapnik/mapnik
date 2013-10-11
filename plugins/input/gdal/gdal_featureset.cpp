@@ -31,8 +31,7 @@
 
 // boost
 #include <boost/format.hpp>
-#include <boost/make_shared.hpp>
-
+#include <boost/variant/apply_visitor.hpp>
 // stl
 #include <cmath>
 
@@ -90,23 +89,8 @@ feature_ptr gdal_featureset::next()
     if (first_)
     {
         first_ = false;
-
         MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Next feature in Dataset=" << &dataset_;
-
-        query *q = boost::get<query>(&gquery_);
-        if (q)
-        {
-            return get_feature(*q);
-        }
-        else
-        {
-            coord2d *p = boost::get<coord2d>(&gquery_);
-            if (p)
-            {
-                return get_feature_at_point(*p);
-            }
-        }
-        // should never reach here
+        return boost::apply_visitor(query_dispatch(*this), gquery_);
     }
     return feature_ptr();
 }
@@ -138,8 +122,8 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
     box2d<double> box = t.forward(intersect);
 
     //size of resized output pixel in source image domain
-    double margin_x = 1.0 / (std::fabs(dx_) * boost::get<0>(q.resolution()));
-    double margin_y = 1.0 / (std::fabs(dy_) * boost::get<1>(q.resolution()));
+    double margin_x = 1.0 / (std::fabs(dx_) * std::get<0>(q.resolution()));
+    double margin_y = 1.0 / (std::fabs(dy_) * std::get<1>(q.resolution()));
     if (margin_x < 1)
     {
         margin_x = 1.0;
@@ -191,13 +175,13 @@ feature_ptr gdal_featureset::get_feature(mapnik::query const& q)
 
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Raster extent=" << raster_extent_;
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: View extent=" << intersect;
-    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Query resolution=" << boost::get<0>(q.resolution()) << "," << boost::get<1>(q.resolution());
+    MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: Query resolution=" << std::get<0>(q.resolution()) << "," << std::get<1>(q.resolution());
     MAPNIK_LOG_DEBUG(gdal) << "gdal_featureset: StartX=" << x_off << " StartY=" << y_off << " Width=" << width << " Height=" << height;
 
     if (width > 0 && height > 0)
     {
-        double width_res = boost::get<0>(q.resolution());
-        double height_res = boost::get<1>(q.resolution());
+        double width_res = std::get<0>(q.resolution());
+        double height_res = std::get<1>(q.resolution());
         int im_width = int(width_res * intersect.width() + 0.5);
         int im_height = int(height_res * intersect.height() + 0.5);
 

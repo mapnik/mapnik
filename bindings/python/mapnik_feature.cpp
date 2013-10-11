@@ -114,7 +114,7 @@ boost::python::dict attributes(mapnik::feature_impl const& f)
 
     for ( ;itr!=end; ++itr)
     {
-        attributes[boost::get<0>(*itr)] = boost::get<1>(*itr);
+        attributes[std::get<0>(*itr)] = std::get<1>(*itr);
     }
 
     return attributes;

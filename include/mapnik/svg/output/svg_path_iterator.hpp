@@ -170,10 +170,10 @@ private:
 
 /*!
  * @brief Specialization of geometry_iterator, as needed by mapnik::svg::svg_path_data_grammar.
- * The Value type is a boost::tuple that holds 5 elements, the command and the x and y coordinate.
+ * The Value type is a std::tuple that holds 5 elements, the command and the x and y coordinate.
  * Each coordinate is stored twice to match the needs of the grammar.
  */
-//typedef path_iterator<boost::tuple<unsigned, geometry_type::coord_type, geometry_type::value_type>,
+//typedef path_iterator<std::tuple<unsigned, geometry_type::coord_type, geometry_type::value_type>,
 //                      coord_transform<CoordTransform, geometry_type> > path_iterator_type;
 
 }}

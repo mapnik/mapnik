@@ -67,14 +67,14 @@ feature_ptr rasterlite_featureset::next()
     {
         first_ = false;
 
-        query *q = boost::get<query>(&gquery_);
+        query *q = std::get<query>(&gquery_);
         if (q)
         {
             return get_feature(*q);
         }
         else
         {
-            coord2d *p = boost::get<coord2d>(&gquery_);
+            coord2d *p = std::get<coord2d>(&gquery_);
             if (p)
             {
                 return get_feature_at_point(*p);
@@ -97,8 +97,8 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     box2d<double> raster_extent(x0, y0, x1, y1);
     box2d<double> intersect = raster_extent.intersect(q.get_bbox());
 
-    const int width = static_cast<int>(boost::get<0>(q.resolution()) * intersect.width() + 0.5);
-    const int height = static_cast<int>(boost::get<0>(q.resolution()) * intersect.height() + 0.5);
+    const int width = static_cast<int>(std::get<0>(q.resolution()) * intersect.width() + 0.5);
+    const int height = static_cast<int>(std::get<0>(q.resolution()) * intersect.height() + 0.5);
 
     const double pixel_size = (intersect.width() >= intersect.height()) ?
         (intersect.width() / (double) width) : (intersect.height() / (double) height);
@@ -106,7 +106,7 @@ feature_ptr rasterlite_featureset::get_feature(mapnik::query const& q)
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Raster extent=" << raster_extent;
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: View extent=" << q.get_bbox();
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Intersect extent=" << intersect;
-    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Query resolution=" << boost::get<0>(q.resolution())  << "," << boost::get<1>(q.resolution());
+    MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Query resolution=" << std::get<0>(q.resolution())  << "," << std::get<1>(q.resolution());
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Size=" << width << " " << height;
     MAPNIK_LOG_DEBUG(rasterlite) << "rasterlite_featureset: Pixel Size=" << pixel_size;
 
