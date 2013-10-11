@@ -24,7 +24,6 @@
 #define BOOST_CHRONO_HEADER_ONLY
 #include <boost/chrono/process_cpu_clocks.hpp>
 #include <boost/chrono.hpp>
-//#include <boost/thread/thread.hpp>
 
 using namespace boost::chrono;
 using namespace mapnik;
