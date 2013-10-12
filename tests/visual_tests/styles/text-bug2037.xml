@@ -10,11 +10,21 @@
     </Layer>
     <Style name="My Style">
         <Rule>
-            <PointSymbolizer/>
+            <Filter>[nr] = 3</Filter>
+            <TextSymbolizer wrap-width="20" face-name="DejaVu Sans Book" size="9"  wrap-before="true">"abcdef&#10;ghijkl&#10;mnopq&#10;stuv&#10;wxyz"</TextSymbolizer>
         </Rule>
         <Rule>
-            <Filter>[nr] = 5</Filter>
-            <TextSymbolizer wrap-width="20" face-name="DejaVu Sans Book" size="9" allow-overlap="true">"xxxxxx&#10;xxxxxx"</TextSymbolizer>
+            <Filter>[nr] = 4</Filter>
+            <TextSymbolizer wrap-width="20" face-name="DejaVu Sans Book" size="9" wrap-before="false">"abcdef&#10;ghijkl&#10;mnopq&#10;stuv&#10;wxyz"</TextSymbolizer>
         </Rule>
+        <Rule>
+            <Filter>[nr] = 7</Filter>
+            <TextSymbolizer wrap-width="30" face-name="DejaVu Sans Book" size="9" wrap-before="true">"Some test text with&#10;forced&#10;line breaks"</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 8</Filter>
+            <TextSymbolizer wrap-width="30" face-name="DejaVu Sans Book" size="9" wrap-before="false">"Some test text with&#10;forced&#10;line breaks"</TextSymbolizer>
+        </Rule>
+
     </Style>
 </Map>

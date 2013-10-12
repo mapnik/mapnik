@@ -95,7 +95,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
     breakitr->setText(text);
 
     double current_line_length = 0;
-    unsigned last_break_position = 0;
+    unsigned last_break_position = line->first_char();
     for (unsigned i=line->first_char(); i<line->last_char(); i++)
     {
         //TODO: character_spacing
@@ -109,11 +109,8 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
 
 
         unsigned break_position = wrap_before ? breakitr->preceding(i) : breakitr->following(i);
-        /* Break iterator operates on the whole string, while we only look at one line. So we need to
-         * clamp break values. */
-        if (break_position < line->first_char()) break_position = line->first_char();
-        if (break_position > line->last_char()) break_position = line->last_char();
-
+        /* following() returns a break position after the last word. So DONE should only be returned
+         * when calling preceding. */
         if (break_position <= last_break_position || break_position == BreakIterator::DONE)
         {
             //A single word is longer than the maximum line width.
@@ -125,6 +122,11 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
                 MAPNIK_LOG_WARN(text_layout) << "Unexpected result in break_line. Trying to recover...\n";
             }
         }
+        /* Break iterator operates on the whole string, while we only look at one line. So we need to
+         * clamp break values. */
+        if (break_position < line->first_char()) break_position = line->first_char();
+        if (break_position > line->last_char()) break_position = line->last_char();
+
         text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
         clear_cluster_widths(last_break_position, break_position);
         shape_text(new_line);
@@ -133,7 +135,7 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
         i = break_position - 1;
         current_line_length = 0;
     }
-    if (last_break_position == 0)
+    if (last_break_position == line->first_char())
     {
         //No line breaks => no reshaping required
         add_line(line);
