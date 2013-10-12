@@ -43,9 +43,9 @@ void text_layout::add_text(const UnicodeString &str, char_properties_ptr format)
     itemizer_.add_text(str, format);
 }
 
-const UnicodeString &text_layout::get_text() const
+const UnicodeString &text_layout::text() const
 {
-    return itemizer_.get_text();
+    return itemizer_.text();
 }
 
 void text_layout::layout(double wrap_width, unsigned text_ratio, bool wrap_before)
@@ -53,16 +53,19 @@ void text_layout::layout(double wrap_width, unsigned text_ratio, bool wrap_befor
     unsigned num_lines = itemizer_.num_lines();
     for (unsigned i = 0; i < num_lines; i++)
     {
-        std::pair<unsigned, unsigned> line_limits = itemizer_.get_line(i);
+        std::pair<unsigned, unsigned> line_limits = itemizer_.line(i);
         text_line_ptr line = boost::make_shared<text_line>(line_limits.first, line_limits.second);
-        shape_text(line);
         break_line(line, wrap_width, text_ratio, wrap_before); //Break line if neccessary
     }
 }
 
-
+/* In the Unicode string characters are always stored in logical order.
+ * This makes line breaking easy. One word is added to the current line at a time. Once the line is too long
+ * we either go back one step or inset the line break at the current position (depending on "wrap_before" setting).
+ * At the end everything that is left over is added as the final line. */
 void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned text_ratio, bool wrap_before)
 {
+    shape_text(line);
     if (!wrap_width || line->width() < wrap_width)
     {
         add_line(line);
@@ -78,19 +81,22 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
         wrap_width = wrap_at;
     }
 
-    UnicodeString const& text = itemizer_.get_text();
+    UnicodeString const& text = itemizer_.text();
     Locale locale; //TODO: Is the default constructor correct?
     UErrorCode status = U_ZERO_ERROR;
     BreakIterator *breakitr = BreakIterator::createLineInstance(locale, status);
+
     //Not breaking the text if an error occurs is probably the best thing we can do.
     if (!U_SUCCESS(status)) {
         add_line(line);
         return;
     }
+
     breakitr->setText(text);
-    unsigned current_line_length = 0;
+
+    double current_line_length = 0;
     unsigned last_break_position = 0;
-    for (unsigned i=line->get_first_char(); i<line->get_last_char(); i++)
+    for (unsigned i=line->first_char(); i<line->last_char(); i++)
     {
         //TODO: character_spacing
         std::map<unsigned, double>::const_iterator width_itr = width_map_.find(i);
@@ -98,38 +104,44 @@ void text_layout::break_line(text_line_ptr line, double wrap_width, unsigned tex
         {
             current_line_length += width_itr->second;
         }
-        if (current_line_length > wrap_width)
+        if (current_line_length <= wrap_width) continue;
+        /***********************************************/
+
+
+        unsigned break_position = wrap_before ? breakitr->preceding(i) : breakitr->following(i);
+        /* Break iterator operates on the whole string, while we only look at one line. So we need to
+         * clamp break values. */
+        if (break_position < line->first_char()) break_position = line->first_char();
+        if (break_position > line->last_char()) break_position = line->last_char();
+
+        if (break_position <= last_break_position || break_position == BreakIterator::DONE)
         {
-            unsigned break_position = wrap_before ? breakitr->preceding(i) : breakitr->following(i);
-            if (break_position <= last_break_position || break_position == BreakIterator::DONE)
+            //A single word is longer than the maximum line width.
+            //Violate line width requirement and choose next break position
+            break_position = breakitr->following(i);
+            if (break_position == BreakIterator::DONE)
             {
-                //A single word is longer than the maximum line width.
-                //Violate line width requirement and choose next break position
-                break_position = breakitr->following(i);
-                if (break_position == BreakIterator::DONE)
-                {
-                    break_position = line->get_last_char();
-                    MAPNIK_LOG_WARN(text_layout) << "Unexpected result in break_line. Trying to recover...\n";
-                }
+                break_position = line->last_char();
+                MAPNIK_LOG_WARN(text_layout) << "Unexpected result in break_line. Trying to recover...\n";
             }
-            text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
-            clear_cluster_widths(last_break_position, break_position);
-            shape_text(new_line);
-            add_line(new_line);
-            last_break_position = break_position;
-            i = break_position - 1;
-            current_line_length = 0;
         }
+        text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, break_position);
+        clear_cluster_widths(last_break_position, break_position);
+        shape_text(new_line);
+        add_line(new_line);
+        last_break_position = break_position;
+        i = break_position - 1;
+        current_line_length = 0;
     }
     if (last_break_position == 0)
     {
-        //No line breaks => no reshaping
+        //No line breaks => no reshaping required
         add_line(line);
     }
-    else if (last_break_position != line->get_last_char())
+    else if (last_break_position != line->last_char())
     {
-        text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, line->get_last_char());
-        clear_cluster_widths(last_break_position, line->get_last_char());
+        text_line_ptr new_line = boost::make_shared<text_line>(last_break_position, line->last_char());
+        clear_cluster_widths(last_break_position, line->last_char());
         shape_text(new_line);
         add_line(new_line);
     }
@@ -257,12 +269,12 @@ void text_line::set_first_line(bool first_line)
     first_line_ = first_line;
 }
 
-unsigned text_line::get_first_char() const
+unsigned text_line::first_char() const
 {
     return first_char_;
 }
 
-unsigned text_line::get_last_char() const
+unsigned text_line::last_char() const
 {
     return last_char_;
 }

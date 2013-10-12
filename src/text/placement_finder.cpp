@@ -256,7 +256,7 @@ bool placement_finder::find_point_placement(pixel_position pos)
     if (collision(bbox)) return false;
     /* add_marker first checks for collision and then updates the detector.*/
     if (has_marker_ && !add_marker(glyphs, pos)) return false;
-    if (layout_.size()) detector_.insert(bbox, layout_.get_text());
+    if (layout_.size()) detector_.insert(bbox, layout_.text());
 
     /* IMPORTANT NOTE:
        x and y are relative to the center of the text
@@ -375,7 +375,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
 
     glyph_positions_ptr glyphs = boost::make_shared<glyph_positions>();
     std::vector<box2d<double> > bboxes;
-    bboxes.reserve(layout_.get_text().length());
+    bboxes.reserve(layout_.text().length());
     unsigned upside_down_glyph_count = 0;
 
 
@@ -445,7 +445,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
         //See comment above
         offset -= sign * (*line_itr)->height()/2;
     }
-    if (upside_down_glyph_count > layout_.get_text().length()/2)
+    if (upside_down_glyph_count > layout_.text().length()/2)
     {
         if (orientation == UPRIGHT_AUTO)
         {
@@ -461,7 +461,7 @@ bool placement_finder::single_line_placement(vertex_cache &pp, text_upright_e or
     }
     BOOST_FOREACH(box2d<double> bbox, bboxes)
     {
-        detector_.insert(bbox, layout_.get_text());
+        detector_.insert(bbox, layout_.text());
     }
     placements_.push_back(glyphs);
     return true;

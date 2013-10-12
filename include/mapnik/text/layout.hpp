@@ -51,7 +51,7 @@ public:
     typedef std::vector<glyph_info> glyph_vector;
     typedef glyph_vector::const_iterator const_iterator;
     /** Get glyph vector. */
-    glyph_vector const& get_glyphs() const { return glyphs_; }
+    glyph_vector const& glyphs() const { return glyphs_; }
     /** Append glyph. */
     void add_glyph(glyph_info const& glyph, double scale_factor_);
 
@@ -79,9 +79,9 @@ public:
     void set_first_line(bool first_line);
 
     /** Index of first UTF-16 char. */
-    unsigned get_first_char() const;
+    unsigned first_char() const;
     /** Index of last UTF-16 char. */
-    unsigned get_last_char() const;
+    unsigned last_char() const;
 
     /** Number of glyphs. */
     unsigned size() const;
@@ -108,7 +108,7 @@ public:
     void add_text(UnicodeString const& str, char_properties_ptr format);
 
     /** Returns the complete text stored in this layout.*/
-    UnicodeString const& get_text() const;
+    UnicodeString const& text() const;
 
     /** Processes the text into a list of glyphs, performing RTL/LTR handling, shaping and line breaking. */
     void layout(double wrap_width, unsigned text_ratio, bool wrap_before);

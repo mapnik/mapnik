@@ -69,7 +69,7 @@ void text_itemizer::clear()
     forced_line_breaks_.push_back(0);
 }
 
-std::pair<unsigned, unsigned> text_itemizer::get_line(unsigned i) const
+std::pair<unsigned, unsigned> text_itemizer::line(unsigned i) const
 {
 #ifdef MAPNIK_DEBUG
     if (i >= forced_line_breaks_.size()) return std::make_pair(0, 0);
