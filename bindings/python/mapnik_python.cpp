@@ -102,8 +102,9 @@ void export_wkt_reader();
 #include "mapnik_threads.hpp"
 #include "python_optional.hpp"
 #include <mapnik/marker_cache.hpp>
+#if defined(SHAPE_MEMORY_MAPPED_FILE)
 #include <mapnik/mapped_memory_cache.hpp>
-
+#endif
 
 void clear_cache()
 {
