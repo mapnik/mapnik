@@ -108,7 +108,9 @@ void export_wkt_reader();
 void clear_cache()
 {
     mapnik::marker_cache::instance().clear();
+#if defined(SHAPE_MEMORY_MAPPED_FILE)
     mapnik::mapped_memory_cache::instance().clear();
+#endif
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
