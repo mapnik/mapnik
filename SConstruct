@@ -994,6 +994,30 @@ int main()
         return True
     return False
 
+def supports_cxx11(context,silent=False):
+    ret = context.TryRun("""
+
+int main()
+{
+#if __cplusplus >= 201103
+    return 0;
+#else
+    return -1;
+#endif
+}
+
+""", '.cpp')
+    if not silent:
+        context.Message('Checking if compiler (%s) supports -std=c++11 flag... ' % context.env.get('CXX','CXX'))
+    if silent:
+        context.did_show_result=1
+    context.Result(ret[0])
+    if ret[0]:
+        return True
+    return False
+
+
+
 conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'CheckPKGConfig'        : CheckPKGConfig,
                'CheckPKG'              : CheckPKG,
@@ -1011,6 +1035,7 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'icu_at_least_four_two' : icu_at_least_four_two,
                'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
+               'supports_cxx11'        : supports_cxx11,
                }
 
 
@@ -1121,7 +1146,6 @@ if not preconfigured:
     if env['SYSTEM_FONTS']:
         if not os.path.isdir(env['SYSTEM_FONTS']):
             color_print(1,'Warning: Directory specified for SYSTEM_FONTS does not exist!')
-    #### Libraries and headers dependency checks ####
 
     # Set up for libraries and headers dependency checks
     env['CPPPATH'] = ['#include', '#']
@@ -1258,6 +1282,11 @@ if not preconfigured:
     # if requested, sort LIBPATH and CPPPATH before running CheckLibWithHeader tests
     if env['PRIORITIZE_LINKING']:
         conf.prioritize_paths(silent=True)
+
+    # test for C++11 support, which is required
+    if not conf.supports_cxx11():
+        color_print(1,"C++ compiler does not support C++11 standard, which is required. Please use Mapnik 2.x instead of 3.x as an alternative")
+        Exit(1)
 
     if not env['HOST']:
         for libname, headers, required, lang in REQUIRED_LIBSHEADERS:
