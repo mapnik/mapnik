@@ -345,12 +345,13 @@ char_info font_face_set::character_dimensions(unsigned int c)
 }
 
 
-void font_face_set::get_string_info(string_info & info, mapnik::value_unicode_string const& ustr, char_properties *format)
+void font_face_set::get_string_info(string_info & info, mapnik::value_unicode_string const& str, char_properties *format)
 {
     double avg_height = character_dimensions('X').height();
     UErrorCode err = U_ZERO_ERROR;
-    mapnik::value_unicode_string reordered;
-    mapnik::value_unicode_string shaped;
+    UnicodeString ustr = UnicodeString::fromUTF8(str);
+    UnicodeString reordered;
+    UnicodeString shaped;
 
     int32_t length = ustr.length();
 

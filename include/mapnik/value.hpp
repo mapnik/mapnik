@@ -43,35 +43,13 @@
 #include <string>
 #include <cmath>
 #include <memory>
+#include <algorithm>
 
 // icu
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
 
 namespace mapnik  {
-
-inline void to_utf8(mapnik::value_unicode_string const& input, std::string & target)
-{
-    if (input.isEmpty()) return;
-
-    const int BUF_SIZE = 256;
-    char buf [BUF_SIZE];
-    int len;
-
-    UErrorCode err = U_ZERO_ERROR;
-    u_strToUTF8(buf, BUF_SIZE, &len, input.getBuffer(), input.length(), &err);
-    if (err == U_BUFFER_OVERFLOW_ERROR || err == U_STRING_NOT_TERMINATED_WARNING )
-    {
-        const std::unique_ptr<char[]> buf_ptr(new char [len+1]);
-        err = U_ZERO_ERROR;
-        u_strToUTF8(buf_ptr.get() , len + 1, &len, input.getBuffer(), input.length(), &err);
-        target.assign(buf_ptr.get() , static_cast<std::size_t>(len));
-    }
-    else
-    {
-        target.assign(buf, static_cast<std::size_t>(len));
-    }
-}
 
 typedef boost::variant<value_null,value_bool,value_integer,value_double,value_unicode_string> value_base;
 
@@ -186,7 +164,7 @@ struct not_equals
     bool operator() (value_null lhs, value_unicode_string const& rhs) const
     {
         boost::ignore_unused_variable_warning(lhs);
-        if (rhs.isEmpty()) return false;
+        if (rhs.empty()) return false;
         return true;
     }
 
@@ -593,7 +571,8 @@ struct negate : public boost::static_visitor<V>
     value_type operator() (value_unicode_string const& ustr) const
     {
         value_unicode_string inplace(ustr);
-        return inplace.reverse();
+        std::reverse(inplace.begin(), inplace.end());
+        return inplace;
     }
 };
 
@@ -606,7 +585,7 @@ struct to_bool : public boost::static_visitor<value_bool>
 
     value_bool operator() (value_unicode_string const& ustr) const
     {
-        return !ustr.isEmpty();
+        return !ustr.empty();
     }
 
     value_bool operator() (value_null const& val) const
@@ -633,11 +612,9 @@ struct to_string : public boost::static_visitor<std::string>
     }
 
     // specializations
-    std::string operator() (value_unicode_string const& val) const
+    std::string const& operator() (value_unicode_string const& val) const
     {
-        std::string utf8;
-        to_utf8(val,utf8);
-        return utf8;
+        return val;
     }
 
     std::string operator() (value_double val) const
@@ -689,9 +666,9 @@ struct to_expression_string : public boost::static_visitor<std::string>
 {
     std::string operator() (value_unicode_string const& val) const
     {
-        std::string utf8;
-        to_utf8(val,utf8);
-        return "'" + utf8 + "'";
+        //std::string utf8(val);
+        //to_utf8(val);//,utf8);
+        return "'" + val + "'";
     }
 
     std::string operator() (value_integer val) const
@@ -737,19 +714,12 @@ struct to_double : public boost::static_visitor<value_double>
         return static_cast<value_double>(val);
     }
 
-    value_double operator() (std::string const& val) const
+    value_double operator() (value_unicode_string const& val) const
     {
         value_double result;
         if (util::string2double(val,result))
             return result;
         return 0;
-    }
-
-    value_double operator() (value_unicode_string const& val) const
-    {
-        std::string utf8;
-        to_utf8(val,utf8);
-        return operator()(utf8);
     }
 
     value_double operator() (value_null const& val) const
@@ -776,19 +746,12 @@ struct to_int : public boost::static_visitor<value_integer>
         return static_cast<value_integer>(val);
     }
 
-    value_integer operator() (std::string const& val) const
+    value_integer operator() (value_unicode_string const& val) const
     {
         value_integer result;
         if (util::string2int(val,result))
             return result;
         return value_integer(0);
-    }
-
-    value_integer operator() (value_unicode_string const& val) const
-    {
-        std::string utf8;
-        to_utf8(val,utf8);
-        return operator()(utf8);
     }
 
     value_integer operator() (value_null const& val) const

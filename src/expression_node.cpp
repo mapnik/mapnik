@@ -30,11 +30,11 @@ namespace mapnik
 
 regex_match_node::regex_match_node (expr_node const& a, mapnik::value_unicode_string const& ustr)
     : expr(a),
-      pattern(boost::make_u32regex(ustr)) {}
+      pattern(ustr) {}
 
 regex_replace_node::regex_replace_node (expr_node const& a, mapnik::value_unicode_string const& ustr, mapnik::value_unicode_string const& f)
     : expr(a),
-      pattern(boost::make_u32regex(ustr)),
+      pattern(ustr),
       format(f) {}
 
 #else

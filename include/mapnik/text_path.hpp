@@ -105,15 +105,13 @@ public:
 
     bool has_line_breaks() const
     {
-        // uint16_t
-        UChar break_char = '\n';
-        return (text_.indexOf(break_char) >= 0);
+        return  (text_.find('\n') != std::string::npos);
     }
 
     // Resets object to initial state.
     void clear()
     {
-        text_.remove();
+        text_.clear();
         characters_.clear();
     }
 };

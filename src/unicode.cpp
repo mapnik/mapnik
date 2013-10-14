@@ -42,14 +42,7 @@ transcoder::transcoder (std::string const& encoding)
 
 mapnik::value_unicode_string transcoder::transcode(const char* data, boost::int32_t length) const
 {
-    UErrorCode err = U_ZERO_ERROR;
-
-    mapnik::value_unicode_string ustr(data,length,conv_,err);
-    if (ustr.isBogus())
-    {
-        ustr.remove();
-    }
-    return ustr;
+    return mapnik::value_unicode_string(data);
 }
 
 transcoder::~transcoder()

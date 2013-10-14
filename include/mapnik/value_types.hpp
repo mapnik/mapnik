@@ -23,9 +23,6 @@
 #ifndef MAPNIK_VALUE_TYPES_HPP
 #define MAPNIK_VALUE_TYPES_HPP
 
-// icu
-#include <unicode/unistr.h>  // for UnicodeString
-
 // boost
 #include <boost/concept_check.hpp>
 
@@ -35,14 +32,13 @@
 namespace mapnik  {
 
 #ifdef BIGINT
-//typedef boost::long_long_type value_integer;
 typedef long long value_integer;
 #else
 typedef int value_integer;
 #endif
 
 typedef double value_double;
-typedef U_NAMESPACE_QUALIFIER UnicodeString value_unicode_string;
+typedef std::string value_unicode_string;
 typedef bool value_bool;
 
 struct value_null

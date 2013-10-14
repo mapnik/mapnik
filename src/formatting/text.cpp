@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *****************************************************************************/
+
 // mapnik
 #include <mapnik/formatting/text.hpp>
 #include <mapnik/expression_string.hpp>
@@ -32,6 +33,7 @@
 // boost
 #include <boost/property_tree/ptree.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace mapnik
 {
@@ -57,17 +59,17 @@ void text_node::apply(char_properties const& p, feature_impl const& feature, pro
     mapnik::value_unicode_string text_str = boost::apply_visitor(evaluate<feature_impl,value_type>(feature), *text_).to_unicode();
     if (p.text_transform == UPPERCASE)
     {
-        text_str = text_str.toUpper();
+        boost::to_upper(text_str);
     }
     else if (p.text_transform == LOWERCASE)
     {
-        text_str = text_str.toLower();
+        boost::to_lower(text_str);
     }
 #if !UCONFIG_NO_BREAK_ITERATION
     else if (p.text_transform == CAPITALIZE)
     {
         // note: requires BreakIterator support in ICU which is optional
-        text_str = text_str.toTitle(NULL);
+        //text_str = text_str.toTitle(NULL);
     }
 #endif
     if (text_str.length() > 0) {

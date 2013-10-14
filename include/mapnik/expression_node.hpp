@@ -29,12 +29,9 @@
 #include <mapnik/attribute.hpp>
 #include <mapnik/expression_node_types.hpp>
 
-// boost
-#include <boost/regex.hpp>
-#if defined(BOOST_REGEX_HAS_ICU)
-#include <boost/regex/icu.hpp>
-#endif
-#include <boost/function.hpp>
+// stl
+#include  <functional>
+#include  <regex>
 
 namespace mapnik
 {
@@ -90,7 +87,7 @@ struct regex_match_node
 {
     regex_match_node (expr_node const& a, mapnik::value_unicode_string const& ustr);
     expr_node expr;
-    boost::u32regex pattern;
+    std::regex pattern;
 };
 
 
@@ -98,7 +95,7 @@ struct regex_replace_node
 {
     regex_replace_node (expr_node const& a, mapnik::value_unicode_string const& ustr, mapnik::value_unicode_string const& f);
     expr_node expr;
-    boost::u32regex pattern;
+    std::regex pattern;
     mapnik::value_unicode_string format;
 };
 
@@ -108,7 +105,7 @@ struct regex_match_node
 {
     regex_match_node (expr_node const& a, std::string const& str);
     expr_node expr;
-    boost::regex pattern;
+    std::regex pattern;
 };
 
 
@@ -116,7 +113,7 @@ struct regex_replace_node
 {
     regex_replace_node (expr_node const& a, std::string const& str, std::string const& f);
     expr_node expr;
-    boost::regex pattern;
+    std::regex pattern;
     std::string format;
 };
 #endif
@@ -129,7 +126,7 @@ struct function_call
           call_(f) {}
 
     expr_node expr;
-    boost::function<value_type(value_type)> call_;
+    std::function<value_type(value_type)> call_;
 };
 
 // ops

@@ -47,21 +47,13 @@ namespace mapnik
 template <typename T0,typename T1>
 expr_node regex_match_impl::operator() (T0 & node, T1 const& pattern) const
 {
-#if defined(BOOST_REGEX_HAS_ICU)
-    return regex_match_node(node,tr_.transcode(pattern.c_str()));
-#else
     return regex_match_node(node,pattern);
-#endif
 }
 
 template <typename T0,typename T1,typename T2>
 expr_node regex_replace_impl::operator() (T0 & node, T1 const& pattern, T2 const& format) const
 {
-#if defined(BOOST_REGEX_HAS_ICU)
-    return regex_replace_node(node,tr_.transcode(pattern.c_str()),tr_.transcode(format.c_str()));
-#else
     return regex_replace_node(node,pattern,format);
-#endif
 }
 
 template <typename Iterator>
@@ -162,7 +154,7 @@ expression_grammar<Iterator>::expression_grammar(mapnik::transcoder const& tr)
         | no_case[lit("false")] [_val = false]
         | no_case[lit("null")] [_val = value_null() ]
         | no_case[geom_type][_val = _1 ]
-        | ustring [_val = unicode_(_1) ]
+        | ustring [_val = _1]
         | lit("[mapnik::geometry_type]")[_val = construct<mapnik::geometry_type_attribute>()]
         | attr [_val = construct<mapnik::attribute>( _1 ) ]
         | '(' >> expr [_val = _1 ] >> ')'

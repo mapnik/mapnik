@@ -115,20 +115,6 @@ struct make_properties_range
     }
 };
 
-
-struct utf8
-{
-    template <typename T>
-    struct result { typedef std::string type; };
-
-    std::string operator() (mapnik::value_unicode_string const& ustr) const
-    {
-        std::string result;
-        to_utf8(ustr,result);
-        return result;
-    }
-};
-
 struct value_base
 {
     template <typename T>
@@ -221,7 +207,7 @@ struct feature_generator_grammar:
         value_null_ = string[_1 = "null"]
             ;
 
-        ustring = escaped_string_(quote_.c_str())[_1 = utf8_(_val)]
+        ustring = escaped_string_(quote_.c_str())[_1 = _val]
             ;
     }
 
@@ -238,7 +224,6 @@ struct feature_generator_grammar:
     // phoenix functions
     phoenix::function<get_id> id_;
     phoenix::function<value_base> value_base_;
-    phoenix::function<utf8> utf8_;
     std::string quote_;
 };
 

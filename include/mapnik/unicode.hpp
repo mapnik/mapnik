@@ -52,9 +52,13 @@ private:
 }
 
 namespace U_ICU_NAMESPACE {
-inline std::size_t hash_value(mapnik::value_unicode_string const& val) {
-    return val.hashCode();
+
+inline std::size_t hash_value(mapnik::value_unicode_string const& val)
+{
+    std::hash<mapnik::value_unicode_string> hash;
+    return hash(val);
 }
+
 }
 
 #endif // MAPNIK_UNICODE_HPP

@@ -100,9 +100,7 @@ struct parameters_pickle_suite : boost::python::pickle_suite
             }
             else if (ex3.check())
             {
-                std::string buffer;
-                mapnik::to_utf8(ex3(),buffer);
-                p[key] = buffer;
+                p[key] = ex3();
             }
             else
             {
@@ -178,20 +176,13 @@ mapnik::value_holder get_param(mapnik::parameter const& p, int index)
 
 std::shared_ptr<mapnik::parameter> create_parameter(mapnik::value_unicode_string const& key, mapnik::value_holder const& value)
 {
-    std::string key_utf8;
-    mapnik::to_utf8(key, key_utf8);
-    return std::make_shared<mapnik::parameter>(key_utf8,value);
+    return std::make_shared<mapnik::parameter>(key,value);
 }
 
-// needed for Python_Unicode to std::string (utf8) conversion
-
+// needed for Python_Unicode to std::string (utf8) conversion  --- FIXME!!
 std::shared_ptr<mapnik::parameter> create_parameter_from_string(mapnik::value_unicode_string const& key, mapnik::value_unicode_string const& ustr)
 {
-    std::string key_utf8;
-    std::string ustr_utf8;
-    mapnik::to_utf8(key, key_utf8);
-    mapnik::to_utf8(ustr,ustr_utf8);
-    return std::make_shared<mapnik::parameter>(key_utf8, ustr_utf8);
+    return std::make_shared<mapnik::parameter>(key, ustr);
 }
 
 void export_parameters()

@@ -77,11 +77,6 @@ struct attr_value_converter : public boost::static_visitor<mapnik::eAttributeTyp
         return mapnik::Boolean;
     }
 
-    mapnik::eAttributeType operator() (std::string const& /*val*/) const
-    {
-        return mapnik::String;
-    }
-
     mapnik::eAttributeType operator() (mapnik::value_unicode_string const& /*val*/) const
     {
         return mapnik::String;

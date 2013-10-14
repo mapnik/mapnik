@@ -31,10 +31,7 @@
 #include <mapnik/value.hpp>
 
 // boost
-#include <boost/variant.hpp>
-#if defined(BOOST_REGEX_HAS_ICU)
-#include <boost/regex/icu.hpp>          // for u32regex
-#endif
+#include <boost/variant/static_visitor.hpp>
 
 namespace mapnik
 {
@@ -91,14 +88,8 @@ struct expression_string : boost::static_visitor<void>
     {
         boost::apply_visitor(expression_string(str_),x.expr);
         str_ +=".match('";
-#if defined(BOOST_REGEX_HAS_ICU)
-        std::string utf8;
-        mapnik::value_unicode_string ustr = mapnik::value_unicode_string::fromUTF32( &x.pattern.str()[0] ,x.pattern.str().length());
-        to_utf8(ustr,utf8);
-        str_ += utf8;
-#else
-        str_ += x.pattern.str();
-#endif
+        //str_ += std::string(x.pattern.str());
+        str_ += "FIXME";
         str_ +="')";
     }
 
@@ -107,19 +98,10 @@ struct expression_string : boost::static_visitor<void>
         boost::apply_visitor(expression_string(str_),x.expr);
         str_ +=".replace(";
         str_ += "'";
-#if defined(BOOST_REGEX_HAS_ICU)
-        std::string utf8;
-        mapnik::value_unicode_string ustr = mapnik::value_unicode_string::fromUTF32( &x.pattern.str()[0] ,x.pattern.str().length());
-        to_utf8(ustr,utf8);
-        str_ += utf8;
-        str_ +="','";
-        to_utf8(x.format ,utf8);
-        str_ += utf8;
-#else
-        str_ += x.pattern.str();
+        //str_ += x.pattern.str();
+        str_ += "FIXME";
         str_ +="','";
         str_ += x.format;
-#endif
         str_ +="')";
     }
 
