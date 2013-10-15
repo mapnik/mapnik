@@ -4,11 +4,7 @@ from copy import copy
 
 Import ('env')
 
-headers = env['CPPPATH'] 
-
-filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-system = 'boost_system%s' % env['BOOST_APPEND']
-regex = 'boost_regex%s' % env['BOOST_APPEND']
+headers = env['CPPPATH']
 
 libraries =  copy(env['LIBMAPNIK_LIBS'])
 libraries.append('mapnik')

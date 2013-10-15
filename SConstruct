@@ -87,7 +87,6 @@ pretty_dep_names = {
     'freetype-config':'freetype-config program | try setting FREETYPE_CONFIG SCons option',
     'osm':'more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
     'curl':'libcurl is required for the "osm" plugin - more info: https://github.com/mapnik/mapnik/wiki/OsmPlugin',
-    'boost_regex_icu':'libboost_regex built with optional ICU unicode support is needed for unicode regex support in mapnik.',
     'sqlite_rtree':'The SQLite plugin requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)',
     'pgsql2sqlite_rtree':'The pgsql2sqlite program requires libsqlite3 built with RTREE support (-DSQLITE_ENABLE_RTREE=1)'
     }
@@ -919,35 +918,6 @@ int main()
     color_print(1,'\nFound insufficient icu version... %s' % result)
     return False
 
-def boost_regex_has_icu(context):
-    if env['RUNTIME_LINK'] == 'static':
-        context.env.AppendUnique(LIBS='icudata')
-    ret = context.TryRun("""
-
-#include <boost/regex/icu.hpp>
-#include <unicode/unistr.h>
-
-int main()
-{
-    U_NAMESPACE_QUALIFIER UnicodeString ustr;
-    try {
-        boost::u32regex pattern = boost::make_u32regex(ustr);
-    }
-    // an exception is fine, still indicates support is
-    // likely compiled into regex
-    catch (...) {
-        return 0;
-    }
-    return 0;
-}
-
-""", '.cpp')
-    context.Message('Checking if boost_regex was built with ICU unicode support... ')
-    context.Result(ret[0])
-    if ret[0]:
-        return True
-    return False
-
 def sqlite_has_rtree(context, silent=False):
     """ check an sqlite3 install has rtree support.
 
@@ -1009,7 +979,6 @@ conf_tests = { 'prioritize_paths'      : prioritize_paths,
                'get_pkg_lib'           : get_pkg_lib,
                'rollback_option'       : rollback_option,
                'icu_at_least_four_two' : icu_at_least_four_two,
-               'boost_regex_has_icu'   : boost_regex_has_icu,
                'sqlite_has_rtree'      : sqlite_has_rtree,
                }
 
@@ -1299,7 +1268,6 @@ if not preconfigured:
         BOOST_LIBSHEADERS = [
             ['system', 'boost/system/system_error.hpp', True],
             ['filesystem', 'boost/filesystem/operations.hpp', True],
-            ['regex', 'boost/regex.hpp', True],
             ['program_options', 'boost/program_options.hpp', False]
         ]
 
@@ -1342,11 +1310,6 @@ if not preconfigured:
         # we need libicui18n if using static boost libraries, so it is
         # important to try this check with the library linked
         env.AppendUnique(LIBS='icui18n')
-        if conf.boost_regex_has_icu():
-            # TODO - should avoid having this be globally defined...
-            env.Append(CPPDEFINES = '-DBOOST_REGEX_HAS_ICU')
-        else:
-            env['SKIPPED_DEPS'].append('boost_regex_icu')
 
         for libname, headers, required, lang, define in OPTIONAL_LIBSHEADERS:
             if not env['HOST']:

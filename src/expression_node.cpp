@@ -26,27 +26,13 @@
 namespace mapnik
 {
 
-#if defined(BOOST_REGEX_HAS_ICU)
-
-regex_match_node::regex_match_node (expr_node const& a, mapnik::value_unicode_string const& ustr)
-    : expr(a),
-      pattern(ustr) {}
-
-regex_replace_node::regex_replace_node (expr_node const& a, mapnik::value_unicode_string const& ustr, mapnik::value_unicode_string const& f)
-    : expr(a),
-      pattern(ustr),
-      format(f) {}
-
-#else
-
 regex_match_node::regex_match_node (expr_node const& a, std::string const& str)
     : expr(a),
-      pattern(str) {}
+      pattern(str, std::regex::extended | std::regex::optimize) {}
 
 regex_replace_node::regex_replace_node (expr_node const& a, std::string const& str, std::string const& f)
     : expr(a),
-      pattern(str),
+      pattern(str,  std::regex::extended | std::regex::optimize),
       format(f) {}
-#endif
 
 }

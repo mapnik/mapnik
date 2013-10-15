@@ -53,11 +53,10 @@ libmapnik_defines = copy(lib_env['CPPDEFINES'])
 ABI_VERSION = env['ABI_VERSION']
 
 filesystem = 'boost_filesystem%s' % env['BOOST_APPEND']
-regex = 'boost_regex%s' % env['BOOST_APPEND']
 system = 'boost_system%s' % env['BOOST_APPEND']
 
 # clear out and re-set libs for this env
-lib_env['LIBS'] = ['freetype',env['ICU_LIB_NAME'],filesystem,system,regex]
+lib_env['LIBS'] = ['freetype',env['ICU_LIB_NAME'],filesystem,system]
 
 if '-DMAPNIK_USE_PROJ4' in env['CPPDEFINES']:
    lib_env['LIBS'].append('proj')
@@ -85,12 +84,6 @@ if len(env['EXTRA_FREETYPE_LIBS']):
 
 lib_env['LIBS'].append('xml2')
 lib_env['LIBS'].append('z')
-
-#if env['THREADING'] == 'multi':
-#    lib_env['LIBS'].append('boost_thread%s' % env['BOOST_APPEND'])
-
-if '-DBOOST_REGEX_HAS_ICU' in env['CPPDEFINES']:
-    lib_env['LIBS'].append('icui18n')
 
 if env['RUNTIME_LINK'] == 'static':
     if 'icuuc' in env['ICU_LIB_NAME']:

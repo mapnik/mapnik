@@ -81,25 +81,6 @@ struct binary_node
     expr_node left,right;
 };
 
-#if defined(BOOST_REGEX_HAS_ICU)
-
-struct regex_match_node
-{
-    regex_match_node (expr_node const& a, mapnik::value_unicode_string const& ustr);
-    expr_node expr;
-    std::regex pattern;
-};
-
-
-struct regex_replace_node
-{
-    regex_replace_node (expr_node const& a, mapnik::value_unicode_string const& ustr, mapnik::value_unicode_string const& f);
-    expr_node expr;
-    std::regex pattern;
-    mapnik::value_unicode_string format;
-};
-
-#else
 
 struct regex_match_node
 {
@@ -116,7 +97,6 @@ struct regex_replace_node
     std::regex pattern;
     std::string format;
 };
-#endif
 
 struct function_call
 {
