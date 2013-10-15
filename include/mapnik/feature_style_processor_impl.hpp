@@ -266,12 +266,12 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay,
             ctx_map,
             p,
             proj0,
-            m_.scale(),
+            scale,
             scale_denom,
-            m_.width(),
-            m_.height(),
-            m_.get_current_extent(),
-            m_.buffer_size(),
+            width,
+            height,
+            extent,
+            buffer_size,
             names);
 
     if (!mat.active_styles_.empty())
