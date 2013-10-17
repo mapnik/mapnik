@@ -29,7 +29,6 @@
 #include <mapnik/util/fs.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string.hpp>
 

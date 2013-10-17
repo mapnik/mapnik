@@ -24,7 +24,6 @@
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
 #include <boost/python/def.hpp>
-#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/graphics.hpp>

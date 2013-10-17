@@ -21,7 +21,6 @@
  *****************************************************************************/
 
 // boost
-#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/util/fs.hpp>

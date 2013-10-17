@@ -38,7 +38,6 @@
 #include <boost/unordered_map.hpp>
 #include <memory>
 #include <boost/optional.hpp>
-#include <boost/make_shared.hpp>
 
 // stl
 #include <cassert>

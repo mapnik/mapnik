@@ -25,7 +25,6 @@
 #include <mapnik/transform_processor.hpp>
 #include <mapnik/debug.hpp>
 
-#include <boost/make_shared.hpp>
 
 namespace mapnik {
 

@@ -30,7 +30,6 @@
 #include <mapnik/font_util.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 namespace mapnik {
 

@@ -29,7 +29,6 @@
 #include <boost/spirit/include/qi.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 namespace mapnik
 {

@@ -25,7 +25,6 @@
 #include <mapnik/xml_node.hpp>
 
 //boost
-#include <boost/make_shared.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 

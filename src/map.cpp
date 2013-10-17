@@ -40,7 +40,6 @@
 #include <mapnik/config.hpp> // for PROJ_ENVELOPE_POINTS
 
 // boost
-#include <boost/make_shared.hpp>
 
 // stl
 #include <stdexcept>

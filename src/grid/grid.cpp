@@ -27,7 +27,6 @@
 #include <mapnik/value.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 namespace mapnik
 {

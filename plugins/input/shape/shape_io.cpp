@@ -27,7 +27,6 @@
 #include <mapnik/datasource.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 using mapnik::datasource_exception;
 using mapnik::geometry_type;

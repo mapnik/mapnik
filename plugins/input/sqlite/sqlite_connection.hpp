@@ -33,7 +33,6 @@
 
 // boost
 #include <memory>
-#include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 
 // sqlite

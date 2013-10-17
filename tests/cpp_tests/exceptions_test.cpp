@@ -1,6 +1,5 @@
 #include <boost/version.hpp>
 #include <boost/detail/lightweight_test.hpp>
-#include <boost/make_shared.hpp>
 #include <iostream>
 #include <mapnik/projection.hpp>
 #include <mapnik/markers_symbolizer.hpp>

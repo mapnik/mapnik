@@ -31,7 +31,6 @@
 #include <mapnik/boolean.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 #include "osm_datasource.hpp"
 #include "osm_featureset.hpp"

@@ -8,7 +8,6 @@
 
 // boost
 
-#include <boost/make_shared.hpp>
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/algorithm/string.hpp>

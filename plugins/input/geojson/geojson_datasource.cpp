@@ -28,7 +28,6 @@
 
 // boost
 #include <boost/variant.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/spirit/include/support_multi_pass.hpp>
 

@@ -42,7 +42,6 @@
 #include <string>
 
 // boost
-#include <boost/make_shared.hpp>
 
 namespace mapnik {
 

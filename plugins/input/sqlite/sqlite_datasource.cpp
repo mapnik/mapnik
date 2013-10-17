@@ -38,7 +38,6 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/make_shared.hpp>
 
 using mapnik::box2d;
 using mapnik::coord2d;

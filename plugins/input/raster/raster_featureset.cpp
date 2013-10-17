@@ -31,7 +31,6 @@
 
 // boost
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/format.hpp>
 
 #include "raster_featureset.hpp"

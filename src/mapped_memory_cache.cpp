@@ -31,7 +31,6 @@
 #include <boost/assert.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/file_mapping.hpp>
-#include <boost/make_shared.hpp>
 
 namespace mapnik
 {

@@ -36,7 +36,6 @@
 // boost
 #include <boost/assert.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 
 // agg
 #include "agg_rendering_buffer.h"

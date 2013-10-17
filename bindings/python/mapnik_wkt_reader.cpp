@@ -25,7 +25,6 @@
 #include <boost/noncopyable.hpp>
 #include <memory>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/make_shared.hpp>
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/wkt/wkt_factory.hpp>

@@ -25,7 +25,6 @@
 #include <boost/python/manage_new_object.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/noncopyable.hpp>
 
 

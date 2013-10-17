@@ -40,7 +40,6 @@
 
 // boost
 #include <memory>
-#include <boost/make_shared.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 #ifdef MAPNIK_THREADSAFE

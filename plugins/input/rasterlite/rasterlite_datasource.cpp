@@ -24,7 +24,6 @@
 #include "rasterlite_featureset.hpp"
 
 // boost
-#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/util/fs.hpp>

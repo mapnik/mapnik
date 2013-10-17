@@ -28,7 +28,6 @@
 #include <mapnik/memory_featureset.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 
 // stl
 #include <algorithm>

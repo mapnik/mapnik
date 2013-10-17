@@ -22,7 +22,6 @@
 
 // boost
 #include <boost/python.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/noncopyable.hpp>
 
 //mapnik

@@ -39,7 +39,6 @@
 // boost
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/make_shared.hpp>
 
 // stl
 #include <sstream>

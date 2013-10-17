@@ -31,7 +31,6 @@
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <memory>
-#include <boost/make_shared.hpp>
 
 namespace mapnik {
 namespace svg {

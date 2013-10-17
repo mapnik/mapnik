@@ -55,7 +55,6 @@
 #include "agg_image_accessors.h"
 #include "agg_span_image_filter_rgba.h"
 // boost
-#include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 // stl

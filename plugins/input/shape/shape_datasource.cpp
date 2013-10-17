@@ -28,7 +28,6 @@
 #include <boost/version.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 
 // mapnik
 #include <mapnik/debug.hpp>

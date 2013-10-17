@@ -27,7 +27,6 @@
 #include <mapnik/params.hpp>
 
 // boost
-#include <boost/make_shared.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/assign/list_of.hpp>
 #endif
