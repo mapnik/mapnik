@@ -88,11 +88,11 @@ datasource_ptr datasource_cache::create(parameters const& params)
         s += *type + "'";
         if (plugin_directories_.empty())
         {
-            s + " (no datasource plugin directories have been successfully registered)";
+            s += " (no datasource plugin directories have been successfully registered)";
         }
         else
         {
-            s + " (searched for datasource plugins in '" + plugin_directories() + "')";
+            s += " (searched for datasource plugins in '" + plugin_directories() + "')";
         }
         throw config_error(s);
     }
