@@ -27,15 +27,15 @@ namespace mapnik {
 
 namespace non_copyable_
 {
-  class noncopyable
-  {
-   protected:
-      noncopyable() {}
-      ~noncopyable() {}
-   private:
-      noncopyable( const noncopyable& );
-      const noncopyable& operator=( const noncopyable& );
-  };
+
+class noncopyable
+{
+protected:
+    constexpr noncopyable() = default;
+    ~noncopyable() = default;
+    noncopyable( const noncopyable& ) = delete;
+    noncopyable& operator=( const noncopyable& ) = delete;
+};
 }
 
 typedef non_copyable_::noncopyable noncopyable;
