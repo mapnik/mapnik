@@ -54,8 +54,7 @@ else:
                                           SHLIBPREFIX='',
                                           SHLIBSUFFIX='.input',
                                           source=plugin_sources,
-                                          LIBS=libraries,
-                                          LINKFLAGS=env.get('CUSTOM_LDFLAGS'))
+                                          LIBS=libraries)
 
         # if the plugin links to libmapnik ensure it is built first
         Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))

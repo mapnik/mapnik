@@ -52,7 +52,7 @@ if env.get('BOOST_LIB_VERSION_FROM_HEADER'):
         # https://github.com/mapnik/mapnik/issues/1082
         program_env.Append(CXXFLAGS = '-fpermissive')
 
-shapeindex = program_env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+shapeindex = program_env.Program('shapeindex', source, CPPPATH=headers, LIBS=libraries)
 
 Depends(shapeindex, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 

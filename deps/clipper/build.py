@@ -24,9 +24,4 @@ Import('env')
 
 clipper_env = env.Clone()
 
-if env['SUNCC']:
-    cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O -KPIC -DNDEBUG'
-else:
-    cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
-
-clipper_env.StaticLibrary('clipper', ['./src/clipper.cpp',], LIBS=[], CXXFLAGS=cxxflags, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+clipper_env.StaticLibrary('clipper', ['./src/clipper.cpp',], LIBS=[])

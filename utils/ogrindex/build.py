@@ -46,7 +46,7 @@ if env['RUNTIME_LINK'] == 'static':
     cmd = 'gdal-config --dep-libs'
     program_env.ParseConfig(cmd)
 
-ogrindex = program_env.Program('ogrindex', source, CPPPATH=headers, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+ogrindex = program_env.Program('ogrindex', source, CPPPATH=headers)
 
 Depends(ogrindex, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 

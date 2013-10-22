@@ -42,7 +42,7 @@ if env['HAS_CAIRO']:
 
 libraries = ['mapnik']
 libraries.extend(copy(env['LIBMAPNIK_LIBS']))
-rundemo = demo_env.Program('rundemo', source, LIBS=libraries, LINKFLAGS=env["CUSTOM_LDFLAGS"])
+rundemo = demo_env.Program('rundemo', source, LIBS=libraries)
 
 Depends(rundemo, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 

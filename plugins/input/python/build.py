@@ -65,10 +65,7 @@ else:
     # so instead add to libraries
     libraries.append('python%s' % env['PYTHON_VERSION'])
 
-if env['CUSTOM_LDFLAGS']:
-    linkflags = '%s %s' % (env['CUSTOM_LDFLAGS'], python_link_flag)
-else:
-    linkflags = python_link_flag
+plugin_env.Append(LINKFLAGS=python_link_flag)
 
 if env['PLUGIN_LINKING'] == 'shared':
     libraries.append('mapnik')
@@ -77,8 +74,7 @@ if env['PLUGIN_LINKING'] == 'shared':
                                       SHLIBSUFFIX='.input',
                                       source=plugin_sources,
                                       CPPPATH=allcpp_paths,
-                                      LIBS=libraries,
-                                      LINKFLAGS=linkflags)
+                                      LIBS=libraries)
 
     # if the plugin links to libmapnik ensure it is built first
     Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))
@@ -94,7 +90,7 @@ plugin_obj = {
   'LIBS': libraries,
   'SOURCES': plugin_sources,
   'CPPPATH': python_cpppath,
-  'LINKFLAGS': linkflags.replace('-Z','').split(' '),
+  'LINKFLAGS': python_link_flag.replace('-Z','').split(' '),
 }
 
 Return('plugin_obj')

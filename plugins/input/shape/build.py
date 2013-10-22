@@ -62,8 +62,7 @@ if env['PLUGIN_LINKING'] == 'shared':
                                       SHLIBSUFFIX='.input',
                                       SHLIBPREFIX='',
                                       source=plugin_sources,
-                                      LIBS=libraries,
-                                      LINKFLAGS=env['CUSTOM_LDFLAGS'])
+                                      LIBS=libraries)
 
     # if the plugin links to libmapnik ensure it is built first
     Depends(TARGET, env.subst('../../../src/%s' % env['MAPNIK_LIB_NAME']))

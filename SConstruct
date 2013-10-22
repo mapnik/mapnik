@@ -1156,10 +1156,10 @@ if not preconfigured:
         DEFAULT_CXX11_CXXFLAGS += ' -stdlib=libc++'
         DEFAULT_CXX11_LINKFLAGS = ' -stdlib=libc++'
     env.Append(CPPDEFINES = env['CUSTOM_DEFINES'])
-    env.Append(CUSTOM_CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)
+    env.Append(CXXFLAGS = DEFAULT_CXX11_CXXFLAGS)
     env.Append(CXXFLAGS = env['CUSTOM_CXXFLAGS'])
     env.Append(CFLAGS = env['CUSTOM_CFLAGS'])
-    env.Append(CUSTOM_LDFLAGS = DEFAULT_CXX11_LINKFLAGS)
+    env.Append(LINKFLAGS = DEFAULT_CXX11_LINKFLAGS)
     env.Append(LINKFLAGS = env['CUSTOM_LDFLAGS'])
 
     ### platform specific bits

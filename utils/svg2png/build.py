@@ -46,7 +46,7 @@ libraries.extend(copy(env['LIBMAPNIK_LIBS']))
 if env['RUNTIME_LINK'] == 'static' and env['PLATFORM'] == 'Linux':
     libraries.append('dl')
 
-svg2png = program_env.Program('svg2png', source, LIBS=libraries, LINKFLAGS=env['CUSTOM_LDFLAGS'])
+svg2png = program_env.Program('svg2png', source, LIBS=libraries)
 
 Depends(svg2png, env.subst('../../src/%s' % env['MAPNIK_LIB_NAME']))
 
