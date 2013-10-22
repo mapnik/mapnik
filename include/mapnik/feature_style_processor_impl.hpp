@@ -126,19 +126,21 @@ struct has_process
 };
 
 // Store material for layer rendering in a two step process
-struct layer_rendering_material {
-        layer const& lay_;
-        projection const& proj0_;
-        projection proj1_;
-        box2d<double> layer_ext2_;
-        std::vector<feature_type_style const*> active_styles_;
-        std::vector<featureset_ptr> featureset_ptr_list_;
-        std::vector<rule_cache> rule_caches_;
+struct layer_rendering_material
+{
+    layer const& lay_;
+    projection const& proj0_;
+    projection proj1_;
+    box2d<double> layer_ext2_;
+    std::vector<feature_type_style const*> active_styles_;
+    std::vector<featureset_ptr> featureset_ptr_list_;
+    std::vector<rule_cache> rule_caches_;
 
-        layer_rendering_material(layer const& lay, projection const& dest) :
-               lay_(lay),
-               proj0_(dest),
-               proj1_(lay.srs(),true) {}
+    layer_rendering_material(layer const& lay, projection const& dest)
+        :
+        lay_(lay),
+        proj0_(dest),
+        proj1_(lay.srs(),true) {}
 };
 
 typedef std::shared_ptr<layer_rendering_material> layer_rendering_material_ptr;
@@ -186,16 +188,16 @@ void feature_style_processor<Processor>::apply(double scale_denom)
             layer_rendering_material_ptr mat = std::make_shared<layer_rendering_material>(lyr, proj);
 
             prepare_layer(*mat,
-                    ctx_map,
-                    p,
-                    proj,
-                    m_.scale(),
-                    scale_denom,
-                    m_.width(),
-                    m_.height(),
-                    m_.get_current_extent(),
-                    m_.buffer_size(),
-                    names);
+                          ctx_map,
+                          p,
+                          proj,
+                          m_.scale(),
+                          scale_denom,
+                          m_.width(),
+                          m_.height(),
+                          m_.get_current_extent(),
+                          m_.buffer_size(),
+                          names);
 
             // Store active material
             if (!mat->active_styles_.empty())
@@ -263,16 +265,16 @@ void feature_style_processor<Processor>::apply_to_layer(layer const& lay,
     layer_rendering_material  mat(lay, proj0);
 
     prepare_layer(mat,
-            ctx_map,
-            p,
-            proj0,
-            scale,
-            scale_denom,
-            width,
-            height,
-            extent,
-            buffer_size,
-            names);
+                  ctx_map,
+                  p,
+                  proj0,
+                  scale,
+                  scale_denom,
+                  width,
+                  height,
+                  extent,
+                  buffer_size,
+                  names);
 
     if (!mat.active_styles_.empty())
     {
@@ -301,7 +303,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     if (! num_styles)
     {
         MAPNIK_LOG_DEBUG(feature_style_processor)
-          << "feature_style_processor: No style for layer=" << lay.name();
+            << "feature_style_processor: No style for layer=" << lay.name();
         return;
     }
 
@@ -309,7 +311,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     if (! ds)
     {
         MAPNIK_LOG_DEBUG(feature_style_processor)
-          << "feature_style_processor: No datasource for layer=" << lay.name();
+            << "feature_style_processor: No datasource for layer=" << lay.name();
         return;
     }
 
@@ -362,9 +364,9 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
         if (! prj_trans.forward(layer_ext, PROJ_ENVELOPE_POINTS))
         {
             MAPNIK_LOG_ERROR(feature_style_processor)
-                    << "feature_style_processor: Layer=" << lay.name()
-                    << " extent=" << layer_ext << " in map projection "
-                    << " did not reproject properly back to layer projection";
+                << "feature_style_processor: Layer=" << lay.name()
+                << " extent=" << layer_ext << " in map projection "
+                << " did not reproject properly back to layer projection";
         }
     }
     else
@@ -437,8 +439,8 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
         if (!style)
         {
             MAPNIK_LOG_DEBUG(feature_style_processor)
-                    << "feature_style_processor: Style=" << style_name
-                    << " required for layer=" << lay.name() << " does not exist.";
+                << "feature_style_processor: Style=" << style_name
+                << " required for layer=" << lay.name() << " does not exist.";
 
             continue;
         }
