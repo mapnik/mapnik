@@ -104,8 +104,9 @@ topojson_datasource::topojson_datasource(parameters const& params)
         {
             if (count == 0) extent_ = bbox;
             else extent_.expand_to_include(bbox);
-            tree_.insert(box_type(point_type(bbox.minx(),bbox.miny()),point_type(bbox.maxx(),bbox.maxy())), count++);
+            tree_.insert(box_type(point_type(bbox.minx(),bbox.miny()),point_type(bbox.maxx(),bbox.maxy())), count);
         }
+        ++count;
     }
 }
 
@@ -139,9 +140,6 @@ mapnik::layer_descriptor topojson_datasource::get_descriptor() const
 
 mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) const
 {
-    std::cerr << "Resolution=" << std::get<0>(q.resolution())
-              << "," << std::get<1>(q.resolution())
-              << " scale_denominator=" << q.scale_denominator() << std::endl;
     // if the query box intersects our world extent then query for features
     mapnik::box2d<double> const& b = q.get_bbox();
     if (extent_.intersects(b))
