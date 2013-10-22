@@ -259,7 +259,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
         SDOPointType* sdopoint = geom->getSdo_point();
         if (sdopoint && ! sdopoint->isNull())
         {
-            geometry_type* point = new geometry_type(mapnik::Point);
+            geometry_type* point = new geometry_type(mapnik::geometry_type::types::Point);
             point->move_to(sdopoint->getX(), sdopoint->getY());
             feature->add_geometry(point);
         }
@@ -272,7 +272,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
             const bool is_single_geom = true;
             const bool is_point_type = false;
             convert_ordinates(feature,
-                              mapnik::LineString,
+                              mapnik::geometry_type::types::LineString,
                               elem_info,
                               ordinates,
                               dimensions,
@@ -288,7 +288,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
             const bool is_single_geom = true;
             const bool is_point_type = false;
             convert_ordinates(feature,
-                              mapnik::Polygon,
+                              mapnik::geometry_type::types::Polygon,
                               elem_info,
                               ordinates,
                               dimensions,
@@ -304,7 +304,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
             const bool is_single_geom = false;
             const bool is_point_type = true;
             convert_ordinates(feature,
-                              mapnik::Point,
+                              mapnik::geometry_type::types::Point,
                               elem_info,
                               ordinates,
                               dimensions,
@@ -321,7 +321,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
             const bool is_point_type = false;
 
             convert_ordinates(feature,
-                              mapnik::LineString,
+                              mapnik::geometry_type::types::LineString,
                               elem_info,
                               ordinates,
                               dimensions,
@@ -338,7 +338,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
             const bool is_point_type = false;
 
             convert_ordinates(feature,
-                              mapnik::Polygon,
+                              mapnik::geometry_type::types::Polygon,
                               elem_info,
                               ordinates,
                               dimensions,
@@ -356,7 +356,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
             const bool is_point_type = false;
 
             convert_ordinates(feature,
-                              mapnik::Polygon,
+                              mapnik::geometry_type::types::Polygon,
                               elem_info,
                               ordinates,
                               dimensions,
@@ -377,7 +377,7 @@ void occi_featureset::convert_geometry(SDOGeometry* geom, feature_ptr feature)
 }
 
 void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
-                                        const mapnik::geometry::types& geom_type,
+                                        const mapnik::geometry_type::types& geom_type,
                                         const std::vector<Number>& elem_info,
                                         const std::vector<Number>& ordinates,
                                         const int dimensions,
@@ -404,20 +404,20 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                 int next_interp = elem_info[i + 2];
                 bool is_linear_element = true;
                 bool is_unknown_etype = false;
-                mapnik::geometry::types gtype = mapnik::Point;
+                mapnik::geometry_type::types gtype = mapnik::geometry_type::types::Point;
 
                 switch (etype)
                 {
                 case SDO_ETYPE_POINT:
                     if (interp == SDO_INTERPRETATION_POINT)     {}
                     if (interp > SDO_INTERPRETATION_POINT)      {}
-                    gtype = mapnik::Point;
+                    gtype = mapnik::geometry_type::types::Point;
                     break;
 
                 case SDO_ETYPE_LINESTRING:
                     if (interp == SDO_INTERPRETATION_STRAIGHT)  {}
                     if (interp == SDO_INTERPRETATION_CIRCULAR)  {}
-                    gtype = mapnik::LineString;
+                    gtype = mapnik::geometry_type::types::LineString;
                     break;
 
                 case SDO_ETYPE_POLYGON:
@@ -426,7 +426,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                     if (interp == SDO_INTERPRETATION_CIRCULAR)  {}
                     if (interp == SDO_INTERPRETATION_RECTANGLE) {}
                     if (interp == SDO_INTERPRETATION_CIRCLE)    {}
-                    gtype = mapnik::Polygon;
+                    gtype = mapnik::geometry_type::types::Polygon;
                     break;
 
                 case SDO_ETYPE_COMPOUND_LINESTRING:
@@ -434,7 +434,7 @@ void occi_featureset::convert_ordinates(mapnik::feature_ptr feature,
                 case SDO_ETYPE_COMPOUND_POLYGON_INTERIOR:
                     // interp = next ETYPE to consider
                     is_linear_element = false;
-                    gtype = mapnik::Polygon;
+                    gtype = mapnik::geometry_type::types::Polygon;
                     break;
 
                 case SDO_ETYPE_UNKNOWN:    // unknown

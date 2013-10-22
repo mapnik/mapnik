@@ -65,21 +65,8 @@ feature_ptr rasterlite_featureset::next()
     if (first_)
     {
         first_ = false;
-
-        query *q = std::get<query>(&gquery_);
-        if (q)
-        {
-            return get_feature(*q);
-        }
-        else
-        {
-            coord2d *p = std::get<coord2d>(&gquery_);
-            if (p)
-            {
-                return get_feature_at_point(*p);
-            }
-        }
-        // should never reach here
+        MAPNIK_LOG_DEBUG(gdal) << "rasterlite_featureset: Next feature in Dataset=" << &dataset_;
+        return boost::apply_visitor(query_dispatch(*this), gquery_);
     }
     return feature_ptr();
 }
