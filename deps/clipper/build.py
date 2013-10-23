@@ -21,7 +21,6 @@ import os
 from glob import glob
 
 Import('env')
-
-clipper_env = env.Clone()
-
-clipper_env.StaticLibrary('clipper', ['./src/clipper.cpp',], LIBS=[])
+lib_env = env.Clone()
+lib_env.Append(CXXFLAGS='-fPIC')
+lib_env.StaticLibrary('clipper', ['./src/clipper.cpp',], LIBS=[])

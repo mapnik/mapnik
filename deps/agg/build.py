@@ -21,5 +21,7 @@ import os
 from glob import glob
 
 Import('env')
-agg_env = env.Clone()
-agg_env.StaticLibrary('agg', glob('./src/' + '*.cpp'), LIBS=[])
+lib_env = env.Clone()
+if 'g++' in env['CXX']:
+    lib_env.Append(CXXFLAGS='-fPIC')
+lib_env.StaticLibrary('agg', glob('./src/' + '*.cpp'), LIBS=[])
