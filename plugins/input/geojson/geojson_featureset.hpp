@@ -34,14 +34,14 @@ class geojson_featureset : public mapnik::Featureset
 {
 public:
     geojson_featureset(std::vector<mapnik::feature_ptr> const& features,
-                       std::deque<std::size_t>::const_iterator index_itr,
-                       std::deque<std::size_t>::const_iterator index_end);
+                       std::deque<std::size_t> && index_array);
     virtual ~geojson_featureset();
     mapnik::feature_ptr next();
 
 private:
     mapnik::box2d<double> box_;
     std::vector<mapnik::feature_ptr> const& features_;
+    const std::deque<std::size_t> index_array_;
     std::deque<std::size_t>::const_iterator index_itr_;
     std::deque<std::size_t>::const_iterator index_end_;
 };

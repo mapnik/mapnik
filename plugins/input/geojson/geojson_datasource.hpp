@@ -74,7 +74,6 @@ private:
     std::shared_ptr<mapnik::transcoder> tr_;
     std::vector<mapnik::feature_ptr> features_;
     spatial_index_type tree_;
-    mutable std::deque<std::size_t> index_array_;
 };
 
 
