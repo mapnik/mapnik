@@ -89,10 +89,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                 gamma_method_ = GAMMA_POWER;
                 gamma_ = 1.0;
             }
-            agg::trans_affine geom_tr;
-            evaluate_transform(geom_tr, feature, sym.get_transform());
             agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
-
             if ((*mark)->is_vector())
             {
                 using namespace mapnik::svg;
