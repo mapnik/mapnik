@@ -39,7 +39,6 @@ public:
     mapnik::feature_ptr next();
 
 private:
-    mapnik::box2d<double> box_;
     std::vector<mapnik::feature_ptr> const& features_;
     const std::deque<std::size_t> index_array_;
     std::deque<std::size_t>::const_iterator index_itr_;
