@@ -53,6 +53,7 @@
 #define PROJ_ENVELOPE_POINTS 20
 
 #include <boost/thread/locks.hpp>
+#include <mutex>
 
 namespace mapnik
 {
