@@ -22,5 +22,6 @@ from glob import glob
 
 Import('env')
 lib_env = env.Clone()
-lib_env.Append(CXXFLAGS='-fPIC')
+if 'g++' in env['CXX']:
+    lib_env.Append(CXXFLAGS='-fPIC')
 lib_env.StaticLibrary('clipper', ['./src/clipper.cpp',], LIBS=[])
