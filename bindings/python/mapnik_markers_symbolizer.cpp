@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 #include <boost/python.hpp>
 
 #include <mapnik/graphics.hpp>

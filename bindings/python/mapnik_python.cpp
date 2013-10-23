@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
 #include <boost/python.hpp>
 #include <boost/get_pointer.hpp>
 #include <boost/python/detail/api_placeholder.hpp>

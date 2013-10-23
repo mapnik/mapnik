@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 #include <boost/python.hpp>
 #include <mapnik/polygon_symbolizer.hpp>
 #include <mapnik/symbolizer_hash.hpp>

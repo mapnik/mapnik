@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 // boost
+#include "boost_std_shared_shim.hpp"
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/noncopyable.hpp>
@@ -44,16 +45,6 @@ using mapnik::datasource;
 using mapnik::memory_datasource;
 using mapnik::layer_descriptor;
 using mapnik::attribute_descriptor;
-
-#if BOOST_VERSION < 105300
-namespace boost
-{
-template<class T> T * get_pointer( std::shared_ptr<T> const& p )
-{
-    return p.get();
-}
-}
-#endif
 
 namespace
 {

@@ -20,9 +20,10 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 // boost
 #include <boost/python.hpp>
-
 
 // mapnik
 #include <mapnik/query.hpp>

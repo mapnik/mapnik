@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 #include <boost/python.hpp>
 #include "mapnik_enumeration.hpp"
 #include <mapnik/line_symbolizer.hpp>

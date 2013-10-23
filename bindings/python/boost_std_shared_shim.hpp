@@ -20,25 +20,29 @@
  *
  *****************************************************************************/
 
-#include "boost_std_shared_shim.hpp"
+#ifndef MAPNIK_PYTHON_BOOST_STD_SHARED_SHIM
+#define MAPNIK_PYTHON_BOOST_STD_SHARED_SHIM
 
-#include <boost/python.hpp>
-#include "mapnik_enumeration.hpp"
-#include <mapnik/debug_symbolizer.hpp>
+// boost
+#include <boost/version.hpp>
 
-void export_debug_symbolizer()
+#if BOOST_VERSION < 105300
+
+// https://github.com/mapnik/mapnik/issues/2022
+#include <memory>
+
+namespace boost {
+template<class T> const T* get_pointer(std::shared_ptr<T> const& p)
 {
-    using namespace boost::python;
-
-    mapnik::enumeration_<mapnik::debug_symbolizer_mode_e>("debug_symbolizer_mode")
-        .value("COLLISION",mapnik::DEBUG_SYM_MODE_COLLISION)
-        .value("VERTEX",mapnik::DEBUG_SYM_MODE_VERTEX)
-        ;
-
-    class_<mapnik::debug_symbolizer>("DebugSymbolizer",
-                             init<>("Default debug Symbolizer"))
-        .add_property("mode",
-                      &mapnik::debug_symbolizer::get_mode,
-                      &mapnik::debug_symbolizer::set_mode)
-        ;
+    return p.get();
 }
+
+template<class T> T* get_pointer(std::shared_ptr<T>& p)
+{
+    return p.get();
+}
+} // namespace boost
+
+#endif
+
+#endif // MAPNIK_PYTHON_BOOST_STD_SHARED_SHIM

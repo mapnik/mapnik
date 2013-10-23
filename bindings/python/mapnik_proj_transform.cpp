@@ -20,6 +20,8 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 // mapnik
 #include <mapnik/proj_transform.hpp>
 #include <boost/noncopyable.hpp>

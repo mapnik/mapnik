@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include "boost_std_shared_shim.hpp"
+
 /* The functions in this file produce deprecation warnings.
  * But as shield symbolizer doesn't fully support more than one
  * placement from python yet these functions are actually the
