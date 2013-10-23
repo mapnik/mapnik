@@ -11,7 +11,7 @@ before_install:
 
 script:
  - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.7" && export CC="gcc-4.7"; fi; ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS=python CPP_TESTS=True CAIRO=False FAST=True || cat config.log
- - make
+ - JOBS=1 make
  - make test-local
 
 branches:
