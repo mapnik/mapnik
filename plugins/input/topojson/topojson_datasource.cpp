@@ -145,8 +145,7 @@ mapnik::featureset_ptr topojson_datasource::features(mapnik::query const& q) con
     if (extent_.intersects(b))
     {
         box_type box(point_type(b.minx(),b.miny()),point_type(b.maxx(),b.maxy()));
-        index_array_ = tree_.find(box);
-        return std::make_shared<topojson_featureset>(topo_, *tr_, index_array_.begin(), index_array_.end());
+        return std::make_shared<topojson_featureset>(topo_, *tr_, tree_.find(box));
     }
     // otherwise return an empty featureset pointer
     return mapnik::featureset_ptr();
