@@ -148,6 +148,7 @@ struct polygon_clipper
         case ignore:
             return SEG_END;
         }
+        return SEG_END;
     }
 
 private:
