@@ -40,13 +40,13 @@ using boost::optional;
 
 text_symbolizer_properties::text_symbolizer_properties() :
     orientation(),
-    displacement(0,0),
+    displacement(0.0,0.0),
     label_placement(POINT_PLACEMENT),
     halign(H_AUTO),
     jalign(J_AUTO),
     valign(V_AUTO),
-    label_spacing(0),
-    label_position_tolerance(0),
+    label_spacing(0.0),
+    label_position_tolerance(0.0),
     avoid_edges(false),
     minimum_distance(0.0),
     minimum_padding(0.0),
@@ -55,8 +55,8 @@ text_symbolizer_properties::text_symbolizer_properties() :
     force_odd_labels(false),
     allow_overlap(false),
     largest_bbox_only(true),
-    text_ratio(0),
-    wrap_width(0),
+    text_ratio(0.0),
+    wrap_width(0.0),
     format(),
     tree_()
 {
@@ -93,7 +93,7 @@ void text_symbolizer_properties::from_xml(xml_node const &sym, fontset_map const
     if (text_ratio_) text_ratio = *text_ratio_;
     optional<double> wrap_width_ = sym.get_opt_attr<double>("wrap-width");
     if (wrap_width_) wrap_width = *wrap_width_;
-    optional<unsigned> label_position_tolerance_ = sym.get_opt_attr<unsigned>("label-position-tolerance");
+    optional<double> label_position_tolerance_ = sym.get_opt_attr<double>("label-position-tolerance");
     if (label_position_tolerance_) label_position_tolerance = *label_position_tolerance_;
     optional<double> spacing_ = sym.get_opt_attr<double>("spacing");
     if (spacing_) label_spacing = *spacing_;
