@@ -1,11 +1,11 @@
-lat,long,name,nr
-0,0,Test one,1
-0,0.1,Test two,2
-0,0.2,Test three,3
-0,0.3,Test four,4
-0,0.4,Test five,5
-0,0.5,Test six,6
-0,0.6,Test seven,7
-0,0.7,Test eight,8
-0,0.8,Test nine,9
-0,0.9,Test ten,10
+lat,long,name,nr,color
+0,0,Test one,1,#ff0000
+0,0.1,Test two,2,red
+0,0.2,Test three,3,#00ff00
+0,0.3,Test four,4,green
+0,0.4,Test five,5,#0000ff
+0,0.5,Test six,6,blue
+0,0.6,Test seven,7,#000000
+0,0.7,Test eight,8,black
+0,0.8,Test nine,9,#ffffff
+0,0.9,Test ten,10,white

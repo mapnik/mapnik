@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+            <StyleName>My Style</StyleName>
+            <Datasource>
+                <Parameter name="type">csv</Parameter>
+                <Parameter name="file">../data/points.csv</Parameter>
+            </Datasource>
+    </Layer>
+    <Style name="My Style">
+        <Rule>
+            <Filter>[nr] = 6</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-90" character-spacing="0.0">"Char spacing 0.0"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-80" character-spacing="0.1">"Char spacing 0.1"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-70" character-spacing="0.2">"Char spacing 0.2"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-60" character-spacing="0.3">"Char spacing 0.3"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-50" character-spacing="0.4">"Char spacing 0.4"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-40" character-spacing="0.5">"Char spacing 0.5"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-30" character-spacing="0.6">"Char spacing 0.6"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-20" character-spacing="0.7">"Char spacing 0.7"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="-10" character-spacing="0.8">"Char spacing 0.8"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="0" character-spacing="0.9">"Char spacing 0.9"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="10" character-spacing="1.0">"Char spacing 1.0"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="20" character-spacing="1.5">"Char spacing 1.5"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="30" character-spacing="2">"Char spacing 2.0"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="40" character-spacing="2.5">"Char spacing 2.5"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="50" character-spacing="4">"Char spacing 4"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="60" character-spacing="6">"Char spacing 6"</TextSymbolizer>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" vertical-alignment="top" dy="70" character-spacing="8">"Char spacing 8"</TextSymbolizer>
+        </Rule>
+    </Style>
+</Map>

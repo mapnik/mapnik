@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<!-- Upright test -->
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/lines2.csv</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="My Style">
+        <Rule>
+            <LineSymbolizer stroke-width="12" stroke="red"/>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="line" upright="auto" max-char-angle-delta="0" horizontal-alignment="left" label-position-tolerance="0.0001">"horizontal-alignment=left"</TextSymbolizer>
+        </Rule>
+    </Style>
+
+</Map>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+            <StyleName>My Style</StyleName>
+            <Datasource>
+                <Parameter name="type">csv</Parameter>
+                <Parameter name="file">../data/points.csv</Parameter>
+            </Datasource>
+    </Layer>
+
+
+    <Style name="My Style">
+        <Rule>
+            <PointSymbolizer/>
+        </Rule>
+            <Rule>
+            <Filter>[nr] = 3</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="36" placement="point" dy="-16" allow-overlap="true" wrap-width="80">"Overflowing lines"</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 3</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="12" placement="point" dy="16" allow-overlap="true" wrap-width="300">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ac urna ornare sapien porta hendrerit. In ultricies luctus massa vitae aliquam. Pellentesque in mauris nec velit elementum rhoncus. Pellentesque diam sapien, volutpat ac sollicitudin volutpat, sagittis in sem. Pellentesque ut purus a neque dapibus sodales. Etiam pellentesque elementum ligula, quis auctor ante ullamcorper in. Suspendisse potenti. Sed vulputate scelerisque orci, nec sagittis velit iaculis at. Integer laoreet aliquam bibendum. Nunc eu odio purus. Donec accumsan dolor in lorem volutpat nec posuere nulla tristique."</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 8</Filter>
+            <TextSymbolizer face-name="DejaVu Sans Book" size="12" placement="point" dy="16" allow-overlap="true" wrap-width="300" wrap-before="true">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ac urna ornare sapien porta hendrerit. In ultricies luctus massa vitae aliquam. Pellentesque in mauris nec velit elementum rhoncus. Pellentesque diam sapien, volutpat ac sollicitudin volutpat, sagittis in sem. Pellentesque ut purus a neque dapibus sodales. Etiam pellentesque elementum ligula, quis auctor ante ullamcorper in. Suspendisse potenti. Sed vulputate scelerisque orci, nec sagittis velit iaculis at. Integer laoreet aliquam bibendum. Nunc eu odio purus. Donec accumsan dolor in lorem volutpat nec posuere nulla tristique."</TextSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 7</Filter>
+            <!-- Text from http://fa.wikipedia.org/wiki/راست‌به‌چپ -->
+            <TextSymbolizer face-name="DejaVu Sans Book" size="12" placement="point" dy="-16" wrap-width="80">
+                "راست‌به‌چپ یا به خط‌هایی گفته می‌شود که نوشتنشان از سمت راست صفحه آغاز شود و به سمت چپ ادامه یابد. خط‌های راست‌به‌چپ عبارتند از"</TextSymbolizer>
+        </Rule>
+    </Style>
+</Map>

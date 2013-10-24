@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<Map background-color="white" srs="+proj=latlong +datum=WGS84">
+
+  <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+    <StyleName>My Style</StyleName>
+    <Datasource>
+      <Parameter name="type">csv</Parameter>
+      <Parameter name="file">../data/points.csv</Parameter>
+    </Datasource>
+  </Layer>
+
+    <Style name="My Style">
+    <Rule>
+      <PointSymbolizer/>
+      <TextSymbolizer placement-type="simple" placements="N,S" face-name="DejaVu Sans Book" size="16" placement="point" dx="0" dy="5">
+      [name]+'&#10;'<Format face-name="DejaVu Sans Oblique" size="9">'('+[name]+')'</Format></TextSymbolizer>
+    </Rule>
+  </Style>
+
+</Map>
