@@ -92,6 +92,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
             agg::trans_affine geom_tr;
             evaluate_transform(geom_tr, feature, sym.get_transform());
             agg::trans_affine tr = agg::trans_affine_scaling(scale_factor_);
+            box2d<double> clip_box = clipping_extent();
 
             if ((*mark)->is_vector())
             {
@@ -139,7 +140,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                       snap_pixels);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(clipping_extent(), rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -179,7 +180,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                       snap_pixels);
                     vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                        converter(clipping_extent(), rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                        converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
                     if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                     {
                         geometry_type::types type = feature.paths()[0].type();
@@ -216,7 +217,7 @@ void agg_renderer<T>::process(markers_symbolizer const& sym,
                                                   true /*snap rasters no matter what*/);
                 vertex_converter<box2d<double>, dispatch_type, markers_symbolizer,
                                  CoordTransform, proj_transform, agg::trans_affine, conv_types>
-                    converter(clipping_extent(), rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
+                    converter(clip_box, rasterizer_dispatch, sym,t_,prj_trans,tr,scale_factor_);
 
                 if (sym.clip() && feature.paths().size() > 0) // optional clip (default: true)
                 {

@@ -335,7 +335,10 @@ void agg_renderer<T>::render_marker(pixel_position const& pos,
         gamma_ = 1.0;
     }
     agg::scanline_u8 sl;
-    agg::rendering_buffer buf(current_buffer_->raw_data(), width_, height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),
+                              current_buffer_->width(),
+                              current_buffer_->height(),
+                              current_buffer_->width() * 4);
     pixfmt_comp_type pixf(buf);
     pixf.comp_op(static_cast<agg::comp_op_e>(comp_op));
     renderer_base renb(pixf);
@@ -441,7 +444,10 @@ template <typename T>
 void agg_renderer<T>::debug_draw_box(box2d<double> const& box,
                                      double x, double y, double angle)
 {
-    agg::rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_ * 4);
+    agg::rendering_buffer buf(current_buffer_->raw_data(),
+                              current_buffer_->width(),
+                              current_buffer_->height(),
+                              current_buffer_->width() * 4);
     debug_draw_box(buf, box, x, y, angle);
 }
 
