@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- With unlock-image -->
+<!DOCTYPE Map>
+<Map background-color="green" srs="+proj=latlong +datum=WGS84" minimum-version="2.0.0">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/points.csv</Parameter>
+        </Datasource>
+    </Layer>
+
+    <Style name="My Style">
+        <Rule>
+            <Filter>[nr] = 1</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg" unlock-image="true">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 2</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg" allow-overlap="true" horizontal-alignment="middle" dx="5" unlock-image="true">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 3</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg" vertical-alignment="middle" dy="5" unlock-image="true">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 4</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg"  dy="0" vertical-alignment="bottom" unlock-image="true">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 5</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg" allow-overlap="true" vertical-alignment="top" unlock-image="true">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 6</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg" allow-overlap="true" horizontal-alignment="left" unlock-image="true">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 7</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg" allow-overlap="true" horizontal-alignment="right" unlock-image="true">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 8</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg" unlock-image="true">'X&#10;X&#10;X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 9</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/svg/crosshair16x16.svg" unlock-image="true">'XXX'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <Filter>[nr] = 10</Filter>
+            <ShieldSymbolizer face-name="DejaVu Sans Book" size="16" placement="point" file="../../data/images/crosshair16x16.png" unlock-image="true">'X'</ShieldSymbolizer>
+        </Rule>
+        <Rule>
+            <PointSymbolizer allow-overlap="true" file="../../data/raster/white-alpha.png"/>
+        </Rule>
+</Style>
+
+</Map>

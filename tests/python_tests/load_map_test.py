@@ -37,7 +37,7 @@ def test_good_files():
     for filename in good_files:
         try:
             m = mapnik.Map(512, 512)
-            strict = True
+            strict = False
             mapnik.load_map(m, filename, strict)
             base_path = os.path.dirname(filename)
             mapnik.load_map_from_string(m,open(filename,'rb').read(),strict,base_path)

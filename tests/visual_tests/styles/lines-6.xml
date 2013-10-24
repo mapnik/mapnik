@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE Map>
+<!-- complex script on line test -->
+<Map background-color="white" srs="+proj=latlong +datum=WGS84" font-directory="../fonts">
+
+    <Layer name="layer" srs="+proj=latlong +datum=WGS84">
+        <StyleName>My Style</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="file">../data/lines2.csv</Parameter>
+        </Datasource>
+    </Layer>
+
+    <FontSet name="dejavu-first">
+        <Font face-name="DejaVu Sans Book" />
+        <Font face-name="Khmer OS Regular" />
+    </FontSet>
+
+    <Style name="My Style">
+        <Rule>
+            <LineSymbolizer stroke-width="12" stroke="green"/>
+            <LineSymbolizer stroke-width="1" stroke="blue" offset="5"/>
+            <TextSymbolizer fontset-name="dejavu-first" size="16" placement="line" spacing="20" max-char-angle-delta="0">
+                "ផ្លូវ​១២៣ abcd"
+            </TextSymbolizer>
+<!--                 <DebugSymbolizer /> -->
+        </Rule>
+    </Style>
+
+</Map>

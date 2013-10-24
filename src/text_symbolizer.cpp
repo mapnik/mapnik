@@ -275,12 +275,12 @@ void  text_symbolizer::set_label_spacing(double spacing)
     placement_options_->defaults.label_spacing = spacing;
 }
 
-unsigned  text_symbolizer::get_label_position_tolerance() const
+double text_symbolizer::get_label_position_tolerance() const
 {
     return placement_options_->defaults.label_position_tolerance;
 }
 
-void  text_symbolizer::set_label_position_tolerance(unsigned tolerance)
+void  text_symbolizer::set_label_position_tolerance(double tolerance)
 {
     placement_options_->defaults.label_position_tolerance = tolerance;
 }

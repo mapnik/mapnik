@@ -90,8 +90,8 @@ struct MAPNIK_DECL text_symbolizer : public symbolizer_base
     void set_character_spacing(double spacing);
     double get_label_spacing() const func_deprecated; // spacing between repeated labels on lines
     void set_label_spacing(double spacing);
-    unsigned get_label_position_tolerance() const func_deprecated; //distance the label can be moved on the line to fit, if 0 the default is used
-    void set_label_position_tolerance(unsigned tolerance);
+    double get_label_position_tolerance() const func_deprecated; //distance the label can be moved on the line to fit, if 0 the default is used
+    void set_label_position_tolerance(double tolerance);
     bool get_force_odd_labels() const func_deprecated; // try render an odd amount of labels
     void set_force_odd_labels(bool force);
     double get_max_char_angle_delta() const func_deprecated; // maximum change in angle between adjacent characters
