@@ -92,7 +92,9 @@ if mapnik.has_pycairo():
         if not os.path.exists(expected_cairo_file):
             print 'generated expected cairo surface file %s' % expected_cairo_file
             shutil.copy(test_cairo_file,expected_cairo_file)
-        eq_(os.stat(expected_cairo_file).st_size,os.stat(test_cairo_file).st_size)
+        diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
+        msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
+        eq_( diff < 1500, True, msg)
         os.remove(test_cairo_file)
 
     def test_passing_pycairo_context_pdf():
@@ -109,7 +111,9 @@ if mapnik.has_pycairo():
         if not os.path.exists(expected_cairo_file):
             print 'generated expected cairo surface file %s' % expected_cairo_file
             shutil.copy(test_cairo_file,expected_cairo_file)
-        eq_(os.stat(expected_cairo_file).st_size,os.stat(test_cairo_file).st_size)
+        diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
+        msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
+        eq_( diff < 1500, True, msg)
         os.remove(test_cairo_file)
 
     def test_passing_pycairo_context_png():
@@ -131,12 +135,16 @@ if mapnik.has_pycairo():
         if not os.path.exists(expected_cairo_file):
             print 'generated expected cairo surface file %s' % expected_cairo_file
             shutil.copy(test_cairo_file,expected_cairo_file)
-        eq_(os.stat(expected_cairo_file).st_size,os.stat(test_cairo_file).st_size)
+        diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
+        msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
+        eq_( diff < 500, True, msg)
         os.remove(test_cairo_file)
         if not os.path.exists(expected_cairo_file2):
             print 'generated expected cairo surface file %s' % expected_cairo_file2
             shutil.copy(reduced_color_image,expected_cairo_file2)
-        eq_(os.stat(expected_cairo_file2).st_size,os.stat(reduced_color_image).st_size)
+        diff = abs(os.stat(expected_cairo_file2).st_size-os.stat(reduced_color_image).st_size)
+        msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,reduced_color_image,'tests/python_tests/'+ expected_cairo_file2)
+        eq_( diff < 500, True, msg)
         os.remove(reduced_color_image)
 
     if 'sqlite' in mapnik.DatasourceCache.plugin_names():
@@ -153,7 +161,9 @@ if mapnik.has_pycairo():
                     if not os.path.exists(expected_cairo_file):
                         print 'generated expected cairo surface file %s' % expected_cairo_file
                         shutil.copy(test_cairo_file,expected_cairo_file)
-                    eq_(os.stat(expected_cairo_file).st_size,os.stat(test_cairo_file).st_size)
+                    diff = abs(os.stat(expected_cairo_file).st_size-os.stat(test_cairo_file).st_size)
+                    msg = 'diff in size (%s) between actual (%s) and expected(%s)' % (diff,test_cairo_file,'tests/python_tests/'+ expected_cairo_file)
+                    eq_( diff < 1500, True, msg)
                     os.remove(test_cairo_file)
                     return True
                 else:
@@ -177,15 +187,6 @@ if mapnik.has_pycairo():
 
         def test_pycairo_pdf_surface3():
             eq_(_pycairo_surface('pdf','polygon'),True)
-
-        def test_pycairo_ps_surface1():
-            eq_(_pycairo_surface('ps','point'),True)
-
-        def test_pycairo_ps_surface2():
-            eq_(_pycairo_surface('ps','building'),True)
-
-        def test_pycairo_ps_surface3():
-            eq_(_pycairo_surface('ps','polygon'),True)
 
 if __name__ == "__main__":
     setup()
