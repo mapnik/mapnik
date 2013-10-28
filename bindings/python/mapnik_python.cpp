@@ -116,6 +116,7 @@ void clear_cache()
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <pycairo.h>
+#include <cairo.h>
 static Pycairo_CAPI_t *Pycairo_CAPI;
 #endif
 
@@ -200,7 +201,7 @@ void render5(const mapnik::Map& map,
              unsigned offset_y = 0)
 {
     python_unblock_auto_block b;
-    mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
+    mapnik::cairo_ptr context(cairo_reference(py_context->ctx), mapnik::cairo_closer());
     mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context,scale_factor,offset_x, offset_y);
     ren.apply();
 }
@@ -208,7 +209,7 @@ void render5(const mapnik::Map& map,
 void render6(const mapnik::Map& map, PycairoContext* py_context)
 {
     python_unblock_auto_block b;
-    mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
+    mapnik::cairo_ptr context(cairo_reference(py_context->ctx), mapnik::cairo_closer());
     mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context);
     ren.apply();
 }
@@ -219,7 +220,7 @@ void render_with_detector2(
     boost::shared_ptr<mapnik::label_collision_detector4> detector)
 {
     python_unblock_auto_block b;
-    mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
+    mapnik::cairo_ptr context(cairo_reference(py_context->ctx), mapnik::cairo_closer());
     mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context,detector);
     ren.apply();
 }
@@ -233,7 +234,7 @@ void render_with_detector3(
     unsigned offset_y = 0u)
 {
     python_unblock_auto_block b;
-    mapnik::cairo_ptr context(py_context->ctx, mapnik::cairo_closer());
+    mapnik::cairo_ptr context(cairo_reference(py_context->ctx), mapnik::cairo_closer());
     mapnik::cairo_renderer<mapnik::cairo_ptr> ren(map,context,detector,scale_factor,offset_x,offset_y);
     ren.apply();
 }

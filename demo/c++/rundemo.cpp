@@ -301,7 +301,7 @@ int main ( int argc , char** argv)
             cairo_image_surface_create(CAIRO_FORMAT_ARGB32,m.width(),m.height()),
             cairo_surface_closer());
         double scale_factor = 1.0;
-        cairo_ptr image_context = (create_context(image_surface));
+        cairo_ptr image_context(create_context(image_surface));
         mapnik::cairo_renderer<cairo_ptr> png_render(m,image_context,scale_factor);
         png_render.apply();
         // we can now write to png with cairo functionality
