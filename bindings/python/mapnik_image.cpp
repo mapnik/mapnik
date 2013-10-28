@@ -38,6 +38,7 @@
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 #include <mapnik/cairo_context.hpp>
 #include <pycairo.h>
+#include <cairo.h>
 #endif
 
 using mapnik::image_32;
@@ -208,7 +209,7 @@ void composite(image_32 & dst, image_32 & src, mapnik::composite_mode_e mode, fl
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 std::shared_ptr<image_32> from_cairo(PycairoSurface* py_surface)
 {
-    mapnik::cairo_surface_ptr surface(py_surface->surface, mapnik::cairo_surface_closer());
+    mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
     std::shared_ptr<image_32> image_ptr = std::make_shared<image_32>(surface);
     return image_ptr;
 }
