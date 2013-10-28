@@ -126,15 +126,9 @@ struct extract_geometry
 };
 #endif
 
-template <typename Iterator, typename FeatureType>
-struct feature_grammar :
-        qi::grammar<Iterator, void(FeatureType&),
-        space_type>
+template <typename Iterator>
+struct generic_json
 {
-    feature_grammar(mapnik::transcoder const& tr);
-
-    // start
-    // generic JSON
     qi::rule<Iterator,space_type> value;
     qi::symbols<char const, char const> unesc_char;
     qi::uint_parser< unsigned, 16, 4, 4 > hex4 ;
@@ -147,6 +141,18 @@ struct feature_grammar :
     qi::rule<Iterator,space_type> array;
     qi::rule<Iterator,space_type> pairs;
     qi::real_parser<double, qi::strict_real_policies<double> > strict_double;
+};
+
+template <typename Iterator, typename FeatureType>
+struct feature_grammar :
+        qi::grammar<Iterator, void(FeatureType&),
+                    space_type>
+{
+    feature_grammar(mapnik::transcoder const& tr);
+
+    // start
+    // generic JSON
+    generic_json<Iterator> json;
 
     // geoJSON
     qi::rule<Iterator,void(FeatureType&),space_type> feature; // START
