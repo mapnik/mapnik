@@ -30,7 +30,7 @@ if 'Linux' == os.uname()[0]:
     # which is older than the 1.12.14 version we used on OS X
     # to generate the expected images, so we'll rachet back the threshold
     # https://github.com/mapnik/mapnik/issues/1868
-    cairo_threshold = 120
+    cairo_threshold = 181
 
 def render_cairo(m, output, scale_factor):
     mapnik.render_to_file(m, output, 'ARGB32', scale_factor)
