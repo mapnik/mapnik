@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Fixed crash when rendering to cairo context from python (#2031)
+
 - Moved `label-position-tolerance` from unsigned type to double
 
 - Default PNG encoding method when `png` is supplied is now `png8:m=h`, so paletted png using hextree color quantization (#2028)
