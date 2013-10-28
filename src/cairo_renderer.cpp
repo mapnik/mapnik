@@ -334,6 +334,7 @@ void cairo_renderer_base::process(polygon_symbolizer const& sym,
         }
     }
     // fill polygon
+    context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
     context_.fill();
 }
 
@@ -871,6 +872,7 @@ void cairo_renderer_base::process(polygon_pattern_symbolizer const& sym,
         }
     }
     // fill polygon
+    context_.set_fill_rule(CAIRO_FILL_RULE_EVEN_ODD);
     context_.fill();
 }
 

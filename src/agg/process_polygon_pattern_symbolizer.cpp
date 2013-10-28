@@ -166,6 +166,7 @@ void agg_renderer<T>::process(polygon_pattern_symbolizer const& sym,
         }
     }
     agg::scanline_u8 sl;
+    ras_ptr->filling_rule(agg::fill_even_odd);
     agg::render_scanlines(*ras_ptr, sl, rp);
 }
 
