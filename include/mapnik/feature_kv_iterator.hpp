@@ -35,7 +35,8 @@
 #include <boost/iterator/filter_iterator.hpp>
 
 // stl
-#include <unordered_map>
+#include <map>
+
 
 namespace mapnik {
 
@@ -60,7 +61,7 @@ private:
     value_type const& dereference() const;
 
     feature_impl const& f_;
-    std::unordered_map<std::string,std::size_t>::const_iterator itr_;
+    std::map<std::string,std::size_t>::const_iterator itr_;
     mutable value_type kv_;
 
 };
@@ -78,3 +79,4 @@ typedef boost::filter_iterator<value_not_null, feature_kv_iterator> feature_kv_i
 }
 
 #endif // MAPNIK_FEATURE_KV_ITERATOR_HPP
+
