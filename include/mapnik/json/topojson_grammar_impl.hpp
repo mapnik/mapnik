@@ -116,7 +116,7 @@ topojson_grammar<Iterator>::topojson_grammar()
         >> lit('{')
         >> -((omit[string_]
               >> lit(':')
-              >>  geometry_collection) % lit(','))
+              >>  (geometry_collection | geometry)) % lit(','))
         >> lit('}')
         ;
 
