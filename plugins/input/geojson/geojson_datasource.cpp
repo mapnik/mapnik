@@ -137,15 +137,13 @@ geojson_datasource::geojson_datasource(parameters const& params)
         throw mapnik::datasource_exception("geojson_datasource: Failed parse GeoJSON file '" + file_ + "'");
     }
 
-    bool first = true;
     std::size_t count=0;
     for (mapnik::feature_ptr const& f : features_)
     {
         mapnik::box2d<double> box = f->envelope();
-        if (first)
+        if (count == 0)
         {
             extent_ = box;
-            first = false;
             mapnik::feature_kv_iterator f_itr = f->begin();
             mapnik::feature_kv_iterator f_end = f->end();
             for ( ;f_itr!=f_end; ++f_itr)
