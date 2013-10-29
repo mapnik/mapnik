@@ -106,6 +106,7 @@ void grid_renderer<T>::process(line_symbolizer const& sym,
 
     // render id
     ren.color(color_type(feature.id()));
+    ras_ptr->filling_rule(agg::fill_non_zero);
     agg::render_scanlines(*ras_ptr, sl, ren);
 
     // add feature properties to grid cache

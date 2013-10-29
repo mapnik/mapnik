@@ -164,6 +164,7 @@ void agg_renderer<T>::process(line_symbolizer const& sym,
         renderer_type ren(renb);
         ren.color(agg::rgba8_pre(r, g, b, int(a * stroke_.get_opacity())));
         agg::scanline_u8 sl;
+        ras_ptr->filling_rule(agg::fill_non_zero);
         agg::render_scanlines(*ras_ptr, sl, ren);
     }
 }

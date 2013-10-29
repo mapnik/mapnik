@@ -497,6 +497,7 @@ void cairo_renderer_base::process(line_symbolizer const& sym,
         }
     }
     // stroke
+    context_.set_fill_rule(CAIRO_FILL_RULE_WINDING);
     context_.stroke();
 }
 
