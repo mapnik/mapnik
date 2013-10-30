@@ -73,7 +73,8 @@ csv_datasource::csv_datasource(parameters const& params)
       manual_headers_(mapnik::util::trim_copy(*params.get<std::string>("headers", ""))),
       strict_(*params.get<mapnik::boolean>("strict", false)),
       filesize_max_(*params.get<double>("filesize_max", 20.0)),  // MB
-      ctx_(boost::make_shared<mapnik::context_type>())
+      ctx_(boost::make_shared<mapnik::context_type>()),
+      extent_initialized_(false)
 {
     /* TODO:
        general:
@@ -96,6 +97,12 @@ csv_datasource::csv_datasource(parameters const& params)
        - move to spirit to tokenize and add character level error feedback:
        http://boost-spirit.com/home/articles/qi-example/tracking-the-input-position-while-parsing/
     */
+
+    boost::optional<std::string> ext = params.get<std::string>("extent");
+    if (ext && !ext->empty())
+    {
+        extent_initialized_ = extent_.from_string(*ext);
+    }
 
     boost::optional<std::string> inline_string = params.get<std::string>("inline");
     if (inline_string)
@@ -407,7 +414,8 @@ void csv_datasource::parse_csv(T & stream,
     }
 
     mapnik::value_integer feature_count(0);
-    bool extent_initialized = false;
+    bool extent_started = false;
+
     std::size_t num_headers = headers_.size();
 
     for (std::size_t i = 0; i < headers_.size(); ++i)
@@ -740,14 +748,17 @@ void csv_datasource::parse_csv(T & stream,
             {
                 if (parsed_wkt || parsed_json)
                 {
-                    if (!extent_initialized)
+                    if (!extent_initialized_)
                     {
-                        extent_initialized = true;
-                        extent_ = feature->envelope();
-                    }
-                    else
-                    {
-                        extent_.expand_to_include(feature->envelope());
+                        if (!extent_started)
+                        {
+                            extent_started = true;
+                            extent_ = feature->envelope();
+                        }
+                        else
+                        {
+                            extent_.expand_to_include(feature->envelope());
+                        }
                     }
                     features_.push_back(feature);
                     null_geom = false;
@@ -778,14 +789,17 @@ void csv_datasource::parse_csv(T & stream,
                     feature->add_geometry(pt);
                     features_.push_back(feature);
                     null_geom = false;
-                    if (!extent_initialized)
+                    if (!extent_initialized_)
                     {
-                        extent_initialized = true;
-                        extent_ = feature->envelope();
-                    }
-                    else
-                    {
-                        extent_.expand_to_include(feature->envelope());
+                        if (!extent_started)
+                        {
+                            extent_started = true;
+                            extent_ = feature->envelope();
+                        }
+                        else
+                        {
+                            extent_.expand_to_include(feature->envelope());
+                        }
                     }
                 }
                 else if (parsed_x || parsed_y)

@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- CSV Plugin: added the ability to pass an `extent` in options
+
 - Fixed crash when rendering to cairo context from python (#2031)
 
 - Moved `label-position-tolerance` from unsigned type to double
