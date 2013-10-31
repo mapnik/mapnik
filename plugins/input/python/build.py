@@ -20,6 +20,7 @@
 #
 
 import os
+import copy
 Import ('plugin_base')
 Import ('env')
 
@@ -42,7 +43,7 @@ libraries.append(env['BOOST_PYTHON_LIB'])
 libraries.append(env['ICU_LIB_NAME'])
 
 python_cpppath = env['PYTHON_INCLUDES']
-allcpp_paths = env['CPPPATH']
+allcpp_paths = copy.copy(env['CPPPATH'])
 allcpp_paths.extend(python_cpppath)
 # NOTE: explicit linking to libpython is uneeded on most linux version if the
 # python plugin is used by a app in python using mapnik's python bindings
