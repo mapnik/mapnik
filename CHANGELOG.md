@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Upgraded unifont to `unifont-6.3.20131020`
+
 - CSV Plugin: added the ability to pass an `extent` in options
 
 - Fixed crash when rendering to cairo context from python (#2031)
