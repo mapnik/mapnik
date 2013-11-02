@@ -480,10 +480,10 @@ void Map::fixAspectRatio()
             current_extent_.width(current_extent_.height() * ratio1);
             break;
         case ADJUST_CANVAS_HEIGHT:
-            height_ = int (width_ / ratio2 + 0.5);
+            height_ = static_cast<unsigned>(std::floor(static_cast<double>(width_) / ratio2 + 0.5));
             break;
         case ADJUST_CANVAS_WIDTH:
-            width_ = int (height_ * ratio2 + 0.5);
+            width_ = static_cast<unsigned>(std::floor(static_cast<double>(height_) * ratio2 + 0.5));
             break;
         case GROW_BBOX:
             if (ratio2 > ratio1)
@@ -499,15 +499,15 @@ void Map::fixAspectRatio()
             break;
         case GROW_CANVAS:
             if (ratio2 > ratio1)
-                width_ = static_cast<int>(height_ * ratio2 + 0.5);
+                width_ = static_cast<unsigned>(std::floor(static_cast<double>(height_) * ratio2 + 0.5));
             else
-                height_ = int (width_ / ratio2 + 0.5);
+                height_ = static_cast<unsigned>(std::floor(static_cast<double>(width_) / ratio2 + 0.5));
             break;
         case SHRINK_CANVAS:
             if (ratio2 > ratio1)
-                height_ = int (width_ / ratio2 + 0.5);
+                height_ = static_cast<unsigned>(std::floor(static_cast<double>(width_) / ratio2 + 0.5));
             else
-                width_ = static_cast<int>(height_ * ratio2 + 0.5);
+                width_ = static_cast<unsigned>(std::floor(static_cast<double>(height_) * ratio2 + 0.5));
             break;
         default:
             if (ratio2 > ratio1)
@@ -537,7 +537,7 @@ void Map::pan(int x,int y)
 {
     int dx = x - int(0.5 * width_);
     int dy = int(0.5 * height_) - y;
-    double s = width_/current_extent_.width();
+    double s = static_cast<double>(width_)/current_extent_.width();
     double minx  = current_extent_.minx() + dx/s;
     double maxx  = current_extent_.maxx() + dx/s;
     double miny  = current_extent_.miny() + dy/s;
@@ -554,7 +554,7 @@ void Map::pan_and_zoom(int x,int y,double factor)
 double Map::scale() const
 {
     if (width_>0)
-        return current_extent_.width()/width_;
+        return current_extent_.width()/static_cast<double>(width_);
     return current_extent_.width();
 }
 
@@ -606,7 +606,7 @@ featureset_ptr Map::query_point(unsigned index, double x, double y) const
                   << "' into layer srs for tolerance calculation";
                 throw std::runtime_error(s.str());
             }
-            double tol = (map_ex.maxx() - map_ex.minx()) / width_ * 3;
+            double tol = (map_ex.maxx() - map_ex.minx()) / static_cast<double>(width_) * 3;
             featureset_ptr fs = ds->features_at_point(mapnik::coord2d(x,y), tol);
             MAPNIK_LOG_DEBUG(map) << "map: Query at point tol=" << tol << "(" << x << "," << y << ")";
             if (fs)
