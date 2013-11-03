@@ -92,7 +92,7 @@ public:
 
     void push_back (coord_type x,coord_type y,command_size command)
     {
-        unsigned block = pos_ >> block_shift;
+        size_type block = pos_ >> block_shift;
         if (block >= num_blocks_)
         {
             allocate_block(block);
@@ -108,7 +108,7 @@ public:
     unsigned get_vertex(unsigned pos,coord_type* x,coord_type* y) const
     {
         if (pos >= pos_) return SEG_END;
-        unsigned block = pos >> block_shift;
+        size_type block = pos >> block_shift;
         const coord_type* vertex = vertices_[block] + (( pos & block_mask) << 1);
         *x = (*vertex++);
         *y = (*vertex);
@@ -119,12 +119,12 @@ public:
     {
         if (pos < pos_)
         {
-            unsigned block = pos >> block_shift;
+            size_type block = pos >> block_shift;
             commands_[block] [pos & block_mask] = command;
         }
     }
 private:
-    void allocate_block(unsigned block)
+    void allocate_block(size_type block)
     {
         if (block >= max_blocks_)
         {
