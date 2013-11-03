@@ -28,9 +28,10 @@
 using namespace boost::chrono;
 using namespace mapnik;
 
-static unsigned test_num = 1;
 static bool dry_run = false;
-static std::set<int> test_set;
+typedef std::set<int> set_type;
+static set_type test_set;
+static set_type::key_type test_num = 1;
 
 typedef process_cpu_clock clock_type;
 typedef clock_type::duration dur;
@@ -88,7 +89,7 @@ void benchmark(T & test_runner, std::string const& name)
     {
         std::clog << "test runner did not complete: " << ex.what() << "\n";
     }
-    test_num++;
+    ++test_num;
 }
 
 bool compare_images(std::string const& src_fn,std::string const& dest_fn)
@@ -731,7 +732,7 @@ int main( int argc, char** argv)
             } else if (opt[0] != '-') {
                 int arg;
                 if (mapnik::util::string2int(opt,arg)) {
-                    test_set.insert(arg);
+                    test_set.insert(static_cast<unsigned>(arg));
                 }
             }
         }
@@ -887,7 +888,7 @@ int main( int argc, char** argv)
             if (!success) {
                std::clog << "warning, did not register any new fonts!\n";
             }
-            unsigned face_count = mapnik::freetype_engine::face_names().size();
+            std::size_t face_count = mapnik::freetype_engine::face_names().size();
             test13 runner(1000,10);
             benchmark(runner, (boost::format("font_engine: created %ld faces in ") % (face_count * 1000 * 10)).str());
         }
