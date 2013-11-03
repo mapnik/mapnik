@@ -24,9 +24,6 @@ Import('env')
 
 agg_env = env.Clone()
 
-if env['SUNCC']:
-    cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O -KPIC -DNDEBUG'
-else:
-    cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
+cxxflags = env['CUSTOM_CXXFLAGS'] + ' -O%s -fPIC -DNDEBUG' % env['OPTIMIZATION']
 
 agg_env.StaticLibrary('agg', glob('./src/' + '*.cpp'), LIBS=[], CXXFLAGS=cxxflags, LINKFLAGS=env['CUSTOM_LDFLAGS'])

@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Dropped support for Sun compiler
+
 - Upgraded unifont to `unifont-6.3.20131020`
 
 - CSV Plugin: added the ability to pass an `extent` in options
