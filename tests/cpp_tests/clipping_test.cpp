@@ -2,6 +2,7 @@
 // mapnik
 #include <mapnik/geometry.hpp>
 #include <mapnik/util/conversions.hpp>
+#include <mapnik/util/trim.hpp>
 
 // boost
 #include <boost/detail/lightweight_test.hpp>
@@ -113,7 +114,7 @@ int main(int argc, char** argv)
             parse_geom(geom,parts[1]);
             //std::clog << dump_path(geom) << "\n";
             // third part is expected, clipped geometry
-            BOOST_TEST_EQ(clip_line(bbox,geom),parts[2]);
+            BOOST_TEST_EQ(clip_line(bbox,geom),mapnik::util::trim_copy(parts[2]));
         }
         stream.close();
     }
