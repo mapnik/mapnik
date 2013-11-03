@@ -120,7 +120,7 @@ inline void read_double_ndr(const char* data, double & val)
 inline void read_int16_xdr(const char* data, boost::int16_t & val)
 {
 #ifndef MAPNIK_BIG_ENDIAN
-    val = (data[3]&0xff) | ((data[2]&0xff)<<8);
+    val = static_cast<boost::int16_t>((data[3]&0xff) | ((data[2]&0xff)<<8));
 #else
     std::memcpy(&val,data,2);
 #endif
