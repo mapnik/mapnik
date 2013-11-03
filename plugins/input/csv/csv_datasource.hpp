@@ -76,6 +76,7 @@ private:
     bool strict_;
     double filesize_max_;
     mapnik::context_ptr ctx_;
+    bool extent_initialized_;
 };
 
 #endif // MAPNIK_CSV_DATASOURCE_HPP

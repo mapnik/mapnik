@@ -36,11 +36,17 @@ except:
 LIBDIR_SCHEMA_DEFAULT='lib'
 severities = ['debug', 'warn', 'error', 'none']
 
+ICU_INCLUDES_DEFAULT='/usr/include'
+ICU_LIBS_DEFAULT='/usr/'
+
 DEFAULT_CC = "gcc"
 DEFAULT_CXX = "g++"
 if sys.platform == 'darwin':
     DEFAULT_CC = "clang"
     DEFAULT_CXX = "clang++"
+    # homebrew default
+    ICU_INCLUDES_DEFAULT='/usr/local/opt/icu4c/include/'
+    ICU_LIBS_DEFAULT='/usr/local/opt/icu4c/'
 
 py3 = None
 
@@ -320,8 +326,8 @@ opts.AddVariables(
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
-    PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('ICU_INCLUDES', 'Search path for ICU include files', ICU_INCLUDES_DEFAULT, PathVariable.PathAccept),
+    PathVariable('ICU_LIBS','Search path for ICU include files',ICU_LIBS_DEFAULT + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc', PathVariable.PathAccept),
 
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),

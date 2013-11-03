@@ -570,6 +570,17 @@ if 'csv' in mapnik.DatasourceCache.plugin_names():
         eq_(desc['geometry_type'],mapnik.DataGeometryType.Point)
         eq_(len(ds.all_features()),8)
 
+    def test_manually_supplied_extent(**kwargs):
+        csv_string = '''
+           wkt,Name
+          '''
+        ds = mapnik.Datasource(**{"type":"csv","extent":"-180,-90,180,90","inline":csv_string})
+        b = ds.envelope()
+        eq_(b.minx,-180)
+        eq_(b.miny,-90)
+        eq_(b.maxx,180)
+        eq_(b.maxy,90)
+
 if __name__ == "__main__":
     setup()
     [eval(run)(visual=True) for run in dir() if 'test_' in run]
