@@ -221,7 +221,7 @@ void cairo_context::set_line_width(double width)
     check_object_status_and_throw_exception(*this);
 }
 
-void cairo_context::set_dash(dash_array const &dashes, double scale_factor)
+void cairo_context::set_dash(dash_array const& dashes, double scale_factor)
 {
     std::valarray<double> d(dashes.size() * 2);
     dash_array::const_iterator itr = dashes.begin();
@@ -234,7 +234,7 @@ void cairo_context::set_dash(dash_array const &dashes, double scale_factor)
         d[index++] = itr->second * scale_factor;
     }
 
-    cairo_set_dash(cairo_.get() , &d[0], d.size(), 0/*offset*/);
+    cairo_set_dash(cairo_.get() , &d[0], static_cast<int>(d.size()), 0/*offset*/);
     check_object_status_and_throw_exception(*this);
 }
 
