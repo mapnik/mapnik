@@ -509,7 +509,7 @@ void feature_style_processor<Processor>::prepare_layer(layer_rendering_material 
     }
     else
     {
-        for(size_t i = 0; i < active_styles.size(); ++i)
+        for(std::size_t i = 0; i < active_styles.size(); ++i)
         {
             featureset_ptr_list.push_back(ds->features_with_context(q,current_ctx));
         }
@@ -564,7 +564,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
                 {
                     // We're at a value boundary, so render what we have
                     // up to this point.
-                    int i = 0;
+                    std::size_t i = 0;
                     BOOST_FOREACH (feature_type_style const* style, active_styles)
                     {
 
@@ -581,7 +581,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
                 prev = feature;
             }
 
-            int i = 0;
+            std::size_t i = 0;
             BOOST_FOREACH (feature_type_style const* style, active_styles)
             {
                 cache->prepare();
@@ -605,7 +605,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
                 cache->push(feature);
             }
         }
-        int i = 0;
+        std::size_t i = 0;
         BOOST_FOREACH (feature_type_style const* style, active_styles)
         {
             cache->prepare();
@@ -618,7 +618,7 @@ void feature_style_processor<Processor>::render_material(layer_rendering_materia
     // We only have a single style and no grouping.
     else
     {
-        int i = 0;
+        std::size_t i = 0;
         std::vector<featureset_ptr>::iterator featuresets = featureset_ptr_list.begin();
         BOOST_FOREACH (feature_type_style const* style, active_styles)
         {
