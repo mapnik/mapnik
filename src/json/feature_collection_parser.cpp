@@ -45,8 +45,10 @@ namespace mapnik { namespace json {
 #if BOOST_VERSION >= 104700
 
     template <typename Iterator>
-    feature_collection_parser<Iterator>::feature_collection_parser(mapnik::context_ptr const& ctx, mapnik::transcoder const& tr)
-        : grammar_(new feature_collection_grammar<iterator_type,feature_type>(ctx,tr)) {}
+    feature_collection_parser<Iterator>::feature_collection_parser(generic_json<Iterator> & json,
+                                                                   mapnik::context_ptr const& ctx,
+                                                                   mapnik::transcoder const& tr)
+        : grammar_(new feature_collection_grammar<iterator_type,feature_type>(json, ctx,tr)) {}
 
     template <typename Iterator>
     feature_collection_parser<Iterator>::~feature_collection_parser() {}
