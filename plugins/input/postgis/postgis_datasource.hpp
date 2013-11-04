@@ -68,7 +68,7 @@ public:
     mapnik::datasource::datasource_t type() const;
     static const char * name();
     processor_context_ptr get_context(feature_style_context_map &) const;
-    featureset_ptr features_with_context(query const& q, processor_context_ptr ctx= processor_context_ptr()) const;
+    featureset_ptr features_with_context(query const& q, processor_context_ptr ctx) const;
     featureset_ptr features(query const& q) const;
     featureset_ptr features_at_point(coord2d const& pt, double tol = 0) const;
     mapnik::box2d<double> envelope() const;

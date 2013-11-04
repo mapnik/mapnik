@@ -100,7 +100,6 @@ private:
     void prepare_layer(layer_rendering_material & mat,
                        feature_style_context_map & ctx_map,
                        Processor & p,
-                       projection const& proj0,
                        double scale,
                        double scale_denom,
                        unsigned width,

@@ -36,6 +36,9 @@ except:
 LIBDIR_SCHEMA_DEFAULT='lib'
 severities = ['debug', 'warn', 'error', 'none']
 
+ICU_INCLUDES_DEFAULT='/usr/include'
+ICU_LIBS_DEFAULT='/usr/'
+
 DEFAULT_CC = "gcc"
 DEFAULT_CXX = "g++"
 DEFAULT_CXX11_CXXFLAGS = " -std=c++11"
@@ -43,6 +46,9 @@ DEFAULT_CXX11_LINKFLAGS = ""
 if sys.platform == 'darwin':
     DEFAULT_CC = "clang"
     DEFAULT_CXX = "clang++"
+    # homebrew default
+    ICU_INCLUDES_DEFAULT='/usr/local/opt/icu4c/include/'
+    ICU_LIBS_DEFAULT='/usr/local/opt/icu4c/'
 
 py3 = None
 
@@ -323,8 +329,8 @@ opts.AddVariables(
     # Variables for required dependencies
     ('FREETYPE_CONFIG', 'The path to the freetype-config executable.', 'freetype-config'),
     ('XML2_CONFIG', 'The path to the xml2-config executable.', 'xml2-config'),
-    PathVariable('ICU_INCLUDES', 'Search path for ICU include files', '/usr/include', PathVariable.PathAccept),
-    PathVariable('ICU_LIBS','Search path for ICU include files','/usr/' + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
+    PathVariable('ICU_INCLUDES', 'Search path for ICU include files', ICU_INCLUDES_DEFAULT, PathVariable.PathAccept),
+    PathVariable('ICU_LIBS','Search path for ICU include files',ICU_LIBS_DEFAULT + LIBDIR_SCHEMA_DEFAULT, PathVariable.PathAccept),
     ('ICU_LIB_NAME', 'The library name for icu (such as icuuc, sicuuc, or icucore)', 'icuuc', PathVariable.PathAccept),
 
     BoolVariable('PNG', 'Build Mapnik with PNG read and write support', 'True'),
@@ -427,7 +433,6 @@ pickle_store = [# Scons internal variables
         'BOOST_APPEND',
         'LIBDIR_SCHEMA',
         'REQUESTED_PLUGINS',
-        'SUNCC',
         'PYTHON_VERSION',
         'PYTHON_INCLUDES',
         'PYTHON_INSTALL_LOCATION',
@@ -1169,21 +1174,6 @@ if not preconfigured:
         thread_suffix = ''
         env.Append(LIBS = 'pthread')
 
-    # Solaris & Sun Studio settings (the `SUNCC` flag will only be
-    # set if the `CXX` option begins with `CC`)
-    SOLARIS = env['PLATFORM'] == 'SunOS'
-    env['SUNCC'] = SOLARIS and env['CXX'].startswith('CC')
-
-    # If the Sun Studio C++ compiler (`CC`) is used instead of gcc.
-    if env['SUNCC']:
-        env['CC'] = 'cc'
-        # To be compatible w/Boost everything needs to be compiled
-        # with the `-library=stlport4` flag (which needs to come
-        # before the `-o` flag).
-        env['CXX'] = 'CC -library=stlport4'
-        if env['THREADING'] == 'multi':
-            env.Append(CXXFLAGS = '-mt')
-
     if env['SHAPE_MEMORY_MAPPED_FILE']:
         env.Append(CPPDEFINES = '-DSHAPE_MEMORY_MAPPED_FILE')
 
@@ -1764,22 +1754,22 @@ if not preconfigured:
         else:
             env.Append(CPPDEFINES = ndebug_defines)
 
-        if not env['SUNCC']:
-            # Common flags for CXX compiler.
-            common_cxx_flags = '-Wall %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+        # Common flags for g++/clang++ CXX compiler.
+        # TODO: clean up code more to make -Wsign-conversion -Wconversion viable
+        common_cxx_flags = '-Wall -Wsign-compare -Wshadow %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
-            # https://github.com/mapnik/mapnik/issues/1835
-            if sys.platform == 'darwin' and env['CXX'] == 'g++':
-                common_cxx_flags += '-fpermissive '
+        # https://github.com/mapnik/mapnik/issues/1835
+        if sys.platform == 'darwin' and env['CXX'] == 'g++':
+            common_cxx_flags += '-fpermissive '
 
-            if env['DEBUG']:
-                env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
-            else:
-                # TODO - add back -fvisibility-inlines-hidden
-                # https://github.com/mapnik/mapnik/issues/1863
-                env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
-            if env['DEBUG_UNDEFINED']:
-                env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
+        if env['DEBUG']:
+            env.Append(CXXFLAGS = common_cxx_flags + '-O0 -fno-inline')
+        else:
+            # TODO - add back -fvisibility-inlines-hidden
+            # https://github.com/mapnik/mapnik/issues/1863
+            env.Append(CXXFLAGS = common_cxx_flags + '-O%s -fno-strict-aliasing -finline-functions -Wno-inline -Wno-parentheses -Wno-char-subscripts' % (env['OPTIMIZATION']))
+        if env['DEBUG_UNDEFINED']:
+            env.Append(CXXFLAGS = '-fsanitize=undefined-trap -fsanitize-undefined-trap-on-error -ftrapv -fwrapv')
 
         if 'python' in env['BINDINGS'] or 'python' in env['REQUESTED_PLUGINS']:
             majver, minver = env['PYTHON_VERSION'].split('.')

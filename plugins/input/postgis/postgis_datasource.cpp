@@ -656,7 +656,7 @@ featureset_ptr postgis_datasource::features(query const& q) const
     }
     else
     {
-        return features_with_context(q);
+        return features_with_context(q,processor_context_ptr());
     }
 }
 

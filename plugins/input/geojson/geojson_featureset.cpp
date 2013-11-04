@@ -25,7 +25,7 @@
 // stl
 #include <string>
 #include <vector>
-#include <fstream>
+#include <deque>
 
 #include "geojson_featureset.hpp"
 

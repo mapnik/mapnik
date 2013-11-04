@@ -91,9 +91,15 @@ public:
 };
 
 
+#ifdef __GNUC__
 template <typename T,
           template <typename U> class CreatePolicy=CreateStatic> class MAPNIK_DECL singleton
 {
+#else
+template <typename T,
+          template <typename U> class CreatePolicy=CreateStatic> class singleton
+{
+#endif
     friend class CreatePolicy<T>;
     static T* pInstance_;
     static bool destroyed_;

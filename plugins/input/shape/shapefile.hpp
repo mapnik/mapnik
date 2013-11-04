@@ -36,12 +36,12 @@
 #ifdef SHAPE_MEMORY_MAPPED_FILE
 #include <boost/interprocess/mapped_region.hpp>
 #include <mapnik/mapped_memory_cache.hpp>
+#include <boost/interprocess/streams/bufferstream.hpp>
 #endif
 #include <mapnik/noncopyable.hpp>
 
 // boost
 #include <boost/cstdint.hpp>
-#include <boost/interprocess/streams/bufferstream.hpp>
 
 using mapnik::box2d;
 using mapnik::read_int32_ndr;
@@ -134,14 +134,12 @@ struct shape_record
     }
 };
 
-using namespace boost::interprocess;
-
 class shape_file : mapnik::noncopyable
 {
 public:
 
 #ifdef SHAPE_MEMORY_MAPPED_FILE
-    typedef ibufferstream file_source_type;
+    typedef boost::interprocess::ibufferstream file_source_type;
     typedef shape_record<MappedRecordTag> record_type;
     mapnik::mapped_region_ptr mapped_region_;
 #else

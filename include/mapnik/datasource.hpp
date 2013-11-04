@@ -112,7 +112,7 @@ public:
     virtual datasource_t type() const = 0;
 
     virtual processor_context_ptr get_context(feature_style_context_map&) const { return processor_context_ptr(); }
-    virtual featureset_ptr features_with_context(const query& q,processor_context_ptr ctx= processor_context_ptr()) const
+    virtual featureset_ptr features_with_context(query const& q,processor_context_ptr /*ctx*/) const
     {
         // default implementation without context use features method
         return features(q);
