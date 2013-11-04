@@ -83,9 +83,9 @@ public:
 
     void clear();
 
-    inline void painted(bool painted)
+    inline void painted(bool is_painted)
     {
-        painted_ = painted;
+        painted_ = is_painted;
     }
 
     inline bool painted() const
