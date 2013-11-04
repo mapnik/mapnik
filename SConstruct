@@ -1719,8 +1719,8 @@ if not preconfigured:
             env.Append(CPPDEFINES = ndebug_defines)
 
         # Common flags for g++/clang++ CXX compiler.
-        # -Wsign-conversion -Wconversion -Wunused-parameter
-        common_cxx_flags = '-Wall -Wsign-compare -Wshadow -Wconversion -Wno-sign-conversion %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
+        # TODO: clean up code more to make -Wsign-conversion -Wconversion viable
+        common_cxx_flags = '-Wall -Wsign-compare -Wshadow %s %s -ftemplate-depth-300 ' % (env['WARNING_CXXFLAGS'], pthread)
 
         # https://github.com/mapnik/mapnik/issues/1835
         if sys.platform == 'darwin' and env['CXX'] == 'g++':
