@@ -23,7 +23,6 @@
 
 #include <boost/python.hpp>
 #include <mapnik/image_scaling.hpp>
-#include "mapnik_enumeration.hpp"
 
 void export_scaling_method()
 {
