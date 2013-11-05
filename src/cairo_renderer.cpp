@@ -77,6 +77,7 @@
 
 // stl
 #include <deque>
+#include <cmath>
 
 namespace mapnik
 {
@@ -784,8 +785,8 @@ void cairo_renderer_base::process(line_pattern_symbolizer const& sym,
                 {
                     double dx = x - x0;
                     double dy = y - y0;
-                    double angle = atan2(dy, dx);
-                    double offset = fmod(length, width);
+                    double angle = std::atan2(dy, dx);
+                    double offset = std::fmod(length, width);
 
                     cairo_matrix_t matrix;
                     cairo_matrix_init_identity(&matrix);
