@@ -34,20 +34,20 @@ namespace agg
     typedef conv_clipper<source_a_type, source_b_type> self_type;
 
   private:
-    source_a_type*							m_src_a;
-    source_b_type*							m_src_b;
-    status									m_status;
-    int										m_vertex;
-    int										m_contour;
-	int										m_scaling_factor;
-    clipper_op_e							m_operation;
-    pod_bvector<ClipperLib::IntPoint, 8>		m_vertex_accumulator;
-    ClipperLib::Polygons						m_poly_a;
-    ClipperLib::Polygons						m_poly_b;
-    ClipperLib::Polygons						m_result;
-    ClipperLib::Clipper						m_clipper;
-    clipper_PolyFillType					m_subjFillType;
-    clipper_PolyFillType					m_clipFillType;
+    source_a_type*                            m_src_a;
+    source_b_type*                            m_src_b;
+    status                                    m_status;
+    int                                        m_vertex;
+    int                                        m_contour;
+    int                                        m_scaling_factor;
+    clipper_op_e              m_operation;
+    pod_bvector<ClipperLib::IntPoint, 8>        m_vertex_accumulator;
+    ClipperLib::Paths         m_poly_a;
+    ClipperLib::Paths         m_poly_b;
+    ClipperLib::Paths         m_result;
+    ClipperLib::Clipper       m_clipper;
+    clipper_PolyFillType      m_subjFillType;
+    clipper_PolyFillType      m_clipFillType;
 
     int Round(double val)
     {
@@ -59,7 +59,7 @@ namespace agg
       clipper_op_e op = clipper_or,
       clipper_PolyFillType subjFillType = clipper_even_odd,
       clipper_PolyFillType clipFillType = clipper_even_odd,
-	  int scaling_factor = 2) :
+      int scaling_factor = 2) :
         m_src_a(&a),
         m_src_b(&b),
         m_status(status_move_to),
@@ -69,9 +69,9 @@ namespace agg
         m_subjFillType(subjFillType),
         m_clipFillType(clipFillType)
     {
-		m_scaling_factor = std::max(std::min(scaling_factor, 6),0);
-		m_scaling_factor = Round(std::pow((double)10, m_scaling_factor));
-	}
+        m_scaling_factor = std::max(std::min(scaling_factor, 6),0);
+        m_scaling_factor = Round(std::pow((double)10, m_scaling_factor));
+    }
 
     ~conv_clipper()
     {
@@ -91,41 +91,41 @@ namespace agg
     bool next_vertex(double* x, double* y);
     void start_extracting();
     void add_vertex_(double &x, double &y);
-    void end_contour(ClipperLib::Polygons &p);
+    void end_contour(ClipperLib::Paths &p);
 
-	template<class VS> void add(VS &src, ClipperLib::Polygons &p){
-		unsigned cmd;
-		double x; double y; double start_x; double start_y;
-		bool starting_first_line;
+    template<class VS> void add(VS &src, ClipperLib::Paths &p){
+        unsigned cmd;
+        double x; double y; double start_x; double start_y;
+        bool starting_first_line;
 
-		start_x = 0.0;
-		start_y = 0.0;
-		starting_first_line = true;
-		p.resize(0);
+        start_x = 0.0;
+        start_y = 0.0;
+        starting_first_line = true;
+        p.resize(0);
 
-		cmd = src->vertex( &x , &y );
-		while(!is_stop(cmd))
-		{
-		  if(is_vertex(cmd))
-		  {
-			if(is_move_to(cmd))
-			{
-			  if(!starting_first_line ) end_contour(p);
-			  start_x = x;
-			  start_y = y;
-			}
-			add_vertex_( x, y );
-			starting_first_line = false;
-		  }
-		  else if(is_end_poly(cmd))
-		  {
-			if(!starting_first_line && is_closed(cmd))
-			  add_vertex_( start_x, start_y );
-		  }
-		  cmd = src->vertex( &x, &y );
-		}
-		end_contour(p);
-	}
+        cmd = src->vertex( &x , &y );
+        while(!is_stop(cmd))
+        {
+          if(is_vertex(cmd))
+          {
+            if(is_move_to(cmd))
+            {
+              if(!starting_first_line ) end_contour(p);
+              start_x = x;
+              start_y = y;
+            }
+            add_vertex_( x, y );
+            starting_first_line = false;
+          }
+          else if(is_end_poly(cmd))
+          {
+            if(!starting_first_line && is_closed(cmd))
+              add_vertex_( start_x, start_y );
+          }
+          cmd = src->vertex( &x, &y );
+        }
+        end_contour(p);
+    }
   };
 
   //------------------------------------------------------------------------
@@ -169,38 +169,38 @@ namespace agg
     switch( m_operation ) {
       case clipper_or:
         {
-        m_clipper.AddPolygons( m_poly_a , ClipperLib::ptSubject );
-        m_clipper.AddPolygons( m_poly_b , ClipperLib::ptClip );
+        m_clipper.AddPaths( m_poly_a , ClipperLib::ptSubject, true );
+        m_clipper.AddPaths( m_poly_b , ClipperLib::ptClip, true );
         m_clipper.Execute( ClipperLib::ctUnion , m_result , pftSubj, pftClip);
-		break;
+        break;
         }
       case clipper_and:
         {
-        m_clipper.AddPolygons( m_poly_a , ClipperLib::ptSubject );
-        m_clipper.AddPolygons( m_poly_b , ClipperLib::ptClip );
+        m_clipper.AddPaths( m_poly_a , ClipperLib::ptSubject, true );
+        m_clipper.AddPaths( m_poly_b , ClipperLib::ptClip, true );
         m_clipper.Execute( ClipperLib::ctIntersection , m_result, pftSubj, pftClip );
-		break;
+        break;
         }
       case clipper_xor:
         {
-        m_clipper.AddPolygons( m_poly_a , ClipperLib::ptSubject );
-        m_clipper.AddPolygons( m_poly_b , ClipperLib::ptClip );
+        m_clipper.AddPaths( m_poly_a , ClipperLib::ptSubject, true );
+        m_clipper.AddPaths( m_poly_b , ClipperLib::ptClip, true );
         m_clipper.Execute( ClipperLib::ctXor , m_result, pftSubj, pftClip );
-		break;
+        break;
         }
       case clipper_a_minus_b:
         {
-        m_clipper.AddPolygons( m_poly_a , ClipperLib::ptSubject );
-        m_clipper.AddPolygons( m_poly_b , ClipperLib::ptClip );
+        m_clipper.AddPaths( m_poly_a , ClipperLib::ptSubject, true );
+        m_clipper.AddPaths( m_poly_b , ClipperLib::ptClip, true );
         m_clipper.Execute( ClipperLib::ctDifference , m_result, pftSubj, pftClip );
-		break;
+        break;
         }
       case clipper_b_minus_a:
         {
-        m_clipper.AddPolygons( m_poly_b , ClipperLib::ptSubject );
-        m_clipper.AddPolygons( m_poly_a , ClipperLib::ptClip );
+        m_clipper.AddPaths( m_poly_b , ClipperLib::ptSubject, true );
+        m_clipper.AddPaths( m_poly_a , ClipperLib::ptClip, true );
         m_clipper.Execute( ClipperLib::ctDifference , m_result, pftSubj, pftClip );
-		break;
+        break;
         }
     }
     start_extracting();
@@ -208,7 +208,7 @@ namespace agg
   //------------------------------------------------------------------------------
 
   template<class VSA, class VSB>
-  void conv_clipper<VSA, VSB>::end_contour( ClipperLib::Polygons &p)
+  void conv_clipper<VSA, VSB>::end_contour( ClipperLib::Paths &p)
   {
   unsigned i, len;
 
@@ -225,21 +225,21 @@ namespace agg
   template<class VSA, class VSB> 
   void conv_clipper<VSA, VSB>::add_vertex_(double &x, double &y)
   {
-	  ClipperLib::IntPoint v;
+      ClipperLib::IntPoint v;
 
-	  v.X = Round(x * m_scaling_factor);
-	  v.Y = Round(y * m_scaling_factor);
-	  m_vertex_accumulator.add( v );
+      v.X = Round(x * m_scaling_factor);
+      v.Y = Round(y * m_scaling_factor);
+      m_vertex_accumulator.add( v );
   }
   //------------------------------------------------------------------------------
 
   template<class VSA, class VSB> 
   bool conv_clipper<VSA, VSB>::next_contour()
   {   
-	m_contour++;
-	if(m_contour >= (int)m_result.size()) return false;
-	m_vertex =-1;
-	return true;
+    m_contour++;
+    if(m_contour >= (int)m_result.size()) return false;
+    m_vertex =-1;
+    return true;
 }
 //------------------------------------------------------------------------------
 
@@ -266,13 +266,13 @@ namespace agg
         m_status =status_line_to;
         return path_cmd_move_to;
       }
-	  else
-	  {
+      else
+      {
         m_status = status_stop;
         return path_cmd_end_poly | path_flags_close;
       }
     }
-	else
+    else
       return path_cmd_stop;
   }
   else
@@ -281,7 +281,7 @@ namespace agg
     {
       return path_cmd_line_to;
     }
-	else
+    else
     {
       m_status = status_move_to;
       return path_cmd_end_poly | path_flags_close;
