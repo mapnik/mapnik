@@ -27,6 +27,10 @@
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/line_pattern_symbolizer.hpp>
+#include <mapnik/marker.hpp>
+#include <mapnik/marker_cache.hpp>
+#include <mapnik/vertex_converters.hpp>
+#include <mapnik/parse_path.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"
@@ -45,10 +49,27 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+
+    boost::optional<marker_ptr> mark = marker_cache::instance().find(filename,true);
+    if (!mark) return;
+
+    if (!(*mark)->is_bitmap())
+    {
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
+        return;
+    }
+
+    boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
+    if (!pat) return;
+
     typedef coord_transform<CoordTransform,geometry_type> path_type;
     typedef typename grid_renderer_base_type::pixfmt_type pixfmt_type;
     typedef typename grid_renderer_base_type::pixfmt_type::color_type color_type;
     typedef agg::renderer_scanline_bin_solid<grid_renderer_base_type> renderer_type;
+    typedef boost::mpl::vector<clip_line_tag, transform_tag,
+                               offset_transform_tag, affine_transform_tag,
+                               simplify_tag, smooth_tag, stroke_tag> conv_types;
     agg::scanline_bin sl;
 
     grid_rendering_buffer buf(pixmap_.raw_data(), width_, height_, width_);
@@ -59,19 +80,45 @@ void grid_renderer<T>::process(line_pattern_symbolizer const& sym,
 
     ras_ptr->reset();
 
-    // TODO - actually handle image dimensions
-    int stroke_width = 2;
+    int stroke_width = (*pat)->width();
 
-    for (std::size_t i=0;i<feature.num_geometries();++i)
+    agg::trans_affine tr;
+    evaluate_transform(tr, feature, sym.get_transform());
+
+    box2d<double> clipping_extent = query_extent_;
+    if (sym.clip())
     {
-        geometry_type & geom = feature.get_geometry(i);
+        double padding = (double)(query_extent_.width()/pixmap_.width());
+        double half_stroke = stroke_width/2.0;
+        if (half_stroke > 1)
+            padding *= half_stroke;
+        if (std::fabs(sym.offset()) > 0)
+            padding *= std::fabs(sym.offset()) * 1.2;
+        padding *= scale_factor_;
+        clipping_extent.pad(padding);
+    }
+    
+    // to avoid the complexity of using an agg pattern filter instead
+    // we create a line_symbolizer in order to fake the pattern
+    stroke str;
+    str.set_width(stroke_width);
+    line_symbolizer line(str);
+    vertex_converter<box2d<double>, grid_rasterizer, line_symbolizer,
+                     CoordTransform, proj_transform, agg::trans_affine, conv_types>
+        converter(clipping_extent,*ras_ptr,line,t_,prj_trans,tr,scale_factor_);
+    if (sym.clip()) converter.set<clip_line_tag>(); // optional clip (default: true)
+    converter.set<transform_tag>(); // always transform
+    if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    converter.set<affine_transform_tag>(); // optional affine transform
+    if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
+    if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
+    converter.set<stroke_tag>(); //always stroke
+
+    BOOST_FOREACH( geometry_type & geom, feature.paths())
+    {
         if (geom.size() > 1)
         {
-            path_type path(t_,geom,prj_trans);
-            agg::conv_stroke<path_type> stroke(path);
-            stroke.generator().miter_limit(4.0);
-            stroke.generator().width(stroke_width * scale_factor_);
-            ras_ptr->add_path(stroke);
+            converter.apply(geom);
         }
     }
 

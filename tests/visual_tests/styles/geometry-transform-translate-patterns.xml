@@ -1,0 +1,99 @@
+<Map background-color="#eee" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+
+    <Style name="polygon">
+        <Rule>
+            <PolygonPatternSymbolizer
+              file="../../data/images/stripes_pattern.png"
+              geometry-transform="translate(2,2)"
+            />
+            <PolygonPatternSymbolizer
+              file="../data/pattern.png"
+            />
+        </Rule>
+    </Style>
+    <Style name="line">
+        <Rule>
+            <LinePatternSymbolizer
+              file="../../data/images/stripes_pattern.png"
+              geometry-transform="translate(-3,-3)"
+            />
+            <LinePatternSymbolizer
+              file="../../data/images/stripes_pattern.png"
+              geometry-transform="translate(3,3)"
+            />
+        </Rule>
+    </Style>
+    <Style name="point">
+        <Rule>
+            <MarkersSymbolizer
+              fill="#437"
+              width="10"
+              stroke-width="0"
+              transform="translate(2,2)"
+              allow-overlap="true"
+            />
+            <MarkersSymbolizer
+              fill="#ec3"
+              width="10"
+              stroke-width="0"
+              allow-overlap="true"
+            />
+        </Rule>
+    </Style>
+
+    <Layer name="polygon" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>polygon</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+wkt
+"POLYGON ((1 1, 4 1, 4 4, 1 4, 1 1), (2 2, 2 3, 3 3, 3 2, 2 2))"
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <Layer name="line" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>line</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+wkt
+"LINESTRING (0.5 0.5, 4.5 4.5)"
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <Layer name="point" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>point</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+wkt
+"POINT (1 4)"
+            </Parameter>
+        </Datasource>
+    </Layer>
+
+    <!-- points to frame data view -->
+
+    <Style name="frame">
+        <Rule>
+            <PointSymbolizer />
+        </Rule>
+    </Style>
+
+    <Layer name="frame" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>frame</StyleName>
+        <Datasource>
+            <Parameter name="type">csv</Parameter>
+            <Parameter name="inline">
+x,y
+0,0
+5,0
+0,5
+5,5
+            </Parameter>
+        </Datasource>
+    </Layer>
+    
+</Map>

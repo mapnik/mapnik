@@ -100,6 +100,7 @@ files = {
     'shield-on-polygon': {'sizes':[(600,400)]},
     'shield-on-line-spacing-eq-width': {'sizes':[(600,400)]},
     'geometry-transform-translate': {'sizes':[(200,200)]},
+    'geometry-transform-translate-patterns': {'sizes':[(200,200)]},
     'marker-svg-opacity':{},
     'marker-svg-opacity2':{},
     'marker-svg-empty-g-element':{},
