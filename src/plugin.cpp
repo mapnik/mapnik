@@ -24,6 +24,7 @@
 #include <stdexcept>
 
 #ifdef _WINDOWS
+  #define NOMINMAX
   #include <windows.h>
   #define handle HMODULE
   #define dlsym GetProcAddress
