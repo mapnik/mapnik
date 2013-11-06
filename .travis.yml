@@ -15,11 +15,6 @@ script:
  - JOBS=1 make
  - make test-local
 
-branches:
-  only:
-    - master
-    - 2.3.x
-
 notifications:
   irc:
     channels:
