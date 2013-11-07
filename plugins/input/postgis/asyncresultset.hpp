@@ -54,6 +54,18 @@ public:
         close();
     }
 
+
+    void abort()
+    {
+        if(conn_ && conn_->isPending() )
+        {
+            MAPNIK_LOG_DEBUG(postgis) << "AsyncResultSet: aborting pending connection - " << conn_.get();
+            // there is no easy way to abort a pending connection, so we close it : this will ensure that
+            // the connection will be recycled in the pool
+            conn_->close();
+        }
+    }
+
     virtual void close()
     {
         if (!is_closed_)
@@ -62,6 +74,8 @@ public:
             is_closed_ = true;
             if (conn_)
             {
+            	if(conn_->isPending())
+            		abort();
                 conn_.reset();
             }
         }
