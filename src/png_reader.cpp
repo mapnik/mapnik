@@ -128,8 +128,8 @@ png_reader<T>::png_reader(std::string const& file_name)
       bit_depth_(0),
       color_type_(0)
 {
-    if (!source_.is_open()) throw image_reader_exception("PNG reader: cannot open file "+ file_name);
-    if (!stream_) throw image_reader_exception("PNG reader: cannot open file "+ file_name);
+    if (!source_.is_open()) throw image_reader_exception("PNG reader: cannot open file '"+ file_name + "'");
+    if (!stream_) throw image_reader_exception("PNG reader: cannot open file '"+ file_name + "'");
     init();
 }
 
