@@ -13,11 +13,6 @@ script:
  - ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS='python' CPP_TESTS=True CAIRO=True FAST=True && JOBS=2 make
  - make test-local
 
-branches:
-  only:
-    - master
-    - 2.3.x
-
 notifications:
   irc:
     channels:
