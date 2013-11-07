@@ -14,6 +14,8 @@ Released ...
 
 Summary: TODO
 
+- Added missing support for `geometry-transform` in `line-pattern` and `polygon-pattern` symbolizers (#2065)
+
 - Dropped support for Sun compiler
 
 - Upgraded unifont to `unifont-6.3.20131020`

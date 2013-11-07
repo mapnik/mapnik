@@ -125,8 +125,13 @@ struct integer_parser
     typedef qi::int_parser<T,10,1,-1> type;
 };
 
+#ifdef __GNUC__
+template <typename Iterator>
+struct MAPNIK_DECL expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
+#else
 template <typename Iterator>
 struct expression_grammar : qi::grammar<Iterator, expr_node(), space_type>
+#endif
 {
     typedef qi::rule<Iterator, expr_node(), space_type> rule_type;
 

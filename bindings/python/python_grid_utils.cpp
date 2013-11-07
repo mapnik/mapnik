@@ -36,7 +36,6 @@
 #include <mapnik/value_error.hpp>
 #include <mapnik/feature.hpp>
 #include <mapnik/feature_kv_iterator.hpp>
-#include "mapnik_value_converter.hpp"
 #include "python_grid_utils.hpp"
 
 // stl

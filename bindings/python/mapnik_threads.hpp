@@ -22,9 +22,9 @@
 #ifndef MAPNIK_THREADS_HPP
 #define MAPNIK_THREADS_HPP
 
-#include <boost/thread.hpp>
-#include <boost/python.hpp>
-
+#include <boost/thread/tss.hpp>         // for thread_specific_ptr
+#include <Python.h>
+ 
 namespace mapnik {
 class python_thread
 {

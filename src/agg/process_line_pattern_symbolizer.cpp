@@ -140,7 +140,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
         clip_box.pad(padding);
     }
 
-    typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,simplify_tag,smooth_tag> conv_types;
+    typedef boost::mpl::vector<clip_line_tag,transform_tag,offset_transform_tag,affine_transform_tag,simplify_tag,smooth_tag> conv_types;
     vertex_converter<box2d<double>, rasterizer_type, line_pattern_symbolizer,
                      CoordTransform, proj_transform, agg::trans_affine, conv_types>
         converter(clip_box,ras,sym,t_,prj_trans,tr,scale_factor_);
@@ -149,6 +149,7 @@ void  agg_renderer<T>::process(line_pattern_symbolizer const& sym,
     converter.set<transform_tag>(); //always transform
     if (sym.simplify_tolerance() > 0.0) converter.set<simplify_tag>(); // optional simplify converter
     if (std::fabs(sym.offset()) > 0.0) converter.set<offset_transform_tag>(); // parallel offset
+    converter.set<affine_transform_tag>(); // optional affine transform
     if (sym.smooth() > 0.0) converter.set<smooth_tag>(); // optional smooth converter
 
     for (geometry_type & geom : feature.paths())

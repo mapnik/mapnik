@@ -31,6 +31,9 @@
 #include <mapnik/grid/grid.hpp>
 #include <mapnik/polygon_pattern_symbolizer.hpp>
 #include <mapnik/vertex_converters.hpp>
+#include <mapnik/marker.hpp>
+#include <mapnik/marker_cache.hpp>
+#include <mapnik/parse_path.hpp>
 
 // agg
 #include "agg_rasterizer_scanline_aa.h"
@@ -48,6 +51,20 @@ void grid_renderer<T>::process(polygon_pattern_symbolizer const& sym,
                                mapnik::feature_impl & feature,
                                proj_transform const& prj_trans)
 {
+    std::string filename = path_processor_type::evaluate( *sym.get_filename(), feature);
+
+    boost::optional<marker_ptr> mark = marker_cache::instance().find(filename,true);
+    if (!mark) return;
+
+    if (!(*mark)->is_bitmap())
+    {
+        MAPNIK_LOG_DEBUG(agg_renderer) << "agg_renderer: Only images (not '" << filename << "') are supported in the line_pattern_symbolizer";
+        return;
+    }
+
+    boost::optional<image_ptr> pat = (*mark)->get_bitmap_data();
+    if (!pat) return;
+
     ras_ptr->reset();
 
     agg::trans_affine tr;

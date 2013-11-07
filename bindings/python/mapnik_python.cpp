@@ -21,15 +21,22 @@
  *****************************************************************************/
 
 #include "boost_std_shared_shim.hpp"
-#include <boost/python.hpp>
-#include <boost/get_pointer.hpp>
-#include <boost/python/detail/api_placeholder.hpp>
+#include <boost/python/args.hpp>        // for keywords, arg, etc
+#include <boost/python/converter/from_python.hpp>
+#include <boost/python/def.hpp>         // for def
+#include <boost/python/detail/defaults_gen.hpp>
+#include <boost/python/detail/none.hpp>  // for none
+#include <boost/python/dict.hpp>        // for dict
 #include <boost/python/exception_translator.hpp>
+#include <boost/python/list.hpp>        // for list
+#include <boost/python/module.hpp>      // for BOOST_PYTHON_MODULE
+#include <boost/python/object_core.hpp>  // for get_managed_object
+#include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/to_python_converter.hpp>
 
 // stl
 #include <stdexcept>
 
-void register_cairo();
 void export_color();
 void export_coord();
 void export_layer();
@@ -79,20 +86,12 @@ void export_logger();
 void export_wkt_reader();
 
 #include <mapnik/version.hpp>
-#include <mapnik/value_error.hpp>
-#include <mapnik/layer.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/agg_renderer.hpp>
-#ifdef HAVE_CAIRO
-#include <mapnik/cairo_renderer.hpp>
-#endif
 #include <mapnik/graphics.hpp>
-#include <mapnik/stroke.hpp>
-#include <mapnik/font_set.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
-#include <mapnik/scale_denominator.hpp>
 #include <mapnik/value_error.hpp>
 #include <mapnik/save_map.hpp>
 #include <mapnik/scale_denominator.hpp>
@@ -107,6 +106,13 @@ void export_wkt_reader();
 #include <mapnik/mapped_memory_cache.hpp>
 #endif
 
+namespace mapnik {
+    class font_set;
+    class stroke;
+    class layer;
+    class color;
+    class label_collision_detector4;
+}
 void clear_cache()
 {
     mapnik::marker_cache::instance().clear();
@@ -116,9 +122,48 @@ void clear_cache()
 }
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
+#include <mapnik/cairo_renderer.hpp>
+#include <boost/python/type_id.hpp>
+#include <boost/python/converter/registry.hpp>
 #include <pycairo.h>
 #include <cairo.h>
 static Pycairo_CAPI_t *Pycairo_CAPI;
+static void *extract_surface(PyObject* op)
+{
+    if (PyObject_TypeCheck(op, const_cast<PyTypeObject*>(Pycairo_CAPI->Surface_Type)))
+    {
+        return op;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+static void *extract_context(PyObject* op)
+{
+    if (PyObject_TypeCheck(op, const_cast<PyTypeObject*>(Pycairo_CAPI->Context_Type)))
+    {
+        return op;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+void register_cairo()
+{
+#if PY_MAJOR_VERSION >= 3
+    Pycairo_CAPI = (Pycairo_CAPI_t*) PyCapsule_Import(const_cast<char *>("cairo.CAPI"), 0);
+#else
+    Pycairo_CAPI = (Pycairo_CAPI_t*) PyCObject_Import(const_cast<char *>("cairo"), const_cast<char *>("CAPI"));
+#endif
+    if (Pycairo_CAPI == NULL) return;
+
+    boost::python::converter::registry::insert(&extract_surface, boost::python::type_id<PycairoSurface>());
+    boost::python::converter::registry::insert(&extract_context, boost::python::type_id<PycairoContext>());
+}
 #endif
 
 using mapnik::python_thread;
@@ -128,7 +173,7 @@ bool python_thread::thread_support = true;
 #endif
 boost::thread_specific_ptr<PyThreadState> python_thread::state;
 
-void render(const mapnik::Map& map,
+void render(mapnik::Map const& map,
             mapnik::image_32& image,
             double scale_factor = 1.0,
             unsigned offset_x = 0u,
@@ -141,7 +186,7 @@ void render(const mapnik::Map& map,
 }
 
 void render_with_detector(
-    const mapnik::Map &map,
+    mapnik::Map const& map,
     mapnik::image_32 &image,
     std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
@@ -153,7 +198,7 @@ void render_with_detector(
     ren.apply();
 }
 
-void render_layer2(const mapnik::Map& map,
+void render_layer2(mapnik::Map const& map,
                    mapnik::image_32& image,
                    unsigned layer_idx)
 {
@@ -175,7 +220,7 @@ void render_layer2(const mapnik::Map& map,
 
 #if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
 
-void render3(const mapnik::Map& map,
+void render3(mapnik::Map const& map,
              PycairoSurface* py_surface,
              double scale_factor = 1.0,
              unsigned offset_x = 0,
@@ -187,7 +232,7 @@ void render3(const mapnik::Map& map,
     ren.apply();
 }
 
-void render4(const mapnik::Map& map, PycairoSurface* py_surface)
+void render4(mapnik::Map const& map, PycairoSurface* py_surface)
 {
     python_unblock_auto_block b;
     mapnik::cairo_surface_ptr surface(cairo_surface_reference(py_surface->surface), mapnik::cairo_surface_closer());
@@ -195,7 +240,7 @@ void render4(const mapnik::Map& map, PycairoSurface* py_surface)
     ren.apply();
 }
 
-void render5(const mapnik::Map& map,
+void render5(mapnik::Map const& map,
              PycairoContext* py_context,
              double scale_factor = 1.0,
              unsigned offset_x = 0,
@@ -207,7 +252,7 @@ void render5(const mapnik::Map& map,
     ren.apply();
 }
 
-void render6(const mapnik::Map& map, PycairoContext* py_context)
+void render6(mapnik::Map const& map, PycairoContext* py_context)
 {
     python_unblock_auto_block b;
     mapnik::cairo_ptr context(cairo_reference(py_context->ctx), mapnik::cairo_closer());
@@ -216,7 +261,7 @@ void render6(const mapnik::Map& map, PycairoContext* py_context)
 }
 
 void render_with_detector2(
-    const mapnik::Map& map,
+    mapnik::Map const& map,
     PycairoContext* py_context,
     std::shared_ptr<mapnik::label_collision_detector4> detector)
 {
@@ -227,7 +272,7 @@ void render_with_detector2(
 }
 
 void render_with_detector3(
-    const mapnik::Map& map,
+    mapnik::Map const& map,
     PycairoContext* py_context,
     std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
@@ -241,7 +286,7 @@ void render_with_detector3(
 }
 
 void render_with_detector4(
-    const mapnik::Map& map,
+    mapnik::Map const& map,
     PycairoSurface* py_surface,
     std::shared_ptr<mapnik::label_collision_detector4> detector)
 {
@@ -252,7 +297,7 @@ void render_with_detector4(
 }
 
 void render_with_detector5(
-    const mapnik::Map& map,
+    mapnik::Map const& map,
     PycairoSurface* py_surface,
     std::shared_ptr<mapnik::label_collision_detector4> detector,
     double scale_factor = 1.0,
@@ -268,7 +313,7 @@ void render_with_detector5(
 #endif
 
 
-void render_tile_to_file(const mapnik::Map& map,
+void render_tile_to_file(mapnik::Map const& map,
                          unsigned offset_x, unsigned offset_y,
                          unsigned width, unsigned height,
                          std::string const& file,
@@ -279,7 +324,7 @@ void render_tile_to_file(const mapnik::Map& map,
     mapnik::save_to_file(image.data(),file,format);
 }
 
-void render_to_file1(const mapnik::Map& map,
+void render_to_file1(mapnik::Map const& map,
                      std::string const& filename,
                      std::string const& format)
 {
@@ -299,7 +344,7 @@ void render_to_file1(const mapnik::Map& map,
     }
 }
 
-void render_to_file2(const mapnik::Map& map,std::string const& filename)
+void render_to_file2(mapnik::Map const& map,std::string const& filename)
 {
     std::string format = mapnik::guess_type(filename);
     if (format == "pdf" || format == "svg" || format =="ps")
@@ -318,7 +363,7 @@ void render_to_file2(const mapnik::Map& map,std::string const& filename)
     }
 }
 
-void render_to_file3(const mapnik::Map& map,
+void render_to_file3(mapnik::Map const& map,
                      std::string const& filename,
                      std::string const& format,
                      double scale_factor = 1.0
@@ -340,7 +385,7 @@ void render_to_file3(const mapnik::Map& map,
     }
 }
 
-double scale_denominator(mapnik::Map const &map, bool geographic)
+double scale_denominator(mapnik::Map const& map, bool geographic)
 {
     return mapnik::scale_denominator(map.scale(), geographic);
 }
@@ -495,7 +540,9 @@ BOOST_PYTHON_MODULE(_mapnik)
     register_exception_translator<std::out_of_range>(&out_of_range_error_translator);
     register_exception_translator<mapnik::value_error>(&value_error_translator);
     register_exception_translator<std::runtime_error>(&runtime_error_translator);
+#if defined(HAVE_CAIRO) && defined(HAVE_PYCAIRO)
     register_cairo();
+#endif
     export_query();
     export_geometry();
     export_feature();

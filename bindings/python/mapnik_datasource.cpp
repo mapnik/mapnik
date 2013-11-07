@@ -23,18 +23,14 @@
 // boost
 #include "boost_std_shared_shim.hpp"
 #include <boost/python.hpp>
-#include <boost/python/detail/api_placeholder.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/version.hpp>
 
 // stl
-#include <sstream>
 #include <vector>
 
 // mapnik
 #include <mapnik/box2d.hpp>
-#include <mapnik/coord.hpp>
-#include <mapnik/query.hpp>
 #include <mapnik/datasource.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/feature_layer_desc.hpp>

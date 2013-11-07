@@ -130,8 +130,8 @@ png_reader<T>::png_reader(std::string const& file_name)
       bit_depth_(0),
       color_type_(0)
 {
-
-    if (!stream_) throw image_reader_exception("PNG reader: cannot open file "+ file_name);
+    if (!source_.is_open()) throw image_reader_exception("PNG reader: cannot open file '"+ file_name + "'");
+    if (!stream_) throw image_reader_exception("PNG reader: cannot open file '"+ file_name + "'");
     init();
 }
 
@@ -145,7 +145,7 @@ png_reader<T>::png_reader(char const* data, std::size_t size)
       color_type_(0)
 {
 
-    if (!stream_) throw image_reader_exception("cannot open image stream");
+    if (!stream_) throw image_reader_exception("PNG reader: cannot open image stream");
     init();
 }
 
@@ -162,7 +162,7 @@ void png_reader<T>::init()
     stream_.read(reinterpret_cast<char*>(header),8);
     if ( stream_.gcount() != 8)
     {
-        throw image_reader_exception("Could not read image");
+        throw image_reader_exception("PNG reader: Could not read image");
     }
     int is_png=!png_sig_cmp(header,0,8);
     if (!is_png)
