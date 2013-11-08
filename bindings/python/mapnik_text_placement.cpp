@@ -26,12 +26,12 @@
 #include <boost/python/stl_iterator.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <mapnik/text_properties.hpp>
-#include <mapnik/formatting/text.hpp>
-#include <mapnik/formatting/list.hpp>
-#include <mapnik/formatting/format.hpp>
-#include <mapnik/formatting/expression_format.hpp>
-#include <mapnik/processed_text.hpp>
+#include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/formatting/text.hpp>
+#include <mapnik/text/formatting/list.hpp>
+#include <mapnik/text/formatting/format.hpp>
+#include <mapnik/text/formatting/expression_format.hpp>
+#include <mapnik/text/processed_text.hpp>
 #include <mapnik/text_symbolizer.hpp>
 
 #include "mapnik_enumeration.hpp"

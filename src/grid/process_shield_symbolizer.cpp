@@ -27,9 +27,9 @@
 #include <mapnik/grid/grid_renderer.hpp>
 #include <mapnik/grid/grid_renderer_base.hpp>
 #include <mapnik/grid/grid.hpp>
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/font_util.hpp>
+#include <mapnik/text/face.hpp>
 
 // agg
 #include "agg_trans_affine.h"

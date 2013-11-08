@@ -24,9 +24,9 @@
 #include <mapnik/feature.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/graphics.hpp>
-#include <mapnik/font_util.hpp>
+#include <mapnik/text/face.hpp>
 
 namespace mapnik {
 

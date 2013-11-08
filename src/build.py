@@ -165,7 +165,7 @@ source = Split(
     parse_transform.cpp
     palette.cpp
     path_expression_grammar.cpp
-    placement_finder.cpp
+    text/placement_finder.cpp
     plugin.cpp
     point_symbolizer.cpp
     polygon_pattern_symbolizer.cpp
@@ -183,7 +183,7 @@ source = Split(
     memory_datasource.cpp
     stroke.cpp
     symbolizer.cpp
-    symbolizer_helpers.cpp
+    text/symbolizer_helpers.cpp
     unicode.cpp
     markers_symbolizer.cpp
     raster_colorizer.cpp
@@ -203,19 +203,19 @@ source = Split(
     json/feature_parser.cpp
     json/feature_collection_parser.cpp
     json/geojson_generator.cpp
-    processed_text.cpp
-    formatting/base.cpp
-    formatting/expression.cpp
-    formatting/list.cpp
-    formatting/text.cpp
-    formatting/format.cpp
-    formatting/registry.cpp
-    text_placements/registry.cpp
-    text_placements/base.cpp
-    text_placements/dummy.cpp
-    text_placements/list.cpp
-    text_placements/simple.cpp
-    text_properties.cpp
+    text/processed_text.cpp
+    text/formatting/base.cpp
+    text/formatting/expression.cpp
+    text/formatting/list.cpp
+    text/formatting/text.cpp
+    text/formatting/format.cpp
+    text/formatting/registry.cpp
+    text/placements/registry.cpp
+    text/placements/base.cpp
+    text/placements/dummy.cpp
+    text/placements/list.cpp
+    text/placements/simple.cpp
+    text/text_properties.cpp
     xml_tree.cpp
     config_error.cpp
     color_factory.cpp

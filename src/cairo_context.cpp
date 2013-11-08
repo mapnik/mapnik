@@ -21,9 +21,9 @@
  *****************************************************************************/
 
 #include <mapnik/cairo_context.hpp>
-#include <mapnik/font_util.hpp>
-#include <mapnik/text_properties.hpp>
-#include <mapnik/text_path.hpp>
+#include <mapnik/text/face.hpp>
+#include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/text_path.hpp>
 #include <mapnik/font_set.hpp>
 
 #include <cairo-ft.h>

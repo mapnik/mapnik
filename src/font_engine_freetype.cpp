@@ -23,7 +23,6 @@
 // mapnik
 #include <mapnik/debug.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/text_properties.hpp>
 #include <mapnik/graphics.hpp>
 #include <mapnik/value_types.hpp>
 
@@ -31,9 +30,10 @@
 #include <mapnik/grid/grid.hpp>
 #endif
 
-#include <mapnik/text_path.hpp>
+#include <mapnik/text/text_properties.hpp>
+#include <mapnik/text/text_path.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/font_util.hpp>
+#include <mapnik/text/face.hpp>
 #include <mapnik/util/fs.hpp>
 
 // boost

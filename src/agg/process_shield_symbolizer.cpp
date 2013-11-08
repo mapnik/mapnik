@@ -25,9 +25,9 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/agg_rasterizer.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/symbolizer_helpers.hpp>
+#include <mapnik/text/symbolizer_helpers.hpp>
 #include <mapnik/pixel_position.hpp>
-#include <mapnik/font_util.hpp>
+#include <mapnik/text/face.hpp>
 
 // boost
 
