@@ -53,6 +53,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/util/fs.hpp>
 #include <mapnik/image_filter_types.hpp>
+#include <mapnik/projection.hpp>
 
 // boost
 #include <boost/optional.hpp>
@@ -225,7 +226,7 @@ void map_parser::parse_map(Map & map, xml_node const& pt, std::string const& bas
                 // create throwaway projection object here to ensure it is valid
                 projection proj(srs);
             }
-            catch (proj_init_error const& ex)
+            catch (std::exception const& ex)
             {
                 throw mapnik::config_error(ex.what());
             }
@@ -578,7 +579,7 @@ void map_parser::parse_layer(Map & map, xml_node const& node)
             // create throwaway projection object here to ensure it is valid
             projection proj(srs);
         }
-        catch (proj_init_error const& ex)
+        catch (std::exception const& ex)
         {
             throw mapnik::config_error(ex.what());
         }
