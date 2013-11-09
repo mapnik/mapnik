@@ -4,22 +4,28 @@
 <Map background-color="white" srs="+proj=latlong +datum=WGS84">
 
     <Layer name="layer" srs="+proj=latlong +datum=WGS84">
-        <StyleName>My Style</StyleName>
+        <StyleName>lines</StyleName>
+        <StyleName>text</StyleName>
         <Datasource>
             <Parameter name="type">csv</Parameter>
             <Parameter name="file">../data/lines2.csv</Parameter>
         </Datasource>
     </Layer>
     
-    <Style name="My Style">
+    <Style name="lines">
         <Rule>
             <LineSymbolizer stroke-width="12" stroke="green"/>
             <LineSymbolizer stroke-width="1" stroke="blue" offset="5"/>
-            <TextSymbolizer face-name="DejaVu Sans Book" size="16" placement="line" spacing="20" max-char-angle-delta="0" dy="6">
-            "Hello&#10;World!"
-                </TextSymbolizer>
-<!--                 <DebugSymbolizer /> -->
         </Rule>
+    </Style>
+
+    <Style name="text">
+        <Rule>
+            <!-- note: &#10; is an encoded \n -->
+            <TextSymbolizer face-name="DejaVu Sans Book" size="12" placement="line" spacing="20" max-char-angle-delta="0" dy="6">
+                "Hello&#10;World!"
+            </TextSymbolizer>
+       </Rule>
     </Style>
 
 </Map>

@@ -288,9 +288,6 @@ class Reporting:
         return item
 
     def summary(self):
-        if self.passed == 0:
-            print '\nNOTICE: No valid visual tests were run'
-            return 0
         if len(self.errors) == 0:
             print '\nAll %s visual tests passed: \x1b[1;32m✓ \x1b[0m' % self.passed
             return 0
