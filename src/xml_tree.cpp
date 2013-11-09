@@ -34,7 +34,7 @@
 #include <mapnik/point_symbolizer.hpp>
 #include <mapnik/markers_symbolizer.hpp>
 #include <mapnik/feature_type_style.hpp>
-#include <mapnik/text_properties.hpp>
+#include <mapnik/text/text_properties.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/raster_colorizer.hpp>
 

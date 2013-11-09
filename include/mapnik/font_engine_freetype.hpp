@@ -31,7 +31,7 @@
 #include <mapnik/ctrans.hpp>
 #include <mapnik/geometry.hpp>
 #include <mapnik/font_set.hpp>
-#include <mapnik/char_info.hpp>
+#include <mapnik/text/char_info.hpp>
 #include <mapnik/image_compositing.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/noncopyable.hpp>

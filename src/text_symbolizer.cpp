@@ -24,7 +24,7 @@
 #include <mapnik/debug.hpp>
 #include <mapnik/text_symbolizer.hpp>
 #include <mapnik/enumeration.hpp>
-#include <mapnik/formatting/text.hpp>
+#include <mapnik/text/formatting/text.hpp>
 
 namespace mapnik
 {

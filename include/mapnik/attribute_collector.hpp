@@ -44,7 +44,7 @@
 #include <mapnik/expression_node.hpp>
 #include <mapnik/parse_path.hpp>  // for path_processor_type
 #include <mapnik/path_expression.hpp>  // for path_expression_ptr
-#include <mapnik/text_placements/base.hpp>  // for text_placements
+#include <mapnik/text/placements/base.hpp>  // for text_placements
 
 // boost
 #include <boost/variant/static_visitor.hpp>

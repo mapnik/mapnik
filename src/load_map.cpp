@@ -41,8 +41,8 @@
 #include <mapnik/parse_transform.hpp>
 #include <mapnik/raster_colorizer.hpp>
 #include <mapnik/svg/svg_path_parser.hpp>
-#include <mapnik/text_placements/registry.hpp>
-#include <mapnik/text_placements/dummy.hpp>
+#include <mapnik/text/placements/registry.hpp>
+#include <mapnik/text/placements/dummy.hpp>
 #include <mapnik/symbolizer.hpp>
 #include <mapnik/rule.hpp>
 #include <mapnik/config_error.hpp>
