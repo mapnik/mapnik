@@ -36,6 +36,7 @@
 #include <mapnik/noncopyable.hpp>
 #include <mapnik/cairo_context.hpp>
 #include <mapnik/pixel_position.hpp>
+#include <mapnik/ctrans.hpp>    // for CoordTransform
 
 // cairo
 #include <cairo.h>
