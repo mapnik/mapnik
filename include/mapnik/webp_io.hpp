@@ -32,10 +32,7 @@
 // stl
 #include <stdexcept>
 #include <string>
-
-// boost
-
-
+#include <cstring>
 
 namespace mapnik {
 

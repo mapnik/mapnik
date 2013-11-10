@@ -31,6 +31,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstring>
 
 polygon_types osm_way::ptypes;
 
@@ -64,7 +65,7 @@ bool osm_dataset::load_from_url(std::string const& url,
         if (resp != NULL)
         {
             char *blx = new char[resp->nbytes + 1];
-            memcpy(blx, resp->data, resp->nbytes);
+            std::memcpy(blx, resp->data, resp->nbytes);
             blx[resp->nbytes] = '\0';
 
             MAPNIK_LOG_DEBUG(osm) << "osm_dataset: CURL Response=" << blx;

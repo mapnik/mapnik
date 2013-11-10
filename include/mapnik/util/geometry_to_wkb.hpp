@@ -30,6 +30,7 @@
 // stl
 #include <vector>
 #include <cstdio>
+#include <cstring>
 #include <memory>
 
 namespace mapnik { namespace util {
