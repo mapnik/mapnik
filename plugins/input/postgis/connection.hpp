@@ -46,7 +46,8 @@ class Connection
 public:
     Connection(std::string const& connection_str,boost::optional<std::string> const& password)
         : cursorId(0),
-          closed_(false)
+          closed_(false),
+          pending_(false)
     {
         std::string connect_with_pass = connection_str;
         if (password && !password->empty())
@@ -54,6 +55,7 @@ public:
             connect_with_pass += " password=" + *password;
         }
         conn_ = PQconnectdb(connect_with_pass.c_str());
+        MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: postgresql connection create - " << this;
         if (PQstatus(conn_) != CONNECTION_OK)
         {
             std::string err_msg = "Postgis Plugin: ";
@@ -61,6 +63,8 @@ public:
             err_msg += "\nConnection string: '";
             err_msg += connection_str;
             err_msg += "'\n";
+            MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: creation failed, closing connection - " << this;
+            close();
             throw mapnik::datasource_exception(err_msg);
         }
     }
@@ -70,7 +74,7 @@ public:
         if (! closed_)
         {
             PQfinish(conn_);
-            MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: postgresql connection closed - " << conn_;
+            MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: postgresql connection closed - " << this;
             closed_ = true;
         }
     }
@@ -156,6 +160,7 @@ public:
             close();
             throw mapnik::datasource_exception(err_msg);
         }
+        pending_ = true;
         return result;
     }
 
@@ -204,12 +209,17 @@ public:
         return (!closed_) && (PQstatus(conn_) != CONNECTION_BAD);
     }
 
+    bool isPending() const
+    {
+        return pending_;
+    }
+
     void close()
     {
         if (! closed_)
         {
             PQfinish(conn_);
-            MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: datasource closed, also closing connection - " << conn_;
+            MAPNIK_LOG_DEBUG(postgis) << "postgis_connection: closing connection (close)- " << this;
             closed_ = true;
         }
     }
@@ -225,8 +235,9 @@ private:
     PGconn *conn_;
     int cursorId;
     bool closed_;
+    bool pending_;
 
-    void clearAsyncResult(PGresult *result) const
+    void clearAsyncResult(PGresult *result)
     {
         // Clear all pending results
         while(result)
@@ -234,6 +245,7 @@ private:
            PQclear(result);
            result = PQgetResult(conn_);
         }
+        pending_ = false;
     }
 };
 

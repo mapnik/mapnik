@@ -701,6 +701,63 @@ if 'postgis' in mapnik.DatasourceCache.plugin_names() \
             count += 1
         eq_(count,8)
 
+
+    def test_psql_error_should_give_back_connections_opened_for_lower_layers_to_the_pool():
+        map1 = mapnik.Map(600,300)
+        s = mapnik.Style()
+        r = mapnik.Rule()
+        r.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#f2eff9')))
+        s.rules.append(r)
+        map1.append_style('style',s)
+
+        # This layer will fail after a while
+        buggy_s = mapnik.Style()
+        buggy_r = mapnik.Rule()
+        buggy_r.symbols.append(mapnik.PolygonSymbolizer(mapnik.Color('#ff0000')))
+        buggy_r.filter = mapnik.Filter("[fips] = 'FR'")
+        buggy_s.rules.append(buggy_r)
+        map1.append_style('style for buggy layer',buggy_s)
+        buggy_layer = mapnik.Layer('this layer is buggy at runtime')
+        # We ensure the query wille be long enough
+        buggy_layer.datasource = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='(SELECT geom as geom, pg_sleep(0.1), fips::int from world_merc) as failure_tabl',
+            max_async_connection=2, max_size=2,asynchronous_request = True, geometry_field='geom')
+        buggy_layer.styles.append('style for buggy layer')
+
+        # The query for this layer will be sent, then the previous layer will raise an exception before results are read
+        forced_canceled_layer = mapnik.Layer('this layer will be canceled when an exception stops map rendering')
+        forced_canceled_layer.datasource = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='world_merc',
+            max_async_connection=2, max_size=2, asynchronous_request = True, geometry_field='geom')
+        forced_canceled_layer.styles.append('style')
+
+        map1.layers.append(buggy_layer)
+        map1.layers.append(forced_canceled_layer)
+        map1.zoom_all()
+        map2 = mapnik.Map(600,300)
+        map2.background = mapnik.Color('steelblue')
+        s = mapnik.Style()
+        r = mapnik.Rule()
+        r.symbols.append(mapnik.LineSymbolizer(mapnik.Color('rgb(50%,50%,50%)'),0.1))
+        r.symbols.append(mapnik.LineSymbolizer(mapnik.Color('rgb(50%,50%,50%)'),0.1))
+        s.rules.append(r)
+        map2.append_style('style',s)
+        layer1 = mapnik.Layer('layer1')
+        layer1.datasource = mapnik.PostGIS(dbname=MAPNIK_TEST_DBNAME,table='world_merc',
+            max_async_connection=2, max_size=2, asynchronous_request = True, geometry_field='geom')
+        layer1.styles.append('style')
+        map2.layers.append(layer1)
+        map2.zoom_all()
+
+        # We expect this to trigger a PSQL error
+        try:
+            mapnik.render_to_file(map1,'world.png', 'png')
+            # Test must fail if error was not raised just above
+            eq_(False,True)
+        except RuntimeError:
+            pass
+        # This used to raise an exception before correction of issue 2042
+        mapnik.render_to_file(map2,'world2.png', 'png')
+
+
     atexit.register(postgis_takedown)
 
 if __name__ == "__main__":
