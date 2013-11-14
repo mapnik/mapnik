@@ -138,7 +138,6 @@ source = Split(
     datasource_cache.cpp
     datasource_cache_static.cpp
     debug.cpp
-    deepcopy.cpp
     expression_node.cpp
     expression_grammar.cpp
     expression_string.cpp

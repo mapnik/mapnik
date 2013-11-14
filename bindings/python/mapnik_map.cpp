@@ -33,7 +33,6 @@
 #include <mapnik/projection.hpp>
 #include <mapnik/ctrans.hpp>
 #include <mapnik/feature_type_style.hpp>
-//#include <mapnik/util/deepcopy.hpp>
 #include "mapnik_enumeration.hpp"
 
 using mapnik::color;
@@ -370,7 +369,6 @@ void export_map()
              ">>> m.zoom_to_box(extent)\n"
             )
 
-        //.def("__deepcopy__",&map_deepcopy)
         .add_property("parameters",make_function(params_nonconst,return_value_policy<reference_existing_object>()),"TODO")
 
         .add_property("aspect_fix_mode",

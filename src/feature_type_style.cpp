@@ -46,32 +46,24 @@ feature_type_style::feature_type_style()
     opacity_(1.0f)
 {}
 
-feature_type_style::feature_type_style(feature_type_style const& rhs, bool deep_copy)
-    : filter_mode_(rhs.filter_mode_),
+feature_type_style::feature_type_style(feature_type_style const& rhs)
+    : rules_(rhs.rules_),
+      filter_mode_(rhs.filter_mode_),
       filters_(rhs.filters_),
       direct_filters_(rhs.direct_filters_),
       comp_op_(rhs.comp_op_),
       opacity_(rhs.opacity_)
 {
-    if (!deep_copy) {
-        rules_ = rhs.rules_;
-    } else {
-        rules::const_iterator it  = rhs.rules_.begin(),
-            end = rhs.rules_.end();
-        for(; it != end; ++it) {
-            rules_.push_back(rule(*it, deep_copy));
-        }
-    }
 }
 
-feature_type_style& feature_type_style::operator=(feature_type_style const& rhs)
+feature_type_style& feature_type_style::operator=(feature_type_style const& other)
 {
-    if (this == &rhs) return *this;
-    rules_=rhs.rules_;
-    filters_ = rhs.filters_;
-    direct_filters_ = rhs.direct_filters_;
-    comp_op_ = rhs.comp_op_;
-    opacity_= rhs.opacity_;
+    if (this == &other) return *this;
+    rules_ = other.rules_;
+    filters_ = other.filters_;
+    direct_filters_ = other.direct_filters_;
+    comp_op_ = other.comp_op_;
+    opacity_ = other.opacity_;
     return *this;
 }
 
