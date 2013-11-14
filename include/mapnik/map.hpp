@@ -112,7 +112,7 @@ public:
      */
     Map(int width, int height, std::string const& srs=MAPNIK_LONGLAT_PROJ);
 
-    /*! \brief Copy Constructur.
+    /*! \brief Copy Constructor.
      *
      *  @param rhs Map to copy from.
      */
