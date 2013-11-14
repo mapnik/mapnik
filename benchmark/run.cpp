@@ -778,17 +778,17 @@ int main( int argc, char** argv)
         }
 
         {
-            test3 runner(1000000,10);
+            test3 runner(100000,10);
             benchmark(runner,"double to string conversion with std::ostringstream");
         }
 
         {
-            test4 runner(1000000,10);
+            test4 runner(100000,10);
             benchmark(runner,"double to string conversion with mapnik::util_to_string");
         }
 
         {
-            test5 runner(1000000,10);
+            test5 runner(100000,10);
             benchmark(runner,"double to string conversion with snprintf");
         }
 
