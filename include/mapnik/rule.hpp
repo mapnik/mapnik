@@ -145,7 +145,7 @@ public:
     rule(std::string const& name,
          double min_scale_denominator = 0,
          double max_scale_denominator = std::numeric_limits<double>::infinity());
-    rule(const rule& rhs, bool deep_copy = false);
+    rule(rule const& rhs);
 
     rule& operator=(rule const& rhs);
     bool operator==(rule const& other);

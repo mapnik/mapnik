@@ -173,6 +173,49 @@ def test_render_with_scale_factor_zero_throws():
     im = mapnik.Image(256, 256)
     mapnik.render(m,im,0.0)
 
+def test_render_with_detector():
+    ds = mapnik.MemoryDatasource()
+    context = mapnik.Context()
+    geojson  = '{ "type": "Feature", "geometry": { "type": "Point", "coordinates": [ 0, 0 ] } }'
+    ds.add_feature(mapnik.Feature.from_geojson(geojson,context))
+    s = mapnik.Style()
+    r = mapnik.Rule()
+    lyr = mapnik.Layer('point')
+    lyr.datasource = ds
+    lyr.styles.append('point')
+    symb = mapnik.MarkersSymbolizer()
+    symb.allow_overlap = False
+    r.symbols.append(symb)
+    s.rules.append(r)
+    m = mapnik.Map(256,256)
+    m.append_style('point',s)
+    m.layers.append(lyr)
+    m.zoom_to_box(mapnik.Box2d(-180,-85,180,85))
+    im = mapnik.Image(256, 256)
+    mapnik.render(m,im)
+    expected_file = './images/support/marker-in-center.png'
+    actual_file = '/tmp/' + os.path.basename(expected_file)
+    #im.save(expected_file,'png8')
+    im.save(actual_file,'png8')
+    actual = mapnik.Image.open(expected_file)
+    expected = mapnik.Image.open(expected_file)
+    eq_(actual.tostring(),expected.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
+    # now render will a collision detector that should
+    # block out the placement of this point
+    detector = mapnik.LabelCollisionDetector(m)
+    eq_(detector.extent(),mapnik.Box2d(-0.0,-0.0,m.width,m.height))
+    eq_(detector.extent(),mapnik.Box2d(-0.0,-0.0,256.0,256.0))
+    eq_(detector.boxes(),[])
+    detector.insert(detector.extent())
+    eq_(detector.boxes(),[detector.extent()])
+    im2 = mapnik.Image(256, 256)
+    mapnik.render_with_detector(m, im2, detector)
+    expected_file_collision = './images/support/marker-in-center-not-placed.png'
+    #im2.save(expected_file_collision,'png8')
+    actual_file = '/tmp/' + os.path.basename(expected_file_collision)
+    im2.save(actual_file,'png8')
+
+
 if 'shape' in mapnik.DatasourceCache.plugin_names():
 
     def test_render_with_scale_factor():
@@ -185,10 +228,10 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             mapnik.render(m,im,size)
             expected_file = './images/support/marker-text-line-scale-factor-%s.png' % size
             actual_file = '/tmp/' + os.path.basename(expected_file)
-            im.save(actual_file,'png8')
-            #im.save(expected_file,'png8')
+            im.save(actual_file,'png32')
+            #im.save(expected_file,'png32')
             # we save and re-open here so both png8 images are ready as full color png
-            actual = mapnik.Image.open(expected_file)
+            actual = mapnik.Image.open(actual_file)
             expected = mapnik.Image.open(expected_file)
             eq_(actual.tostring(),expected.tostring(), 'failed comparing actual (%s) and expected (%s)' % (actual_file,expected_file))
 
