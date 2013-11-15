@@ -24,6 +24,7 @@
 #define MAPNIK_DATASOURCE_CACHE_HPP
 
 // mapnik
+#include <mapnik/config.hpp>
 #include <mapnik/utils.hpp>
 #include <mapnik/params.hpp>
 #include <mapnik/datasource.hpp>
