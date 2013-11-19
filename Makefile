@@ -61,7 +61,8 @@ test-local:
 	make test
 
 bench:
-	@./benchmark/run
+	@export ${LINK_FIX}=`pwd`/src:${${LINK_FIX}} && \
+	./benchmark/run
 
 check: test-local
 
