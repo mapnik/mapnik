@@ -11,9 +11,10 @@ before_install:
  - sudo apt-get install -qq gcc-4.7 g++-4.7 make libgdal1-dev libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev python-nose libicu-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev libz-dev libfreetype6-dev libxml2-dev libproj-dev libcairo-dev python-cairo-dev libsqlite3-dev postgresql-server-dev*
 
 script:
- - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.7" && export CC="gcc-4.7"; fi; ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS=python CPP_TESTS=True CAIRO=True FAST=True || cat config.log
+ - if [ "${CXX}" = 'g++' ]; then export CXX="g++-4.7" && export CC="gcc-4.7"; fi; ./configure CXX=${CXX} CC=${CC} DEMO=False BINDINGS=python BENCHMARK=True CPP_TESTS=True CAIRO=True FAST=True || cat config.log
  - JOBS=1 make
  - make test-local
+ - make bench
 
 notifications:
   irc:
