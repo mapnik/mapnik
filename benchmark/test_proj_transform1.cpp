@@ -71,7 +71,7 @@ int main(int argc, char** argv)
                      from,
                      to,
                      true);
-    run(test_runner,"lonlat->merc epsg)");
+    run(test_runner,"lonlat->merc epsg");
     test test_runner2(params,
                      from_str2,
                      to_str2,
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
                      to,
                      from,
                      true);
-    run(test_runner3,"merc->lonlat epsg)");
+    run(test_runner3,"merc->lonlat epsg");
     test test_runner4(params,
                      to_str2,
                      from_str2,
