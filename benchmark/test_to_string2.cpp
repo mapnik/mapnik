@@ -25,4 +25,4 @@ public:
     }
 };
 
-BENCHMARK(test,"std::ostringstream double->string")
+BENCHMARK(test,"ostringstream double->string")

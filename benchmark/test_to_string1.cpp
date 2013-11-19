@@ -24,4 +24,4 @@ public:
     }
 };
 
-BENCHMARK(test,"mapnik::util_to_string double->string")
+BENCHMARK(test,"to_string double->string")

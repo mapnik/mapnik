@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     mapnik::parameters params;
     benchmark::handle_args(argc,argv,params);
     test test_runner(params);
-    run(test_runner,"expression parsing with grammer per parse");
+    run(test_runner,"expr: grammer per parse");
     test2 test_runner2(params);
-    return run(test_runner2,"expression parsing by re-using grammar");
+    return run(test_runner2,"expr: reuse grammar");
 }

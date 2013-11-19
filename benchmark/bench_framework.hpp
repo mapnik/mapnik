@@ -15,6 +15,7 @@
 #include <thread>
 #include <vector>
 #include <set>
+#include <iomanip>
 
 namespace benchmark {
 
@@ -81,7 +82,11 @@ int run(T const& test_runner, std::string const& name)
         }
         boost::chrono::process_cpu_clock::time_point start;
         boost::chrono::process_cpu_clock::duration elapsed;
-        std::clog << name << ": ";
+        std::stringstream s;
+        s << name << ":"
+            << std::setw(45 - (int)s.tellp()) << std::right
+            << " t:" << test_runner.threads()
+            << " i:" << test_runner.iterations();
         if (test_runner.threads() > 0)
         {
             typedef std::vector<std::unique_ptr<std::thread> > thread_group;
@@ -101,9 +106,9 @@ int run(T const& test_runner, std::string const& name)
             test_runner();
             elapsed = boost::chrono::process_cpu_clock::now() - start;
         }
-        std::clog << boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed)
-            << " t:" << test_runner.threads()
-            << " i:" << test_runner.iterations() << "\n";
+        s << std::setw(65 - (int)s.tellp()) << std::right
+            << boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed) << "\n";
+        std::clog << s.str();
         return 0;
     }
     catch (std::exception const& ex)

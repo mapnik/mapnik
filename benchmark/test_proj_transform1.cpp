@@ -71,26 +71,26 @@ int main(int argc, char** argv)
                      from,
                      to,
                      true);
-    run(test_runner,"lonlat -> merc coord transformation (epsg)");
+    run(test_runner,"lonlat->merc epsg)");
     test test_runner2(params,
                      from_str2,
                      to_str2,
                      from,
                      to,
                      true);
-    run(test_runner2,"lonlat -> merc coord transformation (literal)");
+    run(test_runner2,"lonlat->merc literal");
     test test_runner3(params,
                      to_str,
                      from_str,
                      to,
                      from,
                      true);
-    run(test_runner3,"merc -> lonlat coord transformation (epsg)");
+    run(test_runner3,"merc->lonlat epsg)");
     test test_runner4(params,
                      to_str2,
                      from_str2,
                      to,
                      from,
                      true);
-    return run(test_runner4,"merc -> lonlat coord transformation (literal)");
+    return run(test_runner4,"merc->lonlat literal");
 }
