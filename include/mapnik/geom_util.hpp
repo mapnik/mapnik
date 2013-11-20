@@ -414,11 +414,18 @@ bool hit_test(PathType & path, double x, double y, double tol)
     double y1 = 0;
     path.rewind(0);
     unsigned command = path.vertex(&x0, &y0);
-    if (command == SEG_END) return false;
+    if (command == SEG_END)
+    {
+        return false;
+    }
     unsigned count = 0;
+    mapnik::eGeomType geom_type = static_cast<mapnik::eGeomType>(path.type());
     while (SEG_END != (command = path.vertex(&x1, &y1)))
     {
-        if (command == SEG_CLOSE) continue;
+        if (command == SEG_CLOSE)
+        {
+            continue;
+        }
         ++count;
         if (command == SEG_MOVETO)
         {
@@ -426,18 +433,34 @@ bool hit_test(PathType & path, double x, double y, double tol)
             y0 = y1;
             continue;
         }
-        if ((((y1 <= y) && (y < y0)) ||
-             ((y0 <= y) && (y < y1))) &&
-            (x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
-            inside=!inside;
-
+        switch(geom_type)
+        {
+        case mapnik::Polygon:
+        {
+            if ((((y1 <= y) && (y < y0)) ||
+                 ((y0 <= y) && (y < y1))) &&
+                (x < (x0 - x1) * (y - y1)/ (y0 - y1) + x1))
+                inside=!inside;
+            break;
+        }
+        case mapnik::LineString:
+        {
+            double distance = point_to_segment_distance(x,y,x0,y0,x1,y1);
+            if (distance < tol)
+                return true;
+            break;
+        }
+        default:
+            break;
+        }
         x0 = x1;
         y0 = y1;
     }
 
+    // TODO - handle multi-point?
     if (count == 0) // one vertex
     {
-        return distance(x, y, x0, y0) <= std::fabs(tol);
+        return distance(x, y, x0, y0) <= tol;
     }
     return inside;
 }
