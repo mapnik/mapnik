@@ -79,6 +79,15 @@ struct get_first
     }
 };
 
+struct get_size
+{
+    typedef unsigned result_type;
+    result_type operator() (geometry_type const& geom) const
+    {
+        return geom.size();
+    }
+};
+
 struct multi_geometry_type
 {
     typedef std::tuple<unsigned,bool>  result_type;
@@ -197,6 +206,7 @@ struct geometry_generator_grammar :
         : geometry_generator_grammar::base_type(coordinates)
     {
         using boost::spirit::karma::uint_;
+        using boost::spirit::bool_;
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
         using boost::spirit::karma::lit;
@@ -204,7 +214,10 @@ struct geometry_generator_grammar :
         using boost::spirit::karma::_r1;
         using boost::spirit::karma::eps;
 
-        coordinates =  point | linestring | polygon
+        coordinates =  empty | point | linestring | polygon
+            ;
+
+        empty = &uint_(0)[_1 = _size(_val)] << lit("null")
             ;
 
         point = &uint_(mapnik::geometry_type::types::Point)[_1 = _type(_val)]
@@ -226,7 +239,7 @@ struct geometry_generator_grammar :
         point_coord = &uint_
             << lit('[')
             << coord_type << lit(',') << coord_type
-            << lit("]")
+            << lit(']')
             ;
 
         polygon_coord %= ( &uint_(mapnik::SEG_MOVETO) << eps[_r1 += 1]
@@ -234,10 +247,7 @@ struct geometry_generator_grammar :
                                              .else_[_1 = '[' ]]
                            |
                            &uint_(mapnik::SEG_LINETO)
-            << lit(','))
-            << lit('[') << coord_type
-            << lit(',')
-            << coord_type << lit(']')
+                           << lit(',')) << lit('[') << coord_type << lit(',') << coord_type << lit(']')
             ;
 
         coords2 %= *polygon_coord(_a)
@@ -249,10 +259,10 @@ struct geometry_generator_grammar :
     }
     // rules
     karma::rule<OutputIterator, geometry_type const& ()> coordinates;
+    karma::rule<OutputIterator, geometry_type const& ()> empty;
     karma::rule<OutputIterator, geometry_type const& ()> point;
     karma::rule<OutputIterator, geometry_type const& ()> linestring;
     karma::rule<OutputIterator, geometry_type const& ()> polygon;
-
     karma::rule<OutputIterator, geometry_type const& ()> coords;
     karma::rule<OutputIterator, karma::locals<unsigned>, geometry_type const& ()> coords2;
     karma::rule<OutputIterator, geometry_type::value_type ()> point_coord;
@@ -261,6 +271,7 @@ struct geometry_generator_grammar :
     // phoenix functions
     phoenix::function<get_type > _type;
     phoenix::function<get_first> _first;
+    phoenix::function<get_size> _size;
     //
     karma::real_generator<double, json_coordinate_policy<double> > coord_type;
 
