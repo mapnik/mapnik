@@ -58,7 +58,10 @@ struct close_path
     result_type operator() (T path) const
     {
         BOOST_ASSERT( path!=0 );
-        path->close_path();
+        if (path->size() > 2u) // to form a polygon ring we need at least 3 vertices
+        {
+            path->close_path();
+        }
     }
 };
 
