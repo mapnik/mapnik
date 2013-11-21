@@ -188,8 +188,6 @@ struct feature_generator_grammar:
         using boost::spirit::karma::lit;
         using boost::spirit::karma::uint_;
         using boost::spirit::karma::bool_;
-        //using boost::spirit::karma::int_;
-        //using boost::spirit::karma::long_long;
         using boost::spirit::karma::double_;
         using boost::spirit::karma::_val;
         using boost::spirit::karma::_1;
