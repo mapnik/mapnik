@@ -112,6 +112,20 @@ struct multi_geometry_type
         return std::tuple<unsigned,bool>(type, collection);
     }
 };
+
+struct not_empty
+{
+    typedef bool result_type;
+    result_type operator() (geometry_container const& cont) const
+    {
+        for (auto const& geom : cont)
+        {
+            if (geom.size() > 0) return true;
+        }
+        return false;
+    }
+};
+
 #else
 struct get_type
 {
@@ -214,10 +228,7 @@ struct geometry_generator_grammar :
         using boost::spirit::karma::_r1;
         using boost::spirit::karma::eps;
 
-        coordinates =  empty | point | linestring | polygon
-            ;
-
-        empty = &uint_(0)[_1 = _size(_val)] << lit("null")
+        coordinates =  point | linestring | polygon
             ;
 
         point = &uint_(mapnik::geometry_type::types::Point)[_1 = _type(_val)]
@@ -259,7 +270,6 @@ struct geometry_generator_grammar :
     }
     // rules
     karma::rule<OutputIterator, geometry_type const& ()> coordinates;
-    karma::rule<OutputIterator, geometry_type const& ()> empty;
     karma::rule<OutputIterator, geometry_type const& ()> point;
     karma::rule<OutputIterator, geometry_type const& ()> linestring;
     karma::rule<OutputIterator, geometry_type const& ()> polygon;
@@ -271,7 +281,6 @@ struct geometry_generator_grammar :
     // phoenix functions
     phoenix::function<get_type > _type;
     phoenix::function<get_first> _first;
-    phoenix::function<get_size> _size;
     //
     karma::real_generator<double, json_coordinate_policy<double> > coord_type;
 
@@ -293,6 +302,7 @@ struct multi_geometry_generator_grammar :
         using boost::spirit::karma::_1;
         using boost::spirit::karma::_a;
         using boost::spirit::karma::_r1;
+        using boost::spirit::bool_;
 
         geometry_types.add
             (mapnik::geometry_type::types::Point,"\"Point\"")
@@ -303,7 +313,7 @@ struct multi_geometry_generator_grammar :
             (mapnik::geometry_type::types::Polygon + 3,"\"MultiPolygon\"")
             ;
 
-        start %= ( eps(phoenix::at_c<1>(_a))[_a = _multi_type(_val)]
+        start %= ( eps(phoenix::at_c<1>(_a))[_a = multi_type_(_val)]
                    << lit("{\"type\":\"GeometryCollection\",\"geometries\":[")
                    << geometry_collection << lit("]}")
                    |
@@ -313,13 +323,13 @@ struct multi_geometry_generator_grammar :
         geometry_collection = -(geometry2 % lit(','))
             ;
 
-        geometry = (lit("{\"type\":")
-                    << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = _multi_type(_val)]
-                    << lit(",\"coordinates\":")
-                    << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
-                    << coordinates
-                    << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
-                    << lit('}')) | lit("null")
+        geometry = ( &bool_(true)[_1 = not_empty_(_val)] << lit("{\"type\":")
+                     << geometry_types[_1 = phoenix::at_c<0>(_a)][_a = multi_type_(_val)]
+                     << lit(",\"coordinates\":")
+                     << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = '['].else_[_1 = ""]]
+                     << coordinates
+                     << karma::string[ phoenix::if_ (phoenix::at_c<0>(_a) > 3) [_1 = ']'].else_[_1 = ""]]
+                     << lit('}')) | lit("null")
             ;
 
         geometry2 = lit("{\"type\":")
@@ -345,8 +355,9 @@ struct multi_geometry_generator_grammar :
     karma::rule<OutputIterator, geometry_container const&()> coordinates;
     geometry_generator_grammar<OutputIterator>  path;
     // phoenix
-    phoenix::function<multi_geometry_type> _multi_type;
+    phoenix::function<multi_geometry_type> multi_type_;
     phoenix::function<get_type > type_;
+    phoenix::function<not_empty> not_empty_;
     // symbols table
     karma::symbols<unsigned, char const*> geometry_types;
 };
